@@ -181,6 +181,31 @@ export class MemStorage implements IStorage {
         });
       });
     });
+
+    // Initialize Mincha prayers
+    this.createMinchaPrayer({
+      prayerType: "ashrei",
+      hebrewText: "אַשְׁרֵי יוֹשְׁבֵי בֵיתֶךָ, עוֹד יְהַלְלוּךָ סֶּלָה׃",
+      englishTranslation: "Happy are those who dwell in Your house; they shall praise You forever. Selah.",
+      transliteration: "Ashrei yoshvei veitecha, od yehalucha selah.",
+      orderIndex: 1
+    });
+
+    this.createMinchaPrayer({
+      prayerType: "shemoneh_esrei",
+      hebrewText: "אֲדֹנָי שְׂפָתַי תִּפְתָּח וּפִי יַגִּיד תְּהִלָּתֶךָ׃",
+      englishTranslation: "O Lord, open my lips, and my mouth shall declare Your praise.",
+      transliteration: "Adonai sefatai tiftach ufi yagid tehilatecha.",
+      orderIndex: 2
+    });
+
+    this.createMinchaPrayer({
+      prayerType: "main_prayer",
+      hebrewText: "בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם אֲשֶׁר קִדְּשָׁנוּ בְּמִצְוֹתָיו וְצִוָּנוּ עַל הַתְּפִלָּה׃",
+      englishTranslation: "Blessed are You, Lord our God, King of the universe, who has sanctified us with His commandments and commanded us concerning prayer.",
+      transliteration: "Baruch atah Adonai, Eloheinu melech ha'olam, asher kidshanu bemitzvotav vetzivanu al hatefilah.",
+      orderIndex: 3
+    });
   }
 
   async getUser(id: number): Promise<User | undefined> {

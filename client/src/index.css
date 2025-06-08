@@ -201,6 +201,16 @@ html, body, #root {
   border-radius: 2px;
 }
 
+/* Font classes for prayers */
+.font-hebrew {
+  font-family: 'David', 'Times New Roman', serif;
+  direction: rtl;
+}
+
+.font-english {
+  font-family: 'Poppins', sans-serif;
+}
+
 .modal-content::-webkit-scrollbar-thumb:hover {
   background: hsl(328, 85%, 80%);
 }
