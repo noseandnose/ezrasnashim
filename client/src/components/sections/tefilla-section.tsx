@@ -31,7 +31,7 @@ export default function TefillaSection() {
             <Clock className="text-xl text-peach" size={24} />
             <div className="flex-1">
               <h3 className="font-semibold text-sm">Mincha</h3>
-              <p className="text-xs text-gray-600">First time and last time of mincha</p>
+              <p className="text-xs text-gray-600">12:30 PM - 4:32 PM</p>
             </div>
           </div>
         </div>
