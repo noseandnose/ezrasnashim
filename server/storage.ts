@@ -51,6 +51,10 @@ export interface IStorage {
   getGlobalTehillimProgress(): Promise<GlobalTehillimProgress>;
   updateGlobalTehillimProgress(currentPerek: number, completedBy?: string): Promise<GlobalTehillimProgress>;
   getRandomNameForPerek(): Promise<TehillimName | undefined>;
+
+  // Mincha methods
+  getMinchaPrayers(): Promise<MinchaPrayer[]>;
+  createMinchaPrayer(prayer: InsertMinchaPrayer): Promise<MinchaPrayer>;
 }
 
 export class MemStorage implements IStorage {
@@ -61,6 +65,7 @@ export class MemStorage implements IStorage {
   private shopItems: Map<number, ShopItem>;
   private tehillimNames: Map<number, TehillimName>;
   private globalProgress: GlobalTehillimProgress;
+  private minchaPrayers: Map<number, MinchaPrayer>;
   private currentId: number;
 
   constructor() {
@@ -70,6 +75,7 @@ export class MemStorage implements IStorage {
     this.calendarEvents = new Map();
     this.shopItems = new Map();
     this.tehillimNames = new Map();
+    this.minchaPrayers = new Map();
     this.globalProgress = {
       id: 1,
       currentPerek: 1,
@@ -305,6 +311,17 @@ export class MemStorage implements IStorage {
     
     const randomIndex = Math.floor(Math.random() * activeNames.length);
     return activeNames[randomIndex];
+  }
+
+  async getMinchaPrayers(): Promise<MinchaPrayer[]> {
+    return Array.from(this.minchaPrayers.values()).sort((a, b) => a.orderIndex - b.orderIndex);
+  }
+
+  async createMinchaPrayer(insertPrayer: InsertMinchaPrayer): Promise<MinchaPrayer> {
+    const id = this.currentId++;
+    const prayer: MinchaPrayer = { ...insertPrayer, id, orderIndex: insertPrayer.orderIndex || 0 };
+    this.minchaPrayers.set(id, prayer);
+    return prayer;
   }
 }
 
