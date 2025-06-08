@@ -20,18 +20,23 @@ export const useLocationStore = create<LocationState>((set) => ({
 }));
 
 export function useJewishTimes() {
-  const { geonameid, coordinates } = useLocationStore();
-  // Use actual current date
+  const { geonameid, setGeonameid } = useLocationStore();
   const today = new Date().toISOString().split('T')[0];
+  
+  // Set default location if none exists
+  const effectiveGeonameid = geonameid || "5128581"; // Default to NYC
+  
+  // Set the default location in store if it's not set
+  if (!geonameid && effectiveGeonameid) {
+    setGeonameid(effectiveGeonameid);
+  }
 
   return useQuery({
-    queryKey: [`/api/zmanim`, geonameid, today],
+    queryKey: [`/api/zmanim`, effectiveGeonameid, today],
     queryFn: async () => {
-      if (!geonameid) return null;
-      
       try {
-        // Use our backend API that returns adjusted halachic times
-        const response = await fetch(`/api/zmanim/${geonameid}`);
+        // Always use effective geonameid (with fallback)
+        const response = await fetch(`/api/zmanim/${effectiveGeonameid}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch zmanim data');
@@ -43,10 +48,10 @@ export function useJewishTimes() {
         return null;
       }
     },
-    enabled: true, // Always enabled - use default location if needed
-    staleTime: 1000 * 60 * 60 * 12, // 12 hours - more stable
-    refetchInterval: false, // Don't auto-refetch
-    refetchOnWindowFocus: false, // Don't refetch on focus
-    refetchOnMount: true, // Fetch on mount for immediate loading
+    enabled: true, // Always enabled with default location
+    staleTime: 1000 * 60 * 60 * 12, // 12 hours
+    refetchInterval: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
   });
 }
