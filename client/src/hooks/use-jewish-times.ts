@@ -30,25 +30,19 @@ export function useJewishTimes() {
       if (!geonameid) return null;
       
       try {
-        // Use coordinates for sunset API, fallback to NYC if not available
-        const lat = coordinates?.lat || 40.7128;
-        const lng = coordinates?.lng || -74.0060;
+        // Fetch Hebcal halachic times only
+        const response = await fetch(
+          `https://www.hebcal.com/zmanim?cfg=json&geonameid=${geonameid}&date=${today}`
+        );
         
-        // Fetch both Hebcal halachic times and astronomical sunset
-        const [hebcalResponse, sunsetResponse] = await Promise.all([
-          fetch(`https://www.hebcal.com/zmanim?cfg=json&geonameid=${geonameid}&date=${today}`),
-          fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lng}&date=${today}&formatted=0`)
-        ]);
-        
-        if (!hebcalResponse.ok || !sunsetResponse.ok) {
+        if (!response.ok) {
           throw new Error('Failed to fetch zmanim data');
         }
         
-        const hebcalData = await hebcalResponse.json();
-        const sunsetData = await sunsetResponse.json();
+        const data = await response.json();
         
         // Get timezone from the response
-        const timezone = hebcalData.location?.tzid || 'America/New_York';
+        const timezone = data.location?.tzid || 'America/New_York';
         
         // Format times to 12-hour format - properly handle timezone
         const formatTime = (timeStr: string) => {
@@ -72,15 +66,15 @@ export function useJewishTimes() {
         };
 
         const formattedTimes = {
-          sunrise: formatTime(hebcalData.times?.sunrise),
-          sunset: formatTime(sunsetData.results?.sunset), // Use astronomical sunset for Shkia
-          candleLighting: formatTime(hebcalData.times?.candleLighting),
-          havdalah: formatTime(hebcalData.times?.havdalah),
-          minchaGedolah: formatTime(hebcalData.times?.minchaGedola),
-          minchaKetana: formatTime(hebcalData.times?.minchaKetana),
-          tzaitHakochavim: formatTime(hebcalData.times?.sunset), // Keep this as stars out
-          hebrewDate: hebcalData.date?.hebrew || '',
-          location: hebcalData.location?.title || 'Current Location',
+          sunrise: formatTime(data.times?.sunrise),
+          sunset: formatTime(data.times?.sunset), // Hebcal's authentic Shkia time
+          candleLighting: formatTime(data.times?.candleLighting),
+          havdalah: formatTime(data.times?.havdalah),
+          minchaGedolah: formatTime(data.times?.minchaGedola),
+          minchaKetana: formatTime(data.times?.minchaKetana),
+          tzaitHakochavim: formatTime(data.times?.tzeit7083deg), // Stars out time
+          hebrewDate: data.date?.hebrew || '',
+          location: data.location?.title || 'Current Location',
         };
         
         // Times formatted successfully
