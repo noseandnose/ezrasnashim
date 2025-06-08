@@ -147,6 +147,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Sponsor routes
+  app.get("/api/sponsors/:contentType/:date", async (req, res) => {
+    try {
+      const { contentType, date } = req.params;
+      const sponsor = await storage.getSponsorByContentTypeAndDate(contentType, date);
+      res.json(sponsor || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch sponsor" });
+    }
+  });
+
+  app.get("/api/sponsors", async (req, res) => {
+    try {
+      const sponsors = await storage.getActiveSponsors();
+      res.json(sponsors);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch sponsors" });
+    }
+  });
+
   // Zmanim route that returns parsed and adjusted times
   app.get("/api/zmanim/:location?", async (req, res) => {
     try {

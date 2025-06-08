@@ -1,13 +1,14 @@
 import { 
   users, content, jewishTimes, calendarEvents, shopItems, 
-  tehillimNames, globalTehillimProgress, minchaPrayers,
+  tehillimNames, globalTehillimProgress, minchaPrayers, sponsors,
   type User, type InsertUser, type Content, type InsertContent,
   type JewishTimes, type InsertJewishTimes, type CalendarEvent, type InsertCalendarEvent,
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
-  type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer
+  type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
+  type Sponsor, type InsertSponsor
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, gt, lt } from "drizzle-orm";
+import { eq, gt, lt, and } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -39,6 +40,11 @@ export interface IStorage {
   // Mincha methods
   getMinchaPrayers(): Promise<MinchaPrayer[]>;
   createMinchaPrayer(prayer: InsertMinchaPrayer): Promise<MinchaPrayer>;
+
+  // Sponsor methods
+  getSponsorByContentTypeAndDate(contentType: string, date: string): Promise<Sponsor | undefined>;
+  createSponsor(sponsor: InsertSponsor): Promise<Sponsor>;
+  getActiveSponsors(): Promise<Sponsor[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -218,6 +224,27 @@ export class DatabaseStorage implements IStorage {
   async createMinchaPrayer(insertPrayer: InsertMinchaPrayer): Promise<MinchaPrayer> {
     const [prayer] = await db.insert(minchaPrayers).values(insertPrayer).returning();
     return prayer;
+  }
+
+  // Sponsor methods
+  async getSponsorByContentTypeAndDate(contentType: string, date: string): Promise<Sponsor | undefined> {
+    const [sponsor] = await db.select().from(sponsors)
+      .where(and(
+        eq(sponsors.contentType, contentType),
+        eq(sponsors.sponsorshipDate, date),
+        eq(sponsors.isActive, true)
+      ))
+      .limit(1);
+    return sponsor || undefined;
+  }
+
+  async createSponsor(insertSponsor: InsertSponsor): Promise<Sponsor> {
+    const [sponsor] = await db.insert(sponsors).values(insertSponsor).returning();
+    return sponsor;
+  }
+
+  async getActiveSponsors(): Promise<Sponsor[]> {
+    return await db.select().from(sponsors).where(eq(sponsors.isActive, true));
   }
 }
 
