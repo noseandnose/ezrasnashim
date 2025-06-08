@@ -8,7 +8,6 @@ interface Sponsor {
   id: number;
   name: string;
   hebrewName?: string;
-  contentType: string;
   sponsorshipDate: string;
   message?: string;
   isActive: boolean;

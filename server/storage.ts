@@ -229,14 +229,8 @@ export class DatabaseStorage implements IStorage {
 
   // Sponsor methods
   async getSponsorByContentTypeAndDate(contentType: string, date: string): Promise<Sponsor | undefined> {
-    const [sponsor] = await db.select().from(sponsors)
-      .where(and(
-        eq(sponsors.contentType, contentType),
-        eq(sponsors.sponsorshipDate, date),
-        eq(sponsors.isActive, true)
-      ))
-      .limit(1);
-    return sponsor || undefined;
+    // Since we now have daily sponsors instead of content-specific ones, just return the daily sponsor
+    return this.getDailySponsor(date);
   }
 
   async createSponsor(insertSponsor: InsertSponsor): Promise<Sponsor> {
@@ -245,13 +239,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDailySponsor(date: string): Promise<Sponsor | undefined> {
-    const [sponsor] = await db.select().from(sponsors)
-      .where(and(
-        eq(sponsors.sponsorshipDate, date),
-        eq(sponsors.isActive, true)
-      ))
-      .limit(1);
-    return sponsor || undefined;
+    try {
+      const [sponsor] = await db.select().from(sponsors)
+        .where(and(
+          eq(sponsors.sponsorshipDate, date),
+          eq(sponsors.isActive, true)
+        ))
+        .limit(1);
+      return sponsor || undefined;
+    } catch (error) {
+      console.error('Error fetching daily sponsor:', error);
+      return undefined;
+    }
   }
 
   async getActiveSponsors(): Promise<Sponsor[]> {

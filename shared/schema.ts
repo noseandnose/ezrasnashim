@@ -95,7 +95,6 @@ export const sponsors = pgTable("sponsors", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   hebrewName: text("hebrew_name"),
-  contentType: text("content_type").notNull(), // 'halacha', 'mussar', 'chizuk', 'loshon'
   sponsorshipDate: text("sponsorship_date").notNull(), // Store as YYYY-MM-DD string
   message: text("message"), // Optional custom message
   isActive: boolean("is_active").default(true),
