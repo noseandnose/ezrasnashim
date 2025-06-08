@@ -167,6 +167,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/sponsors", async (req, res) => {
+    try {
+      const sponsor = await storage.createSponsor(req.body);
+      res.json(sponsor);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create sponsor" });
+    }
+  });
+
   // Zmanim route that returns parsed and adjusted times
   app.get("/api/zmanim/:location?", async (req, res) => {
     try {
