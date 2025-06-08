@@ -88,6 +88,14 @@ export default function TimesModals() {
     }
   };
 
+  const toggleNightfall = () => {
+    const newValue = !afterNightfall;
+    setAfterNightfall(newValue);
+    if (englishDate) {
+      convertToHebrewDate(englishDate, newValue);
+    }
+  };
+
   const handleAddToCalendar = () => {
     if (!eventTitle || !englishDate || !convertedHebrewDate) {
       toast({
@@ -139,14 +147,30 @@ export default function TimesModals() {
             </div>
 
             <div className="flex items-center space-x-2">
-              <Checkbox
-                id="nightfall"
-                checked={afterNightfall}
-                onCheckedChange={handleNightfallChange}
-                className="h-5 w-5 border-2 border-blush data-[state=checked]:bg-blush data-[state=checked]:border-blush data-[state=checked]:text-white"
-              />
+              <div
+                onClick={() => handleNightfallChange(!afterNightfall)}
+                className={`h-5 w-5 border-2 border-blush rounded-sm cursor-pointer flex items-center justify-center transition-all ${
+                  afterNightfall ? 'bg-blush' : 'bg-white hover:bg-gray-50'
+                }`}
+              >
+                {afterNightfall && (
+                  <svg
+                    className="h-3 w-3 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={3}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                )}
+              </div>
               <Label 
-                htmlFor="nightfall" 
+                onClick={() => handleNightfallChange(!afterNightfall)}
                 className="text-sm text-gray-700 cursor-pointer"
               >
                 After nightfall (Hebrew date + 1)
