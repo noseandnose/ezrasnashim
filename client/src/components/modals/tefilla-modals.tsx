@@ -46,15 +46,16 @@ export default function TefillaModals() {
           </DialogHeader>
           
           {/* Language and Font Controls */}
-          <div className="flex items-center justify-between mb-6 p-3 bg-cream-light rounded-xl">
+          <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
-              <Languages className="h-4 w-4 text-blush-pink" />
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
-                className="text-sm font-medium text-blush-pink hover:text-peach-warm transition-colors"
+                className="text-xs"
               >
-                {language === 'hebrew' ? 'עברית' : 'English'}
-              </button>
+                {language === 'hebrew' ? 'EN' : 'עב'}
+              </Button>
             </div>
             
             <div className="flex items-center gap-2">
