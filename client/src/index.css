@@ -169,21 +169,21 @@
   color: hsl(240, 5%, 64.9%);
 }
 
-/* Ensure no scrolling on mobile */
+/* Enable scrolling for mobile */
 html, body, #root {
   height: 100vh;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .mobile-app {
-  height: 100vh;
-  max-height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  overflow: auto;
 }
 
 .content-area {
-  height: calc(100vh - 140px);
-  overflow: hidden;
+  min-height: calc(100vh - 140px);
+  overflow: auto;
+  padding-bottom: 2rem;
 }
 
 /* Custom scrollbar for modals */

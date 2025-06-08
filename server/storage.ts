@@ -1,31 +1,13 @@
 import { 
-  users, 
-  content, 
-  jewishTimes, 
-  calendarEvents, 
-  shopItems,
-  tehillimNames,
-  globalTehillimProgress,
-  minchaPrayers,
-  type User, 
-  type InsertUser,
-  type Content,
-  type InsertContent,
-  type JewishTimes,
-  type InsertJewishTimes,
-  type CalendarEvent,
-  type InsertCalendarEvent,
-  type ShopItem,
-  type InsertShopItem,
-  type TehillimName,
-  type InsertTehillimName,
-  type GlobalTehillimProgress,
-  type InsertGlobalTehillimProgress,
-  type MinchaPrayer,
-  type InsertMinchaPrayer
+  users, content, jewishTimes, calendarEvents, shopItems, 
+  tehillimNames, globalTehillimProgress, minchaPrayers,
+  type User, type InsertUser, type Content, type InsertContent,
+  type JewishTimes, type InsertJewishTimes, type CalendarEvent, type InsertCalendarEvent,
+  type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
+  type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, lt } from "drizzle-orm";
+import { eq, gt, lt } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -61,310 +43,116 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   constructor() {
-    // Initialize default data on first run if needed
-    this.initializeDefaults();
+    this.initializeData();
   }
 
   private async initializeDefaults() {
     try {
-      // Check if global progress exists, if not create it
-      const [existingProgress] = await db.select().from(globalTehillimProgress).limit(1);
-      if (!existingProgress) {
-        await db.insert(globalTehillimProgress).values({
-          currentPerek: 1,
-          completedBy: null
-        });
-      }
-
-      // Initialize some sample Mincha prayers if none exist
+      // Check if Mincha prayers already exist
       const existingPrayers = await db.select().from(minchaPrayers).limit(1);
-      if (existingPrayers.length === 0) {
-        await db.insert(minchaPrayers).values([
-          {
-            prayerType: "ashrei",
-            hebrewText: "אַשְׁרֵי יוֹשְׁבֵי בֵיתֶךָ, עוֹד יְהַלְלוּךָ סֶּלָה׃",
-            englishTranslation: "Happy are those who dwell in Your house; they shall praise You forever. Selah.",
-            transliteration: "Ashrei yoshvei veitecha, od yehalucha selah.",
-            orderIndex: 1
-          },
-          {
-            prayerType: "shemoneh_esrei",
-            hebrewText: "אֲדֹנָי שְׂפָתַי תִּפְתָּח וּפִי יַגִּיד תְּהִלָּתֶךָ׃",
-            englishTranslation: "O Lord, open my lips, and my mouth shall declare Your praise.",
-            transliteration: "Adonai sefatai tiftach ufi yagid tehilatecha.",
-            orderIndex: 2
-          }
-        ]);
-      }
+      if (existingPrayers.length > 0) return;
+
+      // Insert default Mincha prayers
+      await db.insert(minchaPrayers).values([
+        {
+          hebrewText: "אַשְׁרֵי יוֹשְׁבֵי בֵיתֶךָ עוֹד יְהַלְלוּךָ סֶּלָה",
+          englishTranslation: "Happy are those who dwell in Your house; they will praise You forever. Selah.",
+          transliteration: "Ashrei yoshvei veitecha, od yehallelucha selah.",
+          orderIndex: 1
+        },
+        {
+          hebrewText: "אַשְׁרֵי הָעָם שֶׁכָּכָה לּוֹ אַשְׁרֵי הָעָם שֶׁה' אֱלֹהָיו",
+          englishTranslation: "Happy is the people for whom it is so; happy is the people whose God is the Lord.",
+          transliteration: "Ashrei ha'am she'kacha lo, ashrei ha'am she'Adonai Elohav.",
+          orderIndex: 2
+        },
+        {
+          hebrewText: "בָּרוּךְ אַתָּה ה' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם אֲשֶׁר קִדְּשָׁנוּ בְּמִצְוֹתָיו וְצִוָּנוּ עַל הַתְּפִלָּה",
+          englishTranslation: "Blessed are You, Lord our God, King of the universe, who has sanctified us with His commandments and commanded us concerning prayer.",
+          transliteration: "Baruch atah Adonai, Eloheinu melech ha'olam, asher kidshanu bemitzvotav vetzivanu al hatefilah.",
+          orderIndex: 3
+        }
+      ]);
+
+      console.log('Initialized default Mincha prayers');
     } catch (error) {
       console.error('Error initializing defaults:', error);
     }
   }
 
   private initializeData() {
-    // Initialize with sample content
-    const todayHebrewDate = "כ״ט כסלו תשפ״ה";
-    const today = new Date().toISOString().split('T')[0];
-
-    // Sample content for today
-    this.createContent({
-      type: 'halacha',
-      title: 'Laws of Chanukah',
-      content: 'On the third night of Chanukah, we light three candles. The newest candle (third) is lit first, followed by the second, then the first.',
-      date: todayHebrewDate,
-      category: 'daily'
-    });
-
-    this.createContent({
-      type: 'mussar',
-      title: 'Building Character',
-      content: 'Today\'s lesson focuses on developing patience and understanding in our daily interactions.',
-      date: todayHebrewDate,
-      category: 'daily'
-    });
-
-    this.createContent({
-      type: 'chizuk',
-      title: 'Finding Light in Darkness',
-      content: 'A daily dose of inspiration and strength.',
-      audioUrl: '/audio/chizuk-daily.mp3',
-      date: todayHebrewDate,
-      category: 'daily'
-    });
-
-    this.createContent({
-      type: 'loshon',
-      title: 'Guard Your Speech',
-      content: 'Daily reminder about the importance of proper speech and avoiding loshon horah.',
-      date: todayHebrewDate,
-      category: 'daily'
-    });
-
-    this.createContent({
-      type: 'recipe',
-      title: 'Honey Glazed Challah',
-      content: 'A special Shabbas recipe with step-by-step instructions for a beautiful, sweet challah.',
-      date: todayHebrewDate,
-      category: 'shabbas'
-    });
-
-    this.createContent({
-      type: 'inspiration',
-      title: 'Chanukah Table Setting',
-      content: 'Beautiful ideas for creating a festive and meaningful Chanukah table.',
-      date: todayHebrewDate,
-      category: 'table'
-    });
-
-    this.createContent({
-      type: 'parsha',
-      title: 'Parshas Vayeshev',
-      content: 'Weekly Torah portion insights and commentary.',
-      audioUrl: '/audio/parsha-vayeshev.mp3',
-      date: todayHebrewDate,
-      category: 'weekly'
-    });
-
-    // Sample Jewish times for today
-    this.createJewishTimes({
-      date: today,
-      location: 'New York, NY',
-      sunrise: '7:12 AM',
-      sunset: '4:32 PM',
-      candleLighting: '4:18 PM',
-      havdalah: '5:33 PM',
-      hebrewDate: todayHebrewDate
-    });
-
-    // Sample shop items
-    const shopCategories = [
-      { category: 'judaica', items: ['Menorah', 'Mezuzah', 'Kiddush Cup', 'Havdalah Set'] },
-      { category: 'books', items: ['Siddur', 'Tehillim', 'Jewish Cookbook', 'Parenting Guide'] },
-      { category: 'kitchen', items: ['Kosher Cookbook', 'Shabbas Hot Plate', 'Challah Board', 'Salt Shaker'] },
-      { category: 'jewelry', items: ['Star of David Necklace', 'Hamsa Bracelet', 'Chai Pendant', 'Jewish Ring'] }
-    ];
-
-    shopCategories.forEach(({ category, items }) => {
-      items.forEach(name => {
-        this.createShopItem({
-          name,
-          category,
-          description: `Beautiful ${name.toLowerCase()} for Jewish home`,
-          price: '$29.99',
-          imageUrl: `/images/${category}/${name.toLowerCase().replace(/\s+/g, '-')}.jpg`,
-          externalUrl: `https://example-jewish-store.com/${category}/${name.toLowerCase().replace(/\s+/g, '-')}`
-        });
-      });
-    });
-
-    // Initialize Mincha prayers
-    this.createMinchaPrayer({
-      prayerType: "ashrei",
-      hebrewText: "אַשְׁרֵי יוֹשְׁבֵי בֵיתֶךָ, עוֹד יְהַלְלוּךָ סֶּלָה׃",
-      englishTranslation: "Happy are those who dwell in Your house; they shall praise You forever. Selah.",
-      transliteration: "Ashrei yoshvei veitecha, od yehalucha selah.",
-      orderIndex: 1
-    });
-
-    this.createMinchaPrayer({
-      prayerType: "shemoneh_esrei",
-      hebrewText: "אֲדֹנָי שְׂפָתַי תִּפְתָּח וּפִי יַגִּיד תְּהִלָּתֶךָ׃",
-      englishTranslation: "O Lord, open my lips, and my mouth shall declare Your praise.",
-      transliteration: "Adonai sefatai tiftach ufi yagid tehilatecha.",
-      orderIndex: 2
-    });
-
-    this.createMinchaPrayer({
-      prayerType: "main_prayer",
-      hebrewText: "בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם אֲשֶׁר קִדְּשָׁנוּ בְּמִצְוֹתָיו וְצִוָּנוּ עַל הַתְּפִלָּה׃",
-      englishTranslation: "Blessed are You, Lord our God, King of the universe, who has sanctified us with His commandments and commanded us concerning prayer.",
-      transliteration: "Baruch atah Adonai, Eloheinu melech ha'olam, asher kidshanu bemitzvotav vetzivanu al hatefilah.",
-      orderIndex: 3
-    });
+    this.initializeDefaults().catch(console.error);
   }
 
+  // User methods
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
 
+  // Content methods (stubs for now)
   async getContentByType(type: string): Promise<Content[]> {
-    return Array.from(this.content.values()).filter(
-      (content) => content.type === type
-    );
+    return [];
   }
 
   async getContentByDate(date: string): Promise<Content[]> {
-    return Array.from(this.content.values()).filter(
-      (content) => content.date === date
-    );
+    return [];
   }
 
   async createContent(insertContent: InsertContent): Promise<Content> {
-    const id = this.currentId++;
-    const content: Content = { ...insertContent, id };
-    this.content.set(id, content);
-    return content;
+    const [created] = await db.insert(content).values(insertContent).returning();
+    return created;
   }
 
+  // Jewish Times methods (stubs for now)
   async getJewishTimesByDate(date: string): Promise<JewishTimes | undefined> {
-    return this.jewishTimes.get(date);
+    return undefined;
   }
 
   async createJewishTimes(insertTimes: InsertJewishTimes): Promise<JewishTimes> {
-    const id = this.currentId++;
-    const times: JewishTimes = { ...insertTimes, id };
-    this.jewishTimes.set(insertTimes.date, times);
+    const [times] = await db.insert(jewishTimes).values(insertTimes).returning();
     return times;
   }
 
+  // Calendar Events methods (stubs for now)
   async getCalendarEvents(): Promise<CalendarEvent[]> {
-    return Array.from(this.calendarEvents.values());
+    return [];
   }
 
   async createCalendarEvent(insertEvent: InsertCalendarEvent): Promise<CalendarEvent> {
-    const id = this.currentId++;
-    const event: CalendarEvent = { ...insertEvent, id };
-    this.calendarEvents.set(id, event);
+    const [event] = await db.insert(calendarEvents).values(insertEvent).returning();
     return event;
   }
 
+  // Shop Items methods (stubs for now)
   async getShopItemsByCategory(category: string): Promise<ShopItem[]> {
-    return Array.from(this.shopItems.values()).filter(
-      (item) => item.category === category
-    );
+    return [];
   }
 
   async getAllShopItems(): Promise<ShopItem[]> {
-    return Array.from(this.shopItems.values());
+    return [];
   }
 
   async createShopItem(insertItem: InsertShopItem): Promise<ShopItem> {
-    const id = this.currentId++;
-    const item: ShopItem = { ...insertItem, id };
-    this.shopItems.set(id, item);
+    const [item] = await db.insert(shopItems).values(insertItem).returning();
     return item;
   }
 
   // Tehillim methods
   async getActiveNames(): Promise<TehillimName[]> {
     await this.cleanupExpiredNames();
-    return Array.from(this.tehillimNames.values());
-  }
-
-  async createTehillimName(insertName: InsertTehillimName): Promise<TehillimName> {
-    const id = this.currentId++;
     const now = new Date();
-    const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
-    
-    const name: TehillimName = {
-      ...insertName,
-      id,
-      dateAdded: now,
-      expiresAt,
-      userId: null
-    };
-    
-    this.tehillimNames.set(id, name);
-    return name;
-  }
-
-  async cleanupExpiredNames(): Promise<void> {
-    const now = new Date();
-    for (const [id, name] of this.tehillimNames.entries()) {
-      if (name.expiresAt && name.expiresAt < now) {
-        this.tehillimNames.delete(id);
-      }
-    }
-  }
-
-  async getGlobalTehillimProgress(): Promise<GlobalTehillimProgress> {
-    return this.globalProgress;
-  }
-
-  async updateGlobalTehillimProgress(currentPerek: number, completedBy?: string): Promise<GlobalTehillimProgress> {
-    this.globalProgress = {
-      ...this.globalProgress,
-      currentPerek: currentPerek > 150 ? 1 : currentPerek, // Reset to 1 after 150
-      lastUpdated: new Date(),
-      completedBy: completedBy || null
-    };
-    return this.globalProgress;
-  }
-
-  async getRandomNameForPerek(): Promise<TehillimName | undefined> {
-    await this.cleanupExpiredNames();
-    const activeNames = Array.from(this.tehillimNames.values());
-    if (activeNames.length === 0) return undefined;
-    
-    const randomIndex = Math.floor(Math.random() * activeNames.length);
-    return activeNames[randomIndex];
-  }
-
-  async getMinchaPrayers(): Promise<MinchaPrayer[]> {
-    return await db.select().from(minchaPrayers).orderBy(minchaPrayers.orderIndex);
-  }
-
-  async createMinchaPrayer(insertPrayer: InsertMinchaPrayer): Promise<MinchaPrayer> {
-    const [prayer] = await db.insert(minchaPrayers).values(insertPrayer).returning();
-    return prayer;
-  }
-
-  async getActiveNames(): Promise<TehillimName[]> {
-    const now = new Date();
-    return await db.select().from(tehillimNames).where(lt(tehillimNames.expiresAt, now));
+    return await db.select().from(tehillimNames).where(gt(tehillimNames.expiresAt, now));
   }
 
   async createTehillimName(insertName: InsertTehillimName): Promise<TehillimName> {
@@ -419,34 +207,14 @@ export class DatabaseStorage implements IStorage {
     return activeNames[randomIndex];
   }
 
-  // Stub implementations for other methods
-  async getContentByType(type: string): Promise<Content[]> { return []; }
-  async getContentByDate(date: string): Promise<Content[]> { return []; }
-  async createContent(content: InsertContent): Promise<Content> { 
-    const [created] = await db.insert(content).values(content).returning();
-    return created;
+  // Mincha methods
+  async getMinchaPrayers(): Promise<MinchaPrayer[]> {
+    return await db.select().from(minchaPrayers).orderBy(minchaPrayers.orderIndex);
   }
-  async getJewishTimesByDate(date: string): Promise<JewishTimes | undefined> { return undefined; }
-  async createJewishTimes(times: InsertJewishTimes): Promise<JewishTimes> {
-    const [created] = await db.insert(jewishTimes).values(times).returning();
-    return created;
-  }
-  async getCalendarEvents(): Promise<CalendarEvent[]> { return []; }
-  async createCalendarEvent(event: InsertCalendarEvent): Promise<CalendarEvent> {
-    const [created] = await db.insert(calendarEvents).values(event).returning();
-    return created;
-  }
-  async getShopItemsByCategory(category: string): Promise<ShopItem[]> { return []; }
-  async getAllShopItems(): Promise<ShopItem[]> { return []; }
-  async createShopItem(item: InsertShopItem): Promise<ShopItem> {
-    const [created] = await db.insert(shopItems).values(item).returning();
-    return created;
-  }
-  async getUser(id: number): Promise<User | undefined> { return undefined; }
-  async getUserByUsername(username: string): Promise<User | undefined> { return undefined; }
-  async createUser(user: InsertUser): Promise<User> {
-    const [created] = await db.insert(users).values(user).returning();
-    return created;
+
+  async createMinchaPrayer(insertPrayer: InsertMinchaPrayer): Promise<MinchaPrayer> {
+    const [prayer] = await db.insert(minchaPrayers).values(insertPrayer).returning();
+    return prayer;
   }
 }
 
