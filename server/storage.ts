@@ -43,6 +43,7 @@ export interface IStorage {
 
   // Sponsor methods
   getSponsorByContentTypeAndDate(contentType: string, date: string): Promise<Sponsor | undefined>;
+  getDailySponsor(date: string): Promise<Sponsor | undefined>;
   createSponsor(sponsor: InsertSponsor): Promise<Sponsor>;
   getActiveSponsors(): Promise<Sponsor[]>;
 }
@@ -241,6 +242,16 @@ export class DatabaseStorage implements IStorage {
   async createSponsor(insertSponsor: InsertSponsor): Promise<Sponsor> {
     const [sponsor] = await db.insert(sponsors).values(insertSponsor).returning();
     return sponsor;
+  }
+
+  async getDailySponsor(date: string): Promise<Sponsor | undefined> {
+    const [sponsor] = await db.select().from(sponsors)
+      .where(and(
+        eq(sponsors.sponsorshipDate, date),
+        eq(sponsors.isActive, true)
+      ))
+      .limit(1);
+    return sponsor || undefined;
   }
 
   async getActiveSponsors(): Promise<Sponsor[]> {

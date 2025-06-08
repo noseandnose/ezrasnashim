@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 interface SponsorshipBarProps {
-  contentType: 'halacha' | 'mussar' | 'chizuk' | 'loshon';
+  className?: string;
 }
 
 interface Sponsor {
@@ -15,13 +15,13 @@ interface Sponsor {
   createdAt: string;
 }
 
-export default function SponsorshipBar({ contentType }: SponsorshipBarProps) {
+export default function SponsorshipBar({ className = "" }: SponsorshipBarProps) {
   const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
 
   const { data: sponsor, isLoading } = useQuery<Sponsor | null>({
-    queryKey: ['sponsor', contentType, today],
+    queryKey: ['daily-sponsor', today],
     queryFn: async () => {
-      const response = await fetch(`/api/sponsors/${contentType}/${today}`);
+      const response = await fetch(`/api/sponsors/daily/${today}`);
       if (!response.ok) return null;
       return response.json();
     },
@@ -35,7 +35,7 @@ export default function SponsorshipBar({ contentType }: SponsorshipBarProps) {
   const customMessage = sponsor.message;
 
   return (
-    <div className="bg-gradient-to-r from-pink-50 to-peach-50 dark:from-pink-900/20 dark:to-peach-900/20 border border-pink-200 dark:border-pink-700 rounded-lg p-3 mb-4 text-center">
+    <div className={`bg-gradient-to-r from-pink-50 to-peach-50 dark:from-pink-900/20 dark:to-peach-900/20 border border-pink-200 dark:border-pink-700 rounded-lg p-3 text-center ${className}`}>
       <div className="text-sm font-medium text-pink-800 dark:text-pink-200">
         {customMessage ? (
           <span>{customMessage}</span>

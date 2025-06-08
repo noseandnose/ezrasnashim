@@ -158,6 +158,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/sponsors/daily/:date", async (req, res) => {
+    try {
+      const { date } = req.params;
+      const sponsor = await storage.getDailySponsor(date);
+      res.json(sponsor || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch daily sponsor" });
+    }
+  });
+
   app.get("/api/sponsors", async (req, res) => {
     try {
       const sponsors = await storage.getActiveSponsors();
