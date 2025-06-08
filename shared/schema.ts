@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -91,6 +91,17 @@ export const minchaPrayers = pgTable("mincha_prayers", {
   orderIndex: integer("order_index").default(0),
 });
 
+export const sponsors = pgTable("sponsors", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  hebrewName: text("hebrew_name"),
+  contentType: text("content_type").notNull(), // 'halacha', 'mussar', 'chizuk', 'loshon'
+  sponsorshipDate: text("sponsorship_date").notNull(), // Store as YYYY-MM-DD string
+  message: text("message"), // Optional custom message
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -136,6 +147,11 @@ export const insertMinchaPrayerSchema = createInsertSchema(minchaPrayers).omit({
   id: true,
 });
 
+export const insertSponsorSchema = createInsertSchema(sponsors).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Content = typeof content.$inferSelect;
@@ -156,3 +172,5 @@ export type GlobalTehillimProgress = typeof globalTehillimProgress.$inferSelect;
 export type InsertGlobalTehillimProgress = z.infer<typeof insertGlobalTehillimProgressSchema>;
 export type MinchaPrayer = typeof minchaPrayers.$inferSelect;
 export type InsertMinchaPrayer = z.infer<typeof insertMinchaPrayerSchema>;
+export type Sponsor = typeof sponsors.$inferSelect;
+export type InsertSponsor = z.infer<typeof insertSponsorSchema>;
