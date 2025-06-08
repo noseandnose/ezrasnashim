@@ -39,9 +39,10 @@ export function useJewishTimes() {
         
         const data = await response.json();
         console.log('Hebcal API response:', data); // Debug log
-        console.log('Formatted times:', {
-          sunrise: data.times?.sunrise,
-          sunset: data.times?.sunset,
+        console.log('Available times in response:', Object.keys(data.times || {}));
+        console.log('MinchaGedolah value:', data.times?.minchaGedolah);
+        console.log('All mincha times:', {
+          minchaGedola: data.times?.minchaGedola,
           minchaGedolah: data.times?.minchaGedolah,
           minchaKetana: data.times?.minchaKetana
         });
@@ -73,16 +74,19 @@ export function useJewishTimes() {
           }
         };
 
-        return {
+        const formattedTimes = {
           sunrise: formatTime(data.times?.sunrise),
           sunset: formatTime(data.times?.sunset),
           candleLighting: formatTime(data.times?.candleLighting),
           havdalah: formatTime(data.times?.havdalah),
-          minchaGedolah: formatTime(data.times?.minchaGedolah),
+          minchaGedolah: formatTime(data.times?.minchaGedola),
           minchaKetana: formatTime(data.times?.minchaKetana),
           hebrewDate: data.date?.hebrew || '',
-          location: data.location?.name || 'Current Location',
+          location: data.location?.title || 'Current Location',
         };
+        
+        console.log('Final formatted times:', formattedTimes);
+        return formattedTimes;
       } catch (error) {
         console.error('Error fetching zmanim:', error);
         return null;
