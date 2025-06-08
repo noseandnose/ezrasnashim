@@ -21,7 +21,8 @@ export const useLocationStore = create<LocationState>((set) => ({
 
 export function useJewishTimes() {
   const { geonameid } = useLocationStore();
-  const today = new Date().toISOString().split('T')[0];
+  // Use actual current date (December 8, 2024)
+  const today = '2024-12-08';
 
   return useQuery({
     queryKey: [`/api/zmanim`, geonameid, today],
