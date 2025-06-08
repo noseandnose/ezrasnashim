@@ -314,12 +314,17 @@ export class MemStorage implements IStorage {
   }
 
   async getMinchaPrayers(): Promise<MinchaPrayer[]> {
-    return Array.from(this.minchaPrayers.values()).sort((a, b) => a.orderIndex - b.orderIndex);
+    return Array.from(this.minchaPrayers.values()).sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
   }
 
   async createMinchaPrayer(insertPrayer: InsertMinchaPrayer): Promise<MinchaPrayer> {
     const id = this.currentId++;
-    const prayer: MinchaPrayer = { ...insertPrayer, id, orderIndex: insertPrayer.orderIndex || 0 };
+    const prayer: MinchaPrayer = { 
+      ...insertPrayer, 
+      id, 
+      orderIndex: insertPrayer.orderIndex || 0,
+      transliteration: insertPrayer.transliteration || null
+    };
     this.minchaPrayers.set(id, prayer);
     return prayer;
   }

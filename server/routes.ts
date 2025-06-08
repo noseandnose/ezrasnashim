@@ -137,6 +137,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Mincha routes
+  app.get("/api/mincha/prayers", async (req, res) => {
+    try {
+      const prayers = await storage.getMinchaPrayers();
+      res.json(prayers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch Mincha prayers" });
+    }
+  });
+
   // Zmanim route that returns parsed and adjusted times
   app.get("/api/zmanim/:location?", async (req, res) => {
     try {
