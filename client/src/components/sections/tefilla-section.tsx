@@ -94,13 +94,49 @@ export default function TefillaSection() {
     setTimeout(() => setJustCompleted(false), 2000);
   };
 
-  // Get current name assignment
+  // Get current name assignment (random selection instead of cycling)
   const getCurrentName = () => {
     if (names.length === 0) return null;
-    return names[currentNameIndex];
+    // Use a seeded random based on perek number to get consistent assignment per perek
+    const seedRandom = (seed: number) => {
+      const x = Math.sin(seed) * 10000;
+      return x - Math.floor(x);
+    };
+    const randomIndex = Math.floor(seedRandom(currentPerek) * names.length);
+    return names[randomIndex];
   };
 
   const currentName = getCurrentName();
+
+  // Get perek text (placeholder for now, will fetch from database)
+  const getPerekText = (perekNumber: number) => {
+    // Sample texts for demonstration - in production these would come from database
+    const sampleTexts: { [key: number]: { hebrew: string; english: string } } = {
+      1: {
+        hebrew: "אַשְׁרֵי הָאִישׁ אֲשֶׁר לֹא הָלַךְ בַּעֲצַת רְשָׁעִים...",
+        english: "Fortunate is the man who has not walked in the counsel of the wicked..."
+      },
+      23: {
+        hebrew: "מִזְמוֹר לְדָוִד יְהוָה רֹעִי לֹא אֶחְסָר...",
+        english: "A psalm of David. The Lord is my shepherd; I shall not want..."
+      },
+      91: {
+        hebrew: "יֹשֵׁב בְּסֵתֶר עֶלְיוֹן בְּצֵל שַׁדַּי יִתְלוֹנָן...",
+        english: "He who dwells in the secret place of the Most High..."
+      },
+      150: {
+        hebrew: "הַלְלוּיָה הַלְלוּ אֵל בְּקָדְשׁוֹ...",
+        english: "Hallelujah! Praise God in His sanctuary..."
+      }
+    };
+    
+    return sampleTexts[perekNumber] || {
+      hebrew: `תהילים פרק ${perekNumber}`,
+      english: `Psalm ${perekNumber} - Text will be added`
+    };
+  };
+
+  const currentPerekText = getPerekText(currentPerek);
 
   return (
     <div className="h-full p-4">
@@ -191,30 +227,41 @@ export default function TefillaSection() {
             <div className="bg-blush/10 rounded-lg p-3">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="font-semibold text-sm text-blush">
-                  Current Perek: {currentPerek}
+                  Perek {currentPerek}
                 </h4>
                 <span className="text-xs bg-blush/20 text-blush px-2 py-1 rounded-full">
                   {Math.ceil(currentPerek / 5)} of 30 cycles
                 </span>
               </div>
               
+              {/* Perek Text Display */}
+              <div className="space-y-3 mb-3">
+                <div className="bg-white/80 rounded p-2 text-right">
+                  <div className="text-sm font-hebrew leading-relaxed" style={{ fontFamily: 'Times, serif' }}>
+                    {currentPerekText.hebrew}
+                  </div>
+                </div>
+                <div className="text-xs text-gray-700 italic">
+                  {currentPerekText.english}
+                </div>
+              </div>
+              
+              {/* Current Name Assignment */}
               {currentName ? (
-                <div className="space-y-2">
+                <div className="bg-white/60 rounded p-2 space-y-1">
                   <div className="flex items-center space-x-2">
-                    <User size={14} className="text-gray-600" />
-                    <span className="text-sm font-medium">{currentName.hebrewName}</span>
+                    <User size={12} className="text-blush" />
+                    <span className="text-sm font-medium text-blush">
+                      Dedicated for: {currentName.hebrewName}
+                    </span>
                   </div>
                   <div className="text-xs text-gray-600">
-                    For: {currentName.reason}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {/* Future feature: Show days remaining (7 days total) */}
-                    Added: {new Date(currentName.dateAdded).toLocaleDateString()}
+                    לרפואה: {currentName.reason}
                   </div>
                 </div>
               ) : (
-                <div className="text-sm text-gray-600">
-                  No names in list. Add a name to begin dedicated prayers.
+                <div className="text-sm text-gray-600 text-center py-2">
+                  Add a name to dedicate this perek
                 </div>
               )}
             </div>
