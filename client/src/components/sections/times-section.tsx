@@ -122,8 +122,8 @@ export default function TimesSection() {
   return (
     <div className="h-full p-4">
       <div className="space-y-3 h-full">
-        {/* Location Input - Only show when location not detected */}
-        {!locationDetected && (
+        {/* Location Input - Only show when no location is available */}
+        {!location && (
           <div className="flex gap-2 items-center">
           <div className="flex-1 relative">
             <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
@@ -149,19 +149,19 @@ export default function TimesSection() {
           </div>
         )}
         
-        {/* Current Location Display */}
-        {location && (
-          <div className="text-xs text-gray-600 text-center py-2">
-            📍 {location}
-          </div>
-        )}
-        
         {/* Today's Times */}
         <div className="content-card rounded-2xl p-4">
-          <h3 className="font-semibold text-sm mb-3 flex items-center">
-            <Sun className="text-peach mr-2" size={20} />
-            Today's Times
-          </h3>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center">
+              <Sun className="text-peach mr-2" size={20} />
+              <h3 className="font-semibold text-sm">Today's Times</h3>
+            </div>
+            {location && (
+              <div className="text-xs text-gray-600">
+                📍 {location}
+              </div>
+            )}
+          </div>
           {isLoading ? (
             <div className="space-y-2 text-xs">
               <div className="animate-pulse">Loading times...</div>
