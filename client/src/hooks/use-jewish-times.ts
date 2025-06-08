@@ -38,16 +38,39 @@ export function useJewishTimes() {
         }
         
         const data = await response.json();
+        console.log('Hebcal API response:', data); // Debug log
+        console.log('Formatted times:', {
+          sunrise: data.times?.sunrise,
+          sunset: data.times?.sunset,
+          minchaGedolah: data.times?.minchaGedolah,
+          minchaKetana: data.times?.minchaKetana
+        });
+        
+        // Get timezone from the response
+        const timezone = data.location?.tzid || 'America/New_York';
         
         // Format times to 12-hour format
         const formatTime = (timeStr: string) => {
           if (!timeStr) return '';
-          const date = new Date(timeStr);
-          return date.toLocaleTimeString('en-US', { 
-            hour: 'numeric', 
-            minute: '2-digit',
-            hour12: true 
-          });
+          try {
+            // Extract time portion from ISO string (e.g., "2025-06-08T20:26:00-04:00")
+            const timePart = timeStr.split('T')[1]?.split('-')[0] || '';
+            if (!timePart) return '';
+            
+            const [hours, minutes] = timePart.split(':');
+            const hour24 = parseInt(hours, 10);
+            const minute = parseInt(minutes, 10);
+            
+            // Convert to 12-hour format
+            const isPM = hour24 >= 12;
+            const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+            const minuteStr = minute.toString().padStart(2, '0');
+            
+            return `${hour12}:${minuteStr} ${isPM ? 'PM' : 'AM'}`;
+          } catch (error) {
+            console.error('Time formatting error for', timeStr, ':', error);
+            return '';
+          }
         };
 
         return {
