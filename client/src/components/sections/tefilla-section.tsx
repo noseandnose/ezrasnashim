@@ -23,19 +23,19 @@ export default function TefillaSection() {
   const [showHebrew, setShowHebrew] = useState(true);
 
   // Fetch global Tehillim progress
-  const { data: progress } = useQuery({
+  const { data: progress } = useQuery<GlobalTehillimProgress>({
     queryKey: ['/api/tehillim/progress'],
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   // Fetch current name for the perek
-  const { data: currentName } = useQuery({
+  const { data: currentName } = useQuery<TehillimName | null>({
     queryKey: ['/api/tehillim/current-name'],
     refetchInterval: 10000, // Refresh every 10 seconds
   });
 
   // Fetch all active names for count display
-  const { data: allNames } = useQuery({
+  const { data: allNames } = useQuery<TehillimName[]>({
     queryKey: ['/api/tehillim/names'],
     refetchInterval: 60000, // Refresh every minute
   });
@@ -43,11 +43,7 @@ export default function TefillaSection() {
   // Mutation to complete a perek
   const completePerekMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest({
-        url: '/api/tehillim/complete',
-        method: 'POST',
-        body: { completedBy: 'user' } // In future, use actual user ID
-      });
+      return apiRequest('POST', '/api/tehillim/complete', { completedBy: 'user' });
     },
     onSuccess: () => {
       toast({
@@ -70,11 +66,7 @@ export default function TefillaSection() {
   // Mutation to add a new name
   const addNameMutation = useMutation({
     mutationFn: async (data: { hebrewName: string; reason: string; reasonEnglish?: string }) => {
-      return apiRequest({
-        url: '/api/tehillim/names',
-        method: 'POST',
-        body: data
-      });
+      return apiRequest('POST', '/api/tehillim/names', data);
     },
     onSuccess: () => {
       toast({
