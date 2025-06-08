@@ -71,29 +71,46 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
   }, []);
 
   return (
-    <div className="gradient-blush-peach rounded-2xl p-4 text-white mb-4">
-      <div className="flex items-center justify-center mb-3">
+    <div className="gradient-blush-peach rounded-2xl p-4 text-white mb-4 audio-controls">
+      <div className="flex items-center justify-center mb-4">
         <Button
           onClick={togglePlay}
-          className="bg-white bg-opacity-20 rounded-full p-3 hover:bg-opacity-30 transition-all border-0"
+          className="bg-white bg-opacity-20 rounded-full p-4 hover:bg-opacity-30 transition-all border-0 audio-play-button"
+          style={{ WebkitTapHighlightColor: 'transparent' }}
         >
           {isPlaying ? (
-            <Pause className="text-xl" size={24} />
+            <Pause className="w-7 h-7" />
           ) : (
-            <Play className="text-xl" size={24} />
+            <Play className="w-7 h-7 ml-0.5" />
           )}
         </Button>
       </div>
-      <div className="space-y-2">
-        <div className="flex justify-between text-xs">
+      <div className="space-y-4">
+        <div className="flex justify-between text-sm font-medium">
           <span>{currentTime}</span>
           <span>{duration}</span>
         </div>
-        <div className="bg-white bg-opacity-20 rounded-full h-2">
+        <div className="audio-progress-bar">
           <div 
-            className="audio-progress h-full rounded-full transition-all duration-100" 
-            style={{ width: `${progress}%` }}
-          ></div>
+            className="bg-white bg-opacity-20 rounded-full audio-progress-track w-full"
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const clickX = e.clientX - rect.left;
+              const newProgress = (clickX / rect.width) * 100;
+              setProgress(Math.max(0, Math.min(100, newProgress)));
+              
+              const totalSeconds = parseDuration(duration);
+              const newCurrentSeconds = Math.floor((newProgress / 100) * totalSeconds);
+              setCurrentTime(formatTime(newCurrentSeconds));
+            }}
+          >
+            <div 
+              className="audio-progress h-full rounded-full transition-all duration-100 relative" 
+              style={{ width: `${progress}%` }}
+            >
+              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg border-2 border-white opacity-90"></div>
+            </div>
+          </div>
         </div>
       </div>
       {/* Hidden audio element for future real audio implementation */}

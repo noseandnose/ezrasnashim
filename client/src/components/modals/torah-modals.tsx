@@ -7,22 +7,22 @@ import AudioPlayer from "@/components/audio-player";
 export default function TorahModals() {
   const { activeModal, closeModal } = useModalStore();
 
-  const { data: content, isLoading } = useQuery({
+  const { data: content = [], isLoading } = useQuery({
     queryKey: ['/api/content/halacha'],
     enabled: activeModal === 'halacha'
   });
 
-  const { data: mussarContent, isLoading: mussarLoading } = useQuery({
+  const { data: mussarContent = [], isLoading: mussarLoading } = useQuery({
     queryKey: ['/api/content/mussar'],
     enabled: activeModal === 'mussar'
   });
 
-  const { data: chizukContent, isLoading: chizukLoading } = useQuery({
+  const { data: chizukContent = [], isLoading: chizukLoading } = useQuery({
     queryKey: ['/api/content/chizuk'],
     enabled: activeModal === 'chizuk'
   });
 
-  const { data: loshonContent, isLoading: loshonLoading } = useQuery({
+  const { data: loshonContent = [], isLoading: loshonLoading } = useQuery({
     queryKey: ['/api/content/loshon'],
     enabled: activeModal === 'loshon'
   });
@@ -93,13 +93,11 @@ export default function TorahModals() {
             </p>
           </DialogHeader>
           
-          {!chizukLoading && chizukContent && chizukContent[0] && (
-            <AudioPlayer 
-              title={chizukContent[0].title}
-              duration="5:23"
-              audioUrl={chizukContent[0].audioUrl || ""}
-            />
-          )}
+          <AudioPlayer 
+            title={chizukContent && chizukContent[0] ? chizukContent[0].title : "Finding Light in Darkness"}
+            duration="5:23"
+            audioUrl={chizukContent && chizukContent[0] ? chizukContent[0].audioUrl || "" : ""}
+          />
 
           <Button 
             onClick={() => closeModal()} 

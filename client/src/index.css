@@ -214,3 +214,32 @@ html, body, #root {
 .modal-content::-webkit-scrollbar-thumb:hover {
   background: hsl(328, 85%, 80%);
 }
+
+/* Mobile audio controls optimization */
+@media (max-width: 640px) {
+  .audio-controls {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  
+  .audio-progress-bar {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+  }
+  
+  .audio-progress-track {
+    height: 6px;
+    border-radius: 3px;
+    position: relative;
+    cursor: pointer;
+  }
+  
+  .audio-play-button {
+    min-width: 56px;
+    min-height: 56px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+}
