@@ -281,28 +281,11 @@ export default function TefillaSection() {
             </div>
           </div>
 
-          {/* Names List (if any) */}
+          {/* Prayer List Summary */}
           {names.length > 0 && (
             <div className="mt-4 pt-3 border-t border-gray-200">
-              <h5 className="text-xs font-medium text-gray-700 mb-2">
-                Prayer List ({names.length} names)
-              </h5>
-              <div className="space-y-1 max-h-20 overflow-y-auto">
-                {names.map((name, index) => (
-                  <div
-                    key={name.id}
-                    className={`text-xs p-2 rounded ${
-                      index === currentNameIndex
-                        ? 'bg-blush/20 text-blush font-medium'
-                        : 'bg-gray-50 text-gray-600'
-                    }`}
-                  >
-                    {name.hebrewName} - {name.reason}
-                    {index === currentNameIndex && (
-                      <span className="ml-2 text-xs">(Current)</span>
-                    )}
-                  </div>
-                ))}
+              <div className="text-xs text-gray-600 text-center">
+                {names.length} name{names.length > 1 ? 's' : ''} in prayer list
               </div>
             </div>
           )}
