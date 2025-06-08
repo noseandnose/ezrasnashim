@@ -121,6 +121,39 @@ export default function TefillaSection() {
     { value: "עליית נשמה", label: "עליית נשמה (Soul Elevation)", english: "Soul Elevation" }
   ];
 
+  const getTehillimText = (perekNumber: number, isHebrew: boolean) => {
+    // Authentic Tehillim texts for the first few perakim
+    const tehillimTexts: Record<number, { hebrew: string; english: string }> = {
+      1: {
+        hebrew: "אַשְׁרֵי הָאִישׁ אֲשֶׁר לֹא הָלַךְ בַּעֲצַת רְשָׁעִים וּבְדֶרֶךְ חַטָּאִים לֹא עָמָד וּבְמוֹשַׁב לֵצִים לֹא יָשָׁב׃ כִּי אִם בְּתוֹרַת יְהוָה חֶפְצוֹ וּבְתוֹרָתוֹ יֶהְגֶּה יוֹמָם וָלָיְלָה׃",
+        english: "Happy is the man who has not walked in the counsel of the wicked, nor stood in the way of sinners, nor sat in the seat of scorners. But his delight is in the law of the Lord, and in His law he meditates day and night."
+      },
+      2: {
+        hebrew: "לָמָּה רָגְשׁוּ גוֹיִם וּלְאֻמִּים יֶהְגּוּ רִיק׃ יִתְיַצְּבוּ מַלְכֵי אֶרֶץ וְרוֹזְנִים נוֹסְדוּ יָחַד עַל יְהוָה וְעַל מְשִׁיחוֹ׃",
+        english: "Why do the nations rage, and the peoples plot in vain? The kings of the earth set themselves, and the rulers take counsel together, against the Lord and against His anointed."
+      },
+      3: {
+        hebrew: "מִזְמוֹר לְדָוִד בְּבָרְחוֹ מִפְּנֵי אַבְשָׁלוֹם בְּנוֹ׃ יְהוָה מָה רַבּוּ צָרָי רַבִּים קָמִים עָלָי׃",
+        english: "A Psalm of David, when he fled from Absalom his son. Lord, how many are my foes! Many are rising against me."
+      }
+    };
+
+    const text = tehillimTexts[perekNumber];
+    if (!text) {
+      return (
+        <div className="text-sm text-gray-600 italic text-center">
+          {isHebrew ? `פרק ${perekNumber} - טקסט מלא זמין בספר תהלים` : `Perek ${perekNumber} - Full text available in Tehillim book`}
+        </div>
+      );
+    }
+
+    return (
+      <div className={`text-sm leading-relaxed ${isHebrew ? 'text-right font-hebrew' : 'font-english'}`}>
+        {isHebrew ? text.hebrew : text.english}
+      </div>
+    );
+  };
+
   return (
     <div className="p-4 space-y-4">
       <div className="flex items-center justify-between">
@@ -217,9 +250,14 @@ export default function TefillaSection() {
           {/* Current Perek Display */}
           <div className="bg-cream rounded-xl p-3 mb-3">
             <div className="text-sm font-medium text-gray-700 mb-2">
-              {showHebrew ? "פרק נוכחי" : "Current Perek"}
+              {showHebrew ? `פרק ${progress?.currentPerek || 1}` : `Current Perek ${progress?.currentPerek || 1}`}
             </div>
             
+            {/* Tehillim Text Display */}
+            <div className="mb-3 bg-white rounded-lg p-3 max-h-32 overflow-y-auto">
+              {getTehillimText(progress?.currentPerek || 1, showHebrew)}
+            </div>
+
             {/* Current Name Assignment */}
             <div className="mb-3">
               {currentName ? (
