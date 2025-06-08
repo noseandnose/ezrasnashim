@@ -11,7 +11,8 @@ import { useState } from "react";
 export default function TimesModals() {
   const { activeModal, closeModal } = useModalStore();
   const [eventTitle, setEventTitle] = useState("");
-  const [hebrewDate, setHebrewDate] = useState("");
+  const [englishDate, setEnglishDate] = useState("");
+  const [convertedHebrewDate, setConvertedHebrewDate] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -26,7 +27,8 @@ export default function TimesModals() {
         description: "Event added to calendar for the next 20 years"
       });
       setEventTitle("");
-      setHebrewDate("");
+      setEnglishDate("");
+      setConvertedHebrewDate("");
       closeModal();
     },
     onError: () => {
@@ -38,23 +40,41 @@ export default function TimesModals() {
     }
   });
 
-  const handleAddToCalendar = () => {
-    if (!eventTitle || !hebrewDate) {
+  // Convert English date to Hebrew date using Hebcal
+  const convertToHebrewDate = async (englishDate: string) => {
+    if (!englishDate) return;
+    
+    try {
+      const response = await fetch(`https://www.hebcal.com/converter?cfg=json&gy=${englishDate.split('-')[0]}&gm=${englishDate.split('-')[1]}&gd=${englishDate.split('-')[2]}&g2h=1`);
+      const data = await response.json();
+      
+      if (data.hebrew) {
+        setConvertedHebrewDate(data.hebrew);
+      }
+    } catch (error) {
+      console.error('Error converting date:', error);
       toast({
         title: "Error",
-        description: "Please fill in all fields",
+        description: "Failed to convert date. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleAddToCalendar = () => {
+    if (!eventTitle || !englishDate || !convertedHebrewDate) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields and convert the date",
         variant: "destructive"
       });
       return;
     }
 
-    // Simple date conversion (in real app, would use proper Hebrew date library)
-    const gregorianDate = new Date().toISOString().split('T')[0];
-
     createEventMutation.mutate({
       title: eventTitle,
-      hebrewDate,
-      gregorianDate,
+      hebrewDate: convertedHebrewDate,
+      gregorianDate: englishDate,
       recurring: true,
       years: 20
     });
@@ -82,15 +102,28 @@ export default function TimesModals() {
             </div>
             
             <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-1">Hebrew Date</Label>
+              <Label className="block text-sm font-medium text-gray-700 mb-1">English Date</Label>
               <Input 
-                type="text" 
-                placeholder="כ״ט כסלו" 
-                value={hebrewDate}
-                onChange={(e) => setHebrewDate(e.target.value)}
+                type="date" 
+                value={englishDate}
+                onChange={(e) => {
+                  setEnglishDate(e.target.value);
+                  if (e.target.value) {
+                    convertToHebrewDate(e.target.value);
+                  }
+                }}
                 className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush"
               />
             </div>
+            
+            {convertedHebrewDate && (
+              <div>
+                <Label className="block text-sm font-medium text-gray-700 mb-1">Hebrew Date</Label>
+                <div className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700">
+                  {convertedHebrewDate}
+                </div>
+              </div>
+            )}
             
             <div className="flex space-x-2">
               <Button 
