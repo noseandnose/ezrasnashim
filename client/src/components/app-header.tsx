@@ -21,9 +21,9 @@ export default function AppHeader() {
           </p>
         </div>
         <div className="text-right">
-          <p className="text-sm font-medium">{getCurrentTime()}</p>
+          <p className="text-sm font-medium">{isLoading ? "Loading..." : times?.sunset || getCurrentTime()}</p>
           <p className="text-xs opacity-90">
-            {isLoading ? "Loading..." : times?.candleLighting ? "Candle Lighting" : "Current Time"}
+            Shkiah
           </p>
         </div>
       </div>
