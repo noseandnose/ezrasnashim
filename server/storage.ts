@@ -6,6 +6,7 @@ import {
   shopItems,
   tehillimNames,
   globalTehillimProgress,
+  minchaPrayers,
   type User, 
   type InsertUser,
   type Content,
@@ -19,7 +20,9 @@ import {
   type TehillimName,
   type InsertTehillimName,
   type GlobalTehillimProgress,
-  type InsertGlobalTehillimProgress
+  type InsertGlobalTehillimProgress,
+  type MinchaPrayer,
+  type InsertMinchaPrayer
 } from "@shared/schema";
 
 export interface IStorage {

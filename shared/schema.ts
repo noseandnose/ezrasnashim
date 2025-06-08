@@ -82,6 +82,15 @@ export const perakimTexts = pgTable("perakim_texts", {
   transliteration: text("transliteration"),
 });
 
+export const minchaPrayers = pgTable("mincha_prayers", {
+  id: serial("id").primaryKey(),
+  prayerType: text("prayer_type").notNull(), // e.g., "main_prayer", "ashrei", "shemoneh_esrei"
+  hebrewText: text("hebrew_text").notNull(),
+  englishTranslation: text("english_translation").notNull(),
+  transliteration: text("transliteration"),
+  orderIndex: integer("order_index").default(0),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -123,6 +132,10 @@ export const insertGlobalTehillimProgressSchema = createInsertSchema(globalTehil
   lastUpdated: true,
 });
 
+export const insertMinchaPrayerSchema = createInsertSchema(minchaPrayers).omit({
+  id: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Content = typeof content.$inferSelect;
@@ -141,3 +154,5 @@ export type PerekText = typeof perakimTexts.$inferSelect;
 export type InsertPerekText = z.infer<typeof insertPerekTextSchema>;
 export type GlobalTehillimProgress = typeof globalTehillimProgress.$inferSelect;
 export type InsertGlobalTehillimProgress = z.infer<typeof insertGlobalTehillimProgressSchema>;
+export type MinchaPrayer = typeof minchaPrayers.$inferSelect;
+export type InsertMinchaPrayer = z.infer<typeof insertMinchaPrayerSchema>;

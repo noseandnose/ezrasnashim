@@ -43,10 +43,10 @@ export function useJewishTimes() {
         return null;
       }
     },
-    enabled: !!geonameid,
+    enabled: true, // Always enabled - use default location if needed
     staleTime: 1000 * 60 * 60 * 12, // 12 hours - more stable
     refetchInterval: false, // Don't auto-refetch
     refetchOnWindowFocus: false, // Don't refetch on focus
-    refetchOnMount: false, // Don't refetch on mount after first load
+    refetchOnMount: true, // Fetch on mount for immediate loading
   });
 }
