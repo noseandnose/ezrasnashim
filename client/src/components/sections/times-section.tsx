@@ -140,6 +140,14 @@ export default function TimesSection() {
             Find
           </Button>
         </div>
+        
+        {/* Current Location Display */}
+        {location && (
+          <div className="text-xs text-gray-600 text-center py-2">
+            📍 {location}
+          </div>
+        )}
+        
         {/* Today's Times */}
         <div className="content-card rounded-2xl p-4">
           <h3 className="font-semibold text-sm mb-3 flex items-center">
