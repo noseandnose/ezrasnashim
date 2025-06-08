@@ -273,7 +273,7 @@ export default function TefillaSection() {
                     </span>
                   </div>
                   <div className="text-xs text-gray-600">
-                    לרפואה: {currentName.reason}
+                    {currentName.reason}
                   </div>
                 </div>
               ) : (

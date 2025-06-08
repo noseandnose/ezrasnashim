@@ -148,6 +148,23 @@
   color: white;
 }
 
+/* Ensure checkbox checkmark is visible when selected */
+[data-state="checked"] svg {
+  color: white !important;
+  stroke-width: 3 !important;
+}
+
+/* Custom checkbox styling for better visibility */
+.checkbox-custom[data-state="checked"] {
+  background-color: hsl(328, 85%, 70%) !important;
+  border-color: hsl(328, 85%, 70%) !important;
+}
+
+.checkbox-custom[data-state="checked"] svg {
+  color: white !important;
+  stroke-width: 2.5 !important;
+}
+
 .nav-tab:not(.active) {
   color: hsl(240, 5%, 64.9%);
 }

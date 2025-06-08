@@ -143,7 +143,7 @@ export default function TimesModals() {
                 id="nightfall"
                 checked={afterNightfall}
                 onCheckedChange={handleNightfallChange}
-                className="border-2 border-blush data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+                className="h-5 w-5 border-2 border-blush data-[state=checked]:bg-blush data-[state=checked]:border-blush data-[state=checked]:text-white"
               />
               <Label 
                 htmlFor="nightfall" 
