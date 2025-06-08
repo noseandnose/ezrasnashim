@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 export default function TimesSection() {
   const { data: times, isLoading } = useJewishTimes();
   const { openModal } = useModalStore();
-  const { location, setLocation, setGeonameid } = useLocationStore();
+  const { location, setLocation, setGeonameid, setCoordinates } = useLocationStore();
   const [locationInput, setLocationInput] = useState("");
   const [locationDetected, setLocationDetected] = useState(false);
 
@@ -42,6 +42,10 @@ export default function TimesSection() {
               const city = data.address?.city || data.address?.town || data.display_name?.split(',')[0];
               const geonameid = cityGeonameMap[city] || '5128581'; // Default to NYC
               
+              setCoordinates({
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+              });
               setGeonameid(geonameid);
               setLocation(city || 'Current Location');
               setLocationDetected(true);
