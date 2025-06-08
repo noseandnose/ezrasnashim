@@ -28,6 +28,7 @@ export default function TefillaSection() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [justCompleted, setJustCompleted] = useState(false);
   const [showHebrew, setShowHebrew] = useState(true);
+  const [isCompleting, setIsCompleting] = useState(false);
 
   // Load saved data from localStorage on component mount
   useEffect(() => {
@@ -79,20 +80,26 @@ export default function TefillaSection() {
 
   // Mark current perek as completed and advance
   const completePerek = () => {
-    setJustCompleted(true);
+    setIsCompleting(true);
     
-    // Advance to next perek (1-150, then cycle back to 1)
-    const nextPerek = currentPerek >= 150 ? 1 : currentPerek + 1;
-    setCurrentPerek(nextPerek);
-    
-    // Advance to next name if we have names
-    if (names.length > 0) {
-      const nextIndex = (currentNameIndex + 1) % names.length;
-      setCurrentNameIndex(nextIndex);
-    }
-    
-    // Clear completion message after 2 seconds
-    setTimeout(() => setJustCompleted(false), 2000);
+    // Short delay to show button feedback
+    setTimeout(() => {
+      setJustCompleted(true);
+      setIsCompleting(false);
+      
+      // Advance to next perek (1-150, then cycle back to 1)
+      const nextPerek = currentPerek >= 150 ? 1 : currentPerek + 1;
+      setCurrentPerek(nextPerek);
+      
+      // Advance to next name if we have names
+      if (names.length > 0) {
+        const nextIndex = (currentNameIndex + 1) % names.length;
+        setCurrentNameIndex(nextIndex);
+      }
+      
+      // Clear completion message after 4 seconds
+      setTimeout(() => setJustCompleted(false), 4000);
+    }, 300);
   };
 
   // Get current name assignment (random selection instead of cycling)
@@ -219,9 +226,9 @@ export default function TefillaSection() {
           {/* Current Perek Display */}
           <div className="space-y-3">
             {justCompleted && (
-              <div className="flex items-center space-x-2 text-green-600 text-sm">
-                <CheckCircle size={16} />
-                <span>Perek {currentPerek - 1 || 150} completed!</span>
+              <div className="flex items-center justify-center space-x-2 text-green-600 text-sm bg-green-50 rounded-lg p-3 mb-3 animate-pulse border border-green-200">
+                <CheckCircle size={20} className="text-green-500" />
+                <span className="font-medium">Perek {currentPerek - 1 || 150} completed! ✓</span>
               </div>
             )}
             
@@ -253,11 +260,7 @@ export default function TefillaSection() {
                     </div>
                   )}
                 </div>
-                {showHebrew && (
-                  <div className="text-xs text-gray-600 italic">
-                    {currentPerekText.english}
-                  </div>
-                )}
+                
               </div>
               
               {/* Current Name Assignment */}
@@ -288,9 +291,17 @@ export default function TefillaSection() {
               <Button
                 size="sm"
                 onClick={completePerek}
-                className="bg-blush hover:bg-blush/90"
+                disabled={isCompleting}
+                className="bg-blush hover:bg-blush/90 disabled:opacity-50"
               >
-                Mark Done
+                {isCompleting ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Completing...</span>
+                  </div>
+                ) : (
+                  "Mark Done"
+                )}
               </Button>
             </div>
           </div>
