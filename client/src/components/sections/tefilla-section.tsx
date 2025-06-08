@@ -1,19 +1,14 @@
-import { Scroll, Clock, HandHeart, ChevronRight, Plus, CheckCircle, User } from "lucide-react";
+import { Scroll, Clock, HandHeart, ChevronRight, Plus, CheckCircle, User, AlertCircle } from "lucide-react";
 import { useModalStore } from "@/lib/types";
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-// Tehillim name entry interface
-interface TehillimName {
-  id: number;
-  hebrewName: string;
-  reason: string;
-  dateAdded: string;
-  // Future feature: automatic removal after 7 days
-}
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { toast } from "@/hooks/use-toast";
+import type { TehillimName, GlobalTehillimProgress } from "@shared/schema";
 
 export default function TefillaSection() {
   const { openModal } = useModalStore();

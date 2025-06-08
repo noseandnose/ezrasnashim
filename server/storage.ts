@@ -66,6 +66,13 @@ export class MemStorage implements IStorage {
     this.jewishTimes = new Map();
     this.calendarEvents = new Map();
     this.shopItems = new Map();
+    this.tehillimNames = new Map();
+    this.globalProgress = {
+      id: 1,
+      currentPerek: 1,
+      lastUpdated: new Date(),
+      completedBy: null
+    };
     this.currentId = 1;
     this.initializeData();
   }
@@ -240,6 +247,61 @@ export class MemStorage implements IStorage {
     const item: ShopItem = { ...insertItem, id };
     this.shopItems.set(id, item);
     return item;
+  }
+
+  // Tehillim methods
+  async getActiveNames(): Promise<TehillimName[]> {
+    await this.cleanupExpiredNames();
+    return Array.from(this.tehillimNames.values());
+  }
+
+  async createTehillimName(insertName: InsertTehillimName): Promise<TehillimName> {
+    const id = this.currentId++;
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
+    
+    const name: TehillimName = {
+      ...insertName,
+      id,
+      dateAdded: now,
+      expiresAt,
+      userId: null
+    };
+    
+    this.tehillimNames.set(id, name);
+    return name;
+  }
+
+  async cleanupExpiredNames(): Promise<void> {
+    const now = new Date();
+    for (const [id, name] of this.tehillimNames.entries()) {
+      if (name.expiresAt && name.expiresAt < now) {
+        this.tehillimNames.delete(id);
+      }
+    }
+  }
+
+  async getGlobalTehillimProgress(): Promise<GlobalTehillimProgress> {
+    return this.globalProgress;
+  }
+
+  async updateGlobalTehillimProgress(currentPerek: number, completedBy?: string): Promise<GlobalTehillimProgress> {
+    this.globalProgress = {
+      ...this.globalProgress,
+      currentPerek: currentPerek > 150 ? 1 : currentPerek, // Reset to 1 after 150
+      lastUpdated: new Date(),
+      completedBy: completedBy || null
+    };
+    return this.globalProgress;
+  }
+
+  async getRandomNameForPerek(): Promise<TehillimName | undefined> {
+    await this.cleanupExpiredNames();
+    const activeNames = Array.from(this.tehillimNames.values());
+    if (activeNames.length === 0) return undefined;
+    
+    const randomIndex = Math.floor(Math.random() * activeNames.length);
+    return activeNames[randomIndex];
   }
 }
 

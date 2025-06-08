@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContentSchema, insertCalendarEventSchema } from "@shared/schema";
+import { insertContentSchema, insertCalendarEventSchema, insertTehillimNameSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -192,6 +192,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(times);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch zmanim data" });
+    }
+  });
+
+  // Tehillim routes
+  app.get("/api/tehillim/progress", async (req, res) => {
+    try {
+      const progress = await storage.getGlobalTehillimProgress();
+      res.json(progress);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch Tehillim progress" });
+    }
+  });
+
+  app.post("/api/tehillim/complete", async (req, res) => {
+    try {
+      const { completedBy } = req.body;
+      const currentProgress = await storage.getGlobalTehillimProgress();
+      const nextPerek = currentProgress.currentPerek + 1;
+      const updatedProgress = await storage.updateGlobalTehillimProgress(nextPerek, completedBy);
+      res.json(updatedProgress);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to complete Tehillim perek" });
+    }
+  });
+
+  app.get("/api/tehillim/current-name", async (req, res) => {
+    try {
+      const name = await storage.getRandomNameForPerek();
+      res.json(name || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch current name" });
+    }
+  });
+
+  app.get("/api/tehillim/names", async (req, res) => {
+    try {
+      const names = await storage.getActiveNames();
+      res.json(names);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch Tehillim names" });
+    }
+  });
+
+  app.post("/api/tehillim/names", async (req, res) => {
+    try {
+      const validatedData = insertTehillimNameSchema.parse(req.body);
+      const name = await storage.createTehillimName(validatedData);
+      res.json(name);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid name data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create Tehillim name" });
+      }
     }
   });
 
