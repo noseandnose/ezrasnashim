@@ -27,6 +27,7 @@ export default function TefillaSection() {
   const [reason, setReason] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [justCompleted, setJustCompleted] = useState(false);
+  const [showHebrew, setShowHebrew] = useState(true);
 
   // Load saved data from localStorage on component mount
   useEffect(() => {
@@ -229,21 +230,34 @@ export default function TefillaSection() {
                 <h4 className="font-semibold text-sm text-blush">
                   Perek {currentPerek}
                 </h4>
-                <span className="text-xs bg-blush/20 text-blush px-2 py-1 rounded-full">
-                  {Math.ceil(currentPerek / 5)} of 30 cycles
-                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setShowHebrew(!showHebrew)}
+                  className="text-xs"
+                >
+                  {showHebrew ? "EN" : "עב"}
+                </Button>
               </div>
               
               {/* Perek Text Display */}
               <div className="space-y-3 mb-3">
-                <div className="bg-white/80 rounded p-2 text-right">
-                  <div className="text-sm font-hebrew leading-relaxed" style={{ fontFamily: 'Times, serif' }}>
-                    {currentPerekText.hebrew}
+                <div className="bg-white/80 rounded p-3">
+                  {showHebrew ? (
+                    <div className="text-sm leading-relaxed text-right" style={{ fontFamily: 'Times, serif', direction: 'rtl' }}>
+                      {currentPerekText.hebrew}
+                    </div>
+                  ) : (
+                    <div className="text-sm leading-relaxed text-left">
+                      {currentPerekText.english}
+                    </div>
+                  )}
+                </div>
+                {showHebrew && (
+                  <div className="text-xs text-gray-600 italic">
+                    {currentPerekText.english}
                   </div>
-                </div>
-                <div className="text-xs text-gray-700 italic">
-                  {currentPerekText.english}
-                </div>
+                )}
               </div>
               
               {/* Current Name Assignment */}
@@ -252,7 +266,7 @@ export default function TefillaSection() {
                   <div className="flex items-center space-x-2">
                     <User size={12} className="text-blush" />
                     <span className="text-sm font-medium text-blush">
-                      Dedicated for: {currentName.hebrewName}
+                      Davening For: {currentName.hebrewName}
                     </span>
                   </div>
                   <div className="text-xs text-gray-600">
@@ -281,14 +295,7 @@ export default function TefillaSection() {
             </div>
           </div>
 
-          {/* Prayer List Summary */}
-          {names.length > 0 && (
-            <div className="mt-4 pt-3 border-t border-gray-200">
-              <div className="text-xs text-gray-600 text-center">
-                {names.length} name{names.length > 1 ? 's' : ''} in prayer list
-              </div>
-            </div>
-          )}
+          
         </div>
 
         {/* Mincha */}
@@ -302,8 +309,8 @@ export default function TefillaSection() {
               <h3 className="font-semibold text-sm">Mincha</h3>
               <p className="text-xs text-gray-600">
                 {isLoading ? "Loading..." : 
-                 times?.minchaGedolah && times?.minchaKetana ? 
-                 `${times.minchaGedolah} - ${times.minchaKetana}` : 
+                 times?.minchaGedolah && times?.minchaKetanah ? 
+                 `${times.minchaGedolah} - ${times.minchaKetanah}` : 
                  "Loading..."}
               </p>
             </div>
