@@ -3,30 +3,34 @@ import { create } from 'zustand';
 
 interface LocationState {
   location: string;
+  geonameid: string | null;
   coordinates: { lat: number; lng: number } | null;
   setLocation: (location: string) => void;
+  setGeonameid: (id: string) => void;
   setCoordinates: (coords: { lat: number; lng: number }) => void;
 }
 
 export const useLocationStore = create<LocationState>((set) => ({
   location: '',
+  geonameid: null,
   coordinates: null,
   setLocation: (location: string) => set({ location }),
+  setGeonameid: (geonameid: string) => set({ geonameid }),
   setCoordinates: (coordinates: { lat: number; lng: number }) => set({ coordinates }),
 }));
 
 export function useJewishTimes() {
-  const { coordinates } = useLocationStore();
+  const { geonameid } = useLocationStore();
   const today = new Date().toISOString().split('T')[0];
 
   return useQuery({
-    queryKey: [`/api/zmanim`, coordinates?.lat, coordinates?.lng, today],
+    queryKey: [`/api/zmanim`, geonameid, today],
     queryFn: async () => {
-      if (!coordinates) return null;
+      if (!geonameid) return null;
       
       try {
         const response = await fetch(
-          `https://www.hebcal.com/zmanim?cfg=json&lat=${coordinates.lat}&lng=${coordinates.lng}&date=${today}`
+          `https://www.hebcal.com/zmanim?cfg=json&geonameid=${geonameid}&date=${today}`
         );
         
         if (!response.ok) {
@@ -61,7 +65,7 @@ export function useJewishTimes() {
         return null;
       }
     },
-    enabled: !!coordinates,
+    enabled: !!geonameid,
     staleTime: 1000 * 60 * 60 * 12, // 12 hours - more stable
     refetchInterval: false, // Don't auto-refetch
     refetchOnWindowFocus: false, // Don't refetch on focus
