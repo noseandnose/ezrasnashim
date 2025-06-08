@@ -13,17 +13,85 @@ export async function fetchHebcalData(location: string = "5128581"): Promise<Heb
   }
 }
 
+// Local halachic time adjustments (in minutes)
+const HALACHIC_ADJUSTMENTS = {
+  'New York': {
+    shkia: -42,  // 42 minutes earlier than astronomical sunset
+    sunrise: -3  // 3 minutes earlier than astronomical sunrise
+  }
+};
+
+function adjustTime(timeStr: string, adjustmentMinutes: number): string {
+  if (!timeStr || timeStr === 'N/A') return timeStr;
+  
+  try {
+    const date = new Date(timeStr);
+    if (isNaN(date.getTime())) return timeStr;
+    
+    date.setMinutes(date.getMinutes() + adjustmentMinutes);
+    return date.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true,
+      timeZone: 'America/New_York'
+    });
+  } catch {
+    return timeStr;
+  }
+}
+
 export function parseJewishTimes(hebcalData: HebcalResponse) {
-  const candleLighting = hebcalData.items.find(item => item.category === 'candles')?.time;
-  const havdalah = hebcalData.items.find(item => item.category === 'havdalah')?.time;
+  const location = hebcalData.location?.title || 'New York';
+  const adjustments = HALACHIC_ADJUSTMENTS[location] || HALACHIC_ADJUSTMENTS['New York'];
+  
+  const times: any = {};
+  
+  // Find specific times from the items array
+  hebcalData.items.forEach(item => {
+    const time = item.time;
+    if (!time) return;
+    
+    const timeStr = new Date(time).toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true,
+      timeZone: 'America/New_York'
+    });
+    
+    switch (item.title.toLowerCase()) {
+      case 'sunrise':
+        times.sunrise = adjustTime(time, adjustments.sunrise);
+        break;
+      case 'sunset':
+        times.shkia = adjustTime(time, adjustments.shkia);
+        break;
+      case 'tzeit hakochavim':
+        times.tzaitHakochavim = timeStr;
+        break;
+      case 'mincha gedolah':
+        times.minchaGedolah = timeStr;
+        break;
+      case 'mincha ketanah':
+        times.minchaKetanah = timeStr;
+        break;
+      case 'candle lighting':
+        times.candleLighting = timeStr;
+        break;
+      case 'havdalah':
+        times.havdalah = timeStr;
+        break;
+    }
+  });
 
   return {
     hebrewDate: hebcalData.date?.hebrew || '',
-    location: hebcalData.location?.title || '',
-    candleLighting,
-    havdalah,
-    // These would typically come from the API as well
-    sunrise: '7:12 AM',
-    sunset: '4:32 PM'
+    location: location,
+    sunrise: times.sunrise || 'N/A',
+    shkia: times.shkia || 'N/A',
+    tzaitHakochavim: times.tzaitHakochavim || 'N/A',
+    minchaGedolah: times.minchaGedolah || 'N/A',
+    minchaKetanah: times.minchaKetanah || 'N/A',
+    candleLighting: times.candleLighting,
+    havdalah: times.havdalah
   };
 }
