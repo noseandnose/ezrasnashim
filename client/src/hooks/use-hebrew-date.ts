@@ -13,7 +13,7 @@ export const useHebrewDateStore = create<HebrewDateState>((set) => ({
 
 export function useHebrewDate() {
   const { hebrewDate, setHebrewDate } = useHebrewDateStore();
-  const today = '2024-12-08';
+  const today = new Date().toISOString().split('T')[0];
 
   return useQuery({
     queryKey: [`/api/hebrew-date`, today],
