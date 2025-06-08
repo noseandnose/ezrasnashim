@@ -1,7 +1,9 @@
 import { useJewishTimes } from "@/hooks/use-jewish-times";
+import { useHebrewDate } from "@/hooks/use-hebrew-date";
 
 export default function AppHeader() {
-  const { data: times, isLoading } = useJewishTimes();
+  const { data: times, isLoading: timesLoading } = useJewishTimes();
+  const { data: hebrewDate, isLoading: dateLoading } = useHebrewDate();
 
   const getCurrentTime = () => {
     return new Date().toLocaleTimeString('en-US', { 
@@ -17,11 +19,11 @@ export default function AppHeader() {
         <div>
           <h1 className="text-xl font-semibold">Ezras Nashim</h1>
           <p className="text-sm opacity-90">
-            {isLoading ? "Loading..." : times?.hebrewDate || "Hebrew Date"}
+            {dateLoading ? "Loading..." : hebrewDate || "Hebrew Date"}
           </p>
         </div>
         <div className="text-right">
-          <p className="text-sm font-medium">{isLoading ? "Loading..." : times?.sunset || getCurrentTime()}</p>
+          <p className="text-sm font-medium">{timesLoading ? "Loading..." : times?.sunset || getCurrentTime()}</p>
           <p className="text-xs opacity-90">
             Shkiah
           </p>
