@@ -50,24 +50,21 @@ export function useJewishTimes() {
         // Get timezone from the response
         const timezone = data.location?.tzid || 'America/New_York';
         
-        // Format times to 12-hour format
+        // Format times to 12-hour format - properly handle timezone
         const formatTime = (timeStr: string) => {
           if (!timeStr) return '';
           try {
-            // Extract time portion from ISO string (e.g., "2025-06-08T20:26:00-04:00")
-            const timePart = timeStr.split('T')[1]?.split('-')[0] || '';
-            if (!timePart) return '';
+            // Parse the full ISO 8601 datetime string with timezone
+            const date = new Date(timeStr);
+            if (isNaN(date.getTime())) return '';
             
-            const [hours, minutes] = timePart.split(':');
-            const hour24 = parseInt(hours, 10);
-            const minute = parseInt(minutes, 10);
-            
-            // Convert to 12-hour format
-            const isPM = hour24 >= 12;
-            const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
-            const minuteStr = minute.toString().padStart(2, '0');
-            
-            return `${hour12}:${minuteStr} ${isPM ? 'PM' : 'AM'}`;
+            // Format using the location's timezone
+            return date.toLocaleTimeString('en-US', { 
+              hour: 'numeric', 
+              minute: '2-digit',
+              hour12: true,
+              timeZone: timezone
+            });
           } catch (error) {
             console.error('Time formatting error for', timeStr, ':', error);
             return '';

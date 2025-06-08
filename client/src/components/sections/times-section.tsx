@@ -10,6 +10,7 @@ export default function TimesSection() {
   const { openModal } = useModalStore();
   const { location, setLocation, setGeonameid } = useLocationStore();
   const [locationInput, setLocationInput] = useState("");
+  const [locationDetected, setLocationDetected] = useState(false);
 
   // Try geolocation first, fallback to NYC
   useEffect(() => {
@@ -43,6 +44,7 @@ export default function TimesSection() {
               
               setGeonameid(geonameid);
               setLocation(city || 'Current Location');
+              setLocationDetected(true);
             } catch (error) {
               // Fallback to NYC
               setGeonameid("5128581");
@@ -116,8 +118,9 @@ export default function TimesSection() {
   return (
     <div className="h-full p-4">
       <div className="space-y-3 h-full">
-        {/* Location Input */}
-        <div className="flex gap-2 items-center">
+        {/* Location Input - Only show when location not detected */}
+        {!locationDetected && (
+          <div className="flex gap-2 items-center">
           <div className="flex-1 relative">
             <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
             <Input
@@ -139,7 +142,8 @@ export default function TimesSection() {
           >
             Find
           </Button>
-        </div>
+          </div>
+        )}
         
         {/* Current Location Display */}
         {location && (
