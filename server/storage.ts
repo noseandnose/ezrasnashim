@@ -24,6 +24,8 @@ import {
   type MinchaPrayer,
   type InsertMinchaPrayer
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, lt } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -57,33 +59,46 @@ export interface IStorage {
   createMinchaPrayer(prayer: InsertMinchaPrayer): Promise<MinchaPrayer>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private content: Map<number, Content>;
-  private jewishTimes: Map<string, JewishTimes>;
-  private calendarEvents: Map<number, CalendarEvent>;
-  private shopItems: Map<number, ShopItem>;
-  private tehillimNames: Map<number, TehillimName>;
-  private globalProgress: GlobalTehillimProgress;
-  private minchaPrayers: Map<number, MinchaPrayer>;
-  private currentId: number;
-
+export class DatabaseStorage implements IStorage {
   constructor() {
-    this.users = new Map();
-    this.content = new Map();
-    this.jewishTimes = new Map();
-    this.calendarEvents = new Map();
-    this.shopItems = new Map();
-    this.tehillimNames = new Map();
-    this.minchaPrayers = new Map();
-    this.globalProgress = {
-      id: 1,
-      currentPerek: 1,
-      lastUpdated: new Date(),
-      completedBy: null
-    };
-    this.currentId = 1;
-    this.initializeData();
+    // Initialize default data on first run if needed
+    this.initializeDefaults();
+  }
+
+  private async initializeDefaults() {
+    try {
+      // Check if global progress exists, if not create it
+      const [existingProgress] = await db.select().from(globalTehillimProgress).limit(1);
+      if (!existingProgress) {
+        await db.insert(globalTehillimProgress).values({
+          currentPerek: 1,
+          completedBy: null
+        });
+      }
+
+      // Initialize some sample Mincha prayers if none exist
+      const existingPrayers = await db.select().from(minchaPrayers).limit(1);
+      if (existingPrayers.length === 0) {
+        await db.insert(minchaPrayers).values([
+          {
+            prayerType: "ashrei",
+            hebrewText: "אַשְׁרֵי יוֹשְׁבֵי בֵיתֶךָ, עוֹד יְהַלְלוּךָ סֶּלָה׃",
+            englishTranslation: "Happy are those who dwell in Your house; they shall praise You forever. Selah.",
+            transliteration: "Ashrei yoshvei veitecha, od yehalucha selah.",
+            orderIndex: 1
+          },
+          {
+            prayerType: "shemoneh_esrei",
+            hebrewText: "אֲדֹנָי שְׂפָתַי תִּפְתָּח וּפִי יַגִּיד תְּהִלָּתֶךָ׃",
+            englishTranslation: "O Lord, open my lips, and my mouth shall declare Your praise.",
+            transliteration: "Adonai sefatai tiftach ufi yagid tehilatecha.",
+            orderIndex: 2
+          }
+        ]);
+      }
+    } catch (error) {
+      console.error('Error initializing defaults:', error);
+    }
   }
 
   private initializeData() {
@@ -339,20 +354,100 @@ export class MemStorage implements IStorage {
   }
 
   async getMinchaPrayers(): Promise<MinchaPrayer[]> {
-    return Array.from(this.minchaPrayers.values()).sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
+    return await db.select().from(minchaPrayers).orderBy(minchaPrayers.orderIndex);
   }
 
   async createMinchaPrayer(insertPrayer: InsertMinchaPrayer): Promise<MinchaPrayer> {
-    const id = this.currentId++;
-    const prayer: MinchaPrayer = { 
-      ...insertPrayer, 
-      id, 
-      orderIndex: insertPrayer.orderIndex || 0,
-      transliteration: insertPrayer.transliteration || null
-    };
-    this.minchaPrayers.set(id, prayer);
+    const [prayer] = await db.insert(minchaPrayers).values(insertPrayer).returning();
     return prayer;
+  }
+
+  async getActiveNames(): Promise<TehillimName[]> {
+    const now = new Date();
+    return await db.select().from(tehillimNames).where(lt(tehillimNames.expiresAt, now));
+  }
+
+  async createTehillimName(insertName: InsertTehillimName): Promise<TehillimName> {
+    const [name] = await db.insert(tehillimNames).values({
+      ...insertName,
+      dateAdded: new Date(),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      userId: null
+    }).returning();
+    return name;
+  }
+
+  async cleanupExpiredNames(): Promise<void> {
+    const now = new Date();
+    await db.delete(tehillimNames).where(lt(tehillimNames.expiresAt, now));
+  }
+
+  async getGlobalTehillimProgress(): Promise<GlobalTehillimProgress> {
+    const [progress] = await db.select().from(globalTehillimProgress).limit(1);
+    if (!progress) {
+      const [newProgress] = await db.insert(globalTehillimProgress).values({
+        currentPerek: 1,
+        completedBy: null
+      }).returning();
+      return newProgress;
+    }
+    return progress;
+  }
+
+  async updateGlobalTehillimProgress(currentPerek: number, completedBy?: string): Promise<GlobalTehillimProgress> {
+    const [progress] = await db.select().from(globalTehillimProgress).limit(1);
+    if (progress) {
+      const [updated] = await db.update(globalTehillimProgress)
+        .set({
+          currentPerek: currentPerek > 150 ? 1 : currentPerek,
+          lastUpdated: new Date(),
+          completedBy: completedBy || null
+        })
+        .where(eq(globalTehillimProgress.id, progress.id))
+        .returning();
+      return updated;
+    }
+    return this.getGlobalTehillimProgress();
+  }
+
+  async getRandomNameForPerek(): Promise<TehillimName | undefined> {
+    await this.cleanupExpiredNames();
+    const activeNames = await this.getActiveNames();
+    if (activeNames.length === 0) return undefined;
+    
+    const randomIndex = Math.floor(Math.random() * activeNames.length);
+    return activeNames[randomIndex];
+  }
+
+  // Stub implementations for other methods
+  async getContentByType(type: string): Promise<Content[]> { return []; }
+  async getContentByDate(date: string): Promise<Content[]> { return []; }
+  async createContent(content: InsertContent): Promise<Content> { 
+    const [created] = await db.insert(content).values(content).returning();
+    return created;
+  }
+  async getJewishTimesByDate(date: string): Promise<JewishTimes | undefined> { return undefined; }
+  async createJewishTimes(times: InsertJewishTimes): Promise<JewishTimes> {
+    const [created] = await db.insert(jewishTimes).values(times).returning();
+    return created;
+  }
+  async getCalendarEvents(): Promise<CalendarEvent[]> { return []; }
+  async createCalendarEvent(event: InsertCalendarEvent): Promise<CalendarEvent> {
+    const [created] = await db.insert(calendarEvents).values(event).returning();
+    return created;
+  }
+  async getShopItemsByCategory(category: string): Promise<ShopItem[]> { return []; }
+  async getAllShopItems(): Promise<ShopItem[]> { return []; }
+  async createShopItem(item: InsertShopItem): Promise<ShopItem> {
+    const [created] = await db.insert(shopItems).values(item).returning();
+    return created;
+  }
+  async getUser(id: number): Promise<User | undefined> { return undefined; }
+  async getUserByUsername(username: string): Promise<User | undefined> { return undefined; }
+  async createUser(user: InsertUser): Promise<User> {
+    const [created] = await db.insert(users).values(user).returning();
+    return created;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
