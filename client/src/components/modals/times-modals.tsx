@@ -148,7 +148,7 @@ export default function TimesModals() {
 
             <div className="flex items-center space-x-2">
               <div
-                onClick={() => handleNightfallChange(!afterNightfall)}
+                onClick={toggleNightfall}
                 className={`h-5 w-5 border-2 border-blush rounded-sm cursor-pointer flex items-center justify-center transition-all ${
                   afterNightfall ? 'bg-blush' : 'bg-white hover:bg-gray-50'
                 }`}
@@ -170,7 +170,7 @@ export default function TimesModals() {
                 )}
               </div>
               <Label 
-                onClick={() => handleNightfallChange(!afterNightfall)}
+                onClick={toggleNightfall}
                 className="text-sm text-gray-700 cursor-pointer"
               >
                 After nightfall (Hebrew date + 1)
