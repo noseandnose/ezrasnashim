@@ -14,7 +14,10 @@ export const useModalStore = create<ModalState>((set) => ({
 
 export interface JewishTimes {
   sunrise: string;
-  sunset: string;
+  shkia: string;
+  tzaitHakochavim: string;
+  minchaGedolah: string;
+  minchaKetanah: string;
   candleLighting?: string;
   havdalah?: string;
   hebrewDate: string;

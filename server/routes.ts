@@ -125,7 +125,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/hebcal/:location?", async (req, res) => {
     try {
       const location = req.params.location || "5128581"; // Default to NYC
-      const hebcalUrl = `https://www.hebcal.com/shabbat?cfg=json&geonameid=${location}&M=on&lg=s`;
+      const today = new Date().toISOString().split('T')[0];
+      const hebcalUrl = `https://www.hebcal.com/zmanim?cfg=json&geonameid=${location}&date=${today}`;
       
       const response = await fetch(hebcalUrl);
       const data = await response.json();
@@ -133,6 +134,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(data);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch from Hebcal API" });
+    }
+  });
+
+  // Zmanim route that returns parsed and adjusted times
+  app.get("/api/zmanim/:location?", async (req, res) => {
+    try {
+      const location = req.params.location || "5128581"; // Default to NYC
+      const today = new Date().toISOString().split('T')[0];
+      const hebcalUrl = `https://www.hebcal.com/zmanim?cfg=json&geonameid=${location}&date=${today}`;
+      
+      const response = await fetch(hebcalUrl);
+      const data = await response.json();
+      
+      // Parse the response to extract times
+      const times: any = {};
+      
+      if (data.times) {
+        const formatTime = (timeStr: string) => {
+          if (!timeStr) return 'N/A';
+          const date = new Date(timeStr);
+          return date.toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit',
+            hour12: true,
+            timeZone: 'America/New_York'
+          });
+        };
+
+        const adjustTime = (timeStr: string, adjustmentMinutes: number) => {
+          if (!timeStr) return 'N/A';
+          try {
+            const date = new Date(timeStr);
+            date.setMinutes(date.getMinutes() + adjustmentMinutes);
+            return date.toLocaleTimeString('en-US', { 
+              hour: 'numeric', 
+              minute: '2-digit',
+              hour12: true,
+              timeZone: 'America/New_York'
+            });
+          } catch {
+            return 'N/A';
+          }
+        };
+
+        times.sunrise = adjustTime(data.times.sunrise, -3); // 3 minutes earlier
+        times.shkia = adjustTime(data.times.sunset, -42); // 42 minutes earlier  
+        times.tzaitHakochavim = formatTime(data.times.tzeit7083deg);
+        times.minchaGedolah = formatTime(data.times.minchaGedola);
+        times.minchaKetanah = formatTime(data.times.minchaKetana);
+        times.candleLighting = formatTime(data.times.candlelighting);
+        times.havdalah = formatTime(data.times.havdalah);
+        times.hebrewDate = data.date?.hebrew || '';
+        times.location = data.location?.title || 'New York';
+      }
+      
+      res.json(times);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch zmanim data" });
     }
   });
 

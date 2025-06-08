@@ -14,7 +14,7 @@ export async function fetchHebcalData(location: string = "5128581"): Promise<Heb
 }
 
 // Local halachic time adjustments (in minutes)
-const HALACHIC_ADJUSTMENTS = {
+const HALACHIC_ADJUSTMENTS: { [key: string]: { shkia: number; sunrise: number } } = {
   'New York': {
     shkia: -42,  // 42 minutes earlier than astronomical sunset
     sunrise: -3  // 3 minutes earlier than astronomical sunrise

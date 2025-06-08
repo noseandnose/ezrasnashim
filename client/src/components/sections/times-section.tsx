@@ -174,7 +174,11 @@ export default function TimesSection() {
               </div>
               <div className="flex justify-between">
                 <span>Shkia (Sunset)</span>
-                <span>{times?.sunset || "Loading..."}</span>
+                <span>{times?.shkia || "Loading..."}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Tzait Hakochavim</span>
+                <span>{times?.tzaitHakochavim || "Loading..."}</span>
               </div>
               <div className="flex justify-between">
                 <span>Mincha Gedolah</span>
