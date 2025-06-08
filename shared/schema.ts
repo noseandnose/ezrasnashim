@@ -52,6 +52,7 @@ export const tehillimNames = pgTable("tehillim_names", {
   id: serial("id").primaryKey(),
   hebrewName: text("hebrew_name").notNull(),
   reason: text("reason").notNull(),
+  reasonEnglish: text("reason_english"),
   dateAdded: timestamp("date_added").defaultNow(),
   expiresAt: timestamp("expires_at"), // 7 days from dateAdded
   userId: integer("user_id"), // Future: link to user accounts
@@ -63,6 +64,14 @@ export const tehillimProgress = pgTable("tehillim_progress", {
   currentNameId: integer("current_name_id"),
   lastUpdated: timestamp("last_updated").defaultNow(),
   userId: integer("user_id"), // Future: link to user accounts
+});
+
+// Global progress table - single row for all users
+export const globalTehillimProgress = pgTable("global_tehillim_progress", {
+  id: serial("id").primaryKey(),
+  currentPerek: integer("current_perek").default(1).notNull(),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  completedBy: text("completed_by"), // Track who completed it
 });
 
 export const perakimTexts = pgTable("perakim_texts", {
@@ -109,6 +118,11 @@ export const insertPerekTextSchema = createInsertSchema(perakimTexts).omit({
   id: true,
 });
 
+export const insertGlobalTehillimProgressSchema = createInsertSchema(globalTehillimProgress).omit({
+  id: true,
+  lastUpdated: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Content = typeof content.$inferSelect;
@@ -125,3 +139,5 @@ export type TehillimProgress = typeof tehillimProgress.$inferSelect;
 export type InsertTehillimProgress = z.infer<typeof insertTehillimProgressSchema>;
 export type PerekText = typeof perakimTexts.$inferSelect;
 export type InsertPerekText = z.infer<typeof insertPerekTextSchema>;
+export type GlobalTehillimProgress = typeof globalTehillimProgress.$inferSelect;
+export type InsertGlobalTehillimProgress = z.infer<typeof insertGlobalTehillimProgressSchema>;

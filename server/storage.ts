@@ -4,6 +4,8 @@ import {
   jewishTimes, 
   calendarEvents, 
   shopItems,
+  tehillimNames,
+  globalTehillimProgress,
   type User, 
   type InsertUser,
   type Content,
@@ -13,7 +15,11 @@ import {
   type CalendarEvent,
   type InsertCalendarEvent,
   type ShopItem,
-  type InsertShopItem
+  type InsertShopItem,
+  type TehillimName,
+  type InsertTehillimName,
+  type GlobalTehillimProgress,
+  type InsertGlobalTehillimProgress
 } from "@shared/schema";
 
 export interface IStorage {
@@ -34,6 +40,14 @@ export interface IStorage {
   getShopItemsByCategory(category: string): Promise<ShopItem[]>;
   getAllShopItems(): Promise<ShopItem[]>;
   createShopItem(item: InsertShopItem): Promise<ShopItem>;
+
+  // Tehillim methods
+  getActiveNames(): Promise<TehillimName[]>;
+  createTehillimName(name: InsertTehillimName): Promise<TehillimName>;
+  cleanupExpiredNames(): Promise<void>;
+  getGlobalTehillimProgress(): Promise<GlobalTehillimProgress>;
+  updateGlobalTehillimProgress(currentPerek: number, completedBy?: string): Promise<GlobalTehillimProgress>;
+  getRandomNameForPerek(): Promise<TehillimName | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -42,6 +56,8 @@ export class MemStorage implements IStorage {
   private jewishTimes: Map<string, JewishTimes>;
   private calendarEvents: Map<number, CalendarEvent>;
   private shopItems: Map<number, ShopItem>;
+  private tehillimNames: Map<number, TehillimName>;
+  private globalProgress: GlobalTehillimProgress;
   private currentId: number;
 
   constructor() {
