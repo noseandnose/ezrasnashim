@@ -1,8 +1,10 @@
 import { Scroll, Clock, HandHeart, ChevronRight } from "lucide-react";
 import { useModalStore } from "@/lib/types";
+import { useJewishTimes } from "@/hooks/use-jewish-times";
 
 export default function TefillaSection() {
   const { openModal } = useModalStore();
+  const { data: times, isLoading } = useJewishTimes();
 
   return (
     <div className="h-full p-4">
@@ -31,7 +33,12 @@ export default function TefillaSection() {
             <Clock className="text-xl text-peach" size={24} />
             <div className="flex-1">
               <h3 className="font-semibold text-sm">Mincha</h3>
-              <p className="text-xs text-gray-600">12:30 PM - 4:32 PM</p>
+              <p className="text-xs text-gray-600">
+                {isLoading ? "Loading..." : 
+                 times?.minchaGedolah && times?.minchaKetana ? 
+                 `${times.minchaGedolah} - ${times.minchaKetana}` : 
+                 "Loading..."}
+              </p>
             </div>
           </div>
         </div>

@@ -23,19 +23,27 @@ export default function TimesSection() {
             <div className="space-y-2 text-xs">
               <div className="flex justify-between">
                 <span>Sunrise</span>
-                <span>{times?.sunrise || "7:12 AM"}</span>
+                <span>{times?.sunrise || "Loading..."}</span>
               </div>
               <div className="flex justify-between">
-                <span>Sunset</span>
-                <span>{times?.sunset || "4:32 PM"}</span>
+                <span>Shkia (Sunset)</span>
+                <span>{times?.sunset || "Loading..."}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Mincha Gedolah</span>
+                <span>{times?.minchaGedolah || "Loading..."}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Mincha Ketana</span>
+                <span>{times?.minchaKetana || "Loading..."}</span>
               </div>
               <div className="flex justify-between">
                 <span>Candle Lighting</span>
-                <span>{times?.candleLighting || "4:18 PM"}</span>
+                <span>{times?.candleLighting || "Loading..."}</span>
               </div>
               <div className="flex justify-between">
                 <span>Havdalah</span>
-                <span>{times?.havdalah || "5:33 PM"}</span>
+                <span>{times?.havdalah || "Loading..."}</span>
               </div>
             </div>
           )}
