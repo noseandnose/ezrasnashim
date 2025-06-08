@@ -38,14 +38,7 @@ export function useJewishTimes() {
         }
         
         const data = await response.json();
-        console.log('Hebcal API response:', data); // Debug log
-        console.log('Available times in response:', Object.keys(data.times || {}));
-        console.log('MinchaGedolah value:', data.times?.minchaGedolah);
-        console.log('All mincha times:', {
-          minchaGedola: data.times?.minchaGedola,
-          minchaGedolah: data.times?.minchaGedolah,
-          minchaKetana: data.times?.minchaKetana
-        });
+        // Remove debug logs for production
         
         // Get timezone from the response
         const timezone = data.location?.tzid || 'America/New_York';
@@ -82,7 +75,7 @@ export function useJewishTimes() {
           location: data.location?.title || 'Current Location',
         };
         
-        console.log('Final formatted times:', formattedTimes);
+        // Times formatted successfully
         return formattedTimes;
       } catch (error) {
         console.error('Error fetching zmanim:', error);
