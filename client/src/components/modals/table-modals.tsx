@@ -7,17 +7,17 @@ import AudioPlayer from "@/components/audio-player";
 export default function TableModals() {
   const { activeModal, closeModal } = useModalStore();
 
-  const { data: recipeContent, isLoading: recipeLoading } = useQuery({
+  const { data: recipeContent = [], isLoading: recipeLoading } = useQuery({
     queryKey: ['/api/content/recipe'],
     enabled: activeModal === 'recipe'
   });
 
-  const { data: inspirationContent, isLoading: inspirationLoading } = useQuery({
+  const { data: inspirationContent = [], isLoading: inspirationLoading } = useQuery({
     queryKey: ['/api/content/inspiration'],
     enabled: activeModal === 'inspiration'
   });
 
-  const { data: parshaContent, isLoading: parshaLoading } = useQuery({
+  const { data: parshaContent = [], isLoading: parshaLoading } = useQuery({
     queryKey: ['/api/content/parsha'],
     enabled: activeModal === 'parsha'
   });
@@ -78,13 +78,11 @@ export default function TableModals() {
             </p>
           </DialogHeader>
           
-          {!parshaLoading && parshaContent && parshaContent[0] && (
-            <AudioPlayer 
-              title={parshaContent[0].title}
-              duration="3:15"
-              audioUrl={parshaContent[0].audioUrl || ""}
-            />
-          )}
+          <AudioPlayer 
+            title={parshaContent && parshaContent[0] ? parshaContent[0].title : "Parshas Vayeshev"}
+            duration="3:15"
+            audioUrl={parshaContent && parshaContent[0] ? parshaContent[0].audioUrl || "" : ""}
+          />
 
           <Button 
             onClick={() => closeModal()} 
