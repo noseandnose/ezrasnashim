@@ -308,7 +308,7 @@ export default function TefillaModals() {
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto">
           <DialogHeader className="text-center mb-4">
             <div className="flex items-center justify-center mb-2">
-              <Heart className="text-rose-500 mr-2" size={24} />
+              <Heart className="text-blush mr-2" size={24} />
               <DialogTitle className="text-lg font-semibold">Nishmas 40-Day Campaign</DialogTitle>
             </div>
             <p className="text-sm text-gray-600">
@@ -318,16 +318,16 @@ export default function TefillaModals() {
           
           {/* Progress Tracker */}
           <div className="mb-6">
-            <div className="bg-gradient-to-r from-rose-50 to-pink-50 rounded-xl p-4">
+            <div className="bg-gradient-to-r from-blush/10 to-peach/10 rounded-xl p-4">
               <div className="flex items-center justify-between mb-3">
                 <span className="font-semibold text-gray-800">Progress</span>
-                <span className="text-2xl font-bold text-rose-500">{nishmasDay}/40</span>
+                <span className="text-2xl font-bold text-blush">{nishmasDay}/40</span>
               </div>
               
               {/* Progress Bar */}
               <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
                 <div 
-                  className="bg-gradient-to-r from-rose-400 to-pink-400 h-3 rounded-full transition-all duration-300"
+                  className="bg-gradient-to-r from-blush to-peach h-3 rounded-full transition-all duration-300"
                   style={{ width: `${(nishmasDay / 40) * 100}%` }}
                 ></div>
               </div>
@@ -340,8 +340,8 @@ export default function TefillaModals() {
               ) : nishmasDay === 40 ? (
                 <div className="text-center">
                   <div className="flex items-center justify-center mb-2">
-                    <CheckCircle className="text-rose-500 mr-2" size={20} />
-                    <span className="font-semibold text-rose-600">Campaign Completed!</span>
+                    <CheckCircle className="text-sage mr-2" size={20} />
+                    <span className="font-semibold text-sage">Campaign Completed!</span>
                   </div>
                   <p className="text-xs text-gray-600">May your tefillos be answered</p>
                 </div>
@@ -427,8 +427,8 @@ export default function TefillaModals() {
                 }}
                 className={`w-full py-3 rounded-xl font-medium transition-all ${
                   todayCompleted 
-                    ? 'bg-green-500 text-white cursor-default' 
-                    : 'bg-rose-500 hover:bg-rose-600 text-white'
+                    ? 'bg-sage text-white cursor-default' 
+                    : 'gradient-blush-peach text-white hover:opacity-90'
                 }`}
                 disabled={todayCompleted || nishmasDay === 40}
               >
