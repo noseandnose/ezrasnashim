@@ -119,7 +119,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         candleLighting: formatTime(data.times?.candleLighting),
         havdalah: formatTime(data.times?.havdalah),
         hebrewDate: data.date || '',
-        location: data.location?.title || closestCity.name
+        location: data.location?.title || closestCity.name,
+        
+        // TODO: Add notification/reminder functionality
+        // - Can set alerts for specific zmanim times
+        // - Push notifications for important times like candle lighting
+        
+        // TODO: Add minhag customization options
+        // - Different calculations for tzait hakochavim (18 min, 42 min, etc.)
+        // - Sephardic vs Ashkenazi customs for zmanim
+        // - Custom candle lighting time preferences
       };
 
       res.json(formattedTimes);
