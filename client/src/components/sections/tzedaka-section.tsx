@@ -94,6 +94,8 @@ export default function TzedakaSection() {
           </div>
         </div>
       </div>
+      {/* Bottom padding to prevent last element from being cut off by navigation */}
+      <div className="h-24"></div>
     </div>
   );
 }
