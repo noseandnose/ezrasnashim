@@ -1,4 +1,4 @@
-import { Scroll, Clock, HandHeart, ChevronRight, Plus, CheckCircle, User, AlertCircle, Calendar } from "lucide-react";
+import { Scroll, Clock, HandHeart, ChevronRight, Plus, CheckCircle, User, AlertCircle, Calendar, Heart } from "lucide-react";
 import { useModalStore } from "@/lib/types";
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useState } from "react";
@@ -332,6 +332,21 @@ export default function TefillaSection() {
             <div className="flex-1">
               <h3 className="font-semibold text-sm">Women's Prayers</h3>
               <p className="text-xs text-gray-600">Blessings, Tefillos & Personal</p>
+            </div>
+            <ChevronRight className="text-gray-400" size={16} />
+          </div>
+        </div>
+
+        {/* Nishmas 40-Day Campaign */}
+        <div 
+          className="content-card rounded-2xl p-4 cursor-pointer"
+          onClick={() => openModal('nishmas-campaign')}
+        >
+          <div className="flex items-center space-x-3">
+            <Heart className="text-xl text-rose-500" size={24} />
+            <div className="flex-1">
+              <h3 className="font-semibold text-sm">Nishmas 40-Day Campaign</h3>
+              <p className="text-xs text-gray-600">Daily tefillah for yeshuos</p>
             </div>
             <ChevronRight className="text-gray-400" size={16} />
           </div>
