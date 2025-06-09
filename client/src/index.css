@@ -32,6 +32,7 @@
   --cream: hsl(35, 100%, 95%);
   --warm-white: hsl(25, 30%, 96%);
   --warm-gray: hsl(0, 0%, 29%);
+  --sage: hsl(120, 25%, 65%);
 }
 
 .dark {
@@ -117,6 +118,14 @@
 
 .text-warm-gray {
   color: hsl(0, 0%, 29%);
+}
+
+.bg-sage {
+  background-color: hsl(120, 25%, 65%);
+}
+
+.text-sage {
+  color: hsl(120, 25%, 65%);
 }
 
 .gradient-blush-peach {

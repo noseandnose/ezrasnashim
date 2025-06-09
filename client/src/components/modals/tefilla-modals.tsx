@@ -405,35 +405,32 @@ export default function TefillaModals() {
 
           {/* Action Buttons */}
           <div className="space-y-3">
-            {/* Debug info - remove later */}
-            {process.env.NODE_ENV === 'development' && (
-              <div className="text-xs text-gray-400 text-center">
-                Day: {nishmasDay}, Completed: {todayCompleted ? 'Yes' : 'No'}
-              </div>
+            {/* Main Action Button - Always Visible */}
+            {nishmasDay >= 40 ? (
+              <Button 
+                className="w-full py-3 rounded-xl font-medium bg-sage text-white cursor-default"
+                disabled={true}
+              >
+                <CheckCircle className="mr-2" size={16} />
+                Campaign Complete
+              </Button>
+            ) : todayCompleted ? (
+              <Button 
+                className="w-full py-3 rounded-xl font-medium bg-sage text-white cursor-default"
+                disabled={true}
+              >
+                <CheckCircle className="mr-2" size={16} />
+                Today's Prayer Completed
+              </Button>
+            ) : (
+              <Button 
+                onClick={markNishmasCompleted}
+                className="w-full py-3 rounded-xl font-medium gradient-blush-peach text-white hover:opacity-90"
+              >
+                <CheckCircle className="mr-2" size={16} />
+                Mark Today's Prayer Complete
+              </Button>
             )}
-            
-            <Button 
-              onClick={() => {
-                console.log('Before completion:', { nishmasDay, todayCompleted });
-                markNishmasCompleted();
-                console.log('After completion:', { nishmasDay: nishmasDay + 1, todayCompleted: true });
-                // Future feature: Add notification/reminder system
-              }}
-              className={`w-full py-3 rounded-xl font-medium transition-all ${
-                todayCompleted 
-                  ? 'bg-sage text-white cursor-default' 
-                  : 'gradient-blush-peach text-white hover:opacity-90'
-              }`}
-              disabled={todayCompleted || nishmasDay >= 40}
-            >
-              <CheckCircle className="mr-2" size={16} />
-              {nishmasDay >= 40 
-                ? 'Campaign Complete' 
-                : todayCompleted 
-                  ? 'Today\'s Prayer Completed' 
-                  : 'Mark Today\'s Prayer Complete'
-              }
-            </Button>
             
             <div className="flex space-x-2">
               <Button 
