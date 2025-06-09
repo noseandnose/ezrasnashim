@@ -2,11 +2,7 @@ import { pgTable, text, serial, integer, boolean, timestamp, date } from "drizzl
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-});
+// No user authentication needed - app works for everyone without profiles
 
 export const content = pgTable("content", {
   id: serial("id").primaryKey(),
@@ -101,11 +97,6 @@ export const sponsors = pgTable("sponsors", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
-
 export const insertContentSchema = createInsertSchema(content).omit({
   id: true,
 });
@@ -151,8 +142,7 @@ export const insertSponsorSchema = createInsertSchema(sponsors).omit({
   createdAt: true,
 });
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+// No user types needed - app works without authentication
 export type Content = typeof content.$inferSelect;
 export type InsertContent = z.infer<typeof insertContentSchema>;
 export type JewishTimes = typeof jewishTimes.$inferSelect;

@@ -1,7 +1,7 @@
 import { 
-  users, content, jewishTimes, calendarEvents, shopItems, 
+  content, jewishTimes, calendarEvents, shopItems, 
   tehillimNames, globalTehillimProgress, minchaPrayers, sponsors,
-  type User, type InsertUser, type Content, type InsertContent,
+  type Content, type InsertContent,
   type JewishTimes, type InsertJewishTimes, type CalendarEvent, type InsertCalendarEvent,
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
@@ -11,10 +11,6 @@ import { db } from "./db";
 import { eq, gt, lt, and } from "drizzle-orm";
 
 export interface IStorage {
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
-  
   getContentByType(type: string): Promise<Content[]>;
   getContentByDate(date: string): Promise<Content[]>;
   createContent(content: InsertContent): Promise<Content>;
@@ -94,23 +90,7 @@ export class DatabaseStorage implements IStorage {
     this.initializeDefaults().catch(console.error);
   }
 
-  // User methods
-  async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user || undefined;
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
-    return user;
-  }
-
-  // Content methods (stubs for now)
+  // Content methods
   async getContentByType(type: string): Promise<Content[]> {
     return [];
   }
