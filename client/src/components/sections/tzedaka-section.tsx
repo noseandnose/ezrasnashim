@@ -6,37 +6,37 @@ export default function TzedakaSection() {
 
   const tzedakaOptions = [
     {
-      id: 'sponsor-day',
+      id: "sponsor-day",
       icon: BookOpen,
-      title: 'Sponsor a Day of Ezras Nashim',
-      description: 'Dedicate all Mitzvot done on the app for one day',
-      color: 'text-blush',
-      bgColor: 'bg-blush/10'
+      title: "Sponsor a Day of Ezras Nashim",
+      description: "Dedicate all Mitzvot done on the app for one day",
+      color: "text-blush",
+      bgColor: "bg-blush/10",
     },
     {
-      id: 'torah-dedication',
+      id: "torah-dedication",
       icon: BookOpen,
-      title: 'Donate to Ezras Nashim Torah',
-      description: 'Letter, Pasuk, Perek or Parsha dedication',
-      color: 'text-peach',
-      bgColor: 'bg-peach/10'
+      title: "Donate to the Ezras Nashim Torah",
+      description: "Letter, Pasuk, Perek or Parsha dedication",
+      color: "text-peach",
+      bgColor: "bg-peach/10",
     },
     {
-      id: 'infertility-support',
+      id: "infertility-support",
       icon: Baby,
       title: "Women's Infertility Support",
-      description: 'Help couples struggling with fertility challenges',
-      color: 'text-rose-500',
-      bgColor: 'bg-rose-50'
+      description: "Help couples struggling with fertility challenges",
+      color: "text-rose-500",
+      bgColor: "bg-rose-50",
     },
     {
-      id: 'abuse-support',
+      id: "abuse-support",
       icon: Shield,
       title: "Women's Abuse Support",
-      description: 'Support women escaping abusive situations',
-      color: 'text-purple-500',
-      bgColor: 'bg-purple-50'
-    }
+      description: "Support women escaping abusive situations",
+      color: "text-purple-500",
+      bgColor: "bg-purple-50",
+    },
   ];
 
   return (
