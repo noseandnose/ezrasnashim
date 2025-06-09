@@ -8,7 +8,7 @@ import { MinchaPrayer } from "@shared/schema";
 
 export default function TefillaModals() {
   const { activeModal, openModal, closeModal } = useModalStore();
-  const [language, setLanguage] = useState<'hebrew' | 'english'>('english');
+  const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
   const [fontSize, setFontSize] = useState(16);
 
   const { data: minchaPrayers = [], isLoading } = useQuery<MinchaPrayer[]>({

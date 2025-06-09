@@ -20,7 +20,7 @@ export default function TefillaSection() {
   const [reason, setReason] = useState("");
   const [reasonEnglish, setReasonEnglish] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showHebrew, setShowHebrew] = useState(false);
+  const [showHebrew, setShowHebrew] = useState(true);
 
   // Fetch global Tehillim progress
   const { data: progress } = useQuery<GlobalTehillimProgress>({
