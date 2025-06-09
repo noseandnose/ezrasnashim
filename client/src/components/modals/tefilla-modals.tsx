@@ -405,9 +405,18 @@ export default function TefillaModals() {
 
           {/* Action Buttons */}
           <div className="space-y-3">
+            {/* Debug info - remove later */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="text-xs text-gray-400 text-center">
+                Day: {nishmasDay}, Completed: {todayCompleted ? 'Yes' : 'No'}
+              </div>
+            )}
+            
             <Button 
               onClick={() => {
+                console.log('Before completion:', { nishmasDay, todayCompleted });
                 markNishmasCompleted();
+                console.log('After completion:', { nishmasDay: nishmasDay + 1, todayCompleted: true });
                 // Future feature: Add notification/reminder system
               }}
               className={`w-full py-3 rounded-xl font-medium transition-all ${
