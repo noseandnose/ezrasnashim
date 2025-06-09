@@ -8,8 +8,8 @@ export default function TzedakaSection() {
     {
       id: 'sponsor-day',
       icon: BookOpen,
-      title: 'Sponsor a Day of Learning',
-      description: 'Dedicate all Torah learning on the app for one day',
+      title: 'Sponsor a Day of Ezras Nashim',
+      description: 'Dedicate all Mitzvot done on the app for one day',
       color: 'text-blush',
       bgColor: 'bg-blush/10'
     },

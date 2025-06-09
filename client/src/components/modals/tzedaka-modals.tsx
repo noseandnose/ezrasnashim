@@ -28,10 +28,10 @@ export default function TzedakaModals() {
           <DialogHeader className="text-center mb-4">
             <div className="flex items-center justify-center mb-2">
               <BookOpen className="text-blush mr-2" size={20} />
-              <DialogTitle className="text-lg font-semibold">Sponsor a Day</DialogTitle>
+              <DialogTitle className="text-lg font-semibold">Sponsor a Day of Ezras Nashim</DialogTitle>
             </div>
             <p className="text-sm text-gray-600">
-              Dedicate all Torah learning on the app for one day
+              Dedicate all Mitzvot done on the app for one day
             </p>
           </DialogHeader>
           
