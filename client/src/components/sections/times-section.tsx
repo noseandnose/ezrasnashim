@@ -1,122 +1,20 @@
 import { Sun, Calendar, Plus, MapPin } from "lucide-react";
-import { useJewishTimes, useLocationStore } from "@/hooks/use-jewish-times";
+import { useJewishTimes, useGeolocation, useLocationStore } from "@/hooks/use-jewish-times";
 import { useModalStore } from "@/lib/types";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
 
 export default function TimesSection() {
   const { data: times, isLoading } = useJewishTimes();
   const { openModal } = useModalStore();
-  const { location, setLocation, setGeonameid, setCoordinates } = useLocationStore();
-  const [locationInput, setLocationInput] = useState("");
-  const [locationDetected, setLocationDetected] = useState(false);
+  const { coordinates, permissionDenied } = useGeolocation();
 
-  // Try geolocation first, fallback to NYC
-  useEffect(() => {
-    if (!location) {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            try {
-              // Use reverse geocoding to find nearest major city
-              const response = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}&addressdetails=1`
-              );
-              const data = await response.json();
-              
-              // Map common cities to their geonameids
-              const cityGeonameMap: { [key: string]: string } = {
-                'New York': '5128581',
-                'Los Angeles': '5368361',
-                'Chicago': '4887398',
-                'Brooklyn': '5110302',
-                'Queens': '5133273',
-                'Philadelphia': '4560349',
-                'Miami': '4164138',
-                'Boston': '4930956',
-                'Washington': '4140963',
-                'Atlanta': '4180439'
-              };
-              
-              const city = data.address?.city || data.address?.town || data.display_name?.split(',')[0];
-              const geonameid = cityGeonameMap[city] || '5128581'; // Default to NYC
-              
-              setCoordinates({
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-              });
-              setGeonameid(geonameid);
-              setLocation(city || 'Current Location');
-              setLocationDetected(true);
-            } catch (error) {
-              // Fallback to NYC
-              setGeonameid("5128581");
-              setLocation("New York City, NY");
-            }
-          },
-          () => {
-            // Geolocation denied, use NYC
-            setGeonameid("5128581");
-            setLocation("New York City, NY");
-          }
-        );
-      } else {
-        // No geolocation support, use NYC
-        setGeonameid("5128581");
-        setLocation("New York City, NY");
-      }
+  const getLocationDisplay = () => {
+    if (permissionDenied) {
+      return "New York City, NY (default - enable location for accurate times)";
     }
-  }, [location, setGeonameid, setLocation]);
-
-  const handleLocationSearch = async () => {
-    if (!locationInput.trim()) return;
-    
-    // Simple city mapping for common locations
-    const cityGeonameMap: { [key: string]: string } = {
-      'new york': '5128581',
-      'nyc': '5128581',
-      'brooklyn': '5110302',
-      'queens': '5133273',
-      'manhattan': '5125771',
-      'bronx': '5110253',
-      'los angeles': '5368361',
-      'la': '5368361',
-      'chicago': '4887398',
-      'philadelphia': '4560349',
-      'philly': '4560349',
-      'miami': '4164138',
-      'boston': '4930956',
-      'washington dc': '4140963',
-      'dc': '4140963',
-      'atlanta': '4180439',
-      'baltimore': '4347778',
-      'detroit': '4990729',
-      'houston': '4699066',
-      'dallas': '4684888',
-      'phoenix': '5308655',
-      'san francisco': '5391959',
-      'sf': '5391959',
-      'seattle': '5809844',
-      'denver': '5419384',
-      'las vegas': '5506956',
-      'orlando': '4167147',
-      'tampa': '4174757'
-    };
-    
-    const searchKey = locationInput.trim().toLowerCase();
-    const geonameid = cityGeonameMap[searchKey];
-    
-    if (geonameid) {
-      setGeonameid(geonameid);
-      setLocation(locationInput.trim());
-      setLocationInput("");
-    } else {
-      // If not found in our map, try NYC as fallback
-      setGeonameid("5128581");
-      setLocation("New York City, NY (default)");
-      setLocationInput("");
+    if (coordinates) {
+      return times?.location || "Current Location";
     }
+    return "Detecting location...";
   };
 
   return (

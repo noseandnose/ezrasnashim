@@ -40,44 +40,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Jewish times routes
-  app.get("/api/times/:date", async (req, res) => {
+  // Hebcal Zmanim API proxy route
+  app.get("/api/zmanim/:lat/:lng", async (req, res) => {
     try {
-      const { date } = req.params;
-      const times = await storage.getJewishTimesByDate(date);
-      if (!times) {
-        // Try to fetch from Hebcal API if not in storage
-        const hebcalUrl = `https://www.hebcal.com/shabbat?cfg=json&geonameid=5128581&M=on&lg=s`;
-        try {
-          const response = await fetch(hebcalUrl);
-          const data = await response.json();
-          
-          if (data.items && data.items.length > 0) {
-            const today = new Date().toISOString().split('T')[0];
-            const hebrewDate = data.date?.hebrew || "Hebrew Date";
-            
-            const newTimes = await storage.createJewishTimes({
-              date: today,
-              location: data.location?.title || "New York, NY",
-              sunrise: "7:12 AM", // Would extract from API
-              sunset: "4:32 PM",
-              candleLighting: data.items.find((item: any) => item.category === "candles")?.time || "4:18 PM",
-              havdalah: data.items.find((item: any) => item.category === "havdalah")?.time || "5:33 PM",
-              hebrewDate: hebrewDate
-            });
-            
-            res.json(newTimes);
-          } else {
-            res.status(404).json({ message: "Times not found for this date" });
-          }
-        } catch (apiError) {
-          res.status(404).json({ message: "Times not found and unable to fetch from API" });
-        }
-      } else {
-        res.json(times);
+      const { lat, lng } = req.params;
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Call Hebcal Zmanim API
+      const hebcalUrl = `https://www.hebcal.com/zmanim?cfg=json&lat=${lat}&lng=${lng}&date=${today}`;
+      const response = await fetch(hebcalUrl);
+      
+      if (!response.ok) {
+        throw new Error(`Hebcal API error: ${response.status}`);
       }
+      
+      const data = await response.json();
+      
+      // Format times to 12-hour format with AM/PM
+      const formatTime = (timeStr: string) => {
+        if (!timeStr) return null;
+        try {
+          const date = new Date(timeStr);
+          return date.toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit',
+            hour12: true 
+          });
+        } catch {
+          return timeStr;
+        }
+      };
+
+      const formattedTimes = {
+        sunrise: formatTime(data.times?.sunrise),
+        shkia: formatTime(data.times?.sunset),
+        tzaitHakochavim: formatTime(data.times?.tzeit),
+        minchaGedolah: formatTime(data.times?.minchaGedolah),
+        minchaKetanah: formatTime(data.times?.minchaKetana),
+        candleLighting: formatTime(data.times?.candleLighting),
+        havdalah: formatTime(data.times?.havdalah),
+        hebrewDate: data.date?.hebrew || '',
+        location: data.location?.title || 'Current Location'
+      };
+
+      res.json(formattedTimes);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch Jewish times" });
+      console.error('Error fetching Hebcal zmanim:', error);
+      res.status(500).json({ message: "Failed to fetch zmanim from Hebcal API" });
     }
   });
 

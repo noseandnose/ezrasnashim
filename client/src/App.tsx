@@ -3,12 +3,13 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useJewishTimes } from "@/hooks/use-jewish-times";
+import { useGeolocation, useJewishTimes } from "@/hooks/use-jewish-times";
 import Home from "@/pages/home";
 import NotFound from "@/pages/not-found";
 
 function Router() {
-  // Preload Jewish times on app startup
+  // Initialize geolocation and preload Jewish times on app startup
+  useGeolocation();
   useJewishTimes();
   
   return (
