@@ -94,13 +94,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const formatTime = (timeStr: string) => {
         if (!timeStr) return null;
         try {
-          const date = new Date(timeStr);
-          return date.toLocaleTimeString('en-US', { 
-            hour: 'numeric', 
-            minute: '2-digit',
-            hour12: true 
-          });
-        } catch {
+          // Parse ISO timestamp and extract local time components
+          const match = timeStr.match(/T(\d{2}):(\d{2}):/);
+          if (match) {
+            const hours = parseInt(match[1]);
+            const minutes = match[2];
+            const period = hours >= 12 ? 'PM' : 'AM';
+            const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+            return `${displayHours}:${minutes} ${period}`;
+          }
+          return timeStr;
+        } catch (error) {
+          console.error('Time formatting error:', error, 'for time:', timeStr);
           return timeStr;
         }
       };
