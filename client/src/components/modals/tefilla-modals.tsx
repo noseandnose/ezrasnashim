@@ -357,28 +357,14 @@ export default function TefillaModals() {
           {/* Language Toggle */}
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm font-medium">Language</span>
-            <div className="flex bg-gray-100 rounded-lg p-1">
-              <button
-                onClick={() => setNishmasLanguage('hebrew')}
-                className={`px-3 py-1 rounded text-xs font-medium transition-all ${
-                  nishmasLanguage === 'hebrew' 
-                    ? 'bg-white text-gray-800 shadow-sm' 
-                    : 'text-gray-600'
-                }`}
-              >
-                עברית
-              </button>
-              <button
-                onClick={() => setNishmasLanguage('english')}
-                className={`px-3 py-1 rounded text-xs font-medium transition-all ${
-                  nishmasLanguage === 'english' 
-                    ? 'bg-white text-gray-800 shadow-sm' 
-                    : 'text-gray-600'
-                }`}
-              >
-                English
-              </button>
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setNishmasLanguage(nishmasLanguage === 'hebrew' ? 'english' : 'hebrew')}
+              className="text-xs"
+            >
+              {nishmasLanguage === 'hebrew' ? 'EN' : 'עב'}
+            </Button>
           </div>
 
           {/* Prayer Text */}
@@ -419,23 +405,26 @@ export default function TefillaModals() {
 
           {/* Action Buttons */}
           <div className="space-y-3">
-            {nishmasDay < 40 && (
-              <Button 
-                onClick={() => {
-                  markNishmasCompleted();
-                  // Future feature: Add notification/reminder system
-                }}
-                className={`w-full py-3 rounded-xl font-medium transition-all ${
-                  todayCompleted 
-                    ? 'bg-sage text-white cursor-default' 
-                    : 'gradient-blush-peach text-white hover:opacity-90'
-                }`}
-                disabled={todayCompleted || nishmasDay === 40}
-              >
-                <CheckCircle className="mr-2" size={16} />
-                {todayCompleted ? 'Today\'s Prayer Completed' : 'Mark Today\'s Prayer Complete'}
-              </Button>
-            )}
+            <Button 
+              onClick={() => {
+                markNishmasCompleted();
+                // Future feature: Add notification/reminder system
+              }}
+              className={`w-full py-3 rounded-xl font-medium transition-all ${
+                todayCompleted 
+                  ? 'bg-sage text-white cursor-default' 
+                  : 'gradient-blush-peach text-white hover:opacity-90'
+              }`}
+              disabled={todayCompleted || nishmasDay >= 40}
+            >
+              <CheckCircle className="mr-2" size={16} />
+              {nishmasDay >= 40 
+                ? 'Campaign Complete' 
+                : todayCompleted 
+                  ? 'Today\'s Prayer Completed' 
+                  : 'Mark Today\'s Prayer Complete'
+              }
+            </Button>
             
             <div className="flex space-x-2">
               <Button 
