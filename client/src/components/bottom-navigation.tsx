@@ -1,4 +1,4 @@
-import { Book, HandHeart, Clock, Utensils, ShoppingBag } from "lucide-react";
+import { Book, HandHeart, Heart, Utensils, ShoppingBag } from "lucide-react";
 import type { Section } from "@/pages/home";
 
 interface BottomNavigationProps {
@@ -10,7 +10,7 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
   const navItems = [
     { id: 'torah' as Section, icon: Book, label: 'Torah' },
     { id: 'tefilla' as Section, icon: HandHeart, label: 'Tefilla' },
-    { id: 'times' as Section, icon: Clock, label: 'Times' },
+    { id: 'tzedaka' as Section, icon: Heart, label: 'Tzedaka' },
     { id: 'table' as Section, icon: Utensils, label: 'Table' },
     { id: 'shop' as Section, icon: ShoppingBag, label: 'Shop' },
   ];

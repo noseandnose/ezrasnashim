@@ -1,4 +1,4 @@
-import { Scroll, Clock, HandHeart, ChevronRight, Plus, CheckCircle, User, AlertCircle } from "lucide-react";
+import { Scroll, Clock, HandHeart, ChevronRight, Plus, CheckCircle, User, AlertCircle, Calendar } from "lucide-react";
 import { useModalStore } from "@/lib/types";
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useState } from "react";
@@ -334,6 +334,21 @@ export default function TefillaSection() {
               <p className="text-xs text-gray-600">Blessings, Tefillos & Personal</p>
             </div>
             <ChevronRight className="text-gray-400" size={16} />
+          </div>
+        </div>
+
+        {/* Hebrew Date Calculator */}
+        <div 
+          className="content-card rounded-2xl p-4 cursor-pointer"
+          onClick={() => openModal('date-calculator')}
+        >
+          <div className="flex items-center space-x-3">
+            <Calendar className="text-xl text-purple-500" size={24} />
+            <div className="flex-1">
+              <h3 className="font-semibold text-sm">Hebrew Date Calculator</h3>
+              <p className="text-xs text-gray-600">Convert dates & add events</p>
+            </div>
+            <Plus className="text-gray-400" size={16} />
           </div>
         </div>
       </div>
