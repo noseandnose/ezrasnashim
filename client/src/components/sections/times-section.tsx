@@ -20,33 +20,6 @@ export default function TimesSection() {
   return (
     <div className="h-full p-4">
       <div className="space-y-3 h-full">
-        {/* Location Input - Only show when no location is available */}
-        {!location && (
-          <div className="flex gap-2 items-center">
-          <div className="flex-1 relative">
-            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-            <Input
-              placeholder="Enter your location..."
-              value={locationInput}
-              onChange={(e) => setLocationInput(e.target.value)}
-              className="pl-10 text-sm"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleLocationSearch();
-                }
-              }}
-            />
-          </div>
-          <Button 
-            onClick={handleLocationSearch}
-            size="sm"
-            className="bg-peach hover:bg-peach/90 text-white"
-          >
-            Find
-          </Button>
-          </div>
-        )}
-        
         {/* Today's Times */}
         <div className="content-card rounded-2xl p-4">
           <div className="flex items-center justify-between mb-3">
@@ -54,11 +27,9 @@ export default function TimesSection() {
               <Sun className="text-peach mr-2" size={20} />
               <h3 className="font-semibold text-sm">Today's Times</h3>
             </div>
-            {location && (
-              <div className="text-xs text-gray-600">
-                📍 {location}
-              </div>
-            )}
+            <div className="text-xs text-gray-600">
+              📍 {getLocationDisplay()}
+            </div>
           </div>
           {isLoading ? (
             <div className="space-y-2 text-xs">

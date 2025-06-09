@@ -46,8 +46,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { lat, lng } = req.params;
       const today = new Date().toISOString().split('T')[0];
       
-      // Call Hebcal Zmanim API
-      const hebcalUrl = `https://www.hebcal.com/zmanim?cfg=json&lat=${lat}&lng=${lng}&date=${today}`;
+      // Map coordinates to nearest major city geonameid
+      const latitude = parseFloat(lat);
+      const longitude = parseFloat(lng);
+      
+      // Find closest major Jewish community by distance
+      const cities = [
+        { name: "New York City, New York, USA", geonameid: 5128581, lat: 40.7128, lng: -74.0060 },
+        { name: "Los Angeles, California, USA", geonameid: 5368361, lat: 34.0522, lng: -118.2437 },
+        { name: "Chicago, Illinois, USA", geonameid: 4887398, lat: 41.8781, lng: -87.6298 },
+        { name: "Philadelphia, Pennsylvania, USA", geonameid: 4560349, lat: 39.9526, lng: -75.1652 },
+        { name: "Miami, Florida, USA", geonameid: 4164138, lat: 25.7617, lng: -80.1918 },
+        { name: "Boston, Massachusetts, USA", geonameid: 4930956, lat: 42.3601, lng: -71.0589 },
+        { name: "Baltimore, Maryland, USA", geonameid: 4347778, lat: 39.2904, lng: -76.6122 },
+        { name: "Brooklyn, New York, USA", geonameid: 5110302, lat: 40.6782, lng: -73.9442 },
+        { name: "Jerusalem, Israel", geonameid: 281184, lat: 31.7683, lng: 35.2137 },
+        { name: "Tel Aviv, Israel", geonameid: 293397, lat: 32.0853, lng: 34.7818 },
+        { name: "London, England, UK", geonameid: 2643743, lat: 51.5074, lng: -0.1278 },
+        { name: "Toronto, Ontario, Canada", geonameid: 6167865, lat: 43.6532, lng: -79.3832 }
+      ];
+      
+      // Calculate distance and find closest city
+      let closestCity = cities[0]; // Default to NYC
+      let minDistance = Number.MAX_VALUE;
+      
+      for (const city of cities) {
+        const distance = Math.sqrt(
+          Math.pow(latitude - city.lat, 2) + Math.pow(longitude - city.lng, 2)
+        );
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestCity = city;
+        }
+      }
+      
+      // Call Hebcal with geonameid
+      const hebcalUrl = `https://www.hebcal.com/zmanim?cfg=json&geonameid=${closestCity.geonameid}&date=${today}`;
       const response = await fetch(hebcalUrl);
       
       if (!response.ok) {
@@ -74,13 +108,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const formattedTimes = {
         sunrise: formatTime(data.times?.sunrise),
         shkia: formatTime(data.times?.sunset),
-        tzaitHakochavim: formatTime(data.times?.tzeit),
-        minchaGedolah: formatTime(data.times?.minchaGedolah),
+        tzaitHakochavim: formatTime(data.times?.tzeit7083deg),
+        minchaGedolah: formatTime(data.times?.minchaGedola),
         minchaKetanah: formatTime(data.times?.minchaKetana),
         candleLighting: formatTime(data.times?.candleLighting),
         havdalah: formatTime(data.times?.havdalah),
-        hebrewDate: data.date?.hebrew || '',
-        location: data.location?.title || 'Current Location'
+        hebrewDate: data.date || '',
+        location: data.location?.title || closestCity.name
       };
 
       res.json(formattedTimes);
