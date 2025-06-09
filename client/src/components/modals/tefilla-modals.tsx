@@ -15,6 +15,7 @@ export default function TefillaModals() {
   const [nishmasDay, setNishmasDay] = useState(0);
   const [nishmasStartDate, setNishmasStartDate] = useState<string | null>(null);
   const [nishmasLanguage, setNishmasLanguage] = useState<'hebrew' | 'english'>('hebrew');
+  const [todayCompleted, setTodayCompleted] = useState(false);
 
   const { data: minchaPrayers = [], isLoading } = useQuery<MinchaPrayer[]>({
     queryKey: ['/api/mincha/prayers'],
@@ -26,9 +27,12 @@ export default function TefillaModals() {
     const savedDay = localStorage.getItem('nishmas-day');
     const savedStartDate = localStorage.getItem('nishmas-start-date');
     const savedLastCompleted = localStorage.getItem('nishmas-last-completed');
+    const today = new Date().toDateString();
+    
+    // Check if today's prayer has already been completed
+    setTodayCompleted(savedLastCompleted === today);
     
     if (savedDay && savedStartDate) {
-      const today = new Date().toDateString();
       const lastCompleted = savedLastCompleted || '';
       
       // Check if user missed a day - if so, reset to day 1
@@ -41,6 +45,7 @@ export default function TefillaModals() {
           // Missed a day, reset campaign
           setNishmasDay(0);
           setNishmasStartDate(null);
+          setTodayCompleted(false);
           localStorage.removeItem('nishmas-day');
           localStorage.removeItem('nishmas-start-date');
           localStorage.removeItem('nishmas-last-completed');
@@ -55,11 +60,14 @@ export default function TefillaModals() {
 
   // Mark today's Nishmas as completed
   const markNishmasCompleted = () => {
+    if (todayCompleted) return; // Prevent multiple completions on same day
+    
     const today = new Date().toDateString();
     const newDay = nishmasDay + 1;
     
     if (newDay <= 40) {
       setNishmasDay(newDay);
+      setTodayCompleted(true);
       localStorage.setItem('nishmas-day', newDay.toString());
       localStorage.setItem('nishmas-last-completed', today);
       
@@ -75,6 +83,7 @@ export default function TefillaModals() {
   const resetNishmasCampaign = () => {
     setNishmasDay(0);
     setNishmasStartDate(null);
+    setTodayCompleted(false);
     localStorage.removeItem('nishmas-day');
     localStorage.removeItem('nishmas-start-date');
     localStorage.removeItem('nishmas-last-completed');
@@ -416,11 +425,15 @@ export default function TefillaModals() {
                   markNishmasCompleted();
                   // Future feature: Add notification/reminder system
                 }}
-                className="w-full bg-rose-500 hover:bg-rose-600 text-white py-3 rounded-xl font-medium"
-                disabled={nishmasDay === 40}
+                className={`w-full py-3 rounded-xl font-medium transition-all ${
+                  todayCompleted 
+                    ? 'bg-green-500 text-white cursor-default' 
+                    : 'bg-rose-500 hover:bg-rose-600 text-white'
+                }`}
+                disabled={todayCompleted || nishmasDay === 40}
               >
                 <CheckCircle className="mr-2" size={16} />
-                Mark Today's Prayer Complete
+                {todayCompleted ? 'Today\'s Prayer Completed' : 'Mark Today\'s Prayer Complete'}
               </Button>
             )}
             
