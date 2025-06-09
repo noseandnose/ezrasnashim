@@ -23,7 +23,7 @@ export default function AppHeader() {
           </p>
         </div>
         <div className="text-right">
-          <p className="text-sm font-medium">{timesLoading ? "Loading..." : times?.sunset || getCurrentTime()}</p>
+          <p className="text-sm font-medium">{timesLoading ? "Loading..." : times?.shkia || "7:44 PM"}</p>
           <p className="text-xs opacity-90">
             Shkiah
           </p>
