@@ -70,10 +70,8 @@ const DonationForm = ({ amount, donationType, metadata, onSuccess }: DonationFor
 
       <PaymentElement 
         options={{
-          wallets: {
-            applePay: 'auto',
-            googlePay: 'auto'
-          },
+          layout: 'tabs',
+          paymentMethodOrder: ['apple_pay', 'google_pay', 'card'],
           fields: {
             billingDetails: 'never'
           }
