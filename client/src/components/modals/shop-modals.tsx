@@ -20,9 +20,6 @@ export default function ShopModals() {
     enabled: !!shopItemId,
   });
 
-  // Debug log to see what data we're getting
-  console.log('Shop modal debug:', { activeModal, shopItemId, shopItem, isLoading });
-
   const handleCopyCoupon = () => {
     if (shopItem?.couponCode) {
       navigator.clipboard.writeText(shopItem.couponCode);
@@ -54,7 +51,9 @@ export default function ShopModals() {
         </DialogHeader>
 
         {isLoading ? (
-          <div className="text-center">Loading...</div>
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin w-8 h-8 border-4 border-blush/20 border-t-blush rounded-full"></div>
+          </div>
         ) : shopItem ? (
           <div className="space-y-4">
             {/* Header with background image */}
@@ -101,6 +100,14 @@ export default function ShopModals() {
                     <Copy size={16} />
                   </Button>
                 </div>
+                {shopItem.externalUrl && (
+                  <div className="text-center">
+                    <p className="text-xs text-gray-500 mb-1">Redeem at:</p>
+                    <p className="text-sm text-blush font-medium break-all">
+                      {shopItem.externalUrl.replace(/^https?:\/\//, '')}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
