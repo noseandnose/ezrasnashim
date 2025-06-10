@@ -4,7 +4,7 @@ import { useModalStore } from "@/lib/types";
 import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { MinchaPrayer } from "@shared/schema";
+import { MinchaPrayer, NishmasText } from "@shared/schema";
 
 export default function TefillaModals() {
   const { activeModal, openModal, closeModal } = useModalStore();
@@ -23,8 +23,8 @@ export default function TefillaModals() {
   });
 
   // Fetch Nishmas text from database
-  const { data: nishmasText } = useQuery({
-    queryKey: ['/api/nishmas', nishmasLanguage],
+  const { data: nishmasText, isLoading: nishmasLoading } = useQuery<NishmasText>({
+    queryKey: [`/api/nishmas/${nishmasLanguage}`],
     enabled: activeModal === 'nishmas-campaign'
   });
 
@@ -393,22 +393,26 @@ export default function TefillaModals() {
               <div className={`text-sm leading-relaxed ${
                 nishmasLanguage === 'hebrew' ? 'text-right font-hebrew' : 'font-english'
               }`}>
-                {nishmasText ? (
+                {nishmasLoading ? (
+                  <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-gray-600 text-sm">Loading prayer text...</p>
+                  </div>
+                ) : nishmasText ? (
                   <div className="mb-4">
                     <p className="whitespace-pre-wrap leading-relaxed">
-                      {nishmasText.fullText}
+                      {(nishmasText as any)?.fullText || nishmasText.fullText || 'Text not available'}
                     </p>
-                    {nishmasText.transliteration && nishmasLanguage === 'hebrew' && (
+                    {(nishmasText as any)?.transliteration && nishmasLanguage === 'hebrew' && (
                       <div className="mt-4 p-3 bg-gray-50 rounded-lg">
                         <p className="text-sm text-gray-600 italic">
-                          {nishmasText.transliteration}
+                          {(nishmasText as any).transliteration}
                         </p>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-gray-600 text-sm">Loading prayer text...</p>
+                  <div className="mb-4 p-3 bg-red-50 rounded-lg">
+                    <p className="text-red-600 text-sm">Failed to load prayer text</p>
                   </div>
                 )}
                 <div className="text-xs text-gray-500 mt-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
