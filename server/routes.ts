@@ -141,16 +141,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Shop routes
   app.get("/api/shop", async (req, res) => {
     try {
-      const { category } = req.query;
-      if (category && typeof category === 'string') {
-        const items = await storage.getShopItemsByCategory(category);
-        res.json(items);
-      } else {
-        const items = await storage.getAllShopItems();
-        res.json(items);
-      }
+      const items = await storage.getAllShopItems();
+      res.json(items);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch shop items" });
+    }
+  });
+
+  app.get("/api/shop/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid shop item ID" });
+      }
+      const item = await storage.getShopItemById(id);
+      if (!item) {
+        return res.status(404).json({ message: "Shop item not found" });
+      }
+      res.json(item);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch shop item" });
     }
   });
 

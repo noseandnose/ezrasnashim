@@ -95,12 +95,13 @@ export const calendarEvents = pgTable("calendar_events", {
 
 export const shopItems = pgTable("shop_items", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  category: text("category").notNull(), // 'judaica', 'books', 'kitchen', 'jewelry'
-  description: text("description"),
-  price: text("price"),
-  imageUrl: text("image_url"),
+  storeName: text("store_name").notNull(),
+  title: text("title").notNull(), // e.g., "20% off at Danielle Faye"
+  description: text("description").notNull(),
+  couponCode: text("coupon_code"),
+  backgroundImageUrl: text("background_image_url").notNull(),
   externalUrl: text("external_url"),
+  isActive: boolean("is_active").default(true),
 });
 
 export const tehillimNames = pgTable("tehillim_names", {

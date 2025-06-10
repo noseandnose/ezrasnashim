@@ -1,49 +1,60 @@
-import { Gem, BookOpen, ChefHat, Sparkles } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useModalStore } from "@/lib/types";
+import { ChevronRight } from "lucide-react";
+import type { ShopItem } from "@shared/schema";
 
 export default function ShopSection() {
-  const shopCategories = [
-    {
-      id: 'judaica',
-      icon: Sparkles,
-      title: 'Judaica',
-      subtitle: 'Ritual Items',
-      color: 'text-blush'
-    },
-    {
-      id: 'books',
-      icon: BookOpen,
-      title: 'Books',
-      subtitle: 'Jewish Literature',
-      color: 'text-peach'
-    },
-    {
-      id: 'kitchen',
-      icon: ChefHat,
-      title: 'Kitchen',
-      subtitle: 'Kosher Essentials',
-      color: 'text-blush'
-    },
-    {
-      id: 'jewelry',
-      icon: Gem,
-      title: 'Jewelry',
-      subtitle: 'Jewish Jewelry',
-      color: 'text-peach'
-    }
-  ];
+  const { openModal } = useModalStore();
+
+  const { data: shopItems = [], isLoading } = useQuery<ShopItem[]>({
+    queryKey: ['/api/shop'],
+  });
+
+  const handleItemClick = (item: ShopItem) => {
+    openModal(`shop-${item.id}`);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="h-full p-4 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="h-full p-4">
-      <div className="grid grid-cols-2 gap-3 h-full">
-        {shopCategories.map(({ id, icon: Icon, title, subtitle, color }) => (
+      <div className="space-y-3">
+        {shopItems.map((item) => (
           <div
-            key={id}
-            className="content-card rounded-2xl p-4 cursor-pointer"
+            key={item.id}
+            onClick={() => handleItemClick(item)}
+            className="content-card rounded-2xl p-0 cursor-pointer overflow-hidden"
           >
-            <div className="text-center">
-              <Icon className={`text-2xl ${color} mb-2 mx-auto`} size={32} />
-              <h3 className="font-semibold text-sm">{title}</h3>
-              <p className="text-xs text-gray-600 mt-1">{subtitle}</p>
+            {/* Background image with overlay */}
+            <div 
+              className="relative h-20 bg-cover bg-center"
+              style={{ 
+                backgroundImage: `url(${item.backgroundImageUrl})`,
+                backgroundPosition: 'center',
+                backgroundSize: 'cover'
+              }}
+            >
+              {/* Dark overlay for text readability */}
+              <div className="absolute inset-0 bg-black bg-opacity-40" />
+              
+              {/* Content overlay */}
+              <div className="relative h-full flex items-center justify-between p-4">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-white text-sm leading-tight">
+                    {item.title}
+                  </h3>
+                  <p className="text-white/90 text-xs mt-1">
+                    {item.storeName}
+                  </p>
+                </div>
+                <ChevronRight className="text-white" size={20} />
+              </div>
             </div>
           </div>
         ))}

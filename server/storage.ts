@@ -21,8 +21,8 @@ export interface IStorage {
   getCalendarEvents(): Promise<CalendarEvent[]>;
   createCalendarEvent(event: InsertCalendarEvent): Promise<CalendarEvent>;
   
-  getShopItemsByCategory(category: string): Promise<ShopItem[]>;
   getAllShopItems(): Promise<ShopItem[]>;
+  getShopItemById(id: number): Promise<ShopItem | undefined>;
   createShopItem(item: InsertShopItem): Promise<ShopItem>;
 
   // Daily Torah content methods
@@ -122,13 +122,14 @@ export class DatabaseStorage implements IStorage {
     return event;
   }
 
-  // Shop Items methods (stubs for now)
-  async getShopItemsByCategory(category: string): Promise<ShopItem[]> {
-    return [];
+  // Shop Items methods
+  async getAllShopItems(): Promise<ShopItem[]> {
+    return await db.select().from(shopItems).where(eq(shopItems.isActive, true));
   }
 
-  async getAllShopItems(): Promise<ShopItem[]> {
-    return [];
+  async getShopItemById(id: number): Promise<ShopItem | undefined> {
+    const [item] = await db.select().from(shopItems).where(eq(shopItems.id, id));
+    return item || undefined;
   }
 
   async createShopItem(insertItem: InsertShopItem): Promise<ShopItem> {
