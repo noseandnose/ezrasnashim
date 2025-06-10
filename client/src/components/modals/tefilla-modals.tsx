@@ -369,13 +369,12 @@ export default function TefillaModals() {
           </div>
 
           {/* Language Toggle */}
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-sm font-medium">Language</span>
+          <div className="flex justify-end mb-2">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => setNishmasLanguage(nishmasLanguage === 'hebrew' ? 'english' : 'hebrew')}
-              className="text-xs"
+              className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
             >
               {nishmasLanguage === 'hebrew' ? 'EN' : 'עב'}
             </Button>
