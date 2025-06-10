@@ -8,7 +8,9 @@ import {
   insertDailyHalachaSchema,
   insertDailyMussarSchema,
   insertDailyChizukSchema,
-  insertLoshonHorahSchema
+  insertLoshonHorahSchema,
+  insertShabbatRecipeSchema,
+  insertParshaVortSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -329,6 +331,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(loshon);
     } catch (error) {
       res.status(500).json({ message: "Failed to create loshon horah content" });
+    }
+  });
+
+  // Weekly Torah content routes
+  app.get("/api/table/recipe/:week", async (req, res) => {
+    try {
+      const { week } = req.params;
+      const recipe = await storage.getShabbatRecipeByWeek(week);
+      res.json(recipe || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch Shabbat recipe" });
+    }
+  });
+
+  app.post("/api/table/recipe", async (req, res) => {
+    try {
+      const validatedData = insertShabbatRecipeSchema.parse(req.body);
+      const recipe = await storage.createShabbatRecipe(validatedData);
+      res.json(recipe);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create Shabbat recipe" });
+    }
+  });
+
+  app.get("/api/table/vort/:week", async (req, res) => {
+    try {
+      const { week } = req.params;
+      const vort = await storage.getParshaVortByWeek(week);
+      res.json(vort || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch Parsha vort" });
+    }
+  });
+
+  app.post("/api/table/vort", async (req, res) => {
+    try {
+      const validatedData = insertParshaVortSchema.parse(req.body);
+      const vort = await storage.createParshaVort(validatedData);
+      res.json(vort);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create Parsha vort" });
     }
   });
 

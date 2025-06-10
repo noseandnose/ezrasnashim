@@ -49,10 +49,43 @@ export const loshonHorah = pgTable("loshon_horah", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Keep existing content table for other general content
+// Weekly Torah content tables
+export const shabbatRecipes = pgTable("shabbat_recipes", {
+  id: serial("id").primaryKey(),
+  week: date("week").notNull(), // Start date of the week
+  hebrewDate: text("hebrew_date").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  ingredients: text("ingredients").notNull(), // JSON array as text
+  instructions: text("instructions").notNull(),
+  servings: text("servings"),
+  prepTime: text("prep_time"),
+  cookTime: text("cook_time"),
+  difficulty: text("difficulty"), // 'easy', 'medium', 'hard'
+  imageUrl: text("image_url"),
+  tags: text("tags"), // JSON array: kosher, pareve, dairy, meat
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const parshaVorts = pgTable("parsha_vorts", {
+  id: serial("id").primaryKey(),
+  week: date("week").notNull(), // Start date of the week
+  parsha: text("parsha").notNull(), // Parsha name
+  hebrewParsha: text("hebrew_parsha").notNull(),
+  title: text("title").notNull(),
+  content: text("content"), // Written vort content
+  audioUrl: text("audio_url").notNull(), // Audio is primary
+  duration: text("duration"),
+  speaker: text("speaker").notNull(),
+  source: text("source"), // Sefer/reference
+  summary: text("summary"), // Brief description
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Keep existing content table for any other miscellaneous content
 export const content = pgTable("content", {
   id: serial("id").primaryKey(),
-  type: text("type").notNull(), // 'recipe', 'vort', etc.
+  type: text("type").notNull(), // For any other content types
   title: text("title").notNull(),
   content: text("content").notNull(),
   audioUrl: text("audio_url"),
@@ -209,6 +242,17 @@ export const insertLoshonHorahSchema = createInsertSchema(loshonHorah).omit({
   createdAt: true,
 });
 
+// Weekly Torah content schemas
+export const insertShabbatRecipeSchema = createInsertSchema(shabbatRecipes).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertParshaVortSchema = createInsertSchema(parshaVorts).omit({
+  id: true,
+  createdAt: true,
+});
+
 // No user types needed - app works without authentication
 export type Content = typeof content.$inferSelect;
 export type InsertContent = z.infer<typeof insertContentSchema>;
@@ -240,3 +284,9 @@ export type DailyChizuk = typeof dailyChizuk.$inferSelect;
 export type InsertDailyChizuk = z.infer<typeof insertDailyChizukSchema>;
 export type LoshonHorah = typeof loshonHorah.$inferSelect;
 export type InsertLoshonHorah = z.infer<typeof insertLoshonHorahSchema>;
+
+// Weekly Torah content types
+export type ShabbatRecipe = typeof shabbatRecipes.$inferSelect;
+export type InsertShabbatRecipe = z.infer<typeof insertShabbatRecipeSchema>;
+export type ParshaVort = typeof parshaVorts.$inferSelect;
+export type InsertParshaVort = z.infer<typeof insertParshaVortSchema>;

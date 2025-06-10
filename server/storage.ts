@@ -2,6 +2,7 @@ import {
   content, jewishTimes, calendarEvents, shopItems, 
   tehillimNames, globalTehillimProgress, minchaPrayers, sponsors,
   dailyHalacha, dailyMussar, dailyChizuk, loshonHorah,
+  shabbatRecipes, parshaVorts,
   type Content, type InsertContent,
   type JewishTimes, type InsertJewishTimes, type CalendarEvent, type InsertCalendarEvent,
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
@@ -10,7 +11,9 @@ import {
   type DailyHalacha, type InsertDailyHalacha,
   type DailyMussar, type InsertDailyMussar,
   type DailyChizuk, type InsertDailyChizuk,
-  type LoshonHorah, type InsertLoshonHorah
+  type LoshonHorah, type InsertLoshonHorah,
+  type ShabbatRecipe, type InsertShabbatRecipe,
+  type ParshaVort, type InsertParshaVort
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, gt, lt, and } from "drizzle-orm";
@@ -42,6 +45,13 @@ export interface IStorage {
   
   getLoshonHorahByDate(date: string): Promise<LoshonHorah | undefined>;
   createLoshonHorah(loshon: InsertLoshonHorah): Promise<LoshonHorah>;
+
+  // Weekly Torah content methods
+  getShabbatRecipeByWeek(week: string): Promise<ShabbatRecipe | undefined>;
+  createShabbatRecipe(recipe: InsertShabbatRecipe): Promise<ShabbatRecipe>;
+  
+  getParshaVortByWeek(week: string): Promise<ParshaVort | undefined>;
+  createParshaVort(vort: InsertParshaVort): Promise<ParshaVort>;
 
   // Tehillim methods
   getActiveNames(): Promise<TehillimName[]>;
@@ -294,6 +304,27 @@ export class DatabaseStorage implements IStorage {
   async createLoshonHorah(insertLoshon: InsertLoshonHorah): Promise<LoshonHorah> {
     const [loshon] = await db.insert(loshonHorah).values(insertLoshon).returning();
     return loshon;
+  }
+
+  // Weekly Torah content methods
+  async getShabbatRecipeByWeek(week: string): Promise<ShabbatRecipe | undefined> {
+    const [recipe] = await db.select().from(shabbatRecipes).where(eq(shabbatRecipes.week, week));
+    return recipe || undefined;
+  }
+
+  async createShabbatRecipe(insertRecipe: InsertShabbatRecipe): Promise<ShabbatRecipe> {
+    const [recipe] = await db.insert(shabbatRecipes).values(insertRecipe).returning();
+    return recipe;
+  }
+
+  async getParshaVortByWeek(week: string): Promise<ParshaVort | undefined> {
+    const [vort] = await db.select().from(parshaVorts).where(eq(parshaVorts.week, week));
+    return vort || undefined;
+  }
+
+  async createParshaVort(insertVort: InsertParshaVort): Promise<ParshaVort> {
+    const [vort] = await db.insert(parshaVorts).values(insertVort).returning();
+    return vort;
   }
 }
 
