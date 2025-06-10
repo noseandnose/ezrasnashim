@@ -20,6 +20,9 @@ export default function ShopModals() {
     enabled: !!shopItemId,
   });
 
+  // Debug log to see what data we're getting
+  console.log('Shop modal debug:', { activeModal, shopItemId, shopItem, isLoading });
+
   const handleCopyCoupon = () => {
     if (shopItem?.couponCode) {
       navigator.clipboard.writeText(shopItem.couponCode);
