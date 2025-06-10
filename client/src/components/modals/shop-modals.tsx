@@ -16,7 +16,7 @@ export default function ShopModals() {
     : null;
 
   const { data: shopItem, isLoading } = useQuery<ShopItem>({
-    queryKey: ['/api/shop', shopItemId],
+    queryKey: [`/api/shop/${shopItemId}`],
     enabled: !!shopItemId,
   });
 
