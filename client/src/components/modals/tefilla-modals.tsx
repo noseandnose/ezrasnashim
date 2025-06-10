@@ -321,7 +321,7 @@ export default function TefillaModals() {
           </DialogHeader>
           
           {/* Progress Tracker */}
-          <div className="mb-6">
+          <div className="mb-3">
             <div className="bg-gradient-to-r from-blush/10 to-peach/10 rounded-xl p-4">
               <div className="flex items-center justify-between mb-3">
                 <span className="font-semibold text-gray-800">Progress</span>
