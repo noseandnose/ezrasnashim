@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useGeolocation, useJewishTimes } from "@/hooks/use-jewish-times";
 import Home from "@/pages/home";
 import NotFound from "@/pages/not-found";
+import Donate from "@/pages/donate";
 
 function Router() {
   // Initialize geolocation and preload Jewish times on app startup
@@ -15,6 +16,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/donate" component={Donate} />
       <Route component={NotFound} />
     </Switch>
   );

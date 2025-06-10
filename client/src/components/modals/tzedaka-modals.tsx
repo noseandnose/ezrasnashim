@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,7 +34,7 @@ export default function TzedakaModals() {
     return amounts[torahPortion] || 0;
   };
 
-  const handleDonation = (donationType: string) => {
+  const handleDonation = () => {
     let amount = 0;
     let typeDescription = "";
 
@@ -139,7 +139,7 @@ export default function TzedakaModals() {
                 Cancel
               </Button>
               <Button 
-                onClick={handleDonation}
+                onClick={() => handleDonation()}
                 className="flex-1 gradient-blush-peach text-white"
                 disabled={!donationAmount}
               >
@@ -207,7 +207,7 @@ export default function TzedakaModals() {
                 Cancel
               </Button>
               <Button 
-                onClick={handleDonation}
+                onClick={() => handleDonation()}
                 className="flex-1 gradient-blush-peach text-white"
                 disabled={!torahPortion}
               >
@@ -267,7 +267,7 @@ export default function TzedakaModals() {
                 Cancel
               </Button>
               <Button 
-                onClick={handleDonation}
+                onClick={() => handleDonation()}
                 className="flex-1 bg-rose-500 hover:bg-rose-600 text-white"
                 disabled={!donationAmount}
               >
@@ -328,7 +328,7 @@ export default function TzedakaModals() {
                 Cancel
               </Button>
               <Button 
-                onClick={handleDonation}
+                onClick={() => handleDonation()}
                 className="flex-1 bg-purple-500 hover:bg-purple-600 text-white"
                 disabled={!donationAmount}
               >
