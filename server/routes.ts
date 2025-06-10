@@ -516,7 +516,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currency: "usd",
         automatic_payment_methods: {
           enabled: true,
+          allow_redirects: 'never'
         },
+        payment_method_types: ['card'],
         metadata: {
           donationType: donationType || "general",
           ...metadata

@@ -68,7 +68,17 @@ const DonationForm = ({ amount, donationType, metadata, onSuccess }: DonationFor
         </div>
       </div>
 
-      <PaymentElement />
+      <PaymentElement 
+        options={{
+          wallets: {
+            applePay: 'auto',
+            googlePay: 'auto'
+          },
+          fields: {
+            billingDetails: 'never'
+          }
+        }}
+      />
 
       <Button
         type="submit"
