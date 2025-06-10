@@ -6,18 +6,68 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useModalStore } from "@/lib/types";
 import { useState } from "react";
 import { Heart, BookOpen, Baby, Shield, DollarSign } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function TzedakaModals() {
   const { activeModal, closeModal } = useModalStore();
+  const [, setLocation] = useLocation();
   const [donationAmount, setDonationAmount] = useState("");
+  const [customAmount, setCustomAmount] = useState("");
   const [donorName, setDonorName] = useState("");
   const [dedicationText, setDedicationText] = useState("");
   const [torahPortion, setTorahPortion] = useState("");
 
-  const handleDonation = () => {
-    // TODO: Integrate with payment processing (Stripe)
-    // Handle donation submission
-    closeModal();
+  const getDonationAmount = () => {
+    if (donationAmount === "custom") {
+      return parseFloat(customAmount) || 0;
+    }
+    return parseFloat(donationAmount) || 0;
+  };
+
+  const getTorahAmount = () => {
+    const amounts: { [key: string]: number } = {
+      letter: 1,
+      pasuk: 18,
+      perek: 54,
+      parsha: 360
+    };
+    return amounts[torahPortion] || 0;
+  };
+
+  const handleDonation = (donationType: string) => {
+    let amount = 0;
+    let typeDescription = "";
+
+    switch (activeModal) {
+      case "sponsor-day":
+        amount = getDonationAmount();
+        typeDescription = "Sponsor a Day of Ezras Nashim";
+        break;
+      case "torah-dedication":
+        amount = getTorahAmount();
+        typeDescription = `Torah Dedication - ${torahPortion}`;
+        break;
+      case "infertility-support":
+        amount = getDonationAmount();
+        typeDescription = "Women's Infertility Support";
+        break;
+      case "abuse-support":
+        amount = getDonationAmount();
+        typeDescription = "Women's Abuse Support";
+        break;
+    }
+
+    if (amount > 0) {
+      const params = new URLSearchParams({
+        amount: amount.toString(),
+        type: typeDescription,
+        sponsor: donorName,
+        dedication: dedicationText
+      });
+
+      closeModal();
+      setLocation(`/donate?${params.toString()}`);
+    }
   };
 
   return (
@@ -55,6 +105,8 @@ export default function TzedakaModals() {
                   placeholder="Enter amount" 
                   className="mt-2"
                   type="number"
+                  value={customAmount}
+                  onChange={(e) => setCustomAmount(e.target.value)}
                 />
               )}
             </div>

@@ -1,6 +1,12 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import Stripe from "stripe";
 import { storage } from "./storage";
+
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 import { 
   insertCalendarEventSchema, 
   insertTehillimNameSchema,
@@ -460,6 +466,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(500).json({ message: "Failed to create Tehillim name" });
       }
+    }
+  });
+
+  // Stripe payment intent creation for donations
+  app.post("/api/create-payment-intent", async (req, res) => {
+    try {
+      const { amount, donationType, metadata } = req.body;
+      
+      if (!amount || amount < 1) {
+        return res.status(400).json({ error: "Invalid amount" });
+      }
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: "usd",
+        metadata: {
+          donationType: donationType || "general",
+          ...metadata
+        },
+        description: `Ezras Nashim Donation - ${donationType || 'General'}`
+      });
+
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id
+      });
+    } catch (error: any) {
+      console.error("Error creating payment intent:", error);
+      res.status(500).json({ 
+        error: "Failed to create payment intent",
+        message: error.message 
+      });
     }
   });
 
