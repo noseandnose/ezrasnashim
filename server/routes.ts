@@ -1,7 +1,15 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContentSchema, insertCalendarEventSchema, insertTehillimNameSchema } from "@shared/schema";
+import { 
+  insertContentSchema, 
+  insertCalendarEventSchema, 
+  insertTehillimNameSchema,
+  insertDailyHalachaSchema,
+  insertDailyMussarSchema,
+  insertDailyChizukSchema,
+  insertLoshonHorahSchema
+} from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -240,6 +248,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(sponsor);
     } catch (error) {
       res.status(500).json({ message: "Failed to create sponsor" });
+    }
+  });
+
+  // Daily Torah content routes
+  app.get("/api/torah/halacha/:date", async (req, res) => {
+    try {
+      const { date } = req.params;
+      const halacha = await storage.getDailyHalachaByDate(date);
+      res.json(halacha || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch daily halacha" });
+    }
+  });
+
+  app.post("/api/torah/halacha", async (req, res) => {
+    try {
+      const validatedData = insertDailyHalachaSchema.parse(req.body);
+      const halacha = await storage.createDailyHalacha(validatedData);
+      res.json(halacha);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create daily halacha" });
+    }
+  });
+
+  app.get("/api/torah/mussar/:date", async (req, res) => {
+    try {
+      const { date } = req.params;
+      const mussar = await storage.getDailyMussarByDate(date);
+      res.json(mussar || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch daily mussar" });
+    }
+  });
+
+  app.post("/api/torah/mussar", async (req, res) => {
+    try {
+      const validatedData = insertDailyMussarSchema.parse(req.body);
+      const mussar = await storage.createDailyMussar(validatedData);
+      res.json(mussar);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create daily mussar" });
+    }
+  });
+
+  app.get("/api/torah/chizuk/:date", async (req, res) => {
+    try {
+      const { date } = req.params;
+      const chizuk = await storage.getDailyChizukByDate(date);
+      res.json(chizuk || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch daily chizuk" });
+    }
+  });
+
+  app.post("/api/torah/chizuk", async (req, res) => {
+    try {
+      const validatedData = insertDailyChizukSchema.parse(req.body);
+      const chizuk = await storage.createDailyChizuk(validatedData);
+      res.json(chizuk);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create daily chizuk" });
+    }
+  });
+
+  app.get("/api/torah/loshon/:date", async (req, res) => {
+    try {
+      const { date } = req.params;
+      const loshon = await storage.getLoshonHorahByDate(date);
+      res.json(loshon || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch loshon horah content" });
+    }
+  });
+
+  app.post("/api/torah/loshon", async (req, res) => {
+    try {
+      const validatedData = insertLoshonHorahSchema.parse(req.body);
+      const loshon = await storage.createLoshonHorah(validatedData);
+      res.json(loshon);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create loshon horah content" });
     }
   });
 
