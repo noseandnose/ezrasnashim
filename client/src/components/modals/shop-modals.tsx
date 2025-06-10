@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useModalStore } from "@/lib/types";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Copy, ExternalLink, X } from "lucide-react";
+import { Copy, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { ShopItem } from "@shared/schema";
 
@@ -40,28 +40,18 @@ export default function ShopModals() {
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent className="modal-content max-w-sm mx-4">
-        <DialogHeader className="relative">
-          <Button
-            onClick={closeModal}
-            variant="ghost"
-            size="sm"
-            className="absolute -top-2 -right-2 h-8 w-8 rounded-full p-0 hover:bg-gray-100"
-          >
-            <X size={16} />
-          </Button>
-          <DialogTitle className="sr-only">
-            {shopItem ? shopItem.title : 'Store Details'}
+      <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6">
+        <DialogHeader className="text-center mb-4">
+          <DialogTitle className="text-lg font-semibold mb-2">
+            {shopItem ? shopItem.storeName : 'Store Details'}
           </DialogTitle>
-          <DialogDescription className="sr-only">
-            {shopItem ? shopItem.description : 'Store information and coupon details'}
-          </DialogDescription>
+          {shopItem && (
+            <p className="text-sm text-gray-600">{shopItem.title}</p>
+          )}
         </DialogHeader>
 
         {isLoading ? (
-          <div className="p-8 flex items-center justify-center">
-            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-          </div>
+          <div className="text-center">Loading...</div>
         ) : shopItem ? (
           <div className="space-y-4">
             {/* Header with background image */}
@@ -82,11 +72,6 @@ export default function ShopModals() {
                   {shopItem.title}
                 </h2>
               </div>
-            </div>
-
-            {/* Store name */}
-            <div className="text-center">
-              <h3 className="font-medium text-gray-900">{shopItem.storeName}</h3>
             </div>
 
             {/* Description */}
@@ -127,10 +112,17 @@ export default function ShopModals() {
                   Visit Store
                 </Button>
               )}
+              <Button
+                onClick={closeModal}
+                variant="outline"
+                className="flex-1"
+              >
+                Close
+              </Button>
             </div>
           </div>
         ) : (
-          <div className="p-8 text-center">
+          <div className="text-center">
             <p className="text-gray-600">Store not found</p>
           </div>
         )}
