@@ -1,11 +1,16 @@
 import { 
   content, jewishTimes, calendarEvents, shopItems, 
   tehillimNames, globalTehillimProgress, minchaPrayers, sponsors,
+  dailyHalacha, dailyMussar, dailyChizuk, loshonHorah,
   type Content, type InsertContent,
   type JewishTimes, type InsertJewishTimes, type CalendarEvent, type InsertCalendarEvent,
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
-  type Sponsor, type InsertSponsor
+  type Sponsor, type InsertSponsor,
+  type DailyHalacha, type InsertDailyHalacha,
+  type DailyMussar, type InsertDailyMussar,
+  type DailyChizuk, type InsertDailyChizuk,
+  type LoshonHorah, type InsertLoshonHorah
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, gt, lt, and } from "drizzle-orm";
@@ -24,6 +29,19 @@ export interface IStorage {
   getShopItemsByCategory(category: string): Promise<ShopItem[]>;
   getAllShopItems(): Promise<ShopItem[]>;
   createShopItem(item: InsertShopItem): Promise<ShopItem>;
+
+  // Daily Torah content methods
+  getDailyHalachaByDate(date: string): Promise<DailyHalacha | undefined>;
+  createDailyHalacha(halacha: InsertDailyHalacha): Promise<DailyHalacha>;
+  
+  getDailyMussarByDate(date: string): Promise<DailyMussar | undefined>;
+  createDailyMussar(mussar: InsertDailyMussar): Promise<DailyMussar>;
+  
+  getDailyChizukByDate(date: string): Promise<DailyChizuk | undefined>;
+  createDailyChizuk(chizuk: InsertDailyChizuk): Promise<DailyChizuk>;
+  
+  getLoshonHorahByDate(date: string): Promise<LoshonHorah | undefined>;
+  createLoshonHorah(loshon: InsertLoshonHorah): Promise<LoshonHorah>;
 
   // Tehillim methods
   getActiveNames(): Promise<TehillimName[]>;
@@ -235,6 +253,47 @@ export class DatabaseStorage implements IStorage {
 
   async getActiveSponsors(): Promise<Sponsor[]> {
     return await db.select().from(sponsors).where(eq(sponsors.isActive, true));
+  }
+
+  // Daily Torah content methods
+  async getDailyHalachaByDate(date: string): Promise<DailyHalacha | undefined> {
+    const [halacha] = await db.select().from(dailyHalacha).where(eq(dailyHalacha.date, date));
+    return halacha || undefined;
+  }
+
+  async createDailyHalacha(insertHalacha: InsertDailyHalacha): Promise<DailyHalacha> {
+    const [halacha] = await db.insert(dailyHalacha).values(insertHalacha).returning();
+    return halacha;
+  }
+
+  async getDailyMussarByDate(date: string): Promise<DailyMussar | undefined> {
+    const [mussar] = await db.select().from(dailyMussar).where(eq(dailyMussar.date, date));
+    return mussar || undefined;
+  }
+
+  async createDailyMussar(insertMussar: InsertDailyMussar): Promise<DailyMussar> {
+    const [mussar] = await db.insert(dailyMussar).values(insertMussar).returning();
+    return mussar;
+  }
+
+  async getDailyChizukByDate(date: string): Promise<DailyChizuk | undefined> {
+    const [chizuk] = await db.select().from(dailyChizuk).where(eq(dailyChizuk.date, date));
+    return chizuk || undefined;
+  }
+
+  async createDailyChizuk(insertChizuk: InsertDailyChizuk): Promise<DailyChizuk> {
+    const [chizuk] = await db.insert(dailyChizuk).values(insertChizuk).returning();
+    return chizuk;
+  }
+
+  async getLoshonHorahByDate(date: string): Promise<LoshonHorah | undefined> {
+    const [loshon] = await db.select().from(loshonHorah).where(eq(loshonHorah.date, date));
+    return loshon || undefined;
+  }
+
+  async createLoshonHorah(insertLoshon: InsertLoshonHorah): Promise<LoshonHorah> {
+    const [loshon] = await db.insert(loshonHorah).values(insertLoshon).returning();
+    return loshon;
   }
 }
 

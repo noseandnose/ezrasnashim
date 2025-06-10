@@ -4,13 +4,59 @@ import { z } from "zod";
 
 // No user authentication needed - app works for everyone without profiles
 
+// Daily Torah content - each type gets its own table for better performance and organization
+export const dailyHalacha = pgTable("daily_halacha", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull(), // SQL date for efficient querying
+  hebrewDate: text("hebrew_date").notNull(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  source: text("source"), // Reference/citation
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const dailyMussar = pgTable("daily_mussar", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull(),
+  hebrewDate: text("hebrew_date").notNull(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  author: text("author"), // Who wrote/said this
+  source: text("source"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const dailyChizuk = pgTable("daily_chizuk", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull(),
+  hebrewDate: text("hebrew_date").notNull(),
+  title: text("title").notNull(),
+  content: text("content"),
+  audioUrl: text("audio_url").notNull(), // Chizuk is primarily audio
+  duration: text("duration"), // Audio length
+  speaker: text("speaker"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const loshonHorah = pgTable("loshon_horah", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull(),
+  hebrewDate: text("hebrew_date").notNull(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  halachicSource: text("halachic_source"), // Which sefer/posek
+  practicalTip: text("practical_tip"), // Daily practical application
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Keep existing content table for other general content
 export const content = pgTable("content", {
   id: serial("id").primaryKey(),
-  type: text("type").notNull(), // 'halacha', 'mussar', 'chizuk', 'loshon', 'recipe', etc.
+  type: text("type").notNull(), // 'recipe', 'vort', etc.
   title: text("title").notNull(),
   content: text("content").notNull(),
   audioUrl: text("audio_url"),
-  date: text("date").notNull(), // Hebrew date
+  date: text("date").notNull(),
   category: text("category"),
 });
 
@@ -142,6 +188,27 @@ export const insertSponsorSchema = createInsertSchema(sponsors).omit({
   createdAt: true,
 });
 
+// Daily Torah content schemas
+export const insertDailyHalachaSchema = createInsertSchema(dailyHalacha).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertDailyMussarSchema = createInsertSchema(dailyMussar).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertDailyChizukSchema = createInsertSchema(dailyChizuk).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertLoshonHorahSchema = createInsertSchema(loshonHorah).omit({
+  id: true,
+  createdAt: true,
+});
+
 // No user types needed - app works without authentication
 export type Content = typeof content.$inferSelect;
 export type InsertContent = z.infer<typeof insertContentSchema>;
@@ -163,3 +230,13 @@ export type MinchaPrayer = typeof minchaPrayers.$inferSelect;
 export type InsertMinchaPrayer = z.infer<typeof insertMinchaPrayerSchema>;
 export type Sponsor = typeof sponsors.$inferSelect;
 export type InsertSponsor = z.infer<typeof insertSponsorSchema>;
+
+// Daily Torah content types
+export type DailyHalacha = typeof dailyHalacha.$inferSelect;
+export type InsertDailyHalacha = z.infer<typeof insertDailyHalachaSchema>;
+export type DailyMussar = typeof dailyMussar.$inferSelect;
+export type InsertDailyMussar = z.infer<typeof insertDailyMussarSchema>;
+export type DailyChizuk = typeof dailyChizuk.$inferSelect;
+export type InsertDailyChizuk = z.infer<typeof insertDailyChizukSchema>;
+export type LoshonHorah = typeof loshonHorah.$inferSelect;
+export type InsertLoshonHorah = z.infer<typeof insertLoshonHorahSchema>;
