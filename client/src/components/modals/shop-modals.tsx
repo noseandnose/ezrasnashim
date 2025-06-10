@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useModalStore } from "@/lib/types";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Copy, ExternalLink } from "lucide-react";
+import { Copy, ExternalLink, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { ShopItem } from "@shared/schema";
 
@@ -40,16 +40,33 @@ export default function ShopModals() {
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+      <DialogContent className="modal-content max-w-sm mx-4">
+        <DialogHeader className="relative">
+          <Button
+            onClick={closeModal}
+            variant="ghost"
+            size="sm"
+            className="absolute -top-2 -right-2 h-8 w-8 rounded-full p-0 hover:bg-gray-100"
+          >
+            <X size={16} />
+          </Button>
+          <DialogTitle className="sr-only">
+            {shopItem ? shopItem.title : 'Store Details'}
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            {shopItem ? shopItem.description : 'Store information and coupon details'}
+          </DialogDescription>
+        </DialogHeader>
+
         {isLoading ? (
           <div className="p-8 flex items-center justify-center">
             <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
           </div>
         ) : shopItem ? (
-          <div className="flex flex-col">
+          <div className="space-y-4">
             {/* Header with background image */}
             <div 
-              className="relative h-32 bg-cover bg-center"
+              className="relative h-32 bg-cover bg-center rounded-xl overflow-hidden"
               style={{ 
                 backgroundImage: `url(${shopItem.backgroundImageUrl})`,
                 backgroundPosition: 'center',
@@ -67,59 +84,49 @@ export default function ShopModals() {
               </div>
             </div>
 
-            {/* Content */}
-            <div className="p-6 space-y-4">
-              {/* Store name */}
-              <div className="text-center">
-                <h3 className="font-medium text-gray-900">{shopItem.storeName}</h3>
-              </div>
+            {/* Store name */}
+            <div className="text-center">
+              <h3 className="font-medium text-gray-900">{shopItem.storeName}</h3>
+            </div>
 
-              {/* Description */}
-              <div className="text-center">
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  {shopItem.description}
-                </p>
-              </div>
+            {/* Description */}
+            <div className="text-center">
+              <p className="text-gray-600 text-sm leading-relaxed">
+                {shopItem.description}
+              </p>
+            </div>
 
-              {/* Coupon section */}
-              {shopItem.couponCode && (
-                <div className="bg-cream/50 rounded-xl p-4 space-y-3">
-                  <h4 className="font-medium text-center text-gray-900">Coupon Code</h4>
-                  <div className="flex items-center justify-between bg-white rounded-lg p-3 border-2 border-dashed border-blush/30">
-                    <code className="font-mono font-semibold text-blush text-lg">
-                      {shopItem.couponCode}
-                    </code>
-                    <Button
-                      onClick={handleCopyCoupon}
-                      variant="ghost"
-                      size="sm"
-                      className="text-blush hover:bg-blush/10"
-                    >
-                      <Copy size={16} />
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {/* Action buttons */}
-              <div className="flex gap-3 pt-2">
-                {shopItem.externalUrl && (
+            {/* Coupon section */}
+            {shopItem.couponCode && (
+              <div className="bg-cream/50 rounded-xl p-4 space-y-3">
+                <h4 className="font-medium text-center text-gray-900">Coupon Code</h4>
+                <div className="flex items-center justify-between bg-white rounded-lg p-3 border-2 border-dashed border-blush/30">
+                  <code className="font-mono font-semibold text-blush text-lg">
+                    {shopItem.couponCode}
+                  </code>
                   <Button
-                    onClick={handleVisitStore}
-                    className="flex-1 bg-blush hover:bg-blush/90 text-white"
+                    onClick={handleCopyCoupon}
+                    variant="ghost"
+                    size="sm"
+                    className="text-blush hover:bg-blush/10"
                   >
-                    <ExternalLink size={16} className="mr-2" />
-                    Visit Store
+                    <Copy size={16} />
                   </Button>
-                )}
-                <Button
-                  onClick={closeModal}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  Close
-                </Button>
+                </div>
               </div>
+            )}
+
+            {/* Action buttons */}
+            <div className="flex gap-3 pt-2">
+              {shopItem.externalUrl && (
+                <Button
+                  onClick={handleVisitStore}
+                  className="flex-1 bg-blush hover:bg-blush/90 text-white"
+                >
+                  <ExternalLink size={16} className="mr-2" />
+                  Visit Store
+                </Button>
+              )}
             </div>
           </div>
         ) : (
