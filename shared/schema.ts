@@ -82,27 +82,7 @@ export const parshaVorts = pgTable("parsha_vorts", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Keep existing content table for any other miscellaneous content
-export const content = pgTable("content", {
-  id: serial("id").primaryKey(),
-  type: text("type").notNull(), // For any other content types
-  title: text("title").notNull(),
-  content: text("content").notNull(),
-  audioUrl: text("audio_url"),
-  date: text("date").notNull(),
-  category: text("category"),
-});
 
-export const jewishTimes = pgTable("jewish_times", {
-  id: serial("id").primaryKey(),
-  date: text("date").notNull(), // ISO date string
-  location: text("location").notNull().default("New York, NY"),
-  sunrise: text("sunrise").notNull(),
-  sunset: text("sunset").notNull(),
-  candleLighting: text("candle_lighting"),
-  havdalah: text("havdalah"),
-  hebrewDate: text("hebrew_date").notNull(),
-});
 
 export const calendarEvents = pgTable("calendar_events", {
   id: serial("id").primaryKey(),
@@ -176,13 +156,7 @@ export const sponsors = pgTable("sponsors", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertContentSchema = createInsertSchema(content).omit({
-  id: true,
-});
 
-export const insertJewishTimesSchema = createInsertSchema(jewishTimes).omit({
-  id: true,
-});
 
 export const insertCalendarEventSchema = createInsertSchema(calendarEvents).omit({
   id: true,
@@ -254,10 +228,6 @@ export const insertParshaVortSchema = createInsertSchema(parshaVorts).omit({
 });
 
 // No user types needed - app works without authentication
-export type Content = typeof content.$inferSelect;
-export type InsertContent = z.infer<typeof insertContentSchema>;
-export type JewishTimes = typeof jewishTimes.$inferSelect;
-export type InsertJewishTimes = z.infer<typeof insertJewishTimesSchema>;
 export type CalendarEvent = typeof calendarEvents.$inferSelect;
 export type InsertCalendarEvent = z.infer<typeof insertCalendarEventSchema>;
 export type ShopItem = typeof shopItems.$inferSelect;

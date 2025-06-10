@@ -1,10 +1,9 @@
 import { 
-  content, jewishTimes, calendarEvents, shopItems, 
+  calendarEvents, shopItems, 
   tehillimNames, globalTehillimProgress, minchaPrayers, sponsors,
   dailyHalacha, dailyMussar, dailyChizuk, loshonHorah,
   shabbatRecipes, parshaVorts,
-  type Content, type InsertContent,
-  type JewishTimes, type InsertJewishTimes, type CalendarEvent, type InsertCalendarEvent,
+  type CalendarEvent, type InsertCalendarEvent,
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
   type Sponsor, type InsertSponsor,
@@ -19,13 +18,6 @@ import { db } from "./db";
 import { eq, gt, lt, and } from "drizzle-orm";
 
 export interface IStorage {
-  getContentByType(type: string): Promise<Content[]>;
-  getContentByDate(date: string): Promise<Content[]>;
-  createContent(content: InsertContent): Promise<Content>;
-  
-  getJewishTimesByDate(date: string): Promise<JewishTimes | undefined>;
-  createJewishTimes(times: InsertJewishTimes): Promise<JewishTimes>;
-  
   getCalendarEvents(): Promise<CalendarEvent[]>;
   createCalendarEvent(event: InsertCalendarEvent): Promise<CalendarEvent>;
   
@@ -118,29 +110,7 @@ export class DatabaseStorage implements IStorage {
     this.initializeDefaults().catch(console.error);
   }
 
-  // Content methods
-  async getContentByType(type: string): Promise<Content[]> {
-    return [];
-  }
 
-  async getContentByDate(date: string): Promise<Content[]> {
-    return [];
-  }
-
-  async createContent(insertContent: InsertContent): Promise<Content> {
-    const [created] = await db.insert(content).values(insertContent).returning();
-    return created;
-  }
-
-  // Jewish Times methods (stubs for now)
-  async getJewishTimesByDate(date: string): Promise<JewishTimes | undefined> {
-    return undefined;
-  }
-
-  async createJewishTimes(insertTimes: InsertJewishTimes): Promise<JewishTimes> {
-    const [times] = await db.insert(jewishTimes).values(insertTimes).returning();
-    return times;
-  }
 
   // Calendar Events methods (stubs for now)
   async getCalendarEvents(): Promise<CalendarEvent[]> {
