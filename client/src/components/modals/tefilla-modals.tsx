@@ -427,7 +427,8 @@ export default function TefillaModals() {
               </Button>
             ) : todayCompleted ? (
               <Button 
-                className="w-full py-3 rounded-xl font-medium bg-sage text-white cursor-default"
+                className="w-full py-3 rounded-xl font-medium text-white cursor-default"
+                style={{ backgroundColor: 'hsl(120, 25%, 65%)' }}
                 disabled={true}
               >
                 <CheckCircle className="mr-2" size={16} />
