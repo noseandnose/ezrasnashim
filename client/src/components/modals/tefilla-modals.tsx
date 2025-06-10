@@ -22,6 +22,12 @@ export default function TefillaModals() {
     enabled: activeModal === 'mincha'
   });
 
+  // Fetch Nishmas text from database
+  const { data: nishmasText } = useQuery({
+    queryKey: ['/api/nishmas', nishmasLanguage],
+    enabled: activeModal === 'nishmas-campaign'
+  });
+
   // Load Nishmas progress from localStorage
   useEffect(() => {
     const savedDay = localStorage.getItem('nishmas-day');
@@ -387,14 +393,23 @@ export default function TefillaModals() {
               <div className={`text-sm leading-relaxed ${
                 nishmasLanguage === 'hebrew' ? 'text-right font-hebrew' : 'font-english'
               }`}>
-                {nishmasLanguage === 'hebrew' ? (
-                  <p className="mb-4">
-                    נִשְׁמַת כָּל חַי תְּבָרֵךְ אֶת שִׁמְךָ יְיָ אֱלֹהֵינוּ, וְרוּחַ כָּל בָּשָׂר תְּפָאֵר וּתְרוֹמֵם זִכְרְךָ מַלְכֵּנוּ תָּמִיד...
-                  </p>
+                {nishmasText ? (
+                  <div className="mb-4">
+                    <p className="whitespace-pre-wrap leading-relaxed">
+                      {nishmasText.fullText}
+                    </p>
+                    {nishmasText.transliteration && nishmasLanguage === 'hebrew' && (
+                      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                        <p className="text-sm text-gray-600 italic">
+                          {nishmasText.transliteration}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 ) : (
-                  <p className="mb-4">
-                    The soul of every living being shall bless Your Name, Hashem, our G-d, and the spirit of all flesh shall always glorify and exalt Your remembrance, our King...
-                  </p>
+                  <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-gray-600 text-sm">Loading prayer text...</p>
+                  </div>
                 )}
                 <div className="text-xs text-gray-500 mt-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
                   <p className="mb-2 font-medium text-gray-700">
