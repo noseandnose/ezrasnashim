@@ -71,19 +71,11 @@ export class DatabaseStorage implements IStorage {
 
   private async initializeDefaults() {
     try {
-      // Check if content already exists
+      // Check if Mincha prayers already exist
       const existingPrayers = await db.select().from(minchaPrayers).limit(1);
       if (existingPrayers.length > 0) return;
 
-      const today = new Date().toISOString().split('T')[0];
-      const thisWeek = (() => {
-        const date = new Date();
-        const year = date.getFullYear();
-        const week = Math.ceil(((date.getTime() - new Date(year, 0, 1).getTime()) / 86400000 + new Date(year, 0, 1).getDay() + 1) / 7);
-        return `${year}-W${week}`;
-      })();
-
-      // Initialize Mincha prayers
+      // Insert default Mincha prayers only
       await db.insert(minchaPrayers).values([
         {
           prayerType: "ashrei",
@@ -108,54 +100,7 @@ export class DatabaseStorage implements IStorage {
         }
       ]);
 
-      // Initialize daily Torah content
-      await db.insert(dailyHalacha).values({
-        date: today,
-        title: "Laws of Chanukah - Day 3",
-        content: "Candles should be lit immediately after sunset, and should burn for at least 30 minutes. The mitzvah is to light one candle each night, with the minhag to add an additional candle each subsequent night.",
-        category: "chanukah"
-      });
-
-      await db.insert(dailyMussar).values({
-        date: today,
-        title: "Patience and Understanding",
-        content: "When we encounter challenges, remember that each test is an opportunity for growth and spiritual elevation. Practice patience in daily interactions.",
-        category: "character"
-      });
-
-      await db.insert(dailyChizuk).values({
-        date: today,
-        title: "Your Light in the World",
-        content: "Every Jewish woman has the power to bring light into the world through her actions and intentions. Your role creates ripples of kedusha.",
-        audioUrl: "https://example.com/chizuk-audio.mp3",
-        duration: "5:15"
-      });
-
-      await db.insert(loshonHorah).values({
-        date: today,
-        title: "Three Questions",
-        content: "Before speaking about others, ask yourself: Is it true? Is it necessary? Is it kind? Positive speech builds relationships and creates harmony.",
-        category: "speech"
-      });
-
-      // Initialize weekly content
-      await db.insert(shabbatRecipes).values({
-        week: thisWeek,
-        title: "Traditional Challah",
-        ingredients: ["4 cups bread flour", "1 packet active dry yeast", "1/4 cup warm water", "1/4 cup honey", "2 eggs + 1 for brushing", "1/4 cup oil", "1 tsp salt"],
-        instructions: "Mix warm water with yeast and let bloom. Combine all ingredients, knead until smooth. Let rise for 1 hour, then braid and let rise again before baking at 350°F for 25-30 minutes.",
-        category: "bread"
-      });
-
-      await db.insert(parshaVorts).values({
-        week: thisWeek,
-        title: "Parshat Vayeshev - Dreams and Vision",
-        content: "The dreams of Yosef teach us about the power of vision and perseverance. Even when circumstances seem challenging, maintaining faith in our purpose can lead to extraordinary outcomes.",
-        audioUrl: "https://example.com/parsha-vort.mp3",
-        duration: "3:15"
-      });
-
-      console.log('Initialized all default content for live app');
+      console.log('Initialized default Mincha prayers');
     } catch (error) {
       console.error('Error initializing defaults:', error);
     }

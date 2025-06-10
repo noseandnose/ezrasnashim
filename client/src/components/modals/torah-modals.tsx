@@ -6,23 +6,25 @@ import AudioPlayer from "@/components/audio-player";
 export default function TorahModals() {
   const { activeModal, closeModal } = useModalStore();
 
-  const { data: halachaContent } = useQuery({
-    queryKey: ['/api/torah/halacha', new Date().toISOString().split('T')[0]],
+  const today = new Date().toISOString().split('T')[0];
+
+  const { data: halachaContent } = useQuery<any>({
+    queryKey: ['/api/torah/halacha', today],
     enabled: activeModal === 'halacha'
   });
 
-  const { data: mussarContent } = useQuery({
-    queryKey: ['/api/torah/mussar', new Date().toISOString().split('T')[0]],
+  const { data: mussarContent } = useQuery<any>({
+    queryKey: ['/api/torah/mussar', today],
     enabled: activeModal === 'mussar'
   });
 
-  const { data: chizukContent } = useQuery({
-    queryKey: ['/api/torah/chizuk', new Date().toISOString().split('T')[0]],
+  const { data: chizukContent } = useQuery<any>({
+    queryKey: ['/api/torah/chizuk', today],
     enabled: activeModal === 'chizuk'
   });
 
-  const { data: loshonContent } = useQuery({
-    queryKey: ['/api/torah/loshon', new Date().toISOString().split('T')[0]],
+  const { data: loshonContent } = useQuery<any>({
+    queryKey: ['/api/torah/loshon', today],
     enabled: activeModal === 'loshon'
   });
 
@@ -33,13 +35,12 @@ export default function TorahModals() {
         <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-semibold mb-2">Daily Halacha</DialogTitle>
-            <p className="text-sm text-gray-600">Laws of Chanukah - Day 3</p>
+            <p className="text-sm text-gray-600">{halachaContent?.title || "Laws of Chanukah - Day 3"}</p>
           </DialogHeader>
           
           <div className="space-y-3 text-sm text-gray-700">
             <div>
-              <p><strong>Today's Halacha:</strong> Candles should be lit immediately after sunset, and should burn for at least 30 minutes.</p>
-              <p className="mt-2"><strong>Additional Guidelines:</strong> The mitzvah is to light one candle each night, with the minhag to add an additional candle each subsequent night.</p>
+              <p><strong>Today's Halacha:</strong> {halachaContent?.content || "Candles should be lit immediately after sunset, and should burn for at least 30 minutes. The mitzvah is to light one candle each night, with the minhag to add an additional candle each subsequent night."}</p>
             </div>
           </div>
         </DialogContent>

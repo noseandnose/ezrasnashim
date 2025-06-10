@@ -13,17 +13,17 @@ export default function TableModals() {
     return `${year}-W${week}`;
   };
 
-  const { data: recipeContent } = useQuery({
+  const { data: recipeContent } = useQuery<any>({
     queryKey: ['/api/table/recipe', getWeekKey()],
     enabled: activeModal === 'recipe'
   });
 
-  const { data: inspirationContent } = useQuery({
+  const { data: inspirationContent } = useQuery<any>({
     queryKey: ['/api/table/inspiration', new Date().toISOString().split('T')[0]],
     enabled: activeModal === 'inspiration'
   });
 
-  const { data: parshaContent } = useQuery({
+  const { data: parshaContent } = useQuery<any>({
     queryKey: ['/api/table/vort', getWeekKey()],
     enabled: activeModal === 'parsha'
   });
@@ -66,6 +66,19 @@ export default function TableModals() {
             <DialogTitle className="text-lg font-semibold mb-2">Table Inspiration</DialogTitle>
             <p className="text-sm text-gray-600">Beautiful Shabbat Settings</p>
           </DialogHeader>
+          
+          {/* Inspiration Image */}
+          <div className="mb-4">
+            <div className="w-full h-48 bg-gradient-to-br from-cream to-warm-white rounded-xl flex items-center justify-center border border-gray-200">
+              <div className="text-center text-gray-600">
+                <svg className="mx-auto mb-2 w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                </svg>
+                <p className="text-sm">Winter Elegance Theme</p>
+                <p className="text-xs">Shabbat Table Setting</p>
+              </div>
+            </div>
+          </div>
           
           <div className="space-y-3 text-sm text-gray-700">
             <div>
