@@ -71,43 +71,7 @@
   }
 }
 
-/* Custom Ezras Nashim Styles */
-.blush {
-  color: hsl(328, 85%, 87%);
-}
-
-.peach {
-  color: hsl(28, 100%, 84%);
-}
-
-.cream {
-  color: hsl(35, 100%, 95%);
-}
-
-.warm-white {
-  background-color: hsl(25, 30%, 96%);
-}
-
-.warm-gray {
-  color: hsl(0, 0%, 29%);
-}
-
-.bg-blush {
-  background-color: hsl(328, 85%, 87%);
-}
-
-.bg-peach {
-  background-color: hsl(28, 100%, 84%);
-}
-
-.bg-cream {
-  background-color: hsl(35, 100%, 95%);
-}
-
-.bg-warm-white {
-  background-color: hsl(25, 30%, 96%);
-}
-
+/* Custom Brand Colors */
 .text-blush {
   color: hsl(328, 85%, 87%);
 }
@@ -120,12 +84,8 @@
   color: hsl(0, 0%, 29%);
 }
 
-.bg-sage {
-  background-color: hsl(120, 25%, 65%);
-}
-
-.text-sage {
-  color: hsl(120, 25%, 65%);
+.bg-blush {
+  background-color: hsl(328, 85%, 87%);
 }
 
 .gradient-blush-peach {

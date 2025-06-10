@@ -112,9 +112,9 @@ export class DatabaseStorage implements IStorage {
 
 
 
-  // Calendar Events methods (stubs for now)
+  // Calendar Events methods
   async getCalendarEvents(): Promise<CalendarEvent[]> {
-    return [];
+    return await db.select().from(calendarEvents);
   }
 
   async createCalendarEvent(insertEvent: InsertCalendarEvent): Promise<CalendarEvent> {
