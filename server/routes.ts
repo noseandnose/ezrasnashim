@@ -15,7 +15,8 @@ import {
   insertDailyChizukSchema,
   insertLoshonHorahSchema,
   insertShabbatRecipeSchema,
-  insertParshaVortSchema
+  insertParshaVortSchema,
+  insertNishmasTextSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -466,6 +467,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(500).json({ message: "Failed to create Tehillim name" });
       }
+    }
+  });
+
+  // Nishmas text routes
+  app.get("/api/nishmas/:language", async (req, res) => {
+    try {
+      const { language } = req.params;
+      const text = await storage.getNishmasTextByLanguage(language);
+      res.json(text || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch Nishmas text" });
+    }
+  });
+
+  app.post("/api/nishmas", async (req, res) => {
+    try {
+      const validatedData = insertNishmasTextSchema.parse(req.body);
+      const text = await storage.createNishmasText(validatedData);
+      res.json(text);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create Nishmas text" });
+    }
+  });
+
+  app.put("/api/nishmas/:language", async (req, res) => {
+    try {
+      const { language } = req.params;
+      const validatedData = insertNishmasTextSchema.partial().parse(req.body);
+      const text = await storage.updateNishmasText(language, validatedData);
+      res.json(text);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update Nishmas text" });
     }
   });
 
