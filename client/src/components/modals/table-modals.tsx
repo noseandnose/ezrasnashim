@@ -1,8 +1,32 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useModalStore } from "@/lib/types";
+import { useQuery } from "@tanstack/react-query";
+import AudioPlayer from "@/components/audio-player";
 
 export default function TableModals() {
   const { activeModal, closeModal } = useModalStore();
+  
+  const getWeekKey = () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const week = Math.ceil(((date.getTime() - new Date(year, 0, 1).getTime()) / 86400000 + new Date(year, 0, 1).getDay() + 1) / 7);
+    return `${year}-W${week}`;
+  };
+
+  const { data: recipeContent } = useQuery({
+    queryKey: ['/api/table/recipe', getWeekKey()],
+    enabled: activeModal === 'recipe'
+  });
+
+  const { data: inspirationContent } = useQuery({
+    queryKey: ['/api/table/inspiration', new Date().toISOString().split('T')[0]],
+    enabled: activeModal === 'inspiration'
+  });
+
+  const { data: parshaContent } = useQuery({
+    queryKey: ['/api/table/vort', getWeekKey()],
+    enabled: activeModal === 'parsha'
+  });
 
   return (
     <>
@@ -56,19 +80,19 @@ export default function TableModals() {
 
       {/* Parsha Vort Modal */}
       <Dialog open={activeModal === 'parsha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto">
-          <DialogHeader className="text-center mb-4">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6">
+          <DialogHeader className="text-center">
             <DialogTitle className="text-lg font-semibold mb-2">Parsha Vort</DialogTitle>
-            <p className="text-sm text-gray-600">Parshat Vayeshev</p>
+            <p className="text-sm text-gray-600 mb-4">
+              {parshaContent?.title || "This Week's Torah Portion"}
+            </p>
           </DialogHeader>
           
-          <div className="space-y-3 text-sm text-gray-700">
-            <div>
-              <p><strong>This Week's Insight:</strong> The dreams of Yosef teach us about the power of vision and perseverance.</p>
-              <p className="mt-2">Even when circumstances seem challenging, maintaining faith in our purpose and potential can lead to extraordinary outcomes.</p>
-              <p className="mt-2"><strong>Table Discussion:</strong> How can we support each other's dreams and aspirations within our families?</p>
-            </div>
-          </div>
+          <AudioPlayer 
+            title={parshaContent?.title || "Parsha Vort"}
+            duration="3:15"
+            audioUrl={parshaContent?.audioUrl || ""}
+          />
         </DialogContent>
       </Dialog>
     </>

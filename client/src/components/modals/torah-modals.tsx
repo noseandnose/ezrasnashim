@@ -1,8 +1,30 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useModalStore } from "@/lib/types";
+import { useQuery } from "@tanstack/react-query";
+import AudioPlayer from "@/components/audio-player";
 
 export default function TorahModals() {
   const { activeModal, closeModal } = useModalStore();
+
+  const { data: halachaContent } = useQuery({
+    queryKey: ['/api/torah/halacha', new Date().toISOString().split('T')[0]],
+    enabled: activeModal === 'halacha'
+  });
+
+  const { data: mussarContent } = useQuery({
+    queryKey: ['/api/torah/mussar', new Date().toISOString().split('T')[0]],
+    enabled: activeModal === 'mussar'
+  });
+
+  const { data: chizukContent } = useQuery({
+    queryKey: ['/api/torah/chizuk', new Date().toISOString().split('T')[0]],
+    enabled: activeModal === 'chizuk'
+  });
+
+  const { data: loshonContent } = useQuery({
+    queryKey: ['/api/torah/loshon', new Date().toISOString().split('T')[0]],
+    enabled: activeModal === 'loshon'
+  });
 
   return (
     <>
@@ -42,18 +64,19 @@ export default function TorahModals() {
 
       {/* Chizuk Modal */}
       <Dialog open={activeModal === 'chizuk'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6">
-          <DialogHeader className="text-center mb-4">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6">
+          <DialogHeader className="text-center">
             <DialogTitle className="text-lg font-semibold mb-2">Daily Chizuk</DialogTitle>
-            <p className="text-sm text-gray-600">Inspiration & Strength</p>
+            <p className="text-sm text-gray-600 mb-4">
+              {chizukContent?.title || "Inspiration & Strength"}
+            </p>
           </DialogHeader>
           
-          <div className="space-y-3 text-sm text-gray-700">
-            <div>
-              <p><strong>Today's Message:</strong> Every Jewish woman has the power to bring light into the world through her actions and intentions.</p>
-              <p className="mt-2">Your role in the home and community creates ripples of kedusha that extend far beyond what you can see.</p>
-            </div>
-          </div>
+          <AudioPlayer 
+            title={chizukContent?.title || "Daily Chizuk"}
+            duration="5:15"
+            audioUrl={chizukContent?.audioUrl || ""}
+          />
         </DialogContent>
       </Dialog>
 
