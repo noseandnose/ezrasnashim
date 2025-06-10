@@ -80,9 +80,9 @@ export default function TzedakaModals() {
               <BookOpen className="text-blush mr-2" size={20} />
               <DialogTitle className="text-lg font-semibold">Sponsor a Day of Ezras Nashim</DialogTitle>
             </div>
-            <p className="text-sm text-gray-600">
+            <DialogDescription className="text-sm text-gray-600">
               Dedicate all Mitzvot done on the app for one day
-            </p>
+            </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
@@ -158,9 +158,9 @@ export default function TzedakaModals() {
               <BookOpen className="text-peach mr-2" size={20} />
               <DialogTitle className="text-lg font-semibold">Torah Dedication</DialogTitle>
             </div>
-            <p className="text-sm text-gray-600">
+            <DialogDescription className="text-sm text-gray-600">
               Dedicate a Letter, Pasuk, Perek or Parsha
-            </p>
+            </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
@@ -226,9 +226,9 @@ export default function TzedakaModals() {
               <Baby className="text-rose-500 mr-2" size={20} />
               <DialogTitle className="text-lg font-semibold">Infertility Support</DialogTitle>
             </div>
-            <p className="text-sm text-gray-600">
+            <DialogDescription className="text-sm text-gray-600">
               Support couples struggling with fertility challenges
-            </p>
+            </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
@@ -256,6 +256,15 @@ export default function TzedakaModals() {
                   <SelectItem value="custom">Custom Amount</SelectItem>
                 </SelectContent>
               </Select>
+              {donationAmount === "custom" && (
+                <Input 
+                  placeholder="Enter amount" 
+                  className="mt-2"
+                  type="number"
+                  value={customAmount}
+                  onChange={(e) => setCustomAmount(e.target.value)}
+                />
+              )}
             </div>
 
             <div className="flex space-x-2">
@@ -286,9 +295,9 @@ export default function TzedakaModals() {
               <Shield className="text-purple-500 mr-2" size={20} />
               <DialogTitle className="text-lg font-semibold">Abuse Support</DialogTitle>
             </div>
-            <p className="text-sm text-gray-600">
+            <DialogDescription className="text-sm text-gray-600">
               Support women escaping abusive situations
-            </p>
+            </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
@@ -317,6 +326,15 @@ export default function TzedakaModals() {
                   <SelectItem value="custom">Custom Amount</SelectItem>
                 </SelectContent>
               </Select>
+              {donationAmount === "custom" && (
+                <Input 
+                  placeholder="Enter amount" 
+                  className="mt-2"
+                  type="number"
+                  value={customAmount}
+                  onChange={(e) => setCustomAmount(e.target.value)}
+                />
+              )}
             </div>
 
             <div className="flex space-x-2">
