@@ -14,40 +14,7 @@ import {
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Content routes
-  app.get("/api/content/:type", async (req, res) => {
-    try {
-      const { type } = req.params;
-      const content = await storage.getContentByType(type);
-      res.json(content);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch content" });
-    }
-  });
 
-  app.get("/api/content/date/:date", async (req, res) => {
-    try {
-      const { date } = req.params;
-      const content = await storage.getContentByDate(date);
-      res.json(content);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch content by date" });
-    }
-  });
-
-  app.post("/api/content", async (req, res) => {
-    try {
-      const validatedData = insertContentSchema.parse(req.body);
-      const content = await storage.createContent(validatedData);
-      res.json(content);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ message: "Invalid content data", errors: error.errors });
-      } else {
-        res.status(500).json({ message: "Failed to create content" });
-      }
-    }
-  });
 
   // Hebcal Zmanim API proxy route
   app.get("/api/zmanim/:lat/:lng", async (req, res) => {

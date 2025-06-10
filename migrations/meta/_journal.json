@@ -15,6 +15,13 @@
       "when": 1749550248249,
       "tag": "0001_fresh_vision",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1749550492564,
+      "tag": "0002_worthless_rockslide",
+      "breakpoints": true
     }
   ]
 }
