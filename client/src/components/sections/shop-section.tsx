@@ -29,7 +29,19 @@ export default function ShopSection() {
           <div
             key={item.id}
             onClick={() => handleItemClick(item)}
-            className="bg-gradient-to-r from-blush to-peach rounded-2xl p-[2px] cursor-pointer hover:from-blush/80 hover:to-peach/80 transition-all duration-300"
+            className="cursor-pointer group"
+            style={{
+              background: 'linear-gradient(135deg, hsl(328, 85%, 87%) 0%, hsl(28, 100%, 84%) 100%)',
+              padding: '2px',
+              borderRadius: '16px',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, hsl(328, 85%, 80%) 0%, hsl(28, 100%, 78%) 100%)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, hsl(328, 85%, 87%) 0%, hsl(28, 100%, 84%) 100%)';
+            }}
           >
             <div className="content-card rounded-2xl overflow-hidden">
               {/* Background image with overlay */}
