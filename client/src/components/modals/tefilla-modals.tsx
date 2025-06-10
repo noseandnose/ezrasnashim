@@ -16,6 +16,7 @@ export default function TefillaModals() {
   const [nishmasStartDate, setNishmasStartDate] = useState<string | null>(null);
   const [nishmasLanguage, setNishmasLanguage] = useState<'hebrew' | 'english'>('hebrew');
   const [todayCompleted, setTodayCompleted] = useState(false);
+  const [nishmasFontSize, setNishmasFontSize] = useState(16);
 
   const { data: minchaPrayers = [], isLoading } = useQuery<MinchaPrayer[]>({
     queryKey: ['/api/mincha/prayers'],
@@ -378,6 +379,27 @@ export default function TefillaModals() {
           <div className="mb-6">
             <div className="bg-warm-white rounded-xl p-4">
               <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setNishmasFontSize(Math.max(12, nishmasFontSize - 2))}
+                    className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
+                    disabled={nishmasFontSize <= 12}
+                  >
+                    <Minus size={10} />
+                  </Button>
+                  <span className="text-xs text-gray-600 px-1">{nishmasFontSize}px</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setNishmasFontSize(Math.min(24, nishmasFontSize + 2))}
+                    className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
+                    disabled={nishmasFontSize >= 24}
+                  >
+                    <Plus size={10} />
+                  </Button>
+                </div>
                 <h3 className="font-semibold text-center flex-1">
                   {nishmasLanguage === 'hebrew' ? 'נשמת כל חי' : 'Nishmas Kol Chai'}
                 </h3>
@@ -390,9 +412,9 @@ export default function TefillaModals() {
                   {nishmasLanguage === 'hebrew' ? 'EN' : 'עב'}
                 </Button>
               </div>
-              <div className={`text-sm leading-relaxed ${
+              <div className={`leading-relaxed ${
                 nishmasLanguage === 'hebrew' ? 'text-right font-hebrew' : 'font-english'
-              }`}>
+              }`} style={{ fontSize: `${nishmasFontSize}px` }}>
                 {nishmasLoading ? (
                   <div className="mb-4 p-3 bg-gray-50 rounded-lg">
                     <p className="text-gray-600 text-sm">Loading prayer text...</p>
