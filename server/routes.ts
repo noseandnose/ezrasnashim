@@ -514,7 +514,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100), // Convert to cents
         currency: "usd",
-        payment_method_types: ['card', 'apple_pay', 'google_pay'],
+        automatic_payment_methods: {
+          enabled: true,
+        },
         metadata: {
           donationType: donationType || "general",
           ...metadata
