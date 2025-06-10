@@ -160,10 +160,10 @@ export default function TefillaSection() {
         <h2 className="text-xl font-semibold warm-gray">Tefilla</h2>
         <div className="flex space-x-2">
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={() => setShowHebrew(!showHebrew)}
-            className="text-xs"
+            className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
           >
             {showHebrew ? 'EN' : 'עב'}
           </Button>

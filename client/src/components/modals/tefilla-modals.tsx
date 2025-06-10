@@ -126,10 +126,10 @@ export default function TefillaModals() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
                 onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
-                className="text-xs"
+                className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
               >
                 {language === 'hebrew' ? 'EN' : 'עב'}
               </Button>
