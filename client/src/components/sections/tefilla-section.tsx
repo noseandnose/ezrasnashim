@@ -1,4 +1,4 @@
-import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart } from "lucide-react";
+import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight } from "lucide-react";
 import { useModalStore } from "@/lib/types";
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useState } from "react";
