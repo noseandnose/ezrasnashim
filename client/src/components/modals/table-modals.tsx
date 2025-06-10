@@ -69,7 +69,7 @@ export default function TableModals() {
           
           {/* Inspiration Image */}
           <div className="mb-4">
-            <div className="w-full h-48 bg-gradient-to-br from-cream to-warm-white rounded-xl flex items-center justify-center border border-gray-200">
+            <div className="w-full h-48 bg-gradient-to-br from-pink-50 to-orange-50 rounded-xl flex items-center justify-center border border-gray-200">
               <div className="text-center text-gray-600">
                 <svg className="mx-auto mb-2 w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
