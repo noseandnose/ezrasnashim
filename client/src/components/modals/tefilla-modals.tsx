@@ -65,6 +65,8 @@ export default function TefillaModals() {
     const today = new Date().toDateString();
     const newDay = nishmasDay + 1;
     
+    console.log('Completing Nishmas:', { currentDay: nishmasDay, newDay, todayCompleted });
+    
     if (newDay <= 40) {
       setNishmasDay(newDay);
       setTodayCompleted(true);
@@ -76,6 +78,8 @@ export default function TefillaModals() {
         setNishmasStartDate(startDate);
         localStorage.setItem('nishmas-start-date', startDate);
       }
+      
+      console.log('Nishmas completed, new state:', { newDay, completed: true });
     }
   };
 
@@ -331,6 +335,13 @@ export default function TefillaModals() {
                   style={{ width: `${(nishmasDay / 40) * 100}%` }}
                 ></div>
               </div>
+              
+              {/* Debug info for progress bar */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="text-xs text-gray-400 text-center mb-2">
+                  Progress: Day {nishmasDay}/40 ({Math.round((nishmasDay / 40) * 100)}%)
+                </div>
+              )}
               
               {nishmasDay === 0 ? (
                 <div className="text-center">
