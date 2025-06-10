@@ -1,31 +1,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/lib/types";
-import { useQuery } from "@tanstack/react-query";
-import AudioPlayer from "@/components/audio-player";
 
 export default function TorahModals() {
   const { activeModal, closeModal } = useModalStore();
-
-  const { data: content = [], isLoading } = useQuery({
-    queryKey: ['/api/content/halacha'],
-    enabled: activeModal === 'halacha'
-  });
-
-  const { data: mussarContent = [], isLoading: mussarLoading } = useQuery({
-    queryKey: ['/api/content/mussar'],
-    enabled: activeModal === 'mussar'
-  });
-
-  const { data: chizukContent = [], isLoading: chizukLoading } = useQuery({
-    queryKey: ['/api/content/chizuk'],
-    enabled: activeModal === 'chizuk'
-  });
-
-  const { data: loshonContent = [], isLoading: loshonLoading } = useQuery({
-    queryKey: ['/api/content/loshon'],
-    enabled: activeModal === 'loshon'
-  });
 
   return (
     <>
@@ -37,96 +14,63 @@ export default function TorahModals() {
             <p className="text-sm text-gray-600">Laws of Chanukah - Day 3</p>
           </DialogHeader>
           
-          {isLoading ? (
-            <div className="text-center">Loading...</div>
-          ) : (
-            <div className="space-y-3 text-sm text-gray-700">
-              {content && content[0] && (
-                <div>
-                  <p><strong>Today's Halacha:</strong> {content[0].content}</p>
-                  <p className="mt-2"><strong>Additional Guidelines:</strong> Candles should be lit immediately after sunset, and should burn for at least 30 minutes.</p>
-                </div>
-              )}
+          <div className="space-y-3 text-sm text-gray-700">
+            <div>
+              <p><strong>Today's Halacha:</strong> Candles should be lit immediately after sunset, and should burn for at least 30 minutes.</p>
+              <p className="mt-2"><strong>Additional Guidelines:</strong> The mitzvah is to light one candle each night, with the minhag to add an additional candle each subsequent night.</p>
             </div>
-          )}
-
-          <Button 
-            onClick={() => closeModal()} 
-            className="w-full gradient-blush-peach text-white py-3 rounded-xl font-medium mt-6 border-0"
-          >
-            Close
-          </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
       {/* Mussar Modal */}
       <Dialog open={activeModal === 'mussar'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6">
+        <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6">
           <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-semibold">Daily Mussar</DialogTitle>
+            <DialogTitle className="text-lg font-semibold mb-2">Daily Mussar</DialogTitle>
+            <p className="text-sm text-gray-600">Character Development</p>
           </DialogHeader>
           
-          {mussarLoading ? (
-            <div className="text-center">Loading...</div>
-          ) : (
-            <div className="text-center text-gray-600">
-              {mussarContent && mussarContent[0] ? mussarContent[0].content : "Today's lesson on building character and spiritual growth..."}
+          <div className="space-y-3 text-sm text-gray-700">
+            <div>
+              <p><strong>Today's Focus:</strong> Patience and understanding in our daily interactions.</p>
+              <p className="mt-2">When we encounter challenges, remember that each test is an opportunity for growth and spiritual elevation.</p>
             </div>
-          )}
-
-          <Button 
-            onClick={() => closeModal()} 
-            className="w-full gradient-blush-peach text-white py-3 rounded-xl font-medium mt-6 border-0"
-          >
-            Close
-          </Button>
+          </div>
         </DialogContent>
       </Dialog>
 
-      {/* Chizuk Audio Modal */}
+      {/* Chizuk Modal */}
       <Dialog open={activeModal === 'chizuk'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6">
-          <DialogHeader className="text-center">
+        <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6">
+          <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-semibold mb-2">Daily Chizuk</DialogTitle>
-            <p className="text-sm text-gray-600 mb-4">
-              {chizukContent && chizukContent[0] ? chizukContent[0].title : "Finding Light in Darkness"}
-            </p>
+            <p className="text-sm text-gray-600">Inspiration & Strength</p>
           </DialogHeader>
           
-          <AudioPlayer 
-            title={chizukContent && chizukContent[0] ? chizukContent[0].title : "Finding Light in Darkness"}
-            duration="5:23"
-            audioUrl={chizukContent && chizukContent[0] ? chizukContent[0].audioUrl || "" : ""}
-          />
-
-          <Button 
-            onClick={() => closeModal()} 
-            className="bg-gray-100 text-gray-700 px-6 py-2 rounded-xl font-medium mt-4"
-          >
-            Close
-          </Button>
+          <div className="space-y-3 text-sm text-gray-700">
+            <div>
+              <p><strong>Today's Message:</strong> Every Jewish woman has the power to bring light into the world through her actions and intentions.</p>
+              <p className="mt-2">Your role in the home and community creates ripples of kedusha that extend far beyond what you can see.</p>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
       {/* Loshon Horah Modal */}
       <Dialog open={activeModal === 'loshon'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6">
+        <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6">
           <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-semibold">Loshon Horah</DialogTitle>
+            <DialogTitle className="text-lg font-semibold mb-2">Loshon Horah</DialogTitle>
+            <p className="text-sm text-gray-600">Guarding Our Speech</p>
           </DialogHeader>
           
-          <div className="text-center text-gray-600">
-            {loshonLoading ? "Loading..." : 
-             loshonContent && loshonContent[0] ? loshonContent[0].content : 
-             "Daily reminder about the importance of guarding our speech..."}
+          <div className="space-y-3 text-sm text-gray-700">
+            <div>
+              <p><strong>Today's Lesson:</strong> Before speaking about others, ask yourself: Is it true? Is it necessary? Is it kind?</p>
+              <p className="mt-2">Positive speech has the power to build relationships and create harmony in our communities.</p>
+            </div>
           </div>
-
-          <Button 
-            onClick={() => closeModal()} 
-            className="w-full gradient-blush-peach text-white py-3 rounded-xl font-medium mt-6 border-0"
-          >
-            Close
-          </Button>
         </DialogContent>
       </Dialog>
     </>
