@@ -331,8 +331,11 @@ export default function TefillaModals() {
               {/* Progress Bar */}
               <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
                 <div 
-                  className="bg-gradient-to-r from-blush to-peach h-3 rounded-full transition-all duration-300"
-                  style={{ width: `${(nishmasDay / 40) * 100}%` }}
+                  className="h-3 rounded-full transition-all duration-300"
+                  style={{ 
+                    width: `${(nishmasDay / 40) * 100}%`,
+                    background: 'linear-gradient(90deg, hsl(328, 85%, 87%) 0%, hsl(28, 100%, 84%) 100%)'
+                  }}
                 ></div>
               </div>
               
