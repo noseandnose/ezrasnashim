@@ -1,12 +1,12 @@
 import { 
   calendarEvents, shopItems, 
-  tehillimNames, globalTehillimProgress, minchaPrayers, sponsors,
+  tehillimNames, globalTehillimProgress, minchaPrayers, sponsors, nishmasText,
   dailyHalacha, dailyMussar, dailyChizuk, loshonHorah,
   shabbatRecipes, parshaVorts,
   type CalendarEvent, type InsertCalendarEvent,
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
-  type Sponsor, type InsertSponsor,
+  type Sponsor, type InsertSponsor, type NishmasText, type InsertNishmasText,
   type DailyHalacha, type InsertDailyHalacha,
   type DailyMussar, type InsertDailyMussar,
   type DailyChizuk, type InsertDailyChizuk,
@@ -62,6 +62,11 @@ export interface IStorage {
   getDailySponsor(date: string): Promise<Sponsor | undefined>;
   createSponsor(sponsor: InsertSponsor): Promise<Sponsor>;
   getActiveSponsors(): Promise<Sponsor[]>;
+
+  // Nishmas text methods
+  getNishmasTextByLanguage(language: string): Promise<NishmasText | undefined>;
+  createNishmasText(text: InsertNishmasText): Promise<NishmasText>;
+  updateNishmasText(language: string, text: Partial<InsertNishmasText>): Promise<NishmasText>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -296,6 +301,25 @@ export class DatabaseStorage implements IStorage {
   async createParshaVort(insertVort: InsertParshaVort): Promise<ParshaVort> {
     const [vort] = await db.insert(parshaVorts).values(insertVort).returning();
     return vort;
+  }
+
+  async getNishmasTextByLanguage(language: string): Promise<NishmasText | undefined> {
+    const [text] = await db.select().from(nishmasText).where(eq(nishmasText.language, language));
+    return text || undefined;
+  }
+
+  async createNishmasText(insertText: InsertNishmasText): Promise<NishmasText> {
+    const [text] = await db.insert(nishmasText).values(insertText).returning();
+    return text;
+  }
+
+  async updateNishmasText(language: string, updatedText: Partial<InsertNishmasText>): Promise<NishmasText> {
+    const [text] = await db
+      .update(nishmasText)
+      .set({ ...updatedText, updatedAt: new Date() })
+      .where(eq(nishmasText.language, language))
+      .returning();
+    return text;
   }
 }
 

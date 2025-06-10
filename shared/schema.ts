@@ -157,6 +157,17 @@ export const sponsors = pgTable("sponsors", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const nishmasText = pgTable("nishmas_text", {
+  id: serial("id").primaryKey(),
+  language: text("language").notNull(), // 'hebrew' or 'english'
+  fullText: text("full_text").notNull(),
+  transliteration: text("transliteration"), // For Hebrew text
+  source: text("source").default("Nishmas.net"),
+  version: text("version").default("1.0"), // For tracking text updates
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 
 
 export const insertCalendarEventSchema = createInsertSchema(calendarEvents).omit({
@@ -194,6 +205,12 @@ export const insertMinchaPrayerSchema = createInsertSchema(minchaPrayers).omit({
 export const insertSponsorSchema = createInsertSchema(sponsors).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertNishmasTextSchema = createInsertSchema(nishmasText).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 // Daily Torah content schemas
@@ -245,6 +262,9 @@ export type MinchaPrayer = typeof minchaPrayers.$inferSelect;
 export type InsertMinchaPrayer = z.infer<typeof insertMinchaPrayerSchema>;
 export type Sponsor = typeof sponsors.$inferSelect;
 export type InsertSponsor = z.infer<typeof insertSponsorSchema>;
+
+export type NishmasText = typeof nishmasText.$inferSelect;
+export type InsertNishmasText = z.infer<typeof insertNishmasTextSchema>;
 
 // Daily Torah content types
 export type DailyHalacha = typeof dailyHalacha.$inferSelect;
