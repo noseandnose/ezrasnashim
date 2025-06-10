@@ -368,24 +368,22 @@ export default function TefillaModals() {
             </div>
           </div>
 
-          {/* Language Toggle */}
-          <div className="flex justify-end mb-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setNishmasLanguage(nishmasLanguage === 'hebrew' ? 'english' : 'hebrew')}
-              className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
-            >
-              {nishmasLanguage === 'hebrew' ? 'EN' : 'עב'}
-            </Button>
-          </div>
-
           {/* Prayer Text */}
           <div className="mb-6">
             <div className="bg-warm-white rounded-xl p-4">
-              <h3 className="font-semibold mb-3 text-center">
-                {nishmasLanguage === 'hebrew' ? 'נשמת כל חי' : 'Nishmas Kol Chai'}
-              </h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-center flex-1">
+                  {nishmasLanguage === 'hebrew' ? 'נשמת כל חי' : 'Nishmas Kol Chai'}
+                </h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setNishmasLanguage(nishmasLanguage === 'hebrew' ? 'english' : 'hebrew')}
+                  className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
+                >
+                  {nishmasLanguage === 'hebrew' ? 'EN' : 'עב'}
+                </Button>
+              </div>
               <div className={`text-sm leading-relaxed ${
                 nishmasLanguage === 'hebrew' ? 'text-right font-hebrew' : 'font-english'
               }`}>
