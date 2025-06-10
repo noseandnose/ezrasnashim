@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Play, Pause, Settings } from "lucide-react";
+import { Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -14,7 +14,6 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState("0:00");
   const [playbackSpeed, setPlaybackSpeed] = useState("1");
-  const [showSpeedControl, setShowSpeedControl] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout>();
 
@@ -77,13 +76,7 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
   return (
     <div className="gradient-blush-peach rounded-2xl p-4 text-white mb-4 audio-controls">
       <div className="flex items-center justify-between mb-4">
-        <Button
-          onClick={() => setShowSpeedControl(!showSpeedControl)}
-          className="bg-white bg-opacity-20 rounded-full p-2 hover:bg-opacity-30 transition-all border-0"
-          style={{ WebkitTapHighlightColor: 'transparent' }}
-        >
-          <Settings className="w-4 h-4" />
-        </Button>
+        <div className="w-16"></div> {/* Left spacer */}
         
         <Button
           onClick={togglePlay}
@@ -97,28 +90,22 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
           )}
         </Button>
         
-        <div className="w-8 h-8"></div> {/* Spacer for center alignment */}
-      </div>
-      
-      {showSpeedControl && (
-        <div className="mb-4 flex items-center justify-center">
-          <div className="bg-white bg-opacity-20 rounded-lg p-2">
-            <Select value={playbackSpeed} onValueChange={setPlaybackSpeed}>
-              <SelectTrigger className="bg-transparent border-white border-opacity-30 text-white text-sm w-20 h-8">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="0.5">0.5x</SelectItem>
-                <SelectItem value="0.75">0.75x</SelectItem>
-                <SelectItem value="1">1x</SelectItem>
-                <SelectItem value="1.25">1.25x</SelectItem>
-                <SelectItem value="1.5">1.5x</SelectItem>
-                <SelectItem value="2">2x</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="bg-white bg-opacity-20 rounded-lg p-1">
+          <Select value={playbackSpeed} onValueChange={setPlaybackSpeed}>
+            <SelectTrigger className="bg-transparent border-none text-white text-xs w-14 h-6">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="0.5">0.5x</SelectItem>
+              <SelectItem value="0.75">0.75x</SelectItem>
+              <SelectItem value="1">1x</SelectItem>
+              <SelectItem value="1.25">1.25x</SelectItem>
+              <SelectItem value="1.5">1.5x</SelectItem>
+              <SelectItem value="2">2x</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-      )}
+      </div>
       <div className="space-y-4">
         <div className="flex justify-between text-sm font-medium">
           <span>{currentTime}</span>
