@@ -29,7 +29,7 @@ export default function ShopSection() {
           <div
             key={item.id}
             onClick={() => handleItemClick(item)}
-            className="content-card rounded-2xl p-0 cursor-pointer overflow-hidden"
+            className="content-card rounded-2xl p-0 cursor-pointer overflow-hidden border-2 border-blush/30 hover:border-blush/50 transition-colors"
           >
             {/* Background image with overlay */}
             <div 
