@@ -11,7 +11,7 @@ interface Sponsor {
 }
 
 interface HomeSectionProps {
-  onSectionChange?: (section: 'torah' | 'tefilla' | 'table' | 'shop') => void;
+  onSectionChange?: (section: Section) => void;
 }
 
 export default function HomeSection({ onSectionChange }: HomeSectionProps) {
@@ -23,7 +23,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     queryKey: ['/api/sponsors/daily', new Date().toISOString().split('T')[0]],
   });
 
-  const navigateToSection = (section: 'torah' | 'tefilla' | 'table' | 'shop') => {
+  const navigateToSection = (section: 'torah' | 'tefilla' | 'tzedaka' | 'table' | 'shop') => {
     if (onSectionChange) {
       onSectionChange(section);
     }
@@ -101,9 +101,9 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           </div>
         </Button>
 
-        {/* Tzedaka Button - Opens tzedaka modal */}
+        {/* Tzedaka Button */}
         <Button
-          onClick={() => openModal('sponsor-day')}
+          onClick={() => navigateToSection('tzedaka')}
           className="h-18 gradient-lavender text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 justify-start px-6"
         >
           <div className="flex items-center justify-start w-full space-x-4">
