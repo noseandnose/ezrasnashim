@@ -1,6 +1,7 @@
 import { useState } from "react";
 import AppHeader from "@/components/app-header";
 import BottomNavigation from "@/components/bottom-navigation";
+import HomeSection from "@/components/sections/home-section";
 import TorahSection from "@/components/sections/torah-section";
 import TefillaSection from "@/components/sections/tefilla-section";
 import TzedakaSection from "@/components/sections/tzedaka-section";
@@ -8,25 +9,25 @@ import TableSection from "@/components/sections/table-section";
 import ShopSection from "@/components/sections/shop-section";
 import ModalContainer from "@/components/modals/modal-container";
 
-export type Section = 'torah' | 'tefilla' | 'tzedaka' | 'table' | 'shop';
+export type Section = 'torah' | 'tefilla' | 'home' | 'table' | 'shop';
 
 export default function Home() {
-  const [activeSection, setActiveSection] = useState<Section>('torah');
+  const [activeSection, setActiveSection] = useState<Section>('home');
 
   const renderSection = () => {
     switch (activeSection) {
+      case 'home':
+        return <HomeSection />;
       case 'torah':
         return <TorahSection />;
       case 'tefilla':
         return <TefillaSection />;
-      case 'tzedaka':
-        return <TzedakaSection />;
       case 'table':
         return <TableSection />;
       case 'shop':
         return <ShopSection />;
       default:
-        return <TorahSection />;
+        return <HomeSection />;
     }
   };
 
