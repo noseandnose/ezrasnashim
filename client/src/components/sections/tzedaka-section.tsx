@@ -1,4 +1,4 @@
-import { Heart, BookOpen, Baby, Shield, Plus } from "lucide-react";
+import { Heart, BookOpen, Shield, Plus } from "lucide-react";
 import { useModalStore } from "@/lib/types";
 
 export default function TzedakaSection() {
@@ -6,36 +6,28 @@ export default function TzedakaSection() {
 
   const tzedakaOptions = [
     {
-      id: "sponsor-day",
+      id: "campaign",
       icon: BookOpen,
-      title: "Sponsor a Day of Ezras Nashim",
-      description: "Dedicate all Mitzvot done on the app for one day",
+      title: "Campaign",
+      description: "Donate towards current projects like sponsoring a Torah or ambulance - starting from $1",
       color: "text-blush",
       bgColor: "bg-blush/10",
     },
     {
-      id: "torah-dedication",
-      icon: BookOpen,
-      title: "Donate to the Ezras Nashim Torah",
-      description: "Letter, Pasuk, Perek or Parsha dedication",
+      id: "causes",
+      icon: Shield,
+      title: "Causes",
+      description: "Support our partner causes including fertility support, women's abuse prevention, and kollels",
       color: "text-peach",
       bgColor: "bg-peach/10",
     },
     {
-      id: "infertility-support",
-      icon: Baby,
-      title: "Women's Infertility Support",
-      description: "Help couples struggling with fertility challenges",
-      color: "text-rose-500",
-      bgColor: "bg-rose-50",
-    },
-    {
-      id: "abuse-support",
-      icon: Shield,
-      title: "Women's Abuse Support",
-      description: "Support women escaping abusive situations",
-      color: "text-purple-500",
-      bgColor: "bg-purple-50",
+      id: "sponsor-day",
+      icon: Heart,
+      title: "Sponsor a Day",
+      description: "Dedicate all Mitzvot done on the app - choose 1 day, 1 week, or 1 month starting from $1",
+      color: "text-sage",
+      bgColor: "bg-sage/10",
     },
   ];
 
@@ -81,14 +73,18 @@ export default function TzedakaSection() {
         <div className="content-card rounded-2xl p-4 bg-gradient-to-r from-blush/5 to-peach/5">
           <div className="text-center">
             <h3 className="font-semibold text-sm mb-2">Community Impact</h3>
-            <div className="grid grid-cols-2 gap-4 text-xs">
+            <div className="grid grid-cols-3 gap-3 text-xs">
               <div>
-                <div className="font-medium text-blush">142</div>
-                <div className="text-gray-600">Days Sponsored</div>
+                <div className="font-medium text-blush">$12,450</div>
+                <div className="text-gray-600">Campaign Raised</div>
               </div>
               <div>
                 <div className="font-medium text-peach">89</div>
-                <div className="text-gray-600">Torah Dedications</div>
+                <div className="text-gray-600">Causes Supported</div>
+              </div>
+              <div>
+                <div className="font-medium text-sage">142</div>
+                <div className="text-gray-600">Days Sponsored</div>
               </div>
             </div>
           </div>
