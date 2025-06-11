@@ -167,7 +167,7 @@ export default function TefillaSection() {
               <div>
                 <h3 className="font-semibold text-sm">Tehillim Cycle</h3>
                 <p className="text-xs text-gray-600">
-                  {showHebrew ? "מחזור תהלים משותף" : "Shared Tehillim Cycle"}
+                  Shared Tehillim Cycle
                 </p>
               </div>
             </div>
@@ -200,7 +200,7 @@ export default function TefillaSection() {
               </div>
               
               <Input
-                placeholder={showHebrew ? "שם בעברית" : "Hebrew Name"}
+                placeholder="Hebrew Name"
                 value={hebrewName}
                 onChange={(e) => setHebrewName(e.target.value)}
                 className="text-right"
@@ -213,7 +213,7 @@ export default function TefillaSection() {
                 setReasonEnglish(option?.english || "");
               }}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder={showHebrew ? "בחר סיבה" : "Select Reason"} />
+                  <SelectValue placeholder="Select Reason" />
                 </SelectTrigger>
                 <SelectContent>
                   {reasonOptions.map((option) => (
@@ -231,7 +231,7 @@ export default function TefillaSection() {
                   size="sm"
                   className="flex-1"
                 >
-                  {showHebrew ? "ביטול" : "Cancel"}
+                  Cancel
                 </Button>
                 <Button 
                   onClick={handleAddName}
@@ -239,7 +239,7 @@ export default function TefillaSection() {
                   size="sm"
                   className="flex-1 bg-blush hover:bg-blush/90"
                 >
-                  {addNameMutation.isPending ? "Adding..." : (showHebrew ? "הוסף" : "Add")}
+                  {addNameMutation.isPending ? "Adding..." : "Add"}
                 </Button>
               </div>
             </div>
@@ -248,7 +248,7 @@ export default function TefillaSection() {
           {/* Current Perek Display */}
           <div className="bg-cream rounded-xl p-3 mb-3">
             <div className="text-sm font-medium text-gray-700 mb-2">
-              {showHebrew ? `פרק ${progress?.currentPerek || 1}` : `Current Perek ${progress?.currentPerek || 1}`}
+              Current Perek {progress?.currentPerek || 1}
             </div>
             
             {/* Tehillim Text Display */}
@@ -263,16 +263,16 @@ export default function TefillaSection() {
                   <div className="flex items-center space-x-2 mb-1">
                     <User size={12} className="text-blush" />
                     <span className="text-sm font-medium text-blush">
-                      {showHebrew ? "מתפלל עבור:" : "Davening For:"} {currentName.hebrewName}
+                      Davening For: {currentName.hebrewName}
                     </span>
                   </div>
                   <div className="text-xs text-gray-600">
-                    {showHebrew ? currentName.reason : (currentName.reasonEnglish || currentName.reason)}
+                    {currentName.reasonEnglish || currentName.reason}
                   </div>
                 </div>
               ) : (
                 <div className="text-sm text-gray-600 text-center py-2">
-                  {showHebrew ? "הוסף שם להקדיש פרק זה" : "Add a name to dedicate this perek"}
+                  Add a name to dedicate this perek
                 </div>
               )}
             </div>
