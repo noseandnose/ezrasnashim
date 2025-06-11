@@ -294,7 +294,7 @@ export default function TefillaSection() {
                     <span>Completing...</span>
                   </div>
                 ) : (
-                  showHebrew ? "סיים פרק" : "Mark Done"
+                  "Mark Done"
                 )}
               </Button>
             </div>
