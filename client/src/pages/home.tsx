@@ -22,8 +22,6 @@ export default function Home() {
         return <TorahSection />;
       case 'tefilla':
         return <TefillaSection />;
-      case 'tzedaka':
-        return <TzedakaSection />;
       case 'table':
         return <TableSection />;
       case 'shop':
