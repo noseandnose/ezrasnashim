@@ -328,6 +328,40 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return text;
   }
+
+  // Campaign methods
+  async getActiveCampaign(): Promise<Campaign | undefined> {
+    const [campaign] = await db
+      .select()
+      .from(campaigns)
+      .where(eq(campaigns.isActive, true))
+      .limit(1);
+    return campaign || undefined;
+  }
+
+  async getAllCampaigns(): Promise<Campaign[]> {
+    return await db.select().from(campaigns);
+  }
+
+  async createCampaign(insertCampaign: InsertCampaign): Promise<Campaign> {
+    const [campaign] = await db
+      .insert(campaigns)
+      .values(insertCampaign)
+      .returning();
+    return campaign;
+  }
+
+  async updateCampaignProgress(id: number, amount: number): Promise<Campaign> {
+    const [campaign] = await db
+      .update(campaigns)
+      .set({ 
+        currentAmount: amount,
+        updatedAt: new Date()
+      })
+      .where(eq(campaigns.id, id))
+      .returning();
+    return campaign;
+  }
 }
 
 export const storage = new DatabaseStorage();

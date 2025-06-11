@@ -236,6 +236,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Campaign routes
+  app.get("/api/campaigns/active", async (req, res) => {
+    try {
+      const campaign = await storage.getActiveCampaign();
+      res.json(campaign || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch active campaign" });
+    }
+  });
+
+  app.get("/api/campaigns", async (req, res) => {
+    try {
+      const campaigns = await storage.getAllCampaigns();
+      res.json(campaigns);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch campaigns" });
+    }
+  });
+
+  app.post("/api/campaigns", async (req, res) => {
+    try {
+      const campaign = await storage.createCampaign(req.body);
+      res.json(campaign);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create campaign" });
+    }
+  });
+
   // Daily Torah content routes
   app.get("/api/torah/halacha/:date", async (req, res) => {
     try {
