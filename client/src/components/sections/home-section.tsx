@@ -32,19 +32,19 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
 
   return (
     <div className="p-4 space-y-3 overflow-y-auto">
-      {/* Today's Sponsor - Compact 2-line layout */}
+      {/* Today's Sponsor - 2 lines total */}
       <Card className="p-3 bg-gradient-to-r from-blush/10 to-peach/10 border-blush/20">
-        <div className="flex items-start space-x-3">
-          <Heart className="text-blush flex-shrink-0 mt-0.5" size={18} />
-          <div className="min-w-0 flex-1">
+        <div className="space-y-1">
+          <div className="flex items-center space-x-2">
+            <Heart className="text-blush" size={16} />
             <h3 className="font-semibold text-gray-800 text-sm">Today's Learning</h3>
-            <p className="text-xs text-gray-600 leading-tight">
-              {sponsor ? 
-                `Sponsored by ${sponsor.name}${sponsor.message ? ` - ${sponsor.message}` : ''}` :
-                "Sponsored by the Cohen family - In memory of Sarah bas Avraham"
-              }
-            </p>
           </div>
+          <p className="text-xs text-gray-600 leading-tight pl-6">
+            {sponsor ? 
+              `Sponsored by ${sponsor.name}${sponsor.message ? ` - ${sponsor.message}` : ''}` :
+              "Sponsored by the Cohen family - In memory of Sarah bas Avraham"
+            }
+          </p>
         </div>
       </Card>
 
