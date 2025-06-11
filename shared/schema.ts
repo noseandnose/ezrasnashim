@@ -168,6 +168,17 @@ export const nishmasText = pgTable("nishmas_text", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const campaigns = pgTable("campaigns", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  goalAmount: integer("goal_amount").notNull(),
+  currentAmount: integer("current_amount").default(0).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 
 
 export const insertCalendarEventSchema = createInsertSchema(calendarEvents).omit({
@@ -245,6 +256,12 @@ export const insertParshaVortSchema = createInsertSchema(parshaVorts).omit({
   createdAt: true,
 });
 
+export const insertCampaignSchema = createInsertSchema(campaigns).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // No user types needed - app works without authentication
 export type CalendarEvent = typeof calendarEvents.$inferSelect;
 export type InsertCalendarEvent = z.infer<typeof insertCalendarEventSchema>;
@@ -281,3 +298,6 @@ export type ShabbatRecipe = typeof shabbatRecipes.$inferSelect;
 export type InsertShabbatRecipe = z.infer<typeof insertShabbatRecipeSchema>;
 export type ParshaVort = typeof parshaVorts.$inferSelect;
 export type InsertParshaVort = z.infer<typeof insertParshaVortSchema>;
+
+export type Campaign = typeof campaigns.$inferSelect;
+export type InsertCampaign = z.infer<typeof insertCampaignSchema>;

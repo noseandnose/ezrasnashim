@@ -2,7 +2,7 @@ import {
   calendarEvents, shopItems, 
   tehillimNames, globalTehillimProgress, minchaPrayers, sponsors, nishmasText,
   dailyHalacha, dailyMussar, dailyChizuk, loshonHorah,
-  shabbatRecipes, parshaVorts,
+  shabbatRecipes, parshaVorts, campaigns,
   type CalendarEvent, type InsertCalendarEvent,
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
@@ -12,7 +12,8 @@ import {
   type DailyChizuk, type InsertDailyChizuk,
   type LoshonHorah, type InsertLoshonHorah,
   type ShabbatRecipe, type InsertShabbatRecipe,
-  type ParshaVort, type InsertParshaVort
+  type ParshaVort, type InsertParshaVort,
+  type Campaign, type InsertCampaign
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, gt, lt, and } from "drizzle-orm";
@@ -67,6 +68,12 @@ export interface IStorage {
   getNishmasTextByLanguage(language: string): Promise<NishmasText | undefined>;
   createNishmasText(text: InsertNishmasText): Promise<NishmasText>;
   updateNishmasText(language: string, text: Partial<InsertNishmasText>): Promise<NishmasText>;
+
+  // Campaign methods
+  getActiveCampaign(): Promise<Campaign | undefined>;
+  getAllCampaigns(): Promise<Campaign[]>;
+  createCampaign(campaign: InsertCampaign): Promise<Campaign>;
+  updateCampaignProgress(id: number, amount: number): Promise<Campaign>;
 }
 
 export class DatabaseStorage implements IStorage {
