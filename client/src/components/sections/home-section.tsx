@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useModalStore } from "@/lib/types";
 import { useJewishTimes } from "@/hooks/use-jewish-times";
+import type { Section } from "@/pages/home";
 
 interface Sponsor {
   name: string;
@@ -23,7 +24,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     queryKey: ['/api/sponsors/daily', new Date().toISOString().split('T')[0]],
   });
 
-  const navigateToSection = (section: 'torah' | 'tefilla' | 'tzedaka' | 'table' | 'shop') => {
+  const navigateToSection = (section: Section) => {
     if (onSectionChange) {
       onSectionChange(section);
     }
