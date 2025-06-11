@@ -49,7 +49,13 @@ export function useGeolocation() {
           });
         },
         (error) => {
-          console.error('Error getting location:', error);
+          if (error.code === error.PERMISSION_DENIED) {
+            console.warn('Location permission denied, using default location');
+          } else if (error.code === error.POSITION_UNAVAILABLE) {
+            console.warn('Location information unavailable, using default location');
+          } else if (error.code === error.TIMEOUT) {
+            console.warn('Location request timed out, using default location');
+          }
           setPermissionDenied(true);
           // Fall back to NYC coordinates
           setCoordinates({ lat: 40.7128, lng: -74.0060 });

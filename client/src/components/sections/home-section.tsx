@@ -31,14 +31,14 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   };
 
   return (
-    <div className="p-4 space-y-5">
-      {/* Today's Sponsor */}
-      <Card className="p-4 bg-gradient-to-r from-blush/10 to-peach/10 border-blush/20">
-        <div className="flex items-center space-x-3">
-          <Heart className="text-blush" size={20} />
-          <div>
-            <h3 className="font-semibold text-gray-800">Today's Learning</h3>
-            <p className="text-sm text-gray-600">
+    <div className="p-4 space-y-3 overflow-y-auto">
+      {/* Today's Sponsor - Compact 2-line layout */}
+      <Card className="p-3 bg-gradient-to-r from-blush/10 to-peach/10 border-blush/20">
+        <div className="flex items-start space-x-3">
+          <Heart className="text-blush flex-shrink-0 mt-0.5" size={18} />
+          <div className="min-w-0 flex-1">
+            <h3 className="font-semibold text-gray-800 text-sm">Today's Learning</h3>
+            <p className="text-xs text-gray-600 leading-tight">
               {sponsor ? 
                 `Sponsored by ${sponsor.name}${sponsor.message ? ` - ${sponsor.message}` : ''}` :
                 "Sponsored by the Cohen family - In memory of Sarah bas Avraham"
@@ -48,32 +48,31 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         </div>
       </Card>
 
-      {/* Today Section - Streamlined */}
-      <Card className="p-4">
-        <div className="flex items-center space-x-3 mb-3">
-          <Clock className="text-sage" size={20} />
-          <h3 className="font-semibold text-gray-800">Today</h3>
+      {/* Today Section - Ultra Compact */}
+      <Card className="p-3">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center space-x-2">
+            <Clock className="text-sage" size={16} />
+            <h3 className="font-semibold text-gray-800 text-sm">Today</h3>
+          </div>
         </div>
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className="flex justify-between">
+        <div className="flex justify-between text-xs mb-2">
+          <div className="flex items-center space-x-1">
             <span className="text-gray-600">Shkia:</span>
             <span className="font-medium">{jewishTimesQuery.data?.shkia || "Loading..."}</span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex items-center space-x-1">
             <span className="text-gray-600">Mincha:</span>
             <span className="font-medium">{jewishTimesQuery.data?.minchaKetanah || "Loading..."}</span>
           </div>
         </div>
-        {/* Today's Message - Condensed */}
-        <div className="pt-3 border-t border-gray-100 mt-3">
-          <p className="text-sm text-gray-600 italic">
-            "May your day be filled with Torah learning, meaningful tefillah, and acts of chesed."
-          </p>
-        </div>
+        <p className="text-xs text-gray-600 italic leading-tight">
+          "May your day be filled with Torah learning, meaningful tefillah, and acts of chesed."
+        </p>
       </Card>
 
       {/* Main Action Buttons - Balanced Prominence */}
-      <div className="grid gap-4">
+      <div className="grid gap-3 mt-2">
         {/* Torah Button */}
         <Button
           onClick={() => navigateToSection('torah')}

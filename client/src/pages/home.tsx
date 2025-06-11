@@ -37,7 +37,7 @@ export default function Home() {
     <div className="mobile-app min-h-screen max-w-md mx-auto bg-white shadow-2xl relative">
       <AppHeader />
       
-      <main className="content-area overflow-hidden">
+      <main className="content-area overflow-y-auto overflow-x-hidden">
         {renderSection()}
       </main>
 
