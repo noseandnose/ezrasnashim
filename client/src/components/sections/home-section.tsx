@@ -10,7 +10,11 @@ interface Sponsor {
   message?: string;
 }
 
-export default function HomeSection() {
+interface HomeSectionProps {
+  onSectionChange?: (section: 'torah' | 'tefilla' | 'table' | 'shop') => void;
+}
+
+export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   const { openModal } = useModalStore();
   const jewishTimesQuery = useJewishTimes();
 
@@ -19,10 +23,10 @@ export default function HomeSection() {
     queryKey: ['/api/sponsors/daily', new Date().toISOString().split('T')[0]],
   });
 
-  const navigateToSection = (section: string) => {
-    // TODO: Implement navigation to specific sections
-    // This will trigger section changes in the parent component
-    console.log(`Navigate to ${section}`);
+  const navigateToSection = (section: 'torah' | 'tefilla' | 'table' | 'shop') => {
+    if (onSectionChange) {
+      onSectionChange(section);
+    }
   };
 
   return (
@@ -129,7 +133,7 @@ export default function HomeSection() {
             </div>
           </Button>
 
-          {/* Tzedaka Button */}
+          {/* Tzedaka Button - Opens modal since tzedaka is no longer a main section */}
           <Button
             onClick={() => openModal('sponsor-day')}
             className="h-16 gradient-lavender text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200"

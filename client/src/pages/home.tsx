@@ -17,7 +17,7 @@ export default function Home() {
   const renderSection = () => {
     switch (activeSection) {
       case 'home':
-        return <HomeSection />;
+        return <HomeSection onSectionChange={setActiveSection} />;
       case 'torah':
         return <TorahSection />;
       case 'tefilla':
@@ -27,7 +27,7 @@ export default function Home() {
       case 'shop':
         return <ShopSection />;
       default:
-        return <HomeSection />;
+        return <HomeSection onSectionChange={setActiveSection} />;
     }
   };
 
