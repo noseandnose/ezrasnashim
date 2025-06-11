@@ -11,7 +11,7 @@ interface Sponsor {
 }
 
 interface HomeSectionProps {
-  onSectionChange?: (section: 'torah' | 'tefilla' | 'table' | 'shop') => void;
+  onSectionChange?: (section: 'torah' | 'tefilla' | 'table' | 'shop' | 'tzedaka') => void;
 }
 
 export default function HomeSection({ onSectionChange }: HomeSectionProps) {
@@ -23,7 +23,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     queryKey: ['/api/sponsors/daily', new Date().toISOString().split('T')[0]],
   });
 
-  const navigateToSection = (section: 'torah' | 'tefilla' | 'table' | 'shop') => {
+  const navigateToSection = (section: 'torah' | 'tefilla' | 'table' | 'shop' | 'tzedaka') => {
     if (onSectionChange) {
       onSectionChange(section);
     }
@@ -47,106 +47,87 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         </div>
       </Card>
 
-      {/* Today's Zmanim */}
+      {/* Today Section - Combined zmanim and daily message */}
       <Card className="p-4">
         <div className="flex items-center space-x-3 mb-3">
           <Clock className="text-sage" size={20} />
-          <h3 className="font-semibold text-gray-800">Today's Zmanim</h3>
+          <h3 className="font-semibold text-gray-800">Today</h3>
         </div>
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className="flex justify-between">
-            <span className="text-gray-600">Shkia:</span>
-            <span className="font-medium">{jewishTimesQuery.data?.shkia || "Loading..."}</span>
+        <div className="space-y-3">
+          {/* Zmanim */}
+          <div className="grid grid-cols-1 gap-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-600">Shkia:</span>
+              <span className="font-medium">{jewishTimesQuery.data?.shkia || "Loading..."}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Mincha Gedolah:</span>
+              <span className="font-medium">{jewishTimesQuery.data?.minchaGedolah || "Loading..."}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Mincha Ketanah:</span>
+              <span className="font-medium">{jewishTimesQuery.data?.minchaKetanah || "Loading..."}</span>
+            </div>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Mincha Gedolah:</span>
-            <span className="font-medium">{jewishTimesQuery.data?.minchaGedolah || "Loading..."}</span>
+          
+          {/* Today's Message from DB */}
+          <div className="pt-2 border-t border-gray-100">
+            <p className="text-sm text-gray-700 font-medium">Today's Message</p>
+            <p className="text-sm text-gray-600 mt-1">
+              {/* TODO: Pull today's message from database */}
+              "May your day be filled with Torah learning, meaningful tefillah, and acts of chesed."
+            </p>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Mincha Ketanah:</span>
-            <span className="font-medium">{jewishTimesQuery.data?.minchaKetanah || "Loading..."}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Tzais:</span>
-            <span className="font-medium">{jewishTimesQuery.data?.tzaitHakochavim || "Loading..."}</span>
-          </div>
-        </div>
-        {jewishTimesQuery.data?.location && (
-          <p className="text-xs text-gray-500 mt-2">{jewishTimesQuery.data.location}</p>
-        )}
-      </Card>
-
-      {/* Date-Specific Information */}
-      <Card className="p-4">
-        <div className="flex items-center space-x-3 mb-3">
-          <Calendar className="text-lavender" size={20} />
-          <h3 className="font-semibold text-gray-800">Today's Date</h3>
-        </div>
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-gray-600">Hebrew Date:</span>
-            <span className="font-medium">{jewishTimesQuery.data?.hebrewDate || "15 Kislev 5785"}</span>
-          </div>
-          {/* TODO: Integrate with database for dynamic date-specific info */}
-          <div className="flex justify-between">
-            <span className="text-gray-600">Omer Count:</span>
-            <span className="font-medium text-gray-400">Not in Omer period</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Special Day:</span>
-            <span className="font-medium text-gray-400">Regular weekday</span>
-          </div>
-          {/* Placeholder for Rosh Chodesh, fast days, etc. */}
+          
+          {jewishTimesQuery.data?.location && (
+            <p className="text-xs text-gray-500">{jewishTimesQuery.data.location}</p>
+          )}
         </div>
       </Card>
 
       {/* Main Action Buttons */}
-      <div className="space-y-4">
-        <h3 className="font-semibold text-gray-800 text-center">Explore Ezras Nashim</h3>
-        
-        <div className="grid gap-4">
-          {/* Torah Button */}
-          <Button
-            onClick={() => navigateToSection('torah')}
-            className="h-16 gradient-blush-peach text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200"
-          >
-            <div className="flex items-center space-x-3">
-              <BookOpen size={24} />
-              <div className="text-left">
-                <div className="font-semibold">Torah</div>
-                <div className="text-xs opacity-90">Daily Halacha, Mussar & Chizuk</div>
-              </div>
+      <div className="grid gap-4">
+        {/* Torah Button */}
+        <Button
+          onClick={() => navigateToSection('torah')}
+          className="h-16 gradient-blush-peach text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 justify-start px-6"
+        >
+          <div className="flex items-center justify-start w-full space-x-4">
+            <BookOpen size={24} className="flex-shrink-0" />
+            <div className="text-left flex-grow">
+              <div className="font-semibold text-base">Torah</div>
+              <div className="text-sm opacity-90">Daily Halacha, Mussar & Chizuk</div>
             </div>
-          </Button>
+          </div>
+        </Button>
 
-          {/* Tefilla Button */}
-          <Button
-            onClick={() => navigateToSection('tefilla')}
-            className="h-16 gradient-sage text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200"
-          >
-            <div className="flex items-center space-x-3">
-              <Heart size={24} />
-              <div className="text-left">
-                <div className="font-semibold">Tefilla</div>
-                <div className="text-xs opacity-90">Tehillim, Mincha & Women's Prayers</div>
-              </div>
+        {/* Tefilla Button */}
+        <Button
+          onClick={() => navigateToSection('tefilla')}
+          className="h-16 gradient-sage text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 justify-start px-6"
+        >
+          <div className="flex items-center justify-start w-full space-x-4">
+            <Heart size={24} className="flex-shrink-0" />
+            <div className="text-left flex-grow">
+              <div className="font-semibold text-base">Tefilla</div>
+              <div className="text-sm opacity-90">Tehillim, Mincha & Women's Prayers</div>
             </div>
-          </Button>
+          </div>
+        </Button>
 
-          {/* Tzedaka Button - Opens modal since tzedaka is no longer a main section */}
-          <Button
-            onClick={() => openModal('sponsor-day')}
-            className="h-16 gradient-lavender text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200"
-          >
-            <div className="flex items-center space-x-3">
-              <HandHeart size={24} />
-              <div className="text-left">
-                <div className="font-semibold">Tzedaka</div>
-                <div className="text-xs opacity-90">Support & Sponsor Learning</div>
-              </div>
+        {/* Tzedaka Button - Navigate to tzedaka section */}
+        <Button
+          onClick={() => navigateToSection('tzedaka')}
+          className="h-16 gradient-lavender text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 justify-start px-6"
+        >
+          <div className="flex items-center justify-start w-full space-x-4">
+            <HandHeart size={24} className="flex-shrink-0" />
+            <div className="text-left flex-grow">
+              <div className="font-semibold text-base">Tzedaka</div>
+              <div className="text-sm opacity-90">Support & Sponsor Learning</div>
             </div>
-          </Button>
-        </div>
+          </div>
+        </Button>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { Book, HandHeart, Home, Utensils, ShoppingBag } from "lucide-react";
+import { Book, HandHeart, Home, Heart, Utensils, ShoppingBag } from "lucide-react";
 import type { Section } from "@/pages/home";
 
 interface BottomNavigationProps {
