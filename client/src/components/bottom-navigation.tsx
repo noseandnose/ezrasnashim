@@ -27,11 +27,13 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
                 ? 'p-3 scale-110' 
                 : 'p-2'
             } ${
-              activeSection === id 
-                ? isCenter 
-                  ? 'bg-gradient-to-br from-blush to-peach text-white shadow-md' 
-                  : 'text-blush bg-blush/10' 
-                : 'text-gray-500 hover:text-gray-700'
+              activeSection === id ? 'active' : ''
+            } ${
+              !isCenter && activeSection === id
+                ? 'text-blush bg-blush/20' 
+                : activeSection !== id 
+                  ? 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  : ''
             }`}
           >
             <Icon 
