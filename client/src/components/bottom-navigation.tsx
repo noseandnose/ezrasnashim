@@ -10,7 +10,7 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
   const navItems = [
     { id: 'torah' as Section, icon: Book, label: 'Torah', isCenter: false },
     { id: 'tefilla' as Section, icon: HandHeart, label: 'Tefilla', isCenter: false },
-    { id: 'home' as Section, icon: Home, label: 'Home', isCenter: true },
+    { id: 'home' as Section, icon: Heart, label: 'Home', isCenter: true },
     { id: 'table' as Section, icon: Utensils, label: 'Table', isCenter: false },
     { id: 'shop' as Section, icon: ShoppingBag, label: 'Shop', isCenter: false },
   ];
