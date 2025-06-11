@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useModalStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import AudioPlayer from "@/components/audio-player";
@@ -35,7 +35,7 @@ export default function TorahModals() {
         <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-semibold mb-2">Daily Halacha</DialogTitle>
-            <p className="text-sm text-gray-600">{halachaContent?.title || "Laws of Chanukah - Day 3"}</p>
+            <DialogDescription className="text-sm text-gray-600">{halachaContent?.title || "Laws of Chanukah - Day 3"}</DialogDescription>
           </DialogHeader>
           
           <div className="space-y-3 text-sm text-gray-700">
@@ -51,7 +51,7 @@ export default function TorahModals() {
         <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-semibold mb-2">Daily Mussar</DialogTitle>
-            <p className="text-sm text-gray-600">Character Development</p>
+            <DialogDescription className="text-sm text-gray-600">Character Development</DialogDescription>
           </DialogHeader>
           
           <div className="space-y-3 text-sm text-gray-700">
@@ -68,6 +68,7 @@ export default function TorahModals() {
         <DialogContent className="w-full max-w-sm rounded-3xl p-6">
           <DialogHeader className="text-center">
             <DialogTitle className="text-lg font-semibold mb-2">Daily Chizuk</DialogTitle>
+            <DialogDescription>Daily inspiration and spiritual strengthening</DialogDescription>
             <p className="text-sm text-gray-600 mb-4">
               {chizukContent?.title || "Inspiration & Strength"}
             </p>

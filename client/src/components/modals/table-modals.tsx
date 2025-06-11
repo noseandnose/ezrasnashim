@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useModalStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import AudioPlayer from "@/components/audio-player";
@@ -35,7 +35,7 @@ export default function TableModals() {
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-semibold mb-2">Shabbat Recipe</DialogTitle>
-            <p className="text-sm text-gray-600">Traditional Challah</p>
+            <DialogDescription className="text-sm text-gray-600">Traditional Challah</DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 text-sm text-gray-700">

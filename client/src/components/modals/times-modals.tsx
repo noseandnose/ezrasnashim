@@ -122,6 +122,7 @@ export default function TimesModals() {
         <DialogContent className="w-full max-w-sm rounded-3xl p-6">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-semibold">Hebrew Date Calculator</DialogTitle>
+            <DialogDescription>Convert English dates to Hebrew dates and add recurring events to your calendar</DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
