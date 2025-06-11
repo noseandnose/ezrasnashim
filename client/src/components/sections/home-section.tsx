@@ -30,73 +30,48 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   };
 
   return (
-    <div className="p-4 space-y-6">
-      {/* Today's Sponsor */}
-      <Card className="p-4 bg-gradient-to-r from-blush/10 to-peach/10 border-blush/20">
-        <div className="flex items-center space-x-3">
-          <Heart className="text-blush" size={20} />
-          <div>
-            <h3 className="font-semibold text-gray-800">Today's Learning</h3>
-            <p className="text-sm text-gray-600">
+    <div className="p-4 space-y-4">
+      {/* Compact Today Section - Combined sponsor and key info */}
+      <Card className="p-3 bg-gradient-to-r from-blush/10 to-peach/10 border-blush/20">
+        <div className="space-y-2">
+          {/* Today's Sponsor - Compact */}
+          <div className="flex items-center space-x-2">
+            <Heart className="text-blush flex-shrink-0" size={16} />
+            <p className="text-xs text-gray-600 truncate">
               {sponsor ? 
-                `Sponsored by ${sponsor.name}${sponsor.message ? ` - ${sponsor.message}` : ''}` :
-                "Sponsored by the Cohen family - In memory of Sarah bas Avraham"
+                `Today's learning sponsored by ${sponsor.name}` :
+                "Today's learning sponsored by the Cohen family"
               }
             </p>
           </div>
-        </div>
-      </Card>
-
-      {/* Today Section - Combined zmanim and daily message */}
-      <Card className="p-4">
-        <div className="flex items-center space-x-3 mb-3">
-          <Clock className="text-sage" size={20} />
-          <h3 className="font-semibold text-gray-800">Today</h3>
-        </div>
-        <div className="space-y-3">
-          {/* Zmanim */}
-          <div className="grid grid-cols-1 gap-2 text-sm">
-            <div className="flex justify-between">
+          
+          {/* Key Zmanim - Horizontal layout */}
+          <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center space-x-1">
+              <Clock className="text-sage" size={14} />
               <span className="text-gray-600">Shkia:</span>
-              <span className="font-medium">{jewishTimesQuery.data?.shkia || "Loading..."}</span>
+              <span className="font-medium text-gray-800">{jewishTimesQuery.data?.shkia || "Loading..."}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Mincha Gedolah:</span>
-              <span className="font-medium">{jewishTimesQuery.data?.minchaGedolah || "Loading..."}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Mincha Ketanah:</span>
-              <span className="font-medium">{jewishTimesQuery.data?.minchaKetanah || "Loading..."}</span>
+            <div className="flex items-center space-x-1">
+              <span className="text-gray-600">Mincha:</span>
+              <span className="font-medium text-gray-800">{jewishTimesQuery.data?.minchaKetanah || "Loading..."}</span>
             </div>
           </div>
-          
-          {/* Today's Message from DB */}
-          <div className="pt-2 border-t border-gray-100">
-            <p className="text-sm text-gray-700 font-medium">Today's Message</p>
-            <p className="text-sm text-gray-600 mt-1">
-              {/* TODO: Pull today's message from database */}
-              "May your day be filled with Torah learning, meaningful tefillah, and acts of chesed."
-            </p>
-          </div>
-          
-          {jewishTimesQuery.data?.location && (
-            <p className="text-xs text-gray-500">{jewishTimesQuery.data.location}</p>
-          )}
         </div>
       </Card>
 
-      {/* Main Action Buttons */}
-      <div className="grid gap-4">
+      {/* Main Action Buttons - Extra Prominent */}
+      <div className="grid gap-5 mt-2">
         {/* Torah Button */}
         <Button
           onClick={() => navigateToSection('torah')}
-          className="h-16 gradient-blush-peach text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 justify-start px-6"
+          className="h-20 gradient-blush-peach text-white rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-200 justify-start px-8 transform hover:scale-[1.02]"
         >
-          <div className="flex items-center justify-start w-full space-x-4">
-            <BookOpen size={24} className="flex-shrink-0" />
+          <div className="flex items-center justify-start w-full space-x-5">
+            <BookOpen size={32} className="flex-shrink-0" />
             <div className="text-left flex-grow">
-              <div className="font-semibold text-base">Torah</div>
-              <div className="text-sm opacity-90">Daily Halacha, Mussar & Chizuk</div>
+              <div className="font-bold text-lg">Torah</div>
+              <div className="text-sm opacity-95">Daily Halacha, Mussar & Chizuk</div>
             </div>
           </div>
         </Button>
@@ -104,13 +79,13 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         {/* Tefilla Button */}
         <Button
           onClick={() => navigateToSection('tefilla')}
-          className="h-16 gradient-sage text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 justify-start px-6"
+          className="h-20 gradient-sage text-white rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-200 justify-start px-8 transform hover:scale-[1.02]"
         >
-          <div className="flex items-center justify-start w-full space-x-4">
-            <Heart size={24} className="flex-shrink-0" />
+          <div className="flex items-center justify-start w-full space-x-5">
+            <Heart size={32} className="flex-shrink-0" />
             <div className="text-left flex-grow">
-              <div className="font-semibold text-base">Tefilla</div>
-              <div className="text-sm opacity-90">Tehillim, Mincha & Women's Prayers</div>
+              <div className="font-bold text-lg">Tefilla</div>
+              <div className="text-sm opacity-95">Tehillim, Mincha & Women's Prayers</div>
             </div>
           </div>
         </Button>
@@ -118,13 +93,13 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         {/* Tzedaka Button - Opens tzedaka modal */}
         <Button
           onClick={() => openModal('sponsor-day')}
-          className="h-16 gradient-lavender text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 justify-start px-6"
+          className="h-20 gradient-lavender text-white rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-200 justify-start px-8 transform hover:scale-[1.02]"
         >
-          <div className="flex items-center justify-start w-full space-x-4">
-            <HandHeart size={24} className="flex-shrink-0" />
+          <div className="flex items-center justify-start w-full space-x-5">
+            <HandHeart size={32} className="flex-shrink-0" />
             <div className="text-left flex-grow">
-              <div className="font-semibold text-base">Tzedaka</div>
-              <div className="text-sm opacity-90">Support & Sponsor Learning</div>
+              <div className="font-bold text-lg">Tzedaka</div>
+              <div className="text-sm opacity-95">Support & Sponsor Learning</div>
             </div>
           </div>
         </Button>
