@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useModalStore } from "@/lib/types";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Copy, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -46,7 +46,7 @@ export default function ShopModals() {
             {shopItem ? shopItem.storeName : 'Store Details'}
           </DialogTitle>
           {shopItem && (
-            <p className="text-sm text-gray-600">{shopItem.title}</p>
+            <DialogDescription className="text-sm text-gray-600">{shopItem.title}</DialogDescription>
           )}
         </DialogHeader>
 

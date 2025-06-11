@@ -64,7 +64,7 @@ export default function TableModals() {
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-semibold mb-2">Table Inspiration</DialogTitle>
-            <p className="text-sm text-gray-600">Beautiful Shabbat Settings</p>
+            <DialogDescription className="text-sm text-gray-600">Beautiful Shabbat Settings</DialogDescription>
           </DialogHeader>
           
           {/* Inspiration Image */}
