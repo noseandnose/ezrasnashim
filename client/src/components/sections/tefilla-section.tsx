@@ -156,19 +156,7 @@ export default function TefillaSection() {
 
   return (
     <div className="p-4 space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold warm-gray">Tefilla</h2>
-        <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowHebrew(!showHebrew)}
-            className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
-          >
-            {showHebrew ? 'EN' : 'עב'}
-          </Button>
-        </div>
-      </div>
+
       
       <div className="space-y-3">
         {/* Tehillim Cycle */}
@@ -183,14 +171,24 @@ export default function TefillaSection() {
                 </p>
               </div>
             </div>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setShowAddForm(!showAddForm)}
-              className="text-blush"
-            >
-              <Plus size={16} />
-            </Button>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowHebrew(!showHebrew)}
+                className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
+              >
+                {showHebrew ? 'EN' : 'עב'}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setShowAddForm(!showAddForm)}
+                className="text-blush"
+              >
+                <Plus size={16} />
+              </Button>
+            </div>
           </div>
 
           {/* Add Name Form */}
