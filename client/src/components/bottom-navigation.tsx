@@ -32,7 +32,7 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
               !isCenter && activeSection === id
                 ? 'text-blush bg-blush/20' 
                 : activeSection !== id 
-                  ? 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  ? 'text-[#4a4a4a] hover:text-[#4a4a4a]/80 hover:bg-gray-50'
                   : ''
             }`}
           >
