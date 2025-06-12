@@ -33,13 +33,13 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   return (
     <div className="p-4 space-y-3 overflow-y-auto">
       {/* Today's Sponsor - 2 lines total */}
-      <Card className="p-3 bg-gradient-to-r from-blush/10 to-peach/10 border-blush/20">
+      <Card className="p-3 bg-gradient-to-r from-pink-50 to-peach-50 border-pink-200">
         <div className="space-y-1">
           <div className="flex items-center space-x-2">
-            <Heart className="text-blush" size={16} />
-            <h3 className="font-semibold text-gray-800 text-sm">Today's Learning</h3>
+            <Heart className="text-pink-600" size={16} />
+            <h3 className="font-semibold text-pink-800 text-sm">Today's Learning</h3>
           </div>
-          <p className="text-xs text-gray-600 leading-tight pl-6">
+          <p className="text-xs text-pink-700 leading-tight pl-6">
             {sponsor ? 
               `Sponsored by ${sponsor.name}${sponsor.message ? ` - ${sponsor.message}` : ''}` :
               "Sponsored by the Cohen family - In memory of Sarah bas Avraham"
