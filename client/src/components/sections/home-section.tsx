@@ -79,7 +79,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         {/* Torah Button */}
         <Button
           onClick={() => navigateToSection('torah')}
-          className="h-18 gradient-blush-peach text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 justify-start px-6"
+          className="h-18 gradient-blush-peach text-[#4a4a4a] rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 justify-start px-6"
         >
           <div className="flex items-center justify-start w-full space-x-4">
             <BookOpen size={28} className="flex-shrink-0" />
@@ -93,7 +93,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         {/* Tefilla Button */}
         <Button
           onClick={() => navigateToSection('tefilla')}
-          className="h-18 gradient-sage text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 justify-start px-6"
+          className="h-18 gradient-sage text-[#4a4a4a] rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 justify-start px-6"
         >
           <div className="flex items-center justify-start w-full space-x-4">
             <Heart size={28} className="flex-shrink-0" />
@@ -107,7 +107,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         {/* Tzedaka Button */}
         <Button
           onClick={() => navigateToSection('tzedaka')}
-          className="h-18 gradient-lavender text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 justify-start px-6"
+          className="h-18 gradient-lavender text-[#4a4a4a] rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 justify-start px-6"
         >
           <div className="flex items-center justify-start w-full space-x-4">
             <HandHeart size={28} className="flex-shrink-0" />
