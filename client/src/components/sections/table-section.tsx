@@ -1,8 +1,11 @@
-import { Utensils, Lightbulb, Mic, Play } from "lucide-react";
+import { Utensils, Lightbulb, Mic, Play, Flame, Clock } from "lucide-react";
 import { useModalStore } from "@/lib/types";
+import { useShabbosTime } from "@/hooks/use-shabbos-times";
+import { Card } from "@/components/ui/card";
 
 export default function TableSection() {
   const { openModal } = useModalStore();
+  const { data: shabbosData, isLoading: shabbosLoading } = useShabbosTime();
 
   const tableItems = [
     {
@@ -30,8 +33,37 @@ export default function TableSection() {
   ];
 
   return (
-    <div className="h-full p-4">
-      <div className="grid grid-cols-2 gap-3 h-full">
+    <div className="h-full p-4 space-y-4">
+      {/* Shabbos Times Section */}
+      <Card className="p-3">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center space-x-2">
+            <Flame className="text-orange-600" size={16} />
+            <h3 className="font-semibold text-gray-800 text-sm">This Shabbos</h3>
+          </div>
+        </div>
+        <div className="space-y-1 text-xs">
+          <div className="flex justify-between">
+            <div className="flex items-center space-x-1">
+              <span className="text-gray-600">🕯️ Candle Lighting:</span>
+              <span className="font-medium">{shabbosData?.candleLighting || "Loading..."}</span>
+            </div>
+          </div>
+          <div className="flex justify-between">
+            <div className="flex items-center space-x-1">
+              <span className="text-gray-600">🔥 Havdalah:</span>
+              <span className="font-medium">{shabbosData?.havdalah || "Loading..."}</span>
+            </div>
+          </div>
+          <div className="flex items-center space-x-1">
+            <span className="text-gray-600">📖 Parsha:</span>
+            <span className="font-medium">{shabbosData?.parsha || "Loading..."}</span>
+          </div>
+        </div>
+      </Card>
+
+      {/* Shabbos Content Grid */}
+      <div className="grid grid-cols-2 gap-3">
         {tableItems.map(({ id, icon: Icon, title, subtitle, color }) => (
           <div
             key={id}
