@@ -49,7 +49,7 @@ export default function TableSection() {
         <div className="space-y-1 text-xs">
           <div className="flex justify-between">
             <div className="flex items-center space-x-1">
-              <Circle className="text-[#4a4a4a]" size={12} />
+              <Flame className="text-[#4a4a4a]" size={12} />
               <span className="text-gray-600">Candle Lighting:</span>
               <span className="font-medium">{shabbosData?.candleLighting || "Loading..."}</span>
             </div>
