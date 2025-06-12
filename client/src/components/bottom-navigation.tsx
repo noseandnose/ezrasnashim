@@ -17,7 +17,7 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
 
   return (
     <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-100 shadow-lg">
-      <div className="flex items-center justify-around py-2 px-2">
+      <div className="flex items-center justify-between py-2 px-4">
         {navItems.map(({ id, icon: Icon, label, isCenter }) => (
           <button
             key={id}

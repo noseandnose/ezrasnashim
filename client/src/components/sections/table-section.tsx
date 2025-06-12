@@ -1,4 +1,4 @@
-import { Utensils, Lightbulb, Mic, Play, Flame, Clock } from "lucide-react";
+import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Zap, BookOpen } from "lucide-react";
 import { useModalStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
 import { useGeolocation } from "@/hooks/use-jewish-times";
@@ -42,25 +42,28 @@ export default function TableSection() {
       <Card className="p-3">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center space-x-2">
-            <Flame className="text-orange-600" size={16} />
+            <Flame className="text-[#4a4a4a]" size={16} />
             <h3 className="font-semibold text-gray-800 text-sm">This Shabbos</h3>
           </div>
         </div>
         <div className="space-y-1 text-xs">
           <div className="flex justify-between">
             <div className="flex items-center space-x-1">
-              <span className="text-gray-600">🕯️ Candle Lighting:</span>
+              <Zap className="text-[#4a4a4a]" size={12} />
+              <span className="text-gray-600">Candle Lighting:</span>
               <span className="font-medium">{shabbosData?.candleLighting || "Loading..."}</span>
             </div>
           </div>
           <div className="flex justify-between">
             <div className="flex items-center space-x-1">
-              <span className="text-gray-600">🔥 Havdalah:</span>
+              <Flame className="text-[#4a4a4a]" size={12} />
+              <span className="text-gray-600">Havdalah:</span>
               <span className="font-medium">{shabbosData?.havdalah || "Loading..."}</span>
             </div>
           </div>
           <div className="flex items-center space-x-1">
-            <span className="text-gray-600">📖 Parsha:</span>
+            <BookOpen className="text-[#4a4a4a]" size={12} />
+            <span className="text-gray-600">Parsha:</span>
             <span className="font-medium">{shabbosData?.parsha || "Loading..."}</span>
           </div>
         </div>
