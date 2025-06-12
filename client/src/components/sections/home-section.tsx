@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useModalStore } from "@/lib/types";
 import { useJewishTimes } from "@/hooks/use-jewish-times";
+import { useHebrewDate } from "@/hooks/use-hebrew-date";
 import type { Section } from "@/pages/home";
 
 interface Sponsor {
@@ -18,6 +19,7 @@ interface HomeSectionProps {
 export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   const { openModal } = useModalStore();
   const jewishTimesQuery = useJewishTimes();
+  const { data: hebrewDate } = useHebrewDate();
 
   // Fetch today's sponsor
   const { data: sponsor } = useQuery<Sponsor>({
@@ -33,7 +35,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   return (
     <div className="p-4 space-y-3 overflow-y-auto">
       {/* Today's Sponsor - 2 lines total */}
-      <Card className="p-3 bg-gradient-to-r from-pink-50 to-peach-50 border-pink-200">
+      <Card className="p-2 bg-gradient-to-r from-pink-50 to-peach-50 border-pink-200">
         <div className="space-y-1">
           <div className="flex items-center space-x-2">
             <Heart className="text-pink-600" size={16} />
@@ -54,6 +56,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           <div className="flex items-center space-x-2">
             <Clock className="text-sage" size={16} />
             <h3 className="font-semibold text-gray-800 text-sm">Today</h3>
+            <span className="text-xs text-gray-600">• {hebrewDate || "Loading..."}</span>
           </div>
         </div>
         <div className="flex justify-between text-xs mb-2">
