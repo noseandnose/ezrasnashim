@@ -1,4 +1,4 @@
-import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Zap, BookOpen } from "lucide-react";
+import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star } from "lucide-react";
 import { useModalStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
 import { useGeolocation } from "@/hooks/use-jewish-times";
@@ -49,14 +49,14 @@ export default function TableSection() {
         <div className="space-y-1 text-xs">
           <div className="flex justify-between">
             <div className="flex items-center space-x-1">
-              <Zap className="text-[#4a4a4a]" size={12} />
+              <Circle className="text-[#4a4a4a]" size={12} />
               <span className="text-gray-600">Candle Lighting:</span>
               <span className="font-medium">{shabbosData?.candleLighting || "Loading..."}</span>
             </div>
           </div>
           <div className="flex justify-between">
             <div className="flex items-center space-x-1">
-              <Flame className="text-[#4a4a4a]" size={12} />
+              <Star className="text-[#4a4a4a]" size={12} />
               <span className="text-gray-600">Havdalah:</span>
               <span className="font-medium">{shabbosData?.havdalah || "Loading..."}</span>
             </div>
