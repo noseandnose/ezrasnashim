@@ -15,7 +15,7 @@ export default function AppHeader() {
 
   return (
     <header className="gradient-header p-3 text-white">
-      <div className="flex items-center justify-center text-[#4a4a4a]">
+      <div className="flex items-center justify-start text-[#4a4a4a]">
         <h1 className="text-xl font-semibold">Ezras Nashim</h1>
       </div>
     </header>
