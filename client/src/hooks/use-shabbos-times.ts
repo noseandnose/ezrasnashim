@@ -32,7 +32,7 @@ export function useShabbosTime() {
         const lng = 35.2137;
         
         const response = await fetch(
-          `https://www.hebcal.com/shabbat/?cfg=json&latitude=${lat}&longitude=${lng}&tzid=auto&b=18&M=on`
+          `https://www.hebcal.com/shabbat/?cfg=json&latitude=${lat}&longitude=${lng}&M=on`
         );
         
         if (!response.ok) {
@@ -44,7 +44,7 @@ export function useShabbosTime() {
       }
 
       const response = await fetch(
-        `https://www.hebcal.com/shabbat/?cfg=json&latitude=${coordinates.lat}&longitude=${coordinates.lng}&tzid=auto&b=18&M=on`
+        `https://www.hebcal.com/shabbat/?cfg=json&latitude=${coordinates.lat}&longitude=${coordinates.lng}&M=on`
       );
       
       if (!response.ok) {
@@ -66,10 +66,10 @@ function parseShabbosData(data: ShabbosTimesResponse, location: string): Shabbos
   };
 
   data.items.forEach(item => {
-    if (item.title === "Candle lighting" && item.time) {
-      result.candleLighting = formatTime(item.time);
-    } else if (item.title === "Havdalah" && item.time) {
-      result.havdalah = formatTime(item.time);
+    if (item.title.includes("Candle lighting:") && item.date) {
+      result.candleLighting = formatTime(item.date);
+    } else if (item.title.includes("Havdalah:") && item.date) {
+      result.havdalah = formatTime(item.date);
     } else if (item.title.startsWith("Parashat ") || item.title.startsWith("Parashah ")) {
       result.parsha = item.title;
     }

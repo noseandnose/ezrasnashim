@@ -1,11 +1,15 @@
 import { Utensils, Lightbulb, Mic, Play, Flame, Clock } from "lucide-react";
 import { useModalStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
+import { useGeolocation } from "@/hooks/use-jewish-times";
 import { Card } from "@/components/ui/card";
 
 export default function TableSection() {
   const { openModal } = useModalStore();
   const { data: shabbosData, isLoading: shabbosLoading } = useShabbosTime();
+  
+  // Trigger geolocation when component mounts
+  useGeolocation();
 
   const tableItems = [
     {
