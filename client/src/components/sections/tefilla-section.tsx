@@ -301,16 +301,17 @@ export default function TefillaSection() {
           </div>
         </div>
 
-        {/* Mincha */}
-        <div 
-          className="content-card rounded-2xl p-4 cursor-pointer"
-          onClick={() => openModal('mincha')}
-        >
-          <div className="flex items-center space-x-3">
-            <Clock className="text-xl text-peach" size={24} />
-            <div className="flex-1">
+        {/* Grid of 4 Square Buttons */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Mincha */}
+          <div 
+            className="content-card rounded-2xl p-4 cursor-pointer hover:scale-105 transition-transform"
+            onClick={() => openModal('mincha')}
+          >
+            <div className="text-center">
+              <Clock className="text-peach mb-2 mx-auto" size={32} />
               <h3 className="font-semibold text-sm">Mincha</h3>
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-gray-600 mt-1">
                 {isLoading ? "Loading..." : 
                  times?.minchaGedolah && times?.minchaKetanah ? 
                  `${times.minchaGedolah} - ${times.minchaKetanah}` : 
@@ -318,50 +319,41 @@ export default function TefillaSection() {
               </p>
             </div>
           </div>
-        </div>
 
-        {/* Women's Prayers */}
-        <div 
-          className="content-card rounded-2xl p-4 cursor-pointer"
-          onClick={() => openModal('womens-prayers')}
-        >
-          <div className="flex items-center space-x-3">
-            <HandHeart className="text-xl text-blush" size={24} />
-            <div className="flex-1">
+          {/* Women's Prayers */}
+          <div 
+            className="content-card rounded-2xl p-4 cursor-pointer hover:scale-105 transition-transform"
+            onClick={() => openModal('womens-prayers')}
+          >
+            <div className="text-center">
+              <HandHeart className="text-blush mb-2 mx-auto" size={32} />
               <h3 className="font-semibold text-sm">Women's Prayers</h3>
-              <p className="text-xs text-gray-600">Blessings, Tefillos & Personal</p>
+              <p className="text-xs text-gray-600 mt-1">Blessings & Tefillos</p>
             </div>
-            <ChevronRight className="text-gray-400" size={16} />
           </div>
-        </div>
 
-        {/* Nishmas 40-Day Campaign */}
-        <div 
-          className="content-card rounded-2xl p-4 cursor-pointer"
-          onClick={() => openModal('nishmas-campaign')}
-        >
-          <div className="flex items-center space-x-3">
-            <Heart className="text-xl text-rose-500" size={24} />
-            <div className="flex-1">
-              <h3 className="font-semibold text-sm">Nishmas 40-Day Campaign</h3>
-              <p className="text-xs text-gray-600">Daily tefillah for yeshuos</p>
+          {/* Nishmas 40-Day Campaign */}
+          <div 
+            className="content-card rounded-2xl p-4 cursor-pointer hover:scale-105 transition-transform"
+            onClick={() => openModal('nishmas-campaign')}
+          >
+            <div className="text-center">
+              <Heart className="text-rose-500 mb-2 mx-auto" size={32} />
+              <h3 className="font-semibold text-sm">Nishmas Campaign</h3>
+              <p className="text-xs text-gray-600 mt-1">40 Days for Yeshuos</p>
             </div>
-            <ChevronRight className="text-gray-400" size={16} />
           </div>
-        </div>
 
-        {/* Hebrew Date Calculator */}
-        <div 
-          className="content-card rounded-2xl p-4 cursor-pointer"
-          onClick={() => openModal('date-calculator')}
-        >
-          <div className="flex items-center space-x-3">
-            <Calendar className="text-xl text-purple-500" size={24} />
-            <div className="flex-1">
-              <h3 className="font-semibold text-sm">Hebrew Date Calculator</h3>
-              <p className="text-xs text-gray-600">Convert dates & add events</p>
+          {/* Hebrew Date Calculator */}
+          <div 
+            className="content-card rounded-2xl p-4 cursor-pointer hover:scale-105 transition-transform"
+            onClick={() => openModal('date-calculator')}
+          >
+            <div className="text-center">
+              <Calendar className="text-purple-500 mb-2 mx-auto" size={32} />
+              <h3 className="font-semibold text-sm">Date Calculator</h3>
+              <p className="text-xs text-gray-600 mt-1">Convert & Add Events</p>
             </div>
-            <Plus className="text-gray-400" size={16} />
           </div>
         </div>
       </div>

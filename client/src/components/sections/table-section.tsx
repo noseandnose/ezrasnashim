@@ -31,20 +31,17 @@ export default function TableSection() {
 
   return (
     <div className="h-full p-4">
-      <div className="grid grid-cols-1 gap-3 h-full">
-        {tableItems.map(({ id, icon: Icon, title, subtitle, color, extraIcon: ExtraIcon }) => (
+      <div className="grid grid-cols-2 gap-3 h-full">
+        {tableItems.map(({ id, icon: Icon, title, subtitle, color }) => (
           <div
             key={id}
-            className="content-card rounded-2xl p-4 cursor-pointer"
+            className="content-card rounded-2xl p-4 cursor-pointer hover:scale-105 transition-transform"
             onClick={() => openModal(id)}
           >
-            <div className="flex items-center space-x-3">
-              <Icon className={`text-xl ${color}`} size={24} />
-              <div className="flex-1">
-                <h3 className="font-semibold text-sm">{title}</h3>
-                <p className="text-xs text-gray-600">{subtitle}</p>
-              </div>
-              {ExtraIcon && <ExtraIcon className="text-gray-400" size={16} />}
+            <div className="text-center">
+              <Icon className={`${color} mb-2 mx-auto`} size={32} />
+              <h3 className="font-semibold text-sm">{title}</h3>
+              <p className="text-xs text-gray-600 mt-1">{subtitle}</p>
             </div>
           </div>
         ))}
