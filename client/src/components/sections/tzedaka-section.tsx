@@ -7,11 +7,15 @@ export default function TzedakaSection() {
   const { openModal } = useModalStore();
 
   // Fetch active campaign data
-  const { data: campaign } = useQuery<Campaign>({
+  const { data: campaign, isLoading } = useQuery<Campaign>({
     queryKey: ['/api/campaigns/active'],
   });
 
-  const progressPercentage = campaign ? Math.round((campaign.currentAmount / campaign.goalAmount) * 100) : 0;
+  // Use default values for immediate display
+  const campaignTitle = campaign?.title || "Sefer Torah for Ezrat Nashim";
+  const currentAmount = campaign?.currentAmount || 85000;
+  const goalAmount = campaign?.goalAmount || 150000;
+  const progressPercentage = Math.round((currentAmount / goalAmount) * 100);
 
   const tzedakaOptions = [
     {
@@ -46,45 +50,46 @@ export default function TzedakaSection() {
           </p>
         </div>
 
-        {/* Campaign Card with Progress Bar */}
-        {campaign && (
-          <div
-            className="content-card rounded-2xl p-4 cursor-pointer transition-all hover:shadow-md"
-            onClick={() => openModal('campaign')}
-          >
-            <div className="space-y-3">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 rounded-xl bg-blush/10">
-                  <BookOpen className="text-blush" size={24} />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-sm mb-1">Campaign</h3>
-                  <p className="text-xs text-gray-600 leading-relaxed">
-                    {campaign.title}
-                  </p>
-                </div>
-                <Plus className="text-gray-400" size={16} />
+        {/* Campaign Card with Progress Bar - Always visible */}
+        <div
+          className="content-card rounded-2xl p-4 cursor-pointer transition-all hover:shadow-md"
+          onClick={() => openModal('campaign')}
+        >
+          <div className="space-y-3">
+            <div className="flex items-center space-x-4">
+              <div className="p-3 rounded-xl bg-blush/10">
+                <BookOpen className="text-blush" size={24} />
               </div>
-              
-              {/* Progress Bar */}
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs">
-                  <span className="text-gray-600">Progress</span>
-                  <span className="font-medium text-blush">${campaign.currentAmount.toLocaleString()} / ${campaign.goalAmount.toLocaleString()}</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-gradient-to-r from-blush to-peach h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${progressPercentage}%` }}
-                  ></div>
-                </div>
-                <div className="text-xs text-gray-600 text-center">
-                  {progressPercentage}% Complete
-                </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-sm mb-1">Campaign</h3>
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  {campaignTitle}
+                </p>
+              </div>
+              <Plus className="text-gray-400" size={16} />
+            </div>
+            
+            {/* Progress Bar */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-600">Progress</span>
+                <span className="font-medium text-blush">${currentAmount.toLocaleString()} / ${goalAmount.toLocaleString()}</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="h-2 rounded-full transition-all duration-300"
+                  style={{ 
+                    width: `${progressPercentage}%`,
+                    background: 'linear-gradient(90deg, hsl(328, 85%, 70%) 0%, hsl(28, 100%, 70%) 100%)'
+                  }}
+                ></div>
+              </div>
+              <div className="text-xs text-gray-600 text-center">
+                {progressPercentage}% Complete
               </div>
             </div>
           </div>
-        )}
+        </div>
 
         {/* Other Tzedaka Options */}
         <div className="space-y-3">
