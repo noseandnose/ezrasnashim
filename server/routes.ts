@@ -563,44 +563,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Stripe webhook handler for completed payments
-  app.post("/api/webhook/stripe", async (req, res) => {
-    const sig = req.headers['stripe-signature'];
-    let event;
-
+  // Donation completion handler
+  app.post("/api/donation-complete", async (req, res) => {
     try {
-      // Note: In production, you should set a webhook endpoint secret
-      // For now, we'll process all payment_intent.succeeded events
-      event = req.body;
+      const { donationType, sponsorName, dedication } = req.body;
       
-      if (event.type === 'payment_intent.succeeded') {
-        const paymentIntent = event.data.object;
-        const { donationType, sponsorName, dedication } = paymentIntent.metadata;
+      // Only create sponsor record for "Sponsor a Day" donations
+      if (donationType === 'Sponsor a Day of Ezras Nashim' && sponsorName) {
+        const today = new Date().toISOString().split('T')[0];
         
-        // Only create sponsor record for "Sponsor a Day" donations
-        if (donationType === 'Sponsor a Day of Ezras Nashim' && sponsorName) {
-          try {
-            const today = new Date().toISOString().split('T')[0];
-            
-            // Create sponsor record
-            await storage.createSponsor({
-              name: sponsorName,
-              sponsorshipDate: today,
-              message: dedication || null,
-              isActive: true
-            });
-            
-            console.log(`Created sponsor record for ${sponsorName} on ${today}`);
-          } catch (error) {
-            console.error('Failed to create sponsor record:', error);
-          }
-        }
+        // Create sponsor record
+        await storage.createSponsor({
+          name: sponsorName,
+          sponsorshipDate: today,
+          message: dedication || null,
+          isActive: true
+        });
+        
+        console.log(`Created sponsor record for ${sponsorName} on ${today}`);
+        res.json({ success: true, message: 'Sponsor record created' });
+      } else {
+        res.json({ success: true, message: 'No sponsor record needed' });
       }
-      
-      res.json({ received: true });
     } catch (error: any) {
-      console.error('Webhook error:', error);
-      res.status(400).send(`Webhook Error: ${error.message}`);
+      console.error('Failed to create sponsor record:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to create sponsor record',
+        error: error.message 
+      });
     }
   });
 

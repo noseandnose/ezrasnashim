@@ -16,11 +16,12 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 interface DonationFormProps {
   amount: number;
   donationType: string;
-  metadata: any;
+  sponsorName: string;
+  dedication: string;
   onSuccess: () => void;
 }
 
-const DonationForm = ({ amount, donationType, metadata, onSuccess }: DonationFormProps) => {
+const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess }: DonationFormProps) => {
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
@@ -50,12 +51,12 @@ const DonationForm = ({ amount, donationType, metadata, onSuccess }: DonationFor
       });
     } else {
       // Call completion handler for sponsor day donations
-      if (metadata?.donationType === 'Sponsor a Day of Ezras Nashim' && metadata?.sponsorName) {
+      if (donationType === 'Sponsor a Day of Ezras Nashim' && sponsorName) {
         try {
           await apiRequest("POST", "/api/donation-complete", {
-            donationType: metadata.donationType,
-            sponsorName: metadata.sponsorName,
-            dedication: metadata.dedication || null
+            donationType,
+            sponsorName,
+            dedication: dedication || null
           });
         } catch (error) {
           console.error('Failed to create sponsor record:', error);
@@ -228,7 +229,8 @@ export default function Donate() {
             <DonationForm
               amount={amount}
               donationType={donationType}
-              metadata={{ sponsorName, dedication }}
+              sponsorName={sponsorName}
+              dedication={dedication}
               onSuccess={handleSuccess}
             />
           </Elements>
