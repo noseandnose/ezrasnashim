@@ -96,8 +96,8 @@ class _HomeSectionState extends State<HomeSection> {
               isLoading 
                 ? "Loading today's sponsor..."
                 : sponsor != null
-                  ? "Today is sponsored by ${sponsor!['name']}${sponsor!['message'] != null ? ' - ${sponsor!['message']}' : ''}"
-                  : "Today is sponsored by the Cohen family - In memory of Sarah bas Avraham",
+                  ? (sponsor!['message'] != null ? sponsor!['message'] : "Today has been sponsored by ${sponsor!['name']}")
+                  : "Today has been sponsored by the Cohen family - In memory of Sarah bas Avraham",
               style: TextStyle(
                 fontSize: 12,
                 color: Color(0xFF92400E),
@@ -187,7 +187,7 @@ class _HomeSectionState extends State<HomeSection> {
                     ),
                   ),
                   Text(
-                    appState.jewishTimes?['minchaKetanah'] ?? 'Loading...',
+                    appState.jewishTimes?['minchaGedolah'] ?? 'Loading...',
                     style: TextStyle(
                       fontWeight: FontWeight.w500,
                       fontSize: 14,

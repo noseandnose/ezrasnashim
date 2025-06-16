@@ -38,9 +38,6 @@ class TorahSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Sponsorship bar
-        _buildSponsorshipBar(),
-        
         // Torah content grid
         Expanded(
           child: Padding(
@@ -67,41 +64,7 @@ class TorahSection extends StatelessWidget {
     );
   }
 
-  Widget _buildSponsorshipBar() {
-    return Container(
-      margin: EdgeInsets.all(16),
-      padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFFFDF2F8), Color(0xFFFEF7FF)],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Color(0xFFE8B4B8).withOpacity(0.3)),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.favorite,
-            color: Color(0xFFE8B4B8),
-            size: 16,
-          ),
-          SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              "Today's Torah learning is sponsored by Rachel Goldstein - L'ilui nishmas Rivka bas Moshe",
-              style: TextStyle(
-                fontSize: 12,
-                color: Color(0xFF92400E),
-                height: 1.3,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildTorahCard(BuildContext context, TorahItem item) {
     return GestureDetector(
