@@ -63,7 +63,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           </div>
           <div className="flex items-center space-x-1">
             <span className="text-gray-600">Mincha:</span>
-            <span className="font-medium">{jewishTimesQuery.data?.minchaKetanah || "Loading..."}</span>
+            <span className="font-medium">{jewishTimesQuery.data?.minchaGedolah || "Loading..."}</span>
           </div>
         </div>
         <p className="text-xs text-gray-600 italic leading-tight">
