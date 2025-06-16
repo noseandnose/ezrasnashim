@@ -1,6 +1,5 @@
 import { Book, Heart, Play, Shield } from "lucide-react";
 import { useModalStore } from "@/lib/types";
-import SponsorshipBar from "@/components/sponsorship-bar";
 
 export default function TorahSection() {
   const { openModal } = useModalStore();
@@ -38,9 +37,6 @@ export default function TorahSection() {
 
   return (
     <div className="h-full p-4">
-      {/* Single sponsorship bar for all daily learning */}
-      <SponsorshipBar className="mb-4" />
-      
       <div className="grid grid-cols-2 gap-3 h-full">
         {torahItems.map(({ id, icon: Icon, title, subtitle, color }) => (
           <div

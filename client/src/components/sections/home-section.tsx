@@ -22,8 +22,14 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   const { data: hebrewDate } = useHebrewDate();
 
   // Fetch today's sponsor
+  const today = new Date().toISOString().split('T')[0];
   const { data: sponsor } = useQuery<Sponsor>({
-    queryKey: ['/api/sponsors/daily', new Date().toISOString().split('T')[0]],
+    queryKey: ['daily-sponsor', today],
+    queryFn: async () => {
+      const response = await fetch(`/api/sponsors/daily/${today}`);
+      if (!response.ok) return null;
+      return response.json();
+    },
   });
 
   const navigateToSection = (section: Section) => {
