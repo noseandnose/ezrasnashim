@@ -45,9 +45,9 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         <div className="flex items-center space-x-2">
           <Heart className="text-pink-600" size={16} />
           <p className="text-xs text-pink-700 leading-tight">
-            Today is sponsored by {sponsor ? 
-              `${sponsor.name}${sponsor.message ? ` - ${sponsor.message}` : ''}` :
-              "the Cohen family - In memory of Sarah bas Avraham"
+            {sponsor ? 
+              (sponsor.message || `Today has been sponsored by ${sponsor.name}`) :
+              "Today has been sponsored by the Cohen family - In memory of Sarah bas Avraham"
             }
           </p>
         </div>

@@ -49,6 +49,19 @@ const DonationForm = ({ amount, donationType, metadata, onSuccess }: DonationFor
         variant: "destructive",
       });
     } else {
+      // Call completion handler for sponsor day donations
+      if (metadata?.donationType === 'Sponsor a Day of Ezras Nashim' && metadata?.sponsorName) {
+        try {
+          await apiRequest("POST", "/api/donation-complete", {
+            donationType: metadata.donationType,
+            sponsorName: metadata.sponsorName,
+            dedication: metadata.dedication || null
+          });
+        } catch (error) {
+          console.error('Failed to create sponsor record:', error);
+        }
+      }
+      
       toast({
         title: "Thank You!",
         description: "Your donation has been processed successfully.",
