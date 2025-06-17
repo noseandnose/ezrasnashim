@@ -15,6 +15,16 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
     { id: 'shop' as Section, icon: ShoppingBag, label: 'Shop', isCenter: false },
   ];
 
+  const getActiveColorClass = (sectionId: Section) => {
+    switch (sectionId) {
+      case 'torah': return 'bg-muted-lavender/15 text-muted-lavender rounded-2xl';
+      case 'tefilla': return 'bg-rose-blush/15 text-rose-blush rounded-2xl';
+      case 'table': return 'bg-sand-gold/15 text-sand-gold rounded-2xl';
+      case 'shop': return 'bg-sand-gold/15 text-sand-gold rounded-2xl';
+      default: return 'bg-rose-blush/15 text-rose-blush rounded-2xl';
+    }
+  };
+
   return (
     <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-soft-white/95 backdrop-blur-sm border-t border-rose-blush/15 shadow-2xl rounded-t-3xl transition-gentle">
       <div className="flex items-center justify-between py-3 px-6">
@@ -35,14 +45,15 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
             }`}
           >
             <Icon 
-              className={`mb-1 transition-colors duration-300 ${
+              className={`mb-1 transition-gentle ${
                 activeSection === id 
                   ? isCenter 
                     ? 'text-white' 
-                    : 'text-blush'
+                    : ''
                   : 'text-warm-gray/70'
               }`}
-              size={isCenter ? 28 : 20} 
+              size={isCenter ? 28 : 20}
+              strokeWidth={1.5} 
             />
             <span className={`font-sans font-medium text-xs transition-colors duration-300 ${
               activeSection === id 

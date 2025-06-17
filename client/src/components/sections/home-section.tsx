@@ -40,19 +40,19 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
 
   return (
     <div className="p-3 space-y-4 overflow-y-auto">
-      {/* Warm Welcome */}
+      {/* Gentle Welcome */}
       <div className="text-center">
-        <h1 className="font-serif text-3xl text-warm-gray mb-2">Welcome to Ezras Nashim</h1>
-        <p className="font-sans text-warm-gray/70 text-sm">Your spiritual companion for daily growth</p>
+        <h1 className="font-serif text-3xl text-warm-gray mb-2 tracking-wide">Welcome to Ezras Nashim</h1>
+        <p className="font-sans text-warm-gray/70 text-sm leading-relaxed">Your quiet retreat for spiritual growth</p>
       </div>
 
       {/* Today's Sponsor */}
-      <div className="bg-gradient-to-r from-blush/10 to-lavender/10 rounded-3xl p-5 border border-blush/20">
+      <div className="gradient-soft-glow rounded-3xl p-5 border border-rose-blush/15 glow-hover transition-gentle">
         <div className="flex items-center space-x-3 mb-2">
-          <div className="bg-blush/20 p-2 rounded-full">
-            <Heart className="text-blush" size={16} />
+          <div className="bg-rose-blush/20 p-2 rounded-full">
+            <Heart className="text-rose-blush" size={16} strokeWidth={1.5} />
           </div>
-          <h3 className="font-serif text-sm text-warm-gray">Today's Sponsor</h3>
+          <h3 className="font-serif text-sm text-warm-gray tracking-wide">Today's Sponsor</h3>
         </div>
         <p className="font-sans text-sm text-warm-gray/80 leading-relaxed">
           {sponsor ? 
@@ -63,10 +63,10 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       </div>
 
       {/* Today's Information */}
-      <div className="bg-white rounded-3xl p-6 shadow-lg border border-blush/10">
+      <div className="bg-soft-white rounded-3xl p-6 shadow-lg border border-rose-blush/10 glow-hover transition-gentle">
         <div className="flex items-center space-x-3 mb-4">
-          <div className="bg-gradient-feminine p-3 rounded-full">
-            <Clock className="text-white" size={20} />
+          <div className="gradient-quiet-joy p-3 rounded-full">
+            <Clock className="text-white" size={20} strokeWidth={1.5} />
           </div>
           <div>
             <h3 className="font-serif text-lg text-warm-gray">Today</h3>
