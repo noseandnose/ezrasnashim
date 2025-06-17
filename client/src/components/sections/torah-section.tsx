@@ -68,15 +68,15 @@ export default function TorahSection() {
         <p className="font-sans text-warm-gray/70 text-xs leading-relaxed">Nourish your soul with wisdom and inspiration</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2">
         {torahItems.map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border }) => (
           <button
             key={id}
-            className={`${gradient} rounded-3xl p-4 text-center glow-hover transition-gentle shadow-lg border ${border}`}
+            className={`${gradient} rounded-3xl p-3 text-center glow-hover transition-gentle shadow-lg border ${border}`}
             onClick={() => openModal(id)}
           >
-            <div className={`${iconBg} p-3 rounded-full mx-auto mb-3 w-fit`}>
-              <Icon className={`${iconColor}`} size={20} strokeWidth={1.5} />
+            <div className={`${iconBg} p-2 rounded-full mx-auto mb-2 w-fit`}>
+              <Icon className={`${iconColor}`} size={18} strokeWidth={1.5} />
             </div>
             <h3 className="font-serif text-xs text-warm-gray mb-1 tracking-wide">{title}</h3>
             <p className="font-sans text-xs text-warm-gray/60 leading-relaxed">{subtitle}</p>
@@ -85,7 +85,7 @@ export default function TorahSection() {
       </div>
 
       {/* Inspirational Quote */}
-      <div className="gradient-soft-glow rounded-3xl p-4 border border-rose-blush/15 glow-hover transition-gentle">
+      <div className="gradient-soft-glow rounded-3xl p-3 border border-rose-blush/15 glow-hover transition-gentle">
         <p className="font-sans text-xs text-warm-gray/80 italic text-center leading-relaxed">
           "{quote?.text || 'Turn it over and over, for everything is in it. Look into it, grow old and worn over it, and never move away from it, for there is no better portion than it.'}"
         </p>
@@ -93,7 +93,7 @@ export default function TorahSection() {
       </div>
 
       {/* Bottom padding */}
-      <div className="h-24"></div>
+      <div className="h-16"></div>
     </div>
   );
 }
