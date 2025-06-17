@@ -1,4 +1,4 @@
-import { Book, Heart, Play, Shield } from "lucide-react";
+import { Book, Heart, Play, Shield, BookOpen, Sparkles, Star, Scroll } from "lucide-react";
 import { useModalStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import type { InspirationalQuote } from "@shared/schema";

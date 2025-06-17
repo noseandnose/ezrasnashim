@@ -37,15 +37,15 @@ export default function TzedakaSection() {
   ];
 
   return (
-    <div className="p-3 space-y-4">
+    <div className="p-2 space-y-2">
       {/* Header */}
       <div className="text-center">
-        <h2 className="font-serif text-2xl text-warm-gray mb-2">Tzedaka & Giving</h2>
-        <p className="font-sans text-warm-gray/70 text-sm">Supporting our community with love and generosity</p>
+        <h2 className="font-serif text-xl text-warm-gray mb-2">Tzedaka & Giving</h2>
+        <p className="font-sans text-warm-gray/70 text-xs">Supporting our community with love and generosity</p>
       </div>
 
       {/* Campaign Card with Progress Bar */}
-      <div className="bg-white rounded-3xl p-6 shadow-lg border border-blush/10">
+      <div className="bg-white rounded-3xl p-4 shadow-lg border border-blush/10">
         <div className="flex items-center space-x-3 mb-4">
           <div className="bg-gradient-feminine p-3 rounded-full">
             <BookOpen className="text-white" size={20} />

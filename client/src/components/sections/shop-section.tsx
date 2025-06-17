@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useModalStore } from "@/lib/types";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ShoppingBag, ExternalLink, Heart, Store, Package, Tag, Star, Gift, Sparkles } from "lucide-react";
 import type { ShopItem } from "@shared/schema";
 
 export default function ShopSection() {
