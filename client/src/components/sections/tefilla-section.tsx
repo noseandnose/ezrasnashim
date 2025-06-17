@@ -167,13 +167,11 @@ export default function TefillaSection() {
   };
 
   return (
-    <div className="p-2 space-y-2">
-
-      
-      <div className="space-y-2">
+    <div className="p-2 space-y-1">
+      <div className="space-y-1">
         {/* Daily Tehillim Card */}
-        <div className="bg-white rounded-3xl p-4 shadow-lg border border-blush/10">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white rounded-3xl p-3 shadow-lg border border-blush/10">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-3">
               <div className="bg-gradient-feminine p-3 rounded-full">
                 <Scroll className="text-white" size={20} />
@@ -200,7 +198,7 @@ export default function TefillaSection() {
 
           {/* Add Name Form */}
           {showAddForm && (
-            <div className="space-y-4 mb-6 p-4 bg-gradient-to-r from-ivory to-lavender/5 rounded-2xl border border-lavender/20">
+            <div className="space-y-3 mb-3 p-3 bg-gradient-to-r from-ivory to-lavender/5 rounded-2xl border border-lavender/20">
               <div className="flex items-center space-x-2 text-sm text-blush/80">
                 <AlertCircle size={16} />
                 <span className="font-sans">Names are automatically removed after 7 days</span>
@@ -253,7 +251,7 @@ export default function TefillaSection() {
           )}
 
           {/* Current Perek Display with Progress Bar */}
-          <div className="bg-gradient-to-br from-ivory to-lavender/10 rounded-2xl p-5 mb-4 border border-blush/15">
+          <div className="bg-gradient-to-br from-ivory to-lavender/10 rounded-2xl p-3 mb-2 border border-blush/15">
             <div className="flex items-center justify-between mb-2">
               <h4 className="font-serif text-lg text-warm-gray">
                 Perek {progress?.currentPerek || 1}
@@ -264,7 +262,7 @@ export default function TefillaSection() {
             </div>
             
             {/* Progress Bar */}
-            <div className="mb-4">
+            <div className="mb-2">
               <div className="w-full bg-blush/20 rounded-full h-2">
                 <div 
                   className="bg-gradient-feminine h-2 rounded-full transition-all duration-500 ease-out"
@@ -276,7 +274,7 @@ export default function TefillaSection() {
             {/* Tehillim Text Preview Button */}
             <button
               onClick={() => openModal('tehillim-text')}
-              className="w-full mb-4 bg-white/70 rounded-2xl p-4 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
+              className="w-full mb-2 bg-white/70 rounded-2xl p-3 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1">
@@ -292,9 +290,9 @@ export default function TefillaSection() {
             </button>
 
             {/* Current Name Assignment */}
-            <div className="mb-4">
+            <div className="mb-2">
               {currentName ? (
-                <div className="bg-white/80 rounded-2xl p-4 border border-blush/15">
+                <div className="bg-white/80 rounded-2xl p-3 border border-blush/15">
                   <div className="flex items-center space-x-2 mb-2">
                     <div className="bg-blush/20 p-1 rounded-full">
                       <User size={12} className="text-blush" />
@@ -319,10 +317,10 @@ export default function TefillaSection() {
         </div>
 
         {/* Prayer Services */}
-        <div className="grid grid-cols-2 gap-4 mb-2">
+        <div className="grid grid-cols-2 gap-2 mb-1">
           <button 
             onClick={() => openModal('mincha')}
-            className="bg-white rounded-3xl p-5 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
+            className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
           >
             <div className="bg-gradient-feminine p-3 rounded-full mx-auto mb-3 w-fit">
               <Clock className="text-white" size={20} />
