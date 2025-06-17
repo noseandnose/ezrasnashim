@@ -23,7 +23,7 @@ export default function ShopSection() {
   }
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-3 space-y-4">
       {/* Header */}
       <div className="text-center">
         <h2 className="font-serif text-2xl text-warm-gray mb-2">Jewish Shop</h2>

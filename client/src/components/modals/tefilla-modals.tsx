@@ -104,12 +104,12 @@ export default function TefillaModals() {
     <>
       {/* Tehillim Modal */}
       <Dialog open={activeModal === 'tehillim'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
           <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-semibold">Tehillim Cycle</DialogTitle>
+            <DialogTitle className="text-lg font-serif font-semibold">Tehillim Cycle</DialogTitle>
           </DialogHeader>
           
-          <div className="text-center text-gray-600">
+          <div className="text-center text-gray-600 font-sans">
             Today's Tehillim chapters (140-150) with translations and commentary...
           </div>
 
@@ -124,9 +124,9 @@ export default function TefillaModals() {
 
       {/* Mincha Modal */}
       <Dialog open={activeModal === 'mincha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
           <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-semibold">Mincha Prayer</DialogTitle>
+            <DialogTitle className="text-lg font-serif font-semibold">Mincha Prayer</DialogTitle>
           </DialogHeader>
           
           {/* Language and Font Controls */}
@@ -199,9 +199,9 @@ export default function TefillaModals() {
 
       {/* Women's Prayers Modal */}
       <Dialog open={activeModal === 'womens-prayers'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
           <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-semibold">Women's Prayers</DialogTitle>
+            <DialogTitle className="text-lg font-serif font-semibold">Women's Prayers</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-3">
@@ -214,7 +214,7 @@ export default function TefillaModals() {
             >
               <div className="flex items-center space-x-3">
                 <HandHeart className="text-blush" size={20} />
-                <span className="font-medium">Blessings</span>
+                <span className="font-sans font-medium">Blessings</span>
               </div>
             </div>
             
@@ -227,7 +227,7 @@ export default function TefillaModals() {
             >
               <div className="flex items-center space-x-3">
                 <Scroll className="text-peach" size={20} />
-                <span className="font-medium">Tefillos</span>
+                <span className="font-sans font-medium">Tefillos</span>
               </div>
             </div>
             
@@ -240,7 +240,7 @@ export default function TefillaModals() {
             >
               <div className="flex items-center space-x-3">
                 <Heart className="text-blush" size={20} />
-                <span className="font-medium">Personal Prayers</span>
+                <span className="font-sans font-medium">Personal Prayers</span>
               </div>
             </div>
           </div>
@@ -256,12 +256,12 @@ export default function TefillaModals() {
 
       {/* Blessings Modal */}
       <Dialog open={activeModal === 'blessings'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
           <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-semibold">Blessings</DialogTitle>
+            <DialogTitle className="text-lg font-serif font-semibold">Blessings</DialogTitle>
           </DialogHeader>
           
-          <div className="text-center text-gray-600">
+          <div className="text-center text-gray-600 font-sans">
             Daily blessings and their proper recitation...
           </div>
 
@@ -276,12 +276,12 @@ export default function TefillaModals() {
 
       {/* Tefillos Modal */}
       <Dialog open={activeModal === 'tefillos'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
           <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-semibold">Tefillos</DialogTitle>
+            <DialogTitle className="text-lg font-serif font-semibold">Tefillos</DialogTitle>
           </DialogHeader>
           
-          <div className="text-center text-gray-600">
+          <div className="text-center text-gray-600 font-sans">
             Traditional prayers and their meanings...
           </div>
 
@@ -296,12 +296,12 @@ export default function TefillaModals() {
 
       {/* Personal Prayers Modal */}
       <Dialog open={activeModal === 'personal-prayers'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
           <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-semibold">Personal Prayers</DialogTitle>
+            <DialogTitle className="text-lg font-serif font-semibold">Personal Prayers</DialogTitle>
           </DialogHeader>
           
-          <div className="text-center text-gray-600">
+          <div className="text-center text-gray-600 font-sans">
             Guidance for personal prayer and connection...
           </div>
 
