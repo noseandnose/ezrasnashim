@@ -34,14 +34,14 @@ export default function SponsorshipBar({ className = "" }: SponsorshipBarProps) 
   const customMessage = sponsor.message;
 
   return (
-    <div className={`bg-gradient-to-r from-pink-50 to-peach-50 dark:from-pink-900/20 dark:to-peach-900/20 border border-pink-200 dark:border-pink-700 rounded-lg p-3 text-center ${className}`}>
-      <div className="text-sm font-medium text-pink-800 dark:text-pink-200">
+    <div className={`bg-gradient-to-r from-blush/10 to-lavender/10 border border-blush/20 rounded-3xl p-4 text-center ${className}`}>
+      <div className="font-sans text-sm font-medium text-warm-gray">
         {customMessage ? (
           <span>{customMessage}</span>
         ) : (
           <span>
             Today's learning has been sponsored by{' '}
-            <span className="font-semibold text-pink-900 dark:text-pink-100">
+            <span className="font-serif font-semibold text-blush">
               {sponsorName}
             </span>
           </span>

@@ -40,7 +40,7 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
               className={`mb-1 ${isCenter ? 'text-2xl' : 'text-lg'}`} 
               size={isCenter ? 28 : 20} 
             />
-            <span className={`font-medium ${isCenter ? 'text-xs' : 'text-xs'}`}>
+            <span className={`font-sans font-medium ${isCenter ? 'text-xs' : 'text-xs'}`}>
               {label}
             </span>
           </button>

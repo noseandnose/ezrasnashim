@@ -23,8 +23,14 @@ export default function ShopSection() {
   }
 
   return (
-    <div className="h-full p-4">
-      <div className="space-y-3">
+    <div className="p-4 space-y-6">
+      {/* Header */}
+      <div className="text-center">
+        <h2 className="font-serif text-2xl text-warm-gray mb-2">Jewish Shop</h2>
+        <p className="font-sans text-warm-gray/70 text-sm">Beautiful items for your Jewish home</p>
+      </div>
+
+      <div className="space-y-4">
         {shopItems.map((item) => (
           <div
             key={item.id}

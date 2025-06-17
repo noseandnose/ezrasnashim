@@ -37,52 +37,65 @@ export default function TableSection() {
   ];
 
   return (
-    <div className="h-full p-4 space-y-4">
+    <div className="p-4 space-y-6">
+      {/* Header */}
+      <div className="text-center">
+        <h2 className="font-serif text-2xl text-warm-gray mb-2">Shabbos Table</h2>
+        <p className="font-sans text-warm-gray/70 text-sm">Prepare for a meaningful Shabbos</p>
+      </div>
+
       {/* Shabbos Times Section */}
-      <Card className="p-3">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center space-x-2">
-            <Flame className="text-[#4a4a4a]" size={16} />
-            <h3 className="font-semibold text-gray-800 text-sm">This Shabbos</h3>
+      <div className="bg-white rounded-3xl p-6 shadow-lg border border-blush/10">
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="bg-gradient-feminine p-3 rounded-full">
+            <Flame className="text-white" size={20} />
+          </div>
+          <div>
+            <h3 className="font-serif text-lg text-warm-gray">This Shabbos</h3>
+            <p className="font-sans text-sm text-warm-gray/70">Candle lighting & Havdalah</p>
           </div>
         </div>
-        <div className="space-y-1 text-xs">
-          <div className="flex justify-between">
-            <div className="flex items-center space-x-1">
-              <Flame className="text-[#4a4a4a]" size={12} />
-              <span className="text-gray-600">Candle Lighting:</span>
-              <span className="font-medium">{shabbosData?.candleLighting || "Loading..."}</span>
+        
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-gradient-to-br from-blush/8 to-ivory rounded-2xl p-3 text-center">
+            <div className="flex items-center justify-center space-x-1 mb-1">
+              <Flame className="text-blush" size={14} />
+              <span className="font-sans text-xs text-warm-gray/70">Candle Lighting</span>
             </div>
+            <p className="font-serif text-lg text-warm-gray">{shabbosData?.candleLighting || "Loading..."}</p>
           </div>
-          <div className="flex justify-between">
-            <div className="flex items-center space-x-1">
-              <Star className="text-[#4a4a4a]" size={12} />
-              <span className="text-gray-600">Havdalah:</span>
-              <span className="font-medium">{shabbosData?.havdalah || "Loading..."}</span>
+          <div className="bg-gradient-to-br from-lavender/8 to-ivory rounded-2xl p-3 text-center">
+            <div className="flex items-center justify-center space-x-1 mb-1">
+              <Star className="text-lavender" size={14} />
+              <span className="font-sans text-xs text-warm-gray/70">Havdalah</span>
             </div>
-          </div>
-          <div className="flex items-center space-x-1">
-            <BookOpen className="text-[#4a4a4a]" size={12} />
-            <span className="text-gray-600">Parsha:</span>
-            <span className="font-medium">{shabbosData?.parsha || "Loading..."}</span>
+            <p className="font-serif text-lg text-warm-gray">{shabbosData?.havdalah || "Loading..."}</p>
           </div>
         </div>
-      </Card>
+        
+        <div className="bg-gradient-to-r from-ivory to-blush/5 rounded-2xl p-3 text-center">
+          <div className="flex items-center justify-center space-x-2 mb-1">
+            <BookOpen className="text-sage" size={14} />
+            <span className="font-sans text-xs text-warm-gray/70">This Week's Parsha</span>
+          </div>
+          <p className="font-serif text-sm text-warm-gray">{shabbosData?.parsha || "Loading..."}</p>
+        </div>
+      </div>
 
       {/* Shabbos Content Grid */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         {tableItems.map(({ id, icon: Icon, title, subtitle, color }) => (
-          <div
+          <button
             key={id}
-            className="content-card rounded-2xl p-4 cursor-pointer hover:scale-105 transition-transform"
+            className="bg-white rounded-3xl p-6 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
             onClick={() => openModal(id)}
           >
-            <div className="text-center">
-              <Icon className={`${color} mb-2 mx-auto`} size={32} />
-              <h3 className="font-semibold text-sm">{title}</h3>
-              <p className="text-xs text-gray-600 mt-1">{subtitle}</p>
+            <div className="bg-gradient-feminine p-4 rounded-full mx-auto mb-4 w-fit">
+              <Icon className="text-white" size={24} />
             </div>
-          </div>
+            <h3 className="font-serif text-sm text-warm-gray mb-2">{title}</h3>
+            <p className="font-sans text-xs text-warm-gray/60 leading-relaxed">{subtitle}</p>
+          </button>
         ))}
       </div>
       {/* Bottom padding to prevent last element from being cut off by navigation */}
