@@ -221,7 +221,7 @@ export default function TefillaModals() {
             disabled={completePerekMutation.isPending}
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
           >
-            {completePerekMutation.isPending ? 'Completing...' : 'Complete & Continue'}
+            {completePerekMutation.isPending ? 'Completing...' : 'Complete'}
           </Button>
         </DialogContent>
       </Dialog>
@@ -366,9 +366,12 @@ export default function TefillaModals() {
 
       {/* Blessings Modal */}
       <Dialog open={activeModal === 'blessings'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="blessings-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold">Blessings</DialogTitle>
+            <p id="blessings-description" className="text-xs text-warm-gray/70 mt-1">
+              Daily blessings and their proper recitation
+            </p>
           </DialogHeader>
           
           <div className="text-center text-gray-600 font-sans">
