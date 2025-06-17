@@ -37,10 +37,10 @@ export default function TzedakaSection() {
   ];
 
   return (
-    <div className="p-2 space-y-2">
+    <div className="p-2 space-y-1">
       {/* Header */}
       <div className="text-center">
-        <h2 className="font-serif text-xl text-warm-gray mb-2">Tzedaka & Giving</h2>
+        <h2 className="font-serif text-lg text-warm-gray mb-1">Tzedaka & Giving</h2>
         <p className="font-sans text-warm-gray/70 text-xs">Supporting our community with love and generosity</p>
       </div>
 

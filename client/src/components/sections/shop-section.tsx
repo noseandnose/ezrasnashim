@@ -23,14 +23,14 @@ export default function ShopSection() {
   }
 
   return (
-    <div className="p-2 space-y-2">
+    <div className="p-2 space-y-1">
       {/* Header */}
       <div className="text-center">
-        <h2 className="font-serif text-xl text-warm-gray mb-2">Jewish Shop</h2>
+        <h2 className="font-serif text-lg text-warm-gray mb-1">Jewish Shop</h2>
         <p className="font-sans text-warm-gray/70 text-xs">Beautiful items for your Jewish home</p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-2">
         {shopItems.map((item) => (
           <div
             key={item.id}
