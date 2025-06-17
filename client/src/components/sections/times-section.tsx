@@ -18,10 +18,10 @@ export default function TimesSection() {
   };
 
   return (
-    <div className="h-full p-3">
-      <div className="space-y-3 h-full">
+    <div className="h-full p-2">
+      <div className="space-y-2 h-full">
         {/* Today's Times */}
-        <div className="content-card rounded-2xl p-4">
+        <div className="content-card rounded-2xl p-3">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center">
               <Sun className="text-peach mr-2" size={20} />

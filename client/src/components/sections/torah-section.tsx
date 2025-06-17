@@ -85,8 +85,8 @@ export default function TorahSection() {
       </div>
 
       {/* Inspirational Quote */}
-      <div className="gradient-soft-glow rounded-3xl p-6 border border-rose-blush/15 glow-hover transition-gentle">
-        <p className="font-sans text-sm text-warm-gray/80 italic text-center leading-relaxed">
+      <div className="gradient-soft-glow rounded-3xl p-4 border border-rose-blush/15 glow-hover transition-gentle">
+        <p className="font-sans text-xs text-warm-gray/80 italic text-center leading-relaxed">
           "{quote?.text || 'Turn it over and over, for everything is in it. Look into it, grow old and worn over it, and never move away from it, for there is no better portion than it.'}"
         </p>
         <p className="font-serif text-xs text-warm-gray/60 text-center mt-2 tracking-wide">- {quote?.source || 'Pirkei Avot 5:22'}</p>
