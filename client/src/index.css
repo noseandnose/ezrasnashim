@@ -131,6 +131,16 @@
   --tw-gradient-to: hsl(120, 20%, 75%);
 }
 
+.from-muted-lavender {
+  --tw-gradient-from: hsl(260, 30%, 85%);
+  --tw-gradient-to: hsl(260, 30%, 85%);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.to-rose-blush {
+  --tw-gradient-to: hsl(350, 45%, 85%);
+}
+
 .font-serif {
   font-family: 'Playfair Display', serif !important;
 }
