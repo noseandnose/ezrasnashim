@@ -52,11 +52,11 @@ export default function TorahSection() {
       id: 'loshon',
       icon: Shield,
       title: 'Loshon Horah',
-      subtitle: 'Guarding Your Speech',
-      gradient: 'from-blush/8 to-ivory',
-      iconBg: 'bg-blush/20',
-      iconColor: 'text-blush',
-      border: 'border-blush/15'
+      subtitle: 'Guard Your Speech',
+      gradient: 'gradient-soft-glow',
+      iconBg: 'bg-sand-gold/20',
+      iconColor: 'text-sand-gold',
+      border: 'border-sand-gold/15'
     }
   ];
 
