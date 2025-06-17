@@ -45,7 +45,7 @@ export default function TableSection() {
       </div>
 
       {/* Shabbos Times Section */}
-      <div className="bg-white rounded-3xl p-4 shadow-lg border border-blush/10">
+      <div className="bg-gradient-to-r from-blush/10 to-lavender/10 border border-blush/20 rounded-3xl p-4 shadow-lg">
         <div className="flex items-center space-x-3 mb-4">
           <div className="bg-gradient-feminine p-3 rounded-full">
             <Flame className="text-white" size={20} />
