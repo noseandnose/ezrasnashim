@@ -16,21 +16,21 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
   ];
 
   return (
-    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur-sm border-t border-blush/20 shadow-2xl rounded-t-3xl">
+    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-soft-white/95 backdrop-blur-sm border-t border-rose-blush/15 shadow-2xl rounded-t-3xl transition-gentle">
       <div className="flex items-center justify-between py-3 px-6">
         {navItems.map(({ id, icon: Icon, label, isCenter }) => (
           <button
             key={id}
             onClick={() => onSectionChange(id)}
-            className={`flex flex-col items-center transition-all duration-300 ${
+            className={`flex flex-col items-center transition-gentle glow-hover focus-glow ${
               isCenter 
                 ? 'p-3 scale-110' 
                 : 'p-2'
             } ${
               activeSection === id 
                 ? isCenter 
-                  ? 'bg-gradient-feminine rounded-full shadow-lg'
-                  : 'bg-blush/15 rounded-2xl'
+                  ? 'gradient-quiet-joy rounded-full shadow-lg'
+                  : getActiveColorClass(id)
                 : 'hover:bg-ivory rounded-2xl'
             }`}
           >

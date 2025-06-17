@@ -26,13 +26,13 @@
   --ring: hsl(345, 55%, 82%);
   --radius: 1.25rem;
   
-  /* Feminine Ezras Nashim Colors */
-  --blush: hsl(345, 55%, 82%);
-  --ivory: hsl(42, 78%, 97%);
-  --lavender: hsl(262, 40%, 88%);
-  --warm-white: hsl(42, 78%, 97%);
-  --warm-gray: hsl(240, 5%, 26%);
-  --sage: hsl(120, 25%, 65%);
+  /* Quiet Joy - Spiritual Retreat Colors */
+  --rose-blush: hsl(350, 45%, 85%);
+  --ivory: hsl(45, 70%, 96%);
+  --sand-gold: hsl(40, 35%, 80%);
+  --muted-lavender: hsl(260, 30%, 85%);
+  --warm-gray: hsl(220, 8%, 35%);
+  --soft-white: hsl(45, 70%, 98%);
 }
 
 .dark {
@@ -65,35 +65,47 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground overflow-hidden;
-    font-family: 'Inter', sans-serif;
-    background-color: hsl(42, 78%, 97%);
-    color: hsl(240, 5%, 26%);
+    font-family: 'Nunito', 'Inter', sans-serif;
+    background: linear-gradient(135deg, hsl(45, 70%, 98%) 0%, hsl(45, 70%, 96%) 100%);
+    color: hsl(220, 8%, 35%);
   }
 }
 
-/* Feminine Brand Colors */
-.text-blush {
-  color: hsl(345, 55%, 82%);
+/* Quiet Joy - Spiritual Colors */
+.text-rose-blush {
+  color: hsl(350, 45%, 75%);
 }
 
-.text-lavender {
-  color: hsl(262, 40%, 88%);
+.text-sand-gold {
+  color: hsl(40, 45%, 65%);
+}
+
+.text-muted-lavender {
+  color: hsl(260, 35%, 75%);
 }
 
 .text-warm-gray {
-  color: hsl(240, 5%, 26%);
+  color: hsl(220, 8%, 35%);
 }
 
-.bg-blush {
-  background-color: hsl(345, 55%, 82%);
+.bg-rose-blush {
+  background-color: hsl(350, 45%, 85%);
+}
+
+.bg-sand-gold {
+  background-color: hsl(40, 35%, 80%);
+}
+
+.bg-muted-lavender {
+  background-color: hsl(260, 30%, 85%);
 }
 
 .bg-ivory {
-  background-color: hsl(42, 78%, 97%);
+  background-color: hsl(45, 70%, 96%);
 }
 
-.bg-lavender {
-  background-color: hsl(262, 40%, 88%);
+.bg-soft-white {
+  background-color: hsl(45, 70%, 98%);
 }
 
 .font-serif {
@@ -101,11 +113,37 @@
 }
 
 .font-sans {
-  font-family: 'Inter', sans-serif !important;
+  font-family: 'Nunito', 'Inter', sans-serif !important;
 }
 
-.gradient-feminine {
-  background: linear-gradient(135deg, hsl(345, 55%, 82%) 0%, hsl(262, 40%, 88%) 100%);
+/* Quiet Joy Gradients */
+.gradient-quiet-joy {
+  background: linear-gradient(135deg, hsl(350, 45%, 88%) 0%, hsl(260, 30%, 88%) 100%);
+}
+
+.gradient-soft-glow {
+  background: linear-gradient(135deg, hsl(45, 70%, 98%) 0%, hsl(350, 45%, 92%) 50%, hsl(260, 30%, 90%) 100%);
+}
+
+.gradient-sand-warm {
+  background: linear-gradient(135deg, hsl(40, 35%, 85%) 0%, hsl(350, 45%, 88%) 100%);
+}
+
+/* Gentle Transitions & Animations */
+.transition-gentle {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glow-hover:hover {
+  box-shadow: 0 8px 32px hsla(350, 45%, 85%, 0.3);
+  transform: translateY(-2px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Soft Focus States */
+.focus-glow:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px hsla(350, 45%, 85%, 0.4);
 }
 
 .gradient-header {
