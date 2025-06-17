@@ -82,34 +82,34 @@ export default function TzedakaSection() {
         </button>
       </div>
 
-      {/* Tzedaka Options */}
-      <div className="grid grid-cols-1 gap-4">
+      {/* Tzedaka Options - Rectangle Grid */}
+      <div className="grid grid-cols-2 gap-2">
         <button
           onClick={() => openModal('causes')}
-          className="bg-white rounded-3xl p-6 shadow-lg hover:scale-105 transition-all duration-300 border border-blush/10 text-left"
+          className="bg-white rounded-3xl p-4 shadow-lg hover:scale-105 transition-all duration-300 border border-blush/10 text-left"
         >
-          <div className="flex items-center space-x-4">
-            <div className="bg-gradient-to-br from-blush/20 to-lavender/20 p-4 rounded-full">
-              <Shield className="text-blush" size={24} />
+          <div className="flex flex-col items-center text-center space-y-2">
+            <div className="bg-gradient-to-br from-blush/20 to-lavender/20 p-3 rounded-full">
+              <Shield className="text-blush" size={20} strokeWidth={1.5} />
             </div>
-            <div className="flex-grow">
-              <h3 className="font-serif text-lg text-warm-gray mb-1">Support Causes</h3>
-              <p className="font-sans text-sm text-warm-gray/70">Fertility support, women's shelters, and kollels</p>
+            <div>
+              <h3 className="font-serif text-sm text-warm-gray mb-1">Support Causes</h3>
+              <p className="font-sans text-xs text-warm-gray/70">Fertility support & kollels</p>
             </div>
           </div>
         </button>
 
         <button
           onClick={() => openModal('sponsor-day')}
-          className="bg-white rounded-3xl p-6 shadow-lg hover:scale-105 transition-all duration-300 border border-blush/10 text-left"
+          className="bg-white rounded-3xl p-4 shadow-lg hover:scale-105 transition-all duration-300 border border-blush/10 text-left"
         >
-          <div className="flex items-center space-x-4">
-            <div className="bg-gradient-to-br from-lavender/20 to-sage/20 p-4 rounded-full">
-              <Heart className="text-lavender" size={24} />
+          <div className="flex flex-col items-center text-center space-y-2">
+            <div className="bg-gradient-to-br from-lavender/20 to-sage/20 p-3 rounded-full">
+              <Heart className="text-lavender" size={20} strokeWidth={1.5} />
             </div>
-            <div className="flex-grow">
-              <h3 className="font-serif text-lg text-warm-gray mb-1">Sponsor a Day</h3>
-              <p className="font-sans text-sm text-warm-gray/70">Dedicate all mitzvot done on the app</p>
+            <div>
+              <h3 className="font-serif text-sm text-warm-gray mb-1">Sponsor a Day</h3>
+              <p className="font-sans text-xs text-warm-gray/70">Dedicate all mitzvot</p>
             </div>
           </div>
         </button>

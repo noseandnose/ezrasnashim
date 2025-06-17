@@ -271,21 +271,21 @@ export default function TefillaSection() {
               </div>
             </div>
             
-            {/* Tehillim Text Preview Button */}
+            {/* Compact Perek Info */}
             <button
               onClick={() => openModal('tehillim-text')}
               className="w-full mb-2 bg-white/70 rounded-2xl p-3 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
             >
               <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="text-xs text-warm-gray/60 mb-1 font-sans">
-                    View Full Text
-                  </div>
-                  <div className="text-sm text-warm-gray line-clamp-2">
-                    {getTehillimFirstLine(progress?.currentPerek || 1)}
-                  </div>
+                <div className="font-serif text-sm text-warm-gray">
+                  Perek {progress?.currentPerek || 1}
                 </div>
-                <ChevronRight className="text-warm-gray/40 ml-2" size={16} strokeWidth={1.5} />
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs text-warm-gray/60 font-sans">
+                    {progress?.currentPerek || 1} of 150
+                  </span>
+                  <ChevronRight className="text-warm-gray/40" size={16} strokeWidth={1.5} />
+                </div>
               </div>
             </button>
 
