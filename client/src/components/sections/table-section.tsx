@@ -83,23 +83,23 @@ export default function TableSection() {
       </div>
 
       {/* Shabbos Content Grid */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-2">
         {tableItems.map(({ id, icon: Icon, title, subtitle, color }) => (
           <button
             key={id}
-            className="bg-white rounded-3xl p-6 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
+            className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
             onClick={() => openModal(id)}
           >
-            <div className="bg-gradient-feminine p-4 rounded-full mx-auto mb-4 w-fit">
-              <Icon className="text-white" size={24} />
+            <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
+              <Icon className="text-white" size={18} strokeWidth={1.5} />
             </div>
-            <h3 className="font-serif text-sm text-warm-gray mb-2">{title}</h3>
+            <h3 className="font-serif text-xs text-warm-gray mb-1">{title}</h3>
             <p className="font-sans text-xs text-warm-gray/60 leading-relaxed">{subtitle}</p>
           </button>
         ))}
       </div>
       {/* Bottom padding to prevent last element from being cut off by navigation */}
-      <div className="h-24"></div>
+      <div className="h-16"></div>
     </div>
   );
 }
