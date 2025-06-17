@@ -170,7 +170,7 @@ export default function TefillaSection() {
     <div className="p-2 space-y-1">
       <div className="space-y-1">
         {/* Daily Tehillim Card */}
-        <div className="bg-white rounded-3xl p-3 shadow-lg border border-blush/10">
+        <div className="bg-gradient-to-r from-blush/10 to-lavender/10 border border-blush/20 rounded-3xl p-3 shadow-lg">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-3">
               <div className="bg-gradient-feminine p-3 rounded-full">
