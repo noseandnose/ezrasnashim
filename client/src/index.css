@@ -1,37 +1,37 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: hsl(0, 0%, 100%);
-  --foreground: hsl(20, 14.3%, 4.1%);
-  --muted: hsl(60, 4.8%, 95.9%);
-  --muted-foreground: hsl(25, 5.3%, 44.7%);
-  --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(20, 14.3%, 4.1%);
-  --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(20, 14.3%, 4.1%);
-  --border: hsl(20, 5.9%, 90%);
-  --input: hsl(20, 5.9%, 90%);
-  --primary: hsl(328, 85%, 87%);
-  --primary-foreground: hsl(20, 14.3%, 4.1%);
-  --secondary: hsl(60, 4.8%, 95.9%);
-  --secondary-foreground: hsl(24, 9.8%, 10%);
-  --accent: hsl(60, 4.8%, 95.9%);
-  --accent-foreground: hsl(24, 9.8%, 10%);
+  --background: hsl(42, 78%, 97%);
+  --foreground: hsl(240, 5%, 26%);
+  --muted: hsl(300, 18%, 94%);
+  --muted-foreground: hsl(240, 5%, 65%);
+  --popover: hsl(42, 78%, 97%);
+  --popover-foreground: hsl(240, 5%, 26%);
+  --card: hsl(42, 78%, 97%);
+  --card-foreground: hsl(240, 5%, 26%);
+  --border: hsl(300, 18%, 90%);
+  --input: hsl(300, 18%, 90%);
+  --primary: hsl(345, 55%, 82%);
+  --primary-foreground: hsl(240, 5%, 26%);
+  --secondary: hsl(300, 18%, 94%);
+  --secondary-foreground: hsl(240, 5%, 26%);
+  --accent: hsl(262, 40%, 88%);
+  --accent-foreground: hsl(240, 5%, 26%);
   --destructive: hsl(0, 84.2%, 60.2%);
   --destructive-foreground: hsl(60, 9.1%, 97.8%);
-  --ring: hsl(20, 14.3%, 4.1%);
-  --radius: 0.5rem;
+  --ring: hsl(345, 55%, 82%);
+  --radius: 1.25rem;
   
-  /* Custom Ezras Nashim Colors */
-  --blush: hsl(328, 85%, 87%);
-  --peach: hsl(28, 100%, 84%);
-  --cream: hsl(35, 100%, 95%);
-  --warm-white: hsl(25, 30%, 96%);
-  --warm-gray: hsl(0, 0%, 29%);
+  /* Feminine Ezras Nashim Colors */
+  --blush: hsl(345, 55%, 82%);
+  --ivory: hsl(42, 78%, 97%);
+  --lavender: hsl(262, 40%, 88%);
+  --warm-white: hsl(42, 78%, 97%);
+  --warm-gray: hsl(240, 5%, 26%);
   --sage: hsl(120, 25%, 65%);
 }
 
@@ -65,47 +65,61 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground overflow-hidden;
-    font-family: 'Poppins', sans-serif;
-    background-color: hsl(25, 30%, 96%);
-    color: hsl(0, 0%, 29%);
+    font-family: 'Inter', sans-serif;
+    background-color: hsl(42, 78%, 97%);
+    color: hsl(240, 5%, 26%);
   }
 }
 
-/* Custom Brand Colors */
+/* Feminine Brand Colors */
 .text-blush {
-  color: hsl(328, 85%, 87%);
+  color: hsl(345, 55%, 82%);
 }
 
-.text-peach {
-  color: hsl(28, 100%, 84%);
+.text-lavender {
+  color: hsl(262, 40%, 88%);
 }
 
 .text-warm-gray {
-  color: hsl(0, 0%, 29%);
+  color: hsl(240, 5%, 26%);
 }
 
 .bg-blush {
-  background-color: hsl(328, 85%, 87%);
+  background-color: hsl(345, 55%, 82%);
 }
 
-.bg-sage {
-  background-color: hsl(120, 25%, 65%);
+.bg-ivory {
+  background-color: hsl(42, 78%, 97%);
 }
 
-.gradient-blush-peach {
-  background: linear-gradient(135deg, hsl(328, 85%, 87%) 0%, hsl(28, 100%, 84%) 100%);
+.bg-lavender {
+  background-color: hsl(262, 40%, 88%);
+}
+
+.font-serif {
+  font-family: 'Playfair Display', serif;
+}
+
+.font-sans {
+  font-family: 'Inter', sans-serif;
+}
+
+.gradient-feminine {
+  background: linear-gradient(135deg, hsl(345, 55%, 82%) 0%, hsl(262, 40%, 88%) 100%);
 }
 
 .gradient-header {
-  background: linear-gradient(90deg, hsl(328, 85%, 87%) 0%, hsl(28, 100%, 84%) 100%);
+  background: linear-gradient(90deg, hsl(345, 55%, 82%) 0%, hsl(262, 40%, 88%) 100%);
 }
 
 .content-card {
-  background: linear-gradient(135deg, hsla(328, 85%, 87%, 0.1) 0%, hsla(28, 100%, 84%, 0.1) 100%);
+  background: linear-gradient(135deg, hsla(345, 55%, 82%, 0.08) 0%, hsla(262, 40%, 88%, 0.08) 100%);
+  box-shadow: 0 4px 20px rgba(345, 55%, 82%, 0.1);
+  border-radius: 1.25rem;
 }
 
 .nav-tab.active {
-  background: linear-gradient(135deg, hsl(328, 85%, 87%) 0%, hsl(28, 100%, 84%) 100%);
+  background: linear-gradient(135deg, hsl(345, 55%, 82%) 0%, hsl(262, 40%, 88%) 100%);
   color: white;
 }
 

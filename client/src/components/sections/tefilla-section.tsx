@@ -155,19 +155,29 @@ export default function TefillaSection() {
   };
 
   return (
-    <div className="p-4 space-y-4">
-
+    <div className="p-4 space-y-6">
+      {/* Personalized Welcome Message */}
+      <div className="bg-gradient-to-r from-blush/10 to-lavender/10 rounded-3xl p-6 text-center border border-blush/20">
+        <h2 className="font-serif text-2xl text-warm-gray mb-2">
+          בוקר טוב, נשים קדושות!
+        </h2>
+        <p className="font-sans text-warm-gray/80 text-sm leading-relaxed">
+          May your tefilla today be uplifting and bring you closer to the Divine
+        </p>
+      </div>
       
-      <div className="space-y-3">
-        {/* Tehillim Cycle */}
-        <div className="content-card rounded-2xl p-4">
-          <div className="flex items-center justify-between mb-3">
+      <div className="space-y-4">
+        {/* Daily Tehillim Card */}
+        <div className="bg-white rounded-3xl p-6 shadow-lg border border-blush/10">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <Scroll className="text-xl text-blush" size={24} />
+              <div className="bg-gradient-feminine p-3 rounded-full">
+                <Scroll className="text-white" size={20} />
+              </div>
               <div>
-                <h3 className="font-semibold text-sm">Tehillim Cycle</h3>
-                <p className="text-xs text-gray-600">
-                  Shared Tehillim Cycle
+                <h3 className="font-serif text-lg text-warm-gray">Daily Tehillim</h3>
+                <p className="font-sans text-sm text-warm-gray/70">
+                  Shared Cycle for Yeshuos
                 </p>
               </div>
             </div>
@@ -193,17 +203,17 @@ export default function TefillaSection() {
 
           {/* Add Name Form */}
           {showAddForm && (
-            <div className="space-y-3 mb-4 p-3 bg-warm-white rounded-xl">
-              <div className="flex items-center space-x-2 text-sm text-orange-600">
+            <div className="space-y-4 mb-6 p-4 bg-gradient-to-r from-ivory to-lavender/5 rounded-2xl border border-lavender/20">
+              <div className="flex items-center space-x-2 text-sm text-blush/80">
                 <AlertCircle size={16} />
-                <span>Names are automatically removed after 7 days</span>
+                <span className="font-sans">Names are automatically removed after 7 days</span>
               </div>
               
               <Input
                 placeholder="Hebrew Name"
                 value={hebrewName}
                 onChange={(e) => setHebrewName(e.target.value)}
-                className="text-right"
+                className="text-right rounded-2xl border-blush/20 focus:border-blush"
                 dir="rtl"
               />
               
@@ -212,7 +222,7 @@ export default function TefillaSection() {
                 const option = reasonOptions.find(opt => opt.value === value);
                 setReasonEnglish(option?.english || "");
               }}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full rounded-2xl border-blush/20">
                   <SelectValue placeholder="Select Reason" />
                 </SelectTrigger>
                 <SelectContent>
@@ -224,12 +234,12 @@ export default function TefillaSection() {
                 </SelectContent>
               </Select>
               
-              <div className="flex space-x-2">
+              <div className="flex space-x-3">
                 <Button 
                   onClick={() => setShowAddForm(false)} 
                   variant="outline"
                   size="sm"
-                  className="flex-1"
+                  className="flex-1 rounded-2xl border-blush/30 hover:bg-blush/5"
                 >
                   Cancel
                 </Button>
@@ -237,67 +247,84 @@ export default function TefillaSection() {
                   onClick={handleAddName}
                   disabled={addNameMutation.isPending}
                   size="sm"
-                  className="flex-1 bg-blush hover:bg-blush/90"
+                  className="flex-1 rounded-2xl bg-gradient-feminine hover:opacity-90 text-white"
                 >
-                  {addNameMutation.isPending ? "Adding..." : "Add"}
+                  {addNameMutation.isPending ? "Adding..." : "Add Name"}
                 </Button>
               </div>
             </div>
           )}
 
-          {/* Current Perek Display */}
-          <div className="bg-cream rounded-xl p-3 mb-3">
-            <div className="text-sm font-medium text-gray-700 mb-2">
-              Current Perek {progress?.currentPerek || 1}
+          {/* Current Perek Display with Progress Bar */}
+          <div className="bg-gradient-to-br from-ivory to-lavender/10 rounded-2xl p-5 mb-4 border border-blush/15">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="font-serif text-lg text-warm-gray">
+                Perek {progress?.currentPerek || 1}
+              </h4>
+              <div className="text-xs text-warm-gray/60 font-sans">
+                {progress?.currentPerek || 1} of 150
+              </div>
+            </div>
+            
+            {/* Progress Bar */}
+            <div className="mb-4">
+              <div className="w-full bg-blush/20 rounded-full h-2">
+                <div 
+                  className="bg-gradient-feminine h-2 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${((progress?.currentPerek || 1) / 150) * 100}%` }}
+                ></div>
+              </div>
+              <div className="text-xs text-warm-gray/60 mt-1 font-sans">
+                {(allNames?.length || 0)} names in cycle
+              </div>
             </div>
             
             {/* Tehillim Text Display */}
-            <div className="mb-3 bg-white rounded-lg p-3 max-h-32 overflow-y-auto">
+            <div className="mb-4 bg-white/70 rounded-2xl p-4 max-h-32 overflow-y-auto border border-blush/10">
               {getTehillimText(progress?.currentPerek || 1, showHebrew)}
             </div>
 
             {/* Current Name Assignment */}
-            <div className="mb-3">
+            <div className="mb-4">
               {currentName ? (
-                <div className="bg-white rounded-lg p-3">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <User size={12} className="text-blush" />
-                    <span className="text-sm font-medium text-blush">
+                <div className="bg-white/80 rounded-2xl p-4 border border-blush/15">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <div className="bg-blush/20 p-1 rounded-full">
+                      <User size={12} className="text-blush" />
+                    </div>
+                    <span className="font-serif text-sm font-medium text-warm-gray">
                       Davening For: {currentName.hebrewName}
                     </span>
                   </div>
-                  <div className="text-xs text-gray-600">
+                  <div className="text-xs text-warm-gray/70 font-sans">
                     {currentName.reasonEnglish || currentName.reason}
                   </div>
                 </div>
               ) : (
-                <div className="text-sm text-gray-600 text-center py-2">
+                <div className="text-sm text-warm-gray/60 text-center py-3 font-sans">
                   Add a name to dedicate this perek
                 </div>
               )}
             </div>
 
-            {/* Progress and Action */}
-            <div className="flex items-center justify-between">
-              <div className="text-xs text-gray-600">
-                {(allNames?.length || 0)} names • Perek {progress?.currentPerek || 1} of 150
-              </div>
-              <Button
-                size="sm"
-                onClick={completePerek}
-                disabled={completePerekMutation.isPending}
-                className="bg-blush hover:bg-blush/90 disabled:opacity-50"
-              >
-                {completePerekMutation.isPending ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Completing...</span>
-                  </div>
-                ) : (
-                  "Mark Done"
-                )}
-              </Button>
-            </div>
+            {/* Mark Done Button */}
+            <Button
+              onClick={completePerek}
+              disabled={completePerekMutation.isPending}
+              className="w-full rounded-2xl bg-gradient-feminine hover:opacity-90 text-white font-sans py-3 shadow-lg transition-all duration-300"
+            >
+              {completePerekMutation.isPending ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Completing...</span>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center space-x-2">
+                  <CheckCircle size={16} />
+                  <span>Mark Done</span>
+                </div>
+              )}
+            </Button>
           </div>
         </div>
 
