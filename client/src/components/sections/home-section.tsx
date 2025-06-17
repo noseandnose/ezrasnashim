@@ -46,7 +46,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       </div>
 
       {/* Today's Sponsor */}
-      <div className="gradient-soft-glow rounded-3xl p-4 border border-rose-blush/15 glow-hover transition-gentle">
+      <div className="gradient-soft-glow rounded-3xl p-3 border border-rose-blush/15 glow-hover transition-gentle">
         <div className="flex items-center space-x-3 mb-2">
           <div className="bg-soft-white p-2 rounded-full">
             <Heart className="text-rose-blush" size={18} strokeWidth={1.5} />
