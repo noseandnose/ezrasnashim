@@ -188,42 +188,52 @@ export default function TefillaModals() {
     <>
       {/* Tehillim Text Modal */}
       <Dialog open={activeModal === 'tehillim-text'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans" aria-describedby="tehillim-description">
           <DialogHeader className="text-center mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-lg font-serif font-semibold">Tehillim Text</h2>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowHebrew(!showHebrew)}
-                  className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
-                >
-                  {showHebrew ? 'EN' : 'עב'}
-                </Button>
-              </div>
-            </div>
+            <DialogTitle className="text-lg font-serif font-semibold">Tehillim Text</DialogTitle>
+            <p id="tehillim-description" className="text-xs text-warm-gray/70 mt-1">
+              Read and complete Perek {progress?.currentPerek || 1}
+            </p>
           </DialogHeader>
+
+          {/* Language Toggle - Moved away from close button */}
+          <div className="flex justify-center mb-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowHebrew(!showHebrew)}
+              className="text-xs px-3 py-1 h-auto border-blush/30 bg-white hover:bg-blush/5"
+            >
+              {showHebrew ? 'Switch to English' : 'Switch to Hebrew'}
+            </Button>
+          </div>
 
           {/* Tehillim Text */}
           <div className="mb-6 bg-white/70 rounded-2xl p-4 border border-blush/10">
-            {getTehillimText(12, showHebrew)}
+            {getTehillimText(progress?.currentPerek || 1, showHebrew)}
           </div>
 
           <Button 
-            onClick={() => closeModal()} 
+            onClick={() => {
+              completePerek();
+              closeModal();
+            }}
+            disabled={completePerekMutation.isPending}
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
           >
-            Close
+            {completePerekMutation.isPending ? 'Completing...' : 'Complete & Continue'}
           </Button>
         </DialogContent>
       </Dialog>
 
       {/* Mincha Modal */}
       <Dialog open={activeModal === 'mincha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans" aria-describedby="mincha-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold">Mincha Prayer</DialogTitle>
+            <p id="mincha-description" className="text-xs text-warm-gray/70 mt-1">
+              Afternoon prayer service with customizable text size
+            </p>
           </DialogHeader>
           
           {/* Language and Font Controls */}
@@ -296,9 +306,12 @@ export default function TefillaModals() {
 
       {/* Women's Prayers Modal */}
       <Dialog open={activeModal === 'womens-prayers'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="womens-prayers-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold">Women's Prayers</DialogTitle>
+            <p id="womens-prayers-description" className="text-xs text-warm-gray/70 mt-1">
+              Special prayers and blessings for women
+            </p>
           </DialogHeader>
           
           <div className="space-y-3">
@@ -373,9 +386,12 @@ export default function TefillaModals() {
 
       {/* Tefillos Modal */}
       <Dialog open={activeModal === 'tefillos'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="tefillos-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold">Tefillos</DialogTitle>
+            <p id="tefillos-description" className="text-xs text-warm-gray/70 mt-1">
+              Traditional prayers and their meanings
+            </p>
           </DialogHeader>
           
           <div className="text-center text-gray-600 font-sans">
@@ -393,9 +409,12 @@ export default function TefillaModals() {
 
       {/* Personal Prayers Modal */}
       <Dialog open={activeModal === 'personal-prayers'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="personal-prayers-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold">Personal Prayers</DialogTitle>
+            <p id="personal-prayers-description" className="text-xs text-warm-gray/70 mt-1">
+              Guidance for personal prayer and connection
+            </p>
           </DialogHeader>
           
           <div className="text-center text-gray-600 font-sans">
@@ -413,13 +432,13 @@ export default function TefillaModals() {
 
       {/* Nishmas 40-Day Campaign Modal */}
       <Dialog open={activeModal === 'nishmas-campaign'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans" aria-describedby="nishmas-description">
           <DialogHeader className="text-center mb-4">
             <div className="flex items-center justify-center mb-2">
               <Heart className="text-blush mr-2" size={24} />
               <DialogTitle className="text-lg font-serif font-semibold">Nishmas 40-Day Campaign</DialogTitle>
             </div>
-            <p className="text-sm text-gray-600 font-sans">
+            <p id="nishmas-description" className="text-sm text-gray-600 font-sans">
               May this 40-day tefillah bring you the yeshuos you need
             </p>
           </DialogHeader>
