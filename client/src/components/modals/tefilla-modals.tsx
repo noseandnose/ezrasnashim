@@ -1,15 +1,19 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/lib/types";
-import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { MinchaPrayer, NishmasText } from "@shared/schema";
+import { MinchaPrayer, NishmasText, GlobalTehillimProgress, TehillimName } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
+import { toast } from "@/hooks/use-toast";
 
 export default function TefillaModals() {
   const { activeModal, openModal, closeModal } = useModalStore();
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
   const [fontSize, setFontSize] = useState(16);
+  const [showHebrew, setShowHebrew] = useState(true);
+  const queryClient = useQueryClient();
 
   // Nishmas 40-Day Campaign state
   const [nishmasDay, setNishmasDay] = useState(0);
@@ -28,6 +32,86 @@ export default function TefillaModals() {
     queryKey: [`/api/nishmas/${nishmasLanguage}`],
     enabled: activeModal === 'nishmas-campaign'
   });
+
+  // Fetch global Tehillim progress
+  const { data: progress } = useQuery<GlobalTehillimProgress>({
+    queryKey: ['/api/tehillim/progress'],
+    refetchInterval: 30000,
+    enabled: activeModal === 'tehillim-text'
+  });
+
+  // Fetch current name for the perek
+  const { data: currentName } = useQuery<TehillimName | null>({
+    queryKey: ['/api/tehillim/current-name'],
+    refetchInterval: 10000,
+    enabled: activeModal === 'tehillim-text'
+  });
+
+  // Mutation to complete a perek
+  const completePerekMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest('POST', '/api/tehillim/complete', { completedBy: 'user' });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Perek Completed!",
+        description: `Perek ${progress?.currentPerek || 'current'} has been completed. Moving to the next perek.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to complete perek. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const completePerek = () => {
+    completePerekMutation.mutate();
+  };
+
+  const getTehillimText = (perekNumber: number, isHebrew: boolean) => {
+    const tehillimTexts: Record<number, { hebrew: string; english: string }> = {
+      1: {
+        hebrew: "אַשְׁרֵי הָאִישׁ אֲשֶׁר לֹא הָלַךְ בַּעֲצַת רְשָׁעִים וּבְדֶרֶךְ חַטָּאִים לֹא עָמָד וּבְמוֹשַׁב לֵצִים לֹא יָשָׁב׃ כִּי אִם בְּתוֹרַת יְהוָה חֶפְצוֹ וּבְתוֹרָתוֹ יֶהְגֶּה יוֹמָם וָלָיְלָה׃",
+        english: "Happy is the man who has not walked in the counsel of the wicked, nor stood in the way of sinners, nor sat in the seat of scorners. But his delight is in the law of the Lord, and in His law he meditates day and night."
+      },
+      2: {
+        hebrew: "לָמָּה רָגְשׁוּ גוֹיִם וּלְאֻמִּים יֶהְגּוּ רִיק׃ יִתְיַצְּבוּ מַלְכֵי אֶרֶץ וְרוֹזְנִים נוֹסְדוּ יָחַד עַל יְהוָה וְעַל מְשִׁיחוֹ׃",
+        english: "Why do the nations rage, and the peoples plot in vain? The kings of the earth set themselves, and the rulers take counsel together, against the Lord and against His anointed."
+      },
+      3: {
+        hebrew: "מִזְמוֹר לְדָוִד בְּבָרְחוֹ מִפְּנֵי אַבְשָׁלוֹם בְּנוֹ׃ יְהוָה מָה רַבּוּ צָרָי רַבִּים קָמִים עָלָי׃",
+        english: "A Psalm of David, when he fled from Absalom his son. Lord, how many are my foes! Many are rising against me."
+      },
+      11: {
+        hebrew: "בַּיהוָה חָסִיתִי אֵיךְ תֹּאמְרוּ לְנַפְשִׁי נוּדִי הַרְכֶם צִפּוֹר׃",
+        english: "In the Lord I take refuge; how can you say to my soul, 'Flee like a bird to your mountain'?"
+      },
+      12: {
+        hebrew: "הוֹשִׁיעָה יְהוָה כִּי גָמַר חָסִיד כִּי פָסוּ אֱמוּנִים מִבְּנֵי אָדָם׃",
+        english: "Save, O Lord, for the godly one is gone; for the faithful have vanished from among the children of man."
+      }
+    };
+
+    const text = tehillimTexts[perekNumber];
+    if (!text) {
+      return (
+        <div className="text-sm text-gray-600 italic text-center">
+          {isHebrew ? `פרק ${perekNumber} - טקסט מלא זמין בספר תהלים` : `Perek ${perekNumber} - Full text available in Tehillim book`}
+        </div>
+      );
+    }
+
+    return (
+      <div className={`text-sm leading-relaxed ${isHebrew ? 'text-right font-hebrew' : 'font-english'}`}>
+        {isHebrew ? text.hebrew : text.english}
+      </div>
+    );
+  };
 
   // Load Nishmas progress from localStorage
   useEffect(() => {
@@ -102,20 +186,33 @@ export default function TefillaModals() {
 
   return (
     <>
-      {/* Tehillim Modal */}
-      <Dialog open={activeModal === 'tehillim'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
+      {/* Tehillim Text Modal */}
+      <Dialog open={activeModal === 'tehillim-text'} onOpenChange={() => closeModal()}>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
           <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-serif font-semibold">Tehillim Cycle</DialogTitle>
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-lg font-serif font-semibold">Tehillim Text</h2>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowHebrew(!showHebrew)}
+                  className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
+                >
+                  {showHebrew ? 'EN' : 'עב'}
+                </Button>
+              </div>
+            </div>
           </DialogHeader>
-          
-          <div className="text-center text-gray-600 font-sans">
-            Today's Tehillim chapters (140-150) with translations and commentary...
+
+          {/* Tehillim Text */}
+          <div className="mb-6 bg-white/70 rounded-2xl p-4 border border-blush/10">
+            {getTehillimText(12, showHebrew)}
           </div>
 
           <Button 
             onClick={() => closeModal()} 
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
           >
             Close
           </Button>

@@ -314,24 +314,7 @@ export default function TefillaSection() {
               )}
             </div>
 
-            {/* Mark Done Button */}
-            <Button
-              onClick={completePerek}
-              disabled={completePerekMutation.isPending}
-              className="w-full rounded-2xl bg-gradient-feminine hover:opacity-90 text-white font-sans py-3 shadow-lg transition-all duration-300"
-            >
-              {completePerekMutation.isPending ? (
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Completing...</span>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center space-x-2">
-                  <CheckCircle size={16} />
-                  <span>Mark Done</span>
-                </div>
-              )}
-            </Button>
+
           </div>
         </div>
 
