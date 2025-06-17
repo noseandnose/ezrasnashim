@@ -2,7 +2,7 @@ import {
   calendarEvents, shopItems, 
   tehillimNames, globalTehillimProgress, minchaPrayers, sponsors, nishmasText,
   dailyHalacha, dailyMussar, dailyChizuk, loshonHorah,
-  shabbatRecipes, parshaVorts, campaigns,
+  shabbatRecipes, parshaVorts, campaigns, inspirationalQuotes,
   type CalendarEvent, type InsertCalendarEvent,
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
@@ -13,7 +13,8 @@ import {
   type LoshonHorah, type InsertLoshonHorah,
   type ShabbatRecipe, type InsertShabbatRecipe,
   type ParshaVort, type InsertParshaVort,
-  type Campaign, type InsertCampaign
+  type Campaign, type InsertCampaign,
+  type InspirationalQuote, type InsertInspirationalQuote
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, gt, lt, and } from "drizzle-orm";
@@ -74,6 +75,10 @@ export interface IStorage {
   getAllCampaigns(): Promise<Campaign[]>;
   createCampaign(campaign: InsertCampaign): Promise<Campaign>;
   updateCampaignProgress(id: number, amount: number): Promise<Campaign>;
+
+  // Inspirational quote methods
+  getInspirationalQuoteByDate(date: string): Promise<InspirationalQuote | undefined>;
+  createInspirationalQuote(quote: InsertInspirationalQuote): Promise<InspirationalQuote>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -361,6 +366,23 @@ export class DatabaseStorage implements IStorage {
       .where(eq(campaigns.id, id))
       .returning();
     return campaign;
+  }
+
+  async getInspirationalQuoteByDate(date: string): Promise<InspirationalQuote | undefined> {
+    const [quote] = await db
+      .select()
+      .from(inspirationalQuotes)
+      .where(eq(inspirationalQuotes.date, date))
+      .limit(1);
+    return quote;
+  }
+
+  async createInspirationalQuote(insertQuote: InsertInspirationalQuote): Promise<InspirationalQuote> {
+    const [quote] = await db
+      .insert(inspirationalQuotes)
+      .values(insertQuote)
+      .returning();
+    return quote;
   }
 }
 
