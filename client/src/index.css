@@ -97,11 +97,11 @@
 }
 
 .font-serif {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Playfair Display', serif !important;
 }
 
 .font-sans {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', sans-serif !important;
 }
 
 .gradient-feminine {
