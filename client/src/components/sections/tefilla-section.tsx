@@ -376,52 +376,7 @@ export default function TefillaSection() {
           </div>
         </div>
 
-        {/* Women's Blessings Section */}
-        <div className="bg-white rounded-3xl p-6 shadow-lg border border-blush/10">
-          <div className="flex items-center space-x-3 mb-5">
-            <div className="bg-gradient-feminine p-3 rounded-full">
-              <Calendar className="text-white" size={20} />
-            </div>
-            <div>
-              <h3 className="font-serif text-lg text-warm-gray">Women's Blessings</h3>
-              <p className="font-sans text-sm text-warm-gray/70">Blessings for Life Stages</p>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <button 
-              onClick={() => openModal('pregnancy-blessings')}
-              className="bg-gradient-to-br from-blush/8 to-ivory rounded-2xl p-4 text-left hover:scale-105 transition-all duration-300 border border-blush/15"
-            >
-              <h4 className="font-serif text-sm text-warm-gray mb-1">Pregnancy & Birth</h4>
-              <p className="font-sans text-xs text-warm-gray/60">Tefillos for Expectant Mothers</p>
-            </button>
-            
-            <button 
-              onClick={() => openModal('children-blessings')}
-              className="bg-gradient-to-br from-lavender/8 to-ivory rounded-2xl p-4 text-left hover:scale-105 transition-all duration-300 border border-lavender/15"
-            >
-              <h4 className="font-serif text-sm text-warm-gray mb-1">Children</h4>
-              <p className="font-sans text-xs text-warm-gray/60">Blessings for Child-rearing</p>
-            </button>
-            
-            <button 
-              onClick={() => openModal('home-blessings')}
-              className="bg-gradient-to-br from-sage/8 to-ivory rounded-2xl p-4 text-left hover:scale-105 transition-all duration-300 border border-sage/15"
-            >
-              <h4 className="font-serif text-sm text-warm-gray mb-1">Home & Family</h4>
-              <p className="font-sans text-xs text-warm-gray/60">Shalom Bayis Tefillos</p>
-            </button>
-            
-            <button 
-              onClick={() => openModal('spiritual-blessings')}
-              className="bg-gradient-to-br from-blush/8 to-ivory rounded-2xl p-4 text-left hover:scale-105 transition-all duration-300 border border-blush/15"
-            >
-              <h4 className="font-serif text-sm text-warm-gray mb-1">Spiritual Growth</h4>
-              <p className="font-sans text-xs text-warm-gray/60">Connection & Elevation</p>
-            </button>
-          </div>
-        </div>
+
 
         {/* Additional Services */}
         <div className="grid grid-cols-2 gap-4">
