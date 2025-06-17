@@ -46,12 +46,12 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       </div>
 
       {/* Today's Sponsor */}
-      <div className="gradient-soft-glow rounded-3xl p-3 border border-rose-blush/15 glow-hover transition-gentle">
+      <div className="gradient-soft-glow rounded-3xl p-4 border border-rose-blush/15 glow-hover transition-gentle">
         <div className="flex items-center space-x-3 mb-2">
           <div className="bg-rose-blush/20 p-2 rounded-full">
-            <Heart className="text-rose-blush" size={16} strokeWidth={1.5} />
+            <Heart className="text-rose-blush" size={18} strokeWidth={1.5} />
           </div>
-          <h3 className="font-serif text-base text-warm-gray tracking-wide">Today's Sponsor</h3>
+          <h3 className="font-serif text-lg text-warm-gray tracking-wide">Today's Sponsor</h3>
         </div>
         <p className="font-sans text-xs text-warm-gray/80 leading-relaxed">
           {sponsor ? 
@@ -62,13 +62,13 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       </div>
 
       {/* Today's Information */}
-      <div className="bg-soft-white rounded-3xl p-3 shadow-lg border border-rose-blush/10 glow-hover transition-gentle">
+      <div className="bg-soft-white rounded-3xl p-4 shadow-lg border border-rose-blush/10 glow-hover transition-gentle">
         <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center space-x-2">
-            <div className="gradient-quiet-joy p-1 rounded-full">
-              <Clock className="text-white" size={14} strokeWidth={1.5} />
+          <div className="flex items-center space-x-3">
+            <div className="gradient-quiet-joy p-2 rounded-full">
+              <Clock className="text-white" size={18} strokeWidth={1.5} />
             </div>
-            <h3 className="font-serif text-base text-warm-gray">Today</h3>
+            <h3 className="font-serif text-lg text-warm-gray">Today</h3>
           </div>
           <p className="font-sans text-xs text-warm-gray/70">{hebrewDate || "Loading..."}</p>
         </div>
@@ -93,10 +93,10 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         >
           <div className="flex items-center space-x-3">
             <div className="bg-gradient-feminine p-2 rounded-full">
-              <BookOpen className="text-white" size={16} strokeWidth={1.5} />
+              <BookOpen className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <div className="text-left flex-grow">
-              <h3 className="font-serif text-base text-warm-gray">Torah Learning</h3>
+              <h3 className="font-serif text-lg text-warm-gray">Torah Learning</h3>
               <p className="font-sans text-xs text-warm-gray/70">Daily Halacha, Mussar & Chizuk</p>
             </div>
           </div>
@@ -108,10 +108,10 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         >
           <div className="flex items-center space-x-3">
             <div className="bg-gradient-to-br from-blush to-lavender p-2 rounded-full">
-              <Heart className="text-white" size={16} strokeWidth={1.5} />
+              <Heart className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <div className="text-left flex-grow">
-              <h3 className="font-serif text-base text-warm-gray">Tefilla & Prayer</h3>
+              <h3 className="font-serif text-lg text-warm-gray">Tefilla & Prayer</h3>
               <p className="font-sans text-xs text-warm-gray/70">Tehillim, Mincha & Women's Prayers</p>
             </div>
           </div>
@@ -123,10 +123,10 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         >
           <div className="flex items-center space-x-3">
             <div className="bg-gradient-to-br from-muted-lavender to-rose-blush p-2 rounded-full">
-              <HandHeart className="text-white" size={16} strokeWidth={1.5} />
+              <HandHeart className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <div className="text-left flex-grow">
-              <h3 className="font-serif text-base text-warm-gray">Tzedaka & Giving</h3>
+              <h3 className="font-serif text-lg text-warm-gray">Tzedaka & Giving</h3>
               <p className="font-sans text-xs text-warm-gray/70">Support Torah Learning & Charity</p>
             </div>
           </div>
