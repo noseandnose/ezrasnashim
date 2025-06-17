@@ -43,7 +43,6 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       {/* Gentle Welcome */}
       <div className="text-center">
         <h1 className="font-serif text-3xl text-warm-gray mb-2 tracking-wide">Welcome to Ezras Nashim</h1>
-        <p className="font-sans text-warm-gray/70 text-sm leading-relaxed">Your quiet retreat for spiritual growth</p>
       </div>
 
       {/* Today's Sponsor */}
