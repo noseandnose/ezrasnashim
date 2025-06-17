@@ -74,13 +74,13 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         </div>
         
         <div className="grid grid-cols-2 gap-3 mb-3">
-          <div className="bg-gradient-to-br from-blush/8 to-ivory rounded-2xl p-2 text-center">
-            <p className="font-sans text-xs text-warm-gray/70 mb-1">Shkia</p>
-            <p className="font-serif text-sm text-warm-gray">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
+          <div className="bg-gradient-to-br from-blush/8 to-ivory rounded-2xl p-4 text-center">
+            <p className="font-sans text-xs text-warm-gray/70 mb-2">Shkia</p>
+            <p className="font-serif text-lg text-warm-gray font-medium">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
           </div>
-          <div className="bg-gradient-to-br from-lavender/8 to-ivory rounded-2xl p-2 text-center">
-            <p className="font-sans text-xs text-warm-gray/70 mb-1">Mincha</p>
-            <p className="font-serif text-sm text-warm-gray">{jewishTimesQuery.data?.minchaGedolah || "Loading..."}</p>
+          <div className="bg-gradient-to-br from-lavender/8 to-ivory rounded-2xl p-4 text-center">
+            <p className="font-sans text-xs text-warm-gray/70 mb-2">Mincha</p>
+            <p className="font-serif text-lg text-warm-gray font-medium">{jewishTimesQuery.data?.minchaGedolah || "Loading..."}</p>
           </div>
         </div>
         
@@ -99,7 +99,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         >
           <div className="flex items-center space-x-3">
             <div className="bg-gradient-feminine p-3 rounded-full">
-              <BookOpen className="text-white" size={20} />
+              <BookOpen className="text-white" size={20} strokeWidth={1.5} />
             </div>
             <div className="text-left flex-grow">
               <h3 className="font-serif text-base text-warm-gray mb-1">Torah Learning</h3>
@@ -114,7 +114,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         >
           <div className="flex items-center space-x-3">
             <div className="bg-gradient-to-br from-blush to-lavender p-3 rounded-full">
-              <Heart className="text-white" size={20} />
+              <Heart className="text-white" size={20} strokeWidth={1.5} />
             </div>
             <div className="text-left flex-grow">
               <h3 className="font-serif text-base text-warm-gray mb-1">Tefilla & Prayer</h3>
@@ -129,7 +129,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         >
           <div className="flex items-center space-x-3">
             <div className="bg-gradient-to-br from-lavender to-sage p-3 rounded-full">
-              <HandHeart className="text-white" size={20} />
+              <HandHeart className="text-white" size={20} strokeWidth={1.5} />
             </div>
             <div className="text-left flex-grow">
               <h3 className="font-serif text-base text-warm-gray mb-1">Tzedaka & Giving</h3>
