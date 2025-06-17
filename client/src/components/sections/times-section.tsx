@@ -1,4 +1,4 @@
-import { Sun, Calendar, Plus, MapPin } from "lucide-react";
+import { Sun, Calendar, Plus, MapPin, Clock, Moon, Sunrise, Sunset, Star, Timer } from "lucide-react";
 import { useJewishTimes, useGeolocation, useLocationStore } from "@/hooks/use-jewish-times";
 import { useModalStore } from "@/lib/types";
 

@@ -1,4 +1,4 @@
-import { Heart, BookOpen, Shield, Plus } from "lucide-react";
+import { Heart, BookOpen, Shield, Plus, HandHeart, Gift, Star, Sparkles, Target, Users, DollarSign, TrendingUp } from "lucide-react";
 import { useModalStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import type { Campaign } from "@shared/schema";
