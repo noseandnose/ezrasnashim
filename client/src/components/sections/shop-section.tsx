@@ -75,7 +75,7 @@ export default function ShopSection() {
       </div>
 
       {/* Featured Store Banner */}
-      <div className="bg-gradient-to-r from-blush/10 to-lavender/10 border border-blush/20 rounded-3xl p-3 mb-4 shadow-lg">
+      <div className="bg-gradient-soft rounded-3xl p-3 mb-4 shadow-lg">
         <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
           <Store className="text-white" size={18} strokeWidth={1.5} />
         </div>

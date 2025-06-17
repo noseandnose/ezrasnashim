@@ -85,7 +85,7 @@ export default function TorahSection() {
       </div>
 
       {/* Inspirational Quote */}
-      <div className="bg-gradient-to-r from-blush/10 to-lavender/10 border border-blush/20 rounded-3xl p-3 shadow-lg">
+      <div className="bg-gradient-soft rounded-3xl p-3 shadow-lg">
         <p className="font-sans text-xs text-warm-gray/80 italic text-center leading-relaxed">
           "{quote?.text || 'Turn it over and over, for everything is in it. Look into it, grow old and worn over it, and never move away from it, for there is no better portion than it.'}"
         </p>
