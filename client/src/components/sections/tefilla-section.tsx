@@ -328,60 +328,129 @@ export default function TefillaSection() {
           </div>
         </div>
 
-        {/* Grid of 4 Square Buttons */}
-        <div className="grid grid-cols-2 gap-3">
-          {/* Mincha */}
-          <div 
-            className="content-card rounded-2xl p-4 cursor-pointer hover:scale-105 transition-transform"
+        {/* Personal Prayer Section */}
+        <div className="bg-white rounded-3xl p-6 shadow-lg border border-blush/10">
+          <div className="flex items-center space-x-3 mb-5">
+            <div className="bg-gradient-feminine p-3 rounded-full">
+              <HandHeart className="text-white" size={20} />
+            </div>
+            <div>
+              <h3 className="font-serif text-lg text-warm-gray">Personal Prayers</h3>
+              <p className="font-sans text-sm text-warm-gray/70">Categories for your Tefillos</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <button 
+              onClick={() => openModal('refuah-prayers')}
+              className="bg-gradient-to-br from-blush/10 to-blush/5 rounded-2xl p-4 text-center hover:scale-105 transition-all duration-300 border border-blush/20"
+            >
+              <div className="bg-blush/20 p-3 rounded-full mx-auto mb-2 w-fit">
+                <Heart className="text-blush" size={18} />
+              </div>
+              <h4 className="font-serif text-sm text-warm-gray">Refuah</h4>
+              <p className="font-sans text-xs text-warm-gray/60 mt-1">Healing</p>
+            </button>
+            
+            <button 
+              onClick={() => openModal('shidduch-prayers')}
+              className="bg-gradient-to-br from-lavender/10 to-lavender/5 rounded-2xl p-4 text-center hover:scale-105 transition-all duration-300 border border-lavender/20"
+            >
+              <div className="bg-lavender/20 p-3 rounded-full mx-auto mb-2 w-fit">
+                <Heart className="text-lavender" size={18} />
+              </div>
+              <h4 className="font-serif text-sm text-warm-gray">Shidduch</h4>
+              <p className="font-sans text-xs text-warm-gray/60 mt-1">Finding Love</p>
+            </button>
+            
+            <button 
+              onClick={() => openModal('parnassah-prayers')}
+              className="bg-gradient-to-br from-sage/10 to-sage/5 rounded-2xl p-4 text-center hover:scale-105 transition-all duration-300 border border-sage/20"
+            >
+              <div className="bg-sage/20 p-3 rounded-full mx-auto mb-2 w-fit">
+                <HandHeart className="text-sage" size={18} />
+              </div>
+              <h4 className="font-serif text-sm text-warm-gray">Parnassah</h4>
+              <p className="font-sans text-xs text-warm-gray/60 mt-1">Livelihood</p>
+            </button>
+          </div>
+        </div>
+
+        {/* Women's Blessings Section */}
+        <div className="bg-white rounded-3xl p-6 shadow-lg border border-blush/10">
+          <div className="flex items-center space-x-3 mb-5">
+            <div className="bg-gradient-feminine p-3 rounded-full">
+              <Calendar className="text-white" size={20} />
+            </div>
+            <div>
+              <h3 className="font-serif text-lg text-warm-gray">Women's Blessings</h3>
+              <p className="font-sans text-sm text-warm-gray/70">Blessings for Life Stages</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <button 
+              onClick={() => openModal('pregnancy-blessings')}
+              className="bg-gradient-to-br from-blush/8 to-ivory rounded-2xl p-4 text-left hover:scale-105 transition-all duration-300 border border-blush/15"
+            >
+              <h4 className="font-serif text-sm text-warm-gray mb-1">Pregnancy & Birth</h4>
+              <p className="font-sans text-xs text-warm-gray/60">Tefillos for Expectant Mothers</p>
+            </button>
+            
+            <button 
+              onClick={() => openModal('children-blessings')}
+              className="bg-gradient-to-br from-lavender/8 to-ivory rounded-2xl p-4 text-left hover:scale-105 transition-all duration-300 border border-lavender/15"
+            >
+              <h4 className="font-serif text-sm text-warm-gray mb-1">Children</h4>
+              <p className="font-sans text-xs text-warm-gray/60">Blessings for Child-rearing</p>
+            </button>
+            
+            <button 
+              onClick={() => openModal('home-blessings')}
+              className="bg-gradient-to-br from-sage/8 to-ivory rounded-2xl p-4 text-left hover:scale-105 transition-all duration-300 border border-sage/15"
+            >
+              <h4 className="font-serif text-sm text-warm-gray mb-1">Home & Family</h4>
+              <p className="font-sans text-xs text-warm-gray/60">Shalom Bayis Tefillos</p>
+            </button>
+            
+            <button 
+              onClick={() => openModal('spiritual-blessings')}
+              className="bg-gradient-to-br from-blush/8 to-ivory rounded-2xl p-4 text-left hover:scale-105 transition-all duration-300 border border-blush/15"
+            >
+              <h4 className="font-serif text-sm text-warm-gray mb-1">Spiritual Growth</h4>
+              <p className="font-sans text-xs text-warm-gray/60">Connection & Elevation</p>
+            </button>
+          </div>
+        </div>
+
+        {/* Additional Services */}
+        <div className="grid grid-cols-2 gap-4">
+          <button 
             onClick={() => openModal('mincha')}
+            className="bg-white rounded-3xl p-5 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
           >
-            <div className="text-center">
-              <Clock className="text-peach mb-2 mx-auto" size={32} />
-              <h3 className="font-semibold text-sm">Mincha</h3>
-              <p className="text-xs text-gray-600 mt-1">
-                {isLoading ? "Loading..." : 
-                 times?.minchaGedolah && times?.minchaKetanah ? 
-                 `${times.minchaGedolah} - ${times.minchaKetanah}` : 
-                 "Loading..."}
-              </p>
+            <div className="bg-gradient-feminine p-3 rounded-full mx-auto mb-3 w-fit">
+              <Clock className="text-white" size={20} />
             </div>
-          </div>
+            <h3 className="font-serif text-sm text-warm-gray mb-1">Mincha Times</h3>
+            <p className="font-sans text-xs text-warm-gray/60">
+              {isLoading ? "Loading..." : 
+               times?.minchaGedolah && times?.minchaKetanah ? 
+               `${times.minchaGedolah} - ${times.minchaKetanah}` : 
+               "Loading..."}
+            </p>
+          </button>
 
-          {/* Women's Prayers */}
-          <div 
-            className="content-card rounded-2xl p-4 cursor-pointer hover:scale-105 transition-transform"
-            onClick={() => openModal('womens-prayers')}
-          >
-            <div className="text-center">
-              <HandHeart className="text-blush mb-2 mx-auto" size={32} />
-              <h3 className="font-semibold text-sm">Women's Prayers</h3>
-              <p className="text-xs text-gray-600 mt-1">Blessings & Tefillos</p>
-            </div>
-          </div>
-
-          {/* Nishmas 40-Day Campaign */}
-          <div 
-            className="content-card rounded-2xl p-4 cursor-pointer hover:scale-105 transition-transform"
+          <button 
             onClick={() => openModal('nishmas-campaign')}
+            className="bg-white rounded-3xl p-5 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
           >
-            <div className="text-center">
-              <Heart className="text-rose-500 mb-2 mx-auto" size={32} />
-              <h3 className="font-semibold text-sm">Nishmas Campaign</h3>
-              <p className="text-xs text-gray-600 mt-1">40 Days for Yeshuos</p>
+            <div className="bg-gradient-feminine p-3 rounded-full mx-auto mb-3 w-fit">
+              <Heart className="text-white" size={20} />
             </div>
-          </div>
-
-          {/* Hebrew Date Calculator */}
-          <div 
-            className="content-card rounded-2xl p-4 cursor-pointer hover:scale-105 transition-transform"
-            onClick={() => openModal('date-calculator')}
-          >
-            <div className="text-center">
-              <Calendar className="text-purple-500 mb-2 mx-auto" size={32} />
-              <h3 className="font-semibold text-sm">Date Calculator</h3>
-              <p className="text-xs text-gray-600 mt-1">Convert & Add Events</p>
-            </div>
-          </div>
+            <h3 className="font-serif text-sm text-warm-gray mb-1">Nishmas Campaign</h3>
+            <p className="font-sans text-xs text-warm-gray/60">40 Days for Yeshuos</p>
+          </button>
         </div>
       </div>
       {/* Bottom padding to prevent last element from being cut off by navigation */}

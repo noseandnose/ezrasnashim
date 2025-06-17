@@ -37,106 +37,104 @@ export default function TzedakaSection() {
   ];
 
   return (
-    <div className="h-full p-4">
-      <div className="space-y-4 h-full">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <div className="flex items-center justify-center mb-2">
-            <Heart className="text-blush mr-2" size={24} />
-            <h2 className="text-lg font-semibold">Tzedaka & Donations</h2>
-          </div>
-          <p className="text-sm text-gray-600">
-            Support meaningful causes in our community
-          </p>
-        </div>
+    <div className="p-4 space-y-6">
+      {/* Header */}
+      <div className="text-center">
+        <h2 className="font-serif text-2xl text-warm-gray mb-2">Tzedaka & Giving</h2>
+        <p className="font-sans text-warm-gray/70 text-sm">Supporting our community with love and generosity</p>
+      </div>
 
-        {/* Campaign Card with Progress Bar - Always visible */}
-        <div
-          className="content-card rounded-2xl p-4 cursor-pointer transition-all hover:shadow-md"
-          onClick={() => openModal('campaign')}
-        >
-          <div className="space-y-3">
-            <div className="flex items-center space-x-4">
-              <div className="p-3 rounded-xl bg-blush/10">
-                <BookOpen className="text-blush" size={24} />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-sm mb-1">Campaign</h3>
-                <p className="text-xs text-gray-600 leading-relaxed">
-                  {campaignTitle}
-                </p>
-              </div>
-              <Plus className="text-gray-400" size={16} />
-            </div>
-            
-            {/* Progress Bar */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs">
-                <span className="text-gray-600">Progress</span>
-                <span className="font-medium text-blush">${currentAmount.toLocaleString()} / ${goalAmount.toLocaleString()}</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="h-2 rounded-full transition-all duration-300"
-                  style={{ 
-                    width: `${progressPercentage}%`,
-                    background: 'linear-gradient(90deg, hsl(328, 85%, 70%) 0%, hsl(28, 100%, 70%) 100%)'
-                  }}
-                ></div>
-              </div>
-              <div className="text-xs text-gray-600 text-center">
-                {progressPercentage}% Complete
-              </div>
-            </div>
+      {/* Campaign Card with Progress Bar */}
+      <div className="bg-white rounded-3xl p-6 shadow-lg border border-blush/10">
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="bg-gradient-feminine p-3 rounded-full">
+            <BookOpen className="text-white" size={20} />
+          </div>
+          <div>
+            <h3 className="font-serif text-lg text-warm-gray">{campaignTitle}</h3>
+            <p className="font-sans text-sm text-warm-gray/70">Support our community</p>
           </div>
         </div>
-
-        {/* Other Tzedaka Options */}
+        
+        {/* Progress Bar */}
         <div className="space-y-3">
-          {tzedakaOptions.map((option) => (
-            <div
-              key={option.id}
-              className="content-card rounded-2xl p-4 cursor-pointer transition-all hover:shadow-md"
-              onClick={() => openModal(option.id)}
-            >
-              <div className="flex items-center space-x-4">
-                <div className={`p-3 rounded-xl ${option.bgColor}`}>
-                  <option.icon className={option.color} size={24} />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-sm mb-1">{option.title}</h3>
-                  <p className="text-xs text-gray-600 leading-relaxed">
-                    {option.description}
-                  </p>
-                </div>
-                <Plus className="text-gray-400" size={16} />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Community Impact */}
-        <div className="content-card rounded-2xl p-4 bg-gradient-to-r from-blush/5 to-peach/5">
+          <div className="flex justify-between">
+            <span className="font-sans text-sm text-warm-gray/70">Progress</span>
+            <span className="font-serif text-sm text-warm-gray">${currentAmount.toLocaleString()} / ${goalAmount.toLocaleString()}</span>
+          </div>
+          <div className="w-full bg-blush/20 rounded-full h-3">
+            <div 
+              className="h-3 rounded-full bg-gradient-feminine transition-all duration-500"
+              style={{ width: `${progressPercentage}%` }}
+            ></div>
+          </div>
           <div className="text-center">
-            <h3 className="font-semibold text-sm mb-2">Community Impact</h3>
-            <div className="grid grid-cols-3 gap-3 text-xs">
-              <div>
-                <div className="font-medium text-sage">142</div>
-                <div className="text-gray-600">Days Sponsored</div>
-              </div>
-              <div>
-                <div className="font-medium text-blush">3</div>
-                <div className="text-gray-600">Campaigns Completed</div>
-              </div>
-              <div>
-                <div className="font-medium text-peach">$24,580</div>
-                <div className="text-gray-600">Total to Causes</div>
-              </div>
+            <span className="font-serif text-lg text-warm-gray">{progressPercentage}%</span>
+            <span className="font-sans text-sm text-warm-gray/70 ml-1">Complete</span>
+          </div>
+        </div>
+        
+        <button 
+          onClick={() => openModal('campaign')}
+          className="w-full mt-4 bg-gradient-feminine text-white rounded-2xl py-3 hover:opacity-90 transition-all duration-300 font-sans"
+        >
+          Donate Now
+        </button>
+      </div>
+
+      {/* Tzedaka Options */}
+      <div className="grid grid-cols-1 gap-4">
+        <button
+          onClick={() => openModal('causes')}
+          className="bg-white rounded-3xl p-6 shadow-lg hover:scale-105 transition-all duration-300 border border-blush/10 text-left"
+        >
+          <div className="flex items-center space-x-4">
+            <div className="bg-gradient-to-br from-blush/20 to-lavender/20 p-4 rounded-full">
+              <Shield className="text-blush" size={24} />
             </div>
+            <div className="flex-grow">
+              <h3 className="font-serif text-lg text-warm-gray mb-1">Support Causes</h3>
+              <p className="font-sans text-sm text-warm-gray/70">Fertility support, women's shelters, and kollels</p>
+            </div>
+          </div>
+        </button>
+
+        <button
+          onClick={() => openModal('sponsor-day')}
+          className="bg-white rounded-3xl p-6 shadow-lg hover:scale-105 transition-all duration-300 border border-blush/10 text-left"
+        >
+          <div className="flex items-center space-x-4">
+            <div className="bg-gradient-to-br from-lavender/20 to-sage/20 p-4 rounded-full">
+              <Heart className="text-lavender" size={24} />
+            </div>
+            <div className="flex-grow">
+              <h3 className="font-serif text-lg text-warm-gray mb-1">Sponsor a Day</h3>
+              <p className="font-sans text-sm text-warm-gray/70">Dedicate all mitzvot done on the app</p>
+            </div>
+          </div>
+        </button>
+      </div>
+
+      {/* Community Impact */}
+      <div className="bg-gradient-to-r from-blush/10 to-lavender/10 rounded-3xl p-6 border border-blush/20">
+        <h3 className="font-serif text-lg text-warm-gray text-center mb-4">Community Impact</h3>
+        <div className="grid grid-cols-3 gap-4 text-center">
+          <div>
+            <div className="font-serif text-2xl text-blush">142</div>
+            <div className="font-sans text-xs text-warm-gray/70">Days Sponsored</div>
+          </div>
+          <div>
+            <div className="font-serif text-2xl text-lavender">3</div>
+            <div className="font-sans text-xs text-warm-gray/70">Campaigns Completed</div>
+          </div>
+          <div>
+            <div className="font-serif text-2xl text-sage">$24,580</div>
+            <div className="font-sans text-xs text-warm-gray/70">Total Raised</div>
           </div>
         </div>
       </div>
-      {/* Bottom padding to prevent last element from being cut off by navigation */}
+
+      {/* Bottom padding */}
       <div className="h-24"></div>
     </div>
   );

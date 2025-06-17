@@ -9,50 +9,77 @@ export default function TorahSection() {
       id: 'halacha',
       icon: Book,
       title: 'Daily Halacha',
-      subtitle: 'Laws of Chanukah',
-      color: 'text-blush'
+      subtitle: 'Jewish Law & Practice',
+      gradient: 'from-blush/8 to-ivory',
+      iconBg: 'bg-blush/20',
+      iconColor: 'text-blush',
+      border: 'border-blush/15'
     },
     {
       id: 'mussar',
       icon: Heart,
       title: 'Daily Mussar',
-      subtitle: 'Building Character',
-      color: 'text-peach'
+      subtitle: 'Character Development',
+      gradient: 'from-lavender/8 to-ivory',
+      iconBg: 'bg-lavender/20',
+      iconColor: 'text-lavender',
+      border: 'border-lavender/15'
     },
     {
       id: 'chizuk',
       icon: Play,
       title: 'Daily Chizuk',
-      subtitle: '5 min audio',
-      color: 'text-blush'
+      subtitle: '5 minute inspiration',
+      gradient: 'from-sage/8 to-ivory',
+      iconBg: 'bg-sage/20',
+      iconColor: 'text-sage',
+      border: 'border-sage/15'
     },
     {
       id: 'loshon',
       icon: Shield,
       title: 'Loshon Horah',
-      subtitle: 'Guard Your Speech',
-      color: 'text-peach'
+      subtitle: 'Guarding Your Speech',
+      gradient: 'from-blush/8 to-ivory',
+      iconBg: 'bg-blush/20',
+      iconColor: 'text-blush',
+      border: 'border-blush/15'
     }
   ];
 
   return (
-    <div className="h-full p-4">
-      <div className="grid grid-cols-2 gap-3 h-full">
-        {torahItems.map(({ id, icon: Icon, title, subtitle, color }) => (
-          <div
+    <div className="p-4 space-y-6">
+      {/* Welcome Header */}
+      <div className="text-center">
+        <h2 className="font-serif text-2xl text-warm-gray mb-2">Daily Torah Learning</h2>
+        <p className="font-sans text-warm-gray/70 text-sm">Nourish your soul with wisdom and inspiration</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        {torahItems.map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border }) => (
+          <button
             key={id}
-            className="content-card rounded-2xl p-4 cursor-pointer hover:scale-105 transition-transform"
+            className={`bg-gradient-to-br ${gradient} rounded-3xl p-6 text-center hover:scale-105 transition-all duration-300 shadow-lg border ${border}`}
             onClick={() => openModal(id)}
           >
-            <div className="text-center">
-              <Icon className={`text-2xl ${color} mb-2 mx-auto`} size={32} />
-              <h3 className="font-semibold text-sm">{title}</h3>
-              <p className="text-xs text-gray-600 mt-1">{subtitle}</p>
+            <div className={`${iconBg} p-4 rounded-full mx-auto mb-4 w-fit`}>
+              <Icon className={`${iconColor}`} size={24} />
             </div>
-          </div>
+            <h3 className="font-serif text-sm text-warm-gray mb-2">{title}</h3>
+            <p className="font-sans text-xs text-warm-gray/60 leading-relaxed">{subtitle}</p>
+          </button>
         ))}
       </div>
-      {/* Bottom padding to prevent last element from being cut off by navigation */}
+
+      {/* Inspirational Quote */}
+      <div className="bg-gradient-to-r from-blush/10 to-lavender/10 rounded-3xl p-6 border border-blush/20">
+        <p className="font-sans text-sm text-warm-gray/80 italic text-center leading-relaxed">
+          "Turn it over and over, for everything is in it. Look into it, grow old and worn over it, and never move away from it, for there is no better portion than it."
+        </p>
+        <p className="font-serif text-xs text-warm-gray/60 text-center mt-2">- Pirkei Avot 5:22</p>
+      </div>
+
+      {/* Bottom padding */}
       <div className="h-24"></div>
     </div>
   );

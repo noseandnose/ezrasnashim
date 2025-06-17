@@ -39,87 +39,105 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   };
 
   return (
-    <div className="p-4 space-y-3 overflow-y-auto">
-      {/* Today's Sponsor - Single line */}
-      <Card className="p-2 bg-gradient-to-r from-pink-50 to-peach-50 border-pink-200">
-        <div className="flex items-center space-x-2">
-          <Heart className="text-pink-600" size={16} />
-          <p className="text-xs text-pink-700 leading-tight">
-            {sponsor ? 
-              (sponsor.message || `Today has been sponsored by ${sponsor.name}`) :
-              "Today has been sponsored by the Cohen family - In memory of Sarah bas Avraham"
-            }
+    <div className="p-4 space-y-6 overflow-y-auto">
+      {/* Warm Welcome */}
+      <div className="text-center">
+        <h1 className="font-serif text-3xl text-warm-gray mb-2">Welcome to Ezras Nashim</h1>
+        <p className="font-sans text-warm-gray/70 text-sm">Your spiritual companion for daily growth</p>
+      </div>
+
+      {/* Today's Sponsor */}
+      <div className="bg-gradient-to-r from-blush/10 to-lavender/10 rounded-3xl p-5 border border-blush/20">
+        <div className="flex items-center space-x-3 mb-2">
+          <div className="bg-blush/20 p-2 rounded-full">
+            <Heart className="text-blush" size={16} />
+          </div>
+          <h3 className="font-serif text-sm text-warm-gray">Today's Sponsor</h3>
+        </div>
+        <p className="font-sans text-sm text-warm-gray/80 leading-relaxed">
+          {sponsor ? 
+            (sponsor.message || `Today has been lovingly sponsored by ${sponsor.name}`) :
+            "Today has been sponsored by the Cohen family - In memory of Sarah bas Avraham"
+          }
+        </p>
+      </div>
+
+      {/* Today's Information */}
+      <div className="bg-white rounded-3xl p-6 shadow-lg border border-blush/10">
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="bg-gradient-feminine p-3 rounded-full">
+            <Clock className="text-white" size={20} />
+          </div>
+          <div>
+            <h3 className="font-serif text-lg text-warm-gray">Today</h3>
+            <p className="font-sans text-sm text-warm-gray/70">{hebrewDate || "Loading Hebrew date..."}</p>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="bg-gradient-to-br from-blush/8 to-ivory rounded-2xl p-3 text-center">
+            <p className="font-sans text-xs text-warm-gray/70 mb-1">Shkia</p>
+            <p className="font-serif text-lg text-warm-gray">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
+          </div>
+          <div className="bg-gradient-to-br from-lavender/8 to-ivory rounded-2xl p-3 text-center">
+            <p className="font-sans text-xs text-warm-gray/70 mb-1">Mincha</p>
+            <p className="font-serif text-lg text-warm-gray">{jewishTimesQuery.data?.minchaGedolah || "Loading..."}</p>
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-r from-ivory to-blush/5 rounded-2xl p-4 text-center">
+          <p className="font-sans text-sm text-warm-gray/80 italic leading-relaxed">
+            "May your day be filled with Torah learning, meaningful tefillah, and acts of chesed."
           </p>
         </div>
-      </Card>
+      </div>
 
-      {/* Today Section - Ultra Compact */}
-      <Card className="p-3">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center space-x-2">
-            <Clock className="text-sage" size={16} />
-            <h3 className="font-semibold text-gray-800 text-sm">Today</h3>
-            <span className="text-xs text-gray-600">• {hebrewDate || "Loading..."}</span>
-          </div>
-        </div>
-        <div className="flex justify-between text-xs mb-2">
-          <div className="flex items-center space-x-1">
-            <span className="text-gray-600">Shkia:</span>
-            <span className="font-medium">{jewishTimesQuery.data?.shkia || "Loading..."}</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <span className="text-gray-600">Mincha:</span>
-            <span className="font-medium">{jewishTimesQuery.data?.minchaGedolah || "Loading..."}</span>
-          </div>
-        </div>
-        <p className="text-xs text-gray-600 italic leading-tight">
-          "May your day be filled with Torah learning, meaningful tefillah, and acts of chesed."
-        </p>
-      </Card>
-
-      {/* Main Action Buttons - Balanced Prominence */}
-      <div className="grid gap-3 mt-2">
-        {/* Torah Button */}
-        <Button
+      {/* Main Action Buttons */}
+      <div className="space-y-4">
+        <button
           onClick={() => navigateToSection('torah')}
-          className="h-18 gradient-blush-peach text-[#4a4a4a] rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 justify-start px-6"
+          className="w-full bg-white rounded-3xl p-6 shadow-lg hover:scale-105 transition-all duration-300 border border-blush/10"
         >
-          <div className="flex items-center justify-start w-full space-x-4">
-            <BookOpen size={28} className="flex-shrink-0" />
+          <div className="flex items-center space-x-4">
+            <div className="bg-gradient-feminine p-4 rounded-full">
+              <BookOpen className="text-white" size={24} />
+            </div>
             <div className="text-left flex-grow">
-              <div className="font-bold text-base">Torah</div>
-              <div className="text-sm opacity-90">Daily Halacha, Mussar & Chizuk</div>
+              <h3 className="font-serif text-lg text-warm-gray mb-1">Torah Learning</h3>
+              <p className="font-sans text-sm text-warm-gray/70">Daily Halacha, Mussar & Chizuk</p>
             </div>
           </div>
-        </Button>
+        </button>
 
-        {/* Tefilla Button */}
-        <Button
+        <button
           onClick={() => navigateToSection('tefilla')}
-          className="h-18 gradient-sage text-[#4a4a4a] rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 justify-start px-6"
+          className="w-full bg-white rounded-3xl p-6 shadow-lg hover:scale-105 transition-all duration-300 border border-blush/10"
         >
-          <div className="flex items-center justify-start w-full space-x-4">
-            <Heart size={28} className="flex-shrink-0" />
+          <div className="flex items-center space-x-4">
+            <div className="bg-gradient-to-br from-blush to-lavender p-4 rounded-full">
+              <Heart className="text-white" size={24} />
+            </div>
             <div className="text-left flex-grow">
-              <div className="font-bold text-base">Tefilla</div>
-              <div className="text-sm opacity-90">Tehillim, Mincha & Women's Prayers</div>
+              <h3 className="font-serif text-lg text-warm-gray mb-1">Tefilla & Prayer</h3>
+              <p className="font-sans text-sm text-warm-gray/70">Tehillim, Mincha & Women's Prayers</p>
             </div>
           </div>
-        </Button>
+        </button>
 
-        {/* Tzedaka Button */}
-        <Button
+        <button
           onClick={() => navigateToSection('tzedaka')}
-          className="h-18 gradient-lavender text-[#4a4a4a] rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 justify-start px-6"
+          className="w-full bg-white rounded-3xl p-6 shadow-lg hover:scale-105 transition-all duration-300 border border-blush/10"
         >
-          <div className="flex items-center justify-start w-full space-x-4">
-            <HandHeart size={28} className="flex-shrink-0" />
+          <div className="flex items-center space-x-4">
+            <div className="bg-gradient-to-br from-lavender to-sage p-4 rounded-full">
+              <HandHeart className="text-white" size={24} />
+            </div>
             <div className="text-left flex-grow">
-              <div className="font-bold text-base">Tzedaka</div>
-              <div className="text-sm opacity-90">Support & Sponsor Learning</div>
+              <h3 className="font-serif text-lg text-warm-gray mb-1">Tzedaka & Giving</h3>
+              <p className="font-sans text-sm text-warm-gray/70">Support Torah Learning & Charity</p>
             </div>
           </div>
-        </Button>
+        </button>
       </div>
     </div>
   );
