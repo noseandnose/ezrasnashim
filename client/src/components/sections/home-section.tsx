@@ -45,43 +45,42 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         <h1 className="font-serif text-2xl text-warm-gray mb-1 tracking-wide">Welcome to Ezras Nashim</h1>
       </div>
 
-      {/* Today's Sponsor */}
-      <div className="gradient-soft-glow rounded-3xl p-3 border border-rose-blush/15 glow-hover transition-gentle">
-        <div className="flex items-center space-x-3 mb-2">
-          <div className="bg-soft-white p-2 rounded-full">
-            <Heart className="text-rose-blush" size={18} strokeWidth={1.5} />
-          </div>
-          <h3 className="font-serif text-lg text-warm-gray tracking-wide">Today's Sponsor</h3>
-        </div>
-        <p className="font-sans text-xs text-warm-gray/80 leading-relaxed">
-          {sponsor ? 
-            (sponsor.message || `Today has been lovingly sponsored by ${sponsor.name}`) :
-            "Today has been sponsored by the Cohen family - In memory of Sarah bas Avraham"
-          }
-        </p>
-      </div>
-
-      {/* Today's Information */}
-      <div className="bg-soft-white rounded-3xl p-3 shadow-lg border border-rose-blush/10 glow-hover transition-gentle">
-        <div className="flex items-center justify-between mb-2">
+      {/* Today's Information & Sponsor */}
+      <div className="bg-gradient-soft rounded-3xl p-3 shadow-lg">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-3">
-            <div className="gradient-quiet-joy p-2 rounded-full">
+            <div className="bg-gradient-feminine p-2 rounded-full">
               <Clock className="text-white" size={18} strokeWidth={1.5} />
             </div>
-            <h3 className="font-serif text-lg text-warm-gray">Today</h3>
+            <h3 className="font-serif text-lg text-warm-gray tracking-wide">Today</h3>
           </div>
           <p className="font-sans text-xs text-warm-gray/70">{hebrewDate || "Loading..."}</p>
         </div>
         
-        <div className="grid grid-cols-2 gap-2">
-          <div className="bg-gradient-to-br from-blush/8 to-ivory rounded-xl p-2 text-center">
+        {/* Times Grid */}
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
             <p className="font-sans text-xs text-warm-gray/70">Shkia</p>
             <p className="font-serif text-base text-warm-gray font-medium">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
           </div>
-          <div className="bg-gradient-to-br from-lavender/8 to-ivory rounded-xl p-2 text-center">
+          <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
             <p className="font-sans text-xs text-warm-gray/70">Mincha</p>
             <p className="font-serif text-base text-warm-gray font-medium">{jewishTimesQuery.data?.minchaGedolah || "Loading..."}</p>
           </div>
+        </div>
+
+        {/* Sponsor Section */}
+        <div className="bg-white/50 rounded-xl p-3 border border-blush/10">
+          <div className="flex items-center space-x-2 mb-2">
+            <Heart className="text-warm-gray/60" size={16} strokeWidth={1.5} />
+            <h4 className="font-serif text-sm text-warm-gray tracking-wide">Today's Sponsor</h4>
+          </div>
+          <p className="font-sans text-xs text-warm-gray/80 leading-relaxed">
+            {sponsor ? 
+              (sponsor.message || `Today has been lovingly sponsored by ${sponsor.name}`) :
+              "Today has been sponsored by the Cohen family - In memory of Sarah bas Avraham"
+            }
+          </p>
         </div>
       </div>
 
