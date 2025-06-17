@@ -65,10 +65,10 @@ export default function ShopSection() {
                 {/* Content overlay */}
                 <div className="relative h-full flex items-center justify-between p-4">
                   <div className="flex-1">
-                    <h3 className="font-semibold text-white text-sm leading-tight">
+                    <h3 className="font-serif font-semibold text-white text-sm leading-tight">
                       {item.title}
                     </h3>
-                    <p className="text-white/90 text-xs mt-1">
+                    <p className="font-sans text-white/90 text-xs mt-1">
                       {item.storeName}
                     </p>
                   </div>
