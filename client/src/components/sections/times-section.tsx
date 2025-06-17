@@ -18,7 +18,7 @@ export default function TimesSection() {
   };
 
   return (
-    <div className="h-full p-4">
+    <div className="h-full p-3">
       <div className="space-y-3 h-full">
         {/* Today's Times */}
         <div className="content-card rounded-2xl p-4">

@@ -16,7 +16,7 @@ export default function ShopSection() {
 
   if (isLoading) {
     return (
-      <div className="h-full p-4 flex items-center justify-center">
+      <div className="h-full p-3 flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-blush/20 border-t-blush rounded-full" />
       </div>
     );

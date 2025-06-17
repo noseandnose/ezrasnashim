@@ -155,7 +155,7 @@ export default function TefillaSection() {
   };
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-3 space-y-4">
       {/* Personalized Welcome Message */}
       <div className="bg-gradient-to-r from-blush/10 to-lavender/10 rounded-3xl p-6 text-center border border-blush/20">
         <h2 className="font-serif text-2xl text-warm-gray mb-2">
