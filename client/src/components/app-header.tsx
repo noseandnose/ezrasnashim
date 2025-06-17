@@ -14,9 +14,9 @@ export default function AppHeader() {
   };
 
   return (
-    <header className="gradient-header p-3 text-white">
-      <div className="flex items-center justify-start text-[#4a4a4a] pl-3">
-        <h1 className="font-serif text-xl font-semibold">Ezras Nashim</h1>
+    <header className="bg-gradient-to-r from-blush/10 to-lavender/10 backdrop-blur-sm border-b border-blush/20 p-4">
+      <div className="flex items-center justify-center">
+        <h1 className="font-serif text-2xl font-semibold text-warm-gray">Ezras Nashim</h1>
       </div>
     </header>
   );

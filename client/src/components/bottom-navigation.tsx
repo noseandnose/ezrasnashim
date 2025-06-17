@@ -16,36 +16,49 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
   ];
 
   return (
-    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-100 shadow-lg">
-      <div className="flex items-center justify-between py-2 px-4">
+    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur-sm border-t border-blush/20 shadow-2xl rounded-t-3xl">
+      <div className="flex items-center justify-between py-3 px-6">
         {navItems.map(({ id, icon: Icon, label, isCenter }) => (
           <button
             key={id}
             onClick={() => onSectionChange(id)}
-            className={`nav-tab flex flex-col items-center rounded-lg transition-all duration-200 ${
+            className={`flex flex-col items-center transition-all duration-300 ${
               isCenter 
                 ? 'p-3 scale-110' 
                 : 'p-2'
             } ${
-              activeSection === id ? 'active' : ''
-            } ${
-              !isCenter && activeSection === id
-                ? 'text-blush bg-blush/20' 
-                : activeSection !== id 
-                  ? 'text-[#4a4a4a] hover:text-[#4a4a4a]/80 hover:bg-gray-50'
-                  : ''
+              activeSection === id 
+                ? isCenter 
+                  ? 'bg-gradient-feminine rounded-full shadow-lg'
+                  : 'bg-blush/15 rounded-2xl'
+                : 'hover:bg-ivory rounded-2xl'
             }`}
           >
             <Icon 
-              className={`mb-1 ${isCenter ? 'text-2xl' : 'text-lg'}`} 
+              className={`mb-1 transition-colors duration-300 ${
+                activeSection === id 
+                  ? isCenter 
+                    ? 'text-white' 
+                    : 'text-blush'
+                  : 'text-warm-gray/70'
+              }`}
               size={isCenter ? 28 : 20} 
             />
-            <span className={`font-sans font-medium ${isCenter ? 'text-xs' : 'text-xs'}`}>
+            <span className={`font-sans font-medium text-xs transition-colors duration-300 ${
+              activeSection === id 
+                ? isCenter 
+                  ? 'text-white' 
+                  : 'text-blush'
+                : 'text-warm-gray/70'
+            }`}>
               {label}
             </span>
           </button>
         ))}
       </div>
+      
+      {/* Soft bottom padding for iPhone home indicator */}
+      <div className="h-1"></div>
     </nav>
   );
 }
