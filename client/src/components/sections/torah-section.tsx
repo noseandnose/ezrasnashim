@@ -23,30 +23,30 @@ export default function TorahSection() {
       icon: Book,
       title: 'Daily Halacha',
       subtitle: 'Jewish Law & Practice',
-      gradient: 'from-blush/8 to-ivory',
-      iconBg: 'bg-blush/20',
-      iconColor: 'text-blush',
-      border: 'border-blush/15'
+      gradient: 'gradient-soft-glow',
+      iconBg: 'bg-rose-blush/20',
+      iconColor: 'text-rose-blush',
+      border: 'border-rose-blush/15'
     },
     {
       id: 'mussar',
       icon: Heart,
       title: 'Daily Mussar',
       subtitle: 'Character Development',
-      gradient: 'from-lavender/8 to-ivory',
-      iconBg: 'bg-lavender/20',
-      iconColor: 'text-lavender',
-      border: 'border-lavender/15'
+      gradient: 'gradient-soft-glow',
+      iconBg: 'bg-muted-lavender/20',
+      iconColor: 'text-muted-lavender',
+      border: 'border-muted-lavender/15'
     },
     {
       id: 'chizuk',
       icon: Play,
       title: 'Daily Chizuk',
       subtitle: '5 minute inspiration',
-      gradient: 'from-sage/8 to-ivory',
-      iconBg: 'bg-sage/20',
-      iconColor: 'text-sage',
-      border: 'border-sage/15'
+      gradient: 'gradient-sand-warm',
+      iconBg: 'bg-sand-gold/20',
+      iconColor: 'text-sand-gold',
+      border: 'border-sand-gold/15'
     },
     {
       id: 'loshon',
@@ -72,24 +72,24 @@ export default function TorahSection() {
         {torahItems.map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border }) => (
           <button
             key={id}
-            className={`bg-gradient-to-br ${gradient} rounded-3xl p-6 text-center hover:scale-105 transition-all duration-300 shadow-lg border ${border}`}
+            className={`${gradient} rounded-3xl p-6 text-center glow-hover transition-gentle shadow-lg border ${border}`}
             onClick={() => openModal(id)}
           >
             <div className={`${iconBg} p-4 rounded-full mx-auto mb-4 w-fit`}>
-              <Icon className={`${iconColor}`} size={24} />
+              <Icon className={`${iconColor}`} size={24} strokeWidth={1.5} />
             </div>
-            <h3 className="font-serif text-sm text-warm-gray mb-2">{title}</h3>
+            <h3 className="font-serif text-sm text-warm-gray mb-2 tracking-wide">{title}</h3>
             <p className="font-sans text-xs text-warm-gray/60 leading-relaxed">{subtitle}</p>
           </button>
         ))}
       </div>
 
       {/* Inspirational Quote */}
-      <div className="bg-gradient-to-r from-blush/10 to-lavender/10 rounded-3xl p-6 border border-blush/20">
+      <div className="gradient-soft-glow rounded-3xl p-6 border border-rose-blush/15 glow-hover transition-gentle">
         <p className="font-sans text-sm text-warm-gray/80 italic text-center leading-relaxed">
           "{quote?.text || 'Turn it over and over, for everything is in it. Look into it, grow old and worn over it, and never move away from it, for there is no better portion than it.'}"
         </p>
-        <p className="font-serif text-xs text-warm-gray/60 text-center mt-2">- {quote?.source || 'Pirkei Avot 5:22'}</p>
+        <p className="font-serif text-xs text-warm-gray/60 text-center mt-2 tracking-wide">- {quote?.source || 'Pirkei Avot 5:22'}</p>
       </div>
 
       {/* Bottom padding */}
