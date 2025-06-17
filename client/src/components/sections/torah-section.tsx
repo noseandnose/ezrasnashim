@@ -61,10 +61,10 @@ export default function TorahSection() {
   ];
 
   return (
-    <div className="p-2 space-y-2">
+    <div className="p-2 space-y-1">
       {/* Welcome Header */}
       <div className="text-center">
-        <h2 className="font-serif text-xl text-warm-gray mb-2 tracking-wide">Daily Torah Learning</h2>
+        <h2 className="font-serif text-lg text-warm-gray mb-1 tracking-wide">Daily Torah Learning</h2>
         <p className="font-sans text-warm-gray/70 text-xs leading-relaxed">Nourish your soul with wisdom and inspiration</p>
       </div>
 

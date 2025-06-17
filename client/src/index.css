@@ -243,9 +243,9 @@ html, body, #root {
 }
 
 .content-area {
-  min-height: calc(100vh - 140px);
+  min-height: calc(100vh - 120px);
   overflow: auto;
-  padding-bottom: 2rem;
+  padding-bottom: 1rem;
 }
 
 /* Custom scrollbar for modals */
