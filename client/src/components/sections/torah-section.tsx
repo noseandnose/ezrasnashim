@@ -61,24 +61,24 @@ export default function TorahSection() {
   ];
 
   return (
-    <div className="p-3 space-y-4">
+    <div className="p-2 space-y-2">
       {/* Welcome Header */}
       <div className="text-center">
-        <h2 className="font-serif text-2xl text-warm-gray mb-2 tracking-wide">Daily Torah Learning</h2>
-        <p className="font-sans text-warm-gray/70 text-sm leading-relaxed">Nourish your soul with wisdom and inspiration</p>
+        <h2 className="font-serif text-xl text-warm-gray mb-2 tracking-wide">Daily Torah Learning</h2>
+        <p className="font-sans text-warm-gray/70 text-xs leading-relaxed">Nourish your soul with wisdom and inspiration</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         {torahItems.map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border }) => (
           <button
             key={id}
-            className={`${gradient} rounded-3xl p-6 text-center glow-hover transition-gentle shadow-lg border ${border}`}
+            className={`${gradient} rounded-3xl p-4 text-center glow-hover transition-gentle shadow-lg border ${border}`}
             onClick={() => openModal(id)}
           >
-            <div className={`${iconBg} p-4 rounded-full mx-auto mb-4 w-fit`}>
-              <Icon className={`${iconColor}`} size={24} strokeWidth={1.5} />
+            <div className={`${iconBg} p-3 rounded-full mx-auto mb-3 w-fit`}>
+              <Icon className={`${iconColor}`} size={20} strokeWidth={1.5} />
             </div>
-            <h3 className="font-serif text-sm text-warm-gray mb-2 tracking-wide">{title}</h3>
+            <h3 className="font-serif text-xs text-warm-gray mb-1 tracking-wide">{title}</h3>
             <p className="font-sans text-xs text-warm-gray/60 leading-relaxed">{subtitle}</p>
           </button>
         ))}
