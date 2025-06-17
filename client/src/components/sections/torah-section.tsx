@@ -1,8 +1,21 @@
 import { Book, Heart, Play, Shield } from "lucide-react";
 import { useModalStore } from "@/lib/types";
+import { useQuery } from "@tanstack/react-query";
+import type { InspirationalQuote } from "@shared/schema";
 
 export default function TorahSection() {
   const { openModal } = useModalStore();
+  
+  // Fetch today's inspirational quote
+  const today = new Date().toISOString().split('T')[0];
+  const { data: quote } = useQuery<InspirationalQuote>({
+    queryKey: ['daily-quote', today],
+    queryFn: async () => {
+      const response = await fetch(`/api/quotes/daily/${today}`);
+      if (!response.ok) return null;
+      return response.json();
+    }
+  });
 
   const torahItems = [
     {
@@ -74,9 +87,9 @@ export default function TorahSection() {
       {/* Inspirational Quote */}
       <div className="bg-gradient-to-r from-blush/10 to-lavender/10 rounded-3xl p-6 border border-blush/20">
         <p className="font-sans text-sm text-warm-gray/80 italic text-center leading-relaxed">
-          "Turn it over and over, for everything is in it. Look into it, grow old and worn over it, and never move away from it, for there is no better portion than it."
+          "{quote?.text || 'Turn it over and over, for everything is in it. Look into it, grow old and worn over it, and never move away from it, for there is no better portion than it.'}"
         </p>
-        <p className="font-serif text-xs text-warm-gray/60 text-center mt-2">- Pirkei Avot 5:22</p>
+        <p className="font-serif text-xs text-warm-gray/60 text-center mt-2">- {quote?.source || 'Pirkei Avot 5:22'}</p>
       </div>
 
       {/* Bottom padding */}

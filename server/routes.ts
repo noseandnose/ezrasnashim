@@ -530,6 +530,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Inspirational quotes routes
+  app.get("/api/quotes/daily/:date", async (req, res) => {
+    try {
+      const { date } = req.params;
+      const quote = await storage.getInspirationalQuoteByDate(date);
+      res.json(quote || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch inspirational quote" });
+    }
+  });
+
   // Stripe payment intent creation for donations
   app.post("/api/create-payment-intent", async (req, res) => {
     try {
