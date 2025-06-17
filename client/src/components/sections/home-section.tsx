@@ -62,7 +62,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       </div>
 
       {/* Today's Information */}
-      <div className="bg-soft-white rounded-3xl p-4 shadow-lg border border-rose-blush/10 glow-hover transition-gentle">
+      <div className="bg-soft-white rounded-3xl p-3 shadow-lg border border-rose-blush/10 glow-hover transition-gentle">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center space-x-3">
             <div className="gradient-quiet-joy p-2 rounded-full">

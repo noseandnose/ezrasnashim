@@ -322,8 +322,8 @@ export default function TefillaSection() {
             onClick={() => openModal('mincha')}
             className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
           >
-            <div className="bg-gradient-feminine p-3 rounded-full mx-auto mb-3 w-fit">
-              <Clock className="text-white" size={20} />
+            <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
+              <Clock className="text-white" size={18} />
             </div>
             <h3 className="font-serif text-sm text-warm-gray mb-1">Mincha</h3>
             <p className="font-sans text-xs text-warm-gray/60">
@@ -336,10 +336,10 @@ export default function TefillaSection() {
 
           <button 
             onClick={() => openModal('nishmas-campaign')}
-            className="bg-white rounded-3xl p-5 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
+            className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
           >
-            <div className="bg-gradient-feminine p-3 rounded-full mx-auto mb-3 w-fit">
-              <Heart className="text-white" size={20} />
+            <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
+              <Heart className="text-white" size={18} />
             </div>
             <h3 className="font-serif text-sm text-warm-gray mb-1">Nishmas Campaign</h3>
             <p className="font-sans text-xs text-warm-gray/60">40 Days for Yeshuos</p>
@@ -347,10 +347,10 @@ export default function TefillaSection() {
         </div>
 
         {/* Personal Prayer Section */}
-        <div className="bg-white rounded-3xl p-6 shadow-lg border border-blush/10">
-          <div className="flex items-center space-x-3 mb-5">
-            <div className="bg-gradient-feminine p-3 rounded-full">
-              <HandHeart className="text-white" size={20} />
+        <div className="bg-white rounded-3xl p-3 shadow-lg border border-blush/10">
+          <div className="flex items-center space-x-3 mb-3">
+            <div className="bg-gradient-feminine p-2 rounded-full">
+              <HandHeart className="text-white" size={18} />
             </div>
             <div>
               <h3 className="font-serif text-lg text-warm-gray">Personal Prayers</h3>
@@ -358,13 +358,13 @@ export default function TefillaSection() {
             </div>
           </div>
           
-          <div className="grid grid-cols-3 gap-3 mb-4">
+          <div className="grid grid-cols-3 gap-2 mb-2">
             <button 
               onClick={() => openModal('refuah-prayers')}
-              className="bg-gradient-to-br from-blush/10 to-blush/5 rounded-2xl p-4 text-center hover:scale-105 transition-all duration-300 border border-blush/20"
+              className="bg-gradient-to-br from-blush/10 to-blush/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-blush/20"
             >
-              <div className="bg-blush/20 p-3 rounded-full mx-auto mb-2 w-fit">
-                <Shield className="text-blush" size={18} strokeWidth={1.5} />
+              <div className="bg-blush/20 p-2 rounded-full mx-auto mb-1 w-fit">
+                <Shield className="text-blush" size={16} strokeWidth={1.5} />
               </div>
               <h4 className="font-serif text-sm text-warm-gray">Refuah</h4>
               <p className="font-sans text-xs text-warm-gray/60 mt-1">Healing</p>
@@ -372,10 +372,10 @@ export default function TefillaSection() {
             
             <button 
               onClick={() => openModal('family-prayers')}
-              className="bg-gradient-to-br from-lavender/10 to-lavender/5 rounded-2xl p-4 text-center hover:scale-105 transition-all duration-300 border border-lavender/20"
+              className="bg-gradient-to-br from-lavender/10 to-lavender/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-lavender/20"
             >
-              <div className="bg-lavender/20 p-3 rounded-full mx-auto mb-2 w-fit">
-                <Home className="text-lavender" size={18} strokeWidth={1.5} />
+              <div className="bg-lavender/20 p-2 rounded-full mx-auto mb-1 w-fit">
+                <Home className="text-lavender" size={16} strokeWidth={1.5} />
               </div>
               <h4 className="font-serif text-sm text-warm-gray">Family</h4>
               <p className="font-sans text-xs text-warm-gray/60 mt-1">Shalom Bayis</p>
@@ -383,10 +383,10 @@ export default function TefillaSection() {
             
             <button 
               onClick={() => openModal('life-prayers')}
-              className="bg-gradient-to-br from-sage/10 to-sage/5 rounded-2xl p-4 text-center hover:scale-105 transition-all duration-300 border border-sage/20"
+              className="bg-gradient-to-br from-sage/10 to-sage/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-sage/20"
             >
-              <div className="bg-sage/20 p-3 rounded-full mx-auto mb-2 w-fit">
-                <Compass className="text-sage" size={18} strokeWidth={1.5} />
+              <div className="bg-sage/20 p-2 rounded-full mx-auto mb-1 w-fit">
+                <Compass className="text-sage" size={16} strokeWidth={1.5} />
               </div>
               <h4 className="font-serif text-sm text-warm-gray">Life</h4>
               <p className="font-sans text-xs text-warm-gray/60 mt-1">Guidance</p>
