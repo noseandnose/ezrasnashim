@@ -249,7 +249,7 @@ export default function TefillaSection() {
 
           {/* Current Perek Display with Progress Bar */}
           <div className="bg-gradient-to-br from-ivory to-lavender/10 rounded-2xl p-5 mb-4 border border-blush/15">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-2">
               <h4 className="font-serif text-lg text-warm-gray">
                 Perek {progress?.currentPerek || 1}
               </h4>
@@ -265,9 +265,6 @@ export default function TefillaSection() {
                   className="bg-gradient-feminine h-2 rounded-full transition-all duration-500 ease-out"
                   style={{ width: `${((progress?.currentPerek || 1) / 150) * 100}%` }}
                 ></div>
-              </div>
-              <div className="text-xs text-warm-gray/60 mt-1 font-sans">
-                {(allNames?.length || 0)} names in cycle
               </div>
             </div>
             
