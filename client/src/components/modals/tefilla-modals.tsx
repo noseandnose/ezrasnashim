@@ -115,7 +115,7 @@ export default function TefillaModals() {
 
           <Button 
             onClick={() => closeModal()} 
-            className="w-full gradient-blush-peach text-white py-3 rounded-xl font-medium mt-6 border-0"
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
           >
             Close
           </Button>
@@ -190,7 +190,7 @@ export default function TefillaModals() {
 
           <Button 
             onClick={() => closeModal()} 
-            className="w-full gradient-blush-peach text-white py-3 rounded-xl font-medium mt-6 border-0"
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
           >
             Close
           </Button>
@@ -247,7 +247,7 @@ export default function TefillaModals() {
 
           <Button 
             onClick={() => closeModal()} 
-            className="w-full gradient-blush-peach text-white py-3 rounded-xl font-medium mt-6 border-0"
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
           >
             Close
           </Button>
@@ -267,7 +267,7 @@ export default function TefillaModals() {
 
           <Button 
             onClick={() => closeModal()} 
-            className="w-full gradient-blush-peach text-white py-3 rounded-xl font-medium mt-6 border-0"
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
           >
             Close
           </Button>

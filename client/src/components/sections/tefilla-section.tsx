@@ -156,15 +156,7 @@ export default function TefillaSection() {
 
   return (
     <div className="p-2 space-y-2">
-      {/* Personalized Welcome Message */}
-      <div className="bg-gradient-to-r from-blush/10 to-lavender/10 rounded-3xl p-4 text-center border border-blush/20">
-        <h2 className="font-serif text-xl text-warm-gray mb-2">
-          בוקר טוב, נשים קדושות!
-        </h2>
-        <p className="font-sans text-warm-gray/80 text-xs leading-relaxed">
-          May your tefilla today be uplifting and bring you closer to the Divine
-        </p>
-      </div>
+
       
       <div className="space-y-2">
         {/* Daily Tehillim Card */}
@@ -387,7 +379,7 @@ export default function TefillaSection() {
             <div className="bg-gradient-feminine p-3 rounded-full mx-auto mb-3 w-fit">
               <Clock className="text-white" size={20} />
             </div>
-            <h3 className="font-serif text-sm text-warm-gray mb-1">Mincha Times</h3>
+            <h3 className="font-serif text-sm text-warm-gray mb-1">Mincha</h3>
             <p className="font-sans text-xs text-warm-gray/60">
               {isLoading ? "Loading..." : 
                times?.minchaGedolah && times?.minchaKetanah ? 
