@@ -154,6 +154,18 @@ export default function TefillaSection() {
     );
   };
 
+  const getTehillimFirstLine = (perekNumber: number) => {
+    const tehillimTexts: Record<number, string> = {
+      1: "אַשְׁרֵי הָאִישׁ אֲשֶׁר לֹא הָלַךְ בַּעֲצַת רְשָׁעִים...",
+      2: "לָמָּה רָגְשׁוּ גוֹיִם וּלְאֻמִּים יֶהְגּוּ רִיק...",
+      3: "מִזְמוֹר לְדָוִד בְּבָרְחוֹ מִפְּנֵי אַבְשָׁלוֹם בְּנוֹ...",
+      11: "בַּיהוָה חָסִיתִי אֵיךְ תֹּאמְרוּ לְנַפְשִׁי...",
+      12: "הוֹשִׁיעָה יְהוָה כִּי גָמַר חָסִיד..."
+    };
+
+    return tehillimTexts[perekNumber] || `פרק ${perekNumber} - לחץ לצפייה בטקסט המלא`;
+  };
+
   return (
     <div className="p-2 space-y-2">
 
@@ -175,20 +187,13 @@ export default function TefillaSection() {
             </div>
             <div className="flex items-center space-x-2">
               <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowHebrew(!showHebrew)}
-                className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
-              >
-                {showHebrew ? 'EN' : 'עב'}
-              </Button>
-              <Button
                 size="sm"
                 variant="ghost"
                 onClick={() => setShowAddForm(!showAddForm)}
-                className="text-blush"
+                className="text-blush text-xs px-3 py-1 h-auto"
               >
-                <Plus size={16} />
+                <Plus size={14} className="mr-1" />
+                Add Name
               </Button>
             </div>
           </div>
@@ -268,10 +273,23 @@ export default function TefillaSection() {
               </div>
             </div>
             
-            {/* Tehillim Text Display */}
-            <div className="mb-4 bg-white/70 rounded-2xl p-4 max-h-32 overflow-y-auto border border-blush/10">
-              {getTehillimText(progress?.currentPerek || 1, showHebrew)}
-            </div>
+            {/* Tehillim Text Preview Button */}
+            <button
+              onClick={() => openModal('tehillim-text')}
+              className="w-full mb-4 bg-white/70 rounded-2xl p-4 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="text-xs text-warm-gray/60 mb-1 font-sans">
+                    View Full Text
+                  </div>
+                  <div className="text-sm text-warm-gray line-clamp-2">
+                    {getTehillimFirstLine(progress?.currentPerek || 1)}
+                  </div>
+                </div>
+                <ChevronRight className="text-warm-gray/40 ml-2" size={16} strokeWidth={1.5} />
+              </div>
+            </button>
 
             {/* Current Name Assignment */}
             <div className="mb-4">
