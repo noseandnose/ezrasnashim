@@ -23,40 +23,40 @@ export default function TorahSection() {
       icon: Book,
       title: 'Daily Halacha',
       subtitle: 'Jewish Law & Practice',
-      gradient: 'gradient-soft-glow',
-      iconBg: 'bg-rose-blush/20',
-      iconColor: 'text-rose-blush',
-      border: 'border-rose-blush/15'
+      gradient: 'bg-white',
+      iconBg: 'bg-gradient-feminine',
+      iconColor: 'text-white',
+      border: 'border-blush/10'
     },
     {
       id: 'mussar',
       icon: Heart,
       title: 'Daily Mussar',
       subtitle: 'Character Development',
-      gradient: 'gradient-soft-glow',
-      iconBg: 'bg-muted-lavender/20',
-      iconColor: 'text-muted-lavender',
-      border: 'border-muted-lavender/15'
+      gradient: 'bg-white',
+      iconBg: 'bg-gradient-feminine',
+      iconColor: 'text-white',
+      border: 'border-blush/10'
     },
     {
       id: 'chizuk',
       icon: Play,
       title: 'Daily Chizuk',
       subtitle: '5 minute inspiration',
-      gradient: 'gradient-sand-warm',
-      iconBg: 'bg-sand-gold/20',
-      iconColor: 'text-sand-gold',
-      border: 'border-sand-gold/15'
+      gradient: 'bg-white',
+      iconBg: 'bg-gradient-feminine',
+      iconColor: 'text-white',
+      border: 'border-blush/10'
     },
     {
       id: 'loshon',
       icon: Shield,
       title: 'Loshon Horah',
       subtitle: 'Guard Your Speech',
-      gradient: 'gradient-soft-glow',
-      iconBg: 'bg-sand-gold/20',
-      iconColor: 'text-sand-gold',
-      border: 'border-sand-gold/15'
+      gradient: 'bg-white',
+      iconBg: 'bg-gradient-feminine',
+      iconColor: 'text-white',
+      border: 'border-blush/10'
     }
   ];
 
@@ -85,7 +85,7 @@ export default function TorahSection() {
       </div>
 
       {/* Inspirational Quote */}
-      <div className="gradient-soft-glow rounded-3xl p-3 border border-rose-blush/15 glow-hover transition-gentle">
+      <div className="bg-white rounded-3xl p-3 border border-blush/10 shadow-lg">
         <p className="font-sans text-xs text-warm-gray/80 italic text-center leading-relaxed">
           "{quote?.text || 'Turn it over and over, for everything is in it. Look into it, grow old and worn over it, and never move away from it, for there is no better portion than it.'}"
         </p>
