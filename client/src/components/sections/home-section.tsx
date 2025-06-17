@@ -48,7 +48,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       {/* Today's Sponsor */}
       <div className="gradient-soft-glow rounded-3xl p-4 border border-rose-blush/15 glow-hover transition-gentle">
         <div className="flex items-center space-x-3 mb-2">
-          <div className="bg-rose-blush/20 p-2 rounded-full">
+          <div className="bg-soft-white p-2 rounded-full">
             <Heart className="text-rose-blush" size={18} strokeWidth={1.5} />
           </div>
           <h3 className="font-serif text-lg text-warm-gray tracking-wide">Today's Sponsor</h3>
@@ -76,11 +76,11 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         <div className="grid grid-cols-2 gap-2">
           <div className="bg-gradient-to-br from-blush/8 to-ivory rounded-xl p-2 text-center">
             <p className="font-sans text-xs text-warm-gray/70">Shkia</p>
-            <p className="font-serif text-sm text-warm-gray font-medium">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
+            <p className="font-serif text-base text-warm-gray font-medium">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
           </div>
           <div className="bg-gradient-to-br from-lavender/8 to-ivory rounded-xl p-2 text-center">
             <p className="font-sans text-xs text-warm-gray/70">Mincha</p>
-            <p className="font-serif text-sm text-warm-gray font-medium">{jewishTimesQuery.data?.minchaGedolah || "Loading..."}</p>
+            <p className="font-serif text-base text-warm-gray font-medium">{jewishTimesQuery.data?.minchaGedolah || "Loading..."}</p>
           </div>
         </div>
       </div>
@@ -89,7 +89,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       <div className="space-y-1">
         <button
           onClick={() => navigateToSection('torah')}
-          className="w-full bg-white rounded-2xl p-3 shadow-lg hover:scale-105 transition-all duration-300 border border-blush/10"
+          className="w-full bg-white rounded-2xl p-3 shadow-soft hover:scale-105 transition-all duration-300 border border-blush/10"
         >
           <div className="flex items-center space-x-3">
             <div className="bg-gradient-feminine p-2 rounded-full">
@@ -104,7 +104,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
 
         <button
           onClick={() => navigateToSection('tefilla')}
-          className="w-full bg-white rounded-2xl p-3 shadow-lg hover:scale-105 transition-all duration-300 border border-blush/10"
+          className="w-full bg-white rounded-2xl p-3 shadow-soft hover:scale-105 transition-all duration-300 border border-blush/10"
         >
           <div className="flex items-center space-x-3">
             <div className="bg-gradient-to-br from-blush to-lavender p-2 rounded-full">
@@ -119,7 +119,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
 
         <button
           onClick={() => navigateToSection('tzedaka')}
-          className="w-full bg-white rounded-2xl p-3 shadow-lg hover:scale-105 transition-all duration-300 border border-blush/10"
+          className="w-full bg-white rounded-2xl p-3 shadow-soft hover:scale-105 transition-all duration-300 border border-blush/10"
         >
           <div className="flex items-center space-x-3">
             <div className="bg-gradient-to-br from-muted-lavender to-rose-blush p-2 rounded-full">
