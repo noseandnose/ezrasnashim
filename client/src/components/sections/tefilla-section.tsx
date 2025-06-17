@@ -1,4 +1,4 @@
-import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings } from "lucide-react";
+import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass } from "lucide-react";
 import { useModalStore } from "@/lib/types";
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useState } from "react";
@@ -368,7 +368,7 @@ export default function TefillaSection() {
               className="bg-gradient-to-br from-blush/10 to-blush/5 rounded-2xl p-4 text-center hover:scale-105 transition-all duration-300 border border-blush/20"
             >
               <div className="bg-blush/20 p-3 rounded-full mx-auto mb-2 w-fit">
-                <Heart className="text-blush" size={18} />
+                <Shield className="text-blush" size={18} strokeWidth={1.5} />
               </div>
               <h4 className="font-serif text-sm text-warm-gray">Refuah</h4>
               <p className="font-sans text-xs text-warm-gray/60 mt-1">Healing</p>
@@ -379,7 +379,7 @@ export default function TefillaSection() {
               className="bg-gradient-to-br from-lavender/10 to-lavender/5 rounded-2xl p-4 text-center hover:scale-105 transition-all duration-300 border border-lavender/20"
             >
               <div className="bg-lavender/20 p-3 rounded-full mx-auto mb-2 w-fit">
-                <Heart className="text-lavender" size={18} />
+                <Home className="text-lavender" size={18} strokeWidth={1.5} />
               </div>
               <h4 className="font-serif text-sm text-warm-gray">Family</h4>
               <p className="font-sans text-xs text-warm-gray/60 mt-1">Shalom Bayis</p>
@@ -390,7 +390,7 @@ export default function TefillaSection() {
               className="bg-gradient-to-br from-sage/10 to-sage/5 rounded-2xl p-4 text-center hover:scale-105 transition-all duration-300 border border-sage/20"
             >
               <div className="bg-sage/20 p-3 rounded-full mx-auto mb-2 w-fit">
-                <HandHeart className="text-sage" size={18} />
+                <Compass className="text-sage" size={18} strokeWidth={1.5} />
               </div>
               <h4 className="font-serif text-sm text-warm-gray">Life</h4>
               <p className="font-sans text-xs text-warm-gray/60 mt-1">Guidance</p>
