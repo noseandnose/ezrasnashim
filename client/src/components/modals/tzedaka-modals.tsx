@@ -74,20 +74,20 @@ export default function TzedakaModals() {
     <>
       {/* Sponsor a Day Modal */}
       <Dialog open={activeModal === 'sponsor-day'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
           <DialogHeader className="text-center mb-4">
             <div className="flex items-center justify-center mb-2">
               <BookOpen className="text-blush mr-2" size={20} />
-              <DialogTitle className="text-lg font-semibold">Sponsor a Day of Ezras Nashim</DialogTitle>
+              <DialogTitle className="text-lg font-serif font-semibold">Sponsor a Day of Ezras Nashim</DialogTitle>
             </div>
-            <DialogDescription className="text-sm text-gray-600">
+            <DialogDescription className="text-sm text-gray-600 font-sans">
               Dedicate all Mitzvot done on the app for one day
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium block mb-2">Donation Amount</label>
+              <label className="text-sm font-sans font-medium block mb-2">Donation Amount</label>
               <Select value={donationAmount} onValueChange={setDonationAmount}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select amount" />

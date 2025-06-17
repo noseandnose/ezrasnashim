@@ -32,13 +32,13 @@ export default function TorahModals() {
     <>
       {/* Halacha Modal */}
       <Dialog open={activeModal === 'halacha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6">
+        <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6 font-sans">
           <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-semibold mb-2">Daily Halacha</DialogTitle>
-            <DialogDescription className="text-sm text-gray-600">{halachaContent?.title || "Laws of Chanukah - Day 3"}</DialogDescription>
+            <DialogTitle className="text-lg font-serif font-semibold mb-2">Daily Halacha</DialogTitle>
+            <DialogDescription className="text-sm text-gray-600 font-sans">{halachaContent?.title || "Laws of Chanukah - Day 3"}</DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-3 text-sm text-gray-700">
+          <div className="space-y-3 text-sm text-gray-700 font-sans">
             <div>
               <p><strong>Today's Halacha:</strong> {halachaContent?.content || "Candles should be lit immediately after sunset, and should burn for at least 30 minutes. The mitzvah is to light one candle each night, with the minhag to add an additional candle each subsequent night."}</p>
             </div>
@@ -48,13 +48,13 @@ export default function TorahModals() {
 
       {/* Mussar Modal */}
       <Dialog open={activeModal === 'mussar'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6">
+        <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6 font-sans">
           <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-semibold mb-2">Daily Mussar</DialogTitle>
-            <DialogDescription className="text-sm text-gray-600">Character Development</DialogDescription>
+            <DialogTitle className="text-lg font-serif font-semibold mb-2">Daily Mussar</DialogTitle>
+            <DialogDescription className="text-sm text-gray-600 font-sans">Character Development</DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-3 text-sm text-gray-700">
+          <div className="space-y-3 text-sm text-gray-700 font-sans">
             <div>
               <p><strong>Today's Focus:</strong> Patience and understanding in our daily interactions.</p>
               <p className="mt-2">When we encounter challenges, remember that each test is an opportunity for growth and spiritual elevation.</p>

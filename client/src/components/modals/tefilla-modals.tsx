@@ -316,13 +316,13 @@ export default function TefillaModals() {
 
       {/* Nishmas 40-Day Campaign Modal */}
       <Dialog open={activeModal === 'nishmas-campaign'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
           <DialogHeader className="text-center mb-4">
             <div className="flex items-center justify-center mb-2">
               <Heart className="text-blush mr-2" size={24} />
-              <DialogTitle className="text-lg font-semibold">Nishmas 40-Day Campaign</DialogTitle>
+              <DialogTitle className="text-lg font-serif font-semibold">Nishmas 40-Day Campaign</DialogTitle>
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 font-sans">
               May this 40-day tefillah bring you the yeshuos you need
             </p>
           </DialogHeader>
