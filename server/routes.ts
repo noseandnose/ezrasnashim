@@ -627,6 +627,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Stripe payment route for donations
+  app.post("/api/create-payment-intent", async (req, res) => {
+    try {
+      const { amount } = req.body;
+      
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: "usd",
+        metadata: {
+          source: "ezras-nashim-donation"
+        }
+      });
+
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        amount: amount 
+      });
+    } catch (error: any) {
+      console.error('Stripe payment intent creation failed:', error);
+      res.status(500).json({ 
+        message: "Error creating payment intent: " + error.message 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -4,6 +4,7 @@ import TimesModals from "./times-modals";
 import TableModals from "./table-modals";
 import TzedakaModals from "./tzedaka-modals";
 import ShopModals from "./shop-modals";
+import DonationModal from "./donation-modal";
 
 export default function ModalContainer() {
   return (
@@ -14,6 +15,7 @@ export default function ModalContainer() {
       <TableModals />
       <TzedakaModals />
       <ShopModals />
+      <DonationModal />
     </>
   );
 }

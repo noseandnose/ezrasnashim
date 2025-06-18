@@ -7,6 +7,7 @@ import { useGeolocation, useJewishTimes } from "@/hooks/use-jewish-times";
 import Home from "@/pages/home";
 import NotFound from "@/pages/not-found";
 import Donate from "@/pages/donate";
+import Checkout from "@/pages/checkout";
 
 function Router() {
   // Initialize geolocation and preload Jewish times on app startup
@@ -17,6 +18,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/donate" component={Donate} />
+      <Route path="/checkout" component={Checkout} />
       <Route component={NotFound} />
     </Switch>
   );
