@@ -541,6 +541,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Women's prayer routes
+  app.get("/api/womens-prayers/:category", async (req, res) => {
+    try {
+      const { category } = req.params;
+      const prayers = await storage.getWomensPrayersByCategory(category);
+      res.json(prayers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch women's prayers" });
+    }
+  });
+
+  app.get("/api/womens-prayers/prayer/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const prayer = await storage.getWomensPrayerById(parseInt(id));
+      res.json(prayer || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch prayer" });
+    }
+  });
+
   // Stripe payment intent creation for donations
   app.post("/api/create-payment-intent", async (req, res) => {
     try {

@@ -2,7 +2,7 @@ import {
   calendarEvents, shopItems, 
   tehillimNames, globalTehillimProgress, minchaPrayers, sponsors, nishmasText,
   dailyHalacha, dailyMussar, dailyChizuk, loshonHorah,
-  shabbatRecipes, parshaVorts, campaigns, inspirationalQuotes,
+  shabbatRecipes, parshaVorts, campaigns, inspirationalQuotes, womensPrayers,
   type CalendarEvent, type InsertCalendarEvent,
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
@@ -14,7 +14,8 @@ import {
   type ShabbatRecipe, type InsertShabbatRecipe,
   type ParshaVort, type InsertParshaVort,
   type Campaign, type InsertCampaign,
-  type InspirationalQuote, type InsertInspirationalQuote
+  type InspirationalQuote, type InsertInspirationalQuote,
+  type WomensPrayer, type InsertWomensPrayer
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, gt, lt, and } from "drizzle-orm";
