@@ -48,11 +48,11 @@ export default function DonationModal() {
     createPaymentMutation.mutate(donationAmount);
   };
 
-  const quickAmounts = [1, 5, 18, 36, 100];
+  const quickAmounts = [1, 18, 54, 180, 1800];
 
   return (
     <Dialog open={activeModal === 'donate'} onOpenChange={() => closeModal()}>
-      <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6 font-sans">
+      <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto gradient-soft-glow rounded-3xl p-6 font-sans border border-blush/20">
         <DialogHeader className="text-center mb-4">
           <DialogTitle className="text-lg font-serif font-semibold mb-2 text-warm-gray">Make a Donation</DialogTitle>
           <p className="text-xs text-warm-gray/70 font-sans">Support our community with your generous contribution</p>
@@ -69,8 +69,8 @@ export default function DonationModal() {
                   onClick={() => setAmount(quickAmount.toString())}
                   className={`p-2 rounded-xl text-xs font-medium transition-all ${
                     amount === quickAmount.toString()
-                      ? 'bg-gradient-feminine text-white'
-                      : 'bg-white border border-blush/10 text-warm-gray hover:bg-ivory'
+                      ? 'bg-gradient-feminine text-white shadow-soft'
+                      : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
                   }`}
                 >
                   ${quickAmount}
@@ -89,7 +89,7 @@ export default function DonationModal() {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Enter amount"
-                className="pl-10 rounded-xl border-blush/20 focus:border-blush bg-white"
+                className="pl-10 rounded-xl border-blush/30 focus:border-blush bg-white/80 backdrop-blur-sm"
                 min="1"
                 step="0.01"
               />
