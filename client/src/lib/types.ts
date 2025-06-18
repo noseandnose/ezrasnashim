@@ -14,6 +14,7 @@ export type ModalType =
   | 'blessings'
   | 'tefillos'
   | 'personal-prayers'
+  | 'donate'
   | null;
 
 export interface ModalState {

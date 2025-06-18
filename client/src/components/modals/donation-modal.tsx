@@ -1,0 +1,123 @@
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useModalStore } from "@/lib/types";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { DollarSign, Heart } from "lucide-react";
+
+export default function DonationModal() {
+  const { activeModal, closeModal } = useModalStore();
+  const { toast } = useToast();
+  const [amount, setAmount] = useState("1");
+
+  const createPaymentMutation = useMutation({
+    mutationFn: async (donationAmount: number) => {
+      const response = await apiRequest('POST', '/api/create-payment-intent', {
+        amount: donationAmount
+      });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.clientSecret) {
+        // Redirect to Stripe checkout or handle payment flow
+        window.location.href = `/checkout?payment_intent=${data.clientSecret}`;
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "Payment Error",
+        description: "Unable to process donation. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDonate = () => {
+    const donationAmount = parseFloat(amount);
+    if (donationAmount <= 0) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter a valid donation amount.",
+        variant: "destructive",
+      });
+      return;
+    }
+    createPaymentMutation.mutate(donationAmount);
+  };
+
+  const quickAmounts = [1, 5, 18, 36, 100];
+
+  return (
+    <Dialog open={activeModal === 'donate'} onOpenChange={() => closeModal()}>
+      <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
+        <DialogHeader className="text-center mb-4">
+          <div className="flex items-center justify-center space-x-2 mb-2">
+            <div className="bg-gradient-feminine p-2 rounded-full">
+              <Heart className="text-white" size={18} />
+            </div>
+            <DialogTitle className="text-lg font-serif font-semibold">Make a Donation</DialogTitle>
+          </div>
+          <p className="text-xs text-warm-gray/70">Support our community with your generous contribution</p>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* Quick Amount Buttons */}
+          <div className="grid grid-cols-5 gap-2">
+            {quickAmounts.map((quickAmount) => (
+              <button
+                key={quickAmount}
+                onClick={() => setAmount(quickAmount.toString())}
+                className={`p-2 rounded-xl text-xs font-medium transition-all ${
+                  amount === quickAmount.toString()
+                    ? 'bg-gradient-feminine text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                ${quickAmount}
+              </button>
+            ))}
+          </div>
+
+          {/* Custom Amount Input */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-warm-gray">Custom Amount</label>
+            <div className="relative">
+              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+              <Input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="Enter amount"
+                className="pl-10 rounded-xl border-blush/20 focus:border-blush"
+                min="1"
+                step="0.01"
+              />
+            </div>
+          </div>
+
+          {/* Donation Buttons */}
+          <div className="space-y-2">
+            <Button
+              onClick={handleDonate}
+              disabled={createPaymentMutation.isPending || !amount || parseFloat(amount) <= 0}
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
+            >
+              {createPaymentMutation.isPending ? 'Processing...' : `Donate $${amount}`}
+            </Button>
+            
+            <Button
+              onClick={() => closeModal()}
+              variant="outline"
+              className="w-full rounded-xl border-gray-300 hover:bg-gray-50"
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

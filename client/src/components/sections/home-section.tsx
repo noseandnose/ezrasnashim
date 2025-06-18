@@ -98,7 +98,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               <BookOpen className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <div className="text-left flex-grow">
-              <h3 className="font-serif text-lg text-warm-gray">Torah Learning</h3>
+              <h3 className="font-serif text-lg text-warm-gray">Daily Torah</h3>
               <p className="font-sans text-xs text-warm-gray/70">Daily Halacha, Mussar & Chizuk</p>
             </div>
           </div>
@@ -113,7 +113,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               <Heart className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <div className="text-left flex-grow">
-              <h3 className="font-serif text-lg text-warm-gray">Tefilla & Prayer</h3>
+              <h3 className="font-serif text-lg text-warm-gray">Daily Tefilla</h3>
               <p className="font-sans text-xs text-warm-gray/70">Tehillim, Mincha & Women's Prayers</p>
             </div>
           </div>
@@ -128,7 +128,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               <HandHeart className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <div className="text-left flex-grow">
-              <h3 className="font-serif text-lg text-warm-gray">Tzedaka & Giving</h3>
+              <h3 className="font-serif text-lg text-warm-gray">Daily Tzedaka</h3>
               <p className="font-sans text-xs text-warm-gray/70">Support Torah Learning & Charity</p>
             </div>
           </div>

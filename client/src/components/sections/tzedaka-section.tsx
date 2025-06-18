@@ -75,7 +75,7 @@ export default function TzedakaSection() {
         </div>
         
         <button 
-          onClick={() => openModal('campaign')}
+          onClick={() => openModal('donate')}
           className="w-full mt-4 bg-gradient-feminine text-white rounded-2xl py-3 hover:opacity-90 transition-all duration-300 font-sans"
         >
           Donate Now
@@ -85,7 +85,7 @@ export default function TzedakaSection() {
       {/* Tzedaka Options - Rectangle Grid */}
       <div className="grid grid-cols-2 gap-2">
         <button
-          onClick={() => openModal('causes')}
+          onClick={() => openModal('donate')}
           className="bg-white rounded-3xl p-4 shadow-lg hover:scale-105 transition-all duration-300 border border-blush/10 text-left"
         >
           <div className="flex flex-col items-center text-center space-y-2">
@@ -100,7 +100,7 @@ export default function TzedakaSection() {
         </button>
 
         <button
-          onClick={() => openModal('sponsor-day')}
+          onClick={() => openModal('donate')}
           className="bg-white rounded-3xl p-4 shadow-lg hover:scale-105 transition-all duration-300 border border-blush/10 text-left"
         >
           <div className="flex flex-col items-center text-center space-y-2">
