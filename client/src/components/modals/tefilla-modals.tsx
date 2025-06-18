@@ -16,6 +16,12 @@ export default function TefillaModals() {
   const [selectedPrayerId, setSelectedPrayerId] = useState<number | null>(null);
   const queryClient = useQueryClient();
 
+  const handlePrayerSelect = (prayerId: number) => {
+    setSelectedPrayerId(prayerId);
+    closeModal();
+    openModal('individual-prayer');
+  };
+
   // Nishmas 40-Day Campaign state
   const [nishmasDay, setNishmasDay] = useState(0);
   const [nishmasStartDate, setNishmasStartDate] = useState<string | null>(null);
@@ -667,7 +673,7 @@ export default function TefillaModals() {
               Prayers for healing and recovery
             </p>
           </DialogHeader>
-          <RefuahPrayersList setSelectedPrayerId={setSelectedPrayerId} />
+          <RefuahPrayersList onPrayerSelect={handlePrayerSelect} />
         </DialogContent>
       </Dialog>
 
@@ -680,7 +686,7 @@ export default function TefillaModals() {
               Prayers for family harmony and children
             </p>
           </DialogHeader>
-          <FamilyPrayersList setSelectedPrayerId={setSelectedPrayerId} />
+          <FamilyPrayersList onPrayerSelect={handlePrayerSelect} />
         </DialogContent>
       </Dialog>
 
@@ -693,7 +699,7 @@ export default function TefillaModals() {
               Prayers for livelihood and guidance
             </p>
           </DialogHeader>
-          <LifePrayersList setSelectedPrayerId={setSelectedPrayerId} />
+          <LifePrayersList onPrayerSelect={handlePrayerSelect} />
         </DialogContent>
       </Dialog>
 
@@ -714,8 +720,8 @@ export default function TefillaModals() {
 }
 
 // Helper components for prayer lists
-function RefuahPrayersList({ setSelectedPrayerId }: { setSelectedPrayerId: (id: number) => void }) {
-  const { closeModal, openModal } = useModalStore();
+function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => void }) {
+  const { closeModal } = useModalStore();
   const { data: prayers, isLoading } = useQuery<WomensPrayer[]>({
     queryKey: ['/api/womens-prayers/refuah'],
   });
@@ -728,11 +734,7 @@ function RefuahPrayersList({ setSelectedPrayerId }: { setSelectedPrayerId: (id: 
         <div 
           key={prayer.id}
           className="content-card rounded-xl p-4 cursor-pointer"
-          onClick={() => {
-            setSelectedPrayerId(prayer.id);
-            closeModal();
-            openModal('individual-prayer');
-          }}
+          onClick={() => onPrayerSelect(prayer.id)}
         >
           <div className="flex items-center space-x-3">
             <Heart className="text-blush" size={20} />
@@ -755,8 +757,8 @@ function RefuahPrayersList({ setSelectedPrayerId }: { setSelectedPrayerId: (id: 
   );
 }
 
-function FamilyPrayersList({ setSelectedPrayerId }: { setSelectedPrayerId: (id: number) => void }) {
-  const { closeModal, openModal } = useModalStore();
+function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => void }) {
+  const { closeModal } = useModalStore();
   const { data: prayers, isLoading } = useQuery<WomensPrayer[]>({
     queryKey: ['/api/womens-prayers/family'],
   });
@@ -769,11 +771,7 @@ function FamilyPrayersList({ setSelectedPrayerId }: { setSelectedPrayerId: (id: 
         <div 
           key={prayer.id}
           className="content-card rounded-xl p-4 cursor-pointer"
-          onClick={() => {
-            setSelectedPrayerId(prayer.id);
-            closeModal();
-            openModal('individual-prayer');
-          }}
+          onClick={() => onPrayerSelect(prayer.id)}
         >
           <div className="flex items-center space-x-3">
             <HandHeart className="text-peach" size={20} />
@@ -796,8 +794,8 @@ function FamilyPrayersList({ setSelectedPrayerId }: { setSelectedPrayerId: (id: 
   );
 }
 
-function LifePrayersList({ setSelectedPrayerId }: { setSelectedPrayerId: (id: number) => void }) {
-  const { closeModal, openModal } = useModalStore();
+function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => void }) {
+  const { closeModal } = useModalStore();
   const { data: prayers, isLoading } = useQuery<WomensPrayer[]>({
     queryKey: ['/api/womens-prayers/life'],
   });
@@ -810,11 +808,7 @@ function LifePrayersList({ setSelectedPrayerId }: { setSelectedPrayerId: (id: nu
         <div 
           key={prayer.id}
           className="content-card rounded-xl p-4 cursor-pointer"
-          onClick={() => {
-            setSelectedPrayerId(prayer.id);
-            closeModal();
-            openModal('individual-prayer');
-          }}
+          onClick={() => onPrayerSelect(prayer.id)}
         >
           <div className="flex items-center space-x-3">
             <Scroll className="text-sage" size={20} />

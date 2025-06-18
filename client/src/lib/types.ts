@@ -1,7 +1,17 @@
 import { create } from 'zustand';
 
+export type ModalType = 
+  | 'mincha' 
+  | 'tehillim' 
+  | 'nishmas' 
+  | 'refuah' 
+  | 'family' 
+  | 'life' 
+  | 'individual-prayer' 
+  | null;
+
 export interface ModalState {
-  activeModal: string | null;
+  activeModal: ModalType;
   openModal: (modalId: string) => void;
   closeModal: () => void;
 }
