@@ -21,7 +21,7 @@ export default function TorahSection() {
     {
       id: 'halacha',
       icon: Book,
-      title: 'Daily Halacha',
+      title: 'Halacha',
       subtitle: 'Jewish Law & Practice',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
@@ -31,7 +31,7 @@ export default function TorahSection() {
     {
       id: 'mussar',
       icon: Heart,
-      title: 'Daily Mussar',
+      title: 'Mussar',
       subtitle: 'Character Development',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
@@ -41,7 +41,7 @@ export default function TorahSection() {
     {
       id: 'chizuk',
       icon: Play,
-      title: 'Daily Chizuk',
+      title: 'Chizuk',
       subtitle: '5 minute inspiration',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',

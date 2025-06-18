@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Clock, Heart, BookOpen, HandHeart } from "lucide-react";
+import { Calendar, Clock, Heart, BookOpen, HandHeart, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useModalStore } from "@/lib/types";
@@ -21,6 +21,14 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   const jewishTimesQuery = useJewishTimes();
   const { data: hebrewDate } = useHebrewDate();
 
+  // Get time-appropriate greeting
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 18) return "Good Afternoon";
+    return "Good Evening";
+  };
+
   // Fetch today's sponsor
   const today = new Date().toISOString().split('T')[0];
   const { data: sponsor } = useQuery<Sponsor>({
@@ -40,9 +48,9 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
 
   return (
     <div className="p-1 space-y-1 overflow-y-auto">
-      {/* Gentle Welcome */}
+      {/* Dynamic Greeting */}
       <div className="text-center">
-        <h1 className="font-serif text-2xl text-warm-gray mb-1 tracking-wide">Welcome to Ezras Nashim</h1>
+        <h1 className="font-serif text-2xl text-warm-gray mb-1 tracking-wide">{getGreeting()}</h1>
       </div>
 
       {/* Today's Information & Sponsor */}
@@ -125,7 +133,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         >
           <div className="flex items-center space-x-3">
             <div className="bg-gradient-to-br from-muted-lavender to-rose-blush p-2 rounded-full">
-              <HandHeart className="text-white" size={18} strokeWidth={1.5} />
+              <Coins className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <div className="text-left flex-grow">
               <h3 className="font-serif text-lg text-warm-gray">Daily Tzedaka</h3>
