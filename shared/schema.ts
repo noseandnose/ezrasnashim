@@ -163,6 +163,52 @@ export const discountPromotions = pgTable("discount_promotions", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Daily Torah content tables
+export const dailyHalacha = pgTable("daily_halacha", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull().unique(), // The date for this content
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  source: text("source"), // Rabbi or book source
+  audioUrl: text("audio_url"), // Optional audio content
+  duration: text("duration"), // Audio duration if available
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const dailyMussar = pgTable("daily_mussar", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull().unique(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  source: text("source"),
+  audioUrl: text("audio_url"),
+  duration: text("duration"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const dailyChizuk = pgTable("daily_chizuk", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull().unique(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  source: text("source"),
+  audioUrl: text("audio_url"),
+  duration: text("duration"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const loshonHorah = pgTable("loshon_horah", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull().unique(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  source: text("source"),
+  audioUrl: text("audio_url"),
+  duration: text("duration"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Insert schemas - defined after all tables
 export const insertCalendarEventSchema = createInsertSchema(calendarEvents).omit({
   id: true,
 });
