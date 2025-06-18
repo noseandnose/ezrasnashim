@@ -65,10 +65,10 @@ export default function TorahSection() {
       {/* Welcome Header */}
       <div className="text-center">
         <h2 className="font-serif text-lg text-warm-gray mb-1 tracking-wide">Daily Torah Learning</h2>
-        <p className="font-sans text-warm-gray/70 text-xs leading-relaxed">Nourish your soul with wisdom and inspiration</p>
+
       </div>
 
-      <div className="grid grid-cols-2 gap-2 mb-4">
+      <div className="grid grid-cols-2 gap-2 mb-6">
         {torahItems.map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border }) => (
           <button
             key={id}
