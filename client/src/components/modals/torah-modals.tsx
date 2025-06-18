@@ -28,6 +28,11 @@ export default function TorahModals() {
     enabled: activeModal === 'loshon'
   });
 
+  const { data: pirkeiAvotContent } = useQuery<any>({
+    queryKey: ['/api/torah/pirkei-avot', today],
+    enabled: activeModal === 'pirkei-avot'
+  });
+
   return (
     <>
       {/* Halacha Modal */}

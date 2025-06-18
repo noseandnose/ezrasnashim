@@ -57,6 +57,16 @@ export default function TorahSection() {
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
       border: 'border-blush/10'
+    },
+    {
+      id: 'pirkei-avot',
+      icon: Scroll,
+      title: 'Pirkei Avot',
+      subtitle: 'Ethics of the Fathers',
+      gradient: 'bg-white',
+      iconBg: 'bg-gradient-feminine',
+      iconColor: 'text-white',
+      border: 'border-blush/10'
     }
   ];
 
@@ -75,11 +85,46 @@ export default function TorahSection() {
         <p className="font-serif text-xs text-warm-gray/60 text-center mt-2 tracking-wide">{quote ? `- ${quote.source}` : ""}</p>
       </div>
 
+      {/* First row: 2 items */}
       <div className="grid grid-cols-2 gap-2 mb-1">
-        {torahItems.map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border }) => (
+        {torahItems.slice(0, 2).map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border }) => (
           <button
             key={id}
             className={`${gradient} rounded-3xl p-3 text-center glow-hover transition-gentle shadow-lg border ${border}`}
+            onClick={() => openModal(id)}
+          >
+            <div className={`${iconBg} p-2 rounded-full mx-auto mb-2 w-fit`}>
+              <Icon className={`${iconColor}`} size={18} strokeWidth={1.5} />
+            </div>
+            <h3 className="font-serif text-xs text-warm-gray mb-1 tracking-wide">{title}</h3>
+            <p className="font-sans text-xs text-warm-gray/60 leading-relaxed">{subtitle}</p>
+          </button>
+        ))}
+      </div>
+
+      {/* Second row: 2 items */}
+      <div className="grid grid-cols-2 gap-2 mb-1">
+        {torahItems.slice(2, 4).map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border }) => (
+          <button
+            key={id}
+            className={`${gradient} rounded-3xl p-3 text-center glow-hover transition-gentle shadow-lg border ${border}`}
+            onClick={() => openModal(id)}
+          >
+            <div className={`${iconBg} p-2 rounded-full mx-auto mb-2 w-fit`}>
+              <Icon className={`${iconColor}`} size={18} strokeWidth={1.5} />
+            </div>
+            <h3 className="font-serif text-xs text-warm-gray mb-1 tracking-wide">{title}</h3>
+            <p className="font-sans text-xs text-warm-gray/60 leading-relaxed">{subtitle}</p>
+          </button>
+        ))}
+      </div>
+
+      {/* Third row: 1 centered item */}
+      <div className="flex justify-center mb-1">
+        {torahItems.slice(4, 5).map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border }) => (
+          <button
+            key={id}
+            className={`${gradient} rounded-3xl p-3 text-center glow-hover transition-gentle shadow-lg border ${border} w-48`}
             onClick={() => openModal(id)}
           >
             <div className={`${iconBg} p-2 rounded-full mx-auto mb-2 w-fit`}>
