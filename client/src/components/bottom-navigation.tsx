@@ -19,11 +19,13 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
     switch (sectionId) {
       case 'torah': return 'bg-muted-lavender/15 text-muted-lavender rounded-2xl';
       case 'tefilla': return 'bg-rose-blush/15 text-rose-blush rounded-2xl';
-      case 'tzedaka': return 'bg-warm-gray/15 text-warm-gray rounded-2xl';
+      case 'tzedaka': return 'bg-sage/15 text-sage rounded-2xl';
       case 'table': return 'bg-sand-gold/15 text-sand-gold rounded-2xl';
       default: return 'bg-rose-blush/15 text-rose-blush rounded-2xl';
     }
   };
+
+
 
   return (
     <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-soft-white/95 backdrop-blur-sm border-t border-rose-blush/15 shadow-2xl rounded-t-3xl transition-gentle">
@@ -59,7 +61,11 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
               activeSection === id 
                 ? isCenter 
                   ? 'text-white' 
-                  : 'text-blush'
+                  : id === 'torah' ? 'text-muted-lavender'
+                  : id === 'tefilla' ? 'text-rose-blush'
+                  : id === 'tzedaka' ? 'text-sage'
+                  : id === 'table' ? 'text-sand-gold'
+                  : 'text-rose-blush'
                 : 'text-warm-gray/70'
             }`}>
               {label}

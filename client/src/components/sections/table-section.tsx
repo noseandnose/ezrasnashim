@@ -46,13 +46,15 @@ export default function TableSection() {
 
       {/* Shabbos Times Section */}
       <div className="bg-gradient-soft rounded-3xl p-4 shadow-lg">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="bg-gradient-feminine p-3 rounded-full">
-            <Flame className="text-white" size={20} />
-          </div>
-          <div>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <div className="bg-gradient-feminine p-3 rounded-full">
+              <Flame className="text-white" size={20} />
+            </div>
             <h3 className="font-serif text-lg text-warm-gray">This Shabbos</h3>
-            <p className="font-sans text-sm text-warm-gray/70">Candle lighting & Havdalah</p>
+          </div>
+          <div className="text-right">
+            <p className="font-serif text-sm text-warm-gray">{shabbosData?.parsha || "Loading..."}</p>
           </div>
         </div>
         
@@ -71,14 +73,6 @@ export default function TableSection() {
             </div>
             <p className="font-serif text-lg text-warm-gray">{shabbosData?.havdalah || "Loading..."}</p>
           </div>
-        </div>
-        
-        <div className="bg-gradient-to-r from-ivory to-blush/5 rounded-2xl p-3 text-center">
-          <div className="flex items-center justify-center space-x-2 mb-1">
-            <BookOpen className="text-sage" size={14} />
-            <span className="font-sans text-xs text-warm-gray/70">This Week's Parsha</span>
-          </div>
-          <p className="font-serif text-sm text-warm-gray">{shabbosData?.parsha || "Loading..."}</p>
         </div>
       </div>
 
