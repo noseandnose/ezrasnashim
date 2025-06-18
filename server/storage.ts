@@ -18,7 +18,7 @@ import {
   type WomensPrayer, type InsertWomensPrayer,
   type DiscountPromotion, type InsertDiscountPromotion
 } from "@shared/schema";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { eq, gt, lt, and } from "drizzle-orm";
 
 export interface IStorage {
@@ -310,7 +310,7 @@ export class DatabaseStorage implements IStorage {
 
   async getPirkeiAvotByDate(date: string): Promise<any | undefined> {
     try {
-      const result = await db.execute(
+      const result = await pool.query(
         `SELECT * FROM pirkei_avot WHERE date = $1 LIMIT 1`,
         [date]
       );
@@ -323,7 +323,7 @@ export class DatabaseStorage implements IStorage {
 
   async createPirkeiAvot(pirkeiAvot: any): Promise<any> {
     try {
-      const result = await db.execute(
+      const result = await pool.query(
         `INSERT INTO pirkei_avot (content, source, explanation, date) 
          VALUES ($1, $2, $3, $4) RETURNING *`,
         [pirkeiAvot.content, pirkeiAvot.source, pirkeiAvot.explanation, pirkeiAvot.date]
