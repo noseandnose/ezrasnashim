@@ -89,8 +89,8 @@ export default function TzedakaSection() {
           className="bg-white rounded-3xl p-4 shadow-lg hover:scale-105 transition-all duration-300 border border-blush/10 text-left"
         >
           <div className="flex flex-col items-center text-center space-y-2">
-            <div className="bg-gradient-to-br from-blush/20 to-lavender/20 p-3 rounded-full">
-              <Shield className="text-blush" size={20} strokeWidth={1.5} />
+            <div className="bg-gradient-feminine p-2 rounded-full">
+              <Shield className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <div>
               <h3 className="font-serif text-sm text-warm-gray mb-1">Support Causes</h3>
@@ -104,8 +104,8 @@ export default function TzedakaSection() {
           className="bg-white rounded-3xl p-4 shadow-lg hover:scale-105 transition-all duration-300 border border-blush/10 text-left"
         >
           <div className="flex flex-col items-center text-center space-y-2">
-            <div className="bg-gradient-to-br from-lavender/20 to-sage/20 p-3 rounded-full">
-              <Heart className="text-lavender" size={20} strokeWidth={1.5} />
+            <div className="bg-gradient-feminine p-2 rounded-full">
+              <Heart className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <div>
               <h3 className="font-serif text-sm text-warm-gray mb-1">Sponsor a Day</h3>
@@ -116,20 +116,20 @@ export default function TzedakaSection() {
       </div>
 
       {/* Community Impact */}
-      <div className="bg-gradient-to-r from-blush/10 to-lavender/10 rounded-3xl p-6 border border-blush/20">
-        <h3 className="font-serif text-lg text-warm-gray text-center mb-4">Community Impact</h3>
-        <div className="grid grid-cols-3 gap-4 text-center">
+      <div className="bg-gradient-soft rounded-3xl p-3 border border-blush/10">
+        <h3 className="font-serif text-sm text-warm-gray text-center mb-2">Community Impact</h3>
+        <div className="grid grid-cols-3 gap-2 text-center">
           <div>
-            <div className="font-serif text-2xl text-blush">142</div>
+            <div className="font-serif text-lg text-blush">142</div>
             <div className="font-sans text-xs text-warm-gray/70">Days Sponsored</div>
           </div>
           <div>
-            <div className="font-serif text-2xl text-lavender">3</div>
-            <div className="font-sans text-xs text-warm-gray/70">Campaigns Completed</div>
+            <div className="font-serif text-lg text-lavender">3</div>
+            <div className="font-sans text-xs text-warm-gray/70">Campaigns</div>
           </div>
           <div>
-            <div className="font-serif text-2xl text-sage">$24,580</div>
-            <div className="font-sans text-xs text-warm-gray/70">Total Raised</div>
+            <div className="font-serif text-lg text-sage">$24,580</div>
+            <div className="font-sans text-xs text-warm-gray/70">Raised</div>
           </div>
         </div>
       </div>

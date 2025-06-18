@@ -52,38 +52,36 @@ export default function DonationModal() {
 
   return (
     <Dialog open={activeModal === 'donate'} onOpenChange={() => closeModal()}>
-      <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
+      <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6 font-sans">
         <DialogHeader className="text-center mb-4">
-          <div className="flex items-center justify-center space-x-2 mb-2">
-            <div className="bg-gradient-feminine p-2 rounded-full">
-              <Heart className="text-white" size={18} />
-            </div>
-            <DialogTitle className="text-lg font-serif font-semibold">Make a Donation</DialogTitle>
-          </div>
-          <p className="text-xs text-warm-gray/70">Support our community with your generous contribution</p>
+          <DialogTitle className="text-lg font-serif font-semibold mb-2 text-warm-gray">Make a Donation</DialogTitle>
+          <p className="text-xs text-warm-gray/70 font-sans">Support our community with your generous contribution</p>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-3 text-sm text-gray-700">
           {/* Quick Amount Buttons */}
-          <div className="grid grid-cols-5 gap-2">
-            {quickAmounts.map((quickAmount) => (
-              <button
-                key={quickAmount}
-                onClick={() => setAmount(quickAmount.toString())}
-                className={`p-2 rounded-xl text-xs font-medium transition-all ${
-                  amount === quickAmount.toString()
-                    ? 'bg-gradient-to-br from-rose-blush to-muted-lavender text-white'
-                    : 'bg-gradient-soft border border-blush/10 text-warm-gray hover:bg-gradient-to-br hover:from-rose-blush/10 hover:to-muted-lavender/10'
-                }`}
-              >
-                ${quickAmount}
-              </button>
-            ))}
+          <div>
+            <p className="text-sm font-medium text-warm-gray mb-2">Quick Amount</p>
+            <div className="grid grid-cols-5 gap-1">
+              {quickAmounts.map((quickAmount) => (
+                <button
+                  key={quickAmount}
+                  onClick={() => setAmount(quickAmount.toString())}
+                  className={`p-2 rounded-xl text-xs font-medium transition-all ${
+                    amount === quickAmount.toString()
+                      ? 'bg-gradient-feminine text-white'
+                      : 'bg-white border border-blush/10 text-warm-gray hover:bg-ivory'
+                  }`}
+                >
+                  ${quickAmount}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Custom Amount Input */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-warm-gray">Custom Amount</label>
+          <div>
+            <label className="text-sm font-medium text-warm-gray mb-2 block">Custom Amount</label>
             <div className="relative">
               <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-warm-gray/60" size={16} />
               <Input
@@ -91,7 +89,7 @@ export default function DonationModal() {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Enter amount"
-                className="pl-10 rounded-xl border-blush/20 focus:border-rose-blush bg-gradient-soft"
+                className="pl-10 rounded-xl border-blush/20 focus:border-blush bg-white"
                 min="1"
                 step="0.01"
               />
@@ -103,7 +101,7 @@ export default function DonationModal() {
             <Button
               onClick={handleDonate}
               disabled={createPaymentMutation.isPending || !amount || parseFloat(amount) <= 0}
-              className="w-full bg-gradient-to-br from-rose-blush to-muted-lavender text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
             >
               {createPaymentMutation.isPending ? 'Processing...' : `Donate $${amount}`}
             </Button>
@@ -111,7 +109,7 @@ export default function DonationModal() {
             <Button
               onClick={() => closeModal()}
               variant="outline"
-              className="w-full rounded-xl border-blush/20 text-warm-gray hover:bg-gradient-soft transition-all duration-300"
+              className="w-full rounded-xl border-blush/20 text-warm-gray hover:bg-ivory transition-all duration-300"
             >
               Cancel
             </Button>
