@@ -207,15 +207,15 @@ export default function TefillaModals() {
                 {showHebrew ? 'EN' : 'עב'}
               </Button>
               <DialogTitle className="text-lg font-serif font-semibold">Tehillim {progress?.currentPerek || 1}</DialogTitle>
-              <div className="flex items-center gap-2">
-                <Type className="h-4 w-4 text-blush-pink" />
+              <div className="flex items-center gap-0">
+                <Type className="h-4 w-4 text-blush-pink mr-2" />
                 <button
                   onClick={() => setFontSize(Math.max(12, fontSize - 2))}
                   className="p-1 hover:bg-white rounded-md transition-colors"
                 >
                   <Minus className="h-3 w-3 text-blush-pink" />
                 </button>
-                <span className="text-xs text-gray-600 min-w-[3rem] text-center mx-1">{fontSize}px</span>
+                <span className="text-xs text-gray-600 min-w-[2rem] text-center px-1">{fontSize}px</span>
                 <button
                   onClick={() => setFontSize(Math.min(24, fontSize + 2))}
                   className="p-1 hover:bg-white rounded-md transition-colors"
@@ -263,15 +263,15 @@ export default function TefillaModals() {
                 {language === 'hebrew' ? 'EN' : 'עב'}
               </Button>
               <DialogTitle className="text-lg font-serif font-semibold">Mincha Prayer</DialogTitle>
-              <div className="flex items-center gap-2">
-                <Type className="h-4 w-4 text-blush-pink" />
+              <div className="flex items-center gap-0">
+                <Type className="h-4 w-4 text-blush-pink mr-2" />
                 <button
                   onClick={() => setFontSize(Math.max(12, fontSize - 2))}
                   className="p-1 hover:bg-white rounded-md transition-colors"
                 >
                   <Minus className="h-3 w-3 text-blush-pink" />
                 </button>
-                <span className="text-xs text-gray-600 min-w-[3rem] text-center mx-1">{fontSize}px</span>
+                <span className="text-xs text-gray-600 min-w-[2rem] text-center px-1">{fontSize}px</span>
                 <button
                   onClick={() => setFontSize(Math.min(24, fontSize + 2))}
                   className="p-1 hover:bg-white rounded-md transition-colors"
@@ -856,15 +856,15 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
             {language === 'hebrew' ? 'EN' : 'עב'}
           </Button>
           <DialogTitle className="text-lg font-serif font-semibold">{prayer.prayerName}</DialogTitle>
-          <div className="flex items-center gap-2">
-            <Type className="h-4 w-4 text-blush-pink" />
+          <div className="flex items-center gap-0">
+            <Type className="h-4 w-4 text-blush-pink mr-2" />
             <button
               onClick={() => setFontSize(Math.max(12, fontSize - 2))}
               className="p-1 hover:bg-white rounded-md transition-colors"
             >
               <Minus className="h-3 w-3 text-blush-pink" />
             </button>
-            <span className="text-xs text-gray-600 min-w-[3rem] text-center mx-1">{fontSize}px</span>
+            <span className="text-xs text-gray-600 min-w-[2rem] text-center px-1">{fontSize}px</span>
             <button
               onClick={() => setFontSize(Math.min(24, fontSize + 2))}
               className="p-1 hover:bg-white rounded-md transition-colors"
