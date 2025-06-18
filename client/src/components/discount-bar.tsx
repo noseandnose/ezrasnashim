@@ -32,9 +32,8 @@ export default function DiscountBar({ className = "" }: DiscountBarProps) {
 
   return (
     <div 
-      className={`bg-gradient-to-r from-rose-300 via-rose-200 to-purple-200 
-                  border border-rose-200 rounded-lg p-3 cursor-pointer 
-                  hover:shadow-md transition-shadow duration-200 ${className}`}
+      className={`bg-gradient-soft border border-blush/10 rounded-3xl p-3 cursor-pointer 
+                  hover:shadow-lg transition-shadow duration-200 ${className}`}
       onClick={handleClick}
     >
       <div className="flex items-center justify-between">
