@@ -65,9 +65,17 @@ export default function TorahSection() {
       {/* Welcome Header */}
       <div className="text-center">
         <h2 className="font-serif text-lg text-warm-gray mb-1 tracking-wide">Daily Torah Learning</h2>
-
       </div>
-      <div className="grid grid-cols-2 gap-2 mb-3">
+
+      {/* Inspirational Quote */}
+      <div className="bg-gradient-soft rounded-3xl p-3 shadow-lg mb-3">
+        <p className="font-sans text-xs text-warm-gray/80 italic text-center leading-relaxed">
+          {quote ? `"${quote.text}"` : ""}
+        </p>
+        <p className="font-serif text-xs text-warm-gray/60 text-center mt-2 tracking-wide">{quote ? `- ${quote.source}` : ""}</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 mb-1">
         {torahItems.map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border }) => (
           <button
             key={id}
@@ -82,13 +90,7 @@ export default function TorahSection() {
           </button>
         ))}
       </div>
-      {/* Inspirational Quote */}
-      <div className="bg-gradient-soft rounded-3xl p-3 shadow-lg mt-[8px] mb-[8px]">
-        <p className="font-sans text-xs text-warm-gray/80 italic text-center leading-relaxed">
-          {quote ? `"${quote.text}"` : ""}
-        </p>
-        <p className="font-serif text-xs text-warm-gray/60 text-center mt-2 tracking-wide">{quote ? `- ${quote.source}` : ""}</p>
-      </div>
+
       {/* Bottom padding */}
       <div className="h-16"></div>
     </div>
