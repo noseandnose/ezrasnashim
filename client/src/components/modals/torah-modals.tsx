@@ -103,6 +103,24 @@ export default function TorahModals() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Pirkei Avot Modal */}
+      <Dialog open={activeModal === 'pirkei-avot'} onOpenChange={() => closeModal()}>
+        <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6">
+          <DialogHeader className="text-center mb-4">
+            <DialogTitle className="text-lg font-semibold mb-2">Pirkei Avot</DialogTitle>
+            <DialogDescription className="text-sm text-gray-600">Ethics of the Fathers</DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-3 text-sm text-gray-700">
+            <div>
+              <p><strong>Today's Teaching:</strong> {pirkeiAvotContent?.content || "Shimon his son says: All my days I have grown up among the wise, and I have found nothing better for the body than silence."}</p>
+              <p className="mt-2 text-xs text-gray-500">- {pirkeiAvotContent?.source || "Pirkei Avot 1:17"}</p>
+              <p className="mt-3">{pirkeiAvotContent?.explanation || "This mishnah teaches us the value of thoughtful speech and careful listening. True wisdom often comes through quiet contemplation and attentive observation of those wiser than ourselves."}</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

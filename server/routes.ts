@@ -345,6 +345,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/torah/pirkei-avot/:date", async (req, res) => {
+    try {
+      const { date } = req.params;
+      const pirkeiAvot = await storage.getPirkeiAvotByDate(date);
+      res.json(pirkeiAvot || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch Pirkei Avot content" });
+    }
+  });
+
   // Weekly Torah content routes
   app.get("/api/table/recipe/:week", async (req, res) => {
     try {

@@ -41,6 +41,9 @@ export interface IStorage {
   
   getLoshonHorahByDate(date: string): Promise<LoshonHorah | undefined>;
   createLoshonHorah(loshon: InsertLoshonHorah): Promise<LoshonHorah>;
+  
+  getPirkeiAvotByDate(date: string): Promise<any | undefined>;
+  createPirkeiAvot(pirkeiAvot: any): Promise<any>;
 
   // Weekly Torah content methods
   getShabbatRecipeByWeek(week: string): Promise<ShabbatRecipe | undefined>;
@@ -303,6 +306,33 @@ export class DatabaseStorage implements IStorage {
   async createLoshonHorah(insertLoshon: InsertLoshonHorah): Promise<LoshonHorah> {
     const [loshon] = await db.insert(loshonHorah).values(insertLoshon).returning();
     return loshon;
+  }
+
+  async getPirkeiAvotByDate(date: string): Promise<any | undefined> {
+    try {
+      const result = await db.execute(
+        `SELECT * FROM pirkei_avot WHERE date = $1 LIMIT 1`,
+        [date]
+      );
+      return result.rows[0] || undefined;
+    } catch (error) {
+      console.error('Error fetching Pirkei Avot:', error);
+      return undefined;
+    }
+  }
+
+  async createPirkeiAvot(pirkeiAvot: any): Promise<any> {
+    try {
+      const result = await db.execute(
+        `INSERT INTO pirkei_avot (content, source, explanation, date) 
+         VALUES ($1, $2, $3, $4) RETURNING *`,
+        [pirkeiAvot.content, pirkeiAvot.source, pirkeiAvot.explanation, pirkeiAvot.date]
+      );
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error creating Pirkei Avot:', error);
+      throw error;
+    }
   }
 
   // Weekly Torah content methods
