@@ -54,9 +54,6 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         <h1 className="font-serif text-2xl text-warm-gray mb-1 tracking-wide">{getGreeting()}</h1>
       </div>
 
-      {/* Discount Promotion Bar */}
-      <DiscountBar />
-
       {/* Today's Information & Sponsor */}
       <div className="bg-gradient-soft rounded-3xl p-3 shadow-lg">
         <div className="flex items-center justify-between mb-3">
@@ -145,6 +142,11 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             </div>
           </div>
         </button>
+
+        {/* Discount Promotion Bar */}
+        <div className="mt-2">
+          <DiscountBar />
+        </div>
       </div>
     </div>
   );
