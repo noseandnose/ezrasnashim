@@ -195,7 +195,7 @@ export default function TefillaModals() {
     <>
       {/* Tehillim Text Modal */}
       <Dialog open={activeModal === 'tehillim-text'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans" aria-describedby="tehillim-description">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
           <DialogHeader className="text-center mb-4">
             <div className="flex items-center justify-between">
               <Button
@@ -207,7 +207,7 @@ export default function TefillaModals() {
                 {showHebrew ? 'EN' : 'עב'}
               </Button>
               <DialogTitle className="text-lg font-serif font-semibold">Tehillim {progress?.currentPerek || 1}</DialogTitle>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <Type className="h-4 w-4 text-blush-pink" />
                 <button
                   onClick={() => setFontSize(Math.max(12, fontSize - 2))}
@@ -215,7 +215,7 @@ export default function TefillaModals() {
                 >
                   <Minus className="h-3 w-3 text-blush-pink" />
                 </button>
-                <span className="text-xs text-gray-600 min-w-[2rem] text-center">{fontSize}px</span>
+                <span className="text-xs text-gray-600 min-w-[2.5rem] text-center">{fontSize}px</span>
                 <button
                   onClick={() => setFontSize(Math.min(24, fontSize + 2))}
                   className="p-1 hover:bg-white rounded-md transition-colors"
@@ -251,17 +251,9 @@ export default function TefillaModals() {
 
       {/* Mincha Modal */}
       <Dialog open={activeModal === 'mincha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans" aria-describedby="mincha-description">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
           <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-serif font-semibold">Mincha Prayer</DialogTitle>
-            <p id="mincha-description" className="text-xs text-warm-gray/70 mt-1">
-              Afternoon prayer service with customizable text size
-            </p>
-          </DialogHeader>
-          
-          {/* Language and Font Controls */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between">
               <Button
                 variant="outline"
                 size="sm"
@@ -270,25 +262,25 @@ export default function TefillaModals() {
               >
                 {language === 'hebrew' ? 'EN' : 'עב'}
               </Button>
+              <DialogTitle className="text-lg font-serif font-semibold">Mincha Prayer</DialogTitle>
+              <div className="flex items-center gap-1">
+                <Type className="h-4 w-4 text-blush-pink" />
+                <button
+                  onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                  className="p-1 hover:bg-white rounded-md transition-colors"
+                >
+                  <Minus className="h-3 w-3 text-blush-pink" />
+                </button>
+                <span className="text-xs text-gray-600 min-w-[2.5rem] text-center">{fontSize}px</span>
+                <button
+                  onClick={() => setFontSize(Math.min(24, fontSize + 2))}
+                  className="p-1 hover:bg-white rounded-md transition-colors"
+                >
+                  <Plus className="h-3 w-3 text-blush-pink" />
+                </button>
+              </div>
             </div>
-            
-            <div className="flex items-center gap-2">
-              <Type className="h-4 w-4 text-blush-pink" />
-              <button
-                onClick={() => setFontSize(Math.max(12, fontSize - 2))}
-                className="p-1 hover:bg-white rounded-md transition-colors"
-              >
-                <Minus className="h-3 w-3 text-blush-pink" />
-              </button>
-              <span className="text-xs text-gray-600 min-w-[2rem] text-center">{fontSize}px</span>
-              <button
-                onClick={() => setFontSize(Math.min(24, fontSize + 2))}
-                className="p-1 hover:bg-white rounded-md transition-colors"
-              >
-                <Plus className="h-3 w-3 text-blush-pink" />
-              </button>
-            </div>
-          </div>
+          </DialogHeader>
 
           {/* Prayer Content */}
           <div className="space-y-6">
@@ -682,12 +674,9 @@ export default function TefillaModals() {
 
       {/* Refuah Prayers Modal */}
       <Dialog open={activeModal === 'refuah'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="refuah-description">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold">Refuah Prayers</DialogTitle>
-            <p id="refuah-description" className="text-xs text-warm-gray/70 mt-1">
-              Prayers for healing and recovery
-            </p>
           </DialogHeader>
           <RefuahPrayersList onPrayerSelect={handlePrayerSelect} />
         </DialogContent>
@@ -695,12 +684,9 @@ export default function TefillaModals() {
 
       {/* Family Prayers Modal */}
       <Dialog open={activeModal === 'family'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="family-description">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold">Family Prayers</DialogTitle>
-            <p id="family-description" className="text-xs text-warm-gray/70 mt-1">
-              Prayers for family harmony and children
-            </p>
           </DialogHeader>
           <FamilyPrayersList onPrayerSelect={handlePrayerSelect} />
         </DialogContent>
@@ -708,12 +694,9 @@ export default function TefillaModals() {
 
       {/* Life Prayers Modal */}
       <Dialog open={activeModal === 'life'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="life-description">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold">Life Prayers</DialogTitle>
-            <p id="life-description" className="text-xs text-warm-gray/70 mt-1">
-              Prayers for livelihood and guidance
-            </p>
           </DialogHeader>
           <LifePrayersList onPrayerSelect={handlePrayerSelect} />
         </DialogContent>
@@ -721,7 +704,7 @@ export default function TefillaModals() {
 
       {/* Individual Prayer Modal */}
       <Dialog open={activeModal === 'individual-prayer'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans" aria-describedby="individual-prayer-description">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
           <IndividualPrayerContent prayerId={selectedPrayerId} language={language} fontSize={fontSize} setLanguage={setLanguage} setFontSize={setFontSize} />
         </DialogContent>
       </Dialog>
@@ -873,7 +856,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
             {language === 'hebrew' ? 'EN' : 'עב'}
           </Button>
           <DialogTitle className="text-lg font-serif font-semibold">{prayer.prayerName}</DialogTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Type className="h-4 w-4 text-blush-pink" />
             <button
               onClick={() => setFontSize(Math.max(12, fontSize - 2))}
@@ -881,7 +864,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
             >
               <Minus className="h-3 w-3 text-blush-pink" />
             </button>
-            <span className="text-xs text-gray-600 min-w-[2rem] text-center">{fontSize}px</span>
+            <span className="text-xs text-gray-600 min-w-[2.5rem] text-center">{fontSize}px</span>
             <button
               onClick={() => setFontSize(Math.min(24, fontSize + 2))}
               className="p-1 hover:bg-white rounded-md transition-colors"
