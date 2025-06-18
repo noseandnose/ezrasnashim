@@ -64,7 +64,7 @@ export default function TorahSection() {
     <div className="p-2 space-y-1">
       {/* Welcome Header */}
       <div className="text-center">
-        <h2 className="font-serif text-lg text-warm-gray mb-1 tracking-wide">Daily Torah Learning</h2>
+        <h2 className="font-serif text-lg text-warm-gray mb-1 tracking-wide">Torah Learning</h2>
       </div>
 
       {/* Inspirational Quote */}

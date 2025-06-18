@@ -2,7 +2,7 @@ import {
   calendarEvents, shopItems, 
   tehillimNames, globalTehillimProgress, minchaPrayers, sponsors, nishmasText,
   dailyHalacha, dailyMussar, dailyChizuk, loshonHorah,
-  shabbatRecipes, parshaVorts, campaigns, inspirationalQuotes, womensPrayers,
+  shabbatRecipes, parshaVorts, campaigns, inspirationalQuotes, womensPrayers, discountPromotions,
   type CalendarEvent, type InsertCalendarEvent,
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
@@ -15,7 +15,8 @@ import {
   type ParshaVort, type InsertParshaVort,
   type Campaign, type InsertCampaign,
   type InspirationalQuote, type InsertInspirationalQuote,
-  type WomensPrayer, type InsertWomensPrayer
+  type WomensPrayer, type InsertWomensPrayer,
+  type DiscountPromotion, type InsertDiscountPromotion
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, gt, lt, and } from "drizzle-orm";
@@ -85,6 +86,10 @@ export interface IStorage {
   getWomensPrayersByCategory(category: string): Promise<WomensPrayer[]>;
   getWomensPrayerById(id: number): Promise<WomensPrayer | undefined>;
   createWomensPrayer(prayer: InsertWomensPrayer): Promise<WomensPrayer>;
+
+  // Discount promotion methods
+  getActiveDiscountPromotion(): Promise<DiscountPromotion | undefined>;
+  createDiscountPromotion(promotion: InsertDiscountPromotion): Promise<DiscountPromotion>;
 }
 
 export class DatabaseStorage implements IStorage {
