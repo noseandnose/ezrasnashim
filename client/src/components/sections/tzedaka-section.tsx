@@ -100,7 +100,7 @@ export default function TzedakaSection() {
         </button>
 
         <button
-          onClick={() => openModal('donate')}
+          onClick={() => openModal('sponsor-day')}
           className="bg-white rounded-3xl p-4 shadow-lg hover:scale-105 transition-all duration-300 border border-blush/10 text-left"
         >
           <div className="flex flex-col items-center text-center space-y-2">

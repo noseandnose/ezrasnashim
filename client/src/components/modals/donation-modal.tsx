@@ -54,7 +54,7 @@ export default function DonationModal() {
     <Dialog open={activeModal === 'donate'} onOpenChange={() => closeModal()}>
       <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto gradient-soft-glow rounded-3xl p-6 font-sans border border-blush/20">
         <DialogHeader className="text-center mb-4">
-          <DialogTitle className="text-lg font-serif font-semibold mb-2 text-warm-gray">Make a Donation</DialogTitle>
+          <DialogTitle className="text-lg font-serif font-semibold mb-2 text-warm-gray">Support Causes</DialogTitle>
           <p className="text-xs text-warm-gray/70 font-sans">Support our community with your generous contribution</p>
         </DialogHeader>
 
@@ -99,19 +99,19 @@ export default function DonationModal() {
           {/* Donation Buttons */}
           <div className="space-y-2">
             <Button
-              onClick={handleDonate}
-              disabled={createPaymentMutation.isPending || !amount || parseFloat(amount) <= 0}
+              onClick={() => closeModal()}
+              variant="outline"
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
             >
-              {createPaymentMutation.isPending ? 'Processing...' : `Donate $${amount}`}
+              Cancel
             </Button>
             
             <Button
-              onClick={() => closeModal()}
-              variant="outline"
-              className="w-full rounded-xl border-blush/20 text-warm-gray hover:bg-ivory transition-all duration-300"
+              onClick={handleDonate}
+              disabled={createPaymentMutation.isPending || !amount || parseFloat(amount) <= 0}
+              className="w-full rounded-xl border-blush/20 text-warm-gray hover:bg-white/90 transition-all duration-300 bg-white/70 backdrop-blur-sm border"
             >
-              Cancel
+              {createPaymentMutation.isPending ? 'Processing...' : `Donate $${amount}`}
             </Button>
           </div>
         </div>

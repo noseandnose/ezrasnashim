@@ -40,7 +40,7 @@ export default function TzedakaModals() {
 
     switch (activeModal) {
       case "sponsor-day":
-        amount = getDonationAmount();
+        amount = 180;
         typeDescription = "Sponsor a Day of Ezras Nashim";
         break;
       case "torah-dedication":
@@ -74,49 +74,37 @@ export default function TzedakaModals() {
     <>
       {/* Sponsor a Day Modal */}
       <Dialog open={activeModal === 'sponsor-day'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
+        <DialogContent className="w-full max-w-sm gradient-soft-glow rounded-3xl p-6 font-sans border border-blush/20">
           <DialogHeader className="text-center mb-4">
-            <div className="flex items-center justify-center mb-2">
-              <BookOpen className="text-blush mr-2" size={20} />
-              <DialogTitle className="text-lg font-serif font-semibold">Sponsor a Day of Ezras Nashim</DialogTitle>
-            </div>
-            <DialogDescription className="text-sm text-gray-600 font-sans">
-              Dedicate all Mitzvot done on the app for one day
-            </DialogDescription>
+            <DialogTitle className="text-lg font-serif font-semibold mb-2 text-warm-gray">Sponsor a Day</DialogTitle>
+            <p className="text-xs text-warm-gray/70 font-sans">Dedicate all mitzvot done on the app for one day - $180</p>
           </DialogHeader>
           
           <div className="space-y-4">
-            <div>
-              <label className="text-sm font-sans font-medium block mb-2">Donation Amount</label>
-              <Select value={donationAmount} onValueChange={setDonationAmount}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select amount" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="36">$36 - Chai</SelectItem>
-                  <SelectItem value="54">$54 - 1.5 Chai</SelectItem>
-                  <SelectItem value="72">$72 - Double Chai</SelectItem>
-                  <SelectItem value="118">$118 - Premium</SelectItem>
-                  <SelectItem value="custom">Custom Amount</SelectItem>
-                </SelectContent>
-              </Select>
-              {donationAmount === "custom" && (
-                <Input 
-                  placeholder="Enter amount" 
-                  className="mt-2"
-                  type="number"
-                  value={customAmount}
-                  onChange={(e) => setCustomAmount(e.target.value)}
-                />
-              )}
+            <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-blush/20">
+              <div className="text-center">
+                <div className="font-serif text-2xl text-warm-gray mb-1">$180</div>
+                <div className="font-sans text-xs text-warm-gray/70">Fixed sponsorship amount</div>
+              </div>
             </div>
 
             <div>
-              <label className="text-sm font-medium block mb-2">Sponsor Name (Optional)</label>
+              <label className="text-sm font-medium text-warm-gray block mb-2">Sponsored By</label>
               <Input 
-                placeholder="L'ilui Nishmas..."
+                placeholder="Enter your name or family name"
                 value={donorName}
                 onChange={(e) => setDonorName(e.target.value)}
+                className="rounded-xl border-blush/30 focus:border-blush bg-white/80 backdrop-blur-sm"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-warm-gray block mb-2">In Honor or Memory Of</label>
+              <Textarea
+                placeholder="L'ilui Nishmas... or L'kavod..."
+                value={dedicationText}
+                onChange={(e) => setDedicationText(e.target.value)}
+                className="rounded-xl border-blush/30 focus:border-blush bg-white/80 backdrop-blur-sm min-h-[80px]"
               />
             </div>
 
@@ -133,17 +121,15 @@ export default function TzedakaModals() {
             <div className="flex space-x-2">
               <Button 
                 onClick={() => closeModal()} 
-                variant="outline"
-                className="flex-1"
+                className="flex-1 bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
               >
                 Cancel
               </Button>
               <Button 
                 onClick={() => handleDonation()}
-                className="flex-1 gradient-blush-peach text-white"
-                disabled={!donationAmount}
+                className="flex-1 rounded-xl border-blush/20 text-warm-gray hover:bg-white/90 transition-all duration-300 bg-white/70 backdrop-blur-sm border"
               >
-                Continue to Payment
+                Sponsor for $180
               </Button>
             </div>
           </div>
