@@ -207,7 +207,7 @@ export default function TefillaModals() {
                 {showHebrew ? 'EN' : 'עב'}
               </Button>
               <DialogTitle className="text-lg font-serif font-semibold">Tehillim {progress?.currentPerek || 1}</DialogTitle>
-              <div className="flex items-center gap-0">
+              <div className="flex items-center gap-0 mr-8">
                 <Type className="h-4 w-4 text-blush-pink mr-2" />
                 <button
                   onClick={() => setFontSize(Math.max(12, fontSize - 2))}
@@ -263,7 +263,7 @@ export default function TefillaModals() {
                 {language === 'hebrew' ? 'EN' : 'עב'}
               </Button>
               <DialogTitle className="text-lg font-serif font-semibold">Mincha Prayer</DialogTitle>
-              <div className="flex items-center gap-0">
+              <div className="flex items-center gap-0 mr-8">
                 <Type className="h-4 w-4 text-blush-pink mr-2" />
                 <button
                   onClick={() => setFontSize(Math.max(12, fontSize - 2))}
@@ -856,7 +856,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
             {language === 'hebrew' ? 'EN' : 'עב'}
           </Button>
           <DialogTitle className="text-lg font-serif font-semibold">{prayer.prayerName}</DialogTitle>
-          <div className="flex items-center gap-0">
+          <div className="flex items-center gap-0 mr-8">
             <Type className="h-4 w-4 text-blush-pink mr-2" />
             <button
               onClick={() => setFontSize(Math.max(12, fontSize - 2))}
