@@ -11,16 +11,16 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
     { id: 'torah' as Section, icon: Book, label: 'Torah', isCenter: false },
     { id: 'tefilla' as Section, icon: HandHeart, label: 'Tefilla', isCenter: false },
     { id: 'home' as Section, icon: Heart, label: 'Home', isCenter: true },
+    { id: 'tzedaka' as Section, icon: HandHeart, label: 'Tzedaka', isCenter: false },
     { id: 'table' as Section, icon: Flame, label: 'Shabbos', isCenter: false },
-    { id: 'shop' as Section, icon: ShoppingBag, label: 'Shop', isCenter: false },
   ];
 
   const getActiveColorClass = (sectionId: Section) => {
     switch (sectionId) {
       case 'torah': return 'bg-muted-lavender/15 text-muted-lavender rounded-2xl';
       case 'tefilla': return 'bg-rose-blush/15 text-rose-blush rounded-2xl';
+      case 'tzedaka': return 'bg-warm-gray/15 text-warm-gray rounded-2xl';
       case 'table': return 'bg-sand-gold/15 text-sand-gold rounded-2xl';
-      case 'shop': return 'bg-sand-gold/15 text-sand-gold rounded-2xl';
       default: return 'bg-rose-blush/15 text-rose-blush rounded-2xl';
     }
   };

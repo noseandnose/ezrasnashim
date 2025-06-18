@@ -9,7 +9,7 @@ import TableSection from "@/components/sections/table-section";
 import ShopSection from "@/components/sections/shop-section";
 import ModalContainer from "@/components/modals/modal-container";
 
-export type Section = 'torah' | 'tefilla' | 'tzedaka' | 'home' | 'table' | 'shop';
+export type Section = 'torah' | 'tefilla' | 'tzedaka' | 'home' | 'table';
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState<Section>('home');
@@ -26,8 +26,6 @@ export default function Home() {
         return <TzedakaSection />;
       case 'table':
         return <TableSection />;
-      case 'shop':
-        return <ShopSection />;
       default:
         return <HomeSection onSectionChange={setActiveSection} />;
     }

@@ -63,10 +63,13 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <p className="font-sans text-xs text-warm-gray/70">Shkia</p>
             <p className="font-serif text-base text-warm-gray font-medium">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
           </div>
-          <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
+          <button 
+            onClick={() => openModal('mincha')}
+            className="bg-white/70 rounded-xl p-2 text-center border border-blush/10 hover:scale-105 transition-all duration-300 hover:bg-white/90"
+          >
             <p className="font-sans text-xs text-warm-gray/70">Mincha</p>
             <p className="font-serif text-base text-warm-gray font-medium">{jewishTimesQuery.data?.minchaGedolah || "Loading..."}</p>
-          </div>
+          </button>
         </div>
 
         {/* Sponsor Section */}
