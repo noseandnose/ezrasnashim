@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { useModalStore } from "@/lib/types";
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate } from "@/hooks/use-hebrew-date";
+import DiscountBar from "@/components/discount-bar";
 import type { Section } from "@/pages/home";
 
 interface Sponsor {
@@ -52,6 +53,9 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       <div className="text-center">
         <h1 className="font-serif text-2xl text-warm-gray mb-1 tracking-wide">{getGreeting()}</h1>
       </div>
+
+      {/* Discount Promotion Bar */}
+      <DiscountBar />
 
       {/* Today's Information & Sponsor */}
       <div className="bg-gradient-soft rounded-3xl p-3 shadow-lg">

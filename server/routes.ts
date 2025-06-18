@@ -562,6 +562,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Discount promotion routes
+  app.get("/api/discount-promotions/active", async (req, res) => {
+    try {
+      const promotion = await storage.getActiveDiscountPromotion();
+      res.json(promotion || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch active discount promotion" });
+    }
+  });
+
   // Stripe payment intent creation for donations
   app.post("/api/create-payment-intent", async (req, res) => {
     try {

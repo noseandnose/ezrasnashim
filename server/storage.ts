@@ -420,6 +420,30 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return prayer;
   }
+
+  async getActiveDiscountPromotion(): Promise<DiscountPromotion | undefined> {
+    const now = new Date();
+    const [promotion] = await db
+      .select()
+      .from(discountPromotions)
+      .where(
+        and(
+          eq(discountPromotions.isActive, true),
+          lt(discountPromotions.startDate, now),
+          gt(discountPromotions.endDate, now)
+        )
+      )
+      .limit(1);
+    return promotion;
+  }
+
+  async createDiscountPromotion(insertPromotion: InsertDiscountPromotion): Promise<DiscountPromotion> {
+    const [promotion] = await db
+      .insert(discountPromotions)
+      .values(insertPromotion)
+      .returning();
+    return promotion;
+  }
 }
 
 export const storage = new DatabaseStorage();
