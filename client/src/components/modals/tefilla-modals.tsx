@@ -4,7 +4,7 @@ import { useModalStore } from "@/lib/types";
 import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { MinchaPrayer, NishmasText, GlobalTehillimProgress, TehillimName } from "@shared/schema";
+import { MinchaPrayer, NishmasText, GlobalTehillimProgress, TehillimName, WomensPrayer } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
 
@@ -13,6 +13,7 @@ export default function TefillaModals() {
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
   const [fontSize, setFontSize] = useState(16);
   const [showHebrew, setShowHebrew] = useState(true);
+  const [selectedPrayerId, setSelectedPrayerId] = useState<number | null>(null);
   const queryClient = useQueryClient();
 
   // Nishmas 40-Day Campaign state
@@ -656,6 +657,262 @@ export default function TefillaModals() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Refuah Prayers Modal */}
+      <Dialog open={activeModal === 'refuah'} onOpenChange={() => closeModal()}>
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="refuah-description">
+          <DialogHeader className="text-center mb-4">
+            <DialogTitle className="text-lg font-serif font-semibold">Refuah Prayers</DialogTitle>
+            <p id="refuah-description" className="text-xs text-warm-gray/70 mt-1">
+              Prayers for healing and recovery
+            </p>
+          </DialogHeader>
+          <RefuahPrayersList setSelectedPrayerId={setSelectedPrayerId} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Family Prayers Modal */}
+      <Dialog open={activeModal === 'family'} onOpenChange={() => closeModal()}>
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="family-description">
+          <DialogHeader className="text-center mb-4">
+            <DialogTitle className="text-lg font-serif font-semibold">Family Prayers</DialogTitle>
+            <p id="family-description" className="text-xs text-warm-gray/70 mt-1">
+              Prayers for family harmony and children
+            </p>
+          </DialogHeader>
+          <FamilyPrayersList setSelectedPrayerId={setSelectedPrayerId} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Life Prayers Modal */}
+      <Dialog open={activeModal === 'life'} onOpenChange={() => closeModal()}>
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="life-description">
+          <DialogHeader className="text-center mb-4">
+            <DialogTitle className="text-lg font-serif font-semibold">Life Prayers</DialogTitle>
+            <p id="life-description" className="text-xs text-warm-gray/70 mt-1">
+              Prayers for livelihood and guidance
+            </p>
+          </DialogHeader>
+          <LifePrayersList setSelectedPrayerId={setSelectedPrayerId} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Individual Prayer Modal */}
+      <Dialog open={activeModal === 'individual-prayer'} onOpenChange={() => closeModal()}>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans" aria-describedby="individual-prayer-description">
+          <DialogHeader className="text-center mb-4">
+            <DialogTitle className="text-lg font-serif font-semibold">Prayer Text</DialogTitle>
+            <p id="individual-prayer-description" className="text-xs text-warm-gray/70 mt-1">
+              Personal prayer with customizable text size
+            </p>
+          </DialogHeader>
+          <IndividualPrayerContent prayerId={selectedPrayerId} language={language} fontSize={fontSize} setLanguage={setLanguage} setFontSize={setFontSize} />
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+// Helper components for prayer lists
+function RefuahPrayersList({ setSelectedPrayerId }: { setSelectedPrayerId: (id: number) => void }) {
+  const { closeModal, openModal } = useModalStore();
+  const { data: prayers, isLoading } = useQuery<WomensPrayer[]>({
+    queryKey: ['/api/womens-prayers/refuah'],
+  });
+
+  if (isLoading) return <div className="text-center">Loading prayers...</div>;
+
+  return (
+    <div className="space-y-3">
+      {prayers?.map((prayer) => (
+        <div 
+          key={prayer.id}
+          className="content-card rounded-xl p-4 cursor-pointer"
+          onClick={() => {
+            setSelectedPrayerId(prayer.id);
+            closeModal();
+            openModal('individual-prayer');
+          }}
+        >
+          <div className="flex items-center space-x-3">
+            <Heart className="text-blush" size={20} />
+            <div>
+              <span className="font-sans font-medium">{prayer.prayerName}</span>
+              {prayer.description && (
+                <p className="text-xs text-warm-gray/60 mt-1">{prayer.description}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+      <Button 
+        onClick={() => closeModal()} 
+        className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+      >
+        Close
+      </Button>
+    </div>
+  );
+}
+
+function FamilyPrayersList({ setSelectedPrayerId }: { setSelectedPrayerId: (id: number) => void }) {
+  const { closeModal, openModal } = useModalStore();
+  const { data: prayers, isLoading } = useQuery<WomensPrayer[]>({
+    queryKey: ['/api/womens-prayers/family'],
+  });
+
+  if (isLoading) return <div className="text-center">Loading prayers...</div>;
+
+  return (
+    <div className="space-y-3">
+      {prayers?.map((prayer) => (
+        <div 
+          key={prayer.id}
+          className="content-card rounded-xl p-4 cursor-pointer"
+          onClick={() => {
+            setSelectedPrayerId(prayer.id);
+            closeModal();
+            openModal('individual-prayer');
+          }}
+        >
+          <div className="flex items-center space-x-3">
+            <HandHeart className="text-peach" size={20} />
+            <div>
+              <span className="font-sans font-medium">{prayer.prayerName}</span>
+              {prayer.description && (
+                <p className="text-xs text-warm-gray/60 mt-1">{prayer.description}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+      <Button 
+        onClick={() => closeModal()} 
+        className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+      >
+        Close
+      </Button>
+    </div>
+  );
+}
+
+function LifePrayersList({ setSelectedPrayerId }: { setSelectedPrayerId: (id: number) => void }) {
+  const { closeModal, openModal } = useModalStore();
+  const { data: prayers, isLoading } = useQuery<WomensPrayer[]>({
+    queryKey: ['/api/womens-prayers/life'],
+  });
+
+  if (isLoading) return <div className="text-center">Loading prayers...</div>;
+
+  return (
+    <div className="space-y-3">
+      {prayers?.map((prayer) => (
+        <div 
+          key={prayer.id}
+          className="content-card rounded-xl p-4 cursor-pointer"
+          onClick={() => {
+            setSelectedPrayerId(prayer.id);
+            closeModal();
+            openModal('individual-prayer');
+          }}
+        >
+          <div className="flex items-center space-x-3">
+            <Scroll className="text-sage" size={20} />
+            <div>
+              <span className="font-sans font-medium">{prayer.prayerName}</span>
+              {prayer.description && (
+                <p className="text-xs text-warm-gray/60 mt-1">{prayer.description}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+      <Button 
+        onClick={() => closeModal()} 
+        className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+      >
+        Close
+      </Button>
+    </div>
+  );
+}
+
+function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, setFontSize }: {
+  prayerId: number | null;
+  language: 'hebrew' | 'english';
+  fontSize: number;
+  setLanguage: (lang: 'hebrew' | 'english') => void;
+  setFontSize: (size: number) => void;
+}) {
+  const { closeModal } = useModalStore();
+  const { data: prayer, isLoading } = useQuery<WomensPrayer>({
+    queryKey: [`/api/womens-prayers/prayer/${prayerId}`],
+    enabled: !!prayerId,
+  });
+
+  if (isLoading) return <div className="text-center">Loading prayer...</div>;
+  if (!prayer) return <div className="text-center">Prayer not found</div>;
+
+  return (
+    <>
+      {/* Language and Font Controls */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
+            className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
+          >
+            {language === 'hebrew' ? 'EN' : 'עב'}
+          </Button>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Type className="h-4 w-4 text-blush-pink" />
+          <button
+            onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+            className="p-1 hover:bg-white rounded-md transition-colors"
+          >
+            <Minus className="h-3 w-3 text-blush-pink" />
+          </button>
+          <span className="text-xs text-gray-600 min-w-[2rem] text-center">{fontSize}px</span>
+          <button
+            onClick={() => setFontSize(Math.min(24, fontSize + 2))}
+            className="p-1 hover:bg-white rounded-md transition-colors"
+          >
+            <Plus className="h-3 w-3 text-blush-pink" />
+          </button>
+        </div>
+      </div>
+
+      {/* Prayer Content */}
+      <div className="p-4 bg-white rounded-xl border border-cream-light mb-6">
+        <h3 className="font-serif text-lg text-center mb-4">{prayer.prayerName}</h3>
+        <div className="text-center">
+          <div
+            className={`${language === 'hebrew' ? 'font-hebrew text-right' : 'font-english'} leading-relaxed`}
+            style={{ fontSize: `${fontSize}px` }}
+          >
+            {language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation}
+          </div>
+          {prayer.transliteration && language === 'english' && (
+            <div
+              className="text-gray-500 italic mt-4"
+              style={{ fontSize: `${fontSize - 2}px` }}
+            >
+              {prayer.transliteration}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <Button 
+        onClick={() => closeModal()} 
+        className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
+      >
+        Close
+      </Button>
     </>
   );
 }
