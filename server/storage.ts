@@ -79,6 +79,11 @@ export interface IStorage {
   // Inspirational quote methods
   getInspirationalQuoteByDate(date: string): Promise<InspirationalQuote | undefined>;
   createInspirationalQuote(quote: InsertInspirationalQuote): Promise<InspirationalQuote>;
+
+  // Women's prayer methods
+  getWomensPrayersByCategory(category: string): Promise<WomensPrayer[]>;
+  getWomensPrayerById(id: number): Promise<WomensPrayer | undefined>;
+  createWomensPrayer(prayer: InsertWomensPrayer): Promise<WomensPrayer>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -383,6 +388,31 @@ export class DatabaseStorage implements IStorage {
       .values(insertQuote)
       .returning();
     return quote;
+  }
+
+  async getWomensPrayersByCategory(category: string): Promise<WomensPrayer[]> {
+    return await db
+      .select()
+      .from(womensPrayers)
+      .where(eq(womensPrayers.category, category))
+      .orderBy(womensPrayers.prayerName);
+  }
+
+  async getWomensPrayerById(id: number): Promise<WomensPrayer | undefined> {
+    const [prayer] = await db
+      .select()
+      .from(womensPrayers)
+      .where(eq(womensPrayers.id, id))
+      .limit(1);
+    return prayer;
+  }
+
+  async createWomensPrayer(insertPrayer: InsertWomensPrayer): Promise<WomensPrayer> {
+    const [prayer] = await db
+      .insert(womensPrayers)
+      .values(insertPrayer)
+      .returning();
+    return prayer;
   }
 }
 

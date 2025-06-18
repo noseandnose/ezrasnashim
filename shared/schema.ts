@@ -187,7 +187,16 @@ export const inspirationalQuotes = pgTable("inspirational_quotes", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-
+export const womensPrayers = pgTable("womens_prayers", {
+  id: serial("id").primaryKey(),
+  category: text("category").notNull(), // 'refuah', 'family', 'life'
+  prayerName: text("prayer_name").notNull(),
+  hebrewText: text("hebrew_text"),
+  englishTranslation: text("english_translation"),
+  transliteration: text("transliteration"),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
 
 export const insertCalendarEventSchema = createInsertSchema(calendarEvents).omit({
   id: true,
@@ -275,6 +284,11 @@ export const insertInspirationalQuoteSchema = createInsertSchema(inspirationalQu
   createdAt: true,
 });
 
+export const insertWomensPrayerSchema = createInsertSchema(womensPrayers).omit({
+  id: true,
+  createdAt: true,
+});
+
 // No user types needed - app works without authentication
 export type CalendarEvent = typeof calendarEvents.$inferSelect;
 export type InsertCalendarEvent = z.infer<typeof insertCalendarEventSchema>;
@@ -317,3 +331,6 @@ export type InsertCampaign = z.infer<typeof insertCampaignSchema>;
 
 export type InspirationalQuote = typeof inspirationalQuotes.$inferSelect;
 export type InsertInspirationalQuote = z.infer<typeof insertInspirationalQuoteSchema>;
+
+export type WomensPrayer = typeof womensPrayers.$inferSelect;
+export type InsertWomensPrayer = z.infer<typeof insertWomensPrayerSchema>;

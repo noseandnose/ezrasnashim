@@ -196,15 +196,15 @@ export default function TefillaModals() {
             </p>
           </DialogHeader>
 
-          {/* Language Toggle - Moved away from close button */}
+          {/* Language Toggle - Matching Mincha style */}
           <div className="flex justify-center mb-4">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowHebrew(!showHebrew)}
-              className="text-xs px-3 py-1 h-auto border-blush/30 bg-white hover:bg-blush/5"
+              className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
             >
-              {showHebrew ? 'Switch to English' : 'Switch to Hebrew'}
+              {showHebrew ? 'EN' : 'עב'}
             </Button>
           </div>
 
