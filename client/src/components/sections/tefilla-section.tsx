@@ -360,7 +360,7 @@ export default function TefillaSection() {
           
           <div className="grid grid-cols-3 gap-2 mb-2">
             <button 
-              onClick={() => openModal('refuah-prayers')}
+              onClick={() => openModal('refuah')}
               className="bg-gradient-to-br from-blush/10 to-blush/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-blush/20"
             >
               <div className="bg-blush/20 p-2 rounded-full mx-auto mb-1 w-fit">
@@ -371,7 +371,7 @@ export default function TefillaSection() {
             </button>
             
             <button 
-              onClick={() => openModal('family-prayers')}
+              onClick={() => openModal('family')}
               className="bg-gradient-to-br from-lavender/10 to-lavender/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-lavender/20"
             >
               <div className="bg-lavender/20 p-2 rounded-full mx-auto mb-1 w-fit">
@@ -382,7 +382,7 @@ export default function TefillaSection() {
             </button>
             
             <button 
-              onClick={() => openModal('life-prayers')}
+              onClick={() => openModal('life')}
               className="bg-gradient-to-br from-sage/10 to-sage/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-sage/20"
             >
               <div className="bg-sage/20 p-2 rounded-full mx-auto mb-1 w-fit">

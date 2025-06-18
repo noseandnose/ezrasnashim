@@ -197,23 +197,21 @@ export default function TefillaModals() {
       <Dialog open={activeModal === 'tehillim-text'} onOpenChange={() => closeModal()}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans" aria-describedby="tehillim-description">
           <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-serif font-semibold">Tehillim Text</DialogTitle>
+            <div className="flex items-center justify-center space-x-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowHebrew(!showHebrew)}
+                className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
+              >
+                {showHebrew ? 'EN' : 'עב'}
+              </Button>
+              <DialogTitle className="text-lg font-serif font-semibold">Tehillim {progress?.currentPerek || 1}</DialogTitle>
+            </div>
             <p id="tehillim-description" className="text-xs text-warm-gray/70 mt-1">
-              Read and complete Perek {progress?.currentPerek || 1}
+              Personal prayer with customizable text size
             </p>
           </DialogHeader>
-
-          {/* Language Toggle - Matching Mincha style */}
-          <div className="flex justify-center mb-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowHebrew(!showHebrew)}
-              className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
-            >
-              {showHebrew ? 'EN' : 'עב'}
-            </Button>
-          </div>
 
           {/* Tehillim Text */}
           <div className="mb-6 bg-white/70 rounded-2xl p-4 border border-blush/10">

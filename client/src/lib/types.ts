@@ -3,15 +3,21 @@ import { create } from 'zustand';
 export type ModalType = 
   | 'mincha' 
   | 'tehillim' 
+  | 'tehillim-text'
   | 'nishmas' 
+  | 'nishmas-campaign'
   | 'refuah' 
   | 'family' 
   | 'life' 
-  | 'individual-prayer' 
+  | 'individual-prayer'
+  | 'womens-prayers'
+  | 'blessings'
+  | 'tefillos'
+  | 'personal-prayers'
   | null;
 
 export interface ModalState {
-  activeModal: ModalType;
+  activeModal: string | null;
   openModal: (modalId: string) => void;
   closeModal: () => void;
 }
