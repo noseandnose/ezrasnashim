@@ -197,7 +197,7 @@ export default function TefillaModals() {
       <Dialog open={activeModal === 'tehillim-text'} onOpenChange={() => closeModal()}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans" aria-describedby="tehillim-description">
           <DialogHeader className="text-center mb-4">
-            <div className="flex items-center justify-center space-x-3">
+            <div className="flex items-center justify-between">
               <Button
                 variant="outline"
                 size="sm"
@@ -207,15 +207,33 @@ export default function TefillaModals() {
                 {showHebrew ? 'EN' : 'עב'}
               </Button>
               <DialogTitle className="text-lg font-serif font-semibold">Tehillim {progress?.currentPerek || 1}</DialogTitle>
+              <div className="flex items-center gap-2">
+                <Type className="h-4 w-4 text-blush-pink" />
+                <button
+                  onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                  className="p-1 hover:bg-white rounded-md transition-colors"
+                >
+                  <Minus className="h-3 w-3 text-blush-pink" />
+                </button>
+                <span className="text-xs text-gray-600 min-w-[2rem] text-center">{fontSize}px</span>
+                <button
+                  onClick={() => setFontSize(Math.min(24, fontSize + 2))}
+                  className="p-1 hover:bg-white rounded-md transition-colors"
+                >
+                  <Plus className="h-3 w-3 text-blush-pink" />
+                </button>
+              </div>
             </div>
-            <p id="tehillim-description" className="text-xs text-warm-gray/70 mt-1">
-              Personal prayer with customizable text size
-            </p>
           </DialogHeader>
 
           {/* Tehillim Text */}
           <div className="mb-6 bg-white/70 rounded-2xl p-4 border border-blush/10">
-            {getTehillimText(progress?.currentPerek || 1, showHebrew)}
+            <div
+              className={`${showHebrew ? 'font-hebrew text-right' : 'font-english'} leading-relaxed`}
+              style={{ fontSize: `${fontSize}px` }}
+            >
+              {getTehillimText(progress?.currentPerek || 1, showHebrew)}
+            </div>
           </div>
 
           <Button 
@@ -704,18 +722,14 @@ export default function TefillaModals() {
       {/* Individual Prayer Modal */}
       <Dialog open={activeModal === 'individual-prayer'} onOpenChange={() => closeModal()}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans" aria-describedby="individual-prayer-description">
-          <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-serif font-semibold">Prayer Text</DialogTitle>
-            <p id="individual-prayer-description" className="text-xs text-warm-gray/70 mt-1">
-              Personal prayer with customizable text size
-            </p>
-          </DialogHeader>
           <IndividualPrayerContent prayerId={selectedPrayerId} language={language} fontSize={fontSize} setLanguage={setLanguage} setFontSize={setFontSize} />
         </DialogContent>
       </Dialog>
     </>
   );
 }
+
+// Helper components for prayer modals
 
 // Helper components for prayer lists
 function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => void }) {
@@ -847,9 +861,9 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
 
   return (
     <>
-      {/* Language and Font Controls */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
+      {/* Prayer Header with Controls */}
+      <DialogHeader className="text-center mb-4">
+        <div className="flex items-center justify-between">
           <Button
             variant="outline"
             size="sm"
@@ -858,29 +872,28 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
           >
             {language === 'hebrew' ? 'EN' : 'עב'}
           </Button>
+          <DialogTitle className="text-lg font-serif font-semibold">{prayer.prayerName}</DialogTitle>
+          <div className="flex items-center gap-2">
+            <Type className="h-4 w-4 text-blush-pink" />
+            <button
+              onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+              className="p-1 hover:bg-white rounded-md transition-colors"
+            >
+              <Minus className="h-3 w-3 text-blush-pink" />
+            </button>
+            <span className="text-xs text-gray-600 min-w-[2rem] text-center">{fontSize}px</span>
+            <button
+              onClick={() => setFontSize(Math.min(24, fontSize + 2))}
+              className="p-1 hover:bg-white rounded-md transition-colors"
+            >
+              <Plus className="h-3 w-3 text-blush-pink" />
+            </button>
+          </div>
         </div>
-        
-        <div className="flex items-center gap-2">
-          <Type className="h-4 w-4 text-blush-pink" />
-          <button
-            onClick={() => setFontSize(Math.max(12, fontSize - 2))}
-            className="p-1 hover:bg-white rounded-md transition-colors"
-          >
-            <Minus className="h-3 w-3 text-blush-pink" />
-          </button>
-          <span className="text-xs text-gray-600 min-w-[2rem] text-center">{fontSize}px</span>
-          <button
-            onClick={() => setFontSize(Math.min(24, fontSize + 2))}
-            className="p-1 hover:bg-white rounded-md transition-colors"
-          >
-            <Plus className="h-3 w-3 text-blush-pink" />
-          </button>
-        </div>
-      </div>
+      </DialogHeader>
 
       {/* Prayer Content */}
       <div className="p-4 bg-white rounded-xl border border-cream-light mb-6">
-        <h3 className="font-serif text-lg text-center mb-4">{prayer.prayerName}</h3>
         <div className="text-center">
           <div
             className={`${language === 'hebrew' ? 'font-hebrew text-right' : 'font-english'} leading-relaxed`}
