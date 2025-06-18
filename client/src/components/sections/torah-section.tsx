@@ -68,7 +68,7 @@ export default function TorahSection() {
 
       </div>
 
-      <div className="grid grid-cols-2 gap-2 mb-1">
+      <div className="grid grid-cols-2 gap-2 mb-3">
         {torahItems.map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border }) => (
           <button
             key={id}
@@ -87,9 +87,9 @@ export default function TorahSection() {
       {/* Inspirational Quote */}
       <div className="bg-gradient-soft rounded-3xl p-3 shadow-lg">
         <p className="font-sans text-xs text-warm-gray/80 italic text-center leading-relaxed">
-          "{quote?.text || 'Turn it over and over, for everything is in it. Look into it, grow old and worn over it, and never move away from it, for there is no better portion than it.'}"
+          {quote ? `"${quote.text}"` : ""}
         </p>
-        <p className="font-serif text-xs text-warm-gray/60 text-center mt-2 tracking-wide">- {quote?.source || 'Pirkei Avot 5:22'}</p>
+        <p className="font-serif text-xs text-warm-gray/60 text-center mt-2 tracking-wide">{quote ? `- ${quote.source}` : ""}</p>
       </div>
 
       {/* Bottom padding */}
