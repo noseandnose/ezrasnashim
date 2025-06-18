@@ -1,53 +1,6 @@
-import { pgTable, text, serial, integer, boolean, timestamp, date } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, date, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-
-// No user authentication needed - app works for everyone without profiles
-
-// Daily Torah content - each type gets its own table for better performance and organization
-export const dailyHalacha = pgTable("daily_halacha", {
-  id: serial("id").primaryKey(),
-  date: date("date").notNull(), // SQL date for efficient querying
-  hebrewDate: text("hebrew_date").notNull(),
-  title: text("title").notNull(),
-  content: text("content").notNull(),
-  source: text("source"), // Reference/citation
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-export const dailyMussar = pgTable("daily_mussar", {
-  id: serial("id").primaryKey(),
-  date: date("date").notNull(),
-  hebrewDate: text("hebrew_date").notNull(),
-  title: text("title").notNull(),
-  content: text("content").notNull(),
-  author: text("author"), // Who wrote/said this
-  source: text("source"),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-export const dailyChizuk = pgTable("daily_chizuk", {
-  id: serial("id").primaryKey(),
-  date: date("date").notNull(),
-  hebrewDate: text("hebrew_date").notNull(),
-  title: text("title").notNull(),
-  content: text("content"),
-  audioUrl: text("audio_url").notNull(), // Chizuk is primarily audio
-  duration: text("duration"), // Audio length
-  speaker: text("speaker"),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-export const loshonHorah = pgTable("loshon_horah", {
-  id: serial("id").primaryKey(),
-  date: date("date").notNull(),
-  hebrewDate: text("hebrew_date").notNull(),
-  title: text("title").notNull(),
-  content: text("content").notNull(),
-  halachicSource: text("halachic_source"), // Which sefer/posek
-  practicalTip: text("practical_tip"), // Daily practical application
-  createdAt: timestamp("created_at").defaultNow(),
-});
 
 // Weekly Torah content tables
 export const shabbatRecipes = pgTable("shabbat_recipes", {
