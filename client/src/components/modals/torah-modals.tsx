@@ -1,4 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import AudioPlayer from "@/components/audio-player";
@@ -48,6 +49,13 @@ export default function TorahModals() {
               <p><strong>Today's Halacha:</strong> {halachaContent?.content || "Candles should be lit immediately after sunset, and should burn for at least 30 minutes. The mitzvah is to light one candle each night, with the minhag to add an additional candle each subsequent night."}</p>
             </div>
           </div>
+          
+          <Button 
+            onClick={() => closeModal()} 
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+          >
+            Complete
+          </Button>
         </DialogContent>
       </Dialog>
 
@@ -65,6 +73,13 @@ export default function TorahModals() {
               <p className="mt-2">When we encounter challenges, remember that each test is an opportunity for growth and spiritual elevation.</p>
             </div>
           </div>
+          
+          <Button 
+            onClick={() => closeModal()} 
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+          >
+            Complete
+          </Button>
         </DialogContent>
       </Dialog>
 
@@ -84,6 +99,13 @@ export default function TorahModals() {
             duration="5:15"
             audioUrl={chizukContent?.audioUrl || ""}
           />
+          
+          <Button 
+            onClick={() => closeModal()} 
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+          >
+            Complete
+          </Button>
         </DialogContent>
       </Dialog>
 
@@ -101,6 +123,13 @@ export default function TorahModals() {
               <p className="mt-2">Positive speech has the power to build relationships and create harmony in our communities.</p>
             </div>
           </div>
+          
+          <Button 
+            onClick={() => closeModal()} 
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+          >
+            Complete
+          </Button>
         </DialogContent>
       </Dialog>
 
@@ -119,6 +148,13 @@ export default function TorahModals() {
               <p className="mt-3">{pirkeiAvotContent?.explanation || "This mishnah teaches us the value of thoughtful speech and careful listening. True wisdom often comes through quiet contemplation and attentive observation of those wiser than ourselves."}</p>
             </div>
           </div>
+          
+          <Button 
+            onClick={() => closeModal()} 
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+          >
+            Complete
+          </Button>
         </DialogContent>
       </Dialog>
     </>
