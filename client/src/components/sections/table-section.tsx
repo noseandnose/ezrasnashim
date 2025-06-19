@@ -1,4 +1,4 @@
-import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar } from "lucide-react";
+import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar, Moon } from "lucide-react";
 import { useModalStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
 import { useGeolocation } from "@/hooks/use-jewish-times";
@@ -54,18 +54,27 @@ export default function TableSection() {
             <h3 className="font-serif text-lg text-warm-gray">This Shabbos</h3>
           </div>
           <div className="text-right">
-            <p className="font-serif text-sm text-warm-gray">{shabbosData?.parsha || "Loading..."}</p>
+            <div className="flex items-center justify-end space-x-1 bg-gradient-to-l from-sage/10 to-transparent rounded-lg px-2 py-1 border border-sage/20">
+              <BookOpen className="text-sage" size={12} />
+              <p className="font-serif text-sm text-sage font-medium">{shabbosData?.parsha || "Loading..."}</p>
+            </div>
           </div>
         </div>
         
         <div className="grid grid-cols-2 gap-2">
           <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
             <p className="font-sans text-xs text-warm-gray/70">Candle Lighting</p>
-            <p className="font-serif text-base text-warm-gray font-medium">{shabbosData?.candleLighting || "Loading..."}</p>
+            <div className="flex items-center justify-center space-x-1">
+              <Flame className="text-blush" size={14} />
+              <p className="font-serif text-base text-warm-gray font-medium">{shabbosData?.candleLighting || "Loading..."}</p>
+            </div>
           </div>
           <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
             <p className="font-sans text-xs text-warm-gray/70">Havdalah</p>
-            <p className="font-serif text-base text-warm-gray font-medium">{shabbosData?.havdalah || "Loading..."}</p>
+            <div className="flex items-center justify-center space-x-1">
+              <Moon className="text-lavender" size={14} />
+              <p className="font-serif text-base text-warm-gray font-medium">{shabbosData?.havdalah || "Loading..."}</p>
+            </div>
           </div>
         </div>
       </div>
