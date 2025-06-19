@@ -22,6 +22,17 @@ export default function DonationModal() {
       return response.json();
     },
     onSuccess: (data) => {
+      // Complete tzedaka task when donation is initiated
+      completeTask('tzedaka');
+      closeModal();
+      
+      // Check if all tasks are completed and show congratulations
+      setTimeout(() => {
+        if (checkAndShowCongratulations()) {
+          openModal('congratulations');
+        }
+      }, 100);
+      
       if (data.clientSecret) {
         // Redirect to Stripe checkout or handle payment flow
         window.location.href = `/checkout?payment_intent=${data.clientSecret}`;

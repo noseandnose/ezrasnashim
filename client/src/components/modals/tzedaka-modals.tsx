@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useModalStore } from "@/lib/types";
+import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useState } from "react";
 import { Heart, BookOpen, Baby, Shield, DollarSign } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function TzedakaModals() {
-  const { activeModal, closeModal } = useModalStore();
+  const { activeModal, closeModal, openModal } = useModalStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const [, setLocation] = useLocation();
   const [donationAmount, setDonationAmount] = useState("");
   const [customAmount, setCustomAmount] = useState("");
@@ -58,6 +59,9 @@ export default function TzedakaModals() {
     }
 
     if (amount > 0) {
+      // Complete tzedaka task when donation is initiated
+      completeTask('tzedaka');
+      
       const params = new URLSearchParams({
         amount: amount.toString(),
         type: typeDescription,
@@ -66,6 +70,14 @@ export default function TzedakaModals() {
       });
 
       closeModal();
+      
+      // Check if all tasks are completed and show congratulations
+      setTimeout(() => {
+        if (checkAndShowCongratulations()) {
+          openModal('congratulations');
+        }
+      }, 100);
+      
       setLocation(`/donate?${params.toString()}`);
     }
   };
