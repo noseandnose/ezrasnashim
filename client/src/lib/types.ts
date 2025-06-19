@@ -43,7 +43,46 @@ export interface DailyCompletionState {
 export const useDailyCompletionStore = create<DailyCompletionState>((set, get) => {
   const today = new Date().toISOString().split('T')[0];
   
-  // Load from localStorage
+  // For testing: reset on every page load/restart
+  // For production: comment out the line below and uncomment the localStorage logic
+  const isTestMode = true; // Set to false for production
+  
+  if (isTestMode) {
+    // Reset on every restart for testing
+    const initial = {
+      torahCompleted: false,
+      tefillaCompleted: false,
+      tzedakaCompleted: false,
+      completionDate: today
+    };
+    
+    return {
+      ...initial,
+      completeTask: (task: 'torah' | 'tefilla' | 'tzedaka') => {
+        const state = get();
+        const newState = {
+          ...state,
+          [`${task}Completed`]: true,
+        };
+        set(newState);
+      },
+      resetDaily: () => {
+        const newState = {
+          torahCompleted: false,
+          tefillaCompleted: false,
+          tzedakaCompleted: false,
+          completionDate: today,
+        };
+        set(newState);
+      },
+      checkAndShowCongratulations: () => {
+        const state = get();
+        return state.torahCompleted && state.tefillaCompleted && state.tzedakaCompleted;
+      }
+    };
+  }
+  
+  // Production logic: persist to localStorage and reset daily
   const stored = localStorage.getItem('dailyCompletion');
   const initial = stored ? JSON.parse(stored) : {
     torahCompleted: false,
