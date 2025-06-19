@@ -1,10 +1,13 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useModalStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import AudioPlayer from "@/components/audio-player";
 
 export default function TableModals() {
   const { activeModal, closeModal } = useModalStore();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
   const getWeekKey = () => {
     const date = new Date();
@@ -69,58 +72,68 @@ export default function TableModals() {
           
           {inspirationContent ? (
             <>
-              {/* Image Gallery - Horizontal Scroll */}
-              {(inspirationContent.imageUrl1 || inspirationContent.imageUrl2 || inspirationContent.imageUrl3 || inspirationContent.imageUrl4 || inspirationContent.imageUrl5) && (
-                <div className="mb-4">
-                  <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
-                    {inspirationContent.imageUrl1 && (
-                      <div className="flex-shrink-0 w-64 h-48 bg-gray-100 rounded-lg overflow-hidden">
-                        <img 
-                          src={inspirationContent.imageUrl1} 
-                          alt="Table inspiration 1"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    {inspirationContent.imageUrl2 && (
-                      <div className="flex-shrink-0 w-64 h-48 bg-gray-100 rounded-lg overflow-hidden">
-                        <img 
-                          src={inspirationContent.imageUrl2} 
-                          alt="Table inspiration 2"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    {inspirationContent.imageUrl3 && (
-                      <div className="flex-shrink-0 w-64 h-48 bg-gray-100 rounded-lg overflow-hidden">
-                        <img 
-                          src={inspirationContent.imageUrl3} 
-                          alt="Table inspiration 3"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    {inspirationContent.imageUrl4 && (
-                      <div className="flex-shrink-0 w-64 h-48 bg-gray-100 rounded-lg overflow-hidden">
-                        <img 
-                          src={inspirationContent.imageUrl4} 
-                          alt="Table inspiration 4"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    {inspirationContent.imageUrl5 && (
-                      <div className="flex-shrink-0 w-64 h-48 bg-gray-100 rounded-lg overflow-hidden">
-                        <img 
-                          src={inspirationContent.imageUrl5} 
-                          alt="Table inspiration 5"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
+              {/* Image Gallery - Single Image with Navigation */}
+              {(() => {
+                const images = [
+                  inspirationContent.imageUrl1,
+                  inspirationContent.imageUrl2,
+                  inspirationContent.imageUrl3,
+                  inspirationContent.imageUrl4,
+                  inspirationContent.imageUrl5
+                ].filter(Boolean);
+                
+                if (images.length === 0) return null;
+                
+                const nextImage = () => {
+                  setCurrentImageIndex((prev) => (prev + 1) % images.length);
+                };
+                
+                const prevImage = () => {
+                  setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+                };
+                
+                return (
+                  <div className="mb-4 relative">
+                    <div className="w-full h-64 bg-gray-100 rounded-lg overflow-hidden relative">
+                      <img 
+                        src={images[currentImageIndex]} 
+                        alt={`Table inspiration ${currentImageIndex + 1}`}
+                        className="w-full h-full object-cover cursor-pointer"
+                        onClick={nextImage}
+                      />
+                      
+                      {images.length > 1 && (
+                        <>
+                          <button
+                            onClick={prevImage}
+                            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70 transition-colors"
+                          >
+                            <ChevronLeft size={20} />
+                          </button>
+                          <button
+                            onClick={nextImage}
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70 transition-colors"
+                          >
+                            <ChevronRight size={20} />
+                          </button>
+                          
+                          {/* Image counter dots */}
+                          <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+                            {images.map((_, index) => (
+                              <div
+                                key={index}
+                                className={`w-2 h-2 rounded-full ${
+                                  index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* Dynamic Title from Database */}
               <div className="mb-3">
