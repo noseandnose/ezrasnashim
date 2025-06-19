@@ -132,16 +132,25 @@ export default function TzedakaSection() {
         </button>
       </div>
 
-      {/* Gave Tzedaka Elsewhere Button */}
-      <div className="w-full">
-        <Button
-          onClick={handleTzedakaComplete}
-          className="w-full bg-gradient-soft text-warm-gray py-3 rounded-xl font-medium border border-blush/20 hover:bg-blush/5 transition-all duration-300"
-          variant="outline"
-        >
-          <HandHeart className="mr-2 text-blush" size={16} />
-          Gave Tzedaka elsewhere
-        </Button>
+      {/* Gave Tzedaka Elsewhere Bar */}
+      <div className="bg-white rounded-3xl p-4 shadow-lg border border-blush/10">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="bg-gradient-feminine p-2 rounded-full">
+              <HandHeart className="text-white" size={18} strokeWidth={1.5} />
+            </div>
+            <div>
+              <h3 className="font-serif text-sm text-warm-gray">Gave Tzedaka elsewhere</h3>
+              <p className="font-sans text-xs text-warm-gray/70">Mark as completed</p>
+            </div>
+          </div>
+          <Button
+            onClick={handleTzedakaComplete}
+            className="bg-gradient-feminine text-white py-2 px-4 rounded-xl font-medium border-0 hover:opacity-90"
+          >
+            Complete
+          </Button>
+        </div>
       </div>
 
       {/* Community Impact */}

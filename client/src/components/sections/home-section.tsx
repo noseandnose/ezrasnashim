@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Calendar, Clock, Heart, BookOpen, HandHeart, Coins, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useModalStore } from "@/lib/types";
+import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate } from "@/hooks/use-hebrew-date";
 import DiscountBar from "@/components/discount-bar";
@@ -19,6 +19,7 @@ interface HomeSectionProps {
 
 export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   const { openModal } = useModalStore();
+  const { torahCompleted, tefillaCompleted, tzedakaCompleted } = useDailyCompletionStore();
   const jewishTimesQuery = useJewishTimes();
   const { data: hebrewDate } = useHebrewDate();
 
@@ -122,6 +123,9 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               <h3 className="font-serif text-lg text-warm-gray">Daily Torah</h3>
               <p className="font-sans text-xs text-warm-gray/70">Daily Halacha, Mussar & Chizuk</p>
             </div>
+            {torahCompleted && (
+              <Heart className="text-blush fill-blush" size={20} />
+            )}
           </div>
         </button>
 
@@ -137,6 +141,9 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               <h3 className="font-serif text-lg text-warm-gray">Daily Tefilla</h3>
               <p className="font-sans text-xs text-warm-gray/70">Tehillim, Mincha & Women's Prayers</p>
             </div>
+            {tefillaCompleted && (
+              <Heart className="text-blush fill-blush" size={20} />
+            )}
           </div>
         </button>
 
@@ -152,6 +159,9 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               <h3 className="font-serif text-lg text-warm-gray">Daily Tzedaka</h3>
               <p className="font-sans text-xs text-warm-gray/70">Support Torah Learning & Charity</p>
             </div>
+            {tzedakaCompleted && (
+              <Heart className="text-blush fill-blush" size={20} />
+            )}
           </div>
         </button>
 
