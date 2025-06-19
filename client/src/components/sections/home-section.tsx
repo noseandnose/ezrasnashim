@@ -68,10 +68,6 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         
         {/* Times Grid */}
         <div className="grid grid-cols-2 gap-2 mb-3">
-          <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
-            <p className="font-sans text-xs text-warm-gray/70">Shkia</p>
-            <p className="font-serif text-base text-warm-gray font-medium">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
-          </div>
           <button 
             onClick={() => openModal('mincha')}
             className="bg-white/70 rounded-xl p-2 text-center border border-blush/10 hover:scale-105 transition-all duration-300 hover:bg-white/90"
@@ -79,6 +75,10 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <p className="font-sans text-xs text-warm-gray/70">Mincha</p>
             <p className="font-serif text-base text-warm-gray font-medium">{jewishTimesQuery.data?.minchaGedolah || "Loading..."}</p>
           </button>
+          <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
+            <p className="font-sans text-xs text-warm-gray/70">Shkia</p>
+            <p className="font-serif text-base text-warm-gray font-medium">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
+          </div>
         </div>
 
         {/* Sponsor Section */}
