@@ -244,13 +244,16 @@ export default function TzedakaModals() {
                 </SelectContent>
               </Select>
               {donationAmount === "custom" && (
-                <Input 
-                  placeholder="Enter amount" 
-                  className="mt-2"
-                  type="number"
-                  value={customAmount}
-                  onChange={(e) => setCustomAmount(e.target.value)}
-                />
+                <div className="relative mt-2">
+                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-warm-gray/60" size={16} />
+                  <Input 
+                    placeholder="Enter amount" 
+                    className="pl-10"
+                    type="number"
+                    value={customAmount}
+                    onChange={(e) => setCustomAmount(e.target.value)}
+                  />
+                </div>
               )}
             </div>
 
@@ -314,13 +317,16 @@ export default function TzedakaModals() {
                 </SelectContent>
               </Select>
               {donationAmount === "custom" && (
-                <Input 
-                  placeholder="Enter amount" 
-                  className="mt-2"
-                  type="number"
-                  value={customAmount}
-                  onChange={(e) => setCustomAmount(e.target.value)}
-                />
+                <div className="relative mt-2">
+                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-warm-gray/60" size={16} />
+                  <Input 
+                    placeholder="Enter amount" 
+                    className="pl-10"
+                    type="number"
+                    value={customAmount}
+                    onChange={(e) => setCustomAmount(e.target.value)}
+                  />
+                </div>
               )}
             </div>
 
