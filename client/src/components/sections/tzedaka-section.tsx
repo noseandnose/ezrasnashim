@@ -11,6 +11,8 @@ export default function TzedakaSection() {
   const [, setLocation] = useLocation();
 
   const handleTzedakaComplete = () => {
+    if (tzedakaCompleted) return; // Prevent double execution
+    
     completeTask('tzedaka');
     
     // Navigate to home page to show progress
@@ -141,7 +143,7 @@ export default function TzedakaSection() {
       <div className="bg-white rounded-3xl p-4 shadow-lg border border-blush/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="bg-gradient-feminine p-2 rounded-full">
+            <div className={`p-2 rounded-full ${tzedakaCompleted ? 'bg-green-500' : 'bg-gradient-feminine'}`}>
               <HandHeart className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <div>
@@ -151,9 +153,13 @@ export default function TzedakaSection() {
           </div>
           <Button
             onClick={handleTzedakaComplete}
-            className="bg-gradient-feminine text-white py-2 px-4 rounded-xl font-medium border-0 hover:opacity-90"
+            className={`py-2 px-4 rounded-xl font-medium border-0 ${
+              tzedakaCompleted 
+                ? 'bg-green-500 text-white' 
+                : 'bg-gradient-feminine text-white hover:opacity-90'
+            }`}
           >
-            Complete
+            {tzedakaCompleted ? 'Completed' : 'Complete'}
           </Button>
         </div>
       </div>
