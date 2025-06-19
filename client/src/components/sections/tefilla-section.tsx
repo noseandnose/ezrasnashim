@@ -188,7 +188,7 @@ export default function TefillaSection() {
                 size="sm"
                 variant="outline"
                 onClick={() => setShowAddForm(!showAddForm)}
-                className="text-blush text-xs px-3 py-1 h-auto bg-blush/5 border-blush/20 hover:bg-blush/10"
+                className="text-blush text-xs px-3 py-1 h-auto bg-blush/15 border-blush/30 hover:bg-blush/20"
               >
                 <Plus size={14} className="mr-1" />
                 Add Name
