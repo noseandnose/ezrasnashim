@@ -44,7 +44,7 @@ export default function Home() {
         onSectionChange={setActiveSection} 
       />
 
-      <ModalContainer />
+      <ModalContainer onSectionChange={setActiveSection} />
     </div>
   );
 }

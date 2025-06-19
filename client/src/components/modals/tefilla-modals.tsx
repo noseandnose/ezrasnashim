@@ -9,7 +9,11 @@ import { MinchaPrayer, NishmasText, GlobalTehillimProgress, TehillimName, Womens
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
 
-export default function TefillaModals() {
+interface TefillaModalsProps {
+  onSectionChange?: (section: any) => void;
+}
+
+export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const { activeModal, openModal, closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const [, setLocation] = useLocation();
@@ -31,8 +35,10 @@ export default function TefillaModals() {
     completeTask('tefilla');
     closeModal();
     
-    // Navigate to home page to show progress
-    setLocation('/');
+    // Navigate to home section to show progress
+    if (onSectionChange) {
+      onSectionChange('home');
+    }
     
     // Check if all tasks are completed and show congratulations
     setTimeout(() => {

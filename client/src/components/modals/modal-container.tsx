@@ -7,11 +7,15 @@ import ShopModals from "./shop-modals";
 import DonationModal from "./donation-modal";
 import CongratulationsModal from "./congratulations-modal";
 
-export default function ModalContainer() {
+interface ModalContainerProps {
+  onSectionChange?: (section: any) => void;
+}
+
+export default function ModalContainer({ onSectionChange }: ModalContainerProps) {
   return (
     <>
-      <TorahModals />
-      <TefillaModals />
+      <TorahModals onSectionChange={onSectionChange} />
+      <TefillaModals onSectionChange={onSectionChange} />
       <TimesModals />
       <TableModals />
       <TzedakaModals />

@@ -18,10 +18,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
   const handleTzedakaComplete = () => {
     if (tzedakaCompleted) return; // Prevent double execution
     
-    console.log('Completing tzedaka task...');
     completeTask('tzedaka');
-    
-    console.log('Navigating to home section...');
     
     // Navigate back to home section to show progress
     if (onSectionChange) {

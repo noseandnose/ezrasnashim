@@ -5,12 +5,16 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import AudioPlayer from "@/components/audio-player";
 
-export default function TorahModals() {
+interface TorahModalsProps {
+  onSectionChange?: (section: any) => void;
+}
+
+export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   const { activeModal, closeModal, openModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const [, setLocation] = useLocation();
 
-  const handleTorahComplete = (onSectionChange?: (section: any) => void) => {
+  const handleTorahComplete = () => {
     completeTask('torah');
     closeModal();
     
