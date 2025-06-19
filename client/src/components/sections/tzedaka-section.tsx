@@ -4,8 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import type { Campaign } from "@shared/schema";
+import type { Section } from "@/pages/home";
 
-export default function TzedakaSection() {
+interface TzedakaSectionProps {
+  onSectionChange?: (section: Section) => void;
+}
+
+export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps) {
   const { openModal } = useModalStore();
   const { tzedakaCompleted, completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const [, setLocation] = useLocation();
@@ -13,10 +18,15 @@ export default function TzedakaSection() {
   const handleTzedakaComplete = () => {
     if (tzedakaCompleted) return; // Prevent double execution
     
+    console.log('Completing tzedaka task...');
     completeTask('tzedaka');
     
-    // Navigate to home page to show progress
-    setLocation('/');
+    console.log('Navigating to home section...');
+    
+    // Navigate back to home section to show progress
+    if (onSectionChange) {
+      onSectionChange('home');
+    }
     
     // Check if all tasks are completed and show congratulations
     setTimeout(() => {

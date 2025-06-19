@@ -19,11 +19,11 @@ export default function Home() {
       case 'home':
         return <HomeSection onSectionChange={setActiveSection} />;
       case 'torah':
-        return <TorahSection />;
+        return <TorahSection onSectionChange={setActiveSection} />;
       case 'tefilla':
-        return <TefillaSection />;
+        return <TefillaSection onSectionChange={setActiveSection} />;
       case 'tzedaka':
-        return <TzedakaSection />;
+        return <TzedakaSection onSectionChange={setActiveSection} />;
       case 'table':
         return <TableSection />;
       default:
