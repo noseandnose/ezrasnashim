@@ -491,68 +491,17 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Nishmas 40-Day Campaign Modal */}
+      {/* Nishmas Kol Chai Modal */}
       <Dialog open={activeModal === 'nishmas-campaign'} onOpenChange={() => closeModal()}>
-        <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans ${isAnimating ? 'prayer-ascending' : ''}`} aria-describedby="nishmas-description">
+        <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans ${isAnimating ? 'prayer-ascending' : ''}`}>
           <DialogHeader className="text-center mb-4">
-            <div className="flex items-center justify-center mb-2">
-              <Heart className="text-blush mr-2" size={24} />
-              <DialogTitle className="text-lg font-serif font-semibold">Nishmas 40-Day Campaign</DialogTitle>
-            </div>
-            <p id="nishmas-description" className="text-sm text-gray-600 font-sans">
-              May this 40-day tefillah bring you the yeshuos you need
-            </p>
+            <DialogTitle className="text-lg font-serif font-semibold">Nishmas Kol Chai</DialogTitle>
+            <DialogDescription className="text-sm text-gray-600 font-sans">
+              A beautiful prayer of gratitude and praise
+            </DialogDescription>
           </DialogHeader>
           
-          {/* Progress Tracker */}
-          <div className="mb-3">
-            <div className="bg-gradient-to-r from-blush/10 to-peach/10 rounded-xl p-4">
-              <div className="flex items-center justify-between mb-3">
-                <span className="font-semibold text-gray-800">Progress</span>
-                <span className="text-2xl font-bold text-blush">{nishmasDay}/40</span>
-              </div>
-              
-              {/* Progress Bar */}
-              <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
-                <div 
-                  className="h-3 rounded-full transition-all duration-300"
-                  style={{ 
-                    width: `${(nishmasDay / 40) * 100}%`,
-                    background: nishmasDay >= 40 
-                      ? 'linear-gradient(90deg, hsl(120, 50%, 60%) 0%, hsl(120, 60%, 50%) 100%)'
-                      : 'linear-gradient(90deg, hsl(328, 85%, 87%) 0%, hsl(28, 100%, 84%) 100%)'
-                  }}
-                ></div>
-              </div>
-              
-              {/* Debug info for progress bar */}
-              {process.env.NODE_ENV === 'development' && (
-                <div className="text-xs text-gray-400 text-center mb-2">
-                  Progress: Day {nishmasDay}/40 ({Math.round((nishmasDay / 40) * 100)}%)
-                </div>
-              )}
-              
-              {nishmasDay === 0 ? (
-                <div className="text-center">
-                  <p className="text-sm text-gray-600 mb-2">Begin your 40-day journey today</p>
-                  <p className="text-xs text-gray-500">Complete daily prayers for spiritual merit</p>
-                </div>
-              ) : nishmasDay === 40 ? (
-                <div className="text-center">
-                  <div className="flex items-center justify-center mb-2">
-                    <CheckCircle className="text-sage mr-2" size={20} />
-                    <span className="font-semibold text-sage">Campaign Completed!</span>
-                  </div>
-                  <p className="text-xs text-gray-600">May your tefillos be answered</p>
-                </div>
-              ) : (
-                <div className="text-center">
-                  <p className="text-sm text-gray-600 mb-1">Day {nishmasDay} of 40</p>
-                  <p className="text-xs text-gray-500">{40 - nishmasDay} days remaining</p>
-                </div>
-              )}
-            </div>
-          </div>
+
 
           {/* Prayer Text */}
           <div className="mb-6">
@@ -618,16 +567,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 )}
                 <div className="text-xs text-gray-500 mt-1 mb-2 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
                   <p className="mb-2 font-medium text-gray-700">
-                    {nishmasLanguage === 'hebrew' 
-                      ? 'תודה מיוחדת ל-Nishmas.net'
-                      : 'Special thanks to Nishmas.net'
-                    }
+                    Special thanks to Nishmas.net
                   </p>
                   <p className="mb-2">
-                    {nishmasLanguage === 'hebrew' 
-                      ? 'לטקסט התפילה המלא והמקורות האותנטיים'
-                      : 'For providing the complete prayer text and authentic sources'
-                    }
+                    For providing the complete prayer text and authentic sources
                   </p>
                   <a 
                     href="https://nishmas.net" 
@@ -635,10 +578,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                     rel="noopener noreferrer"
                     className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
                   >
-                    {nishmasLanguage === 'hebrew' 
-                      ? 'בקרו באתר Nishmas.net'
-                      : 'Visit Nishmas.net'
-                    }
+                    Visit Nishmas.net
                     <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
@@ -648,66 +588,18 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="space-y-3">
-            {/* Main Action Button - Always Visible */}
-            {nishmasDay >= 40 ? (
-              <Button 
-                className="w-full py-3 rounded-xl font-medium bg-sage text-white cursor-default"
-                disabled={true}
-              >
-                <CheckCircle className="mr-2" size={16} />
-                Campaign Complete
-              </Button>
-            ) : todayCompleted ? (
-              <Button 
-                className="w-full py-3 rounded-xl font-medium bg-green-600 text-white cursor-default"
-                disabled={true}
-              >
-                <CheckCircle className="mr-2" size={16} />
-                Completed
-              </Button>
-            ) : (
-              <Button 
-                onClick={() => {
-                  markNishmasCompleted();
-                  completeWithAnimation();
-                }}
-                className="w-full py-3 rounded-xl font-medium bg-gradient-feminine text-white hover:opacity-90"
-              >
-                <CheckCircle className="mr-2" size={16} />
-                Mark Today's Prayer Complete
-              </Button>
-            )}
-            
-            <div className="flex space-x-2">
-              <Button 
-                onClick={() => closeModal()} 
-                variant="outline"
-                className="flex-1 bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-              >
-                Close
-              </Button>
-              
-              {nishmasDay > 0 && (
-                <Button 
-                  onClick={resetNishmasCampaign}
-                  variant="outline"
-                  className="px-4 bg-white text-gray-600 border-gray-300 hover:bg-gray-50 hover:text-gray-800"
-                >
-                  <RotateCcw size={16} />
-                </Button>
-              )}
-            </div>
-          </div>
+          {/* Complete Button */}
+          <Button 
+            onClick={completeWithAnimation} 
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+          >
+            Complete
+          </Button>
 
-          {/* Instructions */}
+          {/* Rebbetzin Kanievsky Quote */}
           <div className="mt-4 text-xs text-gray-500 text-center">
-            <p className="mb-1">
-              Missing a day will restart your 40-day cycle
-            </p>
-            <p>
-              /* Future feature: Notification and reminder system */
+            <p className="leading-relaxed">
+              Rebbetzin Leah Kolodetsky shared that her mother, Rebbetzin Kanievsky zt"l, believed reciting Nishmas Kol Chai for 40 consecutive days is a powerful segulah for having prayers answered.
             </p>
           </div>
         </DialogContent>
