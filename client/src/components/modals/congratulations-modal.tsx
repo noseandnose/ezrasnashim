@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/lib/types";
 
@@ -7,7 +7,17 @@ export default function CongratulationsModal() {
 
   return (
     <Dialog open={activeModal === 'congratulations'} onOpenChange={() => closeModal()}>
-      <DialogContent className="w-full max-w-sm rounded-3xl p-8 font-sans text-center" aria-describedby="congratulations-description">
+      <DialogContent className="w-full max-w-sm rounded-3xl p-8 font-sans text-center">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-serif font-semibold text-warm-gray mb-4">
+            Mazal Tov!
+          </DialogTitle>
+          <DialogDescription className="text-warm-gray/80 mb-6 leading-relaxed">
+            You have completed all three daily Mitsvas: Torah learning, Tefilla, and Tzedaka. 
+            May your spiritual growth continue and bring you and your family abundant blessings.
+          </DialogDescription>
+        </DialogHeader>
+
         {/* Flower SVG in color scheme */}
         <div className="flex justify-center mb-6">
           <svg width="80" height="80" viewBox="0 0 100 100" className="text-blush">
@@ -40,15 +50,6 @@ export default function CongratulationsModal() {
             <ellipse cx="58" cy="88" rx="6" ry="3" fill="#8FBC8F"/>
           </svg>
         </div>
-
-        <h2 className="text-2xl font-serif font-semibold text-warm-gray mb-4">
-          Mazal Tov!
-        </h2>
-        
-        <p id="congratulations-description" className="text-warm-gray/80 mb-6 leading-relaxed">
-          You have completed all three daily Mitsvas: Torah learning, Tefilla, and Tzedaka. 
-          May your spiritual growth continue and bring you and your family abundant blessings.
-        </p>
 
         <Button 
           onClick={() => closeModal()} 
