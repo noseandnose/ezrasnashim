@@ -287,7 +287,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           </Button>
         </DialogContent>
       </Dialog>
-
       {/* Mincha Modal */}
       <Dialog open={activeModal === 'mincha'} onOpenChange={() => closeModal()}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
@@ -361,7 +360,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           </Button>
         </DialogContent>
       </Dialog>
-
       {/* Women's Prayers Modal */}
       <Dialog open={activeModal === 'womens-prayers'} onOpenChange={() => closeModal()}>
         <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
@@ -421,7 +419,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           </Button>
         </DialogContent>
       </Dialog>
-
       {/* Blessings Modal */}
       <Dialog open={activeModal === 'blessings'} onOpenChange={() => closeModal()}>
         <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="blessings-description">
@@ -444,7 +441,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           </Button>
         </DialogContent>
       </Dialog>
-
       {/* Tefillos Modal */}
       <Dialog open={activeModal === 'tefillos'} onOpenChange={() => closeModal()}>
         <DialogContent className={isAnimating ? 'prayer-ascending' : ''} aria-describedby="tefillos-description">
@@ -467,7 +463,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           </Button>
         </DialogContent>
       </Dialog>
-
       {/* Personal Prayers Modal */}
       <Dialog open={activeModal === 'personal-prayers'} onOpenChange={() => closeModal()}>
         <DialogContent className={isAnimating ? 'prayer-ascending' : ''} aria-describedby="personal-prayers-description">
@@ -490,7 +485,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           </Button>
         </DialogContent>
       </Dialog>
-
       {/* Nishmas Kol Chai Modal */}
       <Dialog open={activeModal === 'nishmas-campaign'} onOpenChange={() => closeModal()}>
         <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans ${isAnimating ? 'prayer-ascending' : ''}`}>
@@ -505,7 +499,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           {/* Prayer Text */}
           <div className="mb-6">
-            <div className="bg-warm-white rounded-xl p-4">
+            <div className="bg-warm-white rounded-xl p-4 pt-[0px] pb-[0px]">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center space-x-1">
                   <Button
@@ -606,7 +600,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           </div>
         </DialogContent>
       </Dialog>
-
       {/* Refuah Prayers Modal */}
       <Dialog open={activeModal === 'refuah'} onOpenChange={() => closeModal()}>
         <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
@@ -616,7 +609,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           <RefuahPrayersList onPrayerSelect={handlePrayerSelect} />
         </DialogContent>
       </Dialog>
-
       {/* Family Prayers Modal */}
       <Dialog open={activeModal === 'family'} onOpenChange={() => closeModal()}>
         <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
@@ -626,7 +618,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           <FamilyPrayersList onPrayerSelect={handlePrayerSelect} />
         </DialogContent>
       </Dialog>
-
       {/* Life Prayers Modal */}
       <Dialog open={activeModal === 'life'} onOpenChange={() => closeModal()}>
         <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
@@ -636,7 +627,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           <LifePrayersList onPrayerSelect={handlePrayerSelect} />
         </DialogContent>
       </Dialog>
-
       {/* Individual Prayer Modal */}
       <Dialog open={activeModal === 'individual-prayer'} onOpenChange={() => closeModal()}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
