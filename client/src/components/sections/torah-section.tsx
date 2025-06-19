@@ -2,8 +2,13 @@ import { Book, Heart, Play, Shield, BookOpen, Sparkles, Star, Scroll } from "luc
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import type { InspirationalQuote } from "@shared/schema";
+import type { Section } from "@/pages/home";
 
-export default function TorahSection() {
+interface TorahSectionProps {
+  onSectionChange?: (section: Section) => void;
+}
+
+export default function TorahSection({ onSectionChange }: TorahSectionProps) {
   const { openModal } = useModalStore();
   const { torahCompleted } = useDailyCompletionStore();
   

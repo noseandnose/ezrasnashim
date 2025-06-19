@@ -10,12 +10,14 @@ export default function TorahModals() {
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const [, setLocation] = useLocation();
 
-  const handleTorahComplete = () => {
+  const handleTorahComplete = (onSectionChange?: (section: any) => void) => {
     completeTask('torah');
     closeModal();
     
-    // Navigate to home page to show progress
-    setLocation('/');
+    // Navigate to home section to show progress
+    if (onSectionChange) {
+      onSectionChange('home');
+    }
     
     // Check if all tasks are completed and show congratulations
     setTimeout(() => {

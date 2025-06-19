@@ -1,5 +1,10 @@
 import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass } from "lucide-react";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
+import type { Section } from "@/pages/home";
+
+interface TefillaSectionProps {
+  onSectionChange?: (section: Section) => void;
+}
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -10,7 +15,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
 import type { TehillimName, GlobalTehillimProgress } from "@shared/schema";
 
-export default function TefillaSection() {
+export default function TefillaSection({ onSectionChange }: TefillaSectionProps) {
   const { openModal } = useModalStore();
   const { tefillaCompleted } = useDailyCompletionStore();
   const { data: times, isLoading } = useJewishTimes();
