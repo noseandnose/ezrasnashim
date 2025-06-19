@@ -23,14 +23,9 @@ export default function TefillaModals() {
     openModal('individual-prayer');
   };
 
-  // Heavenly animation for prayer completion
+  // Complete prayer without animation
   const completeWithAnimation = () => {
-    setIsAnimating(true);
-    // Wait for animation to complete before closing
-    setTimeout(() => {
-      closeModal();
-      setIsAnimating(false);
-    }, 800);
+    closeModal();
   };
 
   // Nishmas 40-Day Campaign state with localStorage persistence
@@ -215,7 +210,7 @@ export default function TefillaModals() {
     <>
       {/* Tehillim Text Modal */}
       <Dialog open={activeModal === 'tehillim-text'} onOpenChange={() => closeModal()}>
-        <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans ${isAnimating ? 'prayer-ascending' : ''}`}>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
           <DialogHeader className="text-center mb-4">
             <div className="flex items-center justify-between">
               <Button
@@ -271,7 +266,7 @@ export default function TefillaModals() {
 
       {/* Mincha Modal */}
       <Dialog open={activeModal === 'mincha'} onOpenChange={() => closeModal()}>
-        <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans ${isAnimating ? 'prayer-ascending' : ''}`}>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
           <DialogHeader className="text-center mb-4">
             <div className="flex items-center justify-between">
               <Button
@@ -341,7 +336,7 @@ export default function TefillaModals() {
 
       {/* Women's Prayers Modal */}
       <Dialog open={activeModal === 'womens-prayers'} onOpenChange={() => closeModal()}>
-        <DialogContent className={`w-full max-w-sm rounded-3xl p-6 font-sans ${isAnimating ? 'prayer-ascending' : ''}`} aria-describedby="womens-prayers-description">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="womens-prayers-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold">Women's Prayers</DialogTitle>
             <p id="womens-prayers-description" className="text-xs text-warm-gray/70 mt-1">
@@ -401,7 +396,7 @@ export default function TefillaModals() {
 
       {/* Blessings Modal */}
       <Dialog open={activeModal === 'blessings'} onOpenChange={() => closeModal()}>
-        <DialogContent className={`w-full max-w-sm rounded-3xl p-6 font-sans ${isAnimating ? 'prayer-ascending' : ''}`} aria-describedby="blessings-description">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="blessings-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold">Blessings</DialogTitle>
             <p id="blessings-description" className="text-xs text-warm-gray/70 mt-1">
