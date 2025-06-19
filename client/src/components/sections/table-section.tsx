@@ -23,7 +23,7 @@ export default function TableSection() {
       id: 'inspiration',
       icon: Lightbulb,
       title: 'Table Inspiration',
-      subtitle: 'Chanukah Table Setting',
+      subtitle: 'Elegant Winter Shabbat Setting',
       color: 'text-blush'
     },
     {
@@ -41,7 +41,6 @@ export default function TableSection() {
       {/* Header */}
       <div className="text-center">
         <h2 className="font-serif text-lg text-warm-gray mb-1">Shabbos Table</h2>
-        <p className="font-sans text-warm-gray/70 text-xs">Prepare for a meaningful Shabbos</p>
       </div>
 
       {/* Shabbos Times Section */}

@@ -294,12 +294,19 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             >
               <div className="flex items-center justify-between">
                 <div className="font-serif text-sm text-warm-gray">
-                  Perek {progress?.currentPerek || 1}
+                  {(() => {
+                    const perekNumber = progress?.currentPerek || 1;
+                    const firstLines: Record<number, string> = {
+                      1: "אשרי האיש אשר לא הלך בעצת רשעים",
+                      23: "יהוה רעי לא אחסר",
+                      91: "יושב בסתר עליון בצל שדי יתלונן",
+                      121: "שיר למעלות אשא עיני אל ההרים",
+                      150: "הללויה הללו אל בקדשו"
+                    };
+                    return firstLines[perekNumber] || `פרק ${perekNumber}`;
+                  })()}
                 </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs text-warm-gray/60 font-sans">
-                    {progress?.currentPerek || 1} of 150
-                  </span>
+                <div className="flex items-center">
                   <ChevronRight className="text-warm-gray/40" size={16} strokeWidth={1.5} />
                 </div>
               </div>

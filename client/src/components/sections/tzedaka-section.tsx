@@ -73,7 +73,6 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             <Heart className="gradient-heart" size={20} />
           )}
         </div>
-        <p className="font-sans text-warm-gray/70 text-xs">Supporting our community with love and generosity</p>
       </div>
 
       {/* Campaign Card with Progress Bar */}

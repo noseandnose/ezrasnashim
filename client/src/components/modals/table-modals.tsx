@@ -65,9 +65,9 @@ export default function TableModals() {
       {/* Table Inspiration Modal */}
       <Dialog open={activeModal === 'inspiration'} onOpenChange={() => closeModal()}>
         <DialogContent className="max-h-[80vh] overflow-y-auto">
-          <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-semibold mb-2">Shabbas Inspiration</DialogTitle>
-            <DialogDescription className="text-sm text-gray-600">Daily table setting inspiration</DialogDescription>
+          <DialogHeader className="text-center mb-2">
+            <DialogTitle className="text-lg font-semibold">Shabbas Inspiration</DialogTitle>
+            <DialogDescription className="sr-only">Shabbas table inspiration modal</DialogDescription>
           </DialogHeader>
           
           {inspirationContent ? (
