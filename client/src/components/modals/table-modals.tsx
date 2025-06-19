@@ -19,7 +19,7 @@ export default function TableModals() {
   });
 
   const { data: inspirationContent } = useQuery<any>({
-    queryKey: ['/api/table/inspiration', new Date().toISOString().split('T')[0]],
+    queryKey: [`/api/table/inspiration/${new Date().toISOString().split('T')[0]}`],
     enabled: activeModal === 'inspiration'
   });
 
