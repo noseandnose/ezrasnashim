@@ -357,8 +357,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
               <Heart className="text-white" size={18} />
             </div>
-            <h3 className="font-serif text-sm text-warm-gray mb-1">Nishmas Campaign</h3>
-            <p className="font-sans text-xs text-warm-gray/60">40 Days for Yeshuos</p>
+            <h3 className="font-serif text-sm text-warm-gray mb-1">Nishmas Kol Chai</h3>
+            <p className="font-sans text-xs text-warm-gray/60">Prayer of Gratitude</p>
           </button>
         </div>
 

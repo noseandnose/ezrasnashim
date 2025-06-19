@@ -591,13 +591,13 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           {/* Complete Button */}
           <Button 
             onClick={completeWithAnimation} 
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-4 border-0"
           >
             Complete
           </Button>
 
           {/* Rebbetzin Kanievsky Quote */}
-          <div className="mt-4 text-xs text-gray-500 text-center">
+          <div className="mt-3 text-xs text-gray-500 text-center">
             <p className="leading-relaxed">
               Rebbetzin Leah Kolodetsky shared that her mother, Rebbetzin Kanievsky zt"l, believed reciting Nishmas Kol Chai for 40 consecutive days is a powerful segulah for having prayers answered.
             </p>
