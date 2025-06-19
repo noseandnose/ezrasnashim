@@ -1,22 +1,27 @@
 import { Heart, BookOpen, Shield, Plus, HandHeart, Gift, Star, Sparkles, Target, Users, DollarSign, TrendingUp } from "lucide-react";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import type { Campaign } from "@shared/schema";
 
 export default function TzedakaSection() {
   const { openModal } = useModalStore();
   const { tzedakaCompleted, completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const [, setLocation] = useLocation();
 
   const handleTzedakaComplete = () => {
     completeTask('tzedaka');
+    
+    // Navigate to home page to show progress
+    setLocation('/');
     
     // Check if all tasks are completed and show congratulations
     setTimeout(() => {
       if (checkAndShowCongratulations()) {
         openModal('congratulations');
       }
-    }, 100);
+    }, 200);
   };
 
   // Fetch active campaign data

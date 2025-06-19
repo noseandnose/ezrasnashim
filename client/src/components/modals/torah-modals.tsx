@@ -2,22 +2,27 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import AudioPlayer from "@/components/audio-player";
 
 export default function TorahModals() {
   const { activeModal, closeModal, openModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const [, setLocation] = useLocation();
 
   const handleTorahComplete = () => {
     completeTask('torah');
     closeModal();
+    
+    // Navigate to home page to show progress
+    setLocation('/');
     
     // Check if all tasks are completed and show congratulations
     setTimeout(() => {
       if (checkAndShowCongratulations()) {
         openModal('congratulations');
       }
-    }, 100);
+    }, 200);
   };
 
   const today = new Date().toISOString().split('T')[0];

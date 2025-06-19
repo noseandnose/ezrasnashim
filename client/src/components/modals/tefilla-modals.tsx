@@ -4,6 +4,7 @@ import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { MinchaPrayer, NishmasText, GlobalTehillimProgress, TehillimName, WomensPrayer } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
@@ -11,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 export default function TefillaModals() {
   const { activeModal, openModal, closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const [, setLocation] = useLocation();
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
   const [fontSize, setFontSize] = useState(16);
   const [showHebrew, setShowHebrew] = useState(true);
@@ -29,12 +31,15 @@ export default function TefillaModals() {
     completeTask('tefilla');
     closeModal();
     
+    // Navigate to home page to show progress
+    setLocation('/');
+    
     // Check if all tasks are completed and show congratulations
     setTimeout(() => {
       if (checkAndShowCongratulations()) {
         openModal('congratulations');
       }
-    }, 100);
+    }, 200);
   };
 
   // Nishmas 40-Day Campaign state with localStorage persistence
