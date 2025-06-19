@@ -40,7 +40,7 @@ export default function ShopModals() {
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6 font-sans">
+      <DialogContent className="max-h-[80vh] overflow-y-auto">
         <DialogHeader className="text-center mb-4">
           <DialogTitle className="text-lg font-serif font-semibold mb-2">
             {shopItem ? shopItem.storeName : 'Store Details'}

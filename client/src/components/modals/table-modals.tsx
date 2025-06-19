@@ -32,7 +32,7 @@ export default function TableModals() {
     <>
       {/* Recipe Modal */}
       <Dialog open={activeModal === 'recipe'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-semibold mb-2">Shabbat Recipe</DialogTitle>
             <DialogDescription className="text-sm text-gray-600">Traditional Challah</DialogDescription>
@@ -61,7 +61,7 @@ export default function TableModals() {
 
       {/* Table Inspiration Modal */}
       <Dialog open={activeModal === 'inspiration'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-semibold mb-2">Table Inspiration</DialogTitle>
             <DialogDescription className="text-sm text-gray-600">Beautiful Shabbat Settings</DialogDescription>
@@ -93,7 +93,7 @@ export default function TableModals() {
 
       {/* Parsha Vort Modal */}
       <Dialog open={activeModal === 'parsha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6">
+        <DialogContent>
           <DialogHeader className="text-center">
             <DialogTitle className="text-lg font-semibold mb-2">Parsha Vort</DialogTitle>
             <p className="text-sm text-gray-600 mb-4">

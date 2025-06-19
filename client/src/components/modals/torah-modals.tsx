@@ -106,7 +106,7 @@ export default function TorahModals() {
 
       {/* Pirkei Avot Modal */}
       <Dialog open={activeModal === 'pirkei-avot'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6">
+        <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-semibold mb-2">Pirkei Avot</DialogTitle>
             <DialogDescription className="text-sm text-gray-600">Ethics of the Fathers</DialogDescription>
