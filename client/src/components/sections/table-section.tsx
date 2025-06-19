@@ -54,9 +54,9 @@ export default function TableSection() {
             <h3 className="font-serif text-lg text-warm-gray">This Shabbos</h3>
           </div>
           <div className="text-right">
-            <div className="flex items-center justify-end space-x-1 bg-gradient-to-l from-sage/10 to-transparent rounded-lg px-2 py-1 border border-sage/20">
-              <BookOpen className="text-sage" size={12} />
-              <p className="font-serif text-sm text-sage font-medium">{shabbosData?.parsha || "Loading..."}</p>
+            <div className="flex items-center justify-end space-x-1 bg-gradient-to-l from-blush/10 to-transparent rounded-lg px-2 py-1 border border-blush/20">
+              <BookOpen className="text-warm-gray" size={12} />
+              <p className="font-serif text-sm text-warm-gray font-medium">{shabbosData?.parsha || "Loading..."}</p>
             </div>
           </div>
         </div>
