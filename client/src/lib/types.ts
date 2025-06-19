@@ -34,6 +34,7 @@ export interface DailyCompletionState {
   torahCompleted: boolean;
   tefillaCompleted: boolean;
   tzedakaCompleted: boolean;
+  congratulationsShown: boolean;
   completionDate: string;
   completeTask: (task: 'torah' | 'tefilla' | 'tzedaka') => void;
   resetDaily: () => void;
@@ -53,6 +54,7 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
       torahCompleted: false,
       tefillaCompleted: false,
       tzedakaCompleted: false,
+      congratulationsShown: false,
       completionDate: today
     };
     
@@ -77,7 +79,14 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
       },
       checkAndShowCongratulations: () => {
         const state = get();
-        return state.torahCompleted && state.tefillaCompleted && state.tzedakaCompleted;
+        const allCompleted = state.torahCompleted && state.tefillaCompleted && state.tzedakaCompleted;
+        
+        if (allCompleted && !state.congratulationsShown) {
+          // Mark congratulations as shown
+          set({ ...state, congratulationsShown: true });
+          return true;
+        }
+        return false;
       }
     };
   }
@@ -88,6 +97,7 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
     torahCompleted: false,
     tefillaCompleted: false,
     tzedakaCompleted: false,
+    congratulationsShown: false,
     completionDate: today
   };
   
@@ -96,6 +106,7 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
     initial.torahCompleted = false;
     initial.tefillaCompleted = false;
     initial.tzedakaCompleted = false;
+    initial.congratulationsShown = false;
     initial.completionDate = today;
   }
   
@@ -115,6 +126,7 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
         torahCompleted: false,
         tefillaCompleted: false,
         tzedakaCompleted: false,
+        congratulationsShown: false,
         completionDate: today,
       };
       set(newState);
@@ -122,7 +134,16 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
     },
     checkAndShowCongratulations: () => {
       const state = get();
-      return state.torahCompleted && state.tefillaCompleted && state.tzedakaCompleted;
+      const allCompleted = state.torahCompleted && state.tefillaCompleted && state.tzedakaCompleted;
+      
+      if (allCompleted && !state.congratulationsShown) {
+        // Mark congratulations as shown
+        const newState = { ...state, congratulationsShown: true };
+        set(newState);
+        localStorage.setItem('dailyCompletion', JSON.stringify(newState));
+        return true;
+      }
+      return false;
     }
   };
 });
