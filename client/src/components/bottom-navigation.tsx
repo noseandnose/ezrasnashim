@@ -17,11 +17,11 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
 
   const getActiveColorClass = (sectionId: Section) => {
     switch (sectionId) {
-      case 'torah': return 'bg-muted-lavender/15 text-muted-lavender rounded-2xl';
-      case 'tefilla': return 'bg-rose-blush/15 text-rose-blush rounded-2xl';
-      case 'tzedaka': return 'bg-sage/15 text-sage rounded-2xl';
-      case 'table': return 'bg-sand-gold/15 text-sand-gold rounded-2xl';
-      default: return 'bg-rose-blush/15 text-rose-blush rounded-2xl';
+      case 'torah': return 'bg-muted-lavender/15 text-muted-lavender rounded-xl';
+      case 'tefilla': return 'bg-rose-blush/15 text-rose-blush rounded-xl';
+      case 'tzedaka': return 'bg-sage/15 text-sage rounded-xl';
+      case 'table': return 'bg-sand-gold/15 text-sand-gold rounded-xl';
+      default: return 'bg-rose-blush/15 text-rose-blush rounded-xl';
     }
   };
 
@@ -34,16 +34,16 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
           <button
             key={id}
             onClick={() => onSectionChange(id)}
-            className={`flex flex-col items-center transition-gentle glow-hover focus-glow ${
+            className={`flex flex-col items-center transition-all duration-300 ${
               isCenter 
                 ? 'p-3 scale-110' 
                 : 'p-2'
             } ${
               activeSection === id 
                 ? isCenter 
-                  ? 'gradient-quiet-joy rounded-full shadow-lg'
+                  ? 'bg-gradient-feminine rounded-full shadow-lg'
                   : getActiveColorClass(id)
-                : 'hover:bg-ivory rounded-2xl'
+                : 'hover:bg-blush/5 rounded-xl'
             }`}
           >
             <Icon 

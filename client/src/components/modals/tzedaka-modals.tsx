@@ -139,7 +139,7 @@ export default function TzedakaModals() {
 
       {/* Torah Dedication Modal */}
       <Dialog open={activeModal === 'torah-dedication'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6">
+        <DialogContent>
           <DialogHeader className="text-center mb-4">
             <div className="flex items-center justify-center mb-2">
               <BookOpen className="text-peach mr-2" size={20} />
@@ -185,20 +185,20 @@ export default function TzedakaModals() {
               />
             </div>
 
-            <div className="flex space-x-2">
-              <Button 
-                onClick={() => closeModal()} 
-                variant="outline"
-                className="flex-1"
-              >
-                Cancel
-              </Button>
+            <div className="space-y-2">
               <Button 
                 onClick={() => handleDonation()}
-                className="flex-1 gradient-blush-peach text-white"
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
                 disabled={!torahPortion}
               >
                 Continue to Payment
+              </Button>
+              <Button 
+                onClick={() => closeModal()} 
+                variant="outline"
+                className="w-full rounded-xl border-blush/20 text-warm-gray hover:bg-white/90 transition-all duration-300 bg-white/70 backdrop-blur-sm border"
+              >
+                Cancel
               </Button>
             </div>
           </div>
@@ -207,7 +207,7 @@ export default function TzedakaModals() {
 
       {/* Infertility Support Modal */}
       <Dialog open={activeModal === 'infertility-support'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6">
+        <DialogContent>
           <DialogHeader className="text-center mb-4">
             <div className="flex items-center justify-center mb-2">
               <Baby className="text-rose-500 mr-2" size={20} />
@@ -276,7 +276,7 @@ export default function TzedakaModals() {
 
       {/* Abuse Support Modal */}
       <Dialog open={activeModal === 'abuse-support'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6">
+        <DialogContent>
           <DialogHeader className="text-center mb-4">
             <div className="flex items-center justify-center mb-2">
               <Shield className="text-purple-500 mr-2" size={20} />

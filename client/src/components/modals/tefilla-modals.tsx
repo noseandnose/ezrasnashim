@@ -404,7 +404,7 @@ export default function TefillaModals() {
 
       {/* Tefillos Modal */}
       <Dialog open={activeModal === 'tefillos'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="tefillos-description">
+        <DialogContent aria-describedby="tefillos-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold">Tefillos</DialogTitle>
             <p id="tefillos-description" className="text-xs text-warm-gray/70 mt-1">
