@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User } from "lucide-react";
@@ -356,12 +356,12 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
       {/* Women's Prayers Modal */}
       <Dialog open={activeModal === 'womens-prayers'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="womens-prayers-description">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold">Women's Prayers</DialogTitle>
-            <p id="womens-prayers-description" className="text-xs text-warm-gray/70 mt-1">
+            <DialogDescription className="text-xs text-warm-gray/70 mt-1">
               Special prayers and blessings for women
-            </p>
+            </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-3">
