@@ -2,7 +2,7 @@ import {
   calendarEvents, shopItems, 
   tehillimNames, globalTehillimProgress, minchaPrayers, sponsors, nishmasText,
   dailyHalacha, dailyMussar, dailyChizuk, loshonHorah,
-  shabbatRecipes, parshaVorts, campaigns, inspirationalQuotes, womensPrayers, discountPromotions,
+  shabbatRecipes, parshaVorts, tableInspirations, campaigns, inspirationalQuotes, womensPrayers, discountPromotions,
   type CalendarEvent, type InsertCalendarEvent,
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
@@ -13,6 +13,7 @@ import {
   type LoshonHorah, type InsertLoshonHorah,
   type ShabbatRecipe, type InsertShabbatRecipe,
   type ParshaVort, type InsertParshaVort,
+  type TableInspiration, type InsertTableInspiration,
   type Campaign, type InsertCampaign,
   type InspirationalQuote, type InsertInspirationalQuote,
   type WomensPrayer, type InsertWomensPrayer,
@@ -51,6 +52,10 @@ export interface IStorage {
   
   getParshaVortByWeek(week: string): Promise<ParshaVort | undefined>;
   createParshaVort(vort: InsertParshaVort): Promise<ParshaVort>;
+
+  // Table inspiration methods
+  getTableInspirationByDate(date: string): Promise<TableInspiration | undefined>;
+  createTableInspiration(inspiration: InsertTableInspiration): Promise<TableInspiration>;
 
   // Tehillim methods
   getActiveNames(): Promise<TehillimName[]>;
@@ -473,6 +478,23 @@ export class DatabaseStorage implements IStorage {
       .values(insertPromotion)
       .returning();
     return promotion;
+  }
+
+  async getTableInspirationByDate(date: string): Promise<TableInspiration | undefined> {
+    const [inspiration] = await db
+      .select()
+      .from(tableInspirations)
+      .where(eq(tableInspirations.date, date))
+      .limit(1);
+    return inspiration;
+  }
+
+  async createTableInspiration(insertInspiration: InsertTableInspiration): Promise<TableInspiration> {
+    const [inspiration] = await db
+      .insert(tableInspirations)
+      .values(insertInspiration)
+      .returning();
+    return inspiration;
   }
 }
 

@@ -16,6 +16,7 @@ import {
   insertLoshonHorahSchema,
   insertShabbatRecipeSchema,
   insertParshaVortSchema,
+  insertTableInspirationSchema,
   insertNishmasTextSchema
 } from "@shared/schema";
 import { z } from "zod";

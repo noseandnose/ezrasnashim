@@ -35,6 +35,19 @@ export const parshaVorts = pgTable("parsha_vorts", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const tableInspirations = pgTable("table_inspirations", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull(), // Daily inspiration
+  title: text("title").notNull(),
+  content: text("content").notNull(), // Main paragraph text
+  imageUrl1: text("image_url_1"),
+  imageUrl2: text("image_url_2"),
+  imageUrl3: text("image_url_3"),
+  imageUrl4: text("image_url_4"),
+  imageUrl5: text("image_url_5"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 
 
 export const calendarEvents = pgTable("calendar_events", {
@@ -284,6 +297,11 @@ export const insertParshaVortSchema = createInsertSchema(parshaVorts).omit({
   createdAt: true,
 });
 
+export const insertTableInspirationSchema = createInsertSchema(tableInspirations).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertCampaignSchema = createInsertSchema(campaigns).omit({
   id: true,
   createdAt: true,
@@ -341,6 +359,8 @@ export type ShabbatRecipe = typeof shabbatRecipes.$inferSelect;
 export type InsertShabbatRecipe = z.infer<typeof insertShabbatRecipeSchema>;
 export type ParshaVort = typeof parshaVorts.$inferSelect;
 export type InsertParshaVort = z.infer<typeof insertParshaVortSchema>;
+export type TableInspiration = typeof tableInspirations.$inferSelect;
+export type InsertTableInspiration = z.infer<typeof insertTableInspirationSchema>;
 
 export type Campaign = typeof campaigns.$inferSelect;
 export type InsertCampaign = z.infer<typeof insertCampaignSchema>;
