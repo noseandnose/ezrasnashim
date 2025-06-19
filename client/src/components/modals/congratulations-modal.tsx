@@ -13,7 +13,7 @@ export default function CongratulationsModal() {
             Mazal Tov!
           </DialogTitle>
           <DialogDescription className="text-warm-gray/80 mb-6 leading-relaxed">
-            You have completed all three daily Mitsvas: Torah learning, Tefilla, and Tzedaka. 
+            You have completed all three daily Mitzvahs: Torah learning, Tefilla, and Tzedaka. 
             May your spiritual growth continue and bring you and your family abundant blessings.
           </DialogDescription>
         </DialogHeader>
