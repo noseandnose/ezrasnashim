@@ -232,7 +232,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       <Dialog open={activeModal === 'tehillim-text'} onOpenChange={() => closeModal()}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
           <DialogHeader className="text-center mb-4">
-            <div className="flex items-center justify-between">
+            <DialogTitle className="text-lg font-serif font-semibold">Tehillim {progress?.currentPerek || 1}</DialogTitle>
+            <DialogDescription className="text-xs text-warm-gray/70">
+              Daily chapter from Psalms with Hebrew and English options
+            </DialogDescription>
+            <div className="flex items-center justify-between mt-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -241,7 +245,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               >
                 {showHebrew ? 'EN' : 'עב'}
               </Button>
-              <DialogTitle className="text-lg font-serif font-semibold">Tehillim {progress?.currentPerek || 1}</DialogTitle>
+              <div className="flex-1"></div>
               <div className="flex items-center gap-0 mr-8">
                 <Type className="h-4 w-4 text-blush-pink mr-2" />
                 <button
@@ -288,7 +292,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       <Dialog open={activeModal === 'mincha'} onOpenChange={() => closeModal()}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
           <DialogHeader className="text-center mb-4">
-            <div className="flex items-center justify-between">
+            <DialogTitle className="text-lg font-serif font-semibold">Mincha Prayer</DialogTitle>
+            <DialogDescription className="text-xs text-warm-gray/70">
+              Afternoon prayer service with Hebrew and English options
+            </DialogDescription>
+            <div className="flex items-center justify-between mt-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -297,7 +305,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               >
                 {language === 'hebrew' ? 'EN' : 'עב'}
               </Button>
-              <DialogTitle className="text-lg font-serif font-semibold">Mincha Prayer</DialogTitle>
+              <div className="flex-1"></div>
               <div className="flex items-center gap-0 mr-8">
                 <Type className="h-4 w-4 text-blush-pink mr-2" />
                 <button
