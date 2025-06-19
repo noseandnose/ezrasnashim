@@ -1,11 +1,24 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useModalStore } from "@/lib/types";
+import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import AudioPlayer from "@/components/audio-player";
 
 export default function TorahModals() {
-  const { activeModal, closeModal } = useModalStore();
+  const { activeModal, closeModal, openModal } = useModalStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+
+  const handleTorahComplete = () => {
+    completeTask('torah');
+    closeModal();
+    
+    // Check if all tasks are completed and show congratulations
+    setTimeout(() => {
+      if (checkAndShowCongratulations()) {
+        openModal('congratulations');
+      }
+    }, 100);
+  };
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -51,7 +64,7 @@ export default function TorahModals() {
           </div>
           
           <Button 
-            onClick={() => closeModal()} 
+            onClick={handleTorahComplete} 
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
           >
             Complete
@@ -75,7 +88,7 @@ export default function TorahModals() {
           </div>
           
           <Button 
-            onClick={() => closeModal()} 
+            onClick={handleTorahComplete} 
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
           >
             Complete
@@ -101,7 +114,7 @@ export default function TorahModals() {
           />
           
           <Button 
-            onClick={() => closeModal()} 
+            onClick={handleTorahComplete} 
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
           >
             Complete
