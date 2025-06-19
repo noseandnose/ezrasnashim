@@ -108,15 +108,7 @@ export default function TzedakaModals() {
               />
             </div>
 
-            <div>
-              <label className="text-sm font-medium block mb-2">Dedication Message (Optional)</label>
-              <Textarea 
-                placeholder="In memory of... / For the refuah of..."
-                value={dedicationText}
-                onChange={(e) => setDedicationText(e.target.value)}
-                rows={3}
-              />
-            </div>
+
 
             <div className="space-y-2">
               <Button 
@@ -245,10 +237,10 @@ export default function TzedakaModals() {
               </Select>
               {donationAmount === "custom" && (
                 <div className="relative mt-2">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-warm-gray/60" size={16} />
+                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600 z-10" size={16} />
                   <Input 
                     placeholder="Enter amount" 
-                    className="pl-10"
+                    className="pl-10 bg-white"
                     type="number"
                     value={customAmount}
                     onChange={(e) => setCustomAmount(e.target.value)}
@@ -318,10 +310,10 @@ export default function TzedakaModals() {
               </Select>
               {donationAmount === "custom" && (
                 <div className="relative mt-2">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-warm-gray/60" size={16} />
+                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600 z-10" size={16} />
                   <Input 
                     placeholder="Enter amount" 
-                    className="pl-10"
+                    className="pl-10 bg-white"
                     type="number"
                     value={customAmount}
                     onChange={(e) => setCustomAmount(e.target.value)}

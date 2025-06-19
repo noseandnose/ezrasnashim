@@ -57,9 +57,12 @@ export default function TzedakaSection() {
         </div>
         
         {/* Progress Bar */}
-        <div className="space-y-3">
-          <div className="flex justify-between">
-            <span className="font-sans text-sm text-warm-gray/70">Progress</span>
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-2">
+              <span className="font-sans text-sm text-warm-gray/70">Progress</span>
+              <span className="font-serif text-sm text-warm-gray">{progressPercentage}% Complete</span>
+            </div>
             <span className="font-serif text-sm text-warm-gray">${currentAmount.toLocaleString()} / ${goalAmount.toLocaleString()}</span>
           </div>
           <div className="w-full bg-blush/20 rounded-full h-3">
@@ -67,10 +70,6 @@ export default function TzedakaSection() {
               className="h-3 rounded-full bg-gradient-feminine transition-all duration-500"
               style={{ width: `${progressPercentage}%` }}
             ></div>
-          </div>
-          <div className="text-center">
-            <span className="font-serif text-lg text-warm-gray">{progressPercentage}%</span>
-            <span className="font-sans text-sm text-warm-gray/70 ml-1">Complete</span>
           </div>
         </div>
         
