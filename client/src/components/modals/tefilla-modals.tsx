@@ -542,12 +542,12 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                     <p className="text-gray-600 text-sm">Loading prayer text...</p>
                   </div>
                 ) : nishmasText ? (
-                  <div className="mb-4">
+                  <div className="mb-4 p-3 bg-gray-50 rounded-lg">
                     <p className="whitespace-pre-wrap leading-relaxed">
                       {(nishmasText as any)?.fullText || nishmasText.fullText || 'Text not available'}
                     </p>
                     {(nishmasText as any)?.transliteration && nishmasLanguage === 'hebrew' && (
-                      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                      <div className="mt-4 p-3 bg-gray-100 rounded-lg">
                         <p className="text-sm text-gray-600 italic">
                           {(nishmasText as any).transliteration}
                         </p>
