@@ -1,4 +1,4 @@
-import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar, Moon } from "lucide-react";
+import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar, Moon, MapPin } from "lucide-react";
 import { useModalStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
 import { useGeolocation } from "@/hooks/use-jewish-times";
@@ -46,7 +46,7 @@ export default function TableSection() {
 
       {/* Shabbos Times Section */}
       <div className="bg-gradient-soft rounded-3xl p-4 shadow-lg">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center space-x-3">
             <div className="bg-gradient-feminine p-3 rounded-full">
               <Flame className="text-white" size={20} />
@@ -59,6 +59,12 @@ export default function TableSection() {
               <p className="font-serif text-sm text-sage font-medium">{shabbosData?.parsha || "Loading..."}</p>
             </div>
           </div>
+        </div>
+        
+        {/* Location Display */}
+        <div className="flex items-center justify-center space-x-1 mb-4">
+          <MapPin className="text-warm-gray/60" size={12} />
+          <p className="font-sans text-xs text-warm-gray/60">{shabbosData?.location || "Loading location..."}</p>
         </div>
         
         <div className="grid grid-cols-2 gap-2">

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Clock, Heart, BookOpen, HandHeart, Coins } from "lucide-react";
+import { Calendar, Clock, Heart, BookOpen, HandHeart, Coins, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useModalStore } from "@/lib/types";
@@ -48,7 +48,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   };
 
   return (
-    <div className="p-1 space-y-1 overflow-y-auto">
+    <div className="p-1 space-y-1 overflow-y-auto h-full pb-20">
       {/* Dynamic Greeting */}
       <div className="text-center">
         <h1 className="font-serif text-2xl text-warm-gray mb-1 tracking-wide">{getGreeting()}</h1>
@@ -56,7 +56,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
 
       {/* Today's Information & Sponsor */}
       <div className="bg-gradient-soft rounded-3xl p-3 shadow-lg">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center space-x-3">
             <div className="bg-gradient-feminine p-2 rounded-full">
               <Clock className="text-white" size={18} strokeWidth={1.5} />
@@ -66,6 +66,12 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           <p className="font-sans text-xs text-warm-gray/70">{hebrewDate || "Loading..."}</p>
         </div>
         
+        {/* Location Display */}
+        <div className="flex items-center justify-center space-x-1 mb-3">
+          <MapPin className="text-warm-gray/60" size={12} />
+          <p className="font-sans text-xs text-warm-gray/60">{jewishTimesQuery.data?.location || "Loading location..."}</p>
+        </div>
+        
         {/* Times Grid */}
         <div className="grid grid-cols-2 gap-2 mb-3">
           <button 
@@ -73,11 +79,17 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             className="bg-white/70 rounded-xl p-2 text-center border border-blush/10 hover:scale-105 transition-all duration-300 hover:bg-white/90"
           >
             <p className="font-sans text-xs text-warm-gray/70">Mincha</p>
-            <p className="font-serif text-base text-warm-gray font-medium">{jewishTimesQuery.data?.minchaGedolah || "Loading..."}</p>
+            <div className="flex items-center justify-center space-x-1">
+              <BookOpen className="text-sage" size={14} />
+              <p className="font-serif text-base text-warm-gray font-medium">{jewishTimesQuery.data?.minchaGedolah || "Loading..."}</p>
+            </div>
           </button>
           <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
             <p className="font-sans text-xs text-warm-gray/70">Shkia</p>
-            <p className="font-serif text-base text-warm-gray font-medium">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
+            <div className="flex items-center justify-center space-x-1">
+              <Clock className="text-blush" size={14} />
+              <p className="font-serif text-base text-warm-gray font-medium">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
+            </div>
           </div>
         </div>
 
