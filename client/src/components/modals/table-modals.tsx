@@ -63,31 +63,87 @@ export default function TableModals() {
       <Dialog open={activeModal === 'inspiration'} onOpenChange={() => closeModal()}>
         <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-semibold mb-2">Table Inspiration</DialogTitle>
-            <DialogDescription className="text-sm text-gray-600">Beautiful Shabbat Settings</DialogDescription>
+            <DialogTitle className="text-lg font-semibold mb-2">
+              {inspirationContent?.title || "Table Inspiration"}
+            </DialogTitle>
+            <DialogDescription className="text-sm text-gray-600">Daily table setting inspiration</DialogDescription>
           </DialogHeader>
           
-          {/* Inspiration Image */}
-          <div className="mb-4">
-            <div className="w-full h-48 bg-gradient-to-br from-pink-50 to-orange-50 rounded-xl flex items-center justify-center border border-gray-200">
-              <div className="text-center text-gray-600">
-                <svg className="mx-auto mb-2 w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-                </svg>
-                <p className="text-sm">Winter Elegance Theme</p>
-                <p className="text-xs">Shabbat Table Setting</p>
+          {inspirationContent ? (
+            <>
+              {/* Image Gallery - Horizontal Scroll */}
+              {(inspirationContent.imageUrl1 || inspirationContent.imageUrl2 || inspirationContent.imageUrl3 || inspirationContent.imageUrl4 || inspirationContent.imageUrl5) && (
+                <div className="mb-4">
+                  <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
+                    {inspirationContent.imageUrl1 && (
+                      <div className="flex-shrink-0 w-64 h-48 bg-gray-100 rounded-lg overflow-hidden">
+                        <img 
+                          src={inspirationContent.imageUrl1} 
+                          alt="Table inspiration 1"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    {inspirationContent.imageUrl2 && (
+                      <div className="flex-shrink-0 w-64 h-48 bg-gray-100 rounded-lg overflow-hidden">
+                        <img 
+                          src={inspirationContent.imageUrl2} 
+                          alt="Table inspiration 2"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    {inspirationContent.imageUrl3 && (
+                      <div className="flex-shrink-0 w-64 h-48 bg-gray-100 rounded-lg overflow-hidden">
+                        <img 
+                          src={inspirationContent.imageUrl3} 
+                          alt="Table inspiration 3"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    {inspirationContent.imageUrl4 && (
+                      <div className="flex-shrink-0 w-64 h-48 bg-gray-100 rounded-lg overflow-hidden">
+                        <img 
+                          src={inspirationContent.imageUrl4} 
+                          alt="Table inspiration 4"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    {inspirationContent.imageUrl5 && (
+                      <div className="flex-shrink-0 w-64 h-48 bg-gray-100 rounded-lg overflow-hidden">
+                        <img 
+                          src={inspirationContent.imageUrl5} 
+                          alt="Table inspiration 5"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              {/* Content Text */}
+              <div className="space-y-3 text-sm text-gray-700">
+                <div>
+                  <p>{inspirationContent.content}</p>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-8">
+              <div className="w-full h-48 bg-gradient-to-br from-pink-50 to-orange-50 rounded-xl flex items-center justify-center border border-gray-200 mb-4">
+                <div className="text-center text-gray-600">
+                  <svg className="mx-auto mb-2 w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                  </svg>
+                  <p className="text-sm">No inspiration content available</p>
+                  <p className="text-xs">Please add content to the database</p>
+                </div>
               </div>
             </div>
-          </div>
-          
-          <div className="space-y-3 text-sm text-gray-700">
-            <div>
-              <p><strong>This Week's Theme:</strong> Winter Elegance</p>
-              <p className="mt-2">Create a warm atmosphere with soft candlelight, white linens, and silver accents. Add pinecones or evergreen sprigs for a seasonal touch.</p>
-              <p className="mt-2"><strong>Color Palette:</strong> Cream, silver, and deep green</p>
-              <p className="mt-2"><strong>Special Touch:</strong> Place a small scroll with the week's parsha summary at each setting for meaningful table discussion.</p>
-            </div>
-          </div>
+          )}
         </DialogContent>
       </Dialog>
 

@@ -188,6 +188,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Table inspiration routes
+  app.get("/api/table/inspiration/:date", async (req, res) => {
+    try {
+      const { date } = req.params;
+      const inspiration = await storage.getTableInspirationByDate(date);
+      res.json(inspiration || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch table inspiration" });
+    }
+  });
+
+  app.post("/api/table/inspiration", async (req, res) => {
+    try {
+      const validatedData = insertTableInspirationSchema.parse(req.body);
+      const inspiration = await storage.createTableInspiration(validatedData);
+      res.json(inspiration);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create table inspiration" });
+    }
+  });
+
   // Mincha routes
   app.get("/api/mincha/prayers", async (req, res) => {
     try {
