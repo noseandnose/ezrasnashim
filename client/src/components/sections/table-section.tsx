@@ -58,20 +58,14 @@ export default function TableSection() {
           </div>
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-gradient-to-br from-blush/8 to-ivory rounded-2xl p-3 text-center">
-            <div className="flex items-center justify-center space-x-1 mb-1">
-              <Flame className="text-blush" size={14} />
-              <span className="font-sans text-xs text-warm-gray/70">Candle Lighting</span>
-            </div>
-            <p className="font-serif text-lg text-warm-gray">{shabbosData?.candleLighting || "Loading..."}</p>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
+            <p className="font-sans text-xs text-warm-gray/70">Candle Lighting</p>
+            <p className="font-serif text-base text-warm-gray font-medium">{shabbosData?.candleLighting || "Loading..."}</p>
           </div>
-          <div className="bg-gradient-to-br from-lavender/8 to-ivory rounded-2xl p-3 text-center">
-            <div className="flex items-center justify-center space-x-1 mb-1">
-              <Star className="text-lavender" size={14} />
-              <span className="font-sans text-xs text-warm-gray/70">Havdalah</span>
-            </div>
-            <p className="font-serif text-lg text-warm-gray">{shabbosData?.havdalah || "Loading..."}</p>
+          <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
+            <p className="font-sans text-xs text-warm-gray/70">Havdalah</p>
+            <p className="font-serif text-base text-warm-gray font-medium">{shabbosData?.havdalah || "Loading..."}</p>
           </div>
         </div>
       </div>
