@@ -23,6 +23,15 @@ export default function TefillaModals() {
     openModal('individual-prayer');
   };
 
+  // Heavenly animation for prayer completion
+  const completeWithAnimation = () => {
+    setIsAnimating(true);
+    setTimeout(() => {
+      closeModal();
+      setIsAnimating(false);
+    }, 800);
+  };
+
   // Nishmas 40-Day Campaign state
   const [nishmasDay, setNishmasDay] = useState(0);
   const [nishmasStartDate, setNishmasStartDate] = useState<string | null>(null);
@@ -405,7 +414,7 @@ export default function TefillaModals() {
 
       {/* Tefillos Modal */}
       <Dialog open={activeModal === 'tefillos'} onOpenChange={() => closeModal()}>
-        <DialogContent aria-describedby="tefillos-description">
+        <DialogContent className={isAnimating ? 'prayer-ascending' : ''} aria-describedby="tefillos-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold">Tefillos</DialogTitle>
             <p id="tefillos-description" className="text-xs text-warm-gray/70 mt-1">
@@ -418,7 +427,7 @@ export default function TefillaModals() {
           </div>
 
           <Button 
-            onClick={() => closeModal()} 
+            onClick={completeWithAnimation} 
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
           >
             Complete
@@ -428,7 +437,7 @@ export default function TefillaModals() {
 
       {/* Personal Prayers Modal */}
       <Dialog open={activeModal === 'personal-prayers'} onOpenChange={() => closeModal()}>
-        <DialogContent aria-describedby="personal-prayers-description">
+        <DialogContent className={isAnimating ? 'prayer-ascending' : ''} aria-describedby="personal-prayers-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold">Personal Prayers</DialogTitle>
             <p id="personal-prayers-description" className="text-xs text-warm-gray/70 mt-1">
