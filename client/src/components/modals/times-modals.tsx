@@ -119,7 +119,7 @@ export default function TimesModals() {
     <>
       {/* Hebrew Date Calculator Modal */}
       <Dialog open={activeModal === 'date-calculator'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6">
+        <DialogContent>
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-semibold">Hebrew Date Calculator</DialogTitle>
             <DialogDescription>Convert English dates to Hebrew dates and add recurring events to your calendar</DialogDescription>
@@ -187,20 +187,20 @@ export default function TimesModals() {
               </div>
             )}
             
-            <div className="flex space-x-2">
-              <Button 
-                onClick={() => closeModal()} 
-                variant="outline"
-                className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-medium"
-              >
-                Cancel
-              </Button>
+            <div className="space-y-2">
               <Button 
                 onClick={handleAddToCalendar}
                 disabled={createEventMutation.isPending || !eventTitle || !englishDate}
-                className="flex-1 gradient-blush-peach text-white py-3 rounded-xl font-medium border-0"
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
               >
                 {createEventMutation.isPending ? "Adding..." : "Add to Calendar"}
+              </Button>
+              <Button 
+                onClick={() => closeModal()} 
+                variant="outline"
+                className="w-full rounded-xl border-blush/20 text-warm-gray hover:bg-white/90 transition-all duration-300 bg-white/70 backdrop-blur-sm border"
+              >
+                Cancel
               </Button>
             </div>
           </div>

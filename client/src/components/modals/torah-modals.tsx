@@ -37,7 +37,7 @@ export default function TorahModals() {
     <>
       {/* Halacha Modal */}
       <Dialog open={activeModal === 'halacha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6 font-sans">
+        <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold mb-2">Daily Halacha</DialogTitle>
             <DialogDescription className="text-sm text-gray-600 font-sans">{halachaContent?.title || "Laws of Chanukah - Day 3"}</DialogDescription>
@@ -70,7 +70,7 @@ export default function TorahModals() {
 
       {/* Chizuk Modal */}
       <Dialog open={activeModal === 'chizuk'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6">
+        <DialogContent>
           <DialogHeader className="text-center">
             <DialogTitle className="text-lg font-semibold mb-2">Daily Chizuk</DialogTitle>
             <DialogDescription>Daily inspiration and spiritual strengthening</DialogDescription>
@@ -89,7 +89,7 @@ export default function TorahModals() {
 
       {/* Loshon Horah Modal */}
       <Dialog open={activeModal === 'loshon'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6">
+        <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-semibold mb-2">Loshon Horah</DialogTitle>
             <p className="text-sm text-gray-600">Guarding Our Speech</p>

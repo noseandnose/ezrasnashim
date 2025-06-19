@@ -427,7 +427,7 @@ export default function TefillaModals() {
 
       {/* Personal Prayers Modal */}
       <Dialog open={activeModal === 'personal-prayers'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="personal-prayers-description">
+        <DialogContent aria-describedby="personal-prayers-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold">Personal Prayers</DialogTitle>
             <p id="personal-prayers-description" className="text-xs text-warm-gray/70 mt-1">
