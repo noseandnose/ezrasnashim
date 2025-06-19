@@ -74,7 +74,7 @@ export default function TzedakaModals() {
     <>
       {/* Sponsor a Day Modal */}
       <Dialog open={activeModal === 'sponsor-day'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm gradient-soft-glow rounded-3xl p-6 font-sans border border-blush/20">
+        <DialogContent>
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold mb-2 text-warm-gray">Sponsor a Day</DialogTitle>
             <p className="text-xs text-warm-gray/70 font-sans">Dedicate all mitzvot done on the app for one day - $180</p>
@@ -118,18 +118,19 @@ export default function TzedakaModals() {
               />
             </div>
 
-            <div className="flex space-x-2">
-              <Button 
-                onClick={() => closeModal()} 
-                className="flex-1 bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
-              >
-                Cancel
-              </Button>
+            <div className="space-y-2">
               <Button 
                 onClick={() => handleDonation()}
-                className="flex-1 rounded-xl border-blush/20 text-warm-gray hover:bg-white/90 transition-all duration-300 bg-white/70 backdrop-blur-sm border"
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
               >
                 Sponsor for $180
+              </Button>
+              <Button 
+                onClick={() => closeModal()} 
+                variant="outline"
+                className="w-full rounded-xl border-blush/20 text-warm-gray hover:bg-white/90 transition-all duration-300 bg-white/70 backdrop-blur-sm border"
+              >
+                Cancel
               </Button>
             </div>
           </div>
@@ -323,20 +324,20 @@ export default function TzedakaModals() {
               )}
             </div>
 
-            <div className="flex space-x-2">
-              <Button 
-                onClick={() => closeModal()} 
-                variant="outline"
-                className="flex-1"
-              >
-                Cancel
-              </Button>
+            <div className="space-y-2">
               <Button 
                 onClick={() => handleDonation()}
-                className="flex-1 bg-purple-500 hover:bg-purple-600 text-white"
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
                 disabled={!donationAmount}
               >
                 Donate Now
+              </Button>
+              <Button 
+                onClick={() => closeModal()} 
+                variant="outline"
+                className="w-full rounded-xl border-blush/20 text-warm-gray hover:bg-white/90 transition-all duration-300 bg-white/70 backdrop-blur-sm border"
+              >
+                Cancel
               </Button>
             </div>
           </div>

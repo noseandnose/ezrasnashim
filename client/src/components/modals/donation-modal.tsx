@@ -99,19 +99,19 @@ export default function DonationModal() {
           {/* Donation Buttons */}
           <div className="space-y-2">
             <Button
-              onClick={() => closeModal()}
-              variant="outline"
+              onClick={handleDonate}
+              disabled={createPaymentMutation.isPending || !amount || parseFloat(amount) <= 0}
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
             >
-              Cancel
+              {createPaymentMutation.isPending ? 'Processing...' : `Donate $${amount}`}
             </Button>
             
             <Button
-              onClick={handleDonate}
-              disabled={createPaymentMutation.isPending || !amount || parseFloat(amount) <= 0}
+              onClick={() => closeModal()}
+              variant="outline"
               className="w-full rounded-xl border-blush/20 text-warm-gray hover:bg-white/90 transition-all duration-300 bg-white/70 backdrop-blur-sm border"
             >
-              {createPaymentMutation.isPending ? 'Processing...' : `Donate $${amount}`}
+              Cancel
             </Button>
           </div>
         </div>
