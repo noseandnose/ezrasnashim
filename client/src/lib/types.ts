@@ -45,7 +45,7 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
   
   // For testing: reset on every page load/restart
   // For production: comment out the line below and uncomment the localStorage logic
-  const isTestMode = true; // Set to false for production
+  const isTestMode = false; // Set to false for production
   
   if (isTestMode) {
     // Reset on every restart for testing
