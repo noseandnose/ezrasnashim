@@ -517,16 +517,6 @@ export default function TefillaModals() {
                   </div>
                   <p className="text-xs text-gray-600">May your tefillos be answered</p>
                 </div>
-              ) : todayCompleted ? (
-                <div className="text-center">
-                  <div className="w-full bg-green-100 rounded-lg p-2 mb-2">
-                    <div className="flex items-center justify-center">
-                      <CheckCircle className="text-green-600 mr-2" size={16} />
-                      <span className="text-sm font-medium text-green-700">Today's Prayer Completed</span>
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-500">{40 - nishmasDay} days remaining</p>
-                </div>
               ) : (
                 <div className="text-center">
                   <p className="text-sm text-gray-600 mb-1">Day {nishmasDay} of 40</p>
@@ -643,11 +633,11 @@ export default function TefillaModals() {
               </Button>
             ) : todayCompleted ? (
               <Button 
-                className="w-full py-3 rounded-xl font-medium bg-sage text-white cursor-default"
+                className="w-full py-3 rounded-xl font-medium bg-green-600 text-white cursor-default"
                 disabled={true}
               >
                 <CheckCircle className="mr-2" size={16} />
-                Today's Prayer Completed
+                Completed
               </Button>
             ) : (
               <Button 

@@ -220,9 +220,9 @@ export default function TefillaSection() {
                 <SelectTrigger className="w-full rounded-2xl border-blush/20 bg-white">
                   <SelectValue placeholder="Select Reason" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white">
                   {reasonOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
+                    <SelectItem key={option.value} value={option.value} className="bg-white hover:bg-gray-50">
                       {option.label}
                     </SelectItem>
                   ))}
@@ -234,7 +234,7 @@ export default function TefillaSection() {
                   onClick={() => setShowAddForm(false)} 
                   variant="outline"
                   size="sm"
-                  className="flex-1 rounded-2xl border-blush/30 hover:bg-blush/5"
+                  className="flex-1 rounded-2xl border-blush/30 hover:bg-blush/5 bg-white"
                 >
                   Cancel
                 </Button>
