@@ -102,7 +102,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         candleLighting: formatTime(data.times?.candleLighting),
         havdalah: formatTime(data.times?.havdalah),
         hebrewDate: data.date || '',
-        location: data.location?.title || closestCity.name,
+        location: data.location?.title || data.location?.geo || closestCity.name,
         
         // TODO: Add notification/reminder functionality
         // - Can set alerts for specific zmanim times
