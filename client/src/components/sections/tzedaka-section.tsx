@@ -1,10 +1,23 @@
 import { Heart, BookOpen, Shield, Plus, HandHeart, Gift, Star, Sparkles, Target, Users, DollarSign, TrendingUp } from "lucide-react";
-import { useModalStore } from "@/lib/types";
+import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
 import type { Campaign } from "@shared/schema";
 
 export default function TzedakaSection() {
   const { openModal } = useModalStore();
+  const { tzedakaCompleted, completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+
+  const handleTzedakaComplete = () => {
+    completeTask('tzedaka');
+    
+    // Check if all tasks are completed and show congratulations
+    setTimeout(() => {
+      if (checkAndShowCongratulations()) {
+        openModal('congratulations');
+      }
+    }, 100);
+  };
 
   // Fetch active campaign data
   const { data: campaign, isLoading } = useQuery<Campaign>({
@@ -40,7 +53,12 @@ export default function TzedakaSection() {
     <div className="p-2 space-y-1">
       {/* Header */}
       <div className="text-center">
-        <h2 className="font-serif text-lg text-warm-gray mb-1">Tzedaka & Giving</h2>
+        <div className="flex items-center justify-center gap-2 mb-1">
+          <h2 className="font-serif text-lg text-warm-gray tracking-wide">Daily Tzedaka</h2>
+          {tzedakaCompleted && (
+            <Heart className="text-blush fill-blush" size={20} />
+          )}
+        </div>
         <p className="font-sans text-warm-gray/70 text-xs">Supporting our community with love and generosity</p>
       </div>
 
@@ -112,6 +130,18 @@ export default function TzedakaSection() {
             </div>
           </div>
         </button>
+      </div>
+
+      {/* Gave Tzedaka Elsewhere Button */}
+      <div className="w-full">
+        <Button
+          onClick={handleTzedakaComplete}
+          className="w-full bg-gradient-soft text-warm-gray py-3 rounded-xl font-medium border border-blush/20 hover:bg-blush/5 transition-all duration-300"
+          variant="outline"
+        >
+          <HandHeart className="mr-2 text-blush" size={16} />
+          Gave Tzedaka elsewhere
+        </Button>
       </div>
 
       {/* Community Impact */}

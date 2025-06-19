@@ -169,6 +169,16 @@ export default function TefillaSection() {
 
   return (
     <div className="p-2 space-y-1">
+      {/* Welcome Header */}
+      <div className="text-center mb-3">
+        <div className="flex items-center justify-center gap-2">
+          <h2 className="font-serif text-lg text-warm-gray tracking-wide">Daily Tefilla</h2>
+          {tefillaCompleted && (
+            <Heart className="text-blush fill-blush" size={20} />
+          )}
+        </div>
+      </div>
+
       <div className="space-y-1">
         {/* Daily Tehillim Card */}
         <div className="bg-gradient-soft rounded-3xl p-3 shadow-lg">
