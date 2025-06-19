@@ -217,13 +217,13 @@ export default function TefillaSection() {
                 const option = reasonOptions.find(opt => opt.value === value);
                 setReasonEnglish(option?.english || "");
               }}>
-                <SelectTrigger className="w-full rounded-2xl border-blush/20">
+                <SelectTrigger className="w-full rounded-2xl border-blush/20 bg-white">
                   <SelectValue placeholder="Select Reason" />
                 </SelectTrigger>
                 <SelectContent>
                   {reasonOptions.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
-                      {showHebrew ? option.value : option.label}
+                      {option.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
