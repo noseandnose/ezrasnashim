@@ -63,9 +63,7 @@ export default function TableModals() {
       <Dialog open={activeModal === 'inspiration'} onOpenChange={() => closeModal()}>
         <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-semibold mb-2">
-              {inspirationContent?.title || "Table Inspiration"}
-            </DialogTitle>
+            <DialogTitle className="text-lg font-semibold mb-2">Shabbas Inspiration</DialogTitle>
             <DialogDescription className="text-sm text-gray-600">Daily table setting inspiration</DialogDescription>
           </DialogHeader>
           
@@ -123,6 +121,11 @@ export default function TableModals() {
                   </div>
                 </div>
               )}
+
+              {/* Dynamic Title from Database */}
+              <div className="mb-3">
+                <h3 className="text-lg font-semibold text-gray-800">{inspirationContent.title}</h3>
+              </div>
               
               {/* Content Text */}
               <div className="space-y-3 text-sm text-gray-700">
