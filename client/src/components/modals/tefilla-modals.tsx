@@ -33,11 +33,20 @@ export default function TefillaModals() {
     }, 800);
   };
 
-  // Nishmas 40-Day Campaign state
-  const [nishmasDay, setNishmasDay] = useState(0);
-  const [nishmasStartDate, setNishmasStartDate] = useState<string | null>(null);
+  // Nishmas 40-Day Campaign state with localStorage persistence
+  const [nishmasDay, setNishmasDay] = useState(() => {
+    const saved = localStorage.getItem('nishmas-day');
+    return saved ? parseInt(saved, 10) : 0;
+  });
+  const [nishmasStartDate, setNishmasStartDate] = useState<string | null>(() => {
+    return localStorage.getItem('nishmas-start-date');
+  });
   const [nishmasLanguage, setNishmasLanguage] = useState<'hebrew' | 'english'>('hebrew');
-  const [todayCompleted, setTodayCompleted] = useState(false);
+  const [todayCompleted, setTodayCompleted] = useState(() => {
+    const today = new Date().toDateString();
+    const lastCompleted = localStorage.getItem('nishmas-last-completed');
+    return lastCompleted === today;
+  });
   const [nishmasFontSize, setNishmasFontSize] = useState(16);
 
   const { data: minchaPrayers = [], isLoading } = useQuery<MinchaPrayer[]>({
@@ -513,9 +522,19 @@ export default function TefillaModals() {
                   </div>
                   <p className="text-xs text-gray-600">May your tefillos be answered</p>
                 </div>
+              ) : todayCompleted ? (
+                <div className="text-center">
+                  <div className="w-full bg-green-100 rounded-lg p-2 mb-2">
+                    <div className="flex items-center justify-center">
+                      <CheckCircle className="text-green-600 mr-2" size={16} />
+                      <span className="text-sm font-medium text-green-700">Today's Prayer Completed</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500">{40 - nishmasDay} days remaining</p>
+                </div>
               ) : (
                 <div className="text-center">
-                  <p className="text-sm text-gray-600 mb-1">Day {nishmasDay} completed</p>
+                  <p className="text-sm text-gray-600 mb-1">Day {nishmasDay} of 40</p>
                   <p className="text-xs text-gray-500">{40 - nishmasDay} days remaining</p>
                 </div>
               )}
@@ -584,7 +603,7 @@ export default function TefillaModals() {
                     <p className="text-red-600 text-sm">Failed to load prayer text</p>
                   </div>
                 )}
-                <div className="text-xs text-gray-500 mt-2 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
+                <div className="text-xs text-gray-500 mt-1 mb-2 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
                   <p className="mb-2 font-medium text-gray-700">
                     {nishmasLanguage === 'hebrew' 
                       ? 'תודה מיוחדת ל-Nishmas.net'
@@ -672,16 +691,10 @@ export default function TefillaModals() {
           {/* Instructions */}
           <div className="mt-4 text-xs text-gray-500 text-center">
             <p className="mb-1">
-              {nishmasLanguage === 'hebrew'
-                ? 'אם תפספסי יום אחד, המחזור יתחיל מחדש'
-                : 'Missing a day will restart your 40-day cycle'
-              }
+              Missing a day will restart your 40-day cycle
             </p>
             <p>
-              {nishmasLanguage === 'hebrew'
-                ? '/* מקום להוספת התראות והזכרות עתידיות */'
-                : '/* Future feature: Notification and reminder system */'
-              }
+              /* Future feature: Notification and reminder system */
             </p>
           </div>
         </DialogContent>
