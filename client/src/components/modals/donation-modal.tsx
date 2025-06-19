@@ -83,13 +83,13 @@ export default function DonationModal() {
           <div>
             <label className="text-sm font-medium text-warm-gray mb-2 block">Custom Amount</label>
             <div className="relative">
-              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-warm-gray/60" size={16} />
+              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600 z-10" size={16} />
               <Input
                 type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Enter amount"
-                className="pl-10 rounded-xl border-blush/30 focus:border-blush bg-white/80 backdrop-blur-sm"
+                className="pl-10 rounded-xl border-blush/30 focus:border-blush bg-white"
                 min="1"
                 step="0.01"
               />

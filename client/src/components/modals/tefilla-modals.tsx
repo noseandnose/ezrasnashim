@@ -14,6 +14,7 @@ export default function TefillaModals() {
   const [fontSize, setFontSize] = useState(16);
   const [showHebrew, setShowHebrew] = useState(true);
   const [selectedPrayerId, setSelectedPrayerId] = useState<number | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
   const queryClient = useQueryClient();
 
   const handlePrayerSelect = (prayerId: number) => {
@@ -420,7 +421,7 @@ export default function TefillaModals() {
             onClick={() => closeModal()} 
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
           >
-            Close
+            Complete
           </Button>
         </DialogContent>
       </Dialog>
@@ -443,7 +444,7 @@ export default function TefillaModals() {
             onClick={() => closeModal()} 
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
           >
-            Close
+            Complete
           </Button>
         </DialogContent>
       </Dialog>
@@ -616,8 +617,7 @@ export default function TefillaModals() {
               </Button>
             ) : todayCompleted ? (
               <Button 
-                className="w-full py-3 rounded-xl font-medium text-white cursor-default"
-                style={{ backgroundColor: 'hsl(120, 25%, 65%)' }}
+                className="w-full py-3 rounded-xl font-medium bg-sage text-white cursor-default"
                 disabled={true}
               >
                 <CheckCircle className="mr-2" size={16} />
