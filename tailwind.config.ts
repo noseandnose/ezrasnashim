@@ -61,6 +61,11 @@ export default {
           border: "var(--sidebar-border)",
           ring: "var(--sidebar-ring)",
         },
+        // Custom app colors
+        "blush": "var(--blush)",
+        "sage": "var(--sage)",
+        "lavender": "var(--lavender)",
+        "warm-gray": "var(--warm-gray)",
       },
       keyframes: {
         "accordion-down": {
