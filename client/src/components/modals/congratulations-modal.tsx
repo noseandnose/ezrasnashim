@@ -46,8 +46,8 @@ export default function CongratulationsModal() {
         </h2>
         
         <p id="congratulations-description" className="text-warm-gray/80 mb-6 leading-relaxed">
-          You have completed all three daily tasks: Torah learning, Tefilla, and Tzedaka. 
-          May your spiritual growth continue to flourish like a beautiful flower.
+          You have completed all three daily Mitsvas: Torah learning, Tefilla, and Tzedaka. 
+          May your spiritual growth continue and bring you and your family abundant blessings.
         </p>
 
         <Button 
