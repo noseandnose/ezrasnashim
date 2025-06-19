@@ -205,7 +205,7 @@ export default function TefillaModals() {
     <>
       {/* Tehillim Text Modal */}
       <Dialog open={activeModal === 'tehillim-text'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
+        <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans ${isAnimating ? 'prayer-ascending' : ''}`}>
           <DialogHeader className="text-center mb-4">
             <div className="flex items-center justify-between">
               <Button
@@ -249,7 +249,7 @@ export default function TefillaModals() {
           <Button 
             onClick={() => {
               completePerek();
-              closeModal();
+              completeWithAnimation();
             }}
             disabled={completePerekMutation.isPending}
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
@@ -450,7 +450,7 @@ export default function TefillaModals() {
           </div>
 
           <Button 
-            onClick={() => closeModal()} 
+            onClick={completeWithAnimation} 
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
           >
             Complete
@@ -460,7 +460,7 @@ export default function TefillaModals() {
 
       {/* Nishmas 40-Day Campaign Modal */}
       <Dialog open={activeModal === 'nishmas-campaign'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans" aria-describedby="nishmas-description">
+        <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans ${isAnimating ? 'prayer-ascending' : ''}`} aria-describedby="nishmas-description">
           <DialogHeader className="text-center mb-4">
             <div className="flex items-center justify-center mb-2">
               <Heart className="text-blush mr-2" size={24} />
@@ -634,7 +634,10 @@ export default function TefillaModals() {
               </Button>
             ) : (
               <Button 
-                onClick={markNishmasCompleted}
+                onClick={() => {
+                  markNishmasCompleted();
+                  completeWithAnimation();
+                }}
                 className="w-full py-3 rounded-xl font-medium bg-gradient-feminine text-white hover:opacity-90"
               >
                 <CheckCircle className="mr-2" size={16} />
