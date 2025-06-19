@@ -1,10 +1,11 @@
 import { Book, Heart, Play, Shield, BookOpen, Sparkles, Star, Scroll } from "lucide-react";
-import { useModalStore } from "@/lib/types";
+import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import type { InspirationalQuote } from "@shared/schema";
 
 export default function TorahSection() {
   const { openModal } = useModalStore();
+  const { torahCompleted } = useDailyCompletionStore();
   
   // Fetch today's inspirational quote
   const today = new Date().toISOString().split('T')[0];
@@ -64,7 +65,12 @@ export default function TorahSection() {
     <div className="p-2 space-y-1">
       {/* Welcome Header */}
       <div className="text-center">
-        <h2 className="font-serif text-lg text-warm-gray mb-1 tracking-wide">Torah Learning</h2>
+        <div className="flex items-center justify-center gap-2">
+          <h2 className="font-serif text-lg text-warm-gray tracking-wide">Torah Learning</h2>
+          {torahCompleted && (
+            <Heart className="text-blush fill-blush" size={20} />
+          )}
+        </div>
       </div>
 
       {/* Inspirational Quote */}

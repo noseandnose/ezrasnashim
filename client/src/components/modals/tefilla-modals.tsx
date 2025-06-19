@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useModalStore } from "@/lib/types";
+import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
@@ -10,6 +10,7 @@ import { toast } from "@/hooks/use-toast";
 
 export default function TefillaModals() {
   const { activeModal, openModal, closeModal } = useModalStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
   const [fontSize, setFontSize] = useState(16);
   const [showHebrew, setShowHebrew] = useState(true);
@@ -23,9 +24,17 @@ export default function TefillaModals() {
     openModal('individual-prayer');
   };
 
-  // Complete prayer without animation
+  // Complete prayer with task tracking
   const completeWithAnimation = () => {
+    completeTask('tefilla');
     closeModal();
+    
+    // Check if all tasks are completed and show congratulations
+    setTimeout(() => {
+      if (checkAndShowCongratulations()) {
+        openModal('congratulations');
+      }
+    }, 100);
   };
 
   // Nishmas 40-Day Campaign state with localStorage persistence

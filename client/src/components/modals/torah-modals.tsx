@@ -138,7 +138,7 @@ export default function TorahModals() {
           </div>
           
           <Button 
-            onClick={() => closeModal()} 
+            onClick={handleTorahComplete} 
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
           >
             Complete
@@ -163,7 +163,7 @@ export default function TorahModals() {
           </div>
           
           <Button 
-            onClick={() => closeModal()} 
+            onClick={handleTorahComplete} 
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
           >
             Complete
