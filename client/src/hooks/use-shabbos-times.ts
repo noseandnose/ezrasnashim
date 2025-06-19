@@ -74,7 +74,7 @@ export function useShabbosTime() {
         }
         
         const data: ShabbosTimesResponse = await response.json();
-        return parseShabbosData(data, "Jerusalem");
+        return parseShabbosData(data, "Jerusalem, Israel");
       }
 
       const response = await fetch(
@@ -86,13 +86,8 @@ export function useShabbosTime() {
       }
       
       const data: ShabbosTimesResponse = await response.json();
-      // Extract location from API response or determine from coordinates
-      let locationName = "Your Location";
-      if (data.title) {
-        locationName = data.title.replace(/^Shabbat times for /, '');
-      } else {
-        locationName = getLocationName(coordinates.lat, coordinates.lng);
-      }
+      // Extract clean location name - always use coordinates to get proper city name
+      const locationName = getLocationName(coordinates.lat, coordinates.lng);
       return parseShabbosData(data, locationName);
     },
     enabled: true, // Always fetch, even without coordinates
