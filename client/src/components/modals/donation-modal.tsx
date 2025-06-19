@@ -83,7 +83,7 @@ export default function DonationModal() {
           <div>
             <label className="text-sm font-medium text-warm-gray mb-2 block">Custom Amount</label>
             <div className="relative">
-              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600 z-10" size={16} />
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 font-semibold">$</span>
               <Input
                 type="number"
                 value={amount}

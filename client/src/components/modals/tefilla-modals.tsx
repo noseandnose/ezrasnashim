@@ -26,10 +26,13 @@ export default function TefillaModals() {
   // Heavenly animation for prayer completion
   const completeWithAnimation = () => {
     setIsAnimating(true);
+    // Add a small delay to ensure the animation class is applied
     setTimeout(() => {
-      closeModal();
-      setIsAnimating(false);
-    }, 800);
+      setTimeout(() => {
+        closeModal();
+        setIsAnimating(false);
+      }, 800);
+    }, 50);
   };
 
   // Nishmas 40-Day Campaign state

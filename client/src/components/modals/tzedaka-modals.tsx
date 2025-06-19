@@ -237,7 +237,7 @@ export default function TzedakaModals() {
               </Select>
               {donationAmount === "custom" && (
                 <div className="relative mt-2">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600 z-10" size={16} />
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 font-semibold">$</span>
                   <Input 
                     placeholder="Enter amount" 
                     className="pl-10 bg-white"
@@ -310,7 +310,7 @@ export default function TzedakaModals() {
               </Select>
               {donationAmount === "custom" && (
                 <div className="relative mt-2">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600 z-10" size={16} />
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 font-semibold">$</span>
                   <Input 
                     placeholder="Enter amount" 
                     className="pl-10 bg-white"
