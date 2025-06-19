@@ -264,7 +264,7 @@ export default function TefillaModals() {
 
       {/* Mincha Modal */}
       <Dialog open={activeModal === 'mincha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
+        <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans ${isAnimating ? 'prayer-ascending' : ''}`}>
           <DialogHeader className="text-center mb-4">
             <div className="flex items-center justify-between">
               <Button
@@ -324,10 +324,10 @@ export default function TefillaModals() {
           </div>
 
           <Button 
-            onClick={() => closeModal()} 
+            onClick={completeWithAnimation} 
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
           >
-            Close
+            Complete
           </Button>
         </DialogContent>
       </Dialog>
@@ -488,7 +488,9 @@ export default function TefillaModals() {
                   className="h-3 rounded-full transition-all duration-300"
                   style={{ 
                     width: `${(nishmasDay / 40) * 100}%`,
-                    background: 'linear-gradient(90deg, hsl(328, 85%, 87%) 0%, hsl(28, 100%, 84%) 100%)'
+                    background: nishmasDay >= 40 
+                      ? 'linear-gradient(90deg, hsl(120, 50%, 60%) 0%, hsl(120, 60%, 50%) 100%)'
+                      : 'linear-gradient(90deg, hsl(328, 85%, 87%) 0%, hsl(28, 100%, 84%) 100%)'
                   }}
                 ></div>
               </div>
@@ -584,7 +586,7 @@ export default function TefillaModals() {
                     <p className="text-red-600 text-sm">Failed to load prayer text</p>
                   </div>
                 )}
-                <div className="text-xs text-gray-500 mt-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
+                <div className="text-xs text-gray-500 mt-2 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
                   <p className="mb-2 font-medium text-gray-700">
                     {nishmasLanguage === 'hebrew' 
                       ? 'תודה מיוחדת ל-Nishmas.net'
@@ -652,7 +654,7 @@ export default function TefillaModals() {
               <Button 
                 onClick={() => closeModal()} 
                 variant="outline"
-                className="flex-1"
+                className="flex-1 bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
               >
                 Close
               </Button>
@@ -661,7 +663,7 @@ export default function TefillaModals() {
                 <Button 
                   onClick={resetNishmasCampaign}
                   variant="outline"
-                  className="px-4 text-gray-600 hover:text-gray-800"
+                  className="px-4 bg-white text-gray-600 border-gray-300 hover:bg-gray-50 hover:text-gray-800"
                 >
                   <RotateCcw size={16} />
                 </Button>
