@@ -56,7 +56,7 @@ export default function TzedakaSection() {
         <div className="flex items-center justify-center gap-2 mb-1">
           <h2 className="font-serif text-lg text-warm-gray tracking-wide">Daily Tzedaka</h2>
           {tzedakaCompleted && (
-            <Heart className="text-blush fill-blush" size={20} />
+            <Heart className="gradient-heart" size={20} />
           )}
         </div>
         <p className="font-sans text-warm-gray/70 text-xs">Supporting our community with love and generosity</p>

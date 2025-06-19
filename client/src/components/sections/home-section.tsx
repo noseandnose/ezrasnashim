@@ -124,7 +124,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               <p className="font-sans text-xs text-warm-gray/70">Daily Halacha, Mussar & Chizuk</p>
             </div>
             {torahCompleted && (
-              <Heart className="text-blush fill-blush" size={20} />
+              <Heart className="gradient-heart" size={20} />
             )}
           </div>
         </button>
@@ -142,7 +142,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               <p className="font-sans text-xs text-warm-gray/70">Tehillim, Mincha & Women's Prayers</p>
             </div>
             {tefillaCompleted && (
-              <Heart className="text-blush fill-blush" size={20} />
+              <Heart className="gradient-heart" size={20} />
             )}
           </div>
         </button>
@@ -160,7 +160,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               <p className="font-sans text-xs text-warm-gray/70">Support Torah Learning & Charity</p>
             </div>
             {tzedakaCompleted && (
-              <Heart className="text-blush fill-blush" size={20} />
+              <Heart className="gradient-heart" size={20} />
             )}
           </div>
         </button>
