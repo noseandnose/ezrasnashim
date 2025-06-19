@@ -173,19 +173,19 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
 
       {/* Community Impact */}
       <div className="bg-gradient-soft rounded-3xl p-3 border border-blush/10">
-        <h3 className="font-serif text-sm text-warm-gray text-center mb-2">Community Impact</h3>
+        <h3 className="font-serif text-sm text-black text-center mb-2">Community Impact</h3>
         <div className="grid grid-cols-3 gap-2 text-center">
           <div>
-            <div className="font-serif text-lg text-blush">142</div>
-            <div className="font-sans text-xs text-warm-gray/70">Days Sponsored</div>
+            <div className="font-serif text-lg text-black">142</div>
+            <div className="font-sans text-xs text-black">Days Sponsored</div>
           </div>
           <div>
-            <div className="font-serif text-lg text-lavender">3</div>
-            <div className="font-sans text-xs text-warm-gray/70">Campaigns</div>
+            <div className="font-serif text-lg text-black">3</div>
+            <div className="font-sans text-xs text-black">Campaigns</div>
           </div>
           <div>
-            <div className="font-serif text-lg text-sage">$24,580</div>
-            <div className="font-sans text-xs text-warm-gray/70">Raised</div>
+            <div className="font-serif text-lg text-black">$24,580</div>
+            <div className="font-sans text-xs text-black">Raised</div>
           </div>
         </div>
       </div>
