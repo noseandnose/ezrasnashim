@@ -8,6 +8,7 @@ import { useLocation } from "wouter";
 import { MinchaPrayer, NishmasText, GlobalTehillimProgress, TehillimName, WomensPrayer } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
+import { HeartExplosion } from "@/components/ui/heart-explosion";
 
 interface TefillaModalsProps {
   onSectionChange?: (section: any) => void;
@@ -22,6 +23,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const [showHebrew, setShowHebrew] = useState(true);
   const [selectedPrayerId, setSelectedPrayerId] = useState<number | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [showExplosion, setShowExplosion] = useState(false);
   const queryClient = useQueryClient();
 
   const handlePrayerSelect = (prayerId: number) => {
@@ -32,20 +34,25 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
   // Complete prayer with task tracking
   const completeWithAnimation = () => {
-    completeTask('tefilla');
-    closeModal();
+    setShowExplosion(true);
     
-    // Navigate to home section to show progress
-    if (onSectionChange) {
-      onSectionChange('home');
-    }
-    
-    // Check if all tasks are completed and show congratulations
+    // Wait for animation to complete before proceeding
     setTimeout(() => {
-      if (checkAndShowCongratulations()) {
-        openModal('congratulations');
+      completeTask('tefilla');
+      closeModal();
+      
+      // Navigate to home section to show progress
+      if (onSectionChange) {
+        onSectionChange('home');
       }
-    }, 200);
+      
+      // Check if all tasks are completed and show congratulations
+      setTimeout(() => {
+        if (checkAndShowCongratulations()) {
+          openModal('congratulations');
+        }
+      }, 200);
+    }, 500);
   };
 
   // Nishmas 40-Day Campaign state with localStorage persistence
@@ -352,12 +359,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             )}
           </div>
 
-          <Button 
-            onClick={completeWithAnimation} 
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
-          >
-            Complete
-          </Button>
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={completeWithAnimation} 
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+            >
+              Complete
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
         </DialogContent>
       </Dialog>
       {/* Women's Prayers Modal */}
