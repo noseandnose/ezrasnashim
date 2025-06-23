@@ -19,7 +19,7 @@ COPY server server
 COPY shared shared
 
 ENV NODE_ENV=production
-ENV PORT=5000
-EXPOSE 5000
+ENV PORT=80
+EXPOSE 80
 
 CMD ["npm", "start"]
