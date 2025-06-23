@@ -2,7 +2,9 @@ import { Heart, BookOpen, Shield, Plus, HandHeart, Gift, Star, Sparkles, Target,
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { HeartExplosion } from "@/components/ui/heart-explosion";
 import type { Campaign } from "@shared/schema";
 import type { Section } from "@/pages/home";
 

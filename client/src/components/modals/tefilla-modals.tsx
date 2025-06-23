@@ -282,16 +282,19 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             </div>
           </div>
 
-          <Button 
-            onClick={() => {
-              completePerek();
-              completeWithAnimation();
-            }}
-            disabled={completePerekMutation.isPending}
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
-          >
-            {completePerekMutation.isPending ? 'Completing...' : 'Complete'}
-          </Button>
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={() => {
+                completePerek();
+                completeWithAnimation();
+              }}
+              disabled={completePerekMutation.isPending}
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
+            >
+              {completePerekMutation.isPending ? 'Completing...' : 'Complete'}
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
         </DialogContent>
       </Dialog>
       {/* Mincha Modal */}
@@ -421,12 +424,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             </div>
           </div>
 
-          <Button 
-            onClick={completeWithAnimation} 
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
-          >
-            Complete
-          </Button>
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={completeWithAnimation} 
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+            >
+              Complete
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
         </DialogContent>
       </Dialog>
       {/* Blessings Modal */}
@@ -443,12 +449,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             Daily blessings and their proper recitation...
           </div>
 
-          <Button 
-            onClick={completeWithAnimation} 
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
-          >
-            Complete
-          </Button>
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={completeWithAnimation} 
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+            >
+              Complete
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
         </DialogContent>
       </Dialog>
       {/* Tefillos Modal */}
@@ -465,12 +474,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             Traditional prayers and their meanings...
           </div>
 
-          <Button 
-            onClick={completeWithAnimation} 
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
-          >
-            Complete
-          </Button>
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={completeWithAnimation} 
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+            >
+              Complete
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
         </DialogContent>
       </Dialog>
       {/* Personal Prayers Modal */}
@@ -487,12 +499,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             Guidance for personal prayer and connection...
           </div>
 
-          <Button 
-            onClick={completeWithAnimation} 
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
-          >
-            Complete
-          </Button>
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={completeWithAnimation} 
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+            >
+              Complete
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
         </DialogContent>
       </Dialog>
       {/* Nishmas Kol Chai Modal */}
@@ -574,12 +589,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           </div>
 
           {/* Complete Button */}
-          <Button 
-            onClick={completeWithAnimation} 
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-3 border-0"
-          >
-            Complete
-          </Button>
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={completeWithAnimation} 
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-3 border-0"
+            >
+              Complete
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
 
           {/* Special Thanks Section */}
           <div className="text-xs text-gray-500 mt-3 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
