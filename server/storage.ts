@@ -18,8 +18,8 @@ import {
   type InspirationalQuote, type InsertInspirationalQuote,
   type WomensPrayer, type InsertWomensPrayer,
   type DiscountPromotion, type InsertDiscountPromotion
-} from "@shared/schema";
-import { db, pool } from "./db";
+} from "../shared/schema.js";
+import { db, pool } from "./db.js";
 import { eq, gt, lt, and } from "drizzle-orm";
 
 export interface IStorage {
