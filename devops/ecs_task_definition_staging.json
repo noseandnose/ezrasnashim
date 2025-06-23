@@ -84,6 +84,5 @@
   },
   "registeredAt": "2025-06-23T11:52:37.851Z",
   "registeredBy": "arn:aws:sts::551437426075:assumed-role/zier-tech-admin-external-role/u-jz",
-  "enableFaultInjection": false,
   "tags": []
 }
