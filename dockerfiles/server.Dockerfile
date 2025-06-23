@@ -15,7 +15,6 @@ WORKDIR /app
 # Copy production deps + built client + server source
 COPY package*.json tsconfig.json ./
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/dist/public ./public
 COPY server server
 COPY shared shared
 
