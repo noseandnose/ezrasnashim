@@ -1,0 +1,26 @@
+name: Deploy fronted to s3
+on:
+  push:
+    branches:
+      - staging
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Build and deploy
+      run: |
+        npm install
+        vite build
+    - name: "Configure AWS Credentials" Action for GitHub Actions
+      uses: aws-actions/configure-aws-credentials@v4.2.1
+      with:
+        role-to-assume: arn:aws:iam::551437426075:role/GitHub-OIDC-Policy
+        aws-region: "eu-central-1"
+    - name: Deploy to S3
+      run: |
+        aws s3 sync dist s3://ezras-nashim-frontend/
