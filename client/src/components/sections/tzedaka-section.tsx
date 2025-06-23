@@ -16,23 +16,29 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
   const { openModal } = useModalStore();
   const { tzedakaCompleted, completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const [, setLocation] = useLocation();
+  const [showExplosion, setShowExplosion] = useState(false);
 
   const handleTzedakaComplete = () => {
     if (tzedakaCompleted) return; // Prevent double execution
     
-    completeTask('tzedaka');
+    setShowExplosion(true);
     
-    // Navigate back to home section to show progress
-    if (onSectionChange) {
-      onSectionChange('home');
-    }
-    
-    // Check if all tasks are completed and show congratulations
+    // Wait for animation to complete before proceeding
     setTimeout(() => {
-      if (checkAndShowCongratulations()) {
-        openModal('congratulations');
+      completeTask('tzedaka');
+      
+      // Navigate back to home section to show progress
+      if (onSectionChange) {
+        onSectionChange('home');
       }
-    }, 200);
+      
+      // Check if all tasks are completed and show congratulations
+      setTimeout(() => {
+        if (checkAndShowCongratulations()) {
+          openModal('congratulations');
+        }
+      }, 200);
+    }, 500);
   };
 
   // Fetch active campaign data
@@ -159,16 +165,19 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
               <p className="font-sans text-xs text-warm-gray/70">Mark as completed</p>
             </div>
           </div>
-          <Button
-            onClick={handleTzedakaComplete}
-            className={`py-2 px-4 rounded-xl font-medium border-0 ${
-              tzedakaCompleted 
-                ? 'bg-sage text-white' 
-                : 'bg-gradient-feminine text-white hover:opacity-90'
-            }`}
-          >
-            {tzedakaCompleted ? 'Completed' : 'Complete'}
-          </Button>
+          <div className="heart-explosion-container">
+            <Button
+              onClick={handleTzedakaComplete}
+              className={`py-2 px-4 rounded-xl font-medium border-0 ${
+                tzedakaCompleted 
+                  ? 'bg-sage text-white' 
+                  : 'bg-gradient-feminine text-white hover:opacity-90'
+              }`}
+            >
+              {tzedakaCompleted ? 'Completed' : 'Complete'}
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
         </div>
       </div>
 
