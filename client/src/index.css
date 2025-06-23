@@ -48,6 +48,49 @@
   fill: #E8B4CB !important;
 }
 
+/* Heart Explosion Animation */
+.heart-explosion-container {
+  position: relative;
+  overflow: visible;
+}
+
+.heart-explosion {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.heart-particle {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  color: #E8B4CB;
+  animation: heartExplode 0.5s ease-out forwards;
+  opacity: 1;
+}
+
+@keyframes heartExplode {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(1);
+    opacity: 0;
+  }
+}
+
+.heart-particle:nth-child(1) { --dx: -40px; --dy: -40px; animation-delay: 0ms; }
+.heart-particle:nth-child(2) { --dx: 0px; --dy: -50px; animation-delay: 50ms; }
+.heart-particle:nth-child(3) { --dx: 40px; --dy: -40px; animation-delay: 100ms; }
+.heart-particle:nth-child(4) { --dx: 50px; --dy: 0px; animation-delay: 150ms; }
+.heart-particle:nth-child(5) { --dx: 40px; --dy: 40px; animation-delay: 200ms; }
+.heart-particle:nth-child(6) { --dx: 0px; --dy: 50px; animation-delay: 250ms; }
+.heart-particle:nth-child(7) { --dx: -40px; --dy: 40px; animation-delay: 300ms; }
+.heart-particle:nth-child(8) { --dx: -50px; --dy: 0px; animation-delay: 350ms; }
+
 .dark {
   --background: hsl(240, 10%, 3.9%);
   --foreground: hsl(0, 0%, 98%);

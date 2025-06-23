@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { useState } from "react";
 import AudioPlayer from "@/components/audio-player";
+import { HeartExplosion } from "@/components/ui/heart-explosion";
 
 interface TorahModalsProps {
   onSectionChange?: (section: any) => void;
@@ -13,22 +15,28 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   const { activeModal, closeModal, openModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const [, setLocation] = useLocation();
+  const [showExplosion, setShowExplosion] = useState(false);
 
   const handleTorahComplete = () => {
-    completeTask('torah');
-    closeModal();
+    setShowExplosion(true);
     
-    // Navigate to home section to show progress
-    if (onSectionChange) {
-      onSectionChange('home');
-    }
-    
-    // Check if all tasks are completed and show congratulations
+    // Wait for animation to complete before proceeding
     setTimeout(() => {
-      if (checkAndShowCongratulations()) {
-        openModal('congratulations');
+      completeTask('torah');
+      closeModal();
+      
+      // Navigate to home section to show progress
+      if (onSectionChange) {
+        onSectionChange('home');
       }
-    }, 200);
+      
+      // Check if all tasks are completed and show congratulations
+      setTimeout(() => {
+        if (checkAndShowCongratulations()) {
+          openModal('congratulations');
+        }
+      }, 200);
+    }, 500);
   };
 
   const today = new Date().toISOString().split('T')[0];
@@ -74,12 +82,15 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             </div>
           </div>
           
-          <Button 
-            onClick={handleTorahComplete} 
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
-          >
-            Complete
-          </Button>
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={handleTorahComplete} 
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+            >
+              Complete
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
         </DialogContent>
       </Dialog>
 
