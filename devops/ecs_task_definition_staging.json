@@ -1,9 +1,9 @@
 {
-  "taskDefinitionArn": "arn:aws:ecs:us-east-2:551437426075:task-definition/ezras_nashim_staging:1",
+  "taskDefinitionArn": "arn:aws:ecs:eu-central-1:551437426075:task-definition/ezras_nashim_staging:6",
   "containerDefinitions": [
     {
       "name": "api",
-      "image": "hello-world",
+      "image": "551437426075.dkr.ecr.eu-central-1.amazonaws.com/ezras-nashim-staging:latest",
       "cpu": 0,
       "portMappings": [
         {
@@ -16,10 +16,8 @@
       ],
       "essential": true,
       "environment": [],
-      "environmentFiles": [],
       "mountPoints": [],
       "volumesFrom": [],
-      "ulimits": [],
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
@@ -39,7 +37,7 @@
   "taskRoleArn": "arn:aws:iam::551437426075:role/EcsTaskExecutionRole",
   "executionRoleArn": "arn:aws:iam::551437426075:role/EcsTaskExecutionRole",
   "networkMode": "awsvpc",
-  "revision": 1,
+  "revision": 6,
   "volumes": [],
   "status": "ACTIVE",
   "requiresAttributes": [
@@ -50,6 +48,9 @@
       "name": "ecs.capability.execution-role-awslogs"
     },
     {
+      "name": "com.amazonaws.ecs.capability.ecr-auth"
+    },
+    {
       "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
     },
     {
@@ -57,6 +58,9 @@
     },
     {
       "name": "com.amazonaws.ecs.capability.task-iam-role"
+    },
+    {
+      "name": "ecs.capability.execution-role-ecr-pull"
     },
     {
       "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
@@ -82,7 +86,7 @@
     "cpuArchitecture": "X86_64",
     "operatingSystemFamily": "LINUX"
   },
-  "registeredAt": "2025-06-23T11:52:37.851Z",
+  "registeredAt": "2025-06-23T12:35:59.414Z",
   "registeredBy": "arn:aws:sts::551437426075:assumed-role/zier-tech-admin-external-role/u-jz",
   "tags": []
 }
