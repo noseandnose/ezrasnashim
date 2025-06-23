@@ -1,4 +1,5 @@
 console.log("starting server...");
+console.log('Hello ECS'); setTimeout(() => {}, 60000);
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes.js";
 // Vite integration removed; using console.log for logging

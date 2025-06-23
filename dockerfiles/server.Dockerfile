@@ -5,8 +5,7 @@ COPY package*.json tsconfig.json  ./
 COPY client client
 COPY shared shared
 COPY server server
-RUN #npm ci
-RUN npm install typescript
+RUN npm ci
 RUN npx tsc
 
 # 2) Runtime image
