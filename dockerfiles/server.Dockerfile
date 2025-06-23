@@ -2,7 +2,6 @@
 FROM node:20 AS builder
 WORKDIR /app
 COPY package*.json server/tsconfig.json  ./
-COPY client client
 COPY shared shared
 COPY server server
 RUN npm ci
