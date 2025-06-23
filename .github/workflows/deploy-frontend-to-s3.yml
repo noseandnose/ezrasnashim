@@ -19,7 +19,7 @@ jobs:
     - name: Build and deploy
       run: |
         npm install
-        vite build
+        npx vite build
     - name: Configure AWS Credentials Action for GitHub Actions
       uses: aws-actions/configure-aws-credentials@v4.2.1
       with:
