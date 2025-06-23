@@ -13,10 +13,11 @@ FROM node:20-slim
 WORKDIR /app
 
 # Copy production deps + built client + server source
-COPY package*.json tsconfig.json ./
+COPY package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
-COPY server server
-COPY shared shared
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/server ./server
+COPY --from=builder /app/shared ./shared
 
 ENV NODE_ENV=production
 ENV PORT=80
