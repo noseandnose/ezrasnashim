@@ -129,6 +129,7 @@ Changelog:
 - June 24, 2025. Updated Shabbat table section to display real database content titles
 - June 24, 2025. Removed all hebrew_date fields from database schema
 - June 24, 2025. Added universal media proxy supporting multiple hosting services
+- June 24, 2025. Formatted and stored complete Hebrew Amidah prayer in database with proper section headers and line breaks
 ```
 
 ## User Preferences

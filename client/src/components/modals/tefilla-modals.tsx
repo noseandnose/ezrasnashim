@@ -352,11 +352,25 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 <div key={prayer.id} className="p-4 bg-white rounded-xl border border-cream-light">
                   <div className="text-center">
                     <div
-                      className={`${language === 'hebrew' ? 'font-hebrew text-right' : 'font-english'} leading-relaxed`}
+                      className={`${language === 'hebrew' ? 'font-hebrew text-right' : 'font-english'} leading-relaxed whitespace-pre-line`}
                       style={{ fontSize: `${fontSize}px` }}
-                    >
-                      {language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation}
-                    </div>
+                      dangerouslySetInnerHTML={{
+                        __html: language === 'hebrew' 
+                          ? (prayer.hebrewText || '').replace(/\*\*(.*?)\*\*/g, '<strong class="text-lg font-bold text-blush block my-3">$1</strong>')
+                          : prayer.englishTranslation
+                      }}
+                    />
+                    {language === 'hebrew' && (
+                      <style jsx>{`
+                        .whitespace-pre-line strong {
+                          display: block;
+                          margin: 1rem 0;
+                          font-size: 1.125rem;
+                          font-weight: bold;
+                          color: #E8B4CB;
+                        }
+                      `}</style>
+                    )}
                     {prayer.transliteration && language === 'english' && (
                       <div
                         className="text-gray-500 italic mt-2"
