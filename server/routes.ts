@@ -698,6 +698,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Audio proxy endpoint for Google Drive files
+  app.get("/api/audio-proxy/:fileId", async (req, res) => {
+    try {
+      const { fileId } = req.params;
+      const googleDriveUrl = `https://drive.usercontent.google.com/u/0/uc?id=${fileId}&export=download`;
+      
+      const response = await fetch(googleDriveUrl);
+      if (!response.ok) {
+        return res.status(404).json({ error: "Audio file not found" });
+      }
+      
+      // Set appropriate headers for audio streaming
+      res.setHeader('Content-Type', response.headers.get('content-type') || 'audio/mpeg');
+      res.setHeader('Accept-Ranges', 'bytes');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      
+      // Stream the audio data
+      response.body.pipe(res);
+    } catch (error) {
+      console.error('Audio proxy error:', error);
+      res.status(500).json({ error: "Failed to fetch audio" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
