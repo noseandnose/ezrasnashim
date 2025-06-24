@@ -78,14 +78,21 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
         <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold mb-2">Daily Halacha</DialogTitle>
-            <DialogDescription className="text-sm text-gray-600 font-sans">{halachaContent?.title || "Laws of Chanukah - Day 3"}</DialogDescription>
+            {halachaContent && (
+              <DialogDescription className="text-sm text-gray-600 font-sans">{halachaContent.title}</DialogDescription>
+            )}
           </DialogHeader>
           
-          <div className="space-y-3 text-sm text-gray-700 font-sans">
-            <div>
-              <p><strong>Today's Halacha:</strong> {halachaContent?.content || "Candles should be lit immediately after sunset, and should burn for at least 30 minutes. The mitzvah is to light one candle each night, with the minhag to add an additional candle each subsequent night."}</p>
+          {halachaContent && (
+            <div className="space-y-3 text-sm text-gray-700 font-sans">
+              <div>
+                <p><strong>Today's Halacha:</strong> {halachaContent.content}</p>
+                {halachaContent.source && (
+                  <p className="mt-2 text-xs text-gray-500">Source: {halachaContent.source}</p>
+                )}
+              </div>
             </div>
-          </div>
+          )}
           
           <div className="heart-explosion-container">
             <Button 
@@ -104,15 +111,21 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
         <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6 font-sans">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold mb-2">Daily Mussar</DialogTitle>
-            <DialogDescription className="text-sm text-gray-600 font-sans">Character Development</DialogDescription>
+            {mussarContent && (
+              <DialogDescription className="text-sm text-gray-600 font-sans">{mussarContent.title}</DialogDescription>
+            )}
           </DialogHeader>
           
-          <div className="space-y-3 text-sm text-gray-700 font-sans">
-            <div>
-              <p><strong>Today's Focus:</strong> Patience and understanding in our daily interactions.</p>
-              <p className="mt-2">When we encounter challenges, remember that each test is an opportunity for growth and spiritual elevation.</p>
+          {mussarContent && (
+            <div className="space-y-3 text-sm text-gray-700 font-sans">
+              <div>
+                <p><strong>Today's Focus:</strong> {mussarContent.content}</p>
+                {mussarContent.source && (
+                  <p className="mt-2 text-xs text-gray-500">Source: {mussarContent.source}</p>
+                )}
+              </div>
             </div>
-          </div>
+          )}
           
           <div className="heart-explosion-container">
             <Button 
@@ -132,16 +145,20 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           <DialogHeader className="text-center">
             <DialogTitle className="text-lg font-semibold mb-2">Daily Chizuk</DialogTitle>
             <DialogDescription>Daily inspiration and spiritual strengthening</DialogDescription>
-            <p className="text-sm text-gray-600 mb-4">
-              {chizukContent?.title || "Inspiration & Strength"}
-            </p>
+            {chizukContent && (
+              <p className="text-sm text-gray-600 mb-4">
+                {chizukContent.title}
+              </p>
+            )}
           </DialogHeader>
           
-          <AudioPlayer 
-            title={chizukContent?.title || "Daily Chizuk"}
-            duration={chizukContent?.duration || "5:15"}
-            audioUrl={chizukContent?.audioUrl || ""}
-          />
+          {chizukContent && chizukContent.audioUrl && (
+            <AudioPlayer 
+              title={chizukContent.title}
+              duration={chizukContent.duration || "5:15"}
+              audioUrl={chizukContent.audioUrl}
+            />
+          )}
           
           <div className="heart-explosion-container">
             <Button 
