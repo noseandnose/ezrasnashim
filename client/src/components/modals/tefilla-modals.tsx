@@ -243,6 +243,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             <DialogDescription className="text-xs text-warm-gray/70">
               Daily chapter from Psalms with Hebrew and English options
             </DialogDescription>
+          </DialogHeader>
+          <div id="tehillim-description" className="sr-only">Psalms reading and community prayer participation</div>
             <div className="flex items-center justify-between mt-2">
               <Button
                 variant="outline"
@@ -299,12 +301,14 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       </Dialog>
       {/* Mincha Modal */}
       <Dialog open={activeModal === 'mincha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans" aria-describedby="mincha-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold">Mincha Prayer</DialogTitle>
             <DialogDescription className="text-xs text-warm-gray/70">
               Afternoon prayer service with Hebrew and English options
             </DialogDescription>
+          </DialogHeader>
+          <div id="mincha-description" className="sr-only">Afternoon prayer service and instructions</div>
             <div className="flex items-center justify-between mt-2">
               <Button
                 variant="outline"

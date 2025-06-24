@@ -86,11 +86,12 @@ export default function TzedakaModals() {
     <>
       {/* Sponsor a Day Modal */}
       <Dialog open={activeModal === 'sponsor-day'} onOpenChange={() => closeModal()}>
-        <DialogContent>
+        <DialogContent aria-describedby="sponsor-day-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold mb-2 text-warm-gray">Sponsor a Day</DialogTitle>
             <p className="text-xs text-warm-gray/70 font-sans">Dedicate all mitzvot done on the app for one day - $180</p>
           </DialogHeader>
+          <div id="sponsor-day-description" className="sr-only">Daily sponsorship and dedication options</div>
           
           <div className="space-y-4">
             <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-blush/20">
@@ -143,7 +144,7 @@ export default function TzedakaModals() {
 
       {/* Torah Dedication Modal */}
       <Dialog open={activeModal === 'torah-dedication'} onOpenChange={() => closeModal()}>
-        <DialogContent>
+        <DialogContent aria-describedby="torah-dedication-description">
           <DialogHeader className="text-center mb-4">
             <div className="flex items-center justify-center mb-2">
               <BookOpen className="text-peach mr-2" size={20} />
@@ -153,6 +154,7 @@ export default function TzedakaModals() {
               Dedicate a Letter, Pasuk, Perek or Parsha
             </DialogDescription>
           </DialogHeader>
+          <div id="torah-dedication-description" className="sr-only">Torah learning sponsorship and dedication options</div>
           
           <div className="space-y-4">
             <div>
@@ -211,7 +213,7 @@ export default function TzedakaModals() {
 
       {/* Infertility Support Modal */}
       <Dialog open={activeModal === 'infertility-support'} onOpenChange={() => closeModal()}>
-        <DialogContent>
+        <DialogContent aria-describedby="infertility-support-description">
           <DialogHeader className="text-center mb-4">
             <div className="flex items-center justify-center mb-2">
               <Baby className="text-rose-500 mr-2" size={20} />
@@ -221,6 +223,7 @@ export default function TzedakaModals() {
               Support couples struggling with fertility challenges
             </DialogDescription>
           </DialogHeader>
+          <div id="infertility-support-description" className="sr-only">Fertility support and assistance for couples</div>
           
           <div className="space-y-4">
             <div className="bg-rose-50 p-4 rounded-xl text-sm text-gray-700">
