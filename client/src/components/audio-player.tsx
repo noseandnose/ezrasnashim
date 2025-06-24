@@ -22,15 +22,18 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
   const getDirectAudioUrl = (url: string) => {
     if (!url) return '';
     
+    // Clean the URL - remove any trailing whitespace/newlines
+    const cleanUrl = url.trim();
+    
     // Extract file ID from Google Drive URL
-    const fileIdMatch = url.match(/\/d\/([a-zA-Z0-9-_]+)/) || url.match(/id=([a-zA-Z0-9-_]+)/);
+    const fileIdMatch = cleanUrl.match(/\/d\/([a-zA-Z0-9-_]+)/) || cleanUrl.match(/id=([a-zA-Z0-9-_]+)/);
     if (fileIdMatch) {
       const fileId = fileIdMatch[1];
       // Use the usercontent.google.com domain which is better for streaming
-      return `https://drive.usercontent.google.com/download?id=${fileId}&export=download`;
+      return `https://drive.usercontent.google.com/download?id=${fileId}&export=download&confirm=t`;
     }
     
-    return url; // Return original URL if no conversion needed
+    return cleanUrl; // Return original URL if no conversion needed
   };
 
   const togglePlay = async () => {
@@ -146,10 +149,16 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
 
   return (
     <div className="gradient-blush-peach rounded-2xl p-4 text-white mb-4 audio-controls">
-      <audio ref={audioRef} src={directAudioUrl} preload="none" />
+      <audio 
+        ref={audioRef} 
+        src={directAudioUrl} 
+        preload="none"
+        crossOrigin="anonymous"
+        onError={() => console.error('Audio failed to load:', directAudioUrl)}
+      />
       {audioError && (
         <div className="text-xs text-white/80 mb-2 text-center">
-          ⚠️ Audio temporarily unavailable - please refresh the page
+          Audio temporarily unavailable - please refresh the page
         </div>
       )}
       <div className="flex items-center justify-between mb-4">
