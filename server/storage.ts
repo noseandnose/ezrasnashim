@@ -102,14 +102,12 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   constructor() {
-    this.initializeData();
+    // Skip initialization for better performance
   }
 
   private async initializeDefaults() {
-    try {
-      // Check if Mincha prayers already exist
-      const existingPrayers = await db.select().from(minchaPrayers).limit(1);
-      if (existingPrayers.length > 0) return;
+    // Skip initialization to improve startup performance
+    return;
 
       // Insert default Mincha prayers only
       await db.insert(minchaPrayers).values([

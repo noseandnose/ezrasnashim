@@ -713,9 +713,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('Content-Type', response.headers.get('content-type') || 'audio/mpeg');
       res.setHeader('Accept-Ranges', 'bytes');
       res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
       
-      // Stream the audio data
-      response.body.pipe(res);
+      // Get the audio buffer and stream it
+      const audioBuffer = await response.arrayBuffer();
+      res.send(Buffer.from(audioBuffer));
     } catch (error) {
       console.error('Audio proxy error:', error);
       res.status(500).json({ error: "Failed to fetch audio" });
