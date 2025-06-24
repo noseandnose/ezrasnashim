@@ -277,21 +277,29 @@ export const insertNishmasTextSchema = createInsertSchema(nishmasText).omit({
 export const insertDailyHalachaSchema = createInsertSchema(dailyHalacha).omit({
   id: true,
   createdAt: true,
+}).extend({
+  hebrewDate: z.string().optional(),
 });
 
 export const insertDailyMussarSchema = createInsertSchema(dailyMussar).omit({
   id: true,
   createdAt: true,
+}).extend({
+  hebrewDate: z.string().optional(),
 });
 
 export const insertDailyChizukSchema = createInsertSchema(dailyChizuk).omit({
   id: true,
   createdAt: true,
+}).extend({
+  hebrewDate: z.string().optional(),
 });
 
 export const insertLoshonHorahSchema = createInsertSchema(loshonHorah).omit({
   id: true,
   createdAt: true,
+}).extend({
+  hebrewDate: z.string().optional(),
 });
 
 // Weekly Torah content schemas

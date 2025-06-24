@@ -18,41 +18,63 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
   const progressIntervalRef = useRef<NodeJS.Timeout>();
 
   const togglePlay = () => {
-    if (isPlaying) {
-      // Pause
-      setIsPlaying(false);
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
       }
-    } else {
-      // Play (simulate since we don't have actual audio files)
-      setIsPlaying(true);
-      simulateAudioProgress();
     }
   };
 
-  const simulateAudioProgress = () => {
-    let currentProgress = progress;
-    const speed = parseFloat(playbackSpeed);
-    progressIntervalRef.current = setInterval(() => {
-      currentProgress += 0.5 * speed;
-      if (currentProgress <= 100) {
-        setProgress(currentProgress);
-        // Update current time based on progress
-        const totalSeconds = parseDuration(duration);
-        const currentSeconds = Math.floor((currentProgress / 100) * totalSeconds);
-        setCurrentTime(formatTime(currentSeconds));
-      } else {
-        // Audio finished
-        setIsPlaying(false);
-        setProgress(0);
-        setCurrentTime("0:00");
-        if (progressIntervalRef.current) {
-          clearInterval(progressIntervalRef.current);
-        }
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setProgress(0);
+      setCurrentTime("0:00");
+    };
+
+    const handleTimeUpdate = () => {
+      if (audio.duration) {
+        const progressPercent = (audio.currentTime / audio.duration) * 100;
+        setProgress(progressPercent);
+        setCurrentTime(formatTime(Math.floor(audio.currentTime)));
       }
-    }, 100);
-  };
+    };
+
+    const handleLoadedMetadata = () => {
+      if (audio.duration) {
+        // Update duration if it differs from provided duration
+        const actualDuration = formatTime(Math.floor(audio.duration));
+        // Could update duration state here if needed
+      }
+    };
+
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+
+    return () => {
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+    };
+  }, [audioUrl]);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.playbackRate = parseFloat(playbackSpeed);
+    }
+  }, [playbackSpeed]);
 
   const parseDuration = (duration: string): number => {
     const parts = duration.split(':');
@@ -75,6 +97,7 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
 
   return (
     <div className="gradient-blush-peach rounded-2xl p-4 text-white mb-4 audio-controls">
+      <audio ref={audioRef} src={audioUrl} preload="metadata" />
       <div className="flex items-center justify-between mb-4">
         <div className="w-16"></div> {/* Left spacer */}
         
