@@ -108,36 +108,6 @@ export class DatabaseStorage implements IStorage {
   private async initializeDefaults() {
     // Skip initialization to improve startup performance
     return;
-
-      // Insert default Mincha prayers only
-      await db.insert(minchaPrayers).values([
-        {
-          prayerType: "ashrei",
-          hebrewText: "אַשְׁרֵי יוֹשְׁבֵי בֵיתֶךָ עוֹד יְהַלְלוּךָ סֶּלָה",
-          englishTranslation: "Happy are those who dwell in Your house; they will praise You forever. Selah.",
-          transliteration: "Ashrei yoshvei veitecha, od yehallelucha selah.",
-          orderIndex: 1
-        },
-        {
-          prayerType: "ashrei",
-          hebrewText: "אַשְׁרֵי הָעָם שֶׁכָּכָה לּוֹ אַשְׁרֵי הָעָם שֶׁה' אֱלֹהָיו",
-          englishTranslation: "Happy is the people for whom it is so; happy is the people whose God is the Lord.",
-          transliteration: "Ashrei ha'am she'kacha lo, ashrei ha'am she'Adonai Elohav.",
-          orderIndex: 2
-        },
-        {
-          prayerType: "blessing",
-          hebrewText: "בָּרוּךְ אַתָּה ה' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם אֲשֶׁר קִדְּשָׁנוּ בְּמִצְוֹתָיו וְצִוָּנוּ עַל הַתְּפִלָּה",
-          englishTranslation: "Blessed are You, Lord our God, King of the universe, who has sanctified us with His commandments and commanded us concerning prayer.",
-          transliteration: "Baruch atah Adonai, Eloheinu melech ha'olam, asher kidshanu bemitzvotav vetzivanu al hatefilah.",
-          orderIndex: 3
-        }
-      ]);
-
-      console.log('Initialized default Mincha prayers');
-    } catch (error) {
-      console.error('Error initializing defaults:', error);
-    }
   }
 
   private initializeData() {

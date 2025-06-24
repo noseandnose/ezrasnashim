@@ -119,6 +119,10 @@ Changelog:
 - June 24, 2025. Made hebrew_date optional in all Torah content tables
 - June 24, 2025. Added clickable progress bar for audio seeking
 - June 24, 2025. Fixed heart explosion animation timing and Torah content loading
+- June 24, 2025. Performance optimizations: added query caching, reduced refetch intervals
+- June 24, 2025. Removed placeholder data from Torah modals
+- June 24, 2025. Added audio proxy endpoint for Google Drive streaming
+- June 24, 2025. Optimized database initialization for faster startup
 ```
 
 ## User Preferences
