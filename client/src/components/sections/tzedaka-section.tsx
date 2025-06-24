@@ -13,10 +13,15 @@ interface TzedakaSectionProps {
 }
 
 export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps) {
-  const { openModal } = useModalStore();
+  const { openModal, activeModal } = useModalStore();
   const { tzedakaCompleted, completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const [, setLocation] = useLocation();
   const [showExplosion, setShowExplosion] = useState(false);
+
+  // Reset explosion state when modal changes
+  useEffect(() => {
+    setShowExplosion(false);
+  }, [activeModal]);
 
   const handleTzedakaComplete = () => {
     if (tzedakaCompleted) return; // Prevent double execution

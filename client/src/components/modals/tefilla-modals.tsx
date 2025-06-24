@@ -26,6 +26,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const [showExplosion, setShowExplosion] = useState(false);
   const queryClient = useQueryClient();
 
+  // Reset explosion state when modal changes
+  useEffect(() => {
+    setShowExplosion(false);
+  }, [activeModal]);
+
   const handlePrayerSelect = (prayerId: number) => {
     setSelectedPrayerId(prayerId);
     closeModal();
@@ -38,6 +43,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     
     // Wait for animation to complete before proceeding
     setTimeout(() => {
+      setShowExplosion(false); // Reset explosion state
       completeTask('tefilla');
       closeModal();
       

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AudioPlayer from "@/components/audio-player";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 
@@ -17,11 +17,17 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   const [, setLocation] = useLocation();
   const [showExplosion, setShowExplosion] = useState(false);
 
+  // Reset explosion state when modal changes
+  useEffect(() => {
+    setShowExplosion(false);
+  }, [activeModal]);
+
   const handleTorahComplete = () => {
     setShowExplosion(true);
     
     // Wait for animation to complete before proceeding
     setTimeout(() => {
+      setShowExplosion(false); // Reset explosion state
       completeTask('torah');
       closeModal();
       

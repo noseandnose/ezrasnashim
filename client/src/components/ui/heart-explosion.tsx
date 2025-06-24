@@ -20,6 +20,9 @@ export function HeartExplosion({ trigger, onComplete }: HeartExplosionProps) {
       }, 500);
 
       return () => clearTimeout(timer);
+    } else {
+      // Reset explosion state when trigger becomes false
+      setShowExplosion(false);
     }
   }, [trigger, onComplete]);
 
