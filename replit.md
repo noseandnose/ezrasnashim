@@ -114,6 +114,11 @@ Ezras Nashim is a comprehensive mobile-first web application designed for Jewish
 ```
 Changelog:
 - June 24, 2025. Initial setup
+- June 24, 2025. Fixed audio player to use real audio files instead of simulation
+- June 24, 2025. Resolved database schema mismatches for Torah content APIs
+- June 24, 2025. Made hebrew_date optional in all Torah content tables
+- June 24, 2025. Added clickable progress bar for audio seeking
+- June 24, 2025. Fixed heart explosion animation timing and Torah content loading
 ```
 
 ## User Preferences

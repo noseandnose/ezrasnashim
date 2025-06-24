@@ -87,6 +87,17 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (audioRef.current) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const width = rect.width;
+      const clickPercent = clickX / width;
+      const newTime = clickPercent * audioRef.current.duration;
+      audioRef.current.currentTime = newTime;
+    }
+  };
+
   useEffect(() => {
     return () => {
       if (progressIntervalRef.current) {
