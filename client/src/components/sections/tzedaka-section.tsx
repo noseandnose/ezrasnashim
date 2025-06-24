@@ -2,7 +2,7 @@ import { Heart, BookOpen, Shield, Plus, HandHeart, Gift, Star, Sparkles, Target,
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import type { Campaign } from "@shared/schema";
@@ -30,6 +30,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
     
     // Wait for animation to complete before proceeding
     setTimeout(() => {
+      setShowExplosion(false); // Reset explosion state
       completeTask('tzedaka');
       
       // Navigate back to home section to show progress
