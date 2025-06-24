@@ -18,22 +18,42 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
   const audioRef = useRef<HTMLAudioElement>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout>();
 
-  // Convert Google Drive share URL to proxied streaming URL
+  // Convert various hosting URLs to proxied streaming URLs
   const getDirectAudioUrl = (url: string) => {
     if (!url) return '';
     
     // Clean the URL - remove any trailing whitespace/newlines
     const cleanUrl = url.trim();
     
-    // Extract file ID from Google Drive URL
+    // GitHub raw files
+    if (cleanUrl.includes('raw.githubusercontent.com')) {
+      const pathMatch = cleanUrl.match(/raw\.githubusercontent\.com\/(.+)/);
+      if (pathMatch) {
+        return `/api/media-proxy/github/${pathMatch[1]}`;
+      }
+    }
+    
+    // Cloudinary files
+    if (cleanUrl.includes('res.cloudinary.com')) {
+      const pathMatch = cleanUrl.match(/res\.cloudinary\.com\/(.+)/);
+      if (pathMatch) {
+        return `/api/media-proxy/cloudinary/${pathMatch[1]}`;
+      }
+    }
+    
+    // Google Drive files
     const fileIdMatch = cleanUrl.match(/\/d\/([a-zA-Z0-9-_]+)/) || cleanUrl.match(/id=([a-zA-Z0-9-_]+)/);
     if (fileIdMatch) {
       const fileId = fileIdMatch[1];
-      // Use our server proxy to handle CORS and streaming
-      return `/api/audio-proxy/${fileId}`;
+      return `/api/media-proxy/gdrive/${fileId}`;
     }
     
-    return cleanUrl; // Return original URL if no conversion needed
+    // Direct URLs (already hosted properly)
+    if (cleanUrl.startsWith('http')) {
+      return cleanUrl;
+    }
+    
+    return cleanUrl;
   };
 
   const togglePlay = async () => {
