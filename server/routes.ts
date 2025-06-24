@@ -388,6 +388,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/table/recipe", async (req, res) => {
+    try {
+      // Get current week
+      const date = new Date();
+      const year = date.getFullYear();
+      const week = Math.ceil(((date.getTime() - new Date(year, 0, 1).getTime()) / 86400000 + new Date(year, 0, 1).getDay() + 1) / 7);
+      const weekKey = `${year}-W${week}`;
+      
+      const recipe = await storage.getShabbatRecipeByWeek(weekKey);
+      res.json(recipe || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch Shabbat recipe" });
+    }
+  });
+
   app.post("/api/table/recipe", async (req, res) => {
     try {
       const validatedData = insertShabbatRecipeSchema.parse(req.body);
@@ -402,6 +417,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { week } = req.params;
       const vort = await storage.getParshaVortByWeek(week);
+      res.json(vort || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch Parsha vort" });
+    }
+  });
+
+  app.get("/api/table/vort", async (req, res) => {
+    try {
+      // Get current week
+      const date = new Date();
+      const year = date.getFullYear();
+      const week = Math.ceil(((date.getTime() - new Date(year, 0, 1).getTime()) / 86400000 + new Date(year, 0, 1).getDay() + 1) / 7);
+      const weekKey = `${year}-W${week}`;
+      
+      const vort = await storage.getParshaVortByWeek(weekKey);
       res.json(vort || null);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch Parsha vort" });

@@ -299,7 +299,7 @@ export class DatabaseStorage implements IStorage {
   async getLoshonHorahByDate(date: string): Promise<LoshonHorah | undefined> {
     try {
       const result = await pool.query(
-        `SELECT id, date, hebrew_date as "hebrewDate", title, content, halachic_source as "halachicSource", practical_tip as "practicalTip", created_at as "createdAt" FROM loshon_horah WHERE date = $1 LIMIT 1`,
+        `SELECT id, date, title, content, halachic_source as "halachicSource", practical_tip as "practicalTip", created_at as "createdAt" FROM loshon_horah WHERE date = $1 LIMIT 1`,
         [date]
       );
       return result.rows[0] || undefined;

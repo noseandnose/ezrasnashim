@@ -126,6 +126,9 @@ Changelog:
 - June 24, 2025. Fixed Loshon Horah database connectivity with proper schema mapping
 - June 24, 2025. Enhanced audio streaming with improved Google Drive proxy
 - June 24, 2025. Added accessibility descriptions to all Torah modals
+- June 24, 2025. Updated Shabbat table section to display real database content titles
+- June 24, 2025. Removed all hebrew_date fields from database schema
+- June 24, 2025. Added universal media proxy supporting multiple hosting services
 ```
 
 ## User Preferences
