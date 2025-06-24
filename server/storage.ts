@@ -244,7 +244,7 @@ export class DatabaseStorage implements IStorage {
   async getDailyHalachaByDate(date: string): Promise<DailyHalacha | undefined> {
     try {
       const result = await pool.query(
-        `SELECT id, date, hebrew_date as "hebrewDate", title, content, source, created_at as "createdAt" FROM daily_halacha WHERE date = $1 LIMIT 1`,
+        `SELECT id, date, title, content, source, audio_url as "audioUrl", duration, speaker, created_at as "createdAt" FROM daily_halacha WHERE date = $1 LIMIT 1`,
         [date]
       );
       return result.rows[0] || undefined;
@@ -262,7 +262,7 @@ export class DatabaseStorage implements IStorage {
   async getDailyMussarByDate(date: string): Promise<DailyMussar | undefined> {
     try {
       const result = await pool.query(
-        `SELECT id, date, hebrew_date as "hebrewDate", title, content, author, source, created_at as "createdAt" FROM daily_mussar WHERE date = $1 LIMIT 1`,
+        `SELECT id, date, title, content, source, audio_url as "audioUrl", duration, speaker, created_at as "createdAt" FROM daily_mussar WHERE date = $1 LIMIT 1`,
         [date]
       );
       return result.rows[0] || undefined;
@@ -278,10 +278,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDailyChizukByDate(date: string): Promise<DailyChizuk | undefined> {
-    // Use raw SQL since Drizzle schema has column mismatch
     try {
       const result = await pool.query(
-        `SELECT id, date, hebrew_date as "hebrewDate", title, content, audio_url as "audioUrl", duration, speaker, created_at as "createdAt" FROM daily_chizuk WHERE date = $1 LIMIT 1`,
+        `SELECT id, date, title, content, source, audio_url as "audioUrl", duration, speaker, created_at as "createdAt" FROM daily_chizuk WHERE date = $1 LIMIT 1`,
         [date]
       );
       return result.rows[0] || undefined;
