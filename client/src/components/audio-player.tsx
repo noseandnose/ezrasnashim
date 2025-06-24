@@ -18,7 +18,7 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
   const audioRef = useRef<HTMLAudioElement>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout>();
 
-  // Convert Google Drive share URL to streaming URL
+  // Convert Google Drive share URL to proxied streaming URL
   const getDirectAudioUrl = (url: string) => {
     if (!url) return '';
     
@@ -29,8 +29,8 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
     const fileIdMatch = cleanUrl.match(/\/d\/([a-zA-Z0-9-_]+)/) || cleanUrl.match(/id=([a-zA-Z0-9-_]+)/);
     if (fileIdMatch) {
       const fileId = fileIdMatch[1];
-      // Use the usercontent.google.com domain which is better for streaming
-      return `https://drive.usercontent.google.com/download?id=${fileId}&export=download&confirm=t`;
+      // Use our server proxy to handle CORS and streaming
+      return `/api/audio-proxy/${fileId}`;
     }
     
     return cleanUrl; // Return original URL if no conversion needed
@@ -152,8 +152,7 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
       <audio 
         ref={audioRef} 
         src={directAudioUrl} 
-        preload="none"
-        crossOrigin="anonymous"
+        preload="metadata"
         onError={() => console.error('Audio failed to load:', directAudioUrl)}
       />
       {audioError && (
