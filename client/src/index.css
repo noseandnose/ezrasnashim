@@ -377,6 +377,14 @@ html, body, #root {
   font-family: 'Poppins', sans-serif;
 }
 
+.prayer-content .prayer-header {
+  display: block;
+  margin: 1rem 0 0.5rem 0;
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #E8B4CB;
+}
+
 .modal-content::-webkit-scrollbar-thumb:hover {
   background: hsl(328, 85%, 80%);
 }
