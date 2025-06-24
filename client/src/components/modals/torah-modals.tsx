@@ -43,26 +43,31 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
   const { data: halachaContent } = useQuery<any>({
     queryKey: ['/api/torah/halacha', today],
+    queryFn: () => fetch(`/api/torah/halacha/${today}`).then(res => res.json()),
     enabled: activeModal === 'halacha'
   });
 
   const { data: mussarContent } = useQuery<any>({
     queryKey: ['/api/torah/mussar', today],
+    queryFn: () => fetch(`/api/torah/mussar/${today}`).then(res => res.json()),
     enabled: activeModal === 'mussar'
   });
 
   const { data: chizukContent } = useQuery<any>({
     queryKey: ['/api/torah/chizuk', today],
+    queryFn: () => fetch(`/api/torah/chizuk/${today}`).then(res => res.json()),
     enabled: activeModal === 'chizuk'
   });
 
   const { data: loshonContent } = useQuery<any>({
     queryKey: ['/api/torah/loshon', today],
+    queryFn: () => fetch(`/api/torah/loshon/${today}`).then(res => res.json()),
     enabled: activeModal === 'loshon'
   });
 
   const { data: pirkeiAvotContent } = useQuery<any>({
     queryKey: ['/api/torah/pirkei-avot', today],
+    queryFn: () => fetch(`/api/torah/pirkei-avot/${today}`).then(res => res.json()),
     enabled: activeModal === 'pirkei-avot'
   });
 
@@ -134,7 +139,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           
           <AudioPlayer 
             title={chizukContent?.title || "Daily Chizuk"}
-            duration="5:15"
+            duration={chizukContent?.duration || "5:15"}
             audioUrl={chizukContent?.audioUrl || ""}
           />
           
