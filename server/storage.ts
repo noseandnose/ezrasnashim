@@ -274,8 +274,16 @@ export class DatabaseStorage implements IStorage {
 
   // Daily Torah content methods
   async getDailyHalachaByDate(date: string): Promise<DailyHalacha | undefined> {
-    const [halacha] = await db.select().from(dailyHalacha).where(eq(dailyHalacha.date, date));
-    return halacha || undefined;
+    try {
+      const result = await pool.query(
+        `SELECT id, date, hebrew_date as "hebrewDate", title, content, audio_url as "audioUrl", duration, speaker, created_at as "createdAt" FROM daily_halacha WHERE date = $1 LIMIT 1`,
+        [date]
+      );
+      return result.rows[0] || undefined;
+    } catch (error) {
+      console.error('Failed to fetch daily halacha:', error);
+      return undefined;
+    }
   }
 
   async createDailyHalacha(insertHalacha: InsertDailyHalacha): Promise<DailyHalacha> {
@@ -284,8 +292,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDailyMussarByDate(date: string): Promise<DailyMussar | undefined> {
-    const [mussar] = await db.select().from(dailyMussar).where(eq(dailyMussar.date, date));
-    return mussar || undefined;
+    try {
+      const result = await pool.query(
+        `SELECT id, date, hebrew_date as "hebrewDate", title, content, audio_url as "audioUrl", duration, speaker, created_at as "createdAt" FROM daily_mussar WHERE date = $1 LIMIT 1`,
+        [date]
+      );
+      return result.rows[0] || undefined;
+    } catch (error) {
+      console.error('Failed to fetch daily mussar:', error);
+      return undefined;
+    }
   }
 
   async createDailyMussar(insertMussar: InsertDailyMussar): Promise<DailyMussar> {
@@ -294,25 +310,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDailyChizukByDate(date: string): Promise<DailyChizuk | undefined> {
+    // Use raw SQL since Drizzle schema has column mismatch
     try {
-      console.log('Storage: Fetching chizuk for date:', date);
-      const [chizuk] = await db.select().from(dailyChizuk).where(eq(dailyChizuk.date, date));
-      console.log('Storage: Raw chizuk result:', chizuk);
-      return chizuk || undefined;
+      const result = await pool.query(
+        `SELECT id, date, hebrew_date as "hebrewDate", title, content, audio_url as "audioUrl", duration, speaker, created_at as "createdAt" FROM daily_chizuk WHERE date = $1 LIMIT 1`,
+        [date]
+      );
+      return result.rows[0] || undefined;
     } catch (error) {
-      console.error('Storage: Drizzle error, trying raw SQL:', error);
-      // Fallback to raw SQL query
-      try {
-        const result = await pool.query(
-          `SELECT * FROM daily_chizuk WHERE date = $1 LIMIT 1`,
-          [date]
-        );
-        console.log('Storage: Raw SQL result:', result.rows[0]);
-        return result.rows[0] || undefined;
-      } catch (sqlError) {
-        console.error('Storage: Raw SQL also failed:', sqlError);
-        return undefined;
-      }
+      console.error('Failed to fetch daily chizuk:', error);
+      return undefined;
     }
   }
 
@@ -322,8 +329,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getLoshonHorahByDate(date: string): Promise<LoshonHorah | undefined> {
-    const [loshon] = await db.select().from(loshonHorah).where(eq(loshonHorah.date, date));
-    return loshon || undefined;
+    try {
+      const result = await pool.query(
+        `SELECT id, date, hebrew_date as "hebrewDate", title, content, audio_url as "audioUrl", duration, speaker, created_at as "createdAt" FROM loshon_horah WHERE date = $1 LIMIT 1`,
+        [date]
+      );
+      return result.rows[0] || undefined;
+    } catch (error) {
+      console.error('Failed to fetch loshon horah:', error);
+      return undefined;
+    }
   }
 
   async createLoshonHorah(insertLoshon: InsertLoshonHorah): Promise<LoshonHorah> {

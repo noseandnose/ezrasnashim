@@ -330,13 +330,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/torah/chizuk/:date", async (req, res) => {
     try {
       const { date } = req.params;
-      console.log('Fetching chizuk for date:', date);
       const chizuk = await storage.getDailyChizukByDate(date);
-      console.log('Chizuk result:', chizuk);
       res.json(chizuk || null);
     } catch (error) {
-      console.error('Chizuk API error:', error);
-      res.status(500).json({ message: "Failed to fetch daily chizuk", error: error.message });
+      res.status(500).json({ message: "Failed to fetch daily chizuk" });
     }
   });
 
