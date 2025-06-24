@@ -14,15 +14,36 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState("0:00");
   const [playbackSpeed, setPlaybackSpeed] = useState("1");
+  const [audioError, setAudioError] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout>();
 
-  const togglePlay = () => {
+  // Convert Google Drive share URL to streaming URL
+  const getDirectAudioUrl = (url: string) => {
+    if (!url) return '';
+    
+    // Extract file ID from Google Drive URL
+    const fileIdMatch = url.match(/\/d\/([a-zA-Z0-9-_]+)/) || url.match(/id=([a-zA-Z0-9-_]+)/);
+    if (fileIdMatch) {
+      const fileId = fileIdMatch[1];
+      // Use the usercontent.google.com domain which is better for streaming
+      return `https://drive.usercontent.google.com/download?id=${fileId}&export=download`;
+    }
+    
+    return url; // Return original URL if no conversion needed
+  };
+
+  const togglePlay = async () => {
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        audioRef.current.play();
+        try {
+          await audioRef.current.play();
+        } catch (error) {
+          console.error('Failed to play audio:', error);
+          setAudioError(true);
+        }
       }
     }
   };
@@ -48,6 +69,7 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
     };
 
     const handleLoadedMetadata = () => {
+      setAudioError(false);
       if (audio.duration) {
         // Update duration if it differs from provided duration
         const actualDuration = formatTime(Math.floor(audio.duration));
@@ -55,11 +77,23 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
       }
     };
 
+    const handleError = () => {
+      console.error('Audio failed to load:', audioUrl);
+      setAudioError(true);
+      setIsPlaying(false);
+    };
+
+    const handleCanPlay = () => {
+      setAudioError(false);
+    };
+
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('pause', handlePause);
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('error', handleError);
+    audio.addEventListener('canplay', handleCanPlay);
 
     return () => {
       audio.removeEventListener('play', handlePlay);
@@ -67,6 +101,8 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('error', handleError);
+      audio.removeEventListener('canplay', handleCanPlay);
     };
   }, [audioUrl]);
 
@@ -106,15 +142,23 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
     };
   }, []);
 
+  const directAudioUrl = getDirectAudioUrl(audioUrl);
+
   return (
     <div className="gradient-blush-peach rounded-2xl p-4 text-white mb-4 audio-controls">
-      <audio ref={audioRef} src={audioUrl} preload="metadata" />
+      <audio ref={audioRef} src={directAudioUrl} preload="none" />
+      {audioError && (
+        <div className="text-xs text-white/80 mb-2 text-center">
+          ⚠️ Audio temporarily unavailable - please refresh the page
+        </div>
+      )}
       <div className="flex items-center justify-between mb-4">
         <div className="w-16"></div> {/* Left spacer */}
         
         <Button
           onClick={togglePlay}
-          className="bg-white bg-opacity-20 rounded-full p-4 hover:bg-opacity-30 transition-all border-0 audio-play-button"
+          disabled={audioError}
+          className="bg-white bg-opacity-20 rounded-full p-4 hover:bg-opacity-30 transition-all border-0 audio-play-button disabled:opacity-50"
           style={{ WebkitTapHighlightColor: 'transparent' }}
         >
           {isPlaying ? (
