@@ -280,7 +280,7 @@ export class DatabaseStorage implements IStorage {
   async getDailyChizukByDate(date: string): Promise<DailyChizuk | undefined> {
     try {
       const result = await pool.query(
-        `SELECT id, date, title, content, source, audio_url as "audioUrl", duration, speaker, created_at as "createdAt" FROM daily_chizuk WHERE date = $1 LIMIT 1`,
+        `SELECT id, date, title, content, audio_url as "audioUrl", duration, speaker, created_at as "createdAt" FROM daily_chizuk WHERE date = $1 LIMIT 1`,
         [date]
       );
       return result.rows[0] || undefined;
