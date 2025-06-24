@@ -85,13 +85,14 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     <>
       {/* Halacha Modal */}
       <Dialog open={activeModal === 'halacha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="halacha-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold mb-2">Daily Halacha</DialogTitle>
             {halachaContent && (
               <DialogDescription className="text-sm text-gray-600 font-sans">{halachaContent.title}</DialogDescription>
             )}
           </DialogHeader>
+          <div id="halacha-description" className="sr-only">Daily Jewish law and practice content</div>
           
           {halachaContent && (
             <div className="space-y-3 text-sm text-gray-700 font-sans">
@@ -118,13 +119,14 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
       {/* Mussar Modal */}
       <Dialog open={activeModal === 'mussar'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6 font-sans">
+        <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6 font-sans" aria-describedby="mussar-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold mb-2">Daily Mussar</DialogTitle>
             {mussarContent && (
               <DialogDescription className="text-sm text-gray-600 font-sans">{mussarContent.title}</DialogDescription>
             )}
           </DialogHeader>
+          <div id="mussar-description" className="sr-only">Daily character development and spiritual growth content</div>
           
           {mussarContent && (
             <div className="space-y-3 text-sm text-gray-700 font-sans">
@@ -184,18 +186,31 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
       {/* Loshon Horah Modal */}
       <Dialog open={activeModal === 'loshon'} onOpenChange={() => closeModal()}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="loshon-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-semibold mb-2">Loshon Horah</DialogTitle>
-            <p className="text-sm text-gray-600">Guarding Our Speech</p>
+            {loshonContent && (
+              <DialogDescription className="text-sm text-gray-600 font-sans">{loshonContent.title}</DialogDescription>
+            )}
           </DialogHeader>
+          <div id="loshon-description" className="sr-only">Daily content about preventing negative speech and fostering positive communication</div>
           
-          <div className="space-y-3 text-sm text-gray-700">
-            <div>
-              <p><strong>Today's Lesson:</strong> Before speaking about others, ask yourself: Is it true? Is it necessary? Is it kind?</p>
-              <p className="mt-2">Positive speech has the power to build relationships and create harmony in our communities.</p>
+          {loshonContent && (
+            <div className="space-y-3 text-sm text-gray-700 font-sans">
+              <div>
+                <p><strong>Today's Lesson:</strong> {loshonContent.content}</p>
+                {loshonContent.halachicSource && (
+                  <p className="mt-2 text-xs text-gray-500">Source: {loshonContent.halachicSource}</p>
+                )}
+                {loshonContent.practicalTip && (
+                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-xs font-medium text-gray-700">Practical Tip:</p>
+                    <p className="text-xs text-gray-600 mt-1">{loshonContent.practicalTip}</p>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
           
           <div className="heart-explosion-container">
             <Button 
@@ -211,11 +226,12 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
       {/* Pirkei Avot Modal */}
       <Dialog open={activeModal === 'pirkei-avot'} onOpenChange={() => closeModal()}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="pirkei-avot-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-semibold mb-2">Pirkei Avot</DialogTitle>
             <DialogDescription className="text-sm text-gray-600">Ethics of the Fathers</DialogDescription>
           </DialogHeader>
+          <div id="pirkei-avot-description" className="sr-only">Ethics of the Fathers - timeless wisdom from Jewish sages</div>
           
           <div className="space-y-3 text-sm text-gray-700">
             <div>
