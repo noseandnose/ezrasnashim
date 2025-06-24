@@ -180,7 +180,6 @@ export const discountPromotions = pgTable("discount_promotions", {
 export const dailyHalacha = pgTable("daily_halacha", {
   id: serial("id").primaryKey(),
   date: date("date").notNull().unique(), // The date for this content
-  hebrewDate: text("hebrew_date"),
   title: text("title").notNull(),
   content: text("content").notNull(),
   source: text("source"), // Rabbi or book source
@@ -193,7 +192,6 @@ export const dailyHalacha = pgTable("daily_halacha", {
 export const dailyMussar = pgTable("daily_mussar", {
   id: serial("id").primaryKey(),
   date: date("date").notNull().unique(),
-  hebrewDate: text("hebrew_date"),
   title: text("title").notNull(),
   content: text("content").notNull(),
   source: text("source"),
@@ -206,7 +204,6 @@ export const dailyMussar = pgTable("daily_mussar", {
 export const dailyChizuk = pgTable("daily_chizuk", {
   id: serial("id").primaryKey(),
   date: date("date").notNull().unique(),
-  hebrewDate: text("hebrew_date"),
   title: text("title").notNull(),
   content: text("content").notNull(),
   source: text("source"),
@@ -219,7 +216,6 @@ export const dailyChizuk = pgTable("daily_chizuk", {
 export const loshonHorah = pgTable("loshon_horah", {
   id: serial("id").primaryKey(),
   date: date("date").notNull().unique(),
-  hebrewDate: text("hebrew_date"),
   title: text("title").notNull(),
   content: text("content").notNull(),
   halachicSource: text("halachic_source"),
