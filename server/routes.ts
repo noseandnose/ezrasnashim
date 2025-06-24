@@ -702,22 +702,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/audio-proxy/:fileId", async (req, res) => {
     try {
       const { fileId } = req.params;
-      const googleDriveUrl = `https://drive.usercontent.google.com/u/0/uc?id=${fileId}&export=download`;
+      // Use the direct content URL that bypasses the redirect
+      const googleDriveUrl = `https://drive.usercontent.google.com/download?id=${fileId}&export=download`;
       
-      const response = await fetch(googleDriveUrl);
+      const response = await fetch(googleDriveUrl, {
+        redirect: 'follow',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; AudioPlayer/1.0)'
+        }
+      });
+      
       if (!response.ok) {
         return res.status(404).json({ error: "Audio file not found" });
       }
       
       // Set appropriate headers for audio streaming
-      res.setHeader('Content-Type', response.headers.get('content-type') || 'audio/mpeg');
+      const contentType = response.headers.get('content-type') || 'audio/mpeg';
+      res.setHeader('Content-Type', contentType);
       res.setHeader('Accept-Ranges', 'bytes');
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Cache-Control', 'public, max-age=3600');
       
-      // Get the audio buffer and stream it
-      const audioBuffer = await response.arrayBuffer();
-      res.send(Buffer.from(audioBuffer));
+      // Stream the response directly
+      if (response.body) {
+        const reader = response.body.getReader();
+        const pump = async () => {
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              if (!res.write(value)) {
+                await new Promise(resolve => res.once('drain', resolve));
+              }
+            }
+            res.end();
+          } catch (error) {
+            console.error('Streaming error:', error);
+            res.end();
+          }
+        };
+        pump();
+      } else {
+        res.status(500).json({ error: "No response body" });
+      }
     } catch (error) {
       console.error('Audio proxy error:', error);
       res.status(500).json({ error: "Failed to fetch audio" });

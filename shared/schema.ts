@@ -222,10 +222,8 @@ export const loshonHorah = pgTable("loshon_horah", {
   hebrewDate: text("hebrew_date"),
   title: text("title").notNull(),
   content: text("content").notNull(),
-  source: text("source"),
-  audioUrl: text("audio_url"),
-  duration: text("duration"),
-  speaker: text("speaker"),
+  halachicSource: text("halachic_source"),
+  practicalTip: text("practical_tip"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
