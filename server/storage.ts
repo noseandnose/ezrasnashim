@@ -294,8 +294,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDailyChizukByDate(date: string): Promise<DailyChizuk | undefined> {
-    const [chizuk] = await db.select().from(dailyChizuk).where(eq(dailyChizuk.date, date));
-    return chizuk || undefined;
+    try {
+      console.log('Storage: Fetching chizuk for date:', date);
+      const [chizuk] = await db.select().from(dailyChizuk).where(eq(dailyChizuk.date, date));
+      console.log('Storage: Raw chizuk result:', chizuk);
+      return chizuk || undefined;
+    } catch (error) {
+      console.error('Storage: Drizzle error, trying raw SQL:', error);
+      // Fallback to raw SQL query
+      try {
+        const result = await pool.query(
+          `SELECT * FROM daily_chizuk WHERE date = $1 LIMIT 1`,
+          [date]
+        );
+        console.log('Storage: Raw SQL result:', result.rows[0]);
+        return result.rows[0] || undefined;
+      } catch (sqlError) {
+        console.error('Storage: Raw SQL also failed:', sqlError);
+        return undefined;
+      }
+    }
   }
 
   async createDailyChizuk(insertChizuk: InsertDailyChizuk): Promise<DailyChizuk> {
