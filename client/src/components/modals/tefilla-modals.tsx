@@ -1,5 +1,5 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from ".../ui/dialog";
-import { Button } from ".../ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
+import { Button } from "../ui/button";
 import { useModalStore, useDailyCompletionStore } from "./../lib/types";
 import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -8,7 +8,7 @@ import { useLocation } from "wouter";
 import { MinchaPrayer, NishmasText, GlobalTehillimProgress, TehillimName, WomensPrayer } from "@shared/schema";
 import { apiRequest } from "./../lib/queryClient";
 import { toast } from "./../hooks/use-toast";
-import { HeartExplosion } from ".../ui/heart-explosion";
+import { HeartExplosion } from "../ui/heart-explosion";
 
 interface TefillaModalsProps {
   onSectionChange?: (section: any) => void;
@@ -102,14 +102,12 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     enabled: activeModal === 'tehillim-text'
   });
 
-  // Fetch Tehillim text from Sefaria API
-  const { data: tehillimText, isLoading: tehillimLoading } = useQuery({
-    queryKey: ['sefaria-tehillim', progress?.currentPerek],
-    // Simplified for now
-    enabled: activeModal === 'tehillim-text' && !!progress?.currentPerek,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    retry: 2
-  });
+  // Simplified Tehillim text for now
+  const tehillimText = {
+    hebrew: progress?.currentPerek ? `תהילים פרק ${progress.currentPerek}` : "תהילים",
+    english: progress?.currentPerek ? `Psalms Chapter ${progress.currentPerek}` : "Psalms"
+  };
+  const tehillimLoading = false;
 
   // Mutation to complete a perek
   const completePerekMutation = useMutation({
@@ -123,7 +121,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       });
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
-      queryClient.invalidateQueries({ queryKey: ['sefaria-tehillim'] });
+      queryClient.invalidateQueries({ queryKey: ['tehillim-simple'] });
     },
     onError: () => {
       toast({

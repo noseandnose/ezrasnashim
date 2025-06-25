@@ -1,11 +1,11 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from ".../ui/dialog";
-import { Button } from ".../ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
+import { Button } from "../ui/button";
 import { useModalStore, useDailyCompletionStore } from "./../lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import AudioPlayer from "../audio-player";
-import { HeartExplosion } from ".../ui/heart-explosion";
+import { HeartExplosion } from "../ui/heart-explosion";
 
 interface TorahModalsProps {
   onSectionChange?: (section: any) => void;

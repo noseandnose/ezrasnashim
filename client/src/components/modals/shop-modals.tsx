@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useModalStore } from "./../lib/types";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from ".../ui/dialog";
-import { Button } from ".../ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
+import { Button } from "../ui/button";
 import { Copy, ExternalLink } from "lucide-react";
 import { useToast } from "./../hooks/use-toast";
 import type { ShopItem } from "@shared/schema";
