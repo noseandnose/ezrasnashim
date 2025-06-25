@@ -208,17 +208,55 @@ export class DatabaseStorage implements IStorage {
 
   async getSefariaTehillim(perek: number, language: string): Promise<{text: string; perek: number; language: string}> {
     try {
-      const url = `https://www.sefaria.org/api/v3/texts/Psalms.${perek}?version=${language}&return_format=text_only`;
+      // Use the correct Sefaria API endpoint
+      const url = `https://www.sefaria.org/api/texts/Psalms.${perek}`;
+      console.log(`Fetching Tehillim ${perek} in ${language} from:`, url);
+      
       const response = await fetch(url);
       
       if (!response.ok) {
         throw new Error(`Sefaria API error: ${response.status}`);
       }
       
-      const data = await response.text();
+      const data = await response.json();
+      console.log('Sefaria API response structure:', {
+        hasText: !!data.text,
+        hasHe: !!data.he,
+        textType: Array.isArray(data.text) ? 'array' : typeof data.text,
+        heType: Array.isArray(data.he) ? 'array' : typeof data.he
+      });
+      
+      // Extract text based on language preference
+      let text = '';
+      if (language === 'hebrew' && data.he) {
+        if (Array.isArray(data.he)) {
+          text = data.he.join('\n');
+        } else if (typeof data.he === 'string') {
+          text = data.he;
+        }
+      } else if (language === 'english' && data.text) {
+        if (Array.isArray(data.text)) {
+          text = data.text.join('\n');
+        } else if (typeof data.text === 'string') {
+          text = data.text;
+        }
+      }
+      
+      // Fallback to English if Hebrew not available or empty
+      if (!text && data.text) {
+        if (Array.isArray(data.text)) {
+          text = data.text.join('\n');
+        } else if (typeof data.text === 'string') {
+          text = data.text;
+        }
+      }
+      
+      if (!text) {
+        throw new Error('No text content found in API response');
+      }
       
       return {
-        text: data.trim(),
+        text: text.trim(),
         perek,
         language
       };
@@ -226,7 +264,7 @@ export class DatabaseStorage implements IStorage {
       console.error('Error fetching from Sefaria API:', error);
       // Return fallback text if API fails
       return {
-        text: `Tehillim ${perek} - Unable to load from Sefaria API. Please try again.`,
+        text: `Tehillim ${perek} - Unable to load from Sefaria API. Please try again later.`,
         perek,
         language
       };
