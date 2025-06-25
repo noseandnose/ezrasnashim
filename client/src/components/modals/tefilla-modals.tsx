@@ -364,14 +364,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                           : prayer.englishTranslation
                       }}
                     />
-                    {prayer.transliteration && language === 'english' && (
-                      <div
-                        className="text-gray-500 italic mt-2"
-                        style={{ fontSize: `${fontSize - 2}px` }}
-                      >
-                        {prayer.transliteration}
-                      </div>
-                    )}
                   </div>
                 </div>
               ))

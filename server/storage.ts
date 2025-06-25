@@ -152,7 +152,7 @@ export class DatabaseStorage implements IStorage {
     const [name] = await db.insert(tehillimNames).values({
       ...insertName,
       dateAdded: new Date(),
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      expiresAt: new Date(Date.now() + 18 * 24 * 60 * 60 * 1000), // 18 days from now
       userId: null
     }).returning();
     return name;

@@ -132,6 +132,8 @@ Changelog:
 - June 24, 2025. Formatted and stored complete Hebrew Amidah prayer in database with proper section headers and line breaks
 - June 25, 2025. Fixed console JSX errors by removing inline style elements and using CSS classes
 - June 25, 2025. Optimized Hebrew prayer formatting by removing double line spaces between headers and content
+- June 25, 2025. Removed transliteration field from tefilla prayers in database and frontend
+- June 25, 2025. Changed tehillim name automatic removal from 7 days to 18 days in backend and frontend
 ```
 
 ## User Preferences

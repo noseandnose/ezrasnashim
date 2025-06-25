@@ -76,7 +76,7 @@ export const tehillimNames = pgTable("tehillim_names", {
   reason: text("reason").notNull(),
   reasonEnglish: text("reason_english"),
   dateAdded: timestamp("date_added").defaultNow(),
-  expiresAt: timestamp("expires_at"), // 7 days from dateAdded
+  expiresAt: timestamp("expires_at"), // 18 days from dateAdded
   userId: integer("user_id"), // Future: link to user accounts
 });
 
@@ -109,7 +109,6 @@ export const minchaPrayers = pgTable("mincha_prayers", {
   prayerType: text("prayer_type").notNull(), // e.g., "main_prayer", "ashrei", "shemoneh_esrei"
   hebrewText: text("hebrew_text").notNull(),
   englishTranslation: text("english_translation").notNull(),
-  transliteration: text("transliteration"),
   orderIndex: integer("order_index").default(0),
 });
 
