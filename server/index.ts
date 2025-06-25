@@ -1,8 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes.js";
 // Vite integration removed; using console.log for logging
-var cors = require('cors')
-
+import cors from "cors";
 const app = express();
 
 app.use(cors({
