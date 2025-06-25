@@ -57,11 +57,23 @@ app.use((req, res, next) => {
     });
   });
 
-  // API-only server - frontend will be served separately by Vite on different port
+  // Setup Vite middleware for development
+  if (process.env.NODE_ENV === "development") {
+    const { createServer } = await import('vite');
+    const vite = await createServer({
+      server: { middlewareMode: true },
+      appType: 'spa',
+      root: 'client'
+    });
+    app.use(vite.ssrFixStacktrace);
+    app.use(vite.middlewares);
+  }
 
-  // API server on port 5000
-  const port = process.env.PORT ?? 5000;
+  // Unified server on port 80
+  const port = process.env.PORT ?? 80;
   server.listen(port, "0.0.0.0", () => {
-    console.log(`Backend API server listening on port ${port}`);
+    console.log(`Ezras Nashim server listening on port ${port}`);
+    console.log(`Frontend: http://localhost:${port}`);
+    console.log(`API: http://localhost:${port}/api`);
   });
 })();
