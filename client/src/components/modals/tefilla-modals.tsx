@@ -9,7 +9,6 @@ import { MinchaPrayer, NishmasText, GlobalTehillimProgress, TehillimName, Womens
 import { apiRequest } from "./../lib/queryClient";
 import { toast } from "./../hooks/use-toast";
 import { HeartExplosion } from ".../ui/heart-explosion";
-import { fetchTehillimBothLanguages } from "./../lib/sefaria-api";
 
 interface TefillaModalsProps {
   onSectionChange?: (section: any) => void;
@@ -106,7 +105,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   // Fetch Tehillim text from Sefaria API
   const { data: tehillimText, isLoading: tehillimLoading } = useQuery({
     queryKey: ['sefaria-tehillim', progress?.currentPerek],
-    queryFn: () => fetchTehillimBothLanguages(progress?.currentPerek || 1),
+    // Simplified for now
     enabled: activeModal === 'tehillim-text' && !!progress?.currentPerek,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     retry: 2
