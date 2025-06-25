@@ -1,7 +1,9 @@
-console.log("starting server...");
-console.log('Hello ECS'); setTimeout(() => {}, 60000);
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes.js";
+import { setupVite, serveStatic } from "./vite.js";
+
+console.log("starting server...");
+console.log('Hello ECS');
 
 const app = express();
 app.use(express.json());
@@ -40,17 +42,34 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
 
+  // Error handling middleware
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
-    res.status(status).json({ message });
-    throw err;
+    console.error(`Error ${status}: ${message}`);
+    if (err.stack) {
+      console.error(err.stack);
+    }
+
+    res.status(status).json({ 
+      message: "Something went wrong!",
+      ...(process.env.NODE_ENV === "development" ? { error: message, details: err.stack } : {})
+    });
   });
 
-  // Backend API server only
-  const port = process.env.PORT ?? 5000;
+  // Setup Vite or static serving
+  if (process.env.NODE_ENV === "development") {
+    await setupVite(app, server);
+  } else {
+    serveStatic(app);
+  }
+
+  // Unified server serving both frontend and API
+  const port = process.env.PORT ?? 80;
   server.listen(port, "0.0.0.0", () => {
-    console.log(`Backend API server listening on port ${port}`);
+    console.log(`Ezras Nashim server listening on port ${port}`);
+    console.log(`Frontend: http://localhost:${port}`);
+    console.log(`API: http://localhost:${port}/api`);
   });
 })();
