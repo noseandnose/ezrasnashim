@@ -144,6 +144,7 @@ Changelog:
 - June 25, 2025. Implemented location-based discount promotions: Added targetLocation field to support different discounts for Israel vs worldwide, using same geolocation system as zmanim times
 - June 25, 2025. Applied permanent styling changes: All text is now pure black (#000000) instead of soft gray, with bold headings for improved readability and visual contrast
 - June 25, 2025. Added Apple Pay integration to donation checkout: Enhanced Stripe payment system with Apple Pay support, custom Apple Pay button component, and seamless mobile payment experience
+- June 25, 2025. Updated home section design: Unified top section with greeting, times, and today info as one cohesive unit; added circular arrow button on Mincha to indicate clickability; applied black text styling with bold headings throughout
 ```
 
 ## User Preferences

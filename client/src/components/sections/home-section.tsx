@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Clock, Heart, BookOpen, HandHeart, Coins, MapPin } from "lucide-react";
+import { Calendar, Clock, Heart, BookOpen, HandHeart, Coins, MapPin, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
@@ -52,47 +52,47 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
 
   return (
     <div className="p-1 space-y-1 overflow-y-auto h-full pb-20">
-      {/* Dynamic Greeting */}
-      <div className="text-center">
-        <h1 className="font-serif text-2xl text-warm-gray mb-1 tracking-wide">{getGreeting()}</h1>
-      </div>
+      {/* Unified Top Section with Greeting, Times, and Today Info */}
+      <div className="bg-gradient-soft rounded-3xl p-4 shadow-lg">
+        {/* Greeting */}
+        <div className="text-center mb-4">
+          <h1 className="font-serif text-2xl text-black mb-1 tracking-wide font-bold">{getGreeting()}</h1>
+        </div>
 
-      {/* Today's Information & Sponsor */}
-      <div className="bg-gradient-soft rounded-3xl p-3 shadow-lg">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center space-x-3">
-            <div className="bg-gradient-feminine p-2 rounded-full">
-              <Clock className="text-white" size={18} strokeWidth={1.5} />
-            </div>
-            <h3 className="font-serif text-lg text-warm-gray tracking-wide">Today</h3>
+        {/* Hebrew Date and Location */}
+        <div className="text-center mb-4">
+          <p className="font-serif text-sm text-black mb-1">{hebrewDate || "Loading..."}</p>
+          <div className="flex items-center justify-center space-x-1">
+            <MapPin className="text-black/60" size={12} />
+            <p className="font-sans text-xs text-black/60">{jewishTimesQuery.data?.location || "Loading location..."}</p>
           </div>
-          <p className="font-sans text-xs text-warm-gray/70">{hebrewDate || "Loading..."}</p>
         </div>
         
-        {/* Location Display */}
-        <div className="flex items-center justify-center space-x-1 mb-3">
-          <MapPin className="text-warm-gray/60" size={12} />
-          <p className="font-sans text-xs text-warm-gray/60">{jewishTimesQuery.data?.location || "Loading location..."}</p>
-        </div>
-        
-        {/* Times Grid */}
-        <div className="grid grid-cols-2 gap-2 mb-3">
+        {/* Times Section - Mincha and Shkia */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          {/* Mincha - Clickable with Arrow Icon */}
           <button 
             onClick={() => openModal('mincha')}
-            className="bg-white/70 rounded-xl p-2 text-center border border-blush/10 hover:scale-105 transition-all duration-300 hover:bg-white/90"
+            className="bg-white/80 rounded-2xl p-4 text-center border border-blush/20 hover:scale-105 transition-all duration-300 hover:bg-white/95 hover:shadow-md"
           >
-            <p className="font-sans text-xs text-warm-gray/70">Mincha</p>
-            <div className="flex items-center justify-center space-x-1">
-              <BookOpen className="text-sage" size={14} />
-              <p className="font-serif text-base text-warm-gray font-medium">{jewishTimesQuery.data?.minchaGedolah || "Loading..."}</p>
+            <div className="flex items-center justify-center mb-2">
+              <div className="bg-gradient-feminine p-2 rounded-full mr-2">
+                <ArrowRight className="text-white" size={16} />
+              </div>
             </div>
+            <p className="font-sans text-sm text-black font-bold mb-1">Mincha</p>
+            <p className="font-serif text-lg text-black font-bold">{jewishTimesQuery.data?.minchaGedolah || "Loading..."}</p>
           </button>
-          <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
-            <p className="font-sans text-xs text-warm-gray/70">Shkia</p>
-            <div className="flex items-center justify-center space-x-1">
-              <Clock className="text-blush" size={14} />
-              <p className="font-serif text-base text-warm-gray font-medium">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
+
+          {/* Shkia - Display Only */}
+          <div className="bg-white/80 rounded-2xl p-4 text-center border border-blush/20">
+            <div className="flex items-center justify-center mb-2">
+              <div className="bg-gradient-feminine p-2 rounded-full">
+                <Clock className="text-white" size={16} />
+              </div>
             </div>
+            <p className="font-sans text-sm text-black font-bold mb-1">Shkia</p>
+            <p className="font-serif text-lg text-black font-bold">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
           </div>
         </div>
 
