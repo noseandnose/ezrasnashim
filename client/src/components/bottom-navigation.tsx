@@ -1,5 +1,5 @@
 import { Book, HandHeart, Home, Heart, Flame, ShoppingBag, Coins } from "lucide-react";
-import type { Section } from "../pages/home";
+import type { Section } from "../../pages/home";
 
 interface BottomNavigationProps {
   activeSection: Section;
