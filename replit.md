@@ -140,6 +140,7 @@ Changelog:
 - June 25, 2025. Unified development server to serve both API and frontend on single port
 - June 25, 2025. Completed Sefaria integration with authentic Hebrew and English Tehillim text
 - June 25, 2025. Separated backend (port 5000) and frontend (port 80) servers for proper development setup
+- June 25, 2025. Fixed development server configuration to run both backend API and frontend Vite servers simultaneously
 ```
 
 ## User Preferences
