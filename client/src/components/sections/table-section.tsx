@@ -45,7 +45,7 @@ export default function TableSection() {
     gcTime: 60 * 60 * 1000
   });
 
-  const { data: parshaContent } = useQuery<any>({
+  const { data: parshaContent } = useQuery<{title?: string; content?: string; author?: string}>({
     queryKey: [`/api/table/vort/${getWeekKey()}`],
     queryFn: async () => {
       const response = await fetch(`/api/table/vort/${getWeekKey()}`);

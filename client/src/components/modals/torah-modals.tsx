@@ -71,7 +71,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000
   });
 
-  const { data: loshonContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string}>({
+  const { data: loshonContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string; halachicSource?: string; practicalTip?: string}>({
     queryKey: ['/api/torah/loshon', today],
     queryFn: () => fetch(`/api/torah/loshon/${today}`).then(res => res.json()),
     enabled: activeModal === 'loshon',

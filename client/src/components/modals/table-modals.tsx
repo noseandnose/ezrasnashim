@@ -16,7 +16,7 @@ export default function TableModals() {
     return `${year}-W${week}`;
   };
 
-  const { data: recipeContent } = useQuery<any>({
+  const { data: recipeContent } = useQuery<{title?: string; description?: string; ingredients?: string[]; instructions?: string[]; cookingTime?: string; servings?: number}>({
     queryKey: ['/api/table/recipe', getWeekKey()],
     enabled: activeModal === 'recipe'
   });
