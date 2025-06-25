@@ -1,8 +1,8 @@
 import { useStripe, Elements, PaymentElement, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { useEffect, useState } from 'react';
-import { apiRequest } from "./lib/queryClient";
-import { useToast } from "./hooks/use-toast";
+import { apiRequest } from "../lib/queryClient";
+import { useToast } from "../hooks/use-toast";
 import { Button } from "../components/ui/button";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import { useLocation } from "wouter";
