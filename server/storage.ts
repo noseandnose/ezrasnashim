@@ -169,7 +169,7 @@ export class DatabaseStorage implements IStorage {
     if (!progress) {
       const [newProgress] = await db.insert(globalTehillimProgress).values({
         currentPerek: 1,
-        currentLanguage: 'english',
+
         completedBy: null
       }).returning();
       return newProgress;
@@ -186,7 +186,7 @@ export class DatabaseStorage implements IStorage {
       const [updated] = await db.update(globalTehillimProgress)
         .set({
           currentPerek: nextPerek,
-          currentLanguage: language,
+
           lastUpdated: new Date(),
           completedBy: completedBy || null
         })
