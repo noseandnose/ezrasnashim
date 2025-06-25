@@ -6,21 +6,21 @@
 
 :root {
   --background: hsl(42, 78%, 97%);
-  --foreground: hsl(240, 5%, 26%);
+  --foreground: hsl(0, 0%, 0%);
   --muted: hsl(300, 18%, 94%);
-  --muted-foreground: hsl(240, 5%, 65%);
+  --muted-foreground: hsl(0, 0%, 0%);
   --popover: hsl(42, 78%, 97%);
-  --popover-foreground: hsl(240, 5%, 26%);
+  --popover-foreground: hsl(0, 0%, 0%);
   --card: hsl(42, 78%, 97%);
-  --card-foreground: hsl(240, 5%, 26%);
+  --card-foreground: hsl(0, 0%, 0%);
   --border: hsl(300, 18%, 90%);
   --input: hsl(300, 18%, 90%);
   --primary: hsl(345, 55%, 82%);
-  --primary-foreground: hsl(240, 5%, 26%);
+  --primary-foreground: hsl(0, 0%, 0%);
   --secondary: hsl(300, 18%, 94%);
-  --secondary-foreground: hsl(240, 5%, 26%);
+  --secondary-foreground: hsl(0, 0%, 0%);
   --accent: hsl(262, 40%, 88%);
-  --accent-foreground: hsl(240, 5%, 26%);
+  --accent-foreground: hsl(0, 0%, 0%);
   --destructive: hsl(0, 84.2%, 60.2%);
   --destructive-foreground: hsl(60, 9.1%, 97.8%);
   --ring: hsl(345, 55%, 82%);
@@ -31,7 +31,7 @@
   --ivory: hsl(45, 70%, 96%);
   --sand-gold: hsl(40, 35%, 80%);
   --muted-lavender: hsl(260, 30%, 85%);
-  --warm-gray: hsl(220, 8%, 35%);
+  --warm-gray: hsl(0, 0%, 0%);
   --soft-white: hsl(45, 70%, 98%);
   --blush: hsl(350, 45%, 85%);
   --lavender: hsl(260, 30%, 85%);
@@ -46,6 +46,34 @@
 
 .gradient-heart svg {
   fill: #E8B4CB !important;
+}
+
+/* TEMPORARY: Force all text to be pure black */
+*, *::before, *::after {
+  color: #000000 !important;
+}
+
+/* Force black text in all possible text elements */
+p, span, div, a, li, td, th, label, input, textarea, select, option {
+  color: #000000 !important;
+}
+
+/* Make titles bold and black */
+h1, h2, h3, h4, h5, h6, 
+.text-lg, .text-xl, .text-2xl, .text-3xl, .text-4xl, .text-5xl,
+.font-semibold, .font-bold, .font-extrabold {
+  color: #000000 !important;
+  font-weight: bold !important;
+}
+
+/* Override any muted or gray text classes */
+.text-muted, .text-muted-foreground, .text-gray-500, .text-gray-600, .text-gray-700 {
+  color: #000000 !important;
+}
+
+/* Ensure buttons and interactive elements use black text */
+button, .btn, [role="button"] {
+  color: #000000 !important;
 }
 
 /* Heart Explosion Animation */
