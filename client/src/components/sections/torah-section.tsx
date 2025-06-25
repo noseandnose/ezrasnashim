@@ -25,6 +25,18 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
     gcTime: 60 * 60 * 1000 // 1 hour
   });
 
+  // Fetch today's Pirkei Avot for daily inspiration
+  const { data: pirkeiAvot } = useQuery<{text: string; chapter: number}>({
+    queryKey: ['pirkei-avot-daily', today],
+    queryFn: async () => {
+      const response = await fetch(`/api/torah/pirkei-avot/${today}`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 60 * 60 * 1000 // 1 hour
+  });
+
   const torahItems = [
     {
       id: 'halacha',
@@ -80,13 +92,31 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
         </div>
       </div>
 
+      {/* Daily Inspiration - Pirkei Avot */}
+      {pirkeiAvot && (
+        <div className="bg-gradient-to-br from-ivory via-white to-lavender/10 rounded-3xl p-4 shadow-lg mb-3 border border-blush/15">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="bg-gradient-feminine p-1.5 rounded-full">
+              <Scroll className="text-white" size={16} />
+            </div>
+            <h3 className="font-serif text-sm text-warm-gray font-medium">Daily Inspiration</h3>
+            <span className="text-xs text-warm-gray/60 font-sans">Pirkei Avot {pirkeiAvot.chapter}</span>
+          </div>
+          <p className="font-sans text-xs text-warm-gray/90 leading-relaxed text-justify">
+            {pirkeiAvot.text}
+          </p>
+        </div>
+      )}
+
       {/* Inspirational Quote */}
-      <div className="bg-gradient-soft rounded-3xl p-3 shadow-lg mb-3">
-        <p className="font-sans text-xs text-warm-gray/80 italic text-center leading-relaxed">
-          {quote ? `"${quote.text}"` : ""}
-        </p>
-        <p className="font-serif text-xs text-warm-gray/60 text-center mt-2 tracking-wide">{quote ? `- ${quote.source}` : ""}</p>
-      </div>
+      {quote && (
+        <div className="bg-gradient-soft rounded-3xl p-3 shadow-lg mb-3">
+          <p className="font-sans text-xs text-warm-gray/80 italic text-center leading-relaxed">
+            "{quote.text}"
+          </p>
+          <p className="font-serif text-xs text-warm-gray/60 text-center mt-2 tracking-wide">- {quote.source}</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-2 mb-1">
         {torahItems.map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border }) => (

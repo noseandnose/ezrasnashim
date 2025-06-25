@@ -138,7 +138,8 @@ Changelog:
 - June 25, 2025. Integrated Sefaria API for Tehillim content: Replaced database storage with live API calls, added language support (English/Hebrew), updated completion tracking to include perek number and language preference
 - June 25, 2025. Enhanced Sefaria text cleaning: Removed HTML entities (&thinsp;, &nbsp;), Hebrew paragraph markers ({פ}, {ס}), and all English formatting artifacts for pure authentic Hebrew text display
 - June 25, 2025. Implemented Tehillim preview showing first line of actual Hebrew text instead of "Perek X" placeholder text
-- June 25, 2025. Added Pirkei Avot daily inspiration with authentic teachings cycling through chapters 1-6 based on day of year
+- June 25, 2025. Added complete Pirkei Avot daily inspiration system: 25+ authentic teachings cycling daily, prominently displayed in Torah section with scroll icon and chapter reference
+- June 25, 2025. Expanded Pirkei Avot collection to include comprehensive teachings from all 6 chapters with authentic translations
 ```
 
 ## User Preferences
