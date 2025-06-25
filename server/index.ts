@@ -1,6 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes.js";
-import { setupVite, serveStatic } from "./vite.js";
 
 console.log("starting server...");
 console.log('Hello ECS');
@@ -58,12 +57,8 @@ app.use((req, res, next) => {
     });
   });
 
-  // Setup Vite or static serving
-  if (process.env.NODE_ENV === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
-  }
+  // Serve static files in development (Vite handles this)
+  // No additional setup needed - API routes already registered
 
   // Unified server serving both frontend and API
   const port = process.env.PORT ?? 80;
