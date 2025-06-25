@@ -69,8 +69,8 @@ app.use((req, res, next) => {
     app.use(vite.middlewares);
   }
 
-  // Unified server on port 80
-  const port = process.env.PORT ?? 80;
+  // Server configuration for Replit
+  const port = process.env.NODE_ENV === "development" ? 5000 : (process.env.PORT ?? 80);
   server.listen(port, "0.0.0.0", () => {
     console.log(`Ezras Nashim server listening on port ${port}`);
     console.log(`Frontend: http://localhost:${port}`);
