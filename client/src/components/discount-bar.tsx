@@ -22,21 +22,31 @@ interface DiscountBarProps {
 export default function DiscountBar({ className = "" }: DiscountBarProps) {
   const { coordinates } = useLocationStore();
   
-  const { data: promotion, isLoading } = useQuery<DiscountPromotion | null>({
+  const { data: promotion, isLoading, error } = useQuery<DiscountPromotion | null>({
     queryKey: ['/api/discount-promotions/active', coordinates?.lat, coordinates?.lng],
-    queryFn: () => {
+    queryFn: async () => {
       const params = new URLSearchParams();
       if (coordinates?.lat) params.set('lat', coordinates.lat.toString());
       if (coordinates?.lng) params.set('lng', coordinates.lng.toString());
       
-      return fetch(`/api/discount-promotions/active?${params.toString()}`)
-        .then(res => res.json());
+      const response = await fetch(`/api/discount-promotions/active?${params.toString()}`);
+      if (!response.ok) {
+        console.error('Failed to fetch discount promotion:', response.status);
+        return null;
+      }
+      const data = await response.json();
+      console.log('Discount promotion data:', data);
+      return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 30 * 60 * 1000 // 30 minutes
   });
 
-  if (isLoading || !promotion) {
+  if (isLoading) {
+    return null;
+  }
+
+  if (!promotion) {
     return null;
   }
 
