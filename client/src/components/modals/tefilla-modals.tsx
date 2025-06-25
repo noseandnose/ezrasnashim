@@ -104,8 +104,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
   // Fetch Tehillim text from Sefaria API
   const { data: tehillimText } = useQuery<{text: string; perek: number; language: string}>({
-    queryKey: ['/api/tehillim/text', progress?.currentPerek, language],
-    queryFn: () => fetch(`/api/tehillim/text/${progress?.currentPerek}?language=${language}`).then(res => res.json()),
+    queryKey: ['/api/tehillim/text', progress?.currentPerek, showHebrew ? 'hebrew' : 'english'],
+    queryFn: () => fetch(`/api/tehillim/text/${progress?.currentPerek}?language=${showHebrew ? 'hebrew' : 'english'}`).then(res => res.json()),
     enabled: activeModal === 'tehillim-text' && !!progress?.currentPerek
   });
 
@@ -115,7 +115,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       if (!progress) throw new Error('No progress data');
       return apiRequest('POST', '/api/tehillim/complete', { 
         currentPerek: progress.currentPerek,
-        language: progress.currentLanguage || 'english',
+        language: showHebrew ? 'hebrew' : 'english',
         completedBy: 'user' 
       });
     },
@@ -140,42 +140,18 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     completePerekMutation.mutate();
   };
 
-  const getTehillimText = (perekNumber: number, isHebrew: boolean) => {
-    const tehillimTexts: Record<number, { hebrew: string; english: string }> = {
-      1: {
-        hebrew: "אַשְׁרֵי הָאִישׁ אֲשֶׁר לֹא הָלַךְ בַּעֲצַת רְשָׁעִים וּבְדֶרֶךְ חַטָּאִים לֹא עָמָד וּבְמוֹשַׁב לֵצִים לֹא יָשָׁב׃ כִּי אִם בְּתוֹרַת יְהוָה חֶפְצוֹ וּבְתוֹרָתוֹ יֶהְגֶּה יוֹמָם וָלָיְלָה׃",
-        english: "Happy is the man who has not walked in the counsel of the wicked, nor stood in the way of sinners, nor sat in the seat of scorners. But his delight is in the law of the Lord, and in His law he meditates day and night."
-      },
-      2: {
-        hebrew: "לָמָּה רָגְשׁוּ גוֹיִם וּלְאֻמִּים יֶהְגּוּ רִיק׃ יִתְיַצְּבוּ מַלְכֵי אֶרֶץ וְרוֹזְנִים נוֹסְדוּ יָחַד עַל יְהוָה וְעַל מְשִׁיחוֹ׃",
-        english: "Why do the nations rage, and the peoples plot in vain? The kings of the earth set themselves, and the rulers take counsel together, against the Lord and against His anointed."
-      },
-      3: {
-        hebrew: "מִזְמוֹר לְדָוִד בְּבָרְחוֹ מִפְּנֵי אַבְשָׁלוֹם בְּנוֹ׃ יְהוָה מָה רַבּוּ צָרָי רַבִּים קָמִים עָלָי׃",
-        english: "A Psalm of David, when he fled from Absalom his son. Lord, how many are my foes! Many are rising against me."
-      },
-      11: {
-        hebrew: "בַּיהוָה חָסִיתִי אֵיךְ תֹּאמְרוּ לְנַפְשִׁי נוּדִי הַרְכֶם צִפּוֹר׃",
-        english: "In the Lord I take refuge; how can you say to my soul, 'Flee like a bird to your mountain'?"
-      },
-      12: {
-        hebrew: "הוֹשִׁיעָה יְהוָה כִּי גָמַר חָסִיד כִּי פָסוּ אֱמוּנִים מִבְּנֵי אָדָם׃",
-        english: "Save, O Lord, for the godly one is gone; for the faithful have vanished from among the children of man."
-      }
-    };
-
-    const text = tehillimTexts[perekNumber];
-    if (!text) {
+  const getTehillimDisplayText = () => {
+    if (!tehillimText) {
       return (
         <div className="text-sm text-gray-600 italic text-center">
-          {isHebrew ? `פרק ${perekNumber} - טקסט מלא זמין בספר תהלים` : `Perek ${perekNumber} - Full text available in Tehillim book`}
+          Loading Tehillim text from Sefaria...
         </div>
       );
     }
 
     return (
-      <div className={`text-sm leading-relaxed ${isHebrew ? 'text-right font-hebrew' : 'font-english'}`}>
-        {isHebrew ? text.hebrew : text.english}
+      <div className={`text-sm leading-relaxed whitespace-pre-line ${showHebrew ? 'text-right font-hebrew' : 'font-english text-left'}`}>
+        {tehillimText.text}
       </div>
     );
   };
@@ -298,7 +274,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               className={`${showHebrew ? 'font-hebrew text-right' : 'font-english'} leading-relaxed`}
               style={{ fontSize: `${fontSize}px` }}
             >
-              {getTehillimText(progress?.currentPerek || 1, showHebrew)}
+              {getTehillimDisplayText()}
             </div>
           </div>
 
