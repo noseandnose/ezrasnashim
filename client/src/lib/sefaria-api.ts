@@ -21,15 +21,15 @@ export async function fetchTehillimFromSefaria(
     
     const data: SefariaResponse = await response.json();
     
-    // Extract text from the response
+    // Extract text from the response - for Hebrew use 'he', for English use 'text'
     const textArray = language === 'hebrew' ? data.he : data.text;
     
     if (!textArray || textArray.length === 0) {
       throw new Error('No text found in Sefaria response');
     }
     
-    // Join the text array into a single string with proper formatting
-    return textArray.join('\n');
+    // Join the text array into a single string with proper verse formatting
+    return textArray.join(' ');
   } catch (error) {
     console.error('Failed to fetch Tehillim from Sefaria:', error);
     throw new Error(`Failed to load Perek ${perekNumber} from Sefaria`);

@@ -1,0 +1,1 @@
+// This file is no longer needed - the server now handles both API and frontend

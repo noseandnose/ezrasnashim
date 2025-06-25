@@ -2,6 +2,8 @@ console.log("starting server...");
 console.log('Hello ECS'); setTimeout(() => {}, 60000);
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes.js";
+import { createServer as createViteServer } from "vite";
+import path from "path";
 
 const app = express();
 app.use(express.json());
@@ -48,9 +50,28 @@ app.use((req, res, next) => {
     throw err;
   });
 
+  // Setup Vite in development mode
+  if (process.env.NODE_ENV === "development") {
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: "spa",
+    });
+    app.use(vite.ssrFixStacktrace);
+    app.use(vite.middlewares);
+  } else {
+    // Production static file serving
+    app.use(express.static(path.join(process.cwd(), "dist/public")));
+    app.get("*", (req, res) => {
+      res.sendFile(path.join(process.cwd(), "dist/public/index.html"));
+    });
+  }
+
   // Start server
   const port = process.env.PORT ?? 5000;
   server.listen(port, "0.0.0.0", () => {
     console.log(`Server listening on port ${port}`);
+    if (process.env.NODE_ENV === "development") {
+      console.log(`Frontend available at http://localhost:${port}`);
+    }
   });
 })();
