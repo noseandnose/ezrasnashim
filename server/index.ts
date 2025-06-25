@@ -1,4 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
+import path from "path";
 import { registerRoutes } from "./routes.js";
 
 console.log("starting server...");
@@ -59,14 +60,29 @@ app.use((req, res, next) => {
 
   // Setup Vite middleware for development
   if (process.env.NODE_ENV === "development") {
-    const { createServer } = await import('vite');
-    const vite = await createServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-      root: 'client'
+    try {
+      const { createServer } = await import('vite');
+      const vite = await createServer({
+        server: { middlewareMode: true },
+        appType: 'spa',
+        root: 'client'
+      });
+      app.use(vite.ssrFixStacktrace);
+      app.use(vite.middlewares);
+    } catch (error) {
+      console.error('Vite setup failed:', error);
+      // Fallback to static file serving
+      app.use(express.static('client/dist'));
+      app.get('*', (req, res) => {
+        res.sendFile(path.resolve('client/dist/index.html'));
+      });
+    }
+  } else {
+    // Production static file serving
+    app.use(express.static('dist/public'));
+    app.get('*', (req, res) => {
+      res.sendFile(path.resolve('dist/public/index.html'));
     });
-    app.use(vite.ssrFixStacktrace);
-    app.use(vite.middlewares);
   }
 
   // Server configuration for Replit
