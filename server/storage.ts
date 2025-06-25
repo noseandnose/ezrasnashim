@@ -584,55 +584,48 @@ export class DatabaseStorage implements IStorage {
   async getActiveDiscountPromotion(userLocation?: string): Promise<DiscountPromotion | undefined> {
     try {
       const now = new Date();
-      console.log('getActiveDiscountPromotion called with userLocation:', userLocation);
       
       // Determine target location based on user's coordinates
       let targetLocation = "worldwide";
       if (userLocation === "israel") {
         targetLocation = "israel";
       }
-      console.log('Target location determined as:', targetLocation);
       
-      // First get all active promotions to debug
-      const allActive = await db
-        .select()
-        .from(discountPromotions)
-        .where(eq(discountPromotions.isActive, true));
+      // Use raw SQL to bypass schema issues
+      const query = `
+        SELECT id, title, subtitle, logo_url as "logoUrl", link_url as "linkUrl", 
+               start_date as "startDate", end_date as "endDate", is_active as "isActive",
+               target_location as "targetLocation", created_at as "createdAt"
+        FROM discount_promotions 
+        WHERE is_active = true 
+          AND start_date <= NOW() 
+          AND end_date >= NOW()
+          AND target_location = $1
+        LIMIT 1
+      `;
       
-      console.log('All active promotions:', allActive);
-      console.log('Current time:', now);
-      
-      // Simple query first to test basic functionality
-      let promotion = await db
-        .select()
-        .from(discountPromotions)
-        .where(
-          and(
-            eq(discountPromotions.isActive, true),
-            eq(discountPromotions.targetLocation, targetLocation)
-          )
-        )
-        .limit(1);
-      
-      console.log('Location-specific promotion query result:', promotion);
+      const result = await db.execute(query, [targetLocation]);
+      let promotion = result[0];
       
       // If no location-specific promotion found, fall back to worldwide
-      if (!promotion.length && targetLocation === "israel") {
-        console.log('No Israel-specific promotion found, trying worldwide fallback');
-        promotion = await db
-          .select()
-          .from(discountPromotions)
-          .where(
-            and(
-              eq(discountPromotions.isActive, true),
-              eq(discountPromotions.targetLocation, "worldwide")
-            )
-          )
-          .limit(1);
-        console.log('Worldwide fallback promotion result:', promotion);
+      if (!promotion && targetLocation === "israel") {
+        const fallbackQuery = `
+          SELECT id, title, subtitle, logo_url as "logoUrl", link_url as "linkUrl", 
+                 start_date as "startDate", end_date as "endDate", is_active as "isActive",
+                 target_location as "targetLocation", created_at as "createdAt"
+          FROM discount_promotions 
+          WHERE is_active = true 
+            AND start_date <= NOW() 
+            AND end_date >= NOW()
+            AND target_location = 'worldwide'
+          LIMIT 1
+        `;
+        
+        const fallbackResult = await db.execute(fallbackQuery);
+        promotion = fallbackResult[0];
       }
       
-      return promotion[0];
+      return promotion;
     } catch (error) {
       console.error('Database error in getActiveDiscountPromotion:', error);
       return undefined;
