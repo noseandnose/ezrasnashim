@@ -2,9 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Calendar, Clock, Heart, BookOpen, HandHeart, Coins, MapPin } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
-import { useModalStore, useDailyCompletionStore } from "./../lib/types";
-import { useJewishTimes } from "./../hooks/use-jewish-times";
-import { useHebrewDate } from "./../hooks/use-hebrew-date";
+import { useModalStore, useDailyCompletionStore } from "./../../lib/types";
+import { useJewishTimes } from "./../../hooks/use-jewish-times";
+import { useHebrewDate } from "./../../hooks/use-hebrew-date";
 import DiscountBar from "../discount-bar";
 import type { Section } from "../pages/home";
 

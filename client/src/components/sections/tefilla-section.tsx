@@ -1,18 +1,18 @@
 import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass } from "lucide-react";
-import { useModalStore, useDailyCompletionStore } from "./../lib/types";
+import { useModalStore, useDailyCompletionStore } from "./../../lib/types";
 import type { Section } from "../pages/home";
 
 interface TefillaSectionProps {
   onSectionChange?: (section: Section) => void;
 }
-import { useJewishTimes } from "./../hooks/use-jewish-times";
+import { useJewishTimes } from "./../../hooks/use-jewish-times";
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "./../lib/queryClient";
-import { toast } from "./../hooks/use-toast";
+import { apiRequest } from "./../../lib/queryClient";
+import { toast } from "./../../hooks/use-toast";
 import type { TehillimName, GlobalTehillimProgress } from "@shared/schema";
 
 export default function TefillaSection({ onSectionChange }: TefillaSectionProps) {
