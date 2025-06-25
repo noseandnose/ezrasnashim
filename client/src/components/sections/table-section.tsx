@@ -42,7 +42,7 @@ export default function TableSection() {
       return response.json();
     },
     staleTime: 10 * 60 * 1000,
-    cacheTime: 60 * 60 * 1000
+    gcTime: 60 * 60 * 1000
   });
 
   const { data: parshaContent } = useQuery<any>({
@@ -53,7 +53,7 @@ export default function TableSection() {
       return response.json();
     },
     staleTime: 10 * 60 * 1000,
-    cacheTime: 60 * 60 * 1000
+    gcTime: 60 * 60 * 1000
   });
 
   const tableItems = [

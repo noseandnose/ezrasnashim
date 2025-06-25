@@ -47,7 +47,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const { data: halachaContent } = useQuery<any>({
+  const { data: halachaContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string; halachicSource?: string; practicalTip?: string}>({
     queryKey: ['/api/torah/halacha', today],
     queryFn: () => fetch(`/api/torah/halacha/${today}`).then(res => res.json()),
     enabled: activeModal === 'halacha',
@@ -55,7 +55,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000 // 30 minutes
   });
 
-  const { data: mussarContent } = useQuery<any>({
+  const { data: mussarContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string}>({
     queryKey: ['/api/torah/mussar', today],
     queryFn: () => fetch(`/api/torah/mussar/${today}`).then(res => res.json()),
     enabled: activeModal === 'mussar',
@@ -63,7 +63,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000
   });
 
-  const { data: chizukContent } = useQuery<any>({
+  const { data: chizukContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string}>({
     queryKey: ['/api/torah/chizuk', today],
     queryFn: () => fetch(`/api/torah/chizuk/${today}`).then(res => res.json()),
     enabled: activeModal === 'chizuk',
@@ -71,7 +71,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000
   });
 
-  const { data: loshonContent } = useQuery<any>({
+  const { data: loshonContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string}>({
     queryKey: ['/api/torah/loshon', today],
     queryFn: () => fetch(`/api/torah/loshon/${today}`).then(res => res.json()),
     enabled: activeModal === 'loshon',
@@ -172,7 +172,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           
           {chizukContent && chizukContent.audioUrl && (
             <AudioPlayer 
-              title={chizukContent.title}
+              title={chizukContent.title || 'Chizuk'}
               duration={chizukContent.duration || "5:15"}
               audioUrl={chizukContent.audioUrl}
             />
