@@ -350,9 +350,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             ) : (
               minchaPrayers.map((prayer) => (
                 <div key={prayer.id} className="p-4 bg-white rounded-xl border border-cream-light">
-                  <div className="text-center">
+                  <div className={language === 'hebrew' ? 'text-center' : 'text-left'}>
                     <div
-                      className={`${language === 'hebrew' ? 'font-hebrew text-right' : 'font-english'} leading-relaxed whitespace-pre-line prayer-content`}
+                      className={`${language === 'hebrew' ? 'font-hebrew text-right' : 'font-english text-left'} leading-relaxed whitespace-pre-line prayer-content`}
                       style={{ fontSize: `${fontSize}px` }}
                       dangerouslySetInnerHTML={{
                         __html: language === 'hebrew' 
