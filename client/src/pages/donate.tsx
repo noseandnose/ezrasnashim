@@ -87,7 +87,7 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
       <div className="space-y-3">
         <ApplePayButton
           amount={amount}
-          onSuccess={handleSuccess}
+          onSuccess={() => setDonationComplete(true)}
           onError={(error: string) => {
             toast({
               title: "Apple Pay Failed",
