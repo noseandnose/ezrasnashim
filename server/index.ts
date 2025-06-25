@@ -2,8 +2,6 @@ console.log("starting server...");
 console.log('Hello ECS'); setTimeout(() => {}, 60000);
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes.js";
-import { createServer as createViteServer } from "vite";
-import path from "path";
 
 const app = express();
 app.use(express.json());
@@ -50,37 +48,9 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // Setup Vite in development mode to serve the React frontend
-  if (process.env.NODE_ENV === "development") {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-      root: "./client",
-      resolve: {
-        alias: {
-          "@": path.resolve("./client/src"),
-          "@shared": path.resolve("./shared"),
-          "@assets": path.resolve("./attached_assets"),
-        },
-      },
-    });
-
-    app.use(vite.ssrFixStacktrace);
-    app.use(vite.middlewares);
-  } else {
-    // Production: serve static files
-    app.use(express.static("dist/public"));
-    app.get("*", (req, res) => {
-      res.sendFile(path.resolve("dist/public/index.html"));
-    });
-  }
-
-  // Start server
+  // Backend API server only
   const port = process.env.PORT ?? 5000;
   server.listen(port, "0.0.0.0", () => {
-    console.log(`Server listening on port ${port}`);
-    if (process.env.NODE_ENV === "development") {
-      console.log(`Frontend available at http://localhost:${port}`);
-    }
+    console.log(`Backend API server listening on port ${port}`);
   });
 })();
