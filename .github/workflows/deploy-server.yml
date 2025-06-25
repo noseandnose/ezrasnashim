@@ -23,7 +23,7 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    environment: production
+    environment: Staging
 
     steps:
       - name: Checkout
