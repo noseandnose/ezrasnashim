@@ -356,7 +356,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                       style={{ fontSize: `${fontSize}px` }}
                       dangerouslySetInnerHTML={{
                         __html: language === 'hebrew' 
-                          ? (prayer.hebrewText || '').replace(/\*\*(.*?)\*\*/g, '<strong class="prayer-header">$1</strong><br>')
+                          ? (prayer.hebrewText || '')
+                              // First remove any double newlines after headers
+                              .replace(/\*\*(.*?)\*\*\n\n/g, '**$1**\n')
+                              // Then convert headers to HTML with proper spacing
+                              .replace(/\*\*(.*?)\*\*/g, '<strong class="prayer-header">$1</strong>')
                           : prayer.englishTranslation
                       }}
                     />
