@@ -55,6 +55,15 @@ app.use((req, res, next) => {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
+      root: path.resolve(process.cwd(), "client"),
+      envPrefix: 'VITE_',
+      resolve: {
+        alias: {
+          "@": path.resolve(process.cwd(), "client/src"),
+          "@shared": path.resolve(process.cwd(), "shared"),
+          "@assets": path.resolve(process.cwd(), "attached_assets"),
+        },
+      },
     });
     app.use(vite.ssrFixStacktrace);
     app.use(vite.middlewares);

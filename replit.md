@@ -137,6 +137,8 @@ Changelog:
 - June 25, 2025. Integrated Sefaria API for Tehillim text instead of local database storage
 - June 25, 2025. Configured Vite to use VITE_API_URL environment variable for API calls
 - June 25, 2025. Updated API client to use environment variable for base URL configuration
+- June 25, 2025. Unified development server to serve both API and frontend on single port
+- June 25, 2025. Completed Sefaria integration with authentic Hebrew and English Tehillim text
 ```
 
 ## User Preferences
