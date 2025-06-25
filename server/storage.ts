@@ -582,31 +582,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getActiveDiscountPromotion(userLocation?: string): Promise<DiscountPromotion | undefined> {
-    const now = new Date();
-    
-    // Determine target location based on user's coordinates
-    let targetLocation = "worldwide";
-    if (userLocation === "israel") {
-      targetLocation = "israel";
-    }
-    
-    // First try to get location-specific promotion
-    let promotion = await db
-      .select()
-      .from(discountPromotions)
-      .where(
-        and(
-          eq(discountPromotions.isActive, true),
-          lte(discountPromotions.startDate, now),
-          gte(discountPromotions.endDate, now),
-          eq(discountPromotions.targetLocation, targetLocation)
-        )
-      )
-      .limit(1);
-    
-    // If no location-specific promotion found, fall back to worldwide
-    if (!promotion.length && targetLocation === "israel") {
-      promotion = await db
+    try {
+      const now = new Date();
+      
+      // Determine target location based on user's coordinates
+      let targetLocation = "worldwide";
+      if (userLocation === "israel") {
+        targetLocation = "israel";
+      }
+      
+      // First try to get location-specific promotion
+      let promotion = await db
         .select()
         .from(discountPromotions)
         .where(
@@ -614,13 +600,50 @@ export class DatabaseStorage implements IStorage {
             eq(discountPromotions.isActive, true),
             lte(discountPromotions.startDate, now),
             gte(discountPromotions.endDate, now),
-            eq(discountPromotions.targetLocation, "worldwide")
+            eq(discountPromotions.targetLocation, targetLocation)
           )
         )
         .limit(1);
+      
+      // If no location-specific promotion found, fall back to worldwide
+      if (!promotion.length && targetLocation === "israel") {
+        promotion = await db
+          .select()
+          .from(discountPromotions)
+          .where(
+            and(
+              eq(discountPromotions.isActive, true),
+              lte(discountPromotions.startDate, now),
+              gte(discountPromotions.endDate, now),
+              eq(discountPromotions.targetLocation, "worldwide")
+            )
+          )
+          .limit(1);
+      }
+      
+      return promotion[0];
+    } catch (error) {
+      console.error('Database error in getActiveDiscountPromotion:', error);
+      // Fallback to simple query without location filtering
+      try {
+        const now = new Date();
+        const promotion = await db
+          .select()
+          .from(discountPromotions)
+          .where(
+            and(
+              eq(discountPromotions.isActive, true),
+              lte(discountPromotions.startDate, now),
+              gte(discountPromotions.endDate, now)
+            )
+          )
+          .limit(1);
+        return promotion[0];
+      } catch (fallbackError) {
+        console.error('Fallback query also failed:', fallbackError);
+        return undefined;
+      }
     }
-    
-    return promotion[0];
   }
 
   async createDiscountPromotion(insertPromotion: InsertDiscountPromotion): Promise<DiscountPromotion> {

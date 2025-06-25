@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink } from "lucide-react";
-import { useLocationStore } from "@/lib/types";
+import { useLocationStore } from "@/hooks/use-jewish-times";
 
 interface DiscountPromotion {
   id: number;
