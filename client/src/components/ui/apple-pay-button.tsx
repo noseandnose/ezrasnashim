@@ -21,7 +21,7 @@ export default function ApplePayButton({ amount, onSuccess, onError, disabled }:
 
     try {
       // Check if Apple Pay is available
-      if (!window.ApplePaySession?.canMakePayments()) {
+      if (!(window as any).ApplePaySession?.canMakePayments()) {
         throw new Error('Apple Pay is not available on this device');
       }
 
@@ -102,7 +102,7 @@ export default function ApplePayButton({ amount, onSuccess, onError, disabled }:
 
   // Check if Apple Pay is available
   const isApplePayAvailable = typeof window !== 'undefined' && 
-    window.ApplePaySession?.canMakePayments();
+    (window as any).ApplePaySession?.canMakePayments();
 
   if (!isApplePayAvailable) {
     return null; // Don't render if Apple Pay is not available
