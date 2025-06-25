@@ -130,6 +130,8 @@ Changelog:
 - June 24, 2025. Removed all hebrew_date fields from database schema
 - June 24, 2025. Added universal media proxy supporting multiple hosting services
 - June 24, 2025. Formatted and stored complete Hebrew Amidah prayer in database with proper section headers and line breaks
+- June 25, 2025. Fixed console JSX errors by removing inline style elements and using CSS classes
+- June 25, 2025. Optimized Hebrew prayer formatting by removing double line spaces between headers and content
 ```
 
 ## User Preferences
