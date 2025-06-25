@@ -8,7 +8,8 @@ app.use(cors({
   origin: [
       'localhost:5174',
       'localhost:5173',
-      'http://ezras-nashim-frontend.s3-website-us-east-1.amazonaws.com'
+      'http://ezras-nashim-frontend.s3-website-us-east-1.amazonaws.com',
+      'ezras-nashim-frontend.s3-website-us-east-1.amazonaws.com'
   ]
 }))
 
