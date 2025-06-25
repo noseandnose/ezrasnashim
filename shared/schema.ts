@@ -217,7 +217,7 @@ export const loshonHorah = pgTable("loshon_horah", {
   title: text("title").notNull(),
   content: text("content").notNull(),
   halachicSource: text("halachic_source"),
-  practicalTip: text("practical_tip"),
+  // practicalTip: text("practical_tip"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
