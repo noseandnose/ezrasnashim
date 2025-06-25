@@ -50,28 +50,28 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // Setup Vite in development mode
+  // Setup Vite in development mode to serve the React frontend
   if (process.env.NODE_ENV === "development") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
-      root: path.resolve(process.cwd(), "client"),
-      envPrefix: 'VITE_',
+      root: "./client",
       resolve: {
         alias: {
-          "@": path.resolve(process.cwd(), "client/src"),
-          "@shared": path.resolve(process.cwd(), "shared"),
-          "@assets": path.resolve(process.cwd(), "attached_assets"),
+          "@": path.resolve("./client/src"),
+          "@shared": path.resolve("./shared"),
+          "@assets": path.resolve("./attached_assets"),
         },
       },
     });
+
     app.use(vite.ssrFixStacktrace);
     app.use(vite.middlewares);
   } else {
-    // Production static file serving
-    app.use(express.static(path.join(process.cwd(), "dist/public")));
+    // Production: serve static files
+    app.use(express.static("dist/public"));
     app.get("*", (req, res) => {
-      res.sendFile(path.join(process.cwd(), "dist/public/index.html"));
+      res.sendFile(path.resolve("dist/public/index.html"));
     });
   }
 
