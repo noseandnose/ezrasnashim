@@ -583,6 +583,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get Tehillim preview (first line) from Sefaria API
+  app.get("/api/tehillim/preview/:perek", async (req, res) => {
+    try {
+      const perek = parseInt(req.params.perek);
+      const language = req.query.language as string || 'hebrew';
+      
+      if (isNaN(perek) || perek < 1 || perek > 150) {
+        return res.status(400).json({ error: 'Perek must be between 1 and 150' });
+      }
+      
+      const tehillimText = await storage.getSefariaTehillim(perek, language);
+      // Extract first line for preview
+      const firstLine = tehillimText.text.split('\n')[0] || tehillimText.text.substring(0, 100) + '...';
+      
+      res.json({
+        preview: firstLine,
+        perek: tehillimText.perek,
+        language: tehillimText.language
+      });
+    } catch (error) {
+      console.error('Error fetching Tehillim preview:', error);
+      res.status(500).json({ error: 'Failed to fetch Tehillim preview' });
+    }
+  });
+
   app.post("/api/tehillim/names", async (req, res) => {
     try {
       const validatedData = insertTehillimNameSchema.parse(req.body);

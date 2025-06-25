@@ -46,6 +46,13 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
     refetchInterval: 60000, // Refresh every minute
   });
 
+  // Fetch Tehillim preview (first line) for display
+  const { data: tehillimPreview } = useQuery<{preview: string; perek: number; language: string}>({
+    queryKey: ['/api/tehillim/preview', progress?.currentPerek],
+    queryFn: () => fetch(`/api/tehillim/preview/${progress?.currentPerek}?language=hebrew`).then(res => res.json()),
+    enabled: !!progress?.currentPerek
+  });
+
   // Mutation to complete a perek
   const completePerekMutation = useMutation({
     mutationFn: async () => {
@@ -293,18 +300,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               className="w-full mb-2 bg-white/70 rounded-2xl p-3 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
             >
               <div className="flex items-center justify-between">
-                <div className="font-serif text-sm text-warm-gray">
-                  {(() => {
-                    const perekNumber = progress?.currentPerek || 1;
-                    const firstLines: Record<number, string> = {
-                      1: "אשרי האיש אשר לא הלך בעצת רשעים",
-                      23: "יהוה רעי לא אחסר",
-                      91: "יושב בסתר עליון בצל שדי יתלונן",
-                      121: "שיר למעלות אשא עיני אל ההרים",
-                      150: "הללויה הללו אל בקדשו"
-                    };
-                    return firstLines[perekNumber] || `פרק ${perekNumber}`;
-                  })()}
+                <div className="font-serif text-sm text-warm-gray font-hebrew text-right flex-1 pr-2">
+                  {tehillimPreview?.preview || `פרק ${progress?.currentPerek || 1}`}
                 </div>
                 <div className="flex items-center">
                   <ChevronRight className="text-warm-gray/40" size={16} strokeWidth={1.5} />

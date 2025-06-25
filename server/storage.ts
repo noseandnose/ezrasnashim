@@ -206,6 +206,49 @@ export class DatabaseStorage implements IStorage {
     return activeNames[randomIndex];
   }
 
+  async getSefariaPirkeiAvot(chapter: number): Promise<{text: string; chapter: number}> {
+    try {
+      const url = `https://www.sefaria.org/api/v3/texts/Pirkei_Avot.${chapter}?version=english&return_format=text_only`;
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Sefaria API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      let text = '';
+      
+      if (typeof data.text === 'string') {
+        text = data.text;
+      } else if (Array.isArray(data.text)) {
+        text = data.text.join('\n');
+      }
+      
+      if (!text) {
+        throw new Error('No text content found in API response');
+      }
+      
+      // Clean up HTML formatting
+      const cleanText = text
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<small>(.*?)<\/small>/gi, '$1')
+        .replace(/<sup[^>]*>.*?<\/sup>/gi, '')
+        .replace(/<i[^>]*>.*?<\/i>/gi, '')
+        .replace(/<[^>]*>/gi, '')
+        .replace(/&[a-zA-Z]+;/gi, '')
+        .replace(/\n\s*\n/g, '\n')
+        .trim();
+      
+      return {
+        text: cleanText,
+        chapter
+      };
+    } catch (error) {
+      console.error('Error fetching Pirkei Avot from Sefaria:', error);
+      throw error;
+    }
+  }
+
   async getSefariaTehillim(perek: number, language: string): Promise<{text: string; perek: number; language: string}> {
     try {
       // Use the correct Sefaria API endpoint
@@ -390,31 +433,23 @@ export class DatabaseStorage implements IStorage {
     return loshon;
   }
 
-  async getPirkeiAvotByDate(date: string): Promise<any | undefined> {
+  async getPirkeiAvotByDate(date: string): Promise<{text: string; chapter: number} | undefined> {
     try {
-      const result = await pool.query(
-        `SELECT * FROM pirkei_avot WHERE date = $1 LIMIT 1`,
-        [date]
-      );
-      return result.rows[0] || undefined;
+      // Calculate which chapter based on date (1-6, cycling)
+      const today = new Date(date);
+      const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+      const chapter = (dayOfYear % 6) + 1; // Chapters 1-6, cycling
+      
+      return await this.getSefariaPirkeiAvot(chapter);
     } catch (error) {
-      console.error('Error fetching Pirkei Avot:', error);
+      console.error('Error getting Pirkei Avot:', error);
       return undefined;
     }
   }
 
   async createPirkeiAvot(pirkeiAvot: any): Promise<any> {
-    try {
-      const result = await pool.query(
-        `INSERT INTO pirkei_avot (content, source, explanation, date) 
-         VALUES ($1, $2, $3, $4) RETURNING *`,
-        [pirkeiAvot.content, pirkeiAvot.source, pirkeiAvot.explanation, pirkeiAvot.date]
-      );
-      return result.rows[0];
-    } catch (error) {
-      console.error('Error creating Pirkei Avot:', error);
-      throw error;
-    }
+    // No longer needed since we use Sefaria API, but kept for compatibility
+    return pirkeiAvot;
   }
 
   // Weekly Torah content methods
