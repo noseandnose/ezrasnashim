@@ -1,13 +1,13 @@
 import { Switch, Route } from "wouter";
-import { queryClient } from "../../lib/queryClient";
+import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "../../components/ui/toaster";
-import { TooltipProvider } from "../../components/ui/tooltip";
-import { useGeolocation, useJewishTimes } from "../../hooks/use-jewish-times";
-import Home from "../pages/home";
-import NotFound from "../pages/not-found";
-import Donate from "../pages/donate";
-import Checkout from "../pages/checkout";
+import { Toaster } from "./components/ui/toaster";
+import { TooltipProvider } from "./components/ui/tooltip";
+import { useGeolocation, useJewishTimes } from "./hooks/use-jewish-times";
+import Home from "./pages/home";
+import NotFound from "./pages/not-found";
+import Donate from "./pages/donate";
+import Checkout from "./pages/checkout";
 
 function Router() {
   // Initialize geolocation and preload Jewish times on app startup

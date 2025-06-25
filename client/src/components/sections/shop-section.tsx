@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useModalStore } from "../../lib/types";
 import { ShoppingBag, Star, Gift, Sparkles, Heart, Package, Tag, Store } from "lucide-react";
-import type { ShopItem } from "@shared/schema";
+import type { ShopItem } from "../../../shared/schema";
 
 export default function ShopSection() {
   const { openModal } = useModalStore();
