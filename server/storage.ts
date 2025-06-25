@@ -210,8 +210,6 @@ export class DatabaseStorage implements IStorage {
     try {
       // Use the correct Sefaria API endpoint
       const url = `https://www.sefaria.org/api/texts/Psalms.${perek}`;
-      console.log(`Fetching Tehillim ${perek} in ${language} from:`, url);
-      
       const response = await fetch(url);
       
       if (!response.ok) {
@@ -219,12 +217,6 @@ export class DatabaseStorage implements IStorage {
       }
       
       const data = await response.json();
-      console.log('Sefaria API response structure:', {
-        hasText: !!data.text,
-        hasHe: !!data.he,
-        textType: Array.isArray(data.text) ? 'array' : typeof data.text,
-        heType: Array.isArray(data.he) ? 'array' : typeof data.he
-      });
       
       // Extract text based on language preference
       let text = '';
@@ -255,8 +247,18 @@ export class DatabaseStorage implements IStorage {
         throw new Error('No text content found in API response');
       }
       
+      // Clean up HTML formatting from Sefaria text
+      const cleanText = text
+        .replace(/<br\s*\/?>/gi, '\n')  // Replace <br> tags with newlines
+        .replace(/<small>(.*?)<\/small>/gi, '$1')  // Remove <small> tags but keep content
+        .replace(/<sup[^>]*>.*?<\/sup>/gi, '')  // Remove footnote superscripts
+        .replace(/<i[^>]*>.*?<\/i>/gi, '')  // Remove footnote italic text
+        .replace(/<[^>]*>/gi, '')  // Remove any remaining HTML tags
+        .replace(/\n\s*\n/g, '\n')  // Remove multiple consecutive newlines
+        .trim();
+      
       return {
-        text: text.trim(),
+        text: cleanText,
         perek,
         language
       };
