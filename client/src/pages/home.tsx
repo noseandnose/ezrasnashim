@@ -1,13 +1,13 @@
 import { useState } from "react";
-import AppHeader from "@/components/app-header";
-import BottomNavigation from "@/components/bottom-navigation";
-import HomeSection from "@/components/sections/home-section";
-import TorahSection from "@/components/sections/torah-section";
-import TefillaSection from "@/components/sections/tefilla-section";
-import TzedakaSection from "@/components/sections/tzedaka-section";
-import TableSection from "@/components/sections/table-section";
-import ShopSection from "@/components/sections/shop-section";
-import ModalContainer from "@/components/modals/modal-container";
+import AppHeader from "../components/app-header";
+import BottomNavigation from "../components/bottom-navigation";
+import HomeSection from "../components/sections/home-section";
+import TorahSection from "../components/sections/torah-section";
+import TefillaSection from "../components/sections/tefilla-section";
+import TzedakaSection from "../components/sections/tzedaka-section";
+import TableSection from "../components/sections/table-section";
+import ShopSection from "../components/sections/shop-section";
+import ModalContainer from "../components/modals/modal-container";
 
 export type Section = 'torah' | 'tefilla' | 'tzedaka' | 'home' | 'table';
 

@@ -1,5 +1,5 @@
 import { Book, Heart, Play, Shield, BookOpen, Sparkles, Star, Scroll } from "lucide-react";
-import { useModalStore, useDailyCompletionStore } from "@/lib/types";
+import { useModalStore, useDailyCompletionStore } from "../../lib/types";
 import { useQuery } from "@tanstack/react-query";
 import type { InspirationalQuote } from "@shared/schema";
 import type { Section } from "@/pages/home";

@@ -1,15 +1,15 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { useModalStore, useDailyCompletionStore } from "@/lib/types";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
+import { Button } from "../ui/button";
+import { useModalStore, useDailyCompletionStore } from "../../lib/types";
 import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { MinchaPrayer, NishmasText, GlobalTehillimProgress, TehillimName, WomensPrayer } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
-import { toast } from "@/hooks/use-toast";
-import { HeartExplosion } from "@/components/ui/heart-explosion";
-import { fetchTehillimBothLanguages } from "@/lib/sefaria-api";
+import { apiRequest } from "../../lib/queryClient";
+import { toast } from "../../hooks/use-toast";
+import { HeartExplosion } from "../ui/heart-explosion";
+import { fetchTehillimBothLanguages } from "../../lib/sefaria-api";
 
 interface TefillaModalsProps {
   onSectionChange?: (section: any) => void;
