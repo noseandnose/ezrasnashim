@@ -689,7 +689,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Discount promotion routes
   app.get("/api/discount-promotions/active", async (req, res) => {
     try {
-      const promotion = await storage.getActiveDiscountPromotion();
+      const { lat, lng } = req.query;
+      let userLocation = "worldwide";
+      
+      // Check if coordinates are in Israel (approximate bounding box)
+      if (lat && lng) {
+        const latitude = parseFloat(lat as string);
+        const longitude = parseFloat(lng as string);
+        
+        // Israel's approximate coordinates: 29.5-33.4°N, 34.3-35.9°E
+        if (latitude >= 29.5 && latitude <= 33.4 && longitude >= 34.3 && longitude <= 35.9) {
+          userLocation = "israel";
+        }
+      }
+      
+      const promotion = await storage.getActiveDiscountPromotion(userLocation);
       res.json(promotion || null);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch active discount promotion" });

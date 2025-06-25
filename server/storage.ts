@@ -581,20 +581,46 @@ export class DatabaseStorage implements IStorage {
     return prayer;
   }
 
-  async getActiveDiscountPromotion(): Promise<DiscountPromotion | undefined> {
+  async getActiveDiscountPromotion(userLocation?: string): Promise<DiscountPromotion | undefined> {
     const now = new Date();
-    const [promotion] = await db
+    
+    // Determine target location based on user's coordinates
+    let targetLocation = "worldwide";
+    if (userLocation === "israel") {
+      targetLocation = "israel";
+    }
+    
+    // First try to get location-specific promotion
+    let promotion = await db
       .select()
       .from(discountPromotions)
       .where(
         and(
           eq(discountPromotions.isActive, true),
           lt(discountPromotions.startDate, now),
-          gt(discountPromotions.endDate, now)
+          gt(discountPromotions.endDate, now),
+          eq(discountPromotions.targetLocation, targetLocation)
         )
       )
       .limit(1);
-    return promotion;
+    
+    // If no location-specific promotion found, fall back to worldwide
+    if (!promotion.length && targetLocation === "israel") {
+      promotion = await db
+        .select()
+        .from(discountPromotions)
+        .where(
+          and(
+            eq(discountPromotions.isActive, true),
+            lt(discountPromotions.startDate, now),
+            gt(discountPromotions.endDate, now),
+            eq(discountPromotions.targetLocation, "worldwide")
+          )
+        )
+        .limit(1);
+    }
+    
+    return promotion[0];
   }
 
   async createDiscountPromotion(insertPromotion: InsertDiscountPromotion): Promise<DiscountPromotion> {
