@@ -4,7 +4,13 @@ import { registerRoutes } from "./routes.js";
 import cors from "cors";
 const app = express();
 
-app.use(cors())
+app.use(cors({
+  origin: [
+      'localhost:5174',
+      'localhost:5173',
+      'http://ezras-nashim-frontend.s3-website-us-east-1.amazonaws.com'
+  ]
+}))
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
