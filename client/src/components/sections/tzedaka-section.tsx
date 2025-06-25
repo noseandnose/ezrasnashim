@@ -1,12 +1,12 @@
 import { Heart, BookOpen, Shield, Plus, HandHeart, Gift, Star, Sparkles, Target, Users, DollarSign, TrendingUp } from "lucide-react";
-import { useModalStore, useDailyCompletionStore } from "../../lib/types";
+import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
-import { Button } from "../ui/button";
-import { HeartExplosion } from "../ui/heart-explosion";
-import type { Campaign } from "../../../shared/schema-optimized";
-import type { Section } from "../../pages/home";
+import { Button } from "@/components/ui/button";
+import { HeartExplosion } from "@/components/ui/heart-explosion";
+import type { Campaign } from "@shared/schema";
+import type { Section } from "@/pages/home";
 
 interface TzedakaSectionProps {
   onSectionChange?: (section: Section) => void;

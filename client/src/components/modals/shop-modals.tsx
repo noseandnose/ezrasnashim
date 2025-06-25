@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { useModalStore } from "../../lib/types";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
-import { Button } from "../ui/button";
+import { useModalStore } from "@/lib/types";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Copy, ExternalLink } from "lucide-react";
-import { useToast } from "../../hooks/use-toast";
-import type { ShopItem } from "../../../shared/schema-optimized";
+import { useToast } from "@/hooks/use-toast";
+import type { ShopItem } from "@shared/schema";
 
 export default function ShopModals() {
   const { activeModal, closeModal } = useModalStore();

@@ -205,6 +205,7 @@ export const dailyChizuk = pgTable("daily_chizuk", {
   date: date("date").notNull().unique(),
   title: text("title").notNull(),
   content: text("content").notNull(),
+  source: text("source"),
   audioUrl: text("audio_url"),
   duration: text("duration"),
   speaker: text("speaker"),

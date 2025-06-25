@@ -134,18 +134,6 @@ Changelog:
 - June 25, 2025. Optimized Hebrew prayer formatting by removing double line spaces between headers and content
 - June 25, 2025. Removed transliteration field from tefilla prayers in database and frontend
 - June 25, 2025. Changed tehillim name automatic removal from 7 days to 18 days in backend and frontend
-- June 25, 2025. Integrated Sefaria API for Tehillim text instead of local database storage
-- June 25, 2025. Configured Vite to use VITE_API_URL environment variable for API calls
-- June 25, 2025. Updated API client to use environment variable for base URL configuration
-- June 25, 2025. Unified development server to serve both API and frontend on single port
-- June 25, 2025. Completed Sefaria integration with authentic Hebrew and English Tehillim text
-- June 25, 2025. Separated backend (port 5000) and frontend (port 80) servers for proper development setup
-- June 25, 2025. Fixed development server configuration to run both backend API and frontend Vite servers simultaneously
-- June 25, 2025. Implemented unified server architecture serving both frontend and API on port 80 with Vite middleware integration
-- June 25, 2025. Completed full-stack development setup with backend API (port 5000) and frontend Vite server (port 80) running simultaneously
-- June 25, 2025. Fixed application architecture with unified server on port 80 serving both frontend and API endpoints through Vite middleware
-- June 25, 2025. Removed Sefaria API dependencies and fixed import path issues to get basic frontend working without external dependencies
-- June 25, 2025. Systematically resolved all import path conflicts and compilation issues to enable proper frontend loading
 ```
 
 ## User Preferences
