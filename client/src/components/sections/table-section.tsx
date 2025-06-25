@@ -17,7 +17,7 @@ export default function TableSection() {
   const { data: inspirationContent } = useQuery<any>({
     queryKey: [`/api/table/inspiration/${today}`],
     queryFn: async () => {
-      const response = await fetch(`/api/table/inspiration/${today}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/inspiration/${today}`);
       if (!response.ok) return null;
       return response.json();
     },
@@ -37,7 +37,7 @@ export default function TableSection() {
   const { data: recipeContent } = useQuery<any>({
     queryKey: [`/api/table/recipe/${getWeekKey()}`],
     queryFn: async () => {
-      const response = await fetch(`/api/table/recipe/${getWeekKey()}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/recipe/${getWeekKey()}`);
       if (!response.ok) return null;
       return response.json();
     },
@@ -48,7 +48,7 @@ export default function TableSection() {
   const { data: parshaContent } = useQuery<any>({
     queryKey: [`/api/table/vort/${getWeekKey()}`],
     queryFn: async () => {
-      const response = await fetch(`/api/table/vort/${getWeekKey()}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/vort/${getWeekKey()}`);
       if (!response.ok) return null;
       return response.json();
     },
