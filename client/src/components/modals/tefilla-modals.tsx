@@ -102,10 +102,22 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     enabled: activeModal === 'tehillim-text'
   });
 
+  // Fetch Tehillim text from Sefaria API
+  const { data: tehillimText } = useQuery<{text: string; perek: number; language: string}>({
+    queryKey: ['/api/tehillim/text', progress?.currentPerek, language],
+    queryFn: () => fetch(`/api/tehillim/text/${progress?.currentPerek}?language=${language}`).then(res => res.json()),
+    enabled: activeModal === 'tehillim-text' && !!progress?.currentPerek
+  });
+
   // Mutation to complete a perek
   const completePerekMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest('POST', '/api/tehillim/complete', { completedBy: 'user' });
+      if (!progress) throw new Error('No progress data');
+      return apiRequest('POST', '/api/tehillim/complete', { 
+        currentPerek: progress.currentPerek,
+        language: progress.currentLanguage || 'english',
+        completedBy: 'user' 
+      });
     },
     onSuccess: () => {
       toast({

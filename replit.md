@@ -135,6 +135,7 @@ Changelog:
 - June 25, 2025. Removed transliteration field from tefilla prayers in database and frontend
 - June 25, 2025. Changed tehillim name automatic removal from 7 days to 18 days in backend and frontend
 - June 25, 2025. Comprehensive TypeScript audit: Fixed all cacheTime deprecations (replaced with gcTime), added proper type annotations, eliminated 'any' types where possible
+- June 25, 2025. Integrated Sefaria API for Tehillim content: Replaced database storage with live API calls, added language support (English/Hebrew), updated completion tracking to include perek number and language preference
 ```
 
 ## User Preferences
