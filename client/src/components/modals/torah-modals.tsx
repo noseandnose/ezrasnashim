@@ -76,7 +76,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     queryFn: () => fetch(`/api/torah/loshon/${today}`).then(res => res.json()),
     enabled: activeModal === 'loshon',
     staleTime: 5 * 60 * 1000,
-    cacheTime: 30 * 60 * 1000
+    gcTime: 30 * 60 * 1000
   });
 
   const { data: pirkeiAvotContent } = useQuery<any>({
@@ -84,7 +84,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     queryFn: () => fetch(`/api/torah/pirkei-avot/${today}`).then(res => res.json()),
     enabled: activeModal === 'pirkei-avot',
     staleTime: 5 * 60 * 1000,
-    cacheTime: 30 * 60 * 1000
+    gcTime: 30 * 60 * 1000
   });
 
   return (

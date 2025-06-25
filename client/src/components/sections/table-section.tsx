@@ -22,7 +22,7 @@ export default function TableSection() {
       return response.json();
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
-    cacheTime: 60 * 60 * 1000 // 1 hour
+    gcTime: 60 * 60 * 1000 // 1 hour
   });
 
   // Get week key for weekly content

@@ -41,7 +41,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       return response.json();
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
-    cacheTime: 60 * 60 * 1000 // 1 hour
+    gcTime: 60 * 60 * 1000 // 1 hour
   });
 
   const navigateToSection = (section: Section) => {
