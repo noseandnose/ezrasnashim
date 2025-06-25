@@ -34,8 +34,14 @@ export default function DonationModal() {
       }, 100);
       
       if (data.clientSecret) {
-        // Redirect to Stripe checkout or handle payment flow
-        window.location.href = `/checkout?payment_intent=${data.clientSecret}`;
+        // Navigate to donation page with amount and type
+        const params = new URLSearchParams({
+          amount: amount,
+          type: "General Donation",
+          sponsor: "",
+          dedication: ""
+        });
+        window.location.href = `/donate?${params.toString()}`;
       }
     },
     onError: (error) => {

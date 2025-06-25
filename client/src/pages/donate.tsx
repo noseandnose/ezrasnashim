@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import { useLocation } from "wouter";
+import ApplePayButton from "@/components/ui/apple-pay-button";
 
 // Load Stripe outside of component render
 if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
@@ -82,12 +83,41 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         </div>
       </div>
 
+      {/* Apple Pay Button - Shows first if available */}
+      <div className="space-y-3">
+        <ApplePayButton
+          amount={amount}
+          onSuccess={handleSuccess}
+          onError={(error: string) => {
+            toast({
+              title: "Apple Pay Failed",
+              description: error,
+              variant: "destructive",
+            });
+          }}
+          disabled={isProcessing}
+        />
+        
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-gray-200" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-white px-2 text-gray-500">Or pay with card</span>
+          </div>
+        </div>
+      </div>
+
       <PaymentElement 
         options={{
           layout: 'tabs',
-          paymentMethodOrder: ['apple_pay', 'google_pay', 'card'],
+          paymentMethodOrder: ['card'],
           fields: {
             billingDetails: 'never'
+          },
+          wallets: {
+            applePay: 'never',
+            googlePay: 'auto'
           }
         }}
       />

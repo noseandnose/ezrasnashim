@@ -779,7 +779,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Stripe payment route for donations
   app.post("/api/create-payment-intent", async (req, res) => {
     try {
-      const { amount } = req.body;
+      const { amount, donationType, metadata } = req.body;
       
       if (!amount || amount <= 0) {
         return res.status(400).json({ message: "Invalid amount" });
@@ -788,8 +788,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100), // Convert to cents
         currency: "usd",
+        payment_method_types: ['card', 'apple_pay', 'google_pay'],
         metadata: {
-          source: "ezras-nashim-donation"
+          source: "ezras-nashim-donation",
+          donationType: donationType || "General Donation",
+          sponsorName: metadata?.sponsorName || "",
+          dedication: metadata?.dedication || ""
         }
       });
 
