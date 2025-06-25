@@ -134,6 +134,7 @@ Changelog:
 - June 25, 2025. Optimized Hebrew prayer formatting by removing double line spaces between headers and content
 - June 25, 2025. Removed transliteration field from tefilla prayers in database and frontend
 - June 25, 2025. Changed tehillim name automatic removal from 7 days to 18 days in backend and frontend
+- June 25, 2025. Comprehensive TypeScript audit: Fixed all cacheTime deprecations (replaced with gcTime), added proper type annotations, eliminated 'any' types where possible
 ```
 
 ## User Preferences

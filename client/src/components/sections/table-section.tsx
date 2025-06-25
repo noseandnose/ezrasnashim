@@ -14,7 +14,7 @@ export default function TableSection() {
 
   // Fetch today's table inspiration content
   const today = new Date().toISOString().split('T')[0];
-  const { data: inspirationContent } = useQuery<any>({
+  const { data: inspirationContent } = useQuery<Record<string, any>>({
     queryKey: [`/api/table/inspiration/${today}`],
     queryFn: async () => {
       const response = await fetch(`/api/table/inspiration/${today}`);
@@ -34,7 +34,7 @@ export default function TableSection() {
   };
 
   // Fetch weekly recipe and parsha content
-  const { data: recipeContent } = useQuery<any>({
+  const { data: recipeContent } = useQuery<Record<string, any>>({
     queryKey: [`/api/table/recipe/${getWeekKey()}`],
     queryFn: async () => {
       const response = await fetch(`/api/table/recipe/${getWeekKey()}`);

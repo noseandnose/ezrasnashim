@@ -21,12 +21,12 @@ export default function TableModals() {
     enabled: activeModal === 'recipe'
   });
 
-  const { data: inspirationContent } = useQuery<any>({
+  const { data: inspirationContent } = useQuery<Record<string, any>>({
     queryKey: [`/api/table/inspiration/${new Date().toISOString().split('T')[0]}`],
     enabled: activeModal === 'inspiration'
   });
 
-  const { data: parshaContent } = useQuery<any>({
+  const { data: parshaContent } = useQuery<Record<string, any>>({
     queryKey: ['/api/table/vort', getWeekKey()],
     enabled: activeModal === 'parsha'
   });

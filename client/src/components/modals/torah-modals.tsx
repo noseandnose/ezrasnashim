@@ -79,7 +79,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000
   });
 
-  const { data: pirkeiAvotContent } = useQuery<any>({
+  const { data: pirkeiAvotContent } = useQuery<Record<string, any>>({
     queryKey: ['/api/torah/pirkei-avot', today],
     queryFn: () => fetch(`/api/torah/pirkei-avot/${today}`).then(res => res.json()),
     enabled: activeModal === 'pirkei-avot',
