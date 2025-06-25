@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../../lib/queryClient";
 import { toast } from "../../hooks/use-toast";
-import type { TehillimName, GlobalTehillimProgress } from "../../../shared/schema";
+import type { TehillimName, GlobalTehillimProgress } from "../../../shared/schema-optimized";
 
 export default function TefillaSection({ onSectionChange }: TefillaSectionProps) {
   const { openModal } = useModalStore();

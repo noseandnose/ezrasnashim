@@ -5,7 +5,7 @@ import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Ca
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { MinchaPrayer, NishmasText, GlobalTehillimProgress, TehillimName, WomensPrayer } from "../../../shared/schema";
+import { MinchaPrayer, NishmasText, GlobalTehillimProgress, TehillimName, WomensPrayer } from "../../../shared/schema-optimized";
 import { apiRequest } from "../../lib/queryClient";
 import { toast } from "../../hooks/use-toast";
 import { HeartExplosion } from "../ui/heart-explosion";

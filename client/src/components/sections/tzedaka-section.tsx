@@ -5,7 +5,7 @@ import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { HeartExplosion } from "../ui/heart-explosion";
-import type { Campaign } from "../../../shared/schema";
+import type { Campaign } from "../../../shared/schema-optimized";
 import type { Section } from "../../pages/home";
 
 interface TzedakaSectionProps {

@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "../ui/button";
 import { Copy, ExternalLink } from "lucide-react";
 import { useToast } from "../../hooks/use-toast";
-import type { ShopItem } from "../../../shared/schema";
+import type { ShopItem } from "../../../shared/schema-optimized";
 
 export default function ShopModals() {
   const { activeModal, closeModal } = useModalStore();
