@@ -49,7 +49,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
   const { data: halachaContent } = useQuery<any>({
     queryKey: ['/api/torah/halacha', today],
-    queryFn: () => fetch(`/api/torah/halacha/${today}`).then(res => res.json()),
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/torah/halacha/${today}`).then(res => res.json()),
     enabled: activeModal === 'halacha',
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 30 * 60 * 1000 // 30 minutes
@@ -57,7 +57,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
   const { data: mussarContent } = useQuery<any>({
     queryKey: ['/api/torah/mussar', today],
-    queryFn: () => fetch(`/api/torah/mussar/${today}`).then(res => res.json()),
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/torah/mussar/${today}`).then(res => res.json()),
     enabled: activeModal === 'mussar',
     staleTime: 5 * 60 * 1000,
     cacheTime: 30 * 60 * 1000
@@ -65,7 +65,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
   const { data: chizukContent } = useQuery<any>({
     queryKey: ['/api/torah/chizuk', today],
-    queryFn: () => fetch(`/api/torah/chizuk/${today}`).then(res => res.json()),
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/torah/chizuk/${today}`).then(res => res.json()),
     enabled: activeModal === 'chizuk',
     staleTime: 5 * 60 * 1000,
     cacheTime: 30 * 60 * 1000
@@ -73,7 +73,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
   const { data: loshonContent } = useQuery<any>({
     queryKey: ['/api/torah/loshon', today],
-    queryFn: () => fetch(`/api/torah/loshon/${today}`).then(res => res.json()),
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/torah/loshon/${today}`).then(res => res.json()),
     enabled: activeModal === 'loshon',
     staleTime: 5 * 60 * 1000,
     cacheTime: 30 * 60 * 1000
@@ -81,7 +81,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
   const { data: pirkeiAvotContent } = useQuery<any>({
     queryKey: ['/api/torah/pirkei-avot', today],
-    queryFn: () => fetch(`/api/torah/pirkei-avot/${today}`).then(res => res.json()),
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/torah/pirkei-avot/${today}`).then(res => res.json()),
     enabled: activeModal === 'pirkei-avot',
     staleTime: 5 * 60 * 1000,
     cacheTime: 30 * 60 * 1000

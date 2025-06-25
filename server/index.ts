@@ -4,9 +4,7 @@ import { registerRoutes } from "./routes.js";
 import cors from "cors";
 const app = express();
 
-app.use(cors({
-  origin: ["http://localhost:5173"]
-}))
+app.use(cors())
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -56,7 +54,7 @@ app.use((req, res, next) => {
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
   // Start server
-  const port = process.env.PORT ?? 5000;
+  const port = process.env.PORT ?? 3000;
   server.listen(port, () => {
     console.log(`Server listening on port ${port}`);
   });

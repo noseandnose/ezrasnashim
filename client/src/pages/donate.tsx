@@ -53,7 +53,7 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
       // Call completion handler for sponsor day donations
       if (donationType === 'Sponsor a Day of Ezras Nashim' && sponsorName) {
         try {
-          await apiRequest("POST", "/api/donation-complete", {
+          await apiRequest("POST", "http://18.193.108.87/donation-complete", {
             donationType,
             sponsorName,
             dedication: dedication || null
@@ -130,7 +130,7 @@ export default function Donate() {
     }
 
     // Create PaymentIntent when component loads
-    apiRequest("POST", "/api/create-payment-intent", {
+    apiRequest("POST", "http://18.193.108.87/create-payment-intent", {
       amount,
       donationType,
       metadata: {

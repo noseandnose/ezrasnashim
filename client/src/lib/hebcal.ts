@@ -2,7 +2,7 @@ import type { HebcalResponse } from "./types";
 
 export async function fetchHebcalData(location: string = "5128581"): Promise<HebcalResponse> {
   try {
-    const response = await fetch(`/api/hebcal/${location}`);
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/hebcal/${location}`);
     if (!response.ok) {
       throw new Error('Failed to fetch Hebcal data');
     }
