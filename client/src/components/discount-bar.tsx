@@ -35,7 +35,7 @@ export default function DiscountBar({ className = "" }: DiscountBarProps) {
         return null;
       }
       const data = await response.json();
-      console.log('Discount promotion data:', data);
+    
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
