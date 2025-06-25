@@ -134,6 +134,9 @@ Changelog:
 - June 25, 2025. Optimized Hebrew prayer formatting by removing double line spaces between headers and content
 - June 25, 2025. Removed transliteration field from tefilla prayers in database and frontend
 - June 25, 2025. Changed tehillim name automatic removal from 7 days to 18 days in backend and frontend
+- June 25, 2025. Integrated Sefaria API for Tehillim text instead of local database storage
+- June 25, 2025. Configured Vite to use VITE_API_URL environment variable for API calls
+- June 25, 2025. Updated API client to use environment variable for base URL configuration
 ```
 
 ## User Preferences

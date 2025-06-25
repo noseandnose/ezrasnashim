@@ -9,6 +9,7 @@ import { MinchaPrayer, NishmasText, GlobalTehillimProgress, TehillimName, Womens
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
+import { fetchTehillimBothLanguages } from "@/lib/sefaria-api";
 
 interface TefillaModalsProps {
   onSectionChange?: (section: any) => void;
@@ -281,7 +282,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               className={`${showHebrew ? 'font-hebrew text-right' : 'font-english'} leading-relaxed`}
               style={{ fontSize: `${fontSize}px` }}
             >
-              {getTehillimText(progress?.currentPerek || 1, showHebrew)}
+              {getTehillimText(showHebrew)}
             </div>
           </div>
 
