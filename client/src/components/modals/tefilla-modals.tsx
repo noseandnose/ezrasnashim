@@ -356,7 +356,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                       style={{ fontSize: `${fontSize}px` }}
                       dangerouslySetInnerHTML={{
                         __html: language === 'hebrew' 
-                          ? (prayer.hebrewText || '').replace(/\*\*(.*?)\*\*/g, '<strong class="prayer-header">$1</strong>')
+                          ? (prayer.hebrewText || '').replace(/\*\*(.*?)\*\*/g, '<strong class="prayer-header">$1</strong><br>')
                           : prayer.englishTranslation
                       }}
                     />
