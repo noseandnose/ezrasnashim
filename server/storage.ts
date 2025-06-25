@@ -605,7 +605,7 @@ export class DatabaseStorage implements IStorage {
         LIMIT 1
       `);
       
-      let promotion = result.length > 0 ? result[0] : null;
+      let promotion = result.rows && result.rows.length > 0 ? result.rows[0] : null;
       
       // If no location-specific promotion found, fall back to worldwide
       if (!promotion && targetLocation === "israel") {
@@ -624,7 +624,7 @@ export class DatabaseStorage implements IStorage {
           LIMIT 1
         `);
         
-        promotion = fallbackResult.length > 0 ? fallbackResult[0] : null;
+        promotion = fallbackResult.rows && fallbackResult.rows.length > 0 ? fallbackResult.rows[0] : null;
       }
       
       // Transform to match expected interface
@@ -638,9 +638,8 @@ export class DatabaseStorage implements IStorage {
           startDate: promotion.start_date,
           endDate: promotion.end_date,
           isActive: promotion.is_active,
-          targetLocation: promotion.target_location,
           createdAt: promotion.created_at
-        };
+        } as any;
       }
       
       return undefined;

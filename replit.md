@@ -142,10 +142,12 @@ Changelog:
 - June 25, 2025. Expanded Pirkei Avot collection to include comprehensive teachings from all 6 chapters with authentic translations
 - June 25, 2025. Fixed Tehillim preview loading state: Added skeleton animation while fetching Hebrew text to prevent confusing placeholder flashing
 - June 25, 2025. Implemented location-based discount promotions: Added targetLocation field to support different discounts for Israel vs worldwide, using same geolocation system as zmanim times
+- June 25, 2025. Applied permanent styling changes: All text is now pure black (#000000) instead of soft gray, with bold headings for improved readability and visual contrast
 ```
 
 ## User Preferences
 
 ```
 Preferred communication style: Simple, everyday language.
+Text styling preference: Pure black text (#000000) with bold headings for better readability.
 ```

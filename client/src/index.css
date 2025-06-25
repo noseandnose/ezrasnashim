@@ -48,7 +48,7 @@
   fill: #E8B4CB !important;
 }
 
-/* TEMPORARY: Force all text to be pure black */
+/* Force all text to be pure black */
 *, *::before, *::after {
   color: #000000 !important;
 }
