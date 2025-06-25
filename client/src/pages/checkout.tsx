@@ -3,7 +3,7 @@ import { useLocation } from 'wouter';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { Button } from '../components/ui/button';
-import { useToast } from '../hooks/use-toast';
+import { useToast } from '../../hooks/use-toast';
 import { Heart, ArrowLeft } from 'lucide-react';
 
 // Load Stripe

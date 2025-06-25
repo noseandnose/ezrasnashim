@@ -1,9 +1,9 @@
 import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar, Moon, MapPin } from "lucide-react";
-import { useModalStore } from "../../lib/types";
-import { useShabbosTime } from "../../hooks/use-shabbos-times";
-import { useGeolocation } from "../../hooks/use-jewish-times";
+import { useModalStore } from "./../lib/types";
+import { useShabbosTime } from "./../hooks/use-shabbos-times";
+import { useGeolocation } from "./../hooks/use-jewish-times";
 import { useQuery } from "@tanstack/react-query";
-import { Card } from "../ui/card";
+import { Card } from ".../ui/card";
 
 export default function TableSection() {
   const { openModal } = useModalStore();
