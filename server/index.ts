@@ -1,9 +1,11 @@
-import express, { type Request, Response, NextFunction } from "express";
+import express from "express";
 import path from "path";
-import { registerRoutes } from "./routes.js";
+import { fileURLToPath } from 'url';
 
-console.log("starting server...");
-console.log('Hello ECS');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+console.log("Starting Ezras Nashim server...");
 
 const app = express();
 app.use(express.json());
