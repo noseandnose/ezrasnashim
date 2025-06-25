@@ -17,7 +17,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
   const { data: quote } = useQuery<InspirationalQuote>({
     queryKey: ['daily-quote', today],
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api//api/quotes/daily/${today}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/quotes/daily/${today}`);
       if (!response.ok) return null;
       return response.json();
     },
