@@ -19,6 +19,7 @@ interface DiscountBarProps {
 
 export default function DiscountBar({ className = "" }: DiscountBarProps) {
   const { data: promotion, isLoading } = useQuery<DiscountPromotion | null>({
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/discount-promotions/active`).then(res => res.json()),
     queryKey: ['/api/discount-promotions/active'],
   });
 
