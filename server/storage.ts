@@ -169,6 +169,7 @@ export class DatabaseStorage implements IStorage {
     if (!progress) {
       const [newProgress] = await db.insert(globalTehillimProgress).values({
         currentPerek: 1,
+        currentLanguage: 'english',
         completedBy: null
       }).returning();
       return newProgress;
@@ -176,12 +177,16 @@ export class DatabaseStorage implements IStorage {
     return progress;
   }
 
-  async updateGlobalTehillimProgress(currentPerek: number, completedBy?: string): Promise<GlobalTehillimProgress> {
+  async updateGlobalTehillimProgress(currentPerek: number, language: string, completedBy?: string): Promise<GlobalTehillimProgress> {
     const [progress] = await db.select().from(globalTehillimProgress).limit(1);
     if (progress) {
+      // Calculate next perek (1-150, cycling)
+      const nextPerek = currentPerek >= 150 ? 1 : currentPerek + 1;
+      
       const [updated] = await db.update(globalTehillimProgress)
         .set({
-          currentPerek: currentPerek > 150 ? 1 : currentPerek,
+          currentPerek: nextPerek,
+          currentLanguage: language,
           lastUpdated: new Date(),
           completedBy: completedBy || null
         })
@@ -199,6 +204,33 @@ export class DatabaseStorage implements IStorage {
     
     const randomIndex = Math.floor(Math.random() * activeNames.length);
     return activeNames[randomIndex];
+  }
+
+  async getSefariaTehillim(perek: number, language: string): Promise<{text: string; perek: number; language: string}> {
+    try {
+      const url = `https://www.sefaria.org/api/v3/texts/Psalms.${perek}?version=${language}&return_format=text_only`;
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Sefaria API error: ${response.status}`);
+      }
+      
+      const data = await response.text();
+      
+      return {
+        text: data.trim(),
+        perek,
+        language
+      };
+    } catch (error) {
+      console.error('Error fetching from Sefaria API:', error);
+      // Return fallback text if API fails
+      return {
+        text: `Tehillim ${perek} - Unable to load from Sefaria API. Please try again.`,
+        perek,
+        language
+      };
+    }
   }
 
   // Mincha methods

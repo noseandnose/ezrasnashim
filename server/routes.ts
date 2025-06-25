@@ -509,22 +509,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Tehillim routes
   app.get("/api/tehillim/progress", async (req, res) => {
     try {
+      await storage.cleanupExpiredNames();
       const progress = await storage.getGlobalTehillimProgress();
-      res.json(progress);
+      const randomName = await storage.getRandomNameForPerek();
+      
+      res.json({
+        ...progress,
+        assignedName: randomName?.hebrewName || null
+      });
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch Tehillim progress" });
+      console.error('Error fetching Tehillim progress:', error);
+      res.status(500).json({ error: "Failed to fetch Tehillim progress" });
     }
   });
 
   app.post("/api/tehillim/complete", async (req, res) => {
     try {
-      const { completedBy } = req.body;
-      const currentProgress = await storage.getGlobalTehillimProgress();
-      const nextPerek = currentProgress.currentPerek + 1;
-      const updatedProgress = await storage.updateGlobalTehillimProgress(nextPerek, completedBy);
+      const { currentPerek, language, completedBy } = req.body;
+      
+      if (!currentPerek || currentPerek < 1 || currentPerek > 150) {
+        return res.status(400).json({ error: "Invalid perek number" });
+      }
+      
+      if (!language || !['english', 'hebrew'].includes(language)) {
+        return res.status(400).json({ error: "Language must be 'english' or 'hebrew'" });
+      }
+      
+      const updatedProgress = await storage.updateGlobalTehillimProgress(currentPerek, language, completedBy);
       res.json(updatedProgress);
     } catch (error) {
-      res.status(500).json({ message: "Failed to complete Tehillim perek" });
+      console.error('Error completing Tehillim:', error);
+      res.status(500).json({ error: "Failed to complete Tehillim" });
     }
   });
 
@@ -543,6 +558,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(names);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch Tehillim names" });
+    }
+  });
+
+  // Get Tehillim text from Sefaria API
+  app.get("/api/tehillim/text/:perek", async (req, res) => {
+    try {
+      const perek = parseInt(req.params.perek);
+      const language = req.query.language as string || 'english';
+      
+      if (isNaN(perek) || perek < 1 || perek > 150) {
+        return res.status(400).json({ error: "Perek must be between 1 and 150" });
+      }
+      
+      if (!['english', 'hebrew'].includes(language)) {
+        return res.status(400).json({ error: "Language must be 'english' or 'hebrew'" });
+      }
+      
+      const tehillimData = await storage.getSefariaTehillim(perek, language);
+      res.json(tehillimData);
+    } catch (error) {
+      console.error('Error fetching Tehillim text:', error);
+      res.status(500).json({ error: "Failed to fetch Tehillim text" });
     }
   });
 
