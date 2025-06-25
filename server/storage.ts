@@ -247,13 +247,17 @@ export class DatabaseStorage implements IStorage {
         throw new Error('No text content found in API response');
       }
       
-      // Clean up HTML formatting from Sefaria text
+      // Clean up HTML formatting and Hebrew-specific markers from Sefaria text
       const cleanText = text
         .replace(/<br\s*\/?>/gi, '\n')  // Replace <br> tags with newlines
         .replace(/<small>(.*?)<\/small>/gi, '$1')  // Remove <small> tags but keep content
         .replace(/<sup[^>]*>.*?<\/sup>/gi, '')  // Remove footnote superscripts
         .replace(/<i[^>]*>.*?<\/i>/gi, '')  // Remove footnote italic text
         .replace(/<[^>]*>/gi, '')  // Remove any remaining HTML tags
+        .replace(/&thinsp;/gi, '')  // Remove thin space HTML entities
+        .replace(/&nbsp;/gi, ' ')  // Replace non-breaking spaces with regular spaces
+        .replace(/&[a-zA-Z]+;/gi, '')  // Remove other HTML entities
+        .replace(/\{[פס]\}/g, '')  // Remove Hebrew paragraph markers like {פ} and {ס}
         .replace(/\n\s*\n/g, '\n')  // Remove multiple consecutive newlines
         .trim();
       
