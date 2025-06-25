@@ -60,7 +60,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     queryFn: () => fetch(`/api/torah/mussar/${today}`).then(res => res.json()),
     enabled: activeModal === 'mussar',
     staleTime: 5 * 60 * 1000,
-    cacheTime: 30 * 60 * 1000
+    gcTime: 30 * 60 * 1000
   });
 
   const { data: chizukContent } = useQuery<any>({
@@ -68,7 +68,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     queryFn: () => fetch(`/api/torah/chizuk/${today}`).then(res => res.json()),
     enabled: activeModal === 'chizuk',
     staleTime: 5 * 60 * 1000,
-    cacheTime: 30 * 60 * 1000
+    gcTime: 30 * 60 * 1000
   });
 
   const { data: loshonContent } = useQuery<any>({
