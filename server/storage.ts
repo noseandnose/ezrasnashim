@@ -62,8 +62,9 @@ export interface IStorage {
   createTehillimName(name: InsertTehillimName): Promise<TehillimName>;
   cleanupExpiredNames(): Promise<void>;
   getGlobalTehillimProgress(): Promise<GlobalTehillimProgress>;
-  updateGlobalTehillimProgress(currentPerek: number, completedBy?: string): Promise<GlobalTehillimProgress>;
+  updateGlobalTehillimProgress(currentPerek: number, language: string, completedBy?: string): Promise<GlobalTehillimProgress>;
   getRandomNameForPerek(): Promise<TehillimName | undefined>;
+  getSefariaTehillim(perek: number, language: string): Promise<{text: string; perek: number; language: string}>;
 
   // Mincha methods
   getMinchaPrayers(): Promise<MinchaPrayer[]>;
