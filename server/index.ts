@@ -2,7 +2,6 @@ console.log("starting server...");
 console.log('Hello ECS'); setTimeout(() => {}, 60000);
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes.js";
-import { setupVite, serveStatic, log } from "./vite.js";
 
 const app = express();
 app.use(express.json());
@@ -49,18 +48,9 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (process.env.NODE_ENV === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
-  }
-
   // Start server
   const port = process.env.PORT ?? 5000;
   server.listen(port, "0.0.0.0", () => {
-    log(`Server listening on port ${port}`);
+    console.log(`Server listening on port ${port}`);
   });
 })();
