@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { useState, useEffect } from "react";
 import AudioPlayer from "@/components/audio-player";
+import { HeartExplosion } from "@/components/ui/heart-explosion";
 
 interface TorahModalsProps {
   onSectionChange?: (section: any) => void;
@@ -13,97 +15,145 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   const { activeModal, closeModal, openModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const [, setLocation] = useLocation();
+  const [showExplosion, setShowExplosion] = useState(false);
+
+  // Reset explosion state when modal changes
+  useEffect(() => {
+    setShowExplosion(false);
+  }, [activeModal]);
 
   const handleTorahComplete = () => {
-    completeTask('torah');
-    closeModal();
+    setShowExplosion(true);
     
-    // Navigate to home section to show progress
-    if (onSectionChange) {
-      onSectionChange('home');
-    }
-    
-    // Check if all tasks are completed and show congratulations
+    // Wait for animation to complete before proceeding
     setTimeout(() => {
-      if (checkAndShowCongratulations()) {
-        openModal('congratulations');
+      setShowExplosion(false); // Reset explosion state
+      completeTask('torah');
+      closeModal();
+      
+      // Navigate to home section to show progress
+      if (onSectionChange) {
+        onSectionChange('home');
       }
-    }, 200);
+      
+      // Check if all tasks are completed and show congratulations
+      setTimeout(() => {
+        if (checkAndShowCongratulations()) {
+          openModal('congratulations');
+        }
+      }, 200);
+    }, 500);
   };
 
   const today = new Date().toISOString().split('T')[0];
 
   const { data: halachaContent } = useQuery<any>({
     queryKey: ['/api/torah/halacha', today],
-    enabled: activeModal === 'halacha'
+    queryFn: () => fetch(`/api/torah/halacha/${today}`).then(res => res.json()),
+    enabled: activeModal === 'halacha',
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 30 * 60 * 1000 // 30 minutes
   });
 
   const { data: mussarContent } = useQuery<any>({
     queryKey: ['/api/torah/mussar', today],
-    enabled: activeModal === 'mussar'
+    queryFn: () => fetch(`/api/torah/mussar/${today}`).then(res => res.json()),
+    enabled: activeModal === 'mussar',
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 30 * 60 * 1000
   });
 
   const { data: chizukContent } = useQuery<any>({
     queryKey: ['/api/torah/chizuk', today],
-    enabled: activeModal === 'chizuk'
+    queryFn: () => fetch(`/api/torah/chizuk/${today}`).then(res => res.json()),
+    enabled: activeModal === 'chizuk',
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 30 * 60 * 1000
   });
 
   const { data: loshonContent } = useQuery<any>({
     queryKey: ['/api/torah/loshon', today],
-    enabled: activeModal === 'loshon'
+    queryFn: () => fetch(`/api/torah/loshon/${today}`).then(res => res.json()),
+    enabled: activeModal === 'loshon',
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 30 * 60 * 1000
   });
 
   const { data: pirkeiAvotContent } = useQuery<any>({
     queryKey: ['/api/torah/pirkei-avot', today],
-    enabled: activeModal === 'pirkei-avot'
+    queryFn: () => fetch(`/api/torah/pirkei-avot/${today}`).then(res => res.json()),
+    enabled: activeModal === 'pirkei-avot',
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 30 * 60 * 1000
   });
 
   return (
     <>
       {/* Halacha Modal */}
       <Dialog open={activeModal === 'halacha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="halacha-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold mb-2">Daily Halacha</DialogTitle>
-            <DialogDescription className="text-sm text-gray-600 font-sans">{halachaContent?.title || "Laws of Chanukah - Day 3"}</DialogDescription>
+            {halachaContent && (
+              <DialogDescription className="text-sm text-gray-600 font-sans">{halachaContent.title}</DialogDescription>
+            )}
           </DialogHeader>
+          <div id="halacha-description" className="sr-only">Daily Jewish law and practice content</div>
           
-          <div className="space-y-3 text-sm text-gray-700 font-sans">
-            <div>
-              <p><strong>Today's Halacha:</strong> {halachaContent?.content || "Candles should be lit immediately after sunset, and should burn for at least 30 minutes. The mitzvah is to light one candle each night, with the minhag to add an additional candle each subsequent night."}</p>
+          {halachaContent && (
+            <div className="space-y-3 text-sm text-gray-700 font-sans">
+              <div>
+                <p><strong>Today's Halacha:</strong> {halachaContent.content}</p>
+                {halachaContent.source && (
+                  <p className="mt-2 text-xs text-gray-500">Source: {halachaContent.source}</p>
+                )}
+              </div>
             </div>
-          </div>
+          )}
           
-          <Button 
-            onClick={handleTorahComplete} 
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
-          >
-            Complete
-          </Button>
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={handleTorahComplete} 
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+            >
+              Complete
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
         </DialogContent>
       </Dialog>
 
       {/* Mussar Modal */}
       <Dialog open={activeModal === 'mussar'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6 font-sans">
+        <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6 font-sans" aria-describedby="mussar-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold mb-2">Daily Mussar</DialogTitle>
-            <DialogDescription className="text-sm text-gray-600 font-sans">Character Development</DialogDescription>
+            {mussarContent && (
+              <DialogDescription className="text-sm text-gray-600 font-sans">{mussarContent.title}</DialogDescription>
+            )}
           </DialogHeader>
+          <div id="mussar-description" className="sr-only">Daily character development and spiritual growth content</div>
           
-          <div className="space-y-3 text-sm text-gray-700 font-sans">
-            <div>
-              <p><strong>Today's Focus:</strong> Patience and understanding in our daily interactions.</p>
-              <p className="mt-2">When we encounter challenges, remember that each test is an opportunity for growth and spiritual elevation.</p>
+          {mussarContent && (
+            <div className="space-y-3 text-sm text-gray-700 font-sans">
+              <div>
+                <p><strong>Today's Focus:</strong> {mussarContent.content}</p>
+                {mussarContent.source && (
+                  <p className="mt-2 text-xs text-gray-500">Source: {mussarContent.source}</p>
+                )}
+              </div>
             </div>
-          </div>
+          )}
           
-          <Button 
-            onClick={handleTorahComplete} 
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
-          >
-            Complete
-          </Button>
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={handleTorahComplete} 
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+            >
+              Complete
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -113,57 +163,81 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           <DialogHeader className="text-center">
             <DialogTitle className="text-lg font-semibold mb-2">Daily Chizuk</DialogTitle>
             <DialogDescription>Daily inspiration and spiritual strengthening</DialogDescription>
-            <p className="text-sm text-gray-600 mb-4">
-              {chizukContent?.title || "Inspiration & Strength"}
-            </p>
+            {chizukContent && (
+              <p className="text-sm text-gray-600 mb-4">
+                {chizukContent.title}
+              </p>
+            )}
           </DialogHeader>
           
-          <AudioPlayer 
-            title={chizukContent?.title || "Daily Chizuk"}
-            duration="5:15"
-            audioUrl={chizukContent?.audioUrl || ""}
-          />
+          {chizukContent && chizukContent.audioUrl && (
+            <AudioPlayer 
+              title={chizukContent.title}
+              duration={chizukContent.duration || "5:15"}
+              audioUrl={chizukContent.audioUrl}
+            />
+          )}
           
-          <Button 
-            onClick={handleTorahComplete} 
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
-          >
-            Complete
-          </Button>
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={handleTorahComplete} 
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+            >
+              Complete
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
         </DialogContent>
       </Dialog>
 
       {/* Loshon Horah Modal */}
       <Dialog open={activeModal === 'loshon'} onOpenChange={() => closeModal()}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="loshon-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-semibold mb-2">Loshon Horah</DialogTitle>
-            <p className="text-sm text-gray-600">Guarding Our Speech</p>
+            {loshonContent && (
+              <DialogDescription className="text-sm text-gray-600 font-sans">{loshonContent.title}</DialogDescription>
+            )}
           </DialogHeader>
+          <div id="loshon-description" className="sr-only">Daily content about preventing negative speech and fostering positive communication</div>
           
-          <div className="space-y-3 text-sm text-gray-700">
-            <div>
-              <p><strong>Today's Lesson:</strong> Before speaking about others, ask yourself: Is it true? Is it necessary? Is it kind?</p>
-              <p className="mt-2">Positive speech has the power to build relationships and create harmony in our communities.</p>
+          {loshonContent && (
+            <div className="space-y-3 text-sm text-gray-700 font-sans">
+              <div>
+                <p><strong>Today's Lesson:</strong> {loshonContent.content}</p>
+                {loshonContent.halachicSource && (
+                  <p className="mt-2 text-xs text-gray-500">Source: {loshonContent.halachicSource}</p>
+                )}
+                {loshonContent.practicalTip && (
+                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-xs font-medium text-gray-700">Practical Tip:</p>
+                    <p className="text-xs text-gray-600 mt-1">{loshonContent.practicalTip}</p>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
           
-          <Button 
-            onClick={handleTorahComplete} 
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
-          >
-            Complete
-          </Button>
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={handleTorahComplete} 
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+            >
+              Complete
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
         </DialogContent>
       </Dialog>
 
       {/* Pirkei Avot Modal */}
       <Dialog open={activeModal === 'pirkei-avot'} onOpenChange={() => closeModal()}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="pirkei-avot-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-semibold mb-2">Pirkei Avot</DialogTitle>
             <DialogDescription className="text-sm text-gray-600">Ethics of the Fathers</DialogDescription>
           </DialogHeader>
+          <div id="pirkei-avot-description" className="sr-only">Ethics of the Fathers - timeless wisdom from Jewish sages</div>
           
           <div className="space-y-3 text-sm text-gray-700">
             <div>
@@ -173,12 +247,15 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             </div>
           </div>
           
-          <Button 
-            onClick={handleTorahComplete} 
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
-          >
-            Complete
-          </Button>
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={handleTorahComplete} 
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+            >
+              Complete
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
         </DialogContent>
       </Dialog>
     </>

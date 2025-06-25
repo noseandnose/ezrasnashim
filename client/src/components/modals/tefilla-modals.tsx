@@ -8,6 +8,7 @@ import { useLocation } from "wouter";
 import { MinchaPrayer, NishmasText, GlobalTehillimProgress, TehillimName, WomensPrayer } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
+import { HeartExplosion } from "@/components/ui/heart-explosion";
 
 interface TefillaModalsProps {
   onSectionChange?: (section: any) => void;
@@ -22,7 +23,13 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const [showHebrew, setShowHebrew] = useState(true);
   const [selectedPrayerId, setSelectedPrayerId] = useState<number | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [showExplosion, setShowExplosion] = useState(false);
   const queryClient = useQueryClient();
+
+  // Reset explosion state when modal changes
+  useEffect(() => {
+    setShowExplosion(false);
+  }, [activeModal]);
 
   const handlePrayerSelect = (prayerId: number) => {
     setSelectedPrayerId(prayerId);
@@ -32,20 +39,26 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
   // Complete prayer with task tracking
   const completeWithAnimation = () => {
-    completeTask('tefilla');
-    closeModal();
+    setShowExplosion(true);
     
-    // Navigate to home section to show progress
-    if (onSectionChange) {
-      onSectionChange('home');
-    }
-    
-    // Check if all tasks are completed and show congratulations
+    // Wait for animation to complete before proceeding
     setTimeout(() => {
-      if (checkAndShowCongratulations()) {
-        openModal('congratulations');
+      setShowExplosion(false); // Reset explosion state
+      completeTask('tefilla');
+      closeModal();
+      
+      // Navigate to home section to show progress
+      if (onSectionChange) {
+        onSectionChange('home');
       }
-    }, 200);
+      
+      // Check if all tasks are completed and show congratulations
+      setTimeout(() => {
+        if (checkAndShowCongratulations()) {
+          openModal('congratulations');
+        }
+      }, 200);
+    }, 500);
   };
 
   // Nishmas 40-Day Campaign state with localStorage persistence
@@ -230,40 +243,42 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     <>
       {/* Tehillim Text Modal */}
       <Dialog open={activeModal === 'tehillim-text'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans" aria-describedby="tehillim-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold">Tehillim {progress?.currentPerek || 1}</DialogTitle>
             <DialogDescription className="text-xs text-warm-gray/70">
               Daily chapter from Psalms with Hebrew and English options
             </DialogDescription>
-            <div className="flex items-center justify-between mt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowHebrew(!showHebrew)}
-                className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
-              >
-                {showHebrew ? 'EN' : 'עב'}
-              </Button>
-              <div className="flex-1"></div>
-              <div className="flex items-center gap-0 mr-8">
-                <Type className="h-4 w-4 text-blush-pink mr-2" />
-                <button
-                  onClick={() => setFontSize(Math.max(12, fontSize - 2))}
-                  className="p-1 hover:bg-white rounded-md transition-colors"
-                >
-                  <Minus className="h-3 w-3 text-blush-pink" />
-                </button>
-                <span className="text-xs text-gray-600 min-w-[2rem] text-center px-1">{fontSize}px</span>
-                <button
-                  onClick={() => setFontSize(Math.min(24, fontSize + 2))}
-                  className="p-1 hover:bg-white rounded-md transition-colors"
-                >
-                  <Plus className="h-3 w-3 text-blush-pink" />
-                </button>
-              </div>
-            </div>
           </DialogHeader>
+          <div id="tehillim-description" className="sr-only">Psalms reading and community prayer participation</div>
+          
+          <div className="flex items-center justify-between mt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowHebrew(!showHebrew)}
+              className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
+            >
+              {showHebrew ? 'EN' : 'עב'}
+            </Button>
+            <div className="flex-1"></div>
+            <div className="flex items-center gap-0 mr-8">
+              <Type className="h-4 w-4 text-blush-pink mr-2" />
+              <button
+                onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                className="p-1 hover:bg-white rounded-md transition-colors"
+              >
+                <Minus className="h-3 w-3 text-blush-pink" />
+              </button>
+              <span className="text-xs text-gray-600 min-w-[2rem] text-center px-1">{fontSize}px</span>
+              <button
+                onClick={() => setFontSize(Math.min(24, fontSize + 2))}
+                className="p-1 hover:bg-white rounded-md transition-colors"
+              >
+                <Plus className="h-3 w-3 text-blush-pink" />
+              </button>
+            </div>
+          </div>
 
           {/* Tehillim Text */}
           <div className="mb-6 bg-white/70 rounded-2xl p-4 border border-blush/10">
@@ -275,21 +290,24 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             </div>
           </div>
 
-          <Button 
-            onClick={() => {
-              completePerek();
-              completeWithAnimation();
-            }}
-            disabled={completePerekMutation.isPending}
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
-          >
-            {completePerekMutation.isPending ? 'Completing...' : 'Complete'}
-          </Button>
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={() => {
+                completePerek();
+                completeWithAnimation();
+              }}
+              disabled={completePerekMutation.isPending}
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
+            >
+              {completePerekMutation.isPending ? 'Completing...' : 'Complete'}
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
         </DialogContent>
       </Dialog>
       {/* Mincha Modal */}
       <Dialog open={activeModal === 'mincha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans" aria-describedby="mincha-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold">Mincha Prayer</DialogTitle>
             <DialogDescription className="text-xs text-warm-gray/70">
@@ -323,6 +341,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               </div>
             </div>
           </DialogHeader>
+          <div id="mincha-description" className="sr-only">Afternoon prayer service and instructions</div>
 
           {/* Prayer Content */}
           <div className="space-y-6">
@@ -331,33 +350,35 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             ) : (
               minchaPrayers.map((prayer) => (
                 <div key={prayer.id} className="p-4 bg-white rounded-xl border border-cream-light">
-                  <div className="text-center">
+                  <div className={language === 'hebrew' ? 'text-center' : 'text-left'}>
                     <div
-                      className={`${language === 'hebrew' ? 'font-hebrew text-right' : 'font-english'} leading-relaxed`}
+                      className={`${language === 'hebrew' ? 'font-hebrew text-right' : 'font-english text-left'} leading-relaxed whitespace-pre-line prayer-content`}
                       style={{ fontSize: `${fontSize}px` }}
-                    >
-                      {language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation}
-                    </div>
-                    {prayer.transliteration && language === 'english' && (
-                      <div
-                        className="text-gray-500 italic mt-2"
-                        style={{ fontSize: `${fontSize - 2}px` }}
-                      >
-                        {prayer.transliteration}
-                      </div>
-                    )}
+                      dangerouslySetInnerHTML={{
+                        __html: language === 'hebrew' 
+                          ? (prayer.hebrewText || '')
+                              // First remove any double newlines after headers
+                              .replace(/\*\*(.*?)\*\*\n\n/g, '**$1**\n')
+                              // Then convert headers to HTML with proper spacing
+                              .replace(/\*\*(.*?)\*\*/g, '<strong class="prayer-header">$1</strong>')
+                          : prayer.englishTranslation
+                      }}
+                    />
                   </div>
                 </div>
               ))
             )}
           </div>
 
-          <Button 
-            onClick={completeWithAnimation} 
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
-          >
-            Complete
-          </Button>
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={completeWithAnimation} 
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+            >
+              Complete
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
         </DialogContent>
       </Dialog>
       {/* Women's Prayers Modal */}
@@ -411,12 +432,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             </div>
           </div>
 
-          <Button 
-            onClick={completeWithAnimation} 
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
-          >
-            Complete
-          </Button>
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={completeWithAnimation} 
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+            >
+              Complete
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
         </DialogContent>
       </Dialog>
       {/* Blessings Modal */}
@@ -433,12 +457,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             Daily blessings and their proper recitation...
           </div>
 
-          <Button 
-            onClick={completeWithAnimation} 
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
-          >
-            Complete
-          </Button>
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={completeWithAnimation} 
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+            >
+              Complete
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
         </DialogContent>
       </Dialog>
       {/* Tefillos Modal */}
@@ -455,12 +482,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             Traditional prayers and their meanings...
           </div>
 
-          <Button 
-            onClick={completeWithAnimation} 
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
-          >
-            Complete
-          </Button>
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={completeWithAnimation} 
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+            >
+              Complete
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
         </DialogContent>
       </Dialog>
       {/* Personal Prayers Modal */}
@@ -477,12 +507,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             Guidance for personal prayer and connection...
           </div>
 
-          <Button 
-            onClick={completeWithAnimation} 
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
-          >
-            Complete
-          </Button>
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={completeWithAnimation} 
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+            >
+              Complete
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
         </DialogContent>
       </Dialog>
       {/* Nishmas Kol Chai Modal */}
@@ -564,12 +597,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           </div>
 
           {/* Complete Button */}
-          <Button 
-            onClick={completeWithAnimation} 
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-3 border-0"
-          >
-            Complete
-          </Button>
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={completeWithAnimation} 
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-3 border-0"
+            >
+              Complete
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
 
           {/* Special Thanks Section */}
           <div className="text-xs text-gray-500 mt-3 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">

@@ -2,6 +2,7 @@ import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, W
 import { useModalStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
 import { useGeolocation } from "@/hooks/use-jewish-times";
+import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 
 export default function TableSection() {
@@ -11,26 +12,70 @@ export default function TableSection() {
   // Trigger geolocation when component mounts
   useGeolocation();
 
+  // Fetch today's table inspiration content
+  const today = new Date().toISOString().split('T')[0];
+  const { data: inspirationContent } = useQuery<any>({
+    queryKey: [`/api/table/inspiration/${today}`],
+    queryFn: async () => {
+      const response = await fetch(`/api/table/inspiration/${today}`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    cacheTime: 60 * 60 * 1000 // 1 hour
+  });
+
+  // Get week key for weekly content
+  const getWeekKey = () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const week = Math.ceil(((date.getTime() - new Date(year, 0, 1).getTime()) / 86400000 + new Date(year, 0, 1).getDay() + 1) / 7);
+    return `${year}-W${week}`;
+  };
+
+  // Fetch weekly recipe and parsha content
+  const { data: recipeContent } = useQuery<any>({
+    queryKey: [`/api/table/recipe/${getWeekKey()}`],
+    queryFn: async () => {
+      const response = await fetch(`/api/table/recipe/${getWeekKey()}`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    staleTime: 10 * 60 * 1000,
+    cacheTime: 60 * 60 * 1000
+  });
+
+  const { data: parshaContent } = useQuery<any>({
+    queryKey: [`/api/table/vort/${getWeekKey()}`],
+    queryFn: async () => {
+      const response = await fetch(`/api/table/vort/${getWeekKey()}`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    staleTime: 10 * 60 * 1000,
+    cacheTime: 60 * 60 * 1000
+  });
+
   const tableItems = [
     {
       id: 'recipe',
       icon: Utensils,
       title: 'Shabbas Recipe',
-      subtitle: 'Honey Glazed Challah',
+      subtitle: recipeContent?.title || 'Weekly Recipe',
       color: 'text-peach'
     },
     {
       id: 'inspiration',
       icon: Lightbulb,
       title: 'Table Inspiration',
-      subtitle: 'Elegant Winter Shabbat Setting',
+      subtitle: inspirationContent?.title || 'Daily Inspiration',
       color: 'text-blush'
     },
     {
       id: 'parsha',
       icon: Mic,
       title: 'Parsha Vort',
-      subtitle: 'Parshas Vayeshev - 3 min',
+      subtitle: parshaContent?.title || 'Weekly Vort',
       color: 'text-peach',
       extraIcon: Play
     }

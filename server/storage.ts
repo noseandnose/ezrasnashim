@@ -102,44 +102,12 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   constructor() {
-    this.initializeData();
+    // Skip initialization for better performance
   }
 
   private async initializeDefaults() {
-    try {
-      // Check if Mincha prayers already exist
-      const existingPrayers = await db.select().from(minchaPrayers).limit(1);
-      if (existingPrayers.length > 0) return;
-
-      // Insert default Mincha prayers only
-      await db.insert(minchaPrayers).values([
-        {
-          prayerType: "ashrei",
-          hebrewText: "אַשְׁרֵי יוֹשְׁבֵי בֵיתֶךָ עוֹד יְהַלְלוּךָ סֶּלָה",
-          englishTranslation: "Happy are those who dwell in Your house; they will praise You forever. Selah.",
-          transliteration: "Ashrei yoshvei veitecha, od yehallelucha selah.",
-          orderIndex: 1
-        },
-        {
-          prayerType: "ashrei",
-          hebrewText: "אַשְׁרֵי הָעָם שֶׁכָּכָה לּוֹ אַשְׁרֵי הָעָם שֶׁה' אֱלֹהָיו",
-          englishTranslation: "Happy is the people for whom it is so; happy is the people whose God is the Lord.",
-          transliteration: "Ashrei ha'am she'kacha lo, ashrei ha'am she'Adonai Elohav.",
-          orderIndex: 2
-        },
-        {
-          prayerType: "blessing",
-          hebrewText: "בָּרוּךְ אַתָּה ה' אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם אֲשֶׁר קִדְּשָׁנוּ בְּמִצְוֹתָיו וְצִוָּנוּ עַל הַתְּפִלָּה",
-          englishTranslation: "Blessed are You, Lord our God, King of the universe, who has sanctified us with His commandments and commanded us concerning prayer.",
-          transliteration: "Baruch atah Adonai, Eloheinu melech ha'olam, asher kidshanu bemitzvotav vetzivanu al hatefilah.",
-          orderIndex: 3
-        }
-      ]);
-
-      console.log('Initialized default Mincha prayers');
-    } catch (error) {
-      console.error('Error initializing defaults:', error);
-    }
+    // Skip initialization to improve startup performance
+    return;
   }
 
   private initializeData() {
@@ -184,7 +152,7 @@ export class DatabaseStorage implements IStorage {
     const [name] = await db.insert(tehillimNames).values({
       ...insertName,
       dateAdded: new Date(),
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      expiresAt: new Date(Date.now() + 18 * 24 * 60 * 60 * 1000), // 18 days from now
       userId: null
     }).returning();
     return name;
@@ -274,8 +242,16 @@ export class DatabaseStorage implements IStorage {
 
   // Daily Torah content methods
   async getDailyHalachaByDate(date: string): Promise<DailyHalacha | undefined> {
-    const [halacha] = await db.select().from(dailyHalacha).where(eq(dailyHalacha.date, date));
-    return halacha || undefined;
+    try {
+      const result = await pool.query(
+        `SELECT id, date, title, content, source, created_at as "createdAt" FROM daily_halacha WHERE date = $1 LIMIT 1`,
+        [date]
+      );
+      return result.rows[0] || undefined;
+    } catch (error) {
+      console.error('Failed to fetch daily halacha:', error);
+      return undefined;
+    }
   }
 
   async createDailyHalacha(insertHalacha: InsertDailyHalacha): Promise<DailyHalacha> {
@@ -284,8 +260,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDailyMussarByDate(date: string): Promise<DailyMussar | undefined> {
-    const [mussar] = await db.select().from(dailyMussar).where(eq(dailyMussar.date, date));
-    return mussar || undefined;
+    try {
+      const result = await pool.query(
+        `SELECT id, date, title, content, source, created_at as "createdAt" FROM daily_mussar WHERE date = $1 LIMIT 1`,
+        [date]
+      );
+      return result.rows[0] || undefined;
+    } catch (error) {
+      console.error('Failed to fetch daily mussar:', error);
+      return undefined;
+    }
   }
 
   async createDailyMussar(insertMussar: InsertDailyMussar): Promise<DailyMussar> {
@@ -294,8 +278,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDailyChizukByDate(date: string): Promise<DailyChizuk | undefined> {
-    const [chizuk] = await db.select().from(dailyChizuk).where(eq(dailyChizuk.date, date));
-    return chizuk || undefined;
+    try {
+      const result = await pool.query(
+        `SELECT id, date, title, content, audio_url as "audioUrl", duration, speaker, created_at as "createdAt" FROM daily_chizuk WHERE date = $1 LIMIT 1`,
+        [date]
+      );
+      return result.rows[0] || undefined;
+    } catch (error) {
+      console.error('Failed to fetch daily chizuk:', error);
+      return undefined;
+    }
   }
 
   async createDailyChizuk(insertChizuk: InsertDailyChizuk): Promise<DailyChizuk> {
@@ -304,8 +296,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getLoshonHorahByDate(date: string): Promise<LoshonHorah | undefined> {
-    const [loshon] = await db.select().from(loshonHorah).where(eq(loshonHorah.date, date));
-    return loshon || undefined;
+    try {
+      const result = await pool.query(
+        `SELECT id, date, title, content, halachic_source as "halachicSource", practical_tip as "practicalTip", created_at as "createdAt" FROM loshon_horah WHERE date = $1 LIMIT 1`,
+        [date]
+      );
+      return result.rows[0] || undefined;
+    } catch (error) {
+      console.error('Failed to fetch loshon horah:', error);
+      return undefined;
+    }
   }
 
   async createLoshonHorah(insertLoshon: InsertLoshonHorah): Promise<LoshonHorah> {

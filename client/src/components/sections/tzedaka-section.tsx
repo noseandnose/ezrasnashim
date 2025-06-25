@@ -2,7 +2,9 @@ import { Heart, BookOpen, Shield, Plus, HandHeart, Gift, Star, Sparkles, Target,
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { HeartExplosion } from "@/components/ui/heart-explosion";
 import type { Campaign } from "@shared/schema";
 import type { Section } from "@/pages/home";
 
@@ -11,38 +13,54 @@ interface TzedakaSectionProps {
 }
 
 export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps) {
-  const { openModal } = useModalStore();
+  const { openModal, activeModal } = useModalStore();
   const { tzedakaCompleted, completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const [, setLocation] = useLocation();
+  const [showExplosion, setShowExplosion] = useState(false);
+
+  // Reset explosion state when modal changes
+  useEffect(() => {
+    setShowExplosion(false);
+  }, [activeModal]);
 
   const handleTzedakaComplete = () => {
     if (tzedakaCompleted) return; // Prevent double execution
     
-    completeTask('tzedaka');
+    setShowExplosion(true);
     
-    // Navigate back to home section to show progress
-    if (onSectionChange) {
-      onSectionChange('home');
-    }
-    
-    // Check if all tasks are completed and show congratulations
+    // Wait for animation to complete before proceeding
     setTimeout(() => {
-      if (checkAndShowCongratulations()) {
-        openModal('congratulations');
+      setShowExplosion(false); // Reset explosion state
+      completeTask('tzedaka');
+      
+      // Navigate back to home section to show progress
+      if (onSectionChange) {
+        onSectionChange('home');
       }
-    }, 200);
+      
+      // Check if all tasks are completed and show congratulations
+      setTimeout(() => {
+        if (checkAndShowCongratulations()) {
+          openModal('congratulations');
+        }
+      }, 200);
+    }, 500);
   };
 
   // Fetch active campaign data
   const { data: campaign, isLoading } = useQuery<Campaign>({
     queryKey: ['/api/campaigns/active'],
+    queryFn: async () => {
+      const response = await fetch('/api/campaigns/active');
+      if (!response.ok) return null;
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 30 * 60 * 1000 // 30 minutes
   });
 
-  // Use default values for immediate display
-  const campaignTitle = campaign?.title || "Sefer Torah for Ezrat Nashim";
-  const currentAmount = campaign?.currentAmount || 85000;
-  const goalAmount = campaign?.goalAmount || 150000;
-  const progressPercentage = Math.round((currentAmount / goalAmount) * 100);
+  // Only calculate progress when campaign data is loaded
+  const progressPercentage = campaign ? Math.round((campaign.currentAmount / campaign.goalAmount) * 100) : 0;
 
   const tzedakaOptions = [
     {
@@ -77,39 +95,63 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
 
       {/* Campaign Card with Progress Bar */}
       <div className="bg-white rounded-3xl p-4 shadow-lg border border-blush/10">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="bg-gradient-feminine p-3 rounded-full">
-            <BookOpen className="text-white" size={20} />
-          </div>
-          <div>
-            <h3 className="font-serif text-lg text-warm-gray">{campaignTitle}</h3>
-            <p className="font-sans text-sm text-warm-gray/70">Support our community</p>
-          </div>
-        </div>
-        
-        {/* Progress Bar */}
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              <span className="font-sans text-sm text-warm-gray/70">Progress</span>
-              <span className="font-serif text-sm text-warm-gray">{progressPercentage}% Complete</span>
+        {isLoading ? (
+          <div className="animate-pulse">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="bg-gray-200 p-3 rounded-full">
+                <BookOpen className="text-gray-400" size={20} />
+              </div>
+              <div>
+                <div className="h-5 bg-gray-200 rounded w-48 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-32"></div>
+              </div>
             </div>
-            <span className="font-serif text-sm text-warm-gray">${currentAmount.toLocaleString()} / ${goalAmount.toLocaleString()}</span>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <div className="h-4 bg-gray-200 rounded w-24"></div>
+                <div className="h-4 bg-gray-200 rounded w-32"></div>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3"></div>
+            </div>
+            <div className="w-full mt-4 bg-gray-200 rounded-2xl py-3 h-12"></div>
           </div>
-          <div className="w-full bg-blush/20 rounded-full h-3">
-            <div 
-              className="h-3 rounded-full bg-gradient-feminine transition-all duration-500"
-              style={{ width: `${progressPercentage}%` }}
-            ></div>
-          </div>
-        </div>
-        
-        <button 
-          onClick={() => openModal('donate')}
-          className="w-full mt-4 bg-gradient-feminine text-white rounded-2xl py-3 hover:opacity-90 transition-all duration-300 font-sans"
-        >
-          Donate Now
-        </button>
+        ) : campaign ? (
+          <>
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="bg-gradient-feminine p-3 rounded-full">
+                <BookOpen className="text-white" size={20} />
+              </div>
+              <div>
+                <h3 className="font-serif text-lg text-warm-gray">{campaign.title}</h3>
+                <p className="font-sans text-sm text-warm-gray/70">Support our community</p>
+              </div>
+            </div>
+            
+            {/* Progress Bar */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  <span className="font-sans text-sm text-warm-gray/70">Progress</span>
+                  <span className="font-serif text-sm text-warm-gray">{progressPercentage}% Complete</span>
+                </div>
+                <span className="font-serif text-sm text-warm-gray">${campaign.currentAmount.toLocaleString()} / ${campaign.goalAmount.toLocaleString()}</span>
+              </div>
+              <div className="w-full bg-blush/20 rounded-full h-3">
+                <div 
+                  className="h-3 rounded-full bg-gradient-feminine transition-all duration-500"
+                  style={{ width: `${progressPercentage}%` }}
+                ></div>
+              </div>
+            </div>
+            
+            <button 
+              onClick={() => openModal('donate')}
+              className="w-full mt-4 bg-gradient-feminine text-white rounded-2xl py-3 hover:opacity-90 transition-all duration-300 font-sans"
+            >
+              Donate Now
+            </button>
+          </>
+        ) : null}
       </div>
 
       {/* Tzedaka Options - Rectangle Grid */}
@@ -157,16 +199,19 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
               <p className="font-sans text-xs text-warm-gray/70">Mark as completed</p>
             </div>
           </div>
-          <Button
-            onClick={handleTzedakaComplete}
-            className={`py-2 px-4 rounded-xl font-medium border-0 ${
-              tzedakaCompleted 
-                ? 'bg-sage text-white' 
-                : 'bg-gradient-feminine text-white hover:opacity-90'
-            }`}
-          >
-            {tzedakaCompleted ? 'Completed' : 'Complete'}
-          </Button>
+          <div className="heart-explosion-container">
+            <Button
+              onClick={handleTzedakaComplete}
+              className={`py-2 px-4 rounded-xl font-medium border-0 ${
+                tzedakaCompleted 
+                  ? 'bg-sage text-white' 
+                  : 'bg-gradient-feminine text-white hover:opacity-90'
+              }`}
+            >
+              {tzedakaCompleted ? 'Completed' : 'Complete'}
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
         </div>
       </div>
 

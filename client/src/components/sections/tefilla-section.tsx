@@ -77,7 +77,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
     onSuccess: () => {
       toast({
         title: "Name Added Successfully",
-        description: "The name has been added to the Tehillim cycle and will be removed automatically after 7 days.",
+        description: "The name has been added to the Tehillim cycle and will be removed automatically after 18 days.",
       });
       setHebrewName("");
       setReason("");
@@ -217,7 +217,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             <div className="space-y-3 mb-3 p-3 bg-gradient-to-r from-ivory to-lavender/5 rounded-2xl border border-lavender/20">
               <div className="flex items-center space-x-2 text-sm text-blush/80">
                 <AlertCircle size={16} />
-                <span className="font-sans">Names are automatically removed after 7 days</span>
+                <span className="font-sans">Names are automatically removed after 18 days</span>
               </div>
               
               <Input

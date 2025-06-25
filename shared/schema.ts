@@ -76,7 +76,7 @@ export const tehillimNames = pgTable("tehillim_names", {
   reason: text("reason").notNull(),
   reasonEnglish: text("reason_english"),
   dateAdded: timestamp("date_added").defaultNow(),
-  expiresAt: timestamp("expires_at"), // 7 days from dateAdded
+  expiresAt: timestamp("expires_at"), // 18 days from dateAdded
   userId: integer("user_id"), // Future: link to user accounts
 });
 
@@ -109,7 +109,6 @@ export const minchaPrayers = pgTable("mincha_prayers", {
   prayerType: text("prayer_type").notNull(), // e.g., "main_prayer", "ashrei", "shemoneh_esrei"
   hebrewText: text("hebrew_text").notNull(),
   englishTranslation: text("english_translation").notNull(),
-  transliteration: text("transliteration"),
   orderIndex: integer("order_index").default(0),
 });
 
@@ -185,6 +184,7 @@ export const dailyHalacha = pgTable("daily_halacha", {
   source: text("source"), // Rabbi or book source
   audioUrl: text("audio_url"), // Optional audio content
   duration: text("duration"), // Audio duration if available
+  speaker: text("speaker"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -196,6 +196,7 @@ export const dailyMussar = pgTable("daily_mussar", {
   source: text("source"),
   audioUrl: text("audio_url"),
   duration: text("duration"),
+  speaker: text("speaker"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -207,6 +208,7 @@ export const dailyChizuk = pgTable("daily_chizuk", {
   source: text("source"),
   audioUrl: text("audio_url"),
   duration: text("duration"),
+  speaker: text("speaker"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -215,9 +217,8 @@ export const loshonHorah = pgTable("loshon_horah", {
   date: date("date").notNull().unique(),
   title: text("title").notNull(),
   content: text("content").notNull(),
-  source: text("source"),
-  audioUrl: text("audio_url"),
-  duration: text("duration"),
+  halachicSource: text("halachic_source"),
+  practicalTip: text("practical_tip"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -269,21 +270,29 @@ export const insertNishmasTextSchema = createInsertSchema(nishmasText).omit({
 export const insertDailyHalachaSchema = createInsertSchema(dailyHalacha).omit({
   id: true,
   createdAt: true,
+}).extend({
+  hebrewDate: z.string().optional(),
 });
 
 export const insertDailyMussarSchema = createInsertSchema(dailyMussar).omit({
   id: true,
   createdAt: true,
+}).extend({
+  hebrewDate: z.string().optional(),
 });
 
 export const insertDailyChizukSchema = createInsertSchema(dailyChizuk).omit({
   id: true,
   createdAt: true,
+}).extend({
+  hebrewDate: z.string().optional(),
 });
 
 export const insertLoshonHorahSchema = createInsertSchema(loshonHorah).omit({
   id: true,
   createdAt: true,
+}).extend({
+  hebrewDate: z.string().optional(),
 });
 
 // Weekly Torah content schemas

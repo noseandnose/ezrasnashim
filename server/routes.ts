@@ -388,6 +388,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/table/recipe", async (req, res) => {
+    try {
+      // Get current week
+      const date = new Date();
+      const year = date.getFullYear();
+      const week = Math.ceil(((date.getTime() - new Date(year, 0, 1).getTime()) / 86400000 + new Date(year, 0, 1).getDay() + 1) / 7);
+      const weekKey = `${year}-W${week}`;
+      
+      const recipe = await storage.getShabbatRecipeByWeek(weekKey);
+      res.json(recipe || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch Shabbat recipe" });
+    }
+  });
+
   app.post("/api/table/recipe", async (req, res) => {
     try {
       const validatedData = insertShabbatRecipeSchema.parse(req.body);
@@ -402,6 +417,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { week } = req.params;
       const vort = await storage.getParshaVortByWeek(week);
+      res.json(vort || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch Parsha vort" });
+    }
+  });
+
+  app.get("/api/table/vort", async (req, res) => {
+    try {
+      // Get current week
+      const date = new Date();
+      const year = date.getFullYear();
+      const week = Math.ceil(((date.getTime() - new Date(year, 0, 1).getTime()) / 86400000 + new Date(year, 0, 1).getDay() + 1) / 7);
+      const weekKey = `${year}-W${week}`;
+      
+      const vort = await storage.getParshaVortByWeek(weekKey);
       res.json(vort || null);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch Parsha vort" });
@@ -696,6 +726,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Error creating payment intent: " + error.message 
       });
     }
+  });
+
+  // Universal media proxy endpoint - supports multiple hosting services
+  app.get("/api/media-proxy/:service/:fileId", async (req, res) => {
+    try {
+      const { service, fileId } = req.params;
+      let mediaUrl = '';
+      
+      // Support different hosting services
+      switch (service) {
+        case 'github':
+          // GitHub raw file format: https://raw.githubusercontent.com/username/repo/branch/path/file
+          mediaUrl = `https://raw.githubusercontent.com/${fileId}`;
+          break;
+        case 'cloudinary':
+          // Cloudinary format: https://res.cloudinary.com/cloud-name/raw/upload/v1234567890/file
+          mediaUrl = `https://res.cloudinary.com/${fileId}`;
+          break;
+        case 'supabase':
+          // Supabase storage format
+          mediaUrl = `https://${process.env.SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/${fileId}`;
+          break;
+        case 'firebase':
+          // Firebase storage format
+          mediaUrl = `https://firebasestorage.googleapis.com/v0/b/${fileId}`;
+          break;
+        case 'gdrive':
+        default:
+          // Fallback to Google Drive for backward compatibility
+          mediaUrl = `https://drive.usercontent.google.com/download?id=${fileId}&export=download`;
+          break;
+      }
+      
+      const response = await fetch(mediaUrl, {
+        redirect: 'follow',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; EzrasNashim/1.0)'
+        }
+      });
+      
+      if (!response.ok) {
+        return res.status(404).json({ error: "Media file not found" });
+      }
+      
+      // Set appropriate headers for media streaming
+      const contentType = response.headers.get('content-type') || 'application/octet-stream';
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Accept-Ranges', 'bytes');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      
+      // Stream the response directly
+      if (response.body) {
+        const reader = response.body.getReader();
+        const pump = async () => {
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              if (!res.write(value)) {
+                await new Promise(resolve => res.once('drain', resolve));
+              }
+            }
+            res.end();
+          } catch (error) {
+            console.error('Streaming error:', error);
+            res.end();
+          }
+        };
+        pump();
+      } else {
+        res.status(500).json({ error: "No response body" });
+      }
+    } catch (error) {
+      console.error('Media proxy error:', error);
+      res.status(500).json({ error: "Failed to fetch media" });
+    }
+  });
+
+  // Keep old audio proxy for backward compatibility
+  app.get("/api/audio-proxy/:fileId", async (req, res) => {
+    const { fileId } = req.params;
+    // Redirect to new universal proxy with gdrive service
+    res.redirect(`/api/media-proxy/gdrive/${fileId}`);
   });
 
   const httpServer = createServer(app);

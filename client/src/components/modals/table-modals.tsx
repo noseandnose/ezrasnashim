@@ -64,11 +64,12 @@ export default function TableModals() {
 
       {/* Table Inspiration Modal */}
       <Dialog open={activeModal === 'inspiration'} onOpenChange={() => closeModal()}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="inspiration-description">
           <DialogHeader className="text-center mb-2">
             <DialogTitle className="text-lg font-semibold">Shabbas Inspiration</DialogTitle>
             <DialogDescription className="sr-only">Shabbas table inspiration modal</DialogDescription>
           </DialogHeader>
+          <div id="inspiration-description" className="sr-only">Daily table inspiration and decorating ideas for Shabbat</div>
           
           {inspirationContent ? (
             <>

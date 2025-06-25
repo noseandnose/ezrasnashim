@@ -44,7 +44,7 @@ export const tehillimNames = pgTable("tehillim_names", {
   reason: text("reason").notNull(),
   reasonEnglish: text("reason_english"),
   dateAdded: timestamp("date_added").defaultNow(),
-  expiresAt: timestamp("expires_at").notNull(), // 7 days from dateAdded
+  expiresAt: timestamp("expires_at").notNull(), // 18 days from dateAdded
 }, (table) => ({
   expiresIdx: index("tehillim_names_expires_idx").on(table.expiresAt),
   activeIdx: index("tehillim_names_active_idx").on(table.expiresAt),

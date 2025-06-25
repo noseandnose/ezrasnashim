@@ -20,7 +20,9 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
       const response = await fetch(`/api/quotes/daily/${today}`);
       if (!response.ok) return null;
       return response.json();
-    }
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    cacheTime: 60 * 60 * 1000 // 1 hour
   });
 
   const torahItems = [
