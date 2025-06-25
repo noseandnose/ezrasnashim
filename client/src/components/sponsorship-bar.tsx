@@ -20,7 +20,7 @@ export default function SponsorshipBar({ className = "" }: SponsorshipBarProps) 
   const { data: sponsor, isLoading } = useQuery<Sponsor | null>({
     queryKey: ['daily-sponsor', today],
     queryFn: async () => {
-      const response = await fetch(`fetch(`${import.meta.env.VITE_API_URL}/api//api/sponsors/daily/${today}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api//api/sponsors/daily/${today}`);
       if (!response.ok) return null;
       return response.json();
     },

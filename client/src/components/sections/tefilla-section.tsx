@@ -49,7 +49,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   // Mutation to complete a perek
   const completePerekMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest('POST', '/api/tehillim/complete', { completedBy: 'user' });
+      return apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/tehillim/complete`, { completedBy: 'user' });
     },
     onSuccess: () => {
       toast({
@@ -72,7 +72,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   // Mutation to add a new name
   const addNameMutation = useMutation({
     mutationFn: async (data: { hebrewName: string; reason: string; reasonEnglish?: string }) => {
-      return apiRequest('POST', '/api/tehillim/names', data);
+      return apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/tehillim/names`, data);
     },
     onSuccess: () => {
       toast({

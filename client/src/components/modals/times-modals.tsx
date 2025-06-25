@@ -20,7 +20,7 @@ export default function TimesModals() {
 
   const createEventMutation = useMutation({
     mutationFn: async (data: { title: string; hebrewDate: string; gregorianDate: string; recurring: boolean; years: number }) => {
-      return apiRequest('POST', '/api/calendar-events', data);
+      return apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/calendar-events`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/calendar-events'] });

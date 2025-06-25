@@ -105,7 +105,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   // Mutation to complete a perek
   const completePerekMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest('POST', '/api/tehillim/complete', { completedBy: 'user' });
+      return apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/tehillim/complete`, { completedBy: 'user' });
     },
     onSuccess: () => {
       toast({

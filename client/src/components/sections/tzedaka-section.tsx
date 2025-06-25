@@ -51,7 +51,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
   const { data: campaign, isLoading } = useQuery<Campaign>({
     queryKey: ['/api/campaigns/active'],
     queryFn: async () => {
-      const response = await fetch('/api/campaigns/active');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/campaigns/active`);
       if (!response.ok) return null;
       return response.json();
     },
