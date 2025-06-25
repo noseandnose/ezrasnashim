@@ -140,6 +140,7 @@ Changelog:
 - June 25, 2025. Implemented Tehillim preview showing first line of actual Hebrew text instead of "Perek X" placeholder text
 - June 25, 2025. Added complete Pirkei Avot daily inspiration system: 25+ authentic teachings cycling daily, prominently displayed in Torah section with scroll icon and chapter reference
 - June 25, 2025. Expanded Pirkei Avot collection to include comprehensive teachings from all 6 chapters with authentic translations
+- June 25, 2025. Fixed Tehillim preview loading state: Added skeleton animation while fetching Hebrew text to prevent confusing placeholder flashing
 ```
 
 ## User Preferences

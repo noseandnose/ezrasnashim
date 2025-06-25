@@ -47,10 +47,12 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   });
 
   // Fetch Tehillim preview (first line) for display
-  const { data: tehillimPreview } = useQuery<{preview: string; perek: number; language: string}>({
+  const { data: tehillimPreview, isLoading: isPreviewLoading } = useQuery<{preview: string; perek: number; language: string}>({
     queryKey: ['/api/tehillim/preview', progress?.currentPerek],
     queryFn: () => fetch(`/api/tehillim/preview/${progress?.currentPerek}?language=hebrew`).then(res => res.json()),
-    enabled: !!progress?.currentPerek
+    enabled: !!progress?.currentPerek,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000 // 30 minutes
   });
 
   // Mutation to complete a perek
@@ -301,7 +303,11 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             >
               <div className="flex items-center justify-between">
                 <div className="font-serif text-sm text-warm-gray font-hebrew text-right flex-1 pr-2">
-                  {tehillimPreview?.preview || `פרק ${progress?.currentPerek || 1}`}
+                  {isPreviewLoading ? (
+                    <div className="animate-pulse bg-warm-gray/20 h-4 w-3/4 rounded ml-auto"></div>
+                  ) : (
+                    tehillimPreview?.preview || `פרק ${progress?.currentPerek || 1}`
+                  )}
                 </div>
                 <div className="flex items-center">
                   <ChevronRight className="text-warm-gray/40" size={16} strokeWidth={1.5} />
