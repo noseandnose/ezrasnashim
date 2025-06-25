@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../ui/dialog";
 import { Button } from "../../ui/button";
-import { useModalStore, useDailyCompletionStore } from "../../../lib/types";
+import { useModalStore, useDailyCompletionStore } from "../../lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";

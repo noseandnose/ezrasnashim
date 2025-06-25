@@ -3,7 +3,7 @@ import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { Textarea } from "../../ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
-import { useModalStore, useDailyCompletionStore } from "../../../lib/types";
+import { useModalStore, useDailyCompletionStore } from "../../lib/types";
 import { useState } from "react";
 import { Heart, BookOpen, Baby, Shield, DollarSign } from "lucide-react";
 import { useLocation } from "wouter";
