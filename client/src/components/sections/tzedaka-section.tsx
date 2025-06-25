@@ -56,7 +56,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
       return response.json();
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 30 * 60 * 1000 // 30 minutes
+    gcTime: 30 * 60 * 1000 // 30 minutes
   });
 
   // Only calculate progress when campaign data is loaded

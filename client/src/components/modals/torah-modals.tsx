@@ -52,7 +52,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     queryFn: () => fetch(`/api/torah/halacha/${today}`).then(res => res.json()),
     enabled: activeModal === 'halacha',
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 30 * 60 * 1000 // 30 minutes
+    gcTime: 30 * 60 * 1000 // 30 minutes
   });
 
   const { data: mussarContent } = useQuery<any>({
