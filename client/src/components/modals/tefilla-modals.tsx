@@ -102,6 +102,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     enabled: activeModal === 'tehillim-text'
   });
 
+  // Fetch Tehillim text from Sefaria API
+  const { data: tehillimText, isLoading: tehillimLoading } = useQuery({
+    queryKey: ['sefaria-tehillim', progress?.currentPerek],
+    queryFn: () => fetchTehillimBothLanguages(progress?.currentPerek || 1),
+    enabled: activeModal === 'tehillim-text' && !!progress?.currentPerek,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    retry: 2
+  });
+
   // Mutation to complete a perek
   const completePerekMutation = useMutation({
     mutationFn: async () => {
@@ -114,6 +123,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       });
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+      queryClient.invalidateQueries({ queryKey: ['sefaria-tehillim'] });
     },
     onError: () => {
       toast({
@@ -128,42 +138,27 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     completePerekMutation.mutate();
   };
 
-  const getTehillimText = (perekNumber: number, isHebrew: boolean) => {
-    const tehillimTexts: Record<number, { hebrew: string; english: string }> = {
-      1: {
-        hebrew: "אַשְׁרֵי הָאִישׁ אֲשֶׁר לֹא הָלַךְ בַּעֲצַת רְשָׁעִים וּבְדֶרֶךְ חַטָּאִים לֹא עָמָד וּבְמוֹשַׁב לֵצִים לֹא יָשָׁב׃ כִּי אִם בְּתוֹרַת יְהוָה חֶפְצוֹ וּבְתוֹרָתוֹ יֶהְגֶּה יוֹמָם וָלָיְלָה׃",
-        english: "Happy is the man who has not walked in the counsel of the wicked, nor stood in the way of sinners, nor sat in the seat of scorners. But his delight is in the law of the Lord, and in His law he meditates day and night."
-      },
-      2: {
-        hebrew: "לָמָּה רָגְשׁוּ גוֹיִם וּלְאֻמִּים יֶהְגּוּ רִיק׃ יִתְיַצְּבוּ מַלְכֵי אֶרֶץ וְרוֹזְנִים נוֹסְדוּ יָחַד עַל יְהוָה וְעַל מְשִׁיחוֹ׃",
-        english: "Why do the nations rage, and the peoples plot in vain? The kings of the earth set themselves, and the rulers take counsel together, against the Lord and against His anointed."
-      },
-      3: {
-        hebrew: "מִזְמוֹר לְדָוִד בְּבָרְחוֹ מִפְּנֵי אַבְשָׁלוֹם בְּנוֹ׃ יְהוָה מָה רַבּוּ צָרָי רַבִּים קָמִים עָלָי׃",
-        english: "A Psalm of David, when he fled from Absalom his son. Lord, how many are my foes! Many are rising against me."
-      },
-      11: {
-        hebrew: "בַּיהוָה חָסִיתִי אֵיךְ תֹּאמְרוּ לְנַפְשִׁי נוּדִי הַרְכֶם צִפּוֹר׃",
-        english: "In the Lord I take refuge; how can you say to my soul, 'Flee like a bird to your mountain'?"
-      },
-      12: {
-        hebrew: "הוֹשִׁיעָה יְהוָה כִּי גָמַר חָסִיד כִּי פָסוּ אֱמוּנִים מִבְּנֵי אָדָם׃",
-        english: "Save, O Lord, for the godly one is gone; for the faithful have vanished from among the children of man."
-      }
-    };
-
-    const text = tehillimTexts[perekNumber];
-    if (!text) {
+  const getTehillimText = (isHebrew: boolean) => {
+    if (tehillimLoading) {
       return (
-        <div className="text-sm text-gray-600 italic text-center">
-          {isHebrew ? `פרק ${perekNumber} - טקסט מלא זמין בספר תהלים` : `Perek ${perekNumber} - Full text available in Tehillim book`}
+        <div className="text-center text-gray-500 py-4">
+          Loading Tehillim text from Sefaria...
         </div>
       );
     }
 
+    if (!tehillimText) {
+      return (
+        <div className="text-sm text-gray-600 italic text-center">
+          {isHebrew ? `פרק ${progress?.currentPerek} - לא ניתן לטעון טקסט` : `Perek ${progress?.currentPerek} - Unable to load text`}
+        </div>
+      );
+    }
+
+    const text = isHebrew ? tehillimText.hebrew : tehillimText.english;
     return (
-      <div className={`text-sm leading-relaxed ${isHebrew ? 'text-right font-hebrew' : 'font-english'}`}>
-        {isHebrew ? text.hebrew : text.english}
+      <div className={`text-sm leading-relaxed whitespace-pre-line ${isHebrew ? 'text-right font-hebrew' : 'font-english text-left'}`}>
+        {text}
       </div>
     );
   };
