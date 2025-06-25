@@ -1,5 +1,5 @@
 import { Heart, BookOpen, Shield, Plus, HandHeart, Gift, Star, Sparkles, Target, Users, DollarSign, TrendingUp } from "lucide-react";
-import { useModalStore, useDailyCompletionStore } from "./../../lib/types";
+import { useModalStore, useDailyCompletionStore } from "../../../lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";

@@ -1,6 +1,6 @@
 import { Sun, Calendar, Plus, MapPin, Clock, Moon, Sunrise, Sunset, Star, Timer } from "lucide-react";
-import { useJewishTimes, useGeolocation, useLocationStore } from "./../../hooks/use-jewish-times";
-import { useModalStore } from "./../../lib/types";
+import { useJewishTimes, useGeolocation, useLocationStore } from "../../../hooks/use-jewish-times";
+import { useModalStore } from "../../../lib/types";
 
 export default function TimesSection() {
   const { data: times, isLoading } = useJewishTimes();

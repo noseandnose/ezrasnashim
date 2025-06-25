@@ -1,5 +1,5 @@
-import { useJewishTimes } from "../../../../hooks/use-jewish-times";
-import { useHebrewDate } from "../../../../hooks/use-hebrew-date";
+import { useJewishTimes } from "../../../hooks/use-jewish-times";
+import { useHebrewDate } from "../../../hooks/use-hebrew-date";
 
 export default function AppHeader() {
   const { data: times, isLoading: timesLoading } = useJewishTimes();

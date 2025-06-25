@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../ui/dialog";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
-import { useModalStore, useDailyCompletionStore } from "./../../lib/types";
+import { useModalStore, useDailyCompletionStore } from "../../../lib/types";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "./../../lib/queryClient";
-import { useToast } from "./../../hooks/use-toast";
+import { apiRequest } from "../../../lib/queryClient";
+import { useToast } from "../../../hooks/use-toast";
 import { DollarSign, Heart } from "lucide-react";
 
 export default function DonationModal() {
