@@ -584,65 +584,58 @@ export class DatabaseStorage implements IStorage {
   async getActiveDiscountPromotion(userLocation?: string): Promise<DiscountPromotion | undefined> {
     try {
       const now = new Date();
+      console.log('getActiveDiscountPromotion called with userLocation:', userLocation);
       
       // Determine target location based on user's coordinates
       let targetLocation = "worldwide";
       if (userLocation === "israel") {
         targetLocation = "israel";
       }
+      console.log('Target location determined as:', targetLocation);
       
-      // First try to get location-specific promotion
+      // First get all active promotions to debug
+      const allActive = await db
+        .select()
+        .from(discountPromotions)
+        .where(eq(discountPromotions.isActive, true));
+      
+      console.log('All active promotions:', allActive);
+      console.log('Current time:', now);
+      
+      // Simple query first to test basic functionality
       let promotion = await db
         .select()
         .from(discountPromotions)
         .where(
           and(
             eq(discountPromotions.isActive, true),
-            lte(discountPromotions.startDate, now),
-            gte(discountPromotions.endDate, now),
             eq(discountPromotions.targetLocation, targetLocation)
           )
         )
         .limit(1);
       
+      console.log('Location-specific promotion query result:', promotion);
+      
       // If no location-specific promotion found, fall back to worldwide
       if (!promotion.length && targetLocation === "israel") {
+        console.log('No Israel-specific promotion found, trying worldwide fallback');
         promotion = await db
           .select()
           .from(discountPromotions)
           .where(
             and(
               eq(discountPromotions.isActive, true),
-              lte(discountPromotions.startDate, now),
-              gte(discountPromotions.endDate, now),
               eq(discountPromotions.targetLocation, "worldwide")
             )
           )
           .limit(1);
+        console.log('Worldwide fallback promotion result:', promotion);
       }
       
       return promotion[0];
     } catch (error) {
       console.error('Database error in getActiveDiscountPromotion:', error);
-      // Fallback to simple query without location filtering
-      try {
-        const now = new Date();
-        const promotion = await db
-          .select()
-          .from(discountPromotions)
-          .where(
-            and(
-              eq(discountPromotions.isActive, true),
-              lte(discountPromotions.startDate, now),
-              gte(discountPromotions.endDate, now)
-            )
-          )
-          .limit(1);
-        return promotion[0];
-      } catch (fallbackError) {
-        console.error('Fallback query also failed:', fallbackError);
-        return undefined;
-      }
+      return undefined;
     }
   }
 
