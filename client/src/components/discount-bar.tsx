@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink } from "lucide-react";
+import { useLocationStore } from "@/lib/types";
 
 interface DiscountPromotion {
   id: number;
@@ -10,6 +11,7 @@ interface DiscountPromotion {
   startDate: string;
   endDate: string;
   isActive: boolean;
+  targetLocation: string;
   createdAt: string;
 }
 
@@ -18,8 +20,20 @@ interface DiscountBarProps {
 }
 
 export default function DiscountBar({ className = "" }: DiscountBarProps) {
+  const { coordinates } = useLocationStore();
+  
   const { data: promotion, isLoading } = useQuery<DiscountPromotion | null>({
-    queryKey: ['/api/discount-promotions/active'],
+    queryKey: ['/api/discount-promotions/active', coordinates?.lat, coordinates?.lng],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (coordinates?.lat) params.set('lat', coordinates.lat.toString());
+      if (coordinates?.lng) params.set('lng', coordinates.lng.toString());
+      
+      return fetch(`/api/discount-promotions/active?${params.toString()}`)
+        .then(res => res.json());
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000 // 30 minutes
   });
 
   if (isLoading || !promotion) {

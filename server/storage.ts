@@ -597,8 +597,8 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(discountPromotions.isActive, true),
-          lt(discountPromotions.startDate, now),
-          gt(discountPromotions.endDate, now),
+          lte(discountPromotions.startDate, now),
+          gte(discountPromotions.endDate, now),
           eq(discountPromotions.targetLocation, targetLocation)
         )
       )
@@ -612,8 +612,8 @@ export class DatabaseStorage implements IStorage {
         .where(
           and(
             eq(discountPromotions.isActive, true),
-            lt(discountPromotions.startDate, now),
-            gt(discountPromotions.endDate, now),
+            lte(discountPromotions.startDate, now),
+            gte(discountPromotions.endDate, now),
             eq(discountPromotions.targetLocation, "worldwide")
           )
         )
