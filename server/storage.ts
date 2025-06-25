@@ -589,37 +589,61 @@ export class DatabaseStorage implements IStorage {
         targetLocation = "israel";
       }
       
-      // Get all active promotions using a simple select
-      const allPromotions = await db
-        .select()
-        .from(discountPromotions)
-        .where(eq(discountPromotions.isActive, true));
+      // Use raw SQL to get the correct mapping
+      const result = await db.execute(`
+        SELECT 
+          id, title, subtitle, 
+          logo_url, link_url, 
+          start_date, end_date, 
+          is_active, target_location, 
+          created_at
+        FROM discount_promotions 
+        WHERE is_active = true 
+          AND start_date <= NOW() 
+          AND end_date >= NOW()
+          AND target_location = '${targetLocation}'
+        LIMIT 1
+      `);
       
-      // Filter by date and location manually
-      const now = new Date();
-      const validPromotions = allPromotions.filter((promo: any) => {
-        const startDate = new Date(promo.startDate);
-        const endDate = new Date(promo.endDate);
-        return startDate <= now && endDate >= now;
-      });
-      
-      console.log('Valid promotions:', validPromotions);
-      console.log('User location:', userLocation);
-      console.log('Target location:', targetLocation);
-      
-      // Find promotion by accessing the correct field name
-      let promotion = validPromotions.find((p: any) => {
-        console.log('Checking promotion:', p.id, 'targetLocation field:', p.targetLocation);
-        return p.targetLocation === targetLocation;
-      });
+      let promotion = result.length > 0 ? result[0] : null;
       
       // If no location-specific promotion found, fall back to worldwide
       if (!promotion && targetLocation === "israel") {
-        promotion = validPromotions.find((p: any) => p.targetLocation === "worldwide");
+        const fallbackResult = await db.execute(`
+          SELECT 
+            id, title, subtitle, 
+            logo_url, link_url, 
+            start_date, end_date, 
+            is_active, target_location, 
+            created_at
+          FROM discount_promotions 
+          WHERE is_active = true 
+            AND start_date <= NOW() 
+            AND end_date >= NOW()
+            AND target_location = 'worldwide'
+          LIMIT 1
+        `);
+        
+        promotion = fallbackResult.length > 0 ? fallbackResult[0] : null;
       }
       
-      console.log('Final selected promotion:', promotion);
-      return promotion;
+      // Transform to match expected interface
+      if (promotion) {
+        return {
+          id: promotion.id,
+          title: promotion.title,
+          subtitle: promotion.subtitle,
+          logoUrl: promotion.logo_url,
+          linkUrl: promotion.link_url,
+          startDate: promotion.start_date,
+          endDate: promotion.end_date,
+          isActive: promotion.is_active,
+          targetLocation: promotion.target_location,
+          createdAt: promotion.created_at
+        };
+      }
+      
+      return undefined;
     } catch (error) {
       console.error('Database error in getActiveDiscountPromotion:', error);
       return undefined;
