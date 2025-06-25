@@ -57,14 +57,11 @@ app.use((req, res, next) => {
     });
   });
 
-  // Serve static files in development (Vite handles this)
-  // No additional setup needed - API routes already registered
+  // API-only server - frontend will be served separately by Vite on different port
 
-  // Unified server serving both frontend and API
-  const port = process.env.PORT ?? 80;
+  // API server on port 5000
+  const port = process.env.PORT ?? 5000;
   server.listen(port, "0.0.0.0", () => {
-    console.log(`Ezras Nashim server listening on port ${port}`);
-    console.log(`Frontend: http://localhost:${port}`);
-    console.log(`API: http://localhost:${port}/api`);
+    console.log(`Backend API server listening on port ${port}`);
   });
 })();
