@@ -47,7 +47,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const { data: halachaContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string; halachicSource?: string; practicalTip?: string}>({
+  const { data: halachaContent } = useQuery<{title?: string; content?: string; source?: string; speakerName?: string; speakerWebsite?: string}>({
     queryKey: ['/api/torah/halacha', today],
     queryFn: () => fetch(`/api/torah/halacha/${today}`).then(res => res.json()),
     enabled: activeModal === 'halacha',
@@ -63,7 +63,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000
   });
 
-  const { data: chizukContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string}>({
+  const { data: chizukContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string; speaker?: string; speakerName?: string; speakerWebsite?: string}>({
     queryKey: ['/api/torah/chizuk', today],
     queryFn: () => fetch(`/api/torah/chizuk/${today}`).then(res => res.json()),
     enabled: activeModal === 'chizuk',
@@ -71,7 +71,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000
   });
 
-  const { data: loshonContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string; halachicSource?: string; practicalTip?: string}>({
+  const { data: loshonContent } = useQuery<{title?: string; content?: string; halachicSource?: string; practicalTip?: string; speakerName?: string; speakerWebsite?: string}>({
     queryKey: ['/api/torah/loshon', today],
     queryFn: () => fetch(`/api/torah/loshon/${today}`).then(res => res.json()),
     enabled: activeModal === 'loshon',
@@ -215,11 +215,18 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           <div id="chizuk-description" className="sr-only">5-minute daily inspiration and spiritual strengthening content</div>
           
           {chizukContent && chizukContent.audioUrl && (
-            <AudioPlayer 
-              title={chizukContent.title || 'Chizuk'}
-              duration={chizukContent.duration || "5:15"}
-              audioUrl={chizukContent.audioUrl}
-            />
+            <div className="space-y-4">
+              <AudioPlayer 
+                title={chizukContent.title || 'Chizuk'}
+                duration={chizukContent.duration || "5:15"}
+                audioUrl={chizukContent.audioUrl}
+              />
+              {chizukContent.speaker && (
+                <p className="text-sm text-gray-600 text-center">
+                  <strong>Speaker:</strong> {chizukContent.speaker}
+                </p>
+              )}
+            </div>
           )}
           
           {/* Thank You Section */}
