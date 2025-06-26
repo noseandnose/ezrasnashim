@@ -83,9 +83,8 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
 
   return (
     <div className="overflow-y-auto h-full pb-20">
-      {/* Main Tzedaka Section - Connected to top bar */}
+      {/* Main Tzedaka Section - ONLY CAMPAIGN */}
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg -mt-1">
-        {/* Campaign Card with Progress Bar */}
         <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
         {isLoading ? (
           <div className="animate-pulse">
@@ -144,10 +143,12 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             </button>
           </>
         ) : null}
+        </div>
       </div>
 
-      {/* Tzedaka Options - Rectangle Grid */}
-      <div className="grid grid-cols-2 gap-2">
+      {/* Other Tzedaka Options - Separate sections below */}
+      <div className="p-2 space-y-2">
+        <div className="grid grid-cols-2 gap-2">
         <button
           onClick={() => openModal('donate')}
           className="bg-white rounded-3xl p-4 shadow-lg hover:scale-105 transition-all duration-300 border border-blush/10 text-left"
