@@ -20,12 +20,23 @@ export default function ApplePayButton({ amount, onSuccess, onError, disabled }:
     setIsProcessing(true);
 
     try {
-      // Check if Apple Pay is available
-      if (!(window as any).ApplePaySession?.canMakePayments()) {
-        throw new Error('Apple Pay is not available on this device');
-      }
+      // Create payment intent first
+      const response = await fetch('/api/create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount,
+          donationType: 'Apple Pay Donation',
+          metadata: {
+            paymentMethod: 'apple_pay',
+            timestamp: new Date().toISOString()
+          }
+        }),
+      });
 
-      // Create payment request
+      const { clientSecret } = await response.json();
+
+      // Create payment request for Apple Pay
       const paymentRequest = stripe.paymentRequest({
         country: 'US',
         currency: 'usd',
@@ -39,29 +50,13 @@ export default function ApplePayButton({ amount, onSuccess, onError, disabled }:
 
       // Check if payment request can be made
       const result = await paymentRequest.canMakePayment();
-      if (!result) {
-        throw new Error('Apple Pay is not supported');
+      if (!result || !result.applePay) {
+        throw new Error('Apple Pay is not available on this device');
       }
 
       paymentRequest.on('paymentmethod', async (event) => {
         try {
-          // Create payment intent on server
-          const response = await fetch('/api/create-payment-intent', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              amount,
-              donationType: 'Apple Pay Donation',
-              metadata: {
-                paymentMethod: 'apple_pay',
-                timestamp: new Date().toISOString()
-              }
-            }),
-          });
-
-          const { clientSecret } = await response.json();
-
-          // Confirm payment with Stripe
+          // Confirm payment with the already created client secret
           const { error } = await stripe.confirmCardPayment(clientSecret, {
             payment_method: event.paymentMethod.id,
           });
@@ -85,7 +80,12 @@ export default function ApplePayButton({ amount, onSuccess, onError, disabled }:
         }
       });
 
-      // Show Apple Pay payment sheet
+      // Process payment without showing popup - use inline confirmation
+      paymentRequest.on('cancel', () => {
+        setIsProcessing(false);
+      });
+
+      // Show the Apple Pay payment sheet (this is required by Apple Pay API)
       paymentRequest.show();
 
     } catch (error: any) {
