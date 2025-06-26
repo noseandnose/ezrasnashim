@@ -184,7 +184,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   return (
     <div className="overflow-y-auto h-full pb-20">
       {/* Main Tefilla Section - Connected to top bar */}
-      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg mx-1">
+      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg mx-1 -mt-1">
         {/* Welcome Header */}
         <div className="text-center mb-3">
           <div className="flex items-center justify-center gap-2">

@@ -53,7 +53,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   return (
     <div className="overflow-y-auto h-full pb-20">
       {/* Unified Top Section with Greeting, Times, and Today Info - Connected to top bar */}
-      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg mx-1">
+      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg mx-1 -mt-1">
         {/* Greeting and Date in one row */}
         <div className="flex items-center justify-between mb-3">
           <h1 className="font-serif text-xl text-black tracking-wide font-bold">{getGreeting()}</h1>
