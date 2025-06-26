@@ -82,19 +82,11 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
   ];
 
   return (
-    <div className="p-2 space-y-1">
-      {/* Header */}
-      <div className="text-center">
-        <div className="flex items-center justify-center gap-2 mb-1">
-          <h2 className="font-serif text-lg text-warm-gray tracking-wide">Daily Tzedaka</h2>
-          {tzedakaCompleted && (
-            <Heart className="gradient-heart" size={20} />
-          )}
-        </div>
-      </div>
-
-      {/* Campaign Card with Progress Bar */}
-      <div className="bg-white rounded-3xl p-4 shadow-lg border border-blush/10">
+    <div className="overflow-y-auto h-full pb-20">
+      {/* Main Tzedaka Section - Connected to top bar */}
+      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg -mt-1">
+        {/* Campaign Card with Progress Bar */}
+        <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
         {isLoading ? (
           <div className="animate-pulse">
             <div className="flex items-center space-x-3 mb-4">
@@ -122,8 +114,8 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
                 <BookOpen className="text-white" size={20} />
               </div>
               <div>
-                <h3 className="font-serif text-lg text-warm-gray">{campaign.title}</h3>
-                <p className="font-sans text-sm text-warm-gray/70">Support our community</p>
+                <h3 className="font-serif text-lg text-black font-bold">{campaign.title}</h3>
+                <p className="font-sans text-sm text-black/70">Support our community</p>
               </div>
             </div>
             
@@ -131,10 +123,10 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
-                  <span className="font-sans text-sm text-warm-gray/70">Progress</span>
-                  <span className="font-serif text-sm text-warm-gray">{progressPercentage}% Complete</span>
+                  <span className="font-sans text-sm text-black/70">Progress</span>
+                  <span className="font-serif text-sm text-black font-bold">{progressPercentage}% Complete</span>
                 </div>
-                <span className="font-serif text-sm text-warm-gray">${campaign.currentAmount.toLocaleString()} / ${campaign.goalAmount.toLocaleString()}</span>
+                <span className="font-serif text-sm text-black font-bold">${campaign.currentAmount.toLocaleString()} / ${campaign.goalAmount.toLocaleString()}</span>
               </div>
               <div className="w-full bg-blush/20 rounded-full h-3">
                 <div 
@@ -234,8 +226,9 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
         </div>
       </div>
 
-      {/* Bottom padding */}
-      <div className="h-24"></div>
+        {/* Bottom padding */}
+        <div className="h-16"></div>
+      </div>
     </div>
   );
 }
