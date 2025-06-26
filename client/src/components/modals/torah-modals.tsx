@@ -91,7 +91,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     <>
       {/* Halacha Modal */}
       <Dialog open={activeModal === 'halacha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="halacha-description"">
+        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="halacha-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold mb-2">Daily Halacha</DialogTitle>
             {halachaContent && (
@@ -125,7 +125,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
       {/* Mussar Modal */}
       <Dialog open={activeModal === 'mussar'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6 font-sans" aria-describedby="mussar-description">
+        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="mussar-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold mb-2">Daily Mussar</DialogTitle>
             {mussarContent && (
@@ -159,7 +159,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
       {/* Chizuk Modal */}
       <Dialog open={activeModal === 'chizuk'} onOpenChange={() => closeModal()}>
-        <DialogContent>
+        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="chizuk-description">
           <DialogHeader className="text-center">
             <DialogTitle className="text-lg font-semibold mb-2">Daily Chizuk</DialogTitle>
             <DialogDescription>Daily inspiration and spiritual strengthening</DialogDescription>
@@ -169,6 +169,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               </p>
             )}
           </DialogHeader>
+          <div id="chizuk-description" className="sr-only">5-minute daily inspiration and spiritual strengthening content</div>
           
           {chizukContent && chizukContent.audioUrl && (
             <AudioPlayer 
@@ -199,8 +200,6 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               <DialogDescription className="text-sm text-gray-600 font-sans">{loshonContent.title}</DialogDescription>
             )}
           </DialogHeader>
-          <div id="loshon-description" className="sr-only">Daily content about preventing negative speech and fostering positive communication</div>
-          
           <div id="loshon-description" className="sr-only">Daily teachings about proper speech and guarding one's tongue</div>
           
           {loshonContent && (
