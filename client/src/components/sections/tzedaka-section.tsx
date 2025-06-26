@@ -157,8 +157,8 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
               <Shield className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <div>
-              <h3 className="font-serif text-sm text-warm-gray mb-1">Support Causes</h3>
-              <p className="font-sans text-xs text-warm-gray/70">Fertility support & kollels</p>
+              <h3 className="font-serif text-sm text-black mb-1 font-bold">Support Causes</h3>
+              <p className="font-sans text-xs text-black/70">Fertility support & kollels</p>
             </div>
           </div>
         </button>
@@ -172,8 +172,8 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
               <Heart className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <div>
-              <h3 className="font-serif text-sm text-warm-gray mb-1">Sponsor a Day</h3>
-              <p className="font-sans text-xs text-warm-gray/70">Dedicate all mitzvot</p>
+              <h3 className="font-serif text-sm text-black mb-1 font-bold">Sponsor a Day</h3>
+              <p className="font-sans text-xs text-black/70">Dedicate all mitzvot</p>
             </div>
           </div>
         </button>
@@ -187,8 +187,8 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
               <HandHeart className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <div>
-              <h3 className="font-serif text-sm text-warm-gray">Gave Tzedaka elsewhere</h3>
-              <p className="font-sans text-xs text-warm-gray/70">Mark as completed</p>
+              <h3 className="font-serif text-sm text-black font-bold">Gave Tzedaka elsewhere</h3>
+              <p className="font-sans text-xs text-black/70">Mark as completed</p>
             </div>
           </div>
           <div className="heart-explosion-container">
@@ -209,7 +209,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
 
       {/* Community Impact */}
       <div className="bg-gradient-soft rounded-3xl p-3 border border-blush/10">
-        <h3 className="font-serif text-sm text-black text-center mb-2">Community Impact</h3>
+        <h3 className="font-serif text-sm text-black text-center mb-2 font-bold">Community Impact</h3>
         <div className="grid grid-cols-3 gap-2 text-center">
           <div>
             <div className="font-serif text-lg text-black">142</div>
