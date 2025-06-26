@@ -111,6 +111,31 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             </div>
           )}
           
+          {/* Thank You Section */}
+          {halachaContent?.speakerName && (
+            <div className="mt-6 p-4 bg-blue-50 rounded-xl">
+              <p className="text-sm text-blue-900 font-medium mb-2">
+                🙏 Thank you to our speaker
+              </p>
+              <p className="text-sm text-blue-800">
+                <strong>{halachaContent.speakerName}</strong>
+                {halachaContent.speakerWebsite && (
+                  <>
+                    {' • '}
+                    <a 
+                      href={halachaContent.speakerWebsite} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline hover:text-blue-800"
+                    >
+                      Visit Website
+                    </a>
+                  </>
+                )}
+              </p>
+            </div>
+          )}
+          
           <div className="heart-explosion-container">
             <Button 
               onClick={handleTorahComplete} 
