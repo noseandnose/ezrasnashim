@@ -91,7 +91,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     <>
       {/* Halacha Modal */}
       <Dialog open={activeModal === 'halacha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="halacha-description">
+        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="halacha-description"">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-serif font-semibold mb-2">Daily Halacha</DialogTitle>
             {halachaContent && (
@@ -200,6 +200,8 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             )}
           </DialogHeader>
           <div id="loshon-description" className="sr-only">Daily content about preventing negative speech and fostering positive communication</div>
+          
+          <div id="loshon-description" className="sr-only">Daily teachings about proper speech and guarding one's tongue</div>
           
           {loshonContent && (
             <div className="space-y-3 text-sm text-gray-700 font-sans">
