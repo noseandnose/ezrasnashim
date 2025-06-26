@@ -1,14 +1,14 @@
 import { 
   calendarEvents, shopItems, 
   tehillimNames, globalTehillimProgress, minchaPrayers, sponsors, nishmasText,
-  dailyHalacha, dailyMussar, dailyChizuk, loshonHorah,
+  dailyHalacha, dailyEmuna, dailyChizuk, loshonHorah,
   shabbatRecipes, parshaVorts, tableInspirations, campaigns, inspirationalQuotes, womensPrayers, discountPromotions,
   type CalendarEvent, type InsertCalendarEvent,
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
   type Sponsor, type InsertSponsor, type NishmasText, type InsertNishmasText,
   type DailyHalacha, type InsertDailyHalacha,
-  type DailyMussar, type InsertDailyMussar,
+  type DailyEmuna, type InsertDailyEmuna,
   type DailyChizuk, type InsertDailyChizuk,
   type LoshonHorah, type InsertLoshonHorah,
   type ShabbatRecipe, type InsertShabbatRecipe,
@@ -396,22 +396,22 @@ export class DatabaseStorage implements IStorage {
     return halacha;
   }
 
-  async getDailyMussarByDate(date: string): Promise<DailyMussar | undefined> {
+  async getDailyEmunaByDate(date: string): Promise<DailyEmuna | undefined> {
     try {
       const result = await pool.query(
-        `SELECT id, date, title, content, author, source, audio_url as "audioUrl", duration, speaker, provider, speaker_website as "speakerWebsite", created_at as "createdAt" FROM daily_mussar WHERE date = $1 LIMIT 1`,
+        `SELECT id, date, title, content, author, source, audio_url as "audioUrl", duration, speaker, provider, speaker_website as "speakerWebsite", created_at as "createdAt" FROM daily_emuna WHERE date = $1 LIMIT 1`,
         [date]
       );
       return result.rows[0] || undefined;
     } catch (error) {
-      console.error('Failed to fetch daily mussar:', error);
+      console.error('Failed to fetch daily emuna:', error);
       return undefined;
     }
   }
 
-  async createDailyMussar(insertMussar: InsertDailyMussar): Promise<DailyMussar> {
-    const [mussar] = await db.insert(dailyMussar).values(insertMussar).returning();
-    return mussar;
+  async createDailyEmuna(insertEmuna: InsertDailyEmuna): Promise<DailyEmuna> {
+    const [emuna] = await db.insert(dailyEmuna).values(insertEmuna).returning();
+    return emuna;
   }
 
   async getDailyChizukByDate(date: string): Promise<DailyChizuk | undefined> {
