@@ -108,7 +108,6 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           </p>
         </div>
       </div>
-
       {/* Main Action Buttons */}
       <div className="space-y-1 p-1">
         <button
@@ -157,7 +156,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             </div>
             <div className="text-left flex-grow">
               <h3 className="font-serif text-base text-black font-bold">Daily Tzedaka</h3>
-              <p className="font-sans text-xs text-black/70">Support Torah & Charity</p>
+              <p className="font-sans text-xs text-black/70">Support Women Causes & Torah</p>
             </div>
             {tzedakaCompleted && (
               <Heart className="gradient-heart" size={18} />
