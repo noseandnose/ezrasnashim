@@ -84,7 +84,7 @@ export default function TableSection() {
   return (
     <div className="overflow-y-auto h-full pb-20">
       {/* Main Table Section - Connected to top bar - Only This Shabbos */}
-      <div className="bg-gradient-soft p-3 shadow-lg -mt-1">
+      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg -mt-1">
         {/* Shabbos Times Section */}
         <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
           <div className="flex items-center justify-between mb-2">

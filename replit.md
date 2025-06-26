@@ -147,6 +147,7 @@ Changelog:
 - June 25, 2025. Updated home section design: Unified top section with greeting, times, and today info as one cohesive unit; added circular arrow button on Mincha to indicate clickability; applied black text styling with bold headings throughout; made layout more compact to fit entire home screen without scrolling
 - June 26, 2025. Connected main daily sections to top bar: Removed gaps between top navigation and main content modals on Home, Tefilla, and Shabbat Table pages (excluding Torah and Tzedaka as requested); sections now flow seamlessly from top bar with rounded bottom corners
 - June 26, 2025. Unified top bar and main modal design: Made top bar and main content sections use identical gradient and thickness with seamless visual connection using negative margin and matching rounded corners
+- June 26, 2025. Applied unified design across all pages: Removed page-specific headers, made top sections full-width with rounded bottom corners, reorganized content with main inspiration/core content in top section and secondary actions below
 ```
 
 ## User Preferences

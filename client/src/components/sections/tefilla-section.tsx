@@ -184,17 +184,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   return (
     <div className="overflow-y-auto h-full pb-20">
       {/* Main Tefilla Section - Connected to top bar - Only Tehillim */}
-      <div className="bg-gradient-soft p-3 shadow-lg -mt-1">
-        {/* Welcome Header */}
-        <div className="text-center mb-3">
-          <div className="flex items-center justify-center gap-2">
-            <h2 className="font-serif text-lg text-black tracking-wide font-bold">Daily Tefilla</h2>
-            {tefillaCompleted && (
-              <Heart className="gradient-heart" size={20} />
-            )}
-          </div>
-        </div>
-
+      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg -mt-1">
         {/* Daily Tehillim Card */}
         <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
           <div className="flex items-center justify-between mb-2">
