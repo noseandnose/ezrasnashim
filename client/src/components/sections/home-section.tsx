@@ -51,9 +51,9 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   };
 
   return (
-    <div className="p-1 space-y-1 overflow-y-auto h-full pb-20">
-      {/* Unified Top Section with Greeting, Times, and Today Info */}
-      <div className="bg-gradient-soft rounded-3xl p-3 shadow-lg">
+    <div className="overflow-y-auto h-full pb-20">
+      {/* Unified Top Section with Greeting, Times, and Today Info - Connected to top bar */}
+      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg mx-1">
         {/* Greeting and Date in one row */}
         <div className="flex items-center justify-between mb-3">
           <h1 className="font-serif text-xl text-black tracking-wide font-bold">{getGreeting()}</h1>
@@ -110,7 +110,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       </div>
 
       {/* Main Action Buttons */}
-      <div className="space-y-1">
+      <div className="space-y-1 p-1">
         <button
           onClick={() => navigateToSection('torah')}
           className="w-full bg-white rounded-2xl p-2.5 shadow-soft hover:scale-105 transition-all duration-300 border border-blush/10"

@@ -130,7 +130,7 @@ export default function TableSection() {
       </div>
 
       {/* Shabbos Content Grid */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2 px-2">
         {tableItems.map(({ id, icon: Icon, title, subtitle, color }) => (
           <button
             key={id}
@@ -140,8 +140,8 @@ export default function TableSection() {
             <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
               <Icon className="text-white" size={18} strokeWidth={1.5} />
             </div>
-            <h3 className="font-serif text-xs text-warm-gray mb-1">{title}</h3>
-            <p className="font-sans text-xs text-warm-gray/60 leading-relaxed">{subtitle}</p>
+            <h3 className="font-serif text-xs text-black mb-1 font-bold">{title}</h3>
+            <p className="font-sans text-xs text-black/60 leading-relaxed">{subtitle}</p>
           </button>
         ))}
       </div>
