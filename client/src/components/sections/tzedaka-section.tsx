@@ -179,8 +179,8 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
         </button>
       </div>
 
-      {/* Gave Tzedaka Elsewhere Bar */}
-      <div className="bg-white rounded-3xl p-4 shadow-lg border border-blush/10">
+        {/* Gave Tzedaka Elsewhere Bar */}
+        <div className="bg-white rounded-3xl p-4 shadow-lg border border-blush/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className={`p-2 rounded-full ${tzedakaCompleted ? 'bg-sage' : 'bg-gradient-feminine'}`}>
@@ -205,10 +205,10 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             <HeartExplosion trigger={showExplosion} />
           </div>
         </div>
-      </div>
+        </div>
 
-      {/* Community Impact */}
-      <div className="bg-gradient-soft rounded-3xl p-3 border border-blush/10">
+        {/* Community Impact */}
+        <div className="bg-white rounded-3xl p-3 border border-blush/10 shadow-lg">
         <h3 className="font-serif text-sm text-black text-center mb-2 font-bold">Community Impact</h3>
         <div className="grid grid-cols-3 gap-2 text-center">
           <div>
