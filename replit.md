@@ -148,6 +148,7 @@ Changelog:
 - June 26, 2025. Connected main daily sections to top bar: Removed gaps between top navigation and main content modals on Home, Tefilla, and Shabbat Table pages (excluding Torah and Tzedaka as requested); sections now flow seamlessly from top bar with rounded bottom corners
 - June 26, 2025. Unified top bar and main modal design: Made top bar and main content sections use identical gradient and thickness with seamless visual connection using negative margin and matching rounded corners
 - June 26, 2025. Applied unified design across all pages: Removed page-specific headers, made top sections full-width with rounded bottom corners, reorganized content with main inspiration/core content in top section and secondary actions below
+- June 26, 2025. Enhanced daily mussar to support audio content like chizuk: Added audio_url, duration, and speaker fields to database, updated frontend to display audio player when available, maintains text fallback for non-audio content
 ```
 
 ## User Preferences

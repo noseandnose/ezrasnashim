@@ -55,7 +55,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000 // 30 minutes
   });
 
-  const { data: mussarContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string}>({
+  const { data: mussarContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string; author?: string; speaker?: string}>({
     queryKey: ['/api/torah/mussar', today],
     queryFn: () => fetch(`/api/torah/mussar/${today}`).then(res => res.json()),
     enabled: activeModal === 'mussar',
@@ -134,12 +134,23 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           </DialogHeader>
           <div id="mussar-description" className="sr-only">Daily character development and spiritual growth content</div>
           
-          {mussarContent && (
+          {mussarContent && mussarContent.audioUrl && (
+            <AudioPlayer 
+              title={mussarContent.title || 'Mussar'}
+              duration={mussarContent.duration || "10:00"}
+              audioUrl={mussarContent.audioUrl}
+            />
+          )}
+          
+          {mussarContent && !mussarContent.audioUrl && (
             <div className="space-y-3 text-sm text-gray-700 font-sans">
               <div>
                 <p><strong>Today's Focus:</strong> {mussarContent.content}</p>
+                {mussarContent.author && (
+                  <p className="mt-2 text-xs text-gray-500">Author: {mussarContent.author}</p>
+                )}
                 {mussarContent.source && (
-                  <p className="mt-2 text-xs text-gray-500">Source: {mussarContent.source}</p>
+                  <p className="mt-1 text-xs text-gray-500">Source: {mussarContent.source}</p>
                 )}
               </div>
             </div>
