@@ -55,7 +55,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000 // 30 minutes
   });
 
-  const { data: mussarContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string; author?: string; speaker?: string}>({
+  const { data: mussarContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string; author?: string; speaker?: string; speakerName?: string; speakerWebsite?: string}>({
     queryKey: ['/api/torah/mussar', today],
     queryFn: () => fetch(`/api/torah/mussar/${today}`).then(res => res.json()),
     enabled: activeModal === 'mussar',
@@ -135,11 +135,18 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           <div id="mussar-description" className="sr-only">Daily character development and spiritual growth content</div>
           
           {mussarContent && mussarContent.audioUrl && (
-            <AudioPlayer 
-              title={mussarContent.title || 'Mussar'}
-              duration={mussarContent.duration || "10:00"}
-              audioUrl={mussarContent.audioUrl}
-            />
+            <div className="space-y-4">
+              <AudioPlayer 
+                title={mussarContent.title || 'Mussar'}
+                duration={mussarContent.duration || "10:00"}
+                audioUrl={mussarContent.audioUrl}
+              />
+              {mussarContent.speaker && (
+                <p className="text-sm text-gray-600 text-center">
+                  <strong>Speaker:</strong> {mussarContent.speaker}
+                </p>
+              )}
+            </div>
           )}
           
           {mussarContent && !mussarContent.audioUrl && (
@@ -156,6 +163,31 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             </div>
           )}
           
+          {/* Thank You Section */}
+          {mussarContent?.speakerName && (
+            <div className="mt-6 p-4 bg-blue-50 rounded-xl">
+              <p className="text-sm text-blue-900 font-medium mb-2">
+                🙏 Thank you to our speaker
+              </p>
+              <p className="text-sm text-blue-800">
+                <strong>{mussarContent.speakerName}</strong>
+                {mussarContent.speakerWebsite && (
+                  <>
+                    {' • '}
+                    <a 
+                      href={mussarContent.speakerWebsite} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline hover:text-blue-800"
+                    >
+                      Visit Website
+                    </a>
+                  </>
+                )}
+              </p>
+            </div>
+          )}
+
           <div className="heart-explosion-container">
             <Button 
               onClick={handleTorahComplete} 
@@ -190,6 +222,31 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             />
           )}
           
+          {/* Thank You Section */}
+          {chizukContent?.speakerName && (
+            <div className="mt-6 p-4 bg-blue-50 rounded-xl">
+              <p className="text-sm text-blue-900 font-medium mb-2">
+                🙏 Thank you to our speaker
+              </p>
+              <p className="text-sm text-blue-800">
+                <strong>{chizukContent.speakerName}</strong>
+                {chizukContent.speakerWebsite && (
+                  <>
+                    {' • '}
+                    <a 
+                      href={chizukContent.speakerWebsite} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline hover:text-blue-800"
+                    >
+                      Visit Website
+                    </a>
+                  </>
+                )}
+              </p>
+            </div>
+          )}
+
           <div className="heart-explosion-container">
             <Button 
               onClick={handleTorahComplete} 
@@ -230,6 +287,31 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             </div>
           )}
           
+          {/* Thank You Section */}
+          {loshonContent?.speakerName && (
+            <div className="mt-6 p-4 bg-blue-50 rounded-xl">
+              <p className="text-sm text-blue-900 font-medium mb-2">
+                🙏 Thank you to our speaker
+              </p>
+              <p className="text-sm text-blue-800">
+                <strong>{loshonContent.speakerName}</strong>
+                {loshonContent.speakerWebsite && (
+                  <>
+                    {' • '}
+                    <a 
+                      href={loshonContent.speakerWebsite} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline hover:text-blue-800"
+                    >
+                      Visit Website
+                    </a>
+                  </>
+                )}
+              </p>
+            </div>
+          )}
+
           <div className="heart-explosion-container">
             <Button 
               onClick={handleTorahComplete} 

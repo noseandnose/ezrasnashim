@@ -209,6 +209,8 @@ export const dailyChizuk = pgTable("daily_chizuk", {
   audioUrl: text("audio_url"),
   duration: text("duration"),
   speaker: text("speaker"),
+  speakerName: text("speaker_name"),
+  speakerWebsite: text("speaker_website"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -219,6 +221,8 @@ export const loshonHorah = pgTable("loshon_horah", {
   content: text("content").notNull(),
   halachicSource: text("halachic_source"),
   practicalTip: text("practical_tip"),
+  speakerName: text("speaker_name"),
+  speakerWebsite: text("speaker_website"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

@@ -381,7 +381,7 @@ export class DatabaseStorage implements IStorage {
   async getDailyHalachaByDate(date: string): Promise<DailyHalacha | undefined> {
     try {
       const result = await pool.query(
-        `SELECT id, date, title, content, source, created_at as "createdAt" FROM daily_halacha WHERE date = $1 LIMIT 1`,
+        `SELECT id, date, title, content, source, speaker_name as "speakerName", speaker_website as "speakerWebsite", created_at as "createdAt" FROM daily_halacha WHERE date = $1 LIMIT 1`,
         [date]
       );
       return result.rows[0] || undefined;
@@ -399,7 +399,7 @@ export class DatabaseStorage implements IStorage {
   async getDailyMussarByDate(date: string): Promise<DailyMussar | undefined> {
     try {
       const result = await pool.query(
-        `SELECT id, date, title, content, author, source, audio_url as "audioUrl", duration, speaker, created_at as "createdAt" FROM daily_mussar WHERE date = $1 LIMIT 1`,
+        `SELECT id, date, title, content, author, source, audio_url as "audioUrl", duration, speaker, speaker_name as "speakerName", speaker_website as "speakerWebsite", created_at as "createdAt" FROM daily_mussar WHERE date = $1 LIMIT 1`,
         [date]
       );
       return result.rows[0] || undefined;
@@ -417,7 +417,7 @@ export class DatabaseStorage implements IStorage {
   async getDailyChizukByDate(date: string): Promise<DailyChizuk | undefined> {
     try {
       const result = await pool.query(
-        `SELECT id, date, title, content, audio_url as "audioUrl", duration, speaker, created_at as "createdAt" FROM daily_chizuk WHERE date = $1 LIMIT 1`,
+        `SELECT id, date, title, content, audio_url as "audioUrl", duration, speaker, speaker_name as "speakerName", speaker_website as "speakerWebsite", created_at as "createdAt" FROM daily_chizuk WHERE date = $1 LIMIT 1`,
         [date]
       );
       return result.rows[0] || undefined;
@@ -435,7 +435,7 @@ export class DatabaseStorage implements IStorage {
   async getLoshonHorahByDate(date: string): Promise<LoshonHorah | undefined> {
     try {
       const result = await pool.query(
-        `SELECT id, date, title, content, halachic_source as "halachicSource", practical_tip as "practicalTip", created_at as "createdAt" FROM loshon_horah WHERE date = $1 LIMIT 1`,
+        `SELECT id, date, title, content, halachic_source as "halachicSource", practical_tip as "practicalTip", speaker_name as "speakerName", speaker_website as "speakerWebsite", created_at as "createdAt" FROM loshon_horah WHERE date = $1 LIMIT 1`,
         [date]
       );
       return result.rows[0] || undefined;

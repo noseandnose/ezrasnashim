@@ -149,6 +149,7 @@ Changelog:
 - June 26, 2025. Unified top bar and main modal design: Made top bar and main content sections use identical gradient and thickness with seamless visual connection using negative margin and matching rounded corners
 - June 26, 2025. Applied unified design across all pages: Removed page-specific headers, made top sections full-width with rounded bottom corners, reorganized content with main inspiration/core content in top section and secondary actions below
 - June 26, 2025. Enhanced daily mussar to support audio content like chizuk: Added audio_url, duration, and speaker fields to database, updated frontend to display audio player when available, maintains text fallback for non-audio content
+- June 26, 2025. Added speaker attribution to audio sections and thank you sections to all Torah modals: Enhanced database with speaker_name and speaker_website fields for all Torah content tables, displayed speaker names prominently for audio content, implemented blue thank you sections with website links matching Nishmas design
 ```
 
 ## User Preferences
