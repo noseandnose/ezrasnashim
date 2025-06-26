@@ -144,56 +144,56 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Mussar Modal */}
-      <Dialog open={activeModal === 'mussar'} onOpenChange={() => closeModal()}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="mussar-description">
+      {/* Emuna Modal */}
+      <Dialog open={activeModal === 'emuna'} onOpenChange={() => closeModal()}>
+        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="emuna-description">
           <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-serif font-semibold mb-2">Daily Mussar</DialogTitle>
-            {mussarContent && (
-              <DialogDescription className="text-sm text-gray-600 font-sans">{mussarContent.title}</DialogDescription>
+            <DialogTitle className="text-lg font-serif font-semibold mb-2">Daily Emuna</DialogTitle>
+            {emunaContent && (
+              <DialogDescription className="text-sm text-gray-600 font-sans">{emunaContent.title}</DialogDescription>
             )}
           </DialogHeader>
-          <div id="mussar-description" className="sr-only">Daily character development and spiritual growth content</div>
+          <div id="emuna-description" className="sr-only">Daily faith strengthening and spiritual trust content</div>
           
-          {mussarContent && mussarContent.audioUrl && (
+          {emunaContent && emunaContent.audioUrl && (
             <div className="space-y-4">
               <AudioPlayer 
-                title={mussarContent.title || 'Mussar'}
-                duration={mussarContent.duration || "10:00"}
-                audioUrl={mussarContent.audioUrl}
+                title={emunaContent.title || 'Emuna'}
+                duration={emunaContent.duration || "10:00"}
+                audioUrl={emunaContent.audioUrl}
               />
-              {mussarContent.speaker && (
+              {emunaContent.speaker && (
                 <p className="text-sm text-gray-600 text-center">
-                  <strong>Speaker:</strong> {mussarContent.speaker}
+                  <strong>Speaker:</strong> {emunaContent.speaker}
                 </p>
               )}
             </div>
           )}
           
-          {mussarContent && !mussarContent.audioUrl && (
+          {emunaContent && !emunaContent.audioUrl && (
             <div className="space-y-3 text-sm text-gray-700 font-sans">
               <div>
-                <p><strong>Today's Focus:</strong> {mussarContent.content}</p>
-                {mussarContent.author && (
-                  <p className="mt-2 text-xs text-gray-500">Author: {mussarContent.author}</p>
+                <p><strong>Today's Focus:</strong> {emunaContent.content}</p>
+                {emunaContent.author && (
+                  <p className="mt-2 text-xs text-gray-500">Author: {emunaContent.author}</p>
                 )}
-                {mussarContent.source && (
-                  <p className="mt-1 text-xs text-gray-500">Source: {mussarContent.source}</p>
+                {emunaContent.source && (
+                  <p className="mt-1 text-xs text-gray-500">Source: {emunaContent.source}</p>
                 )}
               </div>
             </div>
           )}
           
           {/* Thank You Section */}
-          {mussarContent?.provider && (
+          {emunaContent?.provider && (
             <div className="mt-6 p-4 bg-blue-50 rounded-xl">
               <p className="text-sm text-blue-900 font-medium mb-2">
-                🙏 Thank you to {mussarContent.provider}
+                🙏 Thank you to {emunaContent.provider}
               </p>
-              {mussarContent.speakerWebsite && (
+              {emunaContent.speakerWebsite && (
                 <p className="text-sm text-blue-800">
                   <a 
-                    href={mussarContent.speakerWebsite} 
+                    href={emunaContent.speakerWebsite} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-blue-600 underline hover:text-blue-800"

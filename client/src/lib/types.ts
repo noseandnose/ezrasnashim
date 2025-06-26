@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 
 export type ModalType = 
+  | 'halacha' 
+  | 'emuna' 
+  | 'chizuk' 
+  | 'loshon'
   | 'mincha' 
   | 'tehillim' 
   | 'tehillim-text'

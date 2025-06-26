@@ -49,10 +49,10 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
       border: 'border-blush/10'
     },
     {
-      id: 'mussar',
+      id: 'emuna',
       icon: Heart,
-      title: 'Mussar',
-      subtitle: 'Character Development',
+      title: 'Emuna',
+      subtitle: 'Faith & Trust',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',

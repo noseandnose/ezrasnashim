@@ -11,7 +11,7 @@ import {
   insertCalendarEventSchema, 
   insertTehillimNameSchema,
   insertDailyHalachaSchema,
-  insertDailyMussarSchema,
+  insertDailyEmunaSchema,
   insertDailyChizukSchema,
   insertLoshonHorahSchema,
   insertShabbatRecipeSchema,
@@ -307,23 +307,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/torah/mussar/:date", async (req, res) => {
+  app.get("/api/torah/emuna/:date", async (req, res) => {
     try {
       const { date } = req.params;
-      const mussar = await storage.getDailyMussarByDate(date);
-      res.json(mussar || null);
+      const emuna = await storage.getDailyEmunaByDate(date);
+      res.json(emuna || null);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch daily mussar" });
+      res.status(500).json({ message: "Failed to fetch daily emuna" });
     }
   });
 
-  app.post("/api/torah/mussar", async (req, res) => {
+  app.post("/api/torah/emuna", async (req, res) => {
     try {
-      const validatedData = insertDailyMussarSchema.parse(req.body);
-      const mussar = await storage.createDailyMussar(validatedData);
-      res.json(mussar);
+      const validatedData = insertDailyEmunaSchema.parse(req.body);
+      const emuna = await storage.createDailyEmuna(validatedData);
+      res.json(emuna);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create daily mussar" });
+      res.status(500).json({ message: "Failed to create daily emuna" });
     }
   });
 
