@@ -47,7 +47,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const { data: halachaContent } = useQuery<{title?: string; content?: string; source?: string; speakerName?: string; speakerWebsite?: string}>({
+  const { data: halachaContent } = useQuery<{title?: string; content?: string; source?: string; provider?: string; speakerWebsite?: string}>({
     queryKey: ['/api/torah/halacha', today],
     queryFn: () => fetch(`/api/torah/halacha/${today}`).then(res => res.json()),
     enabled: activeModal === 'halacha',
@@ -55,7 +55,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000 // 30 minutes
   });
 
-  const { data: mussarContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string; author?: string; speaker?: string; speakerName?: string; speakerWebsite?: string}>({
+  const { data: mussarContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string; author?: string; speaker?: string; provider?: string; speakerWebsite?: string}>({
     queryKey: ['/api/torah/mussar', today],
     queryFn: () => fetch(`/api/torah/mussar/${today}`).then(res => res.json()),
     enabled: activeModal === 'mussar',
@@ -63,7 +63,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000
   });
 
-  const { data: chizukContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string; speaker?: string; speakerName?: string; speakerWebsite?: string}>({
+  const { data: chizukContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string; speaker?: string; provider?: string; speakerWebsite?: string}>({
     queryKey: ['/api/torah/chizuk', today],
     queryFn: () => fetch(`/api/torah/chizuk/${today}`).then(res => res.json()),
     enabled: activeModal === 'chizuk',
@@ -71,7 +71,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000
   });
 
-  const { data: loshonContent } = useQuery<{title?: string; content?: string; halachicSource?: string; practicalTip?: string; speakerName?: string; speakerWebsite?: string}>({
+  const { data: loshonContent } = useQuery<{title?: string; content?: string; halachicSource?: string; practicalTip?: string; provider?: string; speakerWebsite?: string}>({
     queryKey: ['/api/torah/loshon', today],
     queryFn: () => fetch(`/api/torah/loshon/${today}`).then(res => res.json()),
     enabled: activeModal === 'loshon',
@@ -112,27 +112,23 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           )}
           
           {/* Thank You Section */}
-          {halachaContent?.speakerName && (
+          {halachaContent?.provider && (
             <div className="mt-6 p-4 bg-blue-50 rounded-xl">
               <p className="text-sm text-blue-900 font-medium mb-2">
-                🙏 Thank you to our speaker
+                🙏 Thank you to {halachaContent.provider}
               </p>
-              <p className="text-sm text-blue-800">
-                <strong>{halachaContent.speakerName}</strong>
-                {halachaContent.speakerWebsite && (
-                  <>
-                    {' • '}
-                    <a 
-                      href={halachaContent.speakerWebsite} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-600 underline hover:text-blue-800"
-                    >
-                      Visit Website
-                    </a>
-                  </>
-                )}
-              </p>
+              {halachaContent.speakerWebsite && (
+                <p className="text-sm text-blue-800">
+                  <a 
+                    href={halachaContent.speakerWebsite} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    Visit Website
+                  </a>
+                </p>
+              )}
             </div>
           )}
           
@@ -189,27 +185,23 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           )}
           
           {/* Thank You Section */}
-          {mussarContent?.speakerName && (
+          {mussarContent?.provider && (
             <div className="mt-6 p-4 bg-blue-50 rounded-xl">
               <p className="text-sm text-blue-900 font-medium mb-2">
-                🙏 Thank you to our speaker
+                🙏 Thank you to {mussarContent.provider}
               </p>
-              <p className="text-sm text-blue-800">
-                <strong>{mussarContent.speakerName}</strong>
-                {mussarContent.speakerWebsite && (
-                  <>
-                    {' • '}
-                    <a 
-                      href={mussarContent.speakerWebsite} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-600 underline hover:text-blue-800"
-                    >
-                      Visit Website
-                    </a>
-                  </>
-                )}
-              </p>
+              {mussarContent.speakerWebsite && (
+                <p className="text-sm text-blue-800">
+                  <a 
+                    href={mussarContent.speakerWebsite} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    Visit Website
+                  </a>
+                </p>
+              )}
             </div>
           )}
 
@@ -255,27 +247,23 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           )}
           
           {/* Thank You Section */}
-          {chizukContent?.speakerName && (
+          {chizukContent?.provider && (
             <div className="mt-6 p-4 bg-blue-50 rounded-xl">
               <p className="text-sm text-blue-900 font-medium mb-2">
-                🙏 Thank you to our speaker
+                🙏 Thank you to {chizukContent.provider}
               </p>
-              <p className="text-sm text-blue-800">
-                <strong>{chizukContent.speakerName}</strong>
-                {chizukContent.speakerWebsite && (
-                  <>
-                    {' • '}
-                    <a 
-                      href={chizukContent.speakerWebsite} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-600 underline hover:text-blue-800"
-                    >
-                      Visit Website
-                    </a>
-                  </>
-                )}
-              </p>
+              {chizukContent.speakerWebsite && (
+                <p className="text-sm text-blue-800">
+                  <a 
+                    href={chizukContent.speakerWebsite} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    Visit Website
+                  </a>
+                </p>
+              )}
             </div>
           )}
 
@@ -320,27 +308,23 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           )}
           
           {/* Thank You Section */}
-          {loshonContent?.speakerName && (
+          {loshonContent?.provider && (
             <div className="mt-6 p-4 bg-blue-50 rounded-xl">
               <p className="text-sm text-blue-900 font-medium mb-2">
-                🙏 Thank you to our speaker
+                🙏 Thank you to {loshonContent.provider}
               </p>
-              <p className="text-sm text-blue-800">
-                <strong>{loshonContent.speakerName}</strong>
-                {loshonContent.speakerWebsite && (
-                  <>
-                    {' • '}
-                    <a 
-                      href={loshonContent.speakerWebsite} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-600 underline hover:text-blue-800"
-                    >
-                      Visit Website
-                    </a>
-                  </>
-                )}
-              </p>
+              {loshonContent.speakerWebsite && (
+                <p className="text-sm text-blue-800">
+                  <a 
+                    href={loshonContent.speakerWebsite} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    Visit Website
+                  </a>
+                </p>
+              )}
             </div>
           )}
 
