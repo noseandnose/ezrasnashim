@@ -55,10 +55,10 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000 // 30 minutes
   });
 
-  const { data: mussarContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string; author?: string; speaker?: string; provider?: string; speakerWebsite?: string}>({
-    queryKey: ['/api/torah/mussar', today],
-    queryFn: () => fetch(`/api/torah/mussar/${today}`).then(res => res.json()),
-    enabled: activeModal === 'mussar',
+  const { data: emunaContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string; author?: string; speaker?: string; provider?: string; speakerWebsite?: string}>({
+    queryKey: ['/api/torah/emuna', today],
+    queryFn: () => fetch(`/api/torah/emuna/${today}`).then(res => res.json()),
+    enabled: activeModal === 'emuna',
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000
   });

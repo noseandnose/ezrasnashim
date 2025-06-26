@@ -34,8 +34,8 @@ export interface IStorage {
   getDailyHalachaByDate(date: string): Promise<DailyHalacha | undefined>;
   createDailyHalacha(halacha: InsertDailyHalacha): Promise<DailyHalacha>;
   
-  getDailyMussarByDate(date: string): Promise<DailyMussar | undefined>;
-  createDailyMussar(mussar: InsertDailyMussar): Promise<DailyMussar>;
+  getDailyEmunaByDate(date: string): Promise<DailyEmuna | undefined>;
+  createDailyEmuna(emuna: InsertDailyEmuna): Promise<DailyEmuna>;
   
   getDailyChizukByDate(date: string): Promise<DailyChizuk | undefined>;
   createDailyChizuk(chizuk: InsertDailyChizuk): Promise<DailyChizuk>;
