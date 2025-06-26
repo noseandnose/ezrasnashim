@@ -145,7 +145,6 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
         ) : null}
         </div>
       </div>
-
       {/* Other Tzedaka Options - Separate sections below */}
       <div className="p-2 space-y-2">
         <div className="grid grid-cols-2 gap-2">
@@ -159,7 +158,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             </div>
             <div>
               <h3 className="font-serif text-sm text-black mb-1 font-bold">Support Causes</h3>
-              <p className="font-sans text-xs text-black/70">Fertility support & kollels</p>
+              <p className="font-sans text-xs text-black/70">Fertility, Abuse and Torah</p>
             </div>
           </div>
         </button>
