@@ -333,8 +333,12 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           </div>
         </div>
 
+      </div>
+
+      {/* OTHER SECTIONS BELOW - SEPARATE FROM MAIN */}
+      <div className="p-2 space-y-2">
         {/* Prayer Services */}
-        <div className="grid grid-cols-2 gap-2 mb-1">
+        <div className="grid grid-cols-2 gap-2">
           <button 
             onClick={() => openModal('mincha')}
             className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
@@ -342,8 +346,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
               <Clock className="text-white" size={18} />
             </div>
-            <h3 className="font-serif text-sm text-warm-gray mb-1">Mincha</h3>
-            <p className="font-sans text-xs text-warm-gray/60">
+            <h3 className="font-serif text-sm text-black mb-1 font-bold">Mincha</h3>
+            <p className="font-sans text-xs text-black/60">
               {isLoading ? "Loading..." : 
                times?.minchaGedolah && times?.minchaKetanah ? 
                `${times.minchaGedolah} - ${times.minchaKetanah}` : 
@@ -358,8 +362,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
               <Heart className="text-white" size={18} />
             </div>
-            <h3 className="font-serif text-sm text-warm-gray mb-1">Nishmas Kol Chai</h3>
-            <p className="font-sans text-xs text-warm-gray/60">Prayer of Gratitude</p>
+            <h3 className="font-serif text-sm text-black mb-1 font-bold">Nishmas Kol Chai</h3>
+            <p className="font-sans text-xs text-black/60">Prayer of Gratitude</p>
           </button>
         </div>
 
@@ -370,12 +374,12 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               <HandHeart className="text-white" size={18} />
             </div>
             <div>
-              <h3 className="font-serif text-lg text-warm-gray">Personal Prayers</h3>
-              <p className="font-sans text-sm text-warm-gray/70">Categories for your Tefillos</p>
+              <h3 className="font-serif text-lg text-black font-bold">Personal Prayers</h3>
+              <p className="font-sans text-sm text-black/70">Categories for your Tefillos</p>
             </div>
           </div>
           
-          <div className="grid grid-cols-3 gap-2 mb-2">
+          <div className="grid grid-cols-3 gap-2">
             <button 
               onClick={() => openModal('refuah')}
               className="bg-gradient-to-br from-blush/10 to-blush/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-blush/20"
@@ -383,8 +387,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               <div className="bg-blush/20 p-2 rounded-full mx-auto mb-1 w-fit">
                 <Shield className="text-blush" size={16} strokeWidth={1.5} />
               </div>
-              <h4 className="font-serif text-sm text-warm-gray">Refuah</h4>
-              <p className="font-sans text-xs text-warm-gray/60 mt-1">Healing</p>
+              <h4 className="font-serif text-sm text-black font-bold">Refuah</h4>
+              <p className="font-sans text-xs text-black/60 mt-1">Healing</p>
             </button>
             
             <button 
@@ -394,8 +398,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               <div className="bg-lavender/20 p-2 rounded-full mx-auto mb-1 w-fit">
                 <Home className="text-lavender" size={16} strokeWidth={1.5} />
               </div>
-              <h4 className="font-serif text-sm text-warm-gray">Family</h4>
-              <p className="font-sans text-xs text-warm-gray/60 mt-1">Shalom Bayis</p>
+              <h4 className="font-serif text-sm text-black font-bold">Family</h4>
+              <p className="font-sans text-xs text-black/60 mt-1">Shalom Bayis</p>
             </button>
             
             <button 
@@ -405,14 +409,15 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               <div className="bg-sage/20 p-2 rounded-full mx-auto mb-1 w-fit">
                 <Compass className="text-sage" size={16} strokeWidth={1.5} />
               </div>
-              <h4 className="font-serif text-sm text-warm-gray">Life</h4>
-              <p className="font-sans text-xs text-warm-gray/60 mt-1">Guidance</p>
+              <h4 className="font-serif text-sm text-black font-bold">Life</h4>
+              <p className="font-sans text-xs text-black/60 mt-1">Guidance</p>
             </button>
           </div>
         </div>
+
+        {/* Bottom padding */}
+        <div className="h-16"></div>
       </div>
-      {/* Bottom padding to prevent last element from being cut off by navigation */}
-      <div className="h-16"></div>
     </div>
   );
 }
