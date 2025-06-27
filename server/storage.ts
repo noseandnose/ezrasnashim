@@ -283,7 +283,7 @@ export class DatabaseStorage implements IStorage {
       // Return fallback with the correct reference format
       return {
         text: `Pirkei Avot ${selectedRef} - Unable to load from Sefaria API. Please try again later.`,
-        chapter: chapterNum,
+        chapter: parseInt(selectedRef.split('.')[0]),
         source: selectedRef
       };
     }
