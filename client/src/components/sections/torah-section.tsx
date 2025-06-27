@@ -92,7 +92,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
                 <Scroll className="text-white" size={16} />
               </div>
               <h3 className="font-serif text-sm text-black font-bold">Daily Inspiration</h3>
-              <span className="text-xs text-black/60 font-sans">{pirkeiAvot.source}</span>
+              <span className="text-xs text-black/60 font-sans">Pirkei Avot {pirkeiAvot.source.replace('.', ':')}</span>
             </div>
             <p className="font-sans text-xs text-black/90 leading-relaxed text-justify">
               {pirkeiAvot.text}

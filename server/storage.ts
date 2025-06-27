@@ -207,62 +207,69 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSefariaPirkeiAvot(chapter: number): Promise<{text: string; chapter: number; source: string}> {
-    // Authentic Pirkei Avot teachings with verified sources
-    const pirkeiAvotTeachings = [
-      // Chapter 1
-      { text: "Moses received the Torah from Sinai and gave it over to Joshua. Joshua gave it over to the Elders, the Elders to the Prophets, and the Prophets gave it over to the Men of the Great Assembly. They said three things: Be deliberate in judgment, raise up many disciples, and make a fence around the Torah.", chapter: 1, source: "Pirkei Avot 1:1" },
-      { text: "Shimon the Righteous was one of the last of the men of the Great Assembly. He used to say: On three things the world stands: On the Torah, on the Temple service, and on acts of loving kindness.", chapter: 1, source: "Pirkei Avot 1:2" },
-      { text: "Antigonus of Socho received the tradition from Shimon the Righteous. He used to say: Be not like servants who serve the master for the sake of receiving a reward, but be like servants who serve the master not for the sake of receiving a reward; and let the fear of Heaven be upon you.", chapter: 1, source: "Pirkei Avot 1:3" },
-      { text: "Yose ben Yoezer of Zeredah and Yose ben Yochanan of Jerusalem received the tradition from them. Yose ben Yoezer of Zeredah said: Let your house be a meeting house for the sages and sit amid the dust of their feet and drink in their words with thirst.", chapter: 1, source: "Pirkei Avot 1:4" },
-      { text: "Yose ben Yochanan of Jerusalem said: Let your house be wide open and let the poor be members of your household; and do not talk much with women.", chapter: 1, source: "Pirkei Avot 1:5" },
-      
-      // Chapter 2  
-      { text: "Rabbi said: Which is the straight path that a person should choose? One that is harmonious for the one who does it, and harmonious for mankind. Be as careful with a light commandment as with a grave one, for you do not know the reward for the commandments.", chapter: 2, source: "Pirkei Avot 2:1" },
-      { text: "Rabban Gamliel the son of Rabbi Judah the Prince said: Beautiful is the study of Torah together with a worldly occupation, for toil in them both puts sin out of mind. But all Torah without work will in the end fail and cause sin.", chapter: 2, source: "Pirkei Avot 2:2" },
-      { text: "Be careful with the ruling power for they do not befriend a person except for their own needs. They seem like friends when it is to their advantage, but they do not stand by a person at the time of his distress.", chapter: 2, source: "Pirkei Avot 2:3" },
-      { text: "He used to say: Do His will as if it were your will, that He may do your will as if it were His will. Nullify your will before His will, that He may nullify the will of others before your will.", chapter: 2, source: "Pirkei Avot 2:4" },
-      { text: "Hillel said: Do not separate yourself from the community; and do not trust in yourself until the day of your death; and do not judge your fellow until you are in his place; and do not say something that cannot be understood but will be understood in the end; and say not: 'When I have leisure I will study,' for perhaps you will never have leisure.", chapter: 2, source: "Pirkei Avot 2:5" },
-      
-      // Chapter 3
-      { text: "Akavya ben Mahalalel said: Reflect upon three things and you will not come to sin: Know from where you came, where you are going, and before Whom you will give justification and reckoning.", chapter: 3, source: "Pirkei Avot 3:1" },
-      { text: "Rabbi Chanina, the deputy of the priests, said: Pray for the welfare of the government, since but for fear of it people would swallow each other alive.", chapter: 3, source: "Pirkei Avot 3:2" },
-      { text: "Rabbi Chanina ben Teradion said: If two sit together and no words of Torah are spoken between them, it is a session of the scornful, as it is written: 'Nor sat he in the seat of the scornful.' But when two sit together and words of Torah are spoken between them, the Divine Presence rests between them.", chapter: 3, source: "Pirkei Avot 3:3" },
-      { text: "Rabbi Shimon said: If three have eaten at one table and have not spoken words of Torah, it is as if they had eaten sacrifices offered to the dead, as it is written: 'For all tables are full of filthy vomit, without the All-present.'", chapter: 3, source: "Pirkei Avot 3:4" },
-      { text: "Rabbi Chanina ben Chachinai said: One who stays awake at night, or travels alone on the road, or turns his heart to idle thoughts, such a person is liable for his soul.", chapter: 3, source: "Pirkei Avot 3:5" },
-      
-      // Chapter 4
-      { text: "Ben Zoma said: Who is wise? One who learns from every person, as it is said: 'From all who taught me I gained understanding.' Who is strong? One who conquers his inclination, as it is said: 'Better is one slow to anger than a strong man, and one who rules his spirit than a conqueror of a city.' Who is rich? One who is happy with his lot, as it is said: 'When you eat the labor of your hands, happy shall you be, and it shall be well with you.' Who is honored? One who honors others, as it is said: 'For those who honor Me I will honor, and those who despise Me shall be lightly esteemed.'", chapter: 4, source: "Pirkei Avot 4:1" },
-      { text: "Ben Azzai said: Run to perform even a minor mitzvah, and flee from transgression; for one mitzvah leads to another mitzvah, and one transgression leads to another transgression; for the reward of a mitzvah is a mitzvah, and the reward of a transgression is a transgression.", chapter: 4, source: "Pirkei Avot 4:2" },
-      { text: "He used to say: Do not be scornful of any person and do not be disdainful of anything, for there is no person who does not have his hour and no thing that does not have its place.", chapter: 4, source: "Pirkei Avot 4:3" },
-      { text: "Rabbi Levitas of Yavneh said: Be very humble, for the hope of mortal man is worms.", chapter: 4, source: "Pirkei Avot 4:4" },
-      { text: "Rabbi Yochanan ben Beroka said: Whoever profanes the name of Heaven in secret will be punished in public; regarding the profanation of the Name, unintentional and intentional are the same.", chapter: 4, source: "Pirkei Avot 4:5" },
-      
-      // Chapter 5
-      { text: "With ten utterances the world was created. What does this teach us? Surely it could have been created with one utterance. But this is to punish the wicked who destroy the world that was created with ten utterances, and to reward the righteous who sustain the world that was created with ten utterances.", chapter: 5, source: "Pirkei Avot 5:1" },
-      { text: "There were ten generations from Adam to Noah, to make known how great is His patience; for all those generations kept provoking Him, until He brought upon them the waters of the flood.", chapter: 5, source: "Pirkei Avot 5:2" },
-      { text: "There were ten generations from Noah to Abraham, to make known how great is His patience; for all those generations kept provoking Him, until Abraham our forefather came and received the reward of them all.", chapter: 5, source: "Pirkei Avot 5:3" },
-      { text: "With ten trials Abraham our forefather was tested, and he withstood them all; to make known how great was the love of Abraham our forefather.", chapter: 5, source: "Pirkei Avot 5:4" },
-      { text: "Ten miracles were performed for our forefathers in Egypt, and ten at the sea.", chapter: 5, source: "Pirkei Avot 5:5" },
-      
-      // Chapter 4 (continuing authentic sources)
-      { text: "Rabbi Ishmael his son said: One who learns in order to teach, it is given to him to learn and to teach; one who learns in order to practice, it is given to him to learn and teach, observe and practice.", chapter: 4, source: "Pirkei Avot 4:6" },
-      { text: "Rabbi Tzadok said: Do not make them a crown to aggrandize yourself with them, nor a spade to dig with them. So too Hillel used to say: One who makes worldly use of the crown of Torah shall waste away. From here you learn that anyone who derives worldly benefit from words of Torah removes his life from the world.", chapter: 4, source: "Pirkei Avot 4:7" },
-      { text: "Rabbi Yose said: Whoever honors the Torah will himself be honored by people, and whoever dishonors the Torah will himself be dishonored by people.", chapter: 4, source: "Pirkei Avot 4:8" },
-      { text: "Rabbi Ishmael said: Be yielding to a leader, affable to the young, and receive every person with joy.", chapter: 4, source: "Pirkei Avot 4:15" },
-      { text: "Rabbi Akiva said: Jesting and levity accustom a man to promiscuity. Tradition is a fence around Torah; tithes are a fence around riches; vows are a fence around abstinence; a fence around wisdom is silence.", chapter: 4, source: "Pirkei Avot 4:13" }
+    // Define the specific Pirkei Avot references we want to cycle through
+    const pirkeiAvotRefs = [
+      "1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "1.7", "1.8", "1.9", "1.10",
+      "2.1", "2.2", "2.3", "2.4", "2.5", "2.6", "2.7", "2.8", "2.9", "2.10",
+      "3.1", "3.2", "3.3", "3.4", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10",
+      "4.1", "4.2", "4.3", "4.4", "4.5", "4.6", "4.7", "4.8", "4.9", "4.10",
+      "5.1", "5.2", "5.3", "5.4", "5.5", "5.6", "5.7", "5.8", "5.9", "5.10",
+      "6.1", "6.2", "6.3", "6.4", "6.5", "6.6", "6.7", "6.8", "6.9", "6.10"
     ];
 
-    // Calculate which teaching based on day of year, cycling through all teachings
+    // Calculate which reference based on day of year
     const today = new Date();
     const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-    const teachingIndex = dayOfYear % pirkeiAvotTeachings.length;
-    const selectedTeaching = pirkeiAvotTeachings[teachingIndex];
-    
-    return {
-      text: selectedTeaching.text,
-      chapter: selectedTeaching.chapter,
-      source: selectedTeaching.source
-    };
+    const refIndex = dayOfYear % pirkeiAvotRefs.length;
+    const selectedRef = pirkeiAvotRefs[refIndex];
+
+    try {
+      // Fetch from Sefaria API using the exact reference format
+      const url = `https://www.sefaria.org/api/texts/Pirkei_Avot.${selectedRef}`;
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Sefaria API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Extract English text
+      let text = '';
+      if (data.text && Array.isArray(data.text) && data.text.length > 0) {
+        text = data.text[0];
+      } else if (typeof data.text === 'string') {
+        text = data.text;
+      }
+      
+      if (!text) {
+        throw new Error('No text content found in API response');
+      }
+      
+      // Clean up any HTML formatting
+      const cleanText = text
+        .replace(/<[^>]*>/gi, '')  // Remove HTML tags
+        .replace(/&[a-zA-Z]+;/gi, '')  // Remove HTML entities
+        .trim();
+      
+      // Extract chapter number from reference
+      const chapterNumber = parseInt(selectedRef.split('.')[0]);
+      
+      return {
+        text: cleanText,
+        chapter: chapterNumber,
+        source: selectedRef  // Return the exact API reference like "1.1", "2.3", etc.
+      };
+    } catch (error) {
+      console.error('Error fetching from Sefaria API:', error);
+      
+      // Return fallback with the correct reference format
+      return {
+        text: `Pirkei Avot ${selectedRef} - Unable to load from Sefaria API. Please try again later.`,
+        chapter: parseInt(selectedRef.split('.')[0]),
+        source: selectedRef
+      };
+    }
   }
 
   async getSefariaTehillim(perek: number, language: string): Promise<{text: string; perek: number; language: string}> {
