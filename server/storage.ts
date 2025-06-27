@@ -222,11 +222,10 @@ export class DatabaseStorage implements IStorage {
       "6.1", "6.2", "6.3", "6.4", "6.5", "6.6", "6.7", "6.8", "6.9", "6.10", "6.11"
     ];
 
-    // For testing accuracy, start with the first reference
-    // TODO: After verification, restore daily cycling with: const refIndex = dayOfYear % pirkeiAvotRefs.length;
+    // Calculate which reference based on day of year, cycling through all teachings
     const today = new Date();
     const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-    const refIndex = 0; // Force first reference for now to verify accuracy
+    const refIndex = dayOfYear % pirkeiAvotRefs.length;
     const selectedRef = pirkeiAvotRefs[refIndex];
 
     try {
