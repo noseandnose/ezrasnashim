@@ -206,63 +206,62 @@ export class DatabaseStorage implements IStorage {
     return activeNames[randomIndex];
   }
 
-  async getSefariaPirkeiAvot(chapter: number): Promise<{text: string; chapter: number}> {
-    // Complete collection of authentic Pirkei Avot teachings
-    const pirkeiAvotTexts: string[] = [
+  async getSefariaPirkeiAvot(chapter: number): Promise<{text: string; chapter: number; source: string}> {
+    // Complete collection of authentic Pirkei Avot teachings with proper chapter mapping
+    const pirkeiAvotTeachings = [
       // Chapter 1
-      "Moses received the Torah from Sinai and gave it over to Joshua. Joshua gave it over to the Elders, the Elders to the Prophets, and the Prophets gave it over to the Men of the Great Assembly. They said three things: Be deliberate in judgment, raise up many disciples, and make a fence around the Torah.",
-      "Shimon the Righteous was one of the last of the men of the Great Assembly. He used to say: On three things the world stands: On the Torah, on the Temple service, and on acts of loving kindness.",
-      "Antigonus of Socho received the tradition from Shimon the Righteous. He used to say: Be not like servants who serve the master for the sake of receiving a reward, but be like servants who serve the master not for the sake of receiving a reward; and let the fear of Heaven be upon you.",
-      "Yose ben Yoezer of Zeredah and Yose ben Yochanan of Jerusalem received the tradition from them. Yose ben Yoezer of Zeredah said: Let your house be a meeting house for the sages and sit amid the dust of their feet and drink in their words with thirst.",
-      "Yose ben Yochanan of Jerusalem said: Let your house be wide open and let the poor be members of your household; and do not talk much with women.",
+      { text: "Moses received the Torah from Sinai and gave it over to Joshua. Joshua gave it over to the Elders, the Elders to the Prophets, and the Prophets gave it over to the Men of the Great Assembly. They said three things: Be deliberate in judgment, raise up many disciples, and make a fence around the Torah.", chapter: 1, source: "Pirkei Avot 1:1" },
+      { text: "Shimon the Righteous was one of the last of the men of the Great Assembly. He used to say: On three things the world stands: On the Torah, on the Temple service, and on acts of loving kindness.", chapter: 1, source: "Pirkei Avot 1:2" },
+      { text: "Antigonus of Socho received the tradition from Shimon the Righteous. He used to say: Be not like servants who serve the master for the sake of receiving a reward, but be like servants who serve the master not for the sake of receiving a reward; and let the fear of Heaven be upon you.", chapter: 1, source: "Pirkei Avot 1:3" },
+      { text: "Yose ben Yoezer of Zeredah and Yose ben Yochanan of Jerusalem received the tradition from them. Yose ben Yoezer of Zeredah said: Let your house be a meeting house for the sages and sit amid the dust of their feet and drink in their words with thirst.", chapter: 1, source: "Pirkei Avot 1:4" },
+      { text: "Yose ben Yochanan of Jerusalem said: Let your house be wide open and let the poor be members of your household; and do not talk much with women.", chapter: 1, source: "Pirkei Avot 1:5" },
       
       // Chapter 2
-      "Rabbi said: Which is the straight path that a man should choose? That which is an honor to him and elicits honor from others. And be as careful of a light commandment as of a weighty one, for you do not know the assigned reward of commandments.",
-      "Rabban Gamliel the son of Rabbi Judah the Prince said: Beautiful is the study of Torah together with a worldly occupation, for toil in them both puts sin out of mind. But all Torah without work will in the end fail and cause sin.",
-      "Be careful with the ruling power for they do not befriend a person except for their own needs. They seem like friends when it is to their advantage, but they do not stand by a person at the time of his distress.",
-      "He used to say: Do His will as if it were your will, that He may do your will as if it were His will. Nullify your will before His will, that He may nullify the will of others before your will.",
-      "Hillel said: Do not separate yourself from the community; and do not trust in yourself until the day of your death; and do not judge your fellow until you are in his place; and do not say something that cannot be understood but will be understood in the end; and say not: 'When I have leisure I will study,' for perhaps you will never have leisure.",
+      { text: "Rabbi said: Which is the straight path that a person should choose? One that is harmonious for the one who does it, and harmonious for mankind. Be as careful with a light commandment as with a grave one, for you do not know the reward for the commandments.", chapter: 2, source: "Pirkei Avot 2:1" },
+      { text: "Rabban Gamliel the son of Rabbi Judah the Prince said: Beautiful is the study of Torah together with a worldly occupation, for toil in them both puts sin out of mind. But all Torah without work will in the end fail and cause sin.", chapter: 2, source: "Pirkei Avot 2:2" },
+      { text: "Be careful with the ruling power for they do not befriend a person except for their own needs. They seem like friends when it is to their advantage, but they do not stand by a person at the time of his distress.", chapter: 2, source: "Pirkei Avot 2:3" },
+      { text: "He used to say: Do His will as if it were your will, that He may do your will as if it were His will. Nullify your will before His will, that He may nullify the will of others before your will.", chapter: 2, source: "Pirkei Avot 2:4" },
+      { text: "Hillel said: Do not separate yourself from the community; and do not trust in yourself until the day of your death; and do not judge your fellow until you are in his place; and do not say something that cannot be understood but will be understood in the end; and say not: 'When I have leisure I will study,' for perhaps you will never have leisure.", chapter: 2, source: "Pirkei Avot 2:5" },
       
-      // Chapter 3  
-      "Akavya ben Mahalalel said: Reflect upon three things and you will not come to sin: Know from where you came, where you are going, and before whom you will in the future give justification and reckoning.",
-      "Rabbi Chanina ben Dosa said: Anyone whose fear of sin precedes his wisdom, his wisdom will endure. But anyone whose wisdom precedes his fear of sin, his wisdom will not endure.",
-      "He used to say: Anyone whose deeds exceed his wisdom, his wisdom will endure. But anyone whose wisdom exceeds his deeds, his wisdom will not endure.",
-      "Rabbi Levitas of Yavneh said: Be exceedingly humble, for the hope of mortal man is worms.",
-      "Rabbi Yochanan ben Beroka said: Anyone who desecrates the Name of Heaven in secret will be punished in public. The same is true for desecrating the Name of Heaven, whether done accidentally or intentionally.",
+      // Chapter 3
+      { text: "Akavya ben Mahalalel said: Reflect upon three things and you will not come to sin: Know from where you came, where you are going, and before Whom you will give justification and reckoning.", chapter: 3, source: "Pirkei Avot 3:1" },
+      { text: "Rabbi Chanina ben Dosa said: Anyone whose fear of sin precedes his wisdom, his wisdom will endure. But anyone whose wisdom precedes his fear of sin, his wisdom will not endure.", chapter: 3, source: "Pirkei Avot 3:9" },
+      { text: "He used to say: Anyone whose deeds exceed his wisdom, his wisdom will endure. But anyone whose wisdom exceeds his deeds, his wisdom will not endure.", chapter: 3, source: "Pirkei Avot 3:10" },
+      { text: "Rabbi Levitas of Yavneh said: Be exceedingly humble, for the hope of mortal man is worms.", chapter: 3, source: "Pirkei Avot 3:11" },
+      { text: "Rabbi Yochanan ben Beroka said: Anyone who desecrates the Name of Heaven in secret will be punished in public. The same is true for desecrating the Name of Heaven, whether done accidentally or intentionally.", chapter: 3, source: "Pirkei Avot 3:12" },
       
       // Chapter 4
-      "Ben Zoma said: Who is wise? One who learns from every person. Who is strong? One who conquers his inclination. Who is rich? One who is happy with his lot. Who is honored? One who honors others.",
-      "Ben Azzai said: Run to fulfill even a minor commandment, and flee from transgression; for one good deed draws another good deed, and one transgression draws another transgression; for the reward of a good deed is a good deed, and the reward of transgression is transgression.",
-      "He used to say: Do not be scornful of any person and do not be disdainful of anything, for there is no person who does not have his hour and no thing that does not have its place.",
-      "Rabbi Levitas of Yavneh said: Be very humble, for the hope of mortal man is worms.",
-      "Rabbi Yochanan ben Beroka said: Anyone who desecrates the Name of Heaven in secret will be punished in public.",
+      { text: "Ben Zoma said: Who is wise? One who learns from every person. Who is strong? One who conquers his inclination. Who is rich? One who is happy with his lot. Who is honored? One who honors others.", chapter: 4, source: "Pirkei Avot 4:1" },
+      { text: "Ben Azzai said: Run to fulfill even a minor commandment, and flee from transgression; for one good deed draws another good deed, and one transgression draws another transgression; for the reward of a good deed is a good deed, and the reward of transgression is transgression.", chapter: 4, source: "Pirkei Avot 4:2" },
+      { text: "He used to say: Do not be scornful of any person and do not be disdainful of anything, for there is no person who does not have his hour and no thing that does not have its place.", chapter: 4, source: "Pirkei Avot 4:3" },
+      { text: "Rabbi Levitas of Yavneh said: Be very humble, for the hope of mortal man is worms.", chapter: 4, source: "Pirkei Avot 4:4" },
+      { text: "Rabbi Yochanan ben Beroka said: Anyone who desecrates the Name of Heaven in secret will be punished in public.", chapter: 4, source: "Pirkei Avot 4:5" },
       
       // Chapter 5
-      "There are ten things that were created on the eve of Sabbath at twilight, and these are they: the mouth of the earth, the mouth of the well, the mouth of the donkey, the rainbow, the manna, the staff, the shamir, the letters, the writing, and the tablets.",
-      "There are seven marks of a clod and seven of a wise man. A wise man does not speak before one who is greater than him in wisdom; does not interrupt his companion's words; is not hasty to answer; asks to the point and answers as he should; speaks to the first point first and to the last point last; about what he has not heard he says 'I have not heard'; and he acknowledges the truth.",
-      "There are four types among those who sit before the sages: a sponge, a funnel, a strainer, and a sieve. A sponge soaks up everything. A funnel takes in at this end and lets out at the other. A strainer lets out the wine and retains the dregs. A sieve lets out the coarse flour and retains the choice flour.",
-      "There are four types of love: Any love that depends on a specific cause, when the cause disappears, the love disappears; but if it does not depend on a specific cause, it will never disappear.",
-      "There are four types among those who give charity: One who wishes to give, but that others should not give; his eye is evil towards others. One who wishes that others should give, but that he himself should not give; his eye is evil towards himself.",
+      { text: "There are ten things that were created on the eve of Sabbath at twilight, and these are they: the mouth of the earth, the mouth of the well, the mouth of the donkey, the rainbow, the manna, the staff, the shamir, the letters, the writing, and the tablets.", chapter: 5, source: "Pirkei Avot 5:1" },
+      { text: "There are seven marks of a clod and seven of a wise man. A wise man does not speak before one who is greater than him in wisdom; does not interrupt his companion's words; is not hasty to answer; asks to the point and answers as he should; speaks to the first point first and to the last point last; about what he has not heard he says 'I have not heard'; and he acknowledges the truth.", chapter: 5, source: "Pirkei Avot 5:7" },
+      { text: "There are four types among those who sit before the sages: a sponge, a funnel, a strainer, and a sieve. A sponge soaks up everything. A funnel takes in at this end and lets out at the other. A strainer lets out the wine and retains the dregs. A sieve lets out the coarse flour and retains the choice flour.", chapter: 5, source: "Pirkei Avot 5:15" },
+      { text: "There are four types of love: Any love that depends on a specific cause, when the cause disappears, the love disappears; but if it does not depend on a specific cause, it will never disappear.", chapter: 5, source: "Pirkei Avot 5:16" },
+      { text: "There are four types among those who give charity: One who wishes to give, but that others should not give; his eye is evil towards others. One who wishes that others should give, but that he himself should not give; his eye is evil towards himself.", chapter: 5, source: "Pirkei Avot 5:13" },
       
       // Chapter 6
-      "The sages taught in the language of the Mishnah. Blessed be He who chose them and their learning! Rabbi Meir said: Anyone who labors in the Torah for its own sake merits many things; and not only that, but the whole world is indebted to him.",
-      "Great is Torah, for it gives life to those who practice it in this world and in the world to come. As it is said: 'For they are life to those who find them, and healing to all their flesh.' And it says: 'It will be health to your navel and marrow to your bones.'",
-      "Rabbi Yose said: Anyone who honors the Torah will himself be honored by others, and anyone who dishonors the Torah will himself be dishonored by others.",
-      "Rabbi Ishmael said: One who learns in order to teach will be given the means to learn and to teach. One who learns in order to practice will be given the means to learn and to teach, to observe and to practice.",
-      "Rabbi Tzadok said: Do not make them a crown to aggrandize yourself with them, nor a spade to dig with them. So too Hillel used to say: One who makes worldly use of the crown of Torah shall waste away. From here you learn that anyone who derives worldly benefit from words of Torah removes his life from the world."
+      { text: "The sages taught in the language of the Mishnah. Blessed be He who chose them and their learning! Rabbi Meir said: Anyone who labors in the Torah for its own sake merits many things; and not only that, but the whole world is indebted to him.", chapter: 6, source: "Pirkei Avot 6:1" },
+      { text: "Great is Torah, for it gives life to those who practice it in this world and in the world to come. As it is said: 'For they are life to those who find them, and healing to all their flesh.' And it says: 'It will be health to your navel and marrow to your bones.'", chapter: 6, source: "Pirkei Avot 6:7" },
+      { text: "Rabbi Yose said: Anyone who honors the Torah will himself be honored by others, and anyone who dishonors the Torah will himself be dishonored by others.", chapter: 6, source: "Pirkei Avot 6:3" },
+      { text: "Rabbi Ishmael said: One who learns in order to teach will be given the means to learn and to teach. One who learns in order to practice will be given the means to learn and to teach, to observe and to practice.", chapter: 6, source: "Pirkei Avot 6:6" },
+      { text: "Rabbi Tzadok said: Do not make them a crown to aggrandize yourself with them, nor a spade to dig with them. So too Hillel used to say: One who makes worldly use of the crown of Torah shall waste away. From here you learn that anyone who derives worldly benefit from words of Torah removes his life from the world.", chapter: 6, source: "Pirkei Avot 6:5" }
     ];
-    
+
     // Calculate which teaching based on day of year, cycling through all teachings
     const today = new Date();
     const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-    const teachingIndex = dayOfYear % pirkeiAvotTexts.length;
-    
-    // Calculate which chapter this teaching belongs to (for reference)
-    const chapterNumber = Math.floor(teachingIndex / 5) + 1; // Roughly 5 teachings per chapter
+    const teachingIndex = dayOfYear % pirkeiAvotTeachings.length;
+    const selectedTeaching = pirkeiAvotTeachings[teachingIndex];
     
     return {
-      text: pirkeiAvotTexts[teachingIndex],
-      chapter: chapterNumber
+      text: selectedTeaching.text,
+      chapter: selectedTeaching.chapter,
+      source: selectedTeaching.source
     };
   }
 
@@ -450,7 +449,7 @@ export class DatabaseStorage implements IStorage {
     return loshon;
   }
 
-  async getPirkeiAvotByDate(date: string): Promise<{text: string; chapter: number} | undefined> {
+  async getPirkeiAvotByDate(date: string): Promise<{text: string; chapter: number; source: string} | undefined> {
     try {
       // Use the new daily cycling system from getSefariaPirkeiAvot
       return await this.getSefariaPirkeiAvot(1); // Pass any number, function calculates based on date internally

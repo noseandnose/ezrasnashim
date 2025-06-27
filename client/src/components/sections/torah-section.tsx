@@ -26,7 +26,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
   });
 
   // Fetch today's Pirkei Avot for daily inspiration
-  const { data: pirkeiAvot } = useQuery<{text: string; chapter: number}>({
+  const { data: pirkeiAvot } = useQuery<{text: string; chapter: number; source: string}>({
     queryKey: ['pirkei-avot-daily', today],
     queryFn: async () => {
       const response = await fetch(`/api/torah/pirkei-avot/${today}`);
@@ -92,7 +92,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
                 <Scroll className="text-white" size={16} />
               </div>
               <h3 className="font-serif text-sm text-black font-bold">Daily Inspiration</h3>
-              <span className="text-xs text-black/60 font-sans">Pirkei Avot {pirkeiAvot.chapter}</span>
+              <span className="text-xs text-black/60 font-sans">{pirkeiAvot.source}</span>
             </div>
             <p className="font-sans text-xs text-black/90 leading-relaxed text-justify">
               {pirkeiAvot.text}
