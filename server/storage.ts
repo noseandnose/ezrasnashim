@@ -207,14 +207,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSefariaPirkeiAvot(chapter: number): Promise<{text: string; chapter: number; source: string}> {
-    // Use a simple daily cycle starting from 1.1
+    // Define the actual structure of Pirkei Avot chapters with correct verse counts
+    const chapterStructure = [
+      { chapter: 1, maxVerse: 18 },  // Chapter 1: 1-18
+      { chapter: 2, maxVerse: 21 },  // Chapter 2: 1-21  
+      { chapter: 3, maxVerse: 18 },  // Chapter 3: 1-18
+      { chapter: 4, maxVerse: 22 },  // Chapter 4: 1-22
+      { chapter: 5, maxVerse: 23 },  // Chapter 5: 1-23
+      { chapter: 6, maxVerse: 11 }   // Chapter 6: 1-11
+    ];
+    
+    // Create array of all valid references
+    const validRefs: string[] = [];
+    chapterStructure.forEach(({ chapter, maxVerse }) => {
+      for (let verse = 1; verse <= maxVerse; verse++) {
+        validRefs.push(`${chapter}.${verse}`);
+      }
+    });
+    
     const today = new Date();
     const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-    
-    // Simple cycling: start with chapter 1, verse 1, and increment each day
-    const chapterNum = Math.floor((dayOfYear % 120) / 20) + 1; // 6 chapters, 20 days each
-    const verseNum = (dayOfYear % 20) + 1; // 20 verses per chapter cycle
-    const selectedRef = `${chapterNum}.${verseNum}`;
+    const refIndex = dayOfYear % validRefs.length;
+    const selectedRef = validRefs[refIndex];
 
     try {
       // Fetch from Sefaria API using the exact reference format
@@ -247,17 +261,20 @@ export class DatabaseStorage implements IStorage {
       
       // Always use the API's actual ref field for complete accuracy
       let sourceRef = selectedRef;
+      let actualChapter = parseInt(selectedRef.split('.')[0]);
+      
       if (data.ref) {
         // Extract reference from API response like "Pirkei Avot 4:1" -> "4.1"
         const refMatch = data.ref.match(/(\d+):(\d+)/);
         if (refMatch) {
           sourceRef = `${refMatch[1]}.${refMatch[2]}`;
+          actualChapter = parseInt(refMatch[1]);
         }
       }
       
       return {
         text: cleanText,
-        chapter: parseInt(sourceRef.split('.')[0]),
+        chapter: actualChapter,
         source: sourceRef  // Use the API's verified reference
       };
     } catch (error) {
