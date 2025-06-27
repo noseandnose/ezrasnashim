@@ -245,7 +245,7 @@ export class DatabaseStorage implements IStorage {
         .replace(/&[a-zA-Z]+;/gi, '')  // Remove HTML entities
         .trim();
       
-      // Use the API's actual ref field to ensure accuracy
+      // Always use the API's actual ref field for complete accuracy
       let sourceRef = selectedRef;
       if (data.ref) {
         // Extract reference from API response like "Pirkei Avot 4:1" -> "4.1"
