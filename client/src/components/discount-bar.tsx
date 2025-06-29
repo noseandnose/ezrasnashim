@@ -21,26 +21,35 @@ interface DiscountBarProps {
 
 export default function DiscountBar({ className = "" }: DiscountBarProps) {
   const { coordinates } = useLocationStore();
-  
-  const { data: promotion, isLoading, error } = useQuery<DiscountPromotion | null>({
-    queryKey: ['/api/discount-promotions/active', coordinates?.lat, coordinates?.lng],
+
+  const {
+    data: promotion,
+    isLoading,
+    error,
+  } = useQuery<DiscountPromotion | null>({
+    queryKey: [
+      "/api/discount-promotions/active",
+      coordinates?.lat,
+      coordinates?.lng,
+    ],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (coordinates?.lat) params.set('lat', coordinates.lat.toString());
-      if (coordinates?.lng) params.set('lng', coordinates.lng.toString());
-      
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/discount-promotions/active?${params.toString()}`);
+      if (coordinates?.lat) params.set("lat", coordinates.lat.toString());
+      if (coordinates?.lng) params.set("lng", coordinates.lng.toString());
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/discount-promotions/active?${params.toString()}`,
+      );
       if (!response.ok) {
-        console.error('Failed to fetch discount promotion:', response.status);
+        console.error("Failed to fetch discount promotion:", response.status);
         return null;
       }
       const data = await response.json();
-    
+
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 30 * 60 * 1000 // 30 minutes
-
+    gcTime: 30 * 60 * 1000, // 30 minutes
   });
 
   if (isLoading) {
@@ -52,19 +61,19 @@ export default function DiscountBar({ className = "" }: DiscountBarProps) {
   }
 
   const handleClick = () => {
-    window.open(promotion.linkUrl, '_blank', 'noopener,noreferrer');
+    window.open(promotion.linkUrl, "_blank", "noopener,noreferrer");
   };
 
   return (
-    <div 
+    <div
       className={`bg-gradient-soft border border-blush/10 rounded-3xl p-3 cursor-pointer 
                   hover:shadow-lg transition-shadow duration-200 ${className}`}
       onClick={handleClick}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <img 
-            src={promotion.logoUrl} 
+          <img
+            src={promotion.logoUrl}
             alt={promotion.title}
             className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
           />
@@ -72,9 +81,7 @@ export default function DiscountBar({ className = "" }: DiscountBarProps) {
             <h3 className="text-sm font-semibold text-gray-800 leading-tight">
               {promotion.title}
             </h3>
-            <p className="text-xs text-gray-600 mt-0.5">
-              {promotion.subtitle}
-            </p>
+            <p className="text-xs text-gray-600 mt-0.5">{promotion.subtitle}</p>
           </div>
         </div>
         <ExternalLink className="w-4 h-4 text-gray-600 flex-shrink-0 ml-2" />
