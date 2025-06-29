@@ -4,7 +4,9 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev": "NODE_ENV=development tsx server/index.ts",
+    "dev:backend": " NODE_ENV=development tsx server/index.ts",
+    "dev:frontend": "vite dev --mode replit",
+    "dev": "npm-run-all --parallel dev:backend dev:frontend",
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc",
@@ -44,6 +46,7 @@
     "lucide-react": "^0.453.0",
     "memorystore": "^1.6.7",
     "nanoid": "^5.1.5",
+    "npm-run-all": "^4.1.5",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "pg": "^8.16.0",
