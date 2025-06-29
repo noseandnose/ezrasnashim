@@ -2,7 +2,7 @@ import axios, { AxiosResponse, AxiosError } from 'axios';
 
 // Create axios instance with default config
 const axiosClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost', // Browser needs to call localhost for nginx proxy
   timeout: 10000,
   withCredentials: true,
   headers: {
