@@ -833,7 +833,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
       <div className="p-4 bg-white rounded-xl border border-cream-light mb-6">
         <div className="text-center">
           <div
-            className={`${language === 'hebrew' ? 'font-hebrew text-right' : 'font-english'} leading-relaxed`}
+            className={`${language === 'hebrew' ? 'david-libre-regular text-right' : 'font-english'} leading-relaxed`}
             style={{ fontSize: `${fontSize}px` }}
           >
             {language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation}
