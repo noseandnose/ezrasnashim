@@ -67,13 +67,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Call Hebcal with geonameid
       const hebcalUrl = `https://www.hebcal.com/zmanim?cfg=json&geonameid=${closestCity.geonameid}&date=${today}`;
-      const response = await fetch(hebcalUrl);
-      
-      if (!response.ok) {
-        throw new Error(`Hebcal API error: ${response.status}`);
-      }
-      
-      const data = await response.json();
+      const response = await serverAxiosClient.get(hebcalUrl);
+      const data = response.data;
       
       // Format times to 12-hour format with AM/PM
       const formatTime = (timeStr: string) => {

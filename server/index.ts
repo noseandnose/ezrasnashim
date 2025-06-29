@@ -3,17 +3,7 @@ import { registerRoutes } from "./routes.js";
 import cors from "cors";
 const app = express();
 
-app.use(
-  cors({
-    origin: [
-      "localhost:5174",
-      "http://localhost:5173",
-      "http://ezras-nashim-frontend.s3-website-us-east-1.amazonaws.com",
-      "ezras-nashim-frontend.s3-website-us-east-1.amazonaws.com",
-      ".replit.dev",
-    ],
-  }),
-);
+app.use(cors())
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -58,6 +48,7 @@ app.use((req, res, next) => {
     res.status(status).json({ message });
     throw err;
   });
+
 
   // Start server
   const port = process.env.PORT ?? 3000;
