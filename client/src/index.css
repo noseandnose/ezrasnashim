@@ -405,6 +405,28 @@ html, body, #root {
   font-family: 'Poppins', sans-serif;
 }
 
+/* David Libre Hebrew font classes */
+.david-libre-regular {
+  font-family: "David Libre", serif;
+  font-weight: 400;
+  font-style: normal;
+  direction: rtl;
+}
+
+.david-libre-medium {
+  font-family: "David Libre", serif;
+  font-weight: 500;
+  font-style: normal;
+  direction: rtl;
+}
+
+.david-libre-bold {
+  font-family: "David Libre", serif;
+  font-weight: 700;
+  font-style: normal;
+  direction: rtl;
+}
+
 .prayer-content .prayer-header {
   display: block;
   margin: 0.25rem 0 0 0;
