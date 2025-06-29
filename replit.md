@@ -16,11 +16,12 @@ Ezras Nashim is a comprehensive mobile-first web application designed for Jewish
 - **Mobile-First Design**: Responsive layout optimized for mobile devices with max-width container
 
 ### Backend Architecture
-- **Runtime**: Node.js 20 with Express.js server
+- **Runtime**: Node.js 20 with Express.js server (standalone service)
 - **Language**: TypeScript with ES modules
 - **API Design**: RESTful API endpoints with consistent error handling
 - **Session Management**: Express session with memory store for development
-- **Middleware**: Custom logging, JSON parsing, and error handling
+- **Middleware**: Custom logging, JSON parsing, and CORS handling
+- **Port**: Runs independently on port 3000
 
 ### Database Architecture
 - **Primary Database**: PostgreSQL (configured for Supabase)
@@ -94,8 +95,8 @@ Ezras Nashim is a comprehensive mobile-first web application designed for Jewish
 ## Deployment Strategy
 
 ### Environment Configuration
-- **Development**: Hot reload with Vite dev server and tsx for TypeScript execution
-- **Production**: Static frontend build with Express server for API and static file serving
+- **Development**: Separate backend (tsx server on port 3000) and frontend (Vite dev server on port 5173)
+- **Production**: Static frontend deployed to S3, backend deployed to ECS
 - **Database**: Environment variable configuration for PostgreSQL connection strings
 
 ### Build Process
