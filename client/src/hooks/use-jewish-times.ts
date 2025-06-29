@@ -85,7 +85,7 @@ export function useJewishTimes() {
     queryFn: async () => {
       try {
         // Call our backend proxy route to avoid CORS issues
-        const url = `/api/zmanim/${effectiveCoords.lat}/${effectiveCoords.lng}`;
+        const url = `${}/api/zmanim/${effectiveCoords.lat}/${effectiveCoords.lng}`;
         const response = await axiosClient.get(url);
         return response.data;
       } catch (error) {
