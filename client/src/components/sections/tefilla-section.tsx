@@ -166,7 +166,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
     }
 
     return (
-      <div className={`text-sm leading-relaxed ${isHebrew ? 'text-right font-hebrew' : 'font-english'}`}>
+      <div className={`text-sm leading-relaxed ${isHebrew ? 'text-right david-libre-regular' : 'font-english'}`}>
         {isHebrew ? text.hebrew : text.english}
       </div>
     );

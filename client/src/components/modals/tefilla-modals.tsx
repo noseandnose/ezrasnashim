@@ -276,7 +276,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           {/* Tehillim Text */}
           <div className="mb-6 bg-white/70 rounded-2xl p-4 border border-blush/10">
             <div
-              className={`${showHebrew ? 'font-hebrew text-right' : 'font-english'} leading-relaxed`}
+              className={`${showHebrew ? 'david-libre-regular text-right' : 'font-english'} leading-relaxed`}
               style={{ fontSize: `${fontSize}px` }}
             >
               {getTehillimDisplayText()}
@@ -345,7 +345,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 <div key={prayer.id} className="p-4 bg-white rounded-xl border border-cream-light">
                   <div className={language === 'hebrew' ? 'text-center' : 'text-left'}>
                     <div
-                      className={`${language === 'hebrew' ? 'font-hebrew text-right' : 'font-english text-left'} leading-relaxed whitespace-pre-line prayer-content`}
+                      className={`${language === 'hebrew' ? 'david-libre-regular text-right' : 'font-english text-left'} leading-relaxed whitespace-pre-line prayer-content`}
                       style={{ fontSize: `${fontSize}px` }}
                       dangerouslySetInnerHTML={{
                         __html: language === 'hebrew' 
@@ -561,7 +561,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 </Button>
               </div>
               <div className={`leading-relaxed ${
-                nishmasLanguage === 'hebrew' ? 'text-right font-hebrew' : 'font-english'
+                nishmasLanguage === 'hebrew' ? 'text-right david-libre-regular' : 'font-english'
               }`} style={{ fontSize: `${nishmasFontSize}px` }}>
                 {nishmasLoading ? (
                   <div className="mb-4 p-3 bg-gray-50 rounded-lg">
