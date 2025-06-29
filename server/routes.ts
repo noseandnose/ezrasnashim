@@ -858,17 +858,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Stream the response directly with axios
       if (response.data) {
         response.data.pipe(res);
-              if (!res.write(value)) {
-                await new Promise(resolve => res.once('drain', resolve));
-              }
-            }
-            res.end();
-          } catch (error) {
-            console.error('Streaming error:', error);
-            res.end();
-          }
-        };
-        pump();
       } else {
         res.status(500).json({ error: "No response body" });
       }

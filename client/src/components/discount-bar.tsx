@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink } from "lucide-react";
 import { useLocationStore } from "@/hooks/use-jewish-times";
+import axiosClient from "@/lib/axiosClient";
 
 interface DiscountPromotion {
   id: number;
@@ -37,14 +38,10 @@ export default function DiscountBar({ className = "" }: DiscountBarProps) {
       if (coordinates?.lat) params.set("lat", coordinates.lat.toString());
       if (coordinates?.lng) params.set("lng", coordinates.lng.toString());
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/discount-promotions/active?${params.toString()}`,
+      const response = await axiosClient.get(
+        `/api/discount-promotions/active?${params.toString()}`
       );
-      if (!response.ok) {
-        console.error("Failed to fetch discount promotion:", response.status);
-        return null;
-      }
-      const data = await response.json();
+      const data = response.data;
 
       return data;
     },

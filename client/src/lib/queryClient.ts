@@ -23,7 +23,12 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     try {
-      const response = await axiosClient.get(queryKey[0] as string);
+      const url = queryKey[0] as string;
+      // Check if URL already includes full baseURL to avoid doubling
+      const isFullUrl = url.startsWith('http');
+      const requestConfig = isFullUrl ? { baseURL: '' } : {};
+      
+      const response = await axiosClient.get(url, requestConfig);
       return response.data;
     } catch (error: any) {
       if (unauthorizedBehavior === "returnNull" && error.response?.status === 401) {

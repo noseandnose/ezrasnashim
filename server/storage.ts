@@ -1,3 +1,4 @@
+import serverAxiosClient from "./axiosClient";
 import { 
   calendarEvents, shopItems, 
   tehillimNames, globalTehillimProgress, minchaPrayers, sponsors, nishmasText,
@@ -233,13 +234,8 @@ export class DatabaseStorage implements IStorage {
     try {
       // Fetch from Sefaria API using the exact reference format
       const url = `https://www.sefaria.org/api/texts/Pirkei_Avot.${selectedRef}`;
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`Sefaria API error: ${response.status}`);
-      }
-      
-      const data = await response.json();
+      const response = await serverAxiosClient.get(url);
+      const data = response.data;
       
       // Extract English text
       let text = '';
@@ -293,13 +289,8 @@ export class DatabaseStorage implements IStorage {
     try {
       // Use the correct Sefaria API endpoint
       const url = `https://www.sefaria.org/api/texts/Psalms.${perek}`;
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`Sefaria API error: ${response.status}`);
-      }
-      
-      const data = await response.json();
+      const response = await serverAxiosClient.get(url);
+      const data = response.data;
       
       // Extract text based on language preference
       let text = '';

@@ -153,6 +153,7 @@ Changelog:
 - June 26, 2025. Added speaker attribution to audio sections and thank you sections to all Torah modals: Enhanced database with speaker_name and speaker_website fields for all Torah content tables, displayed speaker names prominently for audio content, implemented blue thank you sections with website links matching Nishmas design
 - June 26, 2025. Changed mussar section to emuna throughout the application: Renamed database table from daily_mussar to daily_emuna, updated all frontend components from "Daily Mussar" to "Daily Emuna", changed description from "Character Development" to "Faith & Trust", updated all API endpoints and type definitions accordingly
 - June 27, 2025. Fixed Pirkei Avot source accuracy using authentic Sefaria API: Connected directly to Sefaria API endpoints (Pirkei_Avot.1.1 format), cycles through complete 100+ authentic references, uses exact API reference format for sources (like "1.1", "2.3"), frontend displays as "Pirkei Avot 1:1" format, ensures complete accuracy with verified Sefaria database sources
+- June 29, 2025. Implemented comprehensive axios HTTP client with full request/response logging: Replaced all fetch calls with axios across frontend and backend, added centralized axios clients with baseURL configuration, implemented comprehensive logging interceptors that track every API request/response/error with method and URL details, updated all external API calls (Hebcal, Sefaria) and internal API calls to use axios for consistent error handling and debugging visibility
 ```
 
 ## User Preferences
