@@ -9,6 +9,7 @@ import { MinchaPrayer, NishmasText, GlobalTehillimProgress, TehillimName, Womens
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
+import axiosClient from "@/lib/axiosClient";
 
 interface TefillaModalsProps {
   onSectionChange?: (section: any) => void;
@@ -105,7 +106,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   // Fetch Tehillim text from Sefaria API
   const { data: tehillimText } = useQuery<{text: string; perek: number; language: string}>({
     queryKey: ['/api/tehillim/text', progress?.currentPerek, showHebrew ? 'hebrew' : 'english'],
-    queryFn: () => fetch(`/api/tehillim/text/${progress?.currentPerek}?language=${showHebrew ? 'hebrew' : 'english'}`).then(res => res.json()),
+    queryFn: async () => {
+      const response = await axiosClient.get(`/api/tehillim/text/${progress?.currentPerek}?language=${showHebrew ? 'hebrew' : 'english'}`);
+      return response.data;
+    },
     enabled: activeModal === 'tehillim-text' && !!progress?.currentPerek
   });
 

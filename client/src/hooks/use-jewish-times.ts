@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { create } from 'zustand';
 import { useEffect } from 'react';
+import axiosClient from '../lib/axiosClient';
 
 interface LocationState {
   location: string;
@@ -84,14 +85,9 @@ export function useJewishTimes() {
     queryFn: async () => {
       try {
         // Call our backend proxy route to avoid CORS issues
-        const url = `${import.meta.env.VITE_API_URL}/api/zmanim/${effectiveCoords.lat}/${effectiveCoords.lng}`;
-        const response = await fetch(url);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch zmanim data');
-        }
-        
-        return await response.json();
+        const url = `/api/zmanim/${effectiveCoords.lat}/${effectiveCoords.lng}`;
+        const response = await axiosClient.get(url);
+        return response.data;
       } catch (error) {
         console.error('Error fetching zmanim:', error);
         return null;
