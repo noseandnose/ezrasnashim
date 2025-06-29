@@ -175,8 +175,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const today = new Date().toISOString().split('T')[0];
       const hebcalUrl = `https://www.hebcal.com/zmanim?cfg=json&geonameid=${location}&date=${today}`;
       
-      const response = await fetch(hebcalUrl);
-      const data = await response.json();
+      const response = await serverAxiosClient.get(hebcalUrl);
+      const data = response.data;
       
       res.json(data);
     } catch (error) {
@@ -451,8 +451,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const today = new Date().toISOString().split('T')[0];
       const hebcalUrl = `https://www.hebcal.com/zmanim?cfg=json&geonameid=${location}&date=${today}`;
       
-      const response = await fetch(hebcalUrl);
-      const data = await response.json();
+      const response = await serverAxiosClient.get(hebcalUrl);
+      const data = response.data;
       
       // Parse the response to extract times
       const times: any = {};
@@ -836,32 +836,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
           break;
       }
       
-      const response = await fetch(mediaUrl, {
-        redirect: 'follow',
+      const response = await serverAxiosClient.get(mediaUrl, {
+        maxRedirects: 10,
         headers: {
           'User-Agent': 'Mozilla/5.0 (compatible; EzrasNashim/1.0)'
-        }
+        },
+        responseType: 'stream'
       });
       
-      if (!response.ok) {
+      if (response.status !== 200) {
         return res.status(404).json({ error: "Media file not found" });
       }
       
       // Set appropriate headers for media streaming
-      const contentType = response.headers.get('content-type') || 'application/octet-stream';
+      const contentType = response.headers['content-type'] || 'application/octet-stream';
       res.setHeader('Content-Type', contentType);
       res.setHeader('Accept-Ranges', 'bytes');
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Cache-Control', 'public, max-age=3600');
       
-      // Stream the response directly
-      if (response.body) {
-        const reader = response.body.getReader();
-        const pump = async () => {
-          try {
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
+      // Stream the response directly with axios
+      if (response.data) {
+        response.data.pipe(res);
               if (!res.write(value)) {
                 await new Promise(resolve => res.once('drain', resolve));
               }
