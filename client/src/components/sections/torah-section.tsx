@@ -29,7 +29,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
   const { data: pirkeiAvot } = useQuery<{text: string; chapter: number; source: string}>({
     queryKey: ['pirkei-avot-daily', today],
     queryFn: async () => {
-      const response = await fetch(`/api/torah/pirkei-avot/${today}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/torah/pirkei-avot/${today}`);
       if (!response.ok) return null;
       return response.json();
     },
