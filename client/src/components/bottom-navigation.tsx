@@ -17,18 +17,18 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
 
   const getActiveColorClass = (sectionId: Section) => {
     switch (sectionId) {
-      case 'torah': return 'bg-muted-lavender/15 text-muted-lavender rounded-2xl border-2 border-muted-lavender/30';
-      case 'tefilla': return 'bg-rose-blush/15 text-rose-blush rounded-2xl border-2 border-rose-blush/30';
-      case 'tzedaka': return 'bg-sage/15 text-sage rounded-2xl border-2 border-sage/30';
-      case 'table': return 'bg-sand-gold/15 text-sand-gold rounded-2xl border-2 border-sand-gold/30';
-      default: return 'bg-rose-blush/15 text-rose-blush rounded-2xl border-2 border-rose-blush/30';
+      case 'torah': return 'bg-white text-muted-lavender rounded-2xl border-2 border-muted-lavender/30';
+      case 'tefilla': return 'bg-white text-rose-blush rounded-2xl border-2 border-rose-blush/30';
+      case 'tzedaka': return 'bg-white text-sage rounded-2xl border-2 border-sage/30';
+      case 'table': return 'bg-white text-sand-gold rounded-2xl border-2 border-sand-gold/30';
+      default: return 'bg-white text-rose-blush rounded-2xl border-2 border-rose-blush/30';
     }
   };
 
 
 
   return (
-    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-soft-white/95 backdrop-blur-sm border-t border-rose-blush/15 shadow-2xl rounded-t-3xl transition-gentle">
+    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-gradient-soft backdrop-blur-sm border-t border-rose-blush/15 shadow-2xl rounded-t-3xl transition-gentle">
       <div className="flex items-center justify-around py-2 px-2">
         {navItems.map(({ id, icon: Icon, label, isCenter }) => (
           <button

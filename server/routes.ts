@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
+import serverAxiosClient from "./axiosClient";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -11,7 +12,7 @@ import {
   insertCalendarEventSchema, 
   insertTehillimNameSchema,
   insertDailyHalachaSchema,
-  insertDailyMussarSchema,
+  insertDailyEmunaSchema,
   insertDailyChizukSchema,
   insertLoshonHorahSchema,
   insertShabbatRecipeSchema,
@@ -66,13 +67,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Call Hebcal with geonameid
       const hebcalUrl = `https://www.hebcal.com/zmanim?cfg=json&geonameid=${closestCity.geonameid}&date=${today}`;
-      const response = await fetch(hebcalUrl);
-      
-      if (!response.ok) {
-        throw new Error(`Hebcal API error: ${response.status}`);
-      }
-      
-      const data = await response.json();
+      const response = await serverAxiosClient.get(hebcalUrl);
+      const data = response.data;
       
       // Format times to 12-hour format with AM/PM
       const formatTime = (timeStr: string) => {
@@ -179,8 +175,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const today = new Date().toISOString().split('T')[0];
       const hebcalUrl = `https://www.hebcal.com/zmanim?cfg=json&geonameid=${location}&date=${today}`;
       
-      const response = await fetch(hebcalUrl);
-      const data = await response.json();
+      const response = await serverAxiosClient.get(hebcalUrl);
+      const data = response.data;
       
       res.json(data);
     } catch (error) {
@@ -307,23 +303,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/torah/mussar/:date", async (req, res) => {
+  app.get("/api/torah/emuna/:date", async (req, res) => {
     try {
       const { date } = req.params;
-      const mussar = await storage.getDailyMussarByDate(date);
-      res.json(mussar || null);
+      const emuna = await storage.getDailyEmunaByDate(date);
+      res.json(emuna || null);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch daily mussar" });
+      res.status(500).json({ message: "Failed to fetch daily emuna" });
     }
   });
 
-  app.post("/api/torah/mussar", async (req, res) => {
+  app.post("/api/torah/emuna", async (req, res) => {
     try {
-      const validatedData = insertDailyMussarSchema.parse(req.body);
-      const mussar = await storage.createDailyMussar(validatedData);
-      res.json(mussar);
+      const validatedData = insertDailyEmunaSchema.parse(req.body);
+      const emuna = await storage.createDailyEmuna(validatedData);
+      res.json(emuna);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create daily mussar" });
+      res.status(500).json({ message: "Failed to create daily emuna" });
     }
   });
 
@@ -455,8 +451,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const today = new Date().toISOString().split('T')[0];
       const hebcalUrl = `https://www.hebcal.com/zmanim?cfg=json&geonameid=${location}&date=${today}`;
       
-      const response = await fetch(hebcalUrl);
-      const data = await response.json();
+      const response = await serverAxiosClient.get(hebcalUrl);
+      const data = response.data;
       
       // Parse the response to extract times
       const times: any = {};
@@ -509,22 +505,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Tehillim routes
   app.get("/api/tehillim/progress", async (req, res) => {
     try {
+      await storage.cleanupExpiredNames();
       const progress = await storage.getGlobalTehillimProgress();
-      res.json(progress);
+      const randomName = await storage.getRandomNameForPerek();
+      
+      res.json({
+        ...progress,
+        assignedName: randomName?.hebrewName || null
+      });
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch Tehillim progress" });
+      console.error('Error fetching Tehillim progress:', error);
+      res.status(500).json({ error: "Failed to fetch Tehillim progress" });
     }
   });
 
   app.post("/api/tehillim/complete", async (req, res) => {
     try {
-      const { completedBy } = req.body;
-      const currentProgress = await storage.getGlobalTehillimProgress();
-      const nextPerek = currentProgress.currentPerek + 1;
-      const updatedProgress = await storage.updateGlobalTehillimProgress(nextPerek, completedBy);
+      const { currentPerek, language, completedBy } = req.body;
+      
+      if (!currentPerek || currentPerek < 1 || currentPerek > 150) {
+        return res.status(400).json({ error: "Invalid perek number" });
+      }
+      
+      if (!language || !['english', 'hebrew'].includes(language)) {
+        return res.status(400).json({ error: "Language must be 'english' or 'hebrew'" });
+      }
+      
+      const updatedProgress = await storage.updateGlobalTehillimProgress(currentPerek, language, completedBy);
       res.json(updatedProgress);
     } catch (error) {
-      res.status(500).json({ message: "Failed to complete Tehillim perek" });
+      console.error('Error completing Tehillim:', error);
+      res.status(500).json({ error: "Failed to complete Tehillim" });
     }
   });
 
@@ -543,6 +554,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(names);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch Tehillim names" });
+    }
+  });
+
+  // Get Tehillim text from Sefaria API
+  app.get("/api/tehillim/text/:perek", async (req, res) => {
+    try {
+      const perek = parseInt(req.params.perek);
+      const language = req.query.language as string || 'english';
+      
+      if (isNaN(perek) || perek < 1 || perek > 150) {
+        return res.status(400).json({ error: "Perek must be between 1 and 150" });
+      }
+      
+      if (!['english', 'hebrew'].includes(language)) {
+        return res.status(400).json({ error: "Language must be 'english' or 'hebrew'" });
+      }
+      
+      const tehillimData = await storage.getSefariaTehillim(perek, language);
+      res.json(tehillimData);
+    } catch (error) {
+      console.error('Error fetching Tehillim text:', error);
+      res.status(500).json({ error: "Failed to fetch Tehillim text" });
+    }
+  });
+
+  // Get Tehillim preview (first line) from Sefaria API
+  app.get("/api/tehillim/preview/:perek", async (req, res) => {
+    try {
+      const perek = parseInt(req.params.perek);
+      const language = req.query.language as string || 'hebrew';
+      
+      if (isNaN(perek) || perek < 1 || perek > 150) {
+        return res.status(400).json({ error: 'Perek must be between 1 and 150' });
+      }
+      
+      const tehillimText = await storage.getSefariaTehillim(perek, language);
+      // Extract first line for preview
+      const firstLine = tehillimText.text.split('\n')[0] || tehillimText.text.substring(0, 100) + '...';
+      
+      res.json({
+        preview: firstLine,
+        perek: tehillimText.perek,
+        language: tehillimText.language
+      });
+    } catch (error) {
+      console.error('Error fetching Tehillim preview:', error);
+      res.status(500).json({ error: 'Failed to fetch Tehillim preview' });
     }
   });
 
@@ -627,9 +685,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Discount promotion routes
   app.get("/api/discount-promotions/active", async (req, res) => {
     try {
-      const promotion = await storage.getActiveDiscountPromotion();
+      const { lat, lng } = req.query;
+      let userLocation = "worldwide";
+      
+      // Check if coordinates are in Israel (approximate bounding box)
+      if (lat && lng) {
+        const latitude = parseFloat(lat as string);
+        const longitude = parseFloat(lng as string);
+        
+        // Israel's approximate coordinates: 29.5-33.4°N, 34.3-35.9°E
+        if (latitude >= 29.5 && latitude <= 33.4 && longitude >= 34.3 && longitude <= 35.9) {
+          userLocation = "israel";
+        }
+      }
+      
+      const promotion = await storage.getActiveDiscountPromotion(userLocation);
       res.json(promotion || null);
     } catch (error) {
+      console.error('Error fetching discount promotion:', error);
       res.status(500).json({ message: "Failed to fetch active discount promotion" });
     }
   });
@@ -702,7 +775,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Stripe payment route for donations
   app.post("/api/create-payment-intent", async (req, res) => {
     try {
-      const { amount } = req.body;
+      const { amount, donationType, metadata } = req.body;
       
       if (!amount || amount <= 0) {
         return res.status(400).json({ message: "Invalid amount" });
@@ -711,8 +784,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100), // Convert to cents
         currency: "usd",
+        payment_method_types: ['card', 'apple_pay', 'google_pay'],
         metadata: {
-          source: "ezras-nashim-donation"
+          source: "ezras-nashim-donation",
+          donationType: donationType || "General Donation",
+          sponsorName: metadata?.sponsorName || "",
+          dedication: metadata?.dedication || ""
         }
       });
 
@@ -759,43 +836,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
           break;
       }
       
-      const response = await fetch(mediaUrl, {
-        redirect: 'follow',
+      const response = await serverAxiosClient.get(mediaUrl, {
+        maxRedirects: 10,
         headers: {
           'User-Agent': 'Mozilla/5.0 (compatible; EzrasNashim/1.0)'
-        }
+        },
+        responseType: 'stream'
       });
       
-      if (!response.ok) {
+      if (response.status !== 200) {
         return res.status(404).json({ error: "Media file not found" });
       }
       
       // Set appropriate headers for media streaming
-      const contentType = response.headers.get('content-type') || 'application/octet-stream';
+      const contentType = response.headers['content-type'] || 'application/octet-stream';
       res.setHeader('Content-Type', contentType);
       res.setHeader('Accept-Ranges', 'bytes');
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Cache-Control', 'public, max-age=3600');
       
-      // Stream the response directly
-      if (response.body) {
-        const reader = response.body.getReader();
-        const pump = async () => {
-          try {
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
-              if (!res.write(value)) {
-                await new Promise(resolve => res.once('drain', resolve));
-              }
-            }
-            res.end();
-          } catch (error) {
-            console.error('Streaming error:', error);
-            res.end();
-          }
-        };
-        pump();
+      // Stream the response directly with axios
+      if (response.data) {
+        response.data.pipe(res);
       } else {
         res.status(500).json({ error: "No response body" });
       }

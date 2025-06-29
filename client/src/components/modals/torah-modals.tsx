@@ -47,44 +47,45 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const { data: halachaContent } = useQuery<any>({
+  const { data: halachaContent } = useQuery<{title?: string; content?: string; source?: string; provider?: string; speakerWebsite?: string}>({
     queryKey: ['/api/torah/halacha', today],
-    queryFn: () => fetch(`/api/torah/halacha/${today}`).then(res => res.json()),
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/torah/halacha/${today}`).then(res => res.json()),
     enabled: activeModal === 'halacha',
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 30 * 60 * 1000 // 30 minutes
+    gcTime: 30 * 60 * 1000 // 30 minutes
   });
 
-  const { data: mussarContent } = useQuery<any>({
-    queryKey: ['/api/torah/mussar', today],
-    queryFn: () => fetch(`/api/torah/mussar/${today}`).then(res => res.json()),
-    enabled: activeModal === 'mussar',
+  const { data: emunaContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string; author?: string; speaker?: string; provider?: string; speakerWebsite?: string}>({
+    queryKey: ['/api/torah/emuna', today],
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/torah/emuna/${today}`).then(res => res.json()),
+    enabled: activeModal === 'emuna',
+
     staleTime: 5 * 60 * 1000,
-    cacheTime: 30 * 60 * 1000
+    gcTime: 30 * 60 * 1000
   });
 
-  const { data: chizukContent } = useQuery<any>({
+  const { data: chizukContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string; speaker?: string; provider?: string; speakerWebsite?: string}>({
     queryKey: ['/api/torah/chizuk', today],
-    queryFn: () => fetch(`/api/torah/chizuk/${today}`).then(res => res.json()),
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/torah/chizuk/${today}`).then(res => res.json()),
     enabled: activeModal === 'chizuk',
     staleTime: 5 * 60 * 1000,
-    cacheTime: 30 * 60 * 1000
+    gcTime: 30 * 60 * 1000
   });
 
-  const { data: loshonContent } = useQuery<any>({
+  const { data: loshonContent } = useQuery<{title?: string; content?: string; halachicSource?: string; practicalTip?: string; provider?: string; speakerWebsite?: string}>({
     queryKey: ['/api/torah/loshon', today],
-    queryFn: () => fetch(`/api/torah/loshon/${today}`).then(res => res.json()),
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/torah/loshon/${today}`).then(res => res.json()),
     enabled: activeModal === 'loshon',
     staleTime: 5 * 60 * 1000,
-    cacheTime: 30 * 60 * 1000
+    gcTime: 30 * 60 * 1000
   });
 
-  const { data: pirkeiAvotContent } = useQuery<any>({
+  const { data: pirkeiAvotContent } = useQuery<Record<string, any>>({
     queryKey: ['/api/torah/pirkei-avot', today],
-    queryFn: () => fetch(`/api/torah/pirkei-avot/${today}`).then(res => res.json()),
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/torah/pirkei-avot/${today}`).then(res => res.json()),
     enabled: activeModal === 'pirkei-avot',
     staleTime: 5 * 60 * 1000,
-    cacheTime: 30 * 60 * 1000
+    gcTime: 30 * 60 * 1000
   });
 
   return (
@@ -111,37 +112,24 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             </div>
           )}
           
-          <div className="heart-explosion-container">
-            <Button 
-              onClick={handleTorahComplete} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
-            >
-              Complete
-            </Button>
-            <HeartExplosion trigger={showExplosion} />
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Mussar Modal */}
-      <Dialog open={activeModal === 'mussar'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto modal-content rounded-3xl p-6 font-sans" aria-describedby="mussar-description">
-          <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-serif font-semibold mb-2">Daily Mussar</DialogTitle>
-            {mussarContent && (
-              <DialogDescription className="text-sm text-gray-600 font-sans">{mussarContent.title}</DialogDescription>
-            )}
-          </DialogHeader>
-          <div id="mussar-description" className="sr-only">Daily character development and spiritual growth content</div>
-          
-          {mussarContent && (
-            <div className="space-y-3 text-sm text-gray-700 font-sans">
-              <div>
-                <p><strong>Today's Focus:</strong> {mussarContent.content}</p>
-                {mussarContent.source && (
-                  <p className="mt-2 text-xs text-gray-500">Source: {mussarContent.source}</p>
-                )}
-              </div>
+          {/* Thank You Section */}
+          {halachaContent?.provider && (
+            <div className="mt-6 p-4 bg-blue-50 rounded-xl">
+              <p className="text-sm text-blue-900 font-medium mb-2">
+                🙏 Thank you to {halachaContent.provider}
+              </p>
+              {halachaContent.speakerWebsite && (
+                <p className="text-sm text-blue-800">
+                  <a 
+                    href={halachaContent.speakerWebsite} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    Visit Website
+                  </a>
+                </p>
+              )}
             </div>
           )}
           
@@ -157,9 +145,82 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
         </DialogContent>
       </Dialog>
 
+      {/* Emuna Modal */}
+      <Dialog open={activeModal === 'emuna'} onOpenChange={() => closeModal()}>
+        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="emuna-description">
+          <DialogHeader className="text-center mb-4">
+            <DialogTitle className="text-lg font-serif font-semibold mb-2">Daily Emuna</DialogTitle>
+            {emunaContent && (
+              <DialogDescription className="text-sm text-gray-600 font-sans">{emunaContent.title}</DialogDescription>
+            )}
+          </DialogHeader>
+          <div id="emuna-description" className="sr-only">Daily faith strengthening and spiritual trust content</div>
+          
+          {emunaContent && emunaContent.audioUrl && (
+            <div className="space-y-4">
+              <AudioPlayer 
+                title={emunaContent.title || 'Emuna'}
+                duration={emunaContent.duration || "10:00"}
+                audioUrl={emunaContent.audioUrl}
+              />
+              {emunaContent.speaker && (
+                <p className="text-sm text-gray-600 text-center">
+                  <strong>Speaker:</strong> {emunaContent.speaker}
+                </p>
+              )}
+            </div>
+          )}
+          
+          {emunaContent && !emunaContent.audioUrl && (
+            <div className="space-y-3 text-sm text-gray-700 font-sans">
+              <div>
+                <p><strong>Today's Focus:</strong> {emunaContent.content}</p>
+                {emunaContent.author && (
+                  <p className="mt-2 text-xs text-gray-500">Author: {emunaContent.author}</p>
+                )}
+                {emunaContent.source && (
+                  <p className="mt-1 text-xs text-gray-500">Source: {emunaContent.source}</p>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {/* Thank You Section */}
+          {emunaContent?.provider && (
+            <div className="mt-6 p-4 bg-blue-50 rounded-xl">
+              <p className="text-sm text-blue-900 font-medium mb-2">
+                🙏 Thank you to {emunaContent.provider}
+              </p>
+              {emunaContent.speakerWebsite && (
+                <p className="text-sm text-blue-800">
+                  <a 
+                    href={emunaContent.speakerWebsite} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    Visit Website
+                  </a>
+                </p>
+              )}
+            </div>
+          )}
+
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={handleTorahComplete} 
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+            >
+              Complete
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Chizuk Modal */}
       <Dialog open={activeModal === 'chizuk'} onOpenChange={() => closeModal()}>
-        <DialogContent>
+        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="chizuk-description">
           <DialogHeader className="text-center">
             <DialogTitle className="text-lg font-semibold mb-2">Daily Chizuk</DialogTitle>
             <DialogDescription>Daily inspiration and spiritual strengthening</DialogDescription>
@@ -169,15 +230,44 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               </p>
             )}
           </DialogHeader>
+          <div id="chizuk-description" className="sr-only">5-minute daily inspiration and spiritual strengthening content</div>
           
           {chizukContent && chizukContent.audioUrl && (
-            <AudioPlayer 
-              title={chizukContent.title}
-              duration={chizukContent.duration || "5:15"}
-              audioUrl={chizukContent.audioUrl}
-            />
+            <div className="space-y-4">
+              <AudioPlayer 
+                title={chizukContent.title || 'Chizuk'}
+                duration={chizukContent.duration || "5:15"}
+                audioUrl={chizukContent.audioUrl}
+              />
+              {chizukContent.speaker && (
+                <p className="text-sm text-gray-600 text-center">
+                  <strong>Speaker:</strong> {chizukContent.speaker}
+                </p>
+              )}
+            </div>
           )}
           
+          {/* Thank You Section */}
+          {chizukContent?.provider && (
+            <div className="mt-6 p-4 bg-blue-50 rounded-xl">
+              <p className="text-sm text-blue-900 font-medium mb-2">
+                🙏 Thank you to {chizukContent.provider}
+              </p>
+              {chizukContent.speakerWebsite && (
+                <p className="text-sm text-blue-800">
+                  <a 
+                    href={chizukContent.speakerWebsite} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    Visit Website
+                  </a>
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="heart-explosion-container">
             <Button 
               onClick={handleTorahComplete} 
@@ -199,7 +289,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               <DialogDescription className="text-sm text-gray-600 font-sans">{loshonContent.title}</DialogDescription>
             )}
           </DialogHeader>
-          <div id="loshon-description" className="sr-only">Daily content about preventing negative speech and fostering positive communication</div>
+          <div id="loshon-description" className="sr-only">Daily teachings about proper speech and guarding one's tongue</div>
           
           {loshonContent && (
             <div className="space-y-3 text-sm text-gray-700 font-sans">
@@ -218,6 +308,27 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             </div>
           )}
           
+          {/* Thank You Section */}
+          {loshonContent?.provider && (
+            <div className="mt-6 p-4 bg-blue-50 rounded-xl">
+              <p className="text-sm text-blue-900 font-medium mb-2">
+                🙏 Thank you to {loshonContent.provider}
+              </p>
+              {loshonContent.speakerWebsite && (
+                <p className="text-sm text-blue-800">
+                  <a 
+                    href={loshonContent.speakerWebsite} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    Visit Website
+                  </a>
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="heart-explosion-container">
             <Button 
               onClick={handleTorahComplete} 

@@ -188,7 +188,7 @@ export const dailyHalacha = pgTable("daily_halacha", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const dailyMussar = pgTable("daily_mussar", {
+export const dailyEmuna = pgTable("daily_emuna", {
   id: serial("id").primaryKey(),
   date: date("date").notNull().unique(),
   title: text("title").notNull(),
@@ -209,6 +209,8 @@ export const dailyChizuk = pgTable("daily_chizuk", {
   audioUrl: text("audio_url"),
   duration: text("duration"),
   speaker: text("speaker"),
+  speakerName: text("speaker_name"),
+  speakerWebsite: text("speaker_website"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -219,6 +221,8 @@ export const loshonHorah = pgTable("loshon_horah", {
   content: text("content").notNull(),
   halachicSource: text("halachic_source"),
   practicalTip: text("practical_tip"),
+  speakerName: text("speaker_name"),
+  speakerWebsite: text("speaker_website"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -274,7 +278,7 @@ export const insertDailyHalachaSchema = createInsertSchema(dailyHalacha).omit({
   hebrewDate: z.string().optional(),
 });
 
-export const insertDailyMussarSchema = createInsertSchema(dailyMussar).omit({
+export const insertDailyEmunaSchema = createInsertSchema(dailyEmuna).omit({
   id: true,
   createdAt: true,
 }).extend({
@@ -356,8 +360,8 @@ export type InsertNishmasText = z.infer<typeof insertNishmasTextSchema>;
 // Daily Torah content types
 export type DailyHalacha = typeof dailyHalacha.$inferSelect;
 export type InsertDailyHalacha = z.infer<typeof insertDailyHalachaSchema>;
-export type DailyMussar = typeof dailyMussar.$inferSelect;
-export type InsertDailyMussar = z.infer<typeof insertDailyMussarSchema>;
+export type DailyEmuna = typeof dailyEmuna.$inferSelect;
+export type InsertDailyEmuna = z.infer<typeof insertDailyEmunaSchema>;
 export type DailyChizuk = typeof dailyChizuk.$inferSelect;
 export type InsertDailyChizuk = z.infer<typeof insertDailyChizukSchema>;
 export type LoshonHorah = typeof loshonHorah.$inferSelect;

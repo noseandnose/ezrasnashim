@@ -30,26 +30,38 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
 
   // Fetch global Tehillim progress
   const { data: progress } = useQuery<GlobalTehillimProgress>({
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress`).then(res => res.json()),
     queryKey: ['/api/tehillim/progress'],
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   // Fetch current name for the perek
   const { data: currentName } = useQuery<TehillimName | null>({
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/current-name`).then(res => res.json()),
     queryKey: ['/api/tehillim/current-name'],
     refetchInterval: 10000, // Refresh every 10 seconds
   });
 
   // Fetch all active names for count display
   const { data: allNames } = useQuery<TehillimName[]>({
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/names`).then(res => res.json()),
     queryKey: ['/api/tehillim/names'],
     refetchInterval: 60000, // Refresh every minute
+  });
+
+  // Fetch Tehillim preview (first line) for display
+  const { data: tehillimPreview, isLoading: isPreviewLoading } = useQuery<{preview: string; perek: number; language: string}>({
+    queryKey: ['/api/tehillim/preview', progress?.currentPerek],
+    queryFn: () => fetch(`/api/tehillim/preview/${progress?.currentPerek}?language=hebrew`).then(res => res.json()),
+    enabled: !!progress?.currentPerek,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000 // 30 minutes
   });
 
   // Mutation to complete a perek
   const completePerekMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest('POST', '/api/tehillim/complete', { completedBy: 'user' });
+      return apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/tehillim/complete`, { completedBy: 'user' });
     },
     onSuccess: () => {
       toast({
@@ -72,7 +84,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   // Mutation to add a new name
   const addNameMutation = useMutation({
     mutationFn: async (data: { hebrewName: string; reason: string; reasonEnglish?: string }) => {
-      return apiRequest('POST', '/api/tehillim/names', data);
+      return apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/tehillim/names`, data);
     },
     onSuccess: () => {
       toast({
@@ -173,20 +185,11 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   };
 
   return (
-    <div className="p-2 space-y-1">
-      {/* Welcome Header */}
-      <div className="text-center mb-3">
-        <div className="flex items-center justify-center gap-2">
-          <h2 className="font-serif text-lg text-warm-gray tracking-wide">Daily Tefilla</h2>
-          {tefillaCompleted && (
-            <Heart className="gradient-heart" size={20} />
-          )}
-        </div>
-      </div>
-
-      <div className="space-y-1">
+    <div className="overflow-y-auto h-full pb-20">
+      {/* Main Tefilla Section - Connected to top bar - Only Tehillim */}
+      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg -mt-1">
         {/* Daily Tehillim Card */}
-        <div className="bg-gradient-soft rounded-3xl p-3 shadow-lg">
+        <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-3">
               <div className="bg-gradient-feminine p-3 rounded-full">
@@ -293,18 +296,12 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               className="w-full mb-2 bg-white/70 rounded-2xl p-3 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
             >
               <div className="flex items-center justify-between">
-                <div className="font-serif text-sm text-warm-gray">
-                  {(() => {
-                    const perekNumber = progress?.currentPerek || 1;
-                    const firstLines: Record<number, string> = {
-                      1: "אשרי האיש אשר לא הלך בעצת רשעים",
-                      23: "יהוה רעי לא אחסר",
-                      91: "יושב בסתר עליון בצל שדי יתלונן",
-                      121: "שיר למעלות אשא עיני אל ההרים",
-                      150: "הללויה הללו אל בקדשו"
-                    };
-                    return firstLines[perekNumber] || `פרק ${perekNumber}`;
-                  })()}
+                <div className="font-serif text-sm text-warm-gray font-hebrew text-right flex-1 pr-2">
+                  {isPreviewLoading ? (
+                    <div className="animate-pulse bg-warm-gray/20 h-4 w-3/4 rounded ml-auto"></div>
+                  ) : (
+                    tehillimPreview?.preview || `פרק ${progress?.currentPerek || 1}`
+                  )}
                 </div>
                 <div className="flex items-center">
                   <ChevronRight className="text-warm-gray/40" size={16} strokeWidth={1.5} />
@@ -339,8 +336,12 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           </div>
         </div>
 
+      </div>
+
+      {/* OTHER SECTIONS BELOW - SEPARATE FROM MAIN */}
+      <div className="p-2 space-y-2">
         {/* Prayer Services */}
-        <div className="grid grid-cols-2 gap-2 mb-1">
+        <div className="grid grid-cols-2 gap-2">
           <button 
             onClick={() => openModal('mincha')}
             className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
@@ -348,8 +349,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
               <Clock className="text-white" size={18} />
             </div>
-            <h3 className="font-serif text-sm text-warm-gray mb-1">Mincha</h3>
-            <p className="font-sans text-xs text-warm-gray/60">
+            <h3 className="font-serif text-sm text-black mb-1 font-bold">Mincha</h3>
+            <p className="font-sans text-xs text-black/60">
               {isLoading ? "Loading..." : 
                times?.minchaGedolah && times?.minchaKetanah ? 
                `${times.minchaGedolah} - ${times.minchaKetanah}` : 
@@ -364,8 +365,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
               <Heart className="text-white" size={18} />
             </div>
-            <h3 className="font-serif text-sm text-warm-gray mb-1">Nishmas Kol Chai</h3>
-            <p className="font-sans text-xs text-warm-gray/60">Prayer of Gratitude</p>
+            <h3 className="font-serif text-sm text-black mb-1 font-bold">Nishmas Kol Chai</h3>
+            <p className="font-sans text-xs text-black/60">Prayer of Gratitude</p>
           </button>
         </div>
 
@@ -376,12 +377,12 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               <HandHeart className="text-white" size={18} />
             </div>
             <div>
-              <h3 className="font-serif text-lg text-warm-gray">Personal Prayers</h3>
-              <p className="font-sans text-sm text-warm-gray/70">Categories for your Tefillos</p>
+              <h3 className="font-serif text-lg text-black font-bold">Personal Prayers</h3>
+              <p className="font-sans text-sm text-black/70">Categories for your Tefillos</p>
             </div>
           </div>
           
-          <div className="grid grid-cols-3 gap-2 mb-2">
+          <div className="grid grid-cols-3 gap-2">
             <button 
               onClick={() => openModal('refuah')}
               className="bg-gradient-to-br from-blush/10 to-blush/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-blush/20"
@@ -389,8 +390,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               <div className="bg-blush/20 p-2 rounded-full mx-auto mb-1 w-fit">
                 <Shield className="text-blush" size={16} strokeWidth={1.5} />
               </div>
-              <h4 className="font-serif text-sm text-warm-gray">Refuah</h4>
-              <p className="font-sans text-xs text-warm-gray/60 mt-1">Healing</p>
+              <h4 className="font-serif text-sm text-black font-bold">Refuah</h4>
+              <p className="font-sans text-xs text-black/60 mt-1">Healing</p>
             </button>
             
             <button 
@@ -400,8 +401,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               <div className="bg-lavender/20 p-2 rounded-full mx-auto mb-1 w-fit">
                 <Home className="text-lavender" size={16} strokeWidth={1.5} />
               </div>
-              <h4 className="font-serif text-sm text-warm-gray">Family</h4>
-              <p className="font-sans text-xs text-warm-gray/60 mt-1">Shalom Bayis</p>
+              <h4 className="font-serif text-sm text-black font-bold">Family</h4>
+              <p className="font-sans text-xs text-black/60 mt-1">Shalom Bayis</p>
             </button>
             
             <button 
@@ -411,14 +412,15 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               <div className="bg-sage/20 p-2 rounded-full mx-auto mb-1 w-fit">
                 <Compass className="text-sage" size={16} strokeWidth={1.5} />
               </div>
-              <h4 className="font-serif text-sm text-warm-gray">Life</h4>
-              <p className="font-sans text-xs text-warm-gray/60 mt-1">Guidance</p>
+              <h4 className="font-serif text-sm text-black font-bold">Life</h4>
+              <p className="font-sans text-xs text-black/60 mt-1">Guidance</p>
             </button>
           </div>
         </div>
+
+        {/* Bottom padding */}
+        <div className="h-16"></div>
       </div>
-      {/* Bottom padding to prevent last element from being cut off by navigation */}
-      <div className="h-16"></div>
     </div>
   );
 }

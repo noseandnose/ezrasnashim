@@ -17,12 +17,24 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
   const { data: quote } = useQuery<InspirationalQuote>({
     queryKey: ['daily-quote', today],
     queryFn: async () => {
-      const response = await fetch(`/api/quotes/daily/${today}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/quotes/daily/${today}`);
       if (!response.ok) return null;
       return response.json();
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
-    cacheTime: 60 * 60 * 1000 // 1 hour
+    gcTime: 60 * 60 * 1000 // 1 hour
+  });
+
+  // Fetch today's Pirkei Avot for daily inspiration
+  const { data: pirkeiAvot } = useQuery<{text: string; chapter: number; source: string}>({
+    queryKey: ['pirkei-avot-daily', today],
+    queryFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/torah/pirkei-avot/${today}`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 60 * 60 * 1000 // 1 hour
   });
 
   const torahItems = [
@@ -37,10 +49,10 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
       border: 'border-blush/10'
     },
     {
-      id: 'mussar',
+      id: 'emuna',
       icon: Heart,
-      title: 'Mussar',
-      subtitle: 'Character Development',
+      title: 'Emuna',
+      subtitle: 'Faith & Trust',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
@@ -69,43 +81,57 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
   ];
 
   return (
-    <div className="p-2 space-y-1">
-      {/* Welcome Header */}
-      <div className="text-center">
-        <div className="flex items-center justify-center gap-2">
-          <h2 className="font-serif text-lg text-warm-gray tracking-wide">Torah Learning</h2>
-          {torahCompleted && (
-            <Heart className="gradient-heart" size={20} />
-          )}
-        </div>
-      </div>
-
-      {/* Inspirational Quote */}
-      <div className="bg-gradient-soft rounded-3xl p-3 shadow-lg mb-3">
-        <p className="font-sans text-xs text-warm-gray/80 italic text-center leading-relaxed">
-          {quote ? `"${quote.text}"` : ""}
-        </p>
-        <p className="font-serif text-xs text-warm-gray/60 text-center mt-2 tracking-wide">{quote ? `- ${quote.source}` : ""}</p>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2 mb-1">
-        {torahItems.map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border }) => (
-          <button
-            key={id}
-            className={`${gradient} rounded-3xl p-3 text-center glow-hover transition-gentle shadow-lg border ${border}`}
-            onClick={() => openModal(id)}
-          >
-            <div className={`${iconBg} p-2 rounded-full mx-auto mb-2 w-fit`}>
-              <Icon className={`${iconColor}`} size={18} strokeWidth={1.5} />
+    <div className="overflow-y-auto h-full pb-20">
+      {/* Main Torah Section - Connected to top bar */}
+      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg -mt-1">
+        {/* Daily Inspiration - Pirkei Avot */}
+        {pirkeiAvot && (
+          <div className="bg-white/70 rounded-2xl p-3 mb-3 border border-blush/10">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="bg-gradient-feminine p-1.5 rounded-full">
+                <Scroll className="text-white" size={16} />
+              </div>
+              <h3 className="font-serif text-sm text-black font-bold">Daily Inspiration</h3>
+              <span className="text-xs text-black/60 font-sans">Pirkei Avot {pirkeiAvot.source.replace('.', ':')}</span>
             </div>
-            <h3 className="font-serif text-xs text-warm-gray mb-1 tracking-wide">{title}</h3>
-            <p className="font-sans text-xs text-warm-gray/60 leading-relaxed">{subtitle}</p>
-          </button>
-        ))}
+            <p className="font-sans text-xs text-black/90 leading-relaxed text-justify">
+              {pirkeiAvot.text}
+            </p>
+          </div>
+        )}
+
+        {/* Inspirational Quote */}
+        {quote && (
+          <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
+            <p className="font-sans text-xs text-black/80 italic text-center leading-relaxed">
+              "{quote.text}"
+            </p>
+            <p className="font-serif text-xs text-black/60 text-center mt-2 tracking-wide">- {quote.source}</p>
+          </div>
+        )}
       </div>
 
-      {/* Bottom padding */}
-      <div className="h-16"></div>
+      {/* Daily Torah Content - Separate Section */}
+      <div className="p-2 space-y-1">
+        <div className="grid grid-cols-2 gap-2 mb-1">
+          {torahItems.map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border }) => (
+            <button
+              key={id}
+              className={`${gradient} rounded-3xl p-3 text-center glow-hover transition-gentle shadow-lg border ${border}`}
+              onClick={() => openModal(id)}
+            >
+              <div className={`${iconBg} p-2 rounded-full mx-auto mb-2 w-fit`}>
+                <Icon className={`${iconColor}`} size={18} strokeWidth={1.5} />
+              </div>
+              <h3 className="font-serif text-xs text-black mb-1 tracking-wide font-bold">{title}</h3>
+              <p className="font-sans text-xs text-black/60 leading-relaxed">{subtitle}</p>
+            </button>
+          ))}
+        </div>
+
+        {/* Bottom padding */}
+        <div className="h-16"></div>
+      </div>
     </div>
   );
 }

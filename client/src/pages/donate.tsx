@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import { useLocation } from "wouter";
+// Removed Apple Pay button import - now using integrated PaymentElement
 
 // Load Stripe outside of component render
 if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
@@ -41,6 +42,7 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
       confirmParams: {
         return_url: `${window.location.origin}/?donation=success`,
       },
+      redirect: "if_required", // Stay on same page when possible
     });
 
     if (error) {
@@ -53,7 +55,7 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
       // Call completion handler for sponsor day donations
       if (donationType === 'Sponsor a Day of Ezras Nashim' && sponsorName) {
         try {
-          await apiRequest("POST", "/api/donation-complete", {
+          await apiRequest("POST", "http://18.193.108.87/donation-complete", {
             donationType,
             sponsorName,
             dedication: dedication || null
@@ -85,9 +87,13 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
       <PaymentElement 
         options={{
           layout: 'tabs',
-          paymentMethodOrder: ['apple_pay', 'google_pay', 'card'],
+          paymentMethodOrder: ['card'],
           fields: {
             billingDetails: 'never'
+          },
+          wallets: {
+            applePay: 'auto',
+            googlePay: 'auto'
           }
         }}
       />
@@ -130,7 +136,7 @@ export default function Donate() {
     }
 
     // Create PaymentIntent when component loads
-    apiRequest("POST", "/api/create-payment-intent", {
+    apiRequest("POST", "http://18.193.108.87/create-payment-intent", {
       amount,
       donationType,
       metadata: {

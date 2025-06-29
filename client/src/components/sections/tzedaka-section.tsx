@@ -51,12 +51,12 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
   const { data: campaign, isLoading } = useQuery<Campaign>({
     queryKey: ['/api/campaigns/active'],
     queryFn: async () => {
-      const response = await fetch('/api/campaigns/active');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/campaigns/active`);
       if (!response.ok) return null;
       return response.json();
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 30 * 60 * 1000 // 30 minutes
+    gcTime: 30 * 60 * 1000 // 30 minutes
   });
 
   // Only calculate progress when campaign data is loaded
@@ -82,19 +82,10 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
   ];
 
   return (
-    <div className="p-2 space-y-1">
-      {/* Header */}
-      <div className="text-center">
-        <div className="flex items-center justify-center gap-2 mb-1">
-          <h2 className="font-serif text-lg text-warm-gray tracking-wide">Daily Tzedaka</h2>
-          {tzedakaCompleted && (
-            <Heart className="gradient-heart" size={20} />
-          )}
-        </div>
-      </div>
-
-      {/* Campaign Card with Progress Bar */}
-      <div className="bg-white rounded-3xl p-4 shadow-lg border border-blush/10">
+    <div className="overflow-y-auto h-full pb-20">
+      {/* Main Tzedaka Section - ONLY CAMPAIGN */}
+      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg -mt-1">
+        <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
         {isLoading ? (
           <div className="animate-pulse">
             <div className="flex items-center space-x-3 mb-4">
@@ -122,8 +113,8 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
                 <BookOpen className="text-white" size={20} />
               </div>
               <div>
-                <h3 className="font-serif text-lg text-warm-gray">{campaign.title}</h3>
-                <p className="font-sans text-sm text-warm-gray/70">Support our community</p>
+                <h3 className="font-serif text-lg text-black font-bold">{campaign.title}</h3>
+                <p className="font-sans text-sm text-black/70">Support our community</p>
               </div>
             </div>
             
@@ -131,10 +122,10 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
-                  <span className="font-sans text-sm text-warm-gray/70">Progress</span>
-                  <span className="font-serif text-sm text-warm-gray">{progressPercentage}% Complete</span>
+                  <span className="font-sans text-sm text-black/70">Progress</span>
+                  <span className="font-serif text-sm text-black font-bold">{progressPercentage}% Complete</span>
                 </div>
-                <span className="font-serif text-sm text-warm-gray">${campaign.currentAmount.toLocaleString()} / ${campaign.goalAmount.toLocaleString()}</span>
+                <span className="font-serif text-sm text-black font-bold">${campaign.currentAmount.toLocaleString()} / ${campaign.goalAmount.toLocaleString()}</span>
               </div>
               <div className="w-full bg-blush/20 rounded-full h-3">
                 <div 
@@ -152,10 +143,11 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             </button>
           </>
         ) : null}
+        </div>
       </div>
-
-      {/* Tzedaka Options - Rectangle Grid */}
-      <div className="grid grid-cols-2 gap-2">
+      {/* Other Tzedaka Options - Separate sections below */}
+      <div className="p-2 space-y-2">
+        <div className="grid grid-cols-2 gap-2">
         <button
           onClick={() => openModal('donate')}
           className="bg-white rounded-3xl p-4 shadow-lg hover:scale-105 transition-all duration-300 border border-blush/10 text-left"
@@ -165,8 +157,8 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
               <Shield className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <div>
-              <h3 className="font-serif text-sm text-warm-gray mb-1">Support Causes</h3>
-              <p className="font-sans text-xs text-warm-gray/70">Fertility support & kollels</p>
+              <h3 className="font-serif text-sm text-black mb-1 font-bold">Support Causes</h3>
+              <p className="font-sans text-xs text-black/70">Fertility, Abuse and Torah</p>
             </div>
           </div>
         </button>
@@ -180,23 +172,23 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
               <Heart className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <div>
-              <h3 className="font-serif text-sm text-warm-gray mb-1">Sponsor a Day</h3>
-              <p className="font-sans text-xs text-warm-gray/70">Dedicate all mitzvot</p>
+              <h3 className="font-serif text-sm text-black mb-1 font-bold">Sponsor a Day</h3>
+              <p className="font-sans text-xs text-black/70">Dedicate all mitzvot</p>
             </div>
           </div>
         </button>
       </div>
 
-      {/* Gave Tzedaka Elsewhere Bar */}
-      <div className="bg-white rounded-3xl p-4 shadow-lg border border-blush/10">
+        {/* Gave Tzedaka Elsewhere Bar */}
+        <div className="bg-white rounded-3xl p-4 shadow-lg border border-blush/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className={`p-2 rounded-full ${tzedakaCompleted ? 'bg-sage' : 'bg-gradient-feminine'}`}>
               <HandHeart className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <div>
-              <h3 className="font-serif text-sm text-warm-gray">Gave Tzedaka elsewhere</h3>
-              <p className="font-sans text-xs text-warm-gray/70">Mark as completed</p>
+              <h3 className="font-serif text-sm text-black font-bold">Gave Tzedaka elsewhere</h3>
+              <p className="font-sans text-xs text-black/70">Mark as completed</p>
             </div>
           </div>
           <div className="heart-explosion-container">
@@ -213,11 +205,11 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             <HeartExplosion trigger={showExplosion} />
           </div>
         </div>
-      </div>
+        </div>
 
-      {/* Community Impact */}
-      <div className="bg-gradient-soft rounded-3xl p-3 border border-blush/10">
-        <h3 className="font-serif text-sm text-black text-center mb-2">Community Impact</h3>
+        {/* Community Impact */}
+        <div className="bg-white rounded-3xl p-3 border border-blush/10 shadow-lg">
+        <h3 className="font-serif text-sm text-black text-center mb-2 font-bold">Community Impact</h3>
         <div className="grid grid-cols-3 gap-2 text-center">
           <div>
             <div className="font-serif text-lg text-black">142</div>
@@ -234,8 +226,9 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
         </div>
       </div>
 
-      {/* Bottom padding */}
-      <div className="h-24"></div>
+        {/* Bottom padding */}
+        <div className="h-16"></div>
+      </div>
     </div>
   );
 }

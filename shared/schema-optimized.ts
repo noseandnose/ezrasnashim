@@ -33,6 +33,7 @@ export const campaigns = pgTable("campaigns", {
 export const globalTehillimProgress = pgTable("global_tehillim_progress", {
   id: serial("id").primaryKey(),
   currentPerek: integer("current_perek").default(1).notNull(),
+  currentLanguage: text("current_language").default('english').notNull(),
   lastUpdated: timestamp("last_updated").defaultNow(),
   completedBy: text("completed_by"),
 });
@@ -74,10 +75,12 @@ export const discountPromotions = pgTable("discount_promotions", {
   startDate: timestamp("start_date").notNull(),
   endDate: timestamp("end_date").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
+  targetLocation: text("target_location").notNull().default("worldwide"), // "israel" or "worldwide"
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => ({
   activeIdx: index("discount_promotions_active_idx").on(table.isActive),
   dateRangeIdx: index("discount_promotions_date_range_idx").on(table.startDate, table.endDate),
+  locationIdx: index("discount_promotions_location_idx").on(table.targetLocation),
 }));
 
 // Zod schemas for validation

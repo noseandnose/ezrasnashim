@@ -16,17 +16,17 @@ export default function TableModals() {
     return `${year}-W${week}`;
   };
 
-  const { data: recipeContent } = useQuery<any>({
+  const { data: recipeContent } = useQuery<{title?: string; description?: string; ingredients?: string[]; instructions?: string[]; cookingTime?: string; servings?: number}>({
     queryKey: ['/api/table/recipe', getWeekKey()],
     enabled: activeModal === 'recipe'
   });
 
-  const { data: inspirationContent } = useQuery<any>({
+  const { data: inspirationContent } = useQuery<Record<string, any>>({
     queryKey: [`/api/table/inspiration/${new Date().toISOString().split('T')[0]}`],
     enabled: activeModal === 'inspiration'
   });
 
-  const { data: parshaContent } = useQuery<any>({
+  const { data: parshaContent } = useQuery<Record<string, any>>({
     queryKey: ['/api/table/vort', getWeekKey()],
     enabled: activeModal === 'parsha'
   });

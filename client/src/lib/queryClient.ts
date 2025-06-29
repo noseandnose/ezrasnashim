@@ -1,26 +1,19 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
-
-async function throwIfResNotOk(res: Response) {
-  if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
-  }
-}
+import axiosClient from "./axiosClient";
+import { AxiosResponse } from "axios";
 
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
-): Promise<Response> {
-  const res = await fetch(url, {
+): Promise<AxiosResponse> {
+  const response = await axiosClient({
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
+    url,
+    data,
   });
 
-  await throwIfResNotOk(res);
-  return res;
+  return response;
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
@@ -29,16 +22,20 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
-      credentials: "include",
-    });
-
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+    try {
+      const url = queryKey[0] as string;
+      // Check if URL already includes full baseURL to avoid doubling
+      const isFullUrl = url.startsWith('http');
+      const requestConfig = isFullUrl ? { baseURL: '' } : {};
+      
+      const response = await axiosClient.get(url, requestConfig);
+      return response.data;
+    } catch (error: any) {
+      if (unauthorizedBehavior === "returnNull" && error.response?.status === 401) {
+        return null;
+      }
+      throw error;
     }
-
-    await throwIfResNotOk(res);
-    return await res.json();
   };
 
 export const queryClient = new QueryClient({

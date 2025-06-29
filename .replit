@@ -4,18 +4,29 @@ hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
 channel = "stable-24_05"
+packages = ["nano"]
 
 [deployment]
 deploymentTarget = "autoscale"
-build = ["npm", "run", "build"]
-run = ["npm", "run", "start"]
+# build = ["npm", "run", "build"]
+run = ["npm", "run", "dev"]
+
+[[ports]]
+localPort = 3000
+externalPort = 3000
 
 [[ports]]
 localPort = 5000
+externalPort = 5000
+exposeLocalhost = true
+
+[[ports]]
+localPort = 5173
 externalPort = 80
+exposeLocalhost = true
 
 [workflows]
-runButton = "Project"
+runButton = "Start application"
 
 [[workflows.workflow]]
 name = "Project"

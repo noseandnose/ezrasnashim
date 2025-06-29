@@ -1,14 +1,15 @@
+import serverAxiosClient from "./axiosClient";
 import { 
   calendarEvents, shopItems, 
   tehillimNames, globalTehillimProgress, minchaPrayers, sponsors, nishmasText,
-  dailyHalacha, dailyMussar, dailyChizuk, loshonHorah,
+  dailyHalacha, dailyEmuna, dailyChizuk, loshonHorah,
   shabbatRecipes, parshaVorts, tableInspirations, campaigns, inspirationalQuotes, womensPrayers, discountPromotions,
   type CalendarEvent, type InsertCalendarEvent,
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
   type Sponsor, type InsertSponsor, type NishmasText, type InsertNishmasText,
   type DailyHalacha, type InsertDailyHalacha,
-  type DailyMussar, type InsertDailyMussar,
+  type DailyEmuna, type InsertDailyEmuna,
   type DailyChizuk, type InsertDailyChizuk,
   type LoshonHorah, type InsertLoshonHorah,
   type ShabbatRecipe, type InsertShabbatRecipe,
@@ -34,8 +35,8 @@ export interface IStorage {
   getDailyHalachaByDate(date: string): Promise<DailyHalacha | undefined>;
   createDailyHalacha(halacha: InsertDailyHalacha): Promise<DailyHalacha>;
   
-  getDailyMussarByDate(date: string): Promise<DailyMussar | undefined>;
-  createDailyMussar(mussar: InsertDailyMussar): Promise<DailyMussar>;
+  getDailyEmunaByDate(date: string): Promise<DailyEmuna | undefined>;
+  createDailyEmuna(emuna: InsertDailyEmuna): Promise<DailyEmuna>;
   
   getDailyChizukByDate(date: string): Promise<DailyChizuk | undefined>;
   createDailyChizuk(chizuk: InsertDailyChizuk): Promise<DailyChizuk>;
@@ -62,8 +63,9 @@ export interface IStorage {
   createTehillimName(name: InsertTehillimName): Promise<TehillimName>;
   cleanupExpiredNames(): Promise<void>;
   getGlobalTehillimProgress(): Promise<GlobalTehillimProgress>;
-  updateGlobalTehillimProgress(currentPerek: number, completedBy?: string): Promise<GlobalTehillimProgress>;
+  updateGlobalTehillimProgress(currentPerek: number, language: string, completedBy?: string): Promise<GlobalTehillimProgress>;
   getRandomNameForPerek(): Promise<TehillimName | undefined>;
+  getSefariaTehillim(perek: number, language: string): Promise<{text: string; perek: number; language: string}>;
 
   // Mincha methods
   getMinchaPrayers(): Promise<MinchaPrayer[]>;
@@ -168,6 +170,7 @@ export class DatabaseStorage implements IStorage {
     if (!progress) {
       const [newProgress] = await db.insert(globalTehillimProgress).values({
         currentPerek: 1,
+
         completedBy: null
       }).returning();
       return newProgress;
@@ -175,12 +178,16 @@ export class DatabaseStorage implements IStorage {
     return progress;
   }
 
-  async updateGlobalTehillimProgress(currentPerek: number, completedBy?: string): Promise<GlobalTehillimProgress> {
+  async updateGlobalTehillimProgress(currentPerek: number, language: string, completedBy?: string): Promise<GlobalTehillimProgress> {
     const [progress] = await db.select().from(globalTehillimProgress).limit(1);
     if (progress) {
+      // Calculate next perek (1-150, cycling)
+      const nextPerek = currentPerek >= 150 ? 1 : currentPerek + 1;
+      
       const [updated] = await db.update(globalTehillimProgress)
         .set({
-          currentPerek: currentPerek > 150 ? 1 : currentPerek,
+          currentPerek: nextPerek,
+
           lastUpdated: new Date(),
           completedBy: completedBy || null
         })
@@ -198,6 +205,150 @@ export class DatabaseStorage implements IStorage {
     
     const randomIndex = Math.floor(Math.random() * activeNames.length);
     return activeNames[randomIndex];
+  }
+
+  async getSefariaPirkeiAvot(chapter: number): Promise<{text: string; chapter: number; source: string}> {
+    // Define the actual structure of Pirkei Avot chapters with correct verse counts
+    const chapterStructure = [
+      { chapter: 1, maxVerse: 18 },  // Chapter 1: 1-18
+      { chapter: 2, maxVerse: 21 },  // Chapter 2: 1-21  
+      { chapter: 3, maxVerse: 18 },  // Chapter 3: 1-18
+      { chapter: 4, maxVerse: 22 },  // Chapter 4: 1-22
+      { chapter: 5, maxVerse: 23 },  // Chapter 5: 1-23
+      { chapter: 6, maxVerse: 11 }   // Chapter 6: 1-11
+    ];
+    
+    // Create array of all valid references
+    const validRefs: string[] = [];
+    chapterStructure.forEach(({ chapter, maxVerse }) => {
+      for (let verse = 1; verse <= maxVerse; verse++) {
+        validRefs.push(`${chapter}.${verse}`);
+      }
+    });
+    
+    const today = new Date();
+    const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+    const refIndex = dayOfYear % validRefs.length;
+    const selectedRef = validRefs[refIndex];
+
+    try {
+      // Fetch from Sefaria API using the exact reference format
+      const url = `https://www.sefaria.org/api/texts/Pirkei_Avot.${selectedRef}`;
+      const response = await serverAxiosClient.get(url);
+      const data = response.data;
+      
+      // Extract English text
+      let text = '';
+      if (data.text && Array.isArray(data.text) && data.text.length > 0) {
+        text = data.text[0];
+      } else if (typeof data.text === 'string') {
+        text = data.text;
+      }
+      
+      if (!text) {
+        throw new Error('No text content found in API response');
+      }
+      
+      // Clean up any HTML formatting
+      const cleanText = text
+        .replace(/<[^>]*>/gi, '')  // Remove HTML tags
+        .replace(/&[a-zA-Z]+;/gi, '')  // Remove HTML entities
+        .trim();
+      
+      // Always use the API's actual ref field for complete accuracy
+      let sourceRef = selectedRef;
+      let actualChapter = parseInt(selectedRef.split('.')[0]);
+      
+      if (data.ref) {
+        // Extract reference from API response like "Pirkei Avot 4:1" -> "4.1"
+        const refMatch = data.ref.match(/(\d+):(\d+)/);
+        if (refMatch) {
+          sourceRef = `${refMatch[1]}.${refMatch[2]}`;
+          actualChapter = parseInt(refMatch[1]);
+        }
+      }
+      
+      return {
+        text: cleanText,
+        chapter: actualChapter,
+        source: sourceRef  // Use the API's verified reference
+      };
+    } catch (error) {
+      console.error('Error fetching from Sefaria API:', error);
+      
+      // Return fallback with the correct reference format
+      return {
+        text: `Pirkei Avot ${selectedRef} - Unable to load from Sefaria API. Please try again later.`,
+        chapter: parseInt(selectedRef.split('.')[0]),
+        source: selectedRef
+      };
+    }
+  }
+
+  async getSefariaTehillim(perek: number, language: string): Promise<{text: string; perek: number; language: string}> {
+    try {
+      // Use the correct Sefaria API endpoint
+      const url = `https://www.sefaria.org/api/texts/Psalms.${perek}`;
+      const response = await serverAxiosClient.get(url);
+      const data = response.data;
+      
+      // Extract text based on language preference
+      let text = '';
+      if (language === 'hebrew' && data.he) {
+        if (Array.isArray(data.he)) {
+          text = data.he.join('\n');
+        } else if (typeof data.he === 'string') {
+          text = data.he;
+        }
+      } else if (language === 'english' && data.text) {
+        if (Array.isArray(data.text)) {
+          text = data.text.join('\n');
+        } else if (typeof data.text === 'string') {
+          text = data.text;
+        }
+      }
+      
+      // Fallback to English if Hebrew not available or empty
+      if (!text && data.text) {
+        if (Array.isArray(data.text)) {
+          text = data.text.join('\n');
+        } else if (typeof data.text === 'string') {
+          text = data.text;
+        }
+      }
+      
+      if (!text) {
+        throw new Error('No text content found in API response');
+      }
+      
+      // Clean up HTML formatting and Hebrew-specific markers from Sefaria text
+      const cleanText = text
+        .replace(/<br\s*\/?>/gi, '\n')  // Replace <br> tags with newlines
+        .replace(/<small>(.*?)<\/small>/gi, '$1')  // Remove <small> tags but keep content
+        .replace(/<sup[^>]*>.*?<\/sup>/gi, '')  // Remove footnote superscripts
+        .replace(/<i[^>]*>.*?<\/i>/gi, '')  // Remove footnote italic text
+        .replace(/<[^>]*>/gi, '')  // Remove any remaining HTML tags
+        .replace(/&thinsp;/gi, '')  // Remove thin space HTML entities
+        .replace(/&nbsp;/gi, ' ')  // Replace non-breaking spaces with regular spaces
+        .replace(/&[a-zA-Z]+;/gi, '')  // Remove other HTML entities
+        .replace(/\{[פס]\}/g, '')  // Remove Hebrew paragraph markers like {פ} and {ס}
+        .replace(/\n\s*\n/g, '\n')  // Remove multiple consecutive newlines
+        .trim();
+      
+      return {
+        text: cleanText,
+        perek,
+        language
+      };
+    } catch (error) {
+      console.error('Error fetching from Sefaria API:', error);
+      // Return fallback text if API fails
+      return {
+        text: `Tehillim ${perek} - Unable to load from Sefaria API. Please try again later.`,
+        perek,
+        language
+      };
+    }
   }
 
   // Mincha methods
@@ -244,7 +395,7 @@ export class DatabaseStorage implements IStorage {
   async getDailyHalachaByDate(date: string): Promise<DailyHalacha | undefined> {
     try {
       const result = await pool.query(
-        `SELECT id, date, title, content, source, created_at as "createdAt" FROM daily_halacha WHERE date = $1 LIMIT 1`,
+        `SELECT id, date, title, content, source, provider, speaker_website as "speakerWebsite", created_at as "createdAt" FROM daily_halacha WHERE date = $1 LIMIT 1`,
         [date]
       );
       return result.rows[0] || undefined;
@@ -259,28 +410,28 @@ export class DatabaseStorage implements IStorage {
     return halacha;
   }
 
-  async getDailyMussarByDate(date: string): Promise<DailyMussar | undefined> {
+  async getDailyEmunaByDate(date: string): Promise<DailyEmuna | undefined> {
     try {
       const result = await pool.query(
-        `SELECT id, date, title, content, source, created_at as "createdAt" FROM daily_mussar WHERE date = $1 LIMIT 1`,
+        `SELECT id, date, title, content, author, source, audio_url as "audioUrl", duration, speaker, provider, speaker_website as "speakerWebsite", created_at as "createdAt" FROM daily_emuna WHERE date = $1 LIMIT 1`,
         [date]
       );
       return result.rows[0] || undefined;
     } catch (error) {
-      console.error('Failed to fetch daily mussar:', error);
+      console.error('Failed to fetch daily emuna:', error);
       return undefined;
     }
   }
 
-  async createDailyMussar(insertMussar: InsertDailyMussar): Promise<DailyMussar> {
-    const [mussar] = await db.insert(dailyMussar).values(insertMussar).returning();
-    return mussar;
+  async createDailyEmuna(insertEmuna: InsertDailyEmuna): Promise<DailyEmuna> {
+    const [emuna] = await db.insert(dailyEmuna).values(insertEmuna).returning();
+    return emuna;
   }
 
   async getDailyChizukByDate(date: string): Promise<DailyChizuk | undefined> {
     try {
       const result = await pool.query(
-        `SELECT id, date, title, content, audio_url as "audioUrl", duration, speaker, created_at as "createdAt" FROM daily_chizuk WHERE date = $1 LIMIT 1`,
+        `SELECT id, date, title, content, audio_url as "audioUrl", duration, speaker, provider, speaker_website as "speakerWebsite", created_at as "createdAt" FROM daily_chizuk WHERE date = $1 LIMIT 1`,
         [date]
       );
       return result.rows[0] || undefined;
@@ -298,7 +449,7 @@ export class DatabaseStorage implements IStorage {
   async getLoshonHorahByDate(date: string): Promise<LoshonHorah | undefined> {
     try {
       const result = await pool.query(
-        `SELECT id, date, title, content, halachic_source as "halachicSource", practical_tip as "practicalTip", created_at as "createdAt" FROM loshon_horah WHERE date = $1 LIMIT 1`,
+        `SELECT id, date, title, content, halachic_source as "halachicSource", practical_tip as "practicalTip", provider, speaker_website as "speakerWebsite", created_at as "createdAt" FROM loshon_horah WHERE date = $1 LIMIT 1`,
         [date]
       );
       return result.rows[0] || undefined;
@@ -313,31 +464,19 @@ export class DatabaseStorage implements IStorage {
     return loshon;
   }
 
-  async getPirkeiAvotByDate(date: string): Promise<any | undefined> {
+  async getPirkeiAvotByDate(date: string): Promise<{text: string; chapter: number; source: string} | undefined> {
     try {
-      const result = await pool.query(
-        `SELECT * FROM pirkei_avot WHERE date = $1 LIMIT 1`,
-        [date]
-      );
-      return result.rows[0] || undefined;
+      // Use the new daily cycling system from getSefariaPirkeiAvot
+      return await this.getSefariaPirkeiAvot(1); // Pass any number, function calculates based on date internally
     } catch (error) {
-      console.error('Error fetching Pirkei Avot:', error);
+      console.error('Error getting Pirkei Avot:', error);
       return undefined;
     }
   }
 
   async createPirkeiAvot(pirkeiAvot: any): Promise<any> {
-    try {
-      const result = await pool.query(
-        `INSERT INTO pirkei_avot (content, source, explanation, date) 
-         VALUES ($1, $2, $3, $4) RETURNING *`,
-        [pirkeiAvot.content, pirkeiAvot.source, pirkeiAvot.explanation, pirkeiAvot.date]
-      );
-      return result.rows[0];
-    } catch (error) {
-      console.error('Error creating Pirkei Avot:', error);
-      throw error;
-    }
+    // No longer needed since we use Sefaria API, but kept for compatibility
+    return pirkeiAvot;
   }
 
   // Weekly Torah content methods
@@ -456,20 +595,72 @@ export class DatabaseStorage implements IStorage {
     return prayer;
   }
 
-  async getActiveDiscountPromotion(): Promise<DiscountPromotion | undefined> {
-    const now = new Date();
-    const [promotion] = await db
-      .select()
-      .from(discountPromotions)
-      .where(
-        and(
-          eq(discountPromotions.isActive, true),
-          lt(discountPromotions.startDate, now),
-          gt(discountPromotions.endDate, now)
-        )
-      )
-      .limit(1);
-    return promotion;
+  async getActiveDiscountPromotion(userLocation?: string): Promise<DiscountPromotion | undefined> {
+    try {
+      // Determine target location based on user's coordinates
+      let targetLocation = "worldwide";
+      if (userLocation === "israel") {
+        targetLocation = "israel";
+      }
+      
+      // Use raw SQL to get the correct mapping
+      const result = await db.execute(`
+        SELECT 
+          id, title, subtitle, 
+          logo_url, link_url, 
+          start_date, end_date, 
+          is_active, target_location, 
+          created_at
+        FROM discount_promotions 
+        WHERE is_active = true 
+          AND start_date <= NOW() 
+          AND end_date >= NOW()
+          AND target_location = '${targetLocation}'
+        LIMIT 1
+      `);
+      
+      let promotion = result.rows && result.rows.length > 0 ? result.rows[0] : null;
+      
+      // If no location-specific promotion found, fall back to worldwide
+      if (!promotion && targetLocation === "israel") {
+        const fallbackResult = await db.execute(`
+          SELECT 
+            id, title, subtitle, 
+            logo_url, link_url, 
+            start_date, end_date, 
+            is_active, target_location, 
+            created_at
+          FROM discount_promotions 
+          WHERE is_active = true 
+            AND start_date <= NOW() 
+            AND end_date >= NOW()
+            AND target_location = 'worldwide'
+          LIMIT 1
+        `);
+        
+        promotion = fallbackResult.rows && fallbackResult.rows.length > 0 ? fallbackResult.rows[0] : null;
+      }
+      
+      // Transform to match expected interface
+      if (promotion) {
+        return {
+          id: promotion.id,
+          title: promotion.title,
+          subtitle: promotion.subtitle,
+          logoUrl: promotion.logo_url,
+          linkUrl: promotion.link_url,
+          startDate: promotion.start_date,
+          endDate: promotion.end_date,
+          isActive: promotion.is_active,
+          createdAt: promotion.created_at
+        } as any;
+      }
+      
+      return undefined;
+    } catch (error) {
+      console.error('Database error in getActiveDiscountPromotion:', error);
+      return undefined;
+    }
   }
 
   async createDiscountPromotion(insertPromotion: InsertDiscountPromotion): Promise<DiscountPromotion> {
