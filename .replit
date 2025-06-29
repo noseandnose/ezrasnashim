@@ -8,8 +8,8 @@ packages = ["nano"]
 
 [deployment]
 deploymentTarget = "autoscale"
-build = ["npm", "run", "build"]
-run = ["npm", "run", "start"]
+# build = ["npm", "run", "build"]
+run = ["npm", "run", "dev"]
 
 [[ports]]
 localPort = 3000
