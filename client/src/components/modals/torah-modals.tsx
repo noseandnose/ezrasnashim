@@ -49,7 +49,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
   const { data: halachaContent } = useQuery<{title?: string; content?: string; source?: string; provider?: string; speakerWebsite?: string}>({
     queryKey: ['/api/torah/halacha', today],
-    queryFn: () => fetch(`/api/torah/halacha/${today}`).then(res => res.json()),
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/torah/halacha/${today}`).then(res => res.json()),
     enabled: activeModal === 'halacha',
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 30 * 60 * 1000 // 30 minutes
@@ -57,15 +57,16 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
   const { data: emunaContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string; author?: string; speaker?: string; provider?: string; speakerWebsite?: string}>({
     queryKey: ['/api/torah/emuna', today],
-    queryFn: () => fetch(`/api/torah/emuna/${today}`).then(res => res.json()),
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/torah/emuna/${today}`).then(res => res.json()),
     enabled: activeModal === 'emuna',
+
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000
   });
 
   const { data: chizukContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string; speaker?: string; provider?: string; speakerWebsite?: string}>({
     queryKey: ['/api/torah/chizuk', today],
-    queryFn: () => fetch(`/api/torah/chizuk/${today}`).then(res => res.json()),
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/torah/chizuk/${today}`).then(res => res.json()),
     enabled: activeModal === 'chizuk',
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000
@@ -73,7 +74,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
   const { data: loshonContent } = useQuery<{title?: string; content?: string; halachicSource?: string; practicalTip?: string; provider?: string; speakerWebsite?: string}>({
     queryKey: ['/api/torah/loshon', today],
-    queryFn: () => fetch(`/api/torah/loshon/${today}`).then(res => res.json()),
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/torah/loshon/${today}`).then(res => res.json()),
     enabled: activeModal === 'loshon',
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000
@@ -81,7 +82,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
   const { data: pirkeiAvotContent } = useQuery<Record<string, any>>({
     queryKey: ['/api/torah/pirkei-avot', today],
-    queryFn: () => fetch(`/api/torah/pirkei-avot/${today}`).then(res => res.json()),
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/torah/pirkei-avot/${today}`).then(res => res.json()),
     enabled: activeModal === 'pirkei-avot',
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000

@@ -29,7 +29,7 @@ export default function DiscountBar({ className = "" }: DiscountBarProps) {
       if (coordinates?.lat) params.set('lat', coordinates.lat.toString());
       if (coordinates?.lng) params.set('lng', coordinates.lng.toString());
       
-      const response = await fetch(`/api/discount-promotions/active?${params.toString()}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/discount-promotions/active?${params.toString()}`);
       if (!response.ok) {
         console.error('Failed to fetch discount promotion:', response.status);
         return null;
@@ -40,6 +40,7 @@ export default function DiscountBar({ className = "" }: DiscountBarProps) {
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 30 * 60 * 1000 // 30 minutes
+
   });
 
   if (isLoading) {

@@ -113,11 +113,12 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const completePerekMutation = useMutation({
     mutationFn: async () => {
       if (!progress) throw new Error('No progress data');
-      return apiRequest('POST', '/api/tehillim/complete', { 
+      return apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/tehillim/complete`, { 
         currentPerek: progress.currentPerek,
         language: showHebrew ? 'hebrew' : 'english',
         completedBy: 'user' 
       });
+
     },
     onSuccess: () => {
       toast({
