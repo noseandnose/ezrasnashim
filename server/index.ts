@@ -3,8 +3,18 @@ import { registerRoutes } from "./routes.js";
 import cors from "cors";
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
 
+      // Allow any origin
+      return callback(null, origin);
+    },
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
