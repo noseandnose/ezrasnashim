@@ -81,16 +81,6 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
             </p>
           </div>
         )}
-
-        {/* Inspirational Quote */}
-        {quote && (
-          <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
-            <p className="font-sans text-xs text-black/80 italic text-center leading-relaxed">
-              "{quote.text}"
-            </p>
-            <p className="font-serif text-xs text-black/60 text-center mt-2 tracking-wide">- {quote.source}</p>
-          </div>
-        )}
       </div>
 
       {/* Daily Torah Content - Separate Section */}

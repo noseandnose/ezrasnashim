@@ -373,6 +373,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/torah/pirkei-avot/advance", async (req, res) => {
+    try {
+      const nextRef = await storage.getNextPirkeiAvotReference();
+      const progress = await storage.updatePirkeiAvotProgress(nextRef.chapter, nextRef.verse);
+      res.json(progress);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to advance Pirkei Avot progress" });
+    }
+  });
+
   // Weekly Torah content routes
   app.get("/api/table/recipe/:week", async (req, res) => {
     try {
