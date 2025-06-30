@@ -12,16 +12,16 @@ const __dirname = dirname(__filename);
 const tsconfig = JSON.parse(readFileSync(resolve(__dirname, 'tsconfig.json'), 'utf8'));
 const paths = tsconfig.compilerOptions?.paths || {};
 
-// Create path resolution plugin
+// Create path resolution plugin  
 const pathResolverPlugin = {
   name: 'path-resolver',
   setup(build) {
-    // Resolve @shared/* to ./shared/*
+    // Resolve @shared/* to ./shared/* and bundle it
     build.onResolve({ filter: /^@shared\// }, (args) => {
       const relativePath = args.path.replace('@shared/', './shared/');
       const fullPath = resolve(__dirname, relativePath);
       
-      // Check if it's a TypeScript file and add .ts extension if needed
+      // Add .ts extension if needed
       if (!fullPath.endsWith('.ts') && !fullPath.endsWith('.js')) {
         return { path: fullPath + '.ts' };
       }
@@ -53,10 +53,6 @@ async function buildServer() {
         'pg-native',
         'fsevents'
       ],
-      // Bundle the shared schema to avoid import resolution issues
-      alias: {
-        '@shared/schema': './shared/schema.ts'
-      },
       plugins: [pathResolverPlugin],
       sourcemap: false,
       minify: false,
