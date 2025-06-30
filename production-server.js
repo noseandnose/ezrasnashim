@@ -97,7 +97,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 80;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Ezras Nashim server running on port ${PORT}`);
   console.log(`📍 Environment: ${process.env.NODE_ENV || 'production'}`);
