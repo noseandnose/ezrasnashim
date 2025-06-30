@@ -1,6 +1,6 @@
 [deployment]
 deploymentTarget = "autoscale"
-build = ["node", "deploy-build.js"]
+build = ["npm", "run", "build"]
 run = ["node", "production-server.js"]
 
 [deployment.env]
