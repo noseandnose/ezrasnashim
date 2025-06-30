@@ -255,16 +255,25 @@ export class DatabaseStorage implements IStorage {
         .replace(/&[a-zA-Z]+;/gi, '')  // Remove HTML entities
         .trim();
       
-      // Always use the API's actual ref field for complete accuracy
-      let sourceRef = selectedRef;
+      // Extract the actual reference from the API response for accuracy
+      let sourceRef = selectedRef;  // fallback to what we requested
       let actualChapter = parseInt(selectedRef.split('.')[0]);
       
+      // The API returns refs in format like "Pirkei Avot 4:12" - extract the numbers
       if (data.ref) {
-        // Extract reference from API response like "Pirkei Avot 4:1" -> "4.1"
-        const refMatch = data.ref.match(/(\d+):(\d+)/);
+        const refMatch = data.ref.match(/Pirkei Avot (\d+):(\d+)/);
         if (refMatch) {
           sourceRef = `${refMatch[1]}.${refMatch[2]}`;
           actualChapter = parseInt(refMatch[1]);
+        }
+      }
+      
+      // Also check sectionRef if ref is not available
+      if (!data.ref && data.sectionRef) {
+        const sectionMatch = data.sectionRef.match(/Pirkei Avot (\d+):(\d+)/);
+        if (sectionMatch) {
+          sourceRef = `${sectionMatch[1]}.${sectionMatch[2]}`;
+          actualChapter = parseInt(sectionMatch[1]);
         }
       }
       
