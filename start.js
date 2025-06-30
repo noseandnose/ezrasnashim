@@ -19,16 +19,21 @@ console.log(`🌐 Port: ${process.env.PORT}`);
 // Check for built server
 const builtServerPath = join(__dirname, 'dist', 'index.js');
 
-if (existsSync(builtServerPath)) {
-  console.log('✅ Using built production server');
-  try {
-    await import(builtServerPath);
-  } catch (error) {
-    console.error('❌ Failed to start production server:', error);
-    process.exit(1);
-  }
-} else {
+if (!existsSync(builtServerPath)) {
   console.error('❌ Production build not found at dist/index.js');
   console.error('📝 Please run: npm run build');
+  process.exit(1);
+}
+
+console.log('✅ Using built production server');
+console.log(`📂 Server path: ${builtServerPath}`);
+
+// Import and start the production server
+try {
+  await import(builtServerPath);
+  console.log('🚀 Production server started successfully');
+} catch (error) {
+  console.error('❌ Failed to start production server:', error);
+  console.error('Stack trace:', error.stack);
   process.exit(1);
 }

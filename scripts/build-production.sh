@@ -1,27 +1,27 @@
 #!/bin/bash
 
-echo "Building Ezras Nashim for production..."
-
-# Set production environment
-export NODE_ENV=production
+# Production build script for Ezras Nashim
+echo "🏗️  Building Ezras Nashim for production..."
 
 # Clean previous builds
-echo "Cleaning previous builds..."
-rm -rf dist
+echo "🧹 Cleaning previous builds..."
+rm -rf dist/
 
-# Install dependencies
-echo "Installing dependencies..."
-npm ci --omit=dev
+# Build frontend with Vite
+echo "⚛️  Building frontend..."
+npm run build:frontend || {
+    echo "❌ Frontend build failed"
+    exit 1
+}
 
-# Build frontend
-echo "Building frontend..."
-npm run build
+# Build backend with proper path resolution
+echo "🚀 Building backend..."
+npm run build:backend || {
+    echo "❌ Backend build failed"
+    exit 1
+}
 
-# Ensure the dist directory has the correct structure
-echo "Verifying build output..."
-ls -la dist/
-
-echo "Production build complete!"
-echo "Built files:"
-echo "- Frontend: dist/public/"
-echo "- Backend: dist/index.js"
+echo "✅ Production build completed successfully!"
+echo "📁 Built files:"
+echo "   - Frontend: dist/public/"
+echo "   - Backend: dist/index.js"
