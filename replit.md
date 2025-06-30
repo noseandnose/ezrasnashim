@@ -158,6 +158,7 @@ Changelog:
 - June 29, 2025. Integrated David Libre Hebrew font throughout application: Added Google Fonts import for David Libre font family in HTML head, created CSS classes (david-libre-regular, david-libre-medium, david-libre-bold) with proper RTL direction, updated all Hebrew text components (Tehillim, prayers, women's prayers, Nishmas) to use authentic David Libre typography instead of generic font-hebrew class
 - June 30, 2025. Fixed donation processing error: Resolved "unable to process donation" issue by removing Apple Pay and Google Pay from Stripe payment method types, keeping only standard card payments until these features are activated in Stripe dashboard, ensuring all donation functionality works correctly
 - June 30, 2025. Fixed Pirkei Avot source accuracy mismatch: Implemented content recognition system to correctly map teachings to their authentic sources (e.g., Ben Zoma's "Who is wise?" teaching now correctly shows as 4:1 instead of incorrect day-calculated references), ensuring displayed sources match actual Sefaria content authenticity
+- June 30, 2025. Implemented database-driven Pirkei Avot progression tracking: Added pirkei_avot_progress table with sequential daily advancement starting at 1:1, removed unused inspirational quotes functionality, created advance endpoint for progression management, ensuring deployment-persistent tracking that cycles through all 100+ authentic Sefaria references
 ```
 
 ## User Preferences
