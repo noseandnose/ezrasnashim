@@ -1,7 +1,7 @@
 [deployment]
 deploymentTarget = "autoscale"
-build = ["bash", "deploy-build.sh"]
-run = ["node", "dist/index.js"]
+build = ["node", "build-deploy.mjs"]
+run = ["node", "production.mjs"]
 
 [deployment.env]
 NODE_ENV = "production"
