@@ -28,6 +28,12 @@ const pathResolverPlugin = {
       
       return { path: fullPath };
     });
+    
+    // Also handle relative @shared imports
+    build.onResolve({ filter: /^\.\.?\/.*@shared/ }, (args) => {
+      const resolvedPath = resolve(args.resolveDir, args.path);
+      return { path: resolvedPath };
+    });
   },
 };
 
