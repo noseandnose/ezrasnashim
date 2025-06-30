@@ -1009,7 +1009,7 @@ function IndividualTehillimModal() {
         ) : (
           <div className="text-center">
             <div
-              className={`${language === 'hebrew' ? 'david-libre-regular text-right' : 'font-english'} leading-relaxed`}
+              className={`${language === 'hebrew' ? 'secular-one-regular text-right' : 'font-english'} leading-relaxed`}
               style={{ fontSize: `${fontSize}px` }}
             >
               {tehillimText?.text || `Psalm ${selectedPsalm} text loading...`}

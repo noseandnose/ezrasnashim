@@ -397,7 +397,7 @@ html, body, #root {
 
 /* Font classes for prayers */
 .font-hebrew {
-  font-family: 'David', 'Times New Roman', serif;
+  font-family: "Secular One", sans-serif;
   direction: rtl;
 }
 
