@@ -8,6 +8,8 @@ export type ModalType =
   | 'mincha' 
   | 'tehillim' 
   | 'tehillim-text'
+  | 'special-tehillim'
+  | 'individual-tehillim'
   | 'nishmas' 
   | 'nishmas-campaign'
   | 'refuah' 
@@ -23,14 +25,18 @@ export type ModalType =
 
 export interface ModalState {
   activeModal: string | null;
+  selectedPsalm: number | null;
   openModal: (modalId: string) => void;
   closeModal: () => void;
+  setSelectedPsalm: (psalmNumber: number) => void;
 }
 
 export const useModalStore = create<ModalState>((set) => ({
   activeModal: null,
+  selectedPsalm: null,
   openModal: (modalId: string) => set({ activeModal: modalId }),
   closeModal: () => set({ activeModal: null }),
+  setSelectedPsalm: (psalmNumber: number) => set({ selectedPsalm: psalmNumber }),
 }));
 
 // Daily completion tracking

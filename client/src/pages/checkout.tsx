@@ -31,8 +31,9 @@ const CheckoutForm = ({ clientSecret }: { clientSecret: string }) => {
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/donation-success`,
+        return_url: `${window.location.origin}/?donation=success`,
       },
+      redirect: "if_required", // Stay on same page when possible
     });
 
     if (error) {

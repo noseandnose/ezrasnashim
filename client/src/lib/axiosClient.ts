@@ -1,8 +1,21 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
 
+// Determine the correct base URL for API calls
+function getBaseURL() {
+  // For Replit environment, construct the backend URL using the domain with port 5000
+  if (window.location.hostname.includes('replit.dev')) {
+    // In Replit, the backend runs on port 5000 with the same domain
+    const hostname = window.location.hostname;
+    return `https://${hostname}:5000`;
+  }
+  
+  // For local development, use environment variable or default to localhost:5000
+  return import.meta.env.VITE_API_URL || 'http://localhost:5000';
+}
+
 // Create axios instance with default config
 const axiosClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: getBaseURL(),
   timeout: 10000,
   withCredentials: true,
   headers: {

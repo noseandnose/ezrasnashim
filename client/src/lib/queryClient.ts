@@ -23,7 +23,16 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     try {
-      const url = queryKey[0] as string;
+      let url = queryKey[0] as string;
+      
+      // If there are additional parameters in the queryKey, append them to the URL
+      if (queryKey.length > 1) {
+        const params = queryKey.slice(1);
+        if (params.length > 0) {
+          url = `${url}/${params.join('/')}`;
+        }
+      }
+      
       // Check if URL already includes full baseURL to avoid doubling
       const isFullUrl = url.startsWith('http');
       const requestConfig = isFullUrl ? { baseURL: '' } : {};

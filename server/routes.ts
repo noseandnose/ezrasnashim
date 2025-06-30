@@ -373,6 +373,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/torah/pirkei-avot/advance", async (req, res) => {
+    try {
+      const nextRef = await storage.getNextPirkeiAvotReference();
+      const progress = await storage.updatePirkeiAvotProgress(nextRef.chapter, nextRef.verse);
+      res.json(progress);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to advance Pirkei Avot progress" });
+    }
+  });
+
   // Weekly Torah content routes
   app.get("/api/table/recipe/:week", async (req, res) => {
     try {
@@ -650,14 +660,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Inspirational quotes routes
-  app.get("/api/quotes/daily/:date", async (req, res) => {
+  // Pirkei Avot progression route
+  app.get("/api/pirkei-avot/progress", async (req, res) => {
     try {
-      const { date } = req.params;
-      const quote = await storage.getInspirationalQuoteByDate(date);
-      res.json(quote || null);
+      const progress = await storage.getPirkeiAvotProgress();
+      res.json(progress);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch inspirational quote" });
+      res.status(500).json({ message: "Failed to fetch Pirkei Avot progress" });
     }
   });
 
@@ -707,38 +716,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Stripe payment intent creation for donations
-  app.post("/api/create-payment-intent", async (req, res) => {
-    try {
-      const { amount, donationType, metadata } = req.body;
-      
-      if (!amount || amount < 1) {
-        return res.status(400).json({ error: "Invalid amount" });
-      }
 
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(amount * 100), // Convert to cents
-        currency: "usd",
-        payment_method_types: ['card'],
-        metadata: {
-          donationType: donationType || "general",
-          ...metadata
-        },
-        description: `Ezras Nashim Donation - ${donationType || 'General'}`
-      });
-
-      res.json({ 
-        clientSecret: paymentIntent.client_secret,
-        paymentIntentId: paymentIntent.id
-      });
-    } catch (error: any) {
-      console.error("Error creating payment intent:", error);
-      res.status(500).json({ 
-        error: "Failed to create payment intent",
-        message: error.message 
-      });
-    }
-  });
 
   // Donation completion handler
   app.post("/api/donation-complete", async (req, res) => {
@@ -784,7 +762,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100), // Convert to cents
         currency: "usd",
-        payment_method_types: ['card', 'apple_pay', 'google_pay'],
+        payment_method_types: ['card'],
         metadata: {
           source: "ezras-nashim-donation",
           donationType: donationType || "General Donation",
@@ -806,33 +784,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Universal media proxy endpoint - supports multiple hosting services
-  app.get("/api/media-proxy/:service/:fileId", async (req, res) => {
+  app.get("/api/media-proxy/:service/*", async (req, res) => {
     try {
-      const { service, fileId } = req.params;
+      const { service } = req.params;
+      const filePath = (req.params as any)[0]; // Capture everything after service
       let mediaUrl = '';
       
       // Support different hosting services
       switch (service) {
         case 'github':
           // GitHub raw file format: https://raw.githubusercontent.com/username/repo/branch/path/file
-          mediaUrl = `https://raw.githubusercontent.com/${fileId}`;
+          mediaUrl = `https://raw.githubusercontent.com/${filePath}`;
           break;
         case 'cloudinary':
-          // Cloudinary format: https://res.cloudinary.com/cloud-name/raw/upload/v1234567890/file
-          mediaUrl = `https://res.cloudinary.com/${fileId}`;
+          // Cloudinary format: https://res.cloudinary.com/cloud-name/resource_type/upload/v1234567890/file
+          mediaUrl = `https://res.cloudinary.com/${filePath}`;
           break;
         case 'supabase':
           // Supabase storage format
-          mediaUrl = `https://${process.env.SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/${fileId}`;
+          mediaUrl = `https://${process.env.SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/${filePath}`;
           break;
         case 'firebase':
           // Firebase storage format
-          mediaUrl = `https://firebasestorage.googleapis.com/v0/b/${fileId}`;
+          mediaUrl = `https://firebasestorage.googleapis.com/v0/b/${filePath}`;
           break;
         case 'gdrive':
         default:
           // Fallback to Google Drive for backward compatibility
-          mediaUrl = `https://drive.usercontent.google.com/download?id=${fileId}&export=download`;
+          mediaUrl = `https://drive.usercontent.google.com/download?id=${filePath}&export=download`;
           break;
       }
       
@@ -872,6 +851,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const { fileId } = req.params;
     // Redirect to new universal proxy with gdrive service
     res.redirect(`/api/media-proxy/gdrive/${fileId}`);
+  });
+
+  // Serve frontend application on root route
+  app.get("/", (req, res) => {
+    // In Replit environment, we need to serve the frontend differently
+    if (process.env.REPLIT_DOMAINS) {
+      // For Replit, redirect to the frontend port
+      const replitDomain = process.env.REPLIT_DOMAINS;
+      res.redirect(`https://${replitDomain}`);
+    } else {
+      // Local development
+      res.redirect("http://localhost:5173");
+    }
   });
 
   const httpServer = createServer(app);

@@ -276,7 +276,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           {/* Tehillim Text */}
           <div className="mb-6 bg-white/70 rounded-2xl p-4 border border-blush/10">
             <div
-              className={`${showHebrew ? 'david-libre-regular text-right' : 'font-english'} leading-relaxed`}
+              className={`${showHebrew ? 'heebo-regular text-right' : 'font-english'} leading-relaxed`}
               style={{ fontSize: `${fontSize}px` }}
             >
               {getTehillimDisplayText()}
@@ -662,6 +662,20 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           <IndividualPrayerContent prayerId={selectedPrayerId} language={language} fontSize={fontSize} setLanguage={setLanguage} setFontSize={setFontSize} />
         </DialogContent>
       </Dialog>
+
+      {/* Special Tehillim Modal */}
+      <Dialog open={activeModal === 'special-tehillim'} onOpenChange={() => closeModal()}>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
+          <SpecialTehillimModal />
+        </DialogContent>
+      </Dialog>
+
+      {/* Individual Tehillim Modal */}
+      <Dialog open={activeModal === 'individual-tehillim'} onOpenChange={() => closeModal()}>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
+          <IndividualTehillimModal />
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
@@ -833,7 +847,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
       <div className="p-4 bg-white rounded-xl border border-cream-light mb-6">
         <div className="text-center">
           <div
-            className={`${language === 'hebrew' ? 'david-libre-regular text-right' : 'font-english'} leading-relaxed`}
+            className={`${language === 'hebrew' ? 'heebo-regular text-right' : 'font-english'} leading-relaxed`}
             style={{ fontSize: `${fontSize}px` }}
           >
             {language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation}
@@ -847,6 +861,161 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
             </div>
           )}
         </div>
+      </div>
+
+      <Button 
+        onClick={() => closeModal()} 
+        className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
+      >
+        Close
+      </Button>
+    </>
+  );
+}
+
+// Special Tehillim Modal Component
+function SpecialTehillimModal() {
+  const { closeModal, openModal, setSelectedPsalm } = useModalStore();
+
+  // Open individual Tehillim text
+  const openTehillimText = (psalmNumber: number) => {
+    setSelectedPsalm(psalmNumber);
+    closeModal();
+    openModal('individual-tehillim');
+  };
+
+  // Categories with psalm numbers
+  const categories = [
+    { title: "Bris milah", psalms: [12] },
+    { title: "Cemetery", psalms: [33, 16, 17, 72, 91, 104, 130, 119] },
+    { title: "Children's success", psalms: [127, 128] },
+    { title: "Finding a mate", psalms: [32, 38, 70, 71, 121, 124] },
+    { title: "For having children", psalms: [102, 103, 128] },
+    { title: "Forgiveness", psalms: [25] },
+    { title: "Giving birth", psalms: [20, 139] },
+    { title: "Gratitude", psalms: [9, 17, 18, 21, 23, 33, 42, 57, 63, 65, 68, 71, 72, 95, 100, 103, 104, 105, 107, 108, 116, 124, 136, 138, 145, 146, 147, 148, 149, 150] },
+    { title: "Graves of righteous", psalms: [16, 17, 20, 23] },
+    { title: "Guidance", psalms: [16, 19, 139] },
+    { title: "Heavenly mercy", psalms: [89, 98, 107] },
+    { title: "House of mourning", psalms: [49] },
+    { title: "Illness", psalms: [6, 30, 41, 88, 103] },
+    { title: "Jerusalem", psalms: [87, 122, 125, 137] },
+    { title: "Land of Israel", psalms: [74, 79, 80, 83, 102, 127, 130, 136, 142] },
+    { title: "Longevity", psalms: [23, 90, 92] },
+    { title: "Wedding day", psalms: [19, 33, 45, 49, 128] },
+    { title: "Peace", psalms: [46, 98, 120] },
+    { title: "Protection from harm", psalms: [3, 5, 7, 20, 23, 27, 31, 35, 40, 48, 55, 59, 69, 70, 91, 109, 119, 121] },
+    { title: "Redemption, Rebuilding of Temple", psalms: [42, 43, 84, 96, 132, 138] },
+    { title: "Repentance", psalms: [25, 32, 47, 51, 90] },
+    { title: "Success", psalms: [4, 57, 108, 112, 122] },
+    { title: "Sustenance", psalms: [4, 24, 41] },
+    { title: "Times of trouble", psalms: [16, 20, 22, 25, 26, 38, 54, 81, 85, 86, 87, 102] },
+    { title: "Torah study", psalms: [1, 19, 119, 134] },
+    { title: "Travel", psalms: [17, 91] }
+  ];
+
+  return (
+    <>
+      <DialogHeader className="text-center mb-4">
+        <DialogTitle className="text-lg font-serif font-semibold text-black">Special Tehillim</DialogTitle>
+        <DialogDescription className="text-xs text-black/70">
+          Specific psalms for different needs and occasions
+        </DialogDescription>
+      </DialogHeader>
+
+      <div className="max-h-[60vh] overflow-y-auto space-y-3">
+        {categories.map((category, index) => (
+          <div key={index} className="bg-white/80 rounded-2xl p-3 border border-blush/10">
+            <h3 className="font-serif text-sm text-black font-bold mb-2">{category.title}</h3>
+            <div className="flex flex-wrap gap-2">
+              {category.psalms.map((psalm) => (
+                <button
+                  key={psalm}
+                  onClick={() => openTehillimText(psalm)}
+                  className="bg-gradient-feminine text-white px-3 py-1 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity"
+                >
+                  {psalm}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <Button 
+        onClick={() => closeModal()} 
+        className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 mt-4"
+      >
+        Close
+      </Button>
+    </>
+  );
+}
+
+// Individual Tehillim Modal Component
+function IndividualTehillimModal() {
+  const { closeModal, selectedPsalm } = useModalStore();
+  const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
+  const [fontSize, setFontSize] = useState(16);
+
+  const { data: tehillimText, isLoading } = useQuery({
+    queryKey: ['/api/tehillim/text', selectedPsalm, language],
+    queryFn: async () => {
+      const response = await axiosClient.get(`/api/tehillim/text/${selectedPsalm}?language=${language}`);
+      return response.data;
+    },
+    enabled: !!selectedPsalm,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000 // 30 minutes
+  });
+
+  return (
+    <>
+      <DialogHeader className="text-center mb-4">
+        <div className="flex items-center justify-between">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
+            className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
+          >
+            {language === 'hebrew' ? 'EN' : 'עב'}
+          </Button>
+          <DialogTitle className="text-lg font-serif font-semibold text-black">Tehillim {selectedPsalm}</DialogTitle>
+          <div className="flex items-center gap-0 mr-8">
+            <Type className="h-4 w-4 text-blush-pink mr-2" />
+            <button
+              onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+              className="p-1 hover:bg-white rounded-md transition-colors"
+            >
+              <Minus className="h-3 w-3 text-blush-pink" />
+            </button>
+            <span className="text-xs text-gray-600 min-w-[2rem] text-center px-1">{fontSize}px</span>
+            <button
+              onClick={() => setFontSize(Math.min(24, fontSize + 2))}
+              className="p-1 hover:bg-white rounded-md transition-colors"
+            >
+              <Plus className="h-3 w-3 text-blush-pink" />
+            </button>
+          </div>
+        </div>
+      </DialogHeader>
+
+      <div className="max-h-[60vh] overflow-y-auto p-4 bg-white rounded-xl border border-cream-light mb-6">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
+          </div>
+        ) : (
+          <div className="text-center">
+            <div
+              className={`${language === 'hebrew' ? 'heebo-regular text-right' : 'font-english'} leading-relaxed`}
+              style={{ fontSize: `${fontSize}px` }}
+            >
+              {tehillimText?.text || `Psalm ${selectedPsalm} text loading...`}
+            </div>
+          </div>
+        )}
       </div>
 
       <Button 

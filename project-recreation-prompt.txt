@@ -1,0 +1,206 @@
+COMPLETE PROJECT RECREATION PROMPT - EZRAS NASHIM
+==================================================
+
+Create a comprehensive daily Jewish women's spiritual app called "Ezras Nashim" with the following specifications:
+
+CORE ARCHITECTURE:
+- React 18 + TypeScript frontend with Vite
+- Node.js Express backend with TypeScript
+- PostgreSQL database with Drizzle ORM
+- Mobile-first responsive design with Tailwind CSS
+- Radix UI components with shadcn/ui
+
+KEY FEATURES:
+1. Daily Completion Tracking: Torah, Tefilla, Tzedaka with heart explosion animations
+2. Jewish Times Integration: Real-time zmanim using Hebcal API with geolocation
+3. Content Management: Daily Halacha, Emuna, Chizuk with audio support
+4. Tehillim System: Global community progress with Sefaria API integration
+5. Donation System: Stripe integration for campaigns and general tzedaka
+6. Special Features: Women's prayers, Pirkei Avot daily inspiration, Shabbat recipes
+
+DATABASE SCHEMA (shared/schema.ts):
+Include all these tables with proper types:
+- calendarEvents
+- shopItems
+- dailyHalacha
+- dailyEmuna
+- dailyChizuk
+- loshonHorah
+- shabbatRecipes
+- parshaVorts
+- tableInspiration
+- tehillimNames
+- globalTehillimProgress
+- minchaPrayers
+- sponsors
+- nishmasTexts
+- campaigns
+- pirkeiAvotProgress
+- womensPrayers
+- discountPromotions
+
+CRITICAL DEPLOYMENT CONFIGURATION:
+
+1. CREATE .replit FILE:
+```toml
+modules = ["nodejs-20", "web", "postgresql-16"]
+run = "node production.mjs"
+hidden = [".config", ".git", "node_modules", "dist"]
+
+[nix]
+channel = "stable-24_05"
+
+[deployment]
+deploymentTarget = "autoscale"
+build = ["node", "build-deploy.mjs"]
+run = ["node", "production.mjs"]
+
+[[ports]]
+localPort = 80
+externalPort = 80
+
+[workflows]
+runButton = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 5000
+```
+
+2. CREATE replit.deployment.toml:
+```toml
+[deployment]
+deploymentTarget = "autoscale"
+build = ["node", "build-deploy.mjs"]
+run = ["node", "production.mjs"]
+
+[deployment.env]
+NODE_ENV = "production"
+
+[deployment.publicDir]
+path = "dist/public"
+```
+
+3. ESSENTIAL PRODUCTION FILES:
+
+build-deploy.mjs:
+```javascript
+#!/usr/bin/env node
+import { execSync } from 'child_process';
+import { existsSync, rmSync } from 'fs';
+
+console.log('Building for deployment...');
+if (existsSync('dist')) rmSync('dist', { recursive: true, force: true });
+
+execSync('npx vite build', { stdio: 'inherit' });
+execSync(`npx esbuild server/index.ts --platform=node --target=node20 --format=esm --bundle --outdir=dist --packages=external --alias:@shared=./shared --external:express --external:cors --external:pg --external:drizzle-orm --external:axios`, { stdio: 'inherit' });
+```
+
+production.mjs:
+```javascript
+#!/usr/bin/env node
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { existsSync } from 'fs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+app.use(cors({ origin: (origin, callback) => callback(null, origin || true), credentials: true }));
+app.use(express.json());
+
+// Load API routes
+try {
+  const serverModule = await import('./dist/index.js');
+  if (serverModule.app) app.use('/', serverModule.app);
+} catch (error) {
+  console.warn('API routes not available:', error.message);
+}
+
+// Static files
+const publicPath = path.join(__dirname, 'dist', 'public');
+if (existsSync(publicPath)) {
+  app.use(express.static(publicPath));
+  app.get('*', (req, res) => {
+    if (!req.path.startsWith('/api')) {
+      res.sendFile(path.join(publicPath, 'index.html'));
+    }
+  });
+}
+
+app.get('/health', (req, res) => res.json({ status: 'healthy', timestamp: new Date().toISOString() }));
+
+const PORT = process.env.PORT || 80;
+app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
+```
+
+DESIGN SYSTEM:
+- Color palette: Rose blush (#E8B4CB), ivory (#F7F3E9), sand gold (#D4A574), muted lavender (#C8A8E9)
+- Typography: Heebo font for Hebrew text, Poppins for English
+- Pure black text (#000000) with bold headings for readability
+
+KEY IMPLEMENTATION DETAILS:
+- Use TanStack Query for all API calls with proper caching
+- Implement axios for HTTP requests with comprehensive logging
+- Include Sefaria API integration for authentic Tehillim and Pirkei Avot content
+- Add Stripe payment system with Apple Pay support
+- Create comprehensive error handling and loading states
+- Implement Hebrew date calculations and location-based zmanim
+
+PACKAGE.JSON SCRIPTS:
+```json
+{
+  "scripts": {
+    "dev": "npm-run-all --parallel dev:backend dev:frontend",
+    "dev:frontend": "vite --port 5173 --host 0.0.0.0",
+    "dev:backend": "tsx watch --clear-screen=false server/index.ts",
+    "build": "vite build",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
+  }
+}
+```
+
+ENVIRONMENT VARIABLES NEEDED:
+- DATABASE_URL (PostgreSQL connection)
+- STRIPE_SECRET_KEY (for payments)
+- NODE_ENV=production
+
+SPECIFIC FEATURES TO IMPLEMENT:
+
+1. Home Page:
+- Daily completion tracking with heart explosions
+- Jewish times display with geolocation
+- Today's inspiration from Pirkei Avot
+
+2. Torah Section:
+- Daily Halacha, Emuna, Chizuk with audio support
+- Speaker attribution and thank you sections
+- Modal system for content viewing
+
+3. Tefilla Section:
+- Mincha prayers with Hebrew text
+- Nishmas text with proper formatting
+- Special Tehillim with 26 categories
+- Individual psalm viewing via Sefaria API
+
+4. Tzedaka Section:
+- Active campaign display
+- Stripe donation system
+- Apple Pay integration
+
+5. Shabbat Table Section:
+- Weekly recipes and inspirations
+- Table inspiration content
+
+This configuration ensures deployment will work without any security blocking issues by using proper production commands and single port configuration from the start.
+
+IMPORTANT: The key difference from the original project is that this .replit file uses "node production.mjs" as the run command instead of "npm run dev", which eliminates all Cloud Run security warnings during deployment.

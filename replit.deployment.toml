@@ -1,0 +1,10 @@
+[deployment]
+deploymentTarget = "autoscale"
+build = ["node", "build-deploy.mjs"]
+run = ["node", "production.mjs"]
+
+[deployment.env]
+NODE_ENV = "production"
+
+[deployment.publicDir]
+path = "dist/public"

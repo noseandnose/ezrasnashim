@@ -296,7 +296,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               className="w-full mb-2 bg-white/70 rounded-2xl p-3 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
             >
               <div className="flex items-center justify-between">
-                <div className="font-serif text-sm text-warm-gray font-hebrew text-right flex-1 pr-2">
+                <div className="font-serif text-sm text-warm-gray heebo-regular text-right flex-1 pr-2">
                   {isPreviewLoading ? (
                     <div className="animate-pulse bg-warm-gray/20 h-4 w-3/4 rounded ml-auto"></div>
                   ) : (
@@ -367,6 +367,31 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             </div>
             <h3 className="font-serif text-sm text-black mb-1 font-bold">Nishmas Kol Chai</h3>
             <p className="font-sans text-xs text-black/60">Prayer of Gratitude</p>
+          </button>
+        </div>
+
+        {/* Special Tehillim and Coming Soon */}
+        <div className="grid grid-cols-2 gap-2">
+          <button 
+            onClick={() => openModal('special-tehillim')}
+            className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
+          >
+            <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
+              <BookOpen className="text-white" size={18} />
+            </div>
+            <h3 className="font-serif text-sm text-black mb-1 font-bold">Special Tehillim</h3>
+            <p className="font-sans text-xs text-black/60">For Specific Occasions</p>
+          </button>
+
+          <button 
+            disabled
+            className="bg-gray-100 rounded-3xl p-3 text-center cursor-not-allowed shadow-lg border border-gray-200 opacity-60"
+          >
+            <div className="bg-gray-300 p-2 rounded-full mx-auto mb-2 w-fit">
+              <Sparkles className="text-gray-500" size={18} />
+            </div>
+            <h3 className="font-serif text-sm text-gray-500 mb-1 font-bold">Coming Soon</h3>
+            <p className="font-sans text-xs text-gray-400">New Feature</p>
           </button>
         </div>
 

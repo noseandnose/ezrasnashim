@@ -3,7 +3,7 @@ import {
   calendarEvents, shopItems, 
   tehillimNames, globalTehillimProgress, minchaPrayers, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, loshonHorah,
-  shabbatRecipes, parshaVorts, tableInspirations, campaigns, inspirationalQuotes, womensPrayers, discountPromotions,
+  shabbatRecipes, parshaVorts, tableInspirations, campaigns, womensPrayers, discountPromotions, pirkeiAvotProgress,
   type CalendarEvent, type InsertCalendarEvent,
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
@@ -16,9 +16,9 @@ import {
   type ParshaVort, type InsertParshaVort,
   type TableInspiration, type InsertTableInspiration,
   type Campaign, type InsertCampaign,
-  type InspirationalQuote, type InsertInspirationalQuote,
   type WomensPrayer, type InsertWomensPrayer,
-  type DiscountPromotion, type InsertDiscountPromotion
+  type DiscountPromotion, type InsertDiscountPromotion,
+  type PirkeiAvotProgress, type InsertPirkeiAvotProgress
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, gt, lt, and } from "drizzle-orm";
@@ -88,9 +88,10 @@ export interface IStorage {
   createCampaign(campaign: InsertCampaign): Promise<Campaign>;
   updateCampaignProgress(id: number, amount: number): Promise<Campaign>;
 
-  // Inspirational quote methods
-  getInspirationalQuoteByDate(date: string): Promise<InspirationalQuote | undefined>;
-  createInspirationalQuote(quote: InsertInspirationalQuote): Promise<InspirationalQuote>;
+  // Pirkei Avot progression methods
+  getPirkeiAvotProgress(): Promise<PirkeiAvotProgress>;
+  updatePirkeiAvotProgress(chapter: number, verse: number): Promise<PirkeiAvotProgress>;
+  getNextPirkeiAvotReference(): Promise<{chapter: number, verse: number}>;
 
   // Women's prayer methods
   getWomensPrayersByCategory(category: string): Promise<WomensPrayer[]>;
@@ -208,39 +209,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSefariaPirkeiAvot(chapter: number): Promise<{text: string; chapter: number; source: string}> {
-    // Define the actual structure of Pirkei Avot chapters with correct verse counts
-    const chapterStructure = [
-      { chapter: 1, maxVerse: 18 },  // Chapter 1: 1-18
-      { chapter: 2, maxVerse: 21 },  // Chapter 2: 1-21  
-      { chapter: 3, maxVerse: 18 },  // Chapter 3: 1-18
-      { chapter: 4, maxVerse: 22 },  // Chapter 4: 1-22
-      { chapter: 5, maxVerse: 23 },  // Chapter 5: 1-23
-      { chapter: 6, maxVerse: 11 }   // Chapter 6: 1-11
-    ];
-    
-    // Create array of all valid references
-    const validRefs: string[] = [];
-    chapterStructure.forEach(({ chapter, maxVerse }) => {
-      for (let verse = 1; verse <= maxVerse; verse++) {
-        validRefs.push(`${chapter}.${verse}`);
-      }
-    });
-    
-    const today = new Date();
-    const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-    const refIndex = dayOfYear % validRefs.length;
-    const selectedRef = validRefs[refIndex];
+    // Get current progress from database
+    const progress = await this.getPirkeiAvotProgress();
+    const selectedRef = `${progress.currentChapter}.${progress.currentVerse}`;
 
     try {
-      // Fetch from Sefaria API using the exact reference format
-      const url = `https://www.sefaria.org/api/texts/Pirkei_Avot.${selectedRef}`;
-      const response = await serverAxiosClient.get(url);
+      // Fetch the entire chapter first
+      const chapterUrl = `https://www.sefaria.org/api/texts/Pirkei_Avot.${progress.currentChapter}`;
+      const response = await serverAxiosClient.get(chapterUrl);
       const data = response.data;
       
-      // Extract English text
       let text = '';
-      if (data.text && Array.isArray(data.text) && data.text.length > 0) {
-        text = data.text[0];
+      let actualSourceRef = selectedRef;
+      
+      // Handle the response based on its structure
+      if (data.text && Array.isArray(data.text)) {
+        // Get the specific verse from the array (verse numbers are 1-indexed, arrays are 0-indexed)
+        const verseIndex = progress.currentVerse - 1;
+        text = data.text[verseIndex] || data.text[0] || '';
       } else if (typeof data.text === 'string') {
         text = data.text;
       }
@@ -249,29 +235,27 @@ export class DatabaseStorage implements IStorage {
         throw new Error('No text content found in API response');
       }
       
-      // Clean up any HTML formatting
-      const cleanText = text
+      // Clean up any HTML formatting first
+      let cleanText = text
         .replace(/<[^>]*>/gi, '')  // Remove HTML tags
         .replace(/&[a-zA-Z]+;/gi, '')  // Remove HTML entities
+        .replace(/&thinsp;/g, ' ')  // Remove thin spaces
+        .replace(/&nbsp;/g, ' ')    // Remove non-breaking spaces
+        .replace(/[\u200E\u200F\u202A-\u202E]/g, '')  // Remove Unicode directional marks
+        .replace(/[\u2060\u00A0\u180E\u2000-\u200B\u2028\u2029\uFEFF]/g, '')  // Remove zero-width spaces
+        .replace(/[\u25A0-\u25FF]/g, '')  // Remove geometric shapes (rectangles, squares)
+        .replace(/[\uFFF0-\uFFFF]/g, '')  // Remove specials block characters
         .trim();
       
-      // Always use the API's actual ref field for complete accuracy
-      let sourceRef = selectedRef;
-      let actualChapter = parseInt(selectedRef.split('.')[0]);
+      // Use the actual reference from database
+      actualSourceRef = selectedRef;
       
-      if (data.ref) {
-        // Extract reference from API response like "Pirkei Avot 4:1" -> "4.1"
-        const refMatch = data.ref.match(/(\d+):(\d+)/);
-        if (refMatch) {
-          sourceRef = `${refMatch[1]}.${refMatch[2]}`;
-          actualChapter = parseInt(refMatch[1]);
-        }
-      }
+      const actualChapter = parseInt(actualSourceRef.split('.')[0]);
       
       return {
         text: cleanText,
         chapter: actualChapter,
-        source: sourceRef  // Use the API's verified reference
+        source: actualSourceRef
       };
     } catch (error) {
       console.error('Error fetching from Sefaria API:', error);
@@ -332,6 +316,10 @@ export class DatabaseStorage implements IStorage {
         .replace(/&nbsp;/gi, ' ')  // Replace non-breaking spaces with regular spaces
         .replace(/&[a-zA-Z]+;/gi, '')  // Remove other HTML entities
         .replace(/\{[פס]\}/g, '')  // Remove Hebrew paragraph markers like {פ} and {ס}
+        .replace(/[\u200E\u200F\u202A-\u202E]/g, '')  // Remove Unicode directional marks (LRM, RLM, LRE, RLE, PDF, LRO, RLO)
+        .replace(/[\u2060\u00A0\u180E\u2000-\u200B\u2028\u2029\uFEFF]/g, '')  // Remove zero-width spaces and other invisible characters
+        .replace(/[\u25A0-\u25FF]/g, '')  // Remove geometric shapes (rectangles, squares)
+        .replace(/[\uFFF0-\uFFFF]/g, '')  // Remove specials block characters
         .replace(/\n\s*\n/g, '\n')  // Remove multiple consecutive newlines
         .trim();
       
@@ -553,21 +541,76 @@ export class DatabaseStorage implements IStorage {
     return campaign;
   }
 
-  async getInspirationalQuoteByDate(date: string): Promise<InspirationalQuote | undefined> {
-    const [quote] = await db
-      .select()
-      .from(inspirationalQuotes)
-      .where(eq(inspirationalQuotes.date, date))
-      .limit(1);
-    return quote;
+  async getPirkeiAvotProgress(): Promise<PirkeiAvotProgress> {
+    let [progress] = await db.select().from(pirkeiAvotProgress).limit(1);
+    
+    if (!progress) {
+      // Initialize with 1:1 if no progress exists
+      [progress] = await db
+        .insert(pirkeiAvotProgress)
+        .values({ currentChapter: 1, currentVerse: 1 })
+        .returning();
+    }
+    
+    return progress;
   }
 
-  async createInspirationalQuote(insertQuote: InsertInspirationalQuote): Promise<InspirationalQuote> {
-    const [quote] = await db
-      .insert(inspirationalQuotes)
-      .values(insertQuote)
+  async updatePirkeiAvotProgress(chapter: number, verse: number): Promise<PirkeiAvotProgress> {
+    const progress = await this.getPirkeiAvotProgress();
+    
+    const [updated] = await db
+      .update(pirkeiAvotProgress)
+      .set({ 
+        currentChapter: chapter, 
+        currentVerse: verse,
+        lastUpdated: new Date()
+      })
+      .where(eq(pirkeiAvotProgress.id, progress.id))
       .returning();
-    return quote;
+    
+    return updated;
+  }
+
+  async getNextPirkeiAvotReference(): Promise<{chapter: number, verse: number}> {
+    const progress = await this.getPirkeiAvotProgress();
+    
+    // Define the structure of Pirkei Avot chapters with correct verse counts
+    const chapterStructure = [
+      { chapter: 1, maxVerse: 18 },
+      { chapter: 2, maxVerse: 21 },  
+      { chapter: 3, maxVerse: 18 },
+      { chapter: 4, maxVerse: 22 },
+      { chapter: 5, maxVerse: 23 },
+      { chapter: 6, maxVerse: 11 }
+    ];
+    
+    let { currentChapter, currentVerse } = progress;
+    const currentChapterData = chapterStructure.find(c => c.chapter === currentChapter);
+    
+    if (!currentChapterData) {
+      // Reset to beginning if invalid chapter
+      currentChapter = 1;
+      currentVerse = 1;
+    } else if (currentVerse >= currentChapterData.maxVerse) {
+      // Move to next chapter
+      const nextChapterIndex = chapterStructure.findIndex(c => c.chapter === currentChapter) + 1;
+      if (nextChapterIndex >= chapterStructure.length) {
+        // Cycle back to beginning
+        currentChapter = 1;
+        currentVerse = 1;
+      } else {
+        currentChapter = chapterStructure[nextChapterIndex].chapter;
+        currentVerse = 1;
+      }
+    } else {
+      // Move to next verse in same chapter
+      currentVerse += 1;
+    }
+    
+    // Update the progress in database
+    await this.updatePirkeiAvotProgress(currentChapter, currentVerse);
+    
+    return { chapter: currentChapter, verse: currentVerse };
   }
 
   async getWomensPrayersByCategory(category: string): Promise<WomensPrayer[]> {

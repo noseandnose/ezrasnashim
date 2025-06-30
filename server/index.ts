@@ -1,6 +1,12 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes.js";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 
 app.use(
@@ -48,8 +54,22 @@ app.use((req, res, next) => {
   next();
 });
 
-(async () => {
+// Initialize server configuration
+async function initializeServer() {
   const server = await registerRoutes(app);
+
+  // Serve static files in production
+  if (process.env.NODE_ENV === 'production') {
+    const publicPath = path.join(__dirname, 'public');
+    app.use(express.static(publicPath));
+    
+    // Serve React app for any non-API routes
+    app.get('*', (req: Request, res: Response) => {
+      if (!req.path.startsWith('/api')) {
+        res.sendFile(path.join(publicPath, 'index.html'));
+      }
+    });
+  }
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -59,9 +79,27 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // Start server
-  const port = process.env.PORT ?? 3000;
-  server.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
-  });
-})();
+  return server;
+}
+
+// Production mode: start server immediately
+if (process.env.NODE_ENV === 'production') {
+  initializeServer().then((server) => {
+    const port = parseInt(process.env.PORT ?? '80');
+    server.listen(port, '0.0.0.0', () => {
+      console.log(`🚀 Ezras Nashim production server running on port ${port}`);
+      console.log(`📍 Environment: ${process.env.NODE_ENV}`);
+    });
+  }).catch(console.error);
+} else {
+  // Development mode: start server
+  initializeServer().then((server) => {
+    const port = parseInt(process.env.PORT ?? '3000');
+    server.listen(port, () => {
+      console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${port}`);
+    });
+  }).catch(console.error);
+}
+
+// Export the configured app for external use
+export { app };

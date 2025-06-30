@@ -4,12 +4,16 @@ hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["nano"]
+packages = ["nano", "docker"]
 
 [deployment]
 deploymentTarget = "autoscale"
 # build = ["npm", "run", "build"]
 run = ["npm", "run", "dev"]
+
+[[ports]]
+localPort = 80
+externalPort = 3002
 
 [[ports]]
 localPort = 3000
@@ -18,12 +22,19 @@ externalPort = 3000
 [[ports]]
 localPort = 5000
 externalPort = 5000
-exposeLocalhost = true
+
+[[ports]]
+localPort = 5001
+externalPort = 3001
 
 [[ports]]
 localPort = 5173
 externalPort = 80
 exposeLocalhost = true
+
+[[ports]]
+localPort = 8080
+externalPort = 8080
 
 [workflows]
 runButton = "Start application"
@@ -43,5 +54,5 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "docker compose -f replit.docker-compose.yml up"
+args = "npm run dev"
 waitForPort = 5000

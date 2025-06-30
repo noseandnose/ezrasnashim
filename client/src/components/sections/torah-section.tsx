@@ -1,7 +1,6 @@
 import { Book, Heart, Play, Shield, BookOpen, Sparkles, Star, Scroll } from "lucide-react";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
-import type { InspirationalQuote } from "@shared/schema";
 import type { Section } from "@/pages/home";
 
 interface TorahSectionProps {
@@ -12,27 +11,10 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
   const { openModal } = useModalStore();
   const { torahCompleted } = useDailyCompletionStore();
   
-  // Fetch today's inspirational quote
-  const today = new Date().toISOString().split('T')[0];
-  const { data: quote } = useQuery<InspirationalQuote>({
-    queryKey: ['daily-quote', today],
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/quotes/daily/${today}`);
-      if (!response.ok) return null;
-      return response.json();
-    },
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 60 * 60 * 1000 // 1 hour
-  });
-
   // Fetch today's Pirkei Avot for daily inspiration
+  const today = new Date().toISOString().split('T')[0];
   const { data: pirkeiAvot } = useQuery<{text: string; chapter: number; source: string}>({
-    queryKey: ['pirkei-avot-daily', today],
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/torah/pirkei-avot/${today}`);
-      if (!response.ok) return null;
-      return response.json();
-    },
+    queryKey: ['/api/torah/pirkei-avot', today],
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 60 * 60 * 1000 // 1 hour
   });
@@ -97,16 +79,6 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
             <p className="font-sans text-xs text-black/90 leading-relaxed text-justify">
               {pirkeiAvot.text}
             </p>
-          </div>
-        )}
-
-        {/* Inspirational Quote */}
-        {quote && (
-          <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
-            <p className="font-sans text-xs text-black/80 italic text-center leading-relaxed">
-              "{quote.text}"
-            </p>
-            <p className="font-serif text-xs text-black/60 text-center mt-2 tracking-wide">- {quote.source}</p>
           </div>
         )}
       </div>

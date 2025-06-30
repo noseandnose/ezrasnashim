@@ -6,12 +6,14 @@ import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 import { DollarSign, Heart } from "lucide-react";
 
 export default function DonationModal() {
   const { activeModal, closeModal, openModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [amount, setAmount] = useState("1");
 
   const createPaymentMutation = useMutation({
@@ -19,7 +21,7 @@ export default function DonationModal() {
       const response = await apiRequest('POST', '/api/create-payment-intent', {
         amount: donationAmount
       });
-      return response.json();
+      return response.data;
     },
     onSuccess: (data) => {
       // Complete tzedaka task when donation is initiated
@@ -41,7 +43,7 @@ export default function DonationModal() {
           sponsor: "",
           dedication: ""
         });
-        window.location.href = `/donate?${params.toString()}`;
+        setLocation(`/donate?${params.toString()}`);
       }
     },
     onError: (error) => {
