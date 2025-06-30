@@ -241,6 +241,10 @@ export class DatabaseStorage implements IStorage {
         .replace(/&[a-zA-Z]+;/gi, '')  // Remove HTML entities
         .replace(/&thinsp;/g, ' ')  // Remove thin spaces
         .replace(/&nbsp;/g, ' ')    // Remove non-breaking spaces
+        .replace(/[\u200E\u200F\u202A-\u202E]/g, '')  // Remove Unicode directional marks
+        .replace(/[\u2060\u00A0\u180E\u2000-\u200B\u2028\u2029\uFEFF]/g, '')  // Remove zero-width spaces
+        .replace(/[\u25A0-\u25FF]/g, '')  // Remove geometric shapes (rectangles, squares)
+        .replace(/[\uFFF0-\uFFFF]/g, '')  // Remove specials block characters
         .trim();
       
       // Use the actual reference from database
@@ -312,6 +316,10 @@ export class DatabaseStorage implements IStorage {
         .replace(/&nbsp;/gi, ' ')  // Replace non-breaking spaces with regular spaces
         .replace(/&[a-zA-Z]+;/gi, '')  // Remove other HTML entities
         .replace(/\{[פס]\}/g, '')  // Remove Hebrew paragraph markers like {פ} and {ס}
+        .replace(/[\u200E\u200F\u202A-\u202E]/g, '')  // Remove Unicode directional marks (LRM, RLM, LRE, RLE, PDF, LRO, RLO)
+        .replace(/[\u2060\u00A0\u180E\u2000-\u200B\u2028\u2029\uFEFF]/g, '')  // Remove zero-width spaces and other invisible characters
+        .replace(/[\u25A0-\u25FF]/g, '')  // Remove geometric shapes (rectangles, squares)
+        .replace(/[\uFFF0-\uFFFF]/g, '')  // Remove specials block characters
         .replace(/\n\s*\n/g, '\n')  // Remove multiple consecutive newlines
         .trim();
       
