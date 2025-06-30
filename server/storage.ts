@@ -235,16 +235,30 @@ export class DatabaseStorage implements IStorage {
         throw new Error('No text content found in API response');
       }
       
-      // Clean up any HTML formatting first
+      // Clean up HTML formatting and Unicode artifacts with comprehensive filtering
       let cleanText = text
         .replace(/<[^>]*>/gi, '')  // Remove HTML tags
-        .replace(/&[a-zA-Z]+;/gi, '')  // Remove HTML entities
+        .replace(/&[a-zA-Z0-9#]+;/gi, '')  // Remove HTML entities
         .replace(/&thinsp;/g, ' ')  // Remove thin spaces
         .replace(/&nbsp;/g, ' ')    // Remove non-breaking spaces
         .replace(/[\u200E\u200F\u202A-\u202E]/g, '')  // Remove Unicode directional marks
         .replace(/[\u2060\u00A0\u180E\u2000-\u200B\u2028\u2029\uFEFF]/g, '')  // Remove zero-width spaces
         .replace(/[\u25A0-\u25FF]/g, '')  // Remove geometric shapes (rectangles, squares)
         .replace(/[\uFFF0-\uFFFF]/g, '')  // Remove specials block characters
+        .replace(/[\uE000-\uF8FF]/g, '')  // Remove private use area characters
+        .replace(/[\u2400-\u243F]/g, '')  // Remove control pictures
+        .replace(/[\u2500-\u257F]/g, '')  // Remove box drawing characters
+        .replace(/[\uFE00-\uFE0F]/g, '')  // Remove variation selectors
+        .replace(/[\u0590-\u05CF]/g, (match) => {
+          // Keep valid Hebrew characters, remove problematic ones
+          const codePoint = match.codePointAt(0);
+          if (codePoint >= 0x05D0 && codePoint <= 0x05EA) return match; // Hebrew letters
+          if (codePoint >= 0x05B0 && codePoint <= 0x05BD) return match; // Hebrew points
+          if (codePoint >= 0x05BF && codePoint <= 0x05C2) return match; // Hebrew points
+          if (codePoint >= 0x05C4 && codePoint <= 0x05C5) return match; // Hebrew points
+          if (codePoint === 0x05C7) return match; // Hebrew point
+          return ''; // Remove other characters in Hebrew block
+        })
         .trim();
       
       // Use the actual reference from database
@@ -314,12 +328,26 @@ export class DatabaseStorage implements IStorage {
         .replace(/<[^>]*>/gi, '')  // Remove any remaining HTML tags
         .replace(/&thinsp;/gi, '')  // Remove thin space HTML entities
         .replace(/&nbsp;/gi, ' ')  // Replace non-breaking spaces with regular spaces
-        .replace(/&[a-zA-Z]+;/gi, '')  // Remove other HTML entities
+        .replace(/&[a-zA-Z0-9#]+;/gi, '')  // Remove HTML entities
         .replace(/\{[פס]\}/g, '')  // Remove Hebrew paragraph markers like {פ} and {ס}
-        .replace(/[\u200E\u200F\u202A-\u202E]/g, '')  // Remove Unicode directional marks (LRM, RLM, LRE, RLE, PDF, LRO, RLO)
-        .replace(/[\u2060\u00A0\u180E\u2000-\u200B\u2028\u2029\uFEFF]/g, '')  // Remove zero-width spaces and other invisible characters
+        .replace(/[\u200E\u200F\u202A-\u202E]/g, '')  // Remove Unicode directional marks
+        .replace(/[\u2060\u00A0\u180E\u2000-\u200B\u2028\u2029\uFEFF]/g, '')  // Remove zero-width spaces
         .replace(/[\u25A0-\u25FF]/g, '')  // Remove geometric shapes (rectangles, squares)
         .replace(/[\uFFF0-\uFFFF]/g, '')  // Remove specials block characters
+        .replace(/[\uE000-\uF8FF]/g, '')  // Remove private use area characters
+        .replace(/[\u2400-\u243F]/g, '')  // Remove control pictures
+        .replace(/[\u2500-\u257F]/g, '')  // Remove box drawing characters
+        .replace(/[\uFE00-\uFE0F]/g, '')  // Remove variation selectors
+        .replace(/[\u0590-\u05CF]/g, (match) => {
+          // Keep valid Hebrew characters, remove problematic ones
+          const codePoint = match.codePointAt(0);
+          if (codePoint >= 0x05D0 && codePoint <= 0x05EA) return match; // Hebrew letters
+          if (codePoint >= 0x05B0 && codePoint <= 0x05BD) return match; // Hebrew points
+          if (codePoint >= 0x05BF && codePoint <= 0x05C2) return match; // Hebrew points
+          if (codePoint >= 0x05C4 && codePoint <= 0x05C5) return match; // Hebrew points
+          if (codePoint === 0x05C7) return match; // Hebrew point
+          return ''; // Remove other characters in Hebrew block
+        })
         .replace(/\n\s*\n/g, '\n')  // Remove multiple consecutive newlines
         .trim();
       

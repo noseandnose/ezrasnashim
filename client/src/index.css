@@ -395,9 +395,9 @@ html, body, #root {
   border-radius: 2px;
 }
 
-/* Font classes for prayers */
+/* Font classes for prayers - using Noto Sans Hebrew for better Unicode support */
 .font-hebrew {
-  font-family: "Heebo", sans-serif;
+  font-family: "Noto Sans Hebrew", "Frank Ruhl Libre", "Arial Hebrew", sans-serif;
   direction: rtl;
 }
 
@@ -405,9 +405,9 @@ html, body, #root {
   font-family: 'Poppins', sans-serif;
 }
 
-/* Heebo Hebrew font class */
+/* Hebrew font class - updated to use Noto Sans Hebrew for better Unicode support */
 .heebo-regular {
-  font-family: "Heebo", sans-serif;
+  font-family: "Noto Sans Hebrew", "Frank Ruhl Libre", "Arial Hebrew", sans-serif;
   font-weight: 400;
   font-style: normal;
   direction: rtl;
