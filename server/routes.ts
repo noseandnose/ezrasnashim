@@ -875,6 +875,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.redirect(`/api/media-proxy/gdrive/${fileId}`);
   });
 
+  // Serve frontend application on root route
+  app.get("/", (req, res) => {
+    res.redirect("http://localhost:5173");
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
