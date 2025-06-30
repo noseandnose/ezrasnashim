@@ -226,6 +226,14 @@ export const loshonHorah = pgTable("loshon_horah", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Pirkei Avot progression tracking
+export const pirkeiAvotProgress = pgTable("pirkei_avot_progress", {
+  id: serial("id").primaryKey(),
+  currentChapter: integer("current_chapter").notNull().default(1),
+  currentVerse: integer("current_verse").notNull().default(1),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+});
+
 // Insert schemas - defined after all tables
 export const insertCalendarEventSchema = createInsertSchema(calendarEvents).omit({
   id: true,
@@ -297,6 +305,11 @@ export const insertLoshonHorahSchema = createInsertSchema(loshonHorah).omit({
   createdAt: true,
 }).extend({
   hebrewDate: z.string().optional(),
+});
+
+export const insertPirkeiAvotProgressSchema = createInsertSchema(pirkeiAvotProgress).omit({
+  id: true,
+  lastUpdated: true,
 });
 
 // Weekly Torah content schemas
@@ -386,3 +399,6 @@ export type InsertWomensPrayer = z.infer<typeof insertWomensPrayerSchema>;
 
 export type DiscountPromotion = typeof discountPromotions.$inferSelect;
 export type InsertDiscountPromotion = z.infer<typeof insertDiscountPromotionSchema>;
+
+export type PirkeiAvotProgress = typeof pirkeiAvotProgress.$inferSelect;
+export type InsertPirkeiAvotProgress = z.infer<typeof insertPirkeiAvotProgressSchema>;

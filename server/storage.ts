@@ -3,7 +3,7 @@ import {
   calendarEvents, shopItems, 
   tehillimNames, globalTehillimProgress, minchaPrayers, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, loshonHorah,
-  shabbatRecipes, parshaVorts, tableInspirations, campaigns, inspirationalQuotes, womensPrayers, discountPromotions,
+  shabbatRecipes, parshaVorts, tableInspirations, campaigns, womensPrayers, discountPromotions, pirkeiAvotProgress,
   type CalendarEvent, type InsertCalendarEvent,
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
@@ -16,9 +16,9 @@ import {
   type ParshaVort, type InsertParshaVort,
   type TableInspiration, type InsertTableInspiration,
   type Campaign, type InsertCampaign,
-  type InspirationalQuote, type InsertInspirationalQuote,
   type WomensPrayer, type InsertWomensPrayer,
-  type DiscountPromotion, type InsertDiscountPromotion
+  type DiscountPromotion, type InsertDiscountPromotion,
+  type PirkeiAvotProgress, type InsertPirkeiAvotProgress
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, gt, lt, and } from "drizzle-orm";
@@ -88,9 +88,10 @@ export interface IStorage {
   createCampaign(campaign: InsertCampaign): Promise<Campaign>;
   updateCampaignProgress(id: number, amount: number): Promise<Campaign>;
 
-  // Inspirational quote methods
-  getInspirationalQuoteByDate(date: string): Promise<InspirationalQuote | undefined>;
-  createInspirationalQuote(quote: InsertInspirationalQuote): Promise<InspirationalQuote>;
+  // Pirkei Avot progression methods
+  getPirkeiAvotProgress(): Promise<PirkeiAvotProgress>;
+  updatePirkeiAvotProgress(chapter: number, verse: number): Promise<PirkeiAvotProgress>;
+  getNextPirkeiAvotReference(): Promise<{chapter: number, verse: number}>;
 
   // Women's prayer methods
   getWomensPrayersByCategory(category: string): Promise<WomensPrayer[]>;
