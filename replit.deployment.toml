@@ -1,6 +1,6 @@
 [deployment]
 deploymentTarget = "autoscale"
-build = ["sh", "-c", "vite build && node build-production.mjs"]
+build = ["node", "deploy-build.js"]
 run = ["node", "production-server.js"]
 
 [deployment.env]
