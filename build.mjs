@@ -53,6 +53,10 @@ async function buildServer() {
         'pg-native',
         'fsevents'
       ],
+      // Bundle the shared schema to avoid import resolution issues
+      alias: {
+        '@shared/schema': './shared/schema.ts'
+      },
       plugins: [pathResolverPlugin],
       sourcemap: false,
       minify: false,
