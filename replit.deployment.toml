@@ -1,11 +1,10 @@
 [deployment]
 deploymentTarget = "autoscale"
 build = ["sh", "-c", "vite build && node build.mjs"]
-run = ["node", "main.js"]
+run = ["node", "app.js"]
 
 [deployment.env]
 NODE_ENV = "production"
-PORT = "5000"
 
 [deployment.publicDir]
 path = "dist/public"
