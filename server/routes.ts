@@ -806,33 +806,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Universal media proxy endpoint - supports multiple hosting services
-  app.get("/api/media-proxy/:service/:fileId", async (req, res) => {
+  app.get("/api/media-proxy/:service/*", async (req, res) => {
     try {
-      const { service, fileId } = req.params;
+      const { service } = req.params;
+      const filePath = (req.params as any)[0]; // Capture everything after service
       let mediaUrl = '';
       
       // Support different hosting services
       switch (service) {
         case 'github':
           // GitHub raw file format: https://raw.githubusercontent.com/username/repo/branch/path/file
-          mediaUrl = `https://raw.githubusercontent.com/${fileId}`;
+          mediaUrl = `https://raw.githubusercontent.com/${filePath}`;
           break;
         case 'cloudinary':
-          // Cloudinary format: https://res.cloudinary.com/cloud-name/raw/upload/v1234567890/file
-          mediaUrl = `https://res.cloudinary.com/${fileId}`;
+          // Cloudinary format: https://res.cloudinary.com/cloud-name/resource_type/upload/v1234567890/file
+          mediaUrl = `https://res.cloudinary.com/${filePath}`;
           break;
         case 'supabase':
           // Supabase storage format
-          mediaUrl = `https://${process.env.SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/${fileId}`;
+          mediaUrl = `https://${process.env.SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/${filePath}`;
           break;
         case 'firebase':
           // Firebase storage format
-          mediaUrl = `https://firebasestorage.googleapis.com/v0/b/${fileId}`;
+          mediaUrl = `https://firebasestorage.googleapis.com/v0/b/${filePath}`;
           break;
         case 'gdrive':
         default:
           // Fallback to Google Drive for backward compatibility
-          mediaUrl = `https://drive.usercontent.google.com/download?id=${fileId}&export=download`;
+          mediaUrl = `https://drive.usercontent.google.com/download?id=${filePath}&export=download`;
           break;
       }
       

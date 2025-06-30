@@ -15,24 +15,14 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
   // Fetch today's inspirational quote
   const today = new Date().toISOString().split('T')[0];
   const { data: quote } = useQuery<InspirationalQuote>({
-    queryKey: ['daily-quote', today],
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/quotes/daily/${today}`);
-      if (!response.ok) return null;
-      return response.json();
-    },
+    queryKey: ['/api/quotes/daily', today],
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 60 * 60 * 1000 // 1 hour
   });
 
   // Fetch today's Pirkei Avot for daily inspiration
   const { data: pirkeiAvot } = useQuery<{text: string; chapter: number; source: string}>({
-    queryKey: ['pirkei-avot-daily', today],
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/torah/pirkei-avot/${today}`);
-      if (!response.ok) return null;
-      return response.json();
-    },
+    queryKey: ['/api/torah/pirkei-avot', today],
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 60 * 60 * 1000 // 1 hour
   });
