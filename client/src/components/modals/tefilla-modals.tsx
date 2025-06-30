@@ -276,7 +276,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           {/* Tehillim Text */}
           <div className="mb-6 bg-white/70 rounded-2xl p-4 border border-blush/10">
             <div
-              className={`${showHebrew ? 'secular-one-regular text-right' : 'font-english'} leading-relaxed`}
+              className={`${showHebrew ? 'heebo-regular text-right' : 'font-english'} leading-relaxed`}
               style={{ fontSize: `${fontSize}px` }}
             >
               {getTehillimDisplayText()}
@@ -847,7 +847,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
       <div className="p-4 bg-white rounded-xl border border-cream-light mb-6">
         <div className="text-center">
           <div
-            className={`${language === 'hebrew' ? 'secular-one-regular text-right' : 'font-english'} leading-relaxed`}
+            className={`${language === 'hebrew' ? 'heebo-regular text-right' : 'font-english'} leading-relaxed`}
             style={{ fontSize: `${fontSize}px` }}
           >
             {language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation}
@@ -1009,7 +1009,7 @@ function IndividualTehillimModal() {
         ) : (
           <div className="text-center">
             <div
-              className={`${language === 'hebrew' ? 'secular-one-regular text-right' : 'font-english'} leading-relaxed`}
+              className={`${language === 'hebrew' ? 'heebo-regular text-right' : 'font-english'} leading-relaxed`}
               style={{ fontSize: `${fontSize}px` }}
             >
               {tehillimText?.text || `Psalm ${selectedPsalm} text loading...`}

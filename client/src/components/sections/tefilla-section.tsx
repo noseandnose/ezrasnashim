@@ -296,7 +296,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               className="w-full mb-2 bg-white/70 rounded-2xl p-3 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
             >
               <div className="flex items-center justify-between">
-                <div className="font-serif text-sm text-warm-gray secular-one-regular text-right flex-1 pr-2">
+                <div className="font-serif text-sm text-warm-gray heebo-regular text-right flex-1 pr-2">
                   {isPreviewLoading ? (
                     <div className="animate-pulse bg-warm-gray/20 h-4 w-3/4 rounded ml-auto"></div>
                   ) : (
