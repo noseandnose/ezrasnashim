@@ -59,7 +59,7 @@ jobs:
         with:
           task-definition-family: ezras_nashim_staging
           container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.build-image.outputs.image }}
+          image: ${{ steps.build-image.outputs.image }}There was an error updating Service. The provided target group arn:aws:elasticloadbalancing:eu-central-1:551437426075:targetgroup/ezras-nashim-staging1/79e9757173477b09 has target type instance, which is incompatible with the awsvpc network mode specified in the task definition.
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
