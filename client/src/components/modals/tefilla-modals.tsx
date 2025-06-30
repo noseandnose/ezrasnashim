@@ -875,9 +875,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
 
 // Special Tehillim Modal Component
 function SpecialTehillimModal() {
-  const { closeModal, openModal } = useModalStore();
-  const [selectedPsalm, setSelectedPsalm] = useState<number | null>(null);
-  const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
+  const { closeModal, openModal, setSelectedPsalm } = useModalStore();
 
   // Open individual Tehillim text
   const openTehillimText = (psalmNumber: number) => {
@@ -956,10 +954,9 @@ function SpecialTehillimModal() {
 
 // Individual Tehillim Modal Component
 function IndividualTehillimModal() {
-  const { closeModal } = useModalStore();
+  const { closeModal, selectedPsalm } = useModalStore();
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
   const [fontSize, setFontSize] = useState(16);
-  const [selectedPsalm] = useState<number>(1); // This would be set from the selected psalm
 
   const { data: tehillimText, isLoading } = useQuery({
     queryKey: ['/api/tehillim/text', selectedPsalm, language],
