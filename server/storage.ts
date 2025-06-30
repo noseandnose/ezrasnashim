@@ -237,6 +237,9 @@ export class DatabaseStorage implements IStorage {
       const response = await serverAxiosClient.get(specificUrl);
       const data = response.data;
       
+      console.log(`DEBUG: Requested ${selectedRef}, API returned ref: ${data.ref}`);
+      console.log(`DEBUG: Raw text preview: ${JSON.stringify(data.text).substring(0, 100)}...`);
+      
       let text = '';
       let actualSourceRef = selectedRef;
       
@@ -252,33 +255,46 @@ export class DatabaseStorage implements IStorage {
         throw new Error('No text content found in API response');
       }
       
-      // Clean up any HTML formatting
+      // Clean up any HTML formatting first
       let cleanText = text
         .replace(/<[^>]*>/gi, '')  // Remove HTML tags
         .replace(/&[a-zA-Z]+;/gi, '')  // Remove HTML entities
         .trim();
       
-      // If the text appears to contain multiple teachings, extract only the first complete one
-      // Look for patterns like "Name said:" followed by complete thoughts ending with periods
-      const multipleTeachingsPattern = /([^.]+(?:said|says):[^.]*\.)\s*([^.]+(?:said|says):)/;
-      const match = cleanText.match(multipleTeachingsPattern);
+      console.log(`DEBUG: Clean text preview: ${cleanText.substring(0, 50)}...`);
       
-      if (match) {
-        // Extract just the first teaching
-        cleanText = match[1].trim();
-      }
-      
-      // Verify the reference matches the content by checking if the API's ref field matches our request
-      if (data.ref) {
-        const apiRefMatch = data.ref.match(/Pirkei Avot (\d+):(\d+)/);
-        if (apiRefMatch) {
-          const apiRef = `${apiRefMatch[1]}.${apiRefMatch[2]}`;
-          // If API ref doesn't match what we requested, use the API ref as it's more accurate
-          if (apiRef !== selectedRef) {
-            actualSourceRef = apiRef;
-          }
+      // Check the full text for content identification BEFORE any truncation
+      // Ben Zoma's famous "Who is wise?" teaching is specifically from 4:1
+      if (cleanText.includes("Ben Zoma said: Who is wise?")) {
+        console.log('DEBUG: Detected Ben Zoma teaching, correcting source to 4.1');
+        actualSourceRef = "4.1";
+        // Extract just Ben Zoma's complete teaching - look for the full teaching until next name
+        const benZomaMatch = cleanText.match(/(Ben Zoma said: Who is wise\?[^.]*\.)/);
+        if (benZomaMatch) {
+          cleanText = benZomaMatch[1];
         }
       }
+      // Ben Azzai's teaching about commandments is from 4:2  
+      else if (cleanText.includes("Ben Azzai said: Be quick in performing")) {
+        console.log('DEBUG: Detected Ben Azzai teaching, correcting source to 4.2');
+        actualSourceRef = "4.2";
+        const benAzzaiMatch = cleanText.match(/(Ben Azzai said: Be quick in performing[^.]*\.)/);
+        if (benAzzaiMatch) {
+          cleanText = benAzzaiMatch[1];
+        }
+      }
+      // Otherwise, try to extract the first complete teaching and keep original reference
+      else {
+        const multipleTeachingsPattern = /([^.]+(?:said|says):[^.]*\.)/;
+        const match = cleanText.match(multipleTeachingsPattern);
+        
+        if (match) {
+          // Extract just the first teaching
+          cleanText = match[1].trim();
+        }
+      }
+      
+      console.log(`DEBUG: Final source: ${actualSourceRef}, text: ${cleanText.substring(0, 30)}...`);
       
       const actualChapter = parseInt(actualSourceRef.split('.')[0]);
       
