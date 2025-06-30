@@ -53,6 +53,7 @@ async function buildServer() {
         'pg-native',
         'fsevents'
       ],
+      // Bundle shared modules instead of keeping them external
       plugins: [pathResolverPlugin],
       sourcemap: false,
       minify: false,
