@@ -293,17 +293,10 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               </div>
             </div>
             
-            {/* First Line of Tehillim with Click Indicator */}
-            <div className="flex items-center justify-between">
-              <div className="heebo-regular text-right text-sm text-warm-gray/80 leading-relaxed flex-1 pl-3">
-                {isPreviewLoading ? (
-                  <div className="animate-pulse bg-warm-gray/20 h-4 w-3/4 rounded ml-auto"></div>
-                ) : (
-                  tehillimPreview?.preview || `פרק ${progress?.currentPerek || 1}`
-                )}
-              </div>
-              <div className="bg-blush/20 p-2 rounded-full">
-                <ChevronRight className="text-blush" size={16} strokeWidth={1.5} />
+            {/* Click Indicator Only */}
+            <div className="flex justify-center">
+              <div className="bg-blush/20 p-3 rounded-full">
+                <ChevronRight className="text-blush" size={20} strokeWidth={1.5} />
               </div>
             </div>
           </button>
