@@ -1,6 +1,12 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes.js";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 
 app.use(
@@ -51,6 +57,19 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
 
+  // Serve static files in production
+  if (process.env.NODE_ENV === 'production') {
+    const publicPath = path.join(__dirname, 'public');
+    app.use(express.static(publicPath));
+    
+    // Serve React app for any non-API routes
+    app.get('*', (req, res) => {
+      if (!req.path.startsWith('/api')) {
+        res.sendFile(path.join(publicPath, 'index.html'));
+      }
+    });
+  }
+
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
@@ -60,8 +79,8 @@ app.use((req, res, next) => {
   });
 
   // Start server
-  const port = process.env.PORT ?? 3000;
+  const port = parseInt(process.env.PORT ?? (process.env.NODE_ENV === 'production' ? '5000' : '3000'));
   server.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
+    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${port}`);
   });
 })();
