@@ -866,6 +866,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/healthcheck", (req, res) => {
+    res.json({ status: "OK" });
+  })
+
   const httpServer = createServer(app);
   return httpServer;
 }
