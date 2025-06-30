@@ -1,33 +1,35 @@
 #!/bin/bash
 
-# Deployment script for Ezras Nashim
-echo "🕯️ Preparing Ezras Nashim for deployment..."
+# Production deployment script for Ezras Nashim
+echo "🚀 Starting production deployment for Ezras Nashim..."
 
 # Set production environment
 export NODE_ENV=production
+export PORT=5000
 
 # Clean previous builds
 echo "🧹 Cleaning previous builds..."
-rm -rf dist
+rm -rf dist/
 
-# Install production dependencies only
-echo "📦 Installing production dependencies..."
-npm ci --omit=dev --silent
-
-# Run the build process
+# Build frontend and backend
 echo "🔨 Building application..."
-npm run build
+vite build && node build.mjs
 
-# Verify build output
-if [ -f "dist/index.js" ] && [ -d "dist/public" ]; then
-    echo "✅ Build successful!"
-    echo "📁 Built files:"
-    echo "   - Backend: dist/index.js"
-    echo "   - Frontend: dist/public/"
-    echo "🚀 Ready for deployment!"
-else
-    echo "❌ Build failed - missing output files"
+# Verify build artifacts
+if [ ! -f "dist/index.js" ]; then
+    echo "❌ Backend build failed - dist/index.js not found"
     exit 1
 fi
 
-echo "💡 To start production server: node start.js"
+if [ ! -f "dist/public/index.html" ]; then
+    echo "❌ Frontend build failed - dist/public/index.html not found"
+    exit 1
+fi
+
+echo "✅ Build completed successfully"
+echo "📦 Frontend: dist/public/"
+echo "📦 Backend: dist/index.js"
+
+# Start production server
+echo "🌐 Starting production server..."
+node start.js

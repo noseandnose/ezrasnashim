@@ -2,6 +2,7 @@
 deploymentTarget = "autoscale"
 build = ["sh", "-c", "vite build && node build.mjs"]
 run = ["node", "start.js"]
+ignorePorts = true
 
 [deployment.env]
 NODE_ENV = "production"
