@@ -269,9 +269,12 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             </div>
           )}
 
-          {/* Current Perek Display with Progress Bar */}
-          <div className="bg-gradient-to-br from-ivory to-lavender/10 rounded-2xl p-3 mb-2 border border-blush/15">
-            <div className="flex items-center justify-between mb-2">
+          {/* Streamlined Perek Display */}
+          <button
+            onClick={() => openModal('tehillim-text')}
+            className="w-full bg-gradient-to-br from-ivory to-lavender/10 rounded-2xl p-4 border border-blush/15 hover:bg-white/90 transition-all duration-300"
+          >
+            <div className="flex items-center justify-between mb-3">
               <h4 className="font-serif text-lg text-warm-gray">
                 Perek {progress?.currentPerek || 1}
               </h4>
@@ -281,7 +284,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             </div>
             
             {/* Progress Bar */}
-            <div className="mb-2">
+            <div className="mb-3">
               <div className="w-full bg-blush/20 rounded-full h-2">
                 <div 
                   className="bg-gradient-feminine h-2 rounded-full transition-all duration-500 ease-out"
@@ -290,50 +293,39 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               </div>
             </div>
             
-            {/* Compact Perek Info */}
-            <button
-              onClick={() => openModal('tehillim-text')}
-              className="w-full mb-2 bg-white/70 rounded-2xl p-3 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
-            >
-              <div className="flex items-center justify-between">
-                <div className="font-serif text-sm text-warm-gray heebo-regular text-right flex-1 pr-2">
-                  {isPreviewLoading ? (
-                    <div className="animate-pulse bg-warm-gray/20 h-4 w-3/4 rounded ml-auto"></div>
-                  ) : (
-                    tehillimPreview?.preview || `פרק ${progress?.currentPerek || 1}`
-                  )}
-                </div>
-                <div className="flex items-center">
-                  <ChevronRight className="text-warm-gray/40" size={16} strokeWidth={1.5} />
-                </div>
-              </div>
-            </button>
-
-            {/* Current Name Assignment */}
-            <div className="mb-2">
-              {currentName ? (
-                <div className="bg-white/80 rounded-2xl p-3 border border-blush/15">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <div className="bg-blush/20 p-1 rounded-full">
-                      <User size={12} className="text-blush" />
-                    </div>
-                    <span className="font-serif text-sm font-medium text-warm-gray">
-                      Davening For: {currentName.hebrewName}
-                    </span>
-                  </div>
-                  <div className="text-xs text-warm-gray/70 font-sans">
-                    {currentName.reasonEnglish || currentName.reason}
-                  </div>
-                </div>
+            {/* Hebrew Preview Text */}
+            <div className="heebo-regular text-right text-sm text-warm-gray/80 leading-relaxed">
+              {isPreviewLoading ? (
+                <div className="animate-pulse bg-warm-gray/20 h-4 w-3/4 rounded ml-auto"></div>
               ) : (
-                <div className="text-sm text-warm-gray/60 text-center py-3 font-sans">
-                  Add a name to dedicate this perek
-                </div>
+                tehillimPreview?.preview || `פרק ${progress?.currentPerek || 1}`
               )}
             </div>
+          </button>
 
-
+          {/* Current Name Assignment */}
+          <div className="mb-2">
+            {currentName ? (
+              <div className="bg-white/80 rounded-2xl p-3 border border-blush/15">
+                <div className="flex items-center space-x-2 mb-2">
+                  <div className="bg-blush/20 p-1 rounded-full">
+                    <User size={12} className="text-blush" />
+                  </div>
+                  <span className="font-serif text-sm font-medium text-warm-gray">
+                    Davening For: {currentName.hebrewName}
+                  </span>
+                </div>
+                <div className="text-xs text-warm-gray/70 font-sans">
+                  {currentName.reasonEnglish || currentName.reason}
+                </div>
+              </div>
+            ) : (
+              <div className="text-sm text-warm-gray/60 text-center py-3 font-sans">
+                Add a name to dedicate this perek
+              </div>
+            )}
           </div>
+
         </div>
 
       </div>
