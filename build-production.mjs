@@ -1,50 +1,48 @@
 #!/usr/bin/env node
 
 import { build } from 'esbuild';
-import { readFileSync, writeFileSync } from 'fs';
+import path from 'path';
 import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);
 
-console.log('🔨 Building production server...');
-
-// Simple path resolver that bundles everything
-const bundleAllPlugin = {
-  name: 'bundle-all',
-  setup(build) {
-    build.onResolve({ filter: /^@shared\// }, (args) => {
-      const path = args.path.replace('@shared/', './shared/');
-      const fullPath = resolve(__dirname, path + '.ts');
-      return { path: fullPath };
-    });
-  },
-};
+console.log('Building production server...');
 
 try {
   await build({
     entryPoints: ['server/index.ts'],
     bundle: true,
     platform: 'node',
-    target: 'node18',
+    target: 'node20',
     format: 'esm',
-    outfile: 'dist/server.js',
+    outdir: 'dist',
+    packages: 'external',
+    sourcemap: false,
+    minify: false,
+    // Resolve the @shared alias
+    alias: {
+      '@shared': path.resolve(__dirname, 'shared'),
+    },
+    // External packages that should not be bundled
     external: [
       'express',
-      'cors', 
+      'cors',
       'pg',
       'drizzle-orm',
       'axios',
-      'stripe'
+      '@neondatabase/serverless',
+      'express-session',
+      'connect-pg-simple',
+      'memorystore',
+      'passport',
+      'passport-local',
+      'stripe',
+      'ws',
     ],
-    plugins: [bundleAllPlugin],
-    banner: {
-      js: 'import { createRequire } from "module"; const require = createRequire(import.meta.url);'
-    },
   });
-
-  console.log('✅ Production server built successfully');
+  
+  console.log('✅ Production server build completed successfully');
 } catch (error) {
   console.error('❌ Build failed:', error);
   process.exit(1);

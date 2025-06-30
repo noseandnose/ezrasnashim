@@ -79,19 +79,27 @@ async function initializeServer() {
     throw err;
   });
 
-  // Start server only in development mode
-  if (process.env.NODE_ENV !== 'production') {
+  return server;
+}
+
+// Production mode: start server immediately
+if (process.env.NODE_ENV === 'production') {
+  initializeServer().then((server) => {
+    const port = parseInt(process.env.PORT ?? '80');
+    server.listen(port, '0.0.0.0', () => {
+      console.log(`🚀 Ezras Nashim production server running on port ${port}`);
+      console.log(`📍 Environment: ${process.env.NODE_ENV}`);
+    });
+  }).catch(console.error);
+} else {
+  // Development mode: start server
+  initializeServer().then((server) => {
     const port = parseInt(process.env.PORT ?? '3000');
     server.listen(port, () => {
       console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${port}`);
     });
-  }
-
-  return server;
+  }).catch(console.error);
 }
 
-// Initialize the server
-initializeServer().catch(console.error);
-
-// Export the configured app for production use
+// Export the configured app for external use
 export { app };
