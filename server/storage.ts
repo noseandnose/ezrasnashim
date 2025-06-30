@@ -214,9 +214,9 @@ export class DatabaseStorage implements IStorage {
     const selectedRef = `${progress.currentChapter}.${progress.currentVerse}`;
 
     try {
-      // Try to fetch specific verse first
-      const specificUrl = `https://www.sefaria.org/api/texts/Pirkei_Avot.${selectedRef}`;
-      const response = await serverAxiosClient.get(specificUrl);
+      // Fetch the entire chapter first
+      const chapterUrl = `https://www.sefaria.org/api/texts/Pirkei_Avot.${progress.currentChapter}`;
+      const response = await serverAxiosClient.get(chapterUrl);
       const data = response.data;
       
       let text = '';
@@ -224,8 +224,9 @@ export class DatabaseStorage implements IStorage {
       
       // Handle the response based on its structure
       if (data.text && Array.isArray(data.text)) {
-        // Get the text content
-        text = data.text[0] || '';
+        // Get the specific verse from the array (verse numbers are 1-indexed, arrays are 0-indexed)
+        const verseIndex = progress.currentVerse - 1;
+        text = data.text[verseIndex] || data.text[0] || '';
       } else if (typeof data.text === 'string') {
         text = data.text;
       }
@@ -238,19 +239,12 @@ export class DatabaseStorage implements IStorage {
       let cleanText = text
         .replace(/<[^>]*>/gi, '')  // Remove HTML tags
         .replace(/&[a-zA-Z]+;/gi, '')  // Remove HTML entities
+        .replace(/&thinsp;/g, ' ')  // Remove thin spaces
+        .replace(/&nbsp;/g, ' ')    // Remove non-breaking spaces
         .trim();
       
-      // Use the actual reference from database - no content identification needed
+      // Use the actual reference from database
       actualSourceRef = selectedRef;
-      
-      // Extract the first complete teaching if there are multiple in the response
-      const multipleTeachingsPattern = /([^.]+(?:said|says):[^.]*\.)/;
-      const match = cleanText.match(multipleTeachingsPattern);
-      
-      if (match) {
-        // Extract just the first teaching
-        cleanText = match[1].trim();
-      }
       
       const actualChapter = parseInt(actualSourceRef.split('.')[0]);
       
