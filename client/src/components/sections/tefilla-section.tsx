@@ -380,7 +380,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               <BookOpen className="text-white" size={18} />
             </div>
             <h3 className="font-serif text-sm text-black mb-1 font-bold">Special Tehillim</h3>
-            <p className="font-sans text-xs text-black/60">For Specific Needs</p>
+            <p className="font-sans text-xs text-black/60">For Specific Occasions</p>
           </button>
 
           <button 
