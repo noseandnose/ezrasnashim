@@ -1,0 +1,344 @@
+EZRAS NASHIM - COMPLETE PROJECT RECREATION INSTRUCTIONS
+======================================================
+
+Copy and paste this exact prompt to recreate the entire Ezras Nashim project:
+
+---
+
+Create a comprehensive daily Jewish women's spiritual app called "Ezras Nashim" with these exact specifications:
+
+**CORE TECHNOLOGY STACK:**
+- React 18 + TypeScript frontend with Vite
+- Node.js Express backend with TypeScript  
+- PostgreSQL database with Drizzle ORM
+- Tailwind CSS + Radix UI + shadcn/ui components
+- Mobile-first responsive design
+
+**ESSENTIAL FEATURES TO BUILD:**
+
+1. **Daily Completion System:**
+   - Three main sections: Torah, Tefilla, Tzedaka
+   - Heart explosion animation on completion
+   - Daily reset functionality
+   - Progress tracking with visual indicators
+
+2. **Jewish Times Integration:**
+   - Real-time zmanim using Hebcal API
+   - Geolocation-based times for user's location
+   - Support for New York and Jerusalem time zones
+   - Hebrew date display
+
+3. **Torah Content Management:**
+   - Daily Halacha with text and audio support
+   - Daily Emuna (faith & trust content)
+   - Daily Chizuk (encouragement content)
+   - Loshon Horah daily lessons
+   - Audio player with progress bar and seeking
+   - Speaker attribution with website links
+
+4. **Tefilla (Prayer) System:**
+   - Complete Hebrew Mincha prayers with Heebo font
+   - Nishmas text with proper formatting
+   - Special Tehillim with 26 categories (Bris milah, Cemetery, Children's success, Finding a mate, etc.)
+   - Individual psalm viewing using Sefaria API
+   - Women's prayers by category
+
+5. **Tehillim Global Progress:**
+   - Community-wide Tehillim completion tracking
+   - Names submission for 18-day dedication periods
+   - Sefaria API integration for authentic Hebrew text
+   - Hebrew/English language support
+   - Random name assignment for each perek
+
+6. **Pirkei Avot Daily Inspiration:**
+   - Sequential progression through all 100+ authentic teachings
+   - Database-driven advancement system
+   - Sefaria API integration for authentic sources
+   - Daily advancement with proper chapter:verse formatting
+
+7. **Donation System:**
+   - Stripe payment integration
+   - Active campaign display with progress tracking
+   - General donation functionality
+   - Payment confirmation and processing
+
+8. **Shabbat Table Features:**
+   - Weekly Shabbat recipes
+   - Table inspiration content
+   - Parsha vorts (Torah insights)
+
+9. **Sponsorship System:**
+   - Daily content sponsorship
+   - Custom sponsor messages
+   - Sponsor display throughout app
+
+10. **Discount Promotions:**
+    - Location-based promotions (Israel vs worldwide)
+    - Active promotion display
+    - External link integration
+
+**DATABASE SCHEMA (shared/schema.ts):**
+Create these exact tables with Drizzle ORM:
+
+```typescript
+// Core tables needed:
+export const calendarEvents = pgTable("calendar_events", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  date: timestamp("date").notNull(),
+  time: text("time"),
+  location: text("location"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const shopItems = pgTable("shop_items", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  price: integer("price").notNull(),
+  imageUrl: text("image_url"),
+  category: text("category"),
+  inStock: boolean("in_stock").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const dailyHalacha = pgTable("daily_halacha", {
+  id: serial("id").primaryKey(),
+  date: text("date").notNull().unique(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  audioUrl: text("audio_url"),
+  duration: text("duration"),
+  speakerName: text("speaker_name"),
+  speakerWebsite: text("speaker_website"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const dailyEmuna = pgTable("daily_emuna", {
+  id: serial("id").primaryKey(),
+  date: text("date").notNull().unique(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  audioUrl: text("audio_url"),
+  duration: text("duration"),
+  speakerName: text("speaker_name"),
+  speakerWebsite: text("speaker_website"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const dailyChizuk = pgTable("daily_chizuk", {
+  id: serial("id").primaryKey(),
+  date: text("date").notNull().unique(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  audioUrl: text("audio_url"),
+  duration: text("duration"),
+  speakerName: text("speaker_name"),
+  speakerWebsite: text("speaker_website"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const loshonHorah = pgTable("loshon_horah", {
+  id: serial("id").primaryKey(),
+  date: text("date").notNull().unique(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  audioUrl: text("audio_url"),
+  duration: text("duration"),
+  speakerName: text("speaker_name"),
+  speakerWebsite: text("speaker_website"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const shabbatRecipes = pgTable("shabbat_recipes", {
+  id: serial("id").primaryKey(),
+  week: text("week").notNull().unique(),
+  title: text("title").notNull(),
+  description: text("description"),
+  ingredients: text("ingredients").array(),
+  instructions: text("instructions").notNull(),
+  prepTime: text("prep_time"),
+  cookTime: text("cook_time"),
+  servings: text("servings"),
+  imageUrl: text("image_url"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const parshaVorts = pgTable("parsha_vorts", {
+  id: serial("id").primaryKey(),
+  week: text("week").notNull().unique(),
+  parsha: text("parsha").notNull(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  author: text("author"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const tableInspiration = pgTable("table_inspiration", {
+  id: serial("id").primaryKey(),
+  date: text("date").notNull().unique(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  category: text("category"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const tehillimNames = pgTable("tehillim_names", {
+  id: serial("id").primaryKey(),
+  hebrewName: text("hebrew_name").notNull(),
+  englishName: text("english_name"),
+  submittedAt: timestamp("submitted_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
+export const globalTehillimProgress = pgTable("global_tehillim_progress", {
+  id: serial("id").primaryKey(),
+  currentPerek: integer("current_perek").notNull().default(1),
+  language: text("language").notNull().default("hebrew"),
+  completedBy: text("completed_by"),
+  completedAt: timestamp("completed_at"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const minchaPrayers = pgTable("mincha_prayers", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  hebrewText: text("hebrew_text").notNull(),
+  englishText: text("english_text"),
+  category: text("category"),
+  orderIndex: integer("order_index"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const sponsors = pgTable("sponsors", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  message: text("message"),
+  contentType: text("content_type"),
+  date: text("date").notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const nishmasTexts = pgTable("nishmas_texts", {
+  id: serial("id").primaryKey(),
+  language: text("language").notNull().unique(),
+  text: text("text").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const campaigns = pgTable("campaigns", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  goal: integer("goal").notNull(),
+  raised: integer("raised").default(0),
+  imageUrl: text("image_url"),
+  isActive: boolean("is_active").default(true),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const pirkeiAvotProgress = pgTable("pirkei_avot_progress", {
+  id: serial("id").primaryKey(),
+  currentChapter: integer("current_chapter").notNull().default(1),
+  currentVerse: integer("current_verse").notNull().default(1),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const womensPrayers = pgTable("womens_prayers", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  hebrewText: text("hebrew_text").notNull(),
+  englishText: text("english_text"),
+  transliteration: text("transliteration"),
+  category: text("category").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const discountPromotions = pgTable("discount_promotions", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  subtitle: text("subtitle"),
+  logoUrl: text("logo_url"),
+  linkUrl: text("link_url").notNull(),
+  targetLocation: text("target_location"),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+```
+
+**DESIGN SYSTEM:**
+- Color palette: Rose blush (#E8B4CB), ivory (#F7F3E9), sand gold (#D4A574), muted lavender (#C8A8E9)
+- Typography: Heebo font for Hebrew text, Poppins for English
+- Pure black text (#000000) with bold headings for maximum readability
+- Mobile-first responsive design with max-width containers
+
+**API INTEGRATIONS:**
+1. **Hebcal API** for Jewish times and Hebrew dates
+2. **Sefaria API** for authentic Tehillim and Pirkei Avot content
+3. **Stripe API** for payment processing
+4. **Geolocation API** for user location
+
+**KEY IMPLEMENTATION REQUIREMENTS:**
+
+1. **Audio System:**
+   - Custom audio player component with progress bar
+   - Seeking functionality with clickable progress bar
+   - Support for Google Drive and other media hosting
+
+2. **Hebrew Text Handling:**
+   - Heebo font for clean Hebrew rendering
+   - RTL text direction support
+   - Unicode artifact cleaning for Sefaria content
+
+3. **State Management:**
+   - TanStack Query for server state with proper caching
+   - Zustand for client state (modals, completion tracking)
+   - Proper error boundaries and loading states
+
+4. **Navigation:**
+   - Bottom tab navigation with center home button
+   - Modal system for detailed content viewing
+   - Seamless routing with Wouter
+
+**SPECIAL FEATURES:**
+
+1. **Special Tehillim Categories:**
+   - Bris milah, Cemetery, Children's success, Finding a mate
+   - Health, Livelihood, Marriage, Protection, Repentance
+   - Shalom bayis, Success, Travel, Women's issues
+   - And 14 more categories with specific psalm collections
+
+2. **Heart Explosion Animation:**
+   - Celebration animation on daily completion
+   - Smooth transitions and visual feedback
+
+3. **Location-based Features:**
+   - Different discount promotions for Israel vs worldwide
+   - Accurate zmanim calculations based on user location
+
+**ENVIRONMENT VARIABLES:**
+- DATABASE_URL (PostgreSQL connection)
+- STRIPE_SECRET_KEY (for payment processing)
+- NODE_ENV (development/production)
+
+**SAMPLE DATA TO INCLUDE:**
+- Complete Hebrew Mincha prayers with proper formatting
+- Nishmas text in Hebrew with line breaks
+- Sample Torah content for each category
+- Active campaign with realistic goal and progress
+- Initial Special Tehillim categories with psalm numbers
+- Pirkei Avot progression starting at 1:1
+
+Build this as a complete, fully functional app with all features working, proper error handling, loading states, and mobile-responsive design. Include comprehensive API routes, database operations, and authentic Jewish content integration.
+
+---
+
+This prompt will recreate the exact Ezras Nashim app with all current features and functionality.
