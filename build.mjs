@@ -18,7 +18,7 @@ const pathResolverPlugin = {
   setup(build) {
     // Resolve @shared/* to ./shared/*
     build.onResolve({ filter: /^@shared\// }, (args) => {
-      const relativePath = args.path.replace('@shared/', 'shared/');
+      const relativePath = args.path.replace('@shared/', './shared/');
       const fullPath = resolve(__dirname, relativePath);
       
       // Check if it's a TypeScript file and add .ts extension if needed
