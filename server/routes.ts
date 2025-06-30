@@ -877,7 +877,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Serve frontend application on root route
   app.get("/", (req, res) => {
-    res.redirect("http://localhost:5173");
+    // In Replit environment, we need to serve the frontend differently
+    if (process.env.REPLIT_DOMAINS) {
+      // For Replit, redirect to the frontend port
+      const replitDomain = process.env.REPLIT_DOMAINS;
+      res.redirect(`https://${replitDomain}`);
+    } else {
+      // Local development
+      res.redirect("http://localhost:5173");
+    }
   });
 
   const httpServer = createServer(app);

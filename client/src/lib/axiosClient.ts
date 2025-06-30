@@ -1,8 +1,21 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
 
+// Determine the correct base URL for API calls
+function getBaseURL() {
+  // For Replit environment, construct the backend URL using the domain pattern
+  if (window.location.hostname.includes('replit.dev')) {
+    // Replit uses a specific domain pattern where backend runs on same domain
+    // The preview shows the frontend, but API calls should go to same domain
+    return window.location.origin;
+  }
+  
+  // For local development, use environment variable or default to localhost:5000
+  return import.meta.env.VITE_API_URL || 'http://localhost:5000';
+}
+
 // Create axios instance with default config
 const axiosClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost', // Browser needs to call localhost for nginx proxy
+  baseURL: getBaseURL(),
   timeout: 10000,
   withCredentials: true,
   headers: {
