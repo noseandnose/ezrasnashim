@@ -1,7 +1,6 @@
 import { Book, Heart, Play, Shield, BookOpen, Sparkles, Star, Scroll } from "lucide-react";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
-import type { InspirationalQuote } from "@shared/schema";
 import type { Section } from "@/pages/home";
 
 interface TorahSectionProps {
@@ -12,15 +11,8 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
   const { openModal } = useModalStore();
   const { torahCompleted } = useDailyCompletionStore();
   
-  // Fetch today's inspirational quote
-  const today = new Date().toISOString().split('T')[0];
-  const { data: quote } = useQuery<InspirationalQuote>({
-    queryKey: ['/api/quotes/daily', today],
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 60 * 60 * 1000 // 1 hour
-  });
-
   // Fetch today's Pirkei Avot for daily inspiration
+  const today = new Date().toISOString().split('T')[0];
   const { data: pirkeiAvot } = useQuery<{text: string; chapter: number; source: string}>({
     queryKey: ['/api/torah/pirkei-avot', today],
     staleTime: 10 * 60 * 1000, // 10 minutes

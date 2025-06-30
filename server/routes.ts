@@ -650,14 +650,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Inspirational quotes routes
-  app.get("/api/quotes/daily/:date", async (req, res) => {
+  // Pirkei Avot progression route
+  app.get("/api/pirkei-avot/progress", async (req, res) => {
     try {
-      const { date } = req.params;
-      const quote = await storage.getInspirationalQuoteByDate(date);
-      res.json(quote || null);
+      const progress = await storage.getPirkeiAvotProgress();
+      res.json(progress);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch inspirational quote" });
+      res.status(500).json({ message: "Failed to fetch Pirkei Avot progress" });
     }
   });
 

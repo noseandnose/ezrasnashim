@@ -4,16 +4,13 @@ import { z } from "zod";
 
 // Core tables only - remove unused functionality
 
-// Daily inspirational quotes
-export const inspirationalQuotes = pgTable("inspirational_quotes", {
+// Pirkei Avot progression tracking
+export const pirkeiAvotProgress = pgTable("pirkei_avot_progress", {
   id: serial("id").primaryKey(),
-  text: text("text").notNull(),
-  source: text("source").notNull(),
-  date: date("date").notNull().unique(), // One quote per day
-  createdAt: timestamp("created_at").defaultNow(),
-}, (table) => ({
-  dateIdx: index("inspirational_quotes_date_idx").on(table.date),
-}));
+  currentChapter: integer("current_chapter").notNull().default(1),
+  currentVerse: integer("current_verse").notNull().default(1),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+});
 
 // Tzedaka campaigns
 export const campaigns = pgTable("campaigns", {
@@ -84,9 +81,9 @@ export const discountPromotions = pgTable("discount_promotions", {
 }));
 
 // Zod schemas for validation
-export const insertInspirationalQuoteSchema = createInsertSchema(inspirationalQuotes).omit({
+export const insertPirkeiAvotProgressSchema = createInsertSchema(pirkeiAvotProgress).omit({
   id: true,
-  createdAt: true,
+  lastUpdated: true,
 });
 
 export const insertCampaignSchema = createInsertSchema(campaigns).omit({
@@ -117,8 +114,8 @@ export const insertDiscountPromotionSchema = createInsertSchema(discountPromotio
 });
 
 // Type exports
-export type InspirationalQuote = typeof inspirationalQuotes.$inferSelect;
-export type InsertInspirationalQuote = z.infer<typeof insertInspirationalQuoteSchema>;
+export type PirkeiAvotProgress = typeof pirkeiAvotProgress.$inferSelect;
+export type InsertPirkeiAvotProgress = z.infer<typeof insertPirkeiAvotProgressSchema>;
 
 export type Campaign = typeof campaigns.$inferSelect;
 export type InsertCampaign = z.infer<typeof insertCampaignSchema>;

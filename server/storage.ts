@@ -209,28 +209,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSefariaPirkeiAvot(chapter: number): Promise<{text: string; chapter: number; source: string}> {
-    // Define the actual structure of Pirkei Avot chapters with correct verse counts
-    const chapterStructure = [
-      { chapter: 1, maxVerse: 18 },  // Chapter 1: 1-18
-      { chapter: 2, maxVerse: 21 },  // Chapter 2: 1-21  
-      { chapter: 3, maxVerse: 18 },  // Chapter 3: 1-18
-      { chapter: 4, maxVerse: 22 },  // Chapter 4: 1-22
-      { chapter: 5, maxVerse: 23 },  // Chapter 5: 1-23
-      { chapter: 6, maxVerse: 11 }   // Chapter 6: 1-11
-    ];
-    
-    // Create array of all valid references
-    const validRefs: string[] = [];
-    chapterStructure.forEach(({ chapter, maxVerse }) => {
-      for (let verse = 1; verse <= maxVerse; verse++) {
-        validRefs.push(`${chapter}.${verse}`);
-      }
-    });
-    
-    const today = new Date();
-    const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-    const refIndex = dayOfYear % validRefs.length;
-    const selectedRef = validRefs[refIndex];
+    // Get current progress from database
+    const progress = await this.getPirkeiAvotProgress();
+    const selectedRef = `${progress.currentChapter}.${progress.currentVerse}`;
 
     try {
       // Try to fetch specific verse first
@@ -289,6 +270,9 @@ export class DatabaseStorage implements IStorage {
       }
       
       const actualChapter = parseInt(actualSourceRef.split('.')[0]);
+      
+      // After successfully fetching and displaying content, advance to next reference
+      await this.getNextPirkeiAvotReference();
       
       return {
         text: cleanText,
@@ -575,21 +559,76 @@ export class DatabaseStorage implements IStorage {
     return campaign;
   }
 
-  async getInspirationalQuoteByDate(date: string): Promise<InspirationalQuote | undefined> {
-    const [quote] = await db
-      .select()
-      .from(inspirationalQuotes)
-      .where(eq(inspirationalQuotes.date, date))
-      .limit(1);
-    return quote;
+  async getPirkeiAvotProgress(): Promise<PirkeiAvotProgress> {
+    let [progress] = await db.select().from(pirkeiAvotProgress).limit(1);
+    
+    if (!progress) {
+      // Initialize with 1:1 if no progress exists
+      [progress] = await db
+        .insert(pirkeiAvotProgress)
+        .values({ currentChapter: 1, currentVerse: 1 })
+        .returning();
+    }
+    
+    return progress;
   }
 
-  async createInspirationalQuote(insertQuote: InsertInspirationalQuote): Promise<InspirationalQuote> {
-    const [quote] = await db
-      .insert(inspirationalQuotes)
-      .values(insertQuote)
+  async updatePirkeiAvotProgress(chapter: number, verse: number): Promise<PirkeiAvotProgress> {
+    const progress = await this.getPirkeiAvotProgress();
+    
+    const [updated] = await db
+      .update(pirkeiAvotProgress)
+      .set({ 
+        currentChapter: chapter, 
+        currentVerse: verse,
+        lastUpdated: new Date()
+      })
+      .where(eq(pirkeiAvotProgress.id, progress.id))
       .returning();
-    return quote;
+    
+    return updated;
+  }
+
+  async getNextPirkeiAvotReference(): Promise<{chapter: number, verse: number}> {
+    const progress = await this.getPirkeiAvotProgress();
+    
+    // Define the structure of Pirkei Avot chapters with correct verse counts
+    const chapterStructure = [
+      { chapter: 1, maxVerse: 18 },
+      { chapter: 2, maxVerse: 21 },  
+      { chapter: 3, maxVerse: 18 },
+      { chapter: 4, maxVerse: 22 },
+      { chapter: 5, maxVerse: 23 },
+      { chapter: 6, maxVerse: 11 }
+    ];
+    
+    let { currentChapter, currentVerse } = progress;
+    const currentChapterData = chapterStructure.find(c => c.chapter === currentChapter);
+    
+    if (!currentChapterData) {
+      // Reset to beginning if invalid chapter
+      currentChapter = 1;
+      currentVerse = 1;
+    } else if (currentVerse >= currentChapterData.maxVerse) {
+      // Move to next chapter
+      const nextChapterIndex = chapterStructure.findIndex(c => c.chapter === currentChapter) + 1;
+      if (nextChapterIndex >= chapterStructure.length) {
+        // Cycle back to beginning
+        currentChapter = 1;
+        currentVerse = 1;
+      } else {
+        currentChapter = chapterStructure[nextChapterIndex].chapter;
+        currentVerse = 1;
+      }
+    } else {
+      // Move to next verse in same chapter
+      currentVerse += 1;
+    }
+    
+    // Update the progress in database
+    await this.updatePirkeiAvotProgress(currentChapter, currentVerse);
+    
+    return { chapter: currentChapter, verse: currentVerse };
   }
 
   async getWomensPrayersByCategory(category: string): Promise<WomensPrayer[]> {
