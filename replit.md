@@ -102,13 +102,15 @@ Ezras Nashim is a comprehensive mobile-first web application designed for Jewish
 ### Build Process
 1. **Frontend Build**: Vite builds React app to `dist/public`
 2. **Backend Build**: ESBuild bundles server code to `dist/index.js`
-3. **Deployment**: Single container with both static files and API server
+3. **Production Start**: Custom start.js script with environment validation
+4. **Deployment**: Single container with both static files and API server
 
 ### Replit Configuration
 - **Modules**: Node.js 20, web server, PostgreSQL 16
-- **Ports**: Development on 5000, production on 80
-- **Workflows**: Automated startup with npm run dev
-- **Autoscale**: Configured for automatic scaling in production
+- **Development**: npm run dev on port 5000
+- **Production**: node start.js with built assets serving
+- **Deployment**: Autoscale with proper build/run commands
+- **Environment**: NODE_ENV=production for deployment builds
 
 ## Changelog
 
@@ -162,6 +164,7 @@ Changelog:
 - June 30, 2025. Implemented database-driven Pirkei Avot progression tracking: Added pirkei_avot_progress table with sequential daily advancement starting at 1:1, removed unused inspirational quotes functionality, created advance endpoint for progression management, ensuring deployment-persistent tracking that cycles through all 100+ authentic Sefaria references
 - June 30, 2025. Added Special Tehillim feature with categorized psalm collections: Created Special Tehillim button under Mincha and Nishmas with 26 categories (Bris milah, Cemetery, Children's success, Finding a mate, etc.), implemented clickable psalm numbers that open individual Tehillim text using existing Sefaria API integration, added Coming Soon placeholder button, updated modal store to handle selected psalm state for seamless navigation between categories and individual psalm viewing
 - June 30, 2025. Enhanced Hebrew text cleaning to remove Unicode artifacts: Added comprehensive Unicode character filtering to remove directional marks, zero-width spaces, geometric shapes, and special block characters that were appearing as rectangular boxes in Hebrew text, applied to both Tehillim and Pirkei Avot Sefaria API responses for clean authentic text display
+- June 30, 2025. Fixed production deployment configuration: Created production start script (start.js), updated server to serve static files in production mode, added proper build verification, created deployment scripts (deploy.sh, build-production.sh), configured replit.deployment.toml with correct build/run commands, removed 'dev' dependency from production deployment, set NODE_ENV=production environment variable, implemented proper port configuration for production hosting
 ```
 
 ## User Preferences
