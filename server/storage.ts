@@ -232,15 +232,18 @@ export class DatabaseStorage implements IStorage {
     const selectedRef = validRefs[refIndex];
 
     try {
-      // Fetch from Sefaria API using the exact reference format
-      const url = `https://www.sefaria.org/api/texts/Pirkei_Avot.${selectedRef}`;
-      const response = await serverAxiosClient.get(url);
+      // Try to fetch specific verse first
+      const specificUrl = `https://www.sefaria.org/api/texts/Pirkei_Avot.${selectedRef}`;
+      const response = await serverAxiosClient.get(specificUrl);
       const data = response.data;
       
-      // Extract English text
       let text = '';
-      if (data.text && Array.isArray(data.text) && data.text.length > 0) {
-        text = data.text[0];
+      let actualSourceRef = selectedRef;
+      
+      // Handle the response based on its structure
+      if (data.text && Array.isArray(data.text)) {
+        // Get the text content
+        text = data.text[0] || '';
       } else if (typeof data.text === 'string') {
         text = data.text;
       }
@@ -250,37 +253,39 @@ export class DatabaseStorage implements IStorage {
       }
       
       // Clean up any HTML formatting
-      const cleanText = text
+      let cleanText = text
         .replace(/<[^>]*>/gi, '')  // Remove HTML tags
         .replace(/&[a-zA-Z]+;/gi, '')  // Remove HTML entities
         .trim();
       
-      // Extract the actual reference from the API response for accuracy
-      let sourceRef = selectedRef;  // fallback to what we requested
-      let actualChapter = parseInt(selectedRef.split('.')[0]);
+      // If the text appears to contain multiple teachings, extract only the first complete one
+      // Look for patterns like "Name said:" followed by complete thoughts ending with periods
+      const multipleTeachingsPattern = /([^.]+(?:said|says):[^.]*\.)\s*([^.]+(?:said|says):)/;
+      const match = cleanText.match(multipleTeachingsPattern);
       
-      // The API returns refs in format like "Pirkei Avot 4:12" - extract the numbers
+      if (match) {
+        // Extract just the first teaching
+        cleanText = match[1].trim();
+      }
+      
+      // Verify the reference matches the content by checking if the API's ref field matches our request
       if (data.ref) {
-        const refMatch = data.ref.match(/Pirkei Avot (\d+):(\d+)/);
-        if (refMatch) {
-          sourceRef = `${refMatch[1]}.${refMatch[2]}`;
-          actualChapter = parseInt(refMatch[1]);
+        const apiRefMatch = data.ref.match(/Pirkei Avot (\d+):(\d+)/);
+        if (apiRefMatch) {
+          const apiRef = `${apiRefMatch[1]}.${apiRefMatch[2]}`;
+          // If API ref doesn't match what we requested, use the API ref as it's more accurate
+          if (apiRef !== selectedRef) {
+            actualSourceRef = apiRef;
+          }
         }
       }
       
-      // Also check sectionRef if ref is not available
-      if (!data.ref && data.sectionRef) {
-        const sectionMatch = data.sectionRef.match(/Pirkei Avot (\d+):(\d+)/);
-        if (sectionMatch) {
-          sourceRef = `${sectionMatch[1]}.${sectionMatch[2]}`;
-          actualChapter = parseInt(sectionMatch[1]);
-        }
-      }
+      const actualChapter = parseInt(actualSourceRef.split('.')[0]);
       
       return {
         text: cleanText,
         chapter: actualChapter,
-        source: sourceRef  // Use the API's verified reference
+        source: actualSourceRef
       };
     } catch (error) {
       console.error('Error fetching from Sefaria API:', error);
