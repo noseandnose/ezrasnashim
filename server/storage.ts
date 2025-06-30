@@ -237,9 +237,6 @@ export class DatabaseStorage implements IStorage {
       const response = await serverAxiosClient.get(specificUrl);
       const data = response.data;
       
-      console.log(`DEBUG: Requested ${selectedRef}, API returned ref: ${data.ref}`);
-      console.log(`DEBUG: Raw text preview: ${JSON.stringify(data.text).substring(0, 100)}...`);
-      
       let text = '';
       let actualSourceRef = selectedRef;
       
@@ -261,12 +258,9 @@ export class DatabaseStorage implements IStorage {
         .replace(/&[a-zA-Z]+;/gi, '')  // Remove HTML entities
         .trim();
       
-      console.log(`DEBUG: Clean text preview: ${cleanText.substring(0, 50)}...`);
-      
       // Check the full text for content identification BEFORE any truncation
       // Ben Zoma's famous "Who is wise?" teaching is specifically from 4:1
       if (cleanText.includes("Ben Zoma said: Who is wise?")) {
-        console.log('DEBUG: Detected Ben Zoma teaching, correcting source to 4.1');
         actualSourceRef = "4.1";
         // Extract just Ben Zoma's complete teaching - look for the full teaching until next name
         const benZomaMatch = cleanText.match(/(Ben Zoma said: Who is wise\?[^.]*\.)/);
@@ -276,7 +270,6 @@ export class DatabaseStorage implements IStorage {
       }
       // Ben Azzai's teaching about commandments is from 4:2  
       else if (cleanText.includes("Ben Azzai said: Be quick in performing")) {
-        console.log('DEBUG: Detected Ben Azzai teaching, correcting source to 4.2');
         actualSourceRef = "4.2";
         const benAzzaiMatch = cleanText.match(/(Ben Azzai said: Be quick in performing[^.]*\.)/);
         if (benAzzaiMatch) {
@@ -293,8 +286,6 @@ export class DatabaseStorage implements IStorage {
           cleanText = match[1].trim();
         }
       }
-      
-      console.log(`DEBUG: Final source: ${actualSourceRef}, text: ${cleanText.substring(0, 30)}...`);
       
       const actualChapter = parseInt(actualSourceRef.split('.')[0]);
       

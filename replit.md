@@ -157,6 +157,7 @@ Changelog:
 - June 29, 2025. Fixed Pirkei Avot API display issue: Updated Torah section to use correct backend URL (port 5000) instead of frontend port (5173) for Pirkei Avot API calls, ensuring daily inspiration text displays properly in Torah section
 - June 29, 2025. Integrated David Libre Hebrew font throughout application: Added Google Fonts import for David Libre font family in HTML head, created CSS classes (david-libre-regular, david-libre-medium, david-libre-bold) with proper RTL direction, updated all Hebrew text components (Tehillim, prayers, women's prayers, Nishmas) to use authentic David Libre typography instead of generic font-hebrew class
 - June 30, 2025. Fixed donation processing error: Resolved "unable to process donation" issue by removing Apple Pay and Google Pay from Stripe payment method types, keeping only standard card payments until these features are activated in Stripe dashboard, ensuring all donation functionality works correctly
+- June 30, 2025. Fixed Pirkei Avot source accuracy mismatch: Implemented content recognition system to correctly map teachings to their authentic sources (e.g., Ben Zoma's "Who is wise?" teaching now correctly shows as 4:1 instead of incorrect day-calculated references), ensuring displayed sources match actual Sefaria content authenticity
 ```
 
 ## User Preferences
