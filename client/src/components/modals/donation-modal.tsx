@@ -21,7 +21,7 @@ export default function DonationModal() {
       const response = await apiRequest('POST', '/api/create-payment-intent', {
         amount: donationAmount
       });
-      return response.json();
+      return response.data;
     },
     onSuccess: (data) => {
       // Complete tzedaka task when donation is initiated
