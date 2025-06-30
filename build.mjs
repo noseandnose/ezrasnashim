@@ -18,8 +18,15 @@ const pathResolverPlugin = {
   setup(build) {
     // Resolve @shared/* to ./shared/*
     build.onResolve({ filter: /^@shared\// }, (args) => {
-      const path = args.path.replace('@shared/', './shared/');
-      return { path: resolve(__dirname, path) };
+      const relativePath = args.path.replace('@shared/', 'shared/');
+      const fullPath = resolve(__dirname, relativePath);
+      
+      // Check if it's a TypeScript file and add .ts extension if needed
+      if (!fullPath.endsWith('.ts') && !fullPath.endsWith('.js')) {
+        return { path: fullPath + '.ts' };
+      }
+      
+      return { path: fullPath };
     });
   },
 };
@@ -36,14 +43,23 @@ async function buildServer() {
       format: 'esm',
       outdir: 'dist',
       external: [
-        // Keep node modules external
+        // Keep all node modules external to avoid bundling issues
+        'express',
+        'cors',
+        'pg',
+        'drizzle-orm',
+        'axios',
+        'stripe',
         'pg-native',
         'fsevents'
       ],
       plugins: [pathResolverPlugin],
       sourcemap: false,
-      minify: false, // Keep readable for debugging
+      minify: false,
       treeShaking: true,
+      banner: {
+        js: 'import { createRequire } from "module"; const require = createRequire(import.meta.url);'
+      },
     });
 
     console.log('✅ Server build completed successfully');
