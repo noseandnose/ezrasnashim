@@ -54,37 +54,44 @@ app.use((req, res, next) => {
   next();
 });
 
-// Configure the app
-const server = await registerRoutes(app);
+// Initialize server configuration
+async function initializeServer() {
+  const server = await registerRoutes(app);
 
-// Serve static files in production
-if (process.env.NODE_ENV === 'production') {
-  const publicPath = path.join(__dirname, 'public');
-  app.use(express.static(publicPath));
-  
-  // Serve React app for any non-API routes
-  app.get('*', (req, res) => {
-    if (!req.path.startsWith('/api')) {
-      res.sendFile(path.join(publicPath, 'index.html'));
-    }
+  // Serve static files in production
+  if (process.env.NODE_ENV === 'production') {
+    const publicPath = path.join(__dirname, 'public');
+    app.use(express.static(publicPath));
+    
+    // Serve React app for any non-API routes
+    app.get('*', (req: Request, res: Response) => {
+      if (!req.path.startsWith('/api')) {
+        res.sendFile(path.join(publicPath, 'index.html'));
+      }
+    });
+  }
+
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+
+    res.status(status).json({ message });
+    throw err;
   });
+
+  // Start server only in development mode
+  if (process.env.NODE_ENV !== 'production') {
+    const port = parseInt(process.env.PORT ?? '3000');
+    server.listen(port, () => {
+      console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${port}`);
+    });
+  }
+
+  return server;
 }
 
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  const status = err.status || err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
-
-  res.status(status).json({ message });
-  throw err;
-});
+// Initialize the server
+initializeServer().catch(console.error);
 
 // Export the configured app for production use
 export { app };
-
-// Start server only in development mode
-if (process.env.NODE_ENV !== 'production') {
-  const port = parseInt(process.env.PORT ?? '3000');
-  server.listen(port, () => {
-    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${port}`);
-  });
-}
