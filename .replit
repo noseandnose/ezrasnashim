@@ -42,5 +42,5 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "docker compose -f replit.docker-compose.yml up"
+args = "npm run dev"
 waitForPort = 5000
