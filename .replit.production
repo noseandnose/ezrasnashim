@@ -1,0 +1,11 @@
+modules = ["nodejs-20", "web", "postgresql-16"]
+run = "node production.js"
+hidden = [".config", ".git", "generated-icon.png", "node_modules"]
+
+[nix]
+channel = "stable-24_05"
+packages = ["nano"]
+
+[[ports]]
+localPort = 5000
+externalPort = 5000

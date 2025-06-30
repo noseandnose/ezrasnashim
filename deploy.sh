@@ -1,35 +1,37 @@
 #!/bin/bash
 
-# Production deployment script for Ezras Nashim
-echo "🚀 Starting production deployment for Ezras Nashim..."
+echo "🚀 Ezras Nashim Deployment Script"
+echo "================================="
 
 # Set production environment
 export NODE_ENV=production
 export PORT=5000
 
-# Clean previous builds
-echo "🧹 Cleaning previous builds..."
-rm -rf dist/
+echo "📦 Building frontend..."
+npm run build
 
-# Build frontend and backend
-echo "🔨 Building application..."
-vite build && node build.mjs
-
-# Verify build artifacts
-if [ ! -f "dist/index.js" ]; then
-    echo "❌ Backend build failed - dist/index.js not found"
+if [ $? -ne 0 ]; then
+    echo "❌ Frontend build failed"
     exit 1
 fi
 
-if [ ! -f "dist/public/index.html" ]; then
-    echo "❌ Frontend build failed - dist/public/index.html not found"
+echo "📦 Building backend..."
+node build.mjs
+
+if [ $? -ne 0 ]; then
+    echo "❌ Backend build failed"
     exit 1
 fi
 
 echo "✅ Build completed successfully"
-echo "📦 Frontend: dist/public/"
-echo "📦 Backend: dist/index.js"
+echo ""
+echo "🔍 Verifying deployment configuration..."
+node deploy-check.js
 
-# Start production server
-echo "🌐 Starting production server..."
-node start.js
+echo ""
+echo "🎯 Deployment ready!"
+echo "The application can now be deployed using:"
+echo "  • replit.deployment.toml configuration"
+echo "  • Production entry point: node production.js"
+echo "  • Environment: NODE_ENV=production"
+echo "  • Port: 5000"
