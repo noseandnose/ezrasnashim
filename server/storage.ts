@@ -240,39 +240,19 @@ export class DatabaseStorage implements IStorage {
         .replace(/&[a-zA-Z]+;/gi, '')  // Remove HTML entities
         .trim();
       
-      // Check the full text for content identification BEFORE any truncation
-      // Ben Zoma's famous "Who is wise?" teaching is specifically from 4:1
-      if (cleanText.includes("Ben Zoma said: Who is wise?")) {
-        actualSourceRef = "4.1";
-        // Extract just Ben Zoma's complete teaching - look for the full teaching until next name
-        const benZomaMatch = cleanText.match(/(Ben Zoma said: Who is wise\?[^.]*\.)/);
-        if (benZomaMatch) {
-          cleanText = benZomaMatch[1];
-        }
-      }
-      // Ben Azzai's teaching about commandments is from 4:2  
-      else if (cleanText.includes("Ben Azzai said: Be quick in performing")) {
-        actualSourceRef = "4.2";
-        const benAzzaiMatch = cleanText.match(/(Ben Azzai said: Be quick in performing[^.]*\.)/);
-        if (benAzzaiMatch) {
-          cleanText = benAzzaiMatch[1];
-        }
-      }
-      // Otherwise, try to extract the first complete teaching and keep original reference
-      else {
-        const multipleTeachingsPattern = /([^.]+(?:said|says):[^.]*\.)/;
-        const match = cleanText.match(multipleTeachingsPattern);
-        
-        if (match) {
-          // Extract just the first teaching
-          cleanText = match[1].trim();
-        }
+      // Use the actual reference from database - no content identification needed
+      actualSourceRef = selectedRef;
+      
+      // Extract the first complete teaching if there are multiple in the response
+      const multipleTeachingsPattern = /([^.]+(?:said|says):[^.]*\.)/;
+      const match = cleanText.match(multipleTeachingsPattern);
+      
+      if (match) {
+        // Extract just the first teaching
+        cleanText = match[1].trim();
       }
       
       const actualChapter = parseInt(actualSourceRef.split('.')[0]);
-      
-      // After successfully fetching and displaying content, advance to next reference
-      await this.getNextPirkeiAvotReference();
       
       return {
         text: cleanText,
