@@ -28,7 +28,6 @@ export const parshaVorts = pgTable("parsha_vorts", {
   title: text("title").notNull(),
   content: text("content"), // Written vort content
   audioUrl: text("audio_url").notNull(), // Audio is primary
-  duration: text("duration"),
   speaker: text("speaker").notNull(),
   source: text("source"), // Sefer/reference
   summary: text("summary"), // Brief description
@@ -184,7 +183,6 @@ export const dailyHalacha = pgTable("daily_halacha", {
   content: text("content").notNull(),
   source: text("source"), // Rabbi or book source
   audioUrl: text("audio_url"), // Optional audio content
-  duration: text("duration"), // Audio duration if available
   speaker: text("speaker"),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -196,7 +194,6 @@ export const dailyEmuna = pgTable("daily_emuna", {
   content: text("content").notNull(),
   source: text("source"),
   audioUrl: text("audio_url"),
-  duration: text("duration"),
   speaker: text("speaker"),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -208,7 +205,6 @@ export const dailyChizuk = pgTable("daily_chizuk", {
   content: text("content").notNull(),
   source: text("source"),
   audioUrl: text("audio_url"),
-  duration: text("duration"),
   speaker: text("speaker"),
   speakerName: text("speaker_name"),
   speakerWebsite: text("speaker_website"),
