@@ -49,9 +49,6 @@ export interface DailyCompletionState {
   completeTask: (task: 'torah' | 'tefilla' | 'tzedaka') => void;
   resetDaily: () => void;
   checkAndShowCongratulations: () => boolean;
-  // GAMIFICATION TEST - Can be easily removed
-  onTaskComplete?: (task: 'torah' | 'tefilla' | 'tzedaka') => void;
-  setGamificationCallbacks?: (callbacks: { onTaskComplete: (task: 'torah' | 'tefilla' | 'tzedaka') => void }) => void;
 }
 
 export const useDailyCompletionStore = create<DailyCompletionState>((set, get) => {
@@ -80,15 +77,6 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
           [`${task}Completed`]: true,
         };
         set(newState);
-        
-        // GAMIFICATION TEST - Trigger rewards and celebrations
-        if (state.onTaskComplete) {
-          state.onTaskComplete(task);
-        }
-      },
-      // GAMIFICATION TEST - Set callback functions
-      setGamificationCallbacks: (callbacks) => {
-        set({ onTaskComplete: callbacks.onTaskComplete });
       },
       resetDaily: () => {
         const newState = {
