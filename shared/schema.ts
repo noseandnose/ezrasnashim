@@ -92,6 +92,7 @@ export const tehillimProgress = pgTable("tehillim_progress", {
 export const globalTehillimProgress = pgTable("global_tehillim_progress", {
   id: serial("id").primaryKey(),
   currentPerek: integer("current_perek").default(1).notNull(),
+  currentNameId: integer("current_name_id"), // Reference to assigned name for current perek
   lastUpdated: timestamp("last_updated").defaultNow(),
   completedBy: text("completed_by"), // Track who completed it
 });

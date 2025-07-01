@@ -169,9 +169,11 @@ export class DatabaseStorage implements IStorage {
   async getGlobalTehillimProgress(): Promise<GlobalTehillimProgress> {
     const [progress] = await db.select().from(globalTehillimProgress).limit(1);
     if (!progress) {
+      // Assign a random name for the initial perek
+      const initialName = await this.getRandomNameForInitialAssignment();
       const [newProgress] = await db.insert(globalTehillimProgress).values({
         currentPerek: 1,
-
+        currentNameId: initialName?.id || null,
         completedBy: null
       }).returning();
       return newProgress;
@@ -185,10 +187,13 @@ export class DatabaseStorage implements IStorage {
       // Calculate next perek (1-150, cycling)
       const nextPerek = currentPerek >= 150 ? 1 : currentPerek + 1;
       
+      // Assign a new random name for the next perek
+      const nextName = await this.getRandomNameForInitialAssignment();
+      
       const [updated] = await db.update(globalTehillimProgress)
         .set({
           currentPerek: nextPerek,
-
+          currentNameId: nextName?.id || null,
           lastUpdated: new Date(),
           completedBy: completedBy || null
         })
@@ -200,6 +205,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRandomNameForPerek(): Promise<TehillimName | undefined> {
+    // First get the current progress to see if there's already an assigned name
+    const progress = await this.getGlobalTehillimProgress();
+    if (progress.currentNameId) {
+      // Return the assigned name for this perek
+      const [assignedName] = await db.select().from(tehillimNames).where(eq(tehillimNames.id, progress.currentNameId));
+      if (assignedName) {
+        return assignedName;
+      }
+    }
+    
+    // If no assigned name or name no longer exists, return null (no random cycling)
+    return undefined;
+  }
+
+  async getRandomNameForInitialAssignment(): Promise<TehillimName | undefined> {
     await this.cleanupExpiredNames();
     const activeNames = await this.getActiveNames();
     if (activeNames.length === 0) return undefined;
