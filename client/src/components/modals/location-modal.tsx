@@ -22,26 +22,26 @@ export default function LocationModal({ isOpen, onClose, onLocationChange, curre
 
   // Initialize Google Maps services
   useEffect(() => {
-    if (isOpen && typeof window !== 'undefined' && window.google && window.google.maps) {
-      autocompleteService.current = new window.google.maps.places.AutocompleteService();
+    if (isOpen && typeof window !== 'undefined' && (window as any).google && (window as any).google.maps) {
+      autocompleteService.current = new (window as any).google.maps.places.AutocompleteService();
       
       // Create a temporary div for places service
       const tempDiv = document.createElement('div');
-      placesService.current = new window.google.maps.places.PlacesService(tempDiv);
+      placesService.current = new (window as any).google.maps.places.PlacesService(tempDiv);
     }
   }, [isOpen]);
 
   // Load Google Maps API
   useEffect(() => {
-    if (isOpen && !window.google) {
+    if (isOpen && !(window as any).google) {
       const script = document.createElement('script');
       script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY'}&libraries=places`;
       script.async = true;
       script.defer = true;
       script.onload = () => {
-        autocompleteService.current = new window.google.maps.places.AutocompleteService();
+        autocompleteService.current = new (window as any).google.maps.places.AutocompleteService();
         const tempDiv = document.createElement('div');
-        placesService.current = new window.google.maps.places.PlacesService(tempDiv);
+        placesService.current = new (window as any).google.maps.places.PlacesService(tempDiv);
       };
       document.head.appendChild(script);
     }
@@ -90,7 +90,7 @@ export default function LocationModal({ isOpen, onClose, onLocationChange, curre
       (place: any, status: any) => {
         setIsLoading(false);
         
-        if (status === window.google.maps.places.PlacesServiceStatus.OK && place.geometry) {
+        if (status === (window as any).google.maps.places.PlacesServiceStatus.OK && place.geometry) {
           const coordinates = {
             lat: place.geometry.location.lat(),
             lng: place.geometry.location.lng()
