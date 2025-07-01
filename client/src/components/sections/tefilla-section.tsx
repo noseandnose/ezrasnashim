@@ -1,4 +1,4 @@
-import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass } from "lucide-react";
+import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass, ArrowRight } from "lucide-react";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
 
@@ -35,11 +35,11 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
-  // Fetch current name for the perek
+  // Fetch current name for the perek - Only update when perek is completed
   const { data: currentName } = useQuery<TehillimName | null>({
     queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/current-name`).then(res => res.json()),
     queryKey: ['/api/tehillim/current-name'],
-    refetchInterval: 10000, // Refresh every 10 seconds
+    refetchInterval: false, // Disable automatic refresh - only when perek is completed
   });
 
   // Fetch all active names for count display
@@ -188,7 +188,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
     <div className="overflow-y-auto h-full pb-20">
       {/* Main Tefilla Section - Connected to top bar - Only Tehillim */}
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg -mt-1">
-        {/* Daily Tehillim Card */}
+        {/* Global Tehillim Chain Card */}
         <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-3">
@@ -196,8 +196,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
                 <Scroll className="text-white" size={20} />
               </div>
               <div>
-                <h3 className="font-serif text-lg text-warm-gray">Daily Tehillim</h3>
-                <p className="font-sans text-sm text-warm-gray/70">
+                <h3 className="font-serif text-lg text-black font-bold">Global Tehillim Chain</h3>
+                <p className="font-sans text-sm text-black/70">
                   Shared Cycle for Yeshuos
                 </p>
               </div>
@@ -275,11 +275,11 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             className="w-full bg-gradient-to-br from-ivory to-lavender/10 rounded-2xl p-4 border border-blush/15 hover:bg-white/90 transition-all duration-300"
           >
             <div className="flex items-center justify-between mb-3">
-              <h4 className="font-serif text-lg text-warm-gray">
+              <h4 className="font-serif text-lg text-black font-bold">
                 Perek {progress?.currentPerek || 1}
               </h4>
-              <div className="text-xs text-warm-gray/60 font-sans">
-                {progress?.currentPerek || 1} of 150
+              <div className="bg-blush/20 p-2 rounded-full">
+                <ArrowRight className="text-blush" size={16} strokeWidth={2} />
               </div>
             </div>
             
@@ -293,12 +293,19 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               </div>
             </div>
             
-            {/* Click Indicator Only */}
-            <div className="flex justify-center">
-              <div className="bg-blush/20 p-3 rounded-full">
-                <ChevronRight className="text-blush" size={20} strokeWidth={1.5} />
+            {/* Hebrew Preview Text */}
+            {isPreviewLoading ? (
+              <div className="bg-black/5 rounded-lg p-3 animate-pulse">
+                <div className="h-4 bg-black/10 rounded w-3/4 mb-2"></div>
+                <div className="h-4 bg-black/10 rounded w-1/2"></div>
               </div>
-            </div>
+            ) : (
+              tehillimPreview && (
+                <div className="text-sm text-black/70 heebo-regular text-right bg-white/50 rounded-lg p-3 border border-blush/10">
+                  {tehillimPreview.preview}
+                </div>
+              )
+            )}
           </button>
 
           {/* Current Name Assignment */}

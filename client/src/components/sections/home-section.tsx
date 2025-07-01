@@ -138,7 +138,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             </div>
             <div className="text-left flex-grow">
               <h3 className="font-serif text-base text-black font-bold">Daily Tefilla</h3>
-              <p className="font-sans text-xs text-black/70">Tehillim, Mincha & Prayers</p>
+              <p className="font-sans text-xs text-black/70">Global Tehillim Chain & Prayers</p>
             </div>
             {tefillaCompleted && (
               <Heart className="gradient-heart" size={18} />

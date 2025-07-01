@@ -74,8 +74,8 @@ export default function TableSection() {
     {
       id: 'parsha',
       icon: Mic,
-      title: 'Parsha Vort',
-      subtitle: parshaContent?.title || 'Weekly Vort',
+      title: 'Parsha Shiur',
+      subtitle: parshaContent?.title || 'Weekly Shiur',
       color: 'text-peach',
       extraIcon: Play
     }

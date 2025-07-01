@@ -164,18 +164,18 @@ export default function TableModals() {
         </DialogContent>
       </Dialog>
 
-      {/* Parsha Vort Modal */}
+      {/* Parsha Shiur Modal */}
       <Dialog open={activeModal === 'parsha'} onOpenChange={() => closeModal()}>
         <DialogContent>
           <DialogHeader className="text-center">
-            <DialogTitle className="text-lg font-semibold mb-2">Parsha Vort</DialogTitle>
+            <DialogTitle className="text-lg font-semibold mb-2">Parsha Shiur</DialogTitle>
             <p className="text-sm text-gray-600 mb-4">
               {parshaContent?.title || "This Week's Torah Portion"}
             </p>
           </DialogHeader>
           
           <AudioPlayer 
-            title={parshaContent?.title || "Parsha Vort"}
+            title={parshaContent?.title || "Parsha Shiur"}
             duration="3:15"
             audioUrl={parshaContent?.audioUrl || ""}
           />
