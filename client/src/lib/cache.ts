@@ -18,13 +18,15 @@ class MemoryCache<T> {
     // Remove oldest entries if cache is full
     if (this.cache.size >= this.maxSize) {
       const oldestKey = this.cache.keys().next().value;
-      this.cache.delete(oldestKey);
+      if (oldestKey) {
+        this.cache.delete(oldestKey);
+      }
     }
 
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
-      ttl
+      ttl: ttl || 5 * 60 * 1000
     });
   }
 
@@ -131,7 +133,7 @@ export async function cachedFetch<T>(
     throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
   }
 
-  const data = await response.json();
+  const data: T = await response.json();
   cacheInstance.set(cacheKey, data, ttl);
   return data;
 }

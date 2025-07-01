@@ -25,13 +25,20 @@ function Router() {
   useGeolocation();
   useJewishTimes();
   
+  // Initialize cache system
+  useEffect(() => {
+    initializeCache();
+  }, []);
+  
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/donate" component={Donate} />
-      <Route path="/checkout" component={Checkout} />
-      <Route component={NotFound} />
-    </Switch>
+    <Suspense fallback={<LoadingSpinner />}>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/donate" component={Donate} />
+        <Route path="/checkout" component={Checkout} />
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 

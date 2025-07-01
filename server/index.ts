@@ -3,11 +3,45 @@ import { registerRoutes } from "./routes.js";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
+import compression from "compression";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+// Enable compression for all responses
+app.use(compression({
+  threshold: 1024, // Only compress responses larger than 1KB
+  level: 6, // Compression level (1-9, 6 is good balance)
+  filter: (req, res) => {
+    // Don't compress if the request includes a Cache-Control: no-transform directive
+    if (req.headers['cache-control'] && req.headers['cache-control'].includes('no-transform')) {
+      return false;
+    }
+    return compression.filter(req, res);
+  }
+}));
+
+// Security and performance headers
+app.use((req, res, next) => {
+  // Security headers
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  
+  // Performance headers for static assets
+  if (req.url.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$/)) {
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  }
+  
+  // API responses get short cache
+  if (req.url.startsWith('/api/')) {
+    res.setHeader('Cache-Control', 'public, max-age=300'); // 5 minutes
+  }
+  
+  next();
+});
 
 app.use(
   cors({
@@ -21,8 +55,10 @@ app.use(
     credentials: true,
   }),
 );
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+
+// Increase JSON limit for large payloads
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
 app.use((req, res, next) => {
   const start = Date.now();
