@@ -218,21 +218,12 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
       <div className="space-y-4">
         <div className="flex justify-between text-sm font-medium">
           <span>{currentTime}</span>
-          <span>{duration}</span>
+          <span>{isLoading ? duration : actualDuration}</span>
         </div>
         <div className="audio-progress-bar">
           <div 
             className="bg-white bg-opacity-20 rounded-full audio-progress-track w-full"
-            onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const clickX = e.clientX - rect.left;
-              const newProgress = (clickX / rect.width) * 100;
-              setProgress(Math.max(0, Math.min(100, newProgress)));
-              
-              const totalSeconds = parseDuration(duration);
-              const newCurrentSeconds = Math.floor((newProgress / 100) * totalSeconds);
-              setCurrentTime(formatTime(newCurrentSeconds));
-            }}
+            onClick={handleProgressClick}
           >
             <div 
               className="audio-progress h-full rounded-full transition-all duration-100 relative" 

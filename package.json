@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@babel/traverse": "^7.27.7",
+    "@googlemaps/js-api-loader": "^1.16.10",
     "@hookform/resolvers": "^3.10.0",
     "@jridgewell/trace-mapping": "^0.3.25",
     "@neondatabase/serverless": "^0.10.4",
