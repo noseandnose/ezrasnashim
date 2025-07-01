@@ -1,4 +1,4 @@
-import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass, ArrowRight } from "lucide-react";
+import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass, ArrowRight, Baby, HeartHandshake, Briefcase, GraduationCap, Users, Stethoscope, DollarSign, UserCheck, Smile } from "lucide-react";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
 
@@ -19,6 +19,39 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   const { openModal } = useModalStore();
   const { tefillaCompleted } = useDailyCompletionStore();
   const { data: times, isLoading } = useJewishTimes();
+
+  // Helper functions for reason icons and short text
+  const getReasonIcon = (reason: string) => {
+    const iconMap: Record<string, JSX.Element> = {
+      'health': <Stethoscope size={12} className="text-red-500" />,
+      'shidduch': <HeartHandshake size={12} className="text-pink-500" />,
+      'children': <Baby size={12} className="text-blue-500" />,
+      'parnassa': <DollarSign size={12} className="text-green-500" />,
+      'success': <Star size={12} className="text-yellow-500" />,
+      'family': <Users size={12} className="text-purple-500" />,
+      'education': <GraduationCap size={12} className="text-indigo-500" />,
+      'peace': <Smile size={12} className="text-teal-500" />,
+      'general': <Heart size={12} className="text-blush" />
+    };
+    
+    return iconMap[reason] || iconMap['general'];
+  };
+
+  const getReasonShort = (reason: string) => {
+    const shortMap: Record<string, string> = {
+      'health': 'Health',
+      'shidduch': 'Match',
+      'children': 'Kids',
+      'parnassa': 'Income',
+      'success': 'Success',
+      'family': 'Family',
+      'education': 'Study',
+      'peace': 'Peace',
+      'general': 'Prayer'
+    };
+    
+    return shortMap[reason] || 'Prayer';
+  };
   const queryClient = useQueryClient();
   
   // Local state management
@@ -281,21 +314,6 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
                 <ArrowRight className="text-white" size={14} strokeWidth={2} />
               </div>
             </div>
-
-            {/* Name assignment with reason for davening */}
-            {currentName && (
-              <div className="mb-2 p-2 bg-white/60 rounded-xl border border-blush/10">
-                <div className="flex items-center space-x-1 mb-1">
-                  <User size={12} className="text-blush" />
-                  <span className="font-sans text-sm text-black font-medium heebo-regular text-right" dir="rtl">
-                    {currentName.hebrewName}
-                  </span>
-                </div>
-                <div className="text-xs text-black/70 font-sans">
-                  <span className="font-medium">Reason:</span> {currentName.reasonEnglish || currentName.reason}
-                </div>
-              </div>
-            )}
             
             {/* Progress Bar */}
             <div className="mb-2">
@@ -306,6 +324,26 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
                 ></div>
               </div>
             </div>
+
+            {/* Name assignment with reason icon */}
+            {currentName && (
+              <div className="mb-2 p-2 bg-white/60 rounded-xl border border-blush/10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-1">
+                    <User size={12} className="text-blush" />
+                    <span className="font-sans text-sm text-black font-medium heebo-regular text-right" dir="rtl">
+                      {currentName.hebrewName}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    {getReasonIcon(currentName.reason)}
+                    <span className="text-xs text-black/60 font-sans">
+                      {getReasonShort(currentName.reason)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
             
             {/* Hebrew Preview Text - Compact */}
             {isPreviewLoading ? (
