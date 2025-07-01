@@ -1026,10 +1026,12 @@ function IndividualTehillimModal() {
           completeTask('tefilla');
           setShowHeartExplosion(true);
           
-          // Check for daily completion after a short delay
+          // Check for daily completion and redirect to home after a short delay
           setTimeout(() => {
             checkAndShowCongratulations();
             closeModal();
+            // Navigate to home page to see the heart explosion
+            window.location.hash = '#/';
           }, 2000);
         }} 
         className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"

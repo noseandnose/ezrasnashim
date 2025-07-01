@@ -13,8 +13,10 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState("0:00");
+  const [actualDuration, setActualDuration] = useState(duration);
   const [playbackSpeed, setPlaybackSpeed] = useState("1");
   const [audioError, setAudioError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const audioRef = useRef<HTMLAudioElement>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout>();
 
@@ -93,10 +95,11 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
 
     const handleLoadedMetadata = () => {
       setAudioError(false);
+      setIsLoading(false);
       if (audio.duration) {
-        // Update duration if it differs from provided duration
-        const actualDuration = formatTime(Math.floor(audio.duration));
-        // Could update duration state here if needed
+        // Update duration with actual file duration
+        const actualDurationTime = formatTime(Math.floor(audio.duration));
+        setActualDuration(actualDurationTime);
       }
     };
 

@@ -1,4 +1,4 @@
-import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass, ArrowRight, Baby, HeartHandshake, Briefcase, GraduationCap, Users, Stethoscope, DollarSign, UserCheck, Smile } from "lucide-react";
+import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass, ArrowRight, Baby, HeartHandshake, Briefcase, GraduationCap, Users, Stethoscope, DollarSign, UserCheck, Smile, Zap, TrendingUp, Crown } from "lucide-react";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
 
@@ -161,15 +161,50 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
     completePerekMutation.mutate();
   };
 
-  // Reason options for the dropdown
+  // Reason options for the dropdown with proper icons
   const reasonOptions = [
-    { value: "רפואה שלמה", label: "רפואה שלמה (Complete Healing)", english: "Complete Healing" },
-    { value: "זרע של קיימא", label: "זרע של קיימא (Children)", english: "Children" },
-    { value: "שידוך הגון", label: "שידוך הגון (Good Match)", english: "Good Match" },
-    { value: "פרנסה טובה", label: "פרנסה טובה (Good Livelihood)", english: "Good Livelihood" },
-    { value: "הצלחה", label: "הצלחה (Success)", english: "Success" },
-    { value: "שלום בית", label: "שלום בית (Peace in Home)", english: "Peace in Home" },
-    { value: "עליית נשמה", label: "עליית נשמה (Soul Elevation)", english: "Soul Elevation" }
+    { 
+      value: "health", 
+      label: "רפואה שלמה (Complete Healing)", 
+      english: "Health",
+      icon: <Stethoscope size={16} className="text-red-500" />
+    },
+    { 
+      value: "children", 
+      label: "זרע של קיימא (Children)", 
+      english: "Children",
+      icon: <Baby size={16} className="text-blue-500" />
+    },
+    { 
+      value: "shidduch", 
+      label: "שידוך הגון (Good Match)", 
+      english: "Match",
+      icon: <Heart size={16} className="text-pink-500" />
+    },
+    { 
+      value: "parnassa", 
+      label: "פרנסה טובה (Good Livelihood)", 
+      english: "Income",
+      icon: <DollarSign size={16} className="text-green-500" />
+    },
+    { 
+      value: "success", 
+      label: "הצלחה (Success)", 
+      english: "Success",
+      icon: <TrendingUp size={16} className="text-yellow-500" />
+    },
+    { 
+      value: "family", 
+      label: "שלום בית (Peace in Home)", 
+      english: "Family",
+      icon: <Users size={16} className="text-purple-500" />
+    },
+    { 
+      value: "peace", 
+      label: "עליית נשמה (Soul Elevation)", 
+      english: "Peace",
+      icon: <Smile size={16} className="text-teal-500" />
+    }
   ];
 
   const getTehillimText = (perekNumber: number, isHebrew: boolean) => {
@@ -273,7 +308,10 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
                 <SelectContent className="bg-white">
                   {reasonOptions.map((option) => (
                     <SelectItem key={option.value} value={option.value} className="bg-white hover:bg-gray-50">
-                      {option.label}
+                      <div className="flex items-center space-x-2">
+                        {option.icon}
+                        <span>{option.label}</span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
