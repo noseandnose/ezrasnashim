@@ -1038,11 +1038,10 @@ function IndividualTehillimModal() {
       </Button>
       
       {/* Heart Explosion Animation */}
-      {showHeartExplosion && (
-        <HeartExplosion 
-          onComplete={() => setShowHeartExplosion(false)} 
-        />
-      )}
+      <HeartExplosion 
+        trigger={showHeartExplosion}
+        onComplete={() => setShowHeartExplosion(false)} 
+      />
     </>
   );
 }

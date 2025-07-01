@@ -272,25 +272,30 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             onClick={() => openModal('tehillim-text')}
             className="w-full bg-gradient-to-br from-ivory to-lavender/10 rounded-2xl p-3 border border-blush/15 hover:bg-white/90 transition-all duration-300"
           >
-            {/* Header with perek number and name assignment */}
+            {/* Header with perek number */}
             <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-2">
-                <h4 className="font-serif text-lg text-black font-bold">
-                  Perek {progress?.currentPerek || 1}
-                </h4>
-                {currentName && (
-                  <div className="flex items-center space-x-1">
-                    <User size={10} className="text-blush" />
-                    <span className="font-sans text-xs text-black/70 truncate max-w-[120px]">
-                      {currentName.hebrewName}
-                    </span>
-                  </div>
-                )}
-              </div>
+              <h4 className="font-serif text-lg text-black font-bold">
+                Perek {progress?.currentPerek || 1}
+              </h4>
               <div className="bg-gradient-feminine p-2 rounded-full">
                 <ArrowRight className="text-white" size={14} strokeWidth={2} />
               </div>
             </div>
+
+            {/* Name assignment with reason for davening */}
+            {currentName && (
+              <div className="mb-2 p-2 bg-white/60 rounded-xl border border-blush/10">
+                <div className="flex items-center space-x-1 mb-1">
+                  <User size={12} className="text-blush" />
+                  <span className="font-sans text-sm text-black font-medium heebo-regular text-right" dir="rtl">
+                    {currentName.hebrewName}
+                  </span>
+                </div>
+                <div className="text-xs text-black/70 font-sans">
+                  <span className="font-medium">Reason:</span> {currentName.reasonEnglish || currentName.reason}
+                </div>
+              </div>
+            )}
             
             {/* Progress Bar */}
             <div className="mb-2">
