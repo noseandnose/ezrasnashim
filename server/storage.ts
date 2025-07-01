@@ -215,7 +215,16 @@ export class DatabaseStorage implements IStorage {
       }
     }
     
-    // If no assigned name or name no longer exists, return null (no random cycling)
+    // If no assigned name, assign one now
+    const newName = await this.getRandomNameForInitialAssignment();
+    if (newName && progress.id) {
+      // Update the progress with this name
+      await db.update(globalTehillimProgress)
+        .set({ currentNameId: newName.id })
+        .where(eq(globalTehillimProgress.id, progress.id));
+      return newName;
+    }
+    
     return undefined;
   }
 

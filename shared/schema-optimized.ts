@@ -30,6 +30,7 @@ export const campaigns = pgTable("campaigns", {
 export const globalTehillimProgress = pgTable("global_tehillim_progress", {
   id: serial("id").primaryKey(),
   currentPerek: integer("current_perek").default(1).notNull(),
+  currentNameId: integer("current_name_id"),
   currentLanguage: text("current_language").default('english').notNull(),
   lastUpdated: timestamp("last_updated").defaultNow(),
   completedBy: text("completed_by"),
