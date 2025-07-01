@@ -267,67 +267,54 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             </div>
           )}
 
-          {/* Streamlined Perek Display */}
+          {/* Compact Perek Display */}
           <button
             onClick={() => openModal('tehillim-text')}
-            className="w-full bg-gradient-to-br from-ivory to-lavender/10 rounded-2xl p-4 border border-blush/15 hover:bg-white/90 transition-all duration-300"
+            className="w-full bg-gradient-to-br from-ivory to-lavender/10 rounded-2xl p-3 border border-blush/15 hover:bg-white/90 transition-all duration-300"
           >
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="font-serif text-lg text-black font-bold">
-                Perek {progress?.currentPerek || 1}
-              </h4>
+            {/* Header with perek number and name assignment */}
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center space-x-2">
+                <h4 className="font-serif text-lg text-black font-bold">
+                  Perek {progress?.currentPerek || 1}
+                </h4>
+                {currentName && (
+                  <div className="flex items-center space-x-1">
+                    <User size={10} className="text-blush" />
+                    <span className="font-sans text-xs text-black/70 truncate max-w-[120px]">
+                      {currentName.hebrewName}
+                    </span>
+                  </div>
+                )}
+              </div>
               <div className="bg-gradient-feminine p-2 rounded-full">
-                <ArrowRight className="text-white" size={16} strokeWidth={2} />
+                <ArrowRight className="text-white" size={14} strokeWidth={2} />
               </div>
             </div>
             
             {/* Progress Bar */}
-            <div className="mb-3">
-              <div className="w-full bg-blush/20 rounded-full h-2">
+            <div className="mb-2">
+              <div className="w-full bg-blush/20 rounded-full h-1.5">
                 <div 
-                  className="bg-gradient-feminine h-2 rounded-full transition-all duration-500 ease-out"
+                  className="bg-gradient-feminine h-1.5 rounded-full transition-all duration-500 ease-out"
                   style={{ width: `${((progress?.currentPerek || 1) / 150) * 100}%` }}
                 ></div>
               </div>
             </div>
             
-            {/* Hebrew Preview Text */}
+            {/* Hebrew Preview Text - Compact */}
             {isPreviewLoading ? (
-              <div className="bg-black/5 rounded-lg p-3 animate-pulse">
-                <div className="h-4 bg-black/10 rounded w-3/4 mb-2"></div>
-                <div className="h-4 bg-black/10 rounded w-1/2"></div>
+              <div className="bg-black/5 rounded-lg p-2 animate-pulse">
+                <div className="h-3 bg-black/10 rounded w-3/4"></div>
               </div>
             ) : (
               tehillimPreview && (
-                <div className="text-sm text-black/70 heebo-regular text-right bg-white/50 rounded-lg p-3 border border-blush/10">
+                <div className="text-xs text-black/70 heebo-regular text-right bg-white/50 rounded-lg p-2 border border-blush/10 line-clamp-2">
                   {tehillimPreview.preview}
                 </div>
               )
             )}
           </button>
-
-          {/* Current Name Assignment */}
-          <div className="mb-2">
-            {currentName ? (
-              <div className="bg-white/80 rounded-2xl p-3 border border-blush/15">
-                <div className="flex items-center space-x-2 mb-2">
-                  <div className="bg-blush/20 p-1 rounded-full">
-                    <User size={12} className="text-blush" />
-                  </div>
-                  <span className="font-serif text-sm font-medium text-warm-gray">
-                    Davening For: {currentName.hebrewName}
-                  </span>
-                </div>
-                <div className="text-xs text-warm-gray/70 font-sans">
-                  {currentName.reasonEnglish || currentName.reason}
-                </div>
-              </div>
-            ) : (
-              <div className="text-sm text-warm-gray/60 text-center py-3 font-sans">
-                Add a name to dedicate this perek
-              </div>
-            )}
-          </div>
 
         </div>
 

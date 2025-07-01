@@ -955,8 +955,10 @@ function SpecialTehillimModal() {
 // Individual Tehillim Modal Component
 function IndividualTehillimModal() {
   const { closeModal, selectedPsalm } = useModalStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
   const [fontSize, setFontSize] = useState(16);
+  const [showHeartExplosion, setShowHeartExplosion] = useState(false);
 
   const { data: tehillimText, isLoading } = useQuery({
     queryKey: ['/api/tehillim/text', selectedPsalm, language],
@@ -1007,9 +1009,9 @@ function IndividualTehillimModal() {
             <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
           </div>
         ) : (
-          <div className="text-center">
+          <div className={language === 'hebrew' ? 'text-right' : 'text-left'}>
             <div
-              className={`${language === 'hebrew' ? 'heebo-regular text-right' : 'font-english'} leading-relaxed`}
+              className={`${language === 'hebrew' ? 'heebo-regular text-right' : 'font-english text-left'} leading-relaxed`}
               style={{ fontSize: `${fontSize}px` }}
             >
               {tehillimText?.text || `Psalm ${selectedPsalm} text loading...`}
