@@ -197,9 +197,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               </div>
               <div>
                 <h3 className="font-serif text-lg text-black font-bold">Global Tehillim Chain</h3>
-                <p className="font-sans text-sm text-black/70">
-                  Shared Cycle for Yeshuos
-                </p>
+
               </div>
             </div>
             <div className="flex items-center space-x-2">
@@ -278,8 +276,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               <h4 className="font-serif text-lg text-black font-bold">
                 Perek {progress?.currentPerek || 1}
               </h4>
-              <div className="bg-blush/20 p-2 rounded-full">
-                <ArrowRight className="text-blush" size={16} strokeWidth={2} />
+              <div className="bg-gradient-feminine p-2 rounded-full">
+                <ArrowRight className="text-white" size={16} strokeWidth={2} />
               </div>
             </div>
             
