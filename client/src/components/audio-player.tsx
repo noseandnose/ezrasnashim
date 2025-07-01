@@ -1,8 +1,7 @@
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { debounce } from "@/lib/performance";
 
 interface AudioPlayerProps {
   title: string;
@@ -86,13 +85,13 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
       setCurrentTime("0:00");
     };
 
-    const handleTimeUpdate = useCallback(debounce(() => {
+    const handleTimeUpdate = () => {
       if (audio && audio.duration && !isNaN(audio.duration)) {
         const progressPercent = (audio.currentTime / audio.duration) * 100;
         setProgress(progressPercent);
         setCurrentTime(formatTime(Math.floor(audio.currentTime)));
       }
-    }, 100), [audio]);
+    };
 
     const handleLoadedMetadata = () => {
       setAudioError(false);
