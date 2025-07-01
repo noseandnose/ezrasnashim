@@ -1021,11 +1021,28 @@ function IndividualTehillimModal() {
       </div>
 
       <Button 
-        onClick={() => closeModal()} 
+        onClick={() => {
+          // Complete the tefilla task and trigger heart explosion
+          completeTask('tefilla');
+          setShowHeartExplosion(true);
+          
+          // Check for daily completion after a short delay
+          setTimeout(() => {
+            checkAndShowCongratulations();
+            closeModal();
+          }, 2000);
+        }} 
         className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
       >
-        Close
+        Complete
       </Button>
+      
+      {/* Heart Explosion Animation */}
+      {showHeartExplosion && (
+        <HeartExplosion 
+          onComplete={() => setShowHeartExplosion(false)} 
+        />
+      )}
     </>
   );
 }
