@@ -53,11 +53,29 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      retry: false,
+      staleTime: 10 * 60 * 1000, // 10 minutes
+      gcTime: 60 * 60 * 1000, // 1 hour (was cacheTime)
+      retry: (failureCount, error) => {
+        // Don't retry on 404s or 401s
+        if (error && typeof error === 'object' && 'response' in error) {
+          const status = (error as any).response?.status;
+          if (status === 404 || status === 401) return false;
+        }
+        return failureCount < 2; // Retry max 2 times
+      },
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      networkMode: 'online',
     },
     mutations: {
-      retry: false,
+      retry: (failureCount, error) => {
+        // Don't retry mutations on client errors (4xx)
+        if (error && typeof error === 'object' && 'response' in error) {
+          const status = (error as any).response?.status;
+          if (status >= 400 && status < 500) return false;
+        }
+        return failureCount < 1; // Retry max 1 time for mutations
+      },
+      networkMode: 'online',
     },
   },
 });
