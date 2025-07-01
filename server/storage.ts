@@ -19,9 +19,10 @@ import {
   type WomensPrayer, type InsertWomensPrayer,
   type DiscountPromotion, type InsertDiscountPromotion,
   type PirkeiAvotProgress, type InsertPirkeiAvotProgress
-} from "@shared/schema";
+} from "../shared/schema";
 import { db, pool } from "./db";
 import { eq, gt, lt, and } from "drizzle-orm";
+import { cleanHebrewText, memoize, withRetry, formatDate } from './typeHelpers';
 
 export interface IStorage {
   getCalendarEvents(): Promise<CalendarEvent[]>;
@@ -281,6 +282,7 @@ export class DatabaseStorage implements IStorage {
         .replace(/[\u0590-\u05CF]/g, (match) => {
           // Keep valid Hebrew characters, remove problematic ones
           const codePoint = match.codePointAt(0);
+          if (!codePoint) return '';
           if (codePoint >= 0x05D0 && codePoint <= 0x05EA) return match; // Hebrew letters
           if (codePoint >= 0x05B0 && codePoint <= 0x05BD) return match; // Hebrew points
           if (codePoint >= 0x05BF && codePoint <= 0x05C2) return match; // Hebrew points
@@ -370,6 +372,7 @@ export class DatabaseStorage implements IStorage {
         .replace(/[\u0590-\u05CF]/g, (match) => {
           // Keep valid Hebrew characters, remove problematic ones
           const codePoint = match.codePointAt(0);
+          if (!codePoint) return '';
           if (codePoint >= 0x05D0 && codePoint <= 0x05EA) return match; // Hebrew letters
           if (codePoint >= 0x05B0 && codePoint <= 0x05BD) return match; // Hebrew points
           if (codePoint >= 0x05BF && codePoint <= 0x05C2) return match; // Hebrew points
