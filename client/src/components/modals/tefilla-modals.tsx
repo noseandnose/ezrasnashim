@@ -800,6 +800,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           <IndividualTehillimModal />
         </DialogContent>
       </Dialog>
+
+      {/* Morning Brochas Modal */}
+      <MorningBrochasModal />
     </>
   );
 }
