@@ -478,66 +478,39 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       </Dialog>
       {/* Mincha Modal */}
       <Dialog open={activeModal === 'mincha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans" aria-describedby="mincha-description">
-          <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-serif font-semibold">Mincha Prayer</DialogTitle>
-            <DialogDescription className="text-xs text-warm-gray/70">
-              Afternoon prayer service with Hebrew and English options
-            </DialogDescription>
-            <div className="flex items-center justify-between mt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
-                className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
-              >
-                {language === 'hebrew' ? 'EN' : 'עב'}
-              </Button>
-              <div className="flex-1"></div>
-              <div className="flex items-center gap-0 mr-8">
-                <Type className="h-4 w-4 text-blush-pink mr-2" />
-                <button
-                  onClick={() => setFontSize(Math.max(12, fontSize - 2))}
-                  className="p-1 hover:bg-white rounded-md transition-colors"
-                >
-                  <Minus className="h-3 w-3 text-blush-pink" />
-                </button>
-                <span className="text-xs text-gray-600 min-w-[2rem] text-center px-1">{fontSize}px</span>
-                <button
-                  onClick={() => setFontSize(Math.min(24, fontSize + 2))}
-                  className="p-1 hover:bg-white rounded-md transition-colors"
-                >
-                  <Plus className="h-3 w-3 text-blush-pink" />
-                </button>
-              </div>
-            </div>
-          </DialogHeader>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] overflow-hidden font-sans" aria-describedby="mincha-description">
           <div id="mincha-description" className="sr-only">Afternoon prayer service and instructions</div>
+          
+          <StandardModalHeader 
+            title="Mincha Prayer"
+            showHebrew={language === 'hebrew'}
+            setShowHebrew={(show) => setLanguage(show ? 'hebrew' : 'english')}
+            fontSize={fontSize}
+            setFontSize={setFontSize}
+          />
 
-          {/* Prayer Content */}
-          <div className="space-y-6">
+          <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
             {isLoading ? (
-              <div className="text-center text-gray-500">Loading prayers...</div>
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
+              </div>
             ) : (
-              minchaPrayers.map((prayer) => (
-                <div key={prayer.id} className="p-4 bg-white rounded-xl border border-cream-light">
-                  <div className={language === 'hebrew' ? 'text-center' : 'text-left'}>
+              <div className="space-y-6" style={{ fontSize: `${fontSize}px` }}>
+                {minchaPrayers.map((prayer) => (
+                  <div key={prayer.id} className="border-b border-warm-gray/10 pb-4 last:border-b-0">
                     <div
-                      className={`${language === 'hebrew' ? 'david-libre-regular text-right' : 'font-english text-left'} leading-relaxed whitespace-pre-line prayer-content`}
-                      style={{ fontSize: `${fontSize}px` }}
+                      className={`${language === 'hebrew' ? 'secular-one-bold text-right' : 'text-left'} leading-relaxed whitespace-pre-line text-black`}
                       dangerouslySetInnerHTML={{
                         __html: language === 'hebrew' 
                           ? (prayer.hebrewText || '')
-                              // First remove any double newlines after headers
                               .replace(/\*\*(.*?)\*\*\n\n/g, '**$1**\n')
-                              // Then convert headers to HTML with proper spacing
                               .replace(/\*\*(.*?)\*\*/g, '<strong class="prayer-header">$1</strong>')
                           : prayer.englishTranslation
                       }}
                     />
                   </div>
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </div>
 
@@ -554,13 +527,16 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       </Dialog>
       {/* Women's Prayers Modal */}
       <Dialog open={activeModal === 'womens-prayers'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
-          <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-serif font-semibold">Women's Prayers</DialogTitle>
-            <DialogDescription className="text-xs text-warm-gray/70 mt-1">
-              Special prayers and blessings for women
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] overflow-hidden font-sans" aria-describedby="womens-prayers-description">
+          <div id="womens-prayers-description" className="sr-only">Special prayers and blessings for women</div>
+          
+          <StandardModalHeader 
+            title="Women's Prayers"
+            showHebrew={showHebrew}
+            setShowHebrew={setShowHebrew}
+            fontSize={fontSize}
+            setFontSize={setFontSize}
+          />
           
           <div className="space-y-3">
             <div 
