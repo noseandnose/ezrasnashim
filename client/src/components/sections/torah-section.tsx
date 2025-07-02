@@ -21,26 +21,6 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
 
   const torahItems = [
     {
-      id: 'halacha',
-      icon: Book,
-      title: 'Halacha',
-      subtitle: 'Jewish Law & Practice',
-      gradient: 'bg-white',
-      iconBg: 'bg-gradient-feminine',
-      iconColor: 'text-white',
-      border: 'border-blush/10'
-    },
-    {
-      id: 'emuna',
-      icon: Heart,
-      title: 'Emuna',
-      subtitle: 'Faith & Trust',
-      gradient: 'bg-white',
-      iconBg: 'bg-gradient-feminine',
-      iconColor: 'text-white',
-      border: 'border-blush/10'
-    },
-    {
       id: 'chizuk',
       icon: Play,
       title: 'Chizuk',
@@ -48,17 +28,41 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
-      border: 'border-blush/10'
+      border: 'border-blush/10',
+      contentType: 'audio'
     },
     {
-      id: 'loshon',
-      icon: Shield,
-      title: 'Loshon Horah',
-      subtitle: 'Guard Your Speech',
+      id: 'emuna',
+      icon: Play,
+      title: 'Emuna',
+      subtitle: 'Faith & Trust',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
-      border: 'border-blush/10'
+      border: 'border-blush/10',
+      contentType: 'audio'
+    },
+    {
+      id: 'halacha',
+      icon: Book,
+      title: 'Halacha',
+      subtitle: 'Jewish Law & Practice',
+      gradient: 'bg-white',
+      iconBg: 'bg-gradient-feminine',
+      iconColor: 'text-white',
+      border: 'border-blush/10',
+      contentType: 'text'
+    },
+    {
+      id: 'featured',
+      icon: Star,
+      title: 'Featured',
+      subtitle: 'Special Topics',
+      gradient: 'bg-white',
+      iconBg: 'bg-gradient-feminine',
+      iconColor: 'text-white',
+      border: 'border-blush/10',
+      contentType: 'text'
     }
   ];
 
@@ -86,12 +90,19 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
       {/* Daily Torah Content - Separate Section */}
       <div className="p-2 space-y-1">
         <div className="grid grid-cols-2 gap-2 mb-1">
-          {torahItems.map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border }) => (
+          {torahItems.map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border, contentType }) => (
             <button
               key={id}
-              className={`${gradient} rounded-3xl p-3 text-center glow-hover transition-gentle shadow-lg border ${border}`}
+              className={`${gradient} rounded-3xl p-3 text-center glow-hover transition-gentle shadow-lg border ${border} relative`}
               onClick={() => openModal(id)}
             >
+              {/* Content Type Indicator */}
+              {contentType && (
+                <div className="absolute top-2 left-2 bg-black/80 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {contentType === 'text' ? 'T' : '▶'}
+                </div>
+              )}
+              
               <div className={`${iconBg} p-2 rounded-full mx-auto mb-2 w-fit`}>
                 <Icon className={`${iconColor}`} size={18} strokeWidth={1.5} />
               </div>

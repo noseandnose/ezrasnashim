@@ -68,9 +68,9 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000
   });
 
-  const { data: loshonContent } = useQuery<{title?: string; content?: string; halachicSource?: string; practicalTip?: string; provider?: string; speakerWebsite?: string}>({
-    queryKey: ['/api/torah/loshon', today],
-    enabled: activeModal === 'loshon',
+  const { data: featuredContent } = useQuery<{title?: string; content?: string; halachicSource?: string; practicalTip?: string; provider?: string; speakerWebsite?: string}>({
+    queryKey: ['/api/torah/featured', today],
+    enabled: activeModal === 'featured',
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000
   });
@@ -274,28 +274,28 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Loshon Horah Modal */}
-      <Dialog open={activeModal === 'loshon'} onOpenChange={() => closeModal()}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="loshon-description">
+      {/* Featured Modal */}
+      <Dialog open={activeModal === 'featured'} onOpenChange={() => closeModal()}>
+        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="featured-description">
           <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-semibold mb-2">Loshon Horah</DialogTitle>
-            {loshonContent && (
-              <DialogDescription className="text-sm text-gray-600 font-sans">{loshonContent.title}</DialogDescription>
+            <DialogTitle className="text-lg font-semibold mb-2">Featured Topic</DialogTitle>
+            {featuredContent && (
+              <DialogDescription className="text-sm text-gray-600 font-sans">{featuredContent.title}</DialogDescription>
             )}
           </DialogHeader>
-          <div id="loshon-description" className="sr-only">Daily teachings about proper speech and guarding one's tongue</div>
+          <div id="featured-description" className="sr-only">Featured special topics and content</div>
           
-          {loshonContent && (
+          {featuredContent && (
             <div className="space-y-3 text-sm text-gray-700 font-sans">
               <div>
-                <p><strong>Today's Lesson:</strong> {loshonContent.content}</p>
-                {loshonContent.halachicSource && (
-                  <p className="mt-2 text-xs text-gray-500">Source: {loshonContent.halachicSource}</p>
+                <p><strong>Today's Focus:</strong> {featuredContent.content}</p>
+                {featuredContent.halachicSource && (
+                  <p className="mt-2 text-xs text-gray-500">Source: {featuredContent.halachicSource}</p>
                 )}
-                {loshonContent.practicalTip && (
+                {featuredContent.practicalTip && (
                   <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-xs font-medium text-gray-700">Practical Tip:</p>
-                    <p className="text-xs text-gray-600 mt-1">{loshonContent.practicalTip}</p>
+                    <p className="text-xs font-medium text-gray-700">Practical Insight:</p>
+                    <p className="text-xs text-gray-600 mt-1">{featuredContent.practicalTip}</p>
                   </div>
                 )}
               </div>
@@ -303,15 +303,15 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           )}
           
           {/* Thank You Section */}
-          {loshonContent?.provider && (
+          {featuredContent?.provider && (
             <div className="mt-6 p-4 bg-blue-50 rounded-xl">
               <p className="text-sm text-blue-900 font-medium mb-2">
-                🙏 Thank you to {loshonContent.provider}
+                🙏 Thank you to {featuredContent.provider}
               </p>
-              {loshonContent.speakerWebsite && (
+              {featuredContent.speakerWebsite && (
                 <p className="text-sm text-blue-800">
                   <a 
-                    href={loshonContent.speakerWebsite} 
+                    href={featuredContent.speakerWebsite} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-blue-600 underline hover:text-blue-800"

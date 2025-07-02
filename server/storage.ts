@@ -517,7 +517,7 @@ export class DatabaseStorage implements IStorage {
       // Check if we need to advance to next verse for a new day
       const progress = await this.getPirkeiAvotProgress();
       const today = new Date().toISOString().split('T')[0];
-      const lastUpdated = new Date(progress.lastUpdated).toISOString().split('T')[0];
+      const lastUpdated = progress.lastUpdated ? new Date(progress.lastUpdated).toISOString().split('T')[0] : '';
       
       // If it's a new day, advance to next verse
       if (today !== lastUpdated) {
