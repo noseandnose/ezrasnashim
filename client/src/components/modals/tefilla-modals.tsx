@@ -22,7 +22,7 @@ function MorningBrochasModal() {
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [showHebrew, setShowHebrew] = useState(true);
   const [showEnglish, setShowEnglish] = useState(false);
-  const [fontSize, setFontSize] = useState(16);
+  const [fontSize, setFontSize] = useState(20);
   
   // Sefaria API URLs for morning blessings
   // Fetch all morning blessing texts from backend proxy
@@ -39,7 +39,7 @@ function MorningBrochasModal() {
     enabled: activeModal === 'morning-brochas',
     refetchOnMount: true,
     staleTime: 0,
-    cacheTime: 0 // Completely disable caching
+    gcTime: 0 // Completely disable caching
   });
 
   console.log('MorningBrochasModal - activeModal:', activeModal);
@@ -51,27 +51,11 @@ function MorningBrochasModal() {
   
   return (
     <Dialog open={activeModal === 'morning-brochas'} onOpenChange={() => closeModal()}>
-      <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans" aria-describedby="morning-brochas-description">
-        <DialogHeader className="text-center mb-4">
-          <DialogTitle className="text-lg font-serif font-semibold">Morning Brochas</DialogTitle>
-          <DialogDescription className="text-xs text-warm-gray/70">
-            Daily morning blessings to start your day with gratitude
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] overflow-y-auto font-sans" aria-describedby="morning-brochas-description">
         <div id="morning-brochas-description" className="sr-only">Daily morning blessings and prayers of gratitude</div>
         
-        <div className="text-center mb-4">
-          <div className="bg-gradient-feminine p-3 rounded-full mx-auto mb-3 w-fit">
-            <Sparkles className="text-white" size={24} />
-          </div>
-          <h3 className="font-serif text-lg text-black mb-2 font-bold">Birchot HaShachar</h3>
-          <p className="font-sans text-sm text-black/70">
-            Begin your day by thanking Hashem for basic gifts - sight, movement, consciousness, and life itself.
-          </p>
-        </div>
-
-        {/* Top Controls Bar matching other modals */}
-        <div className="flex items-center justify-between bg-sand-light/30 rounded-xl p-3 mb-4">
+        {/* Standardized Header with centered title */}
+        <div className="flex items-center justify-between mb-6">
           <Button
             onClick={() => setShowHebrew(!showHebrew)}
             variant="ghost"
@@ -84,9 +68,10 @@ function MorningBrochasModal() {
           >
             {showHebrew ? 'עב' : 'EN'}
           </Button>
-          <div className="flex-1"></div>
+          
+          <DialogTitle className="text-lg font-serif font-bold text-black">Morning Brochas</DialogTitle>
+          
           <div className="flex items-center gap-2">
-            <span className="text-xs text-black/70 font-medium">Size:</span>
             <button
               onClick={() => setFontSize(Math.max(12, fontSize - 2))}
               className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
@@ -95,7 +80,7 @@ function MorningBrochasModal() {
             </button>
             <span className="text-xs font-medium text-black/70 w-6 text-center">{fontSize}</span>
             <button
-              onClick={() => setFontSize(Math.min(24, fontSize + 2))}
+              onClick={() => setFontSize(Math.min(32, fontSize + 2))}
               className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
             >
               <span className="text-xs font-medium">+</span>
@@ -103,8 +88,8 @@ function MorningBrochasModal() {
           </div>
         </div>
 
-        {/* Prayer Content */}
-        <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm border border-warm-gray/10">
+        {/* Expanded Prayer Content Area */}
+        <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm border border-warm-gray/10 min-h-[500px]">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
@@ -112,9 +97,9 @@ function MorningBrochasModal() {
           ) : (
             <div className="space-y-6" style={{ fontSize: `${fontSize}px` }}>
               {morningBlessings?.map((blessing: any, index: number) => (
-                <div key={index} className="space-y-3">
+                <div key={index} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
                   {blessing.hebrew && showHebrew && (
-                    <div className="heebo-regular text-right leading-relaxed text-black">
+                    <div className="secular-one-bold text-right leading-relaxed text-black">
                       {blessing.hebrew}
                     </div>
                   )}
@@ -161,7 +146,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const [, setLocation] = useLocation();
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
-  const [fontSize, setFontSize] = useState(16);
+  const [fontSize, setFontSize] = useState(20);
   const [showHebrew, setShowHebrew] = useState(true);
   const [selectedPrayerId, setSelectedPrayerId] = useState<number | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -1101,7 +1086,7 @@ function IndividualTehillimModal() {
   const { closeModal, selectedPsalm } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
-  const [fontSize, setFontSize] = useState(16);
+  const [fontSize, setFontSize] = useState(20);
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
 
   const { data: tehillimText, isLoading } = useQuery({
