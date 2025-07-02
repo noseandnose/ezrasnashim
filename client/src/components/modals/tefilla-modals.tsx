@@ -27,7 +27,7 @@ function MorningBrochasModal() {
   // Sefaria API URLs for morning blessings
   // Fetch all morning blessing texts from backend proxy
   const { data: morningBlessings, isLoading } = useQuery({
-    queryKey: ['morning-blessings-english-debug'],
+    queryKey: ['morning-blessings-lang-params'],
     queryFn: async () => {
       try {
         const response = await axiosClient.get('/api/sefaria/morning-brochas');

@@ -172,21 +172,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         morningBlessingUrls.map(async (url) => {
           try {
             // Fetch Hebrew version
-            const hebrewResponse = await serverAxiosClient.get(url);
+            const hebrewUrl = url + '?lang=hebrew';
+            const hebrewResponse = await serverAxiosClient.get(hebrewUrl);
             const hebrewVersions = hebrewResponse.data?.versions || [];
             const hebrewVersion = hebrewVersions.find((v: any) => v.language === 'he');
             
-            // Fetch English version by modifying URL
-            const englishUrl = url + '?lang=en';
+            // Try multiple approaches for English translations
             let englishText = '';
-            try {
-              const englishResponse = await serverAxiosClient.get(englishUrl);
-              const englishVersions = englishResponse.data?.versions || [];
-              const englishVersion = englishVersions.find((v: any) => v.language === 'en');
-              englishText = cleanText(englishVersion?.text || '');
-              console.log('English text for', url, ':', englishText);
-            } catch (englishError) {
-              console.log('No English version available for:', url);
+            
+            // Method 1: Try finding English in same API response
+            const englishVersionInOriginal = hebrewVersions.find((v: any) => v.language === 'en');
+            if (englishVersionInOriginal?.text) {
+              englishText = cleanText(englishVersionInOriginal.text);
+            } else {
+              // Method 2: Try specific English version URLs
+              const englishUrls = [
+                url + '?version=english',
+                url + '?lang=en',
+                url.replace('Siddur_Ashkenaz', 'Siddur_Ashkenaz_English')
+              ];
+              
+              for (const englishUrl of englishUrls) {
+                try {
+                  const englishResponse = await serverAxiosClient.get(englishUrl);
+                  const englishVersions = englishResponse.data?.versions || [];
+                  const englishVersion = englishVersions.find((v: any) => v.language === 'en');
+                  if (englishVersion?.text) {
+                    englishText = cleanText(englishVersion.text);
+                    console.log('Found English via:', englishUrl);
+                    break;
+                  }
+                } catch (error) {
+                  continue; // Try next URL
+                }
+              }
             }
 
             const hebrewText = cleanText(hebrewVersion?.text || '');
