@@ -20,13 +20,14 @@ function MorningBrochasModal() {
   const { activeModal, closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
-  const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
+  const [showHebrew, setShowHebrew] = useState(true);
+  const [showEnglish, setShowEnglish] = useState(false);
   const [fontSize, setFontSize] = useState(16);
   
   // Sefaria API URLs for morning blessings
   // Fetch all morning blessing texts from backend proxy
   const { data: morningBlessings, isLoading } = useQuery({
-    queryKey: ['morning-blessings-clean'],
+    queryKey: ['morning-blessings-complete'],
     queryFn: async () => {
       try {
         const response = await axiosClient.get('/api/sefaria/morning-brochas');
@@ -65,32 +66,27 @@ function MorningBrochasModal() {
           </p>
         </div>
 
-        {/* Language Controls */}
+        {/* Language and Size Controls */}
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-black/70 font-medium">Language:</span>
-            <div className="flex bg-warm-gray/10 rounded-lg p-1">
-              <button
-                onClick={() => setLanguage('hebrew')}
-                className={`px-3 py-1 rounded text-xs font-medium transition-all ${
-                  language === 'hebrew' 
-                    ? 'bg-white text-black shadow-sm' 
-                    : 'text-black/60 hover:text-black'
-                }`}
-              >
-                עברית
-              </button>
-              <button
-                onClick={() => setLanguage('english')}
-                className={`px-3 py-1 rounded text-xs font-medium transition-all ${
-                  language === 'english' 
-                    ? 'bg-white text-black shadow-sm' 
-                    : 'text-black/60 hover:text-black'
-                }`}
-              >
-                English
-              </button>
-            </div>
+          <div className="flex items-center gap-2">
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showHebrew}
+                onChange={(e) => setShowHebrew(e.target.checked)}
+                className="w-3 h-3 text-blush bg-gray-100 border-gray-300 rounded focus:ring-blush focus:ring-2"
+              />
+              <span className="text-xs text-black/70 font-medium">עברית</span>
+            </label>
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showEnglish}
+                onChange={(e) => setShowEnglish(e.target.checked)}
+                className="w-3 h-3 text-blush bg-gray-100 border-gray-300 rounded focus:ring-blush focus:ring-2"
+              />
+              <span className="text-xs text-black/70 font-medium">English</span>
+            </label>
           </div>
           
           <div className="flex items-center gap-2">
@@ -121,12 +117,12 @@ function MorningBrochasModal() {
             <div className="space-y-6" style={{ fontSize: `${fontSize}px` }}>
               {morningBlessings?.map((blessing: any, index: number) => (
                 <div key={index} className="space-y-3">
-                  {blessing.hebrew && (language === 'hebrew' || language === 'both') && (
+                  {blessing.hebrew && showHebrew && (
                     <div className="heebo-regular text-right leading-relaxed text-black">
                       {blessing.hebrew}
                     </div>
                   )}
-                  {blessing.english && (language === 'english' || language === 'both') && (
+                  {blessing.english && showEnglish && (
                     <div className="text-left leading-relaxed text-black/70">
                       {blessing.english}
                     </div>
