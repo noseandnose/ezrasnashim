@@ -287,20 +287,22 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             setFontSize={setFontSize}
           />
           
-          {chizukContent && chizukContent.audioUrl && (
-            <div className="space-y-4">
-              <AudioPlayer 
-                title={chizukContent.title || 'Chizuk'}
-                duration={chizukContent.duration || "5:15"}
-                audioUrl={chizukContent.audioUrl}
-              />
-              {chizukContent.speaker && (
-                <p className="text-sm text-gray-600 text-center">
-                  <strong>Speaker:</strong> {chizukContent.speaker}
-                </p>
-              )}
-            </div>
-          )}
+          <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm border border-warm-gray/10 min-h-[500px]">
+            {chizukContent && chizukContent.audioUrl && (
+              <div className="space-y-4">
+                <AudioPlayer 
+                  title={chizukContent.title || 'Chizuk'}
+                  duration={chizukContent.duration || "5:15"}
+                  audioUrl={chizukContent.audioUrl}
+                />
+                {chizukContent.speaker && (
+                  <p className="text-sm text-black/60 text-center">
+                    <strong>Speaker:</strong> {chizukContent.speaker}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
           
           {/* Thank You Section */}
           {chizukContent?.provider && (

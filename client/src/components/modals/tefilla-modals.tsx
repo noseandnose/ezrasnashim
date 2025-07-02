@@ -15,6 +15,56 @@ interface TefillaModalsProps {
   onSectionChange?: (section: any) => void;
 }
 
+// Standardized Modal Header Component for Tefilla Modals
+const StandardModalHeader = ({ 
+  title, 
+  showHebrew, 
+  setShowHebrew, 
+  fontSize, 
+  setFontSize 
+}: {
+  title: string;
+  showHebrew: boolean;
+  setShowHebrew: (show: boolean) => void;
+  fontSize: number;
+  setFontSize: (size: number) => void;
+}) => (
+  <div className="flex items-center justify-center mb-6 relative">
+    <div className="flex items-center gap-6">
+      <Button
+        onClick={() => setShowHebrew(!showHebrew)}
+        variant="ghost"
+        size="sm"
+        className={`text-xs font-medium px-3 py-1 rounded-lg transition-all ${
+          showHebrew 
+            ? 'bg-blush text-white' 
+            : 'text-black/60 hover:text-black hover:bg-white/50'
+        }`}
+      >
+        {showHebrew ? 'עב' : 'EN'}
+      </Button>
+      
+      <DialogTitle className="text-lg font-serif font-bold text-black">{title}</DialogTitle>
+      
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+          className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+        >
+          <span className="text-xs font-medium">-</span>
+        </button>
+        <span className="text-xs font-medium text-black/70 w-6 text-center">{fontSize}</span>
+        <button
+          onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+          className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+        >
+          <span className="text-xs font-medium">+</span>
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
 // Morning Brochas Modal Component
 function MorningBrochasModal() {
   const { activeModal, closeModal } = useModalStore();
@@ -566,13 +616,16 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       </Dialog>
       {/* Blessings Modal */}
       <Dialog open={activeModal === 'blessings'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="blessings-description">
-          <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-serif font-semibold">Blessings</DialogTitle>
-            <p id="blessings-description" className="text-xs text-warm-gray/70 mt-1">
-              Daily blessings and their proper recitation
-            </p>
-          </DialogHeader>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] font-sans" aria-describedby="blessings-description">
+          <div id="blessings-description" className="sr-only">Daily blessings and their proper recitation</div>
+          
+          <StandardModalHeader 
+            title="Blessings"
+            showHebrew={showHebrew}
+            setShowHebrew={setShowHebrew}
+            fontSize={fontSize}
+            setFontSize={setFontSize}
+          />
           
           <div className="text-center text-gray-600 font-sans">
             Daily blessings and their proper recitation...
