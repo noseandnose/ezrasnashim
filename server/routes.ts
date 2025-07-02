@@ -155,9 +155,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const hebrewVersion = versions.find((v: any) => v.language === 'he');
             const englishVersion = versions.find((v: any) => v.language === 'en');
             
+            // Clean HTML markup from text
+            const cleanText = (text: string) => {
+              if (!text) return '';
+              return text
+                .replace(/<[^>]*>/g, '') // Remove HTML tags
+                .replace(/&nbsp;/g, ' ') // Replace non-breaking spaces
+                .replace(/&amp;/g, '&') // Replace HTML entities
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .replace(/&#39;/g, "'")
+                .trim();
+            };
+
             // Prefer Hebrew text, fall back to English if Hebrew is not available
-            const hebrewText = hebrewVersion?.text || '';
-            const englishText = englishVersion?.text || '';
+            const hebrewText = cleanText(hebrewVersion?.text || '');
+            const englishText = cleanText(englishVersion?.text || '');
             
             return {
               hebrew: hebrewText,
