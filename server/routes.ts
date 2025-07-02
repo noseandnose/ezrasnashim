@@ -177,13 +177,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const hebrewVersion = hebrewVersions.find((v: any) => v.language === 'he');
             
             // Fetch English version by modifying URL
-            const englishUrl = url + '?version=english';
+            const englishUrl = url + '?lang=en';
             let englishText = '';
             try {
               const englishResponse = await serverAxiosClient.get(englishUrl);
               const englishVersions = englishResponse.data?.versions || [];
               const englishVersion = englishVersions.find((v: any) => v.language === 'en');
               englishText = cleanText(englishVersion?.text || '');
+              console.log('English text for', url, ':', englishText);
             } catch (englishError) {
               console.log('No English version available for:', url);
             }
