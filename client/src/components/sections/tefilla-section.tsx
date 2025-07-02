@@ -384,16 +384,10 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             )}
             
             {/* Hebrew Preview Text - Compact */}
-            {isPreviewLoading ? (
-              <div className="bg-black/5 rounded-lg p-2 animate-pulse">
-                <div className="h-3 bg-black/10 rounded w-3/4"></div>
+            {tehillimPreview && (
+              <div className="text-xs text-black/70 heebo-regular text-right bg-white/50 rounded-lg p-2 border border-blush/10 line-clamp-2">
+                {tehillimPreview.preview}
               </div>
-            ) : (
-              tehillimPreview && (
-                <div className="text-xs text-black/70 heebo-regular text-right bg-white/50 rounded-lg p-2 border border-blush/10 line-clamp-2">
-                  {tehillimPreview.preview}
-                </div>
-              )
             )}
           </button>
 
