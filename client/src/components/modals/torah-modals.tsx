@@ -16,6 +16,8 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const [, setLocation] = useLocation();
   const [showExplosion, setShowExplosion] = useState(false);
+  const [fontSize, setFontSize] = useState(20);
+  const [showHebrew, setShowHebrew] = useState(true);
 
   // Reset explosion state when modal changes
   useEffect(() => {

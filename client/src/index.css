@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Secular+One:wght@400&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -410,6 +410,13 @@ html, body, #root {
   font-family: "Noto Sans Hebrew", "Frank Ruhl Libre", "Arial Hebrew", sans-serif;
   font-weight: 400;
   font-style: normal;
+  direction: rtl;
+}
+
+/* Secular One Hebrew font for bold modern Hebrew display */
+.secular-one-bold {
+  font-family: 'Secular One', "Noto Sans Hebrew", "Frank Ruhl Libre", sans-serif;
+  font-weight: 400; /* Secular One only has regular weight but displays as bold */
   direction: rtl;
 }
 
