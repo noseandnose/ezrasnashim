@@ -118,6 +118,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Sefaria API proxy route for Morning Brochas
+  app.get("/api/sefaria/morning-brochas", async (req, res) => {
+    try {
+      const morningBlessingUrls = [
+        "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Modeh_Ani.1",
+        "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Netilat_Yadayim.1",
+        "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.1",
+        "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.2",
+        "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.3",
+        "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.4",
+        "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.5",
+        "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.6",
+        "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.7",
+        "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.8",
+        "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.9",
+        "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.10",
+        "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.11",
+        "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.12",
+        "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.13",
+        "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.14",
+        "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.15",
+        "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.16",
+        "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.17",
+        "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.18"
+      ];
+
+      // Fetch all morning blessing texts from Sefaria
+      const results = await Promise.all(
+        morningBlessingUrls.map(async (url) => {
+          try {
+            const response = await serverAxiosClient.get(url);
+            
+            // Extract text from the versions array (Hebrew first, then English)
+            const versions = response.data?.versions || [];
+            const hebrewVersion = versions.find((v: any) => v.language === 'he');
+            const englishVersion = versions.find((v: any) => v.language === 'en');
+            
+            // Prefer Hebrew text, fall back to English if Hebrew is not available
+            const hebrewText = hebrewVersion?.text || '';
+            const englishText = englishVersion?.text || '';
+            
+            return {
+              hebrew: hebrewText,
+              english: englishText,
+              ref: response.data?.ref || ''
+            };
+          } catch (error) {
+            console.error('Error fetching morning blessing from Sefaria:', error);
+            return { hebrew: '', english: '', ref: '' };
+          }
+        })
+      );
+
+      // Filter out empty results and format for frontend
+      const validBlessings = results.filter(blessing => 
+        blessing.hebrew.trim() || blessing.english.trim()
+      );
+
+      res.json(validBlessings);
+    } catch (error) {
+      console.error('Error fetching morning brochas from Sefaria:', error);
+      res.status(500).json({ message: "Failed to fetch morning brochas from Sefaria API" });
+    }
+  });
+
   // Calendar events routes
   app.get("/api/calendar-events", async (req, res) => {
     try {

@@ -22,67 +22,17 @@ function MorningBrochasModal() {
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   
   // Sefaria API URLs for morning blessings
-  const morningBlessingUrls = [
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Modeh_Ani.1?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Modeh_Ani.2?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Netilat_Yadayim.1?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Asher_Yatzar.1?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Elokai_Neshama.1?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Torah_Blessings.1?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Torah_Blessings.2?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Torah_Blessings.3?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Torah_Study.1?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Torah_Study.3?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.1?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.2?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.3?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.4?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.5?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.6?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.7?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.8?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.9?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.10?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.11?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.12?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.13?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.14?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.15?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.16?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.17?version=english&return_format=text_only",
-    "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.18?version=english&return_format=text_only"
-  ];
-
-  // Fetch all morning blessing texts
+  // Fetch all morning blessing texts from backend proxy
   const { data: morningBlessings, isLoading } = useQuery({
     queryKey: ['morning-blessings'],
     queryFn: async () => {
-      const results = await Promise.all(
-        morningBlessingUrls.map(async (url) => {
-          try {
-            console.log('Fetching from URL:', url);
-            const response = await axiosClient.get(url);
-            console.log('Response data:', response.data);
-            
-            // Extract text from the versions array (Hebrew first, then English)
-            const versions = response.data?.versions || [];
-            let hebrewVersion = versions.find((v: any) => v.language === 'he');
-            let englishVersion = versions.find((v: any) => v.language === 'en');
-            
-            console.log('Hebrew version:', hebrewVersion?.text);
-            console.log('English version:', englishVersion?.text);
-            
-            // Prefer Hebrew text, fall back to English if Hebrew is not available
-            const text = hebrewVersion?.text || englishVersion?.text || '';
-            console.log('Final text:', text);
-            return text;
-          } catch (error) {
-            console.error('Error fetching morning blessing from URL:', url, error);
-            return '';
-          }
-        })
-      );
-      return results.filter(text => text && text.trim()); // Filter out empty results
+      try {
+        const response = await axiosClient.get('/api/sefaria/morning-brochas');
+        return response.data; // Returns array of {hebrew, english, ref} objects
+      } catch (error) {
+        console.error('Error fetching morning blessings:', error);
+        return [];
+      }
     },
     enabled: activeModal === 'morning-brochas'
   });
@@ -117,9 +67,18 @@ function MorningBrochasModal() {
             </div>
           ) : (
             <div className="space-y-4">
-              {morningBlessings?.map((blessing, index) => (
-                <div key={index} className="heebo-regular text-right leading-relaxed text-sm">
-                  {blessing}
+              {morningBlessings?.map((blessing: any, index: number) => (
+                <div key={index} className="space-y-2">
+                  {blessing.hebrew && (
+                    <div className="heebo-regular text-right leading-relaxed text-sm">
+                      {blessing.hebrew}
+                    </div>
+                  )}
+                  {blessing.english && (
+                    <div className="text-left leading-relaxed text-sm text-black/70">
+                      {blessing.english}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
