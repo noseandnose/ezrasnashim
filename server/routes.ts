@@ -179,12 +179,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             // Extract Hebrew text from API response
             let hebrewText = '';
-            if (hebrewResponse.data?.text && Array.isArray(hebrewResponse.data.text)) {
-              hebrewText = cleanText(hebrewResponse.data.text.join(' '));
-            } else if (hebrewResponse.data?.versions?.length > 0) {
-              const hebrewVersion = hebrewResponse.data.versions.find((v: any) => v.language === 'he');
+            if (hebrewResponse.data?.versions?.length > 0) {
+              const hebrewVersion = hebrewResponse.data.versions.find((v: any) => v.language === 'he' && v.text);
               if (hebrewVersion?.text) {
-                hebrewText = cleanText(Array.isArray(hebrewVersion.text) ? hebrewVersion.text.join(' ') : hebrewVersion.text);
+                hebrewText = cleanText(hebrewVersion.text);
               }
             }
             
@@ -195,12 +193,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const englishResponse = await serverAxiosClient.get(englishUrl);
               
               // Extract English text from API response
-              if (englishResponse.data?.text && Array.isArray(englishResponse.data.text)) {
-                englishText = cleanText(englishResponse.data.text.join(' '));
-              } else if (englishResponse.data?.versions?.length > 0) {
-                const englishVersion = englishResponse.data.versions.find((v: any) => v.language === 'en');
+              if (englishResponse.data?.versions?.length > 0) {
+                const englishVersion = englishResponse.data.versions.find((v: any) => v.language === 'en' && v.text);
                 if (englishVersion?.text) {
-                  englishText = cleanText(Array.isArray(englishVersion.text) ? englishVersion.text.join(' ') : englishVersion.text);
+                  englishText = cleanText(englishVersion.text);
                 }
               }
               console.log('Found English text:', englishText.substring(0, 50) + '...');
