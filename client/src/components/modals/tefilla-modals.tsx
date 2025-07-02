@@ -54,37 +54,39 @@ function MorningBrochasModal() {
       <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] overflow-y-auto font-sans" aria-describedby="morning-brochas-description">
         <div id="morning-brochas-description" className="sr-only">Daily morning blessings and prayers of gratitude</div>
         
-        {/* Standardized Header with centered title */}
-        <div className="flex items-center justify-between mb-6">
-          <Button
-            onClick={() => setShowHebrew(!showHebrew)}
-            variant="ghost"
-            size="sm"
-            className={`text-xs font-medium px-3 py-1 rounded-lg transition-all ${
-              showHebrew 
-                ? 'bg-blush text-white' 
-                : 'text-black/60 hover:text-black hover:bg-white/50'
-            }`}
-          >
-            {showHebrew ? 'עב' : 'EN'}
-          </Button>
-          
-          <DialogTitle className="text-lg font-serif font-bold text-black">Morning Brochas</DialogTitle>
-          
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setFontSize(Math.max(12, fontSize - 2))}
-              className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+        {/* Standardized Header with centered controls */}
+        <div className="flex items-center justify-center mb-6 relative">
+          <div className="flex items-center gap-6">
+            <Button
+              onClick={() => setShowHebrew(!showHebrew)}
+              variant="ghost"
+              size="sm"
+              className={`text-xs font-medium px-3 py-1 rounded-lg transition-all ${
+                showHebrew 
+                  ? 'bg-blush text-white' 
+                  : 'text-black/60 hover:text-black hover:bg-white/50'
+              }`}
             >
-              <span className="text-xs font-medium">-</span>
-            </button>
-            <span className="text-xs font-medium text-black/70 w-6 text-center">{fontSize}</span>
-            <button
-              onClick={() => setFontSize(Math.min(32, fontSize + 2))}
-              className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
-            >
-              <span className="text-xs font-medium">+</span>
-            </button>
+              {showHebrew ? 'עב' : 'EN'}
+            </Button>
+            
+            <DialogTitle className="text-lg font-serif font-bold text-black">Morning Brochas</DialogTitle>
+            
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+              >
+                <span className="text-xs font-medium">-</span>
+              </button>
+              <span className="text-xs font-medium text-black/70 w-6 text-center">{fontSize}</span>
+              <button
+                onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+                className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+              >
+                <span className="text-xs font-medium">+</span>
+              </button>
+            </div>
           </div>
         </div>
 

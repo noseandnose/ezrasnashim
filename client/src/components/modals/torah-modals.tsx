@@ -11,6 +11,56 @@ interface TorahModalsProps {
   onSectionChange?: (section: any) => void;
 }
 
+// Standardized Modal Header Component
+const StandardModalHeader = ({ 
+  title, 
+  showHebrew, 
+  setShowHebrew, 
+  fontSize, 
+  setFontSize 
+}: {
+  title: string;
+  showHebrew: boolean;
+  setShowHebrew: (show: boolean) => void;
+  fontSize: number;
+  setFontSize: (size: number) => void;
+}) => (
+  <div className="flex items-center justify-center mb-6 relative">
+    <div className="flex items-center gap-6">
+      <Button
+        onClick={() => setShowHebrew(!showHebrew)}
+        variant="ghost"
+        size="sm"
+        className={`text-xs font-medium px-3 py-1 rounded-lg transition-all ${
+          showHebrew 
+            ? 'bg-blush text-white' 
+            : 'text-black/60 hover:text-black hover:bg-white/50'
+        }`}
+      >
+        {showHebrew ? 'עב' : 'EN'}
+      </Button>
+      
+      <DialogTitle className="text-lg font-serif font-bold text-black">{title}</DialogTitle>
+      
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+          className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+        >
+          <span className="text-xs font-medium">-</span>
+        </button>
+        <span className="text-xs font-medium text-black/70 w-6 text-center">{fontSize}</span>
+        <button
+          onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+          className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+        >
+          <span className="text-xs font-medium">+</span>
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
 export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   const { activeModal, closeModal, openModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
@@ -88,25 +138,31 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     <>
       {/* Halacha Modal */}
       <Dialog open={activeModal === 'halacha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="halacha-description">
-          <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-serif font-semibold mb-2">Daily Halacha</DialogTitle>
-            {halachaContent && (
-              <DialogDescription className="text-sm text-gray-600 font-sans">{halachaContent.title}</DialogDescription>
-            )}
-          </DialogHeader>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] overflow-y-auto font-sans" aria-describedby="halacha-description">
           <div id="halacha-description" className="sr-only">Daily Jewish law and practice content</div>
           
-          {halachaContent && (
-            <div className="space-y-3 text-sm text-gray-700 font-sans">
-              <div>
-                <p><strong>Today's Halacha:</strong> {halachaContent.content}</p>
+          <StandardModalHeader 
+            title="Daily Halacha"
+            showHebrew={showHebrew}
+            setShowHebrew={setShowHebrew}
+            fontSize={fontSize}
+            setFontSize={setFontSize}
+          />
+          
+          <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm border border-warm-gray/10 min-h-[500px]">
+            {halachaContent && (
+              <div className="space-y-4" style={{ fontSize: `${fontSize}px` }}>
+                <div className="secular-one-bold text-right leading-relaxed text-black">
+                  {halachaContent.content}
+                </div>
                 {halachaContent.source && (
-                  <p className="mt-2 text-xs text-gray-500">Source: {halachaContent.source}</p>
+                  <p className="text-xs text-black/60 text-center border-t border-warm-gray/10 pt-3">
+                    Source: {halachaContent.source}
+                  </p>
                 )}
               </div>
-            </div>
-          )}
+            )}
+          </div>
           
           {/* Thank You Section */}
           {halachaContent?.provider && (

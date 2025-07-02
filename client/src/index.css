@@ -413,10 +413,10 @@ html, body, #root {
   direction: rtl;
 }
 
-/* Secular One Hebrew font for bold modern Hebrew display */
+/* Bold Hebrew font for modern display with proper fallbacks */
 .secular-one-bold {
-  font-family: 'Secular One', "Noto Sans Hebrew", "Frank Ruhl Libre", sans-serif;
-  font-weight: 400; /* Secular One only has regular weight but displays as bold */
+  font-family: "Noto Sans Hebrew", "Frank Ruhl Libre", "Arial Hebrew", sans-serif;
+  font-weight: 700; /* Use actual bold weight instead of Secular One */
   direction: rtl;
 }
 
