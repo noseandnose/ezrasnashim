@@ -158,12 +158,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Clean HTML markup from text
             const cleanText = (text: string) => {
               if (!text) return '';
-              return text
-                .replace(/<\/?[^>]+(>|$)/g, '') // Remove all HTML tags including self-closing
-                .replace(/<b\/>/g, '') // Remove specific problematic tags
-                .replace(/<\/b>/g, '')
-                .replace(/<small\/>/g, '')
-                .replace(/<\/small>/g, '')
+              console.log('Original text:', text);
+              const cleaned = text
+                .replace(/<[^>]*>/g, '') // Remove all HTML tags
                 .replace(/&nbsp;/g, ' ') // Replace non-breaking spaces
                 .replace(/&amp;/g, '&') // Replace HTML entities
                 .replace(/&lt;/g, '<')
@@ -172,6 +169,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 .replace(/&#39;/g, "'")
                 .replace(/\s+/g, ' ') // Replace multiple spaces with single space
                 .trim();
+              console.log('Cleaned text:', cleaned);
+              return cleaned;
             };
 
             // Prefer Hebrew text, fall back to English if Hebrew is not available
