@@ -1171,9 +1171,6 @@ function IndividualTehillimModal() {
         trigger={showHeartExplosion}
         onComplete={() => setShowHeartExplosion(false)} 
       />
-
-      {/* Morning Brochas Modal - Now Using Sefaria API */}
-      <MorningBrochasModal />
     </>
   );
 }
