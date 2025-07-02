@@ -343,23 +343,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/torah/loshon/:date", async (req, res) => {
+  app.get("/api/torah/featured/:date", async (req, res) => {
     try {
       const { date } = req.params;
-      const loshon = await storage.getLoshonHorahByDate(date);
-      res.json(loshon || null);
+      const featured = await storage.getFeaturedContentByDate(date);
+      res.json(featured || null);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch loshon horah content" });
+      res.status(500).json({ message: "Failed to fetch featured content" });
     }
   });
 
-  app.post("/api/torah/loshon", async (req, res) => {
+  app.post("/api/torah/featured", async (req, res) => {
     try {
-      const validatedData = insertLoshonHorahSchema.parse(req.body);
-      const loshon = await storage.createLoshonHorah(validatedData);
-      res.json(loshon);
+      const validatedData = insertFeaturedContentSchema.parse(req.body);
+      const featured = await storage.createFeaturedContent(validatedData);
+      res.json(featured);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create loshon horah content" });
+      res.status(500).json({ message: "Failed to create featured content" });
     }
   });
 
