@@ -101,7 +101,7 @@ function MorningBrochasModal() {
   
   return (
     <Dialog open={activeModal === 'morning-brochas'} onOpenChange={() => closeModal()}>
-      <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] font-sans" aria-describedby="morning-brochas-description">
+      <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] overflow-hidden font-sans" aria-describedby="morning-brochas-description">
         <div id="morning-brochas-description" className="sr-only">Daily morning blessings and prayers of gratitude</div>
         
         {/* Standardized Header with centered controls */}
@@ -141,7 +141,7 @@ function MorningBrochasModal() {
         </div>
 
         {/* Expanded Prayer Content Area */}
-        <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm border border-warm-gray/10 min-h-[500px]">
+        <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>

@@ -138,7 +138,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     <>
       {/* Halacha Modal */}
       <Dialog open={activeModal === 'halacha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] font-sans" aria-describedby="halacha-description">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] overflow-hidden font-sans" aria-describedby="halacha-description">
           <div id="halacha-description" className="sr-only">Daily Jewish law and practice content</div>
           
           <StandardModalHeader 
@@ -149,7 +149,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             setFontSize={setFontSize}
           />
           
-          <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm border border-warm-gray/10 min-h-[500px]">
+          <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
             {halachaContent && (
               <div className="space-y-4" style={{ fontSize: `${fontSize}px` }}>
                 <div className="secular-one-bold text-right leading-relaxed text-black">
@@ -210,7 +210,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             setFontSize={setFontSize}
           />
           
-          <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm border border-warm-gray/10 min-h-[500px]">
+          <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
             {emunaContent && emunaContent.audioUrl && (
               <div className="space-y-4">
                 <AudioPlayer 
@@ -287,7 +287,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             setFontSize={setFontSize}
           />
           
-          <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm border border-warm-gray/10 min-h-[500px]">
+          <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
             {chizukContent && chizukContent.audioUrl && (
               <div className="space-y-4">
                 <AudioPlayer 
