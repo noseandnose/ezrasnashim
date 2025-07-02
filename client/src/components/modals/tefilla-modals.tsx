@@ -61,7 +61,14 @@ function MorningBrochasModal() {
         morningBlessingUrls.map(async (url) => {
           try {
             const response = await axiosClient.get(url);
-            return response.data;
+            // Extract text from the versions array (Hebrew first, then English)
+            const versions = response.data?.versions || [];
+            let hebrewVersion = versions.find((v: any) => v.language === 'he');
+            let englishVersion = versions.find((v: any) => v.language === 'en');
+            
+            // Prefer Hebrew text, fall back to English if Hebrew is not available
+            const text = hebrewVersion?.text || englishVersion?.text || '';
+            return text;
           } catch (error) {
             console.error('Error fetching morning blessing:', error);
             return '';
