@@ -403,8 +403,19 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
 
       {/* OTHER SECTIONS BELOW - SEPARATE FROM MAIN */}
       <div className="p-2 space-y-2">
-        {/* Prayer Services */}
+        {/* Top Row: Morning Brochas and Mincha */}
         <div className="grid grid-cols-2 gap-2">
+          <button 
+            onClick={() => openModal('morning-brochas')}
+            className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
+          >
+            <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
+              <Sparkles className="text-white" size={18} />
+            </div>
+            <h3 className="font-serif text-sm text-black mb-1 font-bold">Morning Brochas</h3>
+            <p className="font-sans text-xs text-black/60">Daily Morning Blessings</p>
+          </button>
+
           <button 
             onClick={() => openModal('mincha')}
             className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
@@ -420,20 +431,9 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
                "Loading..."}
             </p>
           </button>
-
-          <button 
-            onClick={() => openModal('nishmas-campaign')}
-            className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
-          >
-            <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
-              <Heart className="text-white" size={18} />
-            </div>
-            <h3 className="font-serif text-sm text-black mb-1 font-bold">Nishmas Kol Chai</h3>
-            <p className="font-sans text-xs text-black/60">Prayer of Gratitude</p>
-          </button>
         </div>
 
-        {/* Special Tehillim and Coming Soon */}
+        {/* Bottom Row: Special Tehillim and Nishmas */}
         <div className="grid grid-cols-2 gap-2">
           <button 
             onClick={() => openModal('special-tehillim')}
@@ -447,14 +447,14 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           </button>
 
           <button 
-            disabled
-            className="bg-gray-100 rounded-3xl p-3 text-center cursor-not-allowed shadow-lg border border-gray-200 opacity-60"
+            onClick={() => openModal('nishmas-campaign')}
+            className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
           >
-            <div className="bg-gray-300 p-2 rounded-full mx-auto mb-2 w-fit">
-              <Sparkles className="text-gray-500" size={18} />
+            <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
+              <Heart className="text-white" size={18} />
             </div>
-            <h3 className="font-serif text-sm text-gray-500 mb-1 font-bold">Coming Soon</h3>
-            <p className="font-sans text-xs text-gray-400">New Feature</p>
+            <h3 className="font-serif text-sm text-black mb-1 font-bold">Nishmas Kol Chai</h3>
+            <p className="font-sans text-xs text-black/60">Prayer of Gratitude</p>
           </button>
         </div>
 

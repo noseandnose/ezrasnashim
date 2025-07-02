@@ -98,7 +98,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
             >
               {/* Content Type Indicator */}
               {contentType && (
-                <div className="absolute top-2 left-2 bg-black/80 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                <div className="absolute top-2 left-2 bg-white text-blush text-xs rounded-full w-5 h-5 flex items-center justify-center border-2 border-blush shadow-sm">
                   {contentType === 'text' ? 'T' : '▶'}
                 </div>
               )}

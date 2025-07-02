@@ -1044,6 +1044,76 @@ function IndividualTehillimModal() {
         trigger={showHeartExplosion}
         onComplete={() => setShowHeartExplosion(false)} 
       />
+
+      {/* Morning Brochas Modal */}
+      <Dialog open={activeModal === 'morning-brochas'} onOpenChange={() => closeModal()}>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans" aria-describedby="morning-brochas-description">
+          <DialogHeader className="text-center mb-4">
+            <DialogTitle className="text-lg font-serif font-semibold">Morning Brochas</DialogTitle>
+            <DialogDescription className="text-xs text-warm-gray/70">
+              Daily morning blessings to start your day with gratitude
+            </DialogDescription>
+          </DialogHeader>
+          <div id="morning-brochas-description" className="sr-only">Daily morning blessings and prayers of gratitude</div>
+          
+          <div className="text-center mb-4">
+            <div className="bg-gradient-feminine p-3 rounded-full mx-auto mb-3 w-fit">
+              <Sparkles className="text-white" size={24} />
+            </div>
+            <h3 className="font-serif text-lg text-black mb-2 font-bold">Birchot HaShachar</h3>
+            <p className="font-sans text-sm text-black/70">
+              Begin your day by thanking Hashem for basic gifts - sight, movement, consciousness, and life itself.
+            </p>
+          </div>
+
+          <div className="bg-sand-light/20 rounded-2xl p-4 mb-6 text-center">
+            <div className="heebo-regular text-right leading-relaxed text-base">
+              <p className="mb-3">בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם פּוֹקֵחַ עִוְרִים</p>
+              <p className="mb-3">בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם מַלְבִּישׁ עֲרֻמִּים</p>
+              <p className="mb-3">בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם מַתִּיר אֲסוּרִים</p>
+              <p className="mb-3">בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם זוֹקֵף כְּפוּפִים</p>
+              <p className="mb-3">בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם רוֹקַע הָאָרֶץ עַל הַמָּיִם</p>
+              <p className="mb-3">בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם הַמֵּכִין מִצְעֲדֵי גָבֶר</p>
+              <p className="mb-3">בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם אוֹזֵר יִשְׂרָאֵל בִּגְבוּרָה</p>
+              <p className="mb-3">בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם עוֹטֵר יִשְׂרָאֵל בְּתִפְאָרָה</p>
+              <p className="mb-3">בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם הַנּוֹתֵן לַיָּעֵף כֹּחַ</p>
+              <p>בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם הַמַּעֲבִיר שֵׁנָה מֵעֵינַי וּתְנוּמָה מֵעַפְעַפָּי</p>
+            </div>
+          </div>
+
+          <div className="bg-ivory/30 rounded-2xl p-4 mb-6">
+            <h4 className="font-serif text-base font-bold text-black mb-2">English Translation:</h4>
+            <div className="space-y-2 text-sm text-black/80">
+              <p>• Blessed are You, Hashem, who opens the eyes of the blind</p>
+              <p>• Blessed are You, Hashem, who clothes the naked</p>
+              <p>• Blessed are You, Hashem, who releases the bound</p>
+              <p>• Blessed are You, Hashem, who straightens the bent</p>
+              <p>• Blessed are You, Hashem, who spreads the earth upon the waters</p>
+              <p>• Blessed are You, Hashem, who prepares the steps of man</p>
+              <p>• Blessed are You, Hashem, who girds Israel with strength</p>
+              <p>• Blessed are You, Hashem, who crowns Israel with glory</p>
+              <p>• Blessed are You, Hashem, who gives strength to the weary</p>
+              <p>• Blessed are You, Hashem, who removes sleep from my eyes</p>
+            </div>
+          </div>
+
+          <Button 
+            onClick={() => {
+              completeTask('tefilla');
+              setShowHeartExplosion(true);
+              
+              setTimeout(() => {
+                checkAndShowCongratulations();
+                closeModal();
+                window.location.hash = '#/';
+              }, 2000);
+            }} 
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
+          >
+            Complete Morning Brochas
+          </Button>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
