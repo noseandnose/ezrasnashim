@@ -152,10 +152,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.18"
       ];
 
-      // Clean HTML markup from text
-      const cleanText = (text: string) => {
+      // Clean HTML markup from text with proper type checking
+      const cleanText = (text: any) => {
         if (!text) return '';
-        return text
+        // Convert to string if it's not already
+        const textStr = typeof text === 'string' ? text : String(text);
+        return textStr
           .replace(/<[^>]*>/g, '') // Remove all HTML tags
           .replace(/&nbsp;/g, ' ') // Replace non-breaking spaces
           .replace(/&amp;/g, '&') // Replace HTML entities
@@ -174,14 +176,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Fetch Hebrew version with correct Sefaria API format
             const hebrewUrl = url + '?version=hebrew&return_format=text_only';
             const hebrewResponse = await serverAxiosClient.get(hebrewUrl);
-            const hebrewText = cleanText(hebrewResponse.data || '');
+            
+            // Extract Hebrew text from API response
+            let hebrewText = '';
+            if (hebrewResponse.data?.text && Array.isArray(hebrewResponse.data.text)) {
+              hebrewText = cleanText(hebrewResponse.data.text.join(' '));
+            } else if (hebrewResponse.data?.versions?.length > 0) {
+              const hebrewVersion = hebrewResponse.data.versions.find((v: any) => v.language === 'he');
+              if (hebrewVersion?.text) {
+                hebrewText = cleanText(Array.isArray(hebrewVersion.text) ? hebrewVersion.text.join(' ') : hebrewVersion.text);
+              }
+            }
             
             // Fetch English version with correct Sefaria API format
             const englishUrl = url + '?version=english&return_format=text_only';
             let englishText = '';
             try {
               const englishResponse = await serverAxiosClient.get(englishUrl);
-              englishText = cleanText(englishResponse.data || '');
+              
+              // Extract English text from API response
+              if (englishResponse.data?.text && Array.isArray(englishResponse.data.text)) {
+                englishText = cleanText(englishResponse.data.text.join(' '));
+              } else if (englishResponse.data?.versions?.length > 0) {
+                const englishVersion = englishResponse.data.versions.find((v: any) => v.language === 'en');
+                if (englishVersion?.text) {
+                  englishText = cleanText(Array.isArray(englishVersion.text) ? englishVersion.text.join(' ') : englishVersion.text);
+                }
+              }
               console.log('Found English text:', englishText.substring(0, 50) + '...');
             } catch (englishError) {
               console.log('No English version available for:', url);
