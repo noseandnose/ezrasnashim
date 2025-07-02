@@ -514,7 +514,17 @@ export class DatabaseStorage implements IStorage {
 
   async getPirkeiAvotByDate(date: string): Promise<{text: string; chapter: number; source: string} | undefined> {
     try {
-      // Use the new daily cycling system from getSefariaPirkeiAvot
+      // Check if we need to advance to next verse for a new day
+      const progress = await this.getPirkeiAvotProgress();
+      const today = new Date().toISOString().split('T')[0];
+      const lastUpdated = new Date(progress.lastUpdated).toISOString().split('T')[0];
+      
+      // If it's a new day, advance to next verse
+      if (today !== lastUpdated) {
+        await this.getNextPirkeiAvotReference(); // This will advance and update the database
+      }
+      
+      // Now get the current verse content
       return await this.getSefariaPirkeiAvot(1); // Pass any number, function calculates based on date internally
     } catch (error) {
       console.error('Error getting Pirkei Avot:', error);
