@@ -20,6 +20,8 @@ function MorningBrochasModal() {
   const { activeModal, closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
+  const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
+  const [fontSize, setFontSize] = useState(16);
   
   // Sefaria API URLs for morning blessings
   // Fetch all morning blessing texts from backend proxy
@@ -28,13 +30,16 @@ function MorningBrochasModal() {
     queryFn: async () => {
       try {
         const response = await axiosClient.get('/api/sefaria/morning-brochas');
+        console.log('Frontend received:', response.data);
         return response.data; // Returns array of {hebrew, english, ref} objects
       } catch (error) {
         console.error('Error fetching morning blessings:', error);
         return [];
       }
     },
-    enabled: activeModal === 'morning-brochas'
+    enabled: activeModal === 'morning-brochas',
+    refetchOnMount: true, // Force refetch to get latest cleaned data
+    staleTime: 0 // Don't cache this data
   });
 
   console.log('MorningBrochasModal - activeModal:', activeModal);
@@ -60,22 +65,69 @@ function MorningBrochasModal() {
           </p>
         </div>
 
-        <div className="bg-sand-light/20 rounded-2xl p-4 mb-6">
+        {/* Language Controls */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-black/70 font-medium">Language:</span>
+            <div className="flex bg-warm-gray/10 rounded-lg p-1">
+              <button
+                onClick={() => setLanguage('hebrew')}
+                className={`px-3 py-1 rounded text-xs font-medium transition-all ${
+                  language === 'hebrew' 
+                    ? 'bg-white text-black shadow-sm' 
+                    : 'text-black/60 hover:text-black'
+                }`}
+              >
+                עברית
+              </button>
+              <button
+                onClick={() => setLanguage('english')}
+                className={`px-3 py-1 rounded text-xs font-medium transition-all ${
+                  language === 'english' 
+                    ? 'bg-white text-black shadow-sm' 
+                    : 'text-black/60 hover:text-black'
+                }`}
+              >
+                English
+              </button>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-black/70 font-medium">Size:</span>
+            <button
+              onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+              className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+            >
+              <span className="text-xs font-medium">-</span>
+            </button>
+            <span className="text-xs font-medium text-black/70 w-6 text-center">{fontSize}</span>
+            <button
+              onClick={() => setFontSize(Math.min(24, fontSize + 2))}
+              className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+            >
+              <span className="text-xs font-medium">+</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Prayer Content */}
+        <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm border border-warm-gray/10">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6" style={{ fontSize: `${fontSize}px` }}>
               {morningBlessings?.map((blessing: any, index: number) => (
-                <div key={index} className="space-y-2">
-                  {blessing.hebrew && (
-                    <div className="heebo-regular text-right leading-relaxed text-sm">
+                <div key={index} className="space-y-3">
+                  {blessing.hebrew && (language === 'hebrew' || language === 'both') && (
+                    <div className="heebo-regular text-right leading-relaxed text-black">
                       {blessing.hebrew}
                     </div>
                   )}
-                  {blessing.english && (
-                    <div className="text-left leading-relaxed text-sm text-black/70">
+                  {blessing.english && (language === 'english' || language === 'both') && (
+                    <div className="text-left leading-relaxed text-black/70">
                       {blessing.english}
                     </div>
                   )}
