@@ -171,44 +171,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results = await Promise.all(
         morningBlessingUrls.map(async (url) => {
           try {
-            // Fetch Hebrew version
-            const hebrewUrl = url + '?lang=hebrew';
+            // Fetch Hebrew version with correct Sefaria API format
+            const hebrewUrl = url + '?version=hebrew&return_format=text_only';
             const hebrewResponse = await serverAxiosClient.get(hebrewUrl);
-            const hebrewVersions = hebrewResponse.data?.versions || [];
-            const hebrewVersion = hebrewVersions.find((v: any) => v.language === 'he');
+            const hebrewText = cleanText(hebrewResponse.data || '');
             
-            // Try multiple approaches for English translations
+            // Fetch English version with correct Sefaria API format
+            const englishUrl = url + '?version=english&return_format=text_only';
             let englishText = '';
-            
-            // Method 1: Try finding English in same API response
-            const englishVersionInOriginal = hebrewVersions.find((v: any) => v.language === 'en');
-            if (englishVersionInOriginal?.text) {
-              englishText = cleanText(englishVersionInOriginal.text);
-            } else {
-              // Method 2: Try specific English version URLs
-              const englishUrls = [
-                url + '?version=english',
-                url + '?lang=en',
-                url.replace('Siddur_Ashkenaz', 'Siddur_Ashkenaz_English')
-              ];
-              
-              for (const englishUrl of englishUrls) {
-                try {
-                  const englishResponse = await serverAxiosClient.get(englishUrl);
-                  const englishVersions = englishResponse.data?.versions || [];
-                  const englishVersion = englishVersions.find((v: any) => v.language === 'en');
-                  if (englishVersion?.text) {
-                    englishText = cleanText(englishVersion.text);
-                    console.log('Found English via:', englishUrl);
-                    break;
-                  }
-                } catch (error) {
-                  continue; // Try next URL
-                }
-              }
+            try {
+              const englishResponse = await serverAxiosClient.get(englishUrl);
+              englishText = cleanText(englishResponse.data || '');
+              console.log('Found English text:', englishText.substring(0, 50) + '...');
+            } catch (englishError) {
+              console.log('No English version available for:', url);
             }
-
-            const hebrewText = cleanText(hebrewVersion?.text || '');
             
             return {
               hebrew: hebrewText,
