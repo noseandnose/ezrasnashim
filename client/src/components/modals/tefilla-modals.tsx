@@ -66,29 +66,21 @@ function MorningBrochasModal() {
           </p>
         </div>
 
-        {/* Language and Size Controls */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <label className="flex items-center gap-1 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={showHebrew}
-                onChange={(e) => setShowHebrew(e.target.checked)}
-                className="w-3 h-3 text-blush bg-gray-100 border-gray-300 rounded focus:ring-blush focus:ring-2"
-              />
-              <span className="text-xs text-black/70 font-medium">עברית</span>
-            </label>
-            <label className="flex items-center gap-1 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={showEnglish}
-                onChange={(e) => setShowEnglish(e.target.checked)}
-                className="w-3 h-3 text-blush bg-gray-100 border-gray-300 rounded focus:ring-blush focus:ring-2"
-              />
-              <span className="text-xs text-black/70 font-medium">English</span>
-            </label>
-          </div>
-          
+        {/* Top Controls Bar matching other modals */}
+        <div className="flex items-center justify-between bg-sand-light/30 rounded-xl p-3 mb-4">
+          <Button
+            onClick={() => setShowHebrew(!showHebrew)}
+            variant="ghost"
+            size="sm"
+            className={`text-xs font-medium px-3 py-1 rounded-lg transition-all ${
+              showHebrew 
+                ? 'bg-blush text-white' 
+                : 'text-black/60 hover:text-black hover:bg-white/50'
+            }`}
+          >
+            {showHebrew ? 'עב' : 'EN'}
+          </Button>
+          <div className="flex-1"></div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-black/70 font-medium">Size:</span>
             <button
@@ -122,9 +114,9 @@ function MorningBrochasModal() {
                       {blessing.hebrew}
                     </div>
                   )}
-                  {blessing.english && showEnglish && (
+                  {!showHebrew && (
                     <div className="text-left leading-relaxed text-black/70">
-                      {blessing.english}
+                      {blessing.english || "English translation not available"}
                     </div>
                   )}
                 </div>
