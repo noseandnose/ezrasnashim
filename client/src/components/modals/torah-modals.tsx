@@ -138,7 +138,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     <>
       {/* Halacha Modal */}
       <Dialog open={activeModal === 'halacha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] overflow-y-auto font-sans" aria-describedby="halacha-description">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] font-sans" aria-describedby="halacha-description">
           <div id="halacha-description" className="sr-only">Daily Jewish law and practice content</div>
           
           <StandardModalHeader 
@@ -199,43 +199,47 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
       {/* Emuna Modal */}
       <Dialog open={activeModal === 'emuna'} onOpenChange={() => closeModal()}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="emuna-description">
-          <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-serif font-semibold mb-2">Daily Emuna</DialogTitle>
-            {emunaContent && (
-              <DialogDescription className="text-sm text-gray-600 font-sans">{emunaContent.title}</DialogDescription>
-            )}
-          </DialogHeader>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] font-sans" aria-describedby="emuna-description">
           <div id="emuna-description" className="sr-only">Daily faith strengthening and spiritual trust content</div>
           
-          {emunaContent && emunaContent.audioUrl && (
-            <div className="space-y-4">
-              <AudioPlayer 
-                title={emunaContent.title || 'Emuna'}
-                duration={emunaContent.duration || "10:00"}
-                audioUrl={emunaContent.audioUrl}
-              />
-              {emunaContent.speaker && (
-                <p className="text-sm text-gray-600 text-center">
-                  <strong>Speaker:</strong> {emunaContent.speaker}
-                </p>
-              )}
-            </div>
-          )}
+          <StandardModalHeader 
+            title="Daily Emuna"
+            showHebrew={showHebrew}
+            setShowHebrew={setShowHebrew}
+            fontSize={fontSize}
+            setFontSize={setFontSize}
+          />
           
-          {emunaContent && !emunaContent.audioUrl && (
-            <div className="space-y-3 text-sm text-gray-700 font-sans">
-              <div>
-                <p><strong>Today's Focus:</strong> {emunaContent.content}</p>
-                {emunaContent.author && (
-                  <p className="mt-2 text-xs text-gray-500">Author: {emunaContent.author}</p>
-                )}
-                {emunaContent.source && (
-                  <p className="mt-1 text-xs text-gray-500">Source: {emunaContent.source}</p>
+          <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm border border-warm-gray/10 min-h-[500px]">
+            {emunaContent && emunaContent.audioUrl && (
+              <div className="space-y-4">
+                <AudioPlayer 
+                  title={emunaContent.title || 'Emuna'}
+                  duration={emunaContent.duration || "10:00"}
+                  audioUrl={emunaContent.audioUrl}
+                />
+                {emunaContent.speaker && (
+                  <p className="text-sm text-black/60 text-center">
+                    <strong>Speaker:</strong> {emunaContent.speaker}
+                  </p>
                 )}
               </div>
-            </div>
-          )}
+            )}
+            
+            {emunaContent && !emunaContent.audioUrl && (
+              <div className="space-y-4" style={{ fontSize: `${fontSize}px` }}>
+                <div className="secular-one-bold text-right leading-relaxed text-black">
+                  {emunaContent.content}
+                </div>
+                {(emunaContent.author || emunaContent.source) && (
+                  <div className="text-xs text-black/60 text-center border-t border-warm-gray/10 pt-3 space-y-1">
+                    {emunaContent.author && <p>Author: {emunaContent.author}</p>}
+                    {emunaContent.source && <p>Source: {emunaContent.source}</p>}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
           
           {/* Thank You Section */}
           {emunaContent?.provider && (
@@ -272,17 +276,16 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
       {/* Chizuk Modal */}
       <Dialog open={activeModal === 'chizuk'} onOpenChange={() => closeModal()}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="chizuk-description">
-          <DialogHeader className="text-center">
-            <DialogTitle className="text-lg font-semibold mb-2">Daily Chizuk</DialogTitle>
-            <DialogDescription>Daily inspiration and spiritual strengthening</DialogDescription>
-            {chizukContent && (
-              <p className="text-sm text-gray-600 mb-4">
-                {chizukContent.title}
-              </p>
-            )}
-          </DialogHeader>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] font-sans" aria-describedby="chizuk-description">
           <div id="chizuk-description" className="sr-only">5-minute daily inspiration and spiritual strengthening content</div>
+          
+          <StandardModalHeader 
+            title="Daily Chizuk"
+            showHebrew={showHebrew}
+            setShowHebrew={setShowHebrew}
+            fontSize={fontSize}
+            setFontSize={setFontSize}
+          />
           
           {chizukContent && chizukContent.audioUrl && (
             <div className="space-y-4">

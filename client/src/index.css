@@ -416,8 +416,9 @@ html, body, #root {
 /* Bold Hebrew font for modern display with proper fallbacks */
 .secular-one-bold {
   font-family: "Noto Sans Hebrew", "Frank Ruhl Libre", "Arial Hebrew", sans-serif;
-  font-weight: 700; /* Use actual bold weight instead of Secular One */
+  font-weight: 700 !important; /* Force bold weight */
   direction: rtl;
+  font-style: normal;
 }
 
 .prayer-content .prayer-header {
