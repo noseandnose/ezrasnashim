@@ -211,7 +211,7 @@ export const dailyChizuk = pgTable("daily_chizuk", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const loshonHorah = pgTable("loshon_horah", {
+export const featuredContent = pgTable("featured_content", {
   id: serial("id").primaryKey(),
   date: date("date").notNull().unique(),
   title: text("title").notNull(),
@@ -297,7 +297,7 @@ export const insertDailyChizukSchema = createInsertSchema(dailyChizuk).omit({
   hebrewDate: z.string().optional(),
 });
 
-export const insertLoshonHorahSchema = createInsertSchema(loshonHorah).omit({
+export const insertFeaturedContentSchema = createInsertSchema(featuredContent).omit({
   id: true,
   createdAt: true,
 }).extend({
@@ -374,8 +374,8 @@ export type DailyEmuna = typeof dailyEmuna.$inferSelect;
 export type InsertDailyEmuna = z.infer<typeof insertDailyEmunaSchema>;
 export type DailyChizuk = typeof dailyChizuk.$inferSelect;
 export type InsertDailyChizuk = z.infer<typeof insertDailyChizukSchema>;
-export type LoshonHorah = typeof loshonHorah.$inferSelect;
-export type InsertLoshonHorah = z.infer<typeof insertLoshonHorahSchema>;
+export type FeaturedContent = typeof featuredContent.$inferSelect;
+export type InsertFeaturedContent = z.infer<typeof insertFeaturedContentSchema>;
 
 // Weekly Torah content types
 export type ShabbatRecipe = typeof shabbatRecipes.$inferSelect;

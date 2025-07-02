@@ -2,7 +2,7 @@ import serverAxiosClient from "./axiosClient";
 import { 
   calendarEvents, shopItems, 
   tehillimNames, globalTehillimProgress, minchaPrayers, sponsors, nishmasText,
-  dailyHalacha, dailyEmuna, dailyChizuk, loshonHorah,
+  dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
   shabbatRecipes, parshaVorts, tableInspirations, campaigns, womensPrayers, discountPromotions, pirkeiAvotProgress,
   type CalendarEvent, type InsertCalendarEvent,
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
@@ -11,7 +11,7 @@ import {
   type DailyHalacha, type InsertDailyHalacha,
   type DailyEmuna, type InsertDailyEmuna,
   type DailyChizuk, type InsertDailyChizuk,
-  type LoshonHorah, type InsertLoshonHorah,
+  type FeaturedContent, type InsertFeaturedContent,
   type ShabbatRecipe, type InsertShabbatRecipe,
   type ParshaVort, type InsertParshaVort,
   type TableInspiration, type InsertTableInspiration,
@@ -42,8 +42,8 @@ export interface IStorage {
   getDailyChizukByDate(date: string): Promise<DailyChizuk | undefined>;
   createDailyChizuk(chizuk: InsertDailyChizuk): Promise<DailyChizuk>;
   
-  getLoshonHorahByDate(date: string): Promise<LoshonHorah | undefined>;
-  createLoshonHorah(loshon: InsertLoshonHorah): Promise<LoshonHorah>;
+  getFeaturedContentByDate(date: string): Promise<FeaturedContent | undefined>;
+  createFeaturedContent(featured: InsertFeaturedContent): Promise<FeaturedContent>;
   
   getPirkeiAvotByDate(date: string): Promise<any | undefined>;
   createPirkeiAvot(pirkeiAvot: any): Promise<any>;
@@ -494,22 +494,22 @@ export class DatabaseStorage implements IStorage {
     return chizuk;
   }
 
-  async getLoshonHorahByDate(date: string): Promise<LoshonHorah | undefined> {
+  async getFeaturedContentByDate(date: string): Promise<FeaturedContent | undefined> {
     try {
       const result = await pool.query(
-        `SELECT id, date, title, content, halachic_source as "halachicSource", practical_tip as "practicalTip", provider, speaker_website as "speakerWebsite", created_at as "createdAt" FROM loshon_horah WHERE date = $1 LIMIT 1`,
+        `SELECT id, date, title, content, halachic_source as "halachicSource", practical_tip as "practicalTip", provider, speaker_website as "speakerWebsite", created_at as "createdAt" FROM featured_content WHERE date = $1 LIMIT 1`,
         [date]
       );
       return result.rows[0] || undefined;
     } catch (error) {
-      console.error('Failed to fetch loshon horah:', error);
+      console.error('Failed to fetch featured content:', error);
       return undefined;
     }
   }
 
-  async createLoshonHorah(insertLoshon: InsertLoshonHorah): Promise<LoshonHorah> {
-    const [loshon] = await db.insert(loshonHorah).values(insertLoshon).returning();
-    return loshon;
+  async createFeaturedContent(insertFeatured: InsertFeaturedContent): Promise<FeaturedContent> {
+    const [featured] = await db.insert(featuredContent).values(insertFeatured).returning();
+    return featured;
   }
 
   async getPirkeiAvotByDate(date: string): Promise<{text: string; chapter: number; source: string} | undefined> {

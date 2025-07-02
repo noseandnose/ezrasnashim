@@ -14,7 +14,7 @@ import {
   insertDailyHalachaSchema,
   insertDailyEmunaSchema,
   insertDailyChizukSchema,
-  insertLoshonHorahSchema,
+  insertFeaturedContentSchema,
   insertShabbatRecipeSchema,
   insertParshaVortSchema,
   insertTableInspirationSchema,
