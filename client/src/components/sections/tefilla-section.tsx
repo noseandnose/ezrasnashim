@@ -400,7 +400,10 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
         {/* Top Row: Morning Brochas and Mincha */}
         <div className="grid grid-cols-2 gap-2">
           <button 
-            onClick={() => openModal('morning-brochas')}
+            onClick={() => {
+              console.log('Morning Brochas button clicked');
+              openModal('morning-brochas');
+            }}
             className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
           >
             <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">

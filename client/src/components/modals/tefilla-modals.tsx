@@ -73,6 +73,8 @@ function MorningBrochasModal() {
     enabled: activeModal === 'morning-brochas'
   });
 
+  console.log('MorningBrochasModal - activeModal:', activeModal);
+  
   return (
     <Dialog open={activeModal === 'morning-brochas'} onOpenChange={() => closeModal()}>
       <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans" aria-describedby="morning-brochas-description">
