@@ -25,7 +25,7 @@ const StandardModalHeader = ({
   fontSize: number;
   setFontSize: (size: number) => void;
 }) => (
-  <div className="flex items-center justify-center mb-6 relative">
+  <div className="flex items-center justify-center mb-3 relative">
     <div className="flex items-center gap-6">
       <Button
         onClick={() => setShowHebrew(!showHebrew)}
@@ -149,7 +149,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             setFontSize={setFontSize}
           />
           
-          <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
             {halachaContent && (
               <div className="space-y-4" style={{ fontSize: `${fontSize}px` }}>
                 <div className="secular-one-bold text-right leading-relaxed text-black">
@@ -210,7 +210,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             setFontSize={setFontSize}
           />
           
-          <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
             {emunaContent && emunaContent.audioUrl && (
               <div className="space-y-4">
                 <AudioPlayer 
@@ -287,7 +287,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             setFontSize={setFontSize}
           />
           
-          <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
             {chizukContent && chizukContent.audioUrl && (
               <div className="space-y-4">
                 <AudioPlayer 
