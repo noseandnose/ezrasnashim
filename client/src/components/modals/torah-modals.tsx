@@ -149,7 +149,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             setFontSize={setFontSize}
           />
           
-          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[75vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
             {halachaContent && (
               <div className="space-y-4" style={{ fontSize: `${fontSize}px` }}>
                 <div className="secular-one-bold text-right leading-relaxed text-black">
@@ -210,7 +210,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             setFontSize={setFontSize}
           />
           
-          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[75vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
             {emunaContent && emunaContent.audioUrl && (
               <div className="space-y-4">
                 <AudioPlayer 
@@ -287,7 +287,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             setFontSize={setFontSize}
           />
           
-          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[75vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
             {chizukContent && chizukContent.audioUrl && (
               <div className="space-y-4">
                 <AudioPlayer 
