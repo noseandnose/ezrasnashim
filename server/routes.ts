@@ -152,43 +152,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
         "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Morning_Blessings.18"
       ];
 
-      // Fetch all morning blessing texts from Sefaria
+      // Clean HTML markup from text
+      const cleanText = (text: string) => {
+        if (!text) return '';
+        return text
+          .replace(/<[^>]*>/g, '') // Remove all HTML tags
+          .replace(/&nbsp;/g, ' ') // Replace non-breaking spaces
+          .replace(/&amp;/g, '&') // Replace HTML entities
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'")
+          .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+          .trim();
+      };
+
+      // Fetch both Hebrew and English versions
       const results = await Promise.all(
         morningBlessingUrls.map(async (url) => {
           try {
-            const response = await serverAxiosClient.get(url);
+            // Fetch Hebrew version
+            const hebrewResponse = await serverAxiosClient.get(url);
+            const hebrewVersions = hebrewResponse.data?.versions || [];
+            const hebrewVersion = hebrewVersions.find((v: any) => v.language === 'he');
             
-            // Extract text from the versions array (Hebrew first, then English)
-            const versions = response.data?.versions || [];
-            const hebrewVersion = versions.find((v: any) => v.language === 'he');
-            const englishVersion = versions.find((v: any) => v.language === 'en');
-            
-            // Clean HTML markup from text
-            const cleanText = (text: string) => {
-              if (!text) return '';
-              console.log('Original text:', text);
-              const cleaned = text
-                .replace(/<[^>]*>/g, '') // Remove all HTML tags
-                .replace(/&nbsp;/g, ' ') // Replace non-breaking spaces
-                .replace(/&amp;/g, '&') // Replace HTML entities
-                .replace(/&lt;/g, '<')
-                .replace(/&gt;/g, '>')
-                .replace(/&quot;/g, '"')
-                .replace(/&#39;/g, "'")
-                .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-                .trim();
-              console.log('Cleaned text:', cleaned);
-              return cleaned;
-            };
+            // Fetch English version by modifying URL
+            const englishUrl = url + '?version=english';
+            let englishText = '';
+            try {
+              const englishResponse = await serverAxiosClient.get(englishUrl);
+              const englishVersions = englishResponse.data?.versions || [];
+              const englishVersion = englishVersions.find((v: any) => v.language === 'en');
+              englishText = cleanText(englishVersion?.text || '');
+            } catch (englishError) {
+              console.log('No English version available for:', url);
+            }
 
-            // Prefer Hebrew text, fall back to English if Hebrew is not available
             const hebrewText = cleanText(hebrewVersion?.text || '');
-            const englishText = cleanText(englishVersion?.text || '');
             
             return {
               hebrew: hebrewText,
               english: englishText,
-              ref: response.data?.ref || ''
+              ref: hebrewResponse.data?.ref || ''
             };
           } catch (error) {
             console.error('Error fetching morning blessing from Sefaria:', error);
