@@ -26,22 +26,26 @@ function MorningBrochasModal() {
   
   // Sefaria API URLs for morning blessings
   // Fetch all morning blessing texts from backend proxy
-  const { data: morningBlessings, isLoading } = useQuery({
-    queryKey: ['morning-blessings-correct-format'],
+  const { data: morningBlessings, isLoading, error } = useQuery({
+    queryKey: ['morning-blessings-fixed-format-v2'],
     queryFn: async () => {
-      try {
-        const response = await axiosClient.get('/api/sefaria/morning-brochas');
-        console.log('Frontend received:', response.data);
-        return response.data; // Returns array of {hebrew, english, ref} objects
-      } catch (error) {
-        console.error('Error fetching morning blessings:', error);
-        return [];
-      }
+      console.log('Making API call for morning blessings...');
+      const response = await axiosClient.get('/api/sefaria/morning-brochas');
+      console.log('Frontend received response:', response.data);
+      console.log('Number of blessings:', response.data?.length);
+      console.log('First blessing sample:', response.data?.[0]);
+      return response.data; // Returns array of {hebrew, english, ref} objects
     },
     enabled: activeModal === 'morning-brochas',
-    refetchOnMount: true, // Force refetch to get latest cleaned data
-    staleTime: 0 // Don't cache this data
+    refetchOnMount: true,
+    staleTime: 0,
+    cacheTime: 0 // Completely disable caching
   });
+
+  console.log('MorningBrochasModal - activeModal:', activeModal);
+  console.log('MorningBrochasModal - isLoading:', isLoading);
+  console.log('MorningBrochasModal - error:', error);
+  console.log('MorningBrochasModal - data:', morningBlessings);
 
   console.log('MorningBrochasModal - activeModal:', activeModal);
   
