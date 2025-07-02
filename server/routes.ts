@@ -159,13 +159,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const cleanText = (text: string) => {
               if (!text) return '';
               return text
-                .replace(/<[^>]*>/g, '') // Remove HTML tags
+                .replace(/<\/?[^>]+(>|$)/g, '') // Remove all HTML tags including self-closing
+                .replace(/<b\/>/g, '') // Remove specific problematic tags
+                .replace(/<\/b>/g, '')
+                .replace(/<small\/>/g, '')
+                .replace(/<\/small>/g, '')
                 .replace(/&nbsp;/g, ' ') // Replace non-breaking spaces
                 .replace(/&amp;/g, '&') // Replace HTML entities
                 .replace(/&lt;/g, '<')
                 .replace(/&gt;/g, '>')
                 .replace(/&quot;/g, '"')
                 .replace(/&#39;/g, "'")
+                .replace(/\s+/g, ' ') // Replace multiple spaces with single space
                 .trim();
             };
 
