@@ -419,7 +419,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           
           {/* Standardized Header */}
           <div className="flex items-center justify-center mb-3 relative">
-            <div className="absolute left-0 flex items-center">
+            <div className="flex items-center gap-4">
               <Button
                 onClick={() => setShowHebrew(!showHebrew)}
                 variant="ghost"
@@ -432,31 +432,31 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               >
                 {showHebrew ? 'עב' : 'EN'}
               </Button>
-            </div>
-            
-            <DialogTitle className="text-lg font-serif font-bold text-black">Tehillim {progress?.currentPerek || 1}</DialogTitle>
-            
-            <div className="absolute right-0 flex items-center gap-2">
-              <button
-                onClick={() => setFontSize(Math.max(12, fontSize - 2))}
-                className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
-              >
-                <Minus className="w-3 h-3" />
-              </button>
-              <span className="text-xs text-black/60 font-medium">{fontSize}px</span>
-              <button
-                onClick={() => setFontSize(Math.min(28, fontSize + 2))}
-                className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
-              >
-                <Plus className="w-3 h-3" />
-              </button>
+              
+              <DialogTitle className="text-lg font-serif font-bold text-black">Tehillim {progress?.currentPerek || 1}</DialogTitle>
+              
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                >
+                  <Minus className="w-3 h-3" />
+                </button>
+                <span className="text-xs text-black/60 font-medium">{fontSize}px</span>
+                <button
+                  onClick={() => setFontSize(Math.min(28, fontSize + 2))}
+                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                >
+                  <Plus className="w-3 h-3" />
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Standardized Content Area */}
           <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
             <div
-              className={`${showHebrew ? 'noto-sans-hebrew-bold text-right' : 'font-english'} leading-relaxed text-black`}
+              className={`${showHebrew ? 'secular-one-bold text-right' : 'font-english'} leading-relaxed text-black`}
               style={{ fontSize: `${fontSize}px` }}
             >
               {getTehillimDisplayText()}
@@ -1137,7 +1137,7 @@ function IndividualTehillimModal() {
     <>
       {/* Standardized Header */}
       <div className="flex items-center justify-center mb-3 relative">
-        <div className="absolute left-0 flex items-center">
+        <div className="flex items-center gap-4">
           <Button
             onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
             variant="ghost"
@@ -1150,24 +1150,24 @@ function IndividualTehillimModal() {
           >
             {language === 'hebrew' ? 'עב' : 'EN'}
           </Button>
-        </div>
-        
-        <DialogTitle className="text-lg font-serif font-bold text-black">Tehillim {selectedPsalm}</DialogTitle>
-        
-        <div className="absolute right-0 flex items-center gap-2">
-          <button
-            onClick={() => setFontSize(Math.max(12, fontSize - 2))}
-            className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
-          >
-            <Minus className="w-3 h-3" />
-          </button>
-          <span className="text-xs text-black/60 font-medium">{fontSize}px</span>
-          <button
-            onClick={() => setFontSize(Math.min(28, fontSize + 2))}
-            className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
-          >
-            <Plus className="w-3 h-3" />
-          </button>
+          
+          <DialogTitle className="text-lg font-serif font-bold text-black">Tehillim {selectedPsalm}</DialogTitle>
+          
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+              className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+            >
+              <Minus className="w-3 h-3" />
+            </button>
+            <span className="text-xs text-black/60 font-medium">{fontSize}px</span>
+            <button
+              onClick={() => setFontSize(Math.min(28, fontSize + 2))}
+              className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+            >
+              <Plus className="w-3 h-3" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1179,7 +1179,7 @@ function IndividualTehillimModal() {
           </div>
         ) : (
           <div
-            className={`${language === 'hebrew' ? 'noto-sans-hebrew-bold text-right' : 'font-english text-left'} leading-relaxed text-black`}
+            className={`${language === 'hebrew' ? 'secular-one-bold text-right' : 'font-english text-left'} leading-relaxed text-black`}
             style={{ fontSize: `${fontSize}px` }}
           >
             {tehillimText?.text || `Psalm ${selectedPsalm} text loading...`}
