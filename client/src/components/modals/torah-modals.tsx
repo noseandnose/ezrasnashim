@@ -202,13 +202,10 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] font-sans" aria-describedby="emuna-description">
           <div id="emuna-description" className="sr-only">Daily faith strengthening and spiritual trust content</div>
           
-          <StandardModalHeader 
-            title="Daily Emuna"
-            showHebrew={showHebrew}
-            setShowHebrew={setShowHebrew}
-            fontSize={fontSize}
-            setFontSize={setFontSize}
-          />
+          {/* Simple Header for Audio Content */}
+          <div className="flex items-center justify-center mb-3 relative">
+            <DialogTitle className="text-lg font-serif font-bold text-black">Daily Emuna</DialogTitle>
+          </div>
           
           <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
             {emunaContent && emunaContent.audioUrl && (
@@ -279,13 +276,10 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] font-sans" aria-describedby="chizuk-description">
           <div id="chizuk-description" className="sr-only">5-minute daily inspiration and spiritual strengthening content</div>
           
-          <StandardModalHeader 
-            title="Daily Chizuk"
-            showHebrew={showHebrew}
-            setShowHebrew={setShowHebrew}
-            fontSize={fontSize}
-            setFontSize={setFontSize}
-          />
+          {/* Simple Header for Audio Content */}
+          <div className="flex items-center justify-center mb-3 relative">
+            <DialogTitle className="text-lg font-serif font-bold text-black">Daily Chizuk</DialogTitle>
+          </div>
           
           <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
             {chizukContent && chizukContent.audioUrl && (
