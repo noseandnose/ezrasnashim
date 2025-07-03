@@ -423,8 +423,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             <h3 className="font-serif text-sm text-black mb-1 font-bold">Mincha</h3>
             <p className="font-sans text-xs text-black/60">
               {isLoading ? "Loading..." : 
-               times?.minchaGedolah && times?.minchaKetanah ? 
-               `${times.minchaGedolah} - ${times.minchaKetanah}` : 
+               times?.minchaGedolah && times?.shkia ? 
+               `${times.minchaGedolah} - ${times.shkia}` : 
                "Loading..."}
             </p>
           </button>
