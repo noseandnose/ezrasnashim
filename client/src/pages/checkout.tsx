@@ -66,7 +66,19 @@ const CheckoutForm = ({ clientSecret }: { clientSecret: string }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <PaymentElement />
+          <PaymentElement 
+            options={{
+              layout: 'tabs',
+              paymentMethodOrder: ['apple_pay', 'google_pay', 'card'],
+              fields: {
+                billingDetails: 'never'
+              },
+              wallets: {
+                applePay: 'auto',
+                googlePay: 'auto'
+              }
+            }}
+          />
           
           <div className="space-y-3">
             <Button

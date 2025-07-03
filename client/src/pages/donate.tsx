@@ -87,7 +87,7 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
       <PaymentElement 
         options={{
           layout: 'tabs',
-          paymentMethodOrder: ['card'],
+          paymentMethodOrder: ['apple_pay', 'google_pay', 'card'],
           fields: {
             billingDetails: 'never'
           },
