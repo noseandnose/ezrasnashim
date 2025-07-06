@@ -120,10 +120,10 @@ export default function TimesModals() {
       {/* Hebrew Date Calculator Modal */}
       <Dialog open={activeModal === 'date-calculator'} onOpenChange={() => closeModal()}>
         <DialogContent>
-          <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-semibold">Hebrew Date Calculator</DialogTitle>
-            <DialogDescription>Convert English dates to Hebrew dates and add recurring events to your calendar</DialogDescription>
-          </DialogHeader>
+          <div className="flex items-center justify-center mb-3 relative">
+            <DialogTitle className="text-lg font-serif font-bold text-black">Hebrew Date Calculator</DialogTitle>
+          </div>
+          <p className="text-sm text-gray-600 mb-4 text-center">Convert English dates to Hebrew dates and add recurring events to your calendar</p>
           
           <div className="space-y-4">
             <div>

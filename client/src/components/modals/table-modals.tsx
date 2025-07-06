@@ -36,10 +36,9 @@ export default function TableModals() {
       {/* Recipe Modal */}
       <Dialog open={activeModal === 'recipe'} onOpenChange={() => closeModal()}>
         <DialogContent className="max-h-[80vh] overflow-y-auto">
-          <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-semibold mb-2">Shabbat Recipe</DialogTitle>
-            <DialogDescription className="text-sm text-gray-600">Traditional Challah</DialogDescription>
-          </DialogHeader>
+          <div className="flex items-center justify-center mb-3 relative">
+            <DialogTitle className="text-lg font-serif font-bold text-black">Shabbat Recipe</DialogTitle>
+          </div>
           
           <div className="space-y-4 text-sm text-gray-700">
             <div>
@@ -65,10 +64,9 @@ export default function TableModals() {
       {/* Table Inspiration Modal */}
       <Dialog open={activeModal === 'inspiration'} onOpenChange={() => closeModal()}>
         <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="inspiration-description">
-          <DialogHeader className="text-center mb-2">
-            <DialogTitle className="text-lg font-semibold">Shabbas Inspiration</DialogTitle>
-            <DialogDescription className="sr-only">Shabbas table inspiration modal</DialogDescription>
-          </DialogHeader>
+          <div className="flex items-center justify-center mb-3 relative">
+            <DialogTitle className="text-lg font-serif font-bold text-black">Shabbas Inspiration</DialogTitle>
+          </div>
           <div id="inspiration-description" className="sr-only">Daily table inspiration and decorating ideas for Shabbat</div>
           
           {inspirationContent ? (
@@ -167,12 +165,12 @@ export default function TableModals() {
       {/* Parsha Shiur Modal */}
       <Dialog open={activeModal === 'parsha'} onOpenChange={() => closeModal()}>
         <DialogContent>
-          <DialogHeader className="text-center">
-            <DialogTitle className="text-lg font-semibold mb-2">Parsha Shiur</DialogTitle>
-            <p className="text-sm text-gray-600 mb-4">
-              {parshaContent?.title || "This Week's Torah Portion"}
-            </p>
-          </DialogHeader>
+          <div className="flex items-center justify-center mb-3 relative">
+            <DialogTitle className="text-lg font-serif font-bold text-black">Parsha Shiur</DialogTitle>
+          </div>
+          <p className="text-sm text-gray-600 mb-4 text-center">
+            {parshaContent?.title || "This Week's Torah Portion"}
+          </p>
           
           <AudioPlayer 
             title={parshaContent?.title || "Parsha Shiur"}

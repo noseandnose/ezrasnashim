@@ -41,14 +41,14 @@ export default function ShopModals() {
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent className="max-h-[80vh] overflow-y-auto">
-        <DialogHeader className="text-center mb-4">
-          <DialogTitle className="text-lg font-serif font-semibold mb-2">
+        <div className="flex items-center justify-center mb-3 relative">
+          <DialogTitle className="text-lg font-serif font-bold text-black">
             {shopItem ? shopItem.storeName : 'Store Details'}
           </DialogTitle>
-          {shopItem && (
-            <DialogDescription className="text-sm text-gray-600 font-sans">{shopItem.title}</DialogDescription>
-          )}
-        </DialogHeader>
+        </div>
+        {shopItem && (
+          <p className="text-sm text-gray-600 font-sans text-center mb-4">{shopItem.title}</p>
+        )}
 
         {isLoading ? (
           <div className="flex items-center justify-center py-8">

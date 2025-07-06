@@ -73,10 +73,10 @@ export default function DonationModal() {
   return (
     <Dialog open={activeModal === 'donate'} onOpenChange={() => closeModal()}>
       <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto gradient-soft-glow rounded-3xl p-6 font-sans border border-blush/20">
-        <DialogHeader className="text-center mb-4">
-          <DialogTitle className="text-lg font-serif font-semibold mb-2 text-warm-gray">Support Causes</DialogTitle>
-          <p className="text-xs text-warm-gray/70 font-sans">Support our community with your generous contribution</p>
-        </DialogHeader>
+        <div className="flex items-center justify-center mb-3 relative">
+          <DialogTitle className="text-lg font-serif font-bold text-black">Support Causes</DialogTitle>
+        </div>
+        <p className="text-xs text-warm-gray/70 font-sans text-center mb-4">Support our community with your generous contribution</p>
 
         <div className="space-y-3 text-sm text-gray-700">
           {/* Quick Amount Buttons */}

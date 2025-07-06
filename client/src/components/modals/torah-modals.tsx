@@ -26,7 +26,7 @@ const StandardModalHeader = ({
   setFontSize: (size: number) => void;
 }) => (
   <div className="flex items-center justify-center mb-3 relative">
-    <div className="flex items-center gap-6">
+    <div className="flex items-center gap-4">
       <Button
         onClick={() => setShowHebrew(!showHebrew)}
         variant="ghost"

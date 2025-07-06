@@ -8,15 +8,15 @@ export default function CongratulationsModal() {
   return (
     <Dialog open={activeModal === 'congratulations'} onOpenChange={() => closeModal()}>
       <DialogContent className="w-full max-w-sm rounded-3xl p-8 font-sans text-center">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-serif font-semibold text-warm-gray mb-4">
+        <div className="flex items-center justify-center mb-3 relative">
+          <DialogTitle className="text-2xl font-serif font-bold text-black">
             Mazal Tov!
           </DialogTitle>
-          <DialogDescription className="text-warm-gray/80 mb-6 leading-relaxed">
+        </div>
+        <DialogDescription className="text-warm-gray/80 mb-6 leading-relaxed">
             You have completed all three daily Mitzvahs: Torah learning, Tefilla, and Tzedaka. 
             May your spiritual growth continue and bring you and your family abundant blessings.
           </DialogDescription>
-        </DialogHeader>
 
         {/* Flower SVG in color scheme */}
         <div className="flex justify-center mb-6">

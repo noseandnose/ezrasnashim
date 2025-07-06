@@ -87,10 +87,10 @@ export default function TzedakaModals() {
       {/* Sponsor a Day Modal */}
       <Dialog open={activeModal === 'sponsor-day'} onOpenChange={() => closeModal()}>
         <DialogContent aria-describedby="sponsor-day-description">
-          <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-serif font-semibold mb-2 text-warm-gray">Sponsor a Day</DialogTitle>
-            <p className="text-xs text-warm-gray/70 font-sans">Dedicate all mitzvot done on the app for one day - $180</p>
-          </DialogHeader>
+          <div className="flex items-center justify-center mb-3 relative">
+            <DialogTitle className="text-lg font-serif font-bold text-black">Sponsor a Day</DialogTitle>
+          </div>
+          <p className="text-xs text-warm-gray/70 font-sans text-center mb-4">Dedicate all mitzvot done on the app for one day - $180</p>
           <div id="sponsor-day-description" className="sr-only">Daily sponsorship and dedication options</div>
           
           <div className="space-y-4">
@@ -145,15 +145,10 @@ export default function TzedakaModals() {
       {/* Torah Dedication Modal */}
       <Dialog open={activeModal === 'torah-dedication'} onOpenChange={() => closeModal()}>
         <DialogContent aria-describedby="torah-dedication-description">
-          <DialogHeader className="text-center mb-4">
-            <div className="flex items-center justify-center mb-2">
-              <BookOpen className="text-peach mr-2" size={20} />
-              <DialogTitle className="text-lg font-semibold">Torah Dedication</DialogTitle>
-            </div>
-            <DialogDescription className="text-sm text-gray-600">
-              Dedicate a Letter, Pasuk, Perek or Parsha
-            </DialogDescription>
-          </DialogHeader>
+          <div className="flex items-center justify-center mb-3 relative">
+            <DialogTitle className="text-lg font-serif font-bold text-black">Torah Dedication</DialogTitle>
+          </div>
+          <p className="text-sm text-gray-600 text-center mb-4">Dedicate a Letter, Pasuk, Perek or Parsha</p>
           <div id="torah-dedication-description" className="sr-only">Torah learning sponsorship and dedication options</div>
           
           <div className="space-y-4">
@@ -214,15 +209,10 @@ export default function TzedakaModals() {
       {/* Infertility Support Modal */}
       <Dialog open={activeModal === 'infertility-support'} onOpenChange={() => closeModal()}>
         <DialogContent aria-describedby="infertility-support-description">
-          <DialogHeader className="text-center mb-4">
-            <div className="flex items-center justify-center mb-2">
-              <Baby className="text-rose-500 mr-2" size={20} />
-              <DialogTitle className="text-lg font-semibold">Infertility Support</DialogTitle>
-            </div>
-            <DialogDescription className="text-sm text-gray-600">
-              Support couples struggling with fertility challenges
-            </DialogDescription>
-          </DialogHeader>
+          <div className="flex items-center justify-center mb-3 relative">
+            <DialogTitle className="text-lg font-serif font-bold text-black">Infertility Support</DialogTitle>
+          </div>
+          <p className="text-sm text-gray-600 text-center mb-4">Support couples struggling with fertility challenges</p>
           <div id="infertility-support-description" className="sr-only">Fertility support and assistance for couples</div>
           
           <div className="space-y-4">
@@ -287,15 +277,10 @@ export default function TzedakaModals() {
       {/* Abuse Support Modal */}
       <Dialog open={activeModal === 'abuse-support'} onOpenChange={() => closeModal()}>
         <DialogContent>
-          <DialogHeader className="text-center mb-4">
-            <div className="flex items-center justify-center mb-2">
-              <Shield className="text-purple-500 mr-2" size={20} />
-              <DialogTitle className="text-lg font-semibold">Abuse Support</DialogTitle>
-            </div>
-            <DialogDescription className="text-sm text-gray-600">
-              Support women escaping abusive situations
-            </DialogDescription>
-          </DialogHeader>
+          <div className="flex items-center justify-center mb-3 relative">
+            <DialogTitle className="text-lg font-serif font-bold text-black">Abuse Support</DialogTitle>
+          </div>
+          <p className="text-sm text-gray-600 text-center mb-4">Support women escaping abusive situations</p>
           
           <div className="space-y-4">
             <div className="bg-purple-50 p-4 rounded-xl text-sm text-gray-700">

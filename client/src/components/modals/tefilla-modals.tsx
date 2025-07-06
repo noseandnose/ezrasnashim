@@ -30,7 +30,7 @@ const StandardModalHeader = ({
   setFontSize: (size: number) => void;
 }) => (
   <div className="flex items-center justify-center mb-3 relative">
-    <div className="flex items-center gap-6">
+    <div className="flex items-center gap-4">
       <Button
         onClick={() => setShowHebrew(!showHebrew)}
         variant="ghost"
@@ -105,8 +105,8 @@ function MorningBrochasModal() {
         <div id="morning-brochas-description" className="sr-only">Daily morning blessings and prayers of gratitude</div>
         
         {/* Standardized Header with centered controls */}
-        <div className="flex items-center justify-center mb-6 relative">
-          <div className="flex items-center gap-6">
+        <div className="flex items-center justify-center mb-3 relative">
+          <div className="flex items-center gap-4">
             <Button
               onClick={() => setShowHebrew(!showHebrew)}
               variant="ghost"
