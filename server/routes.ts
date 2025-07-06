@@ -19,7 +19,7 @@ import {
   insertParshaVortSchema,
   insertTableInspirationSchema,
   insertNishmasTextSchema
-} from "@shared/schema";
+} from "../shared/schema.js";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -673,6 +673,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(names);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch Tehillim names" });
+    }
+  });
+
+  // Global Tehillim Progress endpoint
+  app.get("/api/tehillim/global-progress", async (_req, res) => {
+    try {
+      const progress = await storage.getGlobalTehillimProgress();
+      res.json(progress);
+    } catch (error) {
+      console.error("Error fetching global tehillim progress:", error);
+      res.status(500).json({ message: "Failed to fetch global tehillim progress" });
     }
   });
 
