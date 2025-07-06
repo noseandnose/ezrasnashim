@@ -254,7 +254,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     const lastCompleted = localStorage.getItem('nishmas-last-completed');
     return lastCompleted === today;
   });
-  const [nishmasFontSize, setNishmasFontSize] = useState(16);
+  const [nishmasFontSize, setNishmasFontSize] = useState(20);
 
   const { data: minchaPrayers = [], isLoading } = useQuery<MinchaPrayer[]>({
     queryKey: ['/api/mincha/prayers'],
@@ -676,79 +676,64 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       {/* Nishmas Kol Chai Modal */}
       <Dialog open={activeModal === 'nishmas-campaign'} onOpenChange={() => closeModal()}>
         <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans ${isAnimating ? 'prayer-ascending' : ''}`}>
-          <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-serif font-semibold">Nishmas Kol Chai</DialogTitle>
-            <DialogDescription className="text-sm text-gray-600 font-sans">
-              A beautiful prayer of gratitude and praise
-            </DialogDescription>
-          </DialogHeader>
-          
-
-
-          {/* Prayer Text */}
-          <div className="mb-6">
-            <div className="bg-warm-white rounded-xl p-4 pt-[0px] pb-[0px]">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-1">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setNishmasFontSize(Math.max(12, nishmasFontSize - 2))}
-                    className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
-                    disabled={nishmasFontSize <= 12}
-                  >
-                    <Minus size={10} />
-                  </Button>
-                  <span className="text-xs text-gray-600 px-1">{nishmasFontSize}px</span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setNishmasFontSize(Math.min(24, nishmasFontSize + 2))}
-                    className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
-                    disabled={nishmasFontSize >= 24}
-                  >
-                    <Plus size={10} />
-                  </Button>
-                </div>
-                <h3 className="font-semibold text-center flex-1">
-                  {nishmasLanguage === 'hebrew' ? 'נשמת כל חי' : 'Nishmas Kol Chai'}
-                </h3>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setNishmasLanguage(nishmasLanguage === 'hebrew' ? 'english' : 'hebrew')}
-                  className="text-xs px-2 py-1 h-auto border-gray-300 bg-white hover:bg-gray-50"
+          {/* Standardized Header */}
+          <div className="flex items-center justify-center mb-3 relative">
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={() => setNishmasLanguage(nishmasLanguage === 'hebrew' ? 'english' : 'hebrew')}
+                variant="ghost"
+                size="sm"
+                className={`text-xs font-medium px-3 py-1 rounded-lg transition-all ${
+                  nishmasLanguage === 'hebrew' 
+                    ? 'bg-blush text-white' 
+                    : 'text-black/60 hover:text-black hover:bg-white/50'
+                }`}
+              >
+                {nishmasLanguage === 'hebrew' ? 'עב' : 'EN'}
+              </Button>
+              
+              <DialogTitle className="text-lg font-serif font-bold text-black">Nishmas Kol Chai</DialogTitle>
+              
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setNishmasFontSize(Math.max(12, nishmasFontSize - 2))}
+                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
                 >
-                  {nishmasLanguage === 'hebrew' ? 'EN' : 'עב'}
-                </Button>
-              </div>
-              <div className={`leading-relaxed ${
-                nishmasLanguage === 'hebrew' ? 'text-right david-libre-regular' : 'font-english'
-              }`} style={{ fontSize: `${nishmasFontSize}px` }}>
-                {nishmasLoading ? (
-                  <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-gray-600 text-sm">Loading prayer text...</p>
-                  </div>
-                ) : nishmasText ? (
-                  <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                    <p className="whitespace-pre-wrap leading-relaxed">
-                      {(nishmasText as any)?.fullText || nishmasText.fullText || 'Text not available'}
-                    </p>
-                    {(nishmasText as any)?.transliteration && nishmasLanguage === 'hebrew' && (
-                      <div className="mt-4 p-3 bg-gray-100 rounded-lg">
-                        <p className="text-sm text-gray-600 italic">
-                          {(nishmasText as any).transliteration}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="mb-4 p-3 bg-red-50 rounded-lg">
-                    <p className="text-red-600 text-sm">Failed to load prayer text</p>
-                  </div>
-                )}
+                  <Minus className="w-3 h-3" />
+                </button>
+                <span className="text-xs text-black/60 font-medium">{nishmasFontSize}px</span>
+                <button
+                  onClick={() => setNishmasFontSize(Math.min(28, nishmasFontSize + 2))}
+                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                >
+                  <Plus className="w-3 h-3" />
+                </button>
               </div>
             </div>
+          </div>
+
+          {/* Standardized Content Area */}
+          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
+            {nishmasLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
+              </div>
+            ) : (
+              <div 
+                className={`leading-relaxed text-black ${
+                  nishmasLanguage === 'hebrew' ? 'text-right secular-one-bold' : 'font-english text-left'
+                }`} 
+                style={{ fontSize: `${nishmasFontSize}px` }}
+              >
+                {nishmasText ? (
+                  <div className="whitespace-pre-wrap leading-relaxed">
+                    {(nishmasText as any)?.fullText || nishmasText.fullText || 'Text not available'}
+                  </div>
+                ) : (
+                  <div className="text-red-600 text-center">Failed to load prayer text</div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Complete Button */}
