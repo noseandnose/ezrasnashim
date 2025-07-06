@@ -402,9 +402,9 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
                     </span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    {getReasonIcon(currentName.reason, currentName.reasonEnglish)}
+                    {getReasonIcon(currentName.reason, currentName.reasonEnglish ?? undefined)}
                     <span className="text-xs text-black/60 font-sans">
-                      {getReasonShort(currentName.reason, currentName.reasonEnglish)}
+                      {getReasonShort(currentName.reason, currentName.reasonEnglish ?? undefined)}
                     </span>
                   </div>
                 </div>

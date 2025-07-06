@@ -333,7 +333,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     }
 
     return (
-      <div className={`text-sm leading-relaxed whitespace-pre-line ${showHebrew ? 'text-right font-hebrew' : 'font-english text-left'}`}>
+      <div 
+        className={`leading-relaxed whitespace-pre-line ${showHebrew ? 'text-right secular-one-bold' : 'font-english text-left'}`}
+        style={{ fontSize: `${fontSize}px` }}
+      >
         {tehillimText.text}
       </div>
     );
