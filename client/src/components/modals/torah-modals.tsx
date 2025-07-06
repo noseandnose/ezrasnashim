@@ -210,16 +210,16 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
             {emunaContent && emunaContent.audioUrl && (
               <div className="space-y-4">
-                <AudioPlayer 
-                  title={emunaContent.title || 'Emuna'}
-                  duration={emunaContent.duration || "10:00"}
-                  audioUrl={emunaContent.audioUrl}
-                />
                 {emunaContent.speaker && (
                   <p className="text-sm text-black/60 text-center">
                     <strong>Speaker:</strong> {emunaContent.speaker}
                   </p>
                 )}
+                <AudioPlayer 
+                  title={emunaContent.title || 'Emuna'}
+                  duration={emunaContent.duration || "10:00"}
+                  audioUrl={emunaContent.audioUrl}
+                />
               </div>
             )}
             
@@ -284,16 +284,16 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
             {chizukContent && chizukContent.audioUrl && (
               <div className="space-y-4">
-                <AudioPlayer 
-                  title={chizukContent.title || 'Chizuk'}
-                  duration={chizukContent.duration || "5:15"}
-                  audioUrl={chizukContent.audioUrl}
-                />
                 {chizukContent.speaker && (
                   <p className="text-sm text-black/60 text-center">
                     <strong>Speaker:</strong> {chizukContent.speaker}
                   </p>
                 )}
+                <AudioPlayer 
+                  title={chizukContent.title || 'Chizuk'}
+                  duration={chizukContent.duration || "5:15"}
+                  audioUrl={chizukContent.audioUrl}
+                />
               </div>
             )}
           </div>

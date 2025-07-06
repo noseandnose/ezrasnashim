@@ -22,7 +22,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
   const torahItems = [
     {
       id: 'chizuk',
-      icon: Play,
+      icon: Heart,
       title: 'Chizuk',
       subtitle: '5 minute inspiration',
       gradient: 'bg-white',
@@ -33,7 +33,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
     },
     {
       id: 'emuna',
-      icon: Play,
+      icon: Shield,
       title: 'Emuna',
       subtitle: 'Faith & Trust',
       gradient: 'bg-white',
