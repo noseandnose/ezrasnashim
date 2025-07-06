@@ -21,7 +21,21 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   const { data: times, isLoading } = useJewishTimes();
 
   // Helper functions for reason icons and short text
-  const getReasonIcon = (reason: string) => {
+  const getReasonIcon = (reason: string, reasonEnglish?: string) => {
+    // Map Hebrew reasons and English translations to icons
+    const reasonToCode = (r: string, eng?: string): string => {
+      if (r === "רפואה שלמה" || eng === "Complete Healing") return "health";
+      if (r === "שידוך" || eng === "Finding a mate") return "shidduch";
+      if (r === "זרע של קיימא" || eng === "Children") return "children";
+      if (r === "פרנסה" || eng === "Livelihood") return "parnassa";
+      if (r === "הצלחה" || eng === "Success") return "success";
+      if (r === "שלום בית" || eng === "Family") return "family";
+      if (r === "חכמה" || eng === "Education") return "education";
+      if (r === "עליית נשמה" || eng === "Peace") return "peace";
+      return "general";
+    };
+    
+    const code = reasonToCode(reason, reasonEnglish);
     const iconMap: Record<string, JSX.Element> = {
       'health': <Stethoscope size={12} className="text-red-500" />,
       'shidduch': <HeartHandshake size={12} className="text-pink-500" />,
@@ -34,10 +48,24 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
       'general': <Heart size={12} className="text-blush" />
     };
     
-    return iconMap[reason] || iconMap['general'];
+    return iconMap[code];
   };
 
-  const getReasonShort = (reason: string) => {
+  const getReasonShort = (reason: string, reasonEnglish?: string) => {
+    // Map Hebrew reasons and English translations to short text
+    const reasonToCode = (r: string, eng?: string): string => {
+      if (r === "רפואה שלמה" || eng === "Complete Healing") return "health";
+      if (r === "שידוך" || eng === "Finding a mate") return "shidduch";
+      if (r === "זרע של קיימא" || eng === "Children") return "children";
+      if (r === "פרנסה" || eng === "Livelihood") return "parnassa";
+      if (r === "הצלחה" || eng === "Success") return "success";
+      if (r === "שלום בית" || eng === "Family") return "family";
+      if (r === "חכמה" || eng === "Education") return "education";
+      if (r === "עליית נשמה" || eng === "Peace") return "peace";
+      return "general";
+    };
+    
+    const code = reasonToCode(reason, reasonEnglish);
     const shortMap: Record<string, string> = {
       'health': 'Health',
       'shidduch': 'Match',
@@ -50,7 +78,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
       'general': 'Prayer'
     };
     
-    return shortMap[reason] || 'Prayer';
+    return shortMap[code];
   };
   const queryClient = useQueryClient();
   
@@ -374,9 +402,9 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
                     </span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    {getReasonIcon(currentName.reason)}
+                    {getReasonIcon(currentName.reason, currentName.reasonEnglish)}
                     <span className="text-xs text-black/60 font-sans">
-                      {getReasonShort(currentName.reason)}
+                      {getReasonShort(currentName.reason, currentName.reasonEnglish)}
                     </span>
                   </div>
                 </div>
