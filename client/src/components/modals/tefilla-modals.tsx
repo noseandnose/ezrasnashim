@@ -29,7 +29,7 @@ const StandardModalHeader = ({
   fontSize: number;
   setFontSize: (size: number) => void;
 }) => (
-  <div className="flex items-center justify-center mb-3 relative">
+  <div className="flex items-center justify-center mb-3 relative pr-8">
     <div className="flex items-center gap-4">
       <Button
         onClick={() => setShowHebrew(!showHebrew)}
@@ -105,7 +105,7 @@ function MorningBrochasModal() {
         <div id="morning-brochas-description" className="sr-only">Daily morning blessings and prayers of gratitude</div>
         
         {/* Standardized Header with centered controls */}
-        <div className="flex items-center justify-center mb-3 relative">
+        <div className="flex items-center justify-center mb-3 relative pr-8">
           <div className="flex items-center gap-4">
             <Button
               onClick={() => setShowHebrew(!showHebrew)}
@@ -421,7 +421,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           <div id="tehillim-description" className="sr-only">Psalms reading and community prayer participation</div>
           
           {/* Standardized Header */}
-          <div className="flex items-center justify-center mb-3 relative">
+          <div className="flex items-center justify-center mb-3 relative pr-8">
             <div className="flex items-center gap-4">
               <Button
                 onClick={() => setShowHebrew(!showHebrew)}
@@ -683,7 +683,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       <Dialog open={activeModal === 'nishmas-campaign'} onOpenChange={() => closeModal()}>
         <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans ${isAnimating ? 'prayer-ascending' : ''}`}>
           {/* Standardized Header */}
-          <div className="flex items-center justify-center mb-3 relative">
+          <div className="flex items-center justify-center mb-3 relative pr-8">
             <div className="flex items-center gap-4">
               <Button
                 onClick={() => setNishmasLanguage(nishmasLanguage === 'hebrew' ? 'english' : 'hebrew')}
@@ -969,7 +969,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
   return (
     <>
       {/* Standardized Header */}
-      <div className="flex items-center justify-center mb-3 relative">
+      <div className="flex items-center justify-center mb-3 relative pr-8">
         <div className="flex items-center gap-4">
           <Button
             onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
@@ -1154,7 +1154,7 @@ function IndividualTehillimModal() {
   return (
     <>
       {/* Standardized Header */}
-      <div className="flex items-center justify-center mb-3 relative">
+      <div className="flex items-center justify-center mb-3 relative pr-8">
         <div className="flex items-center gap-4">
           <Button
             onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
