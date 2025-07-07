@@ -625,13 +625,16 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       </Dialog>
       {/* Tefillos Modal */}
       <Dialog open={activeModal === 'tefillos'} onOpenChange={() => closeModal()}>
-        <DialogContent className={isAnimating ? 'prayer-ascending' : ''} aria-describedby="tefillos-description">
-          <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-serif font-semibold">Tefillos</DialogTitle>
-            <p id="tefillos-description" className="text-xs text-warm-gray/70 mt-1">
-              Traditional prayers and their meanings
-            </p>
-          </DialogHeader>
+        <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[90vh] font-sans ${isAnimating ? 'prayer-ascending' : ''}`} aria-describedby="tefillos-description">
+          <div id="tefillos-description" className="sr-only">Traditional prayers and their meanings</div>
+          
+          <StandardModalHeader 
+            title="Tefillos"
+            showHebrew={showHebrew}
+            setShowHebrew={setShowHebrew}
+            fontSize={fontSize}
+            setFontSize={setFontSize}
+          />
           
           <div className="text-center text-gray-600 font-sans">
             Traditional prayers and their meanings...
@@ -650,13 +653,16 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       </Dialog>
       {/* Personal Prayers Modal */}
       <Dialog open={activeModal === 'personal-prayers'} onOpenChange={() => closeModal()}>
-        <DialogContent className={isAnimating ? 'prayer-ascending' : ''} aria-describedby="personal-prayers-description">
-          <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-serif font-semibold">Personal Prayers</DialogTitle>
-            <p id="personal-prayers-description" className="text-xs text-warm-gray/70 mt-1">
-              Guidance for personal prayer and connection
-            </p>
-          </DialogHeader>
+        <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[90vh] font-sans ${isAnimating ? 'prayer-ascending' : ''}`} aria-describedby="personal-prayers-description">
+          <div id="personal-prayers-description" className="sr-only">Guidance for personal prayer and connection</div>
+          
+          <StandardModalHeader 
+            title="Personal Prayers"
+            showHebrew={showHebrew}
+            setShowHebrew={setShowHebrew}
+            fontSize={fontSize}
+            setFontSize={setFontSize}
+          />
           
           <div className="text-center text-gray-600 font-sans">
             Guidance for personal prayer and connection...
@@ -779,27 +785,27 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       {/* Refuah Prayers Modal */}
       <Dialog open={activeModal === 'refuah'} onOpenChange={() => closeModal()}>
         <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
-          <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-serif font-semibold">Refuah Prayers</DialogTitle>
-          </DialogHeader>
+          <div className="flex items-center justify-center mb-3 relative">
+            <DialogTitle className="text-lg font-serif font-bold text-black">Refuah Prayers</DialogTitle>
+          </div>
           <RefuahPrayersList onPrayerSelect={handlePrayerSelect} />
         </DialogContent>
       </Dialog>
       {/* Family Prayers Modal */}
       <Dialog open={activeModal === 'family'} onOpenChange={() => closeModal()}>
         <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
-          <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-serif font-semibold">Family Prayers</DialogTitle>
-          </DialogHeader>
+          <div className="flex items-center justify-center mb-3 relative">
+            <DialogTitle className="text-lg font-serif font-bold text-black">Family Prayers</DialogTitle>
+          </div>
           <FamilyPrayersList onPrayerSelect={handlePrayerSelect} />
         </DialogContent>
       </Dialog>
       {/* Life Prayers Modal */}
       <Dialog open={activeModal === 'life'} onOpenChange={() => closeModal()}>
         <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
-          <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-serif font-semibold">Life Prayers</DialogTitle>
-          </DialogHeader>
+          <div className="flex items-center justify-center mb-3 relative">
+            <DialogTitle className="text-lg font-serif font-bold text-black">Life Prayers</DialogTitle>
+          </div>
           <LifePrayersList onPrayerSelect={handlePrayerSelect} />
         </DialogContent>
       </Dialog>
