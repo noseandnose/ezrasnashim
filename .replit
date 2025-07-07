@@ -6,11 +6,6 @@ hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 channel = "stable-24_05"
 packages = ["nano", "docker", "jq"]
 
-# [deployment]
-# deploymentTarget = "autoscale"
-# # build = ["npm", "run", "build"]
-# run = ["npm", "run", "dev"]
-
 [[ports]]
 localPort = 80
 externalPort = 3002

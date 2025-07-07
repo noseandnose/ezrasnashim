@@ -972,6 +972,10 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
 
   return (
     <>
+      <DialogHeader>
+        <DialogTitle className="sr-only">{prayer.prayerName}</DialogTitle>
+      </DialogHeader>
+      
       {/* Standardized Header */}
       <div className="flex items-center justify-center mb-3 relative pr-8">
         <div className="flex items-center gap-4">
@@ -988,7 +992,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
             {language === 'hebrew' ? 'עב' : 'EN'}
           </Button>
           
-          <DialogTitle className="text-lg font-serif font-bold text-black">{prayer.prayerName}</DialogTitle>
+          <h2 className="text-lg font-serif font-bold text-black">{prayer.prayerName}</h2>
           
           <div className="flex items-center gap-2">
             <button
