@@ -784,8 +784,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       </Dialog>
       {/* Refuah Prayers Modal */}
       <Dialog open={activeModal === 'refuah'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
-          <div className="flex items-center justify-center mb-3 relative">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="refuah-description">
+          <div id="refuah-description" className="sr-only">Prayers for healing and health</div>
+          <div className="flex items-center justify-center mb-3 relative pr-8">
             <DialogTitle className="text-lg font-serif font-bold text-black">Refuah Prayers</DialogTitle>
           </div>
           <RefuahPrayersList onPrayerSelect={handlePrayerSelect} />
@@ -793,8 +794,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       </Dialog>
       {/* Family Prayers Modal */}
       <Dialog open={activeModal === 'family'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
-          <div className="flex items-center justify-center mb-3 relative">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="family-description">
+          <div id="family-description" className="sr-only">Prayers for family harmony and blessings</div>
+          <div className="flex items-center justify-center mb-3 relative pr-8">
             <DialogTitle className="text-lg font-serif font-bold text-black">Family Prayers</DialogTitle>
           </div>
           <FamilyPrayersList onPrayerSelect={handlePrayerSelect} />
@@ -802,8 +804,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       </Dialog>
       {/* Life Prayers Modal */}
       <Dialog open={activeModal === 'life'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans">
-          <div className="flex items-center justify-center mb-3 relative">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="life-description">
+          <div id="life-description" className="sr-only">Prayers for life events and milestones</div>
+          <div className="flex items-center justify-center mb-3 relative pr-8">
             <DialogTitle className="text-lg font-serif font-bold text-black">Life Prayers</DialogTitle>
           </div>
           <LifePrayersList onPrayerSelect={handlePrayerSelect} />
@@ -811,7 +814,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       </Dialog>
       {/* Individual Prayer Modal */}
       <Dialog open={activeModal === 'individual-prayer'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans" aria-describedby="individual-prayer-description">
+          <div id="individual-prayer-description" className="sr-only">Individual prayer text and translation</div>
           <IndividualPrayerContent prayerId={selectedPrayerId} language={language} fontSize={fontSize} setLanguage={setLanguage} setFontSize={setFontSize} />
         </DialogContent>
       </Dialog>
