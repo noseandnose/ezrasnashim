@@ -1,4 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles } from "lucide-react";
@@ -972,9 +973,9 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
 
   return (
     <>
-      <DialogHeader>
-        <DialogTitle className="sr-only">{prayer.prayerName}</DialogTitle>
-      </DialogHeader>
+      <VisuallyHidden>
+        <DialogTitle>{prayer.prayerName}</DialogTitle>
+      </VisuallyHidden>
       
       {/* Standardized Header */}
       <div className="flex items-center justify-center mb-3 relative pr-8">
