@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { BarChart3, Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLocation } from "wouter";
+import BottomNavigation from "@/components/bottom-navigation";
+import type { Section } from "@/pages/home";
 
 interface DailyStats {
   date: string;
@@ -40,6 +42,14 @@ export default function Statistics() {
     queryKey: ["/api/analytics/stats/daily"],
     refetchInterval: 300000, // Refresh every 5 minutes
   });
+
+  // Handler for bottom navigation
+  const handleSectionChange = (section: Section) => {
+    if (section === 'home') {
+      setLocation('/');
+    }
+    // Add other section handlers as needed
+  };
 
   const StatCard = ({ title, value, icon: Icon, color }: { title: string; value: number | string; icon: any; color: string }) => (
     <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
@@ -196,6 +206,11 @@ export default function Statistics() {
           )}
         </div>
       </main>
+
+      <BottomNavigation 
+        activeSection="home" 
+        onSectionChange={handleSectionChange} 
+      />
     </div>
   );
 }
