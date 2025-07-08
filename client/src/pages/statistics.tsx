@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { BarChart3, Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 
 interface DailyStats {
@@ -70,20 +69,19 @@ export default function Statistics() {
     <div className="min-h-screen bg-gradient-to-br from-blush/10 to-peach/10 p-4 pb-20">
       <div className="w-full max-w-md mx-auto">
         {/* Header */}
-        <div className="gradient-soft-glow rounded-3xl px-4 pt-4 pb-6 shadow-soft mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <Button
-              variant="ghost"
-              size="sm"
+        <header className="bg-gradient-soft p-3 border-0 shadow-none rounded-3xl mb-6">
+          <div className="flex items-center justify-between px-2">
+            <button
               onClick={() => setLocation("/")}
-              className="text-warm-gray hover:text-black p-0"
+              className="p-2 rounded-full hover:bg-white/50 transition-colors"
+              aria-label="Back to Home"
             >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-lg font-serif font-bold text-black">Analytics Dashboard</h1>
-            <div className="w-5" /> {/* Spacer for centering */}
+              <ArrowLeft className="h-5 w-5 text-black/70" />
+            </button>
+            <h1 className="font-serif text-xl font-semibold text-black tracking-wide">Analytics Dashboard</h1>
+            <div className="w-8" /> {/* Spacer for centering */}
           </div>
-        </div>
+        </header>
 
         <div className="space-y-6">
         {/* Today's Stats */}
