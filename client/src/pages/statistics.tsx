@@ -43,15 +43,13 @@ export default function Statistics() {
   });
 
   const StatCard = ({ title, value, icon: Icon, color }: { title: string; value: number | string; icon: any; color: string }) => (
-    <Card className="bg-white shadow-md hover:shadow-lg transition-shadow">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-black/70">{title}</CardTitle>
-        <Icon className={`h-4 w-4 ${color}`} />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold text-black">{value}</div>
-      </CardContent>
-    </Card>
+    <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
+      <div className="flex items-center justify-between mb-2">
+        <Icon className={`h-5 w-5 ${color}`} />
+        <span className="text-xs font-medium text-warm-gray">{title}</span>
+      </div>
+      <div className="text-2xl font-serif font-bold text-black">{value}</div>
+    </div>
   );
 
   const modalTypeNames: Record<string, string> = {
@@ -71,25 +69,25 @@ export default function Statistics() {
   return (
     <div className="min-h-screen bg-sand-light pb-20">
       {/* Header */}
-      <div className="bg-gradient-soft p-4 shadow-lg">
-        <div className="flex items-center justify-between">
+      <div className="gradient-soft-glow rounded-b-3xl px-4 pt-4 pb-6 shadow-soft">
+        <div className="flex items-center justify-between mb-4">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setLocation("/")}
-            className="text-black/60 hover:text-black"
+            className="text-warm-gray hover:text-black p-0"
           >
-            ← Back
+            <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-xl font-serif font-bold text-black">Analytics Dashboard</h1>
-          <div className="w-16" /> {/* Spacer for centering */}
+          <h1 className="text-lg font-serif font-bold text-black">Analytics Dashboard</h1>
+          <div className="w-5" /> {/* Spacer for centering */}
         </div>
       </div>
 
-      <div className="p-4 space-y-6">
+      <div className="px-4 pt-6 space-y-6 max-w-md mx-auto">
         {/* Today's Stats */}
         <div>
-          <h2 className="text-lg font-serif font-bold text-black mb-3">Today's Activity</h2>
+          <h2 className="text-base font-serif font-bold text-black mb-3">Today's Activity</h2>
           <div className="grid grid-cols-2 gap-3">
             <StatCard
               title="Active Users"
@@ -120,7 +118,7 @@ export default function Statistics() {
 
         {/* Total Stats */}
         <div>
-          <h2 className="text-lg font-serif font-bold text-black mb-3">All Time Totals</h2>
+          <h2 className="text-base font-serif font-bold text-black mb-3">All Time Totals</h2>
           <div className="grid grid-cols-2 gap-3">
             <StatCard
               title="Total Users"
@@ -151,9 +149,8 @@ export default function Statistics() {
 
         {/* Modal Completions */}
         <div>
-          <h2 className="text-lg font-serif font-bold text-black mb-3">Feature Usage</h2>
-          <Card className="bg-white shadow-md">
-            <CardContent className="p-4">
+          <h2 className="text-base font-serif font-bold text-black mb-3">Feature Usage</h2>
+          <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
               {totalLoading ? (
                 <div className="text-center text-black/60">Loading...</div>
               ) : (
@@ -161,44 +158,41 @@ export default function Statistics() {
                   {Object.entries(totalStats?.totalModalCompletions || {})
                     .sort(([, a], [, b]) => b - a)
                     .map(([modalType, count]) => (
-                      <div key={modalType} className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-black">
+                      <div key={modalType} className="flex justify-between items-center py-1">
+                        <span className="text-xs font-medium text-warm-gray">
                           {modalTypeNames[modalType] || modalType}
                         </span>
-                        <span className="text-sm font-bold text-black">{count.toLocaleString()}</span>
+                        <span className="text-xs font-bold text-black">{count.toLocaleString()}</span>
                       </div>
                     ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
+          </div>
         </div>
 
         {/* Daily Trend */}
         {dailyStats && dailyStats.length > 0 && (
           <div>
-            <h2 className="text-lg font-serif font-bold text-black mb-3">Recent Activity (Last 7 Days)</h2>
-            <Card className="bg-white shadow-md">
-              <CardContent className="p-4">
+            <h2 className="text-base font-serif font-bold text-black mb-3">Recent Activity (Last 7 Days)</h2>
+            <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
                 <div className="space-y-2">
                   {dailyStats.slice(0, 7).map((day) => (
-                    <div key={day.date} className="flex justify-between items-center">
-                      <span className="text-sm text-black/70">
-                        {new Date(day.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                    <div key={day.date} className="flex justify-between items-center py-1">
+                      <span className="text-xs text-warm-gray">
+                        {new Date(day.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                       </span>
-                      <div className="flex gap-4 text-sm">
+                      <div className="flex gap-3 text-xs">
                         <span className="text-black">
-                          <span className="font-medium">{day.uniqueUsers}</span> users
+                          <span className="font-bold">{day.uniqueUsers}</span> users
                         </span>
                         <span className="text-black">
-                          <span className="font-medium">{day.tehillimCompleted}</span> tehillim
+                          <span className="font-bold">{day.tehillimCompleted}</span> tehillim
                         </span>
                       </div>
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
+            </div>
           </div>
         )}
       </div>
