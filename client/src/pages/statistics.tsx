@@ -67,24 +67,25 @@ export default function Statistics() {
   };
 
   return (
-    <div className="min-h-screen bg-sand-light pb-20">
-      {/* Header */}
-      <div className="gradient-soft-glow rounded-b-3xl px-4 pt-4 pb-6 shadow-soft">
-        <div className="flex items-center justify-between mb-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setLocation("/")}
-            className="text-warm-gray hover:text-black p-0"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-lg font-serif font-bold text-black">Analytics Dashboard</h1>
-          <div className="w-5" /> {/* Spacer for centering */}
+    <div className="min-h-screen bg-gradient-to-br from-blush/10 to-peach/10 p-4 pb-20">
+      <div className="w-full max-w-md mx-auto">
+        {/* Header */}
+        <div className="gradient-soft-glow rounded-3xl px-4 pt-4 pb-6 shadow-soft mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setLocation("/")}
+              className="text-warm-gray hover:text-black p-0"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-lg font-serif font-bold text-black">Analytics Dashboard</h1>
+            <div className="w-5" /> {/* Spacer for centering */}
+          </div>
         </div>
-      </div>
 
-      <div className="px-4 pt-6 space-y-6 max-w-md mx-auto">
+        <div className="space-y-6">
         {/* Today's Stats */}
         <div>
           <h2 className="text-base font-serif font-bold text-black mb-3">Today's Activity</h2>
@@ -195,6 +196,7 @@ export default function Statistics() {
             </div>
           </div>
         )}
+        </div>
       </div>
     </div>
   );
