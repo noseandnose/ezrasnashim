@@ -66,90 +66,90 @@ export default function Statistics() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blush/10 to-peach/10 p-4 pb-20">
-      <div className="w-full max-w-md mx-auto">
-        {/* Header */}
-        <header className="bg-gradient-soft p-3 border-0 shadow-none rounded-3xl mb-6">
-          <div className="flex items-center justify-between px-2">
-            <button
-              onClick={() => setLocation("/")}
-              className="p-2 rounded-full hover:bg-white/50 transition-colors"
-              aria-label="Back to Home"
-            >
-              <ArrowLeft className="h-5 w-5 text-black/70" />
-            </button>
-            <h1 className="font-serif text-xl font-semibold text-black tracking-wide">Analytics Dashboard</h1>
-            <div className="w-8" /> {/* Spacer for centering */}
-          </div>
-        </header>
-
+    <div className="mobile-app min-h-screen max-w-md mx-auto bg-white shadow-2xl relative">
+      {/* Header */}
+      <header className="bg-gradient-soft p-3 border-0 shadow-none">
+        <div className="flex items-center justify-between px-2">
+          <button
+            onClick={() => setLocation("/")}
+            className="p-2 rounded-full hover:bg-white/50 transition-colors"
+            aria-label="Back to Home"
+          >
+            <ArrowLeft className="h-5 w-5 text-black/70" />
+          </button>
+          <h1 className="font-serif text-xl font-semibold text-black tracking-wide">Analytics Dashboard</h1>
+          <div className="w-8" /> {/* Spacer for centering */}
+        </div>
+      </header>
+      
+      <main className="content-area overflow-y-auto overflow-x-hidden p-4 pb-20">
         <div className="space-y-6">
-        {/* Today's Stats */}
-        <div>
-          <h2 className="text-base font-serif font-bold text-black mb-3">Today's Activity</h2>
-          <div className="grid grid-cols-2 gap-3">
-            <StatCard
-              title="Active Users"
-              value={todayLoading ? "..." : todayStats?.uniqueUsers || 0}
-              icon={Users}
-              color="text-blush"
-            />
-            <StatCard
-              title="Page Views"
-              value={todayLoading ? "..." : todayStats?.pageViews || 0}
-              icon={TrendingUp}
-              color="text-sage"
-            />
-            <StatCard
-              title="Tehillim Completed"
-              value={todayLoading ? "..." : todayStats?.tehillimCompleted || 0}
-              icon={ScrollText}
-              color="text-peach"
-            />
-            <StatCard
-              title="Names Prayed For"
-              value={todayLoading ? "..." : todayStats?.namesProcessed || 0}
-              icon={Heart}
-              color="text-lavender"
-            />
+          {/* Today's Stats */}
+          <div>
+            <h2 className="text-base font-serif font-bold text-black mb-3">Today's Activity</h2>
+            <div className="grid grid-cols-2 gap-3">
+              <StatCard
+                title="Active Users"
+                value={todayLoading ? "..." : todayStats?.uniqueUsers || 0}
+                icon={Users}
+                color="text-blush"
+              />
+              <StatCard
+                title="Page Views"
+                value={todayLoading ? "..." : todayStats?.pageViews || 0}
+                icon={TrendingUp}
+                color="text-sage"
+              />
+              <StatCard
+                title="Tehillim Completed"
+                value={todayLoading ? "..." : todayStats?.tehillimCompleted || 0}
+                icon={ScrollText}
+                color="text-peach"
+              />
+              <StatCard
+                title="Names Prayed For"
+                value={todayLoading ? "..." : todayStats?.namesProcessed || 0}
+                icon={Heart}
+                color="text-lavender"
+              />
+            </div>
           </div>
-        </div>
 
-        {/* Total Stats */}
-        <div>
-          <h2 className="text-base font-serif font-bold text-black mb-3">All Time Totals</h2>
-          <div className="grid grid-cols-2 gap-3">
-            <StatCard
-              title="Total Users"
-              value={totalLoading ? "..." : totalStats?.totalUsers.toLocaleString() || 0}
-              icon={Users}
-              color="text-blush"
-            />
-            <StatCard
-              title="Total Page Views"
-              value={totalLoading ? "..." : totalStats?.totalPageViews.toLocaleString() || 0}
-              icon={TrendingUp}
-              color="text-sage"
-            />
-            <StatCard
-              title="Total Tehillim"
-              value={totalLoading ? "..." : totalStats?.totalTehillimCompleted.toLocaleString() || 0}
-              icon={ScrollText}
-              color="text-peach"
-            />
-            <StatCard
-              title="Total Names"
-              value={totalLoading ? "..." : totalStats?.totalNamesProcessed.toLocaleString() || 0}
-              icon={Heart}
-              color="text-lavender"
-            />
+          {/* Total Stats */}
+          <div>
+            <h2 className="text-base font-serif font-bold text-black mb-3">All Time Totals</h2>
+            <div className="grid grid-cols-2 gap-3">
+              <StatCard
+                title="Total Users"
+                value={totalLoading ? "..." : totalStats?.totalUsers.toLocaleString() || 0}
+                icon={Users}
+                color="text-blush"
+              />
+              <StatCard
+                title="Total Page Views"
+                value={totalLoading ? "..." : totalStats?.totalPageViews.toLocaleString() || 0}
+                icon={TrendingUp}
+                color="text-sage"
+              />
+              <StatCard
+                title="Total Tehillim"
+                value={totalLoading ? "..." : totalStats?.totalTehillimCompleted.toLocaleString() || 0}
+                icon={ScrollText}
+                color="text-peach"
+              />
+              <StatCard
+                title="Total Names"
+                value={totalLoading ? "..." : totalStats?.totalNamesProcessed.toLocaleString() || 0}
+                icon={Heart}
+                color="text-lavender"
+              />
+            </div>
           </div>
-        </div>
 
-        {/* Modal Completions */}
-        <div>
-          <h2 className="text-base font-serif font-bold text-black mb-3">Feature Usage</h2>
-          <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
+          {/* Modal Completions */}
+          <div>
+            <h2 className="text-base font-serif font-bold text-black mb-3">Feature Usage</h2>
+            <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
               {totalLoading ? (
                 <div className="text-center text-black/60">Loading...</div>
               ) : (
@@ -166,14 +166,14 @@ export default function Statistics() {
                     ))}
                 </div>
               )}
+            </div>
           </div>
-        </div>
 
-        {/* Daily Trend */}
-        {dailyStats && dailyStats.length > 0 && (
-          <div>
-            <h2 className="text-base font-serif font-bold text-black mb-3">Recent Activity (Last 7 Days)</h2>
-            <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
+          {/* Daily Trend */}
+          {dailyStats && dailyStats.length > 0 && (
+            <div>
+              <h2 className="text-base font-serif font-bold text-black mb-3">Recent Activity (Last 7 Days)</h2>
+              <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
                 <div className="space-y-2">
                   {dailyStats.slice(0, 7).map((day) => (
                     <div key={day.date} className="flex justify-between items-center py-1">
@@ -191,11 +191,11 @@ export default function Statistics() {
                     </div>
                   ))}
                 </div>
+              </div>
             </div>
-          </div>
-        )}
+          )}
         </div>
-      </div>
+      </main>
     </div>
   );
 }
