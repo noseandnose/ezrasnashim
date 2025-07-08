@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { BarChart3, Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar } from "lucide-react";
+import { BarChart3, Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
