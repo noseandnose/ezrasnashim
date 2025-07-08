@@ -823,9 +823,9 @@ export class DatabaseStorage implements IStorage {
       .values(event)
       .returning();
     
-    // Update daily stats
+    // Update daily stats with proper aggregation
     const today = formatDate(new Date());
-    await this.updateDailyStats(today, {});
+    await this.recalculateDailyStats(today);
     
     return newEvent;
   }
@@ -837,6 +837,68 @@ export class DatabaseStorage implements IStorage {
       .where(eq(dailyStats.date, date))
       .limit(1);
     return stats;
+  }
+
+  async recalculateDailyStats(date: string): Promise<DailyStats> {
+    // Count today's events for recalculation
+    const todayEvents = await db
+      .select()
+      .from(analyticsEvents)
+      .where(
+        and(
+          gt(analyticsEvents.createdAt, new Date(date + 'T00:00:00')),
+          lt(analyticsEvents.createdAt, new Date(date + 'T23:59:59'))
+        )
+      );
+    
+    // Count unique users (by session ID)
+    const uniqueSessions = new Set(todayEvents.map(e => e.sessionId).filter(Boolean));
+    
+    // Count event types
+    const pageViews = todayEvents.filter(e => e.eventType === 'page_view').length;
+    const tehillimCompleted = todayEvents.filter(e => e.eventType === 'tehillim_complete').length;
+    const namesProcessed = todayEvents.filter(e => e.eventType === 'name_prayed').length;
+    
+    // Count modal completions by type
+    const modalCompletions: Record<string, number> = {};
+    todayEvents
+      .filter(e => e.eventType === 'modal_complete')
+      .forEach(e => {
+        const modalType = (e.eventData as any)?.modalType || 'unknown';
+        modalCompletions[modalType] = (modalCompletions[modalType] || 0) + 1;
+      });
+    
+    // Upsert stats with recalculated values
+    const existing = await this.getDailyStats(date);
+    
+    if (existing) {
+      const [updated] = await db
+        .update(dailyStats)
+        .set({
+          uniqueUsers: uniqueSessions.size,
+          pageViews,
+          tehillimCompleted,
+          namesProcessed,
+          modalCompletions,
+          updatedAt: new Date()
+        })
+        .where(eq(dailyStats.date, date))
+        .returning();
+      return updated;
+    } else {
+      const [newStats] = await db
+        .insert(dailyStats)
+        .values({
+          date,
+          uniqueUsers: uniqueSessions.size,
+          pageViews,
+          tehillimCompleted,
+          namesProcessed,
+          modalCompletions
+        })
+        .returning();
+      return newStats;
+    }
   }
 
   async updateDailyStats(date: string, updates: Partial<DailyStats>): Promise<DailyStats> {
@@ -854,47 +916,8 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updated;
     } else {
-      // Count today's events for initial creation
-      const todayEvents = await db
-        .select()
-        .from(analyticsEvents)
-        .where(
-          and(
-            gt(analyticsEvents.createdAt, new Date(date + 'T00:00:00')),
-            lt(analyticsEvents.createdAt, new Date(date + 'T23:59:59'))
-          )
-        );
-      
-      // Count unique users (by session ID)
-      const uniqueSessions = new Set(todayEvents.map(e => e.sessionId).filter(Boolean));
-      
-      // Count event types
-      const pageViews = todayEvents.filter(e => e.eventType === 'page_view').length;
-      const tehillimCompleted = todayEvents.filter(e => e.eventType === 'tehillim_complete').length;
-      const namesProcessed = todayEvents.filter(e => e.eventType === 'name_prayed').length;
-      
-      // Count modal completions by type
-      const modalCompletions: Record<string, number> = {};
-      todayEvents
-        .filter(e => e.eventType === 'modal_complete')
-        .forEach(e => {
-          const modalType = (e.eventData as any)?.modalType || 'unknown';
-          modalCompletions[modalType] = (modalCompletions[modalType] || 0) + 1;
-        });
-      
-      const [newStats] = await db
-        .insert(dailyStats)
-        .values({
-          date,
-          uniqueUsers: uniqueSessions.size,
-          pageViews,
-          tehillimCompleted,
-          namesProcessed,
-          modalCompletions,
-          ...updates
-        })
-        .returning();
-      return newStats;
+      // Use recalculation for initial creation
+      return await this.recalculateDailyStats(date);
     }
   }
 
