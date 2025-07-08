@@ -71,6 +71,7 @@ const StandardModalHeader = ({
 function MorningBrochasModal() {
   const { activeModal, closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [showHebrew, setShowHebrew] = useState(true);
   const [showEnglish, setShowEnglish] = useState(false);
@@ -170,6 +171,9 @@ function MorningBrochasModal() {
 
         <Button 
           onClick={() => {
+            // Track modal completion
+            trackModalComplete('morning-brochas');
+            
             completeTask('tefilla');
             setShowHeartExplosion(true);
             
