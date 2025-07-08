@@ -986,6 +986,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Analytics routes
+  app.post("/api/analytics/track", async (req, res) => {
+    try {
+      const { eventType, eventData, sessionId } = req.body;
+      const userAgent = req.headers['user-agent'];
+      
+      const event = await storage.trackEvent({
+        eventType,
+        eventData,
+        sessionId,
+        userAgent
+      });
+      
+      res.json(event);
+    } catch (error) {
+      console.error('Error tracking analytics event:', error);
+      res.status(500).json({ message: "Failed to track event" });
+    }
+  });
+
+  app.get("/api/analytics/stats/today", async (req, res) => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const stats = await storage.getDailyStats(today);
+      res.json(stats || {
+        date: today,
+        uniqueUsers: 0,
+        pageViews: 0,
+        tehillimCompleted: 0,
+        namesProcessed: 0,
+        modalCompletions: {}
+      });
+    } catch (error) {
+      console.error('Error fetching today stats:', error);
+      res.status(500).json({ message: "Failed to fetch today's stats" });
+    }
+  });
+
+  app.get("/api/analytics/stats/total", async (req, res) => {
+    try {
+      const totals = await storage.getTotalStats();
+      res.json(totals);
+    } catch (error) {
+      console.error('Error fetching total stats:', error);
+      res.status(500).json({ message: "Failed to fetch total stats" });
+    }
+  });
+
+  app.get("/api/analytics/stats/daily", async (req, res) => {
+    try {
+      // Get stats for the last 30 days
+      const dailyStats = [];
+      const today = new Date();
+      
+      for (let i = 0; i < 30; i++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        
+        const stats = await storage.getDailyStats(dateStr);
+        if (stats) {
+          dailyStats.push(stats);
+        }
+      }
+      
+      res.json(dailyStats);
+    } catch (error) {
+      console.error('Error fetching daily stats:', error);
+      res.status(500).json({ message: "Failed to fetch daily stats" });
+    }
+  });
+
   app.get("/healthcheck", (req, res) => {
     res.json({ status: "OK" });
   })

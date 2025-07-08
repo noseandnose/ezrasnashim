@@ -7,6 +7,7 @@ import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useState } from "react";
 import { Heart, BookOpen, Baby, Shield, DollarSign } from "lucide-react";
 import { useLocation } from "wouter";
+import { useTrackModalComplete } from "@/hooks/use-analytics";
 
 export default function TzedakaModals() {
   const { activeModal, closeModal, openModal } = useModalStore();
@@ -17,6 +18,7 @@ export default function TzedakaModals() {
   const [donorName, setDonorName] = useState("");
   const [dedicationText, setDedicationText] = useState("");
   const [torahPortion, setTorahPortion] = useState("");
+  const { trackModalComplete } = useTrackModalComplete();
 
   const getDonationAmount = () => {
     if (donationAmount === "custom") {
@@ -59,6 +61,11 @@ export default function TzedakaModals() {
     }
 
     if (amount > 0) {
+      // Track modal completion
+      if (activeModal) {
+        trackModalComplete(activeModal);
+      }
+      
       // Complete tzedaka task when donation is initiated
       completeTask('tzedaka');
       

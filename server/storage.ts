@@ -4,6 +4,7 @@ import {
   tehillimNames, globalTehillimProgress, minchaPrayers, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
   shabbatRecipes, parshaVorts, tableInspirations, campaigns, womensPrayers, discountPromotions, pirkeiAvotProgress,
+  analyticsEvents, dailyStats,
   type CalendarEvent, type InsertCalendarEvent,
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
@@ -18,7 +19,9 @@ import {
   type Campaign, type InsertCampaign,
   type WomensPrayer, type InsertWomensPrayer,
   type DiscountPromotion, type InsertDiscountPromotion,
-  type PirkeiAvotProgress, type InsertPirkeiAvotProgress
+  type PirkeiAvotProgress, type InsertPirkeiAvotProgress,
+  type AnalyticsEvent, type InsertAnalyticsEvent,
+  type DailyStats, type InsertDailyStats
 } from "../shared/schema";
 import { db, pool } from "./db";
 import { eq, gt, lt, and } from "drizzle-orm";
@@ -102,6 +105,18 @@ export interface IStorage {
   // Discount promotion methods
   getActiveDiscountPromotion(): Promise<DiscountPromotion | undefined>;
   createDiscountPromotion(promotion: InsertDiscountPromotion): Promise<DiscountPromotion>;
+
+  // Analytics methods
+  trackEvent(event: InsertAnalyticsEvent): Promise<AnalyticsEvent>;
+  getDailyStats(date: string): Promise<DailyStats | undefined>;
+  updateDailyStats(date: string, updates: Partial<DailyStats>): Promise<DailyStats>;
+  getTotalStats(): Promise<{
+    totalUsers: number;
+    totalPageViews: number;
+    totalTehillimCompleted: number;
+    totalNamesProcessed: number;
+    totalModalCompletions: Record<string, number>;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -799,6 +814,127 @@ export class DatabaseStorage implements IStorage {
       .values(insertInspiration)
       .returning();
     return inspiration;
+  }
+
+  // Analytics methods implementation
+  async trackEvent(event: InsertAnalyticsEvent): Promise<AnalyticsEvent> {
+    const [newEvent] = await db
+      .insert(analyticsEvents)
+      .values(event)
+      .returning();
+    
+    // Update daily stats
+    const today = formatDate(new Date());
+    await this.updateDailyStats(today, {});
+    
+    return newEvent;
+  }
+
+  async getDailyStats(date: string): Promise<DailyStats | undefined> {
+    const [stats] = await db
+      .select()
+      .from(dailyStats)
+      .where(eq(dailyStats.date, date))
+      .limit(1);
+    return stats;
+  }
+
+  async updateDailyStats(date: string, updates: Partial<DailyStats>): Promise<DailyStats> {
+    // Get existing stats or create new
+    const existing = await this.getDailyStats(date);
+    
+    if (existing) {
+      const [updated] = await db
+        .update(dailyStats)
+        .set({
+          ...updates,
+          updatedAt: new Date()
+        })
+        .where(eq(dailyStats.date, date))
+        .returning();
+      return updated;
+    } else {
+      // Count today's events for initial creation
+      const todayEvents = await db
+        .select()
+        .from(analyticsEvents)
+        .where(
+          and(
+            gt(analyticsEvents.createdAt, new Date(date + 'T00:00:00')),
+            lt(analyticsEvents.createdAt, new Date(date + 'T23:59:59'))
+          )
+        );
+      
+      // Count unique users (by session ID)
+      const uniqueSessions = new Set(todayEvents.map(e => e.sessionId).filter(Boolean));
+      
+      // Count event types
+      const pageViews = todayEvents.filter(e => e.eventType === 'page_view').length;
+      const tehillimCompleted = todayEvents.filter(e => e.eventType === 'tehillim_complete').length;
+      const namesProcessed = todayEvents.filter(e => e.eventType === 'name_prayed').length;
+      
+      // Count modal completions by type
+      const modalCompletions: Record<string, number> = {};
+      todayEvents
+        .filter(e => e.eventType === 'modal_complete')
+        .forEach(e => {
+          const modalType = (e.eventData as any)?.modalType || 'unknown';
+          modalCompletions[modalType] = (modalCompletions[modalType] || 0) + 1;
+        });
+      
+      const [newStats] = await db
+        .insert(dailyStats)
+        .values({
+          date,
+          uniqueUsers: uniqueSessions.size,
+          pageViews,
+          tehillimCompleted,
+          namesProcessed,
+          modalCompletions,
+          ...updates
+        })
+        .returning();
+      return newStats;
+    }
+  }
+
+  async getTotalStats(): Promise<{
+    totalUsers: number;
+    totalPageViews: number;
+    totalTehillimCompleted: number;
+    totalNamesProcessed: number;
+    totalModalCompletions: Record<string, number>;
+  }> {
+    // Get all daily stats
+    const allStats = await db.select().from(dailyStats);
+    
+    // Aggregate totals
+    let totalUsers = 0;
+    let totalPageViews = 0;
+    let totalTehillimCompleted = 0;
+    let totalNamesProcessed = 0;
+    const totalModalCompletions: Record<string, number> = {};
+    
+    for (const stats of allStats) {
+      totalUsers += stats.uniqueUsers || 0;
+      totalPageViews += stats.pageViews || 0;
+      totalTehillimCompleted += stats.tehillimCompleted || 0;
+      totalNamesProcessed += stats.namesProcessed || 0;
+      
+      // Merge modal completions
+      const completions = stats.modalCompletions as Record<string, number> || {};
+      for (const [modalType, count] of Object.entries(completions)) {
+        totalModalCompletions[modalType] = (totalModalCompletions[modalType] || 0) + count;
+      }
+    }
+    
+    return {
+      totalUsers,
+      totalPageViews,
+      totalTehillimCompleted,
+      totalNamesProcessed,
+      totalModalCompletions
+    };
   }
 }
 

@@ -6,6 +6,7 @@ import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import AudioPlayer from "@/components/audio-player";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
+import { useTrackModalComplete } from "@/hooks/use-analytics";
 
 interface TorahModalsProps {
   onSectionChange?: (section: any) => void;
@@ -68,6 +69,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   const [showExplosion, setShowExplosion] = useState(false);
   const [fontSize, setFontSize] = useState(20);
   const [showHebrew, setShowHebrew] = useState(true);
+  const { trackModalComplete } = useTrackModalComplete();
 
   // Reset explosion state when modal changes
   useEffect(() => {
@@ -75,6 +77,11 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   }, [activeModal]);
 
   const handleTorahComplete = () => {
+    // Track modal completion
+    if (activeModal) {
+      trackModalComplete(activeModal);
+    }
+    
     setShowExplosion(true);
     
     // Wait for animation to complete before proceeding

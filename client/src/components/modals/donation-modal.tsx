@@ -8,6 +8,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { DollarSign, Heart } from "lucide-react";
+import { useTrackModalComplete } from "@/hooks/use-analytics";
 
 export default function DonationModal() {
   const { activeModal, closeModal, openModal } = useModalStore();
@@ -15,6 +16,7 @@ export default function DonationModal() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [amount, setAmount] = useState("1");
+  const { trackModalComplete } = useTrackModalComplete();
 
   const createPaymentMutation = useMutation({
     mutationFn: async (donationAmount: number) => {
@@ -24,6 +26,9 @@ export default function DonationModal() {
       return response.data;
     },
     onSuccess: (data) => {
+      // Track modal completion
+      trackModalComplete('donate');
+      
       // Complete tzedaka task when donation is initiated
       completeTask('tzedaka');
       closeModal();

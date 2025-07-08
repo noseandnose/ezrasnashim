@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, date, index } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, date, index, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -231,6 +231,31 @@ export const pirkeiAvotProgress = pgTable("pirkei_avot_progress", {
   lastUpdated: timestamp("last_updated").defaultNow(),
 });
 
+// Analytics tracking tables
+export const analyticsEvents = pgTable("analytics_events", {
+  id: serial("id").primaryKey(),
+  eventType: text("event_type").notNull(), // 'page_view', 'modal_open', 'modal_complete', 'tehillim_complete', 'name_prayed'
+  eventData: jsonb("event_data"), // Additional context data
+  sessionId: text("session_id"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  eventTypeIdx: index("analytics_events_type_idx").on(table.eventType),
+  createdAtIdx: index("analytics_events_created_idx").on(table.createdAt),
+}));
+
+export const dailyStats = pgTable("daily_stats", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull().unique(),
+  uniqueUsers: integer("unique_users").default(0),
+  pageViews: integer("page_views").default(0),
+  tehillimCompleted: integer("tehillim_completed").default(0),
+  namesProcessed: integer("names_processed").default(0),
+  modalCompletions: jsonb("modal_completions").default({}), // { "torah": 10, "tefilla": 20, etc }
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Insert schemas - defined after all tables
 export const insertCalendarEventSchema = createInsertSchema(calendarEvents).omit({
   id: true,
@@ -307,6 +332,17 @@ export const insertFeaturedContentSchema = createInsertSchema(featuredContent).o
 export const insertPirkeiAvotProgressSchema = createInsertSchema(pirkeiAvotProgress).omit({
   id: true,
   lastUpdated: true,
+});
+
+export const insertAnalyticsEventSchema = createInsertSchema(analyticsEvents).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertDailyStatsSchema = createInsertSchema(dailyStats).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 // Weekly Torah content schemas
@@ -399,3 +435,9 @@ export type InsertDiscountPromotion = z.infer<typeof insertDiscountPromotionSche
 
 export type PirkeiAvotProgress = typeof pirkeiAvotProgress.$inferSelect;
 export type InsertPirkeiAvotProgress = z.infer<typeof insertPirkeiAvotProgressSchema>;
+
+export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
+export type InsertAnalyticsEvent = z.infer<typeof insertAnalyticsEventSchema>;
+
+export type DailyStats = typeof dailyStats.$inferSelect;
+export type InsertDailyStats = z.infer<typeof insertDailyStatsSchema>;

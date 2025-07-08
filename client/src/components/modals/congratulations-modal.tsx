@@ -1,9 +1,18 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/lib/types";
+import { useTrackModalComplete } from "@/hooks/use-analytics";
+import { useEffect } from "react";
 
 export default function CongratulationsModal() {
   const { activeModal, closeModal } = useModalStore();
+  const { trackModalComplete } = useTrackModalComplete();
+
+  useEffect(() => {
+    if (activeModal === 'congratulations') {
+      trackModalComplete('congratulations');
+    }
+  }, [activeModal]);
 
   return (
     <Dialog open={activeModal === 'congratulations'} onOpenChange={() => closeModal()}>

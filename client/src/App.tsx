@@ -12,6 +12,7 @@ const Home = lazy(() => import("@/pages/home"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const Donate = lazy(() => import("@/pages/donate"));
 const Checkout = lazy(() => import("@/pages/checkout"));
+const Statistics = lazy(() => import("@/pages/statistics"));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -36,6 +37,7 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/donate" component={Donate} />
         <Route path="/checkout" component={Checkout} />
+        <Route path="/statistics" component={Statistics} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

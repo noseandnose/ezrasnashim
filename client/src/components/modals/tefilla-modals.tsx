@@ -11,6 +11,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import axiosClient from "@/lib/axiosClient";
+import { useTrackModalComplete, useAnalytics } from "@/hooks/use-analytics";
 
 interface TefillaModalsProps {
   onSectionChange?: (section: any) => void;
@@ -198,6 +199,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const { activeModal, openModal, closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const [, setLocation] = useLocation();
+  const { trackModalComplete } = useTrackModalComplete();
+  const { trackEvent } = useAnalytics();
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
   const [fontSize, setFontSize] = useState(20);
   const [showHebrew, setShowHebrew] = useState(true);
@@ -219,6 +222,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
   // Complete prayer with task tracking
   const completeWithAnimation = () => {
+    // Track modal completion
+    if (activeModal) {
+      trackModalComplete(activeModal);
+    }
+    
     setShowExplosion(true);
     
     // Wait for animation to complete before proceeding
@@ -304,6 +312,21 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
     },
     onSuccess: () => {
+      // Track tehillim completion
+      trackEvent("tehillim_complete", { 
+        perek: progress?.currentPerek,
+        language: showHebrew ? 'hebrew' : 'english'
+      });
+      
+      // Track name prayed for if there was one
+      if (currentName) {
+        trackEvent("name_prayed", {
+          nameId: currentName.id,
+          reason: currentName.reason,
+          perek: progress?.currentPerek
+        });
+      }
+      
       toast({
         title: "Perek Completed!",
         description: `Perek ${progress?.currentPerek || 'current'} has been completed. Moving to the next perek.`,
@@ -387,6 +410,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     const newDay = nishmasDay + 1;
     
     console.log('Completing Nishmas:', { currentDay: nishmasDay, newDay, todayCompleted });
+    
+    // Track Nishmas completion
+    trackModalComplete('nishmas');
     
     if (newDay <= 40) {
       setNishmasDay(newDay);
