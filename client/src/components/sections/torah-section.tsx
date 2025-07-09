@@ -1,4 +1,4 @@
-import { Book, Heart, Play, Shield, BookOpen, Sparkles, Star, Scroll } from "lucide-react";
+import { Book, Heart, Play, Shield, BookOpen, Sparkles, Star, Scroll, Triangle } from "lucide-react";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import type { Section } from "@/pages/home";
@@ -17,6 +17,21 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
     queryKey: ['/api/torah/pirkei-avot', today],
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 60 * 60 * 1000 // 1 hour
+  });
+
+  // Get week key for Shabbas vort
+  const getWeekKey = () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const week = Math.ceil(((date.getTime() - new Date(year, 0, 1).getTime()) / 86400000 + new Date(year, 0, 1).getDay() + 1) / 7);
+    return `${year}-W${week}`;
+  };
+
+  // Fetch weekly Parsha vort
+  const { data: parshaContent } = useQuery<{parsha?: string; hebrew_parsha?: string; title?: string; speaker?: string}>({
+    queryKey: ['/api/table/vort', getWeekKey()],
+    staleTime: 60 * 60 * 1000, // 1 hour
+    gcTime: 4 * 60 * 60 * 1000 // 4 hours
   });
 
   const torahItems = [
@@ -98,8 +113,8 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
             >
               {/* Content Type Indicator */}
               {contentType && (
-                <div className="absolute top-2 left-2 bg-white text-blush text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-                  {contentType === 'text' ? 'T' : '▶'}
+                <div className="absolute top-2 left-2 bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
+                  {contentType === 'text' ? 'T' : <Triangle className="w-2.5 h-2.5 fill-current" />}
                 </div>
               )}
               
@@ -111,6 +126,30 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
             </button>
           ))}
         </div>
+
+        {/* Shabbas Vort Bonus Bar */}
+        <button
+          onClick={() => openModal('parsha')}
+          className="w-full bg-white rounded-2xl p-3 shadow-lg border border-blush/10 hover:scale-105 transition-all duration-300 mb-3"
+        >
+          <div className="flex items-center gap-3">
+            <div className="bg-gradient-feminine p-2 rounded-full">
+              <BookOpen className="text-white" size={16} strokeWidth={1.5} />
+            </div>
+            <div className="text-left flex-grow">
+              <h3 className="font-serif text-sm text-black font-bold">
+                {parshaContent?.hebrew_parsha || parshaContent?.parsha || 'Parsha Vort'}
+              </h3>
+              <p className="font-sans text-xs text-black/60">
+                {parshaContent?.title || 'Weekly Torah insight'}
+                {parshaContent?.speaker && ` • ${parshaContent.speaker}`}
+              </p>
+            </div>
+            <div className="bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
+              <Triangle className="w-2.5 h-2.5 fill-current" />
+            </div>
+          </div>
+        </button>
 
         {/* Bottom padding */}
         <div className="h-16"></div>
