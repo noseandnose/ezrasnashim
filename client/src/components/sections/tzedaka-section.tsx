@@ -1,4 +1,4 @@
-import { Heart, BookOpen, Shield, Plus, HandHeart, Gift, Star, Sparkles, Target, Users, DollarSign, TrendingUp } from "lucide-react";
+import { Heart, BookOpen, Shield, Plus, HandHeart, Gift, Star, Sparkles, Target, Users, DollarSign, TrendingUp, HandCoins } from "lucide-react";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -17,6 +17,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
   const { tzedakaCompleted, completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const [, setLocation] = useLocation();
   const [showExplosion, setShowExplosion] = useState(false);
+  const [completedButtons, setCompletedButtons] = useState<Set<string>>(new Set());
 
   // Reset explosion state when modal changes
   useEffect(() => {
@@ -27,6 +28,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
     if (tzedakaCompleted) return; // Prevent double execution
     
     setShowExplosion(true);
+    setCompletedButtons(prev => new Set(prev).add('gave-elsewhere'));
     
     // Wait for animation to complete before proceeding
     setTimeout(() => {
@@ -45,6 +47,11 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
         }
       }, 200);
     }, 500);
+  };
+
+  const handleButtonClick = (buttonId: string) => {
+    setCompletedButtons(prev => new Set(prev).add(buttonId));
+    openModal(buttonId);
   };
 
   // Fetch active campaign data
@@ -108,14 +115,20 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
           </div>
         ) : campaign ? (
           <>
-            <div className="flex items-center space-x-3 mb-4">
+            <div className="flex items-center space-x-3 mb-4 relative">
               <div className="bg-gradient-feminine p-3 rounded-full">
                 <BookOpen className="text-white" size={20} />
               </div>
-              <div>
+              <div className="flex-grow">
                 <h3 className="font-serif text-lg text-black font-bold">{campaign.title}</h3>
                 <p className="font-sans text-sm text-black/70">Support our community</p>
               </div>
+              <button
+                onClick={() => openModal('donate')}
+                className="bg-gradient-feminine p-2 rounded-full hover:opacity-90 transition-all duration-300 shadow-lg"
+              >
+                <HandCoins className="text-white" size={16} />
+              </button>
             </div>
             
             {/* Progress Bar */}
@@ -134,13 +147,6 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
                 ></div>
               </div>
             </div>
-            
-            <button 
-              onClick={() => openModal('donate')}
-              className="w-full mt-4 bg-gradient-feminine text-white rounded-2xl py-3 hover:opacity-90 transition-all duration-300 font-sans"
-            >
-              Donate Now
-            </button>
           </>
         ) : null}
         </div>
@@ -150,56 +156,74 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
         <div className="grid grid-cols-2 gap-2">
           {/* Button 1: Support Women's Causes */}
           <button
-            onClick={() => openModal('womens-causes')}
-            className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
+            onClick={() => handleButtonClick('womens-causes')}
+            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
+              completedButtons.has('womens-causes') ? 'bg-sage/20' : 'bg-white'
+            }`}
           >
-            <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
+            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
+              completedButtons.has('womens-causes') ? 'bg-sage' : 'bg-gradient-feminine'
+            }`}>
               <Shield className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <h3 className="font-serif text-xs text-black mb-1 font-bold">Support Women's Causes</h3>
-            <p className="font-sans text-xs text-black/60 leading-relaxed">Fertility, abuse prevention</p>
+            <p className="font-sans text-xs text-black/60 leading-relaxed">
+              {completedButtons.has('womens-causes') ? 'Completed' : 'Fertility, abuse prevention'}
+            </p>
           </button>
 
           {/* Button 2: Support Torah */}
           <button
-            onClick={() => openModal('support-torah')}
-            className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
+            onClick={() => handleButtonClick('support-torah')}
+            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
+              completedButtons.has('support-torah') ? 'bg-sage/20' : 'bg-white'
+            }`}
           >
-            <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
+            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
+              completedButtons.has('support-torah') ? 'bg-sage' : 'bg-gradient-feminine'
+            }`}>
               <BookOpen className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <h3 className="font-serif text-xs text-black mb-1 font-bold">Support Torah</h3>
-            <p className="font-sans text-xs text-black/60 leading-relaxed">Learning and education</p>
+            <p className="font-sans text-xs text-black/60 leading-relaxed">
+              {completedButtons.has('support-torah') ? 'Completed' : 'Learning and education'}
+            </p>
           </button>
 
           {/* Button 3: Sponsor a Day */}
           <button
-            onClick={() => openModal('sponsor-day')}
-            className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
+            onClick={() => handleButtonClick('sponsor-day')}
+            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
+              completedButtons.has('sponsor-day') ? 'bg-sage/20' : 'bg-white'
+            }`}
           >
-            <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
+            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
+              completedButtons.has('sponsor-day') ? 'bg-sage' : 'bg-gradient-feminine'
+            }`}>
               <Heart className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <h3 className="font-serif text-xs text-black mb-1 font-bold">Sponsor a Day</h3>
-            <p className="font-sans text-xs text-black/60 leading-relaxed">Dedicate all mitzvot</p>
+            <p className="font-sans text-xs text-black/60 leading-relaxed">
+              {completedButtons.has('sponsor-day') ? 'Completed' : 'Dedicate all mitzvot'}
+            </p>
           </button>
 
           {/* Button 4: Gave Tzedaka Elsewhere */}
           <button
             onClick={handleTzedakaComplete}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              tzedakaCompleted ? 'bg-sage/20' : 'bg-white'
+              tzedakaCompleted || completedButtons.has('gave-elsewhere') ? 'bg-sage/20' : 'bg-white'
             }`}
           >
             <div className="heart-explosion-container relative">
               <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-                tzedakaCompleted ? 'bg-sage' : 'bg-gradient-feminine'
+                tzedakaCompleted || completedButtons.has('gave-elsewhere') ? 'bg-sage' : 'bg-gradient-feminine'
               }`}>
                 <HandHeart className="text-white" size={18} strokeWidth={1.5} />
               </div>
               <h3 className="font-serif text-xs text-black mb-1 font-bold">Gave Tzedaka Elsewhere</h3>
               <p className="font-sans text-xs text-black/60 leading-relaxed">
-                {tzedakaCompleted ? 'Completed today' : 'Mark as complete'}
+                {tzedakaCompleted || completedButtons.has('gave-elsewhere') ? 'Completed' : 'Mark as complete'}
               </p>
               <HeartExplosion trigger={showExplosion} />
             </div>
