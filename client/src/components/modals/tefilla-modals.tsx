@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
-import { useModalStore, useDailyCompletionStore } from "@/lib/types";
+import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
@@ -71,6 +71,7 @@ const StandardModalHeader = ({
 function MorningBrochasModal() {
   const { activeModal, closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [showHebrew, setShowHebrew] = useState(true);
@@ -171,8 +172,9 @@ function MorningBrochasModal() {
 
         <Button 
           onClick={() => {
-            // Track modal completion
+            // Track modal completion and mark as completed globally
             trackModalComplete('morning-brochas');
+            markModalComplete('morning-brochas');
             
             completeTask('tefilla');
             setShowHeartExplosion(true);
@@ -202,6 +204,7 @@ function MorningBrochasModal() {
 export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const { activeModal, openModal, closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete } = useModalCompletionStore();
   const [, setLocation] = useLocation();
   const { trackModalComplete } = useTrackModalComplete();
   const { trackEvent } = useAnalytics();
@@ -226,9 +229,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
   // Complete prayer with task tracking
   const completeWithAnimation = () => {
-    // Track modal completion
+    // Track modal completion and mark as completed globally
     if (activeModal) {
       trackModalComplete(activeModal);
+      markModalComplete(activeModal);
     }
     
     setShowExplosion(true);

@@ -1,5 +1,5 @@
 import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass, ArrowRight, Baby, HeartHandshake, Briefcase, GraduationCap, Users, Stethoscope, DollarSign, UserCheck, Smile, Zap, TrendingUp, Crown } from "lucide-react";
-import { useModalStore, useDailyCompletionStore } from "@/lib/types";
+import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
 
 interface TefillaSectionProps {
@@ -18,6 +18,7 @@ import type { TehillimName, GlobalTehillimProgress } from "@shared/schema";
 export default function TefillaSection({ onSectionChange }: TefillaSectionProps) {
   const { openModal } = useModalStore();
   const { tefillaCompleted } = useDailyCompletionStore();
+  const { isModalComplete } = useModalCompletionStore();
   const { data: times, isLoading } = useJewishTimes();
 
   // Helper functions for reason icons and short text
@@ -432,25 +433,36 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               console.log('Morning Brochas button clicked');
               openModal('morning-brochas');
             }}
-            className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
+            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
+              isModalComplete('morning-brochas') ? 'bg-sage/20' : 'bg-white'
+            }`}
           >
-            <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
+            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
+              isModalComplete('morning-brochas') ? 'bg-sage' : 'bg-gradient-feminine'
+            }`}>
               <Sparkles className="text-white" size={18} />
             </div>
             <h3 className="font-serif text-sm text-black mb-1 font-bold">Morning Brochas</h3>
-            <p className="font-sans text-xs text-black/60">Daily Morning Blessings</p>
+            <p className="font-sans text-xs text-black/60">
+              {isModalComplete('morning-brochas') ? 'Completed' : 'Daily Morning Blessings'}
+            </p>
           </button>
 
           <button 
             onClick={() => openModal('mincha')}
-            className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
+            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
+              isModalComplete('mincha') ? 'bg-sage/20' : 'bg-white'
+            }`}
           >
-            <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
+            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
+              isModalComplete('mincha') ? 'bg-sage' : 'bg-gradient-feminine'
+            }`}>
               <Clock className="text-white" size={18} />
             </div>
             <h3 className="font-serif text-sm text-black mb-1 font-bold">Mincha</h3>
             <p className="font-sans text-xs text-black/60">
-              {isLoading ? "Loading..." : 
+              {isModalComplete('mincha') ? 'Completed' : 
+               isLoading ? "Loading..." : 
                times?.minchaGedolah && times?.shkia ? 
                `${times.minchaGedolah} - ${times.shkia}` : 
                "Loading..."}
@@ -462,24 +474,36 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
         <div className="grid grid-cols-2 gap-2">
           <button 
             onClick={() => openModal('special-tehillim')}
-            className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
+            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
+              isModalComplete('special-tehillim') ? 'bg-sage/20' : 'bg-white'
+            }`}
           >
-            <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
+            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
+              isModalComplete('special-tehillim') ? 'bg-sage' : 'bg-gradient-feminine'
+            }`}>
               <BookOpen className="text-white" size={18} />
             </div>
             <h3 className="font-serif text-sm text-black mb-1 font-bold">Special Tehillim</h3>
-            <p className="font-sans text-xs text-black/60">For Specific Occasions</p>
+            <p className="font-sans text-xs text-black/60">
+              {isModalComplete('special-tehillim') ? 'Completed' : 'For Specific Occasions'}
+            </p>
           </button>
 
           <button 
             onClick={() => openModal('nishmas-campaign')}
-            className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
+            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
+              isModalComplete('nishmas-campaign') ? 'bg-sage/20' : 'bg-white'
+            }`}
           >
-            <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
+            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
+              isModalComplete('nishmas-campaign') ? 'bg-sage' : 'bg-gradient-feminine'
+            }`}>
               <Heart className="text-white" size={18} />
             </div>
             <h3 className="font-serif text-sm text-black mb-1 font-bold">Nishmas Kol Chai</h3>
-            <p className="font-sans text-xs text-black/60">Prayer of Gratitude</p>
+            <p className="font-sans text-xs text-black/60">
+              {isModalComplete('nishmas-campaign') ? 'Completed' : 'Prayer of Gratitude'}
+            </p>
           </button>
         </div>
 

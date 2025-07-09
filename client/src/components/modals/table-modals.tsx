@@ -1,13 +1,23 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { useModalStore } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import AudioPlayer from "@/components/audio-player";
+import { useTrackModalComplete } from "@/hooks/use-analytics";
 
 export default function TableModals() {
   const { activeModal, closeModal } = useModalStore();
+  const { markModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const handleComplete = (modalId: string) => {
+    trackModalComplete(modalId);
+    markModalComplete(modalId);
+    closeModal();
+  };
   
   const getWeekKey = () => {
     const date = new Date();
@@ -58,6 +68,13 @@ export default function TableModals() {
               <p>Mix warm water with yeast and let bloom. Combine all ingredients, knead until smooth. Let rise for 1 hour, then braid and let rise again before baking at 350°F for 25-30 minutes.</p>
             </div>
           </div>
+
+          <Button 
+            onClick={() => handleComplete('recipe')}
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 mt-4"
+          >
+            Complete Recipe
+          </Button>
         </DialogContent>
       </Dialog>
 
@@ -159,6 +176,13 @@ export default function TableModals() {
               </div>
             </div>
           )}
+
+          <Button 
+            onClick={() => handleComplete('inspiration')}
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 mt-4"
+          >
+            Complete Inspiration
+          </Button>
         </DialogContent>
       </Dialog>
 
@@ -177,6 +201,13 @@ export default function TableModals() {
             duration="3:15"
             audioUrl={parshaContent?.audioUrl || ""}
           />
+
+          <Button 
+            onClick={() => handleComplete('parsha')}
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 mt-4"
+          >
+            Complete Parsha
+          </Button>
         </DialogContent>
       </Dialog>
     </>

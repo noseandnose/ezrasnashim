@@ -1,5 +1,5 @@
 import { Book, Heart, Play, Shield, BookOpen, Sparkles, Star, Scroll, Triangle } from "lucide-react";
-import { useModalStore, useDailyCompletionStore } from "@/lib/types";
+import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import type { Section } from "@/pages/home";
 
@@ -10,6 +10,7 @@ interface TorahSectionProps {
 export default function TorahSection({ onSectionChange }: TorahSectionProps) {
   const { openModal } = useModalStore();
   const { torahCompleted } = useDailyCompletionStore();
+  const { isModalComplete } = useModalCompletionStore();
   
   // Fetch today's Pirkei Avot for daily inspiration
   const today = new Date().toISOString().split('T')[0];
@@ -105,26 +106,31 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
       {/* Daily Torah Content - Separate Section */}
       <div className="p-2 space-y-1">
         <div className="grid grid-cols-2 gap-2 mb-1">
-          {torahItems.map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border, contentType }) => (
-            <button
-              key={id}
-              className={`${gradient} rounded-3xl p-3 text-center glow-hover transition-gentle shadow-lg border ${border} relative`}
-              onClick={() => openModal(id)}
-            >
-              {/* Content Type Indicator */}
-              {contentType && (
-                <div className="absolute top-2 left-2 bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-                  {contentType === 'text' ? 'T' : <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />}
+          {torahItems.map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border, contentType }) => {
+            const isCompleted = isModalComplete(id);
+            return (
+              <button
+                key={id}
+                className={`${isCompleted ? 'bg-sage/20' : gradient} rounded-3xl p-3 text-center glow-hover transition-gentle shadow-lg border ${border} relative`}
+                onClick={() => openModal(id)}
+              >
+                {/* Content Type Indicator */}
+                {contentType && (
+                  <div className="absolute top-2 left-2 bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
+                    {contentType === 'text' ? 'T' : <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />}
+                  </div>
+                )}
+                
+                <div className={`${isCompleted ? 'bg-sage' : iconBg} p-2 rounded-full mx-auto mb-2 w-fit`}>
+                  <Icon className={`${iconColor}`} size={18} strokeWidth={1.5} />
                 </div>
-              )}
-              
-              <div className={`${iconBg} p-2 rounded-full mx-auto mb-2 w-fit`}>
-                <Icon className={`${iconColor}`} size={18} strokeWidth={1.5} />
-              </div>
-              <h3 className="font-serif text-xs text-black mb-1 tracking-wide font-bold">{title}</h3>
-              <p className="font-sans text-xs text-black/60 leading-relaxed">{subtitle}</p>
-            </button>
-          ))}
+                <h3 className="font-serif text-xs text-black mb-1 tracking-wide font-bold">{title}</h3>
+                <p className="font-sans text-xs text-black/60 leading-relaxed">
+                  {isCompleted ? 'Completed' : subtitle}
+                </p>
+              </button>
+            );
+          })}
         </div>
 
         {/* Shabbas Vort Bonus Bar */}

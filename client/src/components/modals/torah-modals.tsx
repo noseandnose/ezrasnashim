@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useModalStore, useDailyCompletionStore } from "@/lib/types";
+import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
@@ -65,6 +65,7 @@ const StandardModalHeader = ({
 export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   const { activeModal, closeModal, openModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete } = useModalCompletionStore();
   const [, setLocation] = useLocation();
   const [showExplosion, setShowExplosion] = useState(false);
   const [fontSize, setFontSize] = useState(20);
@@ -77,9 +78,10 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   }, [activeModal]);
 
   const handleTorahComplete = () => {
-    // Track modal completion
+    // Track modal completion and mark as completed globally
     if (activeModal) {
       trackModalComplete(activeModal);
+      markModalComplete(activeModal);
     }
     
     setShowExplosion(true);

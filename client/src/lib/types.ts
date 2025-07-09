@@ -53,6 +53,29 @@ export interface DailyCompletionState {
   checkAndShowCongratulations: () => boolean;
 }
 
+// Global modal completion tracking
+export interface ModalCompletionState {
+  completedModals: Set<string>;
+  markModalComplete: (modalId: string) => void;
+  isModalComplete: (modalId: string) => boolean;
+  resetModalCompletions: () => void;
+}
+
+export const useModalCompletionStore = create<ModalCompletionState>((set, get) => ({
+  completedModals: new Set(),
+  markModalComplete: (modalId: string) => {
+    set(state => ({
+      completedModals: new Set(state.completedModals).add(modalId)
+    }));
+  },
+  isModalComplete: (modalId: string) => {
+    return get().completedModals.has(modalId);
+  },
+  resetModalCompletions: () => {
+    set({ completedModals: new Set() });
+  }
+}));
+
 export const useDailyCompletionStore = create<DailyCompletionState>((set, get) => {
   const today = new Date().toISOString().split('T')[0];
   

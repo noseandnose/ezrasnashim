@@ -1,5 +1,5 @@
 import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar, Moon, MapPin } from "lucide-react";
-import { useModalStore } from "@/lib/types";
+import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
 import { useGeolocation } from "@/hooks/use-jewish-times";
 import { useQuery } from "@tanstack/react-query";
@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 
 export default function TableSection() {
   const { openModal } = useModalStore();
+  const { isModalComplete } = useModalCompletionStore();
   const { data: shabbosData, isLoading: shabbosLoading } = useShabbosTime();
   
   // Trigger geolocation when component mounts
@@ -111,19 +112,28 @@ export default function TableSection() {
       {/* Shabbos Content Grid - Separate Section */}
       <div className="p-2 space-y-1">
         <div className="grid grid-cols-2 gap-2">
-          {tableItems.map(({ id, icon: Icon, title, subtitle, color }) => (
-            <button
-              key={id}
-              className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
-              onClick={() => openModal(id)}
-            >
-              <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
-                <Icon className="text-white" size={18} strokeWidth={1.5} />
-              </div>
-              <h3 className="font-serif text-xs text-black mb-1 font-bold">{title}</h3>
-              <p className="font-sans text-xs text-black/60 leading-relaxed">{subtitle}</p>
-            </button>
-          ))}
+          {tableItems.map(({ id, icon: Icon, title, subtitle, color }) => {
+            const isCompleted = isModalComplete(id);
+            return (
+              <button
+                key={id}
+                className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
+                  isCompleted ? 'bg-sage/20' : 'bg-white'
+                }`}
+                onClick={() => openModal(id)}
+              >
+                <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
+                  isCompleted ? 'bg-sage' : 'bg-gradient-feminine'
+                }`}>
+                  <Icon className="text-white" size={18} strokeWidth={1.5} />
+                </div>
+                <h3 className="font-serif text-xs text-black mb-1 font-bold">{title}</h3>
+                <p className="font-sans text-xs text-black/60 leading-relaxed">
+                  {isCompleted ? 'Completed' : subtitle}
+                </p>
+              </button>
+            );
+          })}
         </div>
         {/* Bottom padding to prevent last element from being cut off by navigation */}
         <div className="h-16"></div>
