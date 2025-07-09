@@ -45,17 +45,6 @@ export default function TableSection() {
     gcTime: 60 * 60 * 1000
   });
 
-  const { data: parshaContent } = useQuery<{title?: string; content?: string; author?: string}>({
-    queryKey: [`/api/table/vort/${getWeekKey()}`],
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/vort/${getWeekKey()}`);
-      if (!response.ok) return null;
-      return response.json();
-    },
-    staleTime: 10 * 60 * 1000,
-    gcTime: 60 * 60 * 1000
-  });
-
   const tableItems = [
     {
       id: 'recipe',
@@ -70,14 +59,6 @@ export default function TableSection() {
       title: 'Table Inspiration',
       subtitle: inspirationContent?.title || 'Daily Inspiration',
       color: 'text-blush'
-    },
-    {
-      id: 'parsha',
-      icon: Mic,
-      title: 'Parsha Shiur',
-      subtitle: parshaContent?.title || 'Weekly Shiur',
-      color: 'text-peach',
-      extraIcon: Play
     }
   ];
 

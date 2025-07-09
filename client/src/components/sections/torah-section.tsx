@@ -114,7 +114,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
               {/* Content Type Indicator */}
               {contentType && (
                 <div className="absolute top-2 left-2 bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-                  {contentType === 'text' ? 'T' : <Triangle className="w-2.5 h-2.5 fill-current" />}
+                  {contentType === 'text' ? 'T' : <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />}
                 </div>
               )}
               
@@ -138,7 +138,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
             </div>
             <div className="text-left flex-grow">
               <h3 className="font-serif text-sm text-black font-bold">
-                {parshaContent?.hebrew_parsha || parshaContent?.parsha || 'Parsha Vort'}
+                {parshaContent?.hebrew_parsha || parshaContent?.parsha || 'Parsha Shiur'}
               </h3>
               <p className="font-sans text-xs text-black/60">
                 {parshaContent?.title || 'Weekly Torah insight'}
@@ -146,7 +146,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
               </p>
             </div>
             <div className="bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-              <Triangle className="w-2.5 h-2.5 fill-current" />
+              <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
             </div>
           </div>
         </button>
