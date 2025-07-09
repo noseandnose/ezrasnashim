@@ -145,66 +145,65 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
         ) : null}
         </div>
       </div>
-      {/* Other Tzedaka Options - Separate sections below */}
-      <div className="p-2 space-y-2">
+      {/* 4 Tzedaka Action Buttons */}
+      <div className="p-2 space-y-1">
         <div className="grid grid-cols-2 gap-2">
-        <button
-          onClick={() => openModal('donate')}
-          className="bg-white rounded-3xl p-4 shadow-lg hover:scale-105 transition-all duration-300 border border-blush/10 text-left"
-        >
-          <div className="flex flex-col items-center text-center space-y-2">
-            <div className="bg-gradient-feminine p-2 rounded-full">
+          {/* Button 1: Support Women's Causes */}
+          <button
+            onClick={() => openModal('womens-causes')}
+            className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
+          >
+            <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
               <Shield className="text-white" size={18} strokeWidth={1.5} />
             </div>
-            <div>
-              <h3 className="font-serif text-sm text-black mb-1 font-bold">Support Causes</h3>
-              <p className="font-sans text-xs text-black/70">Fertility, Abuse and Torah</p>
-            </div>
-          </div>
-        </button>
+            <h3 className="font-serif text-xs text-black mb-1 font-bold">Support Women's Causes</h3>
+            <p className="font-sans text-xs text-black/60 leading-relaxed">Fertility, abuse prevention</p>
+          </button>
 
-        <button
-          onClick={() => openModal('sponsor-day')}
-          className="bg-white rounded-3xl p-4 shadow-lg hover:scale-105 transition-all duration-300 border border-blush/10 text-left"
-        >
-          <div className="flex flex-col items-center text-center space-y-2">
-            <div className="bg-gradient-feminine p-2 rounded-full">
+          {/* Button 2: Support Torah */}
+          <button
+            onClick={() => openModal('support-torah')}
+            className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
+          >
+            <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
+              <BookOpen className="text-white" size={18} strokeWidth={1.5} />
+            </div>
+            <h3 className="font-serif text-xs text-black mb-1 font-bold">Support Torah</h3>
+            <p className="font-sans text-xs text-black/60 leading-relaxed">Learning and education</p>
+          </button>
+
+          {/* Button 3: Sponsor a Day */}
+          <button
+            onClick={() => openModal('sponsor-day')}
+            className="bg-white rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10"
+          >
+            <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
               <Heart className="text-white" size={18} strokeWidth={1.5} />
             </div>
-            <div>
-              <h3 className="font-serif text-sm text-black mb-1 font-bold">Sponsor a Day</h3>
-              <p className="font-sans text-xs text-black/70">Dedicate all mitzvot</p>
-            </div>
-          </div>
-        </button>
-      </div>
+            <h3 className="font-serif text-xs text-black mb-1 font-bold">Sponsor a Day</h3>
+            <p className="font-sans text-xs text-black/60 leading-relaxed">Dedicate all mitzvot</p>
+          </button>
 
-        {/* Gave Tzedaka Elsewhere Bar */}
-        <div className="bg-white rounded-3xl p-4 shadow-lg border border-blush/10">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className={`p-2 rounded-full ${tzedakaCompleted ? 'bg-sage' : 'bg-gradient-feminine'}`}>
-              <HandHeart className="text-white" size={18} strokeWidth={1.5} />
+          {/* Button 4: Gave Tzedaka Elsewhere */}
+          <button
+            onClick={handleTzedakaComplete}
+            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
+              tzedakaCompleted ? 'bg-sage/20' : 'bg-white'
+            }`}
+          >
+            <div className="heart-explosion-container relative">
+              <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
+                tzedakaCompleted ? 'bg-sage' : 'bg-gradient-feminine'
+              }`}>
+                <HandHeart className="text-white" size={18} strokeWidth={1.5} />
+              </div>
+              <h3 className="font-serif text-xs text-black mb-1 font-bold">Gave Tzedaka Elsewhere</h3>
+              <p className="font-sans text-xs text-black/60 leading-relaxed">
+                {tzedakaCompleted ? 'Completed today' : 'Mark as complete'}
+              </p>
+              <HeartExplosion trigger={showExplosion} />
             </div>
-            <div>
-              <h3 className="font-serif text-sm text-black font-bold">Gave Tzedaka elsewhere</h3>
-              <p className="font-sans text-xs text-black/70">Mark as completed</p>
-            </div>
-          </div>
-          <div className="heart-explosion-container">
-            <Button
-              onClick={handleTzedakaComplete}
-              className={`py-2 px-4 rounded-xl font-medium border-0 ${
-                tzedakaCompleted 
-                  ? 'bg-sage text-white' 
-                  : 'bg-gradient-feminine text-white hover:opacity-90'
-              }`}
-            >
-              {tzedakaCompleted ? 'Completed' : 'Complete'}
-            </Button>
-            <HeartExplosion trigger={showExplosion} />
-          </div>
-        </div>
+          </button>
         </div>
 
         {/* Community Impact */}

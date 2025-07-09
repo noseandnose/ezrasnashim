@@ -58,6 +58,14 @@ export default function TzedakaModals() {
         amount = getDonationAmount();
         typeDescription = "Women's Abuse Support";
         break;
+      case "womens-causes":
+        amount = getDonationAmount();
+        typeDescription = "Women's Causes Support";
+        break;
+      case "support-torah":
+        amount = getDonationAmount();
+        typeDescription = "Torah Learning Support";
+        break;
     }
 
     if (amount > 0) {
@@ -312,6 +320,144 @@ export default function TzedakaModals() {
                   <SelectItem value="50">$50 - Emergency Aid</SelectItem>
                   <SelectItem value="100">$100 - Safe Haven</SelectItem>
                   <SelectItem value="250">$250 - New Beginning</SelectItem>
+                  <SelectItem value="custom">Custom Amount</SelectItem>
+                </SelectContent>
+              </Select>
+              {donationAmount === "custom" && (
+                <div className="relative mt-2">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 font-semibold">$</span>
+                  <Input 
+                    placeholder="Enter amount" 
+                    className="pl-10 bg-white"
+                    type="number"
+                    value={customAmount}
+                    onChange={(e) => setCustomAmount(e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Button 
+                onClick={() => handleDonation()}
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
+                disabled={!donationAmount}
+              >
+                Donate Now
+              </Button>
+              <Button 
+                onClick={() => closeModal()} 
+                variant="outline"
+                className="w-full rounded-xl border-blush/20 text-warm-gray hover:bg-white/90 transition-all duration-300 bg-white/70 backdrop-blur-sm border"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Women's Causes Modal */}
+      <Dialog open={activeModal === 'womens-causes'} onOpenChange={() => closeModal()}>
+        <DialogContent aria-describedby="womens-causes-description">
+          <div className="flex items-center justify-center mb-3 relative">
+            <DialogTitle className="text-lg font-serif font-bold text-black">Support Women's Causes</DialogTitle>
+          </div>
+          <p className="text-sm text-gray-600 text-center mb-4">Support fertility assistance and abuse prevention</p>
+          <div id="womens-causes-description" className="sr-only">Support various women's causes including fertility and abuse prevention</div>
+          
+          <div className="space-y-4">
+            <div className="bg-rose-50 p-4 rounded-xl text-sm text-gray-700">
+              <p className="mb-2">Your donation supports:</p>
+              <ul className="list-disc list-inside space-y-1 text-xs">
+                <li>Fertility treatments and counseling</li>
+                <li>Abuse prevention and safe housing</li>
+                <li>Legal assistance and advocacy</li>
+                <li>Educational workshops and support groups</li>
+                <li>Emergency financial assistance</li>
+              </ul>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium block mb-2">Donation Amount</label>
+              <Select value={donationAmount} onValueChange={setDonationAmount}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select amount" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="36">$36 - Basic Support</SelectItem>
+                  <SelectItem value="72">$72 - Extended Help</SelectItem>
+                  <SelectItem value="180">$180 - Comprehensive Aid</SelectItem>
+                  <SelectItem value="360">$360 - Major Impact</SelectItem>
+                  <SelectItem value="custom">Custom Amount</SelectItem>
+                </SelectContent>
+              </Select>
+              {donationAmount === "custom" && (
+                <div className="relative mt-2">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 font-semibold">$</span>
+                  <Input 
+                    placeholder="Enter amount" 
+                    className="pl-10 bg-white"
+                    type="number"
+                    value={customAmount}
+                    onChange={(e) => setCustomAmount(e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Button 
+                onClick={() => handleDonation()}
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
+                disabled={!donationAmount}
+              >
+                Donate Now
+              </Button>
+              <Button 
+                onClick={() => closeModal()} 
+                variant="outline"
+                className="w-full rounded-xl border-blush/20 text-warm-gray hover:bg-white/90 transition-all duration-300 bg-white/70 backdrop-blur-sm border"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Support Torah Modal */}
+      <Dialog open={activeModal === 'support-torah'} onOpenChange={() => closeModal()}>
+        <DialogContent aria-describedby="support-torah-description">
+          <div className="flex items-center justify-center mb-3 relative">
+            <DialogTitle className="text-lg font-serif font-bold text-black">Support Torah</DialogTitle>
+          </div>
+          <p className="text-sm text-gray-600 text-center mb-4">Support Torah learning and education</p>
+          <div id="support-torah-description" className="sr-only">Support Torah learning, kollels, and Jewish education</div>
+          
+          <div className="space-y-4">
+            <div className="bg-blue-50 p-4 rounded-xl text-sm text-gray-700">
+              <p className="mb-2">Your donation supports:</p>
+              <ul className="list-disc list-inside space-y-1 text-xs">
+                <li>Kollel scholars and Torah study</li>
+                <li>Educational programs and resources</li>
+                <li>Seforim and Torah books</li>
+                <li>Community learning initiatives</li>
+                <li>Study halls and learning spaces</li>
+              </ul>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium block mb-2">Donation Amount</label>
+              <Select value={donationAmount} onValueChange={setDonationAmount}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select amount" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="18">$18 - Chai</SelectItem>
+                  <SelectItem value="54">$54 - Learning</SelectItem>
+                  <SelectItem value="108">$108 - Scholarship</SelectItem>
+                  <SelectItem value="270">$270 - Monthly Support</SelectItem>
                   <SelectItem value="custom">Custom Amount</SelectItem>
                 </SelectContent>
               </Select>
