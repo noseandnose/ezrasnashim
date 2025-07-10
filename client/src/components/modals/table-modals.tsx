@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play, Pause, Volume2 } from "lucide-react";
 import AudioPlayer from "@/components/audio-player";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 
@@ -11,7 +11,7 @@ export default function TableModals() {
   const { activeModal, closeModal } = useModalStore();
   const { markModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
   const handleComplete = (modalId: string) => {
     trackModalComplete(modalId);
@@ -88,59 +88,95 @@ export default function TableModals() {
           
           {inspirationContent ? (
             <>
-              {/* Image Gallery - Single Image with Navigation */}
+              {/* Media Gallery - Images, Audio, and Video with Navigation */}
               {(() => {
-                const images = [
-                  inspirationContent.imageUrl1,
-                  inspirationContent.imageUrl2,
-                  inspirationContent.imageUrl3,
-                  inspirationContent.imageUrl4,
-                  inspirationContent.imageUrl5
-                ].filter(Boolean);
+                const mediaItems = [
+                  { url: inspirationContent.mediaUrl1, type: inspirationContent.mediaType1 },
+                  { url: inspirationContent.mediaUrl2, type: inspirationContent.mediaType2 },
+                  { url: inspirationContent.mediaUrl3, type: inspirationContent.mediaType3 },
+                  { url: inspirationContent.mediaUrl4, type: inspirationContent.mediaType4 },
+                  { url: inspirationContent.mediaUrl5, type: inspirationContent.mediaType5 }
+                ].filter(item => item.url && item.type);
                 
-                if (images.length === 0) return null;
+                if (mediaItems.length === 0) return null;
                 
-                const nextImage = () => {
-                  setCurrentImageIndex((prev) => (prev + 1) % images.length);
+                const nextMedia = () => {
+                  setCurrentMediaIndex((prev) => (prev + 1) % mediaItems.length);
                 };
                 
-                const prevImage = () => {
-                  setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+                const prevMedia = () => {
+                  setCurrentMediaIndex((prev) => (prev - 1 + mediaItems.length) % mediaItems.length);
+                };
+                
+                const currentMedia = mediaItems[currentMediaIndex];
+                
+                const renderMedia = () => {
+                  if (!currentMedia) return null;
+                  
+                  switch (currentMedia.type) {
+                    case 'image':
+                      return (
+                        <img 
+                          src={currentMedia.url} 
+                          alt={`Table inspiration ${currentMediaIndex + 1}`}
+                          className="w-full h-full object-cover cursor-pointer"
+                          onClick={nextMedia}
+                        />
+                      );
+                    case 'audio':
+                      return (
+                        <div className="w-full h-full bg-gradient-to-br from-rose-50 to-pink-50 flex flex-col items-center justify-center">
+                          <Volume2 size={48} className="text-rose-400 mb-4" />
+                          <div className="w-full px-4">
+                            <AudioPlayer audioUrl={currentMedia.url} />
+                          </div>
+                        </div>
+                      );
+                    case 'video':
+                      return (
+                        <video 
+                          src={currentMedia.url} 
+                          controls
+                          className="w-full h-full object-cover"
+                          preload="metadata"
+                        >
+                          Your browser does not support the video tag.
+                        </video>
+                      );
+                    default:
+                      return null;
+                  }
                 };
                 
                 return (
                   <div className="mb-4 relative">
                     <div className="w-full h-64 bg-gray-100 rounded-lg overflow-hidden relative">
-                      <img 
-                        src={images[currentImageIndex]} 
-                        alt={`Table inspiration ${currentImageIndex + 1}`}
-                        className="w-full h-full object-cover cursor-pointer"
-                        onClick={nextImage}
-                      />
+                      {renderMedia()}
                       
-                      {images.length > 1 && (
+                      {mediaItems.length > 1 && (
                         <>
                           <button
-                            onClick={prevImage}
+                            onClick={prevMedia}
                             className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70 transition-colors"
                           >
                             <ChevronLeft size={20} />
                           </button>
                           <button
-                            onClick={nextImage}
+                            onClick={nextMedia}
                             className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70 transition-colors"
                           >
                             <ChevronRight size={20} />
                           </button>
                           
-                          {/* Image counter dots */}
+                          {/* Media counter dots with type indicators */}
                           <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
-                            {images.map((_, index) => (
+                            {mediaItems.map((item, index) => (
                               <div
                                 key={index}
                                 className={`w-2 h-2 rounded-full ${
-                                  index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                                  index === currentMediaIndex ? 'bg-white' : 'bg-white/50'
                                 }`}
+                                title={`${item.type} ${index + 1}`}
                               />
                             ))}
                           </div>

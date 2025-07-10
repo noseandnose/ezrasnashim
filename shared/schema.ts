@@ -39,11 +39,16 @@ export const tableInspirations = pgTable("table_inspirations", {
   date: date("date").notNull(), // Daily inspiration
   title: text("title").notNull(),
   content: text("content").notNull(), // Main paragraph text
-  imageUrl1: text("image_url_1"),
-  imageUrl2: text("image_url_2"),
-  imageUrl3: text("image_url_3"),
-  imageUrl4: text("image_url_4"),
-  imageUrl5: text("image_url_5"),
+  mediaUrl1: text("media_url_1"),
+  mediaType1: text("media_type_1"), // 'image', 'audio', 'video'
+  mediaUrl2: text("media_url_2"),
+  mediaType2: text("media_type_2"), // 'image', 'audio', 'video'
+  mediaUrl3: text("media_url_3"),
+  mediaType3: text("media_type_3"), // 'image', 'audio', 'video'
+  mediaUrl4: text("media_url_4"),
+  mediaType4: text("media_type_4"), // 'image', 'audio', 'video'
+  mediaUrl5: text("media_url_5"),
+  mediaType5: text("media_type_5"), // 'image', 'audio', 'video'
   createdAt: timestamp("created_at").defaultNow(),
 });
 
