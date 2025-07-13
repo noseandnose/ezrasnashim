@@ -260,8 +260,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Missing required fields" });
       }
 
+      // Extract Hebrew date components (e.g., "19th of Tevet" -> day=19, month=Tevet)
+      const parseHebrewDate = (hebrewDateStr: string) => {
+        // Handle formats like "19th of Tevet", "19 Tevet", "Tevet 19", etc.
+        const cleanDate = hebrewDateStr.replace(/(\d+)(st|nd|rd|th)\s+of\s+/i, '$1 ');
+        const parts = cleanDate.split(/\s+/);
+        
+        let day, month;
+        if (parts.length >= 2) {
+          // Try to find day number and month name
+          const dayMatch = parts.find(p => /^\d+$/.test(p));
+          const monthMatch = parts.find(p => isNaN(parseInt(p)) && p.length > 2);
+          day = dayMatch ? parseInt(dayMatch) : null;
+          month = monthMatch || null;
+        }
+        
+        return { day, month };
+      };
+
       // Generate ICS content for recurring event
-      const generateICSContent = () => {
+      const generateICSContent = async () => {
         const now = new Date();
         const uid = `hebrew-date-${Date.now()}@ezrasnashim.com`;
         const dtStamp = now.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
@@ -274,13 +292,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'METHOD:PUBLISH'
         ];
 
-        // Create recurring events for the specified number of years
-        const baseDate = new Date(gregorianDate);
+        const { day, month } = parseHebrewDate(hebrewDate);
+        const currentYear = new Date().getFullYear();
+        
+        // Create events for the next 'years' years starting from current year
         for (let i = 0; i < years; i++) {
-          const eventDate = new Date(baseDate);
-          eventDate.setFullYear(baseDate.getFullYear() + i);
+          const targetYear = currentYear + i;
+          let englishDateForYear = null;
           
-          const dateStr = eventDate.toISOString().split('T')[0].replace(/-/g, '');
+          if (day && month) {
+            // Normalize Hebrew month names for Hebcal API
+            const hebrewMonthNames: { [key: string]: string } = {
+              'tishrei': 'Tishrei', 'cheshvan': 'Cheshvan', 'kislev': 'Kislev', 'tevet': 'Tevet', 
+              'shevat': 'Shevat', 'adar': 'Adar', 'nissan': 'Nissan', 'iyar': 'Iyar', 
+              'sivan': 'Sivan', 'tammuz': 'Tammuz', 'av': 'Av', 'elul': 'Elul',
+              'adar i': 'Adar I', 'adar ii': 'Adar II'
+            };
+            
+            const monthName = hebrewMonthNames[month.toLowerCase()];
+            
+            if (monthName) {
+              try {
+                // Calculate Hebrew year more accurately
+                const hebrewYear = targetYear < 2025 ? 5785 : 5785 + (targetYear - 2025);
+                
+                // Convert Hebrew date to Gregorian for this year
+                const response = await serverAxiosClient.get(`https://www.hebcal.com/converter?cfg=json&hd=${day}&hm=${monthName}&hy=${hebrewYear}&h2g=1`);
+                
+                if (response.data && response.data.gy && response.data.gm && response.data.gd) {
+                  const { gy, gm, gd } = response.data;
+                  englishDateForYear = new Date(gy, gm - 1, gd); // gm is 1-based
+                }
+              } catch (error) {
+                console.error(`Error converting Hebrew date for year ${targetYear}:`, error);
+              }
+            }
+          }
+          
+          // Only use fallback if Hebrew conversion completely failed
+          if (!englishDateForYear) {
+            const baseDate = new Date(gregorianDate);
+            englishDateForYear = new Date(targetYear, baseDate.getMonth(), baseDate.getDate());
+          }
+          
+          const dateStr = englishDateForYear.toISOString().split('T')[0].replace(/-/g, '');
           
           icsContent.push(
             'BEGIN:VEVENT',
@@ -288,7 +343,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             `DTSTAMP:${dtStamp}`,
             `DTSTART;VALUE=DATE:${dateStr}`,
             `SUMMARY:${title}`,
-            `DESCRIPTION:Hebrew Date: ${hebrewDate}\\nEnglish Date: ${eventDate.toLocaleDateString()}`,
+            `DESCRIPTION:Hebrew Date: ${hebrewDate}\\nEnglish Date: ${englishDateForYear.toLocaleDateString()}\\nYear: ${targetYear}`,
             'STATUS:CONFIRMED',
             'TRANSP:TRANSPARENT',
             'END:VEVENT'
@@ -299,7 +354,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return icsContent.join('\r\n');
       };
 
-      const icsContent = generateICSContent();
+      const icsContent = await generateICSContent();
       const filename = `${title.replace(/[^a-zA-Z0-9]/g, '_')}_${years}_years.ics`;
       
       res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
