@@ -59,6 +59,15 @@ export default function TableSection() {
     gcTime: 60 * 60 * 1000
   });
 
+  // Calculate days until Shabbat (Saturday = 6, Sunday = 0)
+  const getDaysUntilShabbat = () => {
+    const today = new Date().getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    if (today === 6) return 7; // Saturday: 7 days until next Shabbat
+    return 6 - today; // Days remaining until Saturday
+  };
+
+  const daysUntilShabbat = getDaysUntilShabbat();
+
   const tableItems = [
     {
       id: 'recipe',
@@ -124,6 +133,31 @@ export default function TableSection() {
 
       {/* Shabbos Content Grid - Separate Section */}
       <div className="p-2 space-y-1">
+        {/* Shabbat Countdown Button */}
+        <button
+          className="w-full rounded-3xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white mb-3"
+          onClick={() => openModal('shabbat-countdown')}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <h3 className="font-serif text-lg text-black mb-1 font-bold">
+                {shabbosData?.parsha || "Loading Parsha..."}
+              </h3>
+              <p className="font-sans text-sm text-black/70 mb-2">
+                {shabbosData?.candleLighting && shabbosData?.havdalah 
+                  ? `${shabbosData.candleLighting} - ${shabbosData.havdalah}`
+                  : "Loading times..."
+                }
+              </p>
+            </div>
+            <div className="flex items-center justify-center w-12 h-12 bg-gradient-feminine rounded-full">
+              <span className="text-white font-serif font-bold text-lg">
+                {daysUntilShabbat}
+              </span>
+            </div>
+          </div>
+        </button>
+
         <div className="grid grid-cols-2 gap-2">
           {tableItems.map(({ id, icon: Icon, title, subtitle, color }) => {
             const isCompleted = isModalComplete(id);
