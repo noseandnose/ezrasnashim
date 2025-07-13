@@ -63,8 +63,8 @@ export default function DailyProgress({ size = 18 }: DailyProgressProps) {
             <ellipse cx="35" cy="35" rx="8" ry="15" transform="rotate(315 35 35)" fill="#F4A6CD"/>
           </g>
           {/* Flower center */}
-          <circle cx="50" cy="50" r="8" fill="#D4A574"/>
-          <circle cx="50" cy="50" r="5" fill="#C9975B"/>
+          <circle cx="50" cy="50" r="8" fill="hsl(350, 45%, 85%)"/>
+          <circle cx="50" cy="50" r="5" fill="hsl(260, 30%, 85%)"/>
         </svg>
       );
     } else if (completedCount === 2) {
@@ -91,8 +91,8 @@ export default function DailyProgress({ size = 18 }: DailyProgressProps) {
             <ellipse cx="32" cy="32" rx="10" ry="18" transform="rotate(315 32 32)" fill="#F4A6CD"/>
           </g>
           {/* Flower center - bigger */}
-          <circle cx="50" cy="50" r="10" fill="#D4A574"/>
-          <circle cx="50" cy="50" r="6" fill="#C9975B"/>
+          <circle cx="50" cy="50" r="10" fill="hsl(350, 45%, 85%)"/>
+          <circle cx="50" cy="50" r="6" fill="hsl(260, 30%, 85%)"/>
         </svg>
       );
     } else {
@@ -109,8 +109,8 @@ export default function DailyProgress({ size = 18 }: DailyProgressProps) {
             <ellipse cx="35" cy="65" rx="8" ry="15" transform="rotate(225 35 65)" fill="#F4A6CD"/>
             <ellipse cx="25" cy="50" rx="8" ry="15" transform="rotate(270 25 50)" fill="#E8B4CB"/>
             <ellipse cx="35" cy="35" rx="8" ry="15" transform="rotate(315 35 35)" fill="#F4A6CD"/>
-            <circle cx="50" cy="50" r="9" fill="#D4A574"/>
-            <circle cx="50" cy="50" r="6" fill="#C9975B"/>
+            <circle cx="50" cy="50" r="9" fill="hsl(350, 45%, 85%)"/>
+            <circle cx="50" cy="50" r="6" fill="hsl(260, 30%, 85%)"/>
           </g>
           
           {/* Second flower - top right, larger scale */}
@@ -123,8 +123,8 @@ export default function DailyProgress({ size = 18 }: DailyProgressProps) {
             <ellipse cx="35" cy="65" rx="8" ry="15" transform="rotate(225 35 65)" fill="#E8B4CB"/>
             <ellipse cx="25" cy="50" rx="8" ry="15" transform="rotate(270 25 50)" fill="#F4A6CD"/>
             <ellipse cx="35" cy="35" rx="8" ry="15" transform="rotate(315 35 35)" fill="#E8B4CB"/>
-            <circle cx="50" cy="50" r="9" fill="#D4A574"/>
-            <circle cx="50" cy="50" r="6" fill="#C9975B"/>
+            <circle cx="50" cy="50" r="9" fill="hsl(350, 45%, 85%)"/>
+            <circle cx="50" cy="50" r="6" fill="hsl(260, 30%, 85%)"/>
           </g>
           
           {/* Third flower - bottom center, larger scale */}
@@ -137,8 +137,8 @@ export default function DailyProgress({ size = 18 }: DailyProgressProps) {
             <ellipse cx="35" cy="65" rx="8" ry="15" transform="rotate(225 35 65)" fill="#F4A6CD"/>
             <ellipse cx="25" cy="50" rx="8" ry="15" transform="rotate(270 25 50)" fill="#E8B4CB"/>
             <ellipse cx="35" cy="35" rx="8" ry="15" transform="rotate(315 35 35)" fill="#F4A6CD"/>
-            <circle cx="50" cy="50" r="9" fill="#D4A574"/>
-            <circle cx="50" cy="50" r="6" fill="#C9975B"/>
+            <circle cx="50" cy="50" r="9" fill="hsl(350, 45%, 85%)"/>
+            <circle cx="50" cy="50" r="6" fill="hsl(260, 30%, 85%)"/>
           </g>
         </svg>
       );

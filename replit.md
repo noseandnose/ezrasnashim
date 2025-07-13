@@ -213,6 +213,7 @@ Changelog:
 - July 13, 2025. Simplified daily progress button to pure visual indicator: Removed all text and clickability from daily progress button, converted to non-interactive visual flower display that grows in size and complexity (outline → small filled flower → bigger flower → bouquet) based on completion count, centered within clean white container matching other buttons
 - July 13, 2025. Enhanced daily progress with beautiful flower design: Replaced generic flower shapes with the beautiful elliptical petal flower design from congratulations modal, featuring pink and peach colored petals with golden centers, progression from gray outline (0) → small filled flower (1) → bigger flower (2) → three-flower bouquet (3), creating visually appealing and meaningful progress representation
 - July 13, 2025. Maximized bouquet size and cleaned up Life page: Increased final bouquet size to 1.8x with larger individual flowers (0.85 scale) and enhanced opacity for maximum visual impact when all sections completed, removed shop items section from Life page keeping only discount promotion bar for cleaner interface
+- July 13, 2025. Updated flower centers to match app gradient colors: Replaced brown/orange flower centers with app's beautiful rose-blush and lavender gradient colors (hsl(350, 45%, 85%) and hsl(260, 30%, 85%)) ensuring visual consistency with the rest of the application design
 ```
 
 ## User Preferences
