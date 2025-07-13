@@ -18,15 +18,43 @@ export default function TimesModals() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const createEventMutation = useMutation({
-    mutationFn: async (data: { title: string; hebrewDate: string; gregorianDate: string; recurring: boolean; years: number }) => {
-      return apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/calendar-events`, data);
+  const downloadCalendarMutation = useMutation({
+    mutationFn: async (data: { title: string; hebrewDate: string; gregorianDate: string; years: number }) => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/calendar-events/download`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate calendar file');
+      }
+      
+      // Get the filename from the Content-Disposition header
+      const contentDisposition = response.headers.get('Content-Disposition');
+      const filename = contentDisposition 
+        ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+        : `${data.title.replace(/[^a-zA-Z0-9]/g, '_')}_${data.years}_years.ics`;
+      
+      // Create blob and download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      return { success: true };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/calendar-events'] });
       toast({
         title: "Success",
-        description: "Event added to calendar for the next 20 years"
+        description: "Calendar file downloaded for the next 10 years"
       });
       setEventTitle("");
       setEnglishDate("");
@@ -37,7 +65,7 @@ export default function TimesModals() {
     onError: () => {
       toast({
         title: "Error",
-        description: "Failed to add event to calendar",
+        description: "Failed to download calendar file",
         variant: "destructive"
       });
     }
@@ -96,7 +124,7 @@ export default function TimesModals() {
     }
   };
 
-  const handleAddToCalendar = () => {
+  const handleDownloadCalendar = () => {
     if (!eventTitle || !englishDate || !convertedHebrewDate) {
       toast({
         title: "Error",
@@ -106,12 +134,11 @@ export default function TimesModals() {
       return;
     }
 
-    createEventMutation.mutate({
+    downloadCalendarMutation.mutate({
       title: eventTitle,
       hebrewDate: convertedHebrewDate,
       gregorianDate: englishDate,
-      recurring: true,
-      years: 20
+      years: 10
     });
   };
 
@@ -189,11 +216,11 @@ export default function TimesModals() {
             
             <div className="space-y-2">
               <Button 
-                onClick={handleAddToCalendar}
-                disabled={createEventMutation.isPending || !eventTitle || !englishDate}
+                onClick={handleDownloadCalendar}
+                disabled={downloadCalendarMutation.isPending || !eventTitle || !englishDate}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
               >
-                {createEventMutation.isPending ? "Adding..." : "Add to Calendar"}
+                {downloadCalendarMutation.isPending ? "Generating..." : "Download Calendar (10 Years)"}
               </Button>
               <Button 
                 onClick={() => closeModal()} 

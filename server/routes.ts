@@ -251,6 +251,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate and download ICS calendar file
+  app.post("/api/calendar-events/download", async (req, res) => {
+    try {
+      const { title, hebrewDate, gregorianDate, years = 10 } = req.body;
+      
+      if (!title || !hebrewDate || !gregorianDate) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      // Generate ICS content for recurring event
+      const generateICSContent = () => {
+        const now = new Date();
+        const uid = `hebrew-date-${Date.now()}@ezrasnashim.com`;
+        const dtStamp = now.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+        
+        let icsContent = [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'PRODID:-//Ezras Nashim//Hebrew Date Converter//EN',
+          'CALSCALE:GREGORIAN',
+          'METHOD:PUBLISH'
+        ];
+
+        // Create recurring events for the specified number of years
+        const baseDate = new Date(gregorianDate);
+        for (let i = 0; i < years; i++) {
+          const eventDate = new Date(baseDate);
+          eventDate.setFullYear(baseDate.getFullYear() + i);
+          
+          const dateStr = eventDate.toISOString().split('T')[0].replace(/-/g, '');
+          
+          icsContent.push(
+            'BEGIN:VEVENT',
+            `UID:${uid}-${i}`,
+            `DTSTAMP:${dtStamp}`,
+            `DTSTART;VALUE=DATE:${dateStr}`,
+            `SUMMARY:${title}`,
+            `DESCRIPTION:Hebrew Date: ${hebrewDate}\\nEnglish Date: ${eventDate.toLocaleDateString()}`,
+            'STATUS:CONFIRMED',
+            'TRANSP:TRANSPARENT',
+            'END:VEVENT'
+          );
+        }
+        
+        icsContent.push('END:VCALENDAR');
+        return icsContent.join('\r\n');
+      };
+
+      const icsContent = generateICSContent();
+      const filename = `${title.replace(/[^a-zA-Z0-9]/g, '_')}_${years}_years.ics`;
+      
+      res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(icsContent);
+      
+    } catch (error) {
+      console.error('Error generating calendar file:', error);
+      res.status(500).json({ message: "Failed to generate calendar file" });
+    }
+  });
+
   // Shop routes
   app.get("/api/shop", async (req, res) => {
     try {

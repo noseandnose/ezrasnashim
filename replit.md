@@ -215,6 +215,7 @@ Changelog:
 - July 13, 2025. Maximized bouquet size and cleaned up Life page: Increased final bouquet size to 1.8x with larger individual flowers (0.85 scale) and enhanced opacity for maximum visual impact when all sections completed, removed shop items section from Life page keeping only discount promotion bar for cleaner interface
 - July 13, 2025. Updated flower centers to match app gradient colors: Replaced brown/orange flower centers with app's beautiful rose-blush and lavender gradient colors (hsl(350, 45%, 85%) and hsl(260, 30%, 85%)) ensuring visual consistency with the rest of the application design
 - July 13, 2025. Added Shabbat countdown and Jewish Date converter buttons to Life page: Created 2x2 grid layout with Shabbat countdown button (showing Parsha name, candle lighting/Havdalah times, and days until Shabbat badge) and Jewish Date converter button (allowing users to input event title and English date, convert to Hebrew date using Hebcal API, and download recurring calendar files for next 10+ years), positioned above existing Recipe and Inspiration buttons
+- July 13, 2025. Fixed Jewish Date converter download functionality: Implemented proper ICS calendar file generation and download system, changed duration from 20 years to 10 years, created actual downloadable calendar files that can be imported into any calendar application, replaced database-only storage with real file download capability
 ```
 
 ## User Preferences
