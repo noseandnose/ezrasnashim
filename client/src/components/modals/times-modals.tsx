@@ -20,10 +20,11 @@ export default function TimesModals() {
 
   const downloadCalendarMutation = useMutation({
     mutationFn: async (data: { title: string; hebrewDate: string; gregorianDate: string; years: number }) => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/calendar-events/download`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/calendar-events/download?t=${Date.now()}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
         },
         body: JSON.stringify(data),
       });
