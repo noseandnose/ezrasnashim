@@ -150,17 +150,9 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <HeartProgress completed={tzedakaCompleted} size={18} />
           </button>
 
-          <button
-            onClick={() => navigateToSection('table')}
-            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
-          >
-            <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-to-br from-sand-gold to-peach">
-              <Sparkles className="text-white" size={18} strokeWidth={1.5} />
-            </div>
-            <h3 className="font-serif text-xs text-black mb-1 font-bold">Life & Shabbos</h3>
-            <p className="font-sans text-xs text-black/60 leading-relaxed mb-2">Recipes & Shop</p>
-            <DailyProgress size={18} />
-          </button>
+          <div className="rounded-3xl p-3 text-center shadow-lg border border-blush/10 bg-white flex items-center justify-center">
+            <DailyProgress size={36} />
+          </div>
         </div>
       </div>
     </div>
