@@ -199,7 +199,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               onClick={handleTorahComplete} 
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
             >
-              Complete
+              Completed
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -273,7 +273,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               onClick={handleTorahComplete} 
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
             >
-              Complete
+              Completed
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -333,7 +333,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               onClick={handleTorahComplete} 
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
             >
-              Complete
+              Completed
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -394,7 +394,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               onClick={handleTorahComplete} 
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
             >
-              Complete
+              Completed
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -423,7 +423,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               onClick={handleTorahComplete} 
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
             >
-              Complete
+              Completed
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>

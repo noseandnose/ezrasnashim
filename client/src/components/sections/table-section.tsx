@@ -1,4 +1,4 @@
-import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar, Moon, MapPin } from "lucide-react";
+import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar, Moon, MapPin, ShoppingBag } from "lucide-react";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
 import { useGeolocation } from "@/hooks/use-jewish-times";
@@ -40,6 +40,18 @@ export default function TableSection() {
     queryFn: async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/recipe/${getWeekKey()}`);
       if (!response.ok) return null;
+      return response.json();
+    },
+    staleTime: 10 * 60 * 1000,
+    gcTime: 60 * 60 * 1000
+  });
+
+  // Fetch shop items
+  const { data: shopItems } = useQuery<Record<string, any>[]>({
+    queryKey: ['/api/shop/items'],
+    queryFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/shop/items`);
+      if (!response.ok) return [];
       return response.json();
     },
     staleTime: 10 * 60 * 1000,
@@ -135,6 +147,32 @@ export default function TableSection() {
             );
           })}
         </div>
+        
+        {/* Shop Items Section */}
+        {shopItems && shopItems.length > 0 && (
+          <>
+            <div className="my-4 px-2">
+              <h3 className="font-serif text-lg text-black font-bold mb-3 text-center">Shop Items</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {shopItems.map((item) => (
+                  <button
+                    key={item.id}
+                    className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
+                    onClick={() => openModal('shop')}
+                  >
+                    <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-feminine">
+                      <ShoppingBag className="text-white" size={18} strokeWidth={1.5} />
+                    </div>
+                    <h3 className="font-serif text-xs text-black mb-1 font-bold">{item.name}</h3>
+                    <p className="font-sans text-xs text-black/60 leading-relaxed">{item.description}</p>
+                    <p className="font-sans text-xs text-black/80 font-bold mt-1">${item.price}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+        
         {/* Bottom padding to prevent last element from being cut off by navigation */}
         <div className="h-16"></div>
       </div>

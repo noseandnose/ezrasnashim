@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useJewishTimes } from "@/hooks/use-jewish-times";
-import { useHebrewDate } from "@/hooks/use-hebrew-date";
+import { useHebrewDate, useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
 import DiscountBar from "@/components/discount-bar";
+import FlowerProgress from "@/components/flower-progress";
 import type { Section } from "@/pages/home";
 
 interface Sponsor {
@@ -21,7 +22,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   const { openModal } = useModalStore();
   const { torahCompleted, tefillaCompleted, tzedakaCompleted } = useDailyCompletionStore();
   const jewishTimesQuery = useJewishTimes();
-  const { data: hebrewDate } = useHebrewDate();
+  const { data: hebrewDate } = useHebrewDateWithShkia(jewishTimesQuery.data?.shkia);
 
   // Get time-appropriate greeting
   const getGreeting = () => {
@@ -122,9 +123,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               <h3 className="font-serif text-base text-black font-bold">Daily Torah</h3>
               <p className="font-sans text-xs text-black/70">Halacha, Mussar & Chizuk</p>
             </div>
-            {torahCompleted && (
-              <Heart className="gradient-heart" size={18} />
-            )}
+            <FlowerProgress completed={torahCompleted} size={18} />
           </div>
         </button>
 
@@ -140,9 +139,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               <h3 className="font-serif text-base text-black font-bold">Daily Tefilla</h3>
               <p className="font-sans text-xs text-black/70">Global Tehillim Chain & Prayers</p>
             </div>
-            {tefillaCompleted && (
-              <Heart className="gradient-heart" size={18} />
-            )}
+            <FlowerProgress completed={tefillaCompleted} size={18} />
           </div>
         </button>
 
@@ -158,9 +155,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               <h3 className="font-serif text-base text-black font-bold">Daily Tzedaka</h3>
               <p className="font-sans text-xs text-black/70">Support Women Causes & Torah</p>
             </div>
-            {tzedakaCompleted && (
-              <Heart className="gradient-heart" size={18} />
-            )}
+            <FlowerProgress completed={tzedakaCompleted} size={18} />
           </div>
         </button>
 

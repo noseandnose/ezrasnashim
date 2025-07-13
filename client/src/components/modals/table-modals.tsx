@@ -73,7 +73,7 @@ export default function TableModals() {
             onClick={() => handleComplete('recipe')}
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 mt-4"
           >
-            Complete Recipe
+            Completed Recipe
           </Button>
         </DialogContent>
       </Dialog>
@@ -217,7 +217,7 @@ export default function TableModals() {
             onClick={() => handleComplete('inspiration')}
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 mt-4"
           >
-            Complete Inspiration
+            Completed Inspiration
           </Button>
         </DialogContent>
       </Dialog>
@@ -242,7 +242,7 @@ export default function TableModals() {
             onClick={() => handleComplete('parsha')}
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 mt-4"
           >
-            Complete Parsha
+            Completed Parsha
           </Button>
         </DialogContent>
       </Dialog>

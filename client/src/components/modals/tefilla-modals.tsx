@@ -188,7 +188,7 @@ function MorningBrochasModal() {
           className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
           disabled={isLoading}
         >
-          Complete Morning Brochas
+          Completed Morning Brochas
         </Button>
         
         {/* Heart Explosion Animation */}
@@ -510,7 +510,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               disabled={completePerekMutation.isPending}
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
             >
-              {completePerekMutation.isPending ? 'Completing...' : 'Complete'}
+              {completePerekMutation.isPending ? 'Completing...' : 'Completed'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -559,7 +559,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               onClick={completeWithAnimation} 
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
             >
-              Complete
+              Completed
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -624,7 +624,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               onClick={completeWithAnimation} 
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
             >
-              Complete
+              Completed
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -652,7 +652,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               onClick={completeWithAnimation} 
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
             >
-              Complete
+              Completed
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -680,7 +680,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               onClick={completeWithAnimation} 
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
             >
-              Complete
+              Completed
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -708,7 +708,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               onClick={completeWithAnimation} 
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
             >
-              Complete
+              Completed
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -783,7 +783,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               onClick={completeWithAnimation} 
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-3 border-0"
             >
-              Complete
+              Completed
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -1264,7 +1264,7 @@ function IndividualTehillimModal() {
         }} 
         className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
       >
-        Complete
+        Completed
       </Button>
       
       {/* Heart Explosion Animation */}

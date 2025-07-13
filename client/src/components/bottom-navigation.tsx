@@ -12,7 +12,7 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
     { id: 'tefilla' as Section, icon: HandHeart, label: 'Tefilla', isCenter: false },
     { id: 'home' as Section, icon: Heart, label: 'Home', isCenter: true },
     { id: 'tzedaka' as Section, icon: Coins, label: 'Tzedaka', isCenter: false },
-    { id: 'table' as Section, icon: Flame, label: 'Shabbos', isCenter: false },
+    { id: 'table' as Section, icon: Flame, label: 'Life', isCenter: false },
   ];
 
   const getActiveColorClass = (sectionId: Section) => {
