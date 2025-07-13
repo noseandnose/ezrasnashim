@@ -45,10 +45,25 @@ export default function Statistics() {
 
   // Handler for bottom navigation
   const handleSectionChange = (section: Section) => {
-    if (section === 'home') {
-      setLocation('/');
+    switch (section) {
+      case 'home':
+        setLocation('/');
+        break;
+      case 'torah':
+        setLocation('/torah');
+        break;
+      case 'tefilla':
+        setLocation('/tefilla');
+        break;
+      case 'tzedaka':
+        setLocation('/tzedaka');
+        break;
+      case 'table':
+        setLocation('/table');
+        break;
+      default:
+        setLocation('/');
     }
-    // Add other section handlers as needed
   };
 
   const StatCard = ({ title, value, icon: Icon, color }: { title: string; value: number | string; icon: any; color: string }) => (

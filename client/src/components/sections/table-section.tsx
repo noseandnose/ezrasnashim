@@ -48,9 +48,9 @@ export default function TableSection() {
 
   // Fetch shop items
   const { data: shopItems } = useQuery<Record<string, any>[]>({
-    queryKey: ['/api/shop/items'],
+    queryKey: ['/api/shop'],
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/shop/items`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/shop`);
       if (!response.ok) return [];
       return response.json();
     },
