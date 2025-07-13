@@ -133,31 +133,45 @@ export default function TableSection() {
 
       {/* Shabbos Content Grid - Separate Section */}
       <div className="p-2 space-y-1">
-        {/* Shabbat Countdown Button */}
-        <button
-          className="w-full rounded-3xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white mb-3"
-          onClick={() => openModal('shabbat-countdown')}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <h3 className="font-serif text-lg text-black mb-1 font-bold">
-                {shabbosData?.parsha || "Loading Parsha..."}
-              </h3>
-              <p className="font-sans text-sm text-black/70 mb-2">
-                {shabbosData?.candleLighting && shabbosData?.havdalah 
-                  ? `${shabbosData.candleLighting} - ${shabbosData.havdalah}`
-                  : "Loading times..."
-                }
-              </p>
-            </div>
-            <div className="flex items-center justify-center w-12 h-12 bg-gradient-feminine rounded-full">
-              <span className="text-white font-serif font-bold text-lg">
+        {/* Top Row: Shabbat and Date Converter */}
+        <div className="grid grid-cols-2 gap-2 mb-2">
+          {/* Shabbat Countdown Button */}
+          <button
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
+            onClick={() => openModal('shabbat-countdown')}
+          >
+            <div className="flex items-center justify-center w-8 h-8 bg-gradient-feminine rounded-full mx-auto mb-2">
+              <span className="text-white font-serif font-bold text-sm">
                 {daysUntilShabbat}
               </span>
             </div>
-          </div>
-        </button>
+            <h3 className="font-serif text-xs text-black mb-1 font-bold">
+              {shabbosData?.parsha || "Loading..."}
+            </h3>
+            <p className="font-sans text-xs text-black/60 leading-relaxed">
+              {shabbosData?.candleLighting && shabbosData?.havdalah 
+                ? `${shabbosData.candleLighting} - ${shabbosData.havdalah}`
+                : "Loading times..."
+              }
+            </p>
+          </button>
 
+          {/* Jewish Date Converter Button */}
+          <button
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
+            onClick={() => openModal('date-calculator')}
+          >
+            <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-feminine">
+              <Calendar className="text-white" size={18} strokeWidth={1.5} />
+            </div>
+            <h3 className="font-serif text-xs text-black mb-1 font-bold">Jewish Date</h3>
+            <p className="font-sans text-xs text-black/60 leading-relaxed">
+              Convert & Download
+            </p>
+          </button>
+        </div>
+
+        {/* Bottom Row: Recipe and Inspiration */}
         <div className="grid grid-cols-2 gap-2">
           {tableItems.map(({ id, icon: Icon, title, subtitle, color }) => {
             const isCompleted = isModalComplete(id);
