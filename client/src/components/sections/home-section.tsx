@@ -5,7 +5,8 @@ import { Card } from "@/components/ui/card";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate, useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
-import FlowerProgress from "@/components/flower-progress";
+import HeartProgress from "@/components/heart-progress";
+import DailyProgress from "@/components/daily-progress";
 import type { Section } from "@/pages/home";
 
 interface Sponsor {
@@ -120,7 +121,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             </div>
             <h3 className="font-serif text-xs text-black mb-1 font-bold">Daily Torah</h3>
             <p className="font-sans text-xs text-black/60 leading-relaxed mb-2">Halacha, Emuna & Chizuk</p>
-            <FlowerProgress completed={torahCompleted} size={18} />
+            <HeartProgress completed={torahCompleted} size={18} />
           </button>
 
           <button
@@ -132,7 +133,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             </div>
             <h3 className="font-serif text-xs text-black mb-1 font-bold">Daily Tefilla</h3>
             <p className="font-sans text-xs text-black/60 leading-relaxed mb-2">Tehillim & Prayers</p>
-            <FlowerProgress completed={tefillaCompleted} size={18} />
+            <HeartProgress completed={tefillaCompleted} size={18} />
           </button>
         </div>
 
@@ -146,7 +147,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             </div>
             <h3 className="font-serif text-xs text-black mb-1 font-bold">Daily Tzedaka</h3>
             <p className="font-sans text-xs text-black/60 leading-relaxed mb-2">Support Causes</p>
-            <FlowerProgress completed={tzedakaCompleted} size={18} />
+            <HeartProgress completed={tzedakaCompleted} size={18} />
           </button>
 
           <button
@@ -158,7 +159,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             </div>
             <h3 className="font-serif text-xs text-black mb-1 font-bold">Life & Shabbos</h3>
             <p className="font-sans text-xs text-black/60 leading-relaxed mb-2">Recipes & Shop</p>
-            <FlowerProgress completed={false} size={18} />
+            <DailyProgress size={18} />
           </button>
         </div>
       </div>
