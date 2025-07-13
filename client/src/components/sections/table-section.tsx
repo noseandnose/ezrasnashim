@@ -149,31 +149,6 @@ export default function TableSection() {
           })}
         </div>
         
-        {/* Shop Items Section */}
-        {shopItems && shopItems.length > 0 && (
-          <>
-            <div className="my-4 px-2">
-              <h3 className="font-serif text-lg text-black font-bold mb-3 text-center">Shop Items</h3>
-              <div className="grid grid-cols-2 gap-2">
-                {shopItems.map((item) => (
-                  <button
-                    key={item.id}
-                    className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
-                    onClick={() => openModal('shop')}
-                  >
-                    <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-feminine">
-                      <ShoppingBag className="text-white" size={18} strokeWidth={1.5} />
-                    </div>
-                    <h3 className="font-serif text-xs text-black mb-1 font-bold">{item.name}</h3>
-                    <p className="font-sans text-xs text-black/60 leading-relaxed">{item.description}</p>
-                    <p className="font-sans text-xs text-black/80 font-bold mt-1">${item.price}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-        
         {/* Discount Promotion Bar */}
         <div className="mt-4 px-2">
           <DiscountBar />
