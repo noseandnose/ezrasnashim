@@ -1,11 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Clock, Heart, BookOpen, HandHeart, Coins, MapPin, ArrowRight } from "lucide-react";
+import { Calendar, Clock, Heart, BookOpen, HandHeart, Coins, MapPin, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate, useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
-import DiscountBar from "@/components/discount-bar";
 import FlowerProgress from "@/components/flower-progress";
 import type { Section } from "@/pages/home";
 
@@ -110,58 +109,57 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         </div>
       </div>
       {/* Main Action Buttons */}
-      <div className="space-y-1 p-1">
-        <button
-          onClick={() => navigateToSection('torah')}
-          className="w-full bg-white rounded-2xl p-2.5 shadow-soft hover:scale-105 transition-all duration-300 border border-blush/10"
-        >
-          <div className="flex items-center space-x-3">
-            <div className="bg-gradient-feminine p-2 rounded-full">
-              <BookOpen className="text-white" size={16} strokeWidth={1.5} />
+      <div className="p-2 space-y-1">
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => navigateToSection('torah')}
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
+          >
+            <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-feminine">
+              <BookOpen className="text-white" size={18} strokeWidth={1.5} />
             </div>
-            <div className="text-left flex-grow">
-              <h3 className="font-serif text-base text-black font-bold">Daily Torah</h3>
-              <p className="font-sans text-xs text-black/70">Halacha, Mussar & Chizuk</p>
-            </div>
+            <h3 className="font-serif text-xs text-black mb-1 font-bold">Daily Torah</h3>
+            <p className="font-sans text-xs text-black/60 leading-relaxed mb-2">Halacha, Emuna & Chizuk</p>
             <FlowerProgress completed={torahCompleted} size={18} />
-          </div>
-        </button>
+          </button>
 
-        <button
-          onClick={() => navigateToSection('tefilla')}
-          className="w-full bg-white rounded-2xl p-2.5 shadow-soft hover:scale-105 transition-all duration-300 border border-blush/10"
-        >
-          <div className="flex items-center space-x-3">
-            <div className="bg-gradient-to-br from-blush to-lavender p-2 rounded-full">
-              <Heart className="text-white" size={16} strokeWidth={1.5} />
+          <button
+            onClick={() => navigateToSection('tefilla')}
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
+          >
+            <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-to-br from-blush to-lavender">
+              <Heart className="text-white" size={18} strokeWidth={1.5} />
             </div>
-            <div className="text-left flex-grow">
-              <h3 className="font-serif text-base text-black font-bold">Daily Tefilla</h3>
-              <p className="font-sans text-xs text-black/70">Global Tehillim Chain & Prayers</p>
-            </div>
+            <h3 className="font-serif text-xs text-black mb-1 font-bold">Daily Tefilla</h3>
+            <p className="font-sans text-xs text-black/60 leading-relaxed mb-2">Tehillim & Prayers</p>
             <FlowerProgress completed={tefillaCompleted} size={18} />
-          </div>
-        </button>
+          </button>
+        </div>
 
-        <button
-          onClick={() => navigateToSection('tzedaka')}
-          className="w-full bg-white rounded-2xl p-2.5 shadow-soft hover:scale-105 transition-all duration-300 border border-blush/10"
-        >
-          <div className="flex items-center space-x-3">
-            <div className="bg-gradient-to-br from-muted-lavender to-rose-blush p-2 rounded-full">
-              <Coins className="text-white" size={16} strokeWidth={1.5} />
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => navigateToSection('tzedaka')}
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
+          >
+            <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-to-br from-muted-lavender to-rose-blush">
+              <Coins className="text-white" size={18} strokeWidth={1.5} />
             </div>
-            <div className="text-left flex-grow">
-              <h3 className="font-serif text-base text-black font-bold">Daily Tzedaka</h3>
-              <p className="font-sans text-xs text-black/70">Support Women Causes & Torah</p>
-            </div>
+            <h3 className="font-serif text-xs text-black mb-1 font-bold">Daily Tzedaka</h3>
+            <p className="font-sans text-xs text-black/60 leading-relaxed mb-2">Support Causes</p>
             <FlowerProgress completed={tzedakaCompleted} size={18} />
-          </div>
-        </button>
+          </button>
 
-        {/* Discount Promotion Bar */}
-        <div className="mt-1">
-          <DiscountBar />
+          <button
+            onClick={() => navigateToSection('table')}
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
+          >
+            <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-to-br from-sand-gold to-peach">
+              <Sparkles className="text-white" size={18} strokeWidth={1.5} />
+            </div>
+            <h3 className="font-serif text-xs text-black mb-1 font-bold">Life & Shabbos</h3>
+            <p className="font-sans text-xs text-black/60 leading-relaxed mb-2">Recipes & Shop</p>
+            <FlowerProgress completed={false} size={18} />
+          </button>
         </div>
       </div>
     </div>

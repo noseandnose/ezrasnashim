@@ -206,6 +206,9 @@ Changelog:
 - July 13, 2025. Transformed home page sections to button layout with flower progress: Updated home page sections to use button interface with integrated flower progress indicators, maintaining existing functionality while improving visual hierarchy and user experience
 - July 13, 2025. Renamed "Shabbos" page to "Life" with shop items integration: Changed bottom navigation from "Shabbos" to "Life", moved shop items section to Life page below Shabbos content, fixed shop items API endpoint routing issue, integrated shop items display with proper grid layout and pricing information
 - July 13, 2025. Fixed analytics navigation issue: Corrected Statistics page navigation to properly handle all section navigation (Torah, Tefilla, Tzedaka, Table, Home) using proper routing logic for seamless user experience across all app sections
+- July 13, 2025. Moved discount bar from home page to Life page: Relocated discount promotion bar from home page to Life page where it belongs with shop items, cleaned up home page layout
+- July 13, 2025. Updated Life page icon from Flame to Sparkles: Changed Life page navigation icon to Sparkles for better visual representation of life content and shop items
+- July 13, 2025. Transformed home page to 2x2 grid button layout: Converted home page sections from vertical list to 2x2 grid with centered button layout matching other pages, added individual flower progress indicators for each button (Torah, Tefilla, Tzedaka, Life & Shabbos), improved visual hierarchy and consistency across application
 ```
 
 ## User Preferences

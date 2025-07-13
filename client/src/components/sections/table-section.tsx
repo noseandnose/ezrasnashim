@@ -1,4 +1,5 @@
 import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar, Moon, MapPin, ShoppingBag } from "lucide-react";
+import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
 import { useGeolocation } from "@/hooks/use-jewish-times";
@@ -172,6 +173,11 @@ export default function TableSection() {
             </div>
           </>
         )}
+        
+        {/* Discount Promotion Bar */}
+        <div className="mt-4 px-2">
+          <DiscountBar />
+        </div>
         
         {/* Bottom padding to prevent last element from being cut off by navigation */}
         <div className="h-16"></div>
