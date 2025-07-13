@@ -43,27 +43,10 @@ export default function Statistics() {
     refetchInterval: 300000, // Refresh every 5 minutes
   });
 
-  // Handler for bottom navigation
+  // Handler for bottom navigation - navigate back to home page with section
   const handleSectionChange = (section: Section) => {
-    switch (section) {
-      case 'home':
-        setLocation('/');
-        break;
-      case 'torah':
-        setLocation('/torah');
-        break;
-      case 'tefilla':
-        setLocation('/tefilla');
-        break;
-      case 'tzedaka':
-        setLocation('/tzedaka');
-        break;
-      case 'table':
-        setLocation('/table');
-        break;
-      default:
-        setLocation('/');
-    }
+    // For all sections, go back to home page and let the home page handle section navigation
+    setLocation(`/?section=${section}`);
   };
 
   const StatCard = ({ title, value, icon: Icon, color }: { title: string; value: number | string; icon: any; color: string }) => (
@@ -223,7 +206,7 @@ export default function Statistics() {
       </main>
 
       <BottomNavigation 
-        activeSection="home" 
+        activeSection={null} 
         onSectionChange={handleSectionChange} 
       />
     </div>

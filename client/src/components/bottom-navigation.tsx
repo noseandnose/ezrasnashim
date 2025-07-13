@@ -2,7 +2,7 @@ import { Book, HandHeart, Home, Heart, Sparkles, ShoppingBag, Coins } from "luci
 import type { Section } from "@/pages/home";
 
 interface BottomNavigationProps {
-  activeSection: Section;
+  activeSection: Section | null;
   onSectionChange: (section: Section) => void;
 }
 

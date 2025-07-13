@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import AppHeader from "@/components/app-header";
 import BottomNavigation from "@/components/bottom-navigation";
 import HomeSection from "@/components/sections/home-section";
@@ -13,6 +14,19 @@ export type Section = 'torah' | 'tefilla' | 'tzedaka' | 'home' | 'table';
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState<Section>('home');
+  const [location] = useLocation();
+
+  // Check for section parameter in URL and set active section
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sectionParam = urlParams.get('section') as Section;
+    
+    if (sectionParam && ['torah', 'tefilla', 'tzedaka', 'home', 'table'].includes(sectionParam)) {
+      setActiveSection(sectionParam);
+      // Clean the URL by removing the parameter
+      window.history.replaceState({}, '', '/');
+    }
+  }, [location]);
 
   const renderSection = () => {
     switch (activeSection) {
