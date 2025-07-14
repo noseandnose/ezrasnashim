@@ -10,7 +10,7 @@ export default function HeartProgress({ completed, size = 18 }: HeartProgressPro
     return (
       <Heart 
         size={size} 
-        className="text-blush fill-blush animate-pulse" 
+        className="text-green-500 fill-green-500 animate-pulse" 
         strokeWidth={2}
       />
     );
