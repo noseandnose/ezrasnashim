@@ -116,7 +116,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             onClick={() => navigateToSection('torah')}
             className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
           >
-            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${torahCompleted ? 'bg-green-500' : 'bg-gradient-feminine'}`}>
+            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${torahCompleted ? 'bg-sage' : 'bg-gradient-feminine'}`}>
               <BookOpen className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <h3 className="font-serif text-xs text-black mb-1 font-bold">Daily Torah</h3>
@@ -128,7 +128,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             onClick={() => navigateToSection('tefilla')}
             className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
           >
-            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${tefillaCompleted ? 'bg-green-500' : 'bg-gradient-to-br from-blush to-lavender'}`}>
+            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${tefillaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-blush to-lavender'}`}>
               <Heart className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <h3 className="font-serif text-xs text-black mb-1 font-bold">Daily Tefilla</h3>
@@ -142,7 +142,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             onClick={() => navigateToSection('tzedaka')}
             className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
           >
-            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${tzedakaCompleted ? 'bg-green-500' : 'bg-gradient-to-br from-muted-lavender to-rose-blush'}`}>
+            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${tzedakaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-muted-lavender to-rose-blush'}`}>
               <Coins className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <h3 className="font-serif text-xs text-black mb-1 font-bold">Daily Tzedaka</h3>
