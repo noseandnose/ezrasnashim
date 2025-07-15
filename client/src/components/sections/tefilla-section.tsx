@@ -327,18 +327,6 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
     <div className="overflow-y-auto h-full pb-20">
       {/* Main Tefilla Section - Connected to top bar - Only Tehillim */}
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg -mt-1">
-        {/* Koren Tefillia Page Title */}
-        <div className="bg-white/70 rounded-2xl p-3 mb-3 border border-blush/10">
-          <div className="flex items-center justify-center space-x-3">
-            <img 
-              src={korenLogo} 
-              alt="Koren Publishers"
-              className="h-6 w-auto object-contain"
-            />
-            <h2 className="font-serif text-lg text-black font-bold">Koren Tefilla Page</h2>
-          </div>
-        </div>
-
         {/* Global Tehillim Chain Card */}
         <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
           <div className="flex items-center justify-between mb-2">
@@ -608,6 +596,18 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               <h4 className="font-serif text-sm text-black font-bold">Life</h4>
               <p className="font-sans text-xs text-black/60 mt-1">Guidance</p>
             </button>
+          </div>
+        </div>
+
+        {/* Powered by Koren Section */}
+        <div className="bg-white/70 rounded-2xl p-3 mt-3 border border-blush/10">
+          <div className="flex items-center justify-center space-x-3">
+            <h2 className="font-serif text-lg text-black font-bold">Powered by Koren</h2>
+            <img 
+              src={korenLogo} 
+              alt="Koren Publishers"
+              className="h-6 w-auto object-contain"
+            />
           </div>
         </div>
 
