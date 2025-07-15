@@ -1,4 +1,5 @@
 import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass, ArrowRight, Baby, HeartHandshake, Briefcase, GraduationCap, Users, Stethoscope, DollarSign, UserCheck, Smile, Zap, TrendingUp, Crown } from "lucide-react";
+import korenLogo from "@assets/This_is_a_logo_for_Koren_Publishers_Jerusalem_1752581940716.jpg";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
 
@@ -326,6 +327,18 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
     <div className="overflow-y-auto h-full pb-20">
       {/* Main Tefilla Section - Connected to top bar - Only Tehillim */}
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg -mt-1">
+        {/* Koren Tefillia Page Title */}
+        <div className="bg-white/70 rounded-2xl p-3 mb-3 border border-blush/10">
+          <div className="flex items-center justify-center space-x-3">
+            <img 
+              src={korenLogo} 
+              alt="Koren Publishers"
+              className="h-6 w-auto object-contain"
+            />
+            <h2 className="font-serif text-lg text-black font-bold">Koren Tefillia Page</h2>
+          </div>
+        </div>
+
         {/* Global Tehillim Chain Card */}
         <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
           <div className="flex items-center justify-between mb-2">

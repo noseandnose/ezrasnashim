@@ -237,6 +237,7 @@ Changelog:
 - July 15, 2025. Reorganized Life page 2x2 grid layout: Final arrangement with Daily Recipe (top-left), Jewish Date Converter (top-right), Table Inspiration (bottom-left), and Parshas Pinchas (bottom-right)
 - July 15, 2025. Updated Tzedaka button text: Changed "Put a coin in the Pushka" to "Put a Coin in Tzedaka" for clearer Hebrew terminology
 - July 15, 2025. Replaced Parshat Pinchas with Community Feedback button: Changed bottom-right Life page button to "Community Feedback" with subtitle "Help us help you", opens Google Forms link in new tab for user feedback collection
+- July 15, 2025. Added Koren Tefillia Page header: Added "Koren Tefillia Page" title with Koren Publishers logo above the Global Tehillim Chain section on Tefilla page, logo scaled to match text height for consistent branding
 ```
 
 ## User Preferences
