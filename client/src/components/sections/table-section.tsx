@@ -1,4 +1,4 @@
-import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar, Moon, MapPin, ShoppingBag } from "lucide-react";
+import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar, Moon, MapPin, ShoppingBag, MessageSquare } from "lucide-react";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
@@ -172,24 +172,17 @@ export default function TableSection() {
             </p>
           </button>
 
-          {/* Parshas Pinchas Button */}
+          {/* Community Feedback Button */}
           <button
             className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
-            onClick={() => openModal('shabbat-countdown')}
+            onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSdh0b9n0l-bnJSMW2t4GdPuhzl1_8PK7mj8uaDixUkK1onT3A/viewform?usp=dialog', '_blank')}
           >
-            <div className="flex items-center justify-center w-8 h-8 bg-gradient-feminine rounded-full mx-auto mb-2">
-              <span className="text-white font-serif font-bold text-sm">
-                {daysUntilShabbat}
-              </span>
+            <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-feminine">
+              <MessageSquare className="text-white" size={18} strokeWidth={1.5} />
             </div>
-            <h3 className="font-serif text-xs text-black mb-1 font-bold">
-              {shabbosData?.parsha || "Loading..."}
-            </h3>
+            <h3 className="font-serif text-xs text-black mb-1 font-bold">Community Feedback</h3>
             <p className="font-sans text-xs text-black/60 leading-relaxed">
-              {shabbosData?.candleLighting && shabbosData?.havdalah 
-                ? `${shabbosData.candleLighting} - ${shabbosData.havdalah}`
-                : "Loading times..."
-              }
+              Help us help you
             </p>
           </button>
         </div>
