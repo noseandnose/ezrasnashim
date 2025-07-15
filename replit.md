@@ -233,6 +233,7 @@ Changelog:
 - July 15, 2025. Implemented real community impact tracking: Replaced placeholder data with live database statistics showing actual days sponsored (from sponsors table), total campaigns, and total raised funds (from campaigns currentAmount), with proper loading states and API integration
 - July 15, 2025. Updated Life page main section design: Replaced Flame icon with Shabbat countdown logo (circular gradient background with days until Shabbat number) matching the design from the top-left button, kept countdown logo and "This Shabbos" on the left with Parsha name on the right, maintaining balanced two-sided layout
 - July 15, 2025. Reorganized Life page bottom buttons: Renamed "Shabbas Recipe" to "Daily Recipe" with recipe name as subtitle, swapped positions so Table Inspiration appears on left and Daily Recipe on right
+- July 15, 2025. Added Coming Soon overlay to Parsha Shiur: Placed semi-transparent overlay with "Coming Soon" message over Parsha Shiur button on Torah page, made it non-clickable until content is available
 ```
 
 ## User Preferences

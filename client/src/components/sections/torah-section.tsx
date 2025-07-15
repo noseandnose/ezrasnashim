@@ -133,12 +133,17 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
           })}
         </div>
 
-        {/* Shabbas Vort Bonus Bar */}
-        <button
-          onClick={() => openModal('parsha')}
-          className="w-full bg-white rounded-2xl p-3 shadow-lg border border-blush/10 hover:scale-105 transition-all duration-300 mb-3"
-        >
-          <div className="flex items-center gap-3">
+        {/* Shabbas Vort Bonus Bar - Coming Soon */}
+        <div className="w-full bg-white rounded-2xl p-3 shadow-lg border border-blush/10 mb-3 relative">
+          {/* Coming Soon Overlay */}
+          <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center z-10">
+            <div className="bg-white/90 rounded-xl px-4 py-2 shadow-lg">
+              <p className="font-serif text-sm text-black font-bold">Coming Soon</p>
+            </div>
+          </div>
+          
+          {/* Content (grayed out) */}
+          <div className="flex items-center gap-3 opacity-60">
             <div className="bg-gradient-feminine p-2 rounded-full">
               <BookOpen className="text-white" size={16} strokeWidth={1.5} />
             </div>
@@ -155,7 +160,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
               <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
             </div>
           </div>
-        </button>
+        </div>
 
         {/* Bottom padding */}
         <div className="h-16"></div>
