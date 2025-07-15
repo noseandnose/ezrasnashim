@@ -3,6 +3,11 @@ import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage.js";
 import serverAxiosClient from "./axiosClient.js";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
@@ -24,6 +29,27 @@ import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
+  // Media serving route for attached assets
+  app.get("/api/media/:filename", (req, res) => {
+    try {
+      const filename = decodeURIComponent(req.params.filename);
+      const mediaPath = path.join(__dirname, "..", "attached_assets", filename);
+      
+      // Set appropriate headers for images
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      
+      res.sendFile(mediaPath, (err) => {
+        if (err) {
+          console.error('Error serving media file:', err);
+          res.status(404).json({ error: 'Media file not found' });
+        }
+      });
+    } catch (error) {
+      console.error('Media route error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
 
   // Hebcal Zmanim API proxy route
   app.get("/api/zmanim/:lat/:lng", async (req, res) => {

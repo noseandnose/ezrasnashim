@@ -15,31 +15,31 @@ export default function DailyProgress({ size = 36 }: DailyProgressProps) {
     switch (completedCount) {
       case 0:
         return {
-          src: `/attached_assets/state0.png`,
+          src: `/api/media/State%200_1752568332614.png`,
           scale: 0.9, // Large scale within fixed container
           alt: "No completions"
         };
       case 1:
         return {
-          src: `/attached_assets/state1.png`,
+          src: `/api/media/State%201_1752568332613.png`,
           scale: 0.8, // Medium scale
           alt: "One completion"
         };
       case 2:
         return {
-          src: `/attached_assets/state2.png`,
+          src: `/api/media/State%202_1752568332613.png`,
           scale: 0.9, // Large scale
           alt: "Two completions"
         };
       case 3:
         return {
-          src: `/attached_assets/state3.png`,
+          src: `/api/media/State%203_1752568332607.png`,
           scale: 1.0, // Fills container
           alt: "All three completions!"
         };
       default:
         return {
-          src: `/attached_assets/state0.png`,
+          src: `/api/media/State%200_1752568332614.png`,
           scale: 0.9,
           alt: "Daily progress"
         };
