@@ -158,40 +158,46 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => navigateToSection('torah')}
-            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white relative"
           >
+            <div className="absolute top-2 left-2">
+              <HeartProgress completed={torahCompleted} size={18} />
+            </div>
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${torahCompleted ? 'bg-sage' : 'bg-gradient-feminine'}`}>
               <BookOpen className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <h3 className="font-serif text-xs text-black mb-1 font-bold">Daily Torah</h3>
-            <p className="font-sans text-xs text-black/60 leading-relaxed mb-2">Halacha, Emuna & Chizuk</p>
-            <HeartProgress completed={torahCompleted} size={18} />
+            <p className="font-sans text-xs text-black/60 leading-relaxed">Halacha, Emuna & Chizuk</p>
           </button>
 
           <button
             onClick={() => navigateToSection('tefilla')}
-            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white relative"
           >
+            <div className="absolute top-2 left-2">
+              <HeartProgress completed={tefillaCompleted} size={18} />
+            </div>
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${tefillaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-blush to-lavender'}`}>
               <Heart className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <h3 className="font-serif text-xs text-black mb-1 font-bold">Daily Tefilla</h3>
-            <p className="font-sans text-xs text-black/60 leading-relaxed mb-2">Tehillim & Prayers</p>
-            <HeartProgress completed={tefillaCompleted} size={18} />
+            <p className="font-sans text-xs text-black/60 leading-relaxed">Tehillim & Prayers</p>
           </button>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => navigateToSection('tzedaka')}
-            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white relative"
           >
+            <div className="absolute top-2 left-2">
+              <HeartProgress completed={tzedakaCompleted} size={18} />
+            </div>
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${tzedakaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-muted-lavender to-rose-blush'}`}>
               <Coins className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <h3 className="font-serif text-xs text-black mb-1 font-bold">Daily Tzedaka</h3>
-            <p className="font-sans text-xs text-black/60 leading-relaxed mb-2">Support Causes</p>
-            <HeartProgress completed={tzedakaCompleted} size={18} />
+            <p className="font-sans text-xs text-black/60 leading-relaxed">Support Causes</p>
           </button>
 
           <div className="rounded-3xl p-3 text-center shadow-lg border border-blush/10 bg-white flex items-center justify-center">
