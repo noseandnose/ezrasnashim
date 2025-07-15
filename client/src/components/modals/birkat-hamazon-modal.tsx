@@ -50,7 +50,7 @@ export function BirkatHamazonModal() {
   };
 
   const StandardModalHeader = () => (
-    <div className="flex items-center justify-center mb-3 relative pr-8">
+    <div className="flex items-center justify-center mb-3 relative">
       <div className="flex items-center gap-4">
         <Button
           onClick={() => setLanguage(language === "hebrew" ? "english" : "hebrew")}
@@ -83,15 +83,6 @@ export function BirkatHamazonModal() {
           </button>
         </div>
       </div>
-      
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={closeModal}
-        className="absolute top-0 right-0 text-black hover:bg-gray-100 w-8 h-8 p-0"
-      >
-        <X className="w-4 h-4" />
-      </Button>
     </div>
   );
 
@@ -126,20 +117,16 @@ export function BirkatHamazonModal() {
           <StandardModalHeader />
         </DialogHeader>
         
-        <div className="flex-1 overflow-y-auto px-6 pb-6">
+        {/* Expanded Prayer Content Area */}
+        <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
           {isLoading ? (
-            <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="h-4 bg-gray-200 rounded mb-2" />
-                  <div className="h-4 bg-gray-200 rounded w-3/4" />
-                </div>
-              ))}
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
             </div>
           ) : prayers && prayers.length > 0 ? (
-            <div className="space-y-6">
+            <div className="space-y-6" style={{ fontSize: `${fontSize}px` }}>
               {prayers.map((prayer) => (
-                <div key={prayer.id} className="space-y-3">
+                <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
                   {renderPrayerText(prayer)}
                 </div>
               ))}
@@ -151,14 +138,12 @@ export function BirkatHamazonModal() {
           )}
         </div>
 
-        <div className="px-6 pb-6 pt-2 border-t border-gray-200">
-          <Button
-            onClick={handleComplete}
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
-          >
-            Completed
-          </Button>
-        </div>
+        <Button
+          onClick={handleComplete}
+          className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
+        >
+          Completed
+        </Button>
         
         <HeartExplosion 
           trigger={showHeartExplosion} 
