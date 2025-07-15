@@ -200,7 +200,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <p className="font-sans text-xs text-black/60 leading-relaxed">Support Causes</p>
           </button>
 
-          <div className="rounded-3xl p-3 text-center shadow-lg border border-blush/10 bg-white flex items-center justify-center">
+          <div className="rounded-3xl p-3 text-center shadow-lg border border-blush/10 bg-white flex items-center justify-center h-full">
             <DailyProgress />
           </div>
         </div>
