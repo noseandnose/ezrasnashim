@@ -152,7 +152,10 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
     <div className="overflow-y-auto h-full pb-20">
       {/* Main Tzedaka Section - ONLY CAMPAIGN */}
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg -mt-1">
-        <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
+        <button 
+          onClick={() => openModal('donate')}
+          className="w-full bg-white/70 rounded-2xl p-3 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
+        >
         {isLoading ? (
           <div className="animate-pulse">
             <div className="flex items-center space-x-3 mb-4">
@@ -183,12 +186,9 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
                 <h3 className="font-serif text-lg text-black font-bold">{campaign.title}</h3>
                 <p className="font-sans text-sm text-black/70">Support our community</p>
               </div>
-              <button
-                onClick={() => openModal('donate')}
-                className="bg-gradient-feminine p-2 rounded-full hover:opacity-90 transition-all duration-300 shadow-lg"
-              >
+              <div className="bg-gradient-feminine p-2 rounded-full shadow-lg">
                 <HandCoins className="text-white" size={16} />
-              </button>
+              </div>
             </div>
             
             {/* Progress Bar */}
@@ -209,7 +209,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             </div>
           </>
         ) : null}
-        </div>
+        </button>
       </div>
       {/* 3 Tzedaka Action Buttons */}
       <div className="p-2 space-y-2">
