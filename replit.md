@@ -220,6 +220,8 @@ Changelog:
 - July 13, 2025. Updated home page completion indicators: Changed gradient circle backgrounds to turn sage green (bg-sage) when tasks are completed, matching the exact same green color used on individual pages, while keeping heart progress indicators pink (blush), providing consistent visual feedback for completion status on Torah, Tefilla, and Tzedaka sections
 - July 15, 2025. Updated Torah page Pirkei Avot section: Changed "Daily Inspiration" to "Pirkei Avot" with subtitle showing just the source reference (e.g., "1:13") for cleaner presentation
 - July 15, 2025. Enhanced Halacha section for audio content: Changed content type indicator from "T" to sideways triangle (consistent with other audio content), updated database schema to include speaker_name, speaker_website, and duration fields for full audio support, set Halacha contentType to 'audio' preparing for all-audio content transition
+- July 15, 2025. Implemented comprehensive time-based prayer system: Created dynamic prayer buttons that change throughout the day based on Jewish prayer times (Morning Brochas from Neitz-Mincha Gedola, Mincha from Mincha Gedola-Shkia, Maariv from Shkia-next Neitz), unified functionality across both Tefilla section and home page time button, added proper icons (Sparkles, Clock, Star) and time range subtitles, completed Maariv modal with authentic prayer content
+- July 15, 2025. Reorganized home page layout: Swapped order of Today's Sponsor section and Times section, sponsor now appears above the time-based prayer and Shkia buttons for improved visual hierarchy
 ```
 
 ## User Preferences

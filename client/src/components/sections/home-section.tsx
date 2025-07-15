@@ -111,8 +111,22 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           </div>
         </div>
         
+        {/* Sponsor Section */}
+        <div className="bg-white/50 rounded-xl p-2 border border-blush/10 mb-3">
+          <div className="flex items-center space-x-1 mb-1">
+            <Heart className="text-black/60" size={12} strokeWidth={1.5} />
+            <h4 className="font-serif text-xs text-black tracking-wide font-bold">Today's Sponsor</h4>
+          </div>
+          <p className="font-sans text-xs text-black/80 leading-tight">
+            {sponsor ? 
+              (sponsor.message || `Today sponsored by ${sponsor.name}`) :
+              "Sponsored by the Cohen family"
+            }
+          </p>
+        </div>
+
         {/* Times Section - Time-based Prayer and Shkia */}
-        <div className="grid grid-cols-2 gap-2 mb-3">
+        <div className="grid grid-cols-2 gap-2">
           {/* Time-based Prayer - Dynamic based on current time */}
           <button 
             onClick={() => openModal(currentPrayer.modal)}
@@ -137,20 +151,6 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <p className="font-sans text-xs text-black font-bold mb-0.5">Shkia</p>
             <p className="font-serif text-sm text-black font-bold">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
           </div>
-        </div>
-
-        {/* Sponsor Section */}
-        <div className="bg-white/50 rounded-xl p-2 border border-blush/10">
-          <div className="flex items-center space-x-1 mb-1">
-            <Heart className="text-black/60" size={12} strokeWidth={1.5} />
-            <h4 className="font-serif text-xs text-black tracking-wide font-bold">Today's Sponsor</h4>
-          </div>
-          <p className="font-sans text-xs text-black/80 leading-tight">
-            {sponsor ? 
-              (sponsor.message || `Today sponsored by ${sponsor.name}`) :
-              "Sponsored by the Cohen family"
-            }
-          </p>
         </div>
       </div>
       {/* Main Action Buttons */}
