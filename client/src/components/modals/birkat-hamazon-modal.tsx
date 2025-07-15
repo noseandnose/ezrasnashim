@@ -15,21 +15,23 @@ interface BirkatHamazonPrayer {
 }
 
 export function BirkatHamazonModal() {
-  const { isBirkatHamazonModalOpen, closeBirkatHamazonModal } = useModalStore();
+  const { activeModal, closeModal } = useModalStore();
   const [language, setLanguage] = useState<"hebrew" | "english">("hebrew");
   const [fontSize, setFontSize] = useState(20);
   const { markTefillaComplete } = useDailyCompletionStore();
   const { trackCompletion } = useAnalytics();
 
+  const isOpen = activeModal === 'birkat-hamazon';
+
   const { data: prayers, isLoading } = useQuery<BirkatHamazonPrayer[]>({
     queryKey: ["/api/birkat-hamazon/prayers"],
-    enabled: isBirkatHamazonModalOpen,
+    enabled: isOpen,
   });
 
   const handleComplete = () => {
     markTefillaComplete();
     trackCompletion("Birkat Hamazon");
-    closeBirkatHamazonModal();
+    closeModal();
   };
 
   const increaseFontSize = () => {
@@ -84,7 +86,7 @@ export function BirkatHamazonModal() {
       <Button
         variant="ghost"
         size="sm"
-        onClick={closeBirkatHamazonModal}
+        onClick={closeModal}
         className="text-black hover:bg-gray-100 w-8 h-8 p-0"
       >
         <X className="w-4 h-4" />
@@ -117,7 +119,7 @@ export function BirkatHamazonModal() {
   };
 
   return (
-    <Dialog open={isBirkatHamazonModalOpen} onOpenChange={closeBirkatHamazonModal}>
+    <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent className="w-full max-w-md mx-auto bg-white text-black border-2 border-black rounded-lg max-h-[90vh] overflow-hidden flex flex-col">
         <StandardModalHeader />
         
