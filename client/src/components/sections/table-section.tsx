@@ -68,22 +68,7 @@ export default function TableSection() {
 
   const daysUntilShabbat = getDaysUntilShabbat();
 
-  const tableItems = [
-    {
-      id: 'inspiration',
-      icon: Lightbulb,
-      title: 'Table Inspiration',
-      subtitle: inspirationContent?.title || 'Daily Inspiration',
-      color: 'text-blush'
-    },
-    {
-      id: 'recipe',
-      icon: Utensils,
-      title: 'Daily Recipe',
-      subtitle: recipeContent?.title || 'Weekly Recipe',
-      color: 'text-peach'
-    }
-  ];
+
 
   return (
     <div className="overflow-y-auto h-full pb-20">
@@ -132,9 +117,44 @@ export default function TableSection() {
 
       {/* Shabbos Content Grid - Separate Section */}
       <div className="p-2 space-y-1">
-        {/* Top Row: Shabbat and Date Converter */}
+        {/* Top Row: Daily Recipe and Date Converter */}
         <div className="grid grid-cols-2 gap-2 mb-2">
-          {/* Shabbat Countdown Button */}
+          {/* Daily Recipe Button */}
+          <button
+            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
+              isModalComplete('recipe') ? 'bg-sage/20' : 'bg-white'
+            }`}
+            onClick={() => openModal('recipe')}
+          >
+            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
+              isModalComplete('recipe') ? 'bg-sage' : 'bg-gradient-feminine'
+            }`}>
+              <Utensils className="text-white" size={18} strokeWidth={1.5} />
+            </div>
+            <h3 className="font-serif text-xs text-black mb-1 font-bold">Daily Recipe</h3>
+            <p className="font-sans text-xs text-black/60 leading-relaxed">
+              {isModalComplete('recipe') ? 'Completed' : (recipeContent?.title || 'Weekly Recipe')}
+            </p>
+          </button>
+
+          {/* Jewish Date Converter Button */}
+          <button
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
+            onClick={() => openModal('date-calculator')}
+          >
+            <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-feminine">
+              <Calendar className="text-white" size={18} strokeWidth={1.5} />
+            </div>
+            <h3 className="font-serif text-xs text-black mb-1 font-bold">Jewish Date</h3>
+            <p className="font-sans text-xs text-black/60 leading-relaxed">
+              Convert & Download
+            </p>
+          </button>
+        </div>
+
+        {/* Bottom Row: Parshas Pinchas and Table Inspiration */}
+        <div className="grid grid-cols-2 gap-2">
+          {/* Parshas Pinchas Button */}
           <button
             className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
             onClick={() => openModal('shabbat-countdown')}
@@ -155,45 +175,23 @@ export default function TableSection() {
             </p>
           </button>
 
-          {/* Jewish Date Converter Button */}
+          {/* Table Inspiration Button */}
           <button
-            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
-            onClick={() => openModal('date-calculator')}
+            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
+              isModalComplete('inspiration') ? 'bg-sage/20' : 'bg-white'
+            }`}
+            onClick={() => openModal('inspiration')}
           >
-            <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-feminine">
-              <Calendar className="text-white" size={18} strokeWidth={1.5} />
+            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
+              isModalComplete('inspiration') ? 'bg-sage' : 'bg-gradient-feminine'
+            }`}>
+              <Lightbulb className="text-white" size={18} strokeWidth={1.5} />
             </div>
-            <h3 className="font-serif text-xs text-black mb-1 font-bold">Jewish Date</h3>
+            <h3 className="font-serif text-xs text-black mb-1 font-bold">Table Inspiration</h3>
             <p className="font-sans text-xs text-black/60 leading-relaxed">
-              Convert & Download
+              {isModalComplete('inspiration') ? 'Completed' : (inspirationContent?.title || 'Daily Inspiration')}
             </p>
           </button>
-        </div>
-
-        {/* Bottom Row: Recipe and Inspiration */}
-        <div className="grid grid-cols-2 gap-2">
-          {tableItems.map(({ id, icon: Icon, title, subtitle, color }) => {
-            const isCompleted = isModalComplete(id);
-            return (
-              <button
-                key={id}
-                className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-                  isCompleted ? 'bg-sage/20' : 'bg-white'
-                }`}
-                onClick={() => openModal(id)}
-              >
-                <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-                  isCompleted ? 'bg-sage' : 'bg-gradient-feminine'
-                }`}>
-                  <Icon className="text-white" size={18} strokeWidth={1.5} />
-                </div>
-                <h3 className="font-serif text-xs text-black mb-1 font-bold">{title}</h3>
-                <p className="font-sans text-xs text-black/60 leading-relaxed">
-                  {isCompleted ? 'Completed' : subtitle}
-                </p>
-              </button>
-            );
-          })}
         </div>
         
         {/* Discount Promotion Bar */}
