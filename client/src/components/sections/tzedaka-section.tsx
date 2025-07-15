@@ -155,19 +155,15 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
       <div className="p-2 space-y-2">
         {/* Large Combined Button: Put a coin in the Pushka */}
         <button
-          onClick={() => handleButtonClick('pushka-donation')}
-          className={`w-full rounded-3xl p-4 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-            completedButtons.has('pushka-donation') ? 'bg-sage/20' : 'bg-white'
-          }`}
+          onClick={() => openModal('donate')}
+          className="w-full rounded-3xl p-4 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
         >
-          <div className={`p-3 rounded-full mx-auto mb-3 w-fit ${
-            completedButtons.has('pushka-donation') ? 'bg-sage' : 'bg-gradient-feminine'
-          }`}>
+          <div className="p-3 rounded-full mx-auto mb-3 w-fit bg-gradient-feminine">
             <HandCoins className="text-white" size={24} strokeWidth={1.5} />
           </div>
           <h3 className="font-serif text-sm text-black mb-2 font-bold">Put a coin in the Pushka</h3>
           <p className="font-sans text-xs text-black/60 leading-relaxed">
-            {completedButtons.has('pushka-donation') ? 'Completed' : 'Donations go towards Fertility, Abuse prevention and Torah causes'}
+            Donations go towards Fertility, Abuse prevention and Torah causes
           </p>
         </button>
 

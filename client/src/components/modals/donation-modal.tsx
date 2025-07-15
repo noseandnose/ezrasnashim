@@ -73,7 +73,7 @@ export default function DonationModal() {
     createPaymentMutation.mutate(donationAmount);
   };
 
-  const quickAmounts = [1, 18, 54, 180, 1800];
+  const quickAmounts = [1, 18, 180, 1800];
 
   return (
     <Dialog open={activeModal === 'donate'} onOpenChange={() => closeModal()}>

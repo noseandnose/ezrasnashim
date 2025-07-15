@@ -229,6 +229,7 @@ Changelog:
 - July 15, 2025. Resolved daily progress image loading completely: Switched from API endpoints to direct asset imports using @assets alias, ensuring State 0-3 images display correctly based on completion count (0=State 0, 1=State 1, 2=State 2, 3=State 3)
 - July 15, 2025. Completed Birkat Hamazon modal integration: Successfully replaced standalone Mincha button in Tefilla section with fully functional Birkat Hamazon feature, fixed modal opening issues by updating activeModal state checks, standardized modal design to match other prayer modals with consistent header layout, language toggle, font controls, and completion button styling with heart explosion animation
 - July 15, 2025. Combined Tzedaka donation buttons: Merged "Support Women's Causes" and "Support Torah" buttons into one large "Put a coin in the Pushka" button with subtitle "Donations go towards Fertility, Abuse prevention and Torah causes", using HandCoins icon and larger size for better visual prominence
+- July 15, 2025. Connected Pushka button to donation modal: Updated "Put a coin in the Pushka" button to open the main donation modal with quick amounts $1, $18, $180, $1800 and Apple Pay/Google Pay support, removing completion tracking since it opens the actual donation flow
 ```
 
 ## User Preferences
