@@ -151,46 +151,28 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
         ) : null}
         </div>
       </div>
-      {/* 4 Tzedaka Action Buttons */}
-      <div className="p-2 space-y-1">
+      {/* 3 Tzedaka Action Buttons */}
+      <div className="p-2 space-y-2">
+        {/* Large Combined Button: Put a coin in the Pushka */}
+        <button
+          onClick={() => handleButtonClick('pushka-donation')}
+          className={`w-full rounded-3xl p-4 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
+            completedButtons.has('pushka-donation') ? 'bg-sage/20' : 'bg-white'
+          }`}
+        >
+          <div className={`p-3 rounded-full mx-auto mb-3 w-fit ${
+            completedButtons.has('pushka-donation') ? 'bg-sage' : 'bg-gradient-feminine'
+          }`}>
+            <HandCoins className="text-white" size={24} strokeWidth={1.5} />
+          </div>
+          <h3 className="font-serif text-sm text-black mb-2 font-bold">Put a coin in the Pushka</h3>
+          <p className="font-sans text-xs text-black/60 leading-relaxed">
+            {completedButtons.has('pushka-donation') ? 'Completed' : 'Donations go towards Fertility, Abuse prevention and Torah causes'}
+          </p>
+        </button>
+
         <div className="grid grid-cols-2 gap-2">
-          {/* Button 1: Support Women's Causes */}
-          <button
-            onClick={() => handleButtonClick('womens-causes')}
-            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              completedButtons.has('womens-causes') ? 'bg-sage/20' : 'bg-white'
-            }`}
-          >
-            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              completedButtons.has('womens-causes') ? 'bg-sage' : 'bg-gradient-feminine'
-            }`}>
-              <Shield className="text-white" size={18} strokeWidth={1.5} />
-            </div>
-            <h3 className="font-serif text-xs text-black mb-1 font-bold">Support Women's Causes</h3>
-            <p className="font-sans text-xs text-black/60 leading-relaxed">
-              {completedButtons.has('womens-causes') ? 'Completed' : 'Fertility, abuse prevention'}
-            </p>
-          </button>
-
-          {/* Button 2: Support Torah */}
-          <button
-            onClick={() => handleButtonClick('support-torah')}
-            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              completedButtons.has('support-torah') ? 'bg-sage/20' : 'bg-white'
-            }`}
-          >
-            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              completedButtons.has('support-torah') ? 'bg-sage' : 'bg-gradient-feminine'
-            }`}>
-              <BookOpen className="text-white" size={18} strokeWidth={1.5} />
-            </div>
-            <h3 className="font-serif text-xs text-black mb-1 font-bold">Support Torah</h3>
-            <p className="font-sans text-xs text-black/60 leading-relaxed">
-              {completedButtons.has('support-torah') ? 'Completed' : 'Learning and education'}
-            </p>
-          </button>
-
-          {/* Button 3: Sponsor a Day */}
+          {/* Button 2: Sponsor a Day */}
           <button
             onClick={() => handleButtonClick('sponsor-day')}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
@@ -208,7 +190,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             </p>
           </button>
 
-          {/* Button 4: Gave Tzedaka Elsewhere */}
+          {/* Button 3: Gave Tzedaka Elsewhere */}
           <button
             onClick={handleTzedakaComplete}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
