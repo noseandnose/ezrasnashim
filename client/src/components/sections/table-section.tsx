@@ -91,18 +91,14 @@ export default function TableSection() {
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg -mt-1">
         {/* Shabbos Times Section */}
         <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-center mb-2">
             <div className="flex items-center space-x-3">
-              <div className="bg-gradient-feminine p-3 rounded-full">
-                <Flame className="text-white" size={20} />
+              <div className="flex items-center justify-center w-10 h-10 bg-gradient-feminine rounded-full">
+                <span className="text-white font-serif font-bold text-lg">
+                  {daysUntilShabbat}
+                </span>
               </div>
               <h3 className="font-serif text-lg text-black font-bold">This Shabbos</h3>
-            </div>
-            <div className="text-right">
-              <div className="flex items-center justify-end space-x-1 bg-gradient-to-l from-blush/10 to-transparent rounded-lg px-2 py-1 border border-blush/20">
-                <BookOpen className="text-black" size={12} />
-                <p className="font-serif text-sm text-black font-medium">{shabbosData?.parsha || "Loading..."}</p>
-              </div>
             </div>
           </div>
           
