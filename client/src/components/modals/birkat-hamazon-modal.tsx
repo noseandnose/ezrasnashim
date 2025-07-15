@@ -43,55 +43,49 @@ export function BirkatHamazonModal() {
   };
 
   const StandardModalHeader = () => (
-    <DialogHeader className="flex flex-row items-center justify-between gap-4 pr-8">
-      <div className="flex items-center gap-2">
+    <div className="flex items-center justify-center mb-3 relative pr-8">
+      <div className="flex items-center gap-4">
         <Button
-          variant="outline"
-          size="sm"
           onClick={() => setLanguage(language === "hebrew" ? "english" : "hebrew")}
-          className="text-black border-black hover:bg-gray-100"
-        >
-          {language === "hebrew" ? "עברית" : "English"}
-        </Button>
-      </div>
-      
-      <div className="flex-1 text-center">
-        <DialogTitle className="text-lg font-serif font-bold text-black">
-          Birkat Hamazon
-        </DialogTitle>
-        <DialogDescription className="text-sm text-black/70">
-          After Blessings
-        </DialogDescription>
-      </div>
-      
-      <div className="flex items-center gap-1">
-        <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
-          onClick={decreaseFontSize}
-          className="text-black border-black hover:bg-gray-100 w-8 h-8 p-0"
+          className={`text-xs font-medium px-3 py-1 rounded-lg transition-all ${
+            language === "hebrew" 
+              ? 'bg-blush text-white' 
+              : 'text-black/60 hover:text-black hover:bg-white/50'
+          }`}
         >
-          <Minus className="w-3 h-3" />
+          {language === "hebrew" ? 'עב' : 'EN'}
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={increaseFontSize}
-          className="text-black border-black hover:bg-gray-100 w-8 h-8 p-0"
-        >
-          <Plus className="w-3 h-3" />
-        </Button>
+        
+        <DialogTitle className="text-lg font-serif font-bold text-black">Birkat Hamazon</DialogTitle>
+        
+        <div className="flex items-center gap-2">
+          <button
+            onClick={decreaseFontSize}
+            className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+          >
+            <span className="text-xs font-medium">-</span>
+          </button>
+          <span className="text-xs font-medium text-black/70 w-6 text-center">{fontSize}</span>
+          <button
+            onClick={increaseFontSize}
+            className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+          >
+            <span className="text-xs font-medium">+</span>
+          </button>
+        </div>
       </div>
       
       <Button
         variant="ghost"
         size="sm"
         onClick={closeModal}
-        className="text-black hover:bg-gray-100 w-8 h-8 p-0"
+        className="absolute top-0 right-0 text-black hover:bg-gray-100 w-8 h-8 p-0"
       >
         <X className="w-4 h-4" />
       </Button>
-    </DialogHeader>
+    </div>
   );
 
   const renderPrayerText = (prayer: BirkatHamazonPrayer) => {
@@ -121,7 +115,9 @@ export function BirkatHamazonModal() {
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent className="w-full max-w-md mx-auto bg-white text-black border-2 border-black rounded-lg max-h-[90vh] overflow-hidden flex flex-col">
-        <StandardModalHeader />
+        <DialogHeader>
+          <StandardModalHeader />
+        </DialogHeader>
         
         <div className="flex-1 overflow-y-auto px-6 pb-6">
           {isLoading ? (
