@@ -1229,6 +1229,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/analytics/community-impact", async (req, res) => {
+    try {
+      const impact = await storage.getCommunityImpact();
+      res.json(impact);
+    } catch (error) {
+      console.error('Error fetching community impact:', error);
+      res.status(500).json({ message: "Failed to fetch community impact" });
+    }
+  });
+
   app.get("/healthcheck", (req, res) => {
     res.json({ status: "OK" });
   })

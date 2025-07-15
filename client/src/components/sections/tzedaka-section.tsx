@@ -8,6 +8,66 @@ import { HeartExplosion } from "@/components/ui/heart-explosion";
 import type { Campaign } from "@shared/schema";
 import type { Section } from "@/pages/home";
 
+// Community Impact Section Component
+function CommunityImpactSection() {
+  const { data: impact, isLoading } = useQuery<{
+    totalDaysSponsored: number;
+    totalCampaigns: number;
+    totalRaised: number;
+  }>({
+    queryKey: ['/api/analytics/community-impact'],
+    queryFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/analytics/community-impact`);
+      if (!response.ok) throw new Error('Failed to fetch community impact');
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000 // 30 minutes
+  });
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-3xl p-3 border border-blush/10 shadow-lg">
+        <h3 className="font-serif text-sm text-black text-center mb-2 font-bold">Community Impact</h3>
+        <div className="grid grid-cols-3 gap-2 text-center">
+          <div>
+            <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+            <div className="font-sans text-xs text-black mt-1">Days Sponsored</div>
+          </div>
+          <div>
+            <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+            <div className="font-sans text-xs text-black mt-1">Campaigns</div>
+          </div>
+          <div>
+            <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+            <div className="font-sans text-xs text-black mt-1">Raised</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-3xl p-3 border border-blush/10 shadow-lg">
+      <h3 className="font-serif text-sm text-black text-center mb-2 font-bold">Community Impact</h3>
+      <div className="grid grid-cols-3 gap-2 text-center">
+        <div>
+          <div className="font-serif text-lg text-black">{impact?.totalDaysSponsored || 0}</div>
+          <div className="font-sans text-xs text-black">Days Sponsored</div>
+        </div>
+        <div>
+          <div className="font-serif text-lg text-black">{impact?.totalCampaigns || 0}</div>
+          <div className="font-sans text-xs text-black">Campaigns</div>
+        </div>
+        <div>
+          <div className="font-serif text-lg text-black">${impact?.totalRaised?.toLocaleString() || 0}</div>
+          <div className="font-sans text-xs text-black">Raised</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface TzedakaSectionProps {
   onSectionChange?: (section: Section) => void;
 }
@@ -209,23 +269,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
         </div>
 
         {/* Community Impact */}
-        <div className="bg-white rounded-3xl p-3 border border-blush/10 shadow-lg">
-        <h3 className="font-serif text-sm text-black text-center mb-2 font-bold">Community Impact</h3>
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div>
-            <div className="font-serif text-lg text-black">142</div>
-            <div className="font-sans text-xs text-black">Days Sponsored</div>
-          </div>
-          <div>
-            <div className="font-serif text-lg text-black">3</div>
-            <div className="font-sans text-xs text-black">Campaigns</div>
-          </div>
-          <div>
-            <div className="font-serif text-lg text-black">$24,580</div>
-            <div className="font-sans text-xs text-black">Raised</div>
-          </div>
-        </div>
-      </div>
+        <CommunityImpactSection />
 
         {/* Bottom padding */}
         <div className="h-16"></div>

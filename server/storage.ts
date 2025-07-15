@@ -126,6 +126,13 @@ export interface IStorage {
     totalNamesProcessed: number;
     totalModalCompletions: Record<string, number>;
   }>;
+
+  // Community impact methods
+  getCommunityImpact(): Promise<{
+    totalDaysSponsored: number;
+    totalCampaigns: number;
+    totalRaised: number;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -986,6 +993,29 @@ export class DatabaseStorage implements IStorage {
       totalTehillimCompleted,
       totalNamesProcessed,
       totalModalCompletions
+    };
+  }
+
+  async getCommunityImpact(): Promise<{
+    totalDaysSponsored: number;
+    totalCampaigns: number;
+    totalRaised: number;
+  }> {
+    // Count total active sponsors (days sponsored)
+    const activeSponsors = await db.select().from(sponsors).where(eq(sponsors.isActive, true));
+    const totalDaysSponsored = activeSponsors.length;
+
+    // Count total campaigns
+    const allCampaigns = await db.select().from(campaigns);
+    const totalCampaigns = allCampaigns.length;
+
+    // Sum total raised from all campaigns
+    const totalRaised = allCampaigns.reduce((sum, campaign) => sum + (campaign.currentAmount || 0), 0);
+
+    return {
+      totalDaysSponsored,
+      totalCampaigns,
+      totalRaised
     };
   }
 }
