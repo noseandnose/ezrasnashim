@@ -18,7 +18,7 @@ interface BirkatHamazonPrayer {
 
 // Koren Thank You Component
 const KorenThankYou = () => (
-  <div className="bg-gradient-to-br from-blush/10 to-lavender/10 rounded-2xl p-3 mt-3 border border-blush/20">
+  <div className="bg-blue-50 rounded-2xl p-4 mt-4 border border-blue-200">
     <div className="flex items-center justify-center space-x-3">
       <span className="text-sm font-medium text-black">Thank you to Koren for providing this Tefilla</span>
       <a 
