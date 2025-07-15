@@ -335,7 +335,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               alt="Koren Publishers"
               className="h-6 w-auto object-contain"
             />
-            <h2 className="font-serif text-lg text-black font-bold">Koren Tefillia Page</h2>
+            <h2 className="font-serif text-lg text-black font-bold">Koren Tefilla Page</h2>
           </div>
         </div>
 
