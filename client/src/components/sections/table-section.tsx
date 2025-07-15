@@ -70,18 +70,18 @@ export default function TableSection() {
 
   const tableItems = [
     {
-      id: 'recipe',
-      icon: Utensils,
-      title: 'Shabbas Recipe',
-      subtitle: recipeContent?.title || 'Weekly Recipe',
-      color: 'text-peach'
-    },
-    {
       id: 'inspiration',
       icon: Lightbulb,
       title: 'Table Inspiration',
       subtitle: inspirationContent?.title || 'Daily Inspiration',
       color: 'text-blush'
+    },
+    {
+      id: 'recipe',
+      icon: Utensils,
+      title: 'Daily Recipe',
+      subtitle: recipeContent?.title || 'Weekly Recipe',
+      color: 'text-peach'
     }
   ];
 
