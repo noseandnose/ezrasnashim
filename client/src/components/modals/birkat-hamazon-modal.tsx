@@ -112,7 +112,7 @@ export function BirkatHamazonModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent className="w-full max-w-md mx-auto bg-white text-black border-2 border-black rounded-lg max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="w-full max-w-md mx-auto bg-gradient-to-b from-sand to-ivory text-black border-2 border-black rounded-lg max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <StandardModalHeader />
         </DialogHeader>
