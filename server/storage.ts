@@ -1,13 +1,14 @@
 import serverAxiosClient from "./axiosClient";
 import { 
   calendarEvents, shopItems, 
-  tehillimNames, globalTehillimProgress, minchaPrayers, sponsors, nishmasText,
+  tehillimNames, globalTehillimProgress, minchaPrayers, maarivPrayers, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
   shabbatRecipes, parshaVorts, tableInspirations, campaigns, womensPrayers, discountPromotions, pirkeiAvotProgress,
   analyticsEvents, dailyStats,
   type CalendarEvent, type InsertCalendarEvent,
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
+  type MaarivPrayer, type InsertMaarivPrayer,
   type Sponsor, type InsertSponsor, type NishmasText, type InsertNishmasText,
   type DailyHalacha, type InsertDailyHalacha,
   type DailyEmuna, type InsertDailyEmuna,
@@ -73,6 +74,9 @@ export interface IStorage {
 
   // Mincha methods
   getMinchaPrayers(): Promise<MinchaPrayer[]>;
+  
+  // Maariv methods
+  getMaarivPrayers(): Promise<MaarivPrayer[]>;
   createMinchaPrayer(prayer: InsertMinchaPrayer): Promise<MinchaPrayer>;
 
   // Sponsor methods
@@ -421,6 +425,16 @@ export class DatabaseStorage implements IStorage {
 
   async createMinchaPrayer(insertPrayer: InsertMinchaPrayer): Promise<MinchaPrayer> {
     const [prayer] = await db.insert(minchaPrayers).values(insertPrayer).returning();
+    return prayer;
+  }
+
+  // Maariv methods
+  async getMaarivPrayers(): Promise<MaarivPrayer[]> {
+    return await db.select().from(maarivPrayers).orderBy(maarivPrayers.orderIndex);
+  }
+
+  async createMaarivPrayer(insertPrayer: InsertMaarivPrayer): Promise<MaarivPrayer> {
+    const [prayer] = await db.insert(maarivPrayers).values(insertPrayer).returning();
     return prayer;
   }
 

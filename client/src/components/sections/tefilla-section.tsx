@@ -21,6 +21,47 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   const { isModalComplete } = useModalCompletionStore();
   const { data: times, isLoading } = useJewishTimes();
 
+  // Time-based prayer logic
+  const getCurrentPrayer = () => {
+    if (!times || isLoading) {
+      return { title: "Morning Brochas", subtitle: "Loading times...", modal: "morning-brochas" };
+    }
+
+    const now = new Date();
+    const neitz = new Date(`${now.toDateString()} ${times.sunrise}`);
+    const minchaGedola = new Date(`${now.toDateString()} ${times.minchaGedolah}`);
+    const shkia = new Date(`${now.toDateString()} ${times.shkia}`);
+    
+    // Calculate next day's neitz for Maariv end time
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    if (now >= neitz && now < minchaGedola) {
+      // Morning Brochas time
+      return {
+        title: "Morning Brochas",
+        subtitle: `${times.sunrise} - ${times.minchaGedolah}`,
+        modal: "morning-brochas"
+      };
+    } else if (now >= minchaGedola && now < shkia) {
+      // Mincha time
+      return {
+        title: "Mincha",
+        subtitle: `${times.minchaGedolah} - ${times.shkia}`,
+        modal: "mincha"
+      };
+    } else {
+      // Maariv time (from Shkia until next morning's Neitz)
+      return {
+        title: "Maariv",
+        subtitle: `${times.shkia} - ${times.sunrise}`,
+        modal: "maariv"
+      };
+    }
+  };
+
+  const currentPrayer = getCurrentPrayer();
+
   // Helper functions for reason icons and short text
   const getReasonIcon = (reason: string, reasonEnglish?: string) => {
     // Map Hebrew reasons and English translations to icons
@@ -430,21 +471,27 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
         <div className="grid grid-cols-2 gap-2">
           <button 
             onClick={() => {
-              console.log('Morning Brochas button clicked');
-              openModal('morning-brochas');
+              console.log(`${currentPrayer.title} button clicked`);
+              openModal(currentPrayer.modal);
             }}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              isModalComplete('morning-brochas') ? 'bg-sage/20' : 'bg-white'
+              isModalComplete(currentPrayer.modal) ? 'bg-sage/20' : 'bg-white'
             }`}
           >
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              isModalComplete('morning-brochas') ? 'bg-sage' : 'bg-gradient-feminine'
+              isModalComplete(currentPrayer.modal) ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
-              <Sparkles className="text-white" size={18} />
+              {currentPrayer.modal === 'morning-brochas' ? (
+                <Sparkles className="text-white" size={18} />
+              ) : currentPrayer.modal === 'mincha' ? (
+                <Clock className="text-white" size={18} />
+              ) : (
+                <Star className="text-white" size={18} />
+              )}
             </div>
-            <h3 className="font-serif text-sm text-black mb-1 font-bold">Morning Brochas</h3>
+            <h3 className="font-serif text-sm text-black mb-1 font-bold">{currentPrayer.title}</h3>
             <p className="font-sans text-xs text-black/60">
-              {isModalComplete('morning-brochas') ? 'Completed' : 'Daily Morning Blessings'}
+              {isModalComplete(currentPrayer.modal) ? 'Completed' : currentPrayer.subtitle}
             </p>
           </button>
 

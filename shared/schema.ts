@@ -117,6 +117,14 @@ export const minchaPrayers = pgTable("mincha_prayers", {
   orderIndex: integer("order_index").default(0),
 });
 
+export const maarivPrayers = pgTable("maariv_prayers", {
+  id: serial("id").primaryKey(),
+  prayerType: text("prayer_type").notNull(), // e.g., "main_prayer", "shema", "shemoneh_esrei", "aleinu"
+  hebrewText: text("hebrew_text").notNull(),
+  englishTranslation: text("english_translation").notNull(),
+  orderIndex: integer("order_index").default(0),
+});
+
 export const sponsors = pgTable("sponsors", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -297,6 +305,10 @@ export const insertMinchaPrayerSchema = createInsertSchema(minchaPrayers).omit({
   id: true,
 });
 
+export const insertMaarivPrayerSchema = createInsertSchema(maarivPrayers).omit({
+  id: true,
+});
+
 export const insertSponsorSchema = createInsertSchema(sponsors).omit({
   id: true,
   createdAt: true,
@@ -405,6 +417,8 @@ export type GlobalTehillimProgress = typeof globalTehillimProgress.$inferSelect;
 export type InsertGlobalTehillimProgress = z.infer<typeof insertGlobalTehillimProgressSchema>;
 export type MinchaPrayer = typeof minchaPrayers.$inferSelect;
 export type InsertMinchaPrayer = z.infer<typeof insertMinchaPrayerSchema>;
+export type MaarivPrayer = typeof maarivPrayers.$inferSelect;
+export type InsertMaarivPrayer = z.infer<typeof insertMaarivPrayerSchema>;
 export type Sponsor = typeof sponsors.$inferSelect;
 export type InsertSponsor = z.infer<typeof insertSponsorSchema>;
 

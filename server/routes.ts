@@ -440,6 +440,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Maariv routes
+  app.get("/api/maariv/prayers", async (req, res) => {
+    try {
+      const prayers = await storage.getMaarivPrayers();
+      res.json(prayers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch Maariv prayers" });
+    }
+  });
+
   // Sponsor routes
   app.get("/api/sponsors/:contentType/:date", async (req, res) => {
     try {

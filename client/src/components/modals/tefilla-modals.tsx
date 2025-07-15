@@ -278,6 +278,12 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     enabled: activeModal === 'mincha'
   });
 
+  // Fetch Maariv prayers
+  const { data: maarivPrayers = [], isLoading: isMaarivLoading } = useQuery<any[]>({
+    queryKey: ['/api/maariv/prayers'],
+    enabled: activeModal === 'maariv'
+  });
+
   // Fetch Nishmas text from database
   const { data: nishmasText, isLoading: nishmasLoading } = useQuery<NishmasText>({
     queryKey: [`/api/nishmas/${nishmasLanguage}`],
@@ -866,6 +872,56 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       <Dialog open={activeModal === 'individual-tehillim'} onOpenChange={() => closeModal()}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans">
           <IndividualTehillimModal />
+        </DialogContent>
+      </Dialog>
+
+      {/* Maariv Modal */}
+      <Dialog open={activeModal === 'maariv'} onOpenChange={() => closeModal()}>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] overflow-hidden font-sans" aria-describedby="maariv-description">
+          <div id="maariv-description" className="sr-only">Evening prayer service and instructions</div>
+          
+          <StandardModalHeader 
+            title="Maariv Prayer"
+            showHebrew={language === 'hebrew'}
+            setShowHebrew={(show) => setLanguage(show ? 'hebrew' : 'english')}
+            fontSize={fontSize}
+            setFontSize={setFontSize}
+          />
+
+          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
+            {isMaarivLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
+              </div>
+            ) : (
+              <div className="space-y-6" style={{ fontSize: `${fontSize}px` }}>
+                {maarivPrayers.map((prayer) => (
+                  <div key={prayer.id} className="border-b border-warm-gray/10 pb-4 last:border-b-0">
+                    <div
+                      className={`${language === 'hebrew' ? 'secular-one-bold text-right' : 'text-left'} leading-relaxed whitespace-pre-line text-black`}
+                      dangerouslySetInnerHTML={{
+                        __html: language === 'hebrew' 
+                          ? (prayer.hebrewText || '')
+                              .replace(/\*\*(.*?)\*\*\n\n/g, '**$1**\n')
+                              .replace(/\*\*(.*?)\*\*/g, '<strong class="prayer-header">$1</strong>')
+                          : prayer.englishTranslation
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={completeWithAnimation} 
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+            >
+              Completed
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
         </DialogContent>
       </Dialog>
 
