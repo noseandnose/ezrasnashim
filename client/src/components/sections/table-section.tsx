@@ -152,8 +152,26 @@ export default function TableSection() {
           </button>
         </div>
 
-        {/* Bottom Row: Parshas Pinchas and Table Inspiration */}
+        {/* Bottom Row: Table Inspiration and Parshas Pinchas */}
         <div className="grid grid-cols-2 gap-2">
+          {/* Table Inspiration Button */}
+          <button
+            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
+              isModalComplete('inspiration') ? 'bg-sage/20' : 'bg-white'
+            }`}
+            onClick={() => openModal('inspiration')}
+          >
+            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
+              isModalComplete('inspiration') ? 'bg-sage' : 'bg-gradient-feminine'
+            }`}>
+              <Lightbulb className="text-white" size={18} strokeWidth={1.5} />
+            </div>
+            <h3 className="font-serif text-xs text-black mb-1 font-bold">Table Inspiration</h3>
+            <p className="font-sans text-xs text-black/60 leading-relaxed">
+              {isModalComplete('inspiration') ? 'Completed' : (inspirationContent?.title || 'Daily Inspiration')}
+            </p>
+          </button>
+
           {/* Parshas Pinchas Button */}
           <button
             className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
@@ -172,24 +190,6 @@ export default function TableSection() {
                 ? `${shabbosData.candleLighting} - ${shabbosData.havdalah}`
                 : "Loading times..."
               }
-            </p>
-          </button>
-
-          {/* Table Inspiration Button */}
-          <button
-            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              isModalComplete('inspiration') ? 'bg-sage/20' : 'bg-white'
-            }`}
-            onClick={() => openModal('inspiration')}
-          >
-            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              isModalComplete('inspiration') ? 'bg-sage' : 'bg-gradient-feminine'
-            }`}>
-              <Lightbulb className="text-white" size={18} strokeWidth={1.5} />
-            </div>
-            <h3 className="font-serif text-xs text-black mb-1 font-bold">Table Inspiration</h3>
-            <p className="font-sans text-xs text-black/60 leading-relaxed">
-              {isModalComplete('inspiration') ? 'Completed' : (inspirationContent?.title || 'Daily Inspiration')}
             </p>
           </button>
         </div>
