@@ -158,7 +158,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => navigateToSection('torah')}
-            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white relative"
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white relative h-24"
           >
             <div className="absolute top-2 left-2">
               <HeartProgress completed={torahCompleted} size={18} />
@@ -172,7 +172,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
 
           <button
             onClick={() => navigateToSection('tefilla')}
-            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white relative"
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white relative h-24"
           >
             <div className="absolute top-2 left-2">
               <HeartProgress completed={tefillaCompleted} size={18} />
@@ -188,7 +188,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => navigateToSection('tzedaka')}
-            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white relative"
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white relative h-24"
           >
             <div className="absolute top-2 left-2">
               <HeartProgress completed={tzedakaCompleted} size={18} />
@@ -200,7 +200,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <p className="font-sans text-xs text-black/60 leading-relaxed">Support Causes</p>
           </button>
 
-          <div className="rounded-3xl p-3 text-center shadow-lg border border-blush/10 bg-white flex items-center justify-center h-full">
+          <div className="rounded-3xl p-3 text-center shadow-lg border border-blush/10 bg-white flex items-center justify-center h-24">
             <DailyProgress />
           </div>
         </div>
