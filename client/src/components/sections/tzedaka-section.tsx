@@ -221,7 +221,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
           <div className="p-3 rounded-full mx-auto mb-3 w-fit bg-gradient-feminine">
             <HandCoins className="text-white" size={24} strokeWidth={1.5} />
           </div>
-          <h3 className="font-serif text-sm text-black mb-2 font-bold">Put a coin in the Pushka</h3>
+          <h3 className="font-serif text-sm text-black mb-2 font-bold">Put a Coin in Tzedaka</h3>
           <p className="font-sans text-xs text-black/60 leading-relaxed">
             Donations go towards Fertility, Abuse prevention and Torah causes
           </p>

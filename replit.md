@@ -235,6 +235,7 @@ Changelog:
 - July 15, 2025. Reorganized Life page bottom buttons: Renamed "Shabbas Recipe" to "Daily Recipe" with recipe name as subtitle, swapped positions so Table Inspiration appears on left and Daily Recipe on right
 - July 15, 2025. Added Coming Soon overlay to Parsha Shiur: Placed semi-transparent overlay with "Coming Soon" message over Parsha Shiur button on Torah page, made it non-clickable until content is available
 - July 15, 2025. Reorganized Life page 2x2 grid layout: Final arrangement with Daily Recipe (top-left), Jewish Date Converter (top-right), Table Inspiration (bottom-left), and Parshas Pinchas (bottom-right)
+- July 15, 2025. Updated Tzedaka button text: Changed "Put a coin in the Pushka" to "Put a Coin in Tzedaka" for clearer Hebrew terminology
 ```
 
 ## User Preferences
