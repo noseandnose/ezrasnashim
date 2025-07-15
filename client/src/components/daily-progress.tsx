@@ -10,36 +10,36 @@ export default function DailyProgress({ size = 36 }: DailyProgressProps) {
   // Count completed sections
   const completedCount = [torahCompleted, tefillaCompleted, tzedakaCompleted].filter(Boolean).length;
   
-  // Map completion count to the appropriate image
+  // Map completion count to the appropriate image using static serving
   const getProgressImage = () => {
     switch (completedCount) {
       case 0:
         return {
-          src: `/api/media/State%200_1752568332614.png`,
+          src: `/attached_assets/State 0_1752568332614.png`,
           scale: 0.9, // Large scale within fixed container
           alt: "No completions"
         };
       case 1:
         return {
-          src: `/api/media/State%201_1752568332613.png`,
+          src: `/attached_assets/State 1_1752568332613.png`,
           scale: 0.8, // Medium scale
           alt: "One completion"
         };
       case 2:
         return {
-          src: `/api/media/State%202_1752568332613.png`,
+          src: `/attached_assets/State 2_1752568332613.png`,
           scale: 0.9, // Large scale
           alt: "Two completions"
         };
       case 3:
         return {
-          src: `/api/media/State%203_1752568332607.png`,
+          src: `/attached_assets/State 3_1752568332607.png`,
           scale: 1.0, // Fills container
           alt: "All three completions!"
         };
       default:
         return {
-          src: `/api/media/State%200_1752568332614.png`,
+          src: `/attached_assets/State 0_1752568332614.png`,
           scale: 0.9,
           alt: "Daily progress"
         };
