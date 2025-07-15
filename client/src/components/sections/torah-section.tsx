@@ -67,7 +67,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
       border: 'border-blush/10',
-      contentType: 'text'
+      contentType: 'audio'
     },
     {
       id: 'featured',
@@ -93,8 +93,8 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
               <div className="bg-gradient-feminine p-1.5 rounded-full">
                 <Scroll className="text-white" size={16} />
               </div>
-              <h3 className="font-serif text-sm text-black font-bold">Daily Inspiration</h3>
-              <span className="text-xs text-black/60 font-sans">Pirkei Avot {pirkeiAvot.source.replace('.', ':')}</span>
+              <h3 className="font-serif text-sm text-black font-bold">Pirkei Avot</h3>
+              <span className="text-xs text-black/60 font-sans">{pirkeiAvot.source.replace('.', ':')}</span>
             </div>
             <p className="font-sans text-xs text-black/90 leading-relaxed text-justify">
               {pirkeiAvot.text}
@@ -116,8 +116,11 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
               >
                 {/* Content Type Indicator */}
                 {contentType && (
-                  <div className="absolute top-2 left-2 bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-                    {contentType === 'text' ? 'T' : <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />}
+                  <div className="absolute top-2 left-2 bg-white text-black text-xs rounded-full px-2 h-5 flex items-center justify-center shadow-sm">
+                    {id === 'halacha' ? 
+                      <span className="text-xs font-bold">Featured</span> : 
+                      <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+                    }
                   </div>
                 )}
                 

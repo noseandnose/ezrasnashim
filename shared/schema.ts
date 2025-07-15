@@ -189,6 +189,9 @@ export const dailyHalacha = pgTable("daily_halacha", {
   source: text("source"), // Rabbi or book source
   audioUrl: text("audio_url"), // Optional audio content
   speaker: text("speaker"),
+  speakerName: text("speaker_name"),
+  speakerWebsite: text("speaker_website"),
+  duration: text("duration"), // Audio duration
   createdAt: timestamp("created_at").defaultNow(),
 });
 
