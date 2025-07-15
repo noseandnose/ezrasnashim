@@ -231,7 +231,7 @@ Changelog:
 - July 15, 2025. Combined Tzedaka donation buttons: Merged "Support Women's Causes" and "Support Torah" buttons into one large "Put a coin in the Pushka" button with subtitle "Donations go towards Fertility, Abuse prevention and Torah causes", using HandCoins icon and larger size for better visual prominence
 - July 15, 2025. Connected Pushka button to donation modal: Updated "Put a coin in the Pushka" button to open the main donation modal with quick amounts $1, $18, $180, $1800 and Apple Pay/Google Pay support, removing completion tracking since it opens the actual donation flow
 - July 15, 2025. Implemented real community impact tracking: Replaced placeholder data with live database statistics showing actual days sponsored (from sponsors table), total campaigns, and total raised funds (from campaigns currentAmount), with proper loading states and API integration
-- July 15, 2025. Updated Life page main section design: Removed Parshas button from main section header, replaced Flame icon with Shabbat countdown logo (circular gradient background with days until Shabbat number) matching the design from the top-left button, centered the header layout for cleaner appearance
+- July 15, 2025. Updated Life page main section design: Replaced Flame icon with Shabbat countdown logo (circular gradient background with days until Shabbat number) matching the design from the top-left button, kept countdown logo and "This Shabbos" on the left with Parsha name on the right, maintaining balanced two-sided layout
 ```
 
 ## User Preferences
