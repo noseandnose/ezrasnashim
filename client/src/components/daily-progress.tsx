@@ -20,31 +20,31 @@ export default function DailyProgress({ size = 36 }: DailyProgressProps) {
       case 0:
         return {
           src: state0Image,
-          scale: 0.9,
+          scale: 1.2,
           alt: "No completions"
         };
       case 1:
         return {
           src: state1Image,
-          scale: 0.8,
+          scale: 1.2,
           alt: "One completion"
         };
       case 2:
         return {
           src: state2Image,
-          scale: 0.9,
+          scale: 1.2,
           alt: "Two completions"
         };
       case 3:
         return {
           src: state3Image,
-          scale: 1.0,
+          scale: 1.2,
           alt: "All three completions!"
         };
       default:
         return {
           src: state0Image,
-          scale: 0.9,
+          scale: 1.2,
           alt: "Daily progress"
         };
     }
@@ -61,8 +61,8 @@ export default function DailyProgress({ size = 36 }: DailyProgressProps) {
         style={{
           width: `${100 * progressImage.scale}px`,
           height: `${100 * progressImage.scale}px`,
-          maxWidth: '100px',
-          maxHeight: '100px'
+          maxWidth: '120px',
+          maxHeight: '120px'
         }}
       />
     </div>
