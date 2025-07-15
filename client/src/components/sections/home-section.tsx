@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Clock, Heart, BookOpen, HandHeart, Coins, MapPin, ArrowRight, Sparkles } from "lucide-react";
+import { Calendar, Clock, Heart, BookOpen, HandHeart, Coins, MapPin, ArrowRight, Sparkles, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
@@ -51,6 +51,50 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     }
   };
 
+  // Time-based prayer logic (same as Tefilla section)
+  const getCurrentPrayer = () => {
+    if (!jewishTimesQuery.data || jewishTimesQuery.isLoading) {
+      return { title: "Morning Brochas", subtitle: "Loading times...", modal: "morning-brochas", icon: Sparkles };
+    }
+
+    const now = new Date();
+    const times = jewishTimesQuery.data;
+    const neitz = new Date(`${now.toDateString()} ${times.sunrise}`);
+    const minchaGedola = new Date(`${now.toDateString()} ${times.minchaGedolah}`);
+    const shkia = new Date(`${now.toDateString()} ${times.shkia}`);
+
+    if (now >= neitz && now < minchaGedola) {
+      // Morning Brochas time
+      return {
+        title: "Morning Brochas",
+        subtitle: `${times.sunrise} - ${times.minchaGedolah}`,
+        modal: "morning-brochas" as const,
+        icon: Sparkles
+      };
+    } else if (now >= minchaGedola && now < shkia) {
+      // Mincha time
+      return {
+        title: "Mincha",
+        subtitle: `${times.minchaGedolah} - ${times.shkia}`,
+        modal: "mincha" as const,
+        icon: Clock
+      };
+    } else {
+      // Maariv time (from Shkia until next morning's Neitz)
+      return {
+        title: "Maariv",
+        subtitle: `${times.shkia} - ${times.sunrise}`,
+        modal: "maariv" as const,
+        icon: Star
+      };
+    }
+  };
+
+  const currentPrayer = getCurrentPrayer();
+
+  // Get the proper icon component
+  const PrayerIcon = currentPrayer.icon;
+
   return (
     <div className="overflow-y-auto h-full pb-20">
       {/* Unified Top Section with Greeting, Times, and Today Info - Connected to top bar */}
@@ -67,20 +111,20 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           </div>
         </div>
         
-        {/* Times Section - Mincha and Shkia */}
+        {/* Times Section - Time-based Prayer and Shkia */}
         <div className="grid grid-cols-2 gap-2 mb-3">
-          {/* Mincha - Clickable with Arrow Icon */}
+          {/* Time-based Prayer - Dynamic based on current time */}
           <button 
-            onClick={() => openModal('mincha')}
+            onClick={() => openModal(currentPrayer.modal)}
             className="bg-white/80 rounded-xl p-3 text-center border border-blush/20 hover:scale-105 transition-all duration-300 hover:bg-white/95"
           >
             <div className="flex items-center justify-center mb-1">
               <div className="bg-gradient-feminine p-1.5 rounded-full mr-1">
-                <ArrowRight className="text-white" size={12} />
+                <PrayerIcon className="text-white" size={12} />
               </div>
             </div>
-            <p className="font-sans text-xs text-black font-bold mb-0.5">Mincha</p>
-            <p className="font-serif text-sm text-black font-bold">{jewishTimesQuery.data?.minchaGedolah || "Loading..."}</p>
+            <p className="font-sans text-xs text-black font-bold mb-0.5">{currentPrayer.title}</p>
+            <p className="font-serif text-xs text-black font-bold leading-tight">{currentPrayer.subtitle}</p>
           </button>
 
           {/* Shkia - Display Only */}
