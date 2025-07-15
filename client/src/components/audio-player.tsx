@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 interface AudioPlayerProps {
   title: string;
-  duration: string;
+  duration: string | number;
   audioUrl: string;
 }
 

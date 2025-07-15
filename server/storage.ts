@@ -493,11 +493,8 @@ export class DatabaseStorage implements IStorage {
   // Daily Torah content methods
   async getDailyHalachaByDate(date: string): Promise<DailyHalacha | undefined> {
     try {
-      const result = await pool.query(
-        `SELECT id, date, title, content, source, provider, speaker_website as "speakerWebsite", created_at as "createdAt" FROM daily_halacha WHERE date = $1 LIMIT 1`,
-        [date]
-      );
-      return result.rows[0] || undefined;
+      const [result] = await db.select().from(dailyHalacha).where(eq(dailyHalacha.date, date)).limit(1);
+      return result;
     } catch (error) {
       console.error('Failed to fetch daily halacha:', error);
       return undefined;
@@ -511,11 +508,8 @@ export class DatabaseStorage implements IStorage {
 
   async getDailyEmunaByDate(date: string): Promise<DailyEmuna | undefined> {
     try {
-      const result = await pool.query(
-        `SELECT id, date, title, content, author, source, audio_url as "audioUrl", speaker, provider, speaker_website as "speakerWebsite", created_at as "createdAt" FROM daily_emuna WHERE date = $1 LIMIT 1`,
-        [date]
-      );
-      return result.rows[0] || undefined;
+      const [result] = await db.select().from(dailyEmuna).where(eq(dailyEmuna.date, date)).limit(1);
+      return result;
     } catch (error) {
       console.error('Failed to fetch daily emuna:', error);
       return undefined;
@@ -529,11 +523,8 @@ export class DatabaseStorage implements IStorage {
 
   async getDailyChizukByDate(date: string): Promise<DailyChizuk | undefined> {
     try {
-      const result = await pool.query(
-        `SELECT id, date, title, content, audio_url as "audioUrl", speaker, provider, speaker_website as "speakerWebsite", created_at as "createdAt" FROM daily_chizuk WHERE date = $1 LIMIT 1`,
-        [date]
-      );
-      return result.rows[0] || undefined;
+      const [result] = await db.select().from(dailyChizuk).where(eq(dailyChizuk.date, date)).limit(1);
+      return result;
     } catch (error) {
       console.error('Failed to fetch daily chizuk:', error);
       return undefined;
@@ -547,11 +538,8 @@ export class DatabaseStorage implements IStorage {
 
   async getFeaturedContentByDate(date: string): Promise<FeaturedContent | undefined> {
     try {
-      const result = await pool.query(
-        `SELECT id, date, title, content, halachic_source as "halachicSource", practical_tip as "practicalTip", provider, speaker_website as "speakerWebsite", created_at as "createdAt" FROM featured_content WHERE date = $1 LIMIT 1`,
-        [date]
-      );
-      return result.rows[0] || undefined;
+      const [result] = await db.select().from(featuredContent).where(eq(featuredContent.date, date)).limit(1);
+      return result;
     } catch (error) {
       console.error('Failed to fetch featured content:', error);
       return undefined;
@@ -761,66 +749,38 @@ export class DatabaseStorage implements IStorage {
 
   async getActiveDiscountPromotion(userLocation?: string): Promise<DiscountPromotion | undefined> {
     try {
-      // Determine target location based on user's coordinates
-      let targetLocation = "worldwide";
-      if (userLocation === "israel") {
-        targetLocation = "israel";
+      const targetLocation = userLocation === "israel" ? "israel" : "worldwide";
+      const now = new Date();
+      
+      // First try location-specific promotion
+      let result = await db.select()
+        .from(discountPromotions)
+        .where(
+          and(
+            eq(discountPromotions.isActive, true),
+            lte(discountPromotions.startDate, now),
+            gte(discountPromotions.endDate, now),
+            eq(discountPromotions.targetLocation, targetLocation)
+          )
+        )
+        .limit(1);
+      
+      // If no location-specific promotion found and target is israel, fall back to worldwide
+      if (result.length === 0 && targetLocation === "israel") {
+        result = await db.select()
+          .from(discountPromotions)
+          .where(
+            and(
+              eq(discountPromotions.isActive, true),
+              lte(discountPromotions.startDate, now),
+              gte(discountPromotions.endDate, now),
+              eq(discountPromotions.targetLocation, "worldwide")
+            )
+          )
+          .limit(1);
       }
       
-      // Use raw SQL to get the correct mapping
-      const result = await db.execute(`
-        SELECT 
-          id, title, subtitle, 
-          logo_url, link_url, 
-          start_date, end_date, 
-          is_active, target_location, 
-          created_at
-        FROM discount_promotions 
-        WHERE is_active = true 
-          AND start_date <= NOW() 
-          AND end_date >= NOW()
-          AND target_location = '${targetLocation}'
-        LIMIT 1
-      `);
-      
-      let promotion = result.rows && result.rows.length > 0 ? result.rows[0] : null;
-      
-      // If no location-specific promotion found, fall back to worldwide
-      if (!promotion && targetLocation === "israel") {
-        const fallbackResult = await db.execute(`
-          SELECT 
-            id, title, subtitle, 
-            logo_url, link_url, 
-            start_date, end_date, 
-            is_active, target_location, 
-            created_at
-          FROM discount_promotions 
-          WHERE is_active = true 
-            AND start_date <= NOW() 
-            AND end_date >= NOW()
-            AND target_location = 'worldwide'
-          LIMIT 1
-        `);
-        
-        promotion = fallbackResult.rows && fallbackResult.rows.length > 0 ? fallbackResult.rows[0] : null;
-      }
-      
-      // Transform to match expected interface
-      if (promotion) {
-        return {
-          id: promotion.id,
-          title: promotion.title,
-          subtitle: promotion.subtitle,
-          logoUrl: promotion.logo_url,
-          linkUrl: promotion.link_url,
-          startDate: promotion.start_date,
-          endDate: promotion.end_date,
-          isActive: promotion.is_active,
-          createdAt: promotion.created_at
-        } as any;
-      }
-      
-      return undefined;
+      return result[0] || undefined;
     } catch (error) {
       console.error('Database error in getActiveDiscountPromotion:', error);
       return undefined;

@@ -128,7 +128,11 @@ export default function TableModals() {
                         <div className="w-full h-full bg-gradient-to-br from-rose-50 to-pink-50 flex flex-col items-center justify-center">
                           <Volume2 size={48} className="text-rose-400 mb-4" />
                           <div className="w-full px-4">
-                            <AudioPlayer audioUrl={currentMedia.url} />
+                            <AudioPlayer 
+                              audioUrl={currentMedia.url} 
+                              title="Table Inspiration Audio"
+                              duration="0:00"
+                            />
                           </div>
                         </div>
                       );
@@ -234,7 +238,7 @@ export default function TableModals() {
           
           <AudioPlayer 
             title={parshaContent?.title || "Parsha Shiur"}
-            duration="3:15"
+            duration={parshaContent?.duration || "0:00"}
             audioUrl={parshaContent?.audioUrl || ""}
           />
 

@@ -226,7 +226,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                 )}
                 <AudioPlayer 
                   title={emunaContent.title || 'Emuna'}
-                  duration={emunaContent.duration || "10:00"}
+                  duration={emunaContent.duration || "0:00"}
                   audioUrl={emunaContent.audioUrl}
                 />
               </div>
@@ -300,7 +300,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                 )}
                 <AudioPlayer 
                   title={chizukContent.title || 'Chizuk'}
-                  duration={chizukContent.duration || "5:15"}
+                  duration={chizukContent.duration || "0:00"}
                   audioUrl={chizukContent.audioUrl}
                 />
               </div>

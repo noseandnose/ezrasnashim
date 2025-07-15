@@ -48,7 +48,11 @@ export const useAnalytics = () => {
     trackEventMutation.mutate({ eventType, eventData });
   };
 
-  return { trackEvent };
+  const trackCompletion = (modalName: string) => {
+    trackEvent("modal_complete", { modal: modalName });
+  };
+
+  return { trackEvent, trackCompletion };
 };
 
 // Hook for tracking modal completions

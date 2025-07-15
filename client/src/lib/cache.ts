@@ -57,10 +57,10 @@ class MemoryCache<T> {
 }
 
 // Specialized caches for different content types
-export const tehillimCache = new MemoryCache<{ text: string; perek: number; language: string }>(50);
-export const pirkeiAvotCache = new MemoryCache<{ text: string; chapter: number; source: string }>(20);
-export const torahContentCache = new MemoryCache<any>(30);
-export const zmanimCache = new MemoryCache<any>(10);
+export const tehillimCache = new MemoryCache<{ text: string; perek: number; language: string }>(30);
+export const pirkeiAvotCache = new MemoryCache<{ text: string; chapter: number; source: string }>(10);
+export const torahContentCache = new MemoryCache<any>(20);
+export const zmanimCache = new MemoryCache<any>(5);
 
 // Cache key generators
 export const getCacheKey = {

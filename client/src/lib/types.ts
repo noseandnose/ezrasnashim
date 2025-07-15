@@ -62,6 +62,7 @@ export interface DailyCompletionState {
   congratulationsShown: boolean;
   completionDate: string;
   completeTask: (task: 'torah' | 'tefilla' | 'tzedaka') => void;
+  markTefillaComplete: () => void;
   resetDaily: () => void;
   checkAndShowCongratulations: () => boolean;
 }
@@ -116,6 +117,14 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
         };
         set(newState);
       },
+      markTefillaComplete: () => {
+        const state = get();
+        const newState = {
+          ...state,
+          tefillaCompleted: true,
+        };
+        set(newState);
+      },
       resetDaily: () => {
         const newState = {
           torahCompleted: false,
@@ -165,6 +174,15 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
       const newState = {
         ...state,
         [`${task}Completed`]: true,
+      };
+      set(newState);
+      localStorage.setItem('dailyCompletion', JSON.stringify(newState));
+    },
+    markTefillaComplete: () => {
+      const state = get();
+      const newState = {
+        ...state,
+        tefillaCompleted: true,
       };
       set(newState);
       localStorage.setItem('dailyCompletion', JSON.stringify(newState));

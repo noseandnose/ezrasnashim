@@ -156,6 +156,12 @@ export function removeUnusedEventListeners(): void {
   elementsWithListeners.forEach(element => {
     element.removeAttribute('data-has-listener');
   });
+  
+  // Clear any orphaned modal listeners
+  const modalBackdrops = document.querySelectorAll('.modal-backdrop');
+  modalBackdrops.forEach(backdrop => {
+    backdrop.remove();
+  });
 }
 
 /**
@@ -169,8 +175,8 @@ export function cleanupMemory(): void {
   
   // Clear any large cached objects
   if ('caches' in window) {
-    caches.keys().then(names => {
-      names.forEach(name => {
+    caches.keys().then((names: string[]) => {
+      names.forEach((name: string) => {
         if (name.includes('old') || name.includes('temp')) {
           caches.delete(name);
         }
