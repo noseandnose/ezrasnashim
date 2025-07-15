@@ -238,6 +238,7 @@ Changelog:
 - July 15, 2025. Updated Tzedaka button text: Changed "Put a coin in the Pushka" to "Put a Coin in Tzedaka" for clearer Hebrew terminology
 - July 15, 2025. Replaced Parshat Pinchas with Community Feedback button: Changed bottom-right Life page button to "Community Feedback" with subtitle "Help us help you", opens Google Forms link in new tab for user feedback collection
 - July 15, 2025. Added "Powered by Koren" footer: Moved Koren Publishers branding from top header to bottom footer section on Tefilla page, changed text to "Powered by Koren" with logo positioned after the text, maintaining consistent visual branding at page bottom
+- July 15, 2025. Integrated Koren thank you sections in all tefilla modals: Removed "Powered by Koren" footer from main Tefilla page, created reusable KorenThankYou component with "Thank you to Koren for providing this Tefilla" message, Koren logo, and link to korenpub.co.il, added to all individual tefilla modals (Morning Brochas, Tehillim Text, Nishmas, Maariv, Individual Tehillim, Birkat Hamazon) for proper attribution since each tefilla content is provided by Koren Publishers
 ```
 
 ## User Preferences

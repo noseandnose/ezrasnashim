@@ -3,6 +3,7 @@ import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles } from "lucide-react";
+import korenLogo from "@assets/This_is_a_logo_for_Koren_Publishers_Jerusalem_1752581940716.jpg";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -17,6 +18,27 @@ import { BirkatHamazonModal } from "@/components/modals/birkat-hamazon-modal";
 interface TefillaModalsProps {
   onSectionChange?: (section: any) => void;
 }
+
+// Koren Thank You Component
+const KorenThankYou = () => (
+  <div className="bg-gradient-to-br from-blush/10 to-lavender/10 rounded-2xl p-3 mt-3 border border-blush/20">
+    <div className="flex items-center justify-center space-x-3">
+      <span className="text-sm font-medium text-black">Thank you to Koren for providing this Tefilla</span>
+      <a 
+        href="https://korenpub.co.il/" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="hover:opacity-80 transition-opacity"
+      >
+        <img 
+          src={korenLogo} 
+          alt="Koren Publishers"
+          className="h-5 w-auto object-contain"
+        />
+      </a>
+    </div>
+  </div>
+);
 
 // Standardized Modal Header Component for Tefilla Modals
 const StandardModalHeader = ({ 
@@ -170,6 +192,8 @@ function MorningBrochasModal() {
             </div>
           )}
         </div>
+
+        <KorenThankYou />
 
         <Button 
           onClick={() => {
@@ -508,6 +532,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             </div>
           </div>
 
+          <KorenThankYou />
+
           <div className="heart-explosion-container">
             <Button 
               onClick={() => {
@@ -784,6 +810,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             )}
           </div>
 
+          <KorenThankYou />
+
           {/* Complete Button */}
           <div className="heart-explosion-container">
             <Button 
@@ -913,6 +941,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               </div>
             )}
           </div>
+
+          <KorenThankYou />
 
           <div className="heart-explosion-container">
             <Button 
@@ -1307,6 +1337,8 @@ function IndividualTehillimModal() {
           </div>
         )}
       </div>
+
+      <KorenThankYou />
 
       <Button 
         onClick={() => {

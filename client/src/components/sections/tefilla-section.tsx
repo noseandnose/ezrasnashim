@@ -599,17 +599,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           </div>
         </div>
 
-        {/* Powered by Koren Section */}
-        <div className="bg-white/70 rounded-2xl p-3 mt-3 border border-blush/10">
-          <div className="flex items-center justify-center space-x-3">
-            <h2 className="font-serif text-lg text-black font-bold">Powered by Koren</h2>
-            <img 
-              src={korenLogo} 
-              alt="Koren Publishers"
-              className="h-6 w-auto object-contain"
-            />
-          </div>
-        </div>
+
 
         {/* Bottom padding */}
         <div className="h-16"></div>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X, Plus, Minus } from "lucide-react";
+import korenLogo from "@assets/This_is_a_logo_for_Koren_Publishers_Jerusalem_1752581940716.jpg";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useAnalytics } from "@/hooks/use-analytics";
@@ -14,6 +15,27 @@ interface BirkatHamazonPrayer {
   englishTranslation: string;
   orderIndex: number;
 }
+
+// Koren Thank You Component
+const KorenThankYou = () => (
+  <div className="bg-gradient-to-br from-blush/10 to-lavender/10 rounded-2xl p-3 mt-3 border border-blush/20">
+    <div className="flex items-center justify-center space-x-3">
+      <span className="text-sm font-medium text-black">Thank you to Koren for providing this Tefilla</span>
+      <a 
+        href="https://korenpub.co.il/" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="hover:opacity-80 transition-opacity"
+      >
+        <img 
+          src={korenLogo} 
+          alt="Koren Publishers"
+          className="h-5 w-auto object-contain"
+        />
+      </a>
+    </div>
+  </div>
+);
 
 export function BirkatHamazonModal() {
   const { activeModal, closeModal } = useModalStore();
@@ -137,6 +159,8 @@ export function BirkatHamazonModal() {
             </div>
           )}
         </div>
+
+        <KorenThankYou />
 
         <Button
           onClick={handleComplete}
