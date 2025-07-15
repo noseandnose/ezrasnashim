@@ -227,6 +227,7 @@ Changelog:
 - July 15, 2025. Implemented custom daily progress images: Replaced flower SVG graphics with user-provided State 0-3 PNG images, properly sized (60px-100px) and centered within 120x120px button container
 - July 15, 2025. Fixed daily progress image loading: Added static serving route for attached assets, resolved button sizing consistency across all home page buttons, images now load correctly from /attached_assets/ path
 - July 15, 2025. Resolved daily progress image loading completely: Switched from API endpoints to direct asset imports using @assets alias, ensuring State 0-3 images display correctly based on completion count (0=State 0, 1=State 1, 2=State 2, 3=State 3)
+- July 15, 2025. Completed Birkat Hamazon modal integration: Successfully replaced standalone Mincha button in Tefilla section with fully functional Birkat Hamazon feature, fixed modal opening issues by updating activeModal state checks, standardized modal design to match other prayer modals with consistent header layout, language toggle, font controls, and completion button styling with heart explosion animation
 ```
 
 ## User Preferences

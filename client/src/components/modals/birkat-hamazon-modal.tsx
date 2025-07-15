@@ -5,6 +5,7 @@ import { X, Plus, Minus } from "lucide-react";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useAnalytics } from "@/hooks/use-analytics";
+import { HeartExplosion } from "@/components/ui/heart-explosion";
 
 interface BirkatHamazonPrayer {
   id: number;
@@ -18,6 +19,7 @@ export function BirkatHamazonModal() {
   const { activeModal, closeModal } = useModalStore();
   const [language, setLanguage] = useState<"hebrew" | "english">("hebrew");
   const [fontSize, setFontSize] = useState(20);
+  const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const { markTefillaComplete } = useDailyCompletionStore();
   const { trackCompletion } = useAnalytics();
 
@@ -29,9 +31,14 @@ export function BirkatHamazonModal() {
   });
 
   const handleComplete = () => {
-    markTefillaComplete();
+    setShowHeartExplosion(true);
     trackCompletion("Birkat Hamazon");
-    closeModal();
+    
+    setTimeout(() => {
+      markTefillaComplete();
+      closeModal();
+      setShowHeartExplosion(false);
+    }, 2000);
   };
 
   const increaseFontSize = () => {
@@ -147,11 +154,16 @@ export function BirkatHamazonModal() {
         <div className="px-6 pb-6 pt-2 border-t border-gray-200">
           <Button
             onClick={handleComplete}
-            className="w-full bg-gradient-to-r from-rose-200 to-rose-300 hover:from-rose-300 hover:to-rose-400 text-black font-semibold"
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
           >
-            Complete
+            Completed
           </Button>
         </div>
+        
+        <HeartExplosion 
+          trigger={showHeartExplosion} 
+          onComplete={() => setShowHeartExplosion(false)} 
+        />
       </DialogContent>
     </Dialog>
   );
