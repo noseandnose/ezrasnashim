@@ -15,31 +15,31 @@ export default function DailyProgress({ size = 36 }: DailyProgressProps) {
     switch (completedCount) {
       case 0:
         return {
-          src: `/attached_assets/State 0_1752569595325.png`,
+          src: `/api/media/State%200_1752569595325.png`,
           scale: 0.9, // Large scale within fixed container
           alt: "No completions"
         };
       case 1:
         return {
-          src: `/attached_assets/State 1_1752569595325.png`,
+          src: `/api/media/State%201_1752569595325.png`,
           scale: 0.8, // Medium scale
           alt: "One completion"
         };
       case 2:
         return {
-          src: `/attached_assets/State 2_1752569595325.png`,
+          src: `/api/media/State%202_1752569595325.png`,
           scale: 0.9, // Large scale
           alt: "Two completions"
         };
       case 3:
         return {
-          src: `/attached_assets/State 3_1752569595324.png`,
+          src: `/api/media/State%203_1752569595324.png`,
           scale: 1.0, // Fills container
           alt: "All three completions!"
         };
       default:
         return {
-          src: `/attached_assets/State 0_1752569595325.png`,
+          src: `/api/media/State%200_1752569595325.png`,
           scale: 0.9,
           alt: "Daily progress"
         };
@@ -62,6 +62,8 @@ export default function DailyProgress({ size = 36 }: DailyProgressProps) {
         }}
         onError={(e) => {
           console.error('Image failed to load:', progressImage.src);
+          console.error('Current target src:', e.currentTarget.src);
+          console.error('Error event:', e);
         }}
         onLoad={() => {
           console.log('Image loaded successfully:', progressImage.src);
