@@ -222,6 +222,9 @@ Changelog:
 - July 15, 2025. Enhanced Halacha section for audio content: Changed content type indicator from "T" to sideways triangle (consistent with other audio content), updated database schema to include speaker_name, speaker_website, and duration fields for full audio support, set Halacha contentType to 'audio' preparing for all-audio content transition
 - July 15, 2025. Implemented comprehensive time-based prayer system: Created dynamic prayer buttons that change throughout the day based on Jewish prayer times (Morning Brochas from Neitz-Mincha Gedola, Mincha from Mincha Gedola-Shkia, Maariv from Shkia-next Neitz), unified functionality across both Tefilla section and home page time button, added proper icons (Sparkles, Clock, Star) and time range subtitles, completed Maariv modal with authentic prayer content
 - July 15, 2025. Reorganized home page layout: Swapped order of Today's Sponsor section and Times section, sponsor now appears above the time-based prayer and Shkia buttons for improved visual hierarchy
+- July 15, 2025. Enhanced home page button design: Moved heart progress icons from bottom to top-left corners of all 3 main buttons for thinner, more elegant appearance
+- July 15, 2025. Created comprehensive design system file: Added complete styling reference including all colors, fonts, gradients, spacing, and component specifications in client/src/styles/design-system.ts
+- July 15, 2025. Implemented custom daily progress images: Replaced flower SVG graphics with user-provided State 0-3 PNG images, properly sized (60px-100px) and centered within 120x120px button container
 ```
 
 ## User Preferences
