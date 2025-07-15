@@ -226,6 +226,7 @@ Changelog:
 - July 15, 2025. Created comprehensive design system file: Added complete styling reference including all colors, fonts, gradients, spacing, and component specifications in client/src/styles/design-system.ts
 - July 15, 2025. Implemented custom daily progress images: Replaced flower SVG graphics with user-provided State 0-3 PNG images, properly sized (60px-100px) and centered within 120x120px button container
 - July 15, 2025. Fixed daily progress image loading: Added static serving route for attached assets, resolved button sizing consistency across all home page buttons, images now load correctly from /attached_assets/ path
+- July 15, 2025. Resolved daily progress image loading completely: Switched from API endpoints to direct asset imports using @assets alias, ensuring State 0-3 images display correctly based on completion count (0=State 0, 1=State 1, 2=State 2, 3=State 3)
 ```
 
 ## User Preferences
