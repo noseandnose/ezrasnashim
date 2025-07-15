@@ -116,11 +116,8 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
               >
                 {/* Content Type Indicator */}
                 {contentType && (
-                  <div className="absolute top-2 left-2 bg-white text-black text-xs rounded-full px-2 h-5 flex items-center justify-center shadow-sm">
-                    {id === 'halacha' ? 
-                      <span className="text-xs font-bold">Featured</span> : 
-                      <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
-                    }
+                  <div className="absolute top-2 left-2 bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
+                    <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
                   </div>
                 )}
                 

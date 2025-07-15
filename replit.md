@@ -219,7 +219,7 @@ Changelog:
 - July 13, 2025. Corrected Jewish Date converter logic: Fixed calendar generation to start from current year (2025) instead of birth year, implemented proper Hebrew-to-English date conversion using Hebcal API for accurate recurring events (e.g., 19th Tevet converts to January 19, 2025 and January 8, 2026), ensuring calendar events appear on correct corresponding English dates each year
 - July 13, 2025. Updated home page completion indicators: Changed gradient circle backgrounds to turn sage green (bg-sage) when tasks are completed, matching the exact same green color used on individual pages, while keeping heart progress indicators pink (blush), providing consistent visual feedback for completion status on Torah, Tefilla, and Tzedaka sections
 - July 15, 2025. Updated Torah page Pirkei Avot section: Changed "Daily Inspiration" to "Pirkei Avot" with subtitle showing just the source reference (e.g., "1:13") for cleaner presentation
-- July 15, 2025. Enhanced Halacha section for audio content: Changed content type indicator from "T" to "Featured" text, updated database schema to include speaker_name, speaker_website, and duration fields for full audio support, set Halacha contentType to 'audio' preparing for all-audio content transition
+- July 15, 2025. Enhanced Halacha section for audio content: Changed content type indicator from "T" to sideways triangle (consistent with other audio content), updated database schema to include speaker_name, speaker_website, and duration fields for full audio support, set Halacha contentType to 'audio' preparing for all-audio content transition
 ```
 
 ## User Preferences
