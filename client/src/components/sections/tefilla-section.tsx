@@ -496,23 +496,19 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           </button>
 
           <button 
-            onClick={() => openModal('mincha')}
+            onClick={() => openModal('birkat-hamazon')}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              isModalComplete('mincha') ? 'bg-sage/20' : 'bg-white'
+              isModalComplete('birkat-hamazon') ? 'bg-sage/20' : 'bg-white'
             }`}
           >
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              isModalComplete('mincha') ? 'bg-sage' : 'bg-gradient-feminine'
+              isModalComplete('birkat-hamazon') ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
-              <Clock className="text-white" size={18} />
+              <HandHeart className="text-white" size={18} />
             </div>
-            <h3 className="font-serif text-sm text-black mb-1 font-bold">Mincha</h3>
+            <h3 className="font-serif text-sm text-black mb-1 font-bold">Birkat Hamazon</h3>
             <p className="font-sans text-xs text-black/60">
-              {isModalComplete('mincha') ? 'Completed' : 
-               isLoading ? "Loading..." : 
-               times?.minchaGedolah && times?.shkia ? 
-               `${times.minchaGedolah} - ${times.shkia}` : 
-               "Loading..."}
+              {isModalComplete('birkat-hamazon') ? 'Completed' : 'After Blessings'}
             </p>
           </button>
         </div>

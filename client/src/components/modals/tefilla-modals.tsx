@@ -12,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import axiosClient from "@/lib/axiosClient";
 import { useTrackModalComplete, useAnalytics } from "@/hooks/use-analytics";
+import { BirkatHamazonModal } from "@/components/modals/birkat-hamazon-modal";
 
 interface TefillaModalsProps {
   onSectionChange?: (section: any) => void;
@@ -927,6 +928,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
       {/* Morning Brochas Modal */}
       <MorningBrochasModal />
+      
+      {/* Birkat Hamazon Modal */}
+      <BirkatHamazonModal />
     </>
   );
 }

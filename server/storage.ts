@@ -1,7 +1,7 @@
 import serverAxiosClient from "./axiosClient";
 import { 
   calendarEvents, shopItems, 
-  tehillimNames, globalTehillimProgress, minchaPrayers, maarivPrayers, sponsors, nishmasText,
+  tehillimNames, globalTehillimProgress, minchaPrayers, maarivPrayers, birkatHamazonPrayers, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
   shabbatRecipes, parshaVorts, tableInspirations, campaigns, womensPrayers, discountPromotions, pirkeiAvotProgress,
   analyticsEvents, dailyStats,
@@ -9,6 +9,7 @@ import {
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
   type MaarivPrayer, type InsertMaarivPrayer,
+  type BirkatHamazonPrayer, type InsertBirkatHamazonPrayer,
   type Sponsor, type InsertSponsor, type NishmasText, type InsertNishmasText,
   type DailyHalacha, type InsertDailyHalacha,
   type DailyEmuna, type InsertDailyEmuna,
@@ -78,6 +79,10 @@ export interface IStorage {
   // Maariv methods
   getMaarivPrayers(): Promise<MaarivPrayer[]>;
   createMinchaPrayer(prayer: InsertMinchaPrayer): Promise<MinchaPrayer>;
+
+  // Birkat Hamazon methods
+  getBirkatHamazonPrayers(): Promise<BirkatHamazonPrayer[]>;
+  createBirkatHamazonPrayer(prayer: InsertBirkatHamazonPrayer): Promise<BirkatHamazonPrayer>;
 
   // Sponsor methods
   getSponsorByContentTypeAndDate(contentType: string, date: string): Promise<Sponsor | undefined>;
@@ -435,6 +440,16 @@ export class DatabaseStorage implements IStorage {
 
   async createMaarivPrayer(insertPrayer: InsertMaarivPrayer): Promise<MaarivPrayer> {
     const [prayer] = await db.insert(maarivPrayers).values(insertPrayer).returning();
+    return prayer;
+  }
+
+  // Birkat Hamazon methods
+  async getBirkatHamazonPrayers(): Promise<BirkatHamazonPrayer[]> {
+    return await db.select().from(birkatHamazonPrayers).orderBy(birkatHamazonPrayers.orderIndex);
+  }
+
+  async createBirkatHamazonPrayer(insertPrayer: InsertBirkatHamazonPrayer): Promise<BirkatHamazonPrayer> {
+    const [prayer] = await db.insert(birkatHamazonPrayers).values(insertPrayer).returning();
     return prayer;
   }
 

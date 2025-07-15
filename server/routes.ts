@@ -476,6 +476,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Birkat Hamazon routes
+  app.get("/api/birkat-hamazon/prayers", async (req, res) => {
+    try {
+      const prayers = await storage.getBirkatHamazonPrayers();
+      res.json(prayers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch Birkat Hamazon prayers" });
+    }
+  });
+
+  app.post("/api/birkat-hamazon/prayers", async (req, res) => {
+    try {
+      const prayer = await storage.createBirkatHamazonPrayer(req.body);
+      res.json(prayer);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create Birkat Hamazon prayer" });
+    }
+  });
+
   // Sponsor routes
   app.get("/api/sponsors/:contentType/:date", async (req, res) => {
     try {

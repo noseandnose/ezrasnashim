@@ -8,6 +8,7 @@ export type ModalType =
   | 'featured'
   | 'mincha' 
   | 'morning-brochas'
+  | 'birkat-hamazon'
   | 'tehillim' 
   | 'tehillim-text'
   | 'special-tehillim'
@@ -31,14 +32,26 @@ export interface ModalState {
   openModal: (modalId: string) => void;
   closeModal: () => void;
   setSelectedPsalm: (psalmNumber: number) => void;
+  
+  // Convenience methods for specific modals
+  isBirkatHamazonModalOpen: boolean;
+  openBirkatHamazonModal: () => void;
+  closeBirkatHamazonModal: () => void;
 }
 
-export const useModalStore = create<ModalState>((set) => ({
+export const useModalStore = create<ModalState>((set, get) => ({
   activeModal: null,
   selectedPsalm: null,
   openModal: (modalId: string) => set({ activeModal: modalId }),
   closeModal: () => set({ activeModal: null }),
   setSelectedPsalm: (psalmNumber: number) => set({ selectedPsalm: psalmNumber }),
+  
+  // Convenience methods for specific modals
+  get isBirkatHamazonModalOpen() {
+    return get().activeModal === 'birkat-hamazon';
+  },
+  openBirkatHamazonModal: () => set({ activeModal: 'birkat-hamazon' }),
+  closeBirkatHamazonModal: () => set({ activeModal: null }),
 }));
 
 // Daily completion tracking
