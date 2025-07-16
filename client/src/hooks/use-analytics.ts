@@ -13,7 +13,7 @@ const getSessionId = () => {
 };
 
 interface TrackEventParams {
-  eventType: "modal_complete" | "tehillim_complete" | "name_prayed";
+  eventType: "modal_complete" | "tehillim_complete" | "name_prayed" | "tehillim_book_complete";
   eventData?: Record<string, any>;
 }
 

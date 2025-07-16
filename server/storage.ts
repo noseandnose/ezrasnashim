@@ -124,6 +124,7 @@ export interface IStorage {
     totalPageViews: number;
     totalTehillimCompleted: number;
     totalNamesProcessed: number;
+    totalBooksCompleted: number;
     totalModalCompletions: Record<string, number>;
   }>;
 
@@ -208,8 +209,24 @@ export class DatabaseStorage implements IStorage {
   async updateGlobalTehillimProgress(currentPerek: number, language: string, completedBy?: string): Promise<GlobalTehillimProgress> {
     const [progress] = await db.select().from(globalTehillimProgress).limit(1);
     if (progress) {
+      // Check if we're completing the entire book (perek 150)
+      const isBookComplete = currentPerek === 150;
+      
       // Calculate next perek (1-150, cycling)
       const nextPerek = currentPerek >= 150 ? 1 : currentPerek + 1;
+      
+      // Log book completion event when finishing perek 150
+      if (isBookComplete) {
+        await this.trackEvent({
+          eventType: 'tehillim_book_complete',
+          eventData: {
+            completedBy: completedBy || 'Anonymous',
+            language: language,
+            completedAt: new Date().toISOString()
+          },
+          sessionId: 'system' // System-generated event
+        });
+      }
       
       // Assign a new random name for the next perek
       const nextName = await this.getRandomNameForInitialAssignment();
@@ -844,6 +861,7 @@ export class DatabaseStorage implements IStorage {
           pageViews: 0,
           tehillimCompleted: 0,
           namesProcessed: 0,
+          booksCompleted: 0,
           modalCompletions: {}
         });
     }
@@ -887,6 +905,7 @@ export class DatabaseStorage implements IStorage {
     const pageViews = 0; // No longer tracking page views
     const tehillimCompleted = todayEvents.filter(e => e.eventType === 'tehillim_complete').length;
     const namesProcessed = todayEvents.filter(e => e.eventType === 'name_prayed').length;
+    const booksCompleted = todayEvents.filter(e => e.eventType === 'tehillim_book_complete').length;
     
     // Count modal completions by type
     const modalCompletions: Record<string, number> = {};
@@ -908,6 +927,7 @@ export class DatabaseStorage implements IStorage {
           pageViews,
           tehillimCompleted,
           namesProcessed,
+          booksCompleted,
           modalCompletions,
           updatedAt: new Date()
         })
@@ -923,6 +943,7 @@ export class DatabaseStorage implements IStorage {
           pageViews,
           tehillimCompleted,
           namesProcessed,
+          booksCompleted,
           modalCompletions
         })
         .returning();
@@ -955,6 +976,7 @@ export class DatabaseStorage implements IStorage {
     totalPageViews: number;
     totalTehillimCompleted: number;
     totalNamesProcessed: number;
+    totalBooksCompleted: number;
     totalModalCompletions: Record<string, number>;
   }> {
     // Get all daily stats
@@ -965,6 +987,7 @@ export class DatabaseStorage implements IStorage {
     let totalPageViews = 0;
     let totalTehillimCompleted = 0;
     let totalNamesProcessed = 0;
+    let totalBooksCompleted = 0;
     const totalModalCompletions: Record<string, number> = {};
     
     for (const stats of allStats) {
@@ -972,6 +995,7 @@ export class DatabaseStorage implements IStorage {
       totalPageViews += stats.pageViews || 0;
       totalTehillimCompleted += stats.tehillimCompleted || 0;
       totalNamesProcessed += stats.namesProcessed || 0;
+      totalBooksCompleted += stats.booksCompleted || 0;
       
       // Merge modal completions
       const completions = stats.modalCompletions as Record<string, number> || {};
@@ -985,6 +1009,7 @@ export class DatabaseStorage implements IStorage {
       totalPageViews,
       totalTehillimCompleted,
       totalNamesProcessed,
+      totalBooksCompleted,
       totalModalCompletions
     };
   }

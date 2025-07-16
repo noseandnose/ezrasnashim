@@ -245,7 +245,7 @@ export const pirkeiAvotProgress = pgTable("pirkei_avot_progress", {
 // Analytics tracking tables - Only essential completion events
 export const analyticsEvents = pgTable("analytics_events", {
   id: serial("id").primaryKey(),
-  eventType: text("event_type").notNull(), // Only: 'modal_complete', 'tehillim_complete', 'name_prayed'
+  eventType: text("event_type").notNull(), // Only: 'modal_complete', 'tehillim_complete', 'name_prayed', 'tehillim_book_complete'
   eventData: jsonb("event_data"), // Additional context data
   sessionId: text("session_id"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -261,6 +261,7 @@ export const dailyStats = pgTable("daily_stats", {
   pageViews: integer("page_views").default(0),
   tehillimCompleted: integer("tehillim_completed").default(0),
   namesProcessed: integer("names_processed").default(0),
+  booksCompleted: integer("books_completed").default(0), // Track complete Tehillim book finishes
   modalCompletions: jsonb("modal_completions").default({}), // { "torah": 10, "tefilla": 20, etc }
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

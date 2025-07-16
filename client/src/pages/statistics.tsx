@@ -11,6 +11,7 @@ interface DailyStats {
   pageViews: number;
   tehillimCompleted: number;
   namesProcessed: number;
+  booksCompleted: number;
   modalCompletions: Record<string, number>;
 }
 
@@ -19,6 +20,7 @@ interface TotalStats {
   totalPageViews: number;
   totalTehillimCompleted: number;
   totalNamesProcessed: number;
+  totalBooksCompleted: number;
   totalModalCompletions: Record<string, number>;
 }
 
@@ -136,6 +138,20 @@ export default function Statistics() {
                 color="text-lavender"
               />
             </div>
+            
+            {/* Book Completions - Special Achievement */}
+            {todayStats?.booksCompleted ? (
+              <div className="mt-3">
+                <div className="bg-gradient-to-r from-blush/20 to-peach/20 rounded-2xl p-4 border border-blush/20">
+                  <div className="flex items-center justify-between mb-2">
+                    <Calendar className="h-6 w-6 text-blush" />
+                    <span className="text-sm font-medium text-warm-gray">Complete Tehillim Books Today</span>
+                  </div>
+                  <div className="text-3xl font-serif font-bold text-black">{todayStats.booksCompleted}</div>
+                  <p className="text-xs text-warm-gray mt-1">Amazing achievement! 🎉</p>
+                </div>
+              </div>
+            ) : null}
           </div>
 
           {/* Total Stats */}
@@ -172,6 +188,20 @@ export default function Statistics() {
                 icon={BookOpen}
                 color="text-lavender"
               />
+            </div>
+            
+            {/* Total Book Completions */}
+            <div className="mt-3">
+              <div className="bg-gradient-to-r from-blush/10 to-peach/10 rounded-2xl p-4 border border-blush/10">
+                <div className="flex items-center justify-between mb-2">
+                  <Calendar className="h-6 w-6 text-blush" />
+                  <span className="text-sm font-medium text-warm-gray">Complete Tehillim Books Ever</span>
+                </div>
+                <div className="text-3xl font-serif font-bold text-black">
+                  {totalLoading ? "..." : totalStats?.totalBooksCompleted.toLocaleString() || 0}
+                </div>
+                <p className="text-xs text-warm-gray mt-1">Full books of 150 perakim completed</p>
+              </div>
             </div>
           </div>
 
