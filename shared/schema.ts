@@ -200,7 +200,6 @@ export const dailyHalacha = pgTable("daily_halacha", {
   speaker: text("speaker"),
   speakerName: text("speaker_name"),
   speakerWebsite: text("speaker_website"),
-  duration: text("duration"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -212,6 +211,8 @@ export const dailyEmuna = pgTable("daily_emuna", {
   source: text("source"),
   audioUrl: text("audio_url"),
   speaker: text("speaker"),
+  speakerName: text("speaker_name"),
+  speakerWebsite: text("speaker_website"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -238,7 +239,6 @@ export const featuredContent = pgTable("featured_content", {
   speaker: text("speaker"),
   speakerName: text("speaker_name"),
   speakerWebsite: text("speaker_website"),
-  duration: text("duration"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
