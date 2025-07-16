@@ -243,6 +243,7 @@ Changelog:
 - July 16, 2025. Updated home page layout from 2x2 grid buttons to horizontal bars: Converted Torah, Tefilla, and Tzedaka sections to full-width horizontal bars with icon on left, content in center, and heart progress on right, added large Daily Progress Garden section below bars for unified progress tracking
 - July 16, 2025. Fixed modal scrolling accessibility issue: Updated all modals (Torah, Tefilla, Birkat Hamazon) to use max-h-[95vh] with overflow-y-auto on DialogContent and reduced content area to max-h-[50vh] to ensure complete buttons are always accessible when text content is long, preventing users from being unable to complete tasks due to hidden buttons
 - July 16, 2025. Reduced spacing between content blocks and thank you sections: Changed margin from mb-3 to mb-1 in all modal content areas to decrease spacing between white content blocks and blue Koren thank you sections for tighter, more cohesive layout
+- July 16, 2025. Removed special thanks sections: Eliminated special thanks sections to Nishmas.net from Nishmas modal and to Chuppah.org from Individual Prayer modal for cleaner interface while keeping Koren attribution in all relevant prayer modals
 ```
 
 ## User Preferences
