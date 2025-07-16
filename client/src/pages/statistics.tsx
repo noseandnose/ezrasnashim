@@ -37,11 +37,7 @@ export default function Statistics() {
     refetchInterval: 60000, // Refresh every minute
   });
 
-  // Fetch daily stats for chart
-  const { data: dailyStats } = useQuery<DailyStats[]>({
-    queryKey: ["/api/analytics/stats/daily"],
-    refetchInterval: 300000, // Refresh every 5 minutes
-  });
+
 
   // Handler for bottom navigation - navigate back to home page with section
   const handleSectionChange = (section: Section) => {
@@ -207,31 +203,7 @@ export default function Statistics() {
             </div>
           </div>
 
-          {/* Daily Trend */}
-          {dailyStats && dailyStats.length > 0 && (
-            <div>
-              <h2 className="text-base font-serif font-bold text-black mb-3">Recent Activity (Last 7 Days)</h2>
-              <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
-                <div className="space-y-2">
-                  {dailyStats.slice(0, 7).map((day) => (
-                    <div key={day.date} className="flex justify-between items-center py-1">
-                      <span className="text-xs text-warm-gray">
-                        {new Date(day.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                      </span>
-                      <div className="flex gap-3 text-xs">
-                        <span className="text-black">
-                          <span className="font-bold">{day.uniqueUsers}</span> users
-                        </span>
-                        <span className="text-black">
-                          <span className="font-bold">{day.tehillimCompleted}</span> tehillim
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
+
         </div>
       </main>
 
