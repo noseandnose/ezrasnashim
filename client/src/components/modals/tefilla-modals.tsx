@@ -168,7 +168,7 @@ function MorningBrochasModal() {
         </div>
 
         {/* Expanded Prayer Content Area */}
-        <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
+        <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
@@ -523,7 +523,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           </div>
 
           {/* Standardized Content Area */}
-          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
             <div
               className={`${showHebrew ? 'secular-one-bold text-right' : 'font-english'} leading-relaxed text-black`}
               style={{ fontSize: `${fontSize}px` }}
@@ -562,7 +562,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             setFontSize={setFontSize}
           />
 
-          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
@@ -787,7 +787,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           </div>
 
           {/* Standardized Content Area */}
-          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
             {nishmasLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
@@ -917,7 +917,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             setFontSize={setFontSize}
           />
 
-          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
             {isMaarivLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
@@ -1138,7 +1138,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
       </div>
 
       {/* Standardized Content Area */}
-      <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
         <div
           className={`${language === 'hebrew' ? 'secular-one-bold text-right' : 'font-english'} leading-relaxed text-black`}
           style={{ fontSize: `${fontSize}px` }}
@@ -1323,7 +1323,7 @@ function IndividualTehillimModal() {
       </div>
 
       {/* Standardized Content Area */}
-      <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
