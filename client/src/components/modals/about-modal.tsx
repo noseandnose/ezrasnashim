@@ -41,7 +41,7 @@ export default function AboutModal() {
         {/* Complete Button */}
         <Button
           onClick={closeModal}
-          className="w-full bg-gradient-blush hover:opacity-90 text-white font-medium py-3 rounded-2xl transition-all shadow-soft"
+          className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
         >
           Close
         </Button>
