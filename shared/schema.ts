@@ -196,9 +196,8 @@ export const dailyHalacha = pgTable("daily_halacha", {
   title: text("title").notNull(),
   content: text("content"),
   source: text("source"),
-  audioUrl: text("audio_url").notNull(), // Primary audio content
+  audioUrl: text("audio_url").notNull(),
   speaker: text("speaker"),
-  speakerName: text("speaker_name"),
   speakerWebsite: text("speaker_website"),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -207,9 +206,9 @@ export const dailyEmuna = pgTable("daily_emuna", {
   id: serial("id").primaryKey(),
   date: date("date").notNull().unique(),
   title: text("title").notNull(),
-  content: text("content").notNull(),
+  content: text("content"),
   source: text("source"),
-  audioUrl: text("audio_url"),
+  audioUrl: text("audio_url").notNull(),
   speaker: text("speaker"),
   speakerWebsite: text("speaker_website"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -219,11 +218,10 @@ export const dailyChizuk = pgTable("daily_chizuk", {
   id: serial("id").primaryKey(),
   date: date("date").notNull().unique(),
   title: text("title").notNull(),
-  content: text("content").notNull(),
+  content: text("content"),
   source: text("source"),
-  audioUrl: text("audio_url"),
+  audioUrl: text("audio_url").notNull(),
   speaker: text("speaker"),
-  speakerName: text("speaker_name"),
   speakerWebsite: text("speaker_website"),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -234,9 +232,8 @@ export const featuredContent = pgTable("featured_content", {
   title: text("title").notNull(),
   content: text("content"),
   source: text("source"),
-  audioUrl: text("audio_url").notNull(), // Primary audio content
+  audioUrl: text("audio_url").notNull(),
   speaker: text("speaker"),
-  speakerName: text("speaker_name"),
   speakerWebsite: text("speaker_website"),
   createdAt: timestamp("created_at").defaultNow(),
 });
