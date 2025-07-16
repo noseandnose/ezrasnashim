@@ -60,16 +60,29 @@ export default function Statistics() {
   );
 
   const modalTypeNames: Record<string, string> = {
+    // Main categories
     torah: "Torah",
-    tefilla: "Tefilla",
+    tefilla: "Tefilla", 
     tzedaka: "Tzedaka",
     "shabbat-table": "Shabbat Table",
     congratulations: "All Tasks Complete",
+    
+    // Prayer subcategories
     "morning-brochas": "Morning Brochas",
     mincha: "Mincha",
+    maariv: "Maariv",
     nishmas: "Nishmas",
+    "birkat-hamazon": "Birkat Hamazon",
     "tehillim-text": "Tehillim",
     "special-tehillim": "Special Tehillim",
+    
+    // Torah subcategories  
+    chizuk: "Chizuk",
+    emuna: "Emuna",
+    halacha: "Halacha",
+    "featured-content": "Featured Content",
+    
+    // Other
     donate: "Donations",
   };
 
@@ -103,21 +116,27 @@ export default function Statistics() {
                 color="text-blush"
               />
               <StatCard
-                title="Page Views"
-                value={todayLoading ? "..." : todayStats?.pageViews || 0}
-                icon={TrendingUp}
-                color="text-sage"
-              />
-              <StatCard
-                title="Tehillim Completed"
+                title="Tehillim Said"
                 value={todayLoading ? "..." : todayStats?.tehillimCompleted || 0}
                 icon={ScrollText}
                 color="text-peach"
               />
               <StatCard
-                title="Names Prayed For"
-                value={todayLoading ? "..." : todayStats?.namesProcessed || 0}
+                title="Prayers Said"
+                value={todayLoading ? "..." : (todayStats?.modalCompletions ? 
+                  Object.entries(todayStats.modalCompletions)
+                    .filter(([key]) => ['morning-brochas', 'mincha', 'maariv', 'nishmas', 'birkat-hamazon'].includes(key))
+                    .reduce((sum, [, count]) => sum + count, 0) : 0)}
                 icon={Heart}
+                color="text-sage"
+              />
+              <StatCard
+                title="Torah Learnt"
+                value={todayLoading ? "..." : (todayStats?.modalCompletions ? 
+                  Object.entries(todayStats.modalCompletions)
+                    .filter(([key]) => ['chizuk', 'emuna', 'halacha', 'featured-content'].includes(key))
+                    .reduce((sum, [, count]) => sum + count, 0) : 0)}
+                icon={BookOpen}
                 color="text-lavender"
               />
             </div>
@@ -128,27 +147,33 @@ export default function Statistics() {
             <h2 className="text-base font-serif font-bold text-black mb-3">All Time Totals</h2>
             <div className="grid grid-cols-2 gap-3">
               <StatCard
-                title="Total Users"
+                title="Active Users"
                 value={totalLoading ? "..." : totalStats?.totalUsers.toLocaleString() || 0}
                 icon={Users}
                 color="text-blush"
               />
               <StatCard
-                title="Total Page Views"
-                value={totalLoading ? "..." : totalStats?.totalPageViews.toLocaleString() || 0}
-                icon={TrendingUp}
-                color="text-sage"
-              />
-              <StatCard
-                title="Total Tehillim"
+                title="Tehillim Said"
                 value={totalLoading ? "..." : totalStats?.totalTehillimCompleted.toLocaleString() || 0}
                 icon={ScrollText}
                 color="text-peach"
               />
               <StatCard
-                title="Total Names"
-                value={totalLoading ? "..." : totalStats?.totalNamesProcessed.toLocaleString() || 0}
+                title="Prayers Said"
+                value={totalLoading ? "..." : (totalStats?.totalModalCompletions ? 
+                  Object.entries(totalStats.totalModalCompletions)
+                    .filter(([key]) => ['morning-brochas', 'mincha', 'maariv', 'nishmas', 'birkat-hamazon'].includes(key))
+                    .reduce((sum, [, count]) => sum + count, 0).toLocaleString() : 0)}
                 icon={Heart}
+                color="text-sage"
+              />
+              <StatCard
+                title="Torah Learnt"
+                value={totalLoading ? "..." : (totalStats?.totalModalCompletions ? 
+                  Object.entries(totalStats.totalModalCompletions)
+                    .filter(([key]) => ['chizuk', 'emuna', 'halacha', 'featured-content'].includes(key))
+                    .reduce((sum, [, count]) => sum + count, 0).toLocaleString() : 0)}
+                icon={BookOpen}
                 color="text-lavender"
               />
             </div>
@@ -163,11 +188,16 @@ export default function Statistics() {
               ) : (
                 <div className="space-y-2">
                   {Object.entries(totalStats?.totalModalCompletions || {})
+                    .filter(([modalType]) => 
+                      // Remove unknown, test, and other unwanted entries
+                      !['unknown', 'test', ''].includes(modalType.toLowerCase()) &&
+                      modalTypeNames[modalType] // Only show items we have names for
+                    )
                     .sort(([, a], [, b]) => b - a)
                     .map(([modalType, count]) => (
                       <div key={modalType} className="flex justify-between items-center py-1">
                         <span className="text-xs font-medium text-warm-gray">
-                          {modalTypeNames[modalType] || modalType}
+                          {modalTypeNames[modalType]}
                         </span>
                         <span className="text-xs font-bold text-black">{count.toLocaleString()}</span>
                       </div>
