@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { BarChart3, Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft } from "lucide-react";
+import { BarChart3, Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLocation } from "wouter";
 import BottomNavigation from "@/components/bottom-navigation";
@@ -82,6 +82,33 @@ export default function Statistics() {
     
     // Other
     donate: "Donations",
+  };
+
+  const modalTypeIcons: Record<string, any> = {
+    // Main categories
+    torah: BookOpen,
+    tefilla: Heart, 
+    tzedaka: HandCoins,
+    "shabbat-table": Sparkles,
+    congratulations: Star,
+    
+    // Prayer subcategories
+    "morning-brochas": Sun,
+    mincha: Clock,
+    maariv: Star,
+    nishmas: Heart,
+    "birkat-hamazon": Clock3,
+    "tehillim-text": ScrollText,
+    "special-tehillim": Star,
+    
+    // Torah subcategories  
+    chizuk: Heart,
+    emuna: Shield,
+    halacha: BookOpen,
+    "featured-content": Star,
+    
+    // Other
+    donate: HandCoins,
   };
 
   return (
@@ -220,14 +247,20 @@ export default function Statistics() {
                       modalTypeNames[modalType] // Only show items we have names for
                     )
                     .sort(([, a], [, b]) => b - a)
-                    .map(([modalType, count]) => (
-                      <div key={modalType} className="flex justify-between items-center py-1">
-                        <span className="text-xs font-medium text-warm-gray">
-                          {modalTypeNames[modalType]}
-                        </span>
-                        <span className="text-xs font-bold text-black">{count.toLocaleString()}</span>
-                      </div>
-                    ))}
+                    .map(([modalType, count]) => {
+                      const Icon = modalTypeIcons[modalType] || BookOpen;
+                      return (
+                        <div key={modalType} className="flex justify-between items-center py-1">
+                          <div className="flex items-center gap-2">
+                            <Icon className="h-4 w-4 text-blush" />
+                            <span className="text-xs font-medium text-warm-gray">
+                              {modalTypeNames[modalType]}
+                            </span>
+                          </div>
+                          <span className="text-xs font-bold text-black">{count.toLocaleString()}</span>
+                        </div>
+                      );
+                    })}
                 </div>
               )}
             </div>

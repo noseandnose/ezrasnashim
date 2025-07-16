@@ -265,6 +265,7 @@ Changelog:
 - July 16, 2025. Added transition effects to daily progress flower images: Implemented smooth transition animations when flower images change based on completion count, added scale, rotation, and opacity effects with sparkle animation during transitions, enhanced visual feedback when users complete tasks
 - July 16, 2025. Enlarged daily progress flower display: Increased flower image size to 120x120px and expanded Daily Progress Garden container to min-height 200px for more prominent visual display that fills the container width properly
 - July 16, 2025. Updated daily progress images with new beautiful flower progression: Replaced State 0-3 images with new watercolor botanical artwork showing progression from green branch (State 0) to single purple flower (State 1) to multiple colorful flowers (State 2) to full garden bouquet (State 3), enhanced alt text descriptions for better accessibility
+- July 16, 2025. Enhanced statistics page feature usage section with icons: Added appropriate icons next to each feature name in the feature usage section, mapped modal types to relevant Lucide icons (BookOpen for Torah, Heart for prayers, HandCoins for donations, etc.), improved visual clarity and user experience on analytics dashboard
 ```
 
 ## User Preferences
