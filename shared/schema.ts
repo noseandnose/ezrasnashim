@@ -140,9 +140,7 @@ export const nishmasText = pgTable("nishmas_text", {
   id: serial("id").primaryKey(),
   language: text("language").notNull(), // 'hebrew' or 'english'
   fullText: text("full_text").notNull(),
-  transliteration: text("transliteration"), // For Hebrew text
   source: text("source").default("Nishmas.net"),
-  version: text("version").default("1.0"), // For tracking text updates
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
