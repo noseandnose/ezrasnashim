@@ -483,7 +483,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     <>
       {/* Tehillim Text Modal */}
       <Dialog open={activeModal === 'tehillim-text'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] font-sans" aria-describedby="tehillim-description">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans" aria-describedby="tehillim-description">
           <div id="tehillim-description" className="sr-only">Psalms reading and community prayer participation</div>
           
           {/* Standardized Header */}
@@ -523,7 +523,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           </div>
 
           {/* Standardized Content Area */}
-          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
             <div
               className={`${showHebrew ? 'secular-one-bold text-right' : 'font-english'} leading-relaxed text-black`}
               style={{ fontSize: `${fontSize}px` }}
@@ -551,7 +551,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       </Dialog>
       {/* Mincha Modal */}
       <Dialog open={activeModal === 'mincha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] overflow-hidden font-sans" aria-describedby="mincha-description">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans" aria-describedby="mincha-description">
           <div id="mincha-description" className="sr-only">Afternoon prayer service and instructions</div>
           
           <StandardModalHeader 
@@ -562,7 +562,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             setFontSize={setFontSize}
           />
 
-          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
@@ -749,7 +749,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       </Dialog>
       {/* Nishmas Kol Chai Modal */}
       <Dialog open={activeModal === 'nishmas-campaign'} onOpenChange={() => closeModal()}>
-        <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[80vh] overflow-y-auto font-sans ${isAnimating ? 'prayer-ascending' : ''}`}>
+        <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans ${isAnimating ? 'prayer-ascending' : ''}`}>
           {/* Standardized Header */}
           <div className="flex items-center justify-center mb-3 relative pr-8">
             <div className="flex items-center gap-4">
@@ -787,7 +787,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           </div>
 
           {/* Standardized Content Area */}
-          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
             {nishmasLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
@@ -906,7 +906,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
       {/* Maariv Modal */}
       <Dialog open={activeModal === 'maariv'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] overflow-hidden font-sans" aria-describedby="maariv-description">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans" aria-describedby="maariv-description">
           <div id="maariv-description" className="sr-only">Evening prayer service and instructions</div>
           
           <StandardModalHeader 
@@ -917,7 +917,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             setFontSize={setFontSize}
           />
 
-          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
             {isMaarivLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>

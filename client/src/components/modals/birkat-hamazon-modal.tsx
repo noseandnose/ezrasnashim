@@ -134,13 +134,13 @@ export function BirkatHamazonModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent className="w-full max-w-md mx-auto bg-gradient-to-b from-sand to-ivory text-black border-2 border-black rounded-lg max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="w-full max-w-md mx-auto bg-gradient-to-b from-sand to-ivory text-black border-2 border-black rounded-lg max-h-[95vh] overflow-y-auto flex flex-col">
         <DialogHeader>
           <StandardModalHeader />
         </DialogHeader>
         
         {/* Expanded Prayer Content Area */}
-        <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
+        <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>

@@ -147,7 +147,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     <>
       {/* Halacha Modal */}
       <Dialog open={activeModal === 'halacha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] overflow-hidden font-sans" aria-describedby="halacha-description">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans" aria-describedby="halacha-description">
           <div id="halacha-description" className="sr-only">Daily Jewish law and practice content</div>
           
           <StandardModalHeader 
@@ -158,7 +158,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             setFontSize={setFontSize}
           />
           
-          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
             {halachaContent && (
               <div className="space-y-4" style={{ fontSize: `${fontSize}px` }}>
                 <div className="secular-one-bold text-right leading-relaxed text-black">
@@ -208,7 +208,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
       {/* Emuna Modal */}
       <Dialog open={activeModal === 'emuna'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] font-sans" aria-describedby="emuna-description">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans" aria-describedby="emuna-description">
           <div id="emuna-description" className="sr-only">Daily faith strengthening and spiritual trust content</div>
           
           {/* Simple Header for Audio Content */}
@@ -216,7 +216,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             <DialogTitle className="text-lg font-serif font-bold text-black">Daily Emuna</DialogTitle>
           </div>
           
-          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
             {emunaContent && emunaContent.audioUrl && (
               <div className="space-y-4">
                 {emunaContent.speaker && (
@@ -282,7 +282,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
       {/* Chizuk Modal */}
       <Dialog open={activeModal === 'chizuk'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] font-sans" aria-describedby="chizuk-description">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans" aria-describedby="chizuk-description">
           <div id="chizuk-description" className="sr-only">5-minute daily inspiration and spiritual strengthening content</div>
           
           {/* Simple Header for Audio Content */}
@@ -290,7 +290,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             <DialogTitle className="text-lg font-serif font-bold text-black">Daily Chizuk</DialogTitle>
           </div>
           
-          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
             {chizukContent && chizukContent.audioUrl && (
               <div className="space-y-4">
                 {chizukContent.speaker && (
@@ -342,7 +342,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
       {/* Featured Modal */}
       <Dialog open={activeModal === 'featured'} onOpenChange={() => closeModal()}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="featured-description">
+        <DialogContent className="max-h-[95vh] overflow-y-auto" aria-describedby="featured-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-semibold mb-2">Featured Topic</DialogTitle>
             {featuredContent && (
@@ -403,7 +403,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
       {/* Pirkei Avot Modal */}
       <Dialog open={activeModal === 'pirkei-avot'} onOpenChange={() => closeModal()}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="pirkei-avot-description">
+        <DialogContent className="max-h-[95vh] overflow-y-auto" aria-describedby="pirkei-avot-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg font-semibold mb-2">Pirkei Avot</DialogTitle>
             <DialogDescription className="text-sm text-gray-600">Ethics of the Fathers</DialogDescription>
