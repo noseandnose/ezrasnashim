@@ -109,11 +109,34 @@ async function initializeServer() {
       }
     });
   } else {
-    // In development, redirect to Vite dev server for client-side routing
+    // In development, handle client-side routing by sending message to access via frontend
     app.get('*', (req: Request, res: Response) => {
       if (!req.path.startsWith('/api')) {
-        // Redirect to Vite dev server with the path
-        res.redirect('http://localhost:5173' + req.path);
+        res.status(200).send(`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access via Frontend</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f5f5f5; }
+    .container { background: white; padding: 30px; border-radius: 10px; display: inline-block; }
+    .button { background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Ezras Nashim</h2>
+    <p>To access the app, please use the frontend development server:</p>
+    <a href="https://${req.get('host').replace(':5000', ':5173')}${req.path}" class="button">
+      Open App
+    </a>
+    <p><small>Route: ${req.path}</small></p>
+  </div>
+</body>
+</html>
+        `);
       }
     });
   }
