@@ -254,6 +254,7 @@ Changelog:
 - July 16, 2025. Standardized Parsha Vorts table schema: Updated parsha_vorts table to match other daily audio content structure, renamed week column to date, removed redundant fields (parsha, hebrew_parsha, source, summary), added speaker_website field, made speaker optional, achieved consistent audio-focused structure across all Torah content types
 - July 16, 2025. Updated weekly content to use date ranges: Modified Parsha Vorts and Table Inspiration tables to use fromDate and untilDate fields instead of single date field, supporting week-long content duration, updated storage functions to query within date ranges for proper weekly content retrieval
 - July 16, 2025. Changed Shabbat Recipes to Daily Recipes with date ranges: Renamed shabbat_recipes table to daily_recipes, updated schema to use fromDate and untilDate instead of week column, modified all related types, storage functions, and API routes, implemented date range queries where recipe is active between fromDate and untilDate (same date for daily recipes), changed API endpoints from week-based to date-based parameters
+- July 16, 2025. Cleaned up Table Inspirations schema: Removed redundant image_url_1 through image_url_5 columns from table_inspirations table, keeping only the media_url_1/media_type_1 through media_url_5/media_type_5 structure that supports images, videos, and audio content, eliminated duplicate fields from database schema evolution
 ```
 
 ## User Preferences
