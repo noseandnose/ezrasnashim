@@ -198,7 +198,7 @@ export default function Statistics() {
                   <span className="text-sm font-medium text-warm-gray">Complete Tehillim Books Ever</span>
                 </div>
                 <div className="text-3xl font-serif font-bold text-black">
-                  {totalLoading ? "..." : totalStats?.totalBooksCompleted.toLocaleString() || 0}
+                  {totalLoading ? "..." : (totalStats?.totalBooksCompleted?.toLocaleString() || "0")}
                 </div>
                 <p className="text-xs text-warm-gray mt-1">Full books of 150 perakim completed</p>
               </div>
