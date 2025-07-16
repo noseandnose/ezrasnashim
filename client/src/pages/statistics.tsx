@@ -12,6 +12,7 @@ interface DailyStats {
   tehillimCompleted: number;
   namesProcessed: number;
   booksCompleted: number;
+  totalActs: number;
   modalCompletions: Record<string, number>;
 }
 
@@ -21,6 +22,7 @@ interface TotalStats {
   totalTehillimCompleted: number;
   totalNamesProcessed: number;
   totalBooksCompleted: number;
+  totalActs: number;
   totalModalCompletions: Record<string, number>;
 }
 
@@ -135,25 +137,22 @@ export default function Statistics() {
             <h2 className="text-base font-serif font-bold text-black mb-3">Today's Activity</h2>
             <div className="grid grid-cols-2 gap-3">
               <StatCard
+                title="Total Acts"
+                value={todayLoading ? "..." : todayStats?.totalActs || 0}
+                icon={TrendingUp}
+                color="text-blush"
+              />
+              <StatCard
                 title="Active Users"
                 value={todayLoading ? "..." : todayStats?.uniqueUsers || 0}
                 icon={Users}
-                color="text-blush"
+                color="text-peach"
               />
               <StatCard
                 title="Tehillim Said"
                 value={todayLoading ? "..." : todayStats?.tehillimCompleted || 0}
                 icon={ScrollText}
-                color="text-peach"
-              />
-              <StatCard
-                title="Prayers Said"
-                value={todayLoading ? "..." : (todayStats?.modalCompletions ? 
-                  Object.entries(todayStats.modalCompletions)
-                    .filter(([key]) => ['morning-brochas', 'mincha', 'maariv', 'nishmas', 'birkat-hamazon'].includes(key))
-                    .reduce((sum, [, count]) => sum + count, 0) : 0)}
-                icon={Heart}
-                color="text-sage"
+                color="text-lavender"
               />
               <StatCard
                 title="Torah Learnt"
@@ -162,7 +161,7 @@ export default function Statistics() {
                     .filter(([key]) => ['chizuk', 'emuna', 'halacha', 'featured-content'].includes(key))
                     .reduce((sum, [, count]) => sum + count, 0) : 0)}
                 icon={BookOpen}
-                color="text-lavender"
+                color="text-sage"
               />
             </div>
             
@@ -186,25 +185,41 @@ export default function Statistics() {
             <h2 className="text-base font-serif font-bold text-black mb-3">All Time Totals</h2>
             <div className="grid grid-cols-2 gap-3">
               <StatCard
+                title="Total Acts"
+                value={totalLoading ? "..." : totalStats?.totalActs?.toLocaleString() || 0}
+                icon={TrendingUp}
+                color="text-blush"
+              />
+            </div>
+
+            {/* Million Acts Goal */}
+            <div className="mt-3">
+              <div className="bg-gradient-to-r from-gold/20 to-blush/20 rounded-2xl p-4 border border-gold/20">
+                <div className="flex items-center justify-between mb-2">
+                  <TrendingUp className="h-6 w-6 text-gold" />
+                  <span className="text-sm font-medium text-warm-gray">1 Million Acts Goal Progress</span>
+                </div>
+                <div className="text-3xl font-serif font-bold text-black">
+                  {totalLoading ? "..." : ((totalStats?.totalActs || 0) / 1000000 * 100).toFixed(2)}%
+                </div>
+                <p className="text-xs text-warm-gray mt-1">
+                  {totalLoading ? "..." : `${(totalStats?.totalActs || 0).toLocaleString()} / 1,000,000 acts completed`}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mt-3">
+              <StatCard
                 title="Active Users"
                 value={totalLoading ? "..." : totalStats?.totalUsers.toLocaleString() || 0}
                 icon={Users}
-                color="text-blush"
+                color="text-peach"
               />
               <StatCard
                 title="Tehillim Said"
                 value={totalLoading ? "..." : totalStats?.totalTehillimCompleted.toLocaleString() || 0}
                 icon={ScrollText}
-                color="text-peach"
-              />
-              <StatCard
-                title="Prayers Said"
-                value={totalLoading ? "..." : (totalStats?.totalModalCompletions ? 
-                  Object.entries(totalStats.totalModalCompletions)
-                    .filter(([key]) => ['morning-brochas', 'mincha', 'maariv', 'nishmas', 'birkat-hamazon'].includes(key))
-                    .reduce((sum, [, count]) => sum + count, 0).toLocaleString() : 0)}
-                icon={Heart}
-                color="text-sage"
+                color="text-lavender"
               />
               <StatCard
                 title="Torah Learnt"
@@ -213,7 +228,7 @@ export default function Statistics() {
                     .filter(([key]) => ['chizuk', 'emuna', 'halacha', 'featured-content'].includes(key))
                     .reduce((sum, [, count]) => sum + count, 0).toLocaleString() : 0)}
                 icon={BookOpen}
-                color="text-lavender"
+                color="text-sage"
               />
             </div>
             

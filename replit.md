@@ -266,6 +266,7 @@ Changelog:
 - July 16, 2025. Enlarged daily progress flower display: Increased flower image size to 120x120px and expanded Daily Progress Garden container to min-height 200px for more prominent visual display that fills the container width properly
 - July 16, 2025. Updated daily progress images with new beautiful flower progression: Replaced State 0-3 images with new watercolor botanical artwork showing progression from green branch (State 0) to single purple flower (State 1) to multiple colorful flowers (State 2) to full garden bouquet (State 3), enhanced alt text descriptions for better accessibility
 - July 16, 2025. Enhanced statistics page feature usage section with icons: Added appropriate icons next to each feature name in the feature usage section, mapped modal types to relevant Lucide icons (BookOpen for Torah, Heart for prayers, HandCoins for donations, etc.), improved visual clarity and user experience on analytics dashboard
+- July 16, 2025. Implemented comprehensive modal home redirection and acts tracking system: Added automatic home page redirection with progress scrolling to all modal close buttons (RefuahPrayersList, IndividualPrayerContent, SpecialTehillimModal, Jewish Date Converter), created totalActs database field to track Torah/Tefilla/Tzedaka completion goal of 1 million acts per month, updated statistics page to prominently display Total Acts with progress toward million-act goal, enhanced analytics to count all spiritual engagement actions across the three core sections
 ```
 
 ## User Preferences

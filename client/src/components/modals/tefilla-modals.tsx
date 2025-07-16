@@ -980,7 +980,11 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
         </div>
       ))}
       <Button 
-        onClick={() => closeModal()} 
+        onClick={() => {
+          closeModal();
+          // Navigate to home and scroll to progress
+          window.location.hash = '#/?section=home&scrollToProgress=true';
+        }} 
         className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
       >
         Close
@@ -1133,7 +1137,11 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
       </div>
 
       <Button 
-        onClick={() => closeModal()} 
+        onClick={() => {
+          closeModal();
+          // Navigate to home and scroll to progress
+          window.location.hash = '#/?section=home&scrollToProgress=true';
+        }} 
         className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
       >
         Close
@@ -1214,7 +1222,11 @@ function SpecialTehillimModal() {
       </div>
 
       <Button 
-        onClick={() => closeModal()} 
+        onClick={() => {
+          closeModal();
+          // Navigate to home and scroll to progress
+          window.location.hash = '#/?section=home&scrollToProgress=true';
+        }} 
         className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 mt-4"
       >
         Close
