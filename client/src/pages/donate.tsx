@@ -37,13 +37,16 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
 
     setIsProcessing(true);
 
-    const { error } = await stripe.confirmPayment({
+    console.log('Attempting to confirm payment...');
+    const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
         return_url: `${window.location.origin}/?donation=success`,
       },
       redirect: "if_required", // Stay on same page when possible
     });
+    
+    console.log('Payment confirmation result:', { error, paymentIntent });
 
     if (error) {
       toast({
@@ -84,17 +87,17 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         </div>
       </div>
 
-      {/* Browser compatibility notice for Apple Pay */}
+      {/* Apple Pay requires HTTPS and domain verification */}
       {(() => {
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const isHTTP = window.location.protocol === 'http:';
         
-        if (isIOS && !isSafari) {
+        if (isLocalhost || isHTTP) {
           return (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
-              <p className="text-sm text-amber-800">
-                <strong>Apple Pay Notice:</strong> To use Apple Pay, please open this page in Safari. 
-                Apple Pay is not available in Chrome or other browsers on iOS devices.
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+              <p className="text-sm text-blue-800">
+                <strong>Apple Pay Notice:</strong> Apple Pay requires HTTPS and domain verification. 
+                It will be available when the app is deployed to production.
               </p>
             </div>
           );
@@ -105,7 +108,7 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
       <PaymentElement 
         options={{
           layout: 'tabs',
-          paymentMethodOrder: ['apple_pay', 'google_pay', 'card'],
+          paymentMethodOrder: ['card', 'google_pay', 'apple_pay'],
           fields: {
             billingDetails: 'never'
           },
@@ -113,6 +116,12 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
             applePay: 'auto',
             googlePay: 'auto'
           }
+        }}
+        onReady={() => {
+          console.log('PaymentElement is ready');
+        }}
+        onError={(error) => {
+          console.error('PaymentElement error:', error);
         }}
       />
 

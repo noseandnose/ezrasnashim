@@ -1038,6 +1038,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid amount" });
       }
 
+      console.log('Creating payment intent with amount:', amount, 'type:', donationType);
+      
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100), // Convert to cents
         currency: "usd",
@@ -1049,6 +1051,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           dedication: metadata?.dedication || ""
         }
       });
+      
+      console.log('Payment intent created successfully:', paymentIntent.id);
 
       res.json({ 
         clientSecret: paymentIntent.client_secret,

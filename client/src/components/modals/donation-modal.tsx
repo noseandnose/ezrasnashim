@@ -83,16 +83,15 @@ export default function DonationModal() {
         </div>
         <p className="text-xs text-warm-gray/70 font-sans text-center mb-4">Support our community with your generous contribution</p>
         
-        {/* Browser compatibility notice for Apple Pay */}
+        {/* Apple Pay development notice */}
         {(() => {
-          const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
-          const isSafari = typeof navigator !== 'undefined' && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+          const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
           
-          if (isIOS && !isSafari) {
+          if (isLocalhost) {
             return (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
                 <p className="text-xs text-blue-800">
-                  💡 <strong>Tip:</strong> For Apple Pay, please open in Safari
+                  💡 <strong>Note:</strong> Apple Pay will be available in production (requires HTTPS)
                 </p>
               </div>
             );
