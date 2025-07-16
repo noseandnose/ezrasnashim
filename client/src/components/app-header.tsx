@@ -8,7 +8,7 @@ export default function AppHeader() {
   const { data: times, isLoading: timesLoading } = useJewishTimes();
   const { data: hebrewDate, isLoading: dateLoading } = useHebrewDate();
   const [, setLocation] = useLocation();
-  const { setActiveModal } = useModalStore();
+  const { openModal } = useModalStore();
 
   const getCurrentTime = () => {
     return new Date().toLocaleTimeString('en-US', { 
@@ -22,7 +22,7 @@ export default function AppHeader() {
     <header className="bg-gradient-soft p-3 border-0 shadow-none">
       <div className="flex items-center justify-between px-2">
         <button
-          onClick={() => setActiveModal('about')}
+          onClick={() => openModal('about')}
           className="p-2 rounded-full hover:bg-white/50 transition-colors"
           aria-label="About Ezras Nashim"
         >
