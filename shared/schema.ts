@@ -22,15 +22,12 @@ export const shabbatRecipes = pgTable("shabbat_recipes", {
 
 export const parshaVorts = pgTable("parsha_vorts", {
   id: serial("id").primaryKey(),
-  week: date("week").notNull(), // Start date of the week
-  parsha: text("parsha").notNull(), // Parsha name
-  hebrewParsha: text("hebrew_parsha").notNull(),
+  date: date("date").notNull(), // Week start date
   title: text("title").notNull(),
-  content: text("content"), // Written vort content
-  audioUrl: text("audio_url").notNull(), // Audio is primary
-  speaker: text("speaker").notNull(),
-  source: text("source"), // Sefer/reference
-  summary: text("summary"), // Brief description
+  content: text("content"),
+  audioUrl: text("audio_url").notNull(),
+  speaker: text("speaker"),
+  speakerWebsite: text("speaker_website"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

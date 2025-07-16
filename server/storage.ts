@@ -597,7 +597,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getParshaVortByWeek(week: string): Promise<ParshaVort | undefined> {
-    const [vort] = await db.select().from(parshaVorts).where(eq(parshaVorts.week, week));
+    const [vort] = await db.select().from(parshaVorts).where(eq(parshaVorts.date, week));
     return vort || undefined;
   }
 
