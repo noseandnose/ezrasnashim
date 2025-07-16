@@ -19,7 +19,7 @@ import {
   insertDailyEmunaSchema,
   insertDailyChizukSchema,
   insertFeaturedContentSchema,
-  insertShabbatRecipeSchema,
+  insertDailyRecipeSchema,
   insertParshaVortSchema,
   insertTableInspirationSchema,
   insertNishmasTextSchema
@@ -654,39 +654,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Weekly Torah content routes
-  app.get("/api/table/recipe/:week", async (req, res) => {
+  // Daily recipe routes
+  app.get("/api/table/recipe/:date", async (req, res) => {
     try {
-      const { week } = req.params;
-      const recipe = await storage.getShabbatRecipeByWeek(week);
+      const { date } = req.params;
+      const recipe = await storage.getDailyRecipeByDate(date);
       res.json(recipe || null);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch Shabbat recipe" });
+      res.status(500).json({ message: "Failed to fetch daily recipe" });
     }
   });
 
   app.get("/api/table/recipe", async (req, res) => {
     try {
-      // Get current week
-      const date = new Date();
-      const year = date.getFullYear();
-      const week = Math.ceil(((date.getTime() - new Date(year, 0, 1).getTime()) / 86400000 + new Date(year, 0, 1).getDay() + 1) / 7);
-      const weekKey = `${year}-W${week}`;
+      // Get current date
+      const today = new Date().toISOString().split('T')[0];
       
-      const recipe = await storage.getShabbatRecipeByWeek(weekKey);
+      const recipe = await storage.getDailyRecipeByDate(today);
       res.json(recipe || null);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch Shabbat recipe" });
+      res.status(500).json({ message: "Failed to fetch daily recipe" });
     }
   });
 
   app.post("/api/table/recipe", async (req, res) => {
     try {
-      const validatedData = insertShabbatRecipeSchema.parse(req.body);
-      const recipe = await storage.createShabbatRecipe(validatedData);
+      const validatedData = insertDailyRecipeSchema.parse(req.body);
+      const recipe = await storage.createDailyRecipe(validatedData);
       res.json(recipe);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create Shabbat recipe" });
+      res.status(500).json({ message: "Failed to create daily recipe" });
     }
   });
 

@@ -3,9 +3,10 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Weekly Torah content tables
-export const shabbatRecipes = pgTable("shabbat_recipes", {
+export const dailyRecipes = pgTable("daily_recipes", {
   id: serial("id").primaryKey(),
-  week: date("week").notNull(), // Start date of the week
+  fromDate: date("from_date").notNull(), // Start date for recipe availability
+  untilDate: date("until_date").notNull(), // End date for recipe availability (same as fromDate if daily)
   hebrewDate: text("hebrew_date").notNull(),
   title: text("title").notNull(),
   description: text("description"),
@@ -360,7 +361,7 @@ export const insertDailyStatsSchema = createInsertSchema(dailyStats).omit({
 });
 
 // Weekly Torah content schemas
-export const insertShabbatRecipeSchema = createInsertSchema(shabbatRecipes).omit({
+export const insertDailyRecipeSchema = createInsertSchema(dailyRecipes).omit({
   id: true,
   createdAt: true,
 });
@@ -431,8 +432,8 @@ export type FeaturedContent = typeof featuredContent.$inferSelect;
 export type InsertFeaturedContent = z.infer<typeof insertFeaturedContentSchema>;
 
 // Weekly Torah content types
-export type ShabbatRecipe = typeof shabbatRecipes.$inferSelect;
-export type InsertShabbatRecipe = z.infer<typeof insertShabbatRecipeSchema>;
+export type DailyRecipe = typeof dailyRecipes.$inferSelect;
+export type InsertDailyRecipe = z.infer<typeof insertDailyRecipeSchema>;
 export type ParshaVort = typeof parshaVorts.$inferSelect;
 export type InsertParshaVort = z.infer<typeof insertParshaVortSchema>;
 export type TableInspiration = typeof tableInspirations.$inferSelect;

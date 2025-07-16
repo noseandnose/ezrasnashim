@@ -3,7 +3,7 @@ import {
   calendarEvents, shopItems, 
   tehillimNames, globalTehillimProgress, minchaPrayers, maarivPrayers, birkatHamazonPrayers, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
-  shabbatRecipes, parshaVorts, tableInspirations, campaigns, womensPrayers, discountPromotions, pirkeiAvotProgress,
+  dailyRecipes, parshaVorts, tableInspirations, campaigns, womensPrayers, discountPromotions, pirkeiAvotProgress,
   analyticsEvents, dailyStats,
 
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
@@ -15,7 +15,7 @@ import {
   type DailyEmuna, type InsertDailyEmuna,
   type DailyChizuk, type InsertDailyChizuk,
   type FeaturedContent, type InsertFeaturedContent,
-  type ShabbatRecipe, type InsertShabbatRecipe,
+  type DailyRecipe, type InsertDailyRecipe,
   type ParshaVort, type InsertParshaVort,
   type TableInspiration, type InsertTableInspiration,
   type Campaign, type InsertCampaign,
@@ -51,9 +51,9 @@ export interface IStorage {
   getPirkeiAvotByDate(date: string): Promise<any | undefined>;
   createPirkeiAvot(pirkeiAvot: any): Promise<any>;
 
-  // Weekly Torah content methods
-  getShabbatRecipeByWeek(week: string): Promise<ShabbatRecipe | undefined>;
-  createShabbatRecipe(recipe: InsertShabbatRecipe): Promise<ShabbatRecipe>;
+  // Daily recipe methods
+  getDailyRecipeByDate(date: string): Promise<DailyRecipe | undefined>;
+  createDailyRecipe(recipe: InsertDailyRecipe): Promise<DailyRecipe>;
   
   getParshaVortByWeek(week: string): Promise<ParshaVort | undefined>;
   createParshaVort(vort: InsertParshaVort): Promise<ParshaVort>;
@@ -585,14 +585,24 @@ export class DatabaseStorage implements IStorage {
     return pirkeiAvot;
   }
 
-  // Weekly Torah content methods
-  async getShabbatRecipeByWeek(week: string): Promise<ShabbatRecipe | undefined> {
-    const [recipe] = await db.select().from(shabbatRecipes).where(eq(shabbatRecipes.week, week));
-    return recipe || undefined;
+  // Daily recipe methods
+  async getDailyRecipeByDate(date: string): Promise<DailyRecipe | undefined> {
+    // Find recipe where the given date falls within the date range
+    const [recipe] = await db
+      .select()
+      .from(dailyRecipes)
+      .where(
+        and(
+          lte(dailyRecipes.fromDate, date),
+          gte(dailyRecipes.untilDate, date)
+        )
+      )
+      .limit(1);
+    return recipe;
   }
 
-  async createShabbatRecipe(insertRecipe: InsertShabbatRecipe): Promise<ShabbatRecipe> {
-    const [recipe] = await db.insert(shabbatRecipes).values(insertRecipe).returning();
+  async createDailyRecipe(insertRecipe: InsertDailyRecipe): Promise<DailyRecipe> {
+    const [recipe] = await db.insert(dailyRecipes).values(insertRecipe).returning();
     return recipe;
   }
 
