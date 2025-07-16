@@ -1,9 +1,9 @@
 import { useDailyCompletionStore } from "@/lib/types";
 import { useState, useEffect } from "react";
-import state0Image from '@assets/State 0_1752569595325.png';
-import state1Image from '@assets/State 1_1752569595325.png';
-import state2Image from '@assets/State 2_1752569595325.png';
-import state3Image from '@assets/State 3_1752569595324.png';
+import state0Image from '@assets/State 0_1752685387597.png';
+import state1Image from '@assets/State 1_1752685387597.png';
+import state2Image from '@assets/State 2_1752685387596.png';
+import state3Image from '@assets/State 4_1752685387593.png';
 
 interface DailyProgressProps {
   size?: number;
@@ -37,25 +37,25 @@ export default function DailyProgress({ size = 36 }: DailyProgressProps) {
         return {
           src: state0Image,
           scale: 1.8,
-          alt: "No completions"
+          alt: "Growing branch - Start your spiritual journey"
         };
       case 1:
         return {
           src: state1Image,
           scale: 1.8,
-          alt: "One completion"
+          alt: "Beautiful flower blooms - One completion"
         };
       case 2:
         return {
           src: state2Image,
           scale: 1.8,
-          alt: "Two completions"
+          alt: "Multiple flowers - Two completions"
         };
       case 3:
         return {
           src: state3Image,
           scale: 1.8,
-          alt: "All three completions!"
+          alt: "Full garden bouquet - All completions!"
         };
       default:
         return {
