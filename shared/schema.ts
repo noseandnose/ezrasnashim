@@ -211,7 +211,6 @@ export const dailyEmuna = pgTable("daily_emuna", {
   source: text("source"),
   audioUrl: text("audio_url"),
   speaker: text("speaker"),
-  speakerName: text("speaker_name"),
   speakerWebsite: text("speaker_website"),
   createdAt: timestamp("created_at").defaultNow(),
 });
