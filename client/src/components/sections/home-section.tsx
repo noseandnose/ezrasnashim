@@ -154,55 +154,59 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         </div>
       </div>
       {/* Main Action Buttons */}
-      <div className="p-2 space-y-1">
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            onClick={() => navigateToSection('torah')}
-            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white relative h-28"
-          >
-            <div className="absolute top-2 left-2">
-              <HeartProgress completed={torahCompleted} size={18} />
-            </div>
-            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${torahCompleted ? 'bg-sage' : 'bg-gradient-feminine'}`}>
-              <BookOpen className="text-white" size={18} strokeWidth={1.5} />
-            </div>
-            <h3 className="font-serif text-xs text-black mb-1 font-bold">Daily Torah</h3>
-            <p className="font-sans text-xs text-black/60 leading-relaxed">Halacha, Emuna & Chizuk</p>
-          </button>
-
-          <button
-            onClick={() => navigateToSection('tefilla')}
-            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white relative h-28"
-          >
-            <div className="absolute top-2 left-2">
-              <HeartProgress completed={tefillaCompleted} size={18} />
-            </div>
-            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${tefillaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-blush to-lavender'}`}>
-              <Heart className="text-white" size={18} strokeWidth={1.5} />
-            </div>
-            <h3 className="font-serif text-xs text-black mb-1 font-bold">Daily Tefilla</h3>
-            <p className="font-sans text-xs text-black/60 leading-relaxed">Tehillim & Prayers</p>
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            onClick={() => navigateToSection('tzedaka')}
-            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white relative h-28"
-          >
-            <div className="absolute top-2 left-2">
-              <HeartProgress completed={tzedakaCompleted} size={18} />
-            </div>
-            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${tzedakaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-muted-lavender to-rose-blush'}`}>
-              <Coins className="text-white" size={18} strokeWidth={1.5} />
-            </div>
-            <h3 className="font-serif text-xs text-black mb-1 font-bold">Daily Tzedaka</h3>
-            <p className="font-sans text-xs text-black/60 leading-relaxed">Support Causes</p>
-          </button>
-
-          <div className="rounded-3xl p-3 text-center shadow-lg border border-blush/10 bg-white flex items-center justify-center h-28">
-            <DailyProgress />
+      <div className="p-2 space-y-2">
+        {/* Daily Torah Bar */}
+        <button
+          onClick={() => navigateToSection('torah')}
+          className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
+        >
+          <div className={`p-3 rounded-full ${torahCompleted ? 'bg-sage' : 'bg-gradient-feminine'}`}>
+            <BookOpen className="text-white" size={20} strokeWidth={1.5} />
           </div>
+          <div className="flex-grow">
+            <h3 className="font-serif text-sm text-black font-bold">Daily Torah</h3>
+            <p className="font-sans text-xs text-black/60">Halacha, Emuna & Chizuk</p>
+          </div>
+          <HeartProgress completed={torahCompleted} size={20} />
+        </button>
+
+        {/* Daily Tefilla Bar */}
+        <button
+          onClick={() => navigateToSection('tefilla')}
+          className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
+        >
+          <div className={`p-3 rounded-full ${tefillaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-blush to-lavender'}`}>
+            <Heart className="text-white" size={20} strokeWidth={1.5} />
+          </div>
+          <div className="flex-grow">
+            <h3 className="font-serif text-sm text-black font-bold">Daily Tefilla</h3>
+            <p className="font-sans text-xs text-black/60">Tehillim & Prayers</p>
+          </div>
+          <HeartProgress completed={tefillaCompleted} size={20} />
+        </button>
+
+        {/* Daily Tzedaka Bar */}
+        <button
+          onClick={() => navigateToSection('tzedaka')}
+          className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
+        >
+          <div className={`p-3 rounded-full ${tzedakaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-muted-lavender to-rose-blush'}`}>
+            <Coins className="text-white" size={20} strokeWidth={1.5} />
+          </div>
+          <div className="flex-grow">
+            <h3 className="font-serif text-sm text-black font-bold">Daily Tzedaka</h3>
+            <p className="font-sans text-xs text-black/60">Support Causes</p>
+          </div>
+          <HeartProgress completed={tzedakaCompleted} size={20} />
+        </button>
+
+        {/* Daily Progress Tracker - Big Button */}
+        <div className="rounded-2xl p-6 shadow-lg border border-blush/10 bg-white flex flex-col items-center justify-center min-h-[120px] mt-4">
+          <h3 className="font-serif text-lg text-black font-bold mb-3">Daily Progress</h3>
+          <DailyProgress />
+          <p className="font-sans text-xs text-black/60 text-center mt-3 leading-relaxed">
+            Complete all three sections to see your daily progress bloom
+          </p>
         </div>
       </div>
     </div>
