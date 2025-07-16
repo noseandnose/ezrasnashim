@@ -1,6 +1,6 @@
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate } from "@/hooks/use-hebrew-date";
-import { BarChart3, Flower } from "lucide-react";
+import { BarChart3, Info } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
 
@@ -26,7 +26,7 @@ export default function AppHeader() {
           className="p-2 rounded-full hover:bg-white/50 transition-colors"
           aria-label="About Ezras Nashim"
         >
-          <Flower className="h-5 w-5 text-blush" />
+          <Info className="h-5 w-5 text-blush" />
         </button>
         <h1 className="font-serif text-xl font-semibold text-black tracking-wide">Ezras Nashim</h1>
         <button
