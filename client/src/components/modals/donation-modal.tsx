@@ -82,6 +82,23 @@ export default function DonationModal() {
           <DialogTitle className="text-lg font-serif font-bold text-black">Support Causes</DialogTitle>
         </div>
         <p className="text-xs text-warm-gray/70 font-sans text-center mb-4">Support our community with your generous contribution</p>
+        
+        {/* Browser compatibility notice for Apple Pay */}
+        {(() => {
+          const isIOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
+          const isSafari = typeof navigator !== 'undefined' && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+          
+          if (isIOS && !isSafari) {
+            return (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                <p className="text-xs text-blue-800">
+                  💡 <strong>Tip:</strong> For Apple Pay, please open in Safari
+                </p>
+              </div>
+            );
+          }
+          return null;
+        })()}
 
         <div className="space-y-3 text-sm text-gray-700">
           {/* Quick Amount Buttons */}

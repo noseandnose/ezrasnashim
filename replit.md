@@ -257,6 +257,7 @@ Changelog:
 - July 16, 2025. Cleaned up Table Inspirations schema: Removed redundant image_url_1 through image_url_5 columns from table_inspirations table, keeping only the media_url_1/media_type_1 through media_url_5/media_type_5 structure that supports images, videos, and audio content, eliminated duplicate fields from database schema evolution
 - July 16, 2025. Removed transliteration column from Women's Prayers: Cleaned up womens_prayers table by removing unnecessary transliteration column, updated schema definition to match, streamlined table structure to essential fields (category, prayer_name, hebrew_text, english_translation, description)
 - July 16, 2025. Comprehensive TypeScript audit and fixes: Fixed all TypeScript compilation errors including missing transliteration field references in Tefilla modals, missing targetLocation field in discount promotions schema, private cache property access in cache cleanup, null check issues in server storage and index files, updated all frontend components to use new date-based API endpoints instead of week-based endpoints, removed obsolete getWeekKey functions, ensured type safety across entire codebase
+- July 16, 2025. Fixed Apple Pay browser compatibility issue: Identified that Apple Pay only works in Safari on iOS devices, not Chrome or other browsers (Apple restriction), added browser detection and user messaging in donation modal and payment page to inform iPhone users to use Safari for Apple Pay, improved payment experience with clear guidance for mobile users
 ```
 
 ## User Preferences

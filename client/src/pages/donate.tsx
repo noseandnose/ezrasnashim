@@ -84,6 +84,24 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         </div>
       </div>
 
+      {/* Browser compatibility notice for Apple Pay */}
+      {(() => {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+        
+        if (isIOS && !isSafari) {
+          return (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+              <p className="text-sm text-amber-800">
+                <strong>Apple Pay Notice:</strong> To use Apple Pay, please open this page in Safari. 
+                Apple Pay is not available in Chrome or other browsers on iOS devices.
+              </p>
+            </div>
+          );
+        }
+        return null;
+      })()}
+
       <PaymentElement 
         options={{
           layout: 'tabs',
