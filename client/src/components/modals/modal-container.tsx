@@ -6,6 +6,7 @@ import TzedakaModals from "./tzedaka-modals";
 import ShopModals from "./shop-modals";
 import DonationModal from "./donation-modal";
 import CongratulationsModal from "./congratulations-modal";
+import AboutModal from "./about-modal";
 
 interface ModalContainerProps {
   onSectionChange?: (section: any) => void;
@@ -22,6 +23,7 @@ export default function ModalContainer({ onSectionChange }: ModalContainerProps)
       <ShopModals />
       <DonationModal />
       <CongratulationsModal />
+      <AboutModal />
     </>
   );
 }
