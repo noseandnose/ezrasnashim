@@ -260,6 +260,7 @@ Changelog:
 - July 16, 2025. Fixed Apple Pay browser compatibility issue: Identified that Apple Pay only works in Safari on iOS devices, not Chrome or other browsers (Apple restriction), added browser detection and user messaging in donation modal and payment page to inform iPhone users to use Safari for Apple Pay, improved payment experience with clear guidance for mobile users
 - July 16, 2025. Resolved Apple Pay development environment issue: Determined that Apple Pay requires HTTPS and domain verification in Stripe, cannot work on localhost or HTTP environments for security reasons, added proper development notices explaining Apple Pay will be available in production, verified Stripe payment system works correctly with successful payment intent creation, prioritized card payments first in development environment
 - July 16, 2025. Renamed Table Inspiration to Creative Jewish Living: Updated section title from "Table Inspiration" to "Creative Jewish Living" throughout frontend components while maintaining content-based subtitles from database, improved branding consistency for Jewish lifestyle content
+- July 16, 2025. Enhanced video playback functionality: Fixed video display issues in Creative Jewish Living section by adding comprehensive error handling, loading states, browser compatibility detection for .mov files, fallback media proxy for QuickTime videos, proper MIME type detection, and user-friendly error recovery with "open in new tab" option, ensuring reliable video playback across all browsers and devices
 ```
 
 ## User Preferences

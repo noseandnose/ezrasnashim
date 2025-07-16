@@ -134,16 +134,77 @@ export default function TableModals() {
                         </div>
                       );
                     case 'video':
-                      return (
-                        <video 
-                          src={currentMedia.url} 
-                          controls
-                          className="w-full h-full object-cover"
-                          preload="metadata"
-                        >
-                          Your browser does not support the video tag.
-                        </video>
-                      );
+                      const VideoPlayer = () => {
+                        const [videoError, setVideoError] = useState(false);
+                        const [isLoading, setIsLoading] = useState(true);
+                        
+                        const handleVideoError = (e: any) => {
+                          console.error('Video failed to load:', currentMedia.url, e);
+                          setVideoError(true);
+                          setIsLoading(false);
+                        };
+                        
+                        const handleCanPlay = () => {
+                          console.log('Video can play:', currentMedia.url);
+                          setIsLoading(false);
+                        };
+                        
+                        const getVideoType = (url: string) => {
+                          if (url.includes('.mp4')) return 'video/mp4';
+                          if (url.includes('.mov')) return 'video/quicktime';
+                          if (url.includes('.webm')) return 'video/webm';
+                          return 'video/mp4'; // default
+                        };
+                        
+                        // Try direct URL first, fallback to proxy for .mov files
+                        const videoUrl = currentMedia.url.includes('.mov') ? 
+                          `/api/media-proxy/cloudinary/${currentMedia.url.split('/').slice(4).join('/')}` : 
+                          currentMedia.url;
+                        
+                        return (
+                          <div className="w-full h-full relative">
+                            {isLoading && !videoError && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                                <div className="animate-spin w-8 h-8 border-4 border-blush border-t-transparent rounded-full"></div>
+                              </div>
+                            )}
+                            
+                            {videoError ? (
+                              <div className="w-full h-full bg-gray-100 flex flex-col items-center justify-center">
+                                <div className="text-gray-500 text-center">
+                                  <p className="mb-2">Video unavailable</p>
+                                  <button 
+                                    onClick={() => window.open(currentMedia.url, '_blank')}
+                                    className="text-blush underline text-sm"
+                                  >
+                                    Open in new tab
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <video 
+                                src={videoUrl}
+                                controls
+                                className="w-full h-full object-cover"
+                                preload="metadata"
+                                onError={handleVideoError}
+                                onLoadStart={() => console.log('Video loading:', videoUrl)}
+                                onCanPlay={handleCanPlay}
+                                crossOrigin="anonymous"
+                                playsInline
+                              >
+                                <source src={currentMedia.url} type={getVideoType(currentMedia.url)} />
+                                {currentMedia.url.includes('.mov') && (
+                                  <source src={videoUrl} type="video/mp4" />
+                                )}
+                                Your browser does not support the video tag.
+                              </video>
+                            )}
+                          </div>
+                        );
+                      };
+                      
+                      return <VideoPlayer />;
                     default:
                       return null;
                   }
