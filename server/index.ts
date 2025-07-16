@@ -108,6 +108,14 @@ async function initializeServer() {
         res.sendFile(path.join(publicPath, 'index.html'));
       }
     });
+  } else {
+    // In development, redirect to Vite dev server for client-side routing
+    app.get('*', (req: Request, res: Response) => {
+      if (!req.path.startsWith('/api')) {
+        // Redirect to Vite dev server with the path
+        res.redirect('http://localhost:5173' + req.path);
+      }
+    });
   }
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
