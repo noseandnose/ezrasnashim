@@ -192,15 +192,15 @@ export const discountPromotions = pgTable("discount_promotions", {
 // Daily Torah content tables
 export const dailyHalacha = pgTable("daily_halacha", {
   id: serial("id").primaryKey(),
-  date: date("date").notNull().unique(), // The date for this content
+  date: date("date").notNull().unique(),
   title: text("title").notNull(),
-  content: text("content").notNull(),
-  source: text("source"), // Rabbi or book source
-  audioUrl: text("audio_url"), // Optional audio content
+  content: text("content"),
+  source: text("source"),
+  audioUrl: text("audio_url").notNull(), // Primary audio content
   speaker: text("speaker"),
   speakerName: text("speaker_name"),
   speakerWebsite: text("speaker_website"),
-  duration: text("duration"), // Audio duration
+  duration: text("duration"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -232,11 +232,13 @@ export const featuredContent = pgTable("featured_content", {
   id: serial("id").primaryKey(),
   date: date("date").notNull().unique(),
   title: text("title").notNull(),
-  content: text("content").notNull(),
-  halachicSource: text("halachic_source"),
-  practicalTip: text("practical_tip"),
+  content: text("content"),
+  source: text("source"),
+  audioUrl: text("audio_url").notNull(), // Primary audio content
+  speaker: text("speaker"),
   speakerName: text("speaker_name"),
   speakerWebsite: text("speaker_website"),
+  duration: text("duration"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
