@@ -1,4 +1,5 @@
 import { useDailyCompletionStore } from "@/lib/types";
+import { useState, useEffect } from "react";
 import state0Image from '@assets/State 0_1752569595325.png';
 import state1Image from '@assets/State 1_1752569595325.png';
 import state2Image from '@assets/State 2_1752569595325.png';
@@ -10,9 +11,24 @@ interface DailyProgressProps {
 
 export default function DailyProgress({ size = 36 }: DailyProgressProps) {
   const { torahCompleted, tefillaCompleted, tzedakaCompleted } = useDailyCompletionStore();
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [previousCount, setPreviousCount] = useState(0);
   
   // Count completed sections
   const completedCount = [torahCompleted, tefillaCompleted, tzedakaCompleted].filter(Boolean).length;
+  
+  // Trigger transition effect when completion count changes
+  useEffect(() => {
+    if (completedCount !== previousCount) {
+      setIsTransitioning(true);
+      const timer = setTimeout(() => {
+        setIsTransitioning(false);
+        setPreviousCount(completedCount);
+      }, 300); // Transition duration
+      
+      return () => clearTimeout(timer);
+    }
+  }, [completedCount, previousCount]);
   
   // Map completion count to the appropriate image using imported static assets
   const getProgressImage = () => {
@@ -53,11 +69,15 @@ export default function DailyProgress({ size = 36 }: DailyProgressProps) {
   const progressImage = getProgressImage();
 
   return (
-    <div className="flex items-center justify-center w-full h-full">
+    <div className="flex items-center justify-center w-full h-full relative">
       <img
         src={progressImage.src}
         alt={progressImage.alt}
-        className="object-contain"
+        className={`object-contain transition-all duration-300 ease-in-out ${
+          isTransitioning 
+            ? 'scale-110 opacity-80 transform rotate-2' 
+            : 'scale-100 opacity-100 transform rotate-0'
+        }`}
         style={{
           width: `${70 * progressImage.scale}px`,
           height: `${70 * progressImage.scale}px`,
@@ -65,6 +85,14 @@ export default function DailyProgress({ size = 36 }: DailyProgressProps) {
           maxHeight: '100px'
         }}
       />
+      
+      {/* Sparkle effect during transition */}
+      {isTransitioning && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blush/20"></div>
+          <div className="animate-pulse absolute inline-flex h-3/4 w-3/4 rounded-full bg-lavender/30"></div>
+        </div>
+      )}
     </div>
   );
 }
