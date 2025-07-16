@@ -170,7 +170,6 @@ export const womensPrayers = pgTable("womens_prayers", {
   prayerName: text("prayer_name").notNull(),
   hebrewText: text("hebrew_text"),
   englishTranslation: text("english_translation"),
-  transliteration: text("transliteration"),
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow(),
 });
