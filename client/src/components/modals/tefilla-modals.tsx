@@ -175,7 +175,7 @@ function MorningBrochasModal() {
             </div>
           ) : (
             <div className="space-y-6" style={{ fontSize: `${fontSize}px` }}>
-              {morningBlessings?.map((blessing: any, index: number) => (
+              {morningBlessings?.map((blessing: {hebrew: string; english: string; ref: string}, index: number) => (
                 <div key={index} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
                   {blessing.hebrew && showHebrew && (
                     <div className="secular-one-bold text-right leading-relaxed text-black">

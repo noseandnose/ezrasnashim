@@ -11,12 +11,16 @@ const serverAxiosClient = axios.create({
 // Request interceptor for logging
 serverAxiosClient.interceptors.request.use(
   (config) => {
-    const url = config.baseURL ? `${config.baseURL}${config.url}` : config.url;
-    console.log(`[Server API Request] ${config.method?.toUpperCase()} ${url}`);
+    if (process.env.NODE_ENV === 'development') {
+      const url = config.baseURL ? `${config.baseURL}${config.url}` : config.url;
+      console.log(`[Server API Request] ${config.method?.toUpperCase()} ${url}`);
+    }
     return config;
   },
   (error) => {
-    console.error('[Server API Request Error]', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('[Server API Request Error]', error);
+    }
     return Promise.reject(error);
   }
 );
@@ -24,15 +28,19 @@ serverAxiosClient.interceptors.request.use(
 // Response interceptor for logging
 serverAxiosClient.interceptors.response.use(
   (response: AxiosResponse) => {
-    console.log(`[Server API Response] ${response.status} ${response.config.method?.toUpperCase()} ${response.config.url}`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[Server API Response] ${response.status} ${response.config.method?.toUpperCase()} ${response.config.url}`);
+    }
     return response;
   },
   (error: AxiosError) => {
-    const url = error.config?.url;
-    const method = error.config?.method?.toUpperCase();
-    
-    console.error(`[Server API Error] ${error.response?.status || 'Unknown'} ${method} ${url}`);
-    console.error('Server API Error details:', error.message);
+    if (process.env.NODE_ENV === 'development') {
+      const url = error.config?.url;
+      const method = error.config?.method?.toUpperCase();
+      
+      console.error(`[Server API Error] ${error.response?.status || 'Unknown'} ${method} ${url}`);
+      console.error('Server API Error details:', error.message);
+    }
     
     return Promise.reject(error);
   }

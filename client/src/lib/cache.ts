@@ -59,8 +59,8 @@ class MemoryCache<T> {
 // Specialized caches for different content types
 export const tehillimCache = new MemoryCache<{ text: string; perek: number; language: string }>(30);
 export const pirkeiAvotCache = new MemoryCache<{ text: string; chapter: number; source: string }>(10);
-export const torahContentCache = new MemoryCache<any>(20);
-export const zmanimCache = new MemoryCache<any>(5);
+export const torahContentCache = new MemoryCache<unknown>(20);
+export const zmanimCache = new MemoryCache<Record<string, unknown>>(5);
 
 // Cache key generators
 export const getCacheKey = {
@@ -109,7 +109,7 @@ export async function preloadCriticalData(): Promise<void> {
 export function cleanupCache(): void {
   [tehillimCache, pirkeiAvotCache, torahContentCache, zmanimCache].forEach(cache => {
     // Force check all entries to remove expired ones
-    const keys = Array.from((cache as any).cache.keys());
+    const keys = Array.from((cache as MemoryCache<unknown>).cache.keys());
     keys.forEach(key => cache.get(key)); // This will remove expired entries
   });
 }

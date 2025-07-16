@@ -34,7 +34,7 @@ export function useHebrewDate() {
         setHebrewDate(hebrewDateStr);
         
         return hebrewDateStr;
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error fetching Hebrew date:', error);
         return hebrewDate; // Return stored value if fetch fails
       }
@@ -98,7 +98,7 @@ export function useHebrewDateWithShkia(shkiaTime?: string) {
         
         const data = await response.json();
         return data.hebrew || '';
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error fetching Hebrew date:', error);
         return '';
       }

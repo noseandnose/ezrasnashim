@@ -26,7 +26,7 @@ import {
   type DailyStats, type InsertDailyStats
 } from "../shared/schema";
 import { db, pool } from "./db";
-import { eq, gt, lt, and } from "drizzle-orm";
+import { eq, gt, lt, gte, lte, and } from "drizzle-orm";
 import { cleanHebrewText, memoize, withRetry, formatDate } from './typeHelpers';
 
 export interface IStorage {

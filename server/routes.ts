@@ -41,12 +41,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.sendFile(mediaPath, (err) => {
         if (err) {
-          console.error('Error serving media file:', err);
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Error serving media file:', err);
+          }
           res.status(404).json({ error: 'Media file not found' });
         }
       });
     } catch (error) {
-      console.error('Media route error:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Media route error:', error);
+      }
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -111,7 +115,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           return timeStr;
         } catch (error) {
-          console.error('Time formatting error:', error, 'for time:', timeStr);
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Time formatting error:', error, 'for time:', timeStr);
+          }
           return timeStr;
         }
       };
@@ -224,9 +230,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   englishText = cleanText(englishVersion.text);
                 }
               }
-              console.log('Found English text:', englishText.substring(0, 50) + '...');
+              if (process.env.NODE_ENV === 'development') {
+                console.log('Found English text:', englishText.substring(0, 50) + '...');
+              }
             } catch (englishError) {
-              console.log('No English version available for:', url);
+              if (process.env.NODE_ENV === 'development') {
+                console.log('No English version available for:', url);
+              }
             }
             
             return {
@@ -235,7 +245,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               ref: hebrewResponse.data?.ref || ''
             };
           } catch (error) {
-            console.error('Error fetching morning blessing from Sefaria:', error);
+            if (process.env.NODE_ENV === 'development') {
+              console.error('Error fetching morning blessing from Sefaria:', error);
+            }
             return { hebrew: '', english: '', ref: '' };
           }
         })
@@ -248,7 +260,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(validBlessings);
     } catch (error) {
-      console.error('Error fetching morning brochas from Sefaria:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error fetching morning brochas from Sefaria:', error);
+      }
       res.status(500).json({ message: "Failed to fetch morning brochas from Sefaria API" });
     }
   });
