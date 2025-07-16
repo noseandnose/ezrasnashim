@@ -54,14 +54,7 @@ export const tableInspirations = pgTable("table_inspirations", {
 
 
 
-export const calendarEvents = pgTable("calendar_events", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  hebrewDate: text("hebrew_date").notNull(),
-  gregorianDate: text("gregorian_date").notNull(),
-  recurring: boolean("recurring").default(true),
-  years: integer("years").default(20), // how many years to add
-});
+
 
 export const shopItems = pgTable("shop_items", {
   id: serial("id").primaryKey(),
@@ -281,9 +274,7 @@ export const dailyStats = pgTable("daily_stats", {
 });
 
 // Insert schemas - defined after all tables
-export const insertCalendarEventSchema = createInsertSchema(calendarEvents).omit({
-  id: true,
-});
+
 
 export const insertShopItemSchema = createInsertSchema(shopItems).omit({
   id: true,
@@ -415,8 +406,7 @@ export const insertDiscountPromotionSchema = createInsertSchema(discountPromotio
 });
 
 // No user types needed - app works without authentication
-export type CalendarEvent = typeof calendarEvents.$inferSelect;
-export type InsertCalendarEvent = z.infer<typeof insertCalendarEventSchema>;
+
 export type ShopItem = typeof shopItems.$inferSelect;
 export type InsertShopItem = z.infer<typeof insertShopItemSchema>;
 export type TehillimName = typeof tehillimNames.$inferSelect;

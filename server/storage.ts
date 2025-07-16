@@ -5,7 +5,7 @@ import {
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
   shabbatRecipes, parshaVorts, tableInspirations, campaigns, womensPrayers, discountPromotions, pirkeiAvotProgress,
   analyticsEvents, dailyStats,
-  type CalendarEvent, type InsertCalendarEvent,
+
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
   type MaarivPrayer, type InsertMaarivPrayer,
@@ -30,8 +30,6 @@ import { eq, gt, lt, gte, lte, and } from "drizzle-orm";
 import { cleanHebrewText, memoize, withRetry, formatDate } from './typeHelpers';
 
 export interface IStorage {
-  getCalendarEvents(): Promise<CalendarEvent[]>;
-  createCalendarEvent(event: InsertCalendarEvent): Promise<CalendarEvent>;
   
   getAllShopItems(): Promise<ShopItem[]>;
   getShopItemById(id: number): Promise<ShopItem | undefined>;
@@ -151,15 +149,7 @@ export class DatabaseStorage implements IStorage {
 
 
 
-  // Calendar Events methods
-  async getCalendarEvents(): Promise<CalendarEvent[]> {
-    return await db.select().from(calendarEvents);
-  }
 
-  async createCalendarEvent(insertEvent: InsertCalendarEvent): Promise<CalendarEvent> {
-    const [event] = await db.insert(calendarEvents).values(insertEvent).returning();
-    return event;
-  }
 
   // Shop Items methods
   async getAllShopItems(): Promise<ShopItem[]> {

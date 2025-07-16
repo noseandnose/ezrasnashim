@@ -245,6 +245,7 @@ Changelog:
 - July 16, 2025. Reduced spacing between content blocks and thank you sections: Changed margin from mb-3 to mb-1 in all modal content areas to decrease spacing between white content blocks and blue Koren thank you sections for tighter, more cohesive layout
 - July 16, 2025. Removed special thanks sections: Eliminated special thanks sections to Nishmas.net from Nishmas modal and to Chuppah.org from Individual Prayer modal for cleaner interface while keeping Koren attribution in all relevant prayer modals
 - July 16, 2025. Updated statistics page metrics and filtering: Changed main stats to Active Users, Tehillim Said, Prayers Said, Torah Learnt for both today and all time; implemented proper camel case formatting in feature usage section; removed Unknown and Test entries; filtered to show only general categories with proper modal type names for better user engagement insights
+- July 16, 2025. Comprehensive TypeScript audit and database cleanup: Fixed critical Drizzle ORM import error (added missing `lte` and `gte` imports), replaced all `any` types with proper TypeScript types, made console logging conditional for production environment, enhanced type safety with `unknown` instead of `any` for error handling, optimized cache management with better typing, removed unused calendar events table and CRUD operations while preserving Hebrew Date Calculator download functionality
 ```
 
 ## User Preferences
