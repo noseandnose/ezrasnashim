@@ -207,7 +207,7 @@ function MorningBrochasModal() {
             setTimeout(() => {
               checkAndShowCongratulations();
               closeModal();
-              window.location.hash = '#/';
+              window.location.hash = '#/?section=home&scrollToProgress=true';
             }, 2000);
           }} 
           className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
@@ -268,9 +268,12 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       completeTask('tefilla');
       closeModal();
       
-      // Navigate to home section to show progress
+      // Navigate to home section and scroll to progress to show flower growth
       if (onSectionChange) {
         onSectionChange('home');
+      } else {
+        // Fallback: redirect to home with scroll parameter
+        window.location.hash = '#/?section=home&scrollToProgress=true';
       }
       
       // Check if all tasks are completed and show congratulations
@@ -1305,8 +1308,8 @@ function IndividualTehillimModal() {
           setTimeout(() => {
             checkAndShowCongratulations();
             closeModal();
-            // Navigate to home page to see the heart explosion
-            window.location.hash = '#/';
+            // Navigate to home page and scroll to progress to see flower growth
+            window.location.hash = '#/?section=home&scrollToProgress=true';
           }, 2000);
         }} 
         className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"

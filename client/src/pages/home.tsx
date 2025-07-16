@@ -20,10 +20,25 @@ export default function Home() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const sectionParam = urlParams.get('section') as Section;
+    const scrollToProgress = urlParams.get('scrollToProgress') === 'true';
     
     if (sectionParam && ['torah', 'tefilla', 'tzedaka', 'home', 'table'].includes(sectionParam)) {
       setActiveSection(sectionParam);
-      // Clean the URL by removing the parameter
+      
+      // If scrollToProgress is requested and we're on home, scroll to progress section
+      if (sectionParam === 'home' && scrollToProgress) {
+        setTimeout(() => {
+          const progressElement = document.getElementById('daily-progress-garden');
+          if (progressElement) {
+            progressElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+          }
+        }, 100); // Small delay to ensure DOM is ready
+      }
+      
+      // Clean the URL by removing the parameters
       window.history.replaceState({}, '', '/');
     }
   }, [location]);

@@ -86,12 +86,17 @@ export default function TzedakaModals() {
 
       closeModal();
       
+      // Navigate to home and scroll to progress to show flower growth
+      setTimeout(() => {
+        window.location.hash = '#/?section=home&scrollToProgress=true';
+      }, 100);
+      
       // Check if all tasks are completed and show congratulations
       setTimeout(() => {
         if (checkAndShowCongratulations()) {
           openModal('congratulations');
         }
-      }, 100);
+      }, 200);
       
       setLocation(`/donate?${params.toString()}`);
     }

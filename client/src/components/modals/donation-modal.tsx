@@ -33,6 +33,9 @@ export default function DonationModal() {
       completeTask('tzedaka');
       closeModal();
       
+      // Navigate to home and scroll to progress to show flower growth
+      window.location.hash = '#/?section=home&scrollToProgress=true';
+      
       // Check if all tasks are completed and show congratulations
       setTimeout(() => {
         if (checkAndShowCongratulations()) {

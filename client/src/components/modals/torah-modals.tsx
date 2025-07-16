@@ -92,9 +92,22 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
       completeTask('torah');
       closeModal();
       
-      // Navigate to home section to show progress
+      // Navigate to home section and scroll to progress to show flower growth
       if (onSectionChange) {
         onSectionChange('home');
+        // Also scroll to progress section
+        setTimeout(() => {
+          const progressElement = document.getElementById('daily-progress-garden');
+          if (progressElement) {
+            progressElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+          }
+        }, 300);
+      } else {
+        // Fallback: redirect to home with scroll parameter
+        window.location.hash = '#/?section=home&scrollToProgress=true';
       }
       
       // Check if all tasks are completed and show congratulations

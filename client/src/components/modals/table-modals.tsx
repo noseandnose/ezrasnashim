@@ -17,6 +17,9 @@ export default function TableModals() {
     trackModalComplete(modalId);
     markModalComplete(modalId);
     closeModal();
+    
+    // Navigate to home and scroll to progress to show flower growth
+    window.location.hash = '#/?section=home&scrollToProgress=true';
   };
   
   const getCurrentDate = () => {

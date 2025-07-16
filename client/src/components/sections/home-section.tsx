@@ -201,7 +201,10 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         </button>
 
         {/* Daily Progress Tracker - Big Button */}
-        <div className="rounded-2xl p-6 shadow-lg border border-blush/10 bg-white flex flex-col items-center justify-center min-h-[120px] mt-4">
+        <div 
+          id="daily-progress-garden"
+          className="rounded-2xl p-6 shadow-lg border border-blush/10 bg-white flex flex-col items-center justify-center min-h-[120px] mt-4"
+        >
           <h3 className="font-serif text-lg text-black font-bold mb-3">Daily Progress Garden</h3>
           <DailyProgress />
           <p className="font-sans text-xs text-black/60 text-center mt-3 leading-relaxed">

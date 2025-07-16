@@ -60,6 +60,8 @@ export function BirkatHamazonModal() {
       markTefillaComplete();
       closeModal();
       setShowHeartExplosion(false);
+      // Navigate to home and scroll to progress to show flower growth
+      window.location.hash = '#/?section=home&scrollToProgress=true';
     }, 2000);
   };
 
