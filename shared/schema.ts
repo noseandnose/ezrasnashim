@@ -180,6 +180,7 @@ export const discountPromotions = pgTable("discount_promotions", {
   subtitle: text("subtitle").notNull(),
   logoUrl: text("logo_url").notNull(),
   linkUrl: text("link_url").notNull(),
+  targetLocation: text("target_location").default("worldwide").notNull(), // 'israel', 'worldwide'
   startDate: timestamp("start_date").notNull(),
   endDate: timestamp("end_date").notNull(),
   isActive: boolean("is_active").default(true).notNull(),

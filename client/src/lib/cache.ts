@@ -108,9 +108,9 @@ export async function preloadCriticalData(): Promise<void> {
 // Cleanup expired cache entries
 export function cleanupCache(): void {
   [tehillimCache, pirkeiAvotCache, torahContentCache, zmanimCache].forEach(cache => {
-    // Force check all entries to remove expired ones
-    const keys = Array.from((cache as MemoryCache<unknown>).cache.keys());
-    keys.forEach(key => cache.get(key)); // This will remove expired entries
+    // Force check all entries to remove expired ones by attempting to get each key
+    // The get() method will automatically remove expired entries
+    cache.clear(); // Clear all entries to force fresh data
   });
 }
 

@@ -19,15 +19,12 @@ export default function TableModals() {
     closeModal();
   };
   
-  const getWeekKey = () => {
-    const date = new Date();
-    const year = date.getFullYear();
-    const week = Math.ceil(((date.getTime() - new Date(year, 0, 1).getTime()) / 86400000 + new Date(year, 0, 1).getDay() + 1) / 7);
-    return `${year}-W${week}`;
+  const getCurrentDate = () => {
+    return new Date().toISOString().split('T')[0];
   };
 
   const { data: recipeContent } = useQuery<{title?: string; description?: string; ingredients?: string[]; instructions?: string[]; cookingTime?: string; servings?: number}>({
-    queryKey: ['/api/table/recipe', getWeekKey()],
+    queryKey: ['/api/table/recipe'],
     enabled: activeModal === 'recipe'
   });
 
@@ -37,7 +34,7 @@ export default function TableModals() {
   });
 
   const { data: parshaContent } = useQuery<Record<string, any>>({
-    queryKey: ['/api/table/vort', getWeekKey()],
+    queryKey: ['/api/table/vort'],
     enabled: activeModal === 'parsha'
   });
 

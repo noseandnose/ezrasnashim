@@ -1126,14 +1126,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
         >
           {language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation}
         </div>
-        {prayer.transliteration && language === 'english' && (
-          <div
-            className="text-black/60 italic mt-4"
-            style={{ fontSize: `${fontSize - 2}px` }}
-          >
-            {prayer.transliteration}
-          </div>
-        )}
+
       </div>
 
       <Button 

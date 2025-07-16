@@ -129,7 +129,7 @@ async function initializeServer() {
   <div class="container">
     <h2>Ezras Nashim</h2>
     <p>To access the app, please use the frontend development server:</p>
-    <a href="https://${req.get('host').replace(':5000', ':5173')}${req.path}" class="button">
+    <a href="https://${(req.get('host') || 'localhost:5000').replace(':5000', ':5173')}${req.path}" class="button">
       Open App
     </a>
     <p><small>Route: ${req.path}</small></p>

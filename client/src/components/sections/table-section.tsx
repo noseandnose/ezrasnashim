@@ -27,19 +27,13 @@ export default function TableSection() {
     gcTime: 60 * 60 * 1000 // 1 hour
   });
 
-  // Get week key for weekly content
-  const getWeekKey = () => {
-    const date = new Date();
-    const year = date.getFullYear();
-    const week = Math.ceil(((date.getTime() - new Date(year, 0, 1).getTime()) / 86400000 + new Date(year, 0, 1).getDay() + 1) / 7);
-    return `${year}-W${week}`;
-  };
 
-  // Fetch weekly recipe and parsha content
+
+  // Fetch daily recipe content
   const { data: recipeContent } = useQuery<Record<string, any>>({
-    queryKey: [`/api/table/recipe/${getWeekKey()}`],
+    queryKey: [`/api/table/recipe`],
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/recipe/${getWeekKey()}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/recipe`);
       if (!response.ok) return null;
       return response.json();
     },

@@ -20,17 +20,9 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
     gcTime: 60 * 60 * 1000 // 1 hour
   });
 
-  // Get week key for Shabbas vort
-  const getWeekKey = () => {
-    const date = new Date();
-    const year = date.getFullYear();
-    const week = Math.ceil(((date.getTime() - new Date(year, 0, 1).getTime()) / 86400000 + new Date(year, 0, 1).getDay() + 1) / 7);
-    return `${year}-W${week}`;
-  };
-
-  // Fetch weekly Parsha vort
+  // Fetch weekly Parsha vort using current date
   const { data: parshaContent } = useQuery<{parsha?: string; hebrew_parsha?: string; title?: string; speaker?: string}>({
-    queryKey: ['/api/table/vort', getWeekKey()],
+    queryKey: ['/api/table/vort'],
     staleTime: 60 * 60 * 1000, // 1 hour
     gcTime: 4 * 60 * 60 * 1000 // 4 hours
   });

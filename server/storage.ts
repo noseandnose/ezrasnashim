@@ -1,6 +1,6 @@
 import serverAxiosClient from "./axiosClient";
 import { 
-  calendarEvents, shopItems, 
+  shopItems, 
   tehillimNames, globalTehillimProgress, minchaPrayers, maarivPrayers, birkatHamazonPrayers, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
   dailyRecipes, parshaVorts, tableInspirations, campaigns, womensPrayers, discountPromotions, pirkeiAvotProgress,
@@ -864,7 +864,7 @@ export class DatabaseStorage implements IStorage {
       await db
         .update(dailyStats)
         .set({
-          uniqueUsers: existing.uniqueUsers + 1,
+          uniqueUsers: (existing.uniqueUsers || 0) + 1,
           updatedAt: new Date()
         })
         .where(eq(dailyStats.date, today));
