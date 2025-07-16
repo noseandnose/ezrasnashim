@@ -597,7 +597,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getParshaVortByWeek(week: string): Promise<ParshaVort | undefined> {
-    const [vort] = await db.select().from(parshaVorts).where(eq(parshaVorts.date, week));
+    // For compatibility, treat week parameter as fromDate for now
+    const [vort] = await db.select().from(parshaVorts).where(eq(parshaVorts.fromDate, week));
     return vort || undefined;
   }
 
@@ -805,10 +806,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTableInspirationByDate(date: string): Promise<TableInspiration | undefined> {
+    // Find inspiration where the given date falls within the date range
     const [inspiration] = await db
       .select()
       .from(tableInspirations)
-      .where(eq(tableInspirations.date, date))
+      .where(
+        and(
+          lte(tableInspirations.fromDate, date),
+          gte(tableInspirations.untilDate, date)
+        )
+      )
       .limit(1);
     return inspiration;
   }

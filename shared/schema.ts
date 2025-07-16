@@ -22,7 +22,8 @@ export const shabbatRecipes = pgTable("shabbat_recipes", {
 
 export const parshaVorts = pgTable("parsha_vorts", {
   id: serial("id").primaryKey(),
-  date: date("date").notNull(), // Week start date
+  fromDate: date("from_date").notNull(), // Week start date
+  untilDate: date("until_date").notNull(), // Week end date
   title: text("title").notNull(),
   content: text("content"),
   audioUrl: text("audio_url").notNull(),
@@ -33,7 +34,8 @@ export const parshaVorts = pgTable("parsha_vorts", {
 
 export const tableInspirations = pgTable("table_inspirations", {
   id: serial("id").primaryKey(),
-  date: date("date").notNull(), // Daily inspiration
+  fromDate: date("from_date").notNull(), // Week start date
+  untilDate: date("until_date").notNull(), // Week end date
   title: text("title").notNull(),
   content: text("content").notNull(), // Main paragraph text
   mediaUrl1: text("media_url_1"),
