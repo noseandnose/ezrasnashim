@@ -242,13 +242,12 @@ export const pirkeiAvotProgress = pgTable("pirkei_avot_progress", {
   lastUpdated: timestamp("last_updated").defaultNow(),
 });
 
-// Analytics tracking tables
+// Analytics tracking tables - Only essential completion events
 export const analyticsEvents = pgTable("analytics_events", {
   id: serial("id").primaryKey(),
-  eventType: text("event_type").notNull(), // 'page_view', 'modal_open', 'modal_complete', 'tehillim_complete', 'name_prayed'
+  eventType: text("event_type").notNull(), // Only: 'modal_complete', 'tehillim_complete', 'name_prayed'
   eventData: jsonb("event_data"), // Additional context data
   sessionId: text("session_id"),
-  userAgent: text("user_agent"),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   eventTypeIdx: index("analytics_events_type_idx").on(table.eventType),

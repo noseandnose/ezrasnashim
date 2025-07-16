@@ -13,7 +13,7 @@ const getSessionId = () => {
 };
 
 interface TrackEventParams {
-  eventType: "page_view" | "modal_open" | "modal_complete" | "tehillim_complete" | "name_prayed";
+  eventType: "modal_complete" | "tehillim_complete" | "name_prayed";
   eventData?: Record<string, any>;
 }
 
@@ -22,6 +22,7 @@ export const useAnalytics = () => {
 
   const trackEventMutation = useMutation({
     mutationFn: async ({ eventType, eventData }: TrackEventParams) => {
+      // Only track significant completion events, not page views
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/analytics/track`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -36,13 +37,19 @@ export const useAnalytics = () => {
     },
   });
 
-  // Track page views
+  // Track unique session/user activity efficiently (once per session)
   useEffect(() => {
-    trackEventMutation.mutate({
-      eventType: "page_view",
-      eventData: { page: location },
-    });
-  }, [location]);
+    const sessionKey = `session_tracked_${getSessionId()}`;
+    if (!sessionStorage.getItem(sessionKey)) {
+      // Track this unique session only once
+      fetch(`${import.meta.env.VITE_API_URL}/api/analytics/session`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: getSessionId() }),
+      });
+      sessionStorage.setItem(sessionKey, "true");
+    }
+  }, []);
 
   const trackEvent = (eventType: TrackEventParams["eventType"], eventData?: Record<string, any>) => {
     trackEventMutation.mutate({ eventType, eventData });

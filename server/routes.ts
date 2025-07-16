@@ -1149,22 +1149,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Analytics routes
+  // Only track essential completion events (not page views)
   app.post("/api/analytics/track", async (req, res) => {
     try {
       const { eventType, eventData, sessionId } = req.body;
-      const userAgent = req.headers['user-agent'];
+      
+      // Only allow completion events, reject high-volume events like page_view
+      const allowedEvents = ['modal_complete', 'tehillim_complete', 'name_prayed'];
+      if (!allowedEvents.includes(eventType)) {
+        return res.status(400).json({ message: "Event type not tracked" });
+      }
       
       const event = await storage.trackEvent({
         eventType,
         eventData,
-        sessionId,
-        userAgent
+        sessionId
       });
       
       res.json(event);
     } catch (error) {
       console.error('Error tracking analytics event:', error);
       res.status(500).json({ message: "Failed to track event" });
+    }
+  });
+
+  // Efficient session tracking - updates daily stats only once per session
+  app.post("/api/analytics/session", async (req, res) => {
+    try {
+      const { sessionId } = req.body;
+      
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID required" });
+      }
+      
+      await storage.recordActiveSession(sessionId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error recording session:', error);
+      res.status(500).json({ message: "Failed to record session" });
+    }
+  });
+
+  // Data cleanup endpoint - remove old analytics data
+  app.post("/api/analytics/cleanup", async (req, res) => {
+    try {
+      await storage.cleanupOldAnalytics();
+      res.json({ success: true, message: "Old analytics data cleaned up" });
+    } catch (error) {
+      console.error('Error cleaning up analytics:', error);
+      res.status(500).json({ message: "Failed to cleanup analytics" });
     }
   });
 

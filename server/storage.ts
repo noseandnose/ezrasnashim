@@ -115,6 +115,8 @@ export interface IStorage {
 
   // Analytics methods
   trackEvent(event: InsertAnalyticsEvent): Promise<AnalyticsEvent>;
+  recordActiveSession(sessionId: string): Promise<void>;
+  cleanupOldAnalytics(): Promise<void>;
   getDailyStats(date: string): Promise<DailyStats | undefined>;
   updateDailyStats(date: string, updates: Partial<DailyStats>): Promise<DailyStats>;
   getTotalStats(): Promise<{
@@ -816,6 +818,47 @@ export class DatabaseStorage implements IStorage {
     return newEvent;
   }
 
+  // Efficient session tracking - only record unique sessions once per day
+  async recordActiveSession(sessionId: string): Promise<void> {
+    const today = formatDate(new Date());
+    
+    // Update daily stats to include this unique session
+    const existing = await this.getDailyStats(today);
+    
+    if (existing) {
+      // Increment unique users count by 1 (simple approach for session-based counting)
+      await db
+        .update(dailyStats)
+        .set({
+          uniqueUsers: existing.uniqueUsers + 1,
+          updatedAt: new Date()
+        })
+        .where(eq(dailyStats.date, today));
+    } else {
+      // Create new daily stats with this session
+      await db
+        .insert(dailyStats)
+        .values({
+          date: today,
+          uniqueUsers: 1,
+          pageViews: 0,
+          tehillimCompleted: 0,
+          namesProcessed: 0,
+          modalCompletions: {}
+        });
+    }
+  }
+
+  // Clean up old analytics events (keep only last 30 days)
+  async cleanupOldAnalytics(): Promise<void> {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    await db
+      .delete(analyticsEvents)
+      .where(lt(analyticsEvents.createdAt, thirtyDaysAgo));
+  }
+
   async getDailyStats(date: string): Promise<DailyStats | undefined> {
     const [stats] = await db
       .select()
@@ -826,7 +869,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async recalculateDailyStats(date: string): Promise<DailyStats> {
-    // Count today's events for recalculation
+    // Count today's events for recalculation (only completion events now)
     const todayEvents = await db
       .select()
       .from(analyticsEvents)
@@ -840,8 +883,8 @@ export class DatabaseStorage implements IStorage {
     // Count unique users (by session ID)
     const uniqueSessions = new Set(todayEvents.map(e => e.sessionId).filter(Boolean));
     
-    // Count event types
-    const pageViews = todayEvents.filter(e => e.eventType === 'page_view').length;
+    // Count event types (no more page_view tracking)
+    const pageViews = 0; // No longer tracking page views
     const tehillimCompleted = todayEvents.filter(e => e.eventType === 'tehillim_complete').length;
     const namesProcessed = todayEvents.filter(e => e.eventType === 'name_prayed').length;
     
