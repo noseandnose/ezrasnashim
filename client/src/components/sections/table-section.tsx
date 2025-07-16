@@ -160,9 +160,9 @@ export default function TableSection() {
             }`}>
               <Lightbulb className="text-white" size={18} strokeWidth={1.5} />
             </div>
-            <h3 className="font-serif text-xs text-black mb-1 font-bold">Table Inspiration</h3>
+            <h3 className="font-serif text-xs text-black mb-1 font-bold">Creative Jewish Living</h3>
             <p className="font-sans text-xs text-black/60 leading-relaxed">
-              {isModalComplete('inspiration') ? 'Completed' : (inspirationContent?.title || 'Daily Inspiration')}
+              {isModalComplete('inspiration') ? 'Completed' : (inspirationContent?.title || 'Creative Living Ideas')}
             </p>
           </button>
 

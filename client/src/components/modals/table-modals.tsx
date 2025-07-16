@@ -79,9 +79,9 @@ export default function TableModals() {
       <Dialog open={activeModal === 'inspiration'} onOpenChange={() => closeModal()}>
         <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="inspiration-description">
           <div className="flex items-center justify-center mb-3 relative">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Shabbas Inspiration</DialogTitle>
+            <DialogTitle className="text-lg font-serif font-bold text-black">Creative Jewish Living</DialogTitle>
           </div>
-          <div id="inspiration-description" className="sr-only">Daily table inspiration and decorating ideas for Shabbat</div>
+          <div id="inspiration-description" className="sr-only">Creative Jewish living ideas and inspiration</div>
           
           {inspirationContent ? (
             <>
@@ -115,7 +115,7 @@ export default function TableModals() {
                       return (
                         <img 
                           src={currentMedia.url} 
-                          alt={`Table inspiration ${currentMediaIndex + 1}`}
+                          alt={`Creative Jewish Living ${currentMediaIndex + 1}`}
                           className="w-full h-full object-cover cursor-pointer"
                           onClick={nextMedia}
                         />
@@ -127,7 +127,7 @@ export default function TableModals() {
                           <div className="w-full px-4">
                             <AudioPlayer 
                               audioUrl={currentMedia.url} 
-                              title="Table Inspiration Audio"
+                              title="Creative Jewish Living Audio"
                               duration="0:00"
                             />
                           </div>
