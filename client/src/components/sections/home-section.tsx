@@ -205,7 +205,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           <h3 className="font-serif text-lg text-black font-bold mb-3">Daily Progress Garden</h3>
           <DailyProgress />
           <p className="font-sans text-xs text-black/60 text-center mt-3 leading-relaxed">
-            Complete all three sections to see your daily progress bloom
+            Complete one item from each task to see your daily progress Bloom
           </p>
         </div>
       </div>
