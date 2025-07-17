@@ -204,7 +204,7 @@ export default function TimesModals() {
                 onClick={toggleNightfall}
                 className="text-sm text-gray-700 cursor-pointer"
               >
-                After nightfall (Hebrew date + 1)
+                After nightfall
               </Label>
             </div>
             
