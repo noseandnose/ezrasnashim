@@ -114,9 +114,9 @@ export default function Statistics() {
   };
 
   return (
-    <div className="mobile-app min-h-screen max-w-md mx-auto bg-white shadow-2xl relative">
+    <div className="mobile-app min-h-screen max-w-md mx-auto bg-white shadow-2xl relative flex flex-col">
       {/* Header */}
-      <header className="bg-gradient-soft p-3 border-0 shadow-none">
+      <header className="bg-gradient-soft p-3 border-0 shadow-none flex-shrink-0">
         <div className="flex items-center justify-between px-2">
           <button
             onClick={() => setLocation("/")}
@@ -130,7 +130,7 @@ export default function Statistics() {
         </div>
       </header>
       
-      <main className="content-area overflow-y-auto overflow-x-hidden p-4 pb-20">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-24">
         <div className="space-y-6">
           {/* Today's Stats */}
           <div>
