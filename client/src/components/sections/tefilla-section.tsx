@@ -134,9 +134,14 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
 
   // Fetch global Tehillim progress
   const { data: progress } = useQuery<GlobalTehillimProgress>({
-    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress`).then(res => res.json()),
-    queryKey: ['/api/tehillim/progress'],
-    refetchInterval: 3000, // Very frequent refresh for immediate updates
+    queryKey: ['/api/tehillim/progress'], 
+    queryFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress?t=${Date.now()}`);
+      const data = await response.json();
+      console.log('Fresh progress data (section):', data);
+      return data;
+    },
+    refetchInterval: 1000, // Very frequent refresh
     staleTime: 0, // Always consider stale
     gcTime: 0 // Don't cache at all
   });

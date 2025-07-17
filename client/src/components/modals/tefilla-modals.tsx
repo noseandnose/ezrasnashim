@@ -320,8 +320,14 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
   // Fetch global Tehillim progress
   const { data: progress } = useQuery<GlobalTehillimProgress>({
-    queryKey: ['/api/tehillim/progress'],
-    refetchInterval: 2000, // Very frequent refresh for real-time updates
+    queryKey: ['/api/tehillim/progress'], 
+    queryFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress?t=${Date.now()}`);
+      const data = await response.json();
+      console.log('Fresh progress data:', data);
+      return data;
+    },
+    refetchInterval: 1000, // Very frequent refresh
     enabled: activeModal === 'tehillim-text',
     staleTime: 0, // Always consider stale
     gcTime: 0 // Don't cache at all
@@ -385,8 +391,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       queryClient.resetQueries({ queryKey: ['/api/tehillim/text'] });
       queryClient.resetQueries({ queryKey: ['/api/tehillim/preview'] });
       
-      // Close modal immediately to trigger fresh data load when reopened
-      closeModal();
+      // Wait a moment then close modal to trigger fresh data load
+      setTimeout(() => {
+        closeModal();
+      }, 500);
     },
     onError: () => {
       toast({
