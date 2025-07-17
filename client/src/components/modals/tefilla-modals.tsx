@@ -1041,7 +1041,11 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
         </div>
       ))}
       <Button 
-        onClick={() => closeModal()} 
+        onClick={() => {
+          closeModal();
+          // Navigate to home and scroll to progress
+          window.location.hash = '#/?section=home&scrollToProgress=true';
+        }} 
         className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
       >
         Close
@@ -1078,7 +1082,11 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
         </div>
       ))}
       <Button 
-        onClick={() => closeModal()} 
+        onClick={() => {
+          closeModal();
+          // Navigate to home and scroll to progress
+          window.location.hash = '#/?section=home&scrollToProgress=true';
+        }} 
         className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
       >
         Close

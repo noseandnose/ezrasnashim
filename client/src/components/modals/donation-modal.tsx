@@ -151,7 +151,11 @@ export default function DonationModal() {
             </Button>
             
             <Button
-              onClick={() => closeModal()}
+              onClick={() => {
+                closeModal();
+                // Navigate to home and scroll to progress
+                window.location.hash = '#/?section=home&scrollToProgress=true';
+              }}
               variant="outline"
               className="w-full rounded-xl border-blush/20 text-warm-gray hover:bg-white/90 transition-all duration-300 bg-white/70 backdrop-blur-sm border"
             >

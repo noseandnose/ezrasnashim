@@ -226,7 +226,11 @@ export default function TimesModals() {
                 {downloadCalendarMutation.isPending ? "Generating..." : "Download Calendar (10 Years)"}
               </Button>
               <Button 
-                onClick={() => closeModal()} 
+                onClick={() => {
+                  closeModal();
+                  // Navigate to home and scroll to progress (except for life page modals)
+                  window.location.hash = '#/?section=home&scrollToProgress=true';
+                }} 
                 variant="outline"
                 className="w-full rounded-xl border-blush/20 text-warm-gray hover:bg-white/90 transition-all duration-300 bg-white/70 backdrop-blur-sm border"
               >

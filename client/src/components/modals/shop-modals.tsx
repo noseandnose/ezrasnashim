@@ -123,7 +123,11 @@ export default function ShopModals() {
                 </Button>
               )}
               <Button
-                onClick={closeModal}
+                onClick={() => {
+                  closeModal();
+                  // Navigate to home and scroll to progress
+                  window.location.hash = '#/?section=home&scrollToProgress=true';
+                }}
                 variant="outline"
                 className="flex-1"
               >
