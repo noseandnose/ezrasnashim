@@ -163,7 +163,7 @@ export default function TimesModals() {
                 placeholder="Anniversary, Yahrzeit, etc." 
                 value={eventTitle}
                 onChange={(e) => setEventTitle(e.target.value)}
-                className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush"
+                className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white"
               />
             </div>
             
@@ -173,7 +173,7 @@ export default function TimesModals() {
                 type="date" 
                 value={englishDate}
                 onChange={(e) => handleDateChange(e.target.value)}
-                className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush"
+                className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white"
               />
             </div>
 

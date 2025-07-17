@@ -5,13 +5,13 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(42, 78%, 97%);
+  --background: hsl(0, 0%, 100%);
   --foreground: hsl(0, 0%, 0%);
   --muted: hsl(300, 18%, 94%);
   --muted-foreground: hsl(0, 0%, 0%);
-  --popover: hsl(42, 78%, 97%);
+  --popover: hsl(0, 0%, 100%);
   --popover-foreground: hsl(0, 0%, 0%);
-  --card: hsl(42, 78%, 97%);
+  --card: hsl(0, 0%, 100%);
   --card-foreground: hsl(0, 0%, 0%);
   --border: hsl(300, 18%, 90%);
   --input: hsl(300, 18%, 90%);
@@ -56,6 +56,11 @@
 /* Force black text in all possible text elements */
 p, span, div, a, li, td, th, label, input, textarea, select, option {
   color: #000000 !important;
+}
+
+/* Force white background for all input fields */
+input, textarea, select {
+  background-color: #ffffff !important;
 }
 
 /* Make titles bold and black */
