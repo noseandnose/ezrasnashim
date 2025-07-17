@@ -321,15 +321,19 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   // Fetch global Tehillim progress
   const { data: progress } = useQuery<GlobalTehillimProgress>({
     queryKey: ['/api/tehillim/progress'],
-    refetchInterval: 5000, // More frequent refresh for real-time updates
-    enabled: activeModal === 'tehillim-text'
+    refetchInterval: 2000, // Very frequent refresh for real-time updates
+    enabled: activeModal === 'tehillim-text',
+    staleTime: 0, // Always consider stale
+    gcTime: 0 // Don't cache at all
   });
 
   // Fetch current name for the perek
   const { data: currentName } = useQuery<TehillimName | null>({
     queryKey: ['/api/tehillim/current-name'],
-    refetchInterval: 5000, // More frequent refresh for real-time updates
-    enabled: activeModal === 'tehillim-text'
+    refetchInterval: 2000, // Very frequent refresh for real-time updates
+    enabled: activeModal === 'tehillim-text',
+    staleTime: 0, // Always consider stale
+    gcTime: 0 // Don't cache at all
   });
 
   // Fetch Tehillim text from Sefaria API
@@ -340,8 +344,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       return response.data;
     },
     enabled: activeModal === 'tehillim-text' && !!progress?.currentPerek,
-    refetchInterval: 5000, // Refresh to get new perek text
-    staleTime: 0 // Always consider data stale to force fresh fetches
+    refetchInterval: 2000, // Very frequent refresh to get new perek text
+    staleTime: 0, // Always consider data stale to force fresh fetches
+    gcTime: 0 // Don't cache at all
   });
 
   // Mutation to complete a perek
@@ -374,11 +379,14 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         title: "Perek Completed!",
         description: `Perek ${progress?.currentPerek || 'current'} has been completed. Moving to the next perek.`,
       });
-      // Invalidate all related queries immediately and force reload
-      queryClient.refetchQueries({ queryKey: ['/api/tehillim/progress'] });
-      queryClient.removeQueries({ queryKey: ['/api/tehillim/text'] });
-      queryClient.removeQueries({ queryKey: ['/api/tehillim/preview'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+      // Force complete cache reset for Tehillim data
+      queryClient.resetQueries({ queryKey: ['/api/tehillim/progress'] });
+      queryClient.resetQueries({ queryKey: ['/api/tehillim/current-name'] });
+      queryClient.resetQueries({ queryKey: ['/api/tehillim/text'] });
+      queryClient.resetQueries({ queryKey: ['/api/tehillim/preview'] });
+      
+      // Close modal immediately to trigger fresh data load when reopened
+      closeModal();
     },
     onError: () => {
       toast({
