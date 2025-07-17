@@ -321,25 +321,27 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   // Fetch global Tehillim progress
   const { data: progress } = useQuery<GlobalTehillimProgress>({
     queryKey: ['/api/tehillim/progress'],
-    refetchInterval: 30000,
+    refetchInterval: 5000, // More frequent refresh for real-time updates
     enabled: activeModal === 'tehillim-text'
   });
 
   // Fetch current name for the perek
   const { data: currentName } = useQuery<TehillimName | null>({
     queryKey: ['/api/tehillim/current-name'],
-    refetchInterval: 10000,
+    refetchInterval: 5000, // More frequent refresh for real-time updates
     enabled: activeModal === 'tehillim-text'
   });
 
   // Fetch Tehillim text from Sefaria API
-  const { data: tehillimText } = useQuery<{text: string; perek: number; language: string}>({
+  const { data: tehillimText, refetch: refetchTehillimText } = useQuery<{text: string; perek: number; language: string}>({
     queryKey: ['/api/tehillim/text', progress?.currentPerek, showHebrew ? 'hebrew' : 'english'],
     queryFn: async () => {
       const response = await axiosClient.get(`/api/tehillim/text/${progress?.currentPerek}?language=${showHebrew ? 'hebrew' : 'english'}`);
       return response.data;
     },
-    enabled: activeModal === 'tehillim-text' && !!progress?.currentPerek
+    enabled: activeModal === 'tehillim-text' && !!progress?.currentPerek,
+    refetchInterval: 5000, // Refresh to get new perek text
+    staleTime: 0 // Always consider data stale to force fresh fetches
   });
 
   // Mutation to complete a perek
@@ -351,7 +353,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         language: showHebrew ? 'hebrew' : 'english',
         completedBy: 'user' 
       });
-
     },
     onSuccess: () => {
       // Track tehillim completion
@@ -373,7 +374,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         title: "Perek Completed!",
         description: `Perek ${progress?.currentPerek || 'current'} has been completed. Moving to the next perek.`,
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
+      // Invalidate all related queries immediately and force reload
+      queryClient.refetchQueries({ queryKey: ['/api/tehillim/progress'] });
+      queryClient.removeQueries({ queryKey: ['/api/tehillim/text'] });
+      queryClient.removeQueries({ queryKey: ['/api/tehillim/preview'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
     },
     onError: () => {

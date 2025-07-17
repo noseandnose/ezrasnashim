@@ -136,14 +136,14 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   const { data: progress } = useQuery<GlobalTehillimProgress>({
     queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress`).then(res => res.json()),
     queryKey: ['/api/tehillim/progress'],
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 10000, // Refresh every 10 seconds for faster updates
   });
 
   // Fetch current name for the perek - Only update when perek is completed
   const { data: currentName } = useQuery<TehillimName | null>({
     queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/current-name`).then(res => res.json()),
     queryKey: ['/api/tehillim/current-name'],
-    refetchInterval: false, // Disable automatic refresh - only when perek is completed
+    refetchInterval: 10000, // Refresh every 10 seconds to get updates
   });
 
   // Fetch all active names for count display
