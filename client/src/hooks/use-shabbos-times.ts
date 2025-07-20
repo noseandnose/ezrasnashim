@@ -25,22 +25,29 @@ interface ShabbosInfo {
 export function useShabbosTime() {
   const { coordinates } = useLocationStore();
 
+  console.log('useShabbosTime hook - coordinates:', coordinates);
+
   return useQuery({
     queryKey: ['shabbos-times', coordinates?.lat, coordinates?.lng],
     queryFn: async () => {
       if (!coordinates) {
+        console.log('useShabbosTime: No coordinates, returning null');
         // Return null instead of throwing error - matches useJewishTimes behavior
         return null;
       }
 
+      console.log('useShabbosTime: Fetching for coordinates:', coordinates);
+      
       // Use our backend proxy instead of direct Hebcal call to avoid CORS issues
       const response = await fetch(`/api/shabbos/${coordinates.lat}/${coordinates.lng}`);
       
       if (!response.ok) {
+        console.error('useShabbosTime: API error:', response.status, response.statusText);
         throw new Error('Failed to fetch Shabbos times');
       }
       
       const data = await response.json();
+      console.log('useShabbosTime: Received data:', data);
       
       return data;
     },

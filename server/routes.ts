@@ -266,20 +266,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       data.items.forEach((item: any) => {
-        if (item.title.includes("Candle lighting:") && item.date) {
-          const date = new Date(item.date);
-          result.candleLighting = date.toLocaleTimeString('en-US', { 
-            hour: 'numeric', 
-            minute: '2-digit',
-            hour12: true 
-          });
-        } else if (item.title.includes("Havdalah:") && item.date) {
-          const date = new Date(item.date);
-          result.havdalah = date.toLocaleTimeString('en-US', { 
-            hour: 'numeric', 
-            minute: '2-digit',
-            hour12: true 
-          });
+        console.log('Processing item:', item.title);
+        if (item.title.includes("Candle lighting:")) {
+          // Extract time directly from title (e.g., "Candle lighting: 19:23")
+          const timeMatch = item.title.match(/Candle lighting: (\d{1,2}:\d{2})/);
+          console.log('Candle lighting timeMatch:', timeMatch);
+          if (timeMatch) {
+            const [hours, minutes] = timeMatch[1].split(':');
+            const hour24 = parseInt(hours);
+            console.log('Candle lighting - hour24:', hour24, 'minutes:', minutes);
+            const displayHour = hour24 > 12 ? hour24 - 12 : (hour24 === 0 ? 12 : hour24);
+            const period = hour24 >= 12 ? 'PM' : 'AM';
+            result.candleLighting = `${displayHour}:${minutes} ${period}`;
+            console.log('Final candleLighting:', result.candleLighting);
+          }
+        } else if (item.title.includes("Havdalah:")) {
+          // Extract time directly from title (e.g., "Havdalah: 20:21")
+          const timeMatch = item.title.match(/Havdalah: (\d{1,2}:\d{2})/);
+          console.log('Havdalah timeMatch:', timeMatch);
+          if (timeMatch) {
+            const [hours, minutes] = timeMatch[1].split(':');
+            const hour24 = parseInt(hours);
+            console.log('Havdalah - hour24:', hour24, 'minutes:', minutes);
+            const displayHour = hour24 > 12 ? hour24 - 12 : (hour24 === 0 ? 12 : hour24);
+            const period = hour24 >= 12 ? 'PM' : 'AM';
+            result.havdalah = `${displayHour}:${minutes} ${period}`;
+            console.log('Final havdalah:', result.havdalah);
+          }
         } else if (item.title.startsWith("Parashat ") || item.title.startsWith("Parashah ")) {
           result.parsha = item.title;
         }
