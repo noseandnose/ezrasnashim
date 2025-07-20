@@ -60,42 +60,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { lat, lng } = req.params;
       const today = new Date().toISOString().split('T')[0];
       
-      // Map coordinates to nearest major city geonameid
       const latitude = parseFloat(lat);
       const longitude = parseFloat(lng);
       
-      // Find closest major Jewish community by distance
-      const cities = [
-        { name: "New York City, New York, USA", geonameid: 5128581, lat: 40.7128, lng: -74.0060 },
-        { name: "Los Angeles, California, USA", geonameid: 5368361, lat: 34.0522, lng: -118.2437 },
-        { name: "Chicago, Illinois, USA", geonameid: 4887398, lat: 41.8781, lng: -87.6298 },
-        { name: "Philadelphia, Pennsylvania, USA", geonameid: 4560349, lat: 39.9526, lng: -75.1652 },
-        { name: "Miami, Florida, USA", geonameid: 4164138, lat: 25.7617, lng: -80.1918 },
-        { name: "Boston, Massachusetts, USA", geonameid: 4930956, lat: 42.3601, lng: -71.0589 },
-        { name: "Baltimore, Maryland, USA", geonameid: 4347778, lat: 39.2904, lng: -76.6122 },
-        { name: "Brooklyn, New York, USA", geonameid: 5110302, lat: 40.6782, lng: -73.9442 },
-        { name: "Jerusalem, Israel", geonameid: 281184, lat: 31.7683, lng: 35.2137 },
-        { name: "Tel Aviv, Israel", geonameid: 293397, lat: 32.0853, lng: 34.7818 },
-        { name: "London, England, UK", geonameid: 2643743, lat: 51.5074, lng: -0.1278 },
-        { name: "Toronto, Ontario, Canada", geonameid: 6167865, lat: 43.6532, lng: -79.3832 }
-      ];
+      // Determine timezone based on coordinates
+      let tzid = 'America/New_York'; // Default
       
-      // Calculate distance and find closest city
-      let closestCity = cities[0]; // Default to NYC
-      let minDistance = Number.MAX_VALUE;
-      
-      for (const city of cities) {
-        const distance = Math.sqrt(
-          Math.pow(latitude - city.lat, 2) + Math.pow(longitude - city.lng, 2)
-        );
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestCity = city;
-        }
+      // Basic timezone detection based on longitude and known regions
+      if (latitude >= 29 && latitude <= 33.5 && longitude >= 34 && longitude <= 36) {
+        // Israel region
+        tzid = 'Asia/Jerusalem';
+      } else if (longitude >= -125 && longitude <= -66) {
+        // North America
+        if (longitude >= -125 && longitude <= -120) tzid = 'America/Los_Angeles';
+        else if (longitude >= -120 && longitude <= -105) tzid = 'America/Denver';
+        else if (longitude >= -105 && longitude <= -90) tzid = 'America/Chicago';
+        else if (longitude >= -90 && longitude <= -66) tzid = 'America/New_York';
+      } else if (longitude >= -10 && longitude <= 30) {
+        // Europe
+        tzid = 'Europe/London';
+      } else if (longitude >= -80 && longitude <= -60) {
+        // Eastern Canada
+        tzid = 'America/Toronto';
       }
       
-      // Call Hebcal with geonameid
-      const hebcalUrl = `https://www.hebcal.com/zmanim?cfg=json&geonameid=${closestCity.geonameid}&date=${today}`;
+      // Call Hebcal with exact coordinates
+      const hebcalUrl = `https://www.hebcal.com/zmanim?cfg=json&latitude=${latitude}&longitude=${longitude}&tzid=${tzid}&date=${today}`;
       const response = await serverAxiosClient.get(hebcalUrl);
       const data = response.data;
       
@@ -121,6 +111,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
 
+      // Get a more user-friendly location name using reverse geocoding
+      let locationName = 'Current Location';
+      
+      try {
+        // Use Google Maps Geocoding API for reverse geocoding
+        const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${process.env.GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY'}`;
+        const geocodeResponse = await serverAxiosClient.get(geocodeUrl);
+        
+        if (geocodeResponse.data.results && geocodeResponse.data.results.length > 0) {
+          const result = geocodeResponse.data.results[0];
+          
+          // Extract city name from address components
+          const addressComponents = result.address_components || [];
+          let city = '';
+          let country = '';
+          
+          for (const component of addressComponents) {
+            if (component.types.includes('locality') || component.types.includes('administrative_area_level_1')) {
+              city = component.long_name;
+            }
+            if (component.types.includes('country')) {
+              country = component.long_name;
+            }
+          }
+          
+          if (city && country) {
+            locationName = `${city}, ${country}`;
+          } else if (city) {
+            locationName = city;
+          } else {
+            // Fallback to formatted address
+            locationName = result.formatted_address;
+          }
+        }
+      } catch (geocodeError) {
+        // If reverse geocoding fails, use coordinate-based fallback
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Reverse geocoding failed:', geocodeError);
+        }
+        
+        if (data.location && data.location.title) {
+          locationName = data.location.title;
+        } else {
+          locationName = `${latitude.toFixed(4)}°, ${longitude.toFixed(4)}°`;
+        }
+      }
+
       const formattedTimes = {
         sunrise: formatTime(data.times?.sunrise),
         shkia: formatTime(data.times?.sunset),
@@ -130,7 +167,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         candleLighting: formatTime(data.times?.candleLighting),
         havdalah: formatTime(data.times?.havdalah),
         hebrewDate: data.date || '',
-        location: data.location?.title || data.location?.geo || closestCity.name,
+        location: locationName,
+        coordinates: {
+          lat: latitude,
+          lng: longitude
+        },
         
         // TODO: Add notification/reminder functionality
         // - Can set alerts for specific zmanim times
