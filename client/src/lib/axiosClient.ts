@@ -1,4 +1,5 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
+import { logger } from './production-logger';
 
 // Determine the correct base URL for API calls
 function getBaseURL() {
@@ -27,16 +28,16 @@ const axiosClient = axios.create({
 axiosClient.interceptors.request.use(
   (config) => {
     const url = config.baseURL ? `${config.baseURL}${config.url}` : config.url;
-    console.log(`[API Request] ${config.method?.toUpperCase()} ${url}`);
+    logger.log(`[API Request] ${config.method?.toUpperCase()} ${url}`);
     
     if (config.data) {
-      console.log(`[API Request Data]`, config.data);
+      logger.log(`[API Request Data]`, config.data);
     }
     
     return config;
   },
   (error) => {
-    console.error('[API Request Error]', error);
+    logger.error('[API Request Error]', error);
     return Promise.reject(error);
   }
 );
@@ -44,10 +45,10 @@ axiosClient.interceptors.request.use(
 // Response interceptor for logging
 axiosClient.interceptors.response.use(
   (response: AxiosResponse) => {
-    console.log(`[API Response] ${response.status} ${response.config.method?.toUpperCase()} ${response.config.url}`);
+    logger.log(`[API Response] ${response.status} ${response.config.method?.toUpperCase()} ${response.config.url}`);
     
     if (response.data) {
-      console.log(`[API Response Data]`, response.data);
+      logger.log(`[API Response Data]`, response.data);
     }
     
     return response;
@@ -56,8 +57,8 @@ axiosClient.interceptors.response.use(
     const url = error.config?.url;
     const method = error.config?.method?.toUpperCase();
     
-    console.error(`[API Error] ${error.response?.status || 'Unknown'} ${method} ${url}`);
-    console.error('Error details:', error.toJSON ? error.toJSON() : error);
+    logger.error(`[API Error] ${error.response?.status || 'Unknown'} ${method} ${url}`);
+    logger.error('Error details:', error.toJSON ? error.toJSON() : error);
     
     return Promise.reject(error);
   }

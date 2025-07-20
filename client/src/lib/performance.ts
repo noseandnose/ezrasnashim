@@ -82,7 +82,9 @@ export class PerformanceMonitor {
     
     const duration = performance.now() - start;
     this.metrics.set(name, duration);
-    console.log(`${name}: ${duration.toFixed(2)}ms`);
+    if (import.meta.env.MODE === 'development') {
+      console.log(`${name}: ${duration.toFixed(2)}ms`);
+    }
     return duration;
   }
 

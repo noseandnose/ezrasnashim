@@ -35,7 +35,9 @@ export function useHebrewDate() {
         
         return hebrewDateStr;
       } catch (error: unknown) {
-        console.error('Error fetching Hebrew date:', error);
+        if (import.meta.env.MODE === 'development') {
+          console.error('Error fetching Hebrew date:', error);
+        }
         return hebrewDate; // Return stored value if fetch fails
       }
     },
@@ -75,7 +77,9 @@ export function useHebrewDateWithShkia(shkiaTime?: string) {
           return tomorrow.toISOString().split('T')[0];
         }
       } catch (error) {
-        console.error('Error parsing shkia time:', error);
+        if (import.meta.env.MODE === 'development') {
+          console.error('Error parsing shkia time:', error);
+        }
       }
     }
     
@@ -99,7 +103,9 @@ export function useHebrewDateWithShkia(shkiaTime?: string) {
         const data = await response.json();
         return data.hebrew || '';
       } catch (error: unknown) {
-        console.error('Error fetching Hebrew date:', error);
+        if (import.meta.env.MODE === 'development') {
+          console.error('Error fetching Hebrew date:', error);
+        }
         return '';
       }
     },

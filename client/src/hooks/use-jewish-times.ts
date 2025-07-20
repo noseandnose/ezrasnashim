@@ -38,7 +38,9 @@ export const useLocationStore = create<LocationState>((set) => ({
       });
       return response.data;
     } catch (error) {
-      console.error('Failed to get IP-based location:', error);
+      if (import.meta.env.MODE === 'development') {
+        console.error('Failed to get IP-based location:', error);
+      }
       throw error;
     }
   },

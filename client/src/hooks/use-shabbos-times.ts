@@ -51,9 +51,10 @@ export function useShabbosTime() {
       } catch (error) {
         console.error('useShabbosTime: Error in axios request:', error);
         // Log response data if available
-        if (error.response) {
-          console.error('useShabbosTime: Error response status:', error.response.status);
-          console.error('useShabbosTime: Error response data:', error.response.data);
+        if (error && typeof error === 'object' && 'response' in error) {
+          const axiosError = error as any;
+          console.error('useShabbosTime: Error response status:', axiosError.response?.status);
+          console.error('useShabbosTime: Error response data:', axiosError.response?.data);
         }
         throw error;
       }

@@ -57,6 +57,7 @@ export interface IStorage {
   createDailyRecipe(recipe: InsertDailyRecipe): Promise<DailyRecipe>;
   
   getParshaVortByWeek(week: string): Promise<ParshaVort | undefined>;
+  getParshaVortByDate(date: string): Promise<ParshaVort | undefined>;
   createParshaVort(vort: InsertParshaVort): Promise<ParshaVort>;
 
   // Table inspiration methods
@@ -619,6 +620,18 @@ export class DatabaseStorage implements IStorage {
     // For compatibility, treat week parameter as fromDate for now
     const [vort] = await db.select().from(parshaVorts).where(eq(parshaVorts.fromDate, week));
     return vort || undefined;
+  }
+
+  async getParshaVortByDate(date: string): Promise<ParshaVort | undefined> {
+    const [vort] = await db
+      .select()
+      .from(parshaVorts)
+      .where(and(
+        lte(parshaVorts.fromDate, date),
+        gte(parshaVorts.untilDate, date)
+      ))
+      .limit(1);
+    return vort;
   }
 
   async createParshaVort(insertVort: InsertParshaVort): Promise<ParshaVort> {

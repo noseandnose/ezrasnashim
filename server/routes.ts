@@ -887,15 +887,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/table/vort", async (req, res) => {
     try {
-      // Get current week
-      const date = new Date();
-      const year = date.getFullYear();
-      const week = Math.ceil(((date.getTime() - new Date(year, 0, 1).getTime()) / 86400000 + new Date(year, 0, 1).getDay() + 1) / 7);
-      const weekKey = `${year}-W${week}`;
-      
-      const vort = await storage.getParshaVortByWeek(weekKey);
+      const today = new Date().toISOString().split('T')[0];
+      const vort = await storage.getParshaVortByDate(today);
       res.json(vort || null);
     } catch (error) {
+      console.error('Error fetching Parsha vort:', error);
       res.status(500).json({ message: "Failed to fetch Parsha vort" });
     }
   });

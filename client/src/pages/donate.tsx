@@ -120,9 +120,6 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         onReady={() => {
           console.log('PaymentElement is ready');
         }}
-        onError={(error) => {
-          console.error('PaymentElement error:', error);
-        }}
       />
 
       <Button
