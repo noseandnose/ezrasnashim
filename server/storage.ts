@@ -1,7 +1,7 @@
 import serverAxiosClient from "./axiosClient";
 import { 
   shopItems, 
-  tehillimNames, globalTehillimProgress, minchaPrayers, maarivPrayers, birkatHamazonPrayers, sponsors, nishmasText,
+  tehillimNames, globalTehillimProgress, minchaPrayers, maarivPrayers, birkatHamazonPrayers, afterBrochasPrayers, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
   dailyRecipes, parshaVorts, tableInspirations, campaigns, womensPrayers, discountPromotions, pirkeiAvotProgress,
   analyticsEvents, dailyStats,
@@ -10,6 +10,7 @@ import {
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
   type MaarivPrayer, type InsertMaarivPrayer,
   type BirkatHamazonPrayer, type InsertBirkatHamazonPrayer,
+  type AfterBrochasPrayer, type InsertAfterBrochasPrayer,
   type Sponsor, type InsertSponsor, type NishmasText, type InsertNishmasText,
   type DailyHalacha, type InsertDailyHalacha,
   type DailyEmuna, type InsertDailyEmuna,
@@ -78,6 +79,9 @@ export interface IStorage {
   getMaarivPrayers(): Promise<MaarivPrayer[]>;
   createMinchaPrayer(prayer: InsertMinchaPrayer): Promise<MinchaPrayer>;
 
+  // After Brochas methods
+  getAfterBrochasPrayers(): Promise<AfterBrochasPrayer[]>;
+  
   // Birkat Hamazon methods
   getBirkatHamazonPrayers(): Promise<BirkatHamazonPrayer[]>;
   createBirkatHamazonPrayer(prayer: InsertBirkatHamazonPrayer): Promise<BirkatHamazonPrayer>;
@@ -457,6 +461,11 @@ export class DatabaseStorage implements IStorage {
   async createMaarivPrayer(insertPrayer: InsertMaarivPrayer): Promise<MaarivPrayer> {
     const [prayer] = await db.insert(maarivPrayers).values(insertPrayer).returning();
     return prayer;
+  }
+
+  // After Brochas methods
+  async getAfterBrochasPrayers(): Promise<AfterBrochasPrayer[]> {
+    return await db.select().from(afterBrochasPrayers);
   }
 
   // Birkat Hamazon methods

@@ -506,19 +506,19 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           </button>
 
           <button 
-            onClick={() => openModal('birkat-hamazon')}
+            onClick={() => openModal('after-brochas')}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              isModalComplete('birkat-hamazon') ? 'bg-sage/20' : 'bg-white'
+              isModalComplete('after-brochas') ? 'bg-sage/20' : 'bg-white'
             }`}
           >
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              isModalComplete('birkat-hamazon') ? 'bg-sage' : 'bg-gradient-feminine'
+              isModalComplete('after-brochas') ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
               <HandHeart className="text-white" size={18} />
             </div>
-            <h3 className="font-serif text-sm text-black mb-1 font-bold">Birkat Hamazon</h3>
+            <h3 className="font-serif text-sm text-black mb-1 font-bold">After Brochas</h3>
             <p className="font-sans text-xs text-black/60">
-              {isModalComplete('birkat-hamazon') ? 'Completed' : 'After Blessings'}
+              {isModalComplete('after-brochas') ? 'Completed' : 'Prayers of Thanks'}
             </p>
           </button>
         </div>

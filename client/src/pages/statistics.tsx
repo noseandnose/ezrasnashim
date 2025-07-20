@@ -162,7 +162,7 @@ export default function Statistics() {
         <h2 className="text-base font-serif font-bold text-black mb-3">Core Metrics - All Time</h2>
         <div className="grid grid-cols-2 gap-3">
           <StatCard
-            title="Mitsvas Completed"
+            title="Mitzvas Completed"
             value={totalLoading ? "..." : totalStats?.totalActs?.toLocaleString() || 0}
             icon={TrendingUp}
             color="text-blush"
@@ -239,7 +239,7 @@ export default function Statistics() {
             
             <div className="grid grid-cols-2 gap-3">
               <StatCard
-                title="Mitsvas Completed"
+                title="Mitzvas Completed"
                 value={currentLoading ? "..." : (currentData as any)?.totalActs?.toLocaleString() || (currentData as any)?.totalActs || 0}
                 icon={TrendingUp}
                 color="text-blush"

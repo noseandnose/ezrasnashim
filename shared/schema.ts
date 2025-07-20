@@ -125,6 +125,15 @@ export const birkatHamazonPrayers = pgTable("birkat_hamazon_prayers", {
   orderIndex: integer("order_index").default(0),
 });
 
+export const afterBrochasPrayers = pgTable("after_brochas_prayers", {
+  id: serial("id").primaryKey(),
+  prayerName: text("prayer_name").notNull(), // "Al Hamichiya" or "Birkat Hamazon"
+  hebrewText: text("hebrew_text").notNull(),
+  englishTranslation: text("english_translation").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const sponsors = pgTable("sponsors", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -304,6 +313,11 @@ export const insertBirkatHamazonPrayerSchema = createInsertSchema(birkatHamazonP
   id: true,
 });
 
+export const insertAfterBrochasPrayerSchema = createInsertSchema(afterBrochasPrayers).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertSponsorSchema = createInsertSchema(sponsors).omit({
   id: true,
   createdAt: true,
@@ -359,6 +373,10 @@ export const insertDailyStatsSchema = createInsertSchema(dailyStats).omit({
   createdAt: true,
   updatedAt: true,
 });
+
+// Types
+export type AfterBrochasPrayer = typeof afterBrochasPrayers.$inferSelect;
+export type InsertAfterBrochasPrayer = z.infer<typeof insertAfterBrochasPrayerSchema>;
 
 // Weekly Torah content schemas
 export const insertDailyRecipeSchema = createInsertSchema(dailyRecipes).omit({

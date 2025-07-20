@@ -163,13 +163,9 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans" aria-describedby="halacha-description">
           <div id="halacha-description" className="sr-only">Daily Jewish law and practice content</div>
           
-          <StandardModalHeader 
-            title="Daily Halacha"
-            showHebrew={showHebrew}
-            setShowHebrew={setShowHebrew}
-            fontSize={fontSize}
-            setFontSize={setFontSize}
-          />
+          <DialogHeader className="text-center mb-4 pr-8">
+            <DialogTitle className="text-lg font-serif font-bold text-black">Daily Halacha</DialogTitle>
+          </DialogHeader>
           
           <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
             {halachaContent && (
@@ -356,8 +352,8 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
       {/* Featured Modal */}
       <Dialog open={activeModal === 'featured'} onOpenChange={() => closeModal()}>
         <DialogContent className="max-h-[95vh] overflow-y-auto" aria-describedby="featured-description">
-          <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-semibold mb-2">Featured Topic</DialogTitle>
+          <DialogHeader className="text-center mb-4 pr-8">
+            <DialogTitle className="text-lg font-serif font-bold text-black">Featured Content</DialogTitle>
             {featuredContent && (
               <DialogDescription className="text-sm text-gray-600 font-sans">{featuredContent.title}</DialogDescription>
             )}

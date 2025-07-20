@@ -260,9 +260,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Parse the Shabbos data
       const result = {
         location: zmanimData.location || 'Unknown Location',
-        candleLighting: null,
-        havdalah: null,
-        parsha: null
+        candleLighting: null as string | null,
+        havdalah: null as string | null,
+        parsha: null as string | null
       };
 
       data.items.forEach((item: any) => {
@@ -281,7 +281,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (suffix) {
               // Already has am/pm, just format it properly
               const displayHour = hour12 === 0 ? 12 : hour12;
-              result.candleLighting = `${displayHour}:${minutes} ${suffix.toUpperCase()}`;
+              result.candleLighting = `${displayHour}:${minutes} ${suffix.toUpperCase().replace(/\./g, '')}`;
             } else {
               // 24-hour format, convert to 12-hour
               const displayHour = hour12 > 12 ? hour12 - 12 : (hour12 === 0 ? 12 : hour12);
@@ -642,6 +642,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(prayers);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch Maariv prayers" });
+    }
+  });
+
+  // After Brochas routes
+  app.get("/api/after-brochas/prayers", async (req, res) => {
+    try {
+      const prayers = await storage.getAfterBrochasPrayers();
+      res.json(prayers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch After Brochas prayers" });
     }
   });
 

@@ -38,18 +38,24 @@ const KorenThankYou = () => (
 );
 
 export function BirkatHamazonModal() {
-  const { activeModal, closeModal } = useModalStore();
+  const { activeModal, closeModal, openModal } = useModalStore();
   const [language, setLanguage] = useState<"hebrew" | "english">("hebrew");
   const [fontSize, setFontSize] = useState(20);
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
+  const [selectedPrayer, setSelectedPrayer] = useState<string | null>(null);
   const { markTefillaComplete } = useDailyCompletionStore();
   const { trackCompletion } = useAnalytics();
 
-  const isOpen = activeModal === 'birkat-hamazon';
+  const isOpen = activeModal === 'after-brochas' || activeModal === 'birkat-hamazon' || activeModal === 'al-hamichiya';
 
   const { data: prayers, isLoading } = useQuery<BirkatHamazonPrayer[]>({
     queryKey: ["/api/birkat-hamazon/prayers"],
-    enabled: isOpen,
+    enabled: activeModal === 'birkat-hamazon',
+  });
+
+  const { data: afterBrochasPrayers, isLoading: isAfterBrochasLoading } = useQuery<{prayerName: string; hebrewText: string; englishTranslation: string}[]>({
+    queryKey: ["/api/after-brochas/prayers"],
+    enabled: activeModal === 'after-brochas' || activeModal === 'al-hamichiya',
   });
 
   const handleComplete = () => {
@@ -134,48 +140,134 @@ export function BirkatHamazonModal() {
     );
   };
 
+  // Show After Brochas selection modal
+  if (activeModal === 'after-brochas') {
+    return (
+      <Dialog open={true} onOpenChange={() => closeModal()}>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 font-sans">
+          <DialogHeader className="text-center mb-4 pr-8">
+            <DialogTitle className="text-lg font-serif font-bold text-black">After Brochas</DialogTitle>
+            <DialogDescription className="text-sm text-gray-600 font-sans">Prayers of Thanks</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            <button
+              onClick={() => openModal('al-hamichiya')}
+              className="w-full bg-white rounded-xl p-4 border border-blush/10 hover:bg-blush/5 transition-colors text-left"
+            >
+              <h3 className="font-serif text-black font-medium mb-1">Al Hamichiya</h3>
+              <p className="text-sm text-gray-600">After cake, cookies, and pastries</p>
+            </button>
+
+            <button
+              onClick={() => openModal('birkat-hamazon')}
+              className="w-full bg-white rounded-xl p-4 border border-blush/10 hover:bg-blush/5 transition-colors text-left"
+            >
+              <h3 className="font-serif text-black font-medium mb-1">Birkat Hamazon</h3>
+              <p className="text-sm text-gray-600">After bread meals</p>
+            </button>
+          </div>
+
+          <div className="flex space-x-3 mt-6">
+            <Button 
+              onClick={() => closeModal()} 
+              variant="outline"
+              className="flex-1 rounded-2xl border-blush/30 text-blush hover:bg-blush/5"
+            >
+              Cancel
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Show individual prayer modals
   return (
-    <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent className="w-full max-w-md mx-auto bg-gradient-to-b from-sand to-ivory text-black border-2 border-black rounded-lg max-h-[95vh] overflow-y-auto flex flex-col">
-        <DialogHeader>
+    <>
+      {/* Al Hamichiya Modal */}
+      <Dialog open={activeModal === 'al-hamichiya'} onOpenChange={() => closeModal()}>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans">
           <StandardModalHeader />
-        </DialogHeader>
-        
-        {/* Expanded Prayer Content Area */}
-        <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
-            </div>
-          ) : prayers && prayers.length > 0 ? (
-            <div className="space-y-6" style={{ fontSize: `${fontSize}px` }}>
-              {prayers.map((prayer) => (
-                <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
-                  {renderPrayerText(prayer)}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-black/60">No Birkat Hamazon content available</p>
-            </div>
-          )}
-        </div>
+          
+          <div className="max-h-[50vh] overflow-y-auto">
+            {isAfterBrochasLoading ? (
+              <div className="flex justify-center py-8">
+                <span className="text-sm text-gray-500">Loading prayer...</span>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {afterBrochasPrayers?.filter(p => p.prayerName === "Al Hamichiya").map((prayer, index) => (
+                  <div key={index} className="bg-white rounded-2xl p-4 border border-blush/10">
+                    <div 
+                      className={`text-black leading-relaxed ${
+                        language === "hebrew" ? "text-right heebo-regular" : "text-left font-sans"
+                      }`}
+                      style={{ fontSize: `${fontSize}px` }}
+                    >
+                      {language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
-        <KorenThankYou />
+          <KorenThankYou />
 
-        <Button
-          onClick={handleComplete}
-          className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
-        >
-          Completed
-        </Button>
-        
-        <HeartExplosion 
-          trigger={showHeartExplosion} 
-          onComplete={() => setShowHeartExplosion(false)} 
-        />
-      </DialogContent>
-    </Dialog>
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={handleComplete}
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-4 border-0"
+            >
+              Completed
+            </Button>
+            <HeartExplosion trigger={showHeartExplosion} />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Birkat Hamazon Modal */}
+      <Dialog open={activeModal === 'birkat-hamazon'} onOpenChange={() => closeModal()}>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans">
+          <StandardModalHeader />
+          
+          <div className="max-h-[50vh] overflow-y-auto">
+            {isLoading ? (
+              <div className="flex justify-center py-8">
+                <span className="text-sm text-gray-500">Loading prayers...</span>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {prayers?.map((prayer) => (
+                  <div key={prayer.id} className="bg-white rounded-2xl p-4 border border-blush/10">
+                    <div 
+                      className={`text-black leading-relaxed ${
+                        language === "hebrew" ? "text-right heebo-regular" : "text-left font-sans"
+                      }`}
+                      style={{ fontSize: `${fontSize}px` }}
+                    >
+                      {language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <KorenThankYou />
+
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={handleComplete}
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-4 border-0"
+            >
+              Completed
+            </Button>
+            <HeartExplosion trigger={showHeartExplosion} />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
