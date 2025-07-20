@@ -38,18 +38,26 @@ export function useShabbosTime() {
 
       console.log('useShabbosTime: Fetching for coordinates:', coordinates);
       
-      // Use our backend proxy instead of direct Hebcal call to avoid CORS issues
-      const response = await fetch(`/api/shabbos/${coordinates.lat}/${coordinates.lng}`);
-      
-      if (!response.ok) {
-        console.error('useShabbosTime: API error:', response.status, response.statusText);
-        throw new Error('Failed to fetch Shabbos times');
+      try {
+        // Use our backend proxy instead of direct Hebcal call to avoid CORS issues
+        const url = `/api/shabbos/${coordinates.lat}/${coordinates.lng}`;
+        console.log('useShabbosTime: Making request to:', url);
+        
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          console.error('useShabbosTime: API error:', response.status, response.statusText);
+          throw new Error(`Failed to fetch Shabbos times: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('useShabbosTime: Received data:', data);
+        
+        return data;
+      } catch (error) {
+        console.error('useShabbosTime: Error in fetch:', error);
+        throw error;
       }
-      
-      const data = await response.json();
-      console.log('useShabbosTime: Received data:', data);
-      
-      return data;
     },
     enabled: !!coordinates, // Only fetch when coordinates are available
     staleTime: 1000 * 60 * 60, // 1 hour
