@@ -75,7 +75,7 @@ export function useShabbosTime() {
       const locationName = zmanimData.location || getLocationName(coordinates.lat, coordinates.lng);
       return parseShabbosData(data, locationName);
     },
-    enabled: true, // Always fetch, even without coordinates
+    enabled: !!coordinates, // Only fetch when coordinates are available
     staleTime: 1000 * 60 * 60, // 1 hour
     refetchInterval: 1000 * 60 * 60, // Refetch every hour
   });
