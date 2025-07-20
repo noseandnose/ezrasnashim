@@ -7,12 +7,16 @@ import ShopModals from "./shop-modals";
 import DonationModal from "./donation-modal";
 import CongratulationsModal from "./congratulations-modal";
 import AboutModal from "./about-modal";
+import LocationModal from "./location-modal";
+import { useModalStore } from "@/lib/types";
 
 interface ModalContainerProps {
   onSectionChange?: (section: any) => void;
 }
 
 export default function ModalContainer({ onSectionChange }: ModalContainerProps) {
+  const { activeModal, closeModal } = useModalStore();
+  
   return (
     <>
       <TorahModals onSectionChange={onSectionChange} />
@@ -24,6 +28,10 @@ export default function ModalContainer({ onSectionChange }: ModalContainerProps)
       <DonationModal />
       <CongratulationsModal />
       <AboutModal />
+      <LocationModal 
+        isOpen={activeModal === 'location'} 
+        onClose={closeModal} 
+      />
     </>
   );
 }

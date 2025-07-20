@@ -25,6 +25,7 @@ export type ModalType =
   | 'personal-prayers'
   | 'donate'
   | 'about'
+  | 'location'
   | null;
 
 export interface ModalState {

@@ -1,32 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocationStore } from "./use-jewish-times";
 
-// Helper function to get location name from coordinates
-function getLocationName(lat: number, lng: number): string {
-  // Use intelligent coordinate-based location names (expanded ranges)
-  if (lat >= 31.60 && lat <= 31.90 && lng >= 34.90 && lng <= 35.20) {
-    return 'Bet Shemesh, Israel';
-  } else if (lat >= 31.7 && lat <= 31.85 && lng >= 35.1 && lng <= 35.3) {
-    return 'Jerusalem, Israel';
-  } else if (lat >= 31.95 && lat <= 32.15 && lng >= 34.65 && lng <= 34.85) {
-    return 'Tel Aviv, Israel';
-  } else if (lat >= 40.65 && lat <= 40.85 && lng >= -74.15 && lng <= -73.95) {
-    return 'New York City, NY';
-  } else if (lat >= 33.95 && lat <= 34.15 && lng >= -118.35 && lng <= -118.15) {
-    return 'Los Angeles, CA';
-  } else {
-    // General region-based fallback
-    if (lat >= 29 && lat <= 33.5 && lng >= 34 && lng <= 36) {
-      return 'Israel';
-    } else if (lng >= -125 && lng <= -66) {
-      return 'United States';
-    } else if (lng >= -10 && lng <= 30) {
-      return 'Europe';
-    } else {
-      return `${lat.toFixed(2)}°, ${lng.toFixed(2)}°`;
-    }
-  }
-}
+// This function is no longer used - location names come from API
 
 interface ShabbosTimesResponse {
   title: string;
@@ -71,9 +46,11 @@ export function useShabbosTime() {
       }
       
       const data: ShabbosTimesResponse = await response.json();
-      // Use the location name from our zmanim API for consistency
-      const locationName = zmanimData.location || getLocationName(coordinates.lat, coordinates.lng);
-      return parseShabbosData(data, locationName);
+      // Use the location name from our zmanim API - no fallbacks
+      if (!zmanimData.location) {
+        throw new Error('Location data unavailable');
+      }
+      return parseShabbosData(data, zmanimData.location);
     },
     enabled: !!coordinates, // Only fetch when coordinates are available
     staleTime: 1000 * 60 * 60, // 1 hour

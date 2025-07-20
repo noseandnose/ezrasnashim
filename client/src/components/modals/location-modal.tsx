@@ -2,20 +2,21 @@ import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MapPin, Loader2 } from "lucide-react";
+import { MapPin, Loader2, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useLocationStore } from "@/hooks/use-jewish-times";
 
 interface LocationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onLocationChange: (location: string, coordinates: { lat: number; lng: number }) => void;
-  currentLocation?: string;
 }
 
-export default function LocationModal({ isOpen, onClose, onLocationChange, currentLocation }: LocationModalProps) {
-  const [inputValue, setInputValue] = useState(currentLocation || "");
+export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
+  const { setCoordinates, setPermissionDenied } = useLocationStore();
+  const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [predictions, setPredictions] = useState<any[]>([]);
+  const [showPredictions, setShowPredictions] = useState(false);
   const autocompleteService = useRef<any>(null);
   const placesService = useRef<any>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -35,7 +36,7 @@ export default function LocationModal({ isOpen, onClose, onLocationChange, curre
   useEffect(() => {
     if (isOpen && !(window as any).google) {
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY'}&libraries=places`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=places`;
       script.async = true;
       script.defer = true;
       script.onload = () => {
@@ -52,6 +53,7 @@ export default function LocationModal({ isOpen, onClose, onLocationChange, curre
     setInputValue(value);
     
     if (value.length > 2 && autocompleteService.current) {
+      setShowPredictions(true);
       autocompleteService.current.getPlacePredictions(
         {
           input: value,
@@ -67,6 +69,7 @@ export default function LocationModal({ isOpen, onClose, onLocationChange, curre
       );
     } else {
       setPredictions([]);
+      setShowPredictions(false);
     }
   };
 
@@ -82,6 +85,7 @@ export default function LocationModal({ isOpen, onClose, onLocationChange, curre
     }
 
     setIsLoading(true);
+    setShowPredictions(false);
     placesService.current.getDetails(
       {
         placeId: placeId,
@@ -96,7 +100,9 @@ export default function LocationModal({ isOpen, onClose, onLocationChange, curre
             lng: place.geometry.location.lng()
           };
           
-          onLocationChange(description, coordinates);
+          // Update the location store directly
+          setCoordinates(coordinates);
+          setPermissionDenied(false);
           setInputValue(description);
           setPredictions([]);
           onClose();
@@ -116,23 +122,16 @@ export default function LocationModal({ isOpen, onClose, onLocationChange, curre
     );
   };
 
-  // Manual location entry (fallback)
-  const handleManualSubmit = () => {
-    if (inputValue.trim()) {
-      // For manual entry, we'll use a geocoding fallback
-      const mockCoordinates = { lat: 40.7128, lng: -74.0060 }; // Default to NYC
-      onLocationChange(inputValue.trim(), mockCoordinates);
-      onClose();
-      
-      toast({
-        title: "Location Updated",
-        description: `Location set to ${inputValue.trim()}`,
-      });
-    }
+  // Close without changes
+  const handleClose = () => {
+    setInputValue("");
+    setPredictions([]);
+    setShowPredictions(false);
+    onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="w-full max-w-md rounded-3xl p-6">
         <DialogHeader className="text-center mb-4">
           <div className="flex items-center justify-center mb-2">
@@ -162,7 +161,7 @@ export default function LocationModal({ isOpen, onClose, onLocationChange, curre
           </div>
 
           {/* Autocomplete suggestions */}
-          {predictions.length > 0 && (
+          {showPredictions && predictions.length > 0 && (
             <div className="bg-white border border-blush/10 rounded-2xl shadow-lg max-h-48 overflow-y-auto">
               {predictions.map((prediction) => (
                 <button
@@ -184,18 +183,18 @@ export default function LocationModal({ isOpen, onClose, onLocationChange, curre
 
           <div className="flex space-x-3">
             <Button 
-              onClick={onClose} 
+              onClick={handleClose} 
               variant="outline"
               className="flex-1 rounded-2xl border-blush/30 text-blush hover:bg-blush/5"
             >
               Cancel
             </Button>
             <Button 
-              onClick={handleManualSubmit}
-              disabled={!inputValue.trim() || isLoading}
+              onClick={handleClose}
+              disabled={isLoading}
               className="flex-1 bg-gradient-feminine text-white rounded-2xl border-0 hover:opacity-90"
             >
-              {isLoading ? "Loading..." : "Set Location"}
+              Close
             </Button>
           </div>
         </div>

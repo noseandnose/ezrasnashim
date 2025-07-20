@@ -34,7 +34,7 @@ export default function TimesSection() {
               className="text-xs text-gray-600 cursor-pointer hover:text-black"
               onClick={() => {
                 if (permissionDenied) {
-                  openModal('location-modal');
+                  openModal('location');
                 }
               }}
             >
