@@ -12,6 +12,7 @@ interface LocationState {
   setCoordinates: (coords: { lat: number; lng: number }) => void;
   setLocationRequested: (requested: boolean) => void;
   setPermissionDenied: (denied: boolean) => void;
+  resetLocation: () => void;
 }
 
 export const useLocationStore = create<LocationState>((set) => ({
@@ -25,6 +26,7 @@ export const useLocationStore = create<LocationState>((set) => ({
   setLocationRequested: (locationRequested: boolean) =>
     set({ locationRequested }),
   setPermissionDenied: (permissionDenied: boolean) => set({ permissionDenied }),
+  resetLocation: () => set({ coordinates: null, locationRequested: false, permissionDenied: false }),
 }));
 
 // Hook to get user's location
@@ -66,13 +68,12 @@ export function useGeolocation() {
             console.warn("Location request timed out, using default location");
           }
           setPermissionDenied(true);
-          // Fall back to NYC coordinates
-          setCoordinates({ lat: 40.7128, lng: -74.006 });
+          // Don't set fallback coordinates - let the app ask for manual location
         },
         {
           enableHighAccuracy: true,
           timeout: 10000,
-          maximumAge: 300000, // 5 minutes
+          maximumAge: 0, // Always get fresh location
         },
       );
     }
@@ -92,8 +93,11 @@ export function useJewishTimes() {
   const { coordinates } = useGeolocation();
   const today = new Date().toISOString().split("T")[0];
 
-  // Use NYC as fallback coordinates
-  const effectiveCoords = coordinates || { lat: 40.7128, lng: -74.006 };
+  // Use coordinates if available, otherwise no API call
+  if (!coordinates) {
+    return { data: null, isLoading: false };
+  }
+  const effectiveCoords = coordinates;
 
   return useQuery({
     queryKey: ["zmanim", effectiveCoords.lat, effectiveCoords.lng, today],
@@ -109,9 +113,9 @@ export function useJewishTimes() {
       }
     },
     enabled: !!effectiveCoords, // Only fetch when we have coordinates
-    staleTime: 1000 * 60 * 60 * 6, // 6 hours - refresh twice daily
+    staleTime: 1000 * 60 * 30, // 30 minutes for location changes
     refetchInterval: false,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true, // Refetch when window gains focus
     refetchOnMount: true,
   });
 }

@@ -9,10 +9,13 @@ export default function TimesSection() {
 
   const getLocationDisplay = () => {
     if (permissionDenied) {
-      return "New York City, NY (default - enable location for accurate times)";
+      return "Location access denied - tap to set manually";
+    }
+    if (coordinates && times?.location) {
+      return times.location;
     }
     if (coordinates) {
-      return times?.location || "Current Location";
+      return "Current Location";
     }
     return "Detecting location...";
   };
@@ -27,7 +30,14 @@ export default function TimesSection() {
               <Sun className="text-peach mr-2" size={20} />
               <h3 className="font-semibold text-sm">Today's Times</h3>
             </div>
-            <div className="text-xs text-gray-600">
+            <div 
+              className="text-xs text-gray-600 cursor-pointer hover:text-black"
+              onClick={() => {
+                if (permissionDenied) {
+                  openModal('location-modal');
+                }
+              }}
+            >
               📍 {getLocationDisplay()}
             </div>
           </div>
