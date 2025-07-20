@@ -159,7 +159,7 @@ export default function Statistics() {
       
       {/* Core Metrics Section - Connected to Top */}
       <div className="bg-gradient-soft -mt-3 rounded-b-3xl px-4 pt-6 pb-6 border-0 shadow-none flex-shrink-0">
-        <h2 className="text-base font-serif font-bold text-black mb-3">Core Metrics</h2>
+        <h2 className="text-base font-serif font-bold text-black mb-3">Core Metrics - All Time</h2>
         <div className="grid grid-cols-2 gap-3">
           <StatCard
             title="Mitsvas Completed"
@@ -168,7 +168,7 @@ export default function Statistics() {
             color="text-blush"
           />
           <StatCard
-            title="Tehillim Books Completed"
+            title="Books Completed"
             value={totalLoading ? "..." : totalStats?.totalBooksCompleted?.toLocaleString() || 0}
             icon={BookOpen}
             color="text-sage"
