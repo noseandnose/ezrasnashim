@@ -11,8 +11,8 @@ export default function TableSection() {
   const { isModalComplete } = useModalCompletionStore();
   const { data: shabbosData, isLoading: shabbosLoading } = useShabbosTime();
   
-  // Trigger geolocation when component mounts
-  useGeolocation();
+  // Get shared location state (don't trigger new geolocation request)
+  const { coordinates } = useGeolocation();
 
   // Fetch today's table inspiration content
   const today = new Date().toISOString().split('T')[0];
