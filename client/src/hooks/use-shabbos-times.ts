@@ -3,16 +3,16 @@ import { useLocationStore } from "./use-jewish-times";
 
 // Helper function to get location name from coordinates
 function getLocationName(lat: number, lng: number): string {
-  // Use intelligent coordinate-based location names
-  if (lat >= 31.7 && lat <= 31.8 && lng >= 35.0 && lng <= 35.1) {
+  // Use intelligent coordinate-based location names (expanded ranges)
+  if (lat >= 31.60 && lat <= 31.90 && lng >= 34.90 && lng <= 35.20) {
     return 'Bet Shemesh, Israel';
-  } else if (lat >= 31.7 && lat <= 31.8 && lng >= 35.1 && lng <= 35.3) {
+  } else if (lat >= 31.7 && lat <= 31.85 && lng >= 35.1 && lng <= 35.3) {
     return 'Jerusalem, Israel';
-  } else if (lat >= 32.0 && lat <= 32.1 && lng >= 34.7 && lng <= 34.8) {
+  } else if (lat >= 31.95 && lat <= 32.15 && lng >= 34.65 && lng <= 34.85) {
     return 'Tel Aviv, Israel';
-  } else if (lat >= 40.7 && lat <= 40.8 && lng >= -74.1 && lng <= -74.0) {
+  } else if (lat >= 40.65 && lat <= 40.85 && lng >= -74.15 && lng <= -73.95) {
     return 'New York City, NY';
-  } else if (lat >= 34.0 && lat <= 34.1 && lng >= -118.3 && lng <= -118.2) {
+  } else if (lat >= 33.95 && lat <= 34.15 && lng >= -118.35 && lng <= -118.15) {
     return 'Los Angeles, CA';
   } else {
     // General region-based fallback

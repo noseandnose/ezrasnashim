@@ -137,13 +137,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Special handling for Israeli locations
           if (country === 'Israel' || address.country_code === 'il') {
-            // Use intelligent coordinate-based names for Israel
-            if (latitude >= 31.7 && latitude <= 31.8 && longitude >= 35.0 && longitude <= 35.1) {
+            // Use intelligent coordinate-based names for Israel (expanded ranges)
+            if (latitude >= 31.60 && latitude <= 31.90 && longitude >= 34.90 && longitude <= 35.20) {
               locationName = 'Bet Shemesh, Israel';
-            } else if (latitude >= 31.7 && latitude <= 31.8 && longitude >= 35.1 && longitude <= 35.3) {
+            } else if (latitude >= 31.7 && latitude <= 31.85 && longitude >= 35.1 && longitude <= 35.3) {
               locationName = 'Jerusalem, Israel';
-            } else if (latitude >= 32.0 && latitude <= 32.1 && longitude >= 34.7 && longitude <= 34.8) {
+            } else if (latitude >= 31.95 && latitude <= 32.15 && longitude >= 34.65 && longitude <= 34.85) {
               locationName = 'Tel Aviv, Israel';
+            } else if (latitude >= 32.7 && latitude <= 32.9 && longitude >= 35.0 && longitude <= 35.3) {
+              locationName = 'Haifa, Israel';
+            } else if (latitude >= 31.2 && latitude <= 31.3 && longitude >= 34.7 && longitude <= 34.9) {
+              locationName = 'Beer Sheva, Israel';
             } else {
               locationName = 'Israel';
             }
@@ -167,16 +171,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.warn('Reverse geocoding failed:', geocodeError);
         }
         
-        // Provide intelligent location names based on known coordinates
-        if (latitude >= 31.7 && latitude <= 31.8 && longitude >= 35.0 && longitude <= 35.1) {
+        // Provide intelligent location names based on known coordinates (expanded ranges)
+        if (latitude >= 31.60 && latitude <= 31.90 && longitude >= 34.90 && longitude <= 35.20) {
           locationName = 'Bet Shemesh, Israel';
-        } else if (latitude >= 31.7 && latitude <= 31.8 && longitude >= 35.1 && longitude <= 35.3) {
+        } else if (latitude >= 31.7 && latitude <= 31.85 && longitude >= 35.1 && longitude <= 35.3) {
           locationName = 'Jerusalem, Israel';
-        } else if (latitude >= 32.0 && latitude <= 32.1 && longitude >= 34.7 && longitude <= 34.8) {
+        } else if (latitude >= 31.95 && latitude <= 32.15 && longitude >= 34.65 && longitude <= 34.85) {
           locationName = 'Tel Aviv, Israel';
-        } else if (latitude >= 40.7 && latitude <= 40.8 && longitude >= -74.1 && longitude <= -74.0) {
+        } else if (latitude >= 40.65 && latitude <= 40.85 && longitude >= -74.15 && longitude <= -73.95) {
           locationName = 'New York City, NY';
-        } else if (latitude >= 34.0 && latitude <= 34.1 && longitude >= -118.3 && longitude <= -118.2) {
+        } else if (latitude >= 33.95 && latitude <= 34.15 && longitude >= -118.35 && longitude <= -118.15) {
           locationName = 'Los Angeles, CA';
         } else {
           // General region-based fallback
