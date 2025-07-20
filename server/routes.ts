@@ -1434,6 +1434,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // IP-based location detection (works with VPN)
+  app.get("/api/location/ip", async (req, res) => {
+    try {
+      // Get client IP address
+      const clientIP = req.headers['x-forwarded-for'] || 
+                      req.headers['x-real-ip'] || 
+                      req.connection.remoteAddress || 
+                      req.socket.remoteAddress ||
+                      (req.connection as any)?.socket?.remoteAddress ||
+                      '127.0.0.1';
+      
+      console.log('IP-based location detection for IP:', clientIP);
+      
+      // Use ip-api.com for IP-based geolocation (free, no API key needed)
+      const ipResponse = await serverAxiosClient.get(`http://ip-api.com/json/${clientIP}?fields=status,message,country,regionName,city,lat,lon,timezone`);
+      
+      if (ipResponse.data.status === 'success') {
+        const locationData = {
+          coordinates: {
+            lat: ipResponse.data.lat,
+            lng: ipResponse.data.lon
+          },
+          location: `${ipResponse.data.city}, ${ipResponse.data.regionName}, ${ipResponse.data.country}`,
+          timezone: ipResponse.data.timezone,
+          source: 'ip'
+        };
+        
+        console.log('IP-based location detected:', locationData);
+        res.json(locationData);
+      } else {
+        console.log('IP-based location failed:', ipResponse.data.message);
+        res.status(400).json({ error: 'Could not determine location from IP address' });
+      }
+    } catch (error) {
+      console.error('IP-based location detection error:', error);
+      res.status(500).json({ error: 'Failed to detect location from IP' });
+    }
+  });
+
   app.get("/healthcheck", (req, res) => {
     res.json({ status: "OK" });
   })

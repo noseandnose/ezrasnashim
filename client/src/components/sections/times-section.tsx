@@ -30,12 +30,15 @@ export default function TimesSection() {
               <Sun className="text-peach mr-2" size={20} />
               <h3 className="font-semibold text-sm">Today's Times</h3>
             </div>
-            <div 
-              className="text-xs text-gray-600 cursor-pointer hover:text-black"
-              onClick={() => openModal('location')}
+            <button 
+              className="text-xs text-gray-600 cursor-pointer hover:text-black hover:bg-gray-100 px-2 py-1 rounded transition-colors"
+              onClick={() => {
+                console.log('Location clicked - opening modal');
+                openModal('location');
+              }}
             >
               📍 {getLocationDisplay()}
-            </div>
+            </button>
           </div>
           {isLoading ? (
             <div className="space-y-2 text-xs">

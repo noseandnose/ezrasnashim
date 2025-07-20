@@ -13,6 +13,7 @@ interface LocationState {
   setLocationRequested: (requested: boolean) => void;
   setPermissionDenied: (denied: boolean) => void;
   resetLocation: () => void;
+  useIPLocation: () => Promise<any>;
 }
 
 export const useLocationStore = create<LocationState>((set) => ({
@@ -27,6 +28,20 @@ export const useLocationStore = create<LocationState>((set) => ({
     set({ locationRequested }),
   setPermissionDenied: (permissionDenied: boolean) => set({ permissionDenied }),
   resetLocation: () => set({ coordinates: null, locationRequested: false, permissionDenied: false }),
+  useIPLocation: async () => {
+    try {
+      const response = await axiosClient.get('/api/location/ip');
+      set({ 
+        coordinates: response.data.coordinates,
+        location: response.data.location,
+        permissionDenied: false 
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Failed to get IP-based location:', error);
+      throw error;
+    }
+  },
 }));
 
 // Hook to get user's location
