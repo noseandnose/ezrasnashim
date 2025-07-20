@@ -9,13 +9,17 @@ import { Card } from "@/components/ui/card";
 export default function TableSection() {
   const { openModal } = useModalStore();
   const { isModalComplete } = useModalCompletionStore();
-  const { data: shabbosData, isLoading: shabbosLoading } = useShabbosTime();
+  const { data: shabbosData, isLoading: shabbosLoading, error: shabbosError } = useShabbosTime();
   
   // Get shared location state and trigger geolocation if needed
   const { coordinates, permissionDenied } = useGeolocation();
   
   // Show location prompt if permission denied and no coordinates
   const showLocationPrompt = permissionDenied && !coordinates;
+  
+  // Determine loading states
+  const isShabbosDataLoading = !coordinates || shabbosLoading;
+  const showShabbosError = !coordinates && permissionDenied;
 
   // Fetch today's table inspiration content
   const today = new Date().toISOString().split('T')[0];
@@ -102,14 +106,22 @@ export default function TableSection() {
               <h3 className="font-serif text-lg text-black font-bold">This Shabbos</h3>
             </div>
             <div className="text-right">
-              <p className="font-serif text-sm text-black font-medium">{shabbosData?.parsha || "Loading..."}</p>
+              <p className="font-serif text-sm text-black font-medium">
+                {showShabbosError ? "Set location" : 
+                 shabbosData?.parsha || 
+                 (isShabbosDataLoading ? "Loading..." : "Parsha unavailable")}
+              </p>
             </div>
           </div>
           
           {/* Location Display */}
           <div className="flex items-center justify-center space-x-1 mb-4">
             <MapPin className="text-black/60" size={12} />
-            <p className="font-sans text-xs text-black/60">{shabbosData?.location || "Loading location..."}</p>
+            <p className="font-sans text-xs text-black/60">
+              {showShabbosError ? "Location required for times" : 
+               shabbosData?.location || 
+               (isShabbosDataLoading ? "Loading location..." : "Location unavailable")}
+            </p>
           </div>
           
           <div className="grid grid-cols-2 gap-2">
@@ -117,14 +129,22 @@ export default function TableSection() {
               <p className="font-sans text-xs text-black/70 font-bold">Candle Lighting</p>
               <div className="flex items-center justify-center space-x-1">
                 <Flame className="text-blush" size={14} />
-                <p className="font-serif text-base text-black font-medium">{shabbosData?.candleLighting || "Loading..."}</p>
+                <p className="font-serif text-base text-black font-medium">
+                  {showShabbosError ? "--:--" : 
+                   shabbosData?.candleLighting || 
+                   (isShabbosDataLoading ? "Loading..." : "--:--")}
+                </p>
               </div>
             </div>
             <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
               <p className="font-sans text-xs text-black/70 font-bold">Havdalah</p>
               <div className="flex items-center justify-center space-x-1">
                 <Moon className="text-lavender" size={14} />
-                <p className="font-serif text-base text-black font-medium">{shabbosData?.havdalah || "Loading..."}</p>
+                <p className="font-serif text-base text-black font-medium">
+                  {showShabbosError ? "--:--" : 
+                   shabbosData?.havdalah || 
+                   (isShabbosDataLoading ? "Loading..." : "--:--")}
+                </p>
               </div>
             </div>
           </div>
