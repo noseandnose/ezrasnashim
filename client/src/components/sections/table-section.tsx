@@ -20,6 +20,16 @@ export default function TableSection() {
   // Determine loading states - match the behavior from Times section
   const isShabbosDataLoading = shabbosLoading && !!coordinates;
   const showShabbosError = !coordinates && permissionDenied;
+  
+  // Debug logging
+  console.log('Table Section Debug:', {
+    coordinates,
+    permissionDenied,
+    shabbosData,
+    isShabbosDataLoading,
+    showShabbosError,
+    shabbosLoading
+  });
 
   // Fetch today's table inspiration content
   const today = new Date().toISOString().split('T')[0];
