@@ -162,19 +162,19 @@ export default function Statistics() {
         <h2 className="text-base font-serif font-bold text-black mb-3">Core Metrics</h2>
         <div className="grid grid-cols-2 gap-3">
           <StatCard
-            title="Mitsvas"
+            title="Mitsvas Completed"
             value={totalLoading ? "..." : totalStats?.totalActs?.toLocaleString() || 0}
             icon={TrendingUp}
             color="text-blush"
           />
           <StatCard
-            title="Tehillim Books"
+            title="Tehillim Books Completed"
             value={totalLoading ? "..." : totalStats?.totalBooksCompleted?.toLocaleString() || 0}
             icon={BookOpen}
             color="text-sage"
           />
           <StatCard
-            title="Active Users"
+            title="Active Women"
             value={totalLoading ? "..." : totalStats?.totalUsers?.toLocaleString() || 0}
             icon={Users}
             color="text-peach"
@@ -192,7 +192,7 @@ export default function Statistics() {
           <div className="bg-gradient-to-r from-blush/10 to-peach/10 rounded-2xl p-4 border border-blush/10">
             <div className="flex items-center justify-between mb-2">
               <TrendingUp className="h-6 w-6 text-blush" />
-              <span className="text-sm font-medium text-warm-gray">Progress to 1 Million Mitsvas/Month</span>
+              <span className="text-sm font-medium text-warm-gray">Progress to 1 Million Mitsvas Completed/Month</span>
             </div>
             <div className="text-3xl font-serif font-bold text-black">
               {totalLoading ? "..." : (totalStats?.totalActs?.toLocaleString() || "0")}
@@ -261,13 +261,13 @@ export default function Statistics() {
             
             <div className="grid grid-cols-2 gap-3">
               <StatCard
-                title="Mitsvas"
+                title="Mitsvas Completed"
                 value={currentLoading ? "..." : (currentData as any)?.totalActs?.toLocaleString() || (currentData as any)?.totalActs || 0}
                 icon={TrendingUp}
                 color="text-blush"
               />
               <StatCard
-                title="Active Users"
+                title="Active Women"
                 value={currentLoading ? "..." : (currentData as any)?.totalUsers?.toLocaleString() || (currentData as any)?.uniqueUsers || 0}
                 icon={Users}
                 color="text-peach"
