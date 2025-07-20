@@ -80,9 +80,9 @@ export default function Statistics() {
     <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
       <div className="flex items-center justify-between mb-2">
         <Icon className={`h-5 w-5 ${color}`} />
-        <span className="text-xs font-medium text-warm-gray">{title}</span>
+        <span className="text-xs font-medium text-warm-gray text-right">{title}</span>
       </div>
-      <div className="text-2xl font-serif font-bold text-black">{value}</div>
+      <div className="text-2xl font-serif font-bold text-black text-center">{value}</div>
     </div>
   );
 
@@ -187,29 +187,7 @@ export default function Statistics() {
           />
         </div>
         
-        {/* Million Mitsvas Goal */}
-        <div className="mt-3">
-          <div className="bg-gradient-to-r from-blush/10 to-peach/10 rounded-2xl p-4 border border-blush/10">
-            <div className="flex items-center justify-between mb-2">
-              <TrendingUp className="h-6 w-6 text-blush" />
-              <span className="text-sm font-medium text-warm-gray">Progress to 1 Million Mitsvas Completed/Month</span>
-            </div>
-            <div className="text-3xl font-serif font-bold text-black">
-              {totalLoading ? "..." : (totalStats?.totalActs?.toLocaleString() || "0")}
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-              <div 
-                className="bg-gradient-to-r from-blush to-peach h-2 rounded-full transition-all duration-300" 
-                style={{ 
-                  width: `${Math.min(((totalStats?.totalActs || 0) / 1000000) * 100, 100)}%` 
-                }}
-              />
-            </div>
-            <p className="text-xs text-warm-gray mt-1">
-              {((((totalStats?.totalActs || 0) / 1000000) * 100).toFixed(1))}% of monthly goal
-            </p>
-          </div>
-        </div>
+
       </div>
 
       <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-24">
@@ -220,7 +198,7 @@ export default function Statistics() {
               <Button
                 onClick={() => setSelectedPeriod('today')}
                 variant={selectedPeriod === 'today' ? 'default' : 'ghost'}
-                className={`flex-1 rounded-lg text-sm ${
+                className={`flex-1 rounded-lg text-sm h-10 ${
                   selectedPeriod === 'today' 
                     ? 'bg-white text-black shadow-sm' 
                     : 'text-gray-600 hover:text-black'
@@ -231,7 +209,7 @@ export default function Statistics() {
               <Button
                 onClick={() => setSelectedPeriod('month')}
                 variant={selectedPeriod === 'month' ? 'default' : 'ghost'}
-                className={`flex-1 rounded-lg text-sm ${
+                className={`flex-1 rounded-lg text-sm h-10 ${
                   selectedPeriod === 'month' 
                     ? 'bg-white text-black shadow-sm' 
                     : 'text-gray-600 hover:text-black'
@@ -242,7 +220,7 @@ export default function Statistics() {
               <Button
                 onClick={() => setSelectedPeriod('alltime')}
                 variant={selectedPeriod === 'alltime' ? 'default' : 'ghost'}
-                className={`flex-1 rounded-lg text-sm ${
+                className={`flex-1 rounded-lg text-sm h-10 ${
                   selectedPeriod === 'alltime' 
                     ? 'bg-white text-black shadow-sm' 
                     : 'text-gray-600 hover:text-black'
