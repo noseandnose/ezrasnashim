@@ -157,60 +157,133 @@ export default function Statistics() {
         </div>
       </header>
       
+      {/* Core Metrics Section - Connected to Top */}
+      <div className="bg-gradient-soft -mt-3 rounded-b-3xl px-4 pt-6 pb-6 border-0 shadow-none flex-shrink-0">
+        <h2 className="text-base font-serif font-bold text-black mb-3">Core Metrics</h2>
+        <div className="grid grid-cols-2 gap-3">
+          <StatCard
+            title="Mitsvas"
+            value={totalLoading ? "..." : totalStats?.totalActs?.toLocaleString() || 0}
+            icon={TrendingUp}
+            color="text-blush"
+          />
+          <StatCard
+            title="Tehillim Books"
+            value={totalLoading ? "..." : totalStats?.totalBooksCompleted?.toLocaleString() || 0}
+            icon={BookOpen}
+            color="text-sage"
+          />
+          <StatCard
+            title="Active Users"
+            value={totalLoading ? "..." : totalStats?.totalUsers?.toLocaleString() || 0}
+            icon={Users}
+            color="text-peach"
+          />
+          <StatCard
+            title="People Davened For"
+            value={totalLoading ? "..." : totalStats?.totalNamesProcessed?.toLocaleString() || 0}
+            icon={Heart}
+            color="text-lavender"
+          />
+        </div>
+        
+        {/* Million Mitsvas Goal */}
+        <div className="mt-3">
+          <div className="bg-gradient-to-r from-blush/10 to-peach/10 rounded-2xl p-4 border border-blush/10">
+            <div className="flex items-center justify-between mb-2">
+              <TrendingUp className="h-6 w-6 text-blush" />
+              <span className="text-sm font-medium text-warm-gray">Progress to 1 Million Mitsvas/Month</span>
+            </div>
+            <div className="text-3xl font-serif font-bold text-black">
+              {totalLoading ? "..." : (totalStats?.totalActs?.toLocaleString() || "0")}
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+              <div 
+                className="bg-gradient-to-r from-blush to-peach h-2 rounded-full transition-all duration-300" 
+                style={{ 
+                  width: `${Math.min(((totalStats?.totalActs || 0) / 1000000) * 100, 100)}%` 
+                }}
+              />
+            </div>
+            <p className="text-xs text-warm-gray mt-1">
+              {((((totalStats?.totalActs || 0) / 1000000) * 100).toFixed(1))}% of monthly goal
+            </p>
+          </div>
+        </div>
+      </div>
+
       <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-24">
         <div className="space-y-6">
-          {/* Core Stats - Always Visible */}
+          {/* Time Period Tabs */}
           <div>
-            <h2 className="text-base font-serif font-bold text-black mb-3">Core Metrics</h2>
+            <div className="flex bg-gray-100 rounded-xl p-1 mb-4">
+              <Button
+                onClick={() => setSelectedPeriod('today')}
+                variant={selectedPeriod === 'today' ? 'default' : 'ghost'}
+                className={`flex-1 rounded-lg text-sm ${
+                  selectedPeriod === 'today' 
+                    ? 'bg-white text-black shadow-sm' 
+                    : 'text-gray-600 hover:text-black'
+                }`}
+              >
+                Today
+              </Button>
+              <Button
+                onClick={() => setSelectedPeriod('month')}
+                variant={selectedPeriod === 'month' ? 'default' : 'ghost'}
+                className={`flex-1 rounded-lg text-sm ${
+                  selectedPeriod === 'month' 
+                    ? 'bg-white text-black shadow-sm' 
+                    : 'text-gray-600 hover:text-black'
+                }`}
+              >
+                This Month
+              </Button>
+              <Button
+                onClick={() => setSelectedPeriod('alltime')}
+                variant={selectedPeriod === 'alltime' ? 'default' : 'ghost'}
+                className={`flex-1 rounded-lg text-sm ${
+                  selectedPeriod === 'alltime' 
+                    ? 'bg-white text-black shadow-sm' 
+                    : 'text-gray-600 hover:text-black'
+                }`}
+              >
+                All Time
+              </Button>
+            </div>
+
+            {/* Period-Specific Stats */}
+            <h2 className="text-base font-serif font-bold text-black mb-3">
+              {selectedPeriod === 'today' ? "Today's Activity" : 
+               selectedPeriod === 'month' ? "This Month's Activity" : 
+               "All Time Activity"}
+            </h2>
+            
             <div className="grid grid-cols-2 gap-3">
               <StatCard
                 title="Mitsvas"
-                value={totalLoading ? "..." : totalStats?.totalActs?.toLocaleString() || 0}
+                value={currentLoading ? "..." : (currentData as any)?.totalActs?.toLocaleString() || (currentData as any)?.totalActs || 0}
                 icon={TrendingUp}
                 color="text-blush"
               />
               <StatCard
-                title="Tehillim Books"
-                value={totalLoading ? "..." : totalStats?.totalBooksCompleted?.toLocaleString() || 0}
-                icon={BookOpen}
-                color="text-sage"
-              />
-              <StatCard
                 title="Active Users"
-                value={totalLoading ? "..." : totalStats?.totalUsers?.toLocaleString() || 0}
+                value={currentLoading ? "..." : (currentData as any)?.totalUsers?.toLocaleString() || (currentData as any)?.uniqueUsers || 0}
                 icon={Users}
                 color="text-peach"
               />
               <StatCard
-                title="People Davened For"
-                value={totalLoading ? "..." : totalStats?.totalNamesProcessed?.toLocaleString() || 0}
-                icon={Heart}
+                title="Tehillim Said"
+                value={currentLoading ? "..." : (currentData as any)?.totalTehillimCompleted?.toLocaleString() || (currentData as any)?.tehillimCompleted || 0}
+                icon={ScrollText}
                 color="text-lavender"
               />
-            </div>
-            
-            {/* Million Mitsvas Goal */}
-            <div className="mt-3">
-              <div className="bg-gradient-to-r from-blush/10 to-peach/10 rounded-2xl p-4 border border-blush/10">
-                <div className="flex items-center justify-between mb-2">
-                  <TrendingUp className="h-6 w-6 text-blush" />
-                  <span className="text-sm font-medium text-warm-gray">Progress to 1 Million Mitsvas/Month</span>
-                </div>
-                <div className="text-3xl font-serif font-bold text-black">
-                  {totalLoading ? "..." : (totalStats?.totalActs?.toLocaleString() || "0")}
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                  <div 
-                    className="bg-gradient-to-r from-blush to-peach h-2 rounded-full transition-all duration-300" 
-                    style={{ 
-                      width: `${Math.min(((totalStats?.totalActs || 0) / 1000000) * 100, 100)}%` 
-                    }}
-                  />
-                </div>
-                <p className="text-xs text-warm-gray mt-1">
-                  {((((totalStats?.totalActs || 0) / 1000000) * 100).toFixed(1))}% of monthly goal
-                </p>
-              </div>
+              <StatCard
+                title="People Davened For"
+                value={currentLoading ? "..." : (currentData as any)?.totalNamesProcessed?.toLocaleString() || (currentData as any)?.namesProcessed || 0}
+                icon={Heart}
+                color="text-sage"
+              />
             </div>
           </div>
 
@@ -228,7 +301,7 @@ export default function Statistics() {
                       !['unknown', 'test', ''].includes(modalType.toLowerCase()) &&
                       modalTypeNames[modalType] // Only show items we have names for
                     )
-                    .sort(([, a], [, b]) => b - a)
+                    .sort(([, a], [, b]) => (b as number) - (a as number))
                     .map(([modalType, count]) => {
                       const Icon = modalTypeIcons[modalType] || BookOpen;
                       return (
@@ -239,7 +312,7 @@ export default function Statistics() {
                               {modalTypeNames[modalType]}
                             </span>
                           </div>
-                          <span className="text-xs font-bold text-black">{count.toLocaleString()}</span>
+                          <span className="text-xs font-bold text-black">{(count as number).toLocaleString()}</span>
                         </div>
                       );
                     })}
@@ -247,8 +320,6 @@ export default function Statistics() {
               )}
             </div>
           </div>
-
-
         </div>
       </main>
 
