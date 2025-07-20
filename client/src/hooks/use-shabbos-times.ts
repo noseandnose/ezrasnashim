@@ -33,34 +33,16 @@ export function useShabbosTime() {
         return null;
       }
 
-      console.log('Fetching Shabbos times for coordinates:', coordinates);
-      
-      // Use the same zmanim API for consistent location names
-      const zmanimResponse = await fetch(`/api/zmanim/${coordinates.lat}/${coordinates.lng}`);
-      const zmanimData = await zmanimResponse.json();
-      
-      console.log('Zmanim API response:', zmanimData);
-      
-      const response = await fetch(
-        `https://www.hebcal.com/shabbat/?cfg=json&latitude=${coordinates.lat}&longitude=${coordinates.lng}`
-      );
+      // Use our backend proxy instead of direct Hebcal call to avoid CORS issues
+      const response = await fetch(`/api/shabbos/${coordinates.lat}/${coordinates.lng}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch Shabbos times');
       }
       
-      const data: ShabbosTimesResponse = await response.json();
-      console.log('Hebcal Shabbos API response:', data);
+      const data = await response.json();
       
-      // Use the location name from our zmanim API - no fallbacks
-      if (!zmanimData.location) {
-        throw new Error('Location data unavailable');
-      }
-      
-      const result = parseShabbosData(data, zmanimData.location);
-      console.log('Parsed Shabbos data:', result);
-      
-      return result;
+      return data;
     },
     enabled: !!coordinates, // Only fetch when coordinates are available
     staleTime: 1000 * 60 * 60, // 1 hour

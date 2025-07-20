@@ -228,6 +228,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Hebcal Shabbos times proxy route
+  app.get("/api/shabbos/:lat/:lng", async (req, res) => {
+    try {
+      const { lat, lng } = req.params;
+      const latitude = parseFloat(lat);
+      const longitude = parseFloat(lng);
+
+      if (isNaN(latitude) || isNaN(longitude)) {
+        return res.status(400).json({ message: "Invalid coordinates" });
+      }
+
+      console.log(`[Server API Request] GET https://www.hebcal.com/shabbat/?cfg=json&latitude=${latitude}&longitude=${longitude}`);
+      
+      const response = await fetch(
+        `https://www.hebcal.com/shabbat/?cfg=json&latitude=${latitude}&longitude=${longitude}`
+      );
+      
+      console.log(`[Server API Response] ${response.status} GET https://www.hebcal.com/shabbat/?cfg=json&latitude=${latitude}&longitude=${longitude}`);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch Shabbos times from Hebcal');
+      }
+
+      const data = await response.json();
+
+      // Get location name from our zmanim endpoint for consistency
+      const zmanimResponse = await fetch(`http://localhost:${process.env.PORT || 5000}/api/zmanim/${latitude}/${longitude}`);
+      const zmanimData = await zmanimResponse.json();
+
+      // Parse the Shabbos data
+      const result = {
+        location: zmanimData.location || 'Unknown Location',
+        candleLighting: null,
+        havdalah: null,
+        parsha: null
+      };
+
+      data.items.forEach((item: any) => {
+        if (item.title.includes("Candle lighting:") && item.date) {
+          const date = new Date(item.date);
+          result.candleLighting = date.toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit',
+            hour12: true 
+          });
+        } else if (item.title.includes("Havdalah:") && item.date) {
+          const date = new Date(item.date);
+          result.havdalah = date.toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit',
+            hour12: true 
+          });
+        } else if (item.title.startsWith("Parashat ") || item.title.startsWith("Parashah ")) {
+          result.parsha = item.title;
+        }
+      });
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching Shabbos times:', error);
+      res.status(500).json({ message: "Failed to fetch Shabbos times from Hebcal API" });
+    }
+  });
+
   // Sefaria API proxy route for Morning Brochas
   app.get("/api/sefaria/morning-brochas", async (req, res) => {
     try {
