@@ -31,13 +31,13 @@ export default function TimesSection() {
               <h3 className="font-semibold text-sm">Today's Times</h3>
             </div>
             <button 
-              className="text-xs text-gray-600 cursor-pointer hover:text-black hover:bg-gray-100 px-2 py-1 rounded transition-colors"
+              className="text-xs text-blue-600 cursor-pointer hover:text-blue-800 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors border border-blue-200 font-medium"
               onClick={() => {
                 console.log('Location clicked - opening modal');
                 openModal('location');
               }}
             >
-              📍 {getLocationDisplay()}
+              🌍 {getLocationDisplay()}
             </button>
           </div>
           {isLoading ? (
