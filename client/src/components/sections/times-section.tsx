@@ -9,15 +9,15 @@ export default function TimesSection() {
 
   const getLocationDisplay = () => {
     if (permissionDenied) {
-      return "Location access denied - tap to set manually";
+      return "Tap to set location manually";
     }
     if (coordinates && times?.location) {
-      return times.location;
+      return `${times.location} (tap to change)`;
     }
     if (coordinates) {
-      return "Current Location";
+      return "Current Location (tap to change)";
     }
-    return "Detecting location...";
+    return "Detecting location... (tap to set manually)";
   };
 
   return (
@@ -32,11 +32,7 @@ export default function TimesSection() {
             </div>
             <div 
               className="text-xs text-gray-600 cursor-pointer hover:text-black"
-              onClick={() => {
-                if (permissionDenied) {
-                  openModal('location');
-                }
-              }}
+              onClick={() => openModal('location')}
             >
               📍 {getLocationDisplay()}
             </div>
