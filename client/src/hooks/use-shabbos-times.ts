@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocationStore } from "./use-jewish-times";
+import axiosClient from "../lib/axiosClient";
 
 // This function is no longer used - location names come from API
 
@@ -39,23 +40,21 @@ export function useShabbosTime() {
       console.log('useShabbosTime: Fetching for coordinates:', coordinates);
       
       try {
-        // Use our backend proxy instead of direct Hebcal call to avoid CORS issues
+        // Use axios like other hooks for consistency
         const url = `/api/shabbos/${coordinates.lat}/${coordinates.lng}`;
         console.log('useShabbosTime: Making request to:', url);
         
-        const response = await fetch(url);
+        const response = await axiosClient.get(url);
+        console.log('useShabbosTime: Received data:', response.data);
         
-        if (!response.ok) {
-          console.error('useShabbosTime: API error:', response.status, response.statusText);
-          throw new Error(`Failed to fetch Shabbos times: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log('useShabbosTime: Received data:', data);
-        
-        return data;
+        return response.data;
       } catch (error) {
-        console.error('useShabbosTime: Error in fetch:', error);
+        console.error('useShabbosTime: Error in axios request:', error);
+        // Log response data if available
+        if (error.response) {
+          console.error('useShabbosTime: Error response status:', error.response.status);
+          console.error('useShabbosTime: Error response data:', error.response.data);
+        }
         throw error;
       }
     },
