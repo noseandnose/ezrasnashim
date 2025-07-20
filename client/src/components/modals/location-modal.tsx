@@ -203,12 +203,12 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
           )}
 
           {/* IP-based location detection button (VPN-friendly) */}
-          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-3 text-center">
-            <p className="text-xs text-blue-700 mb-2">For VPN users: Detect location from IP address</p>
+          <div className="bg-lavender/10 border border-lavender/30 rounded-2xl p-3 text-center">
+            <p className="text-xs text-lavender mb-2">For VPN users: Detect location from IP address</p>
             <Button 
               onClick={handleIPLocation}
               disabled={isLoading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl"
+              className="w-full bg-gradient-feminine text-white rounded-xl border-0 hover:opacity-90"
             >
               {isLoading ? "Detecting..." : "Use IP Location (VPN Compatible)"}
             </Button>

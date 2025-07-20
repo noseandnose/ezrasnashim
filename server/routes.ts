@@ -268,30 +268,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       data.items.forEach((item: any) => {
         console.log('Processing item:', item.title);
         if (item.title.includes("Candle lighting:")) {
-          // Extract time directly from title (e.g., "Candle lighting: 19:23")
-          const timeMatch = item.title.match(/Candle lighting: (\d{1,2}:\d{2})/);
+          // Extract time with possible pm/am suffix (e.g., "Candle lighting: 8:00pm" or "Candle lighting: 19:23")
+          const timeMatch = item.title.match(/Candle lighting: (\d{1,2}:\d{2})(pm|am|p\.m\.|a\.m\.)?/i);
           console.log('Candle lighting timeMatch:', timeMatch);
           if (timeMatch) {
             const [hours, minutes] = timeMatch[1].split(':');
-            const hour24 = parseInt(hours);
-            console.log('Candle lighting - hour24:', hour24, 'minutes:', minutes);
-            const displayHour = hour24 > 12 ? hour24 - 12 : (hour24 === 0 ? 12 : hour24);
-            const period = hour24 >= 12 ? 'PM' : 'AM';
-            result.candleLighting = `${displayHour}:${minutes} ${period}`;
+            const hour12 = parseInt(hours);
+            const suffix = timeMatch[2]?.toLowerCase();
+            
+            console.log('Candle lighting - hour12:', hour12, 'minutes:', minutes, 'suffix:', suffix);
+            
+            if (suffix) {
+              // Already has am/pm, just format it properly
+              const displayHour = hour12 === 0 ? 12 : hour12;
+              result.candleLighting = `${displayHour}:${minutes} ${suffix.toUpperCase()}`;
+            } else {
+              // 24-hour format, convert to 12-hour
+              const displayHour = hour12 > 12 ? hour12 - 12 : (hour12 === 0 ? 12 : hour12);
+              const period = hour12 >= 12 ? 'PM' : 'AM';
+              result.candleLighting = `${displayHour}:${minutes} ${period}`;
+            }
             console.log('Final candleLighting:', result.candleLighting);
           }
         } else if (item.title.includes("Havdalah:")) {
-          // Extract time directly from title (e.g., "Havdalah: 20:21")
-          const timeMatch = item.title.match(/Havdalah: (\d{1,2}:\d{2})/);
-          console.log('Havdalah timeMatch:', timeMatch);
-          if (timeMatch) {
-            const [hours, minutes] = timeMatch[1].split(':');
-            const hour24 = parseInt(hours);
-            console.log('Havdalah - hour24:', hour24, 'minutes:', minutes);
-            const displayHour = hour24 > 12 ? hour24 - 12 : (hour24 === 0 ? 12 : hour24);
-            const period = hour24 >= 12 ? 'PM' : 'AM';
-            result.havdalah = `${displayHour}:${minutes} ${period}`;
+          console.log('Full title for havdalah:', item.title);
+          // Check if it has pm/am at the end of the full title  
+          const timeWithSuffixMatch = item.title.match(/Havdalah: (\d{1,2}:\d{2})\s*(pm|am)/i);
+          if (timeWithSuffixMatch) {
+            const [, time, suffix] = timeWithSuffixMatch;
+            const [hours, minutes] = time.split(':');
+            const hour12 = parseInt(hours);
+            console.log('Havdalah with suffix - hour12:', hour12, 'minutes:', minutes, 'suffix:', suffix);
+            const displayHour = hour12 === 0 ? 12 : hour12;
+            result.havdalah = `${displayHour}:${minutes} ${suffix.toUpperCase()}`;
             console.log('Final havdalah:', result.havdalah);
+          } else {
+            // Try 24-hour format
+            const timeMatch = item.title.match(/Havdalah: (\d{1,2}:\d{2})/);
+            if (timeMatch) {
+              const [hours, minutes] = timeMatch[1].split(':');
+              const hour24 = parseInt(hours);
+              console.log('Havdalah 24hr - hour24:', hour24, 'minutes:', minutes);
+              const displayHour = hour24 > 12 ? hour24 - 12 : (hour24 === 0 ? 12 : hour24);
+              const period = hour24 >= 12 ? 'PM' : 'AM';
+              result.havdalah = `${displayHour}:${minutes} ${period}`;
+              console.log('Final havdalah:', result.havdalah);
+            }
           }
         } else if (item.title.startsWith("Parashat ") || item.title.startsWith("Parashah ")) {
           result.parsha = item.title;
