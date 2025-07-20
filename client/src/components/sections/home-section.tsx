@@ -106,10 +106,10 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <p className="font-serif text-xs text-black">{hebrewDate || "Loading..."}</p>
             <button 
               onClick={() => openModal('location')}
-              className="flex items-center justify-end space-x-1 hover:bg-blush/10 px-2 py-1 rounded transition-colors border border-blush/30 bg-blush/5"
+              className="flex items-center justify-end space-x-1 hover:bg-white/80 px-2 py-1 rounded transition-colors border border-gray-200 bg-white/60"
             >
-              <MapPin className="text-blush" size={10} />
-              <p className="font-sans text-xs text-blush font-medium">{jewishTimesQuery.data?.location ? `${jewishTimesQuery.data.location} (tap)` : "Set Location"}</p>
+              <MapPin className="text-gray-600" size={10} />
+              <p className="font-sans text-xs text-gray-700 font-medium">{jewishTimesQuery.data?.location ? `${jewishTimesQuery.data.location} (tap)` : "Set Location"}</p>
             </button>
           </div>
         </div>

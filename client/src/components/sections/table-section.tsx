@@ -120,14 +120,7 @@ export default function TableSection() {
           </div>
           
           {/* Location Display */}
-          <div className="flex items-center justify-center space-x-1 mb-4">
-            <MapPin className="text-black/60" size={12} />
-            <p className="font-sans text-xs text-black/60">
-              {showShabbosError ? "Location required for times" : 
-               shabbosData?.location || 
-               (isShabbosDataLoading ? "Loading location..." : "Location unavailable")}
-            </p>
-          </div>
+
           
           <div className="grid grid-cols-2 gap-2">
             <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">

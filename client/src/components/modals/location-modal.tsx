@@ -122,26 +122,7 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
     );
   };
 
-  // Use IP-based location detection (works with VPN)
-  const handleIPLocation = async () => {
-    setIsLoading(true);
-    try {
-      const locationData = await useIPLocation();
-      onClose();
-      toast({
-        title: "Location Updated",
-        description: `Location set to ${locationData.location} (from IP)`,
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to detect location from IP address",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+
 
   // Close without changes
   const handleClose = () => {
@@ -202,17 +183,7 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
             </div>
           )}
 
-          {/* IP-based location detection button (VPN-friendly) */}
-          <div className="bg-lavender/10 border border-lavender/30 rounded-2xl p-3 text-center">
-            <p className="text-xs text-lavender mb-2">For VPN users: Detect location from IP address</p>
-            <Button 
-              onClick={handleIPLocation}
-              disabled={isLoading}
-              className="w-full bg-gradient-feminine text-white rounded-xl border-0 hover:opacity-90"
-            >
-              {isLoading ? "Detecting..." : "Use IP Location (VPN Compatible)"}
-            </Button>
-          </div>
+
 
           <div className="flex space-x-3">
             <Button 
