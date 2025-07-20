@@ -93,18 +93,15 @@ export function useJewishTimes() {
   const { coordinates } = useGeolocation();
   const today = new Date().toISOString().split("T")[0];
 
-  // Use coordinates if available, otherwise no API call
-  if (!coordinates) {
-    return { data: null, isLoading: false };
-  }
-  const effectiveCoords = coordinates;
-
   return useQuery({
-    queryKey: ["zmanim", effectiveCoords.lat, effectiveCoords.lng, today],
+    queryKey: ["zmanim", coordinates?.lat, coordinates?.lng, today],
     queryFn: async () => {
+      if (!coordinates) {
+        return null;
+      }
       try {
         // Call our backend proxy route using relative path
-        const url = `/api/zmanim/${effectiveCoords.lat}/${effectiveCoords.lng}`;
+        const url = `/api/zmanim/${coordinates.lat}/${coordinates.lng}`;
         const response = await axiosClient.get(url);
         return response.data;
       } catch (error) {
@@ -112,7 +109,7 @@ export function useJewishTimes() {
         return null;
       }
     },
-    enabled: !!effectiveCoords, // Only fetch when we have coordinates
+    enabled: !!coordinates, // Only fetch when we have coordinates
     staleTime: 1000 * 60 * 30, // 30 minutes for location changes
     refetchInterval: false,
     refetchOnWindowFocus: true, // Refetch when window gains focus
