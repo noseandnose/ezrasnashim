@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { BarChart3, Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
+import { useState } from "react";
 import BottomNavigation from "@/components/bottom-navigation";
 import type { Section } from "@/pages/home";
 
@@ -16,7 +18,7 @@ interface DailyStats {
   modalCompletions: Record<string, number>;
 }
 
-interface TotalStats {
+interface PeriodStats {
   totalUsers: number;
   totalPageViews: number;
   totalTehillimCompleted: number;
@@ -26,8 +28,11 @@ interface TotalStats {
   totalModalCompletions: Record<string, number>;
 }
 
+type TimePeriod = 'today' | 'month' | 'alltime';
+
 export default function Statistics() {
   const [, setLocation] = useLocation();
+  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('today');
 
   // Fetch today's stats
   const { data: todayStats, isLoading: todayLoading } = useQuery<DailyStats>({
@@ -35,11 +40,33 @@ export default function Statistics() {
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
+  // Fetch monthly stats
+  const { data: monthlyStats, isLoading: monthlyLoading } = useQuery<PeriodStats>({
+    queryKey: ["/api/analytics/stats/month"],
+    refetchInterval: 60000, // Refresh every minute
+  });
+
   // Fetch total stats
-  const { data: totalStats, isLoading: totalLoading } = useQuery<TotalStats>({
+  const { data: totalStats, isLoading: totalLoading } = useQuery<PeriodStats>({
     queryKey: ["/api/analytics/stats/total"],
     refetchInterval: 60000, // Refresh every minute
   });
+
+  // Get current data based on selected period
+  const getCurrentData = () => {
+    switch (selectedPeriod) {
+      case 'today':
+        return { data: todayStats, isLoading: todayLoading };
+      case 'month':
+        return { data: monthlyStats, isLoading: monthlyLoading };
+      case 'alltime':
+        return { data: totalStats, isLoading: totalLoading };
+      default:
+        return { data: todayStats, isLoading: todayLoading };
+    }
+  };
+
+  const { data: currentData, isLoading: currentLoading } = getCurrentData();
 
 
 
@@ -132,130 +159,70 @@ export default function Statistics() {
       
       <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-24">
         <div className="space-y-6">
-          {/* Today's Stats */}
+          {/* Core Stats - Always Visible */}
           <div>
-            <h2 className="text-base font-serif font-bold text-black mb-3">Today's Activity</h2>
+            <h2 className="text-base font-serif font-bold text-black mb-3">Core Metrics</h2>
             <div className="grid grid-cols-2 gap-3">
               <StatCard
-                title="Total Acts"
-                value={todayLoading ? "..." : todayStats?.totalActs || 0}
-                icon={TrendingUp}
-                color="text-blush"
-              />
-              <StatCard
-                title="Active Users"
-                value={todayLoading ? "..." : todayStats?.uniqueUsers || 0}
-                icon={Users}
-                color="text-peach"
-              />
-              <StatCard
-                title="Tehillim Said"
-                value={todayLoading ? "..." : todayStats?.tehillimCompleted || 0}
-                icon={ScrollText}
-                color="text-lavender"
-              />
-              <StatCard
-                title="Torah Learnt"
-                value={todayLoading ? "..." : (todayStats?.modalCompletions ? 
-                  Object.entries(todayStats.modalCompletions)
-                    .filter(([key]) => ['chizuk', 'emuna', 'halacha', 'featured-content'].includes(key))
-                    .reduce((sum, [, count]) => sum + count, 0) : 0)}
-                icon={BookOpen}
-                color="text-sage"
-              />
-            </div>
-            
-            {/* Book Completions - Special Achievement */}
-            {todayStats?.booksCompleted ? (
-              <div className="mt-3">
-                <div className="bg-gradient-to-r from-blush/20 to-peach/20 rounded-2xl p-4 border border-blush/20">
-                  <div className="flex items-center justify-between mb-2">
-                    <Calendar className="h-6 w-6 text-blush" />
-                    <span className="text-sm font-medium text-warm-gray">Complete Tehillim Books Today</span>
-                  </div>
-                  <div className="text-3xl font-serif font-bold text-black">{todayStats.booksCompleted}</div>
-                  <p className="text-xs text-warm-gray mt-1">Amazing achievement! 🎉</p>
-                </div>
-              </div>
-            ) : null}
-          </div>
-
-          {/* Total Stats */}
-          <div>
-            <h2 className="text-base font-serif font-bold text-black mb-3">All Time Totals</h2>
-            <div className="grid grid-cols-2 gap-3">
-              <StatCard
-                title="Total Acts"
+                title="Mitsvas"
                 value={totalLoading ? "..." : totalStats?.totalActs?.toLocaleString() || 0}
                 icon={TrendingUp}
                 color="text-blush"
               />
-            </div>
-
-            {/* Million Acts Goal */}
-            <div className="mt-3">
-              <div className="bg-gradient-to-r from-gold/20 to-blush/20 rounded-2xl p-4 border border-gold/20">
-                <div className="flex items-center justify-between mb-2">
-                  <TrendingUp className="h-6 w-6 text-gold" />
-                  <span className="text-sm font-medium text-warm-gray">1 Million Acts Goal Progress</span>
-                </div>
-                <div className="text-3xl font-serif font-bold text-black">
-                  {totalLoading ? "..." : ((totalStats?.totalActs || 0) / 1000000 * 100).toFixed(2)}%
-                </div>
-                <p className="text-xs text-warm-gray mt-1">
-                  {totalLoading ? "..." : `${(totalStats?.totalActs || 0).toLocaleString()} / 1,000,000 acts completed`}
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 mt-3">
+              <StatCard
+                title="Tehillim Books"
+                value={totalLoading ? "..." : totalStats?.totalBooksCompleted?.toLocaleString() || 0}
+                icon={BookOpen}
+                color="text-sage"
+              />
               <StatCard
                 title="Active Users"
-                value={totalLoading ? "..." : totalStats?.totalUsers.toLocaleString() || 0}
+                value={totalLoading ? "..." : totalStats?.totalUsers?.toLocaleString() || 0}
                 icon={Users}
                 color="text-peach"
               />
               <StatCard
-                title="Tehillim Said"
-                value={totalLoading ? "..." : totalStats?.totalTehillimCompleted.toLocaleString() || 0}
-                icon={ScrollText}
+                title="People Davened For"
+                value={totalLoading ? "..." : totalStats?.totalNamesProcessed?.toLocaleString() || 0}
+                icon={Heart}
                 color="text-lavender"
-              />
-              <StatCard
-                title="Torah Learnt"
-                value={totalLoading ? "..." : (totalStats?.totalModalCompletions ? 
-                  Object.entries(totalStats.totalModalCompletions)
-                    .filter(([key]) => ['chizuk', 'emuna', 'halacha', 'featured-content'].includes(key))
-                    .reduce((sum, [, count]) => sum + count, 0).toLocaleString() : 0)}
-                icon={BookOpen}
-                color="text-sage"
               />
             </div>
             
-            {/* Total Book Completions */}
+            {/* Million Mitsvas Goal */}
             <div className="mt-3">
               <div className="bg-gradient-to-r from-blush/10 to-peach/10 rounded-2xl p-4 border border-blush/10">
                 <div className="flex items-center justify-between mb-2">
-                  <Calendar className="h-6 w-6 text-blush" />
-                  <span className="text-sm font-medium text-warm-gray">Complete Tehillim Books Ever</span>
+                  <TrendingUp className="h-6 w-6 text-blush" />
+                  <span className="text-sm font-medium text-warm-gray">Progress to 1 Million Mitsvas/Month</span>
                 </div>
                 <div className="text-3xl font-serif font-bold text-black">
-                  {totalLoading ? "..." : (totalStats?.totalBooksCompleted?.toLocaleString() || "0")}
+                  {totalLoading ? "..." : (totalStats?.totalActs?.toLocaleString() || "0")}
                 </div>
-                <p className="text-xs text-warm-gray mt-1">Full books of 150 perakim completed</p>
+                <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                  <div 
+                    className="bg-gradient-to-r from-blush to-peach h-2 rounded-full transition-all duration-300" 
+                    style={{ 
+                      width: `${Math.min(((totalStats?.totalActs || 0) / 1000000) * 100, 100)}%` 
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-warm-gray mt-1">
+                  {((((totalStats?.totalActs || 0) / 1000000) * 100).toFixed(1))}% of monthly goal
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Modal Completions */}
+          {/* Feature Usage */}
           <div>
             <h2 className="text-base font-serif font-bold text-black mb-3">Feature Usage</h2>
             <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
-              {totalLoading ? (
+              {currentLoading ? (
                 <div className="text-center text-black/60">Loading...</div>
               ) : (
                 <div className="space-y-2">
-                  {Object.entries(totalStats?.totalModalCompletions || {})
+                  {Object.entries((currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {})
                     .filter(([modalType]) => 
                       // Remove unknown, test, and other unwanted entries
                       !['unknown', 'test', ''].includes(modalType.toLowerCase()) &&

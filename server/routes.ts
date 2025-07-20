@@ -1220,6 +1220,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/analytics/stats/month", async (req, res) => {
+    try {
+      const now = new Date();
+      const year = parseInt(req.query.year as string) || now.getFullYear();
+      const month = parseInt(req.query.month as string) || (now.getMonth() + 1);
+      
+      const monthlyStats = await storage.getMonthlyStats(year, month);
+      res.json(monthlyStats);
+    } catch (error) {
+      console.error('Error fetching monthly stats:', error);
+      res.status(500).json({ message: "Failed to fetch monthly stats" });
+    }
+  });
+
   app.get("/api/analytics/stats/total", async (req, res) => {
     try {
       const totals = await storage.getTotalStats();

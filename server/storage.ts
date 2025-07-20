@@ -1011,6 +1011,78 @@ export class DatabaseStorage implements IStorage {
     return totalActs;
   }
 
+  async getMonthlyStats(year: number, month: number): Promise<{
+    totalUsers: number;
+    totalPageViews: number;
+    totalTehillimCompleted: number;
+    totalNamesProcessed: number;
+    totalBooksCompleted: number;
+    totalActs: number;
+    totalModalCompletions: Record<string, number>;
+  }> {
+    try {
+      // Get stats for the specified month
+      const startDate = `${year}-${month.toString().padStart(2, '0')}-01`;
+      const endDate = new Date(year, month, 0).toISOString().split('T')[0]; // Last day of month
+      
+      const monthlyStats = await db
+        .select()
+        .from(dailyStats)
+        .where(
+          and(
+            gte(dailyStats.date, startDate),
+            lte(dailyStats.date, endDate)
+          )
+        );
+      
+      // Aggregate monthly totals
+      let totalUsers = 0;
+      let totalPageViews = 0;
+      let totalTehillimCompleted = 0;
+      let totalNamesProcessed = 0;
+      let totalBooksCompleted = 0;
+      let totalActs = 0;
+      const totalModalCompletions: Record<string, number> = {};
+      
+      for (const stats of monthlyStats) {
+        totalUsers += stats.uniqueUsers || 0;
+        totalPageViews += stats.pageViews || 0;
+        totalTehillimCompleted += stats.tehillimCompleted || 0;
+        totalNamesProcessed += stats.namesProcessed || 0;
+        totalBooksCompleted += stats.booksCompleted || 0;
+        totalActs += stats.totalActs || 0;
+        
+        // Merge modal completions
+        const completions = stats.modalCompletions as Record<string, number> || {};
+        for (const [modalType, count] of Object.entries(completions)) {
+          totalModalCompletions[modalType] = (totalModalCompletions[modalType] || 0) + count;
+        }
+      }
+      
+      return {
+        totalUsers,
+        totalPageViews,
+        totalTehillimCompleted,
+        totalNamesProcessed,
+        totalBooksCompleted,
+        totalActs,
+        totalModalCompletions
+      };
+    } catch (error) {
+      console.error('Error fetching monthly stats:', error);
+      // Return empty stats if error occurs
+      return {
+        totalUsers: 0,
+        totalPageViews: 0,
+        totalTehillimCompleted: 0,
+        totalNamesProcessed: 0,
+        totalBooksCompleted: 0,
+        totalActs: 0,
+        totalModalCompletions: {}
+      };
+    }
+  }
+
   async getTotalStats(): Promise<{
     totalUsers: number;
     totalPageViews: number;
