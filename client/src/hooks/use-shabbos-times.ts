@@ -54,8 +54,8 @@ export function useShabbosTime() {
     queryKey: ['shabbos-times', coordinates?.lat, coordinates?.lng],
     queryFn: async () => {
       if (!coordinates) {
-        // No location available, return null to show location prompt
-        return null;
+        // No location available, throw error to show loading state
+        throw new Error('Location required');
       }
 
       // Use the same zmanim API for consistent location names

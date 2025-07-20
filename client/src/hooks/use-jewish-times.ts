@@ -46,8 +46,7 @@ export function useGeolocation() {
 
       if (!navigator.geolocation) {
         console.warn("Geolocation is not supported by this browser");
-        // Set fallback coordinates for Bet Shemesh
-        setCoordinates({ lat: 31.701591787040115, lng: 34.98518163189156 });
+        setPermissionDenied(true);
         return;
       }
 
@@ -69,8 +68,7 @@ export function useGeolocation() {
             console.warn("Location request timed out, using default location");
           }
           setPermissionDenied(true);
-          // Set fallback coordinates for Bet Shemesh when permission denied
-          setCoordinates({ lat: 31.701591787040115, lng: 34.98518163189156 });
+          // Don't set fallback coordinates - require accurate location
         },
         {
           enableHighAccuracy: true,

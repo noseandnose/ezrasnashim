@@ -13,6 +13,9 @@ export default function TableSection() {
   
   // Get shared location state and trigger geolocation if needed
   const { coordinates, permissionDenied } = useGeolocation();
+  
+  // Show location prompt if permission denied and no coordinates
+  const showLocationPrompt = permissionDenied && !coordinates;
 
   // Fetch today's table inspiration content
   const today = new Date().toISOString().split('T')[0];
@@ -68,6 +71,25 @@ export default function TableSection() {
     <div className="overflow-y-auto h-full pb-20">
       {/* Main Table Section - Connected to top bar - Only This Shabbos */}
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg -mt-1">
+        {/* Location Permission Prompt */}
+        {showLocationPrompt && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 mb-3">
+            <div className="flex items-center space-x-2 mb-2">
+              <MapPin className="text-yellow-600" size={16} />
+              <h4 className="font-serif text-sm font-bold text-yellow-800">Location Required</h4>
+            </div>
+            <p className="font-sans text-xs text-yellow-700 mb-3">
+              Please enable location access for accurate Jewish prayer times, or click below to set your location manually.
+            </p>
+            <button 
+              onClick={() => openModal('location')}
+              className="bg-yellow-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-yellow-700 transition-colors"
+            >
+              Set Location Manually
+            </button>
+          </div>
+        )}
+        
         {/* Shabbos Times Section */}
         <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
           <div className="flex items-center justify-between mb-2">

@@ -7,7 +7,6 @@ export const dailyRecipes = pgTable("daily_recipes", {
   id: serial("id").primaryKey(),
   fromDate: date("from_date").notNull(), // Start date for recipe availability
   untilDate: date("until_date").notNull(), // End date for recipe availability (same as fromDate if daily)
-  hebrewDate: text("hebrew_date").notNull(),
   title: text("title").notNull(),
   description: text("description"),
   ingredients: text("ingredients").notNull(), // JSON array as text
