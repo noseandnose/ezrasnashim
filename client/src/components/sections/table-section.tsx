@@ -17,8 +17,8 @@ export default function TableSection() {
   // Show location prompt if permission denied and no coordinates
   const showLocationPrompt = permissionDenied && !coordinates;
   
-  // Determine loading states
-  const isShabbosDataLoading = !coordinates || shabbosLoading;
+  // Determine loading states - match the behavior from Times section
+  const isShabbosDataLoading = shabbosLoading && !!coordinates;
   const showShabbosError = !coordinates && permissionDenied;
 
   // Fetch today's table inspiration content
