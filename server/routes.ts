@@ -455,23 +455,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Missing required fields" });
       }
 
-      // Extract Hebrew date components (e.g., "19th of Tevet" -> day=19, month=Tevet)
-      const parseHebrewDate = (hebrewDateStr: string) => {
-        // Handle formats like "19th of Tevet", "19 Tevet", "Tevet 19", etc.
-        const cleanDate = hebrewDateStr.replace(/(\d+)(st|nd|rd|th)\s+of\s+/i, '$1 ');
-        const parts = cleanDate.split(/\s+/);
-        
-        let day, month;
-        if (parts.length >= 2) {
-          // Try to find day number and month name
-          const dayMatch = parts.find(p => /^\d+$/.test(p));
-          const monthMatch = parts.find(p => isNaN(parseInt(p)) && p.length > 2);
-          day = dayMatch ? parseInt(dayMatch) : null;
-          month = monthMatch || null;
+      // Step 1: Convert the original input date to Hebrew to get the Hebrew day/month
+      const parseOriginalDate = new Date(gregorianDate);
+      const originalYear = parseOriginalDate.getFullYear();
+      const originalMonth = parseOriginalDate.getMonth() + 1;
+      const originalDay = parseOriginalDate.getDate();
+      
+      // Get Hebrew date for the original input date
+      let hebrewDay, hebrewMonth;
+      try {
+        const response = await serverAxiosClient.get(`https://www.hebcal.com/converter?cfg=json&gy=${originalYear}&gm=${originalMonth}&gd=${originalDay}&g2h=1`);
+        if (response.data && response.data.hd && response.data.hm) {
+          hebrewDay = response.data.hd;
+          hebrewMonth = response.data.hm;
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`Original date ${gregorianDate} converts to ${hebrewDay} ${hebrewMonth}`);
+          }
+        } else {
+          throw new Error('Invalid Hebrew date response');
         }
-        
-        return { day, month };
-      };
+      } catch (error) {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error converting original date to Hebrew:', error);
+        }
+        return res.status(400).json({ message: "Failed to convert input date to Hebrew date" });
+      }
 
       // Generate ICS content for recurring event
       const generateICSContent = async () => {
@@ -487,62 +495,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'METHOD:PUBLISH'
         ];
 
-        const { day, month } = parseHebrewDate(hebrewDate);
         const currentYear = new Date().getFullYear();
         
-        // Create events for the next 'years' years starting from current year
+        // Step 2: For the next 10 years from TODAY, find when this Hebrew date occurs
         for (let i = 0; i < years; i++) {
           const targetYear = currentYear + i;
-          let englishDateForYear = null;
           
-          if (day && month) {
-            // Normalize Hebrew month names for Hebcal API
-            const hebrewMonthNames: { [key: string]: string } = {
-              'tishrei': 'Tishrei', 'cheshvan': 'Cheshvan', 'kislev': 'Kislev', 'tevet': 'Tevet', 
-              'shevat': 'Shevat', 'adar': 'Adar', 'nissan': 'Nissan', 'iyar': 'Iyar', 
-              'sivan': 'Sivan', 'tammuz': 'Tammuz', 'av': 'Av', 'elul': 'Elul',
-              'adar i': 'Adar I', 'adar ii': 'Adar II'
-            };
+          try {
+            // Calculate corresponding Hebrew year for target English year
+            // Hebrew year approximately = English year + 3760, but we need to account for the Hebrew calendar overlap
+            let hebrewYear = targetYear + 3760;
             
-            const monthName = hebrewMonthNames[month.toLowerCase()];
+            // Try both possible Hebrew years since Hebrew year changes around Sept/Oct
+            const hebrewYearsToTry = [hebrewYear, hebrewYear + 1];
+            let englishDateForYear = null;
             
-            if (monthName) {
+            for (const hy of hebrewYearsToTry) {
               try {
-                // Calculate Hebrew year more accurately
-                const hebrewYear = targetYear < 2025 ? 5785 : 5785 + (targetYear - 2025);
-                
-                // Convert Hebrew date to Gregorian for this year
-                const response = await serverAxiosClient.get(`https://www.hebcal.com/converter?cfg=json&hd=${day}&hm=${monthName}&hy=${hebrewYear}&h2g=1`);
+                // Convert Hebrew date back to English for this Hebrew year
+                const response = await serverAxiosClient.get(`https://www.hebcal.com/converter?cfg=json&hd=${hebrewDay}&hm=${hebrewMonth}&hy=${hy}&h2g=1`);
                 
                 if (response.data && response.data.gy && response.data.gm && response.data.gd) {
-                  const { gy, gm, gd } = response.data;
-                  englishDateForYear = new Date(gy, gm - 1, gd); // gm is 1-based
+                  const convertedYear = response.data.gy;
+                  
+                  // Only use this conversion if it falls in our target year
+                  if (convertedYear === targetYear) {
+                    englishDateForYear = new Date(response.data.gy, response.data.gm - 1, response.data.gd);
+                    if (process.env.NODE_ENV === 'development') {
+                      console.log(`${hebrewDay} ${hebrewMonth} ${hy} converts to ${englishDateForYear.toDateString()}`);
+                    }
+                    break;
+                  }
                 }
-              } catch (error) {
-                console.error(`Error converting Hebrew date for year ${targetYear}:`, error);
+              } catch (err) {
+                // Continue trying next Hebrew year
+                continue;
               }
             }
+            
+            if (englishDateForYear) {
+              const dateStr = englishDateForYear.toISOString().split('T')[0].replace(/-/g, '');
+              
+              icsContent.push(
+                'BEGIN:VEVENT',
+                `UID:${uid}-${targetYear}`,
+                `DTSTAMP:${dtStamp}`,
+                `DTSTART;VALUE=DATE:${dateStr}`,
+                `SUMMARY:${title}`,
+                `DESCRIPTION:Hebrew Date: ${hebrewDay} ${hebrewMonth}\\nEnglish Date: ${englishDateForYear.toLocaleDateString()}\\nYear: ${targetYear}`,
+                'STATUS:CONFIRMED',
+                'TRANSP:TRANSPARENT',
+                'END:VEVENT'
+              );
+            } else {
+              if (process.env.NODE_ENV === 'development') {
+                console.log(`Could not find ${hebrewDay} ${hebrewMonth} in ${targetYear}`);
+              }
+            }
+          } catch (error) {
+            if (process.env.NODE_ENV === 'development') {
+              console.error(`Error processing year ${targetYear}:`, error);
+            }
           }
-          
-          // Only use fallback if Hebrew conversion completely failed
-          if (!englishDateForYear) {
-            const baseDate = new Date(gregorianDate);
-            englishDateForYear = new Date(targetYear, baseDate.getMonth(), baseDate.getDate());
-          }
-          
-          const dateStr = englishDateForYear.toISOString().split('T')[0].replace(/-/g, '');
-          
-          icsContent.push(
-            'BEGIN:VEVENT',
-            `UID:${uid}-${i}`,
-            `DTSTAMP:${dtStamp}`,
-            `DTSTART;VALUE=DATE:${dateStr}`,
-            `SUMMARY:${title}`,
-            `DESCRIPTION:Hebrew Date: ${hebrewDate}\\nEnglish Date: ${englishDateForYear.toLocaleDateString()}\\nYear: ${targetYear}`,
-            'STATUS:CONFIRMED',
-            'TRANSP:TRANSPARENT',
-            'END:VEVENT'
-          );
         }
         
         icsContent.push('END:VCALENDAR');
