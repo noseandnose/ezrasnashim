@@ -21,9 +21,9 @@ interface TefillaModalsProps {
 
 // Koren Thank You Component
 const KorenThankYou = () => (
-  <div className="bg-blue-50 rounded-2xl p-4 mt-4 border border-blue-200">
+  <div className="bg-blue-50 rounded-2xl p-4 mt-1 border border-blue-200">
     <div className="flex items-center justify-center space-x-3">
-      <span className="text-sm font-medium text-black">Thank you to Koren for providing this Tefilla</span>
+      <span className="text-sm font-medium text-black">All tefilla texts courtesy of Koren Publishers Jerusalem</span>
       <a 
         href="https://korenpub.co.il/" 
         target="_blank" 
@@ -168,7 +168,7 @@ function MorningBrochasModal() {
         </div>
 
         {/* Expanded Prayer Content Area */}
-        <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
+        <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>

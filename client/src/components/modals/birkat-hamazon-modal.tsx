@@ -18,9 +18,9 @@ interface BirkatHamazonPrayer {
 
 // Koren Thank You Component
 const KorenThankYou = () => (
-  <div className="bg-blue-50 rounded-2xl p-4 mt-4 border border-blue-200">
+  <div className="bg-blue-50 rounded-2xl p-4 mt-1 border border-blue-200">
     <div className="flex items-center justify-center space-x-3">
-      <span className="text-sm font-medium text-black">Thank you to Koren for providing this Tefilla</span>
+      <span className="text-sm font-medium text-black">All tefilla texts courtesy of Koren Publishers Jerusalem</span>
       <a 
         href="https://korenpub.co.il/" 
         target="_blank" 
@@ -190,7 +190,7 @@ export function BirkatHamazonModal() {
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans">
           <StandardModalHeader />
           
-          <div className="max-h-[50vh] overflow-y-auto">
+          <div className="max-h-[60vh] overflow-y-auto">
             {isAfterBrochasLoading ? (
               <div className="flex justify-center py-8">
                 <span className="text-sm text-gray-500">Loading prayer...</span>
@@ -232,7 +232,7 @@ export function BirkatHamazonModal() {
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans">
           <StandardModalHeader />
           
-          <div className="max-h-[50vh] overflow-y-auto">
+          <div className="max-h-[60vh] overflow-y-auto">
             {isLoading ? (
               <div className="flex justify-center py-8">
                 <span className="text-sm text-gray-500">Loading prayers...</span>
