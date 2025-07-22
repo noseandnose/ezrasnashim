@@ -19,20 +19,8 @@ interface BirkatHamazonPrayer {
 // Koren Thank You Component
 const KorenThankYou = () => (
   <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-    <div className="flex items-center justify-center space-x-3">
+    <div className="flex items-center justify-center">
       <span className="text-sm font-medium text-black">All tefilla texts courtesy of Koren Publishers Jerusalem</span>
-      <a 
-        href="https://korenpub.co.il/" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="hover:opacity-80 transition-opacity"
-      >
-        <img 
-          src={korenLogo} 
-          alt="Koren Publishers"
-          className="h-5 w-auto object-contain"
-        />
-      </a>
     </div>
   </div>
 );
