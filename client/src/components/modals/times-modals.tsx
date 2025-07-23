@@ -67,7 +67,7 @@ export default function TimesModals() {
     onSuccess: () => {
       toast({
         title: "Success",
-        description: `Calendar file downloaded for the next ${variables.years} year${variables.years > 1 ? 's' : ''}`
+        description: `Calendar file downloaded for the next ${yearDuration} year${yearDuration > 1 ? 's' : ''}`
       });
       setEventTitle("");
       setEnglishDate("");
@@ -151,12 +151,7 @@ export default function TimesModals() {
       return;
     }
 
-    downloadCalendarMutation.mutate({
-      title: eventTitle,
-      hebrewDate: convertedHebrewDate,
-      gregorianDate: englishDate,
-      years: yearDuration
-    });
+    downloadCalendarMutation.mutate();
   };
 
   return (
