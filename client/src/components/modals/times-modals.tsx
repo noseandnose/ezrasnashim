@@ -19,91 +19,52 @@ export default function TimesModals() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const handleFormDownload = () => {
+    if (!eventTitle || !englishDate) {
+      alert('Please fill in both event title and English date');
+      return;
+    }
+
+    // Create a form and submit it directly to avoid CORS
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `${import.meta.env.VITE_API_URL}/api/calendar-events/download`;
+    // Remove target='_blank' to allow direct file download
+    form.style.display = 'none';
+
+    // Add form fields
+    const fields = [
+      { name: 'title', value: eventTitle },
+      { name: 'hebrewDate', value: convertedHebrewDate },
+      { name: 'gregorianDate', value: englishDate },
+      { name: 'years', value: yearDuration.toString() }
+    ];
+
+    fields.forEach(field => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = field.name;
+      input.value = field.value;
+      form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+
+    // Close modal after brief delay
+    setTimeout(() => {
+      closeModal();
+    }, 1000);
+  };
+
   const downloadCalendarMutation = useMutation({
-    mutationFn: async (data: { title: string; hebrewDate: string; gregorianDate: string; years: number }) => {
-      console.log('Downloading calendar with data:', data);
-      
-      // Check browser environment
-      const userAgent = navigator.userAgent;
-      console.log('User agent:', userAgent);
-      console.log('Is mobile:', /Mobile|Android|iPhone|iPad/.test(userAgent));
-      
-      const baseUrl = import.meta.env.DEV ? 'http://localhost:5000' : '';
-      const response = await fetch(`${baseUrl}/api/calendar-events/download?t=${Date.now()}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache',
-          'Accept': 'text/calendar, */*',
-        },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Calendar download error:', response.status, response.statusText, errorText);
-        throw new Error(`Failed to generate calendar file: ${response.status} ${response.statusText}`);
-      }
-      
-      console.log('Response headers:');
-      response.headers.forEach((value, key) => {
-        console.log(`  ${key}: ${value}`);
-      });
-      
-      // Get the filename from the Content-Disposition header
-      const contentDisposition = response.headers.get('Content-Disposition');
-      const filename = contentDisposition 
-        ? contentDisposition.split('filename=')[1].replace(/"/g, '')
-        : `${data.title.replace(/[^a-zA-Z0-9]/g, '_')}_${data.years}_years.ics`;
-      
-      // Create blob and download
-      const blob = await response.blob();
-      console.log('Blob created:', blob.size, 'bytes');
-      
-      if (blob.size === 0) {
-        throw new Error('Received empty calendar file');
-      }
-      
-      const url = window.URL.createObjectURL(blob);
-      console.log('Download URL created:', url);
-      
-      // Try the download with multiple approaches for better browser compatibility
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.style.display = 'none';
-      console.log('Downloading file:', filename);
-      
-      document.body.appendChild(a);
-      
-      try {
-        // Primary method: programmatic click
-        a.click();
-        console.log('Primary download method executed');
-      } catch (e) {
-        console.log('Primary download failed, trying alternative method:', e);
-        
-        // Alternative method: manual trigger
-        const event = new MouseEvent('click', {
-          view: window,
-          bubbles: true,
-          cancelable: true
-        });
-        a.dispatchEvent(event);
-      }
-      
-      // Cleanup
-      setTimeout(() => {
-        window.URL.revokeObjectURL(url);
-        if (document.body.contains(a)) {
-          document.body.removeChild(a);
-        }
-      }, 100);
-      
-      console.log('Calendar download completed successfully');
+    mutationFn: async () => {
+      // Use form submission instead of fetch to avoid CORS
+      handleFormDownload();
       return { success: true };
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       toast({
         title: "Success",
         description: `Calendar file downloaded for the next ${variables.years} year${variables.years > 1 ? 's' : ''}`
