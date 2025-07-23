@@ -25,11 +25,12 @@ export default function TimesModals() {
     }
 
     try {
-      // Use fetch with proper headers for mobile compatibility
+      // Use fetch with proper headers for cross-platform mobile compatibility
       const response = await fetch('/api/calendar-events/download', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'text/calendar, application/octet-stream, */*'
         },
         body: JSON.stringify({
           title: eventTitle,
@@ -43,32 +44,92 @@ export default function TimesModals() {
         throw new Error(`Download failed: ${response.statusText}`);
       }
 
-      // Get the blob from response
+      // Get the blob from response with proper MIME type
       const blob = await response.blob();
+      const filename = `${eventTitle.replace(/[^a-zA-Z0-9]/g, '_')}_hebrew_calendar.ics`;
       
-      // Create download link for mobile
-      const url = window.URL.createObjectURL(blob);
+      // Detect browser/platform for optimal download method
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isChrome = /Chrome/i.test(navigator.userAgent);
+      
+      // Create download link with enhanced cross-platform compatibility
+      const url = window.URL.createObjectURL(new Blob([blob], { type: 'text/calendar' }));
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${eventTitle.replace(/[^a-zA-Z0-9]/g, '_')}_hebrew_calendar.ics`;
+      link.download = filename;
       
-      // Enhanced mobile Safari compatibility
-      link.style.display = 'none';
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
+      // Platform-specific optimizations
+      if (isAndroid) {
+        // Android Chrome and other browsers
+        link.style.display = 'none';
+        link.target = '_self'; // Android works better with _self
+      } else if (isIOS) {
+        // iOS Safari compatibility
+        link.style.display = 'none';
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+      } else {
+        // Desktop and other mobile browsers
+        link.style.display = 'none';
+        link.target = '_blank';
+      }
+      
       document.body.appendChild(link);
       
-      // iOS Safari needs a user interaction to trigger download
-      // Use setTimeout to ensure proper download behavior
-      setTimeout(() => {
-        link.click();
-        
-        // Cleanup after download
+      // Platform-specific download triggering with fallbacks
+      const triggerDownload = () => {
+        try {
+          link.click();
+        } catch (e) {
+          // Fallback for Android browsers that block programmatic clicks
+          if (isAndroid) {
+            // Open in new tab as fallback for Android
+            window.open(url, '_blank');
+          } else {
+            throw e;
+          }
+        }
+      };
+
+      if (isAndroid) {
+        // Android: Different approaches for different browsers
+        if (isChrome) {
+          // Android Chrome: Immediate click usually works
+          triggerDownload();
+          setTimeout(() => {
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+          }, 500);
+        } else {
+          // Android other browsers: May need different approach
+          setTimeout(() => {
+            triggerDownload();
+            setTimeout(() => {
+              document.body.removeChild(link);
+              window.URL.revokeObjectURL(url);
+            }, 300);
+          }, 100);
+        }
+      } else if (isIOS) {
+        // iOS Safari: Needs user interaction timing
         setTimeout(() => {
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
+          triggerDownload();
+          setTimeout(() => {
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+          }, 200);
         }, 100);
-      }, 100);
+      } else {
+        // Desktop and other platforms
+        setTimeout(() => {
+          triggerDownload();
+          setTimeout(() => {
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+          }, 300);
+        }, 50);
+      }
       
       return { success: true };
     } catch (error) {
@@ -82,7 +143,7 @@ export default function TimesModals() {
     onSuccess: () => {
       toast({
         title: "Success",
-        description: `Calendar file downloaded for the next ${yearDuration} year${yearDuration > 1 ? 's' : ''}`
+        description: `Calendar file downloaded for the next ${yearDuration} year${yearDuration > 1 ? 's' : ''} - Import into any calendar app`
       });
       setEventTitle("");
       setEnglishDate("");
