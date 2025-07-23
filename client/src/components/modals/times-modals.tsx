@@ -27,7 +27,7 @@ export default function TimesModals() {
     console.log('Starting calendar download:', { eventTitle, englishDate, yearDuration });
     
     try {
-      // Build URL with query parameters
+      // Build URL with query parameters using the same base URL logic as other API calls
       const params = new URLSearchParams({
         title: eventTitle,
         hebrewDate: convertedHebrewDate || '',
@@ -35,25 +35,39 @@ export default function TimesModals() {
         years: yearDuration.toString()
       });
       
-      const downloadUrl = import.meta.env.DEV 
-        ? `http://localhost:5000/api/download-calendar?${params.toString()}`
-        : `/api/download-calendar?${params.toString()}`;
+      // Get the base URL similar to axiosClient
+      function getCalendarBaseURL() {
+        // For Replit environment, construct the backend URL using the domain with port 5000
+        if (window.location.hostname.includes('replit.dev')) {
+          const hostname = window.location.hostname;
+          return `https://${hostname}:5000`;
+        }
+        // For other environments, use relative path
+        return '';
+      }
+      
+      const baseUrl = getCalendarBaseURL();
+      const downloadUrl = `${baseUrl}/api/download-calendar?${params.toString()}`;
       
       console.log('Downloading from:', downloadUrl);
       
-      // Create a temporary link and click it
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = `${eventTitle.replace(/[^a-zA-Z0-9]/g, '_')}_${yearDuration}_years.ics`;
-      link.style.display = 'none';
+      // Use window.open with a short timeout to handle download
+      const downloadWindow = window.open(downloadUrl, '_self');
       
-      document.body.appendChild(link);
-      link.click();
-      
-      // Clean up
-      setTimeout(() => {
-        document.body.removeChild(link);
-      }, 100);
+      // Fallback to link click if window.open fails
+      if (!downloadWindow) {
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `${eventTitle.replace(/[^a-zA-Z0-9]/g, '_')}_${yearDuration}_years.ics`;
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        
+        setTimeout(() => {
+          document.body.removeChild(link);
+        }, 100);
+      }
       
       console.log('Calendar download initiated');
       return { success: true };
