@@ -24,55 +24,47 @@ export default function TimesModals() {
       throw new Error('Please fill in both event title and English date');
     }
 
-    console.log('Starting blob-based download:', { eventTitle, englishDate, yearDuration });
+    console.log('Starting calendar download:', { eventTitle, englishDate, yearDuration });
     
     try {
-      // Use the working simple calendar endpoint for now
-      const apiUrl = import.meta.env.DEV 
+      // Create a form and submit it directly to avoid CORS issues
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = import.meta.env.DEV 
         ? 'http://localhost:5000/api/simple-calendar' 
         : '/api/simple-calendar';
+      form.target = '_self'; // Download in same window
+      form.style.display = 'none';
       
-      console.log('Making request to:', apiUrl);
+      // Add form fields
+      const fields = {
+        title: eventTitle,
+        hebrewDate: convertedHebrewDate,
+        gregorianDate: englishDate,
+        years: yearDuration
+      };
       
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': '*/*',
-        },
-        mode: 'cors', // Explicitly set CORS mode
-        credentials: 'include', // Include credentials for CORS
-        body: JSON.stringify({
-          title: eventTitle,
-          hebrewDate: convertedHebrewDate,
-          gregorianDate: englishDate,
-          years: yearDuration
-        })
+      Object.entries(fields).forEach(([key, value]) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = String(value || '');
+        form.appendChild(input);
       });
-
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status} ${response.statusText}`);
-      }
-
-      // Get the response as blob
-      const blob = await response.blob();
       
-      // Create download link and trigger download in same window
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${eventTitle.replace(/[^a-zA-Z0-9]/g, '_')}_${yearDuration}_years.ics`;
-      link.style.display = 'none';
+      // Submit form
+      document.body.appendChild(form);
+      console.log('Submitting form with data:', fields);
+      form.submit();
       
-      // Add to DOM, click, and remove
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Clean up after a short delay
+      setTimeout(() => {
+        if (document.body.contains(form)) {
+          document.body.removeChild(form);
+        }
+      }, 1000);
       
-      // Clean up the blob URL
-      window.URL.revokeObjectURL(url);
-      
-      console.log('Blob download completed successfully');
+      console.log('Form submitted for calendar download');
       return { success: true };
       
     } catch (error) {

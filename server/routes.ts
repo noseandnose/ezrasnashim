@@ -32,8 +32,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/simple-calendar", async (req, res) => {
     try {
       console.log('Simple calendar request:', req.body);
+      console.log('Request headers:', req.headers);
       
-      const { title = "Test Event", hebrewDate, gregorianDate, years = 1 } = req.body;
+      // Handle both JSON and form-encoded data
+      const data = req.body;
+      const title = data.title || "Test Event";
+      const hebrewDate = data.hebrewDate;
+      const gregorianDate = data.gregorianDate;
+      const years = parseInt(data.years) || 1;
       
       if (!title) {
         return res.status(400).json({ message: "Title is required" });
