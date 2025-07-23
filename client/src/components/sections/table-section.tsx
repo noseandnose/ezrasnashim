@@ -216,7 +216,7 @@ export default function TableSection() {
             </div>
             <h3 className="font-serif text-xs text-black mb-1 font-bold">Community Feedback</h3>
             <p className="font-sans text-xs text-black/60 leading-relaxed">
-              Help us help you
+              Help Us, Help You
             </p>
           </button>
         </div>
