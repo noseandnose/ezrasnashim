@@ -24,118 +24,45 @@ export default function TimesModals() {
       throw new Error('Please fill in both event title and English date');
     }
 
+    // Use form submission to avoid CORS issues completely
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = import.meta.env.DEV 
+      ? 'http://localhost:5000/api/calendar-events/download' 
+      : '/api/calendar-events/download';
+    form.target = '_blank'; // Open in new tab to avoid navigation issues
+    form.style.display = 'none';
+
+    // Add form fields
+    const fields = [
+      { name: 'title', value: eventTitle },
+      { name: 'hebrewDate', value: convertedHebrewDate },
+      { name: 'gregorianDate', value: englishDate },
+      { name: 'years', value: yearDuration.toString() }
+    ];
+
+    fields.forEach(field => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = field.name;
+      input.value = field.value;
+      form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    
     try {
-      // Use fetch with proper headers for cross-platform mobile compatibility
-      const apiUrl = import.meta.env.DEV ? 'http://localhost:5000/api/calendar-events/download' : '/api/calendar-events/download';
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'text/calendar, application/octet-stream, */*'
-        },
-        body: JSON.stringify({
-          title: eventTitle,
-          hebrewDate: convertedHebrewDate,
-          gregorianDate: englishDate,
-          years: yearDuration
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Download failed: ${response.statusText}`);
-      }
-
-      // Get the blob from response with proper MIME type
-      const blob = await response.blob();
-      const filename = `${eventTitle.replace(/[^a-zA-Z0-9]/g, '_')}_hebrew_calendar.ics`;
+      form.submit();
       
-      // Detect browser/platform for optimal download method
-      const isAndroid = /Android/i.test(navigator.userAgent);
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-      const isChrome = /Chrome/i.test(navigator.userAgent);
-      
-      // Create download link with enhanced cross-platform compatibility
-      const url = window.URL.createObjectURL(new Blob([blob], { type: 'text/calendar' }));
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      
-      // Platform-specific optimizations
-      if (isAndroid) {
-        // Android Chrome and other browsers
-        link.style.display = 'none';
-        link.target = '_self'; // Android works better with _self
-      } else if (isIOS) {
-        // iOS Safari compatibility
-        link.style.display = 'none';
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-      } else {
-        // Desktop and other mobile browsers
-        link.style.display = 'none';
-        link.target = '_blank';
-      }
-      
-      document.body.appendChild(link);
-      
-      // Platform-specific download triggering with fallbacks
-      const triggerDownload = () => {
-        try {
-          link.click();
-        } catch (e) {
-          // Fallback for Android browsers that block programmatic clicks
-          if (isAndroid) {
-            // Open in new tab as fallback for Android
-            window.open(url, '_blank');
-          } else {
-            throw e;
-          }
-        }
-      };
-
-      if (isAndroid) {
-        // Android: Different approaches for different browsers
-        if (isChrome) {
-          // Android Chrome: Immediate click usually works
-          triggerDownload();
-          setTimeout(() => {
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-          }, 500);
-        } else {
-          // Android other browsers: May need different approach
-          setTimeout(() => {
-            triggerDownload();
-            setTimeout(() => {
-              document.body.removeChild(link);
-              window.URL.revokeObjectURL(url);
-            }, 300);
-          }, 100);
-        }
-      } else if (isIOS) {
-        // iOS Safari: Needs user interaction timing
-        setTimeout(() => {
-          triggerDownload();
-          setTimeout(() => {
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-          }, 200);
-        }, 100);
-      } else {
-        // Desktop and other platforms
-        setTimeout(() => {
-          triggerDownload();
-          setTimeout(() => {
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-          }, 300);
-        }, 50);
-      }
+      // Clean up the form after submission
+      setTimeout(() => {
+        document.body.removeChild(form);
+      }, 1000);
       
       return { success: true };
     } catch (error) {
-      console.error('Mobile download error:', error);
-      throw error;
+      document.body.removeChild(form);
+      throw new Error(`Download failed: ${error.message}`);
     }
   };
 
