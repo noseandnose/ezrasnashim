@@ -45,15 +45,26 @@ export default function TimesModals() {
       
       // Create blob and download
       const blob = await response.blob();
+      console.log('Blob created:', blob.size, 'bytes');
+      
+      if (blob.size === 0) {
+        throw new Error('Received empty calendar file');
+      }
+      
       const url = window.URL.createObjectURL(blob);
+      console.log('Download URL created:', url);
+      
       const a = document.createElement('a');
       a.href = url;
       a.download = filename;
+      console.log('Downloading file:', filename);
+      
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
       
+      console.log('Calendar download completed successfully');
       return { success: true };
     },
     onSuccess: (_, variables) => {
