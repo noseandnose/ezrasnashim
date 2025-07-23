@@ -26,7 +26,8 @@ export default function TimesModals() {
 
     try {
       // Use fetch with proper headers for cross-platform mobile compatibility
-      const response = await fetch('/api/calendar-events/download', {
+      const apiUrl = import.meta.env.DEV ? 'http://localhost:5000/api/calendar-events/download' : '/api/calendar-events/download';
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
