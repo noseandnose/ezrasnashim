@@ -496,10 +496,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ];
 
         const currentYear = new Date().getFullYear();
+        const today = new Date();
         
-        // Step 2: For the next 10 years from TODAY, find when this Hebrew date occurs
+        // Check if the input English date has already passed this year
+        const inputDate = new Date(gregorianDate);
+        const thisYearInputDate = new Date(currentYear, inputDate.getMonth(), inputDate.getDate());
+        const hasPassedThisYear = today > thisYearInputDate;
+        
+        // Start from next year if the date has passed, otherwise start from current year
+        const startYear = hasPassedThisYear ? currentYear + 1 : currentYear;
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`Input date: ${gregorianDate}, This year's date: ${thisYearInputDate.toDateString()}, Today: ${today.toDateString()}`);
+          console.log(`Has passed this year: ${hasPassedThisYear}, Starting from year: ${startYear}`);
+        }
+        
+        // Step 2: Generate calendar events for the specified number of years
         for (let i = 0; i < years; i++) {
-          const targetYear = currentYear + i;
+          const targetYear = startYear + i;
           
           try {
             // Calculate corresponding Hebrew year for target English year
