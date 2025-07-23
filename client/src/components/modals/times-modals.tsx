@@ -15,12 +15,14 @@ export default function TimesModals() {
   const [englishDate, setEnglishDate] = useState("");
   const [convertedHebrewDate, setConvertedHebrewDate] = useState("");
   const [afterNightfall, setAfterNightfall] = useState(false);
+  const [yearDuration, setYearDuration] = useState(10);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const downloadCalendarMutation = useMutation({
     mutationFn: async (data: { title: string; hebrewDate: string; gregorianDate: string; years: number }) => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/calendar-events/download?t=${Date.now()}`, {
+      console.log('Downloading calendar with data:', data);
+      const response = await fetch(`/api/calendar-events/download?t=${Date.now()}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -30,6 +32,8 @@ export default function TimesModals() {
       });
       
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Calendar download error:', errorText);
         throw new Error('Failed to generate calendar file');
       }
       
@@ -52,15 +56,16 @@ export default function TimesModals() {
       
       return { success: true };
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       toast({
         title: "Success",
-        description: "Calendar file downloaded for the next 10 years"
+        description: `Calendar file downloaded for the next ${variables.years} year${variables.years > 1 ? 's' : ''}`
       });
       setEventTitle("");
       setEnglishDate("");
       setConvertedHebrewDate("");
       setAfterNightfall(false);
+      setYearDuration(10);
       closeModal();
       // Navigate to home and scroll to progress
       window.location.hash = '#/?section=home&scrollToProgress=true';
@@ -141,7 +146,7 @@ export default function TimesModals() {
       title: eventTitle,
       hebrewDate: convertedHebrewDate,
       gregorianDate: englishDate,
-      years: 10
+      years: yearDuration
     });
   };
 
@@ -217,13 +222,52 @@ export default function TimesModals() {
               </div>
             )}
             
+            <div>
+              <Label className="block text-sm font-medium text-gray-700 mb-1">Duration</Label>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setYearDuration(1)}
+                  className={`p-2 rounded-xl text-sm font-medium transition-all ${
+                    yearDuration === 1
+                      ? 'bg-gradient-feminine text-white shadow-soft'
+                      : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
+                  }`}
+                >
+                  1 Year
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setYearDuration(10)}
+                  className={`p-2 rounded-xl text-sm font-medium transition-all ${
+                    yearDuration === 10
+                      ? 'bg-gradient-feminine text-white shadow-soft'
+                      : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
+                  }`}
+                >
+                  10 Years
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setYearDuration(120)}
+                  className={`p-2 rounded-xl text-sm font-medium transition-all ${
+                    yearDuration === 120
+                      ? 'bg-gradient-feminine text-white shadow-soft'
+                      : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
+                  }`}
+                >
+                  120 Years
+                </button>
+              </div>
+            </div>
+            
             <div className="space-y-2">
               <Button 
                 onClick={handleDownloadCalendar}
                 disabled={downloadCalendarMutation.isPending || !eventTitle || !englishDate}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
               >
-                {downloadCalendarMutation.isPending ? "Generating..." : "Download Calendar (10 Years)"}
+                {downloadCalendarMutation.isPending ? "Generating..." : `Download Calendar (${yearDuration} Year${yearDuration > 1 ? 's' : ''})`}
               </Button>
               <Button 
                 onClick={() => {
