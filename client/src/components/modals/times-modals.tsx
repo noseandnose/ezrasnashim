@@ -28,7 +28,8 @@ export default function TimesModals() {
       console.log('User agent:', userAgent);
       console.log('Is mobile:', /Mobile|Android|iPhone|iPad/.test(userAgent));
       
-      const response = await fetch(`/api/calendar-events/download?t=${Date.now()}`, {
+      const baseUrl = import.meta.env.DEV ? 'http://localhost:5000' : '';
+      const response = await fetch(`${baseUrl}/api/calendar-events/download?t=${Date.now()}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
