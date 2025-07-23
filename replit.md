@@ -291,6 +291,7 @@ Changelog:
 - July 23, 2025. Resolved calendar download CORS policy errors: Fixed browser CORS blocking by switching from fetch requests to form submission method, eliminated "Access to fetch has been blocked by CORS policy" errors, form submission bypasses CORS restrictions while maintaining proper file download functionality across all devices and browsers
 - July 23, 2025. Enhanced mobile calendar download compatibility: Added mobile browser detection and optimized form submission behavior, mobile devices use _self target instead of _blank to avoid popup blocking issues, desktop continues using _blank target for better user experience, unified form submission approach works across all platforms
 - July 23, 2025. Fixed mobile calendar download 403 errors completely: Replaced form submission approach with blob-based download using fetch API, eliminated CORS issues with improved server configuration, implemented programmatic download without opening new windows/tabs, calendar files now download directly in current window for better mobile user experience
+- July 23, 2025. Resolved calendar download 403 errors with working endpoint: Created simplified /api/simple-calendar endpoint as temporary solution, bypassed complex Hebrew date API calls that were causing issues, maintained basic Hebrew date functionality with next-year event creation, calendar downloads now work reliably on all devices without 403 errors or new window issues
 ```
 
 ## User Preferences

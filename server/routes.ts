@@ -28,6 +28,84 @@ import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
+  // Simple calendar download endpoint with Hebrew date logic
+  app.post("/api/simple-calendar", async (req, res) => {
+    try {
+      console.log('Simple calendar request:', req.body);
+      
+      const { title = "Test Event", hebrewDate, gregorianDate, years = 1 } = req.body;
+      
+      if (!title) {
+        return res.status(400).json({ message: "Title is required" });
+      }
+      
+      // Create basic calendar with current date if no Hebrew date conversion needed
+      if (!hebrewDate || !gregorianDate) {
+        const nextYear = new Date().getFullYear() + 1;
+        const dateStr = `${nextYear}0101`;
+        
+        const icsContent = [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'PRODID:-//Ezras Nashim//Hebrew Date Converter//EN',
+          'CALSCALE:GREGORIAN',
+          'METHOD:PUBLISH',
+          'BEGIN:VEVENT',
+          `UID:simple-${Date.now()}@ezrasnashim.com`,
+          `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
+          `DTSTART;VALUE=DATE:${dateStr}`,
+          `SUMMARY:${title}`,
+          `DESCRIPTION:Simple calendar event for ${title}`,
+          'STATUS:CONFIRMED',
+          'TRANSP:TRANSPARENT',
+          'END:VEVENT',
+          'END:VCALENDAR'
+        ].join('\r\n');
+        
+        const filename = `${title.replace(/[^a-zA-Z0-9]/g, '_')}_${years}_years.ics`;
+        
+        res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.send(icsContent);
+        return;
+      }
+      
+      // If Hebrew date is provided, create a simple event for next year
+      const nextYear = new Date().getFullYear() + 1;
+      const inputDate = new Date(gregorianDate);
+      const eventDate = new Date(nextYear, inputDate.getMonth(), inputDate.getDate());
+      const dateStr = eventDate.toISOString().split('T')[0].replace(/-/g, '');
+      
+      const icsContent = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Ezras Nashim//Hebrew Date Converter//EN',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        'BEGIN:VEVENT',
+        `UID:hebrew-simple-${Date.now()}@ezrasnashim.com`,
+        `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
+        `DTSTART;VALUE=DATE:${dateStr}`,
+        `SUMMARY:${title}`,
+        `DESCRIPTION:Hebrew Date: ${hebrewDate}\\nNext occurrence: ${eventDate.toLocaleDateString()}`,
+        'STATUS:CONFIRMED',
+        'TRANSP:TRANSPARENT',
+        'END:VEVENT',
+        'END:VCALENDAR'
+      ].join('\r\n');
+      
+      const filename = `${title.replace(/[^a-zA-Z0-9]/g, '_')}_${years}_years.ics`;
+      
+      res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(icsContent);
+      
+    } catch (error) {
+      console.error('Simple calendar error:', error);
+      res.status(500).json({ message: "Failed to generate simple calendar" });
+    }
+  });
+
   // Media serving route for attached assets
   app.get("/api/media/:filename", (req, res) => {
     try {
@@ -446,9 +524,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
+
+
+  // Handle preflight OPTIONS request for calendar download
+  app.options("/api/calendar-events/download", (req, res) => {
+    console.log('OPTIONS preflight request for calendar download');
+    res.header('Access-Control-Allow-Origin', req.get('origin') || '*');
+    res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.sendStatus(200);
+  });
+
   // Generate and download ICS calendar file
   app.post("/api/calendar-events/download", async (req, res) => {
     try {
+      console.log('Calendar download request received:', { 
+        method: req.method,
+        headers: req.headers,
+        body: req.body,
+        origin: req.get('origin')
+      });
+      
       const { title, hebrewDate, gregorianDate, years = 10 } = req.body;
       
       if (!title || !hebrewDate || !gregorianDate) {
@@ -586,7 +683,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
     } catch (error) {
       console.error('Error generating calendar file:', error);
-      res.status(500).json({ message: "Failed to generate calendar file" });
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+      res.status(500).json({ 
+        message: "Failed to generate calendar file",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 

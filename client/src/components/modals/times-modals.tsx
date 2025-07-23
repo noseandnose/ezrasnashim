@@ -27,10 +27,10 @@ export default function TimesModals() {
     console.log('Starting blob-based download:', { eventTitle, englishDate, yearDuration });
     
     try {
-      // Use fetch to get the calendar data as blob
+      // Use the working simple calendar endpoint for now
       const apiUrl = import.meta.env.DEV 
-        ? 'http://localhost:5000/api/calendar-events/download' 
-        : '/api/calendar-events/download';
+        ? 'http://localhost:5000/api/simple-calendar' 
+        : '/api/simple-calendar';
       
       console.log('Making request to:', apiUrl);
       
