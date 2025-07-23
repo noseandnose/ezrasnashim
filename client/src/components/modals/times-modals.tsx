@@ -24,13 +24,30 @@ export default function TimesModals() {
       throw new Error('Please fill in both event title and English date');
     }
 
-    // Use form submission to avoid CORS issues completely
+    // Detect mobile browser for better handling
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      console.log('Mobile download attempt:', { isIOS, isAndroid, userAgent: navigator.userAgent.substring(0, 50) });
+    }
+
+    // Create form for both mobile and desktop
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = import.meta.env.DEV 
       ? 'http://localhost:5000/api/calendar-events/download' 
       : '/api/calendar-events/download';
-    form.target = '_blank'; // Open in new tab to avoid navigation issues
+    
+    // Mobile browsers may have issues with _blank target
+    if (isMobile) {
+      form.target = '_self'; // Try _self for mobile to avoid popup blocking
+      console.log('Using mobile-optimized form submission with _self target');
+    } else {
+      form.target = '_blank';
+    }
+    
     form.style.display = 'none';
 
     // Add form fields
@@ -54,14 +71,18 @@ export default function TimesModals() {
     try {
       form.submit();
       
-      // Clean up the form after submission
       setTimeout(() => {
-        document.body.removeChild(form);
+        if (document.body.contains(form)) {
+          document.body.removeChild(form);
+        }
       }, 1000);
       
       return { success: true };
     } catch (error) {
-      document.body.removeChild(form);
+      if (document.body.contains(form)) {
+        document.body.removeChild(form);
+      }
+      console.error('Form submission error:', error);
       throw new Error(`Download failed: ${error.message}`);
     }
   };
