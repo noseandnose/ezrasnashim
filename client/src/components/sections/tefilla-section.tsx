@@ -141,18 +141,18 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
       console.log('Fresh progress data (section):', data);
       return data;
     },
-    refetchInterval: 1000, // Very frequent refresh
-    staleTime: 0, // Always consider stale
-    gcTime: 0 // Don't cache at all
+    refetchInterval: 5000, // Refresh every 5 seconds for real-time updates
+    staleTime: 2000, // Allow 2 seconds of cache
+    gcTime: 10000 // Cache for 10 seconds
   });
 
   // Fetch current name for the perek - Only update when perek is completed
   const { data: currentName } = useQuery<TehillimName | null>({
     queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/current-name`).then(res => res.json()),
     queryKey: ['/api/tehillim/current-name'],
-    refetchInterval: 3000, // Very frequent refresh for immediate updates
-    staleTime: 0, // Always consider stale
-    gcTime: 0 // Don't cache at all
+    refetchInterval: 10000, // Refresh every 10 seconds
+    staleTime: 5000, // Allow 5 seconds of cache
+    gcTime: 15000 // Cache for 15 seconds
   });
 
   // Fetch all active names for count display

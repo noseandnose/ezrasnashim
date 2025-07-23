@@ -36,17 +36,13 @@ export default function TimesModals() {
       });
       
       // Get the base URL similar to axiosClient
-      function getCalendarBaseURL() {
-        // For Replit environment, construct the backend URL using the domain with port 5000
-        if (window.location.hostname.includes('replit.dev')) {
-          const hostname = window.location.hostname;
-          return `https://${hostname}:5000`;
-        }
-        // For other environments, use relative path
-        return '';
+      let baseUrl = '';
+      // For Replit environment, construct the backend URL using the domain with port 5000
+      if (window.location.hostname.includes('replit.dev')) {
+        const hostname = window.location.hostname;
+        baseUrl = `https://${hostname}:5000`;
       }
       
-      const baseUrl = getCalendarBaseURL();
       const downloadUrl = `${baseUrl}/api/download-calendar?${params.toString()}`;
       
       console.log('Downloading from:', downloadUrl);

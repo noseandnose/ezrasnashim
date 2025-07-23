@@ -8,6 +8,7 @@ import { useHebrewDate, useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
 import HeartProgress from "@/components/heart-progress";
 import DailyProgress from "@/components/daily-progress";
 import type { Section } from "@/pages/home";
+import { useMemo } from "react";
 
 interface Sponsor {
   name: string;
@@ -90,7 +91,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     }
   };
 
-  const currentPrayer = getCurrentPrayer();
+  const currentPrayer = useMemo(() => getCurrentPrayer(), [jewishTimesQuery.data, jewishTimesQuery.isLoading]);
 
   // Get the proper icon component
   const PrayerIcon = currentPrayer.icon;

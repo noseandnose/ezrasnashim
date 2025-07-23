@@ -21,8 +21,8 @@ function CommunityImpactSection() {
       if (!response.ok) throw new Error('Failed to fetch community impact');
       return response.json();
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 30 * 60 * 1000 // 30 minutes
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 60 * 60 * 1000 // 60 minutes
   });
 
   if (isLoading) {
@@ -122,8 +122,8 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
       if (!response.ok) return null;
       return response.json();
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 30 * 60 * 1000 // 30 minutes
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 60 * 60 * 1000 // 60 minutes
   });
 
   // Only calculate progress when campaign data is loaded

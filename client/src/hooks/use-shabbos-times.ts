@@ -60,8 +60,8 @@ export function useShabbosTime() {
       }
     },
     enabled: !!coordinates, // Only fetch when coordinates are available
-    staleTime: 1000 * 60 * 60, // 1 hour
-    refetchInterval: 1000 * 60 * 60, // Refetch every hour
+    staleTime: 1000 * 60 * 60 * 6, // 6 hours
+    refetchInterval: 1000 * 60 * 60 * 6, // Refetch every 6 hours
   });
 }
 
