@@ -292,6 +292,7 @@ Changelog:
 - July 23, 2025. Enhanced mobile calendar download compatibility: Added mobile browser detection and optimized form submission behavior, mobile devices use _self target instead of _blank to avoid popup blocking issues, desktop continues using _blank target for better user experience, unified form submission approach works across all platforms
 - July 23, 2025. Fixed mobile calendar download 403 errors completely: Replaced form submission approach with blob-based download using fetch API, eliminated CORS issues with improved server configuration, implemented programmatic download without opening new windows/tabs, calendar files now download directly in current window for better mobile user experience
 - July 23, 2025. Resolved calendar download 403 errors with working endpoint: Created simplified /api/simple-calendar endpoint as temporary solution, bypassed complex Hebrew date API calls that were causing issues, maintained basic Hebrew date functionality with next-year event creation, calendar downloads now work reliably on all devices without 403 errors or new window issues
+- July 23, 2025. Fixed Hebrew Date calendar download completely: Replaced problematic POST endpoint with GET endpoint /api/download-calendar to eliminate all CORS and 403 errors, implemented proper Hebrew date conversion using Hebcal API for accurate recurring events, downloads work seamlessly using simple link clicks without new windows, supports 1/10/120 year durations with proper Hebrew-to-Gregorian date mapping for future years
 ```
 
 ## User Preferences

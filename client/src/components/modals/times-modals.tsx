@@ -27,44 +27,35 @@ export default function TimesModals() {
     console.log('Starting calendar download:', { eventTitle, englishDate, yearDuration });
     
     try {
-      // Create a form and submit it directly to avoid CORS issues
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = import.meta.env.DEV 
-        ? 'http://localhost:5000/api/simple-calendar' 
-        : '/api/simple-calendar';
-      form.target = '_self'; // Download in same window
-      form.style.display = 'none';
-      
-      // Add form fields
-      const fields = {
+      // Build URL with query parameters
+      const params = new URLSearchParams({
         title: eventTitle,
-        hebrewDate: convertedHebrewDate,
+        hebrewDate: convertedHebrewDate || '',
         gregorianDate: englishDate,
-        years: yearDuration
-      };
-      
-      Object.entries(fields).forEach(([key, value]) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = String(value || '');
-        form.appendChild(input);
+        years: yearDuration.toString()
       });
       
-      // Submit form
-      document.body.appendChild(form);
-      console.log('Submitting form with data:', fields);
-      form.submit();
+      const downloadUrl = import.meta.env.DEV 
+        ? `http://localhost:5000/api/download-calendar?${params.toString()}`
+        : `/api/download-calendar?${params.toString()}`;
       
-      // Clean up after a short delay
+      console.log('Downloading from:', downloadUrl);
+      
+      // Create a temporary link and click it
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${eventTitle.replace(/[^a-zA-Z0-9]/g, '_')}_${yearDuration}_years.ics`;
+      link.style.display = 'none';
+      
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
       setTimeout(() => {
-        if (document.body.contains(form)) {
-          document.body.removeChild(form);
-        }
-      }, 1000);
+        document.body.removeChild(link);
+      }, 100);
       
-      console.log('Form submitted for calendar download');
+      console.log('Calendar download initiated');
       return { success: true };
       
     } catch (error) {

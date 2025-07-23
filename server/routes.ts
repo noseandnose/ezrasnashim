@@ -28,59 +28,134 @@ import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
-  // Simple calendar download endpoint with Hebrew date logic
-  app.post("/api/simple-calendar", async (req, res) => {
+  // Calendar download endpoint using GET request to avoid CORS issues
+  app.get("/api/download-calendar", async (req, res) => {
     try {
-      console.log('Simple calendar request:', req.body);
-      console.log('Request headers:', req.headers);
+      // Parse query parameters
+      const title = req.query.title as string || "Event";
+      const hebrewDate = req.query.hebrewDate as string || "";
+      const gregorianDate = req.query.gregorianDate as string || "";
+      const years = parseInt(req.query.years as string) || 1;
       
-      // Handle both JSON and form-encoded data
-      const data = req.body;
-      const title = data.title || "Test Event";
-      const hebrewDate = data.hebrewDate;
-      const gregorianDate = data.gregorianDate;
-      const years = parseInt(data.years) || 1;
+      console.log('Calendar download request:', { title, hebrewDate, gregorianDate, years });
       
-      if (!title) {
-        return res.status(400).json({ message: "Title is required" });
-      }
+      // Generate calendar content
+      const events: string[] = [];
+      const currentYear = new Date().getFullYear();
       
-      // Create basic calendar with current date if no Hebrew date conversion needed
-      if (!hebrewDate || !gregorianDate) {
-        const nextYear = new Date().getFullYear() + 1;
+      if (gregorianDate && hebrewDate) {
+        // First, convert the input date to Hebrew date using Hebcal API
+        const inputDate = new Date(gregorianDate);
+        const inputYear = inputDate.getFullYear();
+        const inputMonth = inputDate.getMonth() + 1; // JavaScript months are 0-based
+        const inputDay = inputDate.getDate();
+        
+        try {
+          // Get the Hebrew date from the input Gregorian date
+          const hebcalUrl = `https://www.hebcal.com/converter?cfg=json&gy=${inputYear}&gm=${inputMonth}&gd=${inputDay}&g2h=1`;
+          const hebcalResponse = await serverAxiosClient.get(hebcalUrl);
+          const hebrewDateInfo = hebcalResponse.data;
+          
+          if (!hebrewDateInfo || !hebrewDateInfo.hd || !hebrewDateInfo.hm) {
+            throw new Error('Failed to get Hebrew date information');
+          }
+          
+          // Now find when this Hebrew date occurs in future years
+          const hebrewDay = hebrewDateInfo.hd;
+          const hebrewMonth = hebrewDateInfo.hm;
+          
+          // Determine if the date has already passed this year
+          const today = new Date();
+          let startYear = currentYear;
+          
+          // Check if we need to start from next year
+          if (inputDate < today) {
+            // Find when this Hebrew date occurs this year
+            const thisYearUrl = `https://www.hebcal.com/converter?cfg=json&hy=${5785 + (currentYear - 2025)}&hm=${hebrewMonth}&hd=${hebrewDay}&h2g=1`;
+            try {
+              const thisYearResponse = await serverAxiosClient.get(thisYearUrl);
+              const thisYearDate = new Date(thisYearResponse.data.gy, thisYearResponse.data.gm - 1, thisYearResponse.data.gd);
+              
+              if (thisYearDate < today) {
+                startYear = currentYear + 1;
+              }
+            } catch {
+              startYear = currentYear + 1;
+            }
+          }
+          
+          // Generate events for the specified number of years
+          for (let i = 0; i < years; i++) {
+            const targetYear = startYear + i;
+            const hebrewYear = 5785 + (targetYear - 2025); // Hebrew year calculation
+            
+            // Convert Hebrew date back to Gregorian for this year
+            const convertUrl = `https://www.hebcal.com/converter?cfg=json&hy=${hebrewYear}&hm=${hebrewMonth}&hd=${hebrewDay}&h2g=1`;
+            
+            try {
+              const convertResponse = await serverAxiosClient.get(convertUrl);
+              const gregorianResult = convertResponse.data;
+              
+              if (gregorianResult && gregorianResult.gy && gregorianResult.gm && gregorianResult.gd) {
+                const eventDate = new Date(gregorianResult.gy, gregorianResult.gm - 1, gregorianResult.gd);
+                const dateStr = eventDate.toISOString().split('T')[0].replace(/-/g, '');
+                
+                events.push([
+                  'BEGIN:VEVENT',
+                  `UID:hebrew-${dateStr}-${i}-${Date.now()}@ezrasnashim.com`,
+                  `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
+                  `DTSTART;VALUE=DATE:${dateStr}`,
+                  `SUMMARY:${title}`,
+                  `DESCRIPTION:Hebrew Date: ${hebrewDate}\\nGregorian: ${eventDate.toLocaleDateString()}`,
+                  'STATUS:CONFIRMED',
+                  'TRANSP:TRANSPARENT',
+                  'END:VEVENT'
+                ].join('\r\n'));
+              }
+            } catch (error) {
+              console.error(`Failed to convert Hebrew date for year ${targetYear}:`, error);
+            }
+          }
+        } catch (error) {
+          console.error('Hebrew date conversion error:', error);
+          // Fallback to simple date logic if API fails
+          const startYear = inputDate.getFullYear() < currentYear ? currentYear : inputDate.getFullYear();
+          
+          for (let i = 0; i < years; i++) {
+            const eventYear = startYear + i;
+            const eventDate = new Date(eventYear, inputDate.getMonth(), inputDate.getDate());
+            const dateStr = eventDate.toISOString().split('T')[0].replace(/-/g, '');
+            
+            events.push([
+              'BEGIN:VEVENT',
+              `UID:hebrew-fallback-${dateStr}-${Date.now()}@ezrasnashim.com`,
+              `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
+              `DTSTART;VALUE=DATE:${dateStr}`,
+              `SUMMARY:${title}`,
+              `DESCRIPTION:Hebrew Date: ${hebrewDate}`,
+              'STATUS:CONFIRMED',
+              'TRANSP:TRANSPARENT',
+              'END:VEVENT'
+            ].join('\r\n'));
+          }
+        }
+      } else {
+        // Create a single event for next year if no Hebrew date
+        const nextYear = currentYear + 1;
         const dateStr = `${nextYear}0101`;
         
-        const icsContent = [
-          'BEGIN:VCALENDAR',
-          'VERSION:2.0',
-          'PRODID:-//Ezras Nashim//Hebrew Date Converter//EN',
-          'CALSCALE:GREGORIAN',
-          'METHOD:PUBLISH',
+        events.push([
           'BEGIN:VEVENT',
           `UID:simple-${Date.now()}@ezrasnashim.com`,
           `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
           `DTSTART;VALUE=DATE:${dateStr}`,
           `SUMMARY:${title}`,
-          `DESCRIPTION:Simple calendar event for ${title}`,
+          'DESCRIPTION:Calendar event',
           'STATUS:CONFIRMED',
           'TRANSP:TRANSPARENT',
-          'END:VEVENT',
-          'END:VCALENDAR'
-        ].join('\r\n');
-        
-        const filename = `${title.replace(/[^a-zA-Z0-9]/g, '_')}_${years}_years.ics`;
-        
-        res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        res.send(icsContent);
-        return;
+          'END:VEVENT'
+        ].join('\r\n'));
       }
-      
-      // If Hebrew date is provided, create a simple event for next year
-      const nextYear = new Date().getFullYear() + 1;
-      const inputDate = new Date(gregorianDate);
-      const eventDate = new Date(nextYear, inputDate.getMonth(), inputDate.getDate());
-      const dateStr = eventDate.toISOString().split('T')[0].replace(/-/g, '');
       
       const icsContent = [
         'BEGIN:VCALENDAR',
@@ -88,27 +163,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'PRODID:-//Ezras Nashim//Hebrew Date Converter//EN',
         'CALSCALE:GREGORIAN',
         'METHOD:PUBLISH',
-        'BEGIN:VEVENT',
-        `UID:hebrew-simple-${Date.now()}@ezrasnashim.com`,
-        `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
-        `DTSTART;VALUE=DATE:${dateStr}`,
-        `SUMMARY:${title}`,
-        `DESCRIPTION:Hebrew Date: ${hebrewDate}\\nNext occurrence: ${eventDate.toLocaleDateString()}`,
-        'STATUS:CONFIRMED',
-        'TRANSP:TRANSPARENT',
-        'END:VEVENT',
+        ...events,
         'END:VCALENDAR'
       ].join('\r\n');
       
       const filename = `${title.replace(/[^a-zA-Z0-9]/g, '_')}_${years}_years.ics`;
       
+      // Set headers for file download
       res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Length', Buffer.byteLength(icsContent).toString());
+      
       res.send(icsContent);
       
     } catch (error) {
-      console.error('Simple calendar error:', error);
-      res.status(500).json({ message: "Failed to generate simple calendar" });
+      console.error('Calendar download error:', error);
+      res.status(500).json({ message: "Failed to generate calendar" });
     }
   });
 
