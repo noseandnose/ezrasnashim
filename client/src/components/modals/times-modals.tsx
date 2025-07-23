@@ -19,51 +19,66 @@ export default function TimesModals() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const handleFormDownload = () => {
+  const handleMobileDownload = async () => {
     if (!eventTitle || !englishDate) {
-      alert('Please fill in both event title and English date');
-      return;
+      throw new Error('Please fill in both event title and English date');
     }
 
-    // Create a form and submit it directly to avoid CORS
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = `${import.meta.env.VITE_API_URL}/api/calendar-events/download`;
-    // Remove target='_blank' to allow direct file download
-    form.style.display = 'none';
+    try {
+      // Use fetch with proper headers for mobile compatibility
+      const response = await fetch('/api/calendar-events/download', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: eventTitle,
+          hebrewDate: convertedHebrewDate,
+          gregorianDate: englishDate,
+          years: yearDuration
+        }),
+      });
 
-    // Add form fields
-    const fields = [
-      { name: 'title', value: eventTitle },
-      { name: 'hebrewDate', value: convertedHebrewDate },
-      { name: 'gregorianDate', value: englishDate },
-      { name: 'years', value: yearDuration.toString() }
-    ];
+      if (!response.ok) {
+        throw new Error(`Download failed: ${response.statusText}`);
+      }
 
-    fields.forEach(field => {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = field.name;
-      input.value = field.value;
-      form.appendChild(input);
-    });
-
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-
-    // Close modal after brief delay
-    setTimeout(() => {
-      closeModal();
-    }, 1000);
+      // Get the blob from response
+      const blob = await response.blob();
+      
+      // Create download link for mobile
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${eventTitle.replace(/[^a-zA-Z0-9]/g, '_')}_hebrew_calendar.ics`;
+      
+      // Enhanced mobile Safari compatibility
+      link.style.display = 'none';
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      
+      // iOS Safari needs a user interaction to trigger download
+      // Use setTimeout to ensure proper download behavior
+      setTimeout(() => {
+        link.click();
+        
+        // Cleanup after download
+        setTimeout(() => {
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        }, 100);
+      }, 100);
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Mobile download error:', error);
+      throw error;
+    }
   };
 
   const downloadCalendarMutation = useMutation({
-    mutationFn: async () => {
-      // Use form submission instead of fetch to avoid CORS
-      handleFormDownload();
-      return { success: true };
-    },
+    mutationFn: handleMobileDownload,
     onSuccess: () => {
       toast({
         title: "Success",
