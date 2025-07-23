@@ -1,0 +1,9 @@
+This file is required for Apple Pay domain verification.
+Replace this with the actual domain verification file from your Stripe dashboard.
+
+To get this file:
+1. Go to your Stripe Dashboard
+2. Navigate to Settings → Payment methods → Apple Pay
+3. Add your domain
+4. Download the verification file
+5. Replace this placeholder with the actual file content

@@ -8,11 +8,22 @@ import { ArrowLeft, CheckCircle } from "lucide-react";
 import { useLocation } from "wouter";
 // Removed Apple Pay button import - now using integrated PaymentElement
 
+// Add Apple Pay types
+declare global {
+  interface Window {
+    ApplePaySession?: {
+      canMakePayments(): boolean;
+    };
+  }
+}
+
 // Load Stripe outside of component render
 if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
   throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
 }
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY, {
+  apiVersion: '2024-04-10',
+});
 
 interface DonationFormProps {
   amount: number;
@@ -87,17 +98,16 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         </div>
       </div>
 
-      {/* Apple Pay requires HTTPS and domain verification */}
+      {/* Apple Pay Safari detection */}
       {(() => {
-        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const isHTTP = window.location.protocol === 'http:';
+        const isIPhone = /iPhone/.test(navigator.userAgent);
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
         
-        if (isLocalhost || isHTTP) {
+        if (isIPhone && !isSafari) {
           return (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
               <p className="text-sm text-blue-800">
-                <strong>Apple Pay Notice:</strong> Apple Pay requires HTTPS and domain verification. 
-                It will be available when the app is deployed to production.
+                <strong>Apple Pay Notice:</strong> Please use Safari to enable Apple Pay on your iPhone.
               </p>
             </div>
           );
@@ -108,17 +118,42 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
       <PaymentElement 
         options={{
           layout: 'tabs',
-          paymentMethodOrder: ['card', 'google_pay', 'apple_pay'],
+          paymentMethodOrder: ['apple_pay', 'google_pay', 'card'],
           fields: {
-            billingDetails: 'never'
+            billingDetails: {
+              address: 'never',
+              email: 'never',
+              name: 'never',
+              phone: 'never'
+            }
           },
           wallets: {
             applePay: 'auto',
             googlePay: 'auto'
+          },
+          business: {
+            name: 'Ezras Nashim'
           }
         }}
         onReady={() => {
           console.log('PaymentElement is ready');
+          console.log('User Agent:', navigator.userAgent);
+          console.log('Protocol:', window.location.protocol);
+          console.log('Hostname:', window.location.hostname);
+          
+          // Check available payment methods
+          if ('ApplePaySession' in window) {
+            console.log('ApplePaySession is available in browser');
+            // Check if Apple Pay is available
+            try {
+              const canMakePayments = window.ApplePaySession?.canMakePayments();
+              console.log('Device can make Apple Pay payments:', canMakePayments);
+            } catch (e) {
+              console.error('Error checking Apple Pay availability:', e);
+            }
+          } else {
+            console.log('ApplePaySession not available in this browser');
+          }
         }}
       />
 
