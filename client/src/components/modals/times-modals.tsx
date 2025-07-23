@@ -24,66 +24,60 @@ export default function TimesModals() {
       throw new Error('Please fill in both event title and English date');
     }
 
-    // Detect mobile browser for better handling
-    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const isAndroid = /Android/i.test(navigator.userAgent);
-    
-    if (isMobile) {
-      console.log('Mobile download attempt:', { isIOS, isAndroid, userAgent: navigator.userAgent.substring(0, 50) });
-    }
-
-    // Create form for both mobile and desktop
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = import.meta.env.DEV 
-      ? 'http://localhost:5000/api/calendar-events/download' 
-      : '/api/calendar-events/download';
-    
-    // Mobile browsers may have issues with _blank target
-    if (isMobile) {
-      form.target = '_self'; // Try _self for mobile to avoid popup blocking
-      console.log('Using mobile-optimized form submission with _self target');
-    } else {
-      form.target = '_blank';
-    }
-    
-    form.style.display = 'none';
-
-    // Add form fields
-    const fields = [
-      { name: 'title', value: eventTitle },
-      { name: 'hebrewDate', value: convertedHebrewDate },
-      { name: 'gregorianDate', value: englishDate },
-      { name: 'years', value: yearDuration.toString() }
-    ];
-
-    fields.forEach(field => {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = field.name;
-      input.value = field.value;
-      form.appendChild(input);
-    });
-
-    document.body.appendChild(form);
+    console.log('Starting blob-based download:', { eventTitle, englishDate, yearDuration });
     
     try {
-      form.submit();
+      // Use fetch to get the calendar data as blob
+      const apiUrl = import.meta.env.DEV 
+        ? 'http://localhost:5000/api/calendar-events/download' 
+        : '/api/calendar-events/download';
       
-      setTimeout(() => {
-        if (document.body.contains(form)) {
-          document.body.removeChild(form);
-        }
-      }, 1000);
+      console.log('Making request to:', apiUrl);
       
-      return { success: true };
-    } catch (error) {
-      if (document.body.contains(form)) {
-        document.body.removeChild(form);
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': '*/*',
+        },
+        mode: 'cors', // Explicitly set CORS mode
+        credentials: 'include', // Include credentials for CORS
+        body: JSON.stringify({
+          title: eventTitle,
+          hebrewDate: convertedHebrewDate,
+          gregorianDate: englishDate,
+          years: yearDuration
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status} ${response.statusText}`);
       }
-      console.error('Form submission error:', error);
-      throw new Error(`Download failed: ${error.message}`);
+
+      // Get the response as blob
+      const blob = await response.blob();
+      
+      // Create download link and trigger download in same window
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${eventTitle.replace(/[^a-zA-Z0-9]/g, '_')}_${yearDuration}_years.ics`;
+      link.style.display = 'none';
+      
+      // Add to DOM, click, and remove
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the blob URL
+      window.URL.revokeObjectURL(url);
+      
+      console.log('Blob download completed successfully');
+      return { success: true };
+      
+    } catch (error) {
+      console.error('Calendar download error:', error);
+      throw new Error(`Download failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 

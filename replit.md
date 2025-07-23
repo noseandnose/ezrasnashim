@@ -290,6 +290,7 @@ Changelog:
 - July 23, 2025. Fixed calendar download API endpoint URL for development environment: Resolved 404 "Not Found" errors by implementing environment-aware API URL handling, frontend now correctly calls localhost:5000 backend port in development mode instead of Vite dev server port 5173, calendar download functionality now working properly in both development and production environments
 - July 23, 2025. Resolved calendar download CORS policy errors: Fixed browser CORS blocking by switching from fetch requests to form submission method, eliminated "Access to fetch has been blocked by CORS policy" errors, form submission bypasses CORS restrictions while maintaining proper file download functionality across all devices and browsers
 - July 23, 2025. Enhanced mobile calendar download compatibility: Added mobile browser detection and optimized form submission behavior, mobile devices use _self target instead of _blank to avoid popup blocking issues, desktop continues using _blank target for better user experience, unified form submission approach works across all platforms
+- July 23, 2025. Fixed mobile calendar download 403 errors completely: Replaced form submission approach with blob-based download using fetch API, eliminated CORS issues with improved server configuration, implemented programmatic download without opening new windows/tabs, calendar files now download directly in current window for better mobile user experience
 ```
 
 ## User Preferences

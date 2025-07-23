@@ -54,6 +54,8 @@ app.use(
       const allowedOrigins = [
         'http://localhost:5173',
         'http://127.0.0.1:5173',
+        'http://localhost:5000', // Add backend origin
+        'http://127.0.0.1:5000',
         /\.replit\.dev$/,
         /\.replit\.app$/
       ];
@@ -69,8 +71,8 @@ app.use(
         return callback(null, true);
       }
       
-      // Allow any origin as fallback
-      return callback(null, origin);
+      // Allow any origin as fallback for development
+      return callback(null, true);
     },
     credentials: true,
   }),
