@@ -296,6 +296,7 @@ Changelog:
 - July 23, 2025. Resolved preview environment calendar download issues: Fixed 403 forbidden errors in Replit preview by implementing environment-aware URL handling matching other API calls, uses proper Replit domain with port 5000 for preview environment, calendar downloads now work correctly in both web preview and mobile environments without authorization errors
 - July 23, 2025. Comprehensive performance optimization: Fixed TypeScript compilation errors (0 errors), created production logging system in client/src/lib/logger.ts, reduced API calls by 75% (Tehillim 1s→5s, Shabbos times 1hr→6hr cache, Community impact doubled cache times), optimized getCurrentPrayer with useMemo, maintained optimal bundle size at 321KB (107KB gzipped)
 - July 23, 2025. Fixed data refresh and routing issues: Added refetchOnMount: true to queryClient defaults ensuring fresh data loads when visiting pages, fixed client-side routing refresh issues by updating server to redirect to frontend dev server for non-API routes, resolved issue where refreshing on /statistics or /donate pages showed 404 errors
+- July 23, 2025. Fixed calendar download 404 error in production/staging: Updated calendar download URL logic to match axiosClient's approach using import.meta.env.VITE_API_URL, removed hardcoded port 5000 for production environments, ensured relative URLs are used in production where frontend and backend share the same domain, calendar downloads now work correctly in all environments (local, preview, staging, production)
 ```
 
 ## User Preferences

@@ -35,13 +35,21 @@ export default function TimesModals() {
         years: yearDuration.toString()
       });
       
-      // Get the base URL similar to axiosClient
+      // Use the same base URL logic as axiosClient
       let baseUrl = '';
-      // For Replit environment, construct the backend URL using the domain with port 5000
-      if (window.location.hostname.includes('replit.dev')) {
+      
+      // Check if VITE_API_URL is set (production build)
+      if (import.meta.env.VITE_API_URL) {
+        baseUrl = import.meta.env.VITE_API_URL;
+      } else if (window.location.hostname.includes('replit.dev')) {
+        // For Replit preview, use port 5000
         const hostname = window.location.hostname;
         baseUrl = `https://${hostname}:5000`;
+      } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        // Local development
+        baseUrl = 'http://localhost:5000';
       }
+      // If none of the above, baseUrl remains empty for relative URLs (production)
       
       const downloadUrl = `${baseUrl}/api/download-calendar?${params.toString()}`;
       
