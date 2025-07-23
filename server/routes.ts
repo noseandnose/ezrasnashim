@@ -1247,10 +1247,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           donationType: donationType || "General Donation",
           sponsorName: metadata?.sponsorName || "",
           dedication: metadata?.dedication || ""
-        },
-        // Ensure payment methods are properly configured
-        automatic_payment_methods: {
-          enabled: false // We're using payment_method_configuration instead
         }
       });
       
