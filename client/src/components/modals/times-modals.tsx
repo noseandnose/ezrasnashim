@@ -223,7 +223,7 @@ export default function TimesModals() {
             )}
             
             <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-1">Duration</Label>
+              <Label className="block text-sm font-medium text-gray-700 mb-1">Add to my calendar for the next:</Label>
               <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
@@ -267,7 +267,7 @@ export default function TimesModals() {
                 disabled={downloadCalendarMutation.isPending || !eventTitle || !englishDate}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
               >
-                {downloadCalendarMutation.isPending ? "Generating..." : `Download Calendar (${yearDuration} Year${yearDuration > 1 ? 's' : ''})`}
+                {downloadCalendarMutation.isPending ? "Generating..." : "Download Calendar"}
               </Button>
               <Button 
                 onClick={() => {
