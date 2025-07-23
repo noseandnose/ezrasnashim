@@ -22,20 +22,32 @@ export default function TimesModals() {
   const downloadCalendarMutation = useMutation({
     mutationFn: async (data: { title: string; hebrewDate: string; gregorianDate: string; years: number }) => {
       console.log('Downloading calendar with data:', data);
+      
+      // Check browser environment
+      const userAgent = navigator.userAgent;
+      console.log('User agent:', userAgent);
+      console.log('Is mobile:', /Mobile|Android|iPhone|iPad/.test(userAgent));
+      
       const response = await fetch(`/api/calendar-events/download?t=${Date.now()}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-cache',
+          'Accept': 'text/calendar, */*',
         },
         body: JSON.stringify(data),
       });
       
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Calendar download error:', errorText);
-        throw new Error('Failed to generate calendar file');
+        console.error('Calendar download error:', response.status, response.statusText, errorText);
+        throw new Error(`Failed to generate calendar file: ${response.status} ${response.statusText}`);
       }
+      
+      console.log('Response headers:');
+      response.headers.forEach((value, key) => {
+        console.log(`  ${key}: ${value}`);
+      });
       
       // Get the filename from the Content-Disposition header
       const contentDisposition = response.headers.get('Content-Disposition');
@@ -54,15 +66,38 @@ export default function TimesModals() {
       const url = window.URL.createObjectURL(blob);
       console.log('Download URL created:', url);
       
+      // Try the download with multiple approaches for better browser compatibility
       const a = document.createElement('a');
       a.href = url;
       a.download = filename;
+      a.style.display = 'none';
       console.log('Downloading file:', filename);
       
       document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      
+      try {
+        // Primary method: programmatic click
+        a.click();
+        console.log('Primary download method executed');
+      } catch (e) {
+        console.log('Primary download failed, trying alternative method:', e);
+        
+        // Alternative method: manual trigger
+        const event = new MouseEvent('click', {
+          view: window,
+          bubbles: true,
+          cancelable: true
+        });
+        a.dispatchEvent(event);
+      }
+      
+      // Cleanup
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+        if (document.body.contains(a)) {
+          document.body.removeChild(a);
+        }
+      }, 100);
       
       console.log('Calendar download completed successfully');
       return { success: true };
@@ -81,10 +116,11 @@ export default function TimesModals() {
       // Navigate to home and scroll to progress
       window.location.hash = '#/?section=home&scrollToProgress=true';
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Download mutation error:', error);
       toast({
         title: "Error",
-        description: "Failed to download calendar file",
+        description: `Failed to download calendar file: ${error.message}`,
         variant: "destructive"
       });
     }
