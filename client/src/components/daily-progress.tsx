@@ -1,5 +1,6 @@
 import { useDailyCompletionStore } from "@/lib/types";
 import { useState, useEffect } from "react";
+import stage0Image from '@assets/Untitled design (2)_1753301031660.png';
 import stage1Image from '@assets/Stage1_1753300751705.png';
 import stage2Image from '@assets/Stage2_1753300751704.png';
 import stage3Image from '@assets/Stage3_1753300751700.png';
@@ -34,9 +35,9 @@ export default function DailyProgress({ size = 36 }: DailyProgressProps) {
     switch (completedCount) {
       case 0:
         return {
-          src: stage1Image,
+          src: stage0Image,
           scale: 1.8,
-          alt: "Single flower - Start your spiritual journey"
+          alt: "Gentle pink beginning - Start your spiritual journey"
         };
       case 1:
         return {
@@ -59,7 +60,7 @@ export default function DailyProgress({ size = 36 }: DailyProgressProps) {
         };
       default:
         return {
-          src: stage1Image,
+          src: stage0Image,
           scale: 1.8,
           alt: "Daily progress"
         };
