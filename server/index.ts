@@ -50,7 +50,26 @@ app.use(
       // Allow requests with no origin (like mobile apps or curl)
       if (!origin) return callback(null, true);
 
-      // Allow any origin
+      // Allow Vite dev server and any origin
+      const allowedOrigins = [
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        /\.replit\.dev$/,
+        /\.replit\.app$/
+      ];
+      
+      const isAllowed = allowedOrigins.some(allowed => {
+        if (typeof allowed === 'string') {
+          return origin === allowed;
+        }
+        return allowed.test(origin);
+      });
+      
+      if (isAllowed || !origin) {
+        return callback(null, true);
+      }
+      
+      // Allow any origin as fallback
       return callback(null, origin);
     },
     credentials: true,
