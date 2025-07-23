@@ -131,34 +131,12 @@ async function initializeServer() {
       }
     });
   } else {
-    // In development, handle client-side routing by sending message to access via frontend
+    // In development, handle client-side routing
     app.get('*', (req: Request, res: Response) => {
-      if (!req.path.startsWith('/api')) {
-        res.status(200).send(`
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Access via Frontend</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f5f5f5; }
-    .container { background: white; padding: 30px; border-radius: 10px; display: inline-block; }
-    .button { background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h2>Ezras Nashim</h2>
-    <p>To access the app, please use the frontend development server:</p>
-    <a href="https://${(req.get('host') || 'localhost:5000').replace(':5000', ':5173')}${req.path}" class="button">
-      Open App
-    </a>
-    <p><small>Route: ${req.path}</small></p>
-  </div>
-</body>
-</html>
-        `);
+      if (!req.path.startsWith('/api') && !req.path.startsWith('/attached_assets')) {
+        // Redirect to the frontend dev server for client-side routing
+        const frontendUrl = process.env.VITE_DEV_URL || 'http://localhost:5173';
+        res.redirect(301, `${frontendUrl}${req.path}`);
       }
     });
   }
