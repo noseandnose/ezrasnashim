@@ -282,7 +282,7 @@ export default function TableModals() {
             onClick={() => handleComplete('inspiration')}
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 mt-4"
           >
-            Completed Inspiration
+            Done
           </Button>
         </DialogContent>
       </Dialog>
