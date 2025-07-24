@@ -22,8 +22,13 @@ interface TefillaModalsProps {
 // Koren Thank You Component
 const KorenThankYou = () => (
   <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-    <div className="flex items-center justify-center">
+    <div className="flex items-center justify-between">
       <span className="text-sm font-medium text-black">All tefilla texts courtesy of Koren Publishers Jerusalem</span>
+      <img 
+        src={korenLogo} 
+        alt="Koren Publishers" 
+        className="h-6 w-auto ml-2 flex-shrink-0"
+      />
     </div>
   </div>
 );
