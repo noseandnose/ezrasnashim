@@ -118,8 +118,13 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         
         {/* Sponsor Section */}
         <button 
-          onClick={() => sponsor && openModal('sponsor-details')}
-          className={`w-full bg-white/50 rounded-xl p-2 border border-blush/10 mb-3 text-left ${sponsor ? 'hover:bg-white/70 transition-colors' : ''}`}
+          onClick={() => {
+            console.log('Sponsor button clicked, sponsor data:', sponsor);
+            if (sponsor) {
+              openModal('sponsor-details');
+            }
+          }}
+          className={`w-full bg-white/50 rounded-xl p-2 border border-blush/10 mb-3 text-left ${sponsor ? 'hover:bg-white/70 transition-colors cursor-pointer' : 'cursor-default'}`}
         >
           <div className="flex items-center space-x-1 mb-1">
             <Heart className="text-black/60" size={12} strokeWidth={1.5} />
@@ -127,7 +132,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           </div>
           <p className="font-sans text-xs text-black/80 leading-tight">
             {sponsor ? 
-              `Sponsored ${sponsor.inHonorMemoryOf || `by ${sponsor.name}`}` :
+              (sponsor.inHonorMemoryOf ? `Sponsored ${sponsor.inHonorMemoryOf}` : `Sponsored by ${sponsor.name}`) :
               "Sponsored by the Cohen family"
             }
           </p>
