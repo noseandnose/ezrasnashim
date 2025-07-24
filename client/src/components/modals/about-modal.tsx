@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/lib/types";
-import justOneChesedImage from '@assets/Second print Photo Signs - Chamal  copy - Small_1753336442937.jpg';
+import justOneChesedImage from '@assets/Second print Photo Signs - Chamal  copy_1753336662272.png';
 
 export default function AboutModal() {
   const { activeModal, closeModal } = useModalStore();
