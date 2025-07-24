@@ -39,16 +39,11 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   const { data: sponsor, isLoading: sponsorLoading, error: sponsorError } = useQuery<Sponsor>({
     queryKey: ['daily-sponsor', today, 'v2'], // Added version to bust cache
     queryFn: async () => {
-      console.log('Fetching sponsor for date:', today);
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sponsors/daily/${today}?t=${Date.now()}`); // Cache busting
       if (!response.ok) {
-        console.log('Sponsor fetch failed:', response.status);
         return null;
       }
       const data = await response.json();
-      console.log('Sponsor data received:', data);
-      console.log('inHonorMemoryOf field:', data?.inHonorMemoryOf);
-      console.log('message field:', data?.message);
       return data;
     },
     staleTime: 0, // No caching - always fresh
@@ -57,7 +52,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     refetchOnWindowFocus: true // Refresh when window gets focus
   });
 
-  console.log('Current sponsor state:', { sponsor, sponsorLoading, sponsorError });
+
 
   const navigateToSection = (section: Section) => {
     if (onSectionChange) {
@@ -131,13 +126,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         {/* Sponsor Section */}
         <button 
           onClick={() => {
-            console.log('Sponsor button clicked, sponsor data:', sponsor);
-            console.log('sponsorLoading:', sponsorLoading, 'sponsorError:', sponsorError);
             if (sponsor) {
-              console.log('Opening sponsor modal');
               openModal('sponsor-details');
-            } else {
-              console.log('No sponsor data available');
             }
           }}
           disabled={sponsorLoading || !sponsor}
@@ -159,12 +149,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
                 "No sponsor for today"
             }
           </p>
-          {/* Debug info - remove after testing */}
-          {sponsor && process.env.NODE_ENV === 'development' && (
-            <div className="text-xs text-red-500 mt-1">
-              Debug: inHonorMemoryOf = "{sponsor.inHonorMemoryOf}" | message = "{sponsor.message}"
-            </div>
-          )}
+
         </button>
 
         {/* Times Section - Time-based Prayer and Shkia */}
