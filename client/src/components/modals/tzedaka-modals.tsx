@@ -108,50 +108,47 @@ export default function TzedakaModals() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-warm-gray block mb-2">Sponsored By</label>
+              <label className="text-sm font-medium text-warm-gray block mb-2">Sponsored By *</label>
               <Input 
                 placeholder="Enter your name or family name"
                 value={donorName}
                 onChange={(e) => setDonorName(e.target.value)}
                 className="rounded-xl border-blush/30 focus:border-blush bg-white/80 backdrop-blur-sm"
+                required
               />
             </div>
 
             <div>
-              <label className="text-sm font-medium text-warm-gray block mb-2">In Honor or Memory Of</label>
+              <label className="text-sm font-medium text-warm-gray block mb-2">In Honor or Memory Of *</label>
               <Input
                 placeholder="L'ilui Nishmas... or L'kavod..."
                 value={dedicationText}
                 onChange={(e) => setDedicationText(e.target.value)}
                 className="rounded-xl border-blush/30 focus:border-blush bg-white/80 backdrop-blur-sm"
+                required
               />
             </div>
 
             <div>
-              <label className="text-sm font-medium text-warm-gray block mb-2">Write a short message about the person</label>
+              <label className="text-sm font-medium text-warm-gray block mb-2">Write a short message about the person *</label>
               <Textarea
                 placeholder="A person who always loved torah..."
                 value={sponsorMessage}
                 onChange={(e) => setSponsorMessage(e.target.value)}
                 className="rounded-xl border-blush/30 focus:border-blush bg-white/80 backdrop-blur-sm min-h-[80px]"
+                required
               />
             </div>
 
 
 
-            <div className="space-y-2">
+            <div>
               <Button 
                 onClick={() => handleDonation()}
-                className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
+                disabled={!donorName.trim() || !dedicationText.trim() || !sponsorMessage.trim()}
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Sponsor for $180
-              </Button>
-              <Button 
-                onClick={() => closeModal()} 
-                variant="outline"
-                className="w-full rounded-xl border-blush/20 text-warm-gray hover:bg-white/90 transition-all duration-300 bg-white/70 backdrop-blur-sm border"
-              >
-                Cancel
               </Button>
             </div>
           </div>
@@ -202,20 +199,13 @@ export default function TzedakaModals() {
               />
             </div>
 
-            <div className="space-y-2">
+            <div>
               <Button 
                 onClick={() => handleDonation()}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
                 disabled={!torahPortion}
               >
                 Continue to Payment
-              </Button>
-              <Button 
-                onClick={() => closeModal()} 
-                variant="outline"
-                className="w-full rounded-xl border-blush/20 text-warm-gray hover:bg-white/90 transition-all duration-300 bg-white/70 backdrop-blur-sm border"
-              >
-                Cancel
               </Button>
             </div>
           </div>
@@ -270,17 +260,10 @@ export default function TzedakaModals() {
               )}
             </div>
 
-            <div className="flex space-x-2">
-              <Button 
-                onClick={() => closeModal()} 
-                variant="outline"
-                className="flex-1"
-              >
-                Cancel
-              </Button>
+            <div>
               <Button 
                 onClick={() => handleDonation()}
-                className="flex-1 bg-rose-500 hover:bg-rose-600 text-white"
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
                 disabled={!donationAmount}
               >
                 Donate Now
@@ -338,20 +321,13 @@ export default function TzedakaModals() {
               )}
             </div>
 
-            <div className="space-y-2">
+            <div>
               <Button 
                 onClick={() => handleDonation()}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
                 disabled={!donationAmount}
               >
                 Donate Now
-              </Button>
-              <Button 
-                onClick={() => closeModal()} 
-                variant="outline"
-                className="w-full rounded-xl border-blush/20 text-warm-gray hover:bg-white/90 transition-all duration-300 bg-white/70 backdrop-blur-sm border"
-              >
-                Cancel
               </Button>
             </div>
           </div>
@@ -407,20 +383,13 @@ export default function TzedakaModals() {
               )}
             </div>
 
-            <div className="space-y-2">
+            <div>
               <Button 
                 onClick={() => handleDonation()}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
                 disabled={!donationAmount}
               >
                 Donate Now
-              </Button>
-              <Button 
-                onClick={() => closeModal()} 
-                variant="outline"
-                className="w-full rounded-xl border-blush/20 text-warm-gray hover:bg-white/90 transition-all duration-300 bg-white/70 backdrop-blur-sm border"
-              >
-                Cancel
               </Button>
             </div>
           </div>
@@ -476,20 +445,13 @@ export default function TzedakaModals() {
               )}
             </div>
 
-            <div className="space-y-2">
+            <div>
               <Button 
                 onClick={() => handleDonation()}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
                 disabled={!donationAmount}
               >
                 Donate Now
-              </Button>
-              <Button 
-                onClick={() => closeModal()} 
-                variant="outline"
-                className="w-full rounded-xl border-blush/20 text-warm-gray hover:bg-white/90 transition-all duration-300 bg-white/70 backdrop-blur-sm border"
-              >
-                Cancel
               </Button>
             </div>
           </div>
