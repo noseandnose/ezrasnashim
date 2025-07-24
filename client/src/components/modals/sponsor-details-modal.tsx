@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/lib/types";
-import { Heart, X } from "lucide-react";
+import { Heart } from "lucide-react";
 
 interface Sponsor {
   name: string;
@@ -33,16 +33,10 @@ export default function SponsorDetailsModal() {
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent className="max-w-md mx-auto rounded-3xl p-0 overflow-hidden bg-white border-2 border-blush/20 max-h-[95vh] overflow-y-auto">
-        <DialogHeader className="p-4 pb-2 flex flex-row items-center justify-between gap-4 pr-8">
-          <DialogTitle className="text-lg font-serif font-bold text-black text-center flex-grow">
+        <DialogHeader className="p-4 pb-2 text-center">
+          <DialogTitle className="text-lg font-serif font-bold text-black">
             Today's Sponsor
           </DialogTitle>
-          <button
-            onClick={closeModal}
-            className="h-8 w-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
-          >
-            <X className="h-4 w-4 text-gray-500" />
-          </button>
         </DialogHeader>
         
         <div className="px-4 pb-4">

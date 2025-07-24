@@ -146,14 +146,14 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           <div className="flex items-center space-x-1 mb-1">
             <Heart className="text-black/60" size={12} strokeWidth={1.5} />
             <h4 className="font-serif text-xs text-black tracking-wide font-bold">
-              Today's Sponsor {sponsorLoading && '(Loading...)'}
+              Today is sponsored {sponsorLoading && '(Loading...)'}
             </h4>
           </div>
           <p className="font-sans text-xs text-black/80 leading-tight">
             {sponsorLoading ? 
               'Loading sponsor information...' :
               sponsor ? 
-                (sponsor.inHonorMemoryOf ? `Sponsored ${sponsor.inHonorMemoryOf}` : `Sponsored by ${sponsor.name}`) :
+                (sponsor.inHonorMemoryOf ? sponsor.inHonorMemoryOf : `by ${sponsor.name}`) :
                 "No sponsor for today"
             }
           </p>
