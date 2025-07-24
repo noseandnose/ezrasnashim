@@ -38,6 +38,18 @@ export default function AboutModal() {
             Our first three bold goals are: to become the largest seminary in the world, to inspire a million mitzvos a month, and to help bring Mashiach—together.
           </p>
           
+          <p className="text-sm text-black leading-relaxed mb-4">
+            Zmanim and Date Converter are provided by{" "}
+            <a 
+              href="https://www.hebcal.com/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 underline font-medium"
+            >
+              Hebcal
+            </a>
+          </p>
+          
           {/* JustOneChesed Logo */}
           <div className="flex justify-center mt-4">
             <img 

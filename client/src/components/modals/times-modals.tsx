@@ -293,17 +293,19 @@ export default function TimesModals() {
               >
                 {downloadCalendarMutation.isPending ? "Generating..." : "Download Calendar"}
               </Button>
-              <Button 
-                onClick={() => {
-                  closeModal();
-                  // Navigate to home and scroll to progress (except for life page modals)
-                  window.location.hash = '#/?section=home&scrollToProgress=true';
-                }} 
-                variant="outline"
-                className="w-full rounded-xl border-blush/20 text-warm-gray hover:bg-white/90 transition-all duration-300 bg-white/70 backdrop-blur-sm border"
-              >
-                Cancel
-              </Button>
+              
+              {/* Hebcal Attribution */}
+              <p className="text-xs text-gray-600 text-center">
+                Zmanim and Date Converter are provided by{" "}
+                <a 
+                  href="https://www.hebcal.com/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 underline font-medium"
+                >
+                  Hebcal
+                </a>
+              </p>
             </div>
           </div>
         </DialogContent>
