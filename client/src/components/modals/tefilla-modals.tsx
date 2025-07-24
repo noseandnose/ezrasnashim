@@ -978,6 +978,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 // Helper components for prayer lists
 function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => void }) {
   const { closeModal } = useModalStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+  const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const { data: prayers, isLoading } = useQuery<WomensPrayer[]>({
     queryKey: ['/api/womens-prayers/refuah'],
   });
@@ -1003,22 +1007,44 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
           </div>
         </div>
       ))}
-      <Button 
-        onClick={() => {
-          closeModal();
-          // Navigate to home and scroll to progress
-          window.location.hash = '#/?section=home&scrollToProgress=true';
-        }} 
-        className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
-      >
-        Complete
-      </Button>
+      <div className="heart-explosion-container">
+        <Button 
+          onClick={() => {
+            // Track modal completion and mark as completed globally
+            trackModalComplete('refuah');
+            markModalComplete('refuah');
+            
+            completeTask('tefilla');
+            setShowHeartExplosion(true);
+            
+            setTimeout(() => {
+              setShowHeartExplosion(false); // Reset explosion state
+              checkAndShowCongratulations();
+              closeModal();
+              window.location.hash = '#/?section=home&scrollToProgress=true';
+            }, 2000);
+          }} 
+          className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+        >
+          Complete
+        </Button>
+        
+        {/* Heart Explosion Animation */}
+        <HeartExplosion 
+          trigger={showHeartExplosion}
+          onComplete={() => setShowHeartExplosion(false)} 
+        />
+      </div>
     </div>
   );
 }
 
 function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => void }) {
   const { closeModal } = useModalStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+  const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const { data: prayers, isLoading } = useQuery<WomensPrayer[]>({
     queryKey: ['/api/womens-prayers/family'],
   });
@@ -1044,22 +1070,44 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
           </div>
         </div>
       ))}
-      <Button 
-        onClick={() => {
-          closeModal();
-          // Navigate to home and scroll to progress
-          window.location.hash = '#/?section=home&scrollToProgress=true';
-        }} 
-        className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
-      >
-        Complete
-      </Button>
+      <div className="heart-explosion-container">
+        <Button 
+          onClick={() => {
+            // Track modal completion and mark as completed globally
+            trackModalComplete('family');
+            markModalComplete('family');
+            
+            completeTask('tefilla');
+            setShowHeartExplosion(true);
+            
+            setTimeout(() => {
+              setShowHeartExplosion(false); // Reset explosion state
+              checkAndShowCongratulations();
+              closeModal();
+              window.location.hash = '#/?section=home&scrollToProgress=true';
+            }, 2000);
+          }} 
+          className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+        >
+          Complete
+        </Button>
+        
+        {/* Heart Explosion Animation */}
+        <HeartExplosion 
+          trigger={showHeartExplosion}
+          onComplete={() => setShowHeartExplosion(false)} 
+        />
+      </div>
     </div>
   );
 }
 
 function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => void }) {
   const { closeModal } = useModalStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+  const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const { data: prayers, isLoading } = useQuery<WomensPrayer[]>({
     queryKey: ['/api/womens-prayers/life'],
   });
@@ -1085,16 +1133,34 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
           </div>
         </div>
       ))}
-      <Button 
-        onClick={() => {
-          closeModal();
-          // Navigate to home and scroll to progress
-          window.location.hash = '#/?section=home&scrollToProgress=true';
-        }} 
-        className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
-      >
-        Complete
-      </Button>
+      <div className="heart-explosion-container">
+        <Button 
+          onClick={() => {
+            // Track modal completion and mark as completed globally
+            trackModalComplete('life');
+            markModalComplete('life');
+            
+            completeTask('tefilla');
+            setShowHeartExplosion(true);
+            
+            setTimeout(() => {
+              setShowHeartExplosion(false); // Reset explosion state
+              checkAndShowCongratulations();
+              closeModal();
+              window.location.hash = '#/?section=home&scrollToProgress=true';
+            }, 2000);
+          }} 
+          className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+        >
+          Complete
+        </Button>
+        
+        {/* Heart Explosion Animation */}
+        <HeartExplosion 
+          trigger={showHeartExplosion}
+          onComplete={() => setShowHeartExplosion(false)} 
+        />
+      </div>
     </div>
   );
 }
@@ -1107,6 +1173,10 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
   setFontSize: (size: number) => void;
 }) {
   const { closeModal } = useModalStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+  const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const { data: prayer, isLoading } = useQuery<WomensPrayer>({
     queryKey: [`/api/womens-prayers/prayer/${prayerId}`],
     enabled: !!prayerId,
@@ -1170,16 +1240,34 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
 
       <KorenThankYou />
 
-      <Button 
-        onClick={() => {
-          closeModal();
-          // Navigate to home and scroll to progress
-          window.location.hash = '#/?section=home&scrollToProgress=true';
-        }} 
-        className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
-      >
-        Complete
-      </Button>
+      <div className="heart-explosion-container">
+        <Button 
+          onClick={() => {
+            // Track modal completion and mark as completed globally
+            trackModalComplete('individual-prayer');
+            markModalComplete('individual-prayer');
+            
+            completeTask('tefilla');
+            setShowHeartExplosion(true);
+            
+            setTimeout(() => {
+              setShowHeartExplosion(false); // Reset explosion state
+              checkAndShowCongratulations();
+              closeModal();
+              window.location.hash = '#/?section=home&scrollToProgress=true';
+            }, 2000);
+          }} 
+          className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
+        >
+          Complete
+        </Button>
+        
+        {/* Heart Explosion Animation */}
+        <HeartExplosion 
+          trigger={showHeartExplosion}
+          onComplete={() => setShowHeartExplosion(false)} 
+        />
+      </div>
 
 
     </>
