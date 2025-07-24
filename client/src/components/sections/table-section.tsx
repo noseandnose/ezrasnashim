@@ -183,7 +183,7 @@ export default function TableSection() {
               Daily Recipe
             </h3>
             <p className={`font-sans text-xs leading-relaxed ${!recipeContent ? 'text-gray-400' : 'text-black/60'}`}>
-              {isModalComplete('recipe') ? 'Completed' : (recipeContent?.title || 'Daily Recipe')}
+              {!recipeContent ? 'Coming Soon' : isModalComplete('recipe') ? 'Completed' : recipeContent.title}
             </p>
           </button>
 
@@ -234,7 +234,7 @@ export default function TableSection() {
               Creative Jewish Living
             </h3>
             <p className={`font-sans text-xs leading-relaxed ${!inspirationContent ? 'text-gray-400' : 'text-black/60'}`}>
-              {isModalComplete('inspiration') ? 'Completed' : (inspirationContent?.title || 'Creative Living Ideas')}
+              {!inspirationContent ? 'Coming Soon' : isModalComplete('inspiration') ? 'Completed' : inspirationContent.title}
             </p>
           </button>
 
