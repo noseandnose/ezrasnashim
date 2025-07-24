@@ -7,6 +7,7 @@ export type ModalType =
   | 'loshon'
   | 'featured'
   | 'mincha' 
+  | 'maariv'
   | 'morning-brochas'
   | 'birkat-hamazon'
   | 'tehillim' 
@@ -26,6 +27,7 @@ export type ModalType =
   | 'donate'
   | 'about'
   | 'location'
+  | 'sponsor-details'
   | null;
 
 export interface ModalState {

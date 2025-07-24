@@ -8,6 +8,7 @@ import DonationModal from "./donation-modal";
 import CongratulationsModal from "./congratulations-modal";
 import AboutModal from "./about-modal";
 import LocationModal from "./location-modal";
+import SponsorDetailsModal from "./sponsor-details-modal";
 import { useModalStore } from "@/lib/types";
 
 interface ModalContainerProps {
@@ -32,6 +33,7 @@ export default function ModalContainer({ onSectionChange }: ModalContainerProps)
         isOpen={activeModal === 'location'} 
         onClose={closeModal} 
       />
+      <SponsorDetailsModal />
     </>
   );
 }

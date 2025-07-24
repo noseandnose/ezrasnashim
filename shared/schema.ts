@@ -139,7 +139,8 @@ export const sponsors = pgTable("sponsors", {
   name: text("name").notNull(),
   hebrewName: text("hebrew_name"),
   sponsorshipDate: text("sponsorship_date").notNull(), // Store as YYYY-MM-DD string
-  message: text("message"), // Optional custom message
+  inHonorMemoryOf: text("in_honor_memory_of"), // Single line dedication text
+  message: text("message"), // Short message about the person
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });

@@ -1390,7 +1390,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Donation completion handler
   app.post("/api/donation-complete", async (req, res) => {
     try {
-      const { donationType, sponsorName, dedication } = req.body;
+      const { donationType, sponsorName, dedication, message } = req.body;
       
       // Only create sponsor record for "Sponsor a Day" donations
       if (donationType === 'Sponsor a Day of Ezras Nashim' && sponsorName) {
@@ -1400,7 +1400,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.createSponsor({
           name: sponsorName,
           sponsorshipDate: today,
-          message: dedication || null,
+          inHonorMemoryOf: dedication || null,
+          message: message || null,
           isActive: true
         });
         

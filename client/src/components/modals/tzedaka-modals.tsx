@@ -17,6 +17,7 @@ export default function TzedakaModals() {
   const [customAmount, setCustomAmount] = useState("");
   const [donorName, setDonorName] = useState("");
   const [dedicationText, setDedicationText] = useState("");
+  const [sponsorMessage, setSponsorMessage] = useState("");
   const [torahPortion, setTorahPortion] = useState("");
   const { trackModalComplete } = useTrackModalComplete();
 
@@ -81,7 +82,8 @@ export default function TzedakaModals() {
         amount: amount.toString(),
         type: typeDescription,
         sponsor: donorName,
-        dedication: dedicationText
+        dedication: dedicationText,
+        message: sponsorMessage
       });
 
       closeModal();
@@ -133,10 +135,20 @@ export default function TzedakaModals() {
 
             <div>
               <label className="text-sm font-medium text-warm-gray block mb-2">In Honor or Memory Of</label>
-              <Textarea
+              <Input
                 placeholder="L'ilui Nishmas... or L'kavod..."
                 value={dedicationText}
                 onChange={(e) => setDedicationText(e.target.value)}
+                className="rounded-xl border-blush/30 focus:border-blush bg-white/80 backdrop-blur-sm"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-warm-gray block mb-2">Write a short message about the person</label>
+              <Textarea
+                placeholder="A person who always loved torah..."
+                value={sponsorMessage}
+                onChange={(e) => setSponsorMessage(e.target.value)}
                 className="rounded-xl border-blush/30 focus:border-blush bg-white/80 backdrop-blur-sm min-h-[80px]"
               />
             </div>
