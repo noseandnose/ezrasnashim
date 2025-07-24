@@ -190,18 +190,34 @@ export default function TableSection() {
         <div className="grid grid-cols-2 gap-2">
           {/* Table Inspiration Button */}
           <button
-            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              isModalComplete('inspiration') ? 'bg-sage/20' : 'bg-white'
+            className={`rounded-3xl p-3 text-center transition-all duration-300 shadow-lg border border-blush/10 relative ${
+              !inspirationContent 
+                ? 'bg-gray-100 cursor-not-allowed' 
+                : isModalComplete('inspiration') ? 'bg-sage/20 hover:scale-105' : 'bg-white hover:scale-105'
             }`}
-            onClick={() => openModal('inspiration')}
+            onClick={() => inspirationContent && openModal('inspiration')}
+            disabled={!inspirationContent}
           >
+            {/* Banner overlay for when no content */}
+            {!inspirationContent && (
+              <div className="absolute inset-0 bg-black/20 rounded-3xl flex items-center justify-center z-10">
+                <div className="bg-white/90 px-2 py-1 rounded-lg">
+                  <p className="font-sans text-xs text-black font-medium">Content loaded on Thursdays</p>
+                </div>
+              </div>
+            )}
+            
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              isModalComplete('inspiration') ? 'bg-sage' : 'bg-gradient-feminine'
+              !inspirationContent 
+                ? 'bg-gray-300' 
+                : isModalComplete('inspiration') ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
-              <Lightbulb className="text-white" size={18} strokeWidth={1.5} />
+              <Lightbulb className={`${!inspirationContent ? 'text-gray-500' : 'text-white'}`} size={18} strokeWidth={1.5} />
             </div>
-            <h3 className="font-serif text-xs text-black mb-1 font-bold">Creative Jewish Living</h3>
-            <p className="font-sans text-xs text-black/60 leading-relaxed">
+            <h3 className={`font-serif text-xs mb-1 font-bold ${!inspirationContent ? 'text-gray-500' : 'text-black'}`}>
+              Creative Jewish Living
+            </h3>
+            <p className={`font-sans text-xs leading-relaxed ${!inspirationContent ? 'text-gray-400' : 'text-black/60'}`}>
               {isModalComplete('inspiration') ? 'Completed' : (inspirationContent?.title || 'Creative Living Ideas')}
             </p>
           </button>
