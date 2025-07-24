@@ -36,16 +36,26 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
 
   // Fetch today's sponsor
   const today = new Date().toISOString().split('T')[0];
-  const { data: sponsor } = useQuery<Sponsor>({
+  const { data: sponsor, isLoading: sponsorLoading, error: sponsorError } = useQuery<Sponsor>({
     queryKey: ['daily-sponsor', today],
     queryFn: async () => {
+      console.log('Fetching sponsor for date:', today);
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sponsors/daily/${today}`);
-      if (!response.ok) return null;
-      return response.json();
+      if (!response.ok) {
+        console.log('Sponsor fetch failed:', response.status);
+        return null;
+      }
+      const data = await response.json();
+      console.log('Sponsor data received:', data);
+      return data;
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 60 * 60 * 1000 // 1 hour
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    refetchOnMount: true,
+    refetchOnWindowFocus: false
   });
+
+  console.log('Current sponsor state:', { sponsor, sponsorLoading, sponsorError });
 
   const navigateToSection = (section: Section) => {
     if (onSectionChange) {
@@ -120,20 +130,31 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         <button 
           onClick={() => {
             console.log('Sponsor button clicked, sponsor data:', sponsor);
+            console.log('sponsorLoading:', sponsorLoading, 'sponsorError:', sponsorError);
             if (sponsor) {
+              console.log('Opening sponsor modal');
               openModal('sponsor-details');
+            } else {
+              console.log('No sponsor data available');
             }
           }}
-          className={`w-full bg-white/50 rounded-xl p-2 border border-blush/10 mb-3 text-left ${sponsor ? 'hover:bg-white/70 transition-colors cursor-pointer' : 'cursor-default'}`}
+          disabled={sponsorLoading || !sponsor}
+          className={`w-full bg-white/50 rounded-xl p-2 border border-blush/10 mb-3 text-left transition-colors ${
+            sponsor ? 'hover:bg-white/70 cursor-pointer' : 'cursor-default opacity-70'
+          }`}
         >
           <div className="flex items-center space-x-1 mb-1">
             <Heart className="text-black/60" size={12} strokeWidth={1.5} />
-            <h4 className="font-serif text-xs text-black tracking-wide font-bold">Today's Sponsor</h4>
+            <h4 className="font-serif text-xs text-black tracking-wide font-bold">
+              Today's Sponsor {sponsorLoading && '(Loading...)'}
+            </h4>
           </div>
           <p className="font-sans text-xs text-black/80 leading-tight">
-            {sponsor ? 
-              (sponsor.inHonorMemoryOf ? `Sponsored ${sponsor.inHonorMemoryOf}` : `Sponsored by ${sponsor.name}`) :
-              "Sponsored by the Cohen family"
+            {sponsorLoading ? 
+              'Loading sponsor information...' :
+              sponsor ? 
+                (sponsor.inHonorMemoryOf ? `Sponsored ${sponsor.inHonorMemoryOf}` : `Sponsored by ${sponsor.name}`) :
+                "No sponsor for today"
             }
           </p>
         </button>
