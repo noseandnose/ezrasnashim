@@ -198,6 +198,7 @@ function MorningBrochasModal() {
             setShowHeartExplosion(true);
             
             setTimeout(() => {
+              setShowHeartExplosion(false); // Reset explosion state
               checkAndShowCongratulations();
               closeModal();
               window.location.hash = '#/?section=home&scrollToProgress=true';
