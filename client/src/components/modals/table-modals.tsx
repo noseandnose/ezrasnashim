@@ -47,27 +47,69 @@ export default function TableModals() {
       <Dialog open={activeModal === 'recipe'} onOpenChange={() => closeModal()}>
         <DialogContent className="max-h-[80vh] overflow-y-auto">
           <div className="flex items-center justify-center mb-3 relative">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Shabbat Recipe</DialogTitle>
+            <DialogTitle className="text-lg font-serif font-bold text-black">
+              {recipeContent?.title || "Daily Recipe"}
+            </DialogTitle>
           </div>
           
-          <div className="space-y-4 text-sm text-gray-700">
-            <div>
-              <h3 className="font-semibold mb-2">Ingredients:</h3>
-              <ul className="list-disc list-inside space-y-1">
-                <li>4 cups bread flour</li>
-                <li>1 packet active dry yeast</li>
-                <li>1/4 cup warm water</li>
-                <li>1/4 cup honey</li>
-                <li>2 eggs + 1 for brushing</li>
-                <li>1/4 cup oil</li>
-                <li>1 tsp salt</li>
-              </ul>
+          {recipeContent ? (
+            <div className="space-y-4 text-sm text-gray-700">
+              {/* Recipe Description */}
+              {recipeContent.description && (
+                <div>
+                  <p>{recipeContent.description}</p>
+                </div>
+              )}
+              
+              {/* Cooking Info */}
+              {(recipeContent.cookingTime || recipeContent.servings) && (
+                <div className="bg-blush/10 p-3 rounded-lg">
+                  <div className="flex gap-4">
+                    {recipeContent.cookingTime && (
+                      <div>
+                        <span className="font-semibold">Cooking Time: </span>
+                        <span>{recipeContent.cookingTime}</span>
+                      </div>
+                    )}
+                    {recipeContent.servings && (
+                      <div>
+                        <span className="font-semibold">Servings: </span>
+                        <span>{recipeContent.servings}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              {/* Ingredients */}
+              {recipeContent.ingredients && recipeContent.ingredients.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-2">Ingredients:</h3>
+                  <ul className="list-disc list-inside space-y-1">
+                    {recipeContent.ingredients.map((ingredient, index) => (
+                      <li key={index}>{ingredient}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {/* Instructions */}
+              {recipeContent.instructions && recipeContent.instructions.length > 0 && (
+                <div>
+                  <h3 className="font-semibold mb-2">Instructions:</h3>
+                  <ol className="list-decimal list-inside space-y-2">
+                    {recipeContent.instructions.map((instruction, index) => (
+                      <li key={index}>{instruction}</li>
+                    ))}
+                  </ol>
+                </div>
+              )}
             </div>
-            <div>
-              <h3 className="font-semibold mb-2">Instructions:</h3>
-              <p>Mix warm water with yeast and let bloom. Combine all ingredients, knead until smooth. Let rise for 1 hour, then braid and let rise again before baking at 350°F for 25-30 minutes.</p>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No recipe available</p>
             </div>
-          </div>
+          )}
 
           <Button 
             onClick={() => handleComplete('recipe')}
