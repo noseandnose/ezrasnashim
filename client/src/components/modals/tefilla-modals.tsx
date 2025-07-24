@@ -264,6 +264,16 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       // Navigate to home section and scroll to progress to show flower growth
       if (onSectionChange) {
         onSectionChange('home');
+        // Also scroll to progress section
+        setTimeout(() => {
+          const progressElement = document.getElementById('daily-progress-garden');
+          if (progressElement) {
+            progressElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+          }
+        }, 300);
       } else {
         // Fallback: redirect to home with scroll parameter
         window.location.hash = '#/?section=home&scrollToProgress=true';
@@ -1000,7 +1010,7 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
         }} 
         className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
       >
-        Close
+        Complete
       </Button>
     </div>
   );
@@ -1041,7 +1051,7 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
         }} 
         className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
       >
-        Close
+        Complete
       </Button>
     </div>
   );
@@ -1082,7 +1092,7 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
         }} 
         className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
       >
-        Close
+        Complete
       </Button>
     </div>
   );
@@ -1167,7 +1177,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
         }} 
         className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
       >
-        Close
+        Complete
       </Button>
 
 
