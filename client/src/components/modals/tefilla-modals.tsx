@@ -1157,6 +1157,8 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
 
       </div>
 
+      <KorenThankYou />
+
       <Button 
         onClick={() => {
           closeModal();

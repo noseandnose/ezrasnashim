@@ -301,6 +301,7 @@ Changelog:
 - July 24, 2025. Enhanced About Ezras Nashim modal with JustOneChesed branding: Added JustOneChesed logo image at bottom of modal content, reduced gap between title and white content area (mb-3 to mb-1), expanded white content area height from max-h-[50vh] to max-h-[65vh] for better visual balance and more prominent display of organizational branding
 - July 24, 2025. Added Hebcal attribution text to About and Hebrew Date Calculator modals: Added "Zmanim and Date Converter are provided by Hebcal" with hyperlink to https://www.hebcal.com/ in both About Ezras Nashim modal and Hebrew Date Calculator modal, removed Cancel button from Hebrew Date Calculator modal since X button already exists for closing
 - July 24, 2025. Restored Koren logo to tefilla modals attribution text: Added Koren Publishers logo back to the right side of "All tefilla texts courtesy of Koren Publishers Jerusalem" text in all tefilla modals (tefilla-modals.tsx and birkat-hamazon-modal.tsx), using justify-between layout to handle text wrapping on mobile devices while keeping logo consistently positioned
+- July 24, 2025. Added Koren attribution to Individual Prayer modal: Added KorenThankYou component to IndividualPrayerContent modal to ensure all tefilla modals containing prayer text have proper Koren Publishers attribution with logo, completing attribution coverage across all personal prayer modals
 ```
 
 ## User Preferences
