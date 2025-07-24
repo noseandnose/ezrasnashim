@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - staging
+      - main
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -16,10 +17,24 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '23'  # or whatever version you're using
+    - name: 'Set Environment Variables'
+      id: set-environment
+      run: |
+        if [ "${{ github.ref_name }}" = "main" ]; then
+          echo "ENVIRONMENT=prod" >> $GITHUB_ENV
+          echo "VITE_MODE=production" >> $GITHUB_ENV
+          echo "S3_BUCKET=ezras-nashim-frontend-production" >> $GITHUB_ENV
+        elif [ "${{ github.ref_name }}" = "staging" ]; then
+          echo "ENVIRONMENT=staging" >> $GITHUB_ENV
+          echo "VITE_MODE=staging" >> $GITHUB_ENV
+          echo "S3_BUCKET=ezras-nashim-frontend" >> $GITHUB_ENV
+        fi
+
     - name: Build and deploy
       run: |
         npm install
-        npx vite build --mode staging
+        npx vite build --mode ${{ env.VITE_MODE }}
+
     - name: Configure AWS Credentials Action for GitHub Actions
       uses: aws-actions/configure-aws-credentials@v4.2.1
       with:
@@ -27,7 +42,7 @@ jobs:
         aws-region: "eu-central-1"
     - name: Deploy to S3
       run: |
-        aws s3 sync dist/public s3://ezras-nashim-frontend/
+        aws s3 sync dist/public s3://${S3_BUCKET}/
         aws cloudfront create-invalidation \
           --distribution-id E4DFY6W9PG5RQ \
           --paths "/*"

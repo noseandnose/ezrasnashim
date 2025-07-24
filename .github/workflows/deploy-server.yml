@@ -2,15 +2,11 @@ name: Deploy to Amazon ECS
 
 on:
   push:
-    branches: [ "staging" ]
+    branches: [ "staging", "main" ]
 
 env:
   AWS_REGION: eu-central-1                   # set this to your preferred AWS region, e.g. us-west-1
-  ECR_REPOSITORY: ezras-nashim-staging  # set this to your Amazon ECR repository name
-  ECS_SERVICE: ezras_nashim_staging-service                 # set this to your Amazon ECS service name
   ECS_CLUSTER: ezras-nashim-cluster  # set this to your Amazon ECS cluster name
-  ECS_TASK_DEFINITION: devops/ecs_task_definition_staging.json # set this to the path to your Amazon ECS task definition
-  # file, e.g. .aws/task-definition.json
   CONTAINER_NAME: api           # set this to the name of the container in the
   # containerDefinitions section of your task definition
 
@@ -23,11 +19,28 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    environment: Staging
+    environment: ${{ github.ref_name == 'main' && 'Production' || 'Staging' }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: 'Set Environment Variables'
+        id: set-environment
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "ENVIRONMENT=prod" >> $GITHUB_ENV
+            echo "ECR_REPOSITORY=ezras-nashim" >> $GITHUB_ENV
+            echo "ECS_SERVICE=ezras_nashim-service" >> $GITHUB_ENV
+            echo "ECS_TASK_DEFINITION=devops/ecs_task_definition.json" >> $GITHUB_ENV
+            echo "ECS_TASK_FAMILY=ezras_nashim" >> $GITHUB_ENV
+          elif [ "${{ github.ref_name }}" = "staging" ]; then
+            echo "ENVIRONMENT=staging" >> $GITHUB_ENV
+            echo "ECR_REPOSITORY=ezras-nashim-staging" >> $GITHUB_ENV
+            echo "ECS_SERVICE=ezras_nashim_staging-service" >> $GITHUB_ENV
+            echo "ECS_TASK_DEFINITION=devops/ecs_task_definition_staging.json" >> $GITHUB_ENV
+            echo "ECS_TASK_FAMILY=ezras_nashim_staging" >> $GITHUB_ENV
+          fi
 
       - name: Configure AWS Credentials Action for GitHub Actions
         uses: aws-actions/configure-aws-credentials@v4.2.1
@@ -57,7 +70,7 @@ jobs:
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition-family: ezras_nashim_staging
+          task-definition-family: ${{ env.ECS_TASK_FAMILY }}
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
 
