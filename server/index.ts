@@ -57,7 +57,9 @@ app.use(
         'http://localhost:5000', // Add backend origin
         'http://127.0.0.1:5000',
         /\.replit\.dev$/,
-        /\.replit\.app$/
+        /\.replit\.app$/,
+        'https://api.ezrasnashim.app',
+        'https://staging.ezrasnashim.app'
       ];
       
       const isAllowed = allowedOrigins.some(allowed => {
