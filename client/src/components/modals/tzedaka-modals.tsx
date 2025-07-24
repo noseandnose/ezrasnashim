@@ -75,9 +75,6 @@ export default function TzedakaModals() {
         trackModalComplete(activeModal);
       }
       
-      // Complete tzedaka task when donation is initiated
-      completeTask('tzedaka');
-      
       const params = new URLSearchParams({
         amount: amount.toString(),
         type: typeDescription,
@@ -87,19 +84,6 @@ export default function TzedakaModals() {
       });
 
       closeModal();
-      
-      // Navigate to home and scroll to progress to show flower growth
-      setTimeout(() => {
-        window.location.hash = '#/?section=home&scrollToProgress=true';
-      }, 100);
-      
-      // Check if all tasks are completed and show congratulations
-      setTimeout(() => {
-        if (checkAndShowCongratulations()) {
-          openModal('congratulations');
-        }
-      }, 200);
-      
       setLocation(`/donate?${params.toString()}`);
     }
   };

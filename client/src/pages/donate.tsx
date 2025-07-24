@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import { useLocation } from "wouter";
+import { useDailyCompletionStore, useModalStore } from "@/lib/types";
 // Removed Apple Pay button import - now using integrated PaymentElement
 
 // Add Apple Pay types
@@ -36,6 +37,8 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
   const elements = useElements();
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { openModal } = useModalStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,10 +80,21 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         }
       }
       
+      // Complete tzedaka task when payment is successful
+      completeTask('tzedaka');
+      
       toast({
         title: "Thank You!",
         description: "Your donation has been processed successfully.",
       });
+      
+      // Check if all tasks are completed and show congratulations
+      setTimeout(() => {
+        if (checkAndShowCongratulations()) {
+          openModal('congratulations');
+        }
+      }, 1000);
+      
       onSuccess();
     }
 
@@ -225,7 +239,8 @@ export default function Donate() {
   };
 
   const handleBackToApp = () => {
-    setLocation('/');
+    // Navigate to home with scroll to progress to show flower growth
+    window.location.hash = '#/?section=home&scrollToProgress=true';
   };
 
   if (donationComplete) {

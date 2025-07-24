@@ -28,20 +28,7 @@ export default function DonationModal() {
     onSuccess: (data) => {
       // Track modal completion
       trackModalComplete('donate');
-      
-      // Complete tzedaka task when donation is initiated
-      completeTask('tzedaka');
       closeModal();
-      
-      // Navigate to home and scroll to progress to show flower growth
-      window.location.hash = '#/?section=home&scrollToProgress=true';
-      
-      // Check if all tasks are completed and show congratulations
-      setTimeout(() => {
-        if (checkAndShowCongratulations()) {
-          openModal('congratulations');
-        }
-      }, 100);
       
       if (data.clientSecret) {
         // Navigate to donation page with amount and type
