@@ -148,8 +148,8 @@ export function BirkatHamazonModal() {
               onClick={() => openModal('al-hamichiya')}
               className="w-full bg-white rounded-xl p-4 border border-blush/10 hover:bg-blush/5 transition-colors text-left"
             >
-              <h3 className="font-serif text-black font-medium mb-1">Al Hamichiya</h3>
-              <p className="text-sm text-gray-600">After cake, cookies, and pastries</p>
+              <h3 className="font-serif text-black font-medium mb-1">Me'ein Shalosh</h3>
+              <p className="text-sm text-gray-600">Al Hamichiya</p>
             </button>
 
             <button
