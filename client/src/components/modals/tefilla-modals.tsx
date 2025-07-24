@@ -1252,7 +1252,7 @@ function SpecialTehillimModal() {
         }} 
         className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 mt-4"
       >
-        Close
+        Complete
       </Button>
     </>
   );
