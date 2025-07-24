@@ -421,7 +421,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           {/* Compact Perek Display */}
           <button
             onClick={() => openModal('tehillim-text')}
-            className="w-full bg-gradient-to-br from-ivory to-lavender/10 rounded-2xl p-3 border border-blush/15 hover:bg-white/90 transition-all duration-300"
+            className="w-full bg-white/80 rounded-2xl p-3 border border-blush/15 hover:bg-white/95 transition-all duration-300"
           >
             {/* Header with perek number */}
             <div className="flex items-center justify-between mb-2">
