@@ -303,7 +303,7 @@ Changelog:
 - July 24, 2025. Restored Koren logo to tefilla modals attribution text: Added Koren Publishers logo back to the right side of "All tefilla texts courtesy of Koren Publishers Jerusalem" text in all tefilla modals (tefilla-modals.tsx and birkat-hamazon-modal.tsx), using justify-between layout to handle text wrapping on mobile devices while keeping logo consistently positioned
 - July 24, 2025. Added Koren attribution to Individual Prayer modal: Added KorenThankYou component to IndividualPrayerContent modal to ensure all tefilla modals containing prayer text have proper Koren Publishers attribution with logo, completing attribution coverage across all personal prayer modals
 - July 24, 2025. Fixed location button rounded corners consistency: Changed home page location button from 'rounded' to 'rounded-xl' to match the consistent styling used by all other buttons throughout the application for uniform visual appearance
-- July 24, 2025. Made Tefilla page main modal section more obviously clickable: Changed Global Tehillim Chain main section background from gradient (from-ivory to-lavender/10) to lighter white/80 background to make it more prominent and clearly indicate it's interactive for accessing the Perek and person information
+- July 24, 2025. Made Tefilla page Perek section more obviously clickable: Enhanced only the inner Perek section (not the entire Global Tehillim Chain container) to be more obviously clickable by increasing background opacity to white/90, adding shadow-sm, and enhancing border visibility, making it clear that users can tap the specific Perek area to view full text while keeping the container styling unchanged
 ```
 
 ## User Preferences
