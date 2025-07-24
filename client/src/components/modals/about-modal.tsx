@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/lib/types";
+import justOneChesedImage from '@assets/Second print Photo Signs - Chamal  copy - Small_1753336442937.jpg';
 
 export default function AboutModal() {
   const { activeModal, closeModal } = useModalStore();
@@ -10,12 +11,12 @@ export default function AboutModal() {
       <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans">
         
         {/* Standardized Header - centered title only */}
-        <div className="flex items-center justify-center mb-3 relative pr-8">
+        <div className="flex items-center justify-center mb-1 relative pr-8">
           <DialogTitle className="text-lg font-serif font-bold text-black">About Ezras Nashim</DialogTitle>
         </div>
 
-        {/* Content Area */}
-        <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
+        {/* Content Area - expanded white area */}
+        <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
           <p className="text-sm text-black leading-relaxed mb-4">
             Ezras Nashim is a project of{" "}
             <a 
@@ -33,9 +34,19 @@ export default function AboutModal() {
             This app is a simple, beautiful companion to help you grow, connect, and elevate your home and heart—one moment at a time.
           </p>
           
-          <p className="text-sm text-black leading-relaxed">
+          <p className="text-sm text-black leading-relaxed mb-4">
             Our first three bold goals are: to become the largest seminary in the world, to inspire a million mitzvos a month, and to help bring Mashiach—together.
           </p>
+          
+          {/* JustOneChesed Logo */}
+          <div className="flex justify-center mt-4">
+            <img 
+              src={justOneChesedImage} 
+              alt="JustOneChesed Logo" 
+              className="max-w-full h-auto rounded-lg"
+              style={{ maxHeight: '120px' }}
+            />
+          </div>
         </div>
 
         {/* Complete Button */}
