@@ -313,4 +313,5 @@ Changelog:
 ```
 Preferred communication style: Simple, everyday language.
 Text styling preference: Pure black text (#000000) with bold headings for better readability.
+Font testing: Currently testing Platypi serif font as potential replacement for English text on home page (July 24, 2025) - temporary reversible changes applied.
 ```
