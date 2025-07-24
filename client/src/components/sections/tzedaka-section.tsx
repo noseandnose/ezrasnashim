@@ -223,7 +223,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
           </div>
           <h3 className="font-serif text-sm text-black mb-2 font-bold">Put a Coin in Tzedaka</h3>
           <p className="font-sans text-xs text-black/60 leading-relaxed">
-            Donations go towards Fertility, Abuse prevention and Torah causes
+            Donations go towards Woman in need and Torah Causes
           </p>
         </button>
 
