@@ -326,6 +326,22 @@ export default function TableModals() {
           >
             Done
           </Button>
+          
+          {/* Thank You Attribution */}
+          <div className="bg-blue-50 p-3 rounded-xl mt-1 text-center">
+            <p className="text-sm text-blue-800">
+              Thank you to{' '}
+              <a 
+                href="https://www.instagram.com/yidwithakid/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 underline font-medium"
+              >
+                YidWithAKid
+              </a>
+              {' '}for providing this.
+            </p>
+          </div>
         </DialogContent>
       </Dialog>
 
