@@ -68,7 +68,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   const { markModalComplete } = useModalCompletionStore();
   const [, setLocation] = useLocation();
   const [showExplosion, setShowExplosion] = useState(false);
-  const [fontSize, setFontSize] = useState(20);
+  const [fontSize, setFontSize] = useState(16);
   const [showHebrew, setShowHebrew] = useState(true);
   const [showFootnotes, setShowFootnotes] = useState(false);
   const { trackModalComplete } = useTrackModalComplete();
@@ -198,7 +198,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             <div className="mb-1">
               <button
                 onClick={() => setShowFootnotes(!showFootnotes)}
-                className="w-full text-left bg-gray-50 hover:bg-gray-100 rounded-2xl p-4 border border-gray-200 transition-colors"
+                className="w-full text-left bg-gray-50 hover:bg-gray-100 rounded-2xl p-3 border border-gray-200 transition-colors"
               >
                 <div className="flex items-center justify-between">
                   <span className="platypi-medium text-black text-sm">Footnotes</span>
