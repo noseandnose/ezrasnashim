@@ -323,22 +323,17 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
       {/* Chizuk Modal */}
       <Dialog open={activeModal === 'chizuk'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans" aria-describedby="chizuk-description">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="chizuk-description">
           <div id="chizuk-description" className="sr-only">5-minute daily inspiration and spiritual strengthening content</div>
           
           {/* Simple Header for Audio Content */}
           <div className="flex items-center justify-center mb-3 relative">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Daily Chizuk</DialogTitle>
+            <DialogTitle className="text-lg platypi-bold text-black">Daily Chizuk</DialogTitle>
           </div>
           
-          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
             {chizukContent && chizukContent.audioUrl && (
               <div className="space-y-4">
-                {chizukContent.speaker && (
-                  <p className="text-sm text-black/60 text-center">
-                    <strong>Speaker:</strong> {chizukContent.speaker}
-                  </p>
-                )}
                 <AudioPlayer 
                   title={chizukContent.title || 'Chizuk'}
                   duration={chizukContent.duration || "0:00"}
@@ -349,25 +344,29 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           </div>
           
           {/* Thank You Section */}
-          {chizukContent?.provider && (
-            <div className="mt-6 p-4 bg-blue-50 rounded-xl">
-              <p className="text-sm text-blue-900 font-medium mb-2">
-                🙏 Thank you to {chizukContent.provider}
-              </p>
-              {chizukContent.speakerWebsite && (
-                <p className="text-sm text-blue-800">
-                  <a 
-                    href={chizukContent.speakerWebsite} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline hover:text-blue-800"
-                  >
-                    Visit Website
-                  </a>
-                </p>
-              )}
-            </div>
-          )}
+          <div className="mt-1 p-4 bg-blue-50 rounded-2xl border border-blue-200">
+            <p className="text-sm text-black platypi-medium">
+              Thank you to{' '}
+              <a 
+                href="https://outorah.org/author/133215/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 underline hover:text-blue-800"
+              >
+                Rabbi David Ashear
+              </a>
+              {' '}and{' '}
+              <a 
+                href="https://outorah.org/author/133215/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 underline hover:text-blue-800"
+              >
+                the OU
+              </a>
+              {' '}for providing this content
+            </p>
+          </div>
 
           <div className="heart-explosion-container">
             <Button 
