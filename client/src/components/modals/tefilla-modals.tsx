@@ -7,7 +7,7 @@ import korenLogo from "@assets/This_is_a_logo_for_Koren_Publishers_Jerusalem_175
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { MinchaPrayer, NishmasText, GlobalTehillimProgress, TehillimName, WomensPrayer } from "@shared/schema";
+import { MinchaPrayer, MorningPrayer, NishmasText, GlobalTehillimProgress, TehillimName, WomensPrayer } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
@@ -94,28 +94,27 @@ function MorningBrochasModal() {
   const [showEnglish, setShowEnglish] = useState(false);
   const [fontSize, setFontSize] = useState(20);
   
-  // Sefaria API URLs for morning blessings
-  // Fetch all morning blessing texts from backend proxy
-  const { data: morningBlessings, isLoading, error } = useQuery({
-    queryKey: ['morning-blessings-fixed-format-v2'],
+  // Fetch morning prayers from database
+  const { data: morningPrayers, isLoading, error } = useQuery({
+    queryKey: ['morning-prayers'],
     queryFn: async () => {
-      console.log('Making API call for morning blessings...');
-      const response = await axiosClient.get('/api/sefaria/morning-brochas');
+      console.log('Making API call for morning prayers from database...');
+      const response = await axiosClient.get('/api/morning/prayers');
       console.log('Frontend received response:', response.data);
-      console.log('Number of blessings:', response.data?.length);
-      console.log('First blessing sample:', response.data?.[0]);
-      return response.data; // Returns array of {hebrew, english, ref} objects
+      console.log('Number of prayers:', response.data?.length);
+      console.log('First prayer sample:', response.data?.[0]);
+      return response.data; // Returns array of MorningPrayer objects from database
     },
     enabled: activeModal === 'morning-brochas',
     refetchOnMount: true,
-    staleTime: 0,
-    gcTime: 0 // Completely disable caching
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000 // 30 minutes
   });
 
   console.log('MorningBrochasModal - activeModal:', activeModal);
   console.log('MorningBrochasModal - isLoading:', isLoading);
   console.log('MorningBrochasModal - error:', error);
-  console.log('MorningBrochasModal - data:', morningBlessings);
+  console.log('MorningBrochasModal - data:', morningPrayers);
 
   console.log('MorningBrochasModal - activeModal:', activeModal);
   
@@ -168,16 +167,16 @@ function MorningBrochasModal() {
             </div>
           ) : (
             <div className="space-y-6" style={{ fontSize: `${fontSize}px` }}>
-              {morningBlessings?.map((blessing: {hebrew: string; english: string; ref: string}, index: number) => (
-                <div key={index} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
-                  {blessing.hebrew && showHebrew && (
+              {morningPrayers?.map((prayer: MorningPrayer, index: number) => (
+                <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
+                  {prayer.hebrewText && showHebrew && (
                     <div className="secular-one-bold text-right leading-relaxed text-black">
-                      {blessing.hebrew}
+                      {prayer.hebrewText}
                     </div>
                   )}
                   {!showHebrew && (
                     <div className="text-left leading-relaxed text-black/70">
-                      {blessing.english || "English translation not available"}
+                      {prayer.englishTranslation || "English translation not available"}
                     </div>
                   )}
                 </div>
