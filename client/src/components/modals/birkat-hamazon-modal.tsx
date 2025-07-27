@@ -3,9 +3,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { X, Plus, Minus } from "lucide-react";
 import korenLogo from "@assets/This_is_a_logo_for_Koren_Publishers_Jerusalem_1752581940716.jpg";
-import { useModalStore, useDailyCompletionStore } from "@/lib/types";
+import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
-import { useAnalytics } from "@/hooks/use-analytics";
+import { useAnalytics, useTrackModalComplete } from "@/hooks/use-analytics";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 
 interface BirkatHamazonPrayer {
@@ -36,7 +36,9 @@ export function BirkatHamazonModal() {
   const [fontSize, setFontSize] = useState(20);
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [selectedPrayer, setSelectedPrayer] = useState<string | null>(null);
-  const { markTefillaComplete } = useDailyCompletionStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
   const { trackCompletion } = useAnalytics();
 
   const isOpen = activeModal === 'after-brochas' || activeModal === 'birkat-hamazon' || activeModal === 'al-hamichiya';
@@ -51,15 +53,20 @@ export function BirkatHamazonModal() {
     enabled: activeModal === 'after-brochas' || activeModal === 'al-hamichiya',
   });
 
-  const handleComplete = () => {
+  const handleComplete = (modalType: string) => {
+    if (isModalComplete(modalType)) return;
+    
+    // Track modal completion and mark as completed globally
+    trackModalComplete(modalType);
+    markModalComplete(modalType);
+    
+    completeTask('tefilla');
     setShowHeartExplosion(true);
-    trackCompletion("Birkat Hamazon");
     
     setTimeout(() => {
-      markTefillaComplete();
-      closeModal();
       setShowHeartExplosion(false);
-      // Navigate to home and scroll to progress to show flower growth
+      checkAndShowCongratulations();
+      closeModal();
       window.location.hash = '#/?section=home&scrollToProgress=true';
     }, 2000);
   };
@@ -210,10 +217,15 @@ export function BirkatHamazonModal() {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={handleComplete}
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-4 border-0"
+              onClick={isModalComplete('al-hamichiya') ? undefined : () => handleComplete('al-hamichiya')}
+              disabled={isModalComplete('al-hamichiya')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
+                isModalComplete('al-hamichiya') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('al-hamichiya') ? 'Completed Today' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showHeartExplosion} />
           </div>
@@ -252,10 +264,15 @@ export function BirkatHamazonModal() {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={handleComplete}
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-4 border-0"
+              onClick={isModalComplete('birkat-hamazon') ? undefined : () => handleComplete('birkat-hamazon')}
+              disabled={isModalComplete('birkat-hamazon')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
+                isModalComplete('birkat-hamazon') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('birkat-hamazon') ? 'Completed Today' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showHeartExplosion} />
           </div>

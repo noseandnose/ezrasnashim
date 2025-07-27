@@ -71,26 +71,34 @@ export interface DailyCompletionState {
   checkAndShowCongratulations: () => boolean;
 }
 
-// Global modal completion tracking
+// Daily modal completion tracking
 export interface ModalCompletionState {
-  completedModals: Set<string>;
+  completedModals: Record<string, Set<string>>; // date -> set of modalIds
   markModalComplete: (modalId: string) => void;
   isModalComplete: (modalId: string) => boolean;
   resetModalCompletions: () => void;
 }
 
 export const useModalCompletionStore = create<ModalCompletionState>((set, get) => ({
-  completedModals: new Set(),
+  completedModals: {},
   markModalComplete: (modalId: string) => {
-    set(state => ({
-      completedModals: new Set(state.completedModals).add(modalId)
-    }));
+    const today = new Date().toISOString().split('T')[0];
+    set(state => {
+      const newState = { ...state.completedModals };
+      if (!newState[today]) {
+        newState[today] = new Set();
+      }
+      newState[today].add(modalId);
+      return { completedModals: newState };
+    });
   },
   isModalComplete: (modalId: string) => {
-    return get().completedModals.has(modalId);
+    const today = new Date().toISOString().split('T')[0];
+    const todaysCompletions = get().completedModals[today];
+    return todaysCompletions ? todaysCompletions.has(modalId) : false;
   },
   resetModalCompletions: () => {
-    set({ completedModals: new Set() });
+    set({ completedModals: {} });
   }
 }));
 

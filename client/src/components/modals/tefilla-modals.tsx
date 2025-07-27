@@ -87,7 +87,7 @@ const StandardModalHeader = ({
 function MorningBrochasModal() {
   const { activeModal, closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete } = useModalCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [showHebrew, setShowHebrew] = useState(true);
@@ -188,7 +188,7 @@ function MorningBrochasModal() {
         <KorenThankYou />
 
         <Button 
-          onClick={() => {
+          onClick={isModalComplete('morning-brochas') ? undefined : () => {
             // Track modal completion and mark as completed globally
             trackModalComplete('morning-brochas');
             markModalComplete('morning-brochas');
@@ -202,11 +202,15 @@ function MorningBrochasModal() {
               closeModal();
               window.location.hash = '#/?section=home&scrollToProgress=true';
             }, 2000);
-          }} 
-          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0"
-          disabled={isLoading}
+          }}
+          disabled={isLoading || isModalComplete('morning-brochas')}
+          className={`w-full py-3 rounded-xl platypi-medium border-0 ${
+            isModalComplete('morning-brochas') 
+              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+          }`}
         >
-          Completed Morning Brochas
+          {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete Morning Brochas'}
         </Button>
         
         {/* Heart Explosion Animation */}
@@ -222,7 +226,7 @@ function MorningBrochasModal() {
 export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const { activeModal, openModal, closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete } = useModalCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const [, setLocation] = useLocation();
   const { trackModalComplete } = useTrackModalComplete();
   const { trackEvent } = useAnalytics();
@@ -615,10 +619,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={completeWithAnimation} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
+              onClick={isModalComplete('mincha') ? undefined : completeWithAnimation}
+              disabled={isModalComplete('mincha')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+                isModalComplete('mincha') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('mincha') ? 'Completed Today' : 'Complete Mincha'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -680,10 +689,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={completeWithAnimation} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
+              onClick={isModalComplete('womens-prayers') ? undefined : completeWithAnimation}
+              disabled={isModalComplete('womens-prayers')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+                isModalComplete('womens-prayers') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('womens-prayers') ? 'Completed Today' : "Complete Women's Prayers"}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -708,10 +722,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={completeWithAnimation} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
+              onClick={isModalComplete('blessings') ? undefined : completeWithAnimation}
+              disabled={isModalComplete('blessings')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+                isModalComplete('blessings') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('blessings') ? 'Completed Today' : 'Complete Blessings'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -736,10 +755,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={completeWithAnimation} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
+              onClick={isModalComplete('tefillos') ? undefined : completeWithAnimation}
+              disabled={isModalComplete('tefillos')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+                isModalComplete('tefillos') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('tefillos') ? 'Completed Today' : 'Complete Tefillos'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -764,10 +788,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={completeWithAnimation} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
+              onClick={isModalComplete('personal-prayers') ? undefined : completeWithAnimation}
+              disabled={isModalComplete('personal-prayers')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+                isModalComplete('personal-prayers') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('personal-prayers') ? 'Completed Today' : 'Complete Personal Prayers'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -953,10 +982,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={completeWithAnimation} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
+              onClick={isModalComplete('maariv') ? undefined : completeWithAnimation}
+              disabled={isModalComplete('maariv')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+                isModalComplete('maariv') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('maariv') ? 'Completed Today' : 'Complete Maariv'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -978,7 +1012,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => void }) {
   const { closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete } = useModalCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const { data: prayers, isLoading } = useQuery<WomensPrayer[]>({
@@ -1008,7 +1042,7 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
       ))}
       <div className="heart-explosion-container">
         <Button 
-          onClick={() => {
+          onClick={isModalComplete('refuah') ? undefined : () => {
             // Track modal completion and mark as completed globally
             trackModalComplete('refuah');
             markModalComplete('refuah');
@@ -1022,10 +1056,15 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
               closeModal();
               window.location.hash = '#/?section=home&scrollToProgress=true';
             }, 2000);
-          }} 
-          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
+          }}
+          disabled={isModalComplete('refuah')}
+          className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+            isModalComplete('refuah') 
+              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+          }`}
         >
-          Complete
+          {isModalComplete('refuah') ? 'Completed Today' : 'Complete'}
         </Button>
         
         {/* Heart Explosion Animation */}
@@ -1041,7 +1080,7 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
 function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => void }) {
   const { closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete } = useModalCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const { data: prayers, isLoading } = useQuery<WomensPrayer[]>({
@@ -1071,7 +1110,7 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
       ))}
       <div className="heart-explosion-container">
         <Button 
-          onClick={() => {
+          onClick={isModalComplete('family') ? undefined : () => {
             // Track modal completion and mark as completed globally
             trackModalComplete('family');
             markModalComplete('family');
@@ -1085,10 +1124,15 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
               closeModal();
               window.location.hash = '#/?section=home&scrollToProgress=true';
             }, 2000);
-          }} 
-          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
+          }}
+          disabled={isModalComplete('family')}
+          className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+            isModalComplete('family') 
+              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+          }`}
         >
-          Complete
+          {isModalComplete('family') ? 'Completed Today' : 'Complete'}
         </Button>
         
         {/* Heart Explosion Animation */}
@@ -1104,7 +1148,7 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
 function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => void }) {
   const { closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete } = useModalCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const { data: prayers, isLoading } = useQuery<WomensPrayer[]>({
@@ -1134,7 +1178,7 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
       ))}
       <div className="heart-explosion-container">
         <Button 
-          onClick={() => {
+          onClick={isModalComplete('life') ? undefined : () => {
             // Track modal completion and mark as completed globally
             trackModalComplete('life');
             markModalComplete('life');
@@ -1148,10 +1192,15 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
               closeModal();
               window.location.hash = '#/?section=home&scrollToProgress=true';
             }, 2000);
-          }} 
-          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
+          }}
+          disabled={isModalComplete('life')}
+          className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+            isModalComplete('life') 
+              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+          }`}
         >
-          Complete
+          {isModalComplete('life') ? 'Completed Today' : 'Complete'}
         </Button>
         
         {/* Heart Explosion Animation */}
@@ -1173,7 +1222,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
 }) {
   const { closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete } = useModalCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const { data: prayer, isLoading } = useQuery<WomensPrayer>({
@@ -1241,7 +1290,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
 
       <div className="heart-explosion-container">
         <Button 
-          onClick={() => {
+          onClick={isModalComplete('individual-prayer') ? undefined : () => {
             // Track modal completion and mark as completed globally
             trackModalComplete('individual-prayer');
             markModalComplete('individual-prayer');
@@ -1255,10 +1304,15 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
               closeModal();
               window.location.hash = '#/?section=home&scrollToProgress=true';
             }, 2000);
-          }} 
-          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0"
+          }}
+          disabled={isModalComplete('individual-prayer')}
+          className={`w-full py-3 rounded-xl platypi-medium border-0 ${
+            isModalComplete('individual-prayer') 
+              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+          }`}
         >
-          Complete
+          {isModalComplete('individual-prayer') ? 'Completed Today' : 'Complete Prayer'}
         </Button>
         
         {/* Heart Explosion Animation */}

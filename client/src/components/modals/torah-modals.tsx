@@ -65,7 +65,7 @@ const StandardModalHeader = ({
 export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   const { activeModal, closeModal, openModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete } = useModalCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const [, setLocation] = useLocation();
   const [showExplosion, setShowExplosion] = useState(false);
   const [fontSize, setFontSize] = useState(16);
@@ -254,10 +254,15 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           
           <div className="heart-explosion-container">
             <Button 
-              onClick={handleTorahComplete} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-4 border-0"
+              onClick={isModalComplete('halacha') ? undefined : handleTorahComplete}
+              disabled={isModalComplete('halacha')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
+                isModalComplete('halacha') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('halacha') ? 'Completed Today' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -334,10 +339,15 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={handleTorahComplete} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+              onClick={isModalComplete('emuna') ? undefined : handleTorahComplete}
+              disabled={isModalComplete('emuna')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+                isModalComplete('emuna') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('emuna') ? 'Completed Today' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -400,10 +410,15 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={handleTorahComplete} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+              onClick={isModalComplete('chizuk') ? undefined : handleTorahComplete}
+              disabled={isModalComplete('chizuk')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+                isModalComplete('chizuk') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('chizuk') ? 'Completed Today' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -461,10 +476,15 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={handleTorahComplete} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+              onClick={isModalComplete('featured') ? undefined : handleTorahComplete}
+              disabled={isModalComplete('featured')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+                isModalComplete('featured') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('featured') ? 'Completed Today' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
