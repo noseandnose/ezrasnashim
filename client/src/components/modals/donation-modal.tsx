@@ -66,7 +66,12 @@ export default function DonationModal() {
   const quickAmounts = [1, 18, 180, 1800];
 
   return (
-    <Dialog open={activeModal === 'donate'} onOpenChange={() => closeModal()}>
+    <Dialog open={activeModal === 'donate'} onOpenChange={(open) => {
+      if (!open) {
+        // User clicked X or pressed Escape - don't track completion
+        closeModal();
+      }
+    }}>
       <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto gradient-soft-glow rounded-3xl p-6 font-sans border border-blush/20">
         <div className="flex items-center justify-center mb-3 relative">
           <DialogTitle className="text-lg font-serif font-bold text-black">Support Causes</DialogTitle>

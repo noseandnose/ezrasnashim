@@ -32,7 +32,12 @@ export default function SponsorDetailsModal() {
   if (!sponsor) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={closeModal}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!open) {
+        // Close modal when X is clicked - no completion tracking needed for details modal
+        closeModal();
+      }
+    }}>
       <DialogContent className="max-w-md mx-auto rounded-3xl p-0 overflow-hidden bg-white border-2 border-blush/20 max-h-[95vh] overflow-y-auto">
         <DialogHeader className="p-4 pb-2 text-center">
           <DialogTitle className="text-lg font-serif font-bold text-black">
@@ -87,8 +92,12 @@ export default function SponsorDetailsModal() {
           
           {/* Close button */}
           <Button
-            onClick={closeModal}
-            className="w-full bg-gradient-feminine hover:opacity-90 text-white rounded-2xl py-3 font-sans font-medium transition-all duration-300 hover:scale-105"
+            onClick={() => {
+              closeModal();
+              // Navigate to home with scroll to progress since user viewed sponsor details
+              window.location.hash = '/?scrollToProgress=true';
+            }}
+            className="w-full bg-gradient-feminine hover:opacity-90 text-white rounded-2xl py-3 platypi-medium transition-all duration-300 hover:scale-105"
           >
             Close
           </Button>

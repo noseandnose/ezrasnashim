@@ -50,23 +50,25 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
     setIsProcessing(true);
 
     console.log('Attempting to confirm payment...');
-    const { error, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/?donation=success`,
-      },
-      redirect: "if_required", // Stay on same page when possible
-    });
-    
-    console.log('Payment confirmation result:', { error, paymentIntent });
-
-    if (error) {
-      toast({
-        title: "Payment Failed",
-        description: error.message,
-        variant: "destructive",
+    try {
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/?donation=success`,
+        },
+        redirect: "if_required", // Stay on same page when possible
       });
-    } else {
+      
+      console.log('Payment confirmation result:', { error, paymentIntent });
+
+      if (error) {
+        console.error('Payment error:', error);
+        toast({
+          title: "Payment Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else if (paymentIntent && paymentIntent.status === 'succeeded') {
       // Call completion handler for sponsor day donations
       if (donationType === 'Sponsor a Day of Ezras Nashim' && sponsorName) {
         try {
@@ -95,7 +97,21 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         }
       }, 1000);
       
-      onSuccess();
+        onSuccess();
+      } else {
+        console.warn('Payment intent status:', paymentIntent?.status);
+        toast({
+          title: "Payment Processing",
+          description: "Payment is being processed. Please wait...",
+        });
+      }
+    } catch (paymentError) {
+      console.error('Payment processing error:', paymentError);
+      toast({
+        title: "Payment Error",
+        description: "An error occurred while processing your payment. Please try again.",
+        variant: "destructive",
+      });
     }
 
     setIsProcessing(false);
@@ -240,7 +256,7 @@ export default function Donate() {
 
   const handleBackToApp = () => {
     // Navigate to home with scroll to progress to show flower growth
-    window.location.hash = '#/?section=home&scrollToProgress=true';
+    setLocation('/?scrollToProgress=true');
   };
 
   if (donationComplete) {

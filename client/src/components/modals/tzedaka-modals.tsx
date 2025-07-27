@@ -70,7 +70,8 @@ export default function TzedakaModals() {
     }
 
     if (amount > 0) {
-      // Track modal completion
+      // Only track modal completion when actually proceeding to payment
+      // This ensures X button doesn't trigger completion tracking
       if (activeModal) {
         trackModalComplete(activeModal);
       }
@@ -91,7 +92,12 @@ export default function TzedakaModals() {
   return (
     <>
       {/* Sponsor a Day Modal */}
-      <Dialog open={activeModal === 'sponsor-day'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'sponsor-day'} onOpenChange={(open) => {
+        if (!open) {
+          // User clicked X or pressed Escape - don't track completion
+          closeModal();
+        }
+      }}>
         <DialogContent aria-describedby="sponsor-day-description">
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg font-serif font-bold text-black">Sponsor a Day</DialogTitle>
@@ -156,7 +162,12 @@ export default function TzedakaModals() {
       </Dialog>
 
       {/* Torah Dedication Modal */}
-      <Dialog open={activeModal === 'torah-dedication'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'torah-dedication'} onOpenChange={(open) => {
+        if (!open) {
+          // User clicked X or pressed Escape - don't track completion
+          closeModal();
+        }
+      }}>
         <DialogContent aria-describedby="torah-dedication-description">
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg font-serif font-bold text-black">Torah Dedication</DialogTitle>
@@ -213,7 +224,12 @@ export default function TzedakaModals() {
       </Dialog>
 
       {/* Infertility Support Modal */}
-      <Dialog open={activeModal === 'infertility-support'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'infertility-support'} onOpenChange={(open) => {
+        if (!open) {
+          // User clicked X or pressed Escape - don't track completion
+          closeModal();
+        }
+      }}>
         <DialogContent aria-describedby="infertility-support-description">
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg font-serif font-bold text-black">Infertility Support</DialogTitle>
@@ -274,7 +290,12 @@ export default function TzedakaModals() {
       </Dialog>
 
       {/* Abuse Support Modal */}
-      <Dialog open={activeModal === 'abuse-support'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'abuse-support'} onOpenChange={(open) => {
+        if (!open) {
+          // User clicked X or pressed Escape - don't track completion
+          closeModal();
+        }
+      }}>
         <DialogContent>
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg font-serif font-bold text-black">Abuse Support</DialogTitle>
@@ -335,7 +356,12 @@ export default function TzedakaModals() {
       </Dialog>
 
       {/* Women's Causes Modal */}
-      <Dialog open={activeModal === 'womens-causes'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'womens-causes'} onOpenChange={(open) => {
+        if (!open) {
+          // User clicked X or pressed Escape - don't track completion
+          closeModal();
+        }
+      }}>
         <DialogContent aria-describedby="womens-causes-description">
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg font-serif font-bold text-black">Support Women's Causes</DialogTitle>
@@ -397,7 +423,12 @@ export default function TzedakaModals() {
       </Dialog>
 
       {/* Support Torah Modal */}
-      <Dialog open={activeModal === 'support-torah'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'support-torah'} onOpenChange={(open) => {
+        if (!open) {
+          // User clicked X or pressed Escape - don't track completion
+          closeModal();
+        }
+      }}>
         <DialogContent aria-describedby="support-torah-description">
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg font-serif font-bold text-black">Support Torah</DialogTitle>
