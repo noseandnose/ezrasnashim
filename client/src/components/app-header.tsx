@@ -3,7 +3,7 @@ import { useHebrewDate } from "@/hooks/use-hebrew-date";
 import { BarChart3, Info } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
-import logoImage from "@assets/3LO_1753595416737.png";
+import logoImage from "@assets/6LO_1753613081319.png";
 
 export default function AppHeader() {
   const { data: times, isLoading: timesLoading } = useJewishTimes();
