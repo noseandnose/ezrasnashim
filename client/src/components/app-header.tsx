@@ -32,7 +32,7 @@ export default function AppHeader() {
         <img 
           src={logoImage} 
           alt="Ezras Nashim" 
-          className="h-8 w-auto"
+          className="h-7 w-auto"
         />
         <button
           onClick={() => setLocation("/statistics")}
