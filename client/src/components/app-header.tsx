@@ -28,7 +28,7 @@ export default function AppHeader() {
         >
           <Info className="h-5 w-5 text-blush" />
         </button>
-        <h1 className="font-serif text-xl font-semibold text-black tracking-wide">Ezras Nashim</h1>
+        <h1 className="platypi-semibold text-xl text-black tracking-wide">Ezras Nashim</h1>
         <button
           onClick={() => setLocation("/statistics")}
           className="p-2 rounded-full hover:bg-white/50 transition-colors"

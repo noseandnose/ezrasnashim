@@ -60,7 +60,7 @@ const CheckoutForm = ({ clientSecret }: { clientSecret: string }) => {
             <div className="bg-gradient-feminine p-3 rounded-full">
               <Heart className="text-white" size={24} />
             </div>
-            <h1 className="text-xl font-serif font-semibold text-warm-gray">Complete Your Donation</h1>
+            <h1 className="text-xl platypi-semibold text-warm-gray">Complete Your Donation</h1>
           </div>
           <p className="text-sm text-warm-gray/70">Your contribution helps support our community</p>
         </div>

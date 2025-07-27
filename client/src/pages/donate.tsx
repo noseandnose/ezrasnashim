@@ -172,7 +172,7 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
       <Button
         type="submit"
         disabled={!stripe || isProcessing}
-        className="w-full py-3 gradient-blush-peach text-white font-medium"
+        className="w-full py-3 gradient-blush-peach text-white platypi-medium"
       >
         {isProcessing ? (
           <div className="flex items-center">

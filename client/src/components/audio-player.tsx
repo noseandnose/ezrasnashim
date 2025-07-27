@@ -216,7 +216,7 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
         </div>
       </div>
       <div className="space-y-4">
-        <div className="flex justify-between text-sm font-medium">
+        <div className="flex justify-between text-sm platypi-medium">
           <span>{currentTime}</span>
           <span>{isLoading ? duration : actualDuration}</span>
         </div>

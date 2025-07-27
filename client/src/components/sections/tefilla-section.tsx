@@ -344,7 +344,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
                 <Scroll className="text-white" size={20} />
               </div>
               <div>
-                <h3 className="font-serif text-lg text-black font-bold">Global Tehillim Chain</h3>
+                <h3 className="platypi-bold text-lg text-black">Global Tehillim Chain</h3>
 
               </div>
             </div>
@@ -366,7 +366,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             <div className="space-y-3 mb-3 p-3 bg-gradient-to-r from-ivory to-lavender/5 rounded-2xl border border-lavender/20">
               <div className="flex items-center space-x-2 text-sm text-blush/80">
                 <AlertCircle size={16} />
-                <span className="font-sans">Names are automatically removed after 18 days</span>
+                <span className="platypi-regular">Names are automatically removed after 18 days</span>
               </div>
               
               <Input
@@ -425,7 +425,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           >
             {/* Header with perek number */}
             <div className="flex items-center justify-between mb-2">
-              <h4 className="font-serif text-lg text-black font-bold">
+              <h4 className="platypi-bold text-lg text-black">
                 Perek {progress?.currentPerek || 1}
               </h4>
               <div className="bg-gradient-feminine p-2 rounded-full">
@@ -449,13 +449,13 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-1">
                     <User size={12} className="text-blush" />
-                    <span className="font-sans text-sm text-black font-medium heebo-regular text-right" dir="rtl">
+                    <span className="platypi-medium text-sm text-black heebo-regular text-right" dir="rtl">
                       {currentName.hebrewName}
                     </span>
                   </div>
                   <div className="flex items-center space-x-1">
                     {getReasonIcon(currentName.reason, currentName.reasonEnglish ?? undefined)}
-                    <span className="text-xs text-black/60 font-sans">
+                    <span className="text-xs text-black/60 platypi-regular">
                       {getReasonShort(currentName.reason, currentName.reasonEnglish ?? undefined)}
                     </span>
                   </div>
@@ -499,8 +499,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
                 <Star className="text-white" size={18} />
               )}
             </div>
-            <h3 className="font-serif text-sm text-black mb-1 font-bold">{currentPrayer.title}</h3>
-            <p className="font-sans text-xs text-black/60">
+            <h3 className="platypi-bold text-sm text-black mb-1">{currentPrayer.title}</h3>
+            <p className="platypi-regular text-xs text-black/60">
               {isModalComplete(currentPrayer.modal) ? 'Completed' : currentPrayer.subtitle}
             </p>
           </button>
@@ -516,8 +516,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             }`}>
               <HandHeart className="text-white" size={18} />
             </div>
-            <h3 className="font-serif text-sm text-black mb-1 font-bold">After Brochas</h3>
-            <p className="font-sans text-xs text-black/60">
+            <h3 className="platypi-bold text-sm text-black mb-1">After Brochas</h3>
+            <p className="platypi-regular text-xs text-black/60">
               {isModalComplete('after-brochas') ? 'Completed' : 'Prayers of Thanks'}
             </p>
           </button>
@@ -536,8 +536,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             }`}>
               <BookOpen className="text-white" size={18} />
             </div>
-            <h3 className="font-serif text-sm text-black mb-1 font-bold">Special Tehillim</h3>
-            <p className="font-sans text-xs text-black/60">
+            <h3 className="platypi-bold text-sm text-black mb-1">Special Tehillim</h3>
+            <p className="platypi-regular text-xs text-black/60">
               {isModalComplete('special-tehillim') ? 'Completed' : 'For Specific Occasions'}
             </p>
           </button>
@@ -553,8 +553,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             }`}>
               <Heart className="text-white" size={18} />
             </div>
-            <h3 className="font-serif text-sm text-black mb-1 font-bold">Nishmas Kol Chai</h3>
-            <p className="font-sans text-xs text-black/60">
+            <h3 className="platypi-bold text-sm text-black mb-1">Nishmas Kol Chai</h3>
+            <p className="platypi-regular text-xs text-black/60">
               {isModalComplete('nishmas-campaign') ? 'Completed' : 'Prayer of Gratitude'}
             </p>
           </button>
@@ -567,8 +567,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               <HandHeart className="text-white" size={18} />
             </div>
             <div>
-              <h3 className="font-serif text-lg text-black font-bold">Personal Prayers</h3>
-              <p className="font-sans text-sm text-black/70">Categories for your Tefillos</p>
+              <h3 className="platypi-bold text-lg text-black">Personal Prayers</h3>
+              <p className="platypi-regular text-sm text-black/70">Categories for your Tefillos</p>
             </div>
           </div>
           

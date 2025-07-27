@@ -57,7 +57,7 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
               size={isCenter ? 28 : 20}
               strokeWidth={1.5} 
             />
-            <span className={`font-sans font-medium text-xs transition-colors duration-300 ${
+            <span className={`platypi-medium text-xs transition-colors duration-300 ${
               activeSection === id 
                 ? isCenter 
                   ? 'text-white' 

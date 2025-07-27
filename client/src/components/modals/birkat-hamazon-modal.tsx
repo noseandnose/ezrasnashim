@@ -79,7 +79,7 @@ export function BirkatHamazonModal() {
           onClick={() => setLanguage(language === "hebrew" ? "english" : "hebrew")}
           variant="ghost"
           size="sm"
-          className={`text-xs font-medium px-3 py-1 rounded-lg transition-all ${
+          className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
             language === "hebrew" 
               ? 'bg-blush text-white' 
               : 'text-black/60 hover:text-black hover:bg-white/50'
@@ -88,21 +88,21 @@ export function BirkatHamazonModal() {
           {language === "hebrew" ? 'עב' : 'EN'}
         </Button>
         
-        <DialogTitle className="text-lg font-serif font-bold text-black">Birkat Hamazon</DialogTitle>
+        <DialogTitle className="text-lg platypi-bold text-black">Birkat Hamazon</DialogTitle>
         
         <div className="flex items-center gap-2">
           <button
             onClick={decreaseFontSize}
             className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
           >
-            <span className="text-xs font-medium">-</span>
+            <span className="text-xs platypi-medium">-</span>
           </button>
-          <span className="text-xs font-medium text-black/70 w-6 text-center">{fontSize}</span>
+          <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
           <button
             onClick={increaseFontSize}
             className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
           >
-            <span className="text-xs font-medium">+</span>
+            <span className="text-xs platypi-medium">+</span>
           </button>
         </div>
       </div>

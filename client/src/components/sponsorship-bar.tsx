@@ -36,13 +36,13 @@ export default function SponsorshipBar({ className = "" }: SponsorshipBarProps) 
 
   return (
     <div className={`bg-gradient-to-r from-blush/10 to-lavender/10 border border-blush/20 rounded-3xl p-4 text-center ${className}`}>
-      <div className="font-sans text-sm font-medium text-warm-gray">
+      <div className="platypi-medium text-sm text-warm-gray">
         {customMessage ? (
           <span>{customMessage}</span>
         ) : (
           <span>
             Today's learning has been sponsored by{' '}
-            <span className="font-serif font-semibold text-blush">
+            <span className="platypi-semibold text-blush">
               {sponsorName}
             </span>
           </span>
