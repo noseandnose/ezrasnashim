@@ -125,8 +125,10 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   const { data: halachaContent } = useQuery<{title?: string; content?: string; footnotes?: string}>({
     queryKey: ['/api/torah/halacha', today],
     enabled: activeModal === 'halacha',
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 30 * 60 * 1000 // 30 minutes
+    staleTime: 0, // Force fresh data
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnMount: true,
+    refetchOnWindowFocus: false
   });
 
   const { data: emunaContent } = useQuery<{title?: string; content?: string; audioUrl?: string; source?: string; duration?: string; author?: string; speaker?: string; provider?: string; speakerWebsite?: string}>({
