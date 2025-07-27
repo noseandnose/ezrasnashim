@@ -122,7 +122,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const { data: halachaContent } = useQuery<{title?: string; content?: string; footnotes?: string; thankYouMessage?: string}>({
+  const { data: halachaContent } = useQuery<{title?: string; content?: string; footnotes?: string}>({
     queryKey: ['/api/torah/halacha', today],
     enabled: activeModal === 'halacha',
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -220,14 +220,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             </div>
           )}
           
-          {/* Thank You Section */}
-          {halachaContent?.thankYouMessage && (
-            <div className="mt-1 p-4 bg-blue-50 rounded-2xl border border-blue-200">
-              <p className="text-sm text-black platypi-medium">
-                {halachaContent.thankYouMessage}
-              </p>
-            </div>
-          )}
+          {/* Thank You Section - Will be added manually like other modals */}
           
           <div className="heart-explosion-container">
             <Button 

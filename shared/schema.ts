@@ -203,7 +203,6 @@ export const dailyHalacha = pgTable("daily_halacha", {
   title: text("title").notNull(),
   content: text("content").notNull(), // Main halacha text content
   footnotes: text("footnotes"), // Optional footnotes section
-  thankYouMessage: text("thank_you_message"), // Thank you attribution message
   createdAt: timestamp("created_at").defaultNow(),
 });
 
