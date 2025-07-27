@@ -201,10 +201,10 @@ export const dailyHalacha = pgTable("daily_halacha", {
   id: serial("id").primaryKey(),
   date: date("date").notNull().unique(),
   title: text("title").notNull(),
-  content: text("content"),
-  audioUrl: text("audio_url").notNull(),
-  speaker: text("speaker"),
-  speakerWebsite: text("speaker_website"),
+  content: text("content").notNull(), // Main halacha text content
+  footnotes: text("footnotes"), // Optional footnotes section
+  thankYouMessage: text("thank_you_message"), // Thank you attribution message
+  source: text("source"), // Source attribution
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -334,8 +334,6 @@ export const insertNishmasTextSchema = createInsertSchema(nishmasText).omit({
 export const insertDailyHalachaSchema = createInsertSchema(dailyHalacha).omit({
   id: true,
   createdAt: true,
-}).extend({
-  hebrewDate: z.string().optional(),
 });
 
 export const insertDailyEmunaSchema = createInsertSchema(dailyEmuna).omit({

@@ -70,6 +70,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   const [showExplosion, setShowExplosion] = useState(false);
   const [fontSize, setFontSize] = useState(20);
   const [showHebrew, setShowHebrew] = useState(true);
+  const [showFootnotes, setShowFootnotes] = useState(false);
   const { trackModalComplete } = useTrackModalComplete();
 
   // Reset explosion state when modal changes
@@ -121,7 +122,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const { data: halachaContent } = useQuery<{title?: string; content?: string; source?: string; provider?: string; speakerWebsite?: string}>({
+  const { data: halachaContent } = useQuery<{title?: string; content?: string; footnotes?: string; thankYouMessage?: string; source?: string}>({
     queryKey: ['/api/torah/halacha', today],
     enabled: activeModal === 'halacha',
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -160,21 +161,38 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     <>
       {/* Halacha Modal */}
       <Dialog open={activeModal === 'halacha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans" aria-describedby="halacha-description">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="halacha-description">
           <div id="halacha-description" className="sr-only">Daily Jewish law and practice content</div>
           
-          <DialogHeader className="text-center mb-4 pr-8">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Daily Halacha</DialogTitle>
-          </DialogHeader>
+          <StandardModalHeader 
+            title="Daily Halacha"
+            showHebrew={showHebrew}
+            setShowHebrew={setShowHebrew}
+            fontSize={fontSize}
+            setFontSize={setFontSize}
+          />
           
-          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
             {halachaContent && (
-              <div className="space-y-4" style={{ fontSize: `${fontSize}px` }}>
-                <div className="secular-one-bold text-right leading-relaxed text-black">
+              <div className="space-y-4">
+                {/* Title */}
+                {halachaContent.title && (
+                  <h3 className="platypi-bold text-lg text-black text-center mb-4">
+                    {halachaContent.title}
+                  </h3>
+                )}
+                
+                {/* Main Content */}
+                <div 
+                  className="platypi-regular leading-relaxed text-black whitespace-pre-line"
+                  style={{ fontSize: `${fontSize}px` }}
+                >
                   {halachaContent.content}
                 </div>
+                
+                {/* Source */}
                 {halachaContent.source && (
-                  <p className="text-xs text-black/60 text-center border-t border-warm-gray/10 pt-3">
+                  <p className="text-xs text-black/60 text-center border-t border-warm-gray/10 pt-3 platypi-regular">
                     Source: {halachaContent.source}
                   </p>
                 )}
@@ -182,31 +200,46 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             )}
           </div>
           
-          {/* Thank You Section */}
-          {halachaContent?.provider && (
-            <div className="mt-6 p-4 bg-blue-50 rounded-xl">
-              <p className="text-sm text-blue-900 font-medium mb-2">
-                🙏 Thank you to {halachaContent.provider}
-              </p>
-              {halachaContent.speakerWebsite && (
-                <p className="text-sm text-blue-800">
-                  <a 
-                    href={halachaContent.speakerWebsite} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline hover:text-blue-800"
+          {/* Expandable Footnotes Section */}
+          {halachaContent?.footnotes && (
+            <div className="mb-1">
+              <button
+                onClick={() => setShowFootnotes(!showFootnotes)}
+                className="w-full text-left bg-gray-50 hover:bg-gray-100 rounded-2xl p-4 border border-gray-200 transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="platypi-medium text-black text-sm">Footnotes</span>
+                  <span className="platypi-regular text-black/60 text-lg">
+                    {showFootnotes ? '−' : '+'}
+                  </span>
+                </div>
+              </button>
+              
+              {showFootnotes && (
+                <div className="bg-white rounded-2xl p-4 mt-2 border border-gray-200">
+                  <div 
+                    className="platypi-regular leading-relaxed text-black/80 text-sm whitespace-pre-line"
                   >
-                    Visit Website
-                  </a>
-                </p>
+                    {halachaContent.footnotes}
+                  </div>
+                </div>
               )}
+            </div>
+          )}
+          
+          {/* Thank You Section */}
+          {halachaContent?.thankYouMessage && (
+            <div className="mt-1 p-4 bg-blue-50 rounded-2xl border border-blue-200">
+              <p className="text-sm text-black platypi-medium">
+                {halachaContent.thankYouMessage}
+              </p>
             </div>
           )}
           
           <div className="heart-explosion-container">
             <Button 
               onClick={handleTorahComplete} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-4 border-0"
             >
               Completed
             </Button>
