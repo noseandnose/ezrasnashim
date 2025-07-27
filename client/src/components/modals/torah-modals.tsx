@@ -122,7 +122,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const { data: halachaContent } = useQuery<{title?: string; content?: string; footnotes?: string; thankYouMessage?: string; source?: string}>({
+  const { data: halachaContent } = useQuery<{title?: string; content?: string; footnotes?: string; thankYouMessage?: string}>({
     queryKey: ['/api/torah/halacha', today],
     enabled: activeModal === 'halacha',
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -189,13 +189,6 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                 >
                   {halachaContent.content}
                 </div>
-                
-                {/* Source */}
-                {halachaContent.source && (
-                  <p className="text-xs text-black/60 text-center border-t border-warm-gray/10 pt-3 platypi-regular">
-                    Source: {halachaContent.source}
-                  </p>
-                )}
               </div>
             )}
           </div>
