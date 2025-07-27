@@ -70,7 +70,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
       border: 'border-blush/10',
-      contentType: 'text'
+      contentType: 'audio'
     }
   ];
 
