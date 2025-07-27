@@ -306,6 +306,8 @@ Changelog:
 - July 24, 2025. Fixed location button rounded corners consistency: Changed home page location button from 'rounded' to 'rounded-xl' to match the consistent styling used by all other buttons throughout the application for uniform visual appearance
 - July 24, 2025. Made Tefilla page Perek section more obviously clickable: Enhanced only the inner Perek section (not the entire Global Tehillim Chain container) to be more obviously clickable by increasing background opacity to white/90, adding shadow-sm, and enhancing border visibility, making it clear that users can tap the specific Perek area to view full text while keeping the container styling unchanged
 - July 24, 2025. Updated After Brochas Page Modal text: Changed "Al Hamichiya" to "Me'ein Shalosh" as the main title with "Al Hamichiya" as the subtitle in the After Brochas selection modal for clearer Hebrew terminology
+- July 27, 2025. Completed comprehensive Platypi font rollout: Successfully converted all English text throughout the application from font-serif/font-sans/font-medium/font-semibold/font-bold to corresponding platypi font classes (platypi-regular, platypi-medium, platypi-semibold, platypi-bold), updated all modal components, pages, UI components, and section components while preserving Hebrew text styling with secular-one-bold and heebo-regular fonts
+- July 27, 2025. Replaced header text with custom logo: Updated app header to display custom circular pink logo (3LO_1753593282952.png) instead of "Ezras Nashim" text, properly sized with h-8 w-auto for responsive scaling and maintained accessibility with alt text
 ```
 
 ## User Preferences
