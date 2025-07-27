@@ -72,45 +72,11 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   const [showHebrew, setShowHebrew] = useState(true);
   const [showFootnotes, setShowFootnotes] = useState(false);
   const { trackModalComplete } = useTrackModalComplete();
-  
-  // TEMPORARY: Swipe functionality state
-  const [swipeStartY, setSwipeStartY] = useState(0);
-  const [contentScrollPosition, setContentScrollPosition] = useState(0);
 
   // Reset explosion state when modal changes
   useEffect(() => {
     setShowExplosion(false);
-    // TEMPORARY: Reset scroll position when opening halacha modal
-    if (activeModal === 'halacha') {
-      setContentScrollPosition(0);
-    }
   }, [activeModal]);
-
-  // TEMPORARY: Swipe handlers for Halacha content
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setSwipeStartY(e.touches[0].clientY);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (activeModal !== 'halacha') return;
-    
-    const currentY = e.touches[0].clientY;
-    const deltaY = swipeStartY - currentY;
-    const newScrollPosition = Math.max(0, contentScrollPosition + deltaY * 2);
-    
-    setContentScrollPosition(newScrollPosition);
-    
-    // Apply scroll transformation
-    const contentElement = document.getElementById('halacha-content');
-    if (contentElement) {
-      contentElement.style.transform = `translateY(-${newScrollPosition}px)`;
-    }
-  };
-
-  const handleTouchEnd = () => {
-    // Reset for next swipe
-    setSwipeStartY(0);
-  };
 
   const handleTorahComplete = () => {
     // Track modal completion and mark as completed globally
@@ -206,19 +172,9 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             setFontSize={setFontSize}
           />
           
-          {/* TEMPORARY: Swipe-enabled content area - replace overflow-y-auto with overflow-hidden and add touch handlers */}
-          <div 
-            className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-hidden relative"
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          >
+          <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
             {halachaContent && (
-              <div 
-                id="halacha-content"
-                className="space-y-4 transition-transform duration-200 ease-out"
-                style={{ transform: `translateY(-${contentScrollPosition}px)` }}
-              >
+              <div className="space-y-4">
                 {/* Title */}
                 {halachaContent.title && (
                   <h3 className="platypi-bold text-lg text-black text-center mb-4">
@@ -235,11 +191,6 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                 </div>
               </div>
             )}
-            
-            {/* TEMPORARY: Swipe indicator */}
-            <div className="absolute bottom-2 right-2 text-xs text-gray-400 platypi-regular">
-              Swipe to scroll
-            </div>
           </div>
           
           {/* Expandable Footnotes Section */}
