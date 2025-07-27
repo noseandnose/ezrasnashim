@@ -68,11 +68,14 @@ export function preloadCriticalResources(): void {
   fontLink.as = 'style';
   document.head.appendChild(fontLink);
   
-  // Preload critical API endpoints
+  // Preload critical API endpoints with proper VITE_API_URL
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const today = new Date().toISOString().split('T')[0];
+  
   const criticalEndpoints = [
-    '/api/daily-halacha',
-    '/api/tehillim/progress',
-    '/api/sponsors/daily'
+    `${baseUrl}/api/torah/halacha/${today}`,
+    `${baseUrl}/api/tehillim/progress`,
+    `${baseUrl}/api/sponsors/daily/${today}`
   ];
   
   criticalEndpoints.forEach(endpoint => {
