@@ -249,22 +249,24 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
       {/* Emuna Modal */}
       <Dialog open={activeModal === 'emuna'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans" aria-describedby="emuna-description">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="emuna-description">
           <div id="emuna-description" className="sr-only">Daily faith strengthening and spiritual trust content</div>
           
           {/* Simple Header for Audio Content */}
           <div className="flex items-center justify-center mb-3 relative">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Daily Emuna</DialogTitle>
+            <DialogTitle className="text-lg platypi-bold text-black">Daily Emuna</DialogTitle>
           </div>
           
-          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
             {emunaContent && emunaContent.audioUrl && (
               <div className="space-y-4">
-                {emunaContent.speaker && (
-                  <p className="text-sm text-black/60 text-center">
-                    <strong>Speaker:</strong> {emunaContent.speaker}
-                  </p>
+                {/* Title */}
+                {emunaContent.title && (
+                  <h3 className="platypi-bold text-sm text-black text-center mb-4">
+                    {emunaContent.title}
+                  </h3>
                 )}
+                
                 <AudioPlayer 
                   title={emunaContent.title || 'Emuna'}
                   duration={emunaContent.duration || "0:00"}
@@ -289,25 +291,29 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           </div>
           
           {/* Thank You Section */}
-          {emunaContent?.provider && (
-            <div className="mt-6 p-4 bg-blue-50 rounded-xl">
-              <p className="text-sm text-blue-900 font-medium mb-2">
-                🙏 Thank you to {emunaContent.provider}
-              </p>
-              {emunaContent.speakerWebsite && (
-                <p className="text-sm text-blue-800">
-                  <a 
-                    href={emunaContent.speakerWebsite} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline hover:text-blue-800"
-                  >
-                    Visit Website
-                  </a>
-                </p>
-              )}
-            </div>
-          )}
+          <div className="mt-1 p-4 bg-blue-50 rounded-2xl border border-blue-200">
+            <p className="text-sm text-black platypi-medium">
+              Thank you to{' '}
+              <a 
+                href="https://transformyouremunah.com/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 underline hover:text-blue-800"
+              >
+                Rav Reuven Garber
+              </a>
+              {' '}and{' '}
+              <a 
+                href="https://transformyouremunah.com/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 underline hover:text-blue-800"
+              >
+                TransformYourEmuna
+              </a>
+              {' '}for this content
+            </p>
+          </div>
 
           <div className="heart-explosion-container">
             <Button 
