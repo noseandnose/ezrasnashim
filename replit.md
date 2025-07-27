@@ -319,6 +319,7 @@ Changelog:
 - July 27, 2025. Updated Halacha button content indicator: Changed Halacha button from triangle (audio) to "T" (text) indicator while keeping Featured button as triangle, properly reflecting that Halacha contains text-based Jewish law content with expandable footnotes
 - July 27, 2025. Completed comprehensive database encoding cleanup: Fixed all � character encoding issues across entire daily_halacha table (452 entries), updated 105 titles, 422 content entries, and 205 footnotes, replaced all encoding artifacts with proper apostrophes and quotes, ensuring clean text display throughout halacha content
 - July 27, 2025. Removed unnecessary backend asset serving routes: Eliminated `/attached_assets` static middleware and `/api/media/:filename` route from backend since all assets use `@assets` imports processed by Vite build system, assets will be served by CloudFront/S3 with frontend rather than backend API server
+- July 27, 2025. Unified server startup code: Consolidated duplicate production/development server initialization into single implementation that always binds to 0.0.0.0, uses environment-aware port defaults (80 for production, 5000 for development), and provides consistent logging format
 ```
 
 ## User Preferences
