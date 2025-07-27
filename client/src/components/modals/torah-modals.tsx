@@ -220,7 +220,12 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             </div>
           )}
           
-          {/* Thank You Section - Will be added manually like other modals */}
+          {/* Thank You Section */}
+          <div className="mt-1 p-4 bg-blue-50 rounded-2xl border border-blue-200">
+            <p className="text-sm text-black platypi-medium">
+              Thank you to Rabbi Daniele Braude for providing this halacha content
+            </p>
+          </div>
           
           <div className="heart-explosion-container">
             <Button 
