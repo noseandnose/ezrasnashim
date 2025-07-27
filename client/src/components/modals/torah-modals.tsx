@@ -334,6 +334,13 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
             {chizukContent && chizukContent.audioUrl && (
               <div className="space-y-4">
+                {/* Title */}
+                {chizukContent.title && (
+                  <h3 className="platypi-bold text-lg text-black text-center mb-4">
+                    {chizukContent.title}
+                  </h3>
+                )}
+                
                 <AudioPlayer 
                   title={chizukContent.title || 'Chizuk'}
                   duration={chizukContent.duration || "0:00"}
