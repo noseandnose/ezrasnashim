@@ -24,10 +24,13 @@ jobs:
           echo "ENVIRONMENT=prod" >> $GITHUB_ENV
           echo "VITE_MODE=production" >> $GITHUB_ENV
           echo "S3_BUCKET=ezras-nashim-frontend-production" >> $GITHUB_ENV
+          echo "CLOUDFRONT_DISTRIBUTION_ID=E1D5U1KTDNFYHS" >> $GITHUB_ENV
         elif [ "${{ github.ref_name }}" = "staging" ]; then
           echo "ENVIRONMENT=staging" >> $GITHUB_ENV
           echo "VITE_MODE=staging" >> $GITHUB_ENV
           echo "S3_BUCKET=ezras-nashim-frontend" >> $GITHUB_ENV
+          echo "CLOUDFRONT_DISTRIBUTION_ID=E4DFY6W9PG5RQ" >> $GITHUB_ENV
+
         fi
 
     - name: Build and deploy
@@ -44,5 +47,5 @@ jobs:
       run: |
         aws s3 sync dist/public s3://${S3_BUCKET}/
         aws cloudfront create-invalidation \
-          --distribution-id E4DFY6W9PG5RQ \
+          --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
           --paths "/*"
