@@ -223,7 +223,15 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           {/* Thank You Section */}
           <div className="mt-1 p-4 bg-blue-50 rounded-2xl border border-blue-200">
             <p className="text-sm text-black platypi-medium">
-              Thank you to Rabbi Daniele Braude for providing this halacha content
+              Provided by Rabbi Daniel Braude from{' '}
+              <a 
+                href="https://www.feldheim.com/learn-shabbos-in-just-3-minutes-a-day"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 underline hover:text-blue-800"
+              >
+                Learn Shabbos in just 3 minutes a day
+              </a>
             </p>
           </div>
           
