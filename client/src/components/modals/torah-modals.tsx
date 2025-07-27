@@ -26,7 +26,7 @@ const StandardModalHeader = ({
   fontSize: number;
   setFontSize: (size: number) => void;
 }) => (
-  <div className="flex items-center justify-center mb-3 relative pr-8">
+  <div className="flex items-center justify-center mb-1 relative pr-8">
     <div className="flex items-center gap-4">
       <Button
         onClick={() => setShowHebrew(!showHebrew)}
@@ -164,13 +164,15 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="halacha-description">
           <div id="halacha-description" className="sr-only">Daily Jewish law and practice content</div>
           
-          <StandardModalHeader 
-            title="Daily Halacha"
-            showHebrew={showHebrew}
-            setShowHebrew={setShowHebrew}
-            fontSize={fontSize}
-            setFontSize={setFontSize}
-          />
+          <div className="mb-1">
+            <StandardModalHeader 
+              title="Daily Halacha"
+              showHebrew={showHebrew}
+              setShowHebrew={setShowHebrew}
+              fontSize={fontSize}
+              setFontSize={setFontSize}
+            />
+          </div>
           
           <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
             {halachaContent && (
@@ -253,7 +255,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           <div id="emuna-description" className="sr-only">Daily faith strengthening and spiritual trust content</div>
           
           {/* Simple Header for Audio Content */}
-          <div className="flex items-center justify-center mb-3 relative">
+          <div className="flex items-center justify-center mb-1 relative">
             <DialogTitle className="text-lg platypi-bold text-black">Daily Emuna</DialogTitle>
           </div>
           
@@ -333,7 +335,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           <div id="chizuk-description" className="sr-only">5-minute daily inspiration and spiritual strengthening content</div>
           
           {/* Simple Header for Audio Content */}
-          <div className="flex items-center justify-center mb-3 relative">
+          <div className="flex items-center justify-center mb-1 relative">
             <DialogTitle className="text-lg platypi-bold text-black">Daily Chizuk</DialogTitle>
           </div>
           
