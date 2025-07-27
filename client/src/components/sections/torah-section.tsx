@@ -59,7 +59,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
       border: 'border-blush/10',
-      contentType: 'audio'
+      contentType: 'text'
     },
     {
       id: 'featured',
@@ -109,7 +109,11 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
                 {/* Content Type Indicator */}
                 {contentType && (
                   <div className="absolute top-2 left-2 bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-                    <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+                    {contentType === 'audio' ? (
+                      <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+                    ) : (
+                      <span className="platypi-bold text-xs">T</span>
+                    )}
                   </div>
                 )}
                 
