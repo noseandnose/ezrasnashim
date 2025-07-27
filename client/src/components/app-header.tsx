@@ -3,7 +3,7 @@ import { useHebrewDate } from "@/hooks/use-hebrew-date";
 import { BarChart3, Info } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
-import logoImage from "@assets/3LO_1753593282952.png";
+import logoImage from "@assets/3LO_1753595416737.png";
 
 export default function AppHeader() {
   const { data: times, isLoading: timesLoading } = useJewishTimes();
@@ -32,7 +32,7 @@ export default function AppHeader() {
         <img 
           src={logoImage} 
           alt="Ezras Nashim" 
-          className="h-8 w-auto"
+          className="h-10 w-auto"
         />
         <button
           onClick={() => setLocation("/statistics")}
