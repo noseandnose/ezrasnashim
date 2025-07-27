@@ -18,14 +18,15 @@ export default function SponsorDetailsModal() {
   // Fetch today's sponsor
   const today = new Date().toISOString().split('T')[0];
   const { data: sponsor } = useQuery<Sponsor>({
-    queryKey: ['daily-sponsor', today],
+    queryKey: ['daily-sponsor', today, 'v2'], // Added version to match home section
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sponsors/daily/${today}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sponsors/daily/${today}?t=${Date.now()}`);
       if (!response.ok) return null;
       return response.json();
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 60 * 60 * 1000 // 1 hour
+    staleTime: 0, // No caching
+    gcTime: 1000, // Short cache time
+    refetchOnMount: true
   });
 
   if (!sponsor) return null;

@@ -59,7 +59,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
       border: 'border-blush/10',
-      contentType: 'audio'
+      contentType: 'text'
     },
     {
       id: 'featured',
@@ -70,7 +70,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
       border: 'border-blush/10',
-      contentType: 'text'
+      contentType: 'audio'
     }
   ];
 
@@ -85,10 +85,10 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
               <div className="bg-gradient-feminine p-1.5 rounded-full">
                 <Scroll className="text-white" size={16} />
               </div>
-              <h3 className="font-serif text-sm text-black font-bold">Pirkei Avot</h3>
-              <span className="text-xs text-black/60 font-sans">{pirkeiAvot.source.replace('.', ':')}</span>
+              <h3 className="platypi-bold text-sm text-black">Pirkei Avot</h3>
+              <span className="text-xs text-black/60 platypi-regular">{pirkeiAvot.source.replace('.', ':')}</span>
             </div>
-            <p className="font-sans text-xs text-black/90 leading-relaxed text-justify">
+            <p className="platypi-regular text-xs text-black/90 leading-relaxed text-justify">
               {pirkeiAvot.text}
             </p>
           </div>
@@ -109,15 +109,19 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
                 {/* Content Type Indicator */}
                 {contentType && (
                   <div className="absolute top-2 left-2 bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-                    <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+                    {contentType === 'audio' ? (
+                      <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+                    ) : (
+                      <span className="platypi-bold text-xs">T</span>
+                    )}
                   </div>
                 )}
                 
                 <div className={`${isCompleted ? 'bg-sage' : iconBg} p-2 rounded-full mx-auto mb-2 w-fit`}>
                   <Icon className={`${iconColor}`} size={18} strokeWidth={1.5} />
                 </div>
-                <h3 className="font-serif text-xs text-black mb-1 tracking-wide font-bold">{title}</h3>
-                <p className="font-sans text-xs text-black/60 leading-relaxed">
+                <h3 className="platypi-bold text-xs text-black mb-1 tracking-wide">{title}</h3>
+                <p className="platypi-regular text-xs text-black/60 leading-relaxed">
                   {isCompleted ? 'Completed' : subtitle}
                 </p>
               </button>
@@ -130,7 +134,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
           {/* Coming Soon Overlay */}
           <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center z-10">
             <div className="bg-white/90 rounded-xl px-4 py-2 shadow-lg">
-              <p className="font-serif text-sm text-black font-bold">Coming Soon</p>
+              <p className="platypi-bold text-sm text-black">Coming Soon</p>
             </div>
           </div>
           
@@ -140,10 +144,10 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
               <BookOpen className="text-white" size={16} strokeWidth={1.5} />
             </div>
             <div className="text-left flex-grow">
-              <h3 className="font-serif text-sm text-black font-bold">
+              <h3 className="platypi-bold text-sm text-black">
                 {parshaContent?.hebrew_parsha || parshaContent?.parsha || 'Parsha Shiur'}
               </h3>
-              <p className="font-sans text-xs text-black/60">
+              <p className="platypi-regular text-xs text-black/60">
                 {parshaContent?.title || 'Weekly Torah insight'}
                 {parshaContent?.speaker && ` • ${parshaContent.speaker}`}
               </p>

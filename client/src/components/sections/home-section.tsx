@@ -37,25 +37,22 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   // Fetch today's sponsor
   const today = new Date().toISOString().split('T')[0];
   const { data: sponsor, isLoading: sponsorLoading, error: sponsorError } = useQuery<Sponsor>({
-    queryKey: ['daily-sponsor', today],
+    queryKey: ['daily-sponsor', today, 'v2'], // Added version to bust cache
     queryFn: async () => {
-      console.log('Fetching sponsor for date:', today);
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sponsors/daily/${today}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sponsors/daily/${today}?t=${Date.now()}`); // Cache busting
       if (!response.ok) {
-        console.log('Sponsor fetch failed:', response.status);
         return null;
       }
       const data = await response.json();
-      console.log('Sponsor data received:', data);
       return data;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: 0, // No caching - always fresh
+    gcTime: 1000, // Short cache time
     refetchOnMount: true,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: true // Refresh when window gets focus
   });
 
-  console.log('Current sponsor state:', { sponsor, sponsorLoading, sponsorError });
+
 
   const navigateToSection = (section: Section) => {
     if (onSectionChange) {
@@ -113,15 +110,15 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg -mt-1">
         {/* Greeting and Date in one row */}
         <div className="flex items-center justify-between mb-3">
-          <h1 className="font-serif text-xl text-black tracking-wide font-bold">{getGreeting()}</h1>
+          <h1 className="platypi-bold text-xl text-black tracking-wide">{getGreeting()}</h1>
           <div className="text-right">
-            <p className="font-serif text-xs text-black">{hebrewDate || "Loading..."}</p>
+            <p className="platypi-regular text-xs text-black">{hebrewDate || "Loading..."}</p>
             <button 
               onClick={() => openModal('location')}
               className="flex items-center justify-end space-x-1 hover:bg-white/80 px-2 py-1 rounded-xl transition-colors border border-gray-200 bg-white/60"
             >
               <MapPin className="text-gray-600" size={10} />
-              <p className="font-sans text-xs text-gray-700 font-medium">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
+              <p className="platypi-medium text-xs text-gray-700">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
             </button>
           </div>
         </div>
@@ -129,13 +126,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         {/* Sponsor Section */}
         <button 
           onClick={() => {
-            console.log('Sponsor button clicked, sponsor data:', sponsor);
-            console.log('sponsorLoading:', sponsorLoading, 'sponsorError:', sponsorError);
             if (sponsor) {
-              console.log('Opening sponsor modal');
               openModal('sponsor-details');
-            } else {
-              console.log('No sponsor data available');
             }
           }}
           disabled={sponsorLoading || !sponsor}
@@ -145,18 +137,19 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         >
           <div className="flex items-center space-x-1 mb-1">
             <Heart className="text-black/60" size={12} strokeWidth={1.5} />
-            <h4 className="font-serif text-xs text-black tracking-wide font-bold">
+            <h4 className="platypi-semibold text-xs text-black tracking-wide">
               Today is sponsored {sponsorLoading && '(Loading...)'}
             </h4>
           </div>
-          <p className="font-sans text-xs text-black/80 leading-tight">
+          <p className="platypi-regular text-xs text-black/80 leading-tight">
             {sponsorLoading ? 
               'Loading sponsor information...' :
               sponsor ? 
                 (sponsor.inHonorMemoryOf ? sponsor.inHonorMemoryOf : `by ${sponsor.name}`) :
-                "No sponsor for today"
+                "By Just One Chesed"
             }
           </p>
+
         </button>
 
         {/* Times Section - Time-based Prayer and Shkia */}
@@ -171,8 +164,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
                 <PrayerIcon className="text-white" size={12} />
               </div>
             </div>
-            <p className="font-sans text-xs text-black font-bold mb-0.5">{currentPrayer.title}</p>
-            <p className="font-serif text-xs text-black font-bold leading-tight">{currentPrayer.subtitle}</p>
+            <p className="platypi-semibold text-xs text-black mb-0.5">{currentPrayer.title}</p>
+            <p className="platypi-medium text-xs text-black leading-tight">{currentPrayer.subtitle}</p>
           </button>
 
           {/* Shkia - Display Only */}
@@ -182,8 +175,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
                 <Clock className="text-white" size={12} />
               </div>
             </div>
-            <p className="font-sans text-xs text-black font-bold mb-0.5">Shkia</p>
-            <p className="font-serif text-sm text-black font-bold">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
+            <p className="platypi-semibold text-xs text-black mb-0.5">Shkia</p>
+            <p className="platypi-medium text-sm text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
           </div>
         </div>
       </div>
@@ -198,8 +191,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <BookOpen className="text-white" size={20} strokeWidth={1.5} />
           </div>
           <div className="flex-grow">
-            <h3 className="font-serif text-sm text-black font-bold">Daily Torah</h3>
-            <p className="font-sans text-xs text-black/60">Halacha, Emuna & Chizuk</p>
+            <h3 className="platypi-bold text-sm text-black">Daily Torah</h3>
+            <p className="platypi-regular text-xs text-black/60">Halacha, Emuna & Chizuk</p>
           </div>
           <HeartProgress completed={torahCompleted} size={20} />
         </button>
@@ -213,8 +206,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <Heart className="text-white" size={20} strokeWidth={1.5} />
           </div>
           <div className="flex-grow">
-            <h3 className="font-serif text-sm text-black font-bold">Daily Tefilla</h3>
-            <p className="font-sans text-xs text-black/60">Tehillim & Prayers</p>
+            <h3 className="platypi-bold text-sm text-black">Daily Tefilla</h3>
+            <p className="platypi-regular text-xs text-black/60">Tehillim & Prayers</p>
           </div>
           <HeartProgress completed={tefillaCompleted} size={20} />
         </button>
@@ -228,8 +221,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <Coins className="text-white" size={20} strokeWidth={1.5} />
           </div>
           <div className="flex-grow">
-            <h3 className="font-serif text-sm text-black font-bold">Daily Tzedaka</h3>
-            <p className="font-sans text-xs text-black/60">Support Causes</p>
+            <h3 className="platypi-bold text-sm text-black">Daily Tzedaka</h3>
+            <p className="platypi-regular text-xs text-black/60">Support Causes</p>
           </div>
           <HeartProgress completed={tzedakaCompleted} size={20} />
         </button>
@@ -239,9 +232,9 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           id="daily-progress-garden"
           className="rounded-2xl p-6 shadow-lg border border-blush/10 bg-white flex flex-col items-center justify-center min-h-[200px] mt-4"
         >
-          <h3 className="font-serif text-lg text-black font-bold mb-3">Daily Progress Garden</h3>
+          <h3 className="platypi-bold text-lg text-black mb-3">Daily Progress Garden</h3>
           <DailyProgress />
-          <p className="font-sans text-xs text-black/60 text-center mt-3 leading-relaxed">
+          <p className="platypi-regular text-xs text-black/60 text-center mt-3 leading-relaxed">
             Complete one item from each task to see your daily progress Bloom
           </p>
         </div>

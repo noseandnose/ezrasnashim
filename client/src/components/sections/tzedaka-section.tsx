@@ -28,19 +28,19 @@ function CommunityImpactSection() {
   if (isLoading) {
     return (
       <div className="bg-white rounded-3xl p-3 border border-blush/10 shadow-lg">
-        <h3 className="font-serif text-sm text-black text-center mb-2 font-bold">Community Impact</h3>
+        <h3 className="platypi-bold text-sm text-black text-center mb-2">Community Impact</h3>
         <div className="grid grid-cols-3 gap-2 text-center">
           <div>
             <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
-            <div className="font-sans text-xs text-black mt-1">Days Sponsored</div>
+            <div className="platypi-regular text-xs text-black mt-1">Days Sponsored</div>
           </div>
           <div>
             <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
-            <div className="font-sans text-xs text-black mt-1">Campaigns</div>
+            <div className="platypi-regular text-xs text-black mt-1">Campaigns</div>
           </div>
           <div>
             <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
-            <div className="font-sans text-xs text-black mt-1">Raised</div>
+            <div className="platypi-regular text-xs text-black mt-1">Raised</div>
           </div>
         </div>
       </div>
@@ -49,19 +49,19 @@ function CommunityImpactSection() {
 
   return (
     <div className="bg-white rounded-3xl p-3 border border-blush/10 shadow-lg">
-      <h3 className="font-serif text-sm text-black text-center mb-2 font-bold">Community Impact</h3>
+      <h3 className="platypi-bold text-sm text-black text-center mb-2">Community Impact</h3>
       <div className="grid grid-cols-3 gap-2 text-center">
         <div>
-          <div className="font-serif text-lg text-black">{impact?.totalDaysSponsored || 0}</div>
-          <div className="font-sans text-xs text-black">Days Sponsored</div>
+          <div className="platypi-semibold text-lg text-black">{impact?.totalDaysSponsored || 0}</div>
+          <div className="platypi-regular text-xs text-black">Days Sponsored</div>
         </div>
         <div>
-          <div className="font-serif text-lg text-black">{impact?.totalCampaigns || 0}</div>
-          <div className="font-sans text-xs text-black">Campaigns</div>
+          <div className="platypi-semibold text-lg text-black">{impact?.totalCampaigns || 0}</div>
+          <div className="platypi-regular text-xs text-black">Campaigns</div>
         </div>
         <div>
-          <div className="font-serif text-lg text-black">${impact?.totalRaised?.toLocaleString() || 0}</div>
-          <div className="font-sans text-xs text-black">Raised</div>
+          <div className="platypi-semibold text-lg text-black">${impact?.totalRaised?.toLocaleString() || 0}</div>
+          <div className="platypi-regular text-xs text-black">Raised</div>
         </div>
       </div>
     </div>

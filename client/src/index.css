@@ -71,6 +71,35 @@ h1, h2, h3, h4, h5, h6,
   font-weight: bold !important;
 }
 
+/* TEMP: Platypi font classes for testing */
+.platypi-regular {
+  font-family: "Platypi", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.platypi-medium {
+  font-family: "Platypi", serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.platypi-semibold {
+  font-family: "Platypi", serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.platypi-bold {
+  font-family: "Platypi", serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+}
+
 /* Override any muted or gray text classes */
 .text-muted, .text-muted-foreground, .text-gray-500, .text-gray-600, .text-gray-700 {
   color: #000000 !important;

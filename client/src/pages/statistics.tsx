@@ -80,9 +80,9 @@ export default function Statistics() {
     <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
       <div className="flex items-center justify-between mb-2">
         <Icon className={`h-5 w-5 ${color}`} />
-        <span className="text-xs font-medium text-warm-gray text-right">{title}</span>
+        <span className="text-xs platypi-medium text-warm-gray text-right">{title}</span>
       </div>
-      <div className="text-2xl font-serif font-bold text-black text-center">{value}</div>
+      <div className="text-2xl platypi-bold text-black text-center">{value}</div>
     </div>
   );
 
@@ -152,14 +152,14 @@ export default function Statistics() {
           >
             <ArrowLeft className="h-5 w-5 text-black/70" />
           </button>
-          <h1 className="font-serif text-xl font-semibold text-black tracking-wide">Analytics Dashboard</h1>
+          <h1 className="platypi-semibold text-xl text-black tracking-wide">Analytics Dashboard</h1>
           <div className="w-8" /> {/* Spacer for centering */}
         </div>
       </header>
       
       {/* Core Metrics Section - Connected to Top */}
       <div className="bg-gradient-soft -mt-3 rounded-b-3xl px-4 pt-6 pb-6 border-0 shadow-none flex-shrink-0">
-        <h2 className="text-base font-serif font-bold text-black mb-3">Core Metrics - All Time</h2>
+        <h2 className="text-base platypi-bold text-black mb-3">Core Metrics - All Time</h2>
         <div className="grid grid-cols-2 gap-3">
           <StatCard
             title="Mitzvas Completed"
@@ -231,7 +231,7 @@ export default function Statistics() {
             </div>
 
             {/* Period-Specific Stats */}
-            <h2 className="text-base font-serif font-bold text-black mb-3">
+            <h2 className="text-base platypi-bold text-black mb-3">
               {selectedPeriod === 'today' ? "Today's Activity" : 
                selectedPeriod === 'month' ? "This Month's Activity" : 
                "All Time Activity"}
@@ -267,7 +267,7 @@ export default function Statistics() {
 
           {/* Feature Usage */}
           <div>
-            <h2 className="text-base font-serif font-bold text-black mb-3">Feature Usage</h2>
+            <h2 className="text-base platypi-bold text-black mb-3">Feature Usage</h2>
             <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
               {currentLoading ? (
                 <div className="text-center text-black/60">Loading...</div>
@@ -286,7 +286,7 @@ export default function Statistics() {
                         <div key={modalType} className="flex justify-between items-center py-1">
                           <div className="flex items-center gap-2">
                             <Icon className="h-4 w-4 text-blush" />
-                            <span className="text-xs font-medium text-warm-gray">
+                            <span className="text-xs platypi-medium text-warm-gray">
                               {modalTypeNames[modalType]}
                             </span>
                           </div>

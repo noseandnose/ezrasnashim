@@ -9,6 +9,7 @@ interface Sponsor {
   name: string;
   hebrewName?: string;
   sponsorshipDate: string;
+  inHonorMemoryOf?: string; // Added missing field!
   message?: string;
   isActive: boolean;
   createdAt: string;
@@ -20,7 +21,7 @@ export default function SponsorshipBar({ className = "" }: SponsorshipBarProps) 
   const { data: sponsor, isLoading } = useQuery<Sponsor | null>({
     queryKey: ['daily-sponsor', today],
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api//api/sponsors/daily/${today}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sponsors/daily/${today}`);
       if (!response.ok) return null;
       return response.json();
     },
@@ -35,13 +36,13 @@ export default function SponsorshipBar({ className = "" }: SponsorshipBarProps) 
 
   return (
     <div className={`bg-gradient-to-r from-blush/10 to-lavender/10 border border-blush/20 rounded-3xl p-4 text-center ${className}`}>
-      <div className="font-sans text-sm font-medium text-warm-gray">
+      <div className="platypi-medium text-sm text-warm-gray">
         {customMessage ? (
           <span>{customMessage}</span>
         ) : (
           <span>
             Today's learning has been sponsored by{' '}
-            <span className="font-serif font-semibold text-blush">
+            <span className="platypi-semibold text-blush">
               {sponsorName}
             </span>
           </span>

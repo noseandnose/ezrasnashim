@@ -21,7 +21,7 @@ export default function ApplePayButton({ amount, onSuccess, onError, disabled }:
 
     try {
       // Create payment intent first
-      const response = await fetch('/api/create-payment-intent', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/create-payment-intent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -113,7 +113,7 @@ export default function ApplePayButton({ amount, onSuccess, onError, disabled }:
       onClick={handleApplePay}
       disabled={disabled || isProcessing || !stripe}
       className={`
-        w-full h-12 bg-black text-white rounded-xl font-medium
+        w-full h-12 bg-black text-white rounded-xl platypi-medium
         flex items-center justify-center space-x-2
         hover:bg-gray-800 transition-colors duration-200
         disabled:opacity-50 disabled:cursor-not-allowed

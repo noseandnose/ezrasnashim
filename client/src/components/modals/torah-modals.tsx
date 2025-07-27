@@ -26,13 +26,13 @@ const StandardModalHeader = ({
   fontSize: number;
   setFontSize: (size: number) => void;
 }) => (
-  <div className="flex items-center justify-center mb-3 relative pr-8">
+  <div className="flex items-center justify-center mb-1 relative pr-8">
     <div className="flex items-center gap-4">
       <Button
         onClick={() => setShowHebrew(!showHebrew)}
         variant="ghost"
         size="sm"
-        className={`text-xs font-medium px-3 py-1 rounded-lg transition-all ${
+        className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
           showHebrew 
             ? 'bg-blush text-white' 
             : 'text-black/60 hover:text-black hover:bg-white/50'
@@ -41,21 +41,21 @@ const StandardModalHeader = ({
         {showHebrew ? 'עב' : 'EN'}
       </Button>
       
-      <DialogTitle className="text-lg font-serif font-bold text-black">{title}</DialogTitle>
+      <DialogTitle className="text-lg platypi-bold text-black">{title}</DialogTitle>
       
       <div className="flex items-center gap-2">
         <button
           onClick={() => setFontSize(Math.max(12, fontSize - 2))}
           className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
         >
-          <span className="text-xs font-medium">-</span>
+          <span className="text-xs platypi-medium">-</span>
         </button>
-        <span className="text-xs font-medium text-black/70 w-6 text-center">{fontSize}</span>
+        <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
         <button
           onClick={() => setFontSize(Math.min(32, fontSize + 2))}
           className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
         >
-          <span className="text-xs font-medium">+</span>
+          <span className="text-xs platypi-medium">+</span>
         </button>
       </div>
     </div>
@@ -68,8 +68,9 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   const { markModalComplete } = useModalCompletionStore();
   const [, setLocation] = useLocation();
   const [showExplosion, setShowExplosion] = useState(false);
-  const [fontSize, setFontSize] = useState(20);
+  const [fontSize, setFontSize] = useState(16);
   const [showHebrew, setShowHebrew] = useState(true);
+  const [showFootnotes, setShowFootnotes] = useState(false);
   const { trackModalComplete } = useTrackModalComplete();
 
   // Reset explosion state when modal changes
@@ -121,7 +122,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const { data: halachaContent } = useQuery<{title?: string; content?: string; source?: string; provider?: string; speakerWebsite?: string}>({
+  const { data: halachaContent } = useQuery<{title?: string; content?: string; footnotes?: string}>({
     queryKey: ['/api/torah/halacha', today],
     enabled: activeModal === 'halacha',
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -160,53 +161,86 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     <>
       {/* Halacha Modal */}
       <Dialog open={activeModal === 'halacha'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans" aria-describedby="halacha-description">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="halacha-description">
           <div id="halacha-description" className="sr-only">Daily Jewish law and practice content</div>
           
-          <DialogHeader className="text-center mb-4 pr-8">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Daily Halacha</DialogTitle>
-          </DialogHeader>
+          <div className="mb-1">
+            <StandardModalHeader 
+              title="Daily Halacha"
+              showHebrew={showHebrew}
+              setShowHebrew={setShowHebrew}
+              fontSize={fontSize}
+              setFontSize={setFontSize}
+            />
+          </div>
           
-          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
             {halachaContent && (
-              <div className="space-y-4" style={{ fontSize: `${fontSize}px` }}>
-                <div className="secular-one-bold text-right leading-relaxed text-black">
+              <div className="space-y-4">
+                {/* Title */}
+                {halachaContent.title && (
+                  <h3 className="platypi-bold text-lg text-black text-center mb-4">
+                    {halachaContent.title}
+                  </h3>
+                )}
+                
+                {/* Main Content */}
+                <div 
+                  className="platypi-regular leading-relaxed text-black whitespace-pre-line"
+                  style={{ fontSize: `${fontSize}px` }}
+                >
                   {halachaContent.content}
                 </div>
-                {halachaContent.source && (
-                  <p className="text-xs text-black/60 text-center border-t border-warm-gray/10 pt-3">
-                    Source: {halachaContent.source}
-                  </p>
-                )}
               </div>
             )}
           </div>
           
-          {/* Thank You Section */}
-          {halachaContent?.provider && (
-            <div className="mt-6 p-4 bg-blue-50 rounded-xl">
-              <p className="text-sm text-blue-900 font-medium mb-2">
-                🙏 Thank you to {halachaContent.provider}
-              </p>
-              {halachaContent.speakerWebsite && (
-                <p className="text-sm text-blue-800">
-                  <a 
-                    href={halachaContent.speakerWebsite} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline hover:text-blue-800"
+          {/* Expandable Footnotes Section */}
+          {halachaContent?.footnotes && (
+            <div className="mb-1">
+              <button
+                onClick={() => setShowFootnotes(!showFootnotes)}
+                className="w-full text-left bg-gray-50 hover:bg-gray-100 rounded-2xl p-3 border border-gray-200 transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="platypi-medium text-black text-sm">Footnotes</span>
+                  <span className="platypi-regular text-black/60 text-lg">
+                    {showFootnotes ? '−' : '+'}
+                  </span>
+                </div>
+              </button>
+              
+              {showFootnotes && (
+                <div className="bg-white rounded-2xl p-4 mt-2 border border-gray-200">
+                  <div 
+                    className="platypi-regular leading-relaxed text-black/80 text-sm whitespace-pre-line"
                   >
-                    Visit Website
-                  </a>
-                </p>
+                    {halachaContent.footnotes}
+                  </div>
+                </div>
               )}
             </div>
           )}
           
+          {/* Thank You Section */}
+          <div className="mt-1 p-4 bg-blue-50 rounded-2xl border border-blue-200">
+            <p className="text-sm text-black platypi-medium">
+              Provided by Rabbi Daniel Braude from{' '}
+              <a 
+                href="https://www.feldheim.com/learn-shabbos-in-just-3-minutes-a-day"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 underline hover:text-blue-800"
+              >
+                Learn Shabbos in just 3 minutes a day
+              </a>
+            </p>
+          </div>
+          
           <div className="heart-explosion-container">
             <Button 
               onClick={handleTorahComplete} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-4 border-0"
             >
               Completed
             </Button>
@@ -217,22 +251,24 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
       {/* Emuna Modal */}
       <Dialog open={activeModal === 'emuna'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans" aria-describedby="emuna-description">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="emuna-description">
           <div id="emuna-description" className="sr-only">Daily faith strengthening and spiritual trust content</div>
           
           {/* Simple Header for Audio Content */}
-          <div className="flex items-center justify-center mb-3 relative">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Daily Emuna</DialogTitle>
+          <div className="flex items-center justify-center mb-1 relative">
+            <DialogTitle className="text-lg platypi-bold text-black">Daily Emuna</DialogTitle>
           </div>
           
-          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
             {emunaContent && emunaContent.audioUrl && (
               <div className="space-y-4">
-                {emunaContent.speaker && (
-                  <p className="text-sm text-black/60 text-center">
-                    <strong>Speaker:</strong> {emunaContent.speaker}
-                  </p>
+                {/* Title */}
+                {emunaContent.title && (
+                  <h3 className="platypi-bold text-sm text-black text-center mb-4">
+                    {emunaContent.title}
+                  </h3>
                 )}
+                
                 <AudioPlayer 
                   title={emunaContent.title || 'Emuna'}
                   duration={emunaContent.duration || "0:00"}
@@ -257,25 +293,29 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           </div>
           
           {/* Thank You Section */}
-          {emunaContent?.provider && (
-            <div className="mt-6 p-4 bg-blue-50 rounded-xl">
-              <p className="text-sm text-blue-900 font-medium mb-2">
-                🙏 Thank you to {emunaContent.provider}
-              </p>
-              {emunaContent.speakerWebsite && (
-                <p className="text-sm text-blue-800">
-                  <a 
-                    href={emunaContent.speakerWebsite} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline hover:text-blue-800"
-                  >
-                    Visit Website
-                  </a>
-                </p>
-              )}
-            </div>
-          )}
+          <div className="mt-1 p-4 bg-blue-50 rounded-2xl border border-blue-200">
+            <p className="text-sm text-black platypi-medium">
+              Thank you to{' '}
+              <a 
+                href="https://transformyouremunah.com/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 underline hover:text-blue-800"
+              >
+                Rav Reuven Garber
+              </a>
+              {' '}and{' '}
+              <a 
+                href="https://transformyouremunah.com/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 underline hover:text-blue-800"
+              >
+                TransformYourEmuna
+              </a>
+              {' '}for this content
+            </p>
+          </div>
 
           <div className="heart-explosion-container">
             <Button 
@@ -291,22 +331,24 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
       {/* Chizuk Modal */}
       <Dialog open={activeModal === 'chizuk'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans" aria-describedby="chizuk-description">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="chizuk-description">
           <div id="chizuk-description" className="sr-only">5-minute daily inspiration and spiritual strengthening content</div>
           
           {/* Simple Header for Audio Content */}
-          <div className="flex items-center justify-center mb-3 relative">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Daily Chizuk</DialogTitle>
+          <div className="flex items-center justify-center mb-1 relative">
+            <DialogTitle className="text-lg platypi-bold text-black">Daily Chizuk</DialogTitle>
           </div>
           
-          <div className="bg-white rounded-2xl p-6 mb-3 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
             {chizukContent && chizukContent.audioUrl && (
               <div className="space-y-4">
-                {chizukContent.speaker && (
-                  <p className="text-sm text-black/60 text-center">
-                    <strong>Speaker:</strong> {chizukContent.speaker}
-                  </p>
+                {/* Title */}
+                {chizukContent.title && (
+                  <h3 className="platypi-bold text-sm text-black text-center mb-4">
+                    {chizukContent.title}
+                  </h3>
                 )}
+                
                 <AudioPlayer 
                   title={chizukContent.title || 'Chizuk'}
                   duration={chizukContent.duration || "0:00"}
@@ -317,25 +359,29 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           </div>
           
           {/* Thank You Section */}
-          {chizukContent?.provider && (
-            <div className="mt-6 p-4 bg-blue-50 rounded-xl">
-              <p className="text-sm text-blue-900 font-medium mb-2">
-                🙏 Thank you to {chizukContent.provider}
-              </p>
-              {chizukContent.speakerWebsite && (
-                <p className="text-sm text-blue-800">
-                  <a 
-                    href={chizukContent.speakerWebsite} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline hover:text-blue-800"
-                  >
-                    Visit Website
-                  </a>
-                </p>
-              )}
-            </div>
-          )}
+          <div className="mt-1 p-4 bg-blue-50 rounded-2xl border border-blue-200">
+            <p className="text-sm text-black platypi-medium">
+              Thank you to{' '}
+              <a 
+                href="https://outorah.org/author/133215/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 underline hover:text-blue-800"
+              >
+                Rabbi David Ashear
+              </a>
+              {' '}and{' '}
+              <a 
+                href="https://outorah.org/author/133215/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 underline hover:text-blue-800"
+              >
+                the OU
+              </a>
+              {' '}for providing this content
+            </p>
+          </div>
 
           <div className="heart-explosion-container">
             <Button 

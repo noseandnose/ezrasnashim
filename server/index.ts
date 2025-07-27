@@ -84,8 +84,7 @@ app.use(
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
-// Serve attached assets statically
-app.use('/attached_assets', express.static(path.join(__dirname, '..', 'attached_assets')));
+
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -154,24 +153,19 @@ async function initializeServer() {
   return server;
 }
 
-// Production mode: start server immediately
-if (process.env.NODE_ENV === 'production') {
-  initializeServer().then((server) => {
-    const port = parseInt(process.env.PORT ?? '80');
-    server.listen(port, '0.0.0.0', () => {
-      console.log(`🚀 Ezras Nashim production server running on port ${port}`);
-      console.log(`📍 Environment: ${process.env.NODE_ENV}`);
-    });
-  }).catch(console.error);
-} else {
-  // Development mode: start server
-  initializeServer().then((server) => {
-    const port = parseInt(process.env.PORT ?? '3000');
-    server.listen(port, () => {
-      console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${port}`);
-    });
-  }).catch(console.error);
-}
+// Start server for both production and development
+initializeServer().then((server) => {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const defaultPort = isProduction ? '80' : '5000';
+  const port = parseInt(process.env.PORT ?? defaultPort);
+  
+  server.listen(port, '0.0.0.0', () => {
+    const environment = process.env.NODE_ENV || 'development';
+    const emoji = isProduction ? '🚀' : '⚡';
+    console.log(`${emoji} Ezras Nashim server running on port ${port}`);
+    console.log(`📍 Environment: ${environment}`);
+  });
+}).catch(console.error);
 
 // Export the configured app for external use
 export { app };
