@@ -580,8 +580,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               <div className="bg-blush/20 p-2 rounded-full mx-auto mb-1 w-fit">
                 <Shield className="text-blush" size={16} strokeWidth={1.5} />
               </div>
-              <h4 className="font-serif text-sm text-black font-bold">Refuah</h4>
-              <p className="font-sans text-xs text-black/60 mt-1">Healing</p>
+              <h4 className="platypi-bold text-sm text-black">Refuah</h4>
+              <p className="platypi-regular text-xs text-black/60 mt-1">Healing</p>
             </button>
             
             <button 
@@ -591,8 +591,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               <div className="bg-lavender/20 p-2 rounded-full mx-auto mb-1 w-fit">
                 <Home className="text-lavender" size={16} strokeWidth={1.5} />
               </div>
-              <h4 className="font-serif text-sm text-black font-bold">Family</h4>
-              <p className="font-sans text-xs text-black/60 mt-1">Shalom Bayis</p>
+              <h4 className="platypi-bold text-sm text-black">Family</h4>
+              <p className="platypi-regular text-xs text-black/60 mt-1">Shalom Bayis</p>
             </button>
             
             <button 
@@ -602,8 +602,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               <div className="bg-sage/20 p-2 rounded-full mx-auto mb-1 w-fit">
                 <Compass className="text-sage" size={16} strokeWidth={1.5} />
               </div>
-              <h4 className="font-serif text-sm text-black font-bold">Life</h4>
-              <p className="font-sans text-xs text-black/60 mt-1">Guidance</p>
+              <h4 className="platypi-bold text-sm text-black">Life</h4>
+              <p className="platypi-regular text-xs text-black/60 mt-1">Guidance</p>
             </button>
           </div>
         </div>
