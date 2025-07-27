@@ -1,14 +1,14 @@
 import serverAxiosClient from "./axiosClient";
 import { 
   shopItems, 
-  tehillimNames, globalTehillimProgress, minchaPrayers, maarivPrayers, birkatHamazonPrayers, afterBrochasPrayers, sponsors, nishmasText,
+  tehillimNames, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, birkatHamazonPrayers, afterBrochasPrayers, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
   dailyRecipes, parshaVorts, tableInspirations, campaigns, womensPrayers, discountPromotions, pirkeiAvotProgress,
   analyticsEvents, dailyStats,
 
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
-  type MaarivPrayer, type InsertMaarivPrayer,
+  type MaarivPrayer, type InsertMaarivPrayer, type MorningPrayer, type InsertMorningPrayer,
   type BirkatHamazonPrayer, type InsertBirkatHamazonPrayer,
   type AfterBrochasPrayer, type InsertAfterBrochasPrayer,
   type Sponsor, type InsertSponsor, type NishmasText, type InsertNishmasText,
@@ -75,10 +75,15 @@ export interface IStorage {
 
   // Mincha methods
   getMinchaPrayers(): Promise<MinchaPrayer[]>;
+  createMinchaPrayer(prayer: InsertMinchaPrayer): Promise<MinchaPrayer>;
+  
+  // Morning prayer methods
+  getMorningPrayers(): Promise<MorningPrayer[]>;
+  createMorningPrayer(prayer: InsertMorningPrayer): Promise<MorningPrayer>;
   
   // Maariv methods
   getMaarivPrayers(): Promise<MaarivPrayer[]>;
-  createMinchaPrayer(prayer: InsertMinchaPrayer): Promise<MinchaPrayer>;
+  createMaarivPrayer(prayer: InsertMaarivPrayer): Promise<MaarivPrayer>;
 
   // After Brochas methods
   getAfterBrochasPrayers(): Promise<AfterBrochasPrayer[]>;
@@ -451,6 +456,16 @@ export class DatabaseStorage implements IStorage {
 
   async createMinchaPrayer(insertPrayer: InsertMinchaPrayer): Promise<MinchaPrayer> {
     const [prayer] = await db.insert(minchaPrayers).values(insertPrayer).returning();
+    return prayer;
+  }
+
+  // Morning prayer methods
+  async getMorningPrayers(): Promise<MorningPrayer[]> {
+    return await db.select().from(morningPrayers).orderBy(morningPrayers.orderIndex);
+  }
+
+  async createMorningPrayer(insertPrayer: InsertMorningPrayer): Promise<MorningPrayer> {
+    const [prayer] = await db.insert(morningPrayers).values(insertPrayer).returning();
     return prayer;
   }
 

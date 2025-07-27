@@ -817,6 +817,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Morning prayer routes
+  app.get("/api/morning/prayers", async (req, res) => {
+    try {
+      const prayers = await storage.getMorningPrayers();
+      res.json(prayers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch Morning prayers" });
+    }
+  });
+
   // Maariv routes
   app.get("/api/maariv/prayers", async (req, res) => {
     try {
