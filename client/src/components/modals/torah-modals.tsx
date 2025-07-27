@@ -165,13 +165,28 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           <div id="halacha-description" className="sr-only">Daily Jewish law and practice content</div>
           
           <div className="mb-1">
-            <StandardModalHeader 
-              title="Daily Halacha"
-              showHebrew={showHebrew}
-              setShowHebrew={setShowHebrew}
-              fontSize={fontSize}
-              setFontSize={setFontSize}
-            />
+            {/* Custom header without translate button for Halacha */}
+            <div className="flex items-center justify-center mb-1 relative pr-8">
+              <div className="flex items-center gap-4">
+                <DialogTitle className="text-lg platypi-bold text-black">Daily Halacha</DialogTitle>
+                
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                    className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                  >
+                    <span className="text-xs platypi-medium">-</span>
+                  </button>
+                  <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
+                  <button
+                    onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+                    className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                  >
+                    <span className="text-xs platypi-medium">+</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
           
           <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
