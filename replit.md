@@ -308,6 +308,7 @@ Changelog:
 - July 24, 2025. Updated After Brochas Page Modal text: Changed "Al Hamichiya" to "Me'ein Shalosh" as the main title with "Al Hamichiya" as the subtitle in the After Brochas selection modal for clearer Hebrew terminology
 - July 27, 2025. Completed comprehensive Platypi font rollout: Successfully converted all English text throughout the application from font-serif/font-sans/font-medium/font-semibold/font-bold to corresponding platypi font classes (platypi-regular, platypi-medium, platypi-semibold, platypi-bold), updated all modal components, pages, UI components, and section components while preserving Hebrew text styling with secular-one-bold and heebo-regular fonts
 - July 27, 2025. Replaced header text with custom logo: Updated app header to display custom circular pink logo (3LO_1753595416737.png) instead of "Ezras Nashim" text, sized with h-9 w-auto for optimal visibility with decreased border, maintained accessibility with alt text
+- July 27, 2025. Updated default sponsor text: Changed fallback sponsor message from "No sponsor for today" to "By Just One Chesed" to properly attribute the organization when no specific sponsor exists for the day
 ```
 
 ## User Preferences

@@ -146,7 +146,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               'Loading sponsor information...' :
               sponsor ? 
                 (sponsor.inHonorMemoryOf ? sponsor.inHonorMemoryOf : `by ${sponsor.name}`) :
-                "No sponsor for today"
+                "By Just One Chesed"
             }
           </p>
 
