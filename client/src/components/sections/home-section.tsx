@@ -112,7 +112,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         <div className="flex items-center justify-between mb-3">
           <h1 className="platypi-bold text-xl text-black tracking-wide">{getGreeting()}</h1>
           <div className="text-right">
-            <p className="font-serif text-xs text-black">{hebrewDate || "Loading..."}</p>
+            <p className="platypi-regular text-xs text-black">{hebrewDate || "Loading..."}</p>
             <button 
               onClick={() => openModal('location')}
               className="flex items-center justify-end space-x-1 hover:bg-white/80 px-2 py-1 rounded-xl transition-colors border border-gray-200 bg-white/60"

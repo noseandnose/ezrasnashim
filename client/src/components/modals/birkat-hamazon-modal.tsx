@@ -20,7 +20,7 @@ interface BirkatHamazonPrayer {
 const KorenThankYou = () => (
   <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
     <div className="flex items-center justify-between">
-      <span className="text-sm font-medium text-black">All tefilla texts courtesy of Koren Publishers Jerusalem</span>
+      <span className="text-sm platypi-medium text-black">All tefilla texts courtesy of Koren Publishers Jerusalem</span>
       <img 
         src={korenLogo} 
         alt="Koren Publishers" 
@@ -125,7 +125,7 @@ export function BirkatHamazonModal() {
     
     return (
       <div 
-        className="font-serif leading-relaxed whitespace-pre-line text-left"
+        className="platypi-regular leading-relaxed whitespace-pre-line text-left"
         style={{ fontSize: `${fontSize}px` }}
       >
         {text}
@@ -137,10 +137,10 @@ export function BirkatHamazonModal() {
   if (activeModal === 'after-brochas') {
     return (
       <Dialog open={true} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 font-sans">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 platypi-regular">
           <DialogHeader className="text-center mb-4 pr-8">
-            <DialogTitle className="text-lg font-serif font-bold text-black">After Brochas</DialogTitle>
-            <DialogDescription className="text-sm text-gray-600 font-sans">Prayers of Thanks</DialogDescription>
+            <DialogTitle className="text-lg platypi-bold text-black">After Brochas</DialogTitle>
+            <DialogDescription className="text-sm text-gray-600 platypi-regular">Prayers of Thanks</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3">
@@ -148,7 +148,7 @@ export function BirkatHamazonModal() {
               onClick={() => openModal('al-hamichiya')}
               className="w-full bg-white rounded-xl p-4 border border-blush/10 hover:bg-blush/5 transition-colors text-left"
             >
-              <h3 className="font-serif text-black font-medium mb-1">Me'ein Shalosh</h3>
+              <h3 className="platypi-medium text-black mb-1">Me'ein Shalosh</h3>
               <p className="text-sm text-gray-600">Al Hamichiya</p>
             </button>
 
@@ -156,7 +156,7 @@ export function BirkatHamazonModal() {
               onClick={() => openModal('birkat-hamazon')}
               className="w-full bg-white rounded-xl p-4 border border-blush/10 hover:bg-blush/5 transition-colors text-left"
             >
-              <h3 className="font-serif text-black font-medium mb-1">Birkat Hamazon</h3>
+              <h3 className="platypi-medium text-black mb-1">Birkat Hamazon</h3>
               <p className="text-sm text-gray-600">After bread meals</p>
             </button>
           </div>
@@ -180,7 +180,7 @@ export function BirkatHamazonModal() {
     <>
       {/* Al Hamichiya Modal */}
       <Dialog open={activeModal === 'al-hamichiya'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
           <StandardModalHeader />
           
           <div className="max-h-[60vh] overflow-y-auto">
@@ -194,7 +194,7 @@ export function BirkatHamazonModal() {
                   <div key={index} className="bg-white rounded-2xl p-4 border border-blush/10">
                     <div 
                       className={`text-black leading-relaxed ${
-                        language === "hebrew" ? "text-right heebo-regular" : "text-left font-sans"
+                        language === "hebrew" ? "text-right heebo-regular" : "text-left platypi-regular"
                       }`}
                       style={{ fontSize: `${fontSize}px` }}
                     >
@@ -211,7 +211,7 @@ export function BirkatHamazonModal() {
           <div className="heart-explosion-container">
             <Button 
               onClick={handleComplete}
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-4 border-0"
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-4 border-0"
             >
               Completed
             </Button>
@@ -222,7 +222,7 @@ export function BirkatHamazonModal() {
 
       {/* Birkat Hamazon Modal */}
       <Dialog open={activeModal === 'birkat-hamazon'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
           <StandardModalHeader />
           
           <div className="max-h-[60vh] overflow-y-auto">
@@ -236,7 +236,7 @@ export function BirkatHamazonModal() {
                   <div key={prayer.id} className="bg-white rounded-2xl p-4 border border-blush/10">
                     <div 
                       className={`text-black leading-relaxed ${
-                        language === "hebrew" ? "text-right heebo-regular" : "text-left font-sans"
+                        language === "hebrew" ? "text-right heebo-regular" : "text-left platypi-regular"
                       }`}
                       style={{ fontSize: `${fontSize}px` }}
                     >
@@ -253,7 +253,7 @@ export function BirkatHamazonModal() {
           <div className="heart-explosion-container">
             <Button 
               onClick={handleComplete}
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-4 border-0"
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-4 border-0"
             >
               Completed
             </Button>

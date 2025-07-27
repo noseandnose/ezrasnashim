@@ -31,7 +31,7 @@ export default function TimesSection() {
               <h3 className="font-semibold text-sm">Today's Times</h3>
             </div>
             <button 
-              className="text-xs text-blush cursor-pointer hover:text-blush/80 hover:bg-blush/10 px-3 py-2 rounded-lg transition-colors border border-blush/30 font-medium"
+              className="text-xs text-blush cursor-pointer hover:text-blush/80 hover:bg-blush/10 px-3 py-2 rounded-lg transition-colors border border-blush/30 platypi-medium"
               onClick={() => {
                 console.log('Location clicked - opening modal');
                 openModal('location');
