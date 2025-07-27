@@ -80,7 +80,7 @@ export async function preloadCriticalData(): Promise<void> {
     // Preload today's Pirkei Avot if not cached
     const pirkeiAvotKey = getCacheKey.pirkeiAvot(today);
     if (!pirkeiAvotCache.has(pirkeiAvotKey)) {
-      const response = await fetch(`/api/torah/pirkei-avot/${today}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/torah/pirkei-avot/${today}`);
       if (response.ok) {
         const data = await response.json();
         pirkeiAvotCache.set(pirkeiAvotKey, data, 24 * 60 * 60 * 1000); // 24 hours
@@ -88,12 +88,12 @@ export async function preloadCriticalData(): Promise<void> {
     }
 
     // Preload current Tehillim if not cached
-    const progressResponse = await fetch('/api/tehillim/progress');
+    const progressResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tehillim/progress`);
     if (progressResponse.ok) {
       const progress = await progressResponse.json();
       const tehillimKey = getCacheKey.tehillim(progress.currentPerek, 'hebrew');
       if (!tehillimCache.has(tehillimKey)) {
-        const textResponse = await fetch(`/api/tehillim/text/${progress.currentPerek}`);
+        const textResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tehillim/text/${progress.currentPerek}`);
         if (textResponse.ok) {
           const textData = await textResponse.json();
           tehillimCache.set(tehillimKey, textData, 60 * 60 * 1000); // 1 hour
@@ -130,7 +130,8 @@ export async function cachedFetch<T>(
   }
 
   // Fetch from API
-  const response = await fetch(url);
+  const fullUrl = url.startsWith('http') ? url : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${url}`;
+  const response = await fetch(fullUrl);
   if (!response.ok) {
     throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
   }

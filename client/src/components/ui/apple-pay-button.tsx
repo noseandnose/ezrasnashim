@@ -21,7 +21,7 @@ export default function ApplePayButton({ amount, onSuccess, onError, disabled }:
 
     try {
       // Create payment intent first
-      const response = await fetch('/api/create-payment-intent', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/create-payment-intent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
