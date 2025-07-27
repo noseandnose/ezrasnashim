@@ -23,7 +23,7 @@ interface TefillaModalsProps {
 const KorenThankYou = () => (
   <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
     <div className="flex items-center justify-between">
-      <span className="text-sm font-medium text-black">All tefilla texts courtesy of Koren Publishers Jerusalem</span>
+      <span className="text-sm platypi-medium text-black">All tefilla texts courtesy of Koren Publishers Jerusalem</span>
       <img 
         src={korenLogo} 
         alt="Koren Publishers" 
@@ -204,7 +204,7 @@ function MorningBrochasModal() {
               window.location.hash = '#/?section=home&scrollToProgress=true';
             }, 2000);
           }} 
-          className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
+          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0"
           disabled={isLoading}
         >
           Completed Morning Brochas
@@ -568,7 +568,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 completeWithAnimation();
               }}
               disabled={completePerekMutation.isPending}
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0"
             >
               {completePerekMutation.isPending ? 'Completing...' : 'Completed'}
             </Button>
@@ -776,7 +776,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       </Dialog>
       {/* Nishmas Kol Chai Modal */}
       <Dialog open={activeModal === 'nishmas-campaign'} onOpenChange={() => closeModal()}>
-        <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans ${isAnimating ? 'prayer-ascending' : ''}`}>
+        <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular ${isAnimating ? 'prayer-ascending' : ''}`}>
           {/* Standardized Header */}
           <div className="flex items-center justify-center mb-3 relative pr-8">
             <div className="flex items-center gap-4">
@@ -784,7 +784,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 onClick={() => setNishmasLanguage(nishmasLanguage === 'hebrew' ? 'english' : 'hebrew')}
                 variant="ghost"
                 size="sm"
-                className={`text-xs font-medium px-3 py-1 rounded-lg transition-all ${
+                className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
                   nishmasLanguage === 'hebrew' 
                     ? 'bg-blush text-white' 
                     : 'text-black/60 hover:text-black hover:bg-white/50'
@@ -793,7 +793,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 {nishmasLanguage === 'hebrew' ? 'עב' : 'EN'}
               </Button>
               
-              <DialogTitle className="text-lg font-serif font-bold text-black">Nishmas Kol Chai</DialogTitle>
+              <DialogTitle className="text-lg platypi-bold text-black">Nishmas Kol Chai</DialogTitle>
               
               <div className="flex items-center gap-2">
                 <button
@@ -802,7 +802,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 >
                   <Minus className="w-3 h-3" />
                 </button>
-                <span className="text-xs text-black/60 font-medium">{nishmasFontSize}px</span>
+                <span className="text-xs text-black/60 platypi-medium">{nishmasFontSize}px</span>
                 <button
                   onClick={() => setNishmasFontSize(Math.min(28, nishmasFontSize + 2))}
                   className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
@@ -843,7 +843,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           <div className="heart-explosion-container">
             <Button 
               onClick={completeWithAnimation} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-3 border-0"
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-3 border-0"
             >
               Completed
             </Button>
@@ -862,37 +862,37 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       </Dialog>
       {/* Refuah Prayers Modal */}
       <Dialog open={activeModal === 'refuah'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="refuah-description">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 platypi-regular" aria-describedby="refuah-description">
           <div id="refuah-description" className="sr-only">Prayers for healing and health</div>
           <div className="flex items-center justify-center mb-3 relative pr-8">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Refuah Prayers</DialogTitle>
+            <DialogTitle className="text-lg platypi-bold text-black">Refuah Prayers</DialogTitle>
           </div>
           <RefuahPrayersList onPrayerSelect={handlePrayerSelect} />
         </DialogContent>
       </Dialog>
       {/* Family Prayers Modal */}
       <Dialog open={activeModal === 'family'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="family-description">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 platypi-regular" aria-describedby="family-description">
           <div id="family-description" className="sr-only">Prayers for family harmony and blessings</div>
           <div className="flex items-center justify-center mb-3 relative pr-8">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Family Prayers</DialogTitle>
+            <DialogTitle className="text-lg platypi-bold text-black">Family Prayers</DialogTitle>
           </div>
           <FamilyPrayersList onPrayerSelect={handlePrayerSelect} />
         </DialogContent>
       </Dialog>
       {/* Life Prayers Modal */}
       <Dialog open={activeModal === 'life'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-6 font-sans" aria-describedby="life-description">
+        <DialogContent className="w-full max-w-sm rounded-3xl p-6 platypi-regular" aria-describedby="life-description">
           <div id="life-description" className="sr-only">Prayers for life events and milestones</div>
           <div className="flex items-center justify-center mb-3 relative pr-8">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Life Prayers</DialogTitle>
+            <DialogTitle className="text-lg platypi-bold text-black">Life Prayers</DialogTitle>
           </div>
           <LifePrayersList onPrayerSelect={handlePrayerSelect} />
         </DialogContent>
       </Dialog>
       {/* Individual Prayer Modal */}
       <Dialog open={activeModal === 'individual-prayer'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans" aria-describedby="individual-prayer-description">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="individual-prayer-description">
           <div id="individual-prayer-description" className="sr-only">Individual prayer text and translation</div>
           <IndividualPrayerContent prayerId={selectedPrayerId} language={language} fontSize={fontSize} setLanguage={setLanguage} setFontSize={setFontSize} />
         </DialogContent>
@@ -900,21 +900,21 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
       {/* Special Tehillim Modal */}
       <Dialog open={activeModal === 'special-tehillim'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
           <SpecialTehillimModal />
         </DialogContent>
       </Dialog>
 
       {/* Individual Tehillim Modal */}
       <Dialog open={activeModal === 'individual-tehillim'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
           <IndividualTehillimModal />
         </DialogContent>
       </Dialog>
 
       {/* Maariv Modal */}
       <Dialog open={activeModal === 'maariv'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans" aria-describedby="maariv-description">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="maariv-description">
           <div id="maariv-description" className="sr-only">Evening prayer service and instructions</div>
           
           <StandardModalHeader 
@@ -955,7 +955,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           <div className="heart-explosion-container">
             <Button 
               onClick={completeWithAnimation} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
             >
               Completed
             </Button>
@@ -999,7 +999,7 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
           <div className="flex items-center space-x-3">
             <Heart className="text-blush" size={20} />
             <div>
-              <span className="font-sans font-medium">{prayer.prayerName}</span>
+              <span className="platypi-medium">{prayer.prayerName}</span>
               {prayer.description && (
                 <p className="text-xs text-warm-gray/60 mt-1">{prayer.description}</p>
               )}
@@ -1024,7 +1024,7 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
               window.location.hash = '#/?section=home&scrollToProgress=true';
             }, 2000);
           }} 
-          className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
         >
           Complete
         </Button>
@@ -1062,7 +1062,7 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
           <div className="flex items-center space-x-3">
             <HandHeart className="text-peach" size={20} />
             <div>
-              <span className="font-sans font-medium">{prayer.prayerName}</span>
+              <span className="platypi-medium">{prayer.prayerName}</span>
               {prayer.description && (
                 <p className="text-xs text-warm-gray/60 mt-1">{prayer.description}</p>
               )}
@@ -1087,7 +1087,7 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
               window.location.hash = '#/?section=home&scrollToProgress=true';
             }, 2000);
           }} 
-          className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
         >
           Complete
         </Button>
@@ -1125,7 +1125,7 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
           <div className="flex items-center space-x-3">
             <Scroll className="text-sage" size={20} />
             <div>
-              <span className="font-sans font-medium">{prayer.prayerName}</span>
+              <span className="platypi-medium">{prayer.prayerName}</span>
               {prayer.description && (
                 <p className="text-xs text-warm-gray/60 mt-1">{prayer.description}</p>
               )}
@@ -1150,7 +1150,7 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
               window.location.hash = '#/?section=home&scrollToProgress=true';
             }, 2000);
           }} 
-          className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
         >
           Complete
         </Button>
@@ -1198,7 +1198,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
             onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
             variant="ghost"
             size="sm"
-            className={`text-xs font-medium px-3 py-1 rounded-lg transition-all ${
+            className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
               language === 'hebrew' 
                 ? 'bg-blush text-white' 
                 : 'text-black/60 hover:text-black hover:bg-white/50'
@@ -1207,7 +1207,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
             {language === 'hebrew' ? 'עב' : 'EN'}
           </Button>
           
-          <h2 className="text-lg font-serif font-bold text-black">{prayer.prayerName}</h2>
+          <h2 className="text-lg platypi-bold text-black">{prayer.prayerName}</h2>
           
           <div className="flex items-center gap-2">
             <button
@@ -1216,7 +1216,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
             >
               <Minus className="w-3 h-3" />
             </button>
-            <span className="text-xs text-black/60 font-medium">{fontSize}px</span>
+            <span className="text-xs text-black/60 platypi-medium">{fontSize}px</span>
             <button
               onClick={() => setFontSize(Math.min(28, fontSize + 2))}
               className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
@@ -1257,7 +1257,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
               window.location.hash = '#/?section=home&scrollToProgress=true';
             }, 2000);
           }} 
-          className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
+          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0"
         >
           Complete
         </Button>
@@ -1318,7 +1318,7 @@ function SpecialTehillimModal() {
   return (
     <>
       <DialogHeader className="text-center mb-4">
-        <DialogTitle className="text-lg font-serif font-semibold text-black">Special Tehillim</DialogTitle>
+        <DialogTitle className="text-lg platypi-semibold text-black">Special Tehillim</DialogTitle>
         <DialogDescription className="text-xs text-black/70">
           Specific psalms for different needs and occasions
         </DialogDescription>
@@ -1327,13 +1327,13 @@ function SpecialTehillimModal() {
       <div className="max-h-[60vh] overflow-y-auto space-y-3">
         {categories.map((category, index) => (
           <div key={index} className="bg-white/80 rounded-2xl p-3 border border-blush/10">
-            <h3 className="font-serif text-sm text-black font-bold mb-2">{category.title}</h3>
+            <h3 className="platypi-bold text-sm text-black mb-2">{category.title}</h3>
             <div className="flex flex-wrap gap-2">
               {category.psalms.map((psalm) => (
                 <button
                   key={psalm}
                   onClick={() => openTehillimText(psalm)}
-                  className="bg-gradient-feminine text-white px-3 py-1 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity"
+                  className="bg-gradient-feminine text-white px-3 py-1 rounded-xl text-sm platypi-medium hover:opacity-90 transition-opacity"
                 >
                   {psalm}
                 </button>
@@ -1349,7 +1349,7 @@ function SpecialTehillimModal() {
           // Navigate to home and scroll to progress
           window.location.hash = '#/?section=home&scrollToProgress=true';
         }} 
-        className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 mt-4"
+        className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
       >
         Complete
       </Button>
@@ -1385,7 +1385,7 @@ function IndividualTehillimModal() {
             onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
             variant="ghost"
             size="sm"
-            className={`text-xs font-medium px-3 py-1 rounded-lg transition-all ${
+            className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
               language === 'hebrew' 
                 ? 'bg-blush text-white' 
                 : 'text-black/60 hover:text-black hover:bg-white/50'
@@ -1394,7 +1394,7 @@ function IndividualTehillimModal() {
             {language === 'hebrew' ? 'עב' : 'EN'}
           </Button>
           
-          <DialogTitle className="text-lg font-serif font-bold text-black">Tehillim {selectedPsalm}</DialogTitle>
+          <DialogTitle className="text-lg platypi-bold text-black">Tehillim {selectedPsalm}</DialogTitle>
           
           <div className="flex items-center gap-2">
             <button
@@ -1403,7 +1403,7 @@ function IndividualTehillimModal() {
             >
               <Minus className="w-3 h-3" />
             </button>
-            <span className="text-xs text-black/60 font-medium">{fontSize}px</span>
+            <span className="text-xs text-black/60 platypi-medium">{fontSize}px</span>
             <button
               onClick={() => setFontSize(Math.min(28, fontSize + 2))}
               className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
@@ -1446,7 +1446,7 @@ function IndividualTehillimModal() {
             window.location.hash = '#/?section=home&scrollToProgress=true';
           }, 2000);
         }} 
-        className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
+        className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0"
       >
         Completed
       </Button>

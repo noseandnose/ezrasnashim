@@ -231,7 +231,7 @@ export default function Statistics() {
             </div>
 
             {/* Period-Specific Stats */}
-            <h2 className="text-base font-serif font-bold text-black mb-3">
+            <h2 className="text-base platypi-bold text-black mb-3">
               {selectedPeriod === 'today' ? "Today's Activity" : 
                selectedPeriod === 'month' ? "This Month's Activity" : 
                "All Time Activity"}
@@ -267,7 +267,7 @@ export default function Statistics() {
 
           {/* Feature Usage */}
           <div>
-            <h2 className="text-base font-serif font-bold text-black mb-3">Feature Usage</h2>
+            <h2 className="text-base platypi-bold text-black mb-3">Feature Usage</h2>
             <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
               {currentLoading ? (
                 <div className="text-center text-black/60">Loading...</div>
@@ -286,7 +286,7 @@ export default function Statistics() {
                         <div key={modalType} className="flex justify-between items-center py-1">
                           <div className="flex items-center gap-2">
                             <Icon className="h-4 w-4 text-blush" />
-                            <span className="text-xs font-medium text-warm-gray">
+                            <span className="text-xs platypi-medium text-warm-gray">
                               {modalTypeNames[modalType]}
                             </span>
                           </div>
