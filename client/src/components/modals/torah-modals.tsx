@@ -336,7 +336,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               <div className="space-y-4">
                 {/* Title */}
                 {chizukContent.title && (
-                  <h3 className="platypi-bold text-lg text-black text-center mb-4">
+                  <h3 className="platypi-bold text-sm text-black text-center mb-4">
                     {chizukContent.title}
                   </h3>
                 )}
