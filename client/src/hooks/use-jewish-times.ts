@@ -117,7 +117,7 @@ export function useJewishTimes() {
         return null;
       }
       try {
-        // Call our backend proxy route using relative path
+        // Call our backend proxy route - axiosClient has base URL configured
         const url = `/api/zmanim/${coordinates.lat}/${coordinates.lng}`;
         const response = await axiosClient.get(url);
         return response.data;

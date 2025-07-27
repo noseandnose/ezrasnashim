@@ -165,7 +165,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   // Fetch Tehillim preview (first line) for display
   const { data: tehillimPreview, isLoading: isPreviewLoading } = useQuery<{preview: string; perek: number; language: string}>({
     queryKey: ['/api/tehillim/preview', progress?.currentPerek],
-    queryFn: () => fetch(`/api/tehillim/preview/${progress?.currentPerek}?language=hebrew`).then(res => res.json()),
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tehillim/preview/${progress?.currentPerek}?language=hebrew`).then(res => res.json()),
     enabled: !!progress?.currentPerek,
     staleTime: 0, // Always consider stale
     gcTime: 0 // Don't cache at all
