@@ -331,6 +331,7 @@ Changelog:
 - July 28, 2025. Fixed Special Tehillim completion flow performance and navigation issues: Enhanced Individual Tehillim modal with proper completion tracking (trackModalComplete, markModalComplete), standardized button styling with sage green for completed state, fixed heart explosion reset behavior for faster completion and proper home page redirection
 - July 28, 2025. Updated Special Tehillim modal button text: Changed button from "Complete" to "Close" since users are selecting psalms rather than completing the entire section, removed unnecessary home navigation from selection modal
 - July 28, 2025. Enhanced Nishmas modal with Information dropdown: Moved Rebbetzin Leah Kolodetsky text from under complete button to expandable Information dropdown section similar to Halacha footnotes, positioned between content area and Koren thank you section for cleaner modal organization
+- July 28, 2025. Updated Individual Prayer modal button to "Close": Changed from "Complete Prayer" to "Close" in Personal Prayers section (Refuah, Family, Life categories), removed completion tracking since these are content viewing modals rather than completion tasks, simplified button behavior to just close the modal
 ```
 
 ## User Preferences
