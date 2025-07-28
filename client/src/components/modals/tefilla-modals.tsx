@@ -474,8 +474,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     
     console.log('Completing Nishmas:', { currentDay: nishmasDay, newDay, todayCompleted });
     
-    // Track Nishmas completion
+    // Track Nishmas completion and mark as completed
     trackModalComplete('nishmas');
+    markModalComplete('nishmas');
     
     if (newDay <= 40) {
       setNishmasDay(newDay);
@@ -491,6 +492,33 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       
       console.log('Nishmas completed, new state:', { newDay, completed: true });
     }
+    
+    // Complete tefilla task and redirect to home
+    completeTask('tefilla');
+    setShowExplosion(true);
+    
+    setTimeout(() => {
+      setShowExplosion(false);
+      checkAndShowCongratulations();
+      closeModal();
+      
+      // Navigate to home section and scroll to progress to show flower growth
+      if (onSectionChange) {
+        onSectionChange('home');
+        setTimeout(() => {
+          const progressElement = document.getElementById('daily-progress-garden');
+          if (progressElement) {
+            progressElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+          }
+        }, 300);
+      } else {
+        // Fallback: redirect to home with scroll parameter
+        window.location.hash = '#/?section=home&scrollToProgress=true';
+      }
+    }, 2000);
   };
 
   // Reset Nishmas campaign

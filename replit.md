@@ -333,6 +333,7 @@ Changelog:
 - July 28, 2025. Enhanced Nishmas modal with Information dropdown: Moved Rebbetzin Leah Kolodetsky text from under complete button to expandable Information dropdown section similar to Halacha footnotes, positioned between content area and Koren thank you section for cleaner modal organization
 - July 28, 2025. Fixed Personal Prayer modal button logic: Changed Personal Prayer Categories (Refuah, Family, Life selection lists) from "Complete" to "Close" buttons since these are selection modals, while Individual Prayer Content maintains "Complete" button with completion tracking since users actually complete reading specific prayers
 - July 28, 2025. Updated Personal Prayer Close button styling: Changed Close buttons in Personal Prayer Categories from gray styling to purple gradient (bg-gradient-feminine) to match other complete/close buttons throughout the application for consistent visual design
+- July 28, 2025. Ensured all Complete buttons redirect to Home page: Updated Nishmas Complete button to include proper home redirect functionality, verified all Complete buttons throughout the application (Torah, Tefilla, Tzedaka modals) redirect users back to Home page after completion with daily progress garden scrolling, maintaining distinction between Close buttons (stay on current page) and Complete buttons (redirect to home)
 ```
 
 ## User Preferences
