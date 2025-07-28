@@ -49,8 +49,7 @@ export default function DonationModal() {
       return response.data;
     },
     onSuccess: (data) => {
-      // Track modal completion
-      trackModalComplete('donate');
+      // Don't track completion or mark task complete here - only after successful payment
       closeModal();
       
       if (data.clientSecret) {

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import { useLocation } from "wouter";
 import { useDailyCompletionStore, useModalStore } from "@/lib/types";
+import { useTrackModalComplete } from "@/hooks/use-analytics";
 // Removed Apple Pay button import - now using integrated PaymentElement
 
 // Add Apple Pay types
@@ -39,6 +40,7 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
   const [isProcessing, setIsProcessing] = useState(false);
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { openModal } = useModalStore();
+  const { trackModalComplete } = useTrackModalComplete();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,41 +70,57 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
           description: error.message,
           variant: "destructive",
         });
-      } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-      // Call completion handler for sponsor day donations
-      if (donationType === 'Sponsor a Day of Ezras Nashim' && sponsorName) {
-        try {
-          await apiRequest("POST", "/api/donation-complete", {
-            donationType,
-            sponsorName,
-            dedication: dedication || null
-          });
-        } catch (error) {
-          console.error('Failed to create sponsor record:', error);
+      } else if (paymentIntent && (paymentIntent.status === 'succeeded' || paymentIntent.status === 'processing')) {
+        // Handle both succeeded and processing status (Apple Pay often shows as processing initially)
+        console.log('Payment successful with status:', paymentIntent.status);
+        
+        // Call completion handler for sponsor day donations
+        if (donationType === 'Sponsor a Day of Ezras Nashim' && sponsorName) {
+          try {
+            await apiRequest("POST", "/api/donation-complete", {
+              donationType,
+              sponsorName,
+              dedication: dedication || null
+            });
+          } catch (error) {
+            console.error('Failed to create sponsor record:', error);
+          }
         }
-      }
-      
-      // Complete tzedaka task when payment is successful
-      completeTask('tzedaka');
-      
-      toast({
-        title: "Thank You!",
-        description: "Your donation has been processed successfully.",
-      });
-      
-      // Check if all tasks are completed and show congratulations
-      setTimeout(() => {
-        if (checkAndShowCongratulations()) {
-          openModal('congratulations');
-        }
-      }, 1000);
-      
-        onSuccess();
-      } else {
-        console.warn('Payment intent status:', paymentIntent?.status);
+        
+        // Complete tzedaka task when payment is successful/processing
+        completeTask('tzedaka');
+        
+        // Track completion for analytics
+        trackModalComplete('donate');
+        
         toast({
-          title: "Payment Processing",
-          description: "Payment is being processed. Please wait...",
+          title: "Thank You!",
+          description: paymentIntent.status === 'processing' 
+            ? "Your donation is being processed and will be confirmed shortly."
+            : "Your donation has been processed successfully.",
+        });
+        
+        // Check if all tasks are completed and show congratulations
+        setTimeout(() => {
+          if (checkAndShowCongratulations()) {
+            openModal('congratulations');
+          }
+        }, 1000);
+        
+        onSuccess();
+      } else if (paymentIntent && paymentIntent.status === 'requires_action') {
+        // Handle payments that require additional authentication (3D Secure, etc.)
+        console.log('Payment requires additional action');
+        toast({
+          title: "Additional Authentication Required",
+          description: "Please complete the authentication process to finalize your payment.",
+        });
+      } else {
+        console.warn('Unexpected payment intent status:', paymentIntent?.status);
+        toast({
+          title: "Payment Status Unclear",
+          description: "Please check with your payment provider to confirm the transaction status.",
+          variant: "destructive",
         });
       }
     } catch (paymentError) {

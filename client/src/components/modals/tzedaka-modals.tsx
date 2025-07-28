@@ -70,11 +70,8 @@ export default function TzedakaModals() {
     }
 
     if (amount > 0) {
-      // Only track modal completion when actually proceeding to payment
-      // This ensures X button doesn't trigger completion tracking
-      if (activeModal) {
-        trackModalComplete(activeModal);
-      }
+      // Don't track completion here - only after successful payment
+      // Completion will be tracked in the donate page after payment succeeds
       
       const params = new URLSearchParams({
         amount: amount.toString(),
