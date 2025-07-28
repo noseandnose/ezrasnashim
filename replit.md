@@ -325,6 +325,7 @@ Changelog:
 - July 27, 2025. Unified server startup code: Consolidated duplicate production/development server initialization into single implementation that always binds to 0.0.0.0, uses environment-aware port defaults (80 for production, 5000 for development), and provides consistent logging format
 - July 27, 2025. Fixed API URL standardization completely: Corrected all backend API calls to properly use VITE_API_URL environment variable, fixed direct `/api/tehillim/preview` fetch call in tefilla-section.tsx that was bypassing environment configuration, verified axiosClient base URL configuration, ensured all API calls use consistent URL handling across development and production environments
 - July 27, 2025. Fixed staging deployment 404 errors: Corrected optimization.ts preload function that was causing 404s by using old API endpoint formats (`/api/daily-halacha`, `/api/sponsors/daily`), updated to use correct current endpoints (`/api/torah/halacha/:date`, `/api/sponsors/daily/:date`) with proper VITE_API_URL configuration, eliminated all API endpoint mismatches in staging environment
+- July 27, 2025. Removed Hebrew preview text from Global Tehillim Chain section on Tefilla page: Eliminated the bar showing first line of current Tehillim text under the person's name and reason, keeping only progress bar and name/reason display for cleaner interface
 ```
 
 ## User Preferences

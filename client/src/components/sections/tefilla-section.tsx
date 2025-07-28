@@ -463,12 +463,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               </div>
             )}
             
-            {/* Hebrew Preview Text - Compact */}
-            {tehillimPreview && (
-              <div className="text-xs text-black/70 heebo-regular text-right bg-white/50 rounded-lg p-2 border border-blush/10 line-clamp-2">
-                {tehillimPreview.preview}
-              </div>
-            )}
+
           </button>
 
         </div>
