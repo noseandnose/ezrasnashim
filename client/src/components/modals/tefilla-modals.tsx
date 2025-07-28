@@ -3,7 +3,7 @@ import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles } from "lucide-react";
-import korenLogo from "@assets/This_is_a_logo_for_Koren_Publishers_Jerusalem_1752581940716.jpg";
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -22,14 +22,7 @@ interface TefillaModalsProps {
 // Koren Thank You Component
 const KorenThankYou = () => (
   <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-    <div className="flex items-center justify-between">
-      <span className="text-sm platypi-medium text-black">All tefilla texts courtesy of Koren Publishers Jerusalem</span>
-      <img 
-        src={korenLogo} 
-        alt="Koren Publishers" 
-        className="h-6 w-auto ml-2 flex-shrink-0"
-      />
-    </div>
+    <span className="text-sm platypi-medium text-black">All tefilla texts courtesy of Koren Publishers Jerusalem</span>
   </div>
 );
 

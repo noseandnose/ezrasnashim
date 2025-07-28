@@ -327,6 +327,7 @@ Changelog:
 - July 27, 2025. Fixed staging deployment 404 errors: Corrected optimization.ts preload function that was causing 404s by using old API endpoint formats (`/api/daily-halacha`, `/api/sponsors/daily`), updated to use correct current endpoints (`/api/torah/halacha/:date`, `/api/sponsors/daily/:date`) with proper VITE_API_URL configuration, eliminated all API endpoint mismatches in staging environment
 - July 27, 2025. Removed Hebrew preview text from Global Tehillim Chain section on Tefilla page: Eliminated the bar showing first line of current Tehillim text under the person's name and reason, keeping only progress bar and name/reason display for cleaner interface
 - July 27, 2025. Fixed Add Name form layout behavior: Changed Add Name form to replace the progress bar and current person display instead of pushing them below, creating cleaner UX where users only see the form when adding names without visual clutter from the Tehillim display underneath
+- July 27, 2025. Removed Koren logo images from all Tefilla modal thank you messages: Eliminated Koren Publishers logo images from KorenThankYou components in tefilla-modals.tsx and birkat-hamazon-modal.tsx while maintaining attribution text, creating cleaner text-only thank you messages across all prayer modals
 ```
 
 ## User Preferences

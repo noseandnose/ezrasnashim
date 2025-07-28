@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X, Plus, Minus } from "lucide-react";
-import korenLogo from "@assets/This_is_a_logo_for_Koren_Publishers_Jerusalem_1752581940716.jpg";
+
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useAnalytics, useTrackModalComplete } from "@/hooks/use-analytics";
@@ -19,14 +19,7 @@ interface BirkatHamazonPrayer {
 // Koren Thank You Component
 const KorenThankYou = () => (
   <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-    <div className="flex items-center justify-between">
-      <span className="text-sm platypi-medium text-black">All tefilla texts courtesy of Koren Publishers Jerusalem</span>
-      <img 
-        src={korenLogo} 
-        alt="Koren Publishers" 
-        className="h-6 w-auto ml-2 flex-shrink-0"
-      />
-    </div>
+    <span className="text-sm platypi-medium text-black">All tefilla texts courtesy of Koren Publishers Jerusalem</span>
   </div>
 );
 
