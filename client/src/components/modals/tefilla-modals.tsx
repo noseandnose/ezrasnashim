@@ -1407,6 +1407,8 @@ function SpecialTehillimModal() {
 function IndividualTehillimModal() {
   const { closeModal, selectedPsalm } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
   const [fontSize, setFontSize] = useState(20);
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
@@ -1479,22 +1481,29 @@ function IndividualTehillimModal() {
       <KorenThankYou />
 
       <Button 
-        onClick={() => {
-          // Complete the tefilla task and trigger heart explosion
+        onClick={isModalComplete('individual-tehillim') ? undefined : () => {
+          // Track modal completion and mark as completed globally
+          trackModalComplete('individual-tehillim');
+          markModalComplete('individual-tehillim');
+          
           completeTask('tefilla');
           setShowHeartExplosion(true);
           
-          // Check for daily completion and redirect to home after a short delay
           setTimeout(() => {
+            setShowHeartExplosion(false); // Reset explosion state
             checkAndShowCongratulations();
             closeModal();
-            // Navigate to home page and scroll to progress to see flower growth
             window.location.hash = '#/?section=home&scrollToProgress=true';
           }, 2000);
-        }} 
-        className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0"
+        }}
+        disabled={isModalComplete('individual-tehillim')}
+        className={`w-full py-3 rounded-xl platypi-medium border-0 ${
+          isModalComplete('individual-tehillim') 
+            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+        }`}
       >
-        Completed
+        {isModalComplete('individual-tehillim') ? 'Completed Today' : 'Complete'}
       </Button>
       
       {/* Heart Explosion Animation */}
