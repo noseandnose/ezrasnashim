@@ -1048,38 +1048,13 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
           </div>
         </div>
       ))}
-      <div className="heart-explosion-container">
+      <div className="mt-6">
         <Button 
-          onClick={isModalComplete('refuah') ? undefined : () => {
-            // Track modal completion and mark as completed globally
-            trackModalComplete('refuah');
-            markModalComplete('refuah');
-            
-            completeTask('tefilla');
-            setShowHeartExplosion(true);
-            
-            setTimeout(() => {
-              setShowHeartExplosion(false); // Reset explosion state
-              checkAndShowCongratulations();
-              closeModal();
-              window.location.hash = '#/?section=home&scrollToProgress=true';
-            }, 2000);
-          }}
-          disabled={isModalComplete('refuah')}
-          className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
-            isModalComplete('refuah') 
-              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
-          }`}
+          onClick={() => closeModal()}
+          className="w-full py-3 rounded-xl platypi-medium border-0 bg-warm-gray/20 text-black hover:bg-warm-gray/30 transition-colors"
         >
-          {isModalComplete('refuah') ? 'Completed Today' : 'Complete'}
+          Close
         </Button>
-        
-        {/* Heart Explosion Animation */}
-        <HeartExplosion 
-          trigger={showHeartExplosion}
-          onComplete={() => setShowHeartExplosion(false)} 
-        />
       </div>
     </div>
   );
@@ -1116,38 +1091,13 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
           </div>
         </div>
       ))}
-      <div className="heart-explosion-container">
+      <div className="mt-6">
         <Button 
-          onClick={isModalComplete('family') ? undefined : () => {
-            // Track modal completion and mark as completed globally
-            trackModalComplete('family');
-            markModalComplete('family');
-            
-            completeTask('tefilla');
-            setShowHeartExplosion(true);
-            
-            setTimeout(() => {
-              setShowHeartExplosion(false); // Reset explosion state
-              checkAndShowCongratulations();
-              closeModal();
-              window.location.hash = '#/?section=home&scrollToProgress=true';
-            }, 2000);
-          }}
-          disabled={isModalComplete('family')}
-          className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
-            isModalComplete('family') 
-              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
-          }`}
+          onClick={() => closeModal()}
+          className="w-full py-3 rounded-xl platypi-medium border-0 bg-warm-gray/20 text-black hover:bg-warm-gray/30 transition-colors"
         >
-          {isModalComplete('family') ? 'Completed Today' : 'Complete'}
+          Close
         </Button>
-        
-        {/* Heart Explosion Animation */}
-        <HeartExplosion 
-          trigger={showHeartExplosion}
-          onComplete={() => setShowHeartExplosion(false)} 
-        />
       </div>
     </div>
   );
@@ -1184,38 +1134,13 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
           </div>
         </div>
       ))}
-      <div className="heart-explosion-container">
+      <div className="mt-6">
         <Button 
-          onClick={isModalComplete('life') ? undefined : () => {
-            // Track modal completion and mark as completed globally
-            trackModalComplete('life');
-            markModalComplete('life');
-            
-            completeTask('tefilla');
-            setShowHeartExplosion(true);
-            
-            setTimeout(() => {
-              setShowHeartExplosion(false); // Reset explosion state
-              checkAndShowCongratulations();
-              closeModal();
-              window.location.hash = '#/?section=home&scrollToProgress=true';
-            }, 2000);
-          }}
-          disabled={isModalComplete('life')}
-          className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
-            isModalComplete('life') 
-              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
-          }`}
+          onClick={() => closeModal()}
+          className="w-full py-3 rounded-xl platypi-medium border-0 bg-warm-gray/20 text-black hover:bg-warm-gray/30 transition-colors"
         >
-          {isModalComplete('life') ? 'Completed Today' : 'Complete'}
+          Close
         </Button>
-        
-        {/* Heart Explosion Animation */}
-        <HeartExplosion 
-          trigger={showHeartExplosion}
-          onComplete={() => setShowHeartExplosion(false)} 
-        />
       </div>
     </div>
   );
@@ -1296,13 +1221,38 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
 
       <KorenThankYou />
 
-      <div className="mt-4">
+      <div className="heart-explosion-container">
         <Button 
-          onClick={() => closeModal()}
-          className="w-full py-3 rounded-xl platypi-medium border-0 bg-warm-gray/20 text-black hover:bg-warm-gray/30 transition-colors"
+          onClick={isModalComplete('individual-prayer') ? undefined : () => {
+            // Track modal completion and mark as completed globally
+            trackModalComplete('individual-prayer');
+            markModalComplete('individual-prayer');
+            
+            completeTask('tefilla');
+            setShowHeartExplosion(true);
+            
+            setTimeout(() => {
+              setShowHeartExplosion(false); // Reset explosion state
+              checkAndShowCongratulations();
+              closeModal();
+              window.location.hash = '#/?section=home&scrollToProgress=true';
+            }, 2000);
+          }}
+          disabled={isModalComplete('individual-prayer')}
+          className={`w-full py-3 rounded-xl platypi-medium border-0 ${
+            isModalComplete('individual-prayer') 
+              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+          }`}
         >
-          Close
+          {isModalComplete('individual-prayer') ? 'Completed Today' : 'Complete'}
         </Button>
+        
+        {/* Heart Explosion Animation */}
+        <HeartExplosion 
+          trigger={showHeartExplosion}
+          onComplete={() => setShowHeartExplosion(false)} 
+        />
       </div>
 
 
