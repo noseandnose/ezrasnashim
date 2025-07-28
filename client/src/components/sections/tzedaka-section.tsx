@@ -196,8 +196,8 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
                 <BookOpen className="text-white" size={20} />
               </div>
               <div className="flex-grow">
-                <h3 className="font-serif text-lg text-black font-bold">{campaign.title}</h3>
-                <p className="font-sans text-sm text-black/70">Support our community</p>
+                <h3 className="platypi-bold text-lg text-black font-bold">{campaign.title}</h3>
+                <p className="platypi-regular text-sm text-black/70">Support our community</p>
               </div>
               <div className="bg-gradient-feminine p-2 rounded-full shadow-lg">
                 <HandCoins className="text-white" size={16} />
@@ -208,10 +208,10 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
-                  <span className="font-sans text-sm text-black/70">Progress</span>
-                  <span className="font-serif text-sm text-black font-bold">{progressPercentage}% Complete</span>
+                  <span className="platypi-regular text-sm text-black/70">Progress</span>
+                  <span className="platypi-bold text-sm text-black font-bold">{progressPercentage}% Complete</span>
                 </div>
-                <span className="font-serif text-sm text-black font-bold">${campaign.currentAmount.toLocaleString()} / ${campaign.goalAmount.toLocaleString()}</span>
+                <span className="platypi-bold text-sm text-black font-bold">${campaign.currentAmount.toLocaleString()} / ${campaign.goalAmount.toLocaleString()}</span>
               </div>
               <div className="w-full bg-blush/20 rounded-full h-3">
                 <div 
@@ -234,8 +234,8 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
           <div className="p-3 rounded-full mx-auto mb-3 w-fit bg-gradient-feminine">
             <HandCoins className="text-white" size={24} strokeWidth={1.5} />
           </div>
-          <h3 className="font-serif text-sm text-black mb-2 font-bold">Put a Coin in Tzedaka</h3>
-          <p className="font-sans text-xs text-black/60 leading-relaxed">
+          <h3 className="platypi-bold text-sm text-black mb-2 font-bold">Put a Coin in Tzedaka</h3>
+          <p className="platypi-regular text-xs text-black/60 leading-relaxed">
             Donations go towards Woman in need and Torah Causes
           </p>
         </button>
@@ -253,8 +253,8 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             }`}>
               <Heart className="text-white" size={18} strokeWidth={1.5} />
             </div>
-            <h3 className="font-serif text-xs text-black mb-1 font-bold">Sponsor a Day</h3>
-            <p className="font-sans text-xs text-black/60 leading-relaxed">
+            <h3 className="platypi-bold text-xs text-black mb-1 font-bold">Sponsor a Day</h3>
+            <p className="platypi-regular text-xs text-black/60 leading-relaxed">
               {completedButtons.has('sponsor-day') ? 'Completed' : 'Dedicate all mitzvot'}
             </p>
           </button>
@@ -272,8 +272,8 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
               }`}>
                 <HandHeart className="text-white" size={18} strokeWidth={1.5} />
               </div>
-              <h3 className="font-serif text-xs text-black mb-1 font-bold">Gave Tzedaka Elsewhere</h3>
-              <p className="font-sans text-xs text-black/60 leading-relaxed">
+              <h3 className="platypi-bold text-xs text-black mb-1 font-bold">Gave Tzedaka Elsewhere</h3>
+              <p className="platypi-regular text-xs text-black/60 leading-relaxed">
                 {tzedakaCompleted || completedButtons.has('gave-elsewhere') ? 'Completed' : 'Mark as complete'}
               </p>
               <HeartExplosion trigger={showExplosion} />
