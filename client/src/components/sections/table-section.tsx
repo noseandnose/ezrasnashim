@@ -231,7 +231,7 @@ export default function TableSection() {
               <Lightbulb className={`${!inspirationContent ? 'text-gray-500' : 'text-white'}`} size={18} strokeWidth={1.5} />
             </div>
             <h3 className={`font-serif text-xs mb-1 font-bold ${!inspirationContent ? 'text-gray-500' : 'text-black'}`}>
-              Creative Jewish Living
+              Learn Shabbos
             </h3>
             <p className={`font-sans text-xs leading-relaxed ${!inspirationContent ? 'text-gray-400' : 'text-black/60'}`}>
               {!inspirationContent ? 'Coming Soon' : isModalComplete('inspiration') ? 'Completed' : inspirationContent.title}
