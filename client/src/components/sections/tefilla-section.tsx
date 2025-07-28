@@ -361,8 +361,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             </div>
           </div>
 
-          {/* Add Name Form */}
-          {showAddForm && (
+          {/* Add Name Form or Compact Perek Display */}
+          {showAddForm ? (
             <div className="space-y-3 mb-3 p-3 bg-gradient-to-r from-ivory to-lavender/5 rounded-2xl border border-lavender/20">
               <div className="flex items-center space-x-2 text-sm text-blush/80">
                 <AlertCircle size={16} />
@@ -416,55 +416,52 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
                 </Button>
               </div>
             </div>
-          )}
-
-          {/* Compact Perek Display */}
-          <button
-            onClick={() => openModal('tehillim-text')}
-            className="w-full bg-white/90 rounded-2xl p-3 border border-blush/20 hover:bg-white transition-all duration-300 shadow-sm"
-          >
-            {/* Header with perek number */}
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="platypi-bold text-lg text-black">
-                Perek {progress?.currentPerek || 1}
-              </h4>
-              <div className="bg-gradient-feminine p-2 rounded-full">
-                <ArrowRight className="text-white" size={14} strokeWidth={2} />
-              </div>
-            </div>
-            
-            {/* Progress Bar */}
-            <div className="mb-2">
-              <div className="w-full bg-blush/20 rounded-full h-1.5">
-                <div 
-                  className="bg-gradient-feminine h-1.5 rounded-full transition-all duration-500 ease-out"
-                  style={{ width: `${((progress?.currentPerek || 1) / 150) * 100}%` }}
-                ></div>
-              </div>
-            </div>
-
-            {/* Name assignment with reason icon */}
-            {currentName && (
-              <div className="mb-2 p-2 bg-white/60 rounded-xl border border-blush/10">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-1">
-                    <User size={12} className="text-blush" />
-                    <span className="platypi-medium text-sm text-black heebo-regular text-right" dir="rtl">
-                      {currentName.hebrewName}
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    {getReasonIcon(currentName.reason, currentName.reasonEnglish ?? undefined)}
-                    <span className="text-xs text-black/60 platypi-regular">
-                      {getReasonShort(currentName.reason, currentName.reasonEnglish ?? undefined)}
-                    </span>
-                  </div>
+          ) : (
+            <button
+              onClick={() => openModal('tehillim-text')}
+              className="w-full bg-white/90 rounded-2xl p-3 border border-blush/20 hover:bg-white transition-all duration-300 shadow-sm"
+            >
+              {/* Header with perek number */}
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="platypi-bold text-lg text-black">
+                  Perek {progress?.currentPerek || 1}
+                </h4>
+                <div className="bg-gradient-feminine p-2 rounded-full">
+                  <ArrowRight className="text-white" size={14} strokeWidth={2} />
                 </div>
               </div>
-            )}
-            
+              
+              {/* Progress Bar */}
+              <div className="mb-2">
+                <div className="w-full bg-blush/20 rounded-full h-1.5">
+                  <div 
+                    className="bg-gradient-feminine h-1.5 rounded-full transition-all duration-500 ease-out"
+                    style={{ width: `${((progress?.currentPerek || 1) / 150) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
 
-          </button>
+              {/* Name assignment with reason icon */}
+              {currentName && (
+                <div className="mb-2 p-2 bg-white/60 rounded-xl border border-blush/10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-1">
+                      <User size={12} className="text-blush" />
+                      <span className="platypi-medium text-sm text-black heebo-regular text-right" dir="rtl">
+                        {currentName.hebrewName}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      {getReasonIcon(currentName.reason, currentName.reasonEnglish ?? undefined)}
+                      <span className="text-xs text-black/60 platypi-regular">
+                        {getReasonShort(currentName.reason, currentName.reasonEnglish ?? undefined)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </button>
+          )}
 
         </div>
 
