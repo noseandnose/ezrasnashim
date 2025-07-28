@@ -332,6 +332,7 @@ Changelog:
 - July 28, 2025. Updated Special Tehillim modal button text: Changed button from "Complete" to "Close" since users are selecting psalms rather than completing the entire section, removed unnecessary home navigation from selection modal
 - July 28, 2025. Enhanced Nishmas modal with Information dropdown: Moved Rebbetzin Leah Kolodetsky text from under complete button to expandable Information dropdown section similar to Halacha footnotes, positioned between content area and Koren thank you section for cleaner modal organization
 - July 28, 2025. Fixed Personal Prayer modal button logic: Changed Personal Prayer Categories (Refuah, Family, Life selection lists) from "Complete" to "Close" buttons since these are selection modals, while Individual Prayer Content maintains "Complete" button with completion tracking since users actually complete reading specific prayers
+- July 28, 2025. Updated Personal Prayer Close button styling: Changed Close buttons in Personal Prayer Categories from gray styling to purple gradient (bg-gradient-feminine) to match other complete/close buttons throughout the application for consistent visual design
 ```
 
 ## User Preferences

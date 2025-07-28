@@ -1051,7 +1051,7 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
       <div className="mt-6">
         <Button 
           onClick={() => closeModal()}
-          className="w-full py-3 rounded-xl platypi-medium border-0 bg-warm-gray/20 text-black hover:bg-warm-gray/30 transition-colors"
+          className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
         >
           Close
         </Button>
@@ -1094,7 +1094,7 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
       <div className="mt-6">
         <Button 
           onClick={() => closeModal()}
-          className="w-full py-3 rounded-xl platypi-medium border-0 bg-warm-gray/20 text-black hover:bg-warm-gray/30 transition-colors"
+          className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
         >
           Close
         </Button>
@@ -1137,7 +1137,7 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
       <div className="mt-6">
         <Button 
           onClick={() => closeModal()}
-          className="w-full py-3 rounded-xl platypi-medium border-0 bg-warm-gray/20 text-black hover:bg-warm-gray/30 transition-colors"
+          className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
         >
           Close
         </Button>
