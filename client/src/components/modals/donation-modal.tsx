@@ -3,12 +3,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { DollarSign, Heart } from "lucide-react";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
+
+interface Campaign {
+  id: number;
+  title: string;
+  description: string;
+  goalAmount: number;
+  currentAmount: number;
+  endDate: string;
+}
 
 export default function DonationModal() {
   const { activeModal, closeModal, openModal } = useModalStore();
@@ -17,6 +26,18 @@ export default function DonationModal() {
   const [, setLocation] = useLocation();
   const [amount, setAmount] = useState("1");
   const { trackModalComplete } = useTrackModalComplete();
+
+  // Fetch active campaign data
+  const { data: campaign } = useQuery<Campaign>({
+    queryKey: ['/api/campaigns/active'],
+    queryFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/campaigns/active`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 60 * 60 * 1000 // 60 minutes
+  });
 
   const createPaymentMutation = useMutation({
     mutationFn: async (donationAmount: number) => {
@@ -74,7 +95,9 @@ export default function DonationModal() {
     }}>
       <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto gradient-soft-glow rounded-3xl p-6 platypi-regular border border-blush/20">
         <div className="flex items-center justify-center mb-3 relative">
-          <DialogTitle className="text-lg platypi-bold text-black">Support Causes</DialogTitle>
+          <DialogTitle className="text-lg platypi-bold text-black">
+            {campaign?.title || "Support Causes"}
+          </DialogTitle>
         </div>
         <p className="text-xs text-warm-gray/70 platypi-regular text-center mb-4">Support our community with your generous contribution</p>
         
