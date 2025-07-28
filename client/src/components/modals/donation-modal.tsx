@@ -99,7 +99,9 @@ export default function DonationModal() {
             {campaign?.title || "Support Causes"}
           </DialogTitle>
         </div>
-        <p className="text-xs text-warm-gray/70 platypi-regular text-center mb-4">Support our community with your generous contribution</p>
+        <p className="text-xs text-warm-gray/70 platypi-regular text-center mb-4">
+          {campaign?.description || "Support our community with your generous contribution"}
+        </p>
         
         {/* Apple Pay development notice */}
         {(() => {
