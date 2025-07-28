@@ -429,24 +429,24 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
       <Dialog open={activeModal === 'featured'} onOpenChange={() => closeModal()}>
         <DialogContent className="max-h-[95vh] overflow-y-auto" aria-describedby="featured-description">
           <DialogHeader className="text-center mb-4 pr-8">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Featured Content</DialogTitle>
+            <DialogTitle className="text-lg platypi-bold text-black">Featured Content</DialogTitle>
             {featuredContent && (
-              <DialogDescription className="text-sm text-gray-600 font-sans">{featuredContent.title}</DialogDescription>
+              <DialogDescription className="text-sm text-gray-600 platypi-regular">{featuredContent.title}</DialogDescription>
             )}
           </DialogHeader>
           <div id="featured-description" className="sr-only">Featured special topics and content</div>
           
           {featuredContent && (
-            <div className="space-y-3 text-sm text-gray-700 font-sans">
+            <div className="space-y-3 text-sm text-gray-700 platypi-regular">
               <div>
-                <p><strong>Today's Focus:</strong> {featuredContent.content}</p>
+                <p><span className="platypi-bold">Today's Focus:</span> {featuredContent.content}</p>
                 {featuredContent.halachicSource && (
-                  <p className="mt-2 text-xs text-gray-500">Source: {featuredContent.halachicSource}</p>
+                  <p className="mt-2 text-xs text-gray-500 platypi-regular">Source: {featuredContent.halachicSource}</p>
                 )}
                 {featuredContent.practicalTip && (
                   <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-xs font-medium text-gray-700">Practical Insight:</p>
-                    <p className="text-xs text-gray-600 mt-1">{featuredContent.practicalTip}</p>
+                    <p className="text-xs platypi-medium text-gray-700">Practical Insight:</p>
+                    <p className="text-xs text-gray-600 mt-1 platypi-regular">{featuredContent.practicalTip}</p>
                   </div>
                 )}
               </div>
@@ -456,11 +456,11 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           {/* Thank You Section */}
           {featuredContent?.provider && (
             <div className="mt-6 p-4 bg-blue-50 rounded-xl">
-              <p className="text-sm text-blue-900 font-medium mb-2">
+              <p className="text-sm text-blue-900 platypi-medium mb-2">
                 🙏 Thank you to {featuredContent.provider}
               </p>
               {featuredContent.speakerWebsite && (
-                <p className="text-sm text-blue-800">
+                <p className="text-sm text-blue-800 platypi-regular">
                   <a 
                     href={featuredContent.speakerWebsite} 
                     target="_blank" 
