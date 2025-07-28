@@ -54,7 +54,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
       id: 'halacha',
       icon: Book,
       title: 'Halacha',
-      subtitle: 'Jewish Law & Practice',
+      subtitle: 'Learn Shabbos',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
