@@ -180,13 +180,13 @@ export default function TimesModals() {
       <Dialog open={activeModal === 'date-calculator'} onOpenChange={() => closeModal()}>
         <DialogContent>
           <div className="flex items-center justify-center mb-3 relative">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Hebrew Date Calculator</DialogTitle>
+            <DialogTitle className="text-lg platypi-bold text-black">Hebrew Date Calculator</DialogTitle>
           </div>
           <p className="text-sm text-gray-600 mb-4 text-center">Convert English dates to Hebrew dates and add recurring events to your calendar</p>
           
           <div className="space-y-4">
             <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-1">Event Title</Label>
+              <Label className="block text-sm platypi-medium text-gray-700 mb-1">Event Title</Label>
               <Input 
                 type="text" 
                 placeholder="Anniversary, Yahrzeit, etc." 
@@ -197,7 +197,7 @@ export default function TimesModals() {
             </div>
             
             <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-1">English Date</Label>
+              <Label className="block text-sm platypi-medium text-gray-700 mb-1">English Date</Label>
               <Input 
                 type="date" 
                 value={englishDate}
@@ -239,7 +239,7 @@ export default function TimesModals() {
             
             {convertedHebrewDate && (
               <div>
-                <Label className="block text-sm font-medium text-gray-700 mb-1">Hebrew Date</Label>
+                <Label className="block text-sm platypi-medium text-gray-700 mb-1">Hebrew Date</Label>
                 <div className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700">
                   {convertedHebrewDate}
                 </div>
@@ -247,12 +247,12 @@ export default function TimesModals() {
             )}
             
             <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-1">Add to my calendar for the next:</Label>
+              <Label className="block text-sm platypi-medium text-gray-700 mb-1">Add to my calendar for the next:</Label>
               <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => setYearDuration(1)}
-                  className={`p-2 rounded-xl text-sm font-medium transition-all ${
+                  className={`p-2 rounded-xl text-sm platypi-medium transition-all ${
                     yearDuration === 1
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
@@ -263,7 +263,7 @@ export default function TimesModals() {
                 <button
                   type="button"
                   onClick={() => setYearDuration(10)}
-                  className={`p-2 rounded-xl text-sm font-medium transition-all ${
+                  className={`p-2 rounded-xl text-sm platypi-medium transition-all ${
                     yearDuration === 10
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
@@ -274,7 +274,7 @@ export default function TimesModals() {
                 <button
                   type="button"
                   onClick={() => setYearDuration(120)}
-                  className={`p-2 rounded-xl text-sm font-medium transition-all ${
+                  className={`p-2 rounded-xl text-sm platypi-medium transition-all ${
                     yearDuration === 120
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
@@ -289,7 +289,7 @@ export default function TimesModals() {
               <Button 
                 onClick={handleDownloadCalendar}
                 disabled={downloadCalendarMutation.isPending || !eventTitle || !englishDate}
-                className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
               >
                 {downloadCalendarMutation.isPending ? "Generating..." : "Download Calendar"}
               </Button>
@@ -301,7 +301,7 @@ export default function TimesModals() {
                   href="https://www.hebcal.com/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 underline font-medium"
+                  className="text-blue-600 hover:text-blue-800 underline platypi-medium"
                 >
                   Hebcal
                 </a>

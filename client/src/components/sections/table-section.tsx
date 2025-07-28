@@ -85,14 +85,14 @@ export default function TableSection() {
           <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 mb-3">
             <div className="flex items-center space-x-2 mb-2">
               <MapPin className="text-yellow-600" size={16} />
-              <h4 className="font-serif text-sm font-bold text-yellow-800">Location Required</h4>
+              <h4 className="platypi-bold text-sm platypi-bold text-yellow-800">Location Required</h4>
             </div>
-            <p className="font-sans text-xs text-yellow-700 mb-3">
+            <p className="platypi-regular text-xs text-yellow-700 mb-3">
               Please enable location access for accurate Jewish prayer times, or click below to set your location manually.
             </p>
             <button 
               onClick={() => openModal('location')}
-              className="bg-yellow-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-yellow-700 transition-colors"
+              className="bg-yellow-600 text-white px-3 py-1.5 rounded-lg text-xs platypi-medium hover:bg-yellow-700 transition-colors"
             >
               Set Location Manually
             </button>
@@ -104,14 +104,14 @@ export default function TableSection() {
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-3">
               <div className="flex items-center justify-center w-10 h-10 bg-gradient-feminine rounded-full">
-                <span className="text-white font-serif font-bold text-lg">
+                <span className="text-white platypi-bold text-lg">
                   {daysUntilShabbat}
                 </span>
               </div>
-              <h3 className="font-serif text-lg text-black font-bold">This Shabbos</h3>
+              <h3 className="platypi-bold text-lg text-black platypi-bold">This Shabbos</h3>
             </div>
             <div className="text-right">
-              <p className="font-serif text-sm text-black font-medium">
+              <p className="platypi-bold text-sm text-black platypi-medium">
                 {showShabbosError ? "Set location" : 
                  shabbosData?.parsha || 
                  (isShabbosDataLoading ? "Loading..." : "Parsha unavailable")}
@@ -124,10 +124,10 @@ export default function TableSection() {
           
           <div className="grid grid-cols-2 gap-2">
             <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
-              <p className="font-sans text-xs text-black/70 font-bold">Candle Lighting</p>
+              <p className="platypi-regular text-xs text-black/70 platypi-bold">Candle Lighting</p>
               <div className="flex items-center justify-center space-x-1">
                 <Flame className="text-blush" size={14} />
-                <p className="font-serif text-base text-black font-medium">
+                <p className="platypi-bold text-base text-black platypi-medium">
                   {showShabbosError ? "--:--" : 
                    shabbosData?.candleLighting || 
                    (isShabbosDataLoading ? "Loading..." : "--:--")}
@@ -135,10 +135,10 @@ export default function TableSection() {
               </div>
             </div>
             <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
-              <p className="font-sans text-xs text-black/70 font-bold">Havdalah</p>
+              <p className="platypi-regular text-xs text-black/70 platypi-bold">Havdalah</p>
               <div className="flex items-center justify-center space-x-1">
                 <Moon className="text-lavender" size={14} />
-                <p className="font-serif text-base text-black font-medium">
+                <p className="platypi-bold text-base text-black platypi-medium">
                   {showShabbosError ? "--:--" : 
                    shabbosData?.havdalah || 
                    (isShabbosDataLoading ? "Loading..." : "--:--")}
@@ -167,7 +167,7 @@ export default function TableSection() {
             {!recipeContent && (
               <div className="absolute inset-0 bg-black/20 rounded-3xl flex items-center justify-center z-10">
                 <div className="bg-white/90 px-2 py-1 rounded-lg">
-                  <p className="font-sans text-xs text-black font-medium">Recipe coming soon</p>
+                  <p className="platypi-regular text-xs text-black platypi-medium">Recipe coming soon</p>
                 </div>
               </div>
             )}
@@ -179,10 +179,10 @@ export default function TableSection() {
             }`}>
               <Utensils className={`${!recipeContent ? 'text-gray-500' : 'text-white'}`} size={18} strokeWidth={1.5} />
             </div>
-            <h3 className={`font-serif text-xs mb-1 font-bold ${!recipeContent ? 'text-gray-500' : 'text-black'}`}>
+            <h3 className={`platypi-bold text-xs mb-1 platypi-bold ${!recipeContent ? 'text-gray-500' : 'text-black'}`}>
               Daily Recipe
             </h3>
-            <p className={`font-sans text-xs leading-relaxed ${!recipeContent ? 'text-gray-400' : 'text-black/60'}`}>
+            <p className={`platypi-regular text-xs leading-relaxed ${!recipeContent ? 'text-gray-400' : 'text-black/60'}`}>
               {!recipeContent ? 'Coming Soon' : isModalComplete('recipe') ? 'Completed' : recipeContent.title}
             </p>
           </button>
@@ -195,8 +195,8 @@ export default function TableSection() {
             <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-feminine">
               <Calendar className="text-white" size={18} strokeWidth={1.5} />
             </div>
-            <h3 className="font-serif text-xs text-black mb-1 font-bold">Jewish Date</h3>
-            <p className="font-sans text-xs text-black/60 leading-relaxed">
+            <h3 className="platypi-bold text-xs text-black mb-1 platypi-bold">Jewish Date</h3>
+            <p className="platypi-regular text-xs text-black/60 leading-relaxed">
               Convert & Download
             </p>
           </button>
@@ -218,7 +218,7 @@ export default function TableSection() {
             {!inspirationContent && (
               <div className="absolute inset-0 bg-black/20 rounded-3xl flex items-center justify-center z-10">
                 <div className="bg-white/90 px-2 py-1 rounded-lg">
-                  <p className="font-sans text-xs text-black font-medium">Content loaded on Thursdays</p>
+                  <p className="platypi-regular text-xs text-black platypi-medium">Content loaded on Thursdays</p>
                 </div>
               </div>
             )}
@@ -230,10 +230,10 @@ export default function TableSection() {
             }`}>
               <Lightbulb className={`${!inspirationContent ? 'text-gray-500' : 'text-white'}`} size={18} strokeWidth={1.5} />
             </div>
-            <h3 className={`font-serif text-xs mb-1 font-bold ${!inspirationContent ? 'text-gray-500' : 'text-black'}`}>
+            <h3 className={`platypi-bold text-xs mb-1 platypi-bold ${!inspirationContent ? 'text-gray-500' : 'text-black'}`}>
               Creative Jewish Living
             </h3>
-            <p className={`font-sans text-xs leading-relaxed ${!inspirationContent ? 'text-gray-400' : 'text-black/60'}`}>
+            <p className={`platypi-regular text-xs leading-relaxed ${!inspirationContent ? 'text-gray-400' : 'text-black/60'}`}>
               {!inspirationContent ? 'Coming Soon' : isModalComplete('inspiration') ? 'Completed' : inspirationContent.title}
             </p>
           </button>
@@ -246,8 +246,8 @@ export default function TableSection() {
             <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-feminine">
               <MessageSquare className="text-white" size={18} strokeWidth={1.5} />
             </div>
-            <h3 className="font-serif text-xs text-black mb-1 font-bold">Community Feedback</h3>
-            <p className="font-sans text-xs text-black/60 leading-relaxed">
+            <h3 className="platypi-bold text-xs text-black mb-1 platypi-bold">Community Feedback</h3>
+            <p className="platypi-regular text-xs text-black/60 leading-relaxed">
               Help Us, Help You
             </p>
           </button>

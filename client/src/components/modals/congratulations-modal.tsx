@@ -17,9 +17,9 @@ export default function CongratulationsModal() {
 
   return (
     <Dialog open={activeModal === 'congratulations'} onOpenChange={() => closeModal()}>
-      <DialogContent className="w-full max-w-sm rounded-3xl p-8 font-sans text-center">
+      <DialogContent className="w-full max-w-sm rounded-3xl p-8 platypi-regular text-center">
         <div className="flex items-center justify-center mb-3 relative">
-          <DialogTitle className="text-2xl font-serif font-bold text-black">
+          <DialogTitle className="text-2xl platypi-bold text-black">
             Mazal Tov!
           </DialogTitle>
         </div>
@@ -43,7 +43,7 @@ export default function CongratulationsModal() {
             // Navigate to home and scroll to progress
             window.location.hash = '#/?section=home&scrollToProgress=true';
           }} 
-          className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
+          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0"
         >
           Continue Your Journey
         </Button>

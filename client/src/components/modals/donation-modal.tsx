@@ -72,11 +72,11 @@ export default function DonationModal() {
         closeModal();
       }
     }}>
-      <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto gradient-soft-glow rounded-3xl p-6 font-sans border border-blush/20">
+      <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto gradient-soft-glow rounded-3xl p-6 platypi-regular border border-blush/20">
         <div className="flex items-center justify-center mb-3 relative">
-          <DialogTitle className="text-lg font-serif font-bold text-black">Support Causes</DialogTitle>
+          <DialogTitle className="text-lg platypi-bold text-black">Support Causes</DialogTitle>
         </div>
-        <p className="text-xs text-warm-gray/70 font-sans text-center mb-4">Support our community with your generous contribution</p>
+        <p className="text-xs text-warm-gray/70 platypi-regular text-center mb-4">Support our community with your generous contribution</p>
         
         {/* Apple Pay development notice */}
         {(() => {
@@ -97,13 +97,13 @@ export default function DonationModal() {
         <div className="space-y-3 text-sm text-gray-700">
           {/* Quick Amount Buttons */}
           <div>
-            <p className="text-sm font-medium text-warm-gray mb-2">Quick Amount</p>
+            <p className="text-sm platypi-medium text-warm-gray mb-2">Quick Amount</p>
             <div className="grid grid-cols-5 gap-1">
               {quickAmounts.map((quickAmount) => (
                 <button
                   key={quickAmount}
                   onClick={() => setAmount(quickAmount.toString())}
-                  className={`p-2 rounded-xl text-xs font-medium transition-all ${
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
                     amount === quickAmount.toString()
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
@@ -117,9 +117,9 @@ export default function DonationModal() {
 
           {/* Custom Amount Input */}
           <div>
-            <label className="text-sm font-medium text-warm-gray mb-2 block">Custom Amount</label>
+            <label className="text-sm platypi-medium text-warm-gray mb-2 block">Custom Amount</label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 font-semibold">$</span>
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 platypi-semibold">$</span>
               <Input
                 type="number"
                 value={amount}
@@ -137,7 +137,7 @@ export default function DonationModal() {
             <Button
               onClick={handleDonate}
               disabled={createPaymentMutation.isPending || !amount || parseFloat(amount) <= 0}
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
             >
               {createPaymentMutation.isPending ? 'Processing...' : `Donate $${amount}`}
             </Button>

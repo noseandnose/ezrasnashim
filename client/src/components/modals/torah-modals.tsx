@@ -495,7 +495,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
       <Dialog open={activeModal === 'pirkei-avot'} onOpenChange={() => closeModal()}>
         <DialogContent className="max-h-[95vh] overflow-y-auto" aria-describedby="pirkei-avot-description">
           <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-semibold mb-2">Pirkei Avot</DialogTitle>
+            <DialogTitle className="text-lg platypi-semibold mb-2">Pirkei Avot</DialogTitle>
             <DialogDescription className="text-sm text-gray-600">Ethics of the Fathers</DialogDescription>
           </DialogHeader>
           <div id="pirkei-avot-description" className="sr-only">Ethics of the Fathers - timeless wisdom from Jewish sages</div>
@@ -511,7 +511,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           <div className="heart-explosion-container">
             <Button 
               onClick={handleTorahComplete} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
             >
               Completed
             </Button>

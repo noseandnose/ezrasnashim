@@ -40,7 +40,7 @@ export default function SponsorDetailsModal() {
     }}>
       <DialogContent className="max-w-md mx-auto rounded-3xl p-0 overflow-hidden bg-white border-2 border-blush/20 max-h-[95vh] overflow-y-auto">
         <DialogHeader className="p-4 pb-2 text-center">
-          <DialogTitle className="text-lg font-serif font-bold text-black">
+          <DialogTitle className="text-lg platypi-bold text-black">
             Today's Sponsor
           </DialogTitle>
         </DialogHeader>
@@ -56,13 +56,13 @@ export default function SponsorDetailsModal() {
               </div>
               
               <div className="space-y-3">
-                <h3 className="font-serif text-lg font-bold text-black">
+                <h3 className="platypi-bold text-lg platypi-bold text-black">
                   {sponsor.name}
                 </h3>
                 
                 {sponsor.inHonorMemoryOf && (
                   <div className="bg-blush/10 rounded-xl p-3">
-                    <p className="font-sans text-sm text-black leading-relaxed">
+                    <p className="platypi-regular text-sm text-black leading-relaxed">
                       {sponsor.inHonorMemoryOf}
                     </p>
                   </div>
@@ -70,14 +70,14 @@ export default function SponsorDetailsModal() {
                 
                 {sponsor.message && (
                   <div className="bg-lavender/10 rounded-xl p-3">
-                    <p className="font-sans text-sm text-black leading-relaxed">
+                    <p className="platypi-regular text-sm text-black leading-relaxed">
                       {sponsor.message}
                     </p>
                   </div>
                 )}
                 
                 <div className="text-center pt-2">
-                  <p className="font-serif text-xs text-black/60">
+                  <p className="platypi-bold text-xs text-black/60">
                     Sponsored on {new Date(sponsor.sponsorshipDate).toLocaleDateString('en-US', {
                       weekday: 'long',
                       year: 'numeric',

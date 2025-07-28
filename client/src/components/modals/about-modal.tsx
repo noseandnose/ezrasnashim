@@ -8,11 +8,11 @@ export default function AboutModal() {
 
   return (
     <Dialog open={activeModal === 'about'} onOpenChange={() => closeModal()}>
-      <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto font-sans">
+      <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
         
         {/* Standardized Header - centered title only */}
         <div className="flex items-center justify-center mb-1 relative pr-8">
-          <DialogTitle className="text-lg font-serif font-bold text-black">About Ezras Nashim</DialogTitle>
+          <DialogTitle className="text-lg platypi-bold text-black">About Ezras Nashim</DialogTitle>
         </div>
 
         {/* Content Area - expanded white area */}
@@ -23,7 +23,7 @@ export default function AboutModal() {
               href="https://justonechesed.org/" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 underline font-medium"
+              className="text-blue-600 hover:text-blue-800 underline platypi-medium"
             >
               Just One Chesed
             </a>
@@ -44,7 +44,7 @@ export default function AboutModal() {
               href="https://www.hebcal.com/" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 underline font-medium"
+              className="text-blue-600 hover:text-blue-800 underline platypi-medium"
             >
               Hebcal
             </a>
@@ -64,7 +64,7 @@ export default function AboutModal() {
         {/* Complete Button */}
         <Button
           onClick={closeModal}
-          className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0"
+          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0"
         >
           Close
         </Button>

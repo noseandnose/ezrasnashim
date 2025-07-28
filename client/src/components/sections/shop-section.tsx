@@ -70,8 +70,8 @@ export default function ShopSection() {
     <div className="p-2 space-y-1">
       {/* Header */}
       <div className="text-center">
-        <h2 className="font-serif text-lg text-warm-gray mb-1 tracking-wide">Jewish Shop</h2>
-        <p className="font-sans text-warm-gray/70 text-xs leading-relaxed">Beautiful items for your Jewish home</p>
+        <h2 className="platypi-bold text-lg text-warm-gray mb-1 tracking-wide">Jewish Shop</h2>
+        <p className="platypi-regular text-warm-gray/70 text-xs leading-relaxed">Beautiful items for your Jewish home</p>
       </div>
 
       {/* Featured Store Banner */}
@@ -79,8 +79,8 @@ export default function ShopSection() {
         <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-2 w-fit">
           <Store className="text-white" size={18} strokeWidth={1.5} />
         </div>
-        <h3 className="font-serif text-xs text-warm-gray mb-2 text-center tracking-wide">Featured Partner</h3>
-        <p className="font-sans text-xs text-warm-gray/80 text-center leading-relaxed">
+        <h3 className="platypi-bold text-xs text-warm-gray mb-2 text-center tracking-wide">Featured Partner</h3>
+        <p className="platypi-regular text-xs text-warm-gray/80 text-center leading-relaxed">
           Explore curated collections from trusted Jewish retailers
         </p>
       </div>
@@ -96,8 +96,8 @@ export default function ShopSection() {
             <div className={`${iconBg} p-2 rounded-full mx-auto mb-2 w-fit`}>
               <Icon className={`${iconColor}`} size={18} strokeWidth={1.5} />
             </div>
-            <h3 className="font-serif text-xs text-warm-gray mb-1 tracking-wide">{title}</h3>
-            <p className="font-sans text-xs text-warm-gray/60 leading-relaxed">{subtitle}</p>
+            <h3 className="platypi-bold text-xs text-warm-gray mb-1 tracking-wide">{title}</h3>
+            <p className="platypi-regular text-xs text-warm-gray/60 leading-relaxed">{subtitle}</p>
           </button>
         ))}
       </div>
@@ -105,7 +105,7 @@ export default function ShopSection() {
       {/* Individual Shop Items */}
       {shopItems.length > 0 && (
         <div className="space-y-2">
-          <h3 className="font-serif text-sm text-warm-gray mb-2 text-center tracking-wide">Featured Items</h3>
+          <h3 className="platypi-bold text-sm text-warm-gray mb-2 text-center tracking-wide">Featured Items</h3>
           {shopItems.map((item) => (
             <button
               key={item.id}
@@ -117,11 +117,11 @@ export default function ShopSection() {
                   <Tag className="text-white" size={18} strokeWidth={1.5} />
                 </div>
                 <div className="flex-grow">
-                  <h4 className="font-serif text-xs text-warm-gray mb-1 tracking-wide">{item.title}</h4>
-                  <p className="font-sans text-xs text-warm-gray/60 leading-relaxed">{item.storeName}</p>
+                  <h4 className="platypi-bold text-xs text-warm-gray mb-1 tracking-wide">{item.title}</h4>
+                  <p className="platypi-regular text-xs text-warm-gray/60 leading-relaxed">{item.storeName}</p>
                 </div>
                 <div className="text-right">
-                  <div className="text-xs text-warm-gray/40 font-sans">Shop</div>
+                  <div className="text-xs text-warm-gray/40 platypi-regular">Shop</div>
                   <Sparkles className="text-warm-gray/40 ml-auto" size={16} strokeWidth={1.5} />
                 </div>
               </div>

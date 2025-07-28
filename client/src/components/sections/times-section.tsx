@@ -28,7 +28,7 @@ export default function TimesSection() {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center">
               <Sun className="text-peach mr-2" size={20} />
-              <h3 className="font-semibold text-sm">Today's Times</h3>
+              <h3 className="platypi-semibold text-sm">Today's Times</h3>
             </div>
             <button 
               className="text-xs text-blush cursor-pointer hover:text-blush/80 hover:bg-blush/10 px-3 py-2 rounded-lg transition-colors border border-blush/30 platypi-medium"
@@ -86,7 +86,7 @@ export default function TimesSection() {
           <div className="flex items-center space-x-3">
             <Calendar className="text-xl text-blush" size={24} />
             <div className="flex-1">
-              <h3 className="font-semibold text-sm">Hebrew Date Calculator</h3>
+              <h3 className="platypi-semibold text-sm">Hebrew Date Calculator</h3>
               <p className="text-xs text-gray-600">Add events to calendar</p>
             </div>
             <Plus className="text-gray-400" size={16} />
