@@ -25,6 +25,8 @@ export default function DonationModal() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [amount, setAmount] = useState("1");
+  const [isCustom, setIsCustom] = useState(false);
+  const [customAmount, setCustomAmount] = useState("");
   const { trackModalComplete } = useTrackModalComplete();
 
   // Fetch active campaign data
@@ -54,7 +56,7 @@ export default function DonationModal() {
       if (data.clientSecret) {
         // Navigate to donation page with amount and type
         const params = new URLSearchParams({
-          amount: amount,
+          amount: (isCustom ? customAmount : amount),
           type: "General Donation",
           sponsor: "",
           dedication: ""
@@ -72,7 +74,7 @@ export default function DonationModal() {
   });
 
   const handleDonate = () => {
-    const donationAmount = parseFloat(amount);
+    const donationAmount = isCustom ? parseFloat(customAmount) : parseFloat(amount);
     if (donationAmount <= 0) {
       toast({
         title: "Invalid Amount",
@@ -84,7 +86,23 @@ export default function DonationModal() {
     createPaymentMutation.mutate(donationAmount);
   };
 
-  const quickAmounts = [1, 18, 180, 1800];
+  const handleAmountSelect = (selectedAmount: string) => {
+    if (selectedAmount === "custom") {
+      setIsCustom(true);
+      setAmount("custom");
+    } else {
+      setIsCustom(false);
+      setAmount(selectedAmount);
+    }
+  };
+
+  const quickAmounts = [
+    { value: "1", label: "$1" },
+    { value: "18", label: "$18" },
+    { value: "180", label: "$180" },
+    { value: "1800", label: "$1800" },
+    { value: "custom", label: "Custom" }
+  ];
 
   return (
     <Dialog open={activeModal === 'donate'} onOpenChange={(open) => {
@@ -120,51 +138,53 @@ export default function DonationModal() {
         })()}
 
         <div className="space-y-3 text-sm text-gray-700">
-          {/* Quick Amount Buttons */}
+          {/* Amount Selection Buttons */}
           <div>
-            <p className="text-sm platypi-medium text-warm-gray mb-2">Quick Amount</p>
+            <p className="text-sm platypi-medium text-warm-gray mb-2">Select Amount</p>
             <div className="grid grid-cols-5 gap-1">
               {quickAmounts.map((quickAmount) => (
                 <button
-                  key={quickAmount}
-                  onClick={() => setAmount(quickAmount.toString())}
+                  key={quickAmount.value}
+                  onClick={() => handleAmountSelect(quickAmount.value)}
                   className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
-                    amount === quickAmount.toString()
+                    amount === quickAmount.value
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
                   }`}
                 >
-                  ${quickAmount}
+                  {quickAmount.label}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Custom Amount Input */}
-          <div>
-            <label className="text-sm platypi-medium text-warm-gray mb-2 block">Custom Amount</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 platypi-semibold">$</span>
-              <Input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="Enter amount"
-                className="pl-10 rounded-xl border-blush/30 focus:border-blush bg-white"
-                min="1"
-                step="0.01"
-              />
+          {/* Custom Amount Input - Only show when Custom is selected */}
+          {isCustom && (
+            <div>
+              <label className="text-sm platypi-medium text-warm-gray mb-2 block">Enter Custom Amount</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 platypi-semibold">$</span>
+                <Input
+                  type="number"
+                  value={customAmount}
+                  onChange={(e) => setCustomAmount(e.target.value)}
+                  placeholder="Enter amount"
+                  className="pl-10 rounded-xl border-blush/30 focus:border-blush bg-white"
+                  min="1"
+                  step="0.01"
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Donation Buttons */}
           <div className="space-y-2">
             <Button
               onClick={handleDonate}
-              disabled={createPaymentMutation.isPending || !amount || parseFloat(amount) <= 0}
+              disabled={createPaymentMutation.isPending || (isCustom ? !customAmount || parseFloat(customAmount) <= 0 : !amount || parseFloat(amount) <= 0)}
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
             >
-              {createPaymentMutation.isPending ? 'Processing...' : `Donate $${amount}`}
+              {createPaymentMutation.isPending ? 'Processing...' : `Donate $${isCustom ? customAmount : amount}`}
             </Button>
             
             <Button
