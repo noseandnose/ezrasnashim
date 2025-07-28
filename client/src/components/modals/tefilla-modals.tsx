@@ -1392,12 +1392,10 @@ function SpecialTehillimModal() {
       <Button 
         onClick={() => {
           closeModal();
-          // Navigate to home and scroll to progress
-          window.location.hash = '#/?section=home&scrollToProgress=true';
         }} 
         className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
       >
-        Complete
+        Close
       </Button>
     </>
   );
