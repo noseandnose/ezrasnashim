@@ -110,7 +110,7 @@ export default function TableSection() {
               </div>
               <h3 className="platypi-bold text-lg text-black">
                 Days Until Shabbas {showShabbosError ? "" : 
-                 shabbosData?.parsha || 
+                 shabbosData?.parsha?.replace("Parashat ", "") || 
                  (isShabbosDataLoading ? "" : "")}
               </h3>
             </div>
