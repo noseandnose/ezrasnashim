@@ -29,15 +29,15 @@ export default function CongratulationsModal() {
 
         {/* Content on top of flower */}
         <div className="relative z-10">
-          <div className="flex items-center justify-center mb-3">
-            <DialogTitle className="text-2xl platypi-bold text-black">
+          <DialogHeader className="mb-3">
+            <DialogTitle className="text-2xl platypi-bold text-black text-center">
               Mazal Tov!
             </DialogTitle>
-          </div>
-          <DialogDescription className="text-warm-gray/80 mb-16 leading-relaxed">
-              You have completed all three daily Mitzvahs: Torah learning, Tefilla, and Tzedaka. 
-              May your spiritual growth continue and bring you and your family abundant blessings.
-            </DialogDescription>
+            <DialogDescription className="text-warm-gray/80 mb-16 leading-relaxed">
+                You have completed all three daily Mitzvahs: Torah learning, Tefilla, and Tzedaka. 
+                May your spiritual growth continue and bring you and your family abundant blessings.
+              </DialogDescription>
+          </DialogHeader>
 
           <Button 
             onClick={() => {
