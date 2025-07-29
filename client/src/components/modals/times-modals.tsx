@@ -7,17 +7,24 @@ import { useModalStore } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function TimesModals() {
   const { activeModal, closeModal } = useModalStore();
   const [eventTitle, setEventTitle] = useState("");
-  const [englishDate, setEnglishDate] = useState("");
+  const [englishDate, setEnglishDate] = useState(new Date().toISOString().split('T')[0]);
   const [convertedHebrewDate, setConvertedHebrewDate] = useState("");
   const [afterNightfall, setAfterNightfall] = useState(false);
   const [yearDuration, setYearDuration] = useState(10);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Convert today's date on component mount
+  useEffect(() => {
+    if (englishDate && !convertedHebrewDate) {
+      convertToHebrewDate(englishDate, false);
+    }
+  }, [englishDate]);
 
   const handleMobileDownload = async () => {
     if (!eventTitle || !englishDate) {
@@ -204,8 +211,8 @@ export default function TimesModals() {
                 onChange={(e) => handleDateChange(e.target.value)}
                 className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white"
                 style={{
-                  WebkitAppearance: 'none',
-                  MozAppearance: 'textfield',
+                  WebkitAppearance: 'menulist-button',
+                  MozAppearance: 'menulist-button',
                 }}
               />
             </div>
