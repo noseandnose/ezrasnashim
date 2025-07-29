@@ -205,16 +205,65 @@ export default function TimesModals() {
             
             <div>
               <Label className="block text-sm platypi-medium text-gray-700 mb-1">English Date</Label>
-              <input 
-                type="date" 
-                value={englishDate}
-                onChange={(e) => handleDateChange(e.target.value)}
-                className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white"
-                style={{
-                  WebkitAppearance: 'menulist-button',
-                  MozAppearance: 'menulist-button',
-                }}
-              />
+              {typeof navigator !== 'undefined' && /iPhone|iPad|iPod/.test(navigator.userAgent) ? (
+                // iOS Custom Date Picker using select elements (wheel picker style)
+                <div className="flex space-x-2">
+                  <select 
+                    value={englishDate ? new Date(englishDate).getMonth() + 1 : new Date().getMonth() + 1}
+                    onChange={(e) => {
+                      const currentDate = englishDate ? new Date(englishDate) : new Date();
+                      const newDate = new Date(currentDate.getFullYear(), parseInt(e.target.value) - 1, currentDate.getDate());
+                      handleDateChange(newDate.toISOString().split('T')[0]);
+                    }}
+                    className="flex-1 p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700"
+                    style={{ minHeight: '48px' }}
+                  >
+                    {Array.from({length: 12}, (_, i) => (
+                      <option key={i+1} value={i+1}>
+                        {new Date(2000, i, 1).toLocaleDateString('en-US', { month: 'long' })}
+                      </option>
+                    ))}
+                  </select>
+                  <select 
+                    value={englishDate ? new Date(englishDate).getDate() : new Date().getDate()}
+                    onChange={(e) => {
+                      const currentDate = englishDate ? new Date(englishDate) : new Date();
+                      const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), parseInt(e.target.value));
+                      handleDateChange(newDate.toISOString().split('T')[0]);
+                    }}
+                    className="flex-1 p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700"
+                    style={{ minHeight: '48px' }}
+                  >
+                    {Array.from({length: 31}, (_, i) => (
+                      <option key={i+1} value={i+1}>{i+1}</option>
+                    ))}
+                  </select>
+                  <select 
+                    value={englishDate ? new Date(englishDate).getFullYear() : new Date().getFullYear()}
+                    onChange={(e) => {
+                      const currentDate = englishDate ? new Date(englishDate) : new Date();
+                      const newDate = new Date(parseInt(e.target.value), currentDate.getMonth(), currentDate.getDate());
+                      handleDateChange(newDate.toISOString().split('T')[0]);
+                    }}
+                    className="flex-1 p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700"
+                    style={{ minHeight: '48px' }}
+                  >
+                    {Array.from({length: 150}, (_, i) => {
+                      const year = new Date().getFullYear() - 100 + i;
+                      return <option key={year} value={year}>{year}</option>;
+                    })}
+                  </select>
+                </div>
+              ) : (
+                // Standard date input for non-iOS devices
+                <input 
+                  type="date" 
+                  value={englishDate}
+                  onChange={(e) => handleDateChange(e.target.value)}
+                  className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700"
+                  style={{ minHeight: '48px' }}
+                />
+              )}
             </div>
 
             <div className="flex items-center space-x-2">

@@ -343,6 +343,7 @@ Changelog:
 - July 29, 2025. Updated Life page Shabbat section layout: Changed "This Shabbos" text to "Days Until Shabbas {Parsha Name}" next to countdown logo, removed separate parsha name display on right side for cleaner unified text presentation, removed "Parashat" prefix so it displays as "Days Until Shabbas Devarim" instead of "Days Until Shabbas Parashat Devarim"
 - July 29, 2025. Enhanced Hebrew Date Calculator modal: Prevented auto-keyboard popup on mobile by adding onOpenAutoFocus prevention to dialog, implemented native device date picker using standard HTML input element instead of custom calendar widget, improved mobile user experience by eliminating unwanted keyboard behavior and providing native date selection interface
 - July 29, 2025. Fixed Hebrew Date Calculator mobile UX issues: Initialized date input with today's date to prevent narrow input bar appearance, added automatic Hebrew date conversion on component mount, applied WebKit styling to encourage native iOS wheel picker instead of calendar popup interface
+- July 29, 2025. Implemented iOS-native wheel picker date selection: Created custom iOS date picker using three select elements (Month, Day, Year) that provide native iOS wheel picker behavior, maintained standard HTML date input for non-iOS devices, ensured consistent field sizing with Hebrew date display field (48px min-height), resolved iOS Safari calendar popup issue by providing authentic wheel picker interface
 ```
 
 ## User Preferences
