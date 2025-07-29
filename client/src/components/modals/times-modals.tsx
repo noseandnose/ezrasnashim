@@ -355,17 +355,19 @@ export default function TimesModals() {
               </Button>
               
               {/* Hebcal Attribution */}
-              <p className="text-xs text-gray-600 text-center">
-                Zmanim and Date Converter are provided by{" "}
-                <a 
-                  href="https://www.hebcal.com/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 underline platypi-medium"
-                >
-                  Hebcal
-                </a>
-              </p>
+              <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+                <span className="text-sm platypi-medium text-black">
+                  Zmanim and Date Converter are provided by{" "}
+                  <a 
+                    href="https://www.hebcal.com/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 underline"
+                  >
+                    Hebcal
+                  </a>
+                </span>
+              </div>
             </div>
           </div>
         </DialogContent>
