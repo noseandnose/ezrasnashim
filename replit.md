@@ -345,6 +345,7 @@ Changelog:
 - July 29, 2025. Fixed Hebrew Date Calculator mobile UX issues: Initialized date input with today's date to prevent narrow input bar appearance, added automatic Hebrew date conversion on component mount, applied WebKit styling to encourage native iOS wheel picker instead of calendar popup interface
 - July 29, 2025. Implemented iOS-native wheel picker date selection: Created custom iOS date picker using three select elements (Month, Day, Year) that provide native iOS wheel picker behavior, maintained standard HTML date input for non-iOS devices, ensured consistent field sizing with Hebrew date display field (48px min-height), resolved iOS Safari calendar popup issue by providing authentic wheel picker interface
 - July 29, 2025. Added Hebcal attribution to Hebrew Date Calculator: Added blue box attribution message "Zmanim and Date Converter are provided by Hebcal" at bottom of Hebrew Date Calculator modal, matching the styling of Koren attribution in tefilla modals with bg-blue-50 background, rounded borders, and clickable Hebcal link
+- July 29, 2025. Updated About Ezras Nashim modal content: Replaced text with new inspirational message about uplifting Jewish women through Torah, tefillah, and tzedaka, emphasizing the vision to reach one million mitzvos monthly through quiet power and kindness, made Hebcal hyperlinked to https://www.hebcal.com/, made Just One Chesed logo clickable to https://justonechesed.org/ with hover effects
 ```
 
 ## User Preferences
