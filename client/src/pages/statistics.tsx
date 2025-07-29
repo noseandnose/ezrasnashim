@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { BarChart3, Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins } from "lucide-react";
+import { BarChart3, Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins, DollarSign, Trophy } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
@@ -140,6 +140,55 @@ export default function Statistics() {
     donate: HandCoins,
   };
 
+  // Financial Stats Component
+  function FinancialStatsSection() {
+    const { data: financialStats, isLoading: financialLoading } = useQuery<{
+      totalDaysSponsored: number;
+      totalCampaigns: number;
+      totalRaised: number;
+    }>({
+      queryKey: ["/api/analytics/community-impact"],
+      refetchInterval: 60000, // Refresh every minute
+    });
+
+    return (
+      <div>
+        <h2 className="text-base platypi-bold text-black mb-3">Financial Impact</h2>
+        <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center">
+              <div className="flex items-center justify-center mb-2">
+                <Trophy className="h-5 w-5 text-blush" />
+              </div>
+              <div className="text-lg platypi-bold text-black">
+                {financialLoading ? "..." : financialStats?.totalCampaigns?.toLocaleString() || 0}
+              </div>
+              <div className="text-xs platypi-medium text-warm-gray">Completed Campaigns</div>
+            </div>
+            <div className="text-center">
+              <div className="flex items-center justify-center mb-2">
+                <Calendar className="h-5 w-5 text-sage" />
+              </div>
+              <div className="text-lg platypi-bold text-black">
+                {financialLoading ? "..." : financialStats?.totalDaysSponsored?.toLocaleString() || 0}
+              </div>
+              <div className="text-xs platypi-medium text-warm-gray">Days Sponsored</div>
+            </div>
+            <div className="text-center">
+              <div className="flex items-center justify-center mb-2">
+                <DollarSign className="h-5 w-5 text-peach" />
+              </div>
+              <div className="text-lg platypi-bold text-black">
+                ${financialLoading ? "..." : financialStats?.totalRaised?.toLocaleString() || 0}
+              </div>
+              <div className="text-xs platypi-medium text-warm-gray">Money Raised</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mobile-app min-h-screen max-w-md mx-auto bg-white shadow-2xl relative flex flex-col">
       {/* Header */}
@@ -232,6 +281,8 @@ export default function Statistics() {
 
       <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-24">
         <div className="space-y-6">
+          {/* Financial Stats */}
+          <FinancialStatsSection />
 
           {/* Feature Usage */}
           <div>
