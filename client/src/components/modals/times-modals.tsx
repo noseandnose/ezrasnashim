@@ -178,7 +178,7 @@ export default function TimesModals() {
     <>
       {/* Hebrew Date Calculator Modal */}
       <Dialog open={activeModal === 'date-calculator'} onOpenChange={() => closeModal()}>
-        <DialogContent>
+        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg platypi-bold text-black">Hebrew Date Calculator</DialogTitle>
           </div>
@@ -198,11 +198,15 @@ export default function TimesModals() {
             
             <div>
               <Label className="block text-sm platypi-medium text-gray-700 mb-1">English Date</Label>
-              <Input 
+              <input 
                 type="date" 
                 value={englishDate}
                 onChange={(e) => handleDateChange(e.target.value)}
                 className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white"
+                style={{
+                  WebkitAppearance: 'none',
+                  MozAppearance: 'textfield',
+                }}
               />
             </div>
 
