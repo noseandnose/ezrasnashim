@@ -77,7 +77,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
   return (
     <div className="overflow-y-auto h-full pb-20">
       {/* Main Torah Section - Connected to top bar */}
-      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg -mt-1">
+      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">
         {/* Daily Inspiration - Pirkei Avot */}
         {pirkeiAvot && (
           <div className="bg-white/70 rounded-2xl p-3 mb-3 border border-blush/10">
