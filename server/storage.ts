@@ -3,7 +3,7 @@ import {
   shopItems, 
   tehillimNames, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, birkatHamazonPrayers, afterBrochasPrayers, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
-  dailyRecipes, parshaVorts, tableInspirations, campaigns, womensPrayers, discountPromotions, pirkeiAvotProgress,
+  dailyRecipes, parshaVorts, tableInspirations, communityImpact, campaigns, womensPrayers, discountPromotions, pirkeiAvotProgress,
   analyticsEvents, dailyStats,
 
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
@@ -19,6 +19,7 @@ import {
   type DailyRecipe, type InsertDailyRecipe,
   type ParshaVort, type InsertParshaVort,
   type TableInspiration, type InsertTableInspiration,
+  type CommunityImpact, type InsertCommunityImpact,
   type Campaign, type InsertCampaign,
   type WomensPrayer, type InsertWomensPrayer,
   type DiscountPromotion, type InsertDiscountPromotion,
@@ -63,6 +64,10 @@ export interface IStorage {
   // Table inspiration methods
   getTableInspirationByDate(date: string): Promise<TableInspiration | undefined>;
   createTableInspiration(inspiration: InsertTableInspiration): Promise<TableInspiration>;
+
+  // Community impact methods
+  getCommunityImpactByDate(date: string): Promise<CommunityImpact | undefined>;
+  createCommunityImpact(impact: InsertCommunityImpact): Promise<CommunityImpact>;
 
   // Tehillim methods
   getActiveNames(): Promise<TehillimName[]>;
@@ -873,6 +878,29 @@ export class DatabaseStorage implements IStorage {
       .values(insertInspiration)
       .returning();
     return inspiration;
+  }
+
+  async getCommunityImpactByDate(date: string): Promise<CommunityImpact | undefined> {
+    // Find community impact where the given date falls within the date range
+    const [impact] = await db
+      .select()
+      .from(communityImpact)
+      .where(
+        and(
+          lte(communityImpact.fromDate, date),
+          gte(communityImpact.untilDate, date)
+        )
+      )
+      .limit(1);
+    return impact;
+  }
+
+  async createCommunityImpact(insertImpact: InsertCommunityImpact): Promise<CommunityImpact> {
+    const [impact] = await db
+      .insert(communityImpact)
+      .values(insertImpact)
+      .returning();
+    return impact;
   }
 
   // Analytics methods implementation

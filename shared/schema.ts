@@ -55,6 +55,16 @@ export const tableInspirations = pgTable("table_inspirations", {
 
 
 
+export const communityImpact = pgTable("community_impact", {
+  id: serial("id").primaryKey(),
+  fromDate: date("from_date").notNull(), // Start date for article availability
+  untilDate: date("until_date").notNull(), // End date for article availability
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  imageUrl: text("image_url").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const shopItems = pgTable("shop_items", {
   id: serial("id").primaryKey(),
   storeName: text("store_name").notNull(),
@@ -403,6 +413,11 @@ export const insertTableInspirationSchema = createInsertSchema(tableInspirations
   createdAt: true,
 });
 
+export const insertCommunityImpactSchema = createInsertSchema(communityImpact).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertCampaignSchema = createInsertSchema(campaigns).omit({
   id: true,
   createdAt: true,
@@ -467,6 +482,9 @@ export type ParshaVort = typeof parshaVorts.$inferSelect;
 export type InsertParshaVort = z.infer<typeof insertParshaVortSchema>;
 export type TableInspiration = typeof tableInspirations.$inferSelect;
 export type InsertTableInspiration = z.infer<typeof insertTableInspirationSchema>;
+
+export type CommunityImpact = typeof communityImpact.$inferSelect;
+export type InsertCommunityImpact = z.infer<typeof insertCommunityImpactSchema>;
 
 export type Campaign = typeof campaigns.$inferSelect;
 export type InsertCampaign = z.infer<typeof insertCampaignSchema>;

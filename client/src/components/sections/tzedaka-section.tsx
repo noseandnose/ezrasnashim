@@ -8,17 +8,21 @@ import { HeartExplosion } from "@/components/ui/heart-explosion";
 import type { Campaign } from "@shared/schema";
 import type { Section } from "@/pages/home";
 
-// Community Impact Section Component
-function CommunityImpactSection() {
-  const { data: impact, isLoading } = useQuery<{
-    totalDaysSponsored: number;
-    totalCampaigns: number;
-    totalRaised: number;
+// Community Impact Blog-Style Button Component
+function CommunityImpactButton() {
+  const today = new Date().toISOString().split('T')[0];
+  const { openModal } = useModalStore();
+  
+  const { data: impactContent, isLoading } = useQuery<{
+    id: number;
+    title: string;
+    description: string;
+    imageUrl: string;
   }>({
-    queryKey: ['/api/analytics/community-impact'],
+    queryKey: [`/api/community/impact/${today}`],
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/analytics/community-impact`);
-      if (!response.ok) throw new Error('Failed to fetch community impact');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/community/impact/${today}`);
+      if (!response.ok) return null;
       return response.json();
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
@@ -27,20 +31,28 @@ function CommunityImpactSection() {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-3xl p-3 border border-blush/10 shadow-lg">
-        <h3 className="platypi-bold text-sm text-black text-center mb-2">Community Impact</h3>
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div>
-            <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
-            <div className="platypi-regular text-xs text-black mt-1">Days Sponsored</div>
+      <div className="bg-white rounded-3xl p-3 border border-blush/10 shadow-lg animate-pulse">
+        <div className="flex items-center space-x-3">
+          <div className="w-12 h-12 bg-gray-200 rounded-full flex-shrink-0"></div>
+          <div className="flex-grow">
+            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+            <div className="h-3 bg-gray-200 rounded w-full"></div>
           </div>
-          <div>
-            <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
-            <div className="platypi-regular text-xs text-black mt-1">Campaigns</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!impactContent) {
+    return (
+      <div className="bg-white rounded-3xl p-3 border border-blush/10 shadow-lg opacity-50">
+        <div className="flex items-center space-x-3">
+          <div className="w-12 h-12 bg-gray-100 rounded-full flex-shrink-0 flex items-center justify-center">
+            <Users className="text-gray-400" size={20} />
           </div>
-          <div>
-            <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
-            <div className="platypi-regular text-xs text-black mt-1">Raised</div>
+          <div className="flex-grow">
+            <h3 className="platypi-bold text-sm text-black mb-1">Community Impact</h3>
+            <p className="platypi-regular text-xs text-black/60">Check back for inspiring stories</p>
           </div>
         </div>
       </div>
@@ -48,23 +60,24 @@ function CommunityImpactSection() {
   }
 
   return (
-    <div className="bg-white rounded-3xl p-3 border border-blush/10 shadow-lg">
-      <h3 className="platypi-bold text-sm text-black text-center mb-2">Community Impact</h3>
-      <div className="grid grid-cols-3 gap-2 text-center">
-        <div>
-          <div className="platypi-semibold text-lg text-black">{impact?.totalDaysSponsored || 0}</div>
-          <div className="platypi-regular text-xs text-black">Days Sponsored</div>
+    <button
+      onClick={() => openModal('community-impact')}
+      className="w-full bg-white rounded-3xl p-3 border border-blush/10 shadow-lg hover:shadow-md transition-all duration-300 text-left"
+    >
+      <div className="flex items-center space-x-3">
+        <div className="w-12 h-12 flex-shrink-0">
+          <img 
+            src={impactContent.imageUrl} 
+            alt={impactContent.title}
+            className="w-full h-full rounded-full object-cover"
+          />
         </div>
-        <div>
-          <div className="platypi-semibold text-lg text-black">{impact?.totalCampaigns || 0}</div>
-          <div className="platypi-regular text-xs text-black">Campaigns</div>
-        </div>
-        <div>
-          <div className="platypi-semibold text-lg text-black">${impact?.totalRaised?.toLocaleString() || 0}</div>
-          <div className="platypi-regular text-xs text-black">Raised</div>
+        <div className="flex-grow">
+          <h3 className="platypi-bold text-sm text-black mb-1 line-clamp-1">{impactContent.title}</h3>
+          <p className="platypi-regular text-xs text-black/60 line-clamp-2">{impactContent.description}</p>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -282,7 +295,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
         </div>
 
         {/* Community Impact */}
-        <CommunityImpactSection />
+        <CommunityImpactButton />
 
         {/* Bottom padding */}
         <div className="h-16"></div>

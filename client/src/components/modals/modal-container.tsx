@@ -9,6 +9,7 @@ import CongratulationsModal from "./congratulations-modal";
 import AboutModal from "./about-modal";
 import LocationModal from "./location-modal";
 import SponsorDetailsModal from "./sponsor-details-modal";
+import { CommunityImpactModal } from "./community-impact-modal";
 import { useModalStore } from "@/lib/types";
 
 interface ModalContainerProps {
@@ -34,6 +35,7 @@ export default function ModalContainer({ onSectionChange }: ModalContainerProps)
         onClose={closeModal} 
       />
       <SponsorDetailsModal />
+      <CommunityImpactModal />
     </>
   );
 }

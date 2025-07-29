@@ -28,6 +28,7 @@ export type ModalType =
   | 'about'
   | 'location'
   | 'sponsor-details'
+  | 'community-impact'
   | null;
 
 export interface ModalState {

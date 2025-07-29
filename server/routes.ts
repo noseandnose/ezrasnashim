@@ -807,6 +807,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Community impact routes
+  app.get("/api/community/impact/:date", async (req, res) => {
+    try {
+      const { date } = req.params;
+      const impact = await storage.getCommunityImpactByDate(date);
+      res.json(impact || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch community impact" });
+    }
+  });
+
   // Mincha routes
   app.get("/api/mincha/prayers", async (req, res) => {
     try {
