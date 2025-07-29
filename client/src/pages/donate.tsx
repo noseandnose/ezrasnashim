@@ -52,6 +52,9 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
     setIsProcessing(true);
 
     console.log('Attempting to confirm payment...');
+    console.log('Elements ready:', !!elements);
+    console.log('Stripe ready:', !!stripe);
+    
     try {
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
@@ -61,17 +64,41 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         redirect: "if_required", // Stay on same page when possible
       });
       
-      console.log('Payment confirmation result:', { error, paymentIntent });
+      console.log('Payment confirmation result:', { 
+        error: error ? { type: error.type, code: error.code, message: error.message } : null, 
+        paymentIntent: paymentIntent ? { 
+          id: paymentIntent.id, 
+          status: paymentIntent.status, 
+          amount: paymentIntent.amount,
+          payment_method: paymentIntent.payment_method
+        } : null 
+      });
 
       if (error) {
-        console.error('Payment error:', error);
-        toast({
-          title: "Payment Failed",
-          description: error.message,
-          variant: "destructive",
+        console.error('Payment error details:', {
+          type: error.type,
+          code: error.code,
+          message: error.message,
+          decline_code: error.decline_code,
+          payment_intent: error.payment_intent
         });
-      } else if (paymentIntent && (paymentIntent.status === 'succeeded' || paymentIntent.status === 'processing')) {
-        // Handle both succeeded and processing status (Apple Pay often shows as processing initially)
+        
+        // Special handling for Apple Pay errors
+        if (error.type === 'card_error' && error.code === 'payment_intent_authentication_failure') {
+          toast({
+            title: "Apple Pay Authentication Failed",
+            description: "Please try again or use a different payment method.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Payment Failed",
+            description: error.message || "Payment could not be processed. Please try again.",
+            variant: "destructive",
+          });
+        }
+      } else if (paymentIntent && (paymentIntent.status === 'succeeded' || paymentIntent.status === 'processing' || paymentIntent.status === 'requires_capture')) {
+        // Handle succeeded, processing, and requires_capture status (Apple Pay variations)
         console.log('Payment successful with status:', paymentIntent.status);
         
         // Call completion handler for sponsor day donations
@@ -97,6 +124,8 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
           title: "Thank You!",
           description: paymentIntent.status === 'processing' 
             ? "Your donation is being processed and will be confirmed shortly."
+            : paymentIntent.status === 'requires_capture'
+            ? "Your donation has been authorized and will be captured shortly."
             : "Your donation has been processed successfully.",
         });
         
@@ -115,11 +144,31 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
           title: "Additional Authentication Required",
           description: "Please complete the authentication process to finalize your payment.",
         });
+      } else if (paymentIntent) {
+        console.warn('Unexpected payment intent status:', paymentIntent.status);
+        console.log('Full payment intent object:', paymentIntent);
+        
+        // Check if this might be a successful payment with an unexpected status
+        if (paymentIntent.status === 'canceled') {
+          toast({
+            title: "Payment Canceled",
+            description: "The payment was canceled. Please try again.",
+            variant: "destructive",
+          });
+        } else {
+          // For any other status, treat as potentially successful but unclear
+          console.log('Treating unknown status as potentially successful:', paymentIntent.status);
+          toast({
+            title: "Payment Status Unclear",
+            description: `Payment status: ${paymentIntent.status}. Please check your payment method for confirmation.`,
+            variant: "destructive",
+          });
+        }
       } else {
-        console.warn('Unexpected payment intent status:', paymentIntent?.status);
+        console.error('No payment intent returned from Stripe');
         toast({
-          title: "Payment Status Unclear",
-          description: "Please check with your payment provider to confirm the transaction status.",
+          title: "Payment Error",
+          description: "No payment information was returned. Please try again.",
           variant: "destructive",
         });
       }
