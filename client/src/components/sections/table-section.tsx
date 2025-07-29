@@ -108,14 +108,11 @@ export default function TableSection() {
                   {daysUntilShabbat}
                 </span>
               </div>
-              <h3 className="platypi-bold text-lg text-black platypi-bold">This Shabbos</h3>
-            </div>
-            <div className="text-right">
-              <p className="platypi-bold text-sm text-black platypi-medium">
-                {showShabbosError ? "Set location" : 
+              <h3 className="platypi-bold text-lg text-black">
+                Days Until Shabbas {showShabbosError ? "" : 
                  shabbosData?.parsha || 
-                 (isShabbosDataLoading ? "Loading..." : "Parsha unavailable")}
-              </p>
+                 (isShabbosDataLoading ? "" : "")}
+              </h3>
             </div>
           </div>
           

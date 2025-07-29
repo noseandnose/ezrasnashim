@@ -340,6 +340,7 @@ Changelog:
 - July 28, 2025. Enhanced donation modal with campaign description: Updated donation modal subtitle to display actual campaign description from database instead of generic "Support our community with your generous contribution" text, ensuring both header and subtitle reflect authentic campaign data for better user understanding of donation purpose
 - July 28, 2025. Redesigned donation modal amount selection system: Replaced separate quick amounts and input sections with unified button system showing $1, $18, $180, $1800, and Custom options, custom input field only appears when Custom button is selected, improved user experience with cleaner interface and logical flow for amount selection
 - July 28, 2025. Fixed tzedaka completion tracking to only occur after successful payment: Removed premature completion tracking from donation modal and tzedaka modals, tasks now only turn green and mark complete when payment transaction actually succeeds, enhanced Apple Pay payment status handling to accept both 'succeeded' and 'processing' statuses since Apple Pay often shows as processing initially, added proper analytics tracking on successful payment completion
+- July 29, 2025. Updated Life page Shabbat section layout: Changed "This Shabbos" text to "Days Until Shabbas {Parsha Name}" next to countdown logo, removed separate parsha name display on right side for cleaner unified text presentation
 ```
 
 ## User Preferences
