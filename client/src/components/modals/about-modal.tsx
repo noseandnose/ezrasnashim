@@ -18,7 +18,16 @@ export default function AboutModal() {
         {/* Content Area - expanded white area */}
         <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
           <p className="text-sm text-black leading-relaxed mb-4">
-            Ezras Nashim is a project of Just One Chesed, created to uplift Jewish women through Torah, tefillah, and tzedaka—woven into everyday life.
+            Ezras Nashim is a project of{" "}
+            <a 
+              href="https://justonechesed.org/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 underline platypi-medium"
+            >
+              Just One Chesed
+            </a>
+            , created to uplift Jewish women through Torah, tefillah, and tzedaka—woven into everyday life.
           </p>
           
           <p className="text-sm text-black leading-relaxed mb-4">
