@@ -1426,9 +1426,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid amount" });
       }
 
-      console.log('Creating payment intent with amount:', amount, 'type:', donationType);
+      console.log('Creating payment intent with:', { 
+        amount, 
+        donationType, 
+        metadata,
+        stripeConfigured: !!process.env.STRIPE_SECRET_KEY
+      });
       
-      const paymentIntent = await stripe.paymentIntents.create({
+      const paymentIntentData = {
         amount: Math.round(amount * 100), // Convert to cents
         currency: "usd",
         payment_method_configuration: "pmc_1Rgkz8FBzwAA3fO1GtotOiNc",
@@ -1436,20 +1441,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
           source: "ezras-nashim-donation",
           donationType: donationType || "General Donation",
           sponsorName: metadata?.sponsorName || "",
-          dedication: metadata?.dedication || ""
+          dedication: metadata?.dedication || "",
+          timestamp: new Date().toISOString()
+        },
+        // Add automatic payment method confirmation for mobile wallets
+        automatic_payment_methods: {
+          enabled: true
         }
-      });
+      };
       
-      console.log('Payment intent created successfully:', paymentIntent.id);
+      console.log('Payment intent configuration:', paymentIntentData);
+      
+      const paymentIntent = await stripe.paymentIntents.create(paymentIntentData);
+      
+      console.log('Payment intent created successfully:', {
+        id: paymentIntent.id,
+        status: paymentIntent.status,
+        amount: paymentIntent.amount,
+        client_secret_exists: !!paymentIntent.client_secret
+      });
 
       res.json({ 
         clientSecret: paymentIntent.client_secret,
-        amount: amount 
+        amount: amount,
+        paymentIntentId: paymentIntent.id
       });
     } catch (error: any) {
-      console.error('Stripe payment intent creation failed:', error);
+      console.error('Stripe payment intent creation failed:', {
+        error: error.message,
+        code: error.code,
+        type: error.type,
+        decline_code: error.decline_code
+      });
       res.status(500).json({ 
-        message: "Error creating payment intent: " + error.message 
+        message: "Error creating payment intent: " + error.message,
+        code: error.code,
+        type: error.type
       });
     }
   });

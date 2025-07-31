@@ -46,17 +46,27 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
     e.preventDefault();
 
     if (!stripe || !elements) {
+      console.error('Stripe or Elements not ready:', { stripe: !!stripe, elements: !!elements });
       return;
     }
 
     setIsProcessing(true);
 
-    console.log('Attempting to confirm payment...');
+    console.log('=== PAYMENT SUBMISSION STARTED ===');
     console.log('Elements ready:', !!elements);
     console.log('Stripe ready:', !!stripe);
+    console.log('Amount:', amount);
+    console.log('Donation type:', donationType);
+    console.log('User agent:', navigator.userAgent);
+    console.log('Payment environment:', {
+      isApplePay: /iPhone|iPad|iPod/.test(navigator.userAgent) && window.ApplePaySession,
+      isSafari: /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent),
+      isIOS: /iPhone|iPad|iPod/.test(navigator.userAgent)
+    });
     
     try {
-      const { error, paymentIntent } = await stripe.confirmPayment({
+      // Enhanced confirmation for Apple Pay compatibility
+      const confirmResult = await stripe.confirmPayment({
         elements,
         confirmParams: {
           return_url: `${window.location.origin}/?donation=success`,
@@ -64,8 +74,10 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         redirect: "if_required", // Stay on same page when possible
       });
       
+      const { error, paymentIntent } = confirmResult;
+      
       console.log('Payment confirmation result:', { 
-        error: error ? { type: error.type, code: error.code, message: error.message } : null, 
+        error: error ? { type: error.type, code: error.code, message: error.message, decline_code: error.decline_code } : null, 
         paymentIntent: paymentIntent ? { 
           id: paymentIntent.id, 
           status: paymentIntent.status, 
@@ -80,7 +92,8 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         console.log('PaymentIntent details:', {
           status: paymentIntent.status,
           amount: paymentIntent.amount,
-          created: paymentIntent.created
+          created: paymentIntent.created,
+          payment_method_id: paymentIntent.payment_method
         });
       }
 
@@ -93,23 +106,44 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
           payment_intent: error.payment_intent
         });
         
-        // Special handling for Apple Pay errors
-        if (error.type === 'card_error' && error.code === 'payment_intent_authentication_failure') {
+        // Enhanced Apple Pay error handling
+        if (error.type === 'card_error') {
+          if (error.code === 'payment_intent_authentication_failure') {
+            toast({
+              title: "Apple Pay Authentication Failed",
+              description: "Touch ID or Face ID authentication failed. Please try again.",
+              variant: "destructive",
+            });
+          } else if (error.code === 'card_declined') {
+            toast({
+              title: "Payment Declined",
+              description: "Your payment method was declined. Please try a different card or payment method.",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Payment Error",
+              description: error.message || "There was an issue with your payment method. Please try again.",
+              variant: "destructive",
+            });
+          }
+        } else if (error.type === 'validation_error') {
           toast({
-            title: "Apple Pay Authentication Failed",
-            description: "Please try again or use a different payment method.",
+            title: "Payment Information Error",
+            description: "Please check your payment information and try again.",
             variant: "destructive",
           });
         } else {
           toast({
-            title: "Payment Failed",
-            description: error.message || "Payment could not be processed. Please try again.",
+            title: "Payment Error",
+            description: error.message || "An error occurred while processing your payment. Please try again.",
             variant: "destructive",
           });
         }
       } else if (paymentIntent && ['succeeded', 'processing', 'requires_capture', 'requires_confirmation'].includes(paymentIntent.status)) {
         // Handle all successful/processing payment statuses (Apple Pay, Google Pay, card variations)
         console.log('Payment successful with status:', paymentIntent.status);
+        console.log('Payment method type detected:', paymentIntent.payment_method);
         
         // Call completion handler for sponsor day donations
         if (donationType === 'Sponsor a Day of Ezras Nashim' && sponsorName) {
@@ -119,6 +153,7 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
               sponsorName,
               dedication: dedication || null
             });
+            console.log('Sponsor record created successfully');
           } catch (error) {
             console.error('Failed to create sponsor record:', error);
           }
@@ -130,13 +165,17 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         // Track completion for analytics
         trackModalComplete('donate');
         
+        const successMessage = paymentIntent.status === 'processing' 
+          ? "Your donation is being processed and will be confirmed shortly."
+          : paymentIntent.status === 'requires_capture'
+          ? "Your donation has been authorized and will be captured shortly."
+          : paymentIntent.status === 'requires_confirmation'
+          ? "Your donation is being confirmed and will complete shortly."
+          : "Your donation has been processed successfully.";
+        
         toast({
           title: "Thank You!",
-          description: paymentIntent.status === 'processing' 
-            ? "Your donation is being processed and will be confirmed shortly."
-            : paymentIntent.status === 'requires_capture'
-            ? "Your donation has been authorized and will be captured shortly."
-            : "Your donation has been processed successfully.",
+          description: successMessage,
         });
         
         // Check if all tasks are completed and show congratulations
@@ -201,11 +240,29 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
       }
     } catch (paymentError) {
       console.error('Payment processing error:', paymentError);
-      toast({
-        title: "Payment Error",
-        description: "An error occurred while processing your payment. Please try again.",
-        variant: "destructive",
+      console.error('Error type:', typeof paymentError);
+      console.error('Error details:', {
+        name: (paymentError as any)?.name,
+        message: (paymentError as any)?.message,
+        stack: (paymentError as any)?.stack
       });
+      
+      // Special handling for network/connectivity errors
+      if ((paymentError as any)?.message?.includes('network') || 
+          (paymentError as any)?.message?.includes('timeout') ||
+          (paymentError as any)?.name === 'NetworkError') {
+        toast({
+          title: "Connection Error",
+          description: "Please check your internet connection and try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Payment Error",
+          description: "An error occurred while processing your payment. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
 
     setIsProcessing(false);
