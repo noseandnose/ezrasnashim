@@ -281,9 +281,6 @@ export default function Statistics() {
 
       <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-24">
         <div className="space-y-6">
-          {/* Financial Stats */}
-          <FinancialStatsSection />
-
           {/* Feature Usage */}
           <div>
             <h2 className="text-base platypi-bold text-black mb-3">Feature Usage</h2>
@@ -317,6 +314,9 @@ export default function Statistics() {
               )}
             </div>
           </div>
+
+          {/* Financial Stats */}
+          <FinancialStatsSection />
         </div>
       </main>
 
