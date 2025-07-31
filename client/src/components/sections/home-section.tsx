@@ -164,8 +164,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
                 <PrayerIcon className="text-white" size={12} />
               </div>
             </div>
-            <p className="platypi-bold text-lg text-black mb-0.5">{currentPrayer.title}</p>
-            <p className="platypi-bold text-base text-black leading-tight">{currentPrayer.subtitle}</p>
+            <p className="platypi-bold text-sm text-black mb-0.5">{currentPrayer.title}</p>
+            <p className="platypi-bold text-xs text-black leading-tight">{currentPrayer.subtitle}</p>
           </button>
 
           {/* Shkia - Display Only */}
@@ -175,8 +175,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
                 <Clock className="text-white" size={12} />
               </div>
             </div>
-            <p className="platypi-bold text-lg text-black mb-0.5">Shkia</p>
-            <p className="platypi-bold text-base text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
+            <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
+            <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
           </div>
         </div>
       </div>
