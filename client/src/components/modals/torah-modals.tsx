@@ -8,6 +8,20 @@ import AudioPlayer from "@/components/audio-player";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 
+// Calculate reading time based on word count (average 200 words per minute)
+const calculateReadingTime = (text: string): string => {
+  if (!text) return "0 min";
+  
+  const wordCount = text.trim().split(/\s+/).length;
+  const readingTimeMinutes = Math.ceil(wordCount / 200);
+  
+  if (readingTimeMinutes === 1) {
+    return "1 min";
+  } else {
+    return `${readingTimeMinutes} min`;
+  }
+};
+
 interface TorahModalsProps {
   onSectionChange?: (section: any) => void;
 }
@@ -165,10 +179,17 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           <div id="halacha-description" className="sr-only">Daily Jewish law and practice content</div>
           
           <div className="mb-1">
-            {/* Custom header without translate button for Halacha */}
+            {/* Custom header with reading time for Halacha */}
             <div className="flex items-center justify-center mb-1 relative pr-8">
               <div className="flex items-center gap-4">
-                <DialogTitle className="text-lg platypi-bold text-black">Daily Halacha</DialogTitle>
+                <div className="flex flex-col items-center">
+                  <DialogTitle className="text-lg platypi-bold text-black">Daily Halacha</DialogTitle>
+                  {halachaContent?.content && (
+                    <span className="text-xs platypi-medium text-black/60 mt-1">
+                      {calculateReadingTime(halachaContent.content)} read
+                    </span>
+                  )}
+                </div>
                 
                 <div className="flex items-center gap-2">
                   <button

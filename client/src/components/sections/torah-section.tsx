@@ -3,6 +3,20 @@ import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from 
 import { useQuery } from "@tanstack/react-query";
 import type { Section } from "@/pages/home";
 
+// Calculate reading time based on word count (average 200 words per minute)
+const calculateReadingTime = (text: string): string => {
+  if (!text) return "0 min";
+  
+  const wordCount = text.trim().split(/\s+/).length;
+  const readingTimeMinutes = Math.ceil(wordCount / 200);
+  
+  if (readingTimeMinutes === 1) {
+    return "1 min";
+  } else {
+    return `${readingTimeMinutes} min`;
+  }
+};
+
 interface TorahSectionProps {
   onSectionChange?: (section: Section) => void;
 }
@@ -25,6 +39,13 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
     queryKey: ['/api/table/vort'],
     staleTime: 60 * 60 * 1000, // 1 hour
     gcTime: 4 * 60 * 60 * 1000 // 4 hours
+  });
+
+  // Fetch today's Halacha content for reading time calculation
+  const { data: halachaContent } = useQuery<{title?: string; content?: string; footnotes?: string}>({
+    queryKey: ['/api/torah/halacha', today],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000 // 30 minutes
   });
 
   const torahItems = [
@@ -100,6 +121,13 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
         <div className="grid grid-cols-2 gap-2 mb-1">
           {torahItems.map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border, contentType }) => {
             const isCompleted = isModalComplete(id);
+            
+            // Dynamic subtitle for Halacha with reading time
+            let displaySubtitle = subtitle;
+            if (id === 'halacha' && halachaContent?.content && !isCompleted) {
+              displaySubtitle = `${calculateReadingTime(halachaContent.content)} read`;
+            }
+            
             return (
               <button
                 key={id}
@@ -122,7 +150,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
                 </div>
                 <h3 className="platypi-bold text-xs text-black mb-1 tracking-wide">{title}</h3>
                 <p className="platypi-regular text-xs text-black/60 leading-relaxed">
-                  {isCompleted ? 'Completed' : subtitle}
+                  {isCompleted ? 'Completed' : displaySubtitle}
                 </p>
               </button>
             );
