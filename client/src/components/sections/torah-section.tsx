@@ -132,7 +132,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
               <button
                 key={id}
                 className={`${isCompleted ? 'bg-sage/20' : gradient} rounded-3xl p-3 text-center glow-hover transition-gentle shadow-lg border ${border} relative`}
-                onClick={() => openModal(id)}
+                onClick={() => openModal(id, 'torah')}
               >
                 {/* Content Type Indicator */}
                 {contentType && (

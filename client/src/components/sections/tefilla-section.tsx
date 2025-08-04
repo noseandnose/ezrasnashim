@@ -418,7 +418,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             </div>
           ) : (
             <button
-              onClick={() => openModal('tehillim-text')}
+              onClick={() => openModal('tehillim-text', 'tefilla')}
               className="w-full bg-white/90 rounded-2xl p-3 border border-blush/20 hover:bg-white transition-all duration-300 shadow-sm"
             >
               {/* Header with perek number */}
@@ -474,7 +474,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           <button 
             onClick={() => {
               console.log(`${currentPrayer.title} button clicked`);
-              openModal(currentPrayer.modal);
+              openModal(currentPrayer.modal, 'tefilla');
             }}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
               isModalComplete(currentPrayer.modal) ? 'bg-sage/20' : 'bg-white'
@@ -498,7 +498,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           </button>
 
           <button 
-            onClick={() => openModal('after-brochas')}
+            onClick={() => openModal('after-brochas', 'tefilla')}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
               isModalComplete('after-brochas') ? 'bg-sage/20' : 'bg-white'
             }`}
@@ -518,7 +518,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
         {/* Bottom Row: Special Tehillim and Nishmas */}
         <div className="grid grid-cols-2 gap-2">
           <button 
-            onClick={() => openModal('special-tehillim')}
+            onClick={() => openModal('special-tehillim', 'tefilla')}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
               isModalComplete('special-tehillim') ? 'bg-sage/20' : 'bg-white'
             }`}
@@ -535,7 +535,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           </button>
 
           <button 
-            onClick={() => openModal('nishmas-campaign')}
+            onClick={() => openModal('nishmas-campaign', 'tefilla')}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
               isModalComplete('nishmas-campaign') ? 'bg-sage/20' : 'bg-white'
             }`}
@@ -566,7 +566,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           
           <div className="grid grid-cols-3 gap-2">
             <button 
-              onClick={() => openModal('refuah')}
+              onClick={() => openModal('refuah', 'tefilla')}
               className="bg-gradient-to-br from-blush/10 to-blush/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-blush/20"
             >
               <div className="bg-blush/20 p-2 rounded-full mx-auto mb-1 w-fit">
@@ -577,7 +577,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             </button>
             
             <button 
-              onClick={() => openModal('family')}
+              onClick={() => openModal('family', 'tefilla')}
               className="bg-gradient-to-br from-lavender/10 to-lavender/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-lavender/20"
             >
               <div className="bg-lavender/20 p-2 rounded-full mx-auto mb-1 w-fit">
@@ -588,7 +588,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             </button>
             
             <button 
-              onClick={() => openModal('life')}
+              onClick={() => openModal('life', 'tefilla')}
               className="bg-gradient-to-br from-sage/10 to-sage/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-sage/20"
             >
               <div className="bg-sage/20 p-2 rounded-full mx-auto mb-1 w-fit">

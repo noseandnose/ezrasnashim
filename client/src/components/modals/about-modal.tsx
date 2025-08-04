@@ -7,7 +7,7 @@ export default function AboutModal() {
   const { activeModal, closeModal } = useModalStore();
 
   return (
-    <Dialog open={activeModal === 'about'} onOpenChange={() => closeModal()}>
+    <Dialog open={activeModal === 'about'} onOpenChange={() => closeModal(true)}>
       <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
         
         {/* Standardized Header - centered title only */}
@@ -84,7 +84,7 @@ export default function AboutModal() {
 
         {/* Complete Button */}
         <Button
-          onClick={closeModal}
+          onClick={() => closeModal(true)}
           className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0"
         >
           Close

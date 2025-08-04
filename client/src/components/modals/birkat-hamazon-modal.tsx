@@ -136,7 +136,7 @@ export function BirkatHamazonModal() {
   // Show After Brochas selection modal
   if (activeModal === 'after-brochas') {
     return (
-      <Dialog open={true} onOpenChange={() => closeModal()}>
+      <Dialog open={true} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 platypi-regular">
           <DialogHeader className="text-center mb-4 pr-8">
             <DialogTitle className="text-lg platypi-bold text-black">After Brochas</DialogTitle>
@@ -145,7 +145,7 @@ export function BirkatHamazonModal() {
 
           <div className="space-y-3">
             <button
-              onClick={() => openModal('al-hamichiya')}
+              onClick={() => openModal('al-hamichiya', 'tefilla')}
               className="w-full bg-white rounded-xl p-4 border border-blush/10 hover:bg-blush/5 transition-colors text-left"
             >
               <h3 className="platypi-medium text-black mb-1">Me'ein Shalosh</h3>
@@ -153,7 +153,7 @@ export function BirkatHamazonModal() {
             </button>
 
             <button
-              onClick={() => openModal('birkat-hamazon')}
+              onClick={() => openModal('birkat-hamazon', 'tefilla')}
               className="w-full bg-white rounded-xl p-4 border border-blush/10 hover:bg-blush/5 transition-colors text-left"
             >
               <h3 className="platypi-medium text-black mb-1">Birkat Hamazon</h3>
@@ -179,7 +179,7 @@ export function BirkatHamazonModal() {
   return (
     <>
       {/* Al Hamichiya Modal */}
-      <Dialog open={activeModal === 'al-hamichiya'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'al-hamichiya'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
           <StandardModalHeader />
           
@@ -226,7 +226,7 @@ export function BirkatHamazonModal() {
       </Dialog>
 
       {/* Birkat Hamazon Modal */}
-      <Dialog open={activeModal === 'birkat-hamazon'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'birkat-hamazon'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
           <StandardModalHeader />
           

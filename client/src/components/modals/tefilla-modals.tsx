@@ -112,7 +112,7 @@ function MorningBrochasModal() {
   console.log('MorningBrochasModal - activeModal:', activeModal);
   
   return (
-    <Dialog open={activeModal === 'morning-brochas'} onOpenChange={() => closeModal()}>
+    <Dialog open={activeModal === 'morning-brochas'} onOpenChange={() => closeModal(true)}>
       <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="morning-brochas-description">
         <div id="morning-brochas-description" className="sr-only">Daily morning blessings and prayers of gratitude</div>
         
@@ -239,7 +239,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const handlePrayerSelect = (prayerId: number) => {
     setSelectedPrayerId(prayerId);
     closeModal();
-    openModal('individual-prayer');
+    openModal('individual-prayer', 'tefilla');
   };
 
   // Complete prayer with task tracking
@@ -279,7 +279,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       // Check if all tasks are completed and show congratulations
       setTimeout(() => {
         if (checkAndShowCongratulations()) {
-          openModal('congratulations');
+          openModal('congratulations', 'tefilla');
         }
       }, 200);
     }, 500);
@@ -534,7 +534,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   return (
     <>
       {/* Tehillim Text Modal */}
-      <Dialog open={activeModal === 'tehillim-text'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'tehillim-text'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="tehillim-description">
           <div id="tehillim-description" className="sr-only">Psalms reading and community prayer participation</div>
           
@@ -602,7 +602,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         </DialogContent>
       </Dialog>
       {/* Mincha Modal */}
-      <Dialog open={activeModal === 'mincha'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'mincha'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="mincha-description">
           <div id="mincha-description" className="sr-only">Afternoon prayer service and instructions</div>
           
@@ -656,7 +656,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         </DialogContent>
       </Dialog>
       {/* Women's Prayers Modal */}
-      <Dialog open={activeModal === 'womens-prayers'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'womens-prayers'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] overflow-hidden platypi-regular" aria-describedby="womens-prayers-description">
           <div id="womens-prayers-description" className="sr-only">Special prayers and blessings for women</div>
           
@@ -673,7 +673,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               className="content-card rounded-xl p-4 cursor-pointer"
               onClick={() => {
                 closeModal();
-                openModal('blessings');
+                openModal('blessings', 'tefilla');
               }}
             >
               <div className="flex items-center space-x-3">
@@ -686,7 +686,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               className="content-card rounded-xl p-4 cursor-pointer"
               onClick={() => {
                 closeModal();
-                openModal('tefillos');
+                openModal('tefillos', 'tefilla');
               }}
             >
               <div className="flex items-center space-x-3">
@@ -699,7 +699,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               className="content-card rounded-xl p-4 cursor-pointer"
               onClick={() => {
                 closeModal();
-                openModal('personal-prayers');
+                openModal('personal-prayers', 'tefilla');
               }}
             >
               <div className="flex items-center space-x-3">
@@ -726,7 +726,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         </DialogContent>
       </Dialog>
       {/* Blessings Modal */}
-      <Dialog open={activeModal === 'blessings'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'blessings'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] platypi-regular" aria-describedby="blessings-description">
           <div id="blessings-description" className="sr-only">Daily blessings and their proper recitation</div>
           
@@ -759,7 +759,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         </DialogContent>
       </Dialog>
       {/* Tefillos Modal */}
-      <Dialog open={activeModal === 'tefillos'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'tefillos'} onOpenChange={() => closeModal(true)}>
         <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[90vh] platypi-regular ${isAnimating ? 'prayer-ascending' : ''}`} aria-describedby="tefillos-description">
           <div id="tefillos-description" className="sr-only">Traditional prayers and their meanings</div>
           
@@ -792,7 +792,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         </DialogContent>
       </Dialog>
       {/* Personal Prayers Modal */}
-      <Dialog open={activeModal === 'personal-prayers'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'personal-prayers'} onOpenChange={() => closeModal(true)}>
         <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[90vh] platypi-regular ${isAnimating ? 'prayer-ascending' : ''}`} aria-describedby="personal-prayers-description">
           <div id="personal-prayers-description" className="sr-only">Guidance for personal prayer and connection</div>
           
@@ -825,7 +825,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         </DialogContent>
       </Dialog>
       {/* Nishmas Kol Chai Modal */}
-      <Dialog open={activeModal === 'nishmas-campaign'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'nishmas-campaign'} onOpenChange={() => closeModal(true)}>
         <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular ${isAnimating ? 'prayer-ascending' : ''}`}>
           {/* Standardized Header */}
           <div className="flex items-center justify-center mb-3 relative pr-8">
@@ -925,7 +925,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         </DialogContent>
       </Dialog>
       {/* Refuah Prayers Modal */}
-      <Dialog open={activeModal === 'refuah'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'refuah'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-sm rounded-3xl p-6 platypi-regular" aria-describedby="refuah-description">
           <div id="refuah-description" className="sr-only">Prayers for healing and health</div>
           <div className="flex items-center justify-center mb-3 relative pr-8">
@@ -935,7 +935,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         </DialogContent>
       </Dialog>
       {/* Family Prayers Modal */}
-      <Dialog open={activeModal === 'family'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'family'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-sm rounded-3xl p-6 platypi-regular" aria-describedby="family-description">
           <div id="family-description" className="sr-only">Prayers for family harmony and blessings</div>
           <div className="flex items-center justify-center mb-3 relative pr-8">
@@ -945,7 +945,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         </DialogContent>
       </Dialog>
       {/* Life Prayers Modal */}
-      <Dialog open={activeModal === 'life'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'life'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-sm rounded-3xl p-6 platypi-regular" aria-describedby="life-description">
           <div id="life-description" className="sr-only">Prayers for life events and milestones</div>
           <div className="flex items-center justify-center mb-3 relative pr-8">
@@ -955,7 +955,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         </DialogContent>
       </Dialog>
       {/* Individual Prayer Modal */}
-      <Dialog open={activeModal === 'individual-prayer'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'individual-prayer'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="individual-prayer-description">
           <div id="individual-prayer-description" className="sr-only">Individual prayer text and translation</div>
           <IndividualPrayerContent prayerId={selectedPrayerId} language={language} fontSize={fontSize} setLanguage={setLanguage} setFontSize={setFontSize} />
@@ -963,21 +963,21 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       </Dialog>
 
       {/* Special Tehillim Modal */}
-      <Dialog open={activeModal === 'special-tehillim'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'special-tehillim'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
           <SpecialTehillimModal />
         </DialogContent>
       </Dialog>
 
       {/* Individual Tehillim Modal */}
-      <Dialog open={activeModal === 'individual-tehillim'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'individual-tehillim'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
           <IndividualTehillimModal />
         </DialogContent>
       </Dialog>
 
       {/* Maariv Modal */}
-      <Dialog open={activeModal === 'maariv'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'maariv'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="maariv-description">
           <div id="maariv-description" className="sr-only">Evening prayer service and instructions</div>
           
@@ -1296,7 +1296,7 @@ function SpecialTehillimModal() {
   const openTehillimText = (psalmNumber: number) => {
     setSelectedPsalm(psalmNumber);
     closeModal();
-    openModal('individual-tehillim');
+    openModal('individual-tehillim', 'tefilla');
   };
 
   // Categories with psalm numbers

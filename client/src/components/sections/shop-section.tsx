@@ -11,7 +11,7 @@ export default function ShopSection() {
   });
 
   const handleItemClick = (item: ShopItem) => {
-    openModal(`shop-${item.id}`);
+    openModal(`shop-${item.id}`, 'shop');
   };
 
   if (isLoading) {
@@ -91,7 +91,7 @@ export default function ShopSection() {
           <button
             key={id}
             className={`${gradient} rounded-3xl p-3 text-center glow-hover transition-gentle shadow-lg border ${border}`}
-            onClick={() => openModal(id)}
+            onClick={() => openModal(id, 'shop')}
           >
             <div className={`${iconBg} p-2 rounded-full mx-auto mb-2 w-fit`}>
               <Icon className={`${iconColor}`} size={18} strokeWidth={1.5} />

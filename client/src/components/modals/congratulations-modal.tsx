@@ -16,7 +16,7 @@ export default function CongratulationsModal() {
   }, [activeModal]);
 
   return (
-    <Dialog open={activeModal === 'congratulations'} onOpenChange={() => closeModal()}>
+    <Dialog open={activeModal === 'congratulations'} onOpenChange={() => closeModal(true)}>
       <DialogContent className="w-full max-w-sm rounded-3xl p-8 platypi-regular text-center">
         <div className="flex items-center justify-center mb-3 relative">
           <DialogTitle className="text-2xl platypi-bold text-black">

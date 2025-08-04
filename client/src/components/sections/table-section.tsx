@@ -91,7 +91,7 @@ export default function TableSection() {
               Please enable location access for accurate Jewish prayer times, or click below to set your location manually.
             </p>
             <button 
-              onClick={() => openModal('location')}
+              onClick={() => openModal('location', 'table')}
               className="bg-yellow-600 text-white px-3 py-1.5 rounded-lg text-xs platypi-medium hover:bg-yellow-700 transition-colors"
             >
               Set Location Manually
@@ -157,7 +157,7 @@ export default function TableSection() {
                 ? 'bg-gray-100 cursor-not-allowed' 
                 : isModalComplete('recipe') ? 'bg-sage/20 hover:scale-105' : 'bg-white hover:scale-105'
             }`}
-            onClick={() => recipeContent && openModal('recipe')}
+            onClick={() => recipeContent && openModal('recipe', 'table')}
             disabled={!recipeContent}
           >
             {/* Banner overlay for when no content */}
@@ -187,7 +187,7 @@ export default function TableSection() {
           {/* Jewish Date Converter Button */}
           <button
             className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
-            onClick={() => openModal('date-calculator')}
+            onClick={() => openModal('date-calculator', 'table')}
           >
             <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-feminine">
               <Calendar className="text-white" size={18} strokeWidth={1.5} />
@@ -208,7 +208,7 @@ export default function TableSection() {
                 ? 'bg-gray-100 cursor-not-allowed' 
                 : isModalComplete('inspiration') ? 'bg-sage/20 hover:scale-105' : 'bg-white hover:scale-105'
             }`}
-            onClick={() => inspirationContent && openModal('inspiration')}
+            onClick={() => inspirationContent && openModal('inspiration', 'table')}
             disabled={!inspirationContent}
           >
             {/* Banner overlay for when no content */}

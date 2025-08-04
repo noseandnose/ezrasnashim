@@ -44,7 +44,7 @@ export default function TableModals() {
   return (
     <>
       {/* Recipe Modal */}
-      <Dialog open={activeModal === 'recipe'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'recipe'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="max-h-[80vh] overflow-y-auto">
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg platypi-bold text-black">
@@ -121,7 +121,7 @@ export default function TableModals() {
       </Dialog>
 
       {/* Table Inspiration Modal */}
-      <Dialog open={activeModal === 'inspiration'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'inspiration'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="inspiration-description">
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg platypi-bold text-black">Creative Jewish Living</DialogTitle>
@@ -346,7 +346,7 @@ export default function TableModals() {
       </Dialog>
 
       {/* Parsha Shiur Modal */}
-      <Dialog open={activeModal === 'parsha'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'parsha'} onOpenChange={() => closeModal(true)}>
         <DialogContent>
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg platypi-bold text-black">Parsha Shiur</DialogTitle>

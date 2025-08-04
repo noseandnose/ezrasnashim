@@ -114,7 +114,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           <div className="text-right">
             <p className="platypi-regular text-xs text-black">{hebrewDate || "Loading..."}</p>
             <button 
-              onClick={() => openModal('location')}
+              onClick={() => openModal('location', 'home')}
               className="flex items-center justify-end space-x-1 hover:bg-white/80 px-2 py-1 rounded-xl transition-colors border border-gray-200 bg-white/60"
             >
               <MapPin className="text-gray-600" size={10} />
@@ -127,7 +127,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         <button 
           onClick={() => {
             if (sponsor) {
-              openModal('sponsor-details');
+              openModal('sponsor-details', 'home');
             }
           }}
           disabled={sponsorLoading || !sponsor}
@@ -156,7 +156,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         <div className="grid grid-cols-2 gap-2">
           {/* Time-based Prayer - Dynamic based on current time */}
           <button 
-            onClick={() => openModal(currentPrayer.modal)}
+            onClick={() => openModal(currentPrayer.modal, 'home')}
             className="bg-white/80 rounded-xl p-3 text-center border border-blush/20 hover:scale-105 transition-all duration-300 hover:bg-white/95"
           >
             <div className="flex items-center justify-center mb-1">

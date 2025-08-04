@@ -34,8 +34,9 @@ export type ModalType =
 export interface ModalState {
   activeModal: string | null;
   selectedPsalm: number | null;
-  openModal: (modalId: string) => void;
-  closeModal: () => void;
+  previousSection: string | null;
+  openModal: (modalId: string, fromSection?: string) => void;
+  closeModal: (returnToPrevious?: boolean) => void;
   setSelectedPsalm: (psalmNumber: number) => void;
   
   // Convenience methods for specific modals
@@ -47,8 +48,26 @@ export interface ModalState {
 export const useModalStore = create<ModalState>((set, get) => ({
   activeModal: null,
   selectedPsalm: null,
-  openModal: (modalId: string) => set({ activeModal: modalId }),
-  closeModal: () => set({ activeModal: null }),
+  previousSection: null,
+  openModal: (modalId: string, fromSection?: string) => set({ 
+    activeModal: modalId, 
+    previousSection: fromSection || get().previousSection 
+  }),
+  closeModal: (returnToPrevious?: boolean) => {
+    const state = get();
+    set({ activeModal: null });
+    
+    // Handle navigation based on close type
+    if (returnToPrevious && state.previousSection && typeof window !== 'undefined') {
+      // Use a small delay to ensure modal close animation completes
+      setTimeout(() => {
+        const event = new CustomEvent('navigateToSection', { 
+          detail: { section: state.previousSection } 
+        });
+        window.dispatchEvent(event);
+      }, 100);
+    }
+  },
   setSelectedPsalm: (psalmNumber: number) => set({ selectedPsalm: psalmNumber }),
   
   // Convenience methods for specific modals

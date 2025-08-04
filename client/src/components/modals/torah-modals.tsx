@@ -128,7 +128,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
       // Check if all tasks are completed and show congratulations
       setTimeout(() => {
         if (checkAndShowCongratulations()) {
-          openModal('congratulations');
+          openModal('congratulations', 'torah');
         }
       }, 200);
     }, 500);
@@ -174,7 +174,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   return (
     <>
       {/* Halacha Modal */}
-      <Dialog open={activeModal === 'halacha'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'halacha'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="halacha-description">
           <div id="halacha-description" className="sr-only">Daily Jewish law and practice content</div>
           
@@ -286,7 +286,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
       </Dialog>
 
       {/* Emuna Modal */}
-      <Dialog open={activeModal === 'emuna'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'emuna'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="emuna-description">
           <div id="emuna-description" className="sr-only">Daily faith strengthening and spiritual trust content</div>
           
@@ -371,7 +371,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
       </Dialog>
 
       {/* Chizuk Modal */}
-      <Dialog open={activeModal === 'chizuk'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'chizuk'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="chizuk-description">
           <div id="chizuk-description" className="sr-only">5-minute daily inspiration and spiritual strengthening content</div>
           
@@ -442,7 +442,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
       </Dialog>
 
       {/* Featured Modal */}
-      <Dialog open={activeModal === 'featured'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'featured'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="max-h-[95vh] overflow-y-auto" aria-describedby="featured-description">
           <DialogHeader className="text-center mb-4 pr-8">
             <DialogTitle className="text-lg platypi-bold text-black">Featured Content</DialogTitle>
@@ -508,7 +508,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
       </Dialog>
 
       {/* Pirkei Avot Modal */}
-      <Dialog open={activeModal === 'pirkei-avot'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'pirkei-avot'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="max-h-[95vh] overflow-y-auto" aria-describedby="pirkei-avot-description">
           <DialogHeader className="text-center mb-4">
             <DialogTitle className="text-lg platypi-semibold mb-2">Pirkei Avot</DialogTitle>

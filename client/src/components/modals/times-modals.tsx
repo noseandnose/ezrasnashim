@@ -184,7 +184,7 @@ export default function TimesModals() {
   return (
     <>
       {/* Hebrew Date Calculator Modal */}
-      <Dialog open={activeModal === 'date-calculator'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'date-calculator'} onOpenChange={() => closeModal(true)}>
         <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg platypi-bold text-black">Hebrew Date Calculator</DialogTitle>
