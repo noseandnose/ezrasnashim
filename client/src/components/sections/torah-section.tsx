@@ -125,7 +125,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
             // Dynamic subtitle for Halacha with reading time
             let displaySubtitle = subtitle;
             if (id === 'halacha' && halachaContent?.content && !isCompleted) {
-              displaySubtitle = `${calculateReadingTime(halachaContent.content)} read`;
+              displaySubtitle = `Learn Shabbos (${calculateReadingTime(halachaContent.content)})`;
             }
             
             return (

@@ -184,11 +184,6 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               <div className="flex items-center gap-4">
                 <div className="flex flex-col items-center">
                   <DialogTitle className="text-lg platypi-bold text-black">Daily Halacha</DialogTitle>
-                  {halachaContent?.content && (
-                    <span className="text-xs platypi-medium text-black/60 mt-1">
-                      {calculateReadingTime(halachaContent.content)} read
-                    </span>
-                  )}
                 </div>
                 
                 <div className="flex items-center gap-2">
