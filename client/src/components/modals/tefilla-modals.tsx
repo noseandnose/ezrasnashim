@@ -1655,16 +1655,10 @@ function JerusalemCompass() {
             <div className="space-y-6">
               {/* Compass */}
               <div className="relative w-64 h-64 mx-auto">
-                {/* Compass Circle with device orientation rotation */}
-                <div 
-                  className="w-full h-full rounded-full border-4 border-blush/20 bg-gradient-to-br from-white to-blush/5 shadow-lg relative overflow-hidden"
-                  style={{
-                    transform: orientationSupported ? `rotate(-${deviceOrientation}deg)` : 'none',
-                    transition: 'transform 0.3s ease'
-                  }}
-                >
+                {/* Fixed Compass Circle - doesn't rotate */}
+                <div className="w-full h-full rounded-full border-4 border-blush/20 bg-gradient-to-br from-white to-blush/5 shadow-lg relative overflow-hidden">
                   
-                  {/* Cardinal directions - these rotate with the compass */}
+                  {/* Fixed Cardinal directions */}
                   <div className="absolute inset-4 rounded-full border border-blush/10">
                     <div className="absolute top-2 left-1/2 transform -translate-x-1/2 platypi-bold text-sm text-black">N</div>
                     <div className="absolute right-2 top-1/2 transform -translate-y-1/2 platypi-bold text-sm text-black">E</div>
@@ -1672,39 +1666,73 @@ function JerusalemCompass() {
                     <div className="absolute left-2 top-1/2 transform -translate-y-1/2 platypi-bold text-sm text-black">W</div>
                   </div>
                   
-                  {/* Western Wall direction arrow - fixed in space */}
+                  {/* Western Wall direction marker - FIXED position */}
                   <div 
                     className="absolute top-1/2 left-1/2 origin-bottom"
                     style={{ 
-                      transform: `translate(-50%, -100%) rotate(${direction}deg)`,
+                      transform: `translate(-50%, -100%) rotate(${direction}deg)`
+                    }}
+                  >
+                    <div className="w-2 h-24 bg-gradient-feminine rounded-full relative">
+                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                        <div className="w-0 h-0 border-l-4 border-r-4 border-b-6 border-l-transparent border-r-transparent border-b-blush"></div>
+                      </div>
+                      <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs platypi-bold text-blush whitespace-nowrap">
+                        Western Wall
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* User direction arrow - rotates with device orientation */}
+                  <div 
+                    className="absolute top-1/2 left-1/2 origin-bottom"
+                    style={{ 
+                      transform: orientationSupported 
+                        ? `translate(-50%, -100%) rotate(${-deviceOrientation}deg)` 
+                        : 'translate(-50%, -100%) rotate(0deg)',
                       transition: 'transform 0.3s ease'
                     }}
                   >
-                    <div className="w-1 h-24 bg-gradient-feminine rounded-full relative">
+                    <div className="w-1 h-20 bg-blue-500 rounded-full relative">
                       <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                        <Navigation className="w-4 h-4 text-blush" fill="currentColor" />
+                        <Navigation className="w-3 h-3 text-blue-500" fill="currentColor" />
+                      </div>
+                      <div className="absolute -bottom-5 left-1/2 transform -translate-x-1/2 text-xs platypi-bold text-blue-600">
+                        YOU
                       </div>
                     </div>
                   </div>
                   
                   {/* Center dot */}
-                  <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-gradient-feminine rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
-                </div>
-
-                {/* Phone orientation indicator (always points up) */}
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <div className="absolute -top-32 left-1/2 transform -translate-x-1/2">
-                    <div className="w-0 h-0 border-l-4 border-r-4 border-b-8 border-l-transparent border-r-transparent border-b-blue-500"></div>
-                    <div className="text-xs platypi-medium text-blue-600 mt-1 text-center">YOU</div>
-                  </div>
+                  <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-gray-400 rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
                 </div>
               </div>
+
+              {/* Alignment Status */}
+              {orientationSupported && (
+                <div className={`rounded-2xl p-3 border text-center ${
+                  Math.abs((direction - deviceOrientation + 360) % 360) < 15 || Math.abs((direction - deviceOrientation + 360) % 360) > 345
+                    ? 'bg-green-50 border-green-200' 
+                    : 'bg-blue-50 border-blue-200'
+                }`}>
+                  <p className={`platypi-medium text-sm ${
+                    Math.abs((direction - deviceOrientation + 360) % 360) < 15 || Math.abs((direction - deviceOrientation + 360) % 360) > 345
+                      ? 'text-green-800' 
+                      : 'text-blue-800'
+                  }`}>
+                    {Math.abs((direction - deviceOrientation + 360) % 360) < 15 || Math.abs((direction - deviceOrientation + 360) % 360) > 345
+                      ? '✓ Aligned with Western Wall!' 
+                      : 'Turn your device until the blue arrow aligns with the pink line'
+                    }
+                  </p>
+                </div>
+              )}
 
               {/* Orientation Status */}
               {!orientationSupported && (
                 <div className="bg-yellow-50 rounded-2xl p-3 border border-yellow-200">
                   <p className="platypi-regular text-xs text-yellow-800">
-                    Device orientation not available. Hold your device upright and face the indicated direction.
+                    Device orientation not available. Face the direction shown by the pink arrow pointing to "Western Wall".
                   </p>
                 </div>
               )}
@@ -1750,9 +1778,9 @@ function JerusalemCompass() {
             <h4 className="platypi-bold text-sm text-black mb-2">How to Use:</h4>
             <ol className="platypi-regular text-xs text-black/70 space-y-1">
               <li>1. Allow location access when prompted</li>
-              <li>2. {orientationSupported ? 'Hold device upright and turn until the pink arrow points up' : 'Face the direction shown by the pink arrow'}</li>
-              <li>3. {orientationSupported ? 'The compass rotates as you turn, showing your facing direction' : 'The arrow points towards the Western Wall'}</li>
-              <li>4. When the arrow points up (toward "YOU"), you're facing the Western Wall</li>
+              <li>2. {orientationSupported ? 'Hold device upright and turn your body' : 'Face the direction of the pink line pointing to "Western Wall"'}</li>
+              <li>3. {orientationSupported ? 'The blue "YOU" arrow moves as you turn' : 'The pink line shows the Western Wall direction'}</li>
+              <li>4. {orientationSupported ? 'When the blue arrow aligns with the pink line, you\'re facing the Western Wall' : 'Face the direction shown and pray toward the Western Wall'}</li>
             </ol>
           </div>
         </div>
