@@ -334,26 +334,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
 
   return (
     <div className="overflow-y-auto h-full pb-20">
-      {/* Jerusalem Compass Section - Top Bar */}
-      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg -mt-1 mb-2">
-        <button
-          onClick={() => openModal('jerusalem-compass', 'tefilla')}
-          className="w-full bg-white/70 rounded-2xl p-3 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
-        >
-          <div className="flex items-center space-x-3">
-            <div className="bg-gradient-feminine p-3 rounded-full">
-              <Compass className="text-white" size={20} />
-            </div>
-            <div className="flex-grow">
-              <h3 className="platypi-bold text-lg text-black">Jerusalem Compass</h3>
-              <p className="platypi-regular text-sm text-black/70">Find the direction to pray</p>
-            </div>
-            <div className="bg-gradient-feminine p-2 rounded-full shadow-lg">
-              <ArrowRight className="text-white" size={16} />
-            </div>
-          </div>
-        </button>
-      </div>
+
 
       {/* Main Tefilla Section - Tehillim */}
       <div className="bg-gradient-soft rounded-3xl p-3 shadow-lg mx-2">
@@ -621,7 +602,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           </div>
         </div>
 
-        {/* Jerusalem Compass Section */}
+        {/* Western Wall Compass Section */}
         <div className="bg-white rounded-3xl p-3 shadow-lg border border-blush/10">
           <button 
             onClick={() => openModal('jerusalem-compass', 'tefilla')}
@@ -630,7 +611,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             <div className="bg-blue-500 p-3 rounded-full mx-auto mb-2 w-fit">
               <Compass className="text-white" size={20} />
             </div>
-            <h3 className="platypi-bold text-lg text-black mb-1">Jerusalem Compass</h3>
+            <h3 className="platypi-bold text-lg text-black mb-1">Western Wall Compass</h3>
             <p className="platypi-regular text-sm text-black/70">Find the direction to face during prayers</p>
           </button>
         </div>

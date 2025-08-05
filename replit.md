@@ -37,6 +37,7 @@ Reading time display: User requested reading time estimation for text content, i
 - **Daily Completion Tracking**: Torah, Tefilla, Tzedaka.
 - **Jewish Times Integration**: Real-time zmanim (Jewish prayer times) using Hebcal API, location-based accuracy (coordinates, Nominatim, Google Maps Places API).
 - **Content Management**: Daily Torah (Halacha, Mussar/Emuna, Chizuk), prayers (Mincha, Nishmas, Tehillim, Morning Brochas, Birkat Hamazon, Maariv), Shabbat resources, Pirkei Avot. Supports text and audio.
+- **Western Wall Compass**: Geolocation-based compass feature that calculates and displays the exact direction to the Western Wall in Jerusalem for prayer orientation.
 - **Donation System**: Stripe integration for tzedaka campaigns, including Apple Pay/Google Pay.
 - **Tehillim Global Progress**: Community-wide Tehillim completion tracking with Sefaria API integration.
 - **Sponsorship System**: Daily content sponsorship.

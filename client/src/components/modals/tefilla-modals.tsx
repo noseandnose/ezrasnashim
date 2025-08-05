@@ -1493,11 +1493,11 @@ function JerusalemCompass() {
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Jerusalem coordinates
-  const JERUSALEM_LAT = 31.7683;
-  const JERUSALEM_LNG = 35.2137;
+  // Western Wall coordinates (more precise for prayer direction)
+  const WESTERN_WALL_LAT = 31.7767;
+  const WESTERN_WALL_LNG = 35.2345;
 
-  // Calculate bearing to Jerusalem
+  // Calculate bearing to Western Wall
   const calculateBearing = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
     const dLng = (lng2 - lng1) * Math.PI / 180;
     const lat1Rad = lat1 * Math.PI / 180;
@@ -1528,8 +1528,8 @@ function JerusalemCompass() {
         
         setLocation({ lat: userLat, lng: userLng });
         
-        // Calculate direction to Jerusalem
-        const bearing = calculateBearing(userLat, userLng, JERUSALEM_LAT, JERUSALEM_LNG);
+        // Calculate direction to Western Wall
+        const bearing = calculateBearing(userLat, userLng, WESTERN_WALL_LAT, WESTERN_WALL_LNG);
         setDirection(bearing);
         
         // Get location name using reverse geocoding
@@ -1583,14 +1583,14 @@ function JerusalemCompass() {
         
         {/* Header */}
         <div className="flex items-center justify-center mb-4 relative pr-8">
-          <DialogTitle className="text-xl platypi-bold text-black">Jerusalem Compass</DialogTitle>
+          <DialogTitle className="text-xl platypi-bold text-black">Western Wall Compass</DialogTitle>
         </div>
 
         <div className="space-y-6">
           {/* Description */}
           <div className="text-center">
             <p className="platypi-regular text-sm text-black/70 mb-4">
-              Find the direction to face when praying towards Jerusalem
+              Find the direction to face when praying towards the Western Wall
             </p>
           </div>
 
@@ -1657,7 +1657,7 @@ function JerusalemCompass() {
                       {getCardinalDirection(direction)} ({Math.round(direction)}°)
                     </span>
                   </div>
-                  <p className="platypi-regular text-sm text-black/70">Direction to Jerusalem</p>
+                  <p className="platypi-regular text-sm text-black/70">Direction to Western Wall</p>
                 </div>
               </div>
 
@@ -1690,7 +1690,7 @@ function JerusalemCompass() {
             <ol className="platypi-regular text-xs text-black/70 space-y-1">
               <li>1. Allow location access when prompted</li>
               <li>2. Face the direction shown by the arrow</li>
-              <li>3. The compass points towards Jerusalem</li>
+              <li>3. The compass points towards the Western Wall</li>
               <li>4. Use this direction for your prayers</li>
             </ol>
           </div>
