@@ -63,7 +63,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
   });
 
   // Fetch today's Featured content
-  const { data: featuredContent } = useQuery<{title?: string; audioUrl?: string; speaker?: string}>({
+  const { data: featuredContent } = useQuery<{title?: string; content?: string; audioUrl?: string; speaker?: string}>({
     queryKey: ['/api/torah/featured', today],
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000
@@ -112,7 +112,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
       border: 'border-blush/10',
-      contentType: 'audio'
+      contentType: 'text'
     }
   ];
 
@@ -153,7 +153,10 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
                 content = halachaContent;
                 hasContent = !!halachaContent?.content;
                 if (hasContent && !isCompleted && halachaContent) {
-                  displaySubtitle = halachaContent.title || `Learn Shabbos (${calculateReadingTime(halachaContent.content || '')})`;
+                  const readingTime = calculateReadingTime(halachaContent.content || '');
+                  displaySubtitle = halachaContent.title ? 
+                    `${halachaContent.title} (${readingTime})` : 
+                    `Learn Shabbos (${readingTime})`;
                 }
                 break;
               case 'chizuk':
@@ -172,9 +175,12 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
                 break;
               case 'featured':
                 content = featuredContent;
-                hasContent = !!featuredContent?.audioUrl;
+                hasContent = !!featuredContent?.content;
                 if (hasContent && !isCompleted && featuredContent) {
-                  displaySubtitle = featuredContent.title || subtitle;
+                  const readingTime = calculateReadingTime(featuredContent.content || '');
+                  displaySubtitle = featuredContent.title ? 
+                    `${featuredContent.title} (${readingTime})` : 
+                    `Special Topics (${readingTime})`;
                 }
                 break;
             }
