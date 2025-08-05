@@ -149,7 +149,7 @@ export function BirkatHamazonModal() {
               className="w-full bg-white rounded-xl p-4 border border-blush/10 hover:bg-blush/5 transition-colors text-left"
             >
               <h3 className="platypi-medium text-black mb-1">Me'ein Shalosh</h3>
-              <p className="text-sm text-gray-600">Al Hamichiya</p>
+              <p className="text-sm text-gray-600">Al Hamichiya/Hagafen/HaEtz</p>
             </button>
 
             <button
