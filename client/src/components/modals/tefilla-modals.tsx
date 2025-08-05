@@ -1495,9 +1495,9 @@ function JerusalemCompass() {
   const [isLoading, setIsLoading] = useState(false);
   const [orientationSupported, setOrientationSupported] = useState(true);
 
-  // Western Wall coordinates (more precise for prayer direction)
+  // Western Wall coordinates (exact location)
   const WESTERN_WALL_LAT = 31.7767;
-  const WESTERN_WALL_LNG = 35.2345;
+  const WESTERN_WALL_LNG = 35.2344;
 
   // Calculate bearing to Western Wall - fixed calculation
   const calculateBearing = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
@@ -1663,7 +1663,7 @@ function JerusalemCompass() {
               {/* Compass */}
               <div className="relative w-64 h-64 mx-auto">
                 {/* Fixed Compass Circle - doesn't rotate */}
-                <div className="w-full h-full rounded-full border-4 border-blush/20 bg-gradient-to-br from-white to-blush/5 shadow-lg relative overflow-hidden">
+                <div className="w-full h-full rounded-full border-4 border-blush/20 bg-gradient-to-br from-white to-blush/5 shadow-lg relative">
                   
                   {/* Fixed Cardinal directions */}
                   <div className="absolute inset-4 rounded-full border border-blush/10">
@@ -1681,7 +1681,7 @@ function JerusalemCompass() {
                     }}
                   >
                     <div className="relative w-0 h-0">
-                      <div className="absolute left-1/2 transform -translate-x-1/2 text-2xl" style={{ top: '-140px' }}>
+                      <div className="absolute left-1/2 transform -translate-x-1/2 text-2xl" style={{ top: '-150px' }}>
                         ✡️
                       </div>
                     </div>
@@ -1714,9 +1714,14 @@ function JerusalemCompass() {
 
               {/* Alignment Status */}
               {orientationSupported && (() => {
-                const alignmentDiff = Math.abs((direction - deviceOrientation + 360) % 360);
-                const isAligned = alignmentDiff < 10 || alignmentDiff > 350;
-                console.log(`Alignment check: Direction=${direction}°, Device=${deviceOrientation}°, Diff=${alignmentDiff}°, Aligned=${isAligned}`);
+                // Calculate angular difference between target direction and current device orientation
+                let angleDiff = Math.abs(direction - deviceOrientation);
+                if (angleDiff > 180) {
+                  angleDiff = 360 - angleDiff;
+                }
+                const isAligned = angleDiff < 15;
+                
+                console.log(`Alignment check: Target=${direction}°, Device=${deviceOrientation}°, Diff=${angleDiff}°, Aligned=${isAligned}`);
                 
                 return (
                   <div className={`rounded-2xl p-3 border text-center ${
