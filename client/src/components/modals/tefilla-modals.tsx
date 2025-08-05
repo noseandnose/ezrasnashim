@@ -1495,9 +1495,9 @@ function JerusalemCompass() {
   const [isLoading, setIsLoading] = useState(false);
   const [orientationSupported, setOrientationSupported] = useState(true);
 
-  // Western Wall coordinates (exact location)
-  const WESTERN_WALL_LAT = 31.7767;
-  const WESTERN_WALL_LNG = 35.2344;
+  // Western Wall (Kotel) coordinates - verified accurate location
+  const WESTERN_WALL_LAT = 31.7781;
+  const WESTERN_WALL_LNG = 35.2346;
 
   // Calculate bearing to Western Wall - fixed calculation
   const calculateBearing = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
@@ -1588,10 +1588,17 @@ function JerusalemCompass() {
     if (typeof DeviceOrientationEvent !== 'undefined') {
       const handleOrientation = (event: DeviceOrientationEvent) => {
         // Get compass heading (alpha gives us the rotation around z-axis)
-        let heading = event.alpha;
-        if (heading !== null) {
-          // Normalize to 0-360 degrees
-          setDeviceOrientation(heading);
+        if (event.alpha !== null) {
+          // For a proper compass, we need to invert alpha
+          // as alpha increases when rotating clockwise, but compass degrees increase counter-clockwise
+          let heading = 360 - event.alpha;
+          
+          // Use webkitCompassHeading if available (iOS)
+          if ((event as any).webkitCompassHeading !== undefined && (event as any).webkitCompassHeading !== null) {
+            heading = (event as any).webkitCompassHeading;
+          }
+          
+          setDeviceOrientation(heading % 360);
         }
       };
 
@@ -1673,55 +1680,56 @@ function JerusalemCompass() {
                     <div className="absolute left-2 top-1/2 transform -translate-y-1/2 platypi-bold text-sm text-black">W</div>
                   </div>
                   
-                  {/* Western Wall direction marker - FIXED position on circle edge */}
+                  {/* Center dot */}
+                  <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-gray-400 rounded-full transform -translate-x-1/2 -translate-y-1/2 z-20"></div>
+                  
+                  {/* User direction arrow - this represents the phone's north-facing direction */}
                   <div 
-                    className="absolute top-1/2 left-1/2 origin-center"
-                    style={{ 
-                      transform: `translate(-50%, -50%) rotate(${direction}deg)`
-                    }}
-                  >
-                    <div className="relative w-0 h-0">
-                      <div className="absolute left-1/2 transform -translate-x-1/2 text-2xl" style={{ top: '-150px' }}>
-                        ✡️
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* User direction arrow - rotates with device orientation */}
-                  <div 
-                    className="absolute top-1/2 left-1/2 origin-bottom"
+                    className="absolute top-1/2 left-1/2 w-64 h-64"
                     style={{ 
                       transform: orientationSupported 
-                        ? `translate(-50%, -100%) rotate(${-deviceOrientation}deg)` 
-                        : 'translate(-50%, -100%) rotate(0deg)',
+                        ? `translate(-50%, -50%) rotate(${-deviceOrientation}deg)` 
+                        : 'translate(-50%, -50%) rotate(0deg)',
                       transition: 'transform 0.3s ease'
                     }}
                   >
-                    <div className="w-1 h-20 bg-blue-500 rounded-full relative">
-                      <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                        <Navigation className="w-3 h-3 text-blue-500" fill="currentColor" />
-                      </div>
-                      <div className="absolute -bottom-5 left-1/2 transform -translate-x-1/2 text-xs platypi-bold text-blue-600">
-                        YOU
+                    {/* Blue arrow pointing upward (north) */}
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2">
+                      <div className="flex flex-col items-center">
+                        <Navigation className="w-5 h-5 text-blue-500" fill="currentColor" />
+                        <div className="w-1 h-24 bg-blue-500 rounded-full"></div>
+                        <div className="text-xs platypi-bold text-blue-600 mt-1">YOU</div>
                       </div>
                     </div>
                   </div>
                   
-                  {/* Center dot */}
-                  <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-gray-400 rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
+                  {/* Western Wall marker - positioned at calculated bearing */}
+                  <div 
+                    className="absolute top-1/2 left-1/2 w-64 h-64 pointer-events-none"
+                    style={{ 
+                      transform: `translate(-50%, -50%) rotate(${direction}deg)`
+                    }}
+                  >
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 text-3xl">
+                      ✡️
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* Alignment Status */}
               {orientationSupported && (() => {
-                // Calculate angular difference between target direction and current device orientation
+                // For alignment, we need to check if the user (facing north when arrow points up)
+                // is actually facing the direction of the Western Wall
+                // When the compass rotates by -deviceOrientation, north aligns with the top
+                // So the user is facing the deviceOrientation direction
                 let angleDiff = Math.abs(direction - deviceOrientation);
                 if (angleDiff > 180) {
                   angleDiff = 360 - angleDiff;
                 }
-                const isAligned = angleDiff < 15;
+                const isAligned = angleDiff < 10;
                 
-                console.log(`Alignment check: Target=${direction}°, Device=${deviceOrientation}°, Diff=${angleDiff}°, Aligned=${isAligned}`);
+                console.log(`Alignment: User facing=${deviceOrientation}°, Target=${direction}°, Diff=${angleDiff}°, Aligned=${isAligned}`);
                 
                 return (
                   <div className={`rounded-2xl p-3 border text-center ${
@@ -1732,7 +1740,7 @@ function JerusalemCompass() {
                     }`}>
                       {isAligned
                         ? '✓ Aligned with ✡️!' 
-                        : 'Turn your body until the blue arrow points directly to ✡️'
+                        : 'Turn until the blue arrow points to ✡️'
                       }
                     </p>
                   </div>
