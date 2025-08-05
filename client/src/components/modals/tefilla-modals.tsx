@@ -1683,17 +1683,17 @@ function JerusalemCompass() {
                   {/* Center dot */}
                   <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-gray-400 rounded-full transform -translate-x-1/2 -translate-y-1/2 z-20"></div>
                   
-                  {/* User direction arrow - this represents the phone's north-facing direction */}
+                  {/* User direction arrow - points to where user is facing */}
                   <div 
                     className="absolute top-1/2 left-1/2 w-64 h-64"
                     style={{ 
                       transform: orientationSupported 
-                        ? `translate(-50%, -50%) rotate(${-deviceOrientation}deg)` 
+                        ? `translate(-50%, -50%) rotate(${deviceOrientation}deg)` 
                         : 'translate(-50%, -50%) rotate(0deg)',
                       transition: 'transform 0.3s ease'
                     }}
                   >
-                    {/* Blue arrow pointing upward (north) */}
+                    {/* Blue arrow pointing upward (user's facing direction) */}
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2">
                       <div className="flex flex-col items-center">
                         <Navigation className="w-5 h-5 text-blue-500" fill="currentColor" />
