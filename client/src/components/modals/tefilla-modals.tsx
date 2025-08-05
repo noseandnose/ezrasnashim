@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles } from "lucide-react";
+import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, Navigation } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
@@ -1038,6 +1038,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       
       {/* Birkat Hamazon Modal */}
       <BirkatHamazonModal />
+      
+      {/* Jerusalem Compass Modal */}
+      <JerusalemCompass />
     </>
   );
 }
@@ -1478,5 +1481,229 @@ function IndividualTehillimModal() {
         onComplete={() => setShowHeartExplosion(false)} 
       />
     </>
+  );
+}
+
+// Jerusalem Compass Component
+function JerusalemCompass() {
+  const { activeModal, closeModal } = useModalStore();
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [direction, setDirection] = useState<number | null>(null);
+  const [locationName, setLocationName] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Jerusalem coordinates
+  const JERUSALEM_LAT = 31.7683;
+  const JERUSALEM_LNG = 35.2137;
+
+  // Calculate bearing to Jerusalem
+  const calculateBearing = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const lat1Rad = lat1 * Math.PI / 180;
+    const lat2Rad = lat2 * Math.PI / 180;
+    
+    const y = Math.sin(dLng) * Math.cos(lat2Rad);
+    const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) - Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLng);
+    
+    let bearing = Math.atan2(y, x) * 180 / Math.PI;
+    return (bearing + 360) % 360; // Normalize to 0-360
+  };
+
+  // Get user's location
+  const getUserLocation = () => {
+    setIsLoading(true);
+    setError("");
+    
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by this browser");
+      setIsLoading(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const userLat = position.coords.latitude;
+        const userLng = position.coords.longitude;
+        
+        setLocation({ lat: userLat, lng: userLng });
+        
+        // Calculate direction to Jerusalem
+        const bearing = calculateBearing(userLat, userLng, JERUSALEM_LAT, JERUSALEM_LNG);
+        setDirection(bearing);
+        
+        // Get location name using reverse geocoding
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLat}&lon=${userLng}&accept-language=en`
+          );
+          const data = await response.json();
+          const city = data.address?.city || data.address?.town || data.address?.village || data.address?.county || "Unknown location";
+          const country = data.address?.country || "";
+          setLocationName(`${city}, ${country}`);
+        } catch (err) {
+          setLocationName(`${userLat.toFixed(4)}, ${userLng.toFixed(4)}`);
+        }
+        
+        setIsLoading(false);
+      },
+      (error) => {
+        setError("Unable to get your location. Please enable location access.");
+        setIsLoading(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 600000 // 10 minutes
+      }
+    );
+  };
+
+  // Get cardinal direction
+  const getCardinalDirection = (bearing: number): string => {
+    const directions = [
+      "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+      "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"
+    ];
+    const index = Math.round(bearing / 22.5) % 16;
+    return directions[index];
+  };
+
+  useEffect(() => {
+    if (activeModal === 'jerusalem-compass') {
+      getUserLocation();
+    }
+  }, [activeModal]);
+
+  if (activeModal !== 'jerusalem-compass') return null;
+
+  return (
+    <Dialog open={true} onOpenChange={() => closeModal(true)}>
+      <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
+        
+        {/* Header */}
+        <div className="flex items-center justify-center mb-4 relative pr-8">
+          <DialogTitle className="text-xl platypi-bold text-black">Jerusalem Compass</DialogTitle>
+        </div>
+
+        <div className="space-y-6">
+          {/* Description */}
+          <div className="text-center">
+            <p className="platypi-regular text-sm text-black/70 mb-4">
+              Find the direction to face when praying towards Jerusalem
+            </p>
+          </div>
+
+          {/* Location Status */}
+          {isLoading ? (
+            <div className="flex flex-col items-center space-y-3 py-8">
+              <div className="animate-spin w-8 h-8 border-3 border-blush/20 border-t-blush rounded-full"></div>
+              <p className="platypi-regular text-sm text-black/60">Getting your location...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <div className="bg-red-50 rounded-2xl p-4 mb-4">
+                <MapPin className="w-6 h-6 text-red-500 mx-auto mb-2" />
+                <p className="platypi-regular text-sm text-red-700">{error}</p>
+              </div>
+              <Button 
+                onClick={getUserLocation}
+                className="bg-gradient-feminine text-white px-6 py-2 rounded-xl platypi-medium hover:opacity-90"
+              >
+                Try Again
+              </Button>
+            </div>
+          ) : direction !== null ? (
+            <div className="space-y-6">
+              {/* Compass */}
+              <div className="relative w-64 h-64 mx-auto">
+                {/* Compass Circle */}
+                <div className="w-full h-full rounded-full border-4 border-blush/20 bg-gradient-to-br from-white to-blush/5 shadow-lg relative overflow-hidden">
+                  
+                  {/* Cardinal directions */}
+                  <div className="absolute inset-4 rounded-full border border-blush/10">
+                    <div className="absolute top-2 left-1/2 transform -translate-x-1/2 platypi-bold text-sm text-black">N</div>
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 platypi-bold text-sm text-black">E</div>
+                    <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 platypi-bold text-sm text-black">S</div>
+                    <div className="absolute left-2 top-1/2 transform -translate-y-1/2 platypi-bold text-sm text-black">W</div>
+                  </div>
+                  
+                  {/* Jerusalem direction arrow */}
+                  <div 
+                    className="absolute top-1/2 left-1/2 origin-bottom"
+                    style={{ 
+                      transform: `translate(-50%, -100%) rotate(${direction}deg)`,
+                      transition: 'transform 0.5s ease'
+                    }}
+                  >
+                    <div className="w-1 h-24 bg-gradient-feminine rounded-full relative">
+                      <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                        <Navigation className="w-4 h-4 text-blush" fill="currentColor" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Center dot */}
+                  <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-gradient-feminine rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
+                </div>
+              </div>
+
+              {/* Direction Info */}
+              <div className="bg-gradient-soft rounded-2xl p-4 text-center">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-center space-x-2">
+                    <Compass className="w-5 h-5 text-blush" />
+                    <span className="platypi-bold text-lg text-black">
+                      {getCardinalDirection(direction)} ({Math.round(direction)}°)
+                    </span>
+                  </div>
+                  <p className="platypi-regular text-sm text-black/70">Direction to Jerusalem</p>
+                </div>
+              </div>
+
+              {/* Location Info */}
+              <div className="bg-white rounded-2xl p-3 border border-blush/10">
+                <div className="flex items-center space-x-2">
+                  <MapPin className="w-4 h-4 text-blush flex-shrink-0" />
+                  <div>
+                    <p className="platypi-medium text-sm text-black">Your Location</p>
+                    <p className="platypi-regular text-xs text-black/60">{locationName}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <Button 
+                onClick={getUserLocation}
+                className="bg-gradient-feminine text-white px-6 py-3 rounded-xl platypi-medium hover:opacity-90"
+              >
+                <MapPin className="w-4 h-4 mr-2" />
+                Get My Location
+              </Button>
+            </div>
+          )}
+
+          {/* Instructions */}
+          <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200">
+            <h4 className="platypi-bold text-sm text-black mb-2">How to Use:</h4>
+            <ol className="platypi-regular text-xs text-black/70 space-y-1">
+              <li>1. Allow location access when prompted</li>
+              <li>2. Face the direction shown by the arrow</li>
+              <li>3. The compass points towards Jerusalem</li>
+              <li>4. Use this direction for your prayers</li>
+            </ol>
+          </div>
+        </div>
+
+        {/* Complete Button */}
+        <Button
+          onClick={() => closeModal(true)}
+          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
+        >
+          Close
+        </Button>
+      </DialogContent>
+    </Dialog>
   );
 }

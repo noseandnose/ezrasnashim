@@ -24,6 +24,7 @@ export type ModalType =
   | 'blessings'
   | 'tefillos'
   | 'personal-prayers'
+  | 'jerusalem-compass'
   | 'donate'
   | 'about'
   | 'location'
