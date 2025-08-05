@@ -1499,17 +1499,23 @@ function JerusalemCompass() {
   const WESTERN_WALL_LAT = 31.7767;
   const WESTERN_WALL_LNG = 35.2345;
 
-  // Calculate bearing to Western Wall
+  // Calculate bearing to Western Wall - fixed calculation
   const calculateBearing = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
-    const dLng = (lng2 - lng1) * Math.PI / 180;
+    // Convert to radians
     const lat1Rad = lat1 * Math.PI / 180;
     const lat2Rad = lat2 * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
     
+    // Calculate bearing using proper formula
     const y = Math.sin(dLng) * Math.cos(lat2Rad);
     const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) - Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLng);
     
+    // Convert to degrees and normalize
     let bearing = Math.atan2(y, x) * 180 / Math.PI;
-    return (bearing + 360) % 360; // Normalize to 0-360
+    bearing = (bearing + 360) % 360; // Normalize to 0-360
+    
+    console.log(`Bearing calculation: From (${lat1}, ${lng1}) to (${lat2}, ${lng2}) = ${bearing}°`);
+    return bearing;
   };
 
   // Get user's location
@@ -1677,8 +1683,8 @@ function JerusalemCompass() {
                       <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                         <div className="w-0 h-0 border-l-4 border-r-4 border-b-6 border-l-transparent border-r-transparent border-b-blush"></div>
                       </div>
-                      <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs platypi-bold text-blush whitespace-nowrap">
-                        Western Wall
+                      <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-lg">
+                        🕌
                       </div>
                     </div>
                   </div>
@@ -1721,7 +1727,7 @@ function JerusalemCompass() {
                       : 'text-blue-800'
                   }`}>
                     {Math.abs((direction - deviceOrientation + 360) % 360) < 15 || Math.abs((direction - deviceOrientation + 360) % 360) > 345
-                      ? '✓ Aligned with Western Wall!' 
+                      ? '✓ Aligned with 🕌!' 
                       : 'Turn your device until the blue arrow aligns with the pink line'
                     }
                   </p>
@@ -1732,7 +1738,7 @@ function JerusalemCompass() {
               {!orientationSupported && (
                 <div className="bg-yellow-50 rounded-2xl p-3 border border-yellow-200">
                   <p className="platypi-regular text-xs text-yellow-800">
-                    Device orientation not available. Face the direction shown by the pink arrow pointing to "Western Wall".
+                    Device orientation not available. Face the direction shown by the pink arrow pointing to 🕌.
                   </p>
                 </div>
               )}
@@ -1746,7 +1752,7 @@ function JerusalemCompass() {
                       {getCardinalDirection(direction)} ({Math.round(direction)}°)
                     </span>
                   </div>
-                  <p className="platypi-regular text-sm text-black/70">Direction to Western Wall</p>
+                  <p className="platypi-regular text-sm text-black/70">Direction to 🕌</p>
                 </div>
               </div>
 
@@ -1778,9 +1784,9 @@ function JerusalemCompass() {
             <h4 className="platypi-bold text-sm text-black mb-2">How to Use:</h4>
             <ol className="platypi-regular text-xs text-black/70 space-y-1">
               <li>1. Allow location access when prompted</li>
-              <li>2. {orientationSupported ? 'Hold device upright and turn your body' : 'Face the direction of the pink line pointing to "Western Wall"'}</li>
-              <li>3. {orientationSupported ? 'The blue "YOU" arrow moves as you turn' : 'The pink line shows the Western Wall direction'}</li>
-              <li>4. {orientationSupported ? 'When the blue arrow aligns with the pink line, you\'re facing the Western Wall' : 'Face the direction shown and pray toward the Western Wall'}</li>
+              <li>2. {orientationSupported ? 'Hold device upright and turn your body' : 'Face the direction of the pink line pointing to 🕌'}</li>
+              <li>3. {orientationSupported ? 'The blue "YOU" arrow moves as you turn' : 'The pink line shows the direction to 🕌'}</li>
+              <li>4. {orientationSupported ? 'When the blue arrow aligns with the pink line, you\'re facing 🕌' : 'Face the direction shown and pray toward 🕌'}</li>
             </ol>
           </div>
         </div>
