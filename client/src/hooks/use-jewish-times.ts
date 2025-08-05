@@ -62,7 +62,7 @@ export function useGeolocation() {
       setLocationRequested(true);
 
       if (!navigator.geolocation) {
-        console.warn("Geolocation is not supported by this browser");
+
         setPermissionDenied(true);
         return;
       }
@@ -76,13 +76,11 @@ export function useGeolocation() {
         },
         (error) => {
           if (error.code === error.PERMISSION_DENIED) {
-            console.warn("Location permission denied, using default location");
+
           } else if (error.code === error.POSITION_UNAVAILABLE) {
-            console.warn(
-              "Location information unavailable, using default location",
-            );
+
           } else if (error.code === error.TIMEOUT) {
-            console.warn("Location request timed out, using default location");
+
           }
           setPermissionDenied(true);
           // Don't set fallback coordinates - require accurate location

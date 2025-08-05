@@ -33,7 +33,7 @@ export default function TimesSection() {
             <button 
               className="text-xs text-blush cursor-pointer hover:text-blush/80 hover:bg-blush/10 px-3 py-2 rounded-lg transition-colors border border-blush/30 platypi-medium"
               onClick={() => {
-                console.log('Location clicked - opening modal');
+
                 openModal('location', 'times');
               }}
             >

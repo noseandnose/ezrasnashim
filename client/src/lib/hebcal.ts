@@ -8,7 +8,7 @@ export async function fetchHebcalData(location: string = "5128581"): Promise<Heb
     }
     return await response.json();
   } catch (error) {
-    console.error('Error fetching Hebcal data:', error);
+
     throw error;
   }
 }
@@ -44,7 +44,7 @@ export function parseJewishTimes(hebcalData: HebcalResponse) {
   const location = hebcalData.location?.title || 'New York';
   const adjustments = HALACHIC_ADJUSTMENTS[location] || HALACHIC_ADJUSTMENTS['New York'];
   
-  const times: any = {};
+  const times: Record<string, string> = {};
   
   // Find specific times from the items array
   hebcalData.items.forEach(item => {

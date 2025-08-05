@@ -11,8 +11,7 @@ export default function TableSection() {
   const { isModalComplete } = useModalCompletionStore();
   const { data: shabbosData, isLoading: shabbosLoading, error: shabbosError } = useShabbosTime();
   
-  // Debug logging for table section
-  console.log('TableSection Debug - shabbosData:', shabbosData, 'loading:', shabbosLoading, 'error:', shabbosError);
+
   
   // Get shared location state and trigger geolocation if needed
   const { coordinates, permissionDenied } = useGeolocation();

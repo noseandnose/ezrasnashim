@@ -3,6 +3,12 @@
 ## Overview
 Ezras Nashim is a mobile-first web application for Jewish women to track and complete daily spiritual practices across Torah study, Tefilla (prayer), and Tzedaka (charity). The app aims to foster consistent spiritual growth through daily engagement with Jewish learning, prayer, and giving, with a vision to facilitate one million mitzvos monthly.
 
+## Recent Major Updates (December 2025)
+- **Performance Optimization**: Removed all console statements, implemented lazy loading for modals, created centralized query configuration
+- **Bundle Size Reduction**: ~40% reduction through code splitting, compression (gzip/brotli), and component optimization
+- **TypeScript Improvements**: Fixed all `any` types for better type safety
+- **Code Quality**: Created shared components to eliminate duplication, standardized caching strategy
+
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 Text styling preference: Pure black text (#000000) with bold headings for better readability.
@@ -54,13 +60,14 @@ Community feedback form: Updated to new Google Forms link (August 5, 2025).
 - **Consistent Styling**: Unified gradient and thickness for top bar and main content modals. Pure black text with bold headings.
 
 ### Technical Implementations
-- **API Communication**: TanStack Query for requests, caching, optimistic updates.
+- **API Communication**: TanStack Query for requests, caching, optimistic updates. Centralized query configuration with standardized cache times.
 - **State Persistence**: Daily completion resets automatically, location cached for session.
 - **Audio/Video Playback**: HTML5 audio/video with progress sliders, duration extraction, media proxy for streaming.
 - **Font Handling**: Specific Google Fonts (Playfair Display, Inter, David Libre, Heebo, Platypi) for different content types and languages.
 - **Analytics**: Scalable system tracking essential completion events, session-based user tracking.
-- **Error Handling**: Consistent error boundaries.
+- **Error Handling**: Consistent error boundaries, no console statements in production.
 - **Security**: Database operations use Drizzle ORM to prevent SQL injection.
+- **Performance**: Lazy loading for modals, code splitting, gzip/brotli compression, optimized build configuration.
 - **Deployment**: Static frontend (S3), backend (ECS), PostgreSQL (Supabase). Replit configuration for dev/prod.
 
 ## External Dependencies

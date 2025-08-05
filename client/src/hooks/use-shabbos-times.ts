@@ -26,36 +26,21 @@ interface ShabbosInfo {
 export function useShabbosTime() {
   const { coordinates } = useLocationStore();
 
-  console.log('useShabbosTime hook - coordinates:', coordinates);
-
   return useQuery({
     queryKey: ['shabbos-times', coordinates?.lat, coordinates?.lng],
     queryFn: async () => {
       if (!coordinates) {
-        console.log('useShabbosTime: No coordinates, returning null');
         // Return null instead of throwing error - matches useJewishTimes behavior
         return null;
       }
 
-      console.log('useShabbosTime: Fetching for coordinates:', coordinates);
-      
       try {
         // Use axios like other hooks for consistency
         const url = `/api/shabbos/${coordinates.lat}/${coordinates.lng}`;
-        console.log('useShabbosTime: Making request to:', url);
-        
         const response = await axiosClient.get(url);
-        console.log('useShabbosTime: Received data:', response.data);
-        
         return response.data;
       } catch (error) {
-        console.error('useShabbosTime: Error in axios request:', error);
-        // Log response data if available
-        if (error && typeof error === 'object' && 'response' in error) {
-          const axiosError = error as any;
-          console.error('useShabbosTime: Error response status:', axiosError.response?.status);
-          console.error('useShabbosTime: Error response data:', axiosError.response?.data);
-        }
+
         throw error;
       }
     },
