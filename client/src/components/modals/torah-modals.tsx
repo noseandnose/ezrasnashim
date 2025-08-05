@@ -220,7 +220,23 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                   className="platypi-regular leading-relaxed text-black whitespace-pre-line"
                   style={{ fontSize: `${fontSize}px` }}
                 >
-                  {halachaContent.content}
+                  {(() => {
+                    if (!halachaContent.content) return null;
+                    
+                    // Replace apostrophes with spaces and format footnotes
+                    let processedContent = halachaContent.content.replace(/'/g, ' ');
+                    
+                    // Format footnote numbers (1-99) to be smaller
+                    processedContent = processedContent.replace(/\b(\d{1,2})\b/g, (match, num) => {
+                      const number = parseInt(num);
+                      if (number >= 1 && number <= 99) {
+                        return `<sup style="font-size: 0.75em">${num}</sup>`;
+                      }
+                      return match;
+                    });
+                    
+                    return <div dangerouslySetInnerHTML={{ __html: processedContent }} />;
+                  })()}
                 </div>
               </div>
             )}
