@@ -1539,6 +1539,7 @@ function JerusalemCompass() {
         // Calculate direction to Western Wall
         const bearing = calculateBearing(userLat, userLng, WESTERN_WALL_LAT, WESTERN_WALL_LNG);
         setDirection(bearing);
+        console.log(`Set direction to: ${bearing}°`);
         
         // Get location name using reverse geocoding
         try {
@@ -1684,7 +1685,7 @@ function JerusalemCompass() {
                         <div className="w-0 h-0 border-l-4 border-r-4 border-b-6 border-l-transparent border-r-transparent border-b-blush"></div>
                       </div>
                       <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
-                        <img src="/attached_assets/E_1754375579710.png" alt="Prayer direction" className="w-6 h-6" />
+                        <img src="attached_assets/E_1754375579710.png" alt="Prayer direction" className="w-6 h-6" />
                       </div>
                     </div>
                   </div>
@@ -1715,24 +1716,26 @@ function JerusalemCompass() {
               </div>
 
               {/* Alignment Status */}
-              {orientationSupported && (
-                <div className={`rounded-2xl p-3 border text-center ${
-                  Math.abs((direction - deviceOrientation + 360) % 360) < 15 || Math.abs((direction - deviceOrientation + 360) % 360) > 345
-                    ? 'bg-green-50 border-green-200' 
-                    : 'bg-blue-50 border-blue-200'
-                }`}>
-                  <p className={`platypi-medium text-sm ${
-                    Math.abs((direction - deviceOrientation + 360) % 360) < 15 || Math.abs((direction - deviceOrientation + 360) % 360) > 345
-                      ? 'text-green-800' 
-                      : 'text-blue-800'
+              {orientationSupported && (() => {
+                const alignmentDiff = Math.abs((direction - deviceOrientation + 360) % 360);
+                const isAligned = alignmentDiff < 10 || alignmentDiff > 350;
+                console.log(`Alignment check: Direction=${direction}°, Device=${deviceOrientation}°, Diff=${alignmentDiff}°, Aligned=${isAligned}`);
+                
+                return (
+                  <div className={`rounded-2xl p-3 border text-center ${
+                    isAligned ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'
                   }`}>
-                    {Math.abs((direction - deviceOrientation + 360) % 360) < 15 || Math.abs((direction - deviceOrientation + 360) % 360) > 345
-                      ? '✓ Aligned for Prayer!' 
-                      : 'Turn your device until the blue arrow aligns with the pink line'
-                    }
-                  </p>
-                </div>
-              )}
+                    <p className={`platypi-medium text-sm ${
+                      isAligned ? 'text-green-800' : 'text-blue-800'
+                    }`}>
+                      {isAligned
+                        ? '✓ Aligned for Prayer!' 
+                        : 'Turn your body until the blue arrow aligns with the pink line'
+                      }
+                    </p>
+                  </div>
+                );
+              })()}
 
               {/* Orientation Status */}
               {!orientationSupported && (
