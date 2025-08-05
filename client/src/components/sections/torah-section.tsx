@@ -17,6 +17,14 @@ const calculateReadingTime = (text: string): string => {
   }
 };
 
+// Convert string to camel case
+const toCamelCase = (str: string): string => {
+  if (!str) return '';
+  return str.split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
+
 interface TorahSectionProps {
   onSectionChange?: (section: Section) => void;
 }
@@ -154,8 +162,9 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
                 hasContent = !!halachaContent?.content;
                 if (hasContent && !isCompleted && halachaContent) {
                   const readingTime = calculateReadingTime(halachaContent.content || '');
-                  displaySubtitle = halachaContent.title ? 
-                    `${halachaContent.title} (${readingTime})` : 
+                  const camelCaseTitle = toCamelCase(halachaContent.title || '');
+                  displaySubtitle = camelCaseTitle ? 
+                    `${camelCaseTitle} (${readingTime})` : 
                     `Learn Shabbos (${readingTime})`;
                 }
                 break;
@@ -163,14 +172,14 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
                 content = chizukContent;
                 hasContent = !!chizukContent?.audioUrl;
                 if (hasContent && !isCompleted && chizukContent) {
-                  displaySubtitle = chizukContent.title || subtitle;
+                  displaySubtitle = toCamelCase(chizukContent.title || '') || subtitle;
                 }
                 break;
               case 'emuna':
                 content = emunaContent;
                 hasContent = !!emunaContent?.audioUrl;
                 if (hasContent && !isCompleted && emunaContent) {
-                  displaySubtitle = emunaContent.title || subtitle;
+                  displaySubtitle = toCamelCase(emunaContent.title || '') || subtitle;
                 }
                 break;
               case 'featured':
@@ -178,8 +187,9 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
                 hasContent = !!featuredContent?.content;
                 if (hasContent && !isCompleted && featuredContent) {
                   const readingTime = calculateReadingTime(featuredContent.content || '');
-                  displaySubtitle = featuredContent.title ? 
-                    `${featuredContent.title} (${readingTime})` : 
+                  const camelCaseTitle = toCamelCase(featuredContent.title || '');
+                  displaySubtitle = camelCaseTitle ? 
+                    `${camelCaseTitle} (${readingTime})` : 
                     `Special Topics (${readingTime})`;
                 }
                 break;
