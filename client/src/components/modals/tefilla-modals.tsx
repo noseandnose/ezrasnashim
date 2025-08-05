@@ -1673,18 +1673,15 @@ function JerusalemCompass() {
                     <div className="absolute left-2 top-1/2 transform -translate-y-1/2 platypi-bold text-sm text-black">W</div>
                   </div>
                   
-                  {/* Western Wall direction marker - FIXED position */}
+                  {/* Western Wall direction marker - FIXED position on circle edge */}
                   <div 
-                    className="absolute top-1/2 left-1/2 origin-bottom"
+                    className="absolute top-1/2 left-1/2 origin-center"
                     style={{ 
-                      transform: `translate(-50%, -100%) rotate(${direction}deg)`
+                      transform: `translate(-50%, -50%) rotate(${direction}deg)`
                     }}
                   >
-                    <div className="w-2 h-24 bg-gradient-feminine rounded-full relative">
-                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                        <div className="w-0 h-0 border-l-4 border-r-4 border-b-6 border-l-transparent border-r-transparent border-b-blush"></div>
-                      </div>
-                      <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-lg">
+                    <div className="relative w-0 h-0">
+                      <div className="absolute left-1/2 transform -translate-x-1/2 text-2xl" style={{ top: '-140px' }}>
                         ✡️
                       </div>
                     </div>
@@ -1730,7 +1727,7 @@ function JerusalemCompass() {
                     }`}>
                       {isAligned
                         ? '✓ Aligned with ✡️!' 
-                        : 'Turn your body until the blue arrow points to ✡️'
+                        : 'Turn your body until the blue arrow points directly to ✡️'
                       }
                     </p>
                   </div>
@@ -1741,7 +1738,7 @@ function JerusalemCompass() {
               {!orientationSupported && (
                 <div className="bg-yellow-50 rounded-2xl p-3 border border-yellow-200">
                   <p className="platypi-regular text-xs text-yellow-800">
-                    Device orientation not available. Face the direction shown by the pink arrow pointing to ✡️.
+                    Device orientation not available. Face the direction where ✡️ appears on the circle.
                   </p>
                 </div>
               )}
@@ -1787,9 +1784,9 @@ function JerusalemCompass() {
             <h4 className="platypi-bold text-sm text-black mb-2">How to Use:</h4>
             <ol className="platypi-regular text-xs text-black/70 space-y-1">
               <li>1. Allow location access when prompted</li>
-              <li>2. {orientationSupported ? 'Hold device upright and turn your body' : 'Face the direction of the pink line pointing to ✡️'}</li>
-              <li>3. {orientationSupported ? 'The blue "YOU" arrow moves as you turn' : 'The pink line shows the direction to ✡️'}</li>
-              <li>4. {orientationSupported ? 'When the blue arrow points to ✡️, you\'re facing the correct direction' : 'Face the direction shown toward ✡️'}</li>
+              <li>2. {orientationSupported ? 'Hold device upright and turn your body' : 'Face the direction where ✡️ appears on the circle'}</li>
+              <li>3. {orientationSupported ? 'The blue "YOU" arrow moves as you turn' : 'The ✡️ shows the prayer direction'}</li>
+              <li>4. {orientationSupported ? 'When the blue arrow points directly to ✡️, you\'re aligned' : 'Face toward the ✡️ for prayer'}</li>
             </ol>
           </div>
         </div>
