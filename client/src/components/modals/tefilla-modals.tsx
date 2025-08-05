@@ -1683,8 +1683,8 @@ function JerusalemCompass() {
                       <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                         <div className="w-0 h-0 border-l-4 border-r-4 border-b-6 border-l-transparent border-r-transparent border-b-blush"></div>
                       </div>
-                      <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-lg">
-                        🕌
+                      <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
+                        <img src="/attached_assets/E_1754375579710.png" alt="Prayer direction" className="w-6 h-6" />
                       </div>
                     </div>
                   </div>
@@ -1727,7 +1727,7 @@ function JerusalemCompass() {
                       : 'text-blue-800'
                   }`}>
                     {Math.abs((direction - deviceOrientation + 360) % 360) < 15 || Math.abs((direction - deviceOrientation + 360) % 360) > 345
-                      ? '✓ Aligned with 🕌!' 
+                      ? '✓ Aligned for Prayer!' 
                       : 'Turn your device until the blue arrow aligns with the pink line'
                     }
                   </p>
@@ -1738,7 +1738,7 @@ function JerusalemCompass() {
               {!orientationSupported && (
                 <div className="bg-yellow-50 rounded-2xl p-3 border border-yellow-200">
                   <p className="platypi-regular text-xs text-yellow-800">
-                    Device orientation not available. Face the direction shown by the pink arrow pointing to 🕌.
+                    Device orientation not available. Face the direction shown by the pink arrow for prayer.
                   </p>
                 </div>
               )}
@@ -1752,7 +1752,7 @@ function JerusalemCompass() {
                       {getCardinalDirection(direction)} ({Math.round(direction)}°)
                     </span>
                   </div>
-                  <p className="platypi-regular text-sm text-black/70">Direction to 🕌</p>
+                  <p className="platypi-regular text-sm text-black/70">Prayer Direction</p>
                 </div>
               </div>
 
@@ -1784,9 +1784,9 @@ function JerusalemCompass() {
             <h4 className="platypi-bold text-sm text-black mb-2">How to Use:</h4>
             <ol className="platypi-regular text-xs text-black/70 space-y-1">
               <li>1. Allow location access when prompted</li>
-              <li>2. {orientationSupported ? 'Hold device upright and turn your body' : 'Face the direction of the pink line pointing to 🕌'}</li>
-              <li>3. {orientationSupported ? 'The blue "YOU" arrow moves as you turn' : 'The pink line shows the direction to 🕌'}</li>
-              <li>4. {orientationSupported ? 'When the blue arrow aligns with the pink line, you\'re facing 🕌' : 'Face the direction shown and pray toward 🕌'}</li>
+              <li>2. {orientationSupported ? 'Hold device upright and turn your body' : 'Face the direction of the pink line'}</li>
+              <li>3. {orientationSupported ? 'The blue "YOU" arrow moves as you turn' : 'The pink line shows the prayer direction'}</li>
+              <li>4. {orientationSupported ? 'When the blue arrow aligns with the pink line, you\'re facing the correct direction' : 'Face the direction shown for prayer'}</li>
             </ol>
           </div>
         </div>
