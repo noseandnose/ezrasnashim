@@ -48,6 +48,27 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
     gcTime: 30 * 60 * 1000 // 30 minutes
   });
 
+  // Fetch today's Chizuk content
+  const { data: chizukContent } = useQuery<{title?: string; audioUrl?: string; speaker?: string}>({
+    queryKey: ['/api/torah/chizuk', today],
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000
+  });
+
+  // Fetch today's Emuna content
+  const { data: emunaContent } = useQuery<{title?: string; audioUrl?: string; speaker?: string}>({
+    queryKey: ['/api/torah/emuna', today],
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000
+  });
+
+  // Fetch today's Featured content
+  const { data: featuredContent } = useQuery<{title?: string; audioUrl?: string; speaker?: string}>({
+    queryKey: ['/api/torah/featured', today],
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000
+  });
+
   const torahItems = [
     {
       id: 'chizuk',
@@ -122,20 +143,51 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
           {torahItems.map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border, contentType }) => {
             const isCompleted = isModalComplete(id);
             
-            // Dynamic subtitle for Halacha with reading time
+            // Get content for each button
+            let content = null;
+            let hasContent = false;
             let displaySubtitle = subtitle;
-            if (id === 'halacha' && halachaContent?.content && !isCompleted) {
-              displaySubtitle = `Learn Shabbos (${calculateReadingTime(halachaContent.content)})`;
+            
+            switch(id) {
+              case 'halacha':
+                content = halachaContent;
+                hasContent = !!halachaContent?.content;
+                if (hasContent && !isCompleted && halachaContent) {
+                  displaySubtitle = halachaContent.title || `Learn Shabbos (${calculateReadingTime(halachaContent.content || '')})`;
+                }
+                break;
+              case 'chizuk':
+                content = chizukContent;
+                hasContent = !!chizukContent?.audioUrl;
+                if (hasContent && !isCompleted && chizukContent) {
+                  displaySubtitle = chizukContent.title || subtitle;
+                }
+                break;
+              case 'emuna':
+                content = emunaContent;
+                hasContent = !!emunaContent?.audioUrl;
+                if (hasContent && !isCompleted && emunaContent) {
+                  displaySubtitle = emunaContent.title || subtitle;
+                }
+                break;
+              case 'featured':
+                content = featuredContent;
+                hasContent = !!featuredContent?.audioUrl;
+                if (hasContent && !isCompleted && featuredContent) {
+                  displaySubtitle = featuredContent.title || subtitle;
+                }
+                break;
             }
             
             return (
               <button
                 key={id}
-                className={`${isCompleted ? 'bg-sage/20' : gradient} rounded-3xl p-3 text-center glow-hover transition-gentle shadow-lg border ${border} relative`}
-                onClick={() => openModal(id, 'torah')}
+                className={`${isCompleted ? 'bg-sage/20' : hasContent ? gradient : 'bg-gray-100'} rounded-3xl p-3 text-center ${hasContent ? 'glow-hover' : ''} transition-gentle shadow-lg border ${hasContent ? border : 'border-gray-200'} relative ${!hasContent ? 'cursor-not-allowed' : ''}`}
+                onClick={() => hasContent && openModal(id, 'torah')}
+                disabled={!hasContent}
               >
                 {/* Content Type Indicator */}
-                {contentType && (
+                {contentType && hasContent && (
                   <div className="absolute top-2 left-2 bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
                     {contentType === 'audio' ? (
                       <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
@@ -145,12 +197,12 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
                   </div>
                 )}
                 
-                <div className={`${isCompleted ? 'bg-sage' : iconBg} p-2 rounded-full mx-auto mb-2 w-fit`}>
-                  <Icon className={`${iconColor}`} size={18} strokeWidth={1.5} />
+                <div className={`${isCompleted ? 'bg-sage' : hasContent ? iconBg : 'bg-gray-300'} p-2 rounded-full mx-auto mb-2 w-fit`}>
+                  <Icon className={`${hasContent ? iconColor : 'text-gray-500'}`} size={18} strokeWidth={1.5} />
                 </div>
                 <h3 className="platypi-bold text-xs text-black mb-1 tracking-wide">{title}</h3>
                 <p className="platypi-regular text-xs text-black/60 leading-relaxed">
-                  {isCompleted ? 'Completed' : displaySubtitle}
+                  {!hasContent ? 'Coming Soon' : isCompleted ? 'Completed' : displaySubtitle}
                 </p>
               </button>
             );
