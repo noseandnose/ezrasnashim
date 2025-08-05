@@ -1696,23 +1696,33 @@ function JerusalemCompass() {
                     }}
                   >
                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 text-3xl">
-                      💖
+                      💜
                     </div>
                   </div>
                 </div>
                 
-                {/* Fixed Blue arrow pointing up - doesn't rotate */}
-                <div className="absolute top-1/2 left-1/2 w-64 h-64 pointer-events-none" 
-                  style={{ transform: 'translate(-50%, -50%)' }}
-                >
-                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2">
-                    <div className="flex flex-col items-center">
-                      <Navigation className="w-5 h-5 text-blue-500" fill="currentColor" />
-                      <div className="w-1 h-24 bg-blue-500 rounded-full"></div>
-                      <div className="text-xs platypi-bold text-blue-600 mt-1">YOU</div>
+                {/* Fixed arrow pointing up - changes color when aligned */}
+                {(() => {
+                  let angleDiff = Math.abs(direction - deviceOrientation);
+                  if (angleDiff > 180) {
+                    angleDiff = 360 - angleDiff;
+                  }
+                  const isAligned = angleDiff < 10;
+                  
+                  return (
+                    <div className="absolute top-1/2 left-1/2 w-64 h-64 pointer-events-none" 
+                      style={{ transform: 'translate(-50%, -50%)' }}
+                    >
+                      <div className="absolute top-0 left-1/2 transform -translate-x-1/2">
+                        <div className="flex flex-col items-center">
+                          <Navigation className={`w-5 h-5 ${isAligned ? 'text-green-500' : 'text-blue-500'}`} fill="currentColor" />
+                          <div className={`w-1 h-24 rounded-full ${isAligned ? 'bg-green-500' : 'bg-blue-500'}`}></div>
+                          <div className={`text-xs platypi-bold mt-1 ${isAligned ? 'text-green-600' : 'text-blue-600'}`}>YOU</div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  );
+                })()}
                 
                 {/* Center dot */}
                 <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-gray-400 rounded-full transform -translate-x-1/2 -translate-y-1/2 z-20"></div>
@@ -1740,8 +1750,8 @@ function JerusalemCompass() {
                       isAligned ? 'text-green-800' : 'text-blue-800'
                     }`}>
                       {isAligned
-                        ? '✓ Aligned with 💖!' 
-                        : 'Turn until 💖 is at the top'
+                        ? '✓ Aligned with 💜!' 
+                        : 'Turn until 💜 is at the top'
                       }
                     </p>
                   </div>
@@ -1752,7 +1762,7 @@ function JerusalemCompass() {
               {!orientationSupported && (
                 <div className="bg-yellow-50 rounded-2xl p-3 border border-yellow-200">
                   <p className="platypi-regular text-xs text-yellow-800">
-                    Device orientation not available. Face the direction where 💖 appears on the circle.
+                    Device orientation not available. Face the direction where 💜 appears on the circle.
                   </p>
                 </div>
               )}
@@ -1766,7 +1776,7 @@ function JerusalemCompass() {
                       {getCardinalDirection(direction)} ({Math.round(direction)}°)
                     </span>
                   </div>
-                  <p className="platypi-regular text-sm text-black/70">Direction to 💖</p>
+                  <p className="platypi-regular text-sm text-black/70">Direction to 💜</p>
                 </div>
               </div>
 
