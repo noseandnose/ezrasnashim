@@ -1489,9 +1489,11 @@ function JerusalemCompass() {
   const { activeModal, closeModal } = useModalStore();
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [direction, setDirection] = useState<number | null>(null);
+  const [deviceOrientation, setDeviceOrientation] = useState<number>(0);
   const [locationName, setLocationName] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [orientationSupported, setOrientationSupported] = useState(true);
 
   // Western Wall coordinates (more precise for prayer direction)
   const WESTERN_WALL_LAT = 31.7767;
@@ -1569,9 +1571,45 @@ function JerusalemCompass() {
     return directions[index];
   };
 
+  // Handle device orientation
   useEffect(() => {
-    if (activeModal === 'jerusalem-compass') {
-      getUserLocation();
+    if (activeModal !== 'jerusalem-compass') return;
+
+    getUserLocation();
+
+    // Check if device orientation is supported
+    if (typeof DeviceOrientationEvent !== 'undefined') {
+      const handleOrientation = (event: DeviceOrientationEvent) => {
+        // Get compass heading (alpha gives us the rotation around z-axis)
+        let heading = event.alpha;
+        if (heading !== null) {
+          // Normalize to 0-360 degrees
+          setDeviceOrientation(heading);
+        }
+      };
+
+      // Request permission for iOS 13+
+      if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
+        (DeviceOrientationEvent as any).requestPermission()
+          .then((response: string) => {
+            if (response === 'granted') {
+              window.addEventListener('deviceorientation', handleOrientation);
+            } else {
+              setOrientationSupported(false);
+            }
+          })
+          .catch(() => setOrientationSupported(false));
+      } else {
+        // For non-iOS devices
+        window.addEventListener('deviceorientation', handleOrientation);
+      }
+
+      // Cleanup
+      return () => {
+        window.removeEventListener('deviceorientation', handleOrientation);
+      };
+    } else {
+      setOrientationSupported(false);
     }
   }, [activeModal]);
 
@@ -1617,10 +1655,16 @@ function JerusalemCompass() {
             <div className="space-y-6">
               {/* Compass */}
               <div className="relative w-64 h-64 mx-auto">
-                {/* Compass Circle */}
-                <div className="w-full h-full rounded-full border-4 border-blush/20 bg-gradient-to-br from-white to-blush/5 shadow-lg relative overflow-hidden">
+                {/* Compass Circle with device orientation rotation */}
+                <div 
+                  className="w-full h-full rounded-full border-4 border-blush/20 bg-gradient-to-br from-white to-blush/5 shadow-lg relative overflow-hidden"
+                  style={{
+                    transform: orientationSupported ? `rotate(-${deviceOrientation}deg)` : 'none',
+                    transition: 'transform 0.3s ease'
+                  }}
+                >
                   
-                  {/* Cardinal directions */}
+                  {/* Cardinal directions - these rotate with the compass */}
                   <div className="absolute inset-4 rounded-full border border-blush/10">
                     <div className="absolute top-2 left-1/2 transform -translate-x-1/2 platypi-bold text-sm text-black">N</div>
                     <div className="absolute right-2 top-1/2 transform -translate-y-1/2 platypi-bold text-sm text-black">E</div>
@@ -1628,12 +1672,12 @@ function JerusalemCompass() {
                     <div className="absolute left-2 top-1/2 transform -translate-y-1/2 platypi-bold text-sm text-black">W</div>
                   </div>
                   
-                  {/* Jerusalem direction arrow */}
+                  {/* Western Wall direction arrow - fixed in space */}
                   <div 
                     className="absolute top-1/2 left-1/2 origin-bottom"
                     style={{ 
                       transform: `translate(-50%, -100%) rotate(${direction}deg)`,
-                      transition: 'transform 0.5s ease'
+                      transition: 'transform 0.3s ease'
                     }}
                   >
                     <div className="w-1 h-24 bg-gradient-feminine rounded-full relative">
@@ -1646,7 +1690,24 @@ function JerusalemCompass() {
                   {/* Center dot */}
                   <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-gradient-feminine rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
                 </div>
+
+                {/* Phone orientation indicator (always points up) */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  <div className="absolute -top-32 left-1/2 transform -translate-x-1/2">
+                    <div className="w-0 h-0 border-l-4 border-r-4 border-b-8 border-l-transparent border-r-transparent border-b-blue-500"></div>
+                    <div className="text-xs platypi-medium text-blue-600 mt-1 text-center">YOU</div>
+                  </div>
+                </div>
               </div>
+
+              {/* Orientation Status */}
+              {!orientationSupported && (
+                <div className="bg-yellow-50 rounded-2xl p-3 border border-yellow-200">
+                  <p className="platypi-regular text-xs text-yellow-800">
+                    Device orientation not available. Hold your device upright and face the indicated direction.
+                  </p>
+                </div>
+              )}
 
               {/* Direction Info */}
               <div className="bg-gradient-soft rounded-2xl p-4 text-center">
@@ -1689,9 +1750,9 @@ function JerusalemCompass() {
             <h4 className="platypi-bold text-sm text-black mb-2">How to Use:</h4>
             <ol className="platypi-regular text-xs text-black/70 space-y-1">
               <li>1. Allow location access when prompted</li>
-              <li>2. Face the direction shown by the arrow</li>
-              <li>3. The compass points towards the Western Wall</li>
-              <li>4. Use this direction for your prayers</li>
+              <li>2. {orientationSupported ? 'Hold device upright and turn until the pink arrow points up' : 'Face the direction shown by the pink arrow'}</li>
+              <li>3. {orientationSupported ? 'The compass rotates as you turn, showing your facing direction' : 'The arrow points towards the Western Wall'}</li>
+              <li>4. When the arrow points up (toward "YOU"), you're facing the Western Wall</li>
             </ol>
           </div>
         </div>
