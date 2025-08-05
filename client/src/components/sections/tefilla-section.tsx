@@ -603,7 +603,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
         </div>
 
         {/* Western Wall Compass Section */}
-        <div className="bg-gradient-soft rounded-3xl p-3 shadow-lg mx-2">
+        <div className="bg-gradient-soft rounded-3xl p-4 shadow-lg">
           <button
             onClick={() => openModal('jerusalem-compass', 'tefilla')}
             className="w-full bg-white/70 rounded-2xl p-3 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
