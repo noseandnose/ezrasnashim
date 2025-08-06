@@ -136,6 +136,8 @@ export function BirkatHamazonModal() {
 
   const renderPrayerText = (prayer: BirkatHamazonPrayer) => {
     const text = language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation;
+    
+    // Apply text formatting to handle ** and ---
     const formattedText = formatTextContent(text);
     
     if (language === "hebrew") {
@@ -216,14 +218,7 @@ export function BirkatHamazonModal() {
               <div className="space-y-6">
                 {afterBrochasPrayers?.filter(p => p.prayerName === "Al Hamichiya").map((prayer, index) => (
                   <div key={index} className="bg-white rounded-2xl p-4 border border-blush/10">
-                    <div 
-                      className={`text-black leading-relaxed ${
-                        language === "hebrew" ? "text-right heebo-regular" : "text-left platypi-regular"
-                      }`}
-                      style={{ fontSize: `${fontSize}px` }}
-                    >
-                      {language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation}
-                    </div>
+                    {renderPrayerText(prayer as any)}
                   </div>
                 ))}
               </div>
@@ -263,14 +258,7 @@ export function BirkatHamazonModal() {
               <div className="space-y-6">
                 {prayers?.map((prayer) => (
                   <div key={prayer.id} className="bg-white rounded-2xl p-4 border border-blush/10">
-                    <div 
-                      className={`text-black leading-relaxed ${
-                        language === "hebrew" ? "text-right heebo-regular" : "text-left platypi-regular"
-                      }`}
-                      style={{ fontSize: `${fontSize}px` }}
-                    >
-                      {language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation}
-                    </div>
+                    {renderPrayerText(prayer)}
                   </div>
                 ))}
               </div>
