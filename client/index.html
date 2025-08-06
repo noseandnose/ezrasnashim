@@ -17,6 +17,28 @@
     <meta name="author" content="Ezras Nashim">
     <meta name="robots" content="index, follow">
     
+    <!-- Preload custom Koren fonts to prevent flash -->
+    <link rel="preload" href="/fonts/KorenSiddur.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="/fonts/ArnoKoren.otf" as="font" type="font/otf" crossorigin>
+    
+    <!-- Inline critical font CSS to prevent flash -->
+    <style>
+      @font-face {
+        font-family: 'Koren Siddur';
+        src: url('/fonts/KorenSiddur.otf') format('opentype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: optional; /* Use fallback immediately if font doesn't load quickly */
+      }
+      @font-face {
+        font-family: 'Arno Koren';
+        src: url('/fonts/ArnoKoren.otf') format('opentype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: optional; /* Use fallback immediately if font doesn't load quickly */
+      }
+    </style>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Platypi:ital,wght@0,300..800;1,300..800&family=Secular+One&display=swap" rel="stylesheet">

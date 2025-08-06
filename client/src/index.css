@@ -10,7 +10,7 @@
   src: url('/fonts/KorenSiddur.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
-  font-display: swap;
+  font-display: optional; /* Use fallback immediately if font doesn't load quickly */
 }
 
 @font-face {
@@ -18,11 +18,11 @@
   src: url('/fonts/ArnoKoren.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
-  font-display: swap;
+  font-display: optional; /* Use fallback immediately if font doesn't load quickly */
 }
 
 .koren-siddur-hebrew {
-  font-family: 'Koren Siddur', serif;
+  font-family: 'Koren Siddur', 'Frank Ruhl Libre', 'David Libre', serif;
   font-weight: 600;
   font-style: normal;
   color: #000000;
@@ -34,7 +34,7 @@
 }
 
 .koren-siddur-english {
-  font-family: 'Arno Koren', serif;
+  font-family: 'Arno Koren', 'Playfair Display', Georgia, serif;
   font-weight: normal;
   font-style: normal;
   line-height: 1.6;
