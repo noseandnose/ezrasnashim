@@ -1037,20 +1037,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/torah/pirkei-avot/:date", async (req, res) => {
     try {
       const { date } = req.params;
-      const pirkeiAvot = await storage.getPirkeiAvotByDate(date);
-      res.json(pirkeiAvot || null);
+      // Get the current Pirkei Avot content from the database
+      const currentPirkeiAvot = await storage.getCurrentPirkeiAvot();
+      
+      if (currentPirkeiAvot) {
+        // Return formatted response similar to other Torah content
+        res.json({
+          text: currentPirkeiAvot.content,
+          chapter: currentPirkeiAvot.chapter,
+          source: `${currentPirkeiAvot.chapter}.${currentPirkeiAvot.perek}`
+        });
+      } else {
+        res.json(null);
+      }
     } catch (error) {
+      console.error('Error fetching Pirkei Avot:', error);
       res.status(500).json({ message: "Failed to fetch Pirkei Avot content" });
     }
   });
 
   app.post("/api/torah/pirkei-avot/advance", async (req, res) => {
     try {
-      const nextRef = await storage.getNextPirkeiAvotReference();
-      const progress = await storage.updatePirkeiAvotProgress(nextRef.chapter, nextRef.verse);
+      const progress = await storage.advancePirkeiAvotProgress();
       res.json(progress);
     } catch (error) {
       res.status(500).json({ message: "Failed to advance Pirkei Avot progress" });
+    }
+  });
+
+  // New routes for Pirkei Avot management
+  app.get("/api/pirkei-avot", async (req, res) => {
+    try {
+      const allPirkeiAvot = await storage.getAllPirkeiAvot();
+      res.json(allPirkeiAvot);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch all Pirkei Avot content" });
+    }
+  });
+
+  app.post("/api/pirkei-avot", async (req, res) => {
+    try {
+      const newPirkeiAvot = await storage.createPirkeiAvot(req.body);
+      res.json(newPirkeiAvot);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create Pirkei Avot content" });
     }
   });
 

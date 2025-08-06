@@ -257,11 +257,24 @@ export const featuredContent = pgTable("featured_content", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Pirkei Avot table for internal content management
+export const pirkeiAvot = pgTable("pirkei_avot", {
+  id: serial("id").primaryKey(),
+  chapter: integer("chapter").notNull(), // Chapter number (1-6)
+  perek: text("perek").notNull(), // Perek identifier or name
+  content: text("content").notNull(), // English content
+  orderIndex: integer("order_index").notNull(), // For cycling through in order
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  orderIdx: index("pirkei_avot_order_idx").on(table.orderIndex),
+  chapterIdx: index("pirkei_avot_chapter_idx").on(table.chapter),
+}));
+
 // Pirkei Avot progression tracking
 export const pirkeiAvotProgress = pgTable("pirkei_avot_progress", {
   id: serial("id").primaryKey(),
-  currentChapter: integer("current_chapter").notNull().default(1),
-  currentVerse: integer("current_verse").notNull().default(1),
+  currentOrderIndex: integer("current_order_index").notNull().default(0), // Track by orderIndex for cycling
   lastUpdated: timestamp("last_updated").defaultNow(),
 });
 
@@ -375,6 +388,12 @@ export const insertFeaturedContentSchema = createInsertSchema(featuredContent).o
   createdAt: true,
 }).extend({
   hebrewDate: z.string().optional(),
+});
+
+export const insertPirkeiAvotSchema = createInsertSchema(pirkeiAvot).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertPirkeiAvotProgressSchema = createInsertSchema(pirkeiAvotProgress).omit({
@@ -497,6 +516,9 @@ export type InsertWomensPrayer = z.infer<typeof insertWomensPrayerSchema>;
 
 export type DiscountPromotion = typeof discountPromotions.$inferSelect;
 export type InsertDiscountPromotion = z.infer<typeof insertDiscountPromotionSchema>;
+
+export type PirkeiAvot = typeof pirkeiAvot.$inferSelect;
+export type InsertPirkeiAvot = z.infer<typeof insertPirkeiAvotSchema>;
 
 export type PirkeiAvotProgress = typeof pirkeiAvotProgress.$inferSelect;
 export type InsertPirkeiAvotProgress = z.infer<typeof insertPirkeiAvotProgressSchema>;
