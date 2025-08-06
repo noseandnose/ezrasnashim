@@ -206,7 +206,7 @@ export function BirkatHamazonModal() {
     <>
       {/* Al Hamichiya Modal */}
       <Dialog open={activeModal === 'al-hamichiya'} onOpenChange={() => closeModal(true)}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
+        <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
           <StandardModalHeader />
           
           <div className="max-h-[60vh] overflow-y-auto">
@@ -246,7 +246,7 @@ export function BirkatHamazonModal() {
 
       {/* Birkat Hamazon Modal */}
       <Dialog open={activeModal === 'birkat-hamazon'} onOpenChange={() => closeModal(true)}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
+        <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
           <StandardModalHeader />
           
           <div className="max-h-[60vh] overflow-y-auto">

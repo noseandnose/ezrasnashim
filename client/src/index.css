@@ -26,12 +26,20 @@
   font-weight: 600;
   font-style: normal;
   color: #000000;
+  line-height: 1.8;
+  text-align: right !important;
+  direction: rtl;
+  unicode-bidi: embed;
+  letter-spacing: 0.02em;
 }
 
 .koren-siddur-english {
   font-family: 'Arno Koren', serif;
   font-weight: normal;
   font-style: normal;
+  line-height: 1.6;
+  text-align: left !important;
+  direction: ltr;
 }
 
 :root {
@@ -66,6 +74,33 @@
   --blush: hsl(350, 45%, 85%);
   --lavender: hsl(260, 30%, 85%);
   --sage: hsl(120, 20%, 75%);
+}
+
+/* Fix for Hebrew text alignment in modals */
+.text-right {
+  text-align: right !important;
+}
+
+.text-left {
+  text-align: left !important;
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+/* Ensure proper RTL for Hebrew content */
+[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Modal content specific fixes */
+.dialog-content .koren-siddur-hebrew {
+  display: block;
+  width: 100%;
+  text-align: right !important;
+  padding: 0 0.5rem;
 }
 
 /* Gradient Heart Styling */

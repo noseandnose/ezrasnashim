@@ -138,7 +138,7 @@ function MorningBrochasModal() {
   
   return (
     <Dialog open={activeModal === 'morning-brochas'} onOpenChange={() => closeModal(true)}>
-      <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="morning-brochas-description">
+      <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="morning-brochas-description">
         <div id="morning-brochas-description" className="sr-only">Daily morning blessings and prayers of gratitude</div>
         
         {/* Standardized Header with centered controls */}
