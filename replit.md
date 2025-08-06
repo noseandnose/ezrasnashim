@@ -3,11 +3,13 @@
 ## Overview
 Ezras Nashim is a mobile-first web application for Jewish women to track and complete daily spiritual practices across Torah study, Tefilla (prayer), and Tzedaka (charity). The app aims to foster consistent spiritual growth through daily engagement with Jewish learning, prayer, and giving, with a vision to facilitate one million mitzvos monthly.
 
-## Recent Major Updates (December 2025)
+## Recent Major Updates (December 2025 - August 2025)
 - **Performance Optimization**: Removed all console statements, implemented lazy loading for modals, created centralized query configuration
 - **Bundle Size Reduction**: ~40% reduction through code splitting, compression (gzip/brotli), and component optimization
 - **TypeScript Improvements**: Fixed all `any` types for better type safety
 - **Code Quality**: Created shared components to eliminate duplication, standardized caching strategy
+- **After Brochas Database**: Created `after_brochas_prayers` table for Me'ein Shalosh and other after-blessing content (August 6, 2025)
+- **Custom Koren Fonts**: Implemented separate fonts for Hebrew (Koren Siddur) and English (Arno Koren) in all Tefilla modals (August 6, 2025)
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.

@@ -92,6 +92,7 @@ export interface IStorage {
 
   // After Brochas methods
   getAfterBrochasPrayers(): Promise<AfterBrochasPrayer[]>;
+  createAfterBrochasPrayer(prayer: InsertAfterBrochasPrayer): Promise<AfterBrochasPrayer>;
   
   // Birkat Hamazon methods
   getBirkatHamazonPrayers(): Promise<BirkatHamazonPrayer[]>;
@@ -487,6 +488,11 @@ export class DatabaseStorage implements IStorage {
   // After Brochas methods
   async getAfterBrochasPrayers(): Promise<AfterBrochasPrayer[]> {
     return await db.select().from(afterBrochasPrayers);
+  }
+
+  async createAfterBrochasPrayer(insertPrayer: InsertAfterBrochasPrayer): Promise<AfterBrochasPrayer> {
+    const [prayer] = await db.insert(afterBrochasPrayers).values(insertPrayer).returning();
+    return prayer;
   }
 
   // Birkat Hamazon methods

@@ -858,6 +858,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/after-brochas/prayers", async (req, res) => {
+    try {
+      const prayer = await storage.createAfterBrochasPrayer(req.body);
+      res.json(prayer);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create After Brochas prayer" });
+    }
+  });
+
   // Birkat Hamazon routes
   app.get("/api/birkat-hamazon/prayers", async (req, res) => {
     try {
