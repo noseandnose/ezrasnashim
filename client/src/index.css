@@ -27,7 +27,7 @@
   src: url('/fonts/VC_Koren-Light.otf') format('opentype');
   font-weight: 400;
   font-style: normal;
-  font-display: optional;
+  font-display: swap;
 }
 
 @font-face {
@@ -35,7 +35,7 @@
   src: url('/fonts/VC_Koren-Bold.otf') format('opentype');
   font-weight: 700;
   font-style: normal;
-  font-display: optional;
+  font-display: swap;
 }
 
 .koren-siddur-hebrew {
@@ -52,8 +52,8 @@
 
 /* VC Koren Hebrew classes for Tefilla Modals */
 .vc-koren-hebrew {
-  font-family: 'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif;
-  font-weight: 400;
+  font-family: 'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif !important;
+  font-weight: 400 !important;
   font-style: normal;
   color: #000000;
   line-height: 1.8;
@@ -64,8 +64,8 @@
 }
 
 .vc-koren-hebrew-bold {
-  font-family: 'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif;
-  font-weight: 700;
+  font-family: 'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif !important;
+  font-weight: 700 !important;
   font-style: normal;
   color: #000000;
   line-height: 1.8;
@@ -73,6 +73,13 @@
   direction: rtl;
   unicode-bidi: embed;
   letter-spacing: 0.02em;
+}
+
+/* Ensure bold tags within Hebrew text use the bold font */
+.vc-koren-hebrew strong,
+.vc-koren-hebrew b {
+  font-family: 'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif !important;
+  font-weight: 700 !important;
 }
 
 .koren-siddur-english {
