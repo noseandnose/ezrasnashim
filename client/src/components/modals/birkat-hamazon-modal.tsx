@@ -143,7 +143,7 @@ export function BirkatHamazonModal() {
     if (language === "hebrew") {
       return (
         <div 
-          className="koren-siddur text-right leading-relaxed"
+          className="koren-siddur-hebrew text-right leading-relaxed"
           style={{ fontSize: `${fontSize}px`, direction: 'rtl' }}
           dangerouslySetInnerHTML={{ __html: formattedText }}
         />
@@ -152,7 +152,7 @@ export function BirkatHamazonModal() {
     
     return (
       <div 
-        className="koren-siddur leading-relaxed text-left"
+        className="koren-siddur-english leading-relaxed text-left"
         style={{ fontSize: `${fontSize}px` }}
         dangerouslySetInnerHTML={{ __html: formattedText }}
       />

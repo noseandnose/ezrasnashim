@@ -4,7 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Koren Siddur Font for Tefilla Content */
+/* Koren Fonts for Tefilla Content */
 @font-face {
   font-family: 'Koren Siddur';
   src: url('/fonts/KorenSiddur.otf') format('opentype');
@@ -13,8 +13,22 @@
   font-display: swap;
 }
 
-.koren-siddur {
+@font-face {
+  font-family: 'Arno Koren';
+  src: url('/fonts/ArnoKoren.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.koren-siddur-hebrew {
   font-family: 'Koren Siddur', serif;
+  font-weight: normal;
+  font-style: normal;
+}
+
+.koren-siddur-english {
+  font-family: 'Arno Koren', serif;
   font-weight: normal;
   font-style: normal;
 }
