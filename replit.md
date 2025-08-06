@@ -10,6 +10,7 @@ Ezras Nashim is a mobile-first web application for Jewish women to track and com
 - **Code Quality**: Created shared components to eliminate duplication, standardized caching strategy
 - **After Brochas Database**: Created `after_brochas_prayers` table for Me'ein Shalosh and other after-blessing content (August 6, 2025)
 - **Custom Koren Fonts**: Implemented separate fonts for Hebrew (Koren Siddur) and English (Arno Koren) in all Tefilla modals (August 6, 2025)
+- **Pirkei Avot Database**: Migrated from Sefaria API to internal database table with cycling system, displays with Arno Koren font (August 6, 2025)
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
