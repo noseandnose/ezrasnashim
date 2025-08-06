@@ -15,7 +15,7 @@ Text styling preference: Pure black text (#000000) with bold headings for better
 Font testing: Currently testing Platypi serif font as potential replacement for English text on home page (July 24, 2025) - temporary reversible changes applied.
 Reading time display: User requested reading time estimation for text content, implemented for Halacha content using 200 words per minute calculation (August 1, 2025).
 Community feedback form: Updated to new Google Forms link (August 5, 2025).
-Text formatting: Database content supports markdown-style formatting - **text** for bold, --- for line breaks (August 6, 2025).
+Text formatting: Database content supports markdown-style formatting - **text** for bold, --- for line breaks, ~~text~~ for greyed out text (August 6, 2025).
 
 ## System Architecture
 ### Frontend

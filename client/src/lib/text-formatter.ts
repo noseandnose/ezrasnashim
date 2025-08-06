@@ -1,5 +1,8 @@
 /**
- * Formats text content to handle bold markers (**) and line breaks (---)
+ * Formats text content to handle special markers:
+ * - ** for bold text
+ * - --- for line breaks
+ * - ~~ for greyed out text
  * @param text - The raw text to format
  * @returns The formatted HTML string
  */
@@ -11,15 +14,15 @@ export function formatTextContent(text: string | null | undefined): string {
   // Replace --- with line breaks first
   formatted = formatted.replace(/---/g, '<br /><br />');
   
-  // Replace **text** with bold text
-  // Process each ** pair, handling the content between them
+  // Process the text character by character to handle ** and ~~ markers
   let result = '';
   let lastIndex = 0;
   let isInBold = false;
+  let isInGrey = false;
   
   for (let i = 0; i < formatted.length - 1; i++) {
+    // Check for ** (bold) markers
     if (formatted[i] === '*' && formatted[i + 1] === '*') {
-      // Found a ** marker
       result += formatted.substring(lastIndex, i);
       
       if (!isInBold) {
@@ -30,6 +33,20 @@ export function formatTextContent(text: string | null | undefined): string {
       
       isInBold = !isInBold;
       i++; // Skip the second *
+      lastIndex = i + 1;
+    }
+    // Check for ~~ (grey) markers
+    else if (formatted[i] === '~' && formatted[i + 1] === '~') {
+      result += formatted.substring(lastIndex, i);
+      
+      if (!isInGrey) {
+        result += '<span style="color: #9CA3AF; opacity: 0.8;">';
+      } else {
+        result += '</span>';
+      }
+      
+      isInGrey = !isInGrey;
+      i++; // Skip the second ~
       lastIndex = i + 1;
     }
   }
