@@ -189,13 +189,13 @@ function MorningBrochasModal() {
                 <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
                   {prayer.hebrewText && showHebrew && (
                     <div 
-                      className="secular-one-bold text-right leading-relaxed text-black"
+                      className="koren-siddur text-right leading-relaxed text-black"
                       dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.hebrewText) }}
                     />
                   )}
                   {!showHebrew && (
                     <div 
-                      className="text-left leading-relaxed text-black/70"
+                      className="koren-siddur text-left leading-relaxed text-black/70"
                       dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.englishTranslation || "English translation not available") }}
                     />
                   )}
@@ -448,7 +448,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
     return (
       <div 
-        className={`leading-relaxed whitespace-pre-line ${showHebrew ? 'text-right secular-one-bold' : 'font-english text-left'}`}
+        className={`leading-relaxed whitespace-pre-line ${showHebrew ? 'koren-siddur text-right' : 'koren-siddur text-left'}`}
         style={{ fontSize: `${fontSize}px` }}
       >
         {tehillimText.text}
@@ -604,7 +604,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           {/* Standardized Content Area */}
           <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
             <div
-              className={`${showHebrew ? 'secular-one-bold text-right' : 'font-english'} leading-relaxed text-black`}
+              className={`${showHebrew ? 'koren-siddur text-right' : 'koren-siddur'} leading-relaxed text-black`}
               style={{ fontSize: `${fontSize}px` }}
             >
               {getTehillimDisplayText()}
@@ -651,7 +651,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 {minchaPrayers.map((prayer) => (
                   <div key={prayer.id} className="border-b border-warm-gray/10 pb-4 last:border-b-0">
                     <div
-                      className={`${language === 'hebrew' ? 'secular-one-bold text-right' : 'text-left'} leading-relaxed whitespace-pre-line text-black`}
+                      className={`${language === 'hebrew' ? 'koren-siddur text-right' : 'koren-siddur text-left'} leading-relaxed whitespace-pre-line text-black`}
                       dangerouslySetInnerHTML={{
                         __html: formatTextContent(language === 'hebrew' ? prayer.hebrewText || '' : prayer.englishTranslation || '')
                       }}
@@ -895,7 +895,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             ) : (
               <div 
                 className={`leading-relaxed text-black ${
-                  nishmasLanguage === 'hebrew' ? 'text-right secular-one-bold' : 'font-english text-left'
+                  nishmasLanguage === 'hebrew' ? 'koren-siddur text-right' : 'koren-siddur text-left'
                 }`} 
                 style={{ fontSize: `${nishmasFontSize}px` }}
               >
@@ -1022,7 +1022,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 {maarivPrayers.map((prayer) => (
                   <div key={prayer.id} className="border-b border-warm-gray/10 pb-4 last:border-b-0">
                     <div
-                      className={`${language === 'hebrew' ? 'secular-one-bold text-right' : 'text-left'} leading-relaxed whitespace-pre-line text-black`}
+                      className={`${language === 'hebrew' ? 'koren-siddur text-right' : 'koren-siddur text-left'} leading-relaxed whitespace-pre-line text-black`}
                       dangerouslySetInnerHTML={{
                         __html: language === 'hebrew' 
                           ? (prayer.hebrewText || '')
@@ -1265,7 +1265,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
       {/* Standardized Content Area */}
       <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
         <div
-          className={`${language === 'hebrew' ? 'secular-one-bold text-right' : 'font-english'} leading-relaxed text-black`}
+          className={`${language === 'hebrew' ? 'koren-siddur text-right' : 'koren-siddur'} leading-relaxed text-black`}
           style={{ fontSize: `${fontSize}px` }}
           dangerouslySetInnerHTML={{ __html: formatTextContent(language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation) }}
         />
@@ -1461,7 +1461,7 @@ function IndividualTehillimModal() {
           </div>
         ) : (
           <div
-            className={`${language === 'hebrew' ? 'secular-one-bold text-right' : 'font-english text-left'} leading-relaxed text-black`}
+            className={`${language === 'hebrew' ? 'koren-siddur text-right' : 'koren-siddur text-left'} leading-relaxed text-black`}
             style={{ fontSize: `${fontSize}px` }}
           >
             {tehillimText?.text || `Psalm ${selectedPsalm} text loading...`}

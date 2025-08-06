@@ -13,6 +13,7 @@ Ezras Nashim is a mobile-first web application for Jewish women to track and com
 Preferred communication style: Simple, everyday language.
 Text styling preference: Pure black text (#000000) with bold headings for better readability.
 Font testing: Currently testing Platypi serif font as potential replacement for English text on home page (July 24, 2025) - temporary reversible changes applied.
+Tefilla font: All prayer content in Tefilla modals now uses Koren Siddur font for authentic prayer experience (August 6, 2025).
 Reading time display: User requested reading time estimation for text content, implemented for Halacha content using 200 words per minute calculation (August 1, 2025).
 Community feedback form: Updated to new Google Forms link (August 5, 2025).
 Text formatting: Database content supports markdown-style formatting - **text** for bold, --- for line breaks, ~~text~~ for greyed out text (August 6, 2025).
