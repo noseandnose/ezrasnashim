@@ -8,20 +8,36 @@ export function formatTextContent(text: string | null | undefined): string {
   
   let formatted = text;
   
-  // First escape any HTML to prevent XSS
-  formatted = formatted
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-  
-  // Replace --- with line breaks (must be done after HTML escaping)
+  // Replace --- with line breaks first
   formatted = formatted.replace(/---/g, '<br /><br />');
   
   // Replace **text** with bold text
-  // Using [\s\S] to match any character including newlines
-  formatted = formatted.replace(/\*\*([\s\S]*?)\*\*/g, '<strong>$1</strong>');
+  // Process each ** pair, handling the content between them
+  let result = '';
+  let lastIndex = 0;
+  let isInBold = false;
   
-  return formatted;
+  for (let i = 0; i < formatted.length - 1; i++) {
+    if (formatted[i] === '*' && formatted[i + 1] === '*') {
+      // Found a ** marker
+      result += formatted.substring(lastIndex, i);
+      
+      if (!isInBold) {
+        result += '<strong>';
+      } else {
+        result += '</strong>';
+      }
+      
+      isInBold = !isInBold;
+      i++; // Skip the second *
+      lastIndex = i + 1;
+    }
+  }
+  
+  // Add any remaining text
+  result += formatted.substring(lastIndex);
+  
+  return result;
 }
 
 /**
@@ -33,17 +49,8 @@ export function formatTextContent(text: string | null | undefined): string {
 export function formatHalachaContent(text: string | null | undefined): string {
   if (!text) return '';
   
-  // First escape HTML
-  let formatted = text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-  
-  // Replace --- with line breaks
-  formatted = formatted.replace(/---/g, '<br /><br />');
-  
-  // Replace **text** with bold text
-  formatted = formatted.replace(/\*\*([\s\S]*?)\*\*/g, '<strong>$1</strong>');
+  // Use the base formatter first
+  let formatted = formatTextContent(text);
   
   // Replace apostrophes with spaces
   formatted = formatted.replace(/'/g, ' ');
