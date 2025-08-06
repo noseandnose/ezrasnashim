@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, Navigation } from "lucide-react";
+import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, Navigation, Home } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
@@ -1719,8 +1719,10 @@ function JerusalemCompass() {
                       transform: `translate(-50%, -50%) rotate(${direction}deg)`
                     }}
                   >
-                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 text-3xl">
-                      💜
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                      <div className="bg-gradient-feminine p-1.5 rounded-full">
+                        <Home className="w-4 h-4 text-white" strokeWidth={1.5} />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1739,9 +1741,9 @@ function JerusalemCompass() {
                     >
                       <div className="absolute top-0 left-1/2 transform -translate-x-1/2">
                         <div className="flex flex-col items-center">
-                          <Navigation className={`w-5 h-5 ${isAligned ? 'text-green-500' : 'text-blue-500'}`} fill="currentColor" />
-                          <div className={`w-1 h-24 rounded-full ${isAligned ? 'bg-green-500' : 'bg-blue-500'}`}></div>
-                          <div className={`text-xs platypi-bold mt-1 ${isAligned ? 'text-green-600' : 'text-blue-600'}`}>YOU</div>
+                          <Navigation className={`w-5 h-5 ${isAligned ? 'text-sage' : 'text-blue-500'}`} fill="currentColor" />
+                          <div className={`w-1 h-24 rounded-full ${isAligned ? 'bg-sage' : 'bg-blue-500'}`}></div>
+                          <div className={`text-xs platypi-bold mt-1 ${isAligned ? 'text-sage' : 'text-blue-600'}`}>YOU</div>
                         </div>
                       </div>
                     </div>
@@ -1764,18 +1766,18 @@ function JerusalemCompass() {
                 }
                 const isAligned = angleDiff < 10;
                 
-                console.log(`Alignment: User facing=${deviceOrientation}°, Target=${direction}°, Diff=${angleDiff}°, Aligned=${isAligned}`);
+
                 
                 return (
                   <div className={`rounded-2xl p-3 border text-center ${
-                    isAligned ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'
+                    isAligned ? 'bg-sage/20 border-sage' : 'bg-blue-50 border-blue-200'
                   }`}>
                     <p className={`platypi-medium text-sm ${
-                      isAligned ? 'text-green-800' : 'text-blue-800'
+                      isAligned ? 'text-black' : 'text-blue-800'
                     }`}>
                       {isAligned
-                        ? '✓ Aligned with 💜!' 
-                        : 'Turn until 💜 is at the top'
+                        ? '✓ Aligned!' 
+                        : 'Turn until the wall icon is at the top'
                       }
                     </p>
                   </div>
@@ -1786,7 +1788,7 @@ function JerusalemCompass() {
               {!orientationSupported && (
                 <div className="bg-yellow-50 rounded-2xl p-3 border border-yellow-200">
                   <p className="platypi-regular text-xs text-yellow-800">
-                    Device orientation not available. Face the direction where 💜 appears on the circle.
+                    Device orientation not available. Face the direction where the wall icon appears on the circle.
                   </p>
                 </div>
               )}
@@ -1800,7 +1802,7 @@ function JerusalemCompass() {
                       {getCardinalDirection(direction)} ({Math.round(direction)}°)
                     </span>
                   </div>
-                  <p className="platypi-regular text-sm text-black/70">Direction to 💜</p>
+                  <p className="platypi-regular text-sm text-black/70">Direction to the Western Wall</p>
                 </div>
               </div>
 
@@ -1832,9 +1834,9 @@ function JerusalemCompass() {
             <h4 className="platypi-bold text-sm text-black mb-2">How to Use:</h4>
             <ol className="platypi-regular text-xs text-black/70 space-y-1">
               <li>1. Allow location access when prompted</li>
-              <li>2. {orientationSupported ? 'Hold device upright and turn your body' : 'Face the direction where ✡️ appears on the circle'}</li>
-              <li>3. {orientationSupported ? 'The blue "YOU" arrow moves as you turn' : 'The ✡️ shows the prayer direction'}</li>
-              <li>4. {orientationSupported ? 'When the blue arrow points directly to ✡️, you\'re aligned' : 'Face toward the ✡️ for prayer'}</li>
+              <li>2. {orientationSupported ? 'Hold device upright and turn your body' : 'Face the direction where the wall icon appears on the circle'}</li>
+              <li>3. {orientationSupported ? 'The blue "YOU" arrow moves as you turn' : 'The wall icon shows the prayer direction'}</li>
+              <li>4. {orientationSupported ? 'When the blue arrow points directly to the wall icon, you\'re aligned' : 'Face toward the wall icon for prayer'}</li>
             </ol>
           </div>
         </div>
