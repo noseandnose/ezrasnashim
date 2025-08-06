@@ -21,9 +21,51 @@
   font-display: optional; /* Use fallback immediately if font doesn't load quickly */
 }
 
+/* VC Koren Fonts for Hebrew Text in Tefilla Modals */
+@font-face {
+  font-family: 'VC Koren Hebrew';
+  src: url('/fonts/VC_Koren-Light.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: optional;
+}
+
+@font-face {
+  font-family: 'VC Koren Hebrew';
+  src: url('/fonts/VC_Koren-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: optional;
+}
+
 .koren-siddur-hebrew {
   font-family: 'Koren Siddur', 'Frank Ruhl Libre', 'David Libre', serif;
   font-weight: 600;
+  font-style: normal;
+  color: #000000;
+  line-height: 1.8;
+  text-align: right !important;
+  direction: rtl;
+  unicode-bidi: embed;
+  letter-spacing: 0.02em;
+}
+
+/* VC Koren Hebrew classes for Tefilla Modals */
+.vc-koren-hebrew {
+  font-family: 'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif;
+  font-weight: 400;
+  font-style: normal;
+  color: #000000;
+  line-height: 1.8;
+  text-align: right !important;
+  direction: rtl;
+  unicode-bidi: embed;
+  letter-spacing: 0.02em;
+}
+
+.vc-koren-hebrew-bold {
+  font-family: 'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif;
+  font-weight: 700;
   font-style: normal;
   color: #000000;
   line-height: 1.8;

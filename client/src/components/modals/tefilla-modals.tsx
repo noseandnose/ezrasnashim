@@ -189,9 +189,9 @@ function MorningBrochasModal() {
                 <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
                   {prayer.hebrewText && showHebrew && (
                     <div 
-                      className="koren-siddur-hebrew text-right leading-relaxed text-black"
+                      className="vc-koren-hebrew text-right leading-relaxed text-black"
                       style={{ fontSize: `${fontSize + 1}px` }}
-                      dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.hebrewText) }}
+                      dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.hebrewText).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
                     />
                   )}
                   {!showHebrew && (
@@ -606,7 +606,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           {/* Standardized Content Area */}
           <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
             <div
-              className={`${showHebrew ? 'koren-siddur-hebrew text-right' : 'koren-siddur-english'} leading-relaxed text-black`}
+              className={`${showHebrew ? 'vc-koren-hebrew text-right' : 'koren-siddur-english'} leading-relaxed text-black`}
               style={{ fontSize: `${showHebrew ? fontSize + 1 : fontSize}px` }}
             >
               {getTehillimDisplayText()}
@@ -653,10 +653,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 {minchaPrayers.map((prayer) => (
                   <div key={prayer.id} className="border-b border-warm-gray/10 pb-4 last:border-b-0">
                     <div
-                      className={`${language === 'hebrew' ? 'koren-siddur-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed whitespace-pre-line text-black`}
+                      className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed whitespace-pre-line text-black`}
                       style={{ fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px` }}
                       dangerouslySetInnerHTML={{
-                        __html: formatTextContent(language === 'hebrew' ? prayer.hebrewText || '' : prayer.englishTranslation || '')
+                        __html: formatTextContent(language === 'hebrew' ? prayer.hebrewText || '' : prayer.englishTranslation || '').replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">')
                       }}
                     />
                   </div>
@@ -898,7 +898,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             ) : (
               <div 
                 className={`leading-relaxed text-black ${
-                  nishmasLanguage === 'hebrew' ? 'koren-siddur-hebrew text-right' : 'koren-siddur-english text-left'
+                  nishmasLanguage === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'
                 }`} 
                 style={{ fontSize: `${nishmasLanguage === 'hebrew' ? nishmasFontSize + 1 : nishmasFontSize}px` }}
               >
@@ -1025,13 +1025,13 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 {maarivPrayers.map((prayer) => (
                   <div key={prayer.id} className="border-b border-warm-gray/10 pb-4 last:border-b-0">
                     <div
-                      className={`${language === 'hebrew' ? 'koren-siddur-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed whitespace-pre-line text-black`}
+                      className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed whitespace-pre-line text-black`}
                       style={{ fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px` }}
                       dangerouslySetInnerHTML={{
                         __html: language === 'hebrew' 
                           ? (prayer.hebrewText || '')
                               .replace(/\*\*(.*?)\*\*\n\n/g, '**$1**\n')
-                              .replace(/\*\*(.*?)\*\*/g, '<strong class="prayer-header">$1</strong>')
+                              .replace(/\*\*(.*?)\*\*/g, '<strong class="prayer-header vc-koren-hebrew-bold">$1</strong>')
                           : prayer.englishTranslation
                       }}
                     />
@@ -1269,9 +1269,9 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
       {/* Standardized Content Area */}
       <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
         <div
-          className={`${language === 'hebrew' ? 'koren-siddur-hebrew text-right' : 'koren-siddur-english'} leading-relaxed text-black`}
+          className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english'} leading-relaxed text-black`}
           style={{ fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px` }}
-          dangerouslySetInnerHTML={{ __html: formatTextContent(language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation) }}
+          dangerouslySetInnerHTML={{ __html: formatTextContent(language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
         />
 
       </div>
@@ -1465,7 +1465,7 @@ function IndividualTehillimModal() {
           </div>
         ) : (
           <div
-            className={`${language === 'hebrew' ? 'koren-siddur-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
+            className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
             style={{ fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px` }}
           >
             {tehillimText?.text || `Psalm ${selectedPsalm} text loading...`}

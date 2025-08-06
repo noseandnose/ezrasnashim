@@ -143,9 +143,9 @@ export function BirkatHamazonModal() {
     if (language === "hebrew") {
       return (
         <div 
-          className="koren-siddur-hebrew text-right leading-relaxed"
+          className="vc-koren-hebrew text-right leading-relaxed"
           style={{ fontSize: `${fontSize + 1}px`, direction: 'rtl' }}
-          dangerouslySetInnerHTML={{ __html: formattedText }}
+          dangerouslySetInnerHTML={{ __html: formattedText.replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
         />
       );
     }
