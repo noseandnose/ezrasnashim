@@ -37,6 +37,9 @@ export function formatTextContent(text: string | null | undefined): string {
   // Add any remaining text
   result += formatted.substring(lastIndex);
   
+  // Convert newlines to <br> tags for proper HTML rendering
+  result = result.replace(/\n/g, '<br />');
+  
   return result;
 }
 

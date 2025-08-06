@@ -136,22 +136,23 @@ export function BirkatHamazonModal() {
 
   const renderPrayerText = (prayer: BirkatHamazonPrayer) => {
     const text = language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation;
+    const formattedText = formatTextContent(text);
     
     if (language === "hebrew") {
       return (
         <div 
-          className="secular-one-bold text-right leading-relaxed whitespace-pre-line"
+          className="secular-one-bold text-right leading-relaxed"
           style={{ fontSize: `${fontSize}px`, direction: 'rtl' }}
-          dangerouslySetInnerHTML={{ __html: formatTextContent(text) }}
+          dangerouslySetInnerHTML={{ __html: formattedText }}
         />
       );
     }
     
     return (
       <div 
-        className="platypi-regular leading-relaxed whitespace-pre-line text-left"
+        className="platypi-regular leading-relaxed text-left"
         style={{ fontSize: `${fontSize}px` }}
-        dangerouslySetInnerHTML={{ __html: formatTextContent(text) }}
+        dangerouslySetInnerHTML={{ __html: formattedText }}
       />
     );
   };
