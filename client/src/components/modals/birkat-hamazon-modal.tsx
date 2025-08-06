@@ -148,7 +148,8 @@ export function BirkatHamazonModal() {
             fontSize: `${fontSize + 1}px`, 
             direction: 'rtl',
             fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
-            fontWeight: 400
+            fontWeight: 400,
+            animation: 'fadeInText 0.3s ease-in-out'
           }}
           dangerouslySetInnerHTML={{ __html: formattedText.replace(/<strong>/g, '<strong style="font-weight: 700;">') }}
         />

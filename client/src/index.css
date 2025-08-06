@@ -27,7 +27,7 @@
   src: url('/fonts/VC_Koren-Light.otf') format('opentype');
   font-weight: 400;
   font-style: normal;
-  font-display: swap;
+  font-display: block; /* Wait for font to load before displaying text */
 }
 
 @font-face {
@@ -35,7 +35,7 @@
   src: url('/fonts/VC_Koren-Bold.otf') format('opentype');
   font-weight: 700;
   font-style: normal;
-  font-display: swap;
+  font-display: block; /* Wait for font to load before displaying text */
 }
 
 .koren-siddur-hebrew {
@@ -61,6 +61,8 @@
   direction: rtl;
   unicode-bidi: embed;
   letter-spacing: 0.02em;
+  /* Prevent flash by fading in once font loads */
+  animation: fadeInText 0.3s ease-in-out;
 }
 
 .vc-koren-hebrew-bold {
@@ -73,6 +75,8 @@
   direction: rtl;
   unicode-bidi: embed;
   letter-spacing: 0.02em;
+  /* Prevent flash by fading in once font loads */
+  animation: fadeInText 0.3s ease-in-out;
 }
 
 /* Ensure bold tags within Hebrew text use the bold font */
@@ -222,6 +226,16 @@ h1, h2, h3, h4, h5, h6,
 /* Ensure buttons and interactive elements use black text */
 button, .btn, [role="button"] {
   color: #000000 !important;
+}
+
+/* Fade in animation for Hebrew text to prevent font flash */
+@keyframes fadeInText {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Heart Explosion Animation */

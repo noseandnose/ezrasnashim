@@ -5,7 +5,7 @@ import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from 
 import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, Navigation, Home } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { MinchaPrayer, MorningPrayer, NishmasText, GlobalTehillimProgress, TehillimName, WomensPrayer } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
@@ -193,7 +193,8 @@ function MorningBrochasModal() {
                       style={{ 
                         fontSize: `${fontSize + 1}px`,
                         fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
-                        fontWeight: 400
+                        fontWeight: 400,
+                        animation: 'fadeInText 0.3s ease-in-out'
                       }}
                       dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.hebrewText).replace(/<strong>/g, '<strong style="font-weight: 700;">') }}
                     />
@@ -616,7 +617,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 ...(showHebrew && {
                   fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
                   fontWeight: 400,
-                  direction: 'rtl'
+                  direction: 'rtl',
+                  animation: 'fadeInText 0.3s ease-in-out'
                 })
               }}
             >
@@ -670,7 +672,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                         ...(language === 'hebrew' && {
                           fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
                           fontWeight: 400,
-                          direction: 'rtl'
+                          direction: 'rtl',
+                          animation: 'fadeInText 0.3s ease-in-out'
                         })
                       }}
                       dangerouslySetInnerHTML={{
@@ -923,7 +926,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                   ...(nishmasLanguage === 'hebrew' && {
                     fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
                     fontWeight: 400,
-                    direction: 'rtl'
+                    direction: 'rtl',
+                    animation: 'fadeInText 0.3s ease-in-out'
                   })
                 }}
               >
@@ -1056,7 +1060,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                         ...(language === 'hebrew' && {
                           fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
                           fontWeight: 400,
-                          direction: 'rtl'
+                          direction: 'rtl',
+                          animation: 'fadeInText 0.3s ease-in-out'
                         })
                       }}
                       dangerouslySetInnerHTML={{
@@ -1307,7 +1312,8 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
             ...(language === 'hebrew' && {
               fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
               fontWeight: 400,
-              direction: 'rtl'
+              direction: 'rtl',
+              animation: 'fadeInText 0.3s ease-in-out'
             })
           }}
           dangerouslySetInnerHTML={{ __html: formatTextContent(language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation).replace(/<strong>/g, '<strong style="font-weight: 700;">') }}
@@ -1510,7 +1516,8 @@ function IndividualTehillimModal() {
               ...(language === 'hebrew' && {
                 fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
                 fontWeight: 400,
-                direction: 'rtl'
+                direction: 'rtl',
+                animation: 'fadeInText 0.3s ease-in-out'
               })
             }}
           >
