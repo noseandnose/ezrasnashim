@@ -184,18 +184,20 @@ function MorningBrochasModal() {
               <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
             </div>
           ) : (
-            <div className="space-y-6" style={{ fontSize: `${fontSize}px` }}>
+            <div className="space-y-6">
               {morningPrayers?.map((prayer: MorningPrayer, index: number) => (
                 <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
                   {prayer.hebrewText && showHebrew && (
                     <div 
                       className="koren-siddur-hebrew text-right leading-relaxed text-black"
+                      style={{ fontSize: `${fontSize + 1}px` }}
                       dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.hebrewText) }}
                     />
                   )}
                   {!showHebrew && (
                     <div 
                       className="koren-siddur-english text-left leading-relaxed text-black/70"
+                      style={{ fontSize: `${fontSize}px` }}
                       dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.englishTranslation || "English translation not available") }}
                     />
                   )}
@@ -449,7 +451,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     return (
       <div 
         className={`leading-relaxed whitespace-pre-line ${showHebrew ? 'koren-siddur-hebrew text-right' : 'koren-siddur-english text-left'}`}
-        style={{ fontSize: `${fontSize}px` }}
+        style={{ fontSize: `${showHebrew ? fontSize + 1 : fontSize}px` }}
       >
         {tehillimText.text}
       </div>
@@ -605,7 +607,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
             <div
               className={`${showHebrew ? 'koren-siddur-hebrew text-right' : 'koren-siddur-english'} leading-relaxed text-black`}
-              style={{ fontSize: `${fontSize}px` }}
+              style={{ fontSize: `${showHebrew ? fontSize + 1 : fontSize}px` }}
             >
               {getTehillimDisplayText()}
             </div>
@@ -647,11 +649,12 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
               </div>
             ) : (
-              <div className="space-y-6" style={{ fontSize: `${fontSize}px` }}>
+              <div className="space-y-6">
                 {minchaPrayers.map((prayer) => (
                   <div key={prayer.id} className="border-b border-warm-gray/10 pb-4 last:border-b-0">
                     <div
                       className={`${language === 'hebrew' ? 'koren-siddur-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed whitespace-pre-line text-black`}
+                      style={{ fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px` }}
                       dangerouslySetInnerHTML={{
                         __html: formatTextContent(language === 'hebrew' ? prayer.hebrewText || '' : prayer.englishTranslation || '')
                       }}
@@ -897,7 +900,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 className={`leading-relaxed text-black ${
                   nishmasLanguage === 'hebrew' ? 'koren-siddur-hebrew text-right' : 'koren-siddur-english text-left'
                 }`} 
-                style={{ fontSize: `${nishmasFontSize}px` }}
+                style={{ fontSize: `${nishmasLanguage === 'hebrew' ? nishmasFontSize + 1 : nishmasFontSize}px` }}
               >
                 {nishmasText ? (
                   <div className="whitespace-pre-wrap leading-relaxed">
@@ -1018,11 +1021,12 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
               </div>
             ) : (
-              <div className="space-y-6" style={{ fontSize: `${fontSize}px` }}>
+              <div className="space-y-6">
                 {maarivPrayers.map((prayer) => (
                   <div key={prayer.id} className="border-b border-warm-gray/10 pb-4 last:border-b-0">
                     <div
                       className={`${language === 'hebrew' ? 'koren-siddur-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed whitespace-pre-line text-black`}
+                      style={{ fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px` }}
                       dangerouslySetInnerHTML={{
                         __html: language === 'hebrew' 
                           ? (prayer.hebrewText || '')
@@ -1266,7 +1270,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
       <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
         <div
           className={`${language === 'hebrew' ? 'koren-siddur-hebrew text-right' : 'koren-siddur-english'} leading-relaxed text-black`}
-          style={{ fontSize: `${fontSize}px` }}
+          style={{ fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px` }}
           dangerouslySetInnerHTML={{ __html: formatTextContent(language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation) }}
         />
 
@@ -1462,7 +1466,7 @@ function IndividualTehillimModal() {
         ) : (
           <div
             className={`${language === 'hebrew' ? 'koren-siddur-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
-            style={{ fontSize: `${fontSize}px` }}
+            style={{ fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px` }}
           >
             {tehillimText?.text || `Psalm ${selectedPsalm} text loading...`}
           </div>

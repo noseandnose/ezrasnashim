@@ -144,7 +144,7 @@ export function BirkatHamazonModal() {
       return (
         <div 
           className="koren-siddur-hebrew text-right leading-relaxed"
-          style={{ fontSize: `${fontSize}px`, direction: 'rtl' }}
+          style={{ fontSize: `${fontSize + 1}px`, direction: 'rtl' }}
           dangerouslySetInnerHTML={{ __html: formattedText }}
         />
       );

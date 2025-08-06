@@ -23,8 +23,9 @@
 
 .koren-siddur-hebrew {
   font-family: 'Koren Siddur', serif;
-  font-weight: normal;
+  font-weight: 600;
   font-style: normal;
+  color: #000000;
 }
 
 .koren-siddur-english {
