@@ -176,26 +176,14 @@ export default function DonationModal() {
             </div>
           )}
 
-          {/* Donation Buttons */}
-          <div className="space-y-2">
+          {/* Donation Button */}
+          <div className="mt-4">
             <Button
               onClick={handleDonate}
               disabled={createPaymentMutation.isPending || (isCustom ? !customAmount || parseFloat(customAmount) <= 0 : !amount || parseFloat(amount) <= 0)}
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
             >
               {createPaymentMutation.isPending ? 'Processing...' : `Donate $${isCustom ? customAmount : amount}`}
-            </Button>
-            
-            <Button
-              onClick={() => {
-                closeModal();
-                // Navigate to home and scroll to progress
-                window.location.hash = '#/?section=home&scrollToProgress=true';
-              }}
-              variant="outline"
-              className="w-full rounded-xl border-blush/20 text-warm-gray hover:bg-white/90 transition-all duration-300 bg-white/70 backdrop-blur-sm border"
-            >
-              Cancel
             </Button>
           </div>
         </div>
