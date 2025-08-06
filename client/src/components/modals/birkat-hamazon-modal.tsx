@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAnalytics, useTrackModalComplete } from "@/hooks/use-analytics";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useLocationStore } from '@/hooks/use-jewish-times';
+import { formatTextContent } from "@/lib/text-formatter";
 
 interface BirkatHamazonPrayer {
   id: number;
@@ -141,9 +142,8 @@ export function BirkatHamazonModal() {
         <div 
           className="secular-one-bold text-right leading-relaxed whitespace-pre-line"
           style={{ fontSize: `${fontSize}px`, direction: 'rtl' }}
-        >
-          {text}
-        </div>
+          dangerouslySetInnerHTML={{ __html: formatTextContent(text) }}
+        />
       );
     }
     
@@ -151,9 +151,8 @@ export function BirkatHamazonModal() {
       <div 
         className="platypi-regular leading-relaxed whitespace-pre-line text-left"
         style={{ fontSize: `${fontSize}px` }}
-      >
-        {text}
-      </div>
+        dangerouslySetInnerHTML={{ __html: formatTextContent(text) }}
+      />
     );
   };
 

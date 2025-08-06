@@ -15,6 +15,7 @@ import axiosClient from "@/lib/axiosClient";
 import { useTrackModalComplete, useAnalytics } from "@/hooks/use-analytics";
 import { BirkatHamazonModal } from "@/components/modals/birkat-hamazon-modal";
 import { useLocationStore } from '@/hooks/use-jewish-times';
+import { formatTextContent } from "@/lib/text-formatter";
 
 interface TefillaModalsProps {
   onSectionChange?: (section: any) => void;
@@ -187,14 +188,16 @@ function MorningBrochasModal() {
               {morningPrayers?.map((prayer: MorningPrayer, index: number) => (
                 <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
                   {prayer.hebrewText && showHebrew && (
-                    <div className="secular-one-bold text-right leading-relaxed text-black">
-                      {prayer.hebrewText}
-                    </div>
+                    <div 
+                      className="secular-one-bold text-right leading-relaxed text-black"
+                      dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.hebrewText) }}
+                    />
                   )}
                   {!showHebrew && (
-                    <div className="text-left leading-relaxed text-black/70">
-                      {prayer.englishTranslation || "English translation not available"}
-                    </div>
+                    <div 
+                      className="text-left leading-relaxed text-black/70"
+                      dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.englishTranslation || "English translation not available") }}
+                    />
                   )}
                 </div>
               ))}
@@ -650,11 +653,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                     <div
                       className={`${language === 'hebrew' ? 'secular-one-bold text-right' : 'text-left'} leading-relaxed whitespace-pre-line text-black`}
                       dangerouslySetInnerHTML={{
-                        __html: language === 'hebrew' 
-                          ? (prayer.hebrewText || '')
-                              .replace(/\*\*(.*?)\*\*\n\n/g, '**$1**\n')
-                              .replace(/\*\*(.*?)\*\*/g, '<strong class="prayer-header">$1</strong>')
-                          : prayer.englishTranslation
+                        __html: formatTextContent(language === 'hebrew' ? prayer.hebrewText || '' : prayer.englishTranslation || '')
                       }}
                     />
                   </div>
@@ -1268,9 +1267,8 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
         <div
           className={`${language === 'hebrew' ? 'secular-one-bold text-right' : 'font-english'} leading-relaxed text-black`}
           style={{ fontSize: `${fontSize}px` }}
-        >
-          {language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation}
-        </div>
+          dangerouslySetInnerHTML={{ __html: formatTextContent(language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation) }}
+        />
 
       </div>
 
