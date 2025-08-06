@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import AudioPlayer from "@/components/audio-player";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
+import { formatTextContent, formatHalachaContent } from "@/lib/text-formatter";
 
 // Calculate reading time based on word count (average 200 words per minute)
 const calculateReadingTime = (text: string): string => {
@@ -220,23 +221,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                   className="platypi-regular leading-relaxed text-black whitespace-pre-line"
                   style={{ fontSize: `${fontSize}px` }}
                 >
-                  {(() => {
-                    if (!halachaContent.content) return null;
-                    
-                    // Replace apostrophes with spaces and format footnotes
-                    let processedContent = halachaContent.content.replace(/'/g, ' ');
-                    
-                    // Format footnote numbers (1-99) to be smaller
-                    processedContent = processedContent.replace(/\b(\d{1,2})\b/g, (match, num) => {
-                      const number = parseInt(num);
-                      if (number >= 1 && number <= 99) {
-                        return `<sup style="font-size: 0.75em">${num}</sup>`;
-                      }
-                      return match;
-                    });
-                    
-                    return <div dangerouslySetInnerHTML={{ __html: processedContent }} />;
-                  })()}
+                    <div dangerouslySetInnerHTML={{ __html: formatHalachaContent(halachaContent.content) }} />
                 </div>
               </div>
             )}
@@ -331,9 +316,10 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             
             {emunaContent && !emunaContent.audioUrl && (
               <div className="space-y-4" style={{ fontSize: `${fontSize}px` }}>
-                <div className="secular-one-bold text-right leading-relaxed text-black">
-                  {emunaContent.content}
-                </div>
+                <div 
+                  className="secular-one-bold text-right leading-relaxed text-black"
+                  dangerouslySetInnerHTML={{ __html: formatTextContent(emunaContent.content) }}
+                />
                 {(emunaContent.author || emunaContent.source) && (
                   <div className="text-xs text-black/60 text-center border-t border-warm-gray/10 pt-3 space-y-1">
                     {emunaContent.author && <p>Author: {emunaContent.author}</p>}
@@ -471,14 +457,20 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           {featuredContent && (
             <div className="space-y-3 text-sm text-gray-700 platypi-regular">
               <div>
-                <p><span className="platypi-bold">Today's Focus:</span> {featuredContent.content}</p>
+                <p>
+                  <span className="platypi-bold">Today's Focus:</span>{' '}
+                  <span dangerouslySetInnerHTML={{ __html: formatTextContent(featuredContent.content) }} />
+                </p>
                 {featuredContent.halachicSource && (
                   <p className="mt-2 text-xs text-gray-500 platypi-regular">Source: {featuredContent.halachicSource}</p>
                 )}
                 {featuredContent.practicalTip && (
                   <div className="mt-3 p-3 bg-gray-50 rounded-lg">
                     <p className="text-xs platypi-medium text-gray-700">Practical Insight:</p>
-                    <p className="text-xs text-gray-600 mt-1 platypi-regular">{featuredContent.practicalTip}</p>
+                    <p 
+                      className="text-xs text-gray-600 mt-1 platypi-regular"
+                      dangerouslySetInnerHTML={{ __html: formatTextContent(featuredContent.practicalTip) }}
+                    />
                   </div>
                 )}
               </div>
@@ -534,9 +526,17 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           
           <div className="space-y-3 text-sm text-gray-700">
             <div>
-              <p><strong>Today's Teaching:</strong> {pirkeiAvotContent?.content || "Shimon his son says: All my days I have grown up among the wise, and I have found nothing better for the body than silence."}</p>
-              <p className="mt-2 text-xs text-gray-500">- {pirkeiAvotContent?.source || "Pirkei Avot 1:17"}</p>
-              <p className="mt-3">{pirkeiAvotContent?.explanation || "This mishnah teaches us the value of thoughtful speech and careful listening. True wisdom often comes through quiet contemplation and attentive observation of those wiser than ourselves."}</p>
+              <p>
+                <strong>Today's Teaching:</strong>{' '}
+                <span dangerouslySetInnerHTML={{ __html: formatTextContent(pirkeiAvotContent?.content || "Shimon his son says: All my days I have grown up among the wise, and I have found nothing better for the body than silence.") }} />
+              </p>
+              <p className="mt-2 text-xs text-gray-500">
+                - <span dangerouslySetInnerHTML={{ __html: formatTextContent(pirkeiAvotContent?.source || "Pirkei Avot 1:17") }} />
+              </p>
+              <p 
+                className="mt-3"
+                dangerouslySetInnerHTML={{ __html: formatTextContent(pirkeiAvotContent?.explanation || "This mishnah teaches us the value of thoughtful speech and careful listening. True wisdom often comes through quiet contemplation and attentive observation of those wiser than ourselves.") }}
+              />
             </div>
           </div>
           

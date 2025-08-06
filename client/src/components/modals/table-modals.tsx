@@ -6,6 +6,7 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight, Play, Pause, Volume2 } from "lucide-react";
 import AudioPlayer from "@/components/audio-player";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
+import { formatTextContent } from "@/lib/text-formatter";
 
 export default function TableModals() {
   const { activeModal, closeModal } = useModalStore();
@@ -57,7 +58,7 @@ export default function TableModals() {
               {/* Recipe Description */}
               {recipeContent.description && (
                 <div>
-                  <p>{recipeContent.description}</p>
+                  <p dangerouslySetInnerHTML={{ __html: formatTextContent(recipeContent.description) }} />
                 </div>
               )}
               
@@ -87,7 +88,7 @@ export default function TableModals() {
                   <h3 className="platypi-semibold mb-2">Ingredients:</h3>
                   <ul className="list-disc list-inside space-y-1">
                     {recipeContent.ingredients.map((ingredient, index) => (
-                      <li key={index}>{ingredient}</li>
+                      <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(ingredient) }} />
                     ))}
                   </ul>
                 </div>
@@ -99,7 +100,7 @@ export default function TableModals() {
                   <h3 className="platypi-semibold mb-2">Instructions:</h3>
                   <ol className="list-decimal list-inside space-y-2">
                     {recipeContent.instructions.map((instruction, index) => (
-                      <li key={index}>{instruction}</li>
+                      <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(instruction) }} />
                     ))}
                   </ol>
                 </div>
@@ -302,7 +303,7 @@ export default function TableModals() {
               {/* Content Text */}
               <div className="space-y-3 text-sm text-gray-700">
                 <div>
-                  <p>{inspirationContent.content}</p>
+                  <p dangerouslySetInnerHTML={{ __html: formatTextContent(inspirationContent.content) }} />
                 </div>
               </div>
             </>
