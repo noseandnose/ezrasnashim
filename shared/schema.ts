@@ -261,7 +261,7 @@ export const featuredContent = pgTable("featured_content", {
 export const pirkeiAvot = pgTable("pirkei_avot", {
   id: serial("id").primaryKey(),
   chapter: integer("chapter").notNull(), // Chapter number (1-6)
-  perek: text("perek").notNull(), // Perek identifier or name
+  perek: integer("perek").notNull(), // Verse number within chapter
   content: text("content").notNull(), // English content
   orderIndex: integer("order_index").notNull(), // For cycling through in order
   createdAt: timestamp("created_at").defaultNow(),
