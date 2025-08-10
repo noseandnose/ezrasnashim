@@ -1768,10 +1768,10 @@ function JerusalemCompass() {
                         maxHeight: '100%'
                       }}
                     >
-                      <div className="absolute top-0 left-1/2 transform -translate-x-1/2">
+                      <div className="absolute top-6 left-1/2 transform -translate-x-1/2">
                         <div className="flex flex-col items-center">
-                          <Navigation className={`w-5 h-5 ${isAligned ? 'text-sage' : 'text-blue-500'}`} fill="currentColor" />
-                          <div className={`w-1 h-24 rounded-full ${isAligned ? 'bg-sage' : 'bg-blue-500'}`}></div>
+                          <Navigation className={`w-4 h-4 ${isAligned ? 'text-sage' : 'text-blue-500'}`} fill="currentColor" style={{ transform: 'rotate(0deg)' }} />
+                          <div className={`w-1 h-16 rounded-full ${isAligned ? 'bg-sage' : 'bg-blue-500'}`}></div>
                           <div className={`text-xs platypi-bold mt-1 ${isAligned ? 'text-sage' : 'text-blue-600'}`}>YOU</div>
                         </div>
                       </div>
