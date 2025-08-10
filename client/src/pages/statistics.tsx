@@ -102,12 +102,23 @@ export default function Statistics() {
     "birkat-hamazon": "Birkat Hamazon",
     "tehillim-text": "Tehillim",
     "special-tehillim": "Special Tehillim",
+    "individual-tehillim": "Individual Tehillim", 
+    "nishmas-campaign": "Nishmas Campaign",
+    "al-hamichiya": "Al Hamichiya",
+    "individual-prayer": "Individual Prayer",
     
     // Torah subcategories  
     chizuk: "Chizuk",
-    emuna: "Emuna",
+    emuna: "Emuna", 
     halacha: "Halacha",
     "featured-content": "Featured Content",
+    featured: "Featured",
+    
+    // Life section
+    recipe: "Daily Recipe",
+    inspiration: "Creative Jewish Living",
+    "sponsor-day": "Day Sponsorship",
+    refuah: "Refuah Names",
     
     // Other
     donate: "Donations",
@@ -129,12 +140,23 @@ export default function Statistics() {
     "birkat-hamazon": Clock3,
     "tehillim-text": ScrollText,
     "special-tehillim": Star,
+    "individual-tehillim": ScrollText,
+    "nishmas-campaign": Heart,
+    "al-hamichiya": Clock3,
+    "individual-prayer": Heart,
     
     // Torah subcategories  
     chizuk: Heart,
     emuna: Shield,
     halacha: BookOpen,
     "featured-content": Star,
+    featured: Star,
+    
+    // Life section
+    recipe: Sparkles,
+    inspiration: Star,
+    "sponsor-day": Trophy,
+    refuah: Heart,
     
     // Other
     donate: HandCoins,
@@ -266,7 +288,14 @@ export default function Statistics() {
           />
           <StatCard
             title="Tehillim Said"
-            value={currentLoading ? "..." : (currentData as any)?.totalTehillimCompleted?.toLocaleString() || (currentData as any)?.tehillimCompleted || 0}
+            value={currentLoading ? "..." : (() => {
+              const modalCompletions = (currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {};
+              const regularTehillim = modalCompletions['tehillim-text'] || 0;
+              const specialTehillim = modalCompletions['special-tehillim'] || 0;
+              const individualTehillim = Object.keys(modalCompletions).filter(key => key.startsWith('individual-tehillim')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
+              const tehillimEvents = (currentData as any)?.totalTehillimCompleted || (currentData as any)?.tehillimCompleted || 0;
+              return (regularTehillim + specialTehillim + individualTehillim + tehillimEvents).toLocaleString();
+            })()}
             icon={ScrollText}
             color="text-lavender"
           />
