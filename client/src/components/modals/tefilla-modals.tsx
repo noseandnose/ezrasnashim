@@ -1669,7 +1669,14 @@ function JerusalemCompass() {
 
   return (
     <Dialog open={true} onOpenChange={() => closeModal(true)}>
-      <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
+      <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular select-none" 
+        style={{ 
+          touchAction: 'none',
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          msUserSelect: 'none'
+        }}
+      >
         
         {/* Header */}
         <div className="flex items-center justify-center mb-4 relative pr-8">
@@ -1705,8 +1712,18 @@ function JerusalemCompass() {
             </div>
           ) : direction !== null ? (
             <div className="space-y-6">
-              {/* Compass */}
-              <div className="relative w-64 h-64 mx-auto">
+              {/* Compass Container with Proper Containment */}
+              <div className="relative w-64 h-64 mx-auto overflow-hidden rounded-full select-none"
+                style={{
+                  touchAction: 'none',
+                  userSelect: 'none',
+                  WebkitUserSelect: 'none',
+                  WebkitTouchCallout: 'none',
+                  WebkitUserDrag: 'none',
+                  MozUserSelect: 'none',
+                  msUserSelect: 'none'
+                }}
+              >
                 {/* Rotating Compass Circle */}
                 <div 
                   className="w-full h-full rounded-full border-4 border-blush/20 bg-gradient-to-br from-white to-blush/5 shadow-lg relative"
@@ -1728,9 +1745,11 @@ function JerusalemCompass() {
                   
                   {/* Western Wall marker - positioned at calculated bearing, rotates with compass */}
                   <div 
-                    className="absolute top-1/2 left-1/2 w-64 h-64 pointer-events-none"
+                    className="absolute top-1/2 left-1/2 w-full h-full pointer-events-none"
                     style={{ 
-                      transform: `translate(-50%, -50%) rotate(${direction}deg)`
+                      transform: `translate(-50%, -50%) rotate(${direction}deg)`,
+                      maxWidth: '100%',
+                      maxHeight: '100%'
                     }}
                   >
                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -1750,8 +1769,12 @@ function JerusalemCompass() {
                   const isAligned = angleDiff < 10;
                   
                   return (
-                    <div className="absolute top-1/2 left-1/2 w-64 h-64 pointer-events-none" 
-                      style={{ transform: 'translate(-50%, -50%)' }}
+                    <div className="absolute top-1/2 left-1/2 w-full h-full pointer-events-none" 
+                      style={{ 
+                        transform: 'translate(-50%, -50%)',
+                        maxWidth: '100%',
+                        maxHeight: '100%'
+                      }}
                     >
                       <div className="absolute top-0 left-1/2 transform -translate-x-1/2">
                         <div className="flex flex-col items-center">
