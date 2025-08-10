@@ -15,8 +15,8 @@ export function formatTextContent(text: string | null | undefined): string {
   // Replace --- with line breaks first
   formatted = formatted.replace(/---/g, '<br /><br />');
   
-  // Process [[ ]] for grey box BEFORE other processing
-  formatted = formatted.replace(/\[\[(.*?)\]\]/g, (match, content) => {
+  // Process [[ ]] for grey box BEFORE other processing (handle multiline)
+  formatted = formatted.replace(/\[\[([\s\S]*?)\]\]/g, (match, content) => {
     return `<div style="background-color: #F3F4F6; border: 1px solid #D1D5DB; border-radius: 8px; padding: 12px; margin: 8px 0; color: #374151;">${content}</div>`;
   });
   
