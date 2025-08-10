@@ -185,7 +185,7 @@ function MorningBrochasModal() {
                       className="text-right leading-relaxed text-black"
                       style={{ 
                         fontSize: `${fontSize + 1}px`,
-                        fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
+                        fontFamily: "'Frank Ruhl Libre', 'David Libre', 'Noto Sans Hebrew', 'Arial Hebrew', serif",
                         fontWeight: 400,
                         animation: 'fadeInText 0.3s ease-in-out'
                       }}
@@ -608,7 +608,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               style={{ 
                 fontSize: `${showHebrew ? fontSize + 1 : fontSize}px`,
                 ...(showHebrew && {
-                  fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
+                  fontFamily: "'Frank Ruhl Libre', 'David Libre', 'Noto Sans Hebrew', 'Arial Hebrew', serif",
                   fontWeight: 400,
                   direction: 'rtl',
                   animation: 'fadeInText 0.3s ease-in-out'
@@ -663,7 +663,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                       style={{ 
                         fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px`,
                         ...(language === 'hebrew' && {
-                          fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
+                          fontFamily: "'Frank Ruhl Libre', 'David Libre', 'Noto Sans Hebrew', 'Arial Hebrew', serif",
                           fontWeight: 400,
                           direction: 'rtl',
                           animation: 'fadeInText 0.3s ease-in-out'
@@ -917,7 +917,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 style={{ 
                   fontSize: `${nishmasLanguage === 'hebrew' ? nishmasFontSize + 1 : nishmasFontSize}px`,
                   ...(nishmasLanguage === 'hebrew' && {
-                    fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
+                    fontFamily: "'Frank Ruhl Libre', 'David Libre', 'Noto Sans Hebrew', 'Arial Hebrew', serif",
                     fontWeight: 400,
                     direction: 'rtl',
                     animation: 'fadeInText 0.3s ease-in-out'
@@ -1056,7 +1056,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                       style={{ 
                         fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px`,
                         ...(language === 'hebrew' && {
-                          fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
+                          fontFamily: "'Frank Ruhl Libre', 'David Libre', 'Noto Sans Hebrew', 'Arial Hebrew', serif",
                           fontWeight: 400,
                           direction: 'rtl',
                           animation: 'fadeInText 0.3s ease-in-out'
@@ -1308,7 +1308,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
           style={{ 
             fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px`,
             ...(language === 'hebrew' && {
-              fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
+              fontFamily: "'Frank Ruhl Libre', 'David Libre', 'Noto Sans Hebrew', 'Arial Hebrew', serif",
               fontWeight: 400,
               direction: 'rtl',
               animation: 'fadeInText 0.3s ease-in-out'
@@ -1512,7 +1512,7 @@ function IndividualTehillimModal() {
             style={{ 
               fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px`,
               ...(language === 'hebrew' && {
-                fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
+                fontFamily: "'Frank Ruhl Libre', 'David Libre', 'Noto Sans Hebrew', 'Arial Hebrew', serif",
                 fontWeight: 400,
                 direction: 'rtl',
                 animation: 'fadeInText 0.3s ease-in-out'
