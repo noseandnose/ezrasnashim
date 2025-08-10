@@ -1669,13 +1669,7 @@ function JerusalemCompass() {
 
   return (
     <Dialog open={true} onOpenChange={() => closeModal(true)}>
-      <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-hidden platypi-regular select-none" 
-        style={{ 
-          touchAction: 'none',
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-          msUserSelect: 'none'
-        }}
+      <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular"
       >
         
         {/* Header */}
@@ -1753,7 +1747,7 @@ function JerusalemCompass() {
                     }}
                   >
                     <div className="absolute top-2 left-1/2 transform -translate-x-1/2">
-                      <div className="w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-md"></div>
+                      <div className="w-3 h-3 bg-sage rounded-full border-2 border-white shadow-md"></div>
                     </div>
                   </div>
                 </div>
