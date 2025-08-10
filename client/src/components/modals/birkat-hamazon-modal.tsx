@@ -222,7 +222,7 @@ export function BirkatHamazonModal() {
               </div>
             ) : (
               <div className="space-y-6">
-                {afterBrochasPrayers?.filter(p => p.prayerName === "Al Hamichiya").map((prayer, index) => (
+                {afterBrochasPrayers?.filter(p => p.prayerName === "Me'ein Shalosh").map((prayer, index) => (
                   <div key={index} className="bg-white rounded-2xl p-4 border border-blush/10">
                     {renderPrayerText(prayer as any)}
                   </div>
