@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, Navigation, Home } from "lucide-react";
+import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, Navigation } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
@@ -1669,7 +1669,7 @@ function JerusalemCompass() {
 
   return (
     <Dialog open={true} onOpenChange={() => closeModal(true)}>
-      <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular select-none" 
+      <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-hidden platypi-regular select-none" 
         style={{ 
           touchAction: 'none',
           userSelect: 'none',
@@ -1752,10 +1752,8 @@ function JerusalemCompass() {
                       maxHeight: '100%'
                     }}
                   >
-                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                      <div className="bg-gradient-feminine p-1.5 rounded-full">
-                        <Home className="w-4 h-4 text-white" strokeWidth={1.5} />
-                      </div>
+                    <div className="absolute top-2 left-1/2 transform -translate-x-1/2">
+                      <div className="w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-md"></div>
                     </div>
                   </div>
                 </div>
