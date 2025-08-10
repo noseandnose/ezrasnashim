@@ -250,10 +250,9 @@ export const featuredContent = pgTable("featured_content", {
   id: serial("id").primaryKey(),
   date: date("date").notNull().unique(),
   title: text("title").notNull(),
-  content: text("content"),
-  audioUrl: text("audio_url").notNull(),
-  speaker: text("speaker"),
-  speakerWebsite: text("speaker_website"),
+  content: text("content").notNull(),
+  provider: text("provider"),
+  footnotes: text("footnotes"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

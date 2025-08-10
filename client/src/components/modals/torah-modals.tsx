@@ -158,7 +158,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000
   });
 
-  const { data: featuredContent } = useQuery<{title?: string; content?: string; halachicSource?: string; practicalTip?: string; provider?: string; speakerWebsite?: string}>({
+  const { data: featuredContent } = useQuery<{title?: string; content?: string; provider?: string; footnotes?: string}>({
     queryKey: ['/api/torah/featured', today],
     enabled: activeModal === 'featured',
     staleTime: 5 * 60 * 1000,
@@ -445,56 +445,90 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
       {/* Featured Modal */}
       <Dialog open={activeModal === 'featured'} onOpenChange={() => closeModal(true)}>
-        <DialogContent className="max-h-[95vh] overflow-y-auto" aria-describedby="featured-description">
-          <DialogHeader className="text-center mb-4 pr-8">
-            <DialogTitle className="text-lg platypi-bold text-black">Featured Content</DialogTitle>
-            {featuredContent && (
-              <DialogDescription className="text-sm text-gray-600 platypi-regular">{featuredContent.title}</DialogDescription>
-            )}
-          </DialogHeader>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="featured-description">
           <div id="featured-description" className="sr-only">Featured special topics and content</div>
           
-          {featuredContent && (
-            <div className="space-y-3 text-sm text-gray-700 platypi-regular">
-              <div>
-                <p>
-                  <span className="platypi-bold">Today's Focus:</span>{' '}
-                  <span dangerouslySetInnerHTML={{ __html: formatTextContent(featuredContent.content) }} />
-                </p>
-                {featuredContent.halachicSource && (
-                  <p className="mt-2 text-xs text-gray-500 platypi-regular">Source: {featuredContent.halachicSource}</p>
-                )}
-                {featuredContent.practicalTip && (
-                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-xs platypi-medium text-gray-700">Practical Insight:</p>
-                    <p 
-                      className="text-xs text-gray-600 mt-1 platypi-regular"
-                      dangerouslySetInnerHTML={{ __html: formatTextContent(featuredContent.practicalTip) }}
-                    />
-                  </div>
-                )}
+          <div className="mb-1">
+            {/* Custom header with font size controls - matches Halacha modal */}
+            <div className="flex items-center justify-center mb-1 relative pr-8">
+              <div className="flex items-center gap-4">
+                <div className="flex flex-col items-center">
+                  <DialogTitle className="text-lg platypi-bold text-black">Featured Content</DialogTitle>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                    className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                  >
+                    <span className="text-xs platypi-medium">-</span>
+                  </button>
+                  <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
+                  <button
+                    onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+                    className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                  >
+                    <span className="text-xs platypi-medium">+</span>
+                  </button>
+                </div>
               </div>
             </div>
-          )}
+          </div>
           
-          {/* Thank You Section */}
-          {featuredContent?.provider && (
-            <div className="mt-6 p-4 bg-blue-50 rounded-xl">
-              <p className="text-sm text-blue-900 platypi-medium mb-2">
-                🙏 Thank you to {featuredContent.provider}
-              </p>
-              {featuredContent.speakerWebsite && (
-                <p className="text-sm text-blue-800 platypi-regular">
-                  <a 
-                    href={featuredContent.speakerWebsite} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline hover:text-blue-800"
+          <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
+            {featuredContent && (
+              <div className="space-y-4">
+                {/* Title */}
+                {featuredContent.title && (
+                  <h3 className="platypi-bold text-lg text-black text-center mb-4">
+                    {featuredContent.title}
+                  </h3>
+                )}
+                
+                {/* Main Content */}
+                <div 
+                  className="platypi-regular leading-relaxed text-black whitespace-pre-line"
+                  style={{ fontSize: `${fontSize}px` }}
+                >
+                    <div dangerouslySetInnerHTML={{ __html: formatTextContent(featuredContent.content) }} />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footnotes Section - matches Halacha modal */}
+          {featuredContent?.footnotes && (
+            <div className="mb-1">
+              <button
+                onClick={() => setShowFootnotes(!showFootnotes)}
+                className="w-full text-left bg-gray-50 hover:bg-gray-100 rounded-2xl p-3 border border-gray-200 transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="platypi-medium text-black text-sm">Footnotes</span>
+                  <span className="platypi-regular text-black/60 text-lg">
+                    {showFootnotes ? '−' : '+'}
+                  </span>
+                </div>
+              </button>
+              
+              {showFootnotes && (
+                <div className="bg-white rounded-2xl p-4 mt-2 border border-gray-200">
+                  <div 
+                    className="platypi-regular leading-relaxed text-black/80 text-sm whitespace-pre-line"
                   >
-                    Visit Website
-                  </a>
-                </p>
+                    {featuredContent.footnotes}
+                  </div>
+                </div>
               )}
+            </div>
+          )}
+
+          {/* Thank You Section - matches Halacha modal style */}
+          {featuredContent?.provider && (
+            <div className="mb-1 p-4 bg-blue-50 rounded-xl border border-blue-100">
+              <p className="text-sm text-blue-900 platypi-medium">
+                Thank you to {featuredContent.provider}
+              </p>
             </div>
           )}
 
