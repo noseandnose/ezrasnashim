@@ -21,13 +21,14 @@
   font-display: optional; /* Use fallback immediately if font doesn't load quickly */
 }
 
-/* VC Koren Fonts commented out - using standard Hebrew fonts for better niqqud support
+/* VC Koren Fonts for Hebrew Text in Tefilla Modals */
 @font-face {
   font-family: 'VC Koren Hebrew';
   src: url('/fonts/VC_Koren-Light.otf') format('opentype');
   font-weight: 400;
   font-style: normal;
-  font-display: block;
+  font-display: swap; /* Allow fallback font to show immediately */
+  unicode-range: U+0590-05FF, U+FB1D-FB4F; /* Hebrew Unicode range */
 }
 
 @font-face {
@@ -35,9 +36,9 @@
   src: url('/fonts/VC_Koren-Bold.otf') format('opentype');
   font-weight: 700;
   font-style: normal;
-  font-display: block;
+  font-display: swap; /* Allow fallback font to show immediately */
+  unicode-range: U+0590-05FF, U+FB1D-FB4F; /* Hebrew Unicode range */
 }
-*/
 
 .koren-siddur-hebrew {
   font-family: 'Koren Siddur', 'Frank Ruhl Libre', 'David Libre', serif;
@@ -51,9 +52,9 @@
   letter-spacing: 0.02em;
 }
 
-/* Using standard Hebrew fonts for better niqqud support */
+/* VC Koren Hebrew classes for Tefilla Modals */
 .vc-koren-hebrew {
-  font-family: 'Frank Ruhl Libre', 'David Libre', 'Noto Sans Hebrew', 'Arial Hebrew', serif !important;
+  font-family: 'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif !important;
   font-weight: 400 !important;
   font-style: normal;
   color: #000000;
@@ -67,7 +68,7 @@
 }
 
 .vc-koren-hebrew-bold {
-  font-family: 'Frank Ruhl Libre', 'David Libre', 'Noto Sans Hebrew', 'Arial Hebrew', serif !important;
+  font-family: 'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif !important;
   font-weight: 700 !important;
   font-style: normal;
   color: #000000;
@@ -83,7 +84,7 @@
 /* Ensure bold tags within Hebrew text use the bold font */
 .vc-koren-hebrew strong,
 .vc-koren-hebrew b {
-  font-family: 'Frank Ruhl Libre', 'David Libre', 'Noto Sans Hebrew', 'Arial Hebrew', serif !important;
+  font-family: 'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif !important;
   font-weight: 700 !important;
 }
 

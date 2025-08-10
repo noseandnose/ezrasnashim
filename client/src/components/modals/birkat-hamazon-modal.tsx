@@ -147,7 +147,7 @@ export function BirkatHamazonModal() {
           style={{ 
             fontSize: `${fontSize + 1}px`, 
             direction: 'rtl',
-            fontFamily: "'Frank Ruhl Libre', 'David Libre', 'Noto Sans Hebrew', 'Arial Hebrew', serif",
+            fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
             fontWeight: 400,
             animation: 'fadeInText 0.3s ease-in-out'
           }}
