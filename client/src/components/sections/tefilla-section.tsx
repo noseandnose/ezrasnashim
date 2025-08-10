@@ -136,7 +136,10 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   const { data: progress } = useQuery<GlobalTehillimProgress>({
     queryKey: ['/api/tehillim/progress'], 
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress?t=${Date.now()}`);
+      const response = await fetch(`/api/tehillim/progress?t=${Date.now()}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch tehillim progress');
+      }
       const data = await response.json();
       // Progress data updated
       return data;
@@ -148,7 +151,13 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
 
   // Fetch current name for the perek - Only update when perek is completed
   const { data: currentName } = useQuery<TehillimName | null>({
-    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/current-name`).then(res => res.json()),
+    queryFn: async () => {
+      const response = await fetch(`/api/tehillim/current-name`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch current name');
+      }
+      return response.json();
+    },
     queryKey: ['/api/tehillim/current-name'],
     refetchInterval: 10000, // Refresh every 10 seconds
     staleTime: 5000, // Allow 5 seconds of cache
@@ -157,7 +166,13 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
 
   // Fetch all active names for count display
   const { data: allNames } = useQuery<TehillimName[]>({
-    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/names`).then(res => res.json()),
+    queryFn: async () => {
+      const response = await fetch(`/api/tehillim/names`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch tehillim names');
+      }
+      return response.json();
+    },
     queryKey: ['/api/tehillim/names'],
     refetchInterval: 60000, // Refresh every minute
   });
@@ -165,7 +180,13 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   // Fetch Tehillim preview (first line) for display
   const { data: tehillimPreview, isLoading: isPreviewLoading } = useQuery<{preview: string; perek: number; language: string}>({
     queryKey: ['/api/tehillim/preview', progress?.currentPerek],
-    queryFn: () => fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tehillim/preview/${progress?.currentPerek}?language=hebrew`).then(res => res.json()),
+    queryFn: async () => {
+      const response = await fetch(`/api/tehillim/preview/${progress?.currentPerek}?language=hebrew`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch tehillim preview');
+      }
+      return response.json();
+    },
     enabled: !!progress?.currentPerek,
     staleTime: 0, // Always consider stale
     gcTime: 0 // Don't cache at all
