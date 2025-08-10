@@ -182,14 +182,9 @@ function MorningBrochasModal() {
                 <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
                   {prayer.hebrewText && showHebrew && (
                     <div 
-                      className="text-right leading-relaxed text-black"
-                      style={{ 
-                        fontSize: `${fontSize + 1}px`,
-                        fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
-                        fontWeight: 400,
-                        animation: 'fadeInText 0.3s ease-in-out'
-                      }}
-                      dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.hebrewText).replace(/<strong>/g, '<strong style="font-weight: 700;">') }}
+                      className="vc-koren-hebrew leading-relaxed"
+                      style={{ fontSize: `${fontSize + 1}px` }}
+                      dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.hebrewText).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
                     />
                   )}
                   {!showHebrew && (
@@ -604,16 +599,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           {/* Standardized Content Area */}
           <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
             <div
-              className={`${showHebrew ? 'text-right' : 'koren-siddur-english'} leading-relaxed text-black`}
-              style={{ 
-                fontSize: `${showHebrew ? fontSize + 1 : fontSize}px`,
-                ...(showHebrew && {
-                  fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
-                  fontWeight: 400,
-                  direction: 'rtl',
-                  animation: 'fadeInText 0.3s ease-in-out'
-                })
-              }}
+              className={`${showHebrew ? 'vc-koren-hebrew' : 'koren-siddur-english'} leading-relaxed text-black`}
+              style={{ fontSize: `${showHebrew ? fontSize + 1 : fontSize}px` }}
             >
               {getTehillimDisplayText()}
             </div>
@@ -910,17 +897,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             ) : (
               <div 
                 className={`leading-relaxed text-black ${
-                  nishmasLanguage === 'hebrew' ? 'text-right' : 'koren-siddur-english text-left'
+                  nishmasLanguage === 'hebrew' ? 'vc-koren-hebrew' : 'koren-siddur-english text-left'
                 }`} 
-                style={{ 
-                  fontSize: `${nishmasLanguage === 'hebrew' ? nishmasFontSize + 1 : nishmasFontSize}px`,
-                  ...(nishmasLanguage === 'hebrew' && {
-                    fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
-                    fontWeight: 400,
-                    direction: 'rtl',
-                    animation: 'fadeInText 0.3s ease-in-out'
-                  })
-                }}
+                style={{ fontSize: `${nishmasLanguage === 'hebrew' ? nishmasFontSize + 1 : nishmasFontSize}px` }}
               >
                 {nishmasText ? (
                   <div 
@@ -1302,17 +1281,9 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
       {/* Standardized Content Area */}
       <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
         <div
-          className={`${language === 'hebrew' ? 'text-right' : 'koren-siddur-english'} leading-relaxed text-black`}
-          style={{ 
-            fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px`,
-            ...(language === 'hebrew' && {
-              fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
-              fontWeight: 400,
-              direction: 'rtl',
-              animation: 'fadeInText 0.3s ease-in-out'
-            })
-          }}
-          dangerouslySetInnerHTML={{ __html: formatTextContent(language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation).replace(/<strong>/g, '<strong style="font-weight: 700;">') }}
+          className={`${language === 'hebrew' ? 'vc-koren-hebrew' : 'koren-siddur-english'} leading-relaxed text-black`}
+          style={{ fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px` }}
+          dangerouslySetInnerHTML={{ __html: formatTextContent(language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
         />
 
       </div>
@@ -1506,16 +1477,8 @@ function IndividualTehillimModal() {
           </div>
         ) : (
           <div
-            className={`${language === 'hebrew' ? 'text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
-            style={{ 
-              fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px`,
-              ...(language === 'hebrew' && {
-                fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
-                fontWeight: 400,
-                direction: 'rtl',
-                animation: 'fadeInText 0.3s ease-in-out'
-              })
-            }}
+            className={`${language === 'hebrew' ? 'vc-koren-hebrew' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
+            style={{ fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px` }}
           >
             {tehillimText?.text || `Psalm ${selectedPsalm} text loading...`}
           </div>
