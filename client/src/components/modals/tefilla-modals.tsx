@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, Navigation } from "lucide-react";
+import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, ArrowUp } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
@@ -1770,7 +1770,7 @@ function JerusalemCompass() {
                     >
                       <div className="absolute top-6 left-1/2 transform -translate-x-1/2">
                         <div className="flex flex-col items-center">
-                          <Navigation className={`w-4 h-4 ${isAligned ? 'text-sage' : 'text-blue-500'}`} fill="currentColor" style={{ transform: 'rotate(0deg)' }} />
+                          <ArrowUp className={`w-4 h-4 ${isAligned ? 'text-sage' : 'text-blue-500'}`} strokeWidth={3} />
                           <div className={`w-1 h-16 rounded-full ${isAligned ? 'bg-sage' : 'bg-blue-500'}`}></div>
                           <div className={`text-xs platypi-bold mt-1 ${isAligned ? 'text-sage' : 'text-blue-600'}`}>YOU</div>
                         </div>
