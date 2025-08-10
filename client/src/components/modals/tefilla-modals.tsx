@@ -932,9 +932,14 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 }}
               >
                 {nishmasText ? (
-                  <div className="whitespace-pre-wrap leading-relaxed">
-                    {(nishmasText as any)?.fullText || nishmasText.fullText || 'Text not available'}
-                  </div>
+                  <div 
+                    className="whitespace-pre-wrap leading-relaxed"
+                    dangerouslySetInnerHTML={{ 
+                      __html: formatTextContent(
+                        (nishmasText as any)?.fullText || nishmasText.fullText || 'Text not available'
+                      ).replace(/<strong>/g, '<strong style="font-weight: 700;">')
+                    }}
+                  />
                 ) : (
                   <div className="text-red-600 text-center">Failed to load prayer text</div>
                 )}
@@ -1065,11 +1070,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                         })
                       }}
                       dangerouslySetInnerHTML={{
-                        __html: language === 'hebrew' 
-                          ? (prayer.hebrewText || '')
-                              .replace(/\*\*(.*?)\*\*\n\n/g, '**$1**\n')
-                              .replace(/\*\*(.*?)\*\*/g, '<strong class="prayer-header" style="font-weight: 700;">$1</strong>')
-                          : prayer.englishTranslation
+                        __html: formatTextContent(
+                          language === 'hebrew' 
+                            ? (prayer.hebrewText || '')
+                            : prayer.englishTranslation
+                        ).replace(/<strong>/g, '<strong style="font-weight: 700;">')
                       }}
                     />
                   </div>

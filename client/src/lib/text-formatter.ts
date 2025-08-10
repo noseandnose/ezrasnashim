@@ -57,6 +57,11 @@ export function formatTextContent(text: string | null | undefined): string {
   // Convert newlines to <br> tags for proper HTML rendering
   result = result.replace(/\n/g, '<br />');
   
+  // Preserve multiple spaces by replacing them with non-breaking spaces
+  result = result.replace(/  +/g, (match) => {
+    return match.split('').map(() => '&nbsp;').join('');
+  });
+  
   return result;
 }
 
