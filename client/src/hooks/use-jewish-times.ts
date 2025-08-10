@@ -39,7 +39,7 @@ export const useLocationStore = create<LocationState>((set) => ({
       return response.data;
     } catch (error) {
       if (import.meta.env.MODE === 'development') {
-        console.error('Failed to get IP-based location:', error);
+        // Failed to get IP-based location
       }
       throw error;
     }
@@ -120,7 +120,7 @@ export function useJewishTimes() {
         const response = await axiosClient.get(url);
         return response.data;
       } catch (error) {
-        console.error("Error fetching zmanim:", error);
+        // Error fetching zmanim
         return null;
       }
     },

@@ -36,7 +36,7 @@ export function useHebrewDate() {
         return hebrewDateStr;
       } catch (error: unknown) {
         if (import.meta.env.MODE === 'development') {
-          console.error('Error fetching Hebrew date:', error);
+          // Error fetching Hebrew date
         }
         return hebrewDate; // Return stored value if fetch fails
       }
@@ -78,7 +78,7 @@ export function useHebrewDateWithShkia(shkiaTime?: string) {
         }
       } catch (error) {
         if (import.meta.env.MODE === 'development') {
-          console.error('Error parsing shkia time:', error);
+          // Error parsing shkia time
         }
       }
     }
@@ -104,7 +104,7 @@ export function useHebrewDateWithShkia(shkiaTime?: string) {
         return data.hebrew || '';
       } catch (error: unknown) {
         if (import.meta.env.MODE === 'development') {
-          console.error('Error fetching Hebrew date:', error);
+          // Error fetching Hebrew date with shkia
         }
         return '';
       }

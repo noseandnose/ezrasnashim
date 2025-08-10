@@ -31,7 +31,7 @@ export default function TimesModals() {
       throw new Error('Please fill in both event title and English date');
     }
 
-    console.log('Starting calendar download:', { eventTitle, englishDate, yearDuration });
+    // Starting calendar download
     
     try {
       // Build URL with query parameters using the same base URL logic as other API calls
@@ -60,7 +60,7 @@ export default function TimesModals() {
       
       const downloadUrl = `${baseUrl}/api/download-calendar?${params.toString()}`;
       
-      console.log('Downloading from:', downloadUrl);
+      // Downloading calendar file
       
       // Use window.open with a short timeout to handle download
       const downloadWindow = window.open(downloadUrl, '_self');
@@ -80,11 +80,11 @@ export default function TimesModals() {
         }, 100);
       }
       
-      console.log('Calendar download initiated');
+      // Calendar download initiated
       return { success: true };
       
     } catch (error) {
-      console.error('Calendar download error:', error);
+      // Calendar download error occurred
       throw new Error(`Download failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
@@ -106,7 +106,7 @@ export default function TimesModals() {
       window.location.hash = '#/?section=home&scrollToProgress=true';
     },
     onError: (error) => {
-      console.error('Download mutation error:', error);
+      // Download mutation error
       toast({
         title: "Error",
         description: `Failed to download calendar file: ${error.message}`,

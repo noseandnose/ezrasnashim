@@ -138,7 +138,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
     queryFn: async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress?t=${Date.now()}`);
       const data = await response.json();
-      console.log('Fresh progress data (section):', data);
+      // Progress data updated
       return data;
     },
     refetchInterval: 5000, // Refresh every 5 seconds for real-time updates
@@ -475,7 +475,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
         <div className="grid grid-cols-2 gap-2">
           <button 
             onClick={() => {
-              console.log(`${currentPrayer.title} button clicked`);
+              // Prayer button clicked
               openModal(currentPrayer.modal, 'tefilla');
             }}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${

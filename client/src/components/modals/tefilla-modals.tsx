@@ -116,11 +116,9 @@ function MorningBrochasModal() {
   const { data: morningPrayers, isLoading, error } = useQuery({
     queryKey: ['morning-prayers'],
     queryFn: async () => {
-      console.log('Making API call for morning prayers from database...');
+      // Making API call for morning prayers from database
       const response = await axiosClient.get('/api/morning/prayers');
-      console.log('Frontend received response:', response.data);
-      console.log('Number of prayers:', response.data?.length);
-      console.log('First prayer sample:', response.data?.[0]);
+      // Response received from API
       return response.data; // Returns array of MorningPrayer objects from database
     },
     enabled: activeModal === 'morning-brochas',
@@ -129,12 +127,7 @@ function MorningBrochasModal() {
     gcTime: 30 * 60 * 1000 // 30 minutes
   });
 
-  console.log('MorningBrochasModal - activeModal:', activeModal);
-  console.log('MorningBrochasModal - isLoading:', isLoading);
-  console.log('MorningBrochasModal - error:', error);
-  console.log('MorningBrochasModal - data:', morningPrayers);
-
-  console.log('MorningBrochasModal - activeModal:', activeModal);
+  // Modal state and data loaded
   
   return (
     <Dialog open={activeModal === 'morning-brochas'} onOpenChange={() => closeModal(true)}>

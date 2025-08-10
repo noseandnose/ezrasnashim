@@ -66,7 +66,7 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
         try {
           await audioRef.current.play();
         } catch (error) {
-          console.error('Failed to play audio:', error);
+          // Failed to play audio
           setAudioError(true);
         }
       }
@@ -104,7 +104,7 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
     };
 
     const handleError = () => {
-      console.error('Audio failed to load:', audioUrl);
+      // Audio failed to load
       setAudioError(true);
       setIsPlaying(false);
     };
@@ -176,7 +176,7 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
         ref={audioRef} 
         src={directAudioUrl} 
         preload="metadata"
-        onError={() => console.error('Audio failed to load:', directAudioUrl)}
+        onError={() => { /* Audio failed to load */ }}
       />
       {audioError && (
         <div className="text-xs text-gray-600 mb-2 text-center">

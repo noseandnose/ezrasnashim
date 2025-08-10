@@ -185,13 +185,13 @@ export default function TableModals() {
                         const [isLoading, setIsLoading] = useState(true);
                         
                         const handleVideoError = (e: any) => {
-                          console.error('Video failed to load:', currentMedia.url, e);
+                          // Video failed to load
                           setVideoError(true);
                           setIsLoading(false);
                         };
                         
                         const handleCanPlay = () => {
-                          console.log('Video can play:', currentMedia.url);
+                          // Video can play
                           setIsLoading(false);
                         };
                         
@@ -234,7 +234,7 @@ export default function TableModals() {
                                 className="w-full h-full object-cover"
                                 preload="metadata"
                                 onError={handleVideoError}
-                                onLoadStart={() => console.log('Video loading:', videoUrl)}
+                                onLoadStart={() => { /* Video loading */ }}
                                 onCanPlay={handleCanPlay}
                                 crossOrigin="anonymous"
                                 playsInline
