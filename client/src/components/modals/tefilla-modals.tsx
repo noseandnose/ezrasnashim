@@ -1525,10 +1525,10 @@ function IndividualTehillimModal() {
       <KorenThankYou />
 
       <Button 
-        onClick={isModalComplete('individual-tehillim') ? undefined : () => {
-          // Track modal completion and mark as completed globally
-          trackModalComplete('individual-tehillim');
-          markModalComplete('individual-tehillim');
+        onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
+          // Track modal completion and mark as completed globally with specific psalm ID
+          trackModalComplete(`individual-tehillim-${selectedPsalm}`);
+          markModalComplete(`individual-tehillim-${selectedPsalm}`);
           
           completeTask('tefilla');
           setShowHeartExplosion(true);
@@ -1540,14 +1540,14 @@ function IndividualTehillimModal() {
             window.location.hash = '#/?section=home&scrollToProgress=true';
           }, 2000);
         }}
-        disabled={isModalComplete('individual-tehillim')}
+        disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
         className={`w-full py-3 rounded-xl platypi-medium border-0 ${
-          isModalComplete('individual-tehillim') 
+          isModalComplete(`individual-tehillim-${selectedPsalm}`) 
             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
             : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
         }`}
       >
-        {isModalComplete('individual-tehillim') ? 'Completed Today' : 'Complete'}
+        {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed Today' : 'Complete'}
       </Button>
       
       {/* Heart Explosion Animation */}
