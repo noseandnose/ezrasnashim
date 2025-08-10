@@ -558,17 +558,17 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           </DialogHeader>
           <div id="pirkei-avot-description" className="sr-only">Ethics of the Fathers - timeless wisdom from Jewish sages</div>
           
-          <div className="space-y-3 text-sm text-gray-700">
+          <div className="space-y-3 text-base">
             <div>
-              <p>
+              <p className="font-bold text-black">
                 <strong>Today's Teaching:</strong>{' '}
-                <span dangerouslySetInnerHTML={{ __html: formatTextContent(pirkeiAvotContent?.content || "Shimon his son says: All my days I have grown up among the wise, and I have found nothing better for the body than silence.") }} />
+                <span className="font-bold" dangerouslySetInnerHTML={{ __html: formatTextContent(pirkeiAvotContent?.content || "Shimon his son says: All my days I have grown up among the wise, and I have found nothing better for the body than silence.") }} />
               </p>
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="mt-2 text-sm font-semibold text-black/70">
                 - <span dangerouslySetInnerHTML={{ __html: formatTextContent(pirkeiAvotContent?.source || "Pirkei Avot 1:17") }} />
               </p>
               <p 
-                className="mt-3"
+                className="mt-3 font-bold text-black leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: formatTextContent(pirkeiAvotContent?.explanation || "This mishnah teaches us the value of thoughtful speech and careful listening. True wisdom often comes through quiet contemplation and attentive observation of those wiser than ourselves.") }}
               />
             </div>
