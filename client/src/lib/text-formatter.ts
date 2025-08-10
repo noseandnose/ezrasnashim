@@ -3,6 +3,7 @@
  * - ** for bold text
  * - --- for line breaks
  * - ~~ for greyed out text
+ * - [[ ]] for text in a grey box
  * @param text - The raw text to format
  * @returns The formatted HTML string
  */
@@ -13,6 +14,11 @@ export function formatTextContent(text: string | null | undefined): string {
   
   // Replace --- with line breaks first
   formatted = formatted.replace(/---/g, '<br /><br />');
+  
+  // Process [[ ]] for grey box BEFORE other processing
+  formatted = formatted.replace(/\[\[(.*?)\]\]/g, (match, content) => {
+    return `<div style="background-color: #F3F4F6; border: 1px solid #D1D5DB; border-radius: 8px; padding: 12px; margin: 8px 0; color: #374151;">${content}</div>`;
+  });
   
   // Process the text character by character to handle ** and ~~ markers
   let result = '';
