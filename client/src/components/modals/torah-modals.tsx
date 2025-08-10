@@ -527,7 +527,22 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           {featuredContent?.provider && (
             <div className="mb-1 p-4 bg-blue-50 rounded-xl border border-blue-100">
               <p className="text-sm text-blue-900 platypi-medium">
-                Thank you to {featuredContent.provider}
+                Thank you to{' '}
+                {featuredContent.provider === 'Rabbi Daniel Braude' ? (
+                  <>
+                    Rabbi Daniel Braude from{' '}
+                    <a 
+                      href="https://feldheim.com/learn-hilchos-lashon-hara-in-just-3-minutes-a-day"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline hover:text-blue-800"
+                    >
+                      Learn Hilchos Lashon Hara in just 3 minutes a day
+                    </a>
+                  </>
+                ) : (
+                  featuredContent.provider
+                )}
               </p>
             </div>
           )}
