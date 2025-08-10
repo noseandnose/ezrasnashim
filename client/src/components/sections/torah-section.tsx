@@ -114,7 +114,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
     {
       id: 'featured',
       icon: Star,
-      title: 'Featured',
+      title: 'Loshon Horah',
       subtitle: 'Special Topics',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
@@ -192,6 +192,8 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
                     `${camelCaseTitle} (${readingTime})` : 
                     `Special Topics (${readingTime})`;
                 }
+                // Always show text indicator for featured content
+                contentType = hasContent ? 'text' : contentType;
                 break;
             }
             
