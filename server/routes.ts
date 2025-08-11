@@ -1475,7 +1475,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const paymentIntentData = {
         amount: Math.round(amount * 100), // Convert to cents
         currency: "usd",
-        payment_method_configuration: "pmc_1Rgkz8FBzwAA3fO1GtotOiNc",
         metadata: {
           source: "ezras-nashim-donation",
           donationType: donationType || "General Donation",
@@ -1483,9 +1482,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           dedication: metadata?.dedication || "",
           timestamp: new Date().toISOString()
         },
-        // Add automatic payment method confirmation for mobile wallets
+        // Enable automatic payment methods including Apple Pay and Google Pay
         automatic_payment_methods: {
-          enabled: true
+          enabled: true,
+          allow_redirects: 'never' as const // Keep on same page for better UX
         }
       };
       

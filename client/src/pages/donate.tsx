@@ -299,12 +299,7 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
           layout: 'tabs',
           paymentMethodOrder: ['apple_pay', 'google_pay', 'card'],
           fields: {
-            billingDetails: {
-              address: 'never',
-              email: 'never',
-              name: 'never',
-              phone: 'never'
-            }
+            billingDetails: 'never'
           },
           wallets: {
             applePay: 'auto',
