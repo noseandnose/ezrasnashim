@@ -114,7 +114,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
     {
       id: 'featured',
       icon: Star,
-      title: 'Loshon Horah',
+      title: 'Shmirat Haloshan',
       subtitle: 'Special Topics',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
