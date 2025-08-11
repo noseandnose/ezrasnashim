@@ -908,7 +908,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                     dangerouslySetInnerHTML={{ 
                       __html: formatTextContent(
                         (nishmasText as any)?.fullText || nishmasText.fullText || 'Text not available'
-                      ).replace(/<strong>/g, '<strong style="font-weight: 700;">')
+                      ).replace(/<strong>/g, nishmasLanguage === 'hebrew' ? '<strong class="vc-koren-hebrew-bold">' : '<strong style="font-weight: 700;">')
                     }}
                   />
                 ) : (
@@ -1029,25 +1029,20 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               <div className="space-y-6">
                 {maarivPrayers.map((prayer) => (
                   <div key={prayer.id} className="border-b border-warm-gray/10 pb-4 last:border-b-0">
-                    <div
-                      className={`${language === 'hebrew' ? 'text-right' : 'koren-siddur-english text-left'} leading-relaxed whitespace-pre-line text-black`}
-                      style={{ 
-                        fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px`,
-                        ...(language === 'hebrew' && {
-                          fontFamily: "'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif",
-                          fontWeight: 400,
-                          direction: 'rtl',
-                          animation: 'fadeInText 0.3s ease-in-out'
-                        })
-                      }}
-                      dangerouslySetInnerHTML={{
-                        __html: formatTextContent(
-                          language === 'hebrew' 
-                            ? (prayer.hebrewText || '')
-                            : prayer.englishTranslation
-                        ).replace(/<strong>/g, '<strong style="font-weight: 700;">')
-                      }}
-                    />
+                    {prayer.hebrewText && language === 'hebrew' && (
+                      <div 
+                        className="vc-koren-hebrew leading-relaxed"
+                        style={{ fontSize: `${fontSize + 1}px` }}
+                        dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.hebrewText).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
+                      />
+                    )}
+                    {language === 'english' && (
+                      <div 
+                        className="koren-siddur-english text-left leading-relaxed text-black/70"
+                        style={{ fontSize: `${fontSize}px` }}
+                        dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.englishTranslation || "English translation not available") }}
+                      />
+                    )}
                   </div>
                 ))}
               </div>
@@ -1714,10 +1709,9 @@ function JerusalemCompass() {
                   userSelect: 'none',
                   WebkitUserSelect: 'none',
                   WebkitTouchCallout: 'none',
-                  WebkitUserDrag: 'none',
                   MozUserSelect: 'none',
                   msUserSelect: 'none'
-                }}
+                } as React.CSSProperties}
               >
                 {/* Rotating Compass Circle */}
                 <div 
