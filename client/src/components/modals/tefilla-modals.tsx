@@ -644,20 +644,21 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             ) : (
               <div className="space-y-6">
                 {minchaPrayers.map((prayer) => (
-                  <div key={prayer.id} className="border-b border-warm-gray/10 pb-4 last:border-b-0">
-                    <div
-                      className={`${language === 'hebrew' ? 'koren-siddur-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed whitespace-pre-line text-black`}
-                      style={{ 
-                        fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px`,
-                        ...(language === 'hebrew' && {
-                          direction: 'rtl',
-                          animation: 'fadeInText 0.3s ease-in-out'
-                        })
-                      }}
-                      dangerouslySetInnerHTML={{
-                        __html: formatTextContent(language === 'hebrew' ? prayer.hebrewText || '' : prayer.englishTranslation || '').replace(/<strong>/g, '<strong style="font-weight: 700;">')
-                      }}
-                    />
+                  <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
+                    {prayer.hebrewText && language === 'hebrew' && (
+                      <div 
+                        className="vc-koren-hebrew leading-relaxed"
+                        style={{ fontSize: `${fontSize + 1}px` }}
+                        dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.hebrewText).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
+                      />
+                    )}
+                    {language === 'english' && (
+                      <div 
+                        className="koren-siddur-english text-left leading-relaxed text-black/70"
+                        style={{ fontSize: `${fontSize}px` }}
+                        dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.englishTranslation || "English translation not available") }}
+                      />
+                    )}
                   </div>
                 ))}
               </div>
