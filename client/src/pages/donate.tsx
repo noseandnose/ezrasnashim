@@ -58,13 +58,19 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
     console.log('Amount:', amount);
     console.log('Donation type:', donationType);
     console.log('User agent:', navigator.userAgent);
+    console.log('Current URL:', window.location.href);
     console.log('Payment environment:', {
       isApplePay: /iPhone|iPad|iPod/.test(navigator.userAgent) && window.ApplePaySession,
       isSafari: /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent),
-      isIOS: /iPhone|iPad|iPod/.test(navigator.userAgent)
+      isIOS: /iPhone|iPad|iPod/.test(navigator.userAgent),
+      protocol: window.location.protocol,
+      hostname: window.location.hostname
     });
     
     try {
+      console.log('About to confirm payment with Stripe...');
+      console.log('Return URL will be:', `${window.location.origin}/?donation=success`);
+      
       // Enhanced confirmation for Apple Pay compatibility
       const confirmResult = await stripe.confirmPayment({
         elements,
@@ -74,18 +80,36 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         redirect: "if_required", // Stay on same page when possible
       });
       
+      console.log('Stripe confirmPayment completed:', confirmResult);
+      
       const { error, paymentIntent } = confirmResult;
       
-      console.log('Payment confirmation result:', { 
-        error: error ? { type: error.type, code: error.code, message: error.message, decline_code: error.decline_code } : null, 
-        paymentIntent: paymentIntent ? { 
-          id: paymentIntent.id, 
-          status: paymentIntent.status, 
-          amount: paymentIntent.amount,
-          payment_method: paymentIntent.payment_method,
-          client_secret: paymentIntent.client_secret
-        } : null 
-      });
+      console.log('=== FULL PAYMENT CONFIRMATION RESULT ===');
+      console.log('Raw confirmResult object:', confirmResult);
+      console.log('Error object:', error);
+      console.log('PaymentIntent object:', paymentIntent);
+      console.log('Error exists:', !!error);
+      console.log('PaymentIntent exists:', !!paymentIntent);
+      
+      if (error) {
+        console.log('=== ERROR DETAILS ===');
+        console.log('Error type:', error.type);
+        console.log('Error code:', error.code);
+        console.log('Error message:', error.message);
+        console.log('Decline code:', error.decline_code);
+        console.log('Payment Intent in error:', error.payment_intent);
+        console.log('Full error object keys:', Object.keys(error));
+      }
+      
+      if (paymentIntent) {
+        console.log('=== PAYMENT INTENT DETAILS ===');
+        console.log('Payment Intent ID:', paymentIntent.id);
+        console.log('Payment Intent status:', paymentIntent.status);
+        console.log('Payment Intent amount:', paymentIntent.amount);
+        console.log('Payment method:', paymentIntent.payment_method);
+        console.log('Client secret exists:', !!paymentIntent.client_secret);
+        console.log('Full PaymentIntent keys:', Object.keys(paymentIntent));
+      }
       console.log('Raw Stripe response - error exists:', !!error);
       console.log('Raw Stripe response - paymentIntent exists:', !!paymentIntent);
       if (paymentIntent) {
@@ -310,24 +334,44 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
           }
         }}
         onReady={() => {
-          console.log('PaymentElement is ready');
+          console.log('=== PAYMENT ELEMENT READY ===');
           console.log('User Agent:', navigator.userAgent);
           console.log('Protocol:', window.location.protocol);
           console.log('Hostname:', window.location.hostname);
+          console.log('Full URL:', window.location.href);
           
           // Check available payment methods
           if ('ApplePaySession' in window) {
-            console.log('ApplePaySession is available in browser');
-            // Check if Apple Pay is available
+            console.log('✅ ApplePaySession is available in browser');
             try {
               const canMakePayments = window.ApplePaySession?.canMakePayments();
               console.log('Device can make Apple Pay payments:', canMakePayments);
+              
+              // Test domain verification
+              fetch('/.well-known/apple-developer-merchantid-domain-association')
+                .then(response => {
+                  console.log('Apple Pay domain verification response:', response.status, response.ok);
+                  return response.text();
+                })
+                .then(content => {
+                  console.log('Domain verification content length:', content.length);
+                  console.log('Domain verification content preview:', content.substring(0, 50) + '...');
+                })
+                .catch(error => {
+                  console.error('❌ Apple Pay domain verification failed:', error);
+                });
             } catch (e) {
               console.error('Error checking Apple Pay availability:', e);
             }
           } else {
-            console.log('ApplePaySession not available in this browser');
+            console.log('❌ ApplePaySession not available in this browser');
           }
+          
+          console.log('=== STRIPE PUBLIC KEY INFO ===');
+          const publicKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+          console.log('Public key exists:', !!publicKey);
+          console.log('Public key format:', publicKey?.substring(0, 10) + '...');
+          console.log('Is live key:', publicKey?.includes('pk_live'));
         }}
       />
 
@@ -369,6 +413,12 @@ export default function Donate() {
     }
 
     // Create PaymentIntent when component loads
+    console.log('=== PAYMENT INTENT CREATION ===');
+    console.log('Amount:', amount);
+    console.log('Donation type:', donationType);
+    console.log('Sponsor name:', sponsorName);
+    console.log('Dedication:', dedication);
+
     apiRequest("POST", "/api/create-payment-intent", {
       amount,
       donationType,
@@ -379,18 +429,30 @@ export default function Donate() {
       }
     })
       .then((response) => {
+        console.log('Payment intent response:', response);
         const data = response.data;
+        console.log('Payment intent data:', data);
+        
         if (data.clientSecret) {
+          console.log('Client secret received successfully');
           setClientSecret(data.clientSecret);
         } else {
+          console.error('No client secret in response:', data);
           throw new Error('No client secret received');
         }
       })
       .catch((error) => {
         console.error('Error creating payment intent:', error);
+        console.error('Error details:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status,
+          statusText: error.response?.statusText
+        });
+        
         toast({
           title: "Payment Setup Failed",
-          description: "Unable to initialize payment. Please try again.",
+          description: `Unable to initialize payment: ${error.response?.data?.message || error.message}`,
           variant: "destructive",
         });
       });
