@@ -7,37 +7,35 @@
 /* Koren Fonts for Tefilla Content */
 @font-face {
   font-family: 'Koren Siddur';
-  src: url('/fonts/KorenSiddur.otf') format('opentype');
+  src: url('./fonts/KorenSiddur.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
-  font-display: optional; /* Use fallback immediately if font doesn't load quickly */
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'Arno Koren';
-  src: url('/fonts/ArnoKoren.otf') format('opentype');
+  src: url('./fonts/ArnoKoren.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
-  font-display: optional; /* Use fallback immediately if font doesn't load quickly */
+  font-display: swap;
 }
 
 /* VC Koren Fonts for Hebrew Text in Tefilla Modals */
 @font-face {
   font-family: 'VC Koren Hebrew';
-  src: url('/fonts/VC_Koren-Light.otf') format('opentype');
+  src: url('./fonts/VC_Koren-Light.otf') format('opentype');
   font-weight: 400;
   font-style: normal;
-  font-display: block; /* Wait for font to load to prevent font swapping */
-  unicode-range: U+0590-05FF, U+FB1D-FB4F; /* Hebrew Unicode range */
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'VC Koren Hebrew';
-  src: url('/fonts/VC_Koren-Bold.otf') format('opentype');
+  src: url('./fonts/VC_Koren-Bold.otf') format('opentype');
   font-weight: 700;
   font-style: normal;
-  font-display: block; /* Wait for font to load to prevent font swapping */
-  unicode-range: U+0590-05FF, U+FB1D-FB4F; /* Hebrew Unicode range */
+  font-display: swap;
 }
 
 .koren-siddur-hebrew {

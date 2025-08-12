@@ -539,3 +539,16 @@ export type InsertAnalyticsEvent = z.infer<typeof insertAnalyticsEventSchema>;
 
 export type DailyStats = typeof dailyStats.$inferSelect;
 export type InsertDailyStats = z.infer<typeof insertDailyStatsSchema>;
+
+// Tehillim table
+export const tehillim = pgTable("tehillim", {
+  id: serial("id").primaryKey(),
+  englishNumber: integer("english_number").notNull(),
+  hebrewNumber: text("hebrew_number").notNull(),
+  englishText: text("english_text").notNull(),
+  hebrewText: text("hebrew_text").notNull(),
+});
+
+export const insertTehillimSchema = createInsertSchema(tehillim);
+export type Tehillim = typeof tehillim.$inferSelect;
+export type InsertTehillim = z.infer<typeof insertTehillimSchema>;
