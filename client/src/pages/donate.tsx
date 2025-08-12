@@ -71,6 +71,31 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
       console.log('About to confirm payment with Stripe...');
       console.log('Return URL will be:', `${window.location.origin}/?donation=success`);
       
+      // First, validate that the payment element has been filled
+      const { error: submitError } = await elements.submit();
+      if (submitError) {
+        console.error('Payment element validation error:', submitError);
+        
+        // Handle specific validation errors
+        if (submitError.type === 'validation_error') {
+          toast({
+            title: "Payment Information Required",
+            description: "Please complete all required payment fields.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Payment Error", 
+            description: submitError.message || "Please check your payment information and try again.",
+            variant: "destructive",
+          });
+        }
+        setIsProcessing(false);
+        return;
+      }
+      
+      console.log('Payment element validated successfully, confirming payment...');
+      
       // Enhanced confirmation for Apple Pay compatibility
       const confirmResult = await stripe.confirmPayment({
         elements,
@@ -82,7 +107,9 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
       
       console.log('Stripe confirmPayment completed:', confirmResult);
       
-      const { error, paymentIntent } = confirmResult;
+      // Handle the TypeScript typing issue - confirmResult may have different structures
+      const error = (confirmResult as any)?.error;
+      const paymentIntent = (confirmResult as any)?.paymentIntent;
       
       console.log('=== FULL PAYMENT CONFIRMATION RESULT ===');
       console.log('Raw confirmResult object:', confirmResult);
@@ -96,8 +123,8 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         console.log('Error type:', error.type);
         console.log('Error code:', error.code);
         console.log('Error message:', error.message);
-        console.log('Decline code:', error.decline_code);
-        console.log('Payment Intent in error:', error.payment_intent);
+        console.log('Decline code:', (error as any).decline_code);
+        console.log('Payment Intent in error:', (error as any).payment_intent);
         console.log('Full error object keys:', Object.keys(error));
       }
       
@@ -164,6 +191,12 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
             variant: "destructive",
           });
         }
+      } else if (!error && (!paymentIntent || paymentIntent?.status === 'requires_payment_method')) {
+        // This is a normal state when user hasn't entered payment details yet
+        console.log('Payment requires method - user needs to complete form');
+        // Don't show error, just let user continue with form
+        setIsProcessing(false);
+        return;
       } else if (paymentIntent && ['succeeded', 'processing', 'requires_capture', 'requires_confirmation'].includes(paymentIntent.status)) {
         // Handle all successful/processing payment statuses (Apple Pay, Google Pay, card variations)
         console.log('Payment successful with status:', paymentIntent.status);
@@ -255,10 +288,18 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
           }
         }
       } else {
-        console.error('No payment intent returned from Stripe');
+        // This shouldn't happen but handle it gracefully
+        console.log('Unexpected payment state:', { error, paymentIntent });
+        if (!error && !paymentIntent) {
+          // User may have cancelled or form needs input
+          console.log('Payment form needs completion');
+          setIsProcessing(false);
+          return;
+        }
+        
         toast({
           title: "Payment Error",
-          description: "No payment information was returned. Please try again.",
+          description: "An unexpected error occurred. Please try again.",
           variant: "destructive",
         });
       }
