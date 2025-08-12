@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ArrowLeft, CheckCircle, Mail } from "lucide-react";
 import { useLocation } from "wouter";
 import { useDailyCompletionStore, useModalStore } from "@/lib/types";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
@@ -38,6 +40,7 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
   const elements = useElements();
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { openModal } = useModalStore();
   const { trackModalComplete } = useTrackModalComplete();
@@ -83,7 +86,8 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         confirmResult = await stripe.confirmPayment({
           elements,
           confirmParams: {
-            return_url: `${window.location.origin}/?donation=success`,
+            return_url: `${window.location.origin}/donate?success=true&amount=${amount}&type=${encodeURIComponent(donationType)}&email=${encodeURIComponent(userEmail || '')}`,
+            receipt_email: userEmail || undefined,
           },
         });
         
@@ -367,6 +371,25 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         return null;
       })()}
 
+      {/* Email field for tax receipt */}
+      <div className="mb-6">
+        <Label htmlFor="email" className="flex items-center gap-2 mb-2">
+          <Mail className="w-4 h-4" />
+          Email for Tax Receipt
+        </Label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="your@email.com"
+          value={userEmail}
+          onChange={(e) => setUserEmail(e.target.value)}
+          className="w-full"
+        />
+        <p className="text-sm text-gray-500 mt-1">
+          We'll send your tax-deductible donation receipt to this email
+        </p>
+      </div>
+
       <PaymentElement 
         options={{
           layout: 'tabs',
@@ -443,16 +466,28 @@ export default function Donate() {
   const [, setLocation] = useLocation();
   const [clientSecret, setClientSecret] = useState("");
   const [donationComplete, setDonationComplete] = useState(false);
+  const [userEmailForReceipt, setUserEmailForReceipt] = useState("");
   const { toast } = useToast();
 
   // Get donation details from URL params
   const urlParams = new URLSearchParams(window.location.search);
+  const isSuccess = urlParams.get('success') === 'true';
   const amount = parseFloat(urlParams.get('amount') || '0');
   const donationType = urlParams.get('type') || 'General Donation';
   const sponsorName = urlParams.get('sponsor') || '';
   const dedication = urlParams.get('dedication') || '';
+  const emailFromUrl = urlParams.get('email') || '';
 
   useEffect(() => {
+    // Check if returning from successful payment
+    if (isSuccess) {
+      setDonationComplete(true);
+      setUserEmailForReceipt(emailFromUrl);
+      // Clean the URL
+      window.history.replaceState({}, '', '/donate');
+      return;
+    }
+
     if (amount <= 0) {
       setLocation('/');
       return;
@@ -472,7 +507,8 @@ export default function Donate() {
         sponsorName,
         dedication,
         timestamp: new Date().toISOString()
-      }
+      },
+      email: "" // Will be filled by user in the form
     })
       .then((response) => {
         console.log('Payment intent response:', response);
@@ -515,24 +551,43 @@ export default function Donate() {
 
   if (donationComplete) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blush/10 to-peach/10 flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-white rounded-3xl p-8 text-center shadow-lg">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="text-green-600" size={32} />
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div className="w-full max-w-md bg-white rounded-3xl p-8 text-center shadow-2xl animate-in fade-in zoom-in duration-300">
+          <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <CheckCircle className="text-white" size={40} />
           </div>
           
-          <h1 className="text-2xl font-bold mb-4">Thank You!</h1>
-          <p className="text-gray-600 mb-6">
-            Your donation of ${amount} has been processed successfully. 
-            May your generosity bring many blessings.
+          <h1 className="text-3xl font-bold mb-4 text-gray-800">Thank You!</h1>
+          <p className="text-lg text-gray-600 mb-2">
+            Your donation has been processed successfully.
+          </p>
+          <p className="text-xl font-semibold text-blush mb-6">
+            ${amount || '0'} - {donationType}
+          </p>
+          <p className="text-sm text-gray-500 mb-8">
+            May your generosity bring many blessings and help us reach our goal of 1 million mitzvos monthly.
+            {userEmailForReceipt && (
+              <span className="block mt-2">
+                A tax receipt will be sent to: <strong>{userEmailForReceipt}</strong>
+              </span>
+            )}
           </p>
           
-          <Button
-            onClick={handleBackToApp}
-            className="w-full gradient-blush-peach text-white py-3"
-          >
-            Return to Ezras Nashim
-          </Button>
+          <div className="space-y-3">
+            <Button
+              onClick={handleBackToApp}
+              className="w-full gradient-blush-peach text-white py-3 font-semibold shadow-md hover:shadow-lg transition-shadow"
+            >
+              Return to Ezras Nashim
+            </Button>
+            <Button
+              onClick={() => window.location.reload()}
+              variant="outline"
+              className="w-full py-3"
+            >
+              Make Another Donation
+            </Button>
+          </div>
         </div>
       </div>
     );

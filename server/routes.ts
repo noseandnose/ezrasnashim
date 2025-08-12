@@ -1508,7 +1508,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Stripe payment route for donations
   app.post("/api/create-payment-intent", async (req, res) => {
     try {
-      const { amount, donationType, metadata } = req.body;
+      const { amount, donationType, metadata, email } = req.body;
       
       console.log('=== PAYMENT INTENT REQUEST ===');
       console.log('Request body:', { amount, donationType, metadata });
@@ -1532,7 +1532,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         stripeConfigured: !!process.env.STRIPE_SECRET_KEY
       });
       
-      const paymentIntentData = {
+      const paymentIntentData: any = {
         amount: Math.round(amount * 100), // Convert to cents
         currency: "usd",
         metadata: {
@@ -1540,6 +1540,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           donationType: donationType || "General Donation",
           sponsorName: metadata?.sponsorName || "",
           dedication: metadata?.dedication || "",
+          email: email || metadata?.email || "",
           timestamp: new Date().toISOString()
         },
         // Enable automatic payment methods including Apple Pay and Google Pay
@@ -1548,6 +1549,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           allow_redirects: 'never' as const // Keep on same page for better UX
         }
       };
+      
+      // Add receipt_email if provided
+      if (email || metadata?.email) {
+        paymentIntentData.receipt_email = email || metadata?.email;
+      }
       
       console.log('Payment intent configuration:', paymentIntentData);
       
