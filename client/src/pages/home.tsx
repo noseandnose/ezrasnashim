@@ -43,6 +43,22 @@ export default function Home() {
     }
   }, [location]);
 
+  // Listen for custom navigation events from modal closures
+  useEffect(() => {
+    const handleNavigateToSection = (event: CustomEvent) => {
+      const { section } = event.detail;
+      if (['torah', 'tefilla', 'tzedaka', 'home', 'table'].includes(section)) {
+        setActiveSection(section);
+      }
+    };
+
+    window.addEventListener('navigateToSection', handleNavigateToSection as EventListener);
+    
+    return () => {
+      window.removeEventListener('navigateToSection', handleNavigateToSection as EventListener);
+    };
+  }, []);
+
   const renderSection = () => {
     switch (activeSection) {
       case 'home':

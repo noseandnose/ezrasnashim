@@ -75,7 +75,7 @@ export default function DiscountBar({ className = "" }: DiscountBarProps) {
             className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
           />
           <div className="flex-1">
-            <h3 className="text-sm font-semibold text-gray-800 leading-tight">
+            <h3 className="text-sm platypi-semibold text-gray-800 leading-tight">
               {promotion.title}
             </h3>
             <p className="text-xs text-gray-600 mt-0.5">{promotion.subtitle}</p>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VC Koren Font Test</title>
+    <style>
+        @font-face {
+            font-family: 'VC Koren Test';
+            src: url('/fonts/VC_Koren-Light.otf') format('opentype');
+            font-weight: 400;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'VC Koren Test';
+            src: url('/fonts/VC_Koren-Bold.otf') format('opentype');
+            font-weight: 700;
+            font-style: normal;
+        }
+        
+        body {
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .vc-koren-light {
+            font-family: 'VC Koren Test', serif;
+            font-weight: 400;
+            font-size: 24px;
+            line-height: 1.8;
+            direction: rtl;
+        }
+        
+        .vc-koren-bold {
+            font-family: 'VC Koren Test', serif;
+            font-weight: 700;
+            font-size: 24px;
+            line-height: 1.8;
+            direction: rtl;
+        }
+        
+        .fallback {
+            font-family: serif;
+            font-size: 24px;
+            line-height: 1.8;
+            direction: rtl;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">VC Koren Font Test Page</h1>
+    
+    <div class="test-container">
+        <h2>VC Koren Light (400)</h2>
+        <p class="vc-koren-light">
+            בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם
+        </p>
+    </div>
+    
+    <div class="test-container">
+        <h2>VC Koren Bold (700)</h2>
+        <p class="vc-koren-bold">
+            בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם
+        </p>
+    </div>
+    
+    <div class="test-container">
+        <h2>Fallback Font (for comparison)</h2>
+        <p class="fallback">
+            בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם
+        </p>
+    </div>
+    
+    <script>
+        document.fonts.ready.then(() => {
+            console.log('Fonts loaded!');
+            document.fonts.forEach(font => {
+                console.log(`Font: ${font.family}, Weight: ${font.weight}, Style: ${font.style}, Status: ${font.status}`);
+            });
+        });
+    </script>
+</body>
+</html>

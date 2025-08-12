@@ -39,7 +39,7 @@ export const useLocationStore = create<LocationState>((set) => ({
       return response.data;
     } catch (error) {
       if (import.meta.env.MODE === 'development') {
-        console.error('Failed to get IP-based location:', error);
+        // Failed to get IP-based location
       }
       throw error;
     }
@@ -62,7 +62,7 @@ export function useGeolocation() {
       setLocationRequested(true);
 
       if (!navigator.geolocation) {
-        console.warn("Geolocation is not supported by this browser");
+
         setPermissionDenied(true);
         return;
       }
@@ -76,13 +76,11 @@ export function useGeolocation() {
         },
         (error) => {
           if (error.code === error.PERMISSION_DENIED) {
-            console.warn("Location permission denied, using default location");
+
           } else if (error.code === error.POSITION_UNAVAILABLE) {
-            console.warn(
-              "Location information unavailable, using default location",
-            );
+
           } else if (error.code === error.TIMEOUT) {
-            console.warn("Location request timed out, using default location");
+
           }
           setPermissionDenied(true);
           // Don't set fallback coordinates - require accurate location
@@ -117,12 +115,12 @@ export function useJewishTimes() {
         return null;
       }
       try {
-        // Call our backend proxy route using relative path
+        // Call our backend proxy route - axiosClient has base URL configured
         const url = `/api/zmanim/${coordinates.lat}/${coordinates.lng}`;
         const response = await axiosClient.get(url);
         return response.data;
       } catch (error) {
-        console.error("Error fetching zmanim:", error);
+        // Error fetching zmanim
         return null;
       }
     },

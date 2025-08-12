@@ -24,17 +24,20 @@ export type ModalType =
   | 'blessings'
   | 'tefillos'
   | 'personal-prayers'
+  | 'jerusalem-compass'
   | 'donate'
   | 'about'
   | 'location'
   | 'sponsor-details'
+  | 'community-impact'
   | null;
 
 export interface ModalState {
   activeModal: string | null;
   selectedPsalm: number | null;
-  openModal: (modalId: string) => void;
-  closeModal: () => void;
+  previousSection: string | null;
+  openModal: (modalId: string, fromSection?: string) => void;
+  closeModal: (returnToPrevious?: boolean) => void;
   setSelectedPsalm: (psalmNumber: number) => void;
   
   // Convenience methods for specific modals
@@ -46,8 +49,26 @@ export interface ModalState {
 export const useModalStore = create<ModalState>((set, get) => ({
   activeModal: null,
   selectedPsalm: null,
-  openModal: (modalId: string) => set({ activeModal: modalId }),
-  closeModal: () => set({ activeModal: null }),
+  previousSection: null,
+  openModal: (modalId: string, fromSection?: string) => set({ 
+    activeModal: modalId, 
+    previousSection: fromSection || get().previousSection 
+  }),
+  closeModal: (returnToPrevious?: boolean) => {
+    const state = get();
+    set({ activeModal: null });
+    
+    // Handle navigation based on close type
+    if (returnToPrevious && state.previousSection && typeof window !== 'undefined') {
+      // Use a small delay to ensure modal close animation completes
+      setTimeout(() => {
+        const event = new CustomEvent('navigateToSection', { 
+          detail: { section: state.previousSection } 
+        });
+        window.dispatchEvent(event);
+      }, 100);
+    }
+  },
   setSelectedPsalm: (psalmNumber: number) => set({ selectedPsalm: psalmNumber }),
   
   // Convenience methods for specific modals
@@ -71,26 +92,34 @@ export interface DailyCompletionState {
   checkAndShowCongratulations: () => boolean;
 }
 
-// Global modal completion tracking
+// Daily modal completion tracking
 export interface ModalCompletionState {
-  completedModals: Set<string>;
+  completedModals: Record<string, Set<string>>; // date -> set of modalIds
   markModalComplete: (modalId: string) => void;
   isModalComplete: (modalId: string) => boolean;
   resetModalCompletions: () => void;
 }
 
 export const useModalCompletionStore = create<ModalCompletionState>((set, get) => ({
-  completedModals: new Set(),
+  completedModals: {},
   markModalComplete: (modalId: string) => {
-    set(state => ({
-      completedModals: new Set(state.completedModals).add(modalId)
-    }));
+    const today = new Date().toISOString().split('T')[0];
+    set(state => {
+      const newState = { ...state.completedModals };
+      if (!newState[today]) {
+        newState[today] = new Set();
+      }
+      newState[today].add(modalId);
+      return { completedModals: newState };
+    });
   },
   isModalComplete: (modalId: string) => {
-    return get().completedModals.has(modalId);
+    const today = new Date().toISOString().split('T')[0];
+    const todaysCompletions = get().completedModals[today];
+    return todaysCompletions ? todaysCompletions.has(modalId) : false;
   },
   resetModalCompletions: () => {
-    set({ completedModals: new Set() });
+    set({ completedModals: {} });
   }
 }));
 

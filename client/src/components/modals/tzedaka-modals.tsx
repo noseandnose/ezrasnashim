@@ -70,10 +70,8 @@ export default function TzedakaModals() {
     }
 
     if (amount > 0) {
-      // Track modal completion
-      if (activeModal) {
-        trackModalComplete(activeModal);
-      }
+      // Don't track completion here - only after successful payment
+      // Completion will be tracked in the donate page after payment succeeds
       
       const params = new URLSearchParams({
         amount: amount.toString(),
@@ -91,24 +89,29 @@ export default function TzedakaModals() {
   return (
     <>
       {/* Sponsor a Day Modal */}
-      <Dialog open={activeModal === 'sponsor-day'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'sponsor-day'} onOpenChange={(open) => {
+        if (!open) {
+          // User clicked X or pressed Escape - don't track completion
+          closeModal();
+        }
+      }}>
         <DialogContent aria-describedby="sponsor-day-description">
           <div className="flex items-center justify-center mb-3 relative">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Sponsor a Day</DialogTitle>
+            <DialogTitle className="text-lg platypi-bold text-black">Sponsor a Day</DialogTitle>
           </div>
-          <p className="text-xs text-warm-gray/70 font-sans text-center mb-4">Dedicate all mitzvot done on the app for one day - $180</p>
+          <p className="text-xs text-warm-gray/70 platypi-regular text-center mb-4">Dedicate all mitzvot done on the app for one day - $180</p>
           <div id="sponsor-day-description" className="sr-only">Daily sponsorship and dedication options</div>
           
           <div className="space-y-4">
             <div className="bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-blush/20">
               <div className="text-center">
-                <div className="font-serif text-2xl text-warm-gray mb-1">$180</div>
-                <div className="font-sans text-xs text-warm-gray/70">Fixed sponsorship amount</div>
+                <div className="platypi-regular text-2xl text-warm-gray mb-1">$180</div>
+                <div className="platypi-regular text-xs text-warm-gray/70">Fixed sponsorship amount</div>
               </div>
             </div>
 
             <div>
-              <label className="text-sm font-medium text-warm-gray block mb-2">Sponsored By *</label>
+              <label className="text-sm platypi-medium text-warm-gray block mb-2">Sponsored By *</label>
               <Input 
                 placeholder="Enter your name or family name"
                 value={donorName}
@@ -119,7 +122,7 @@ export default function TzedakaModals() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-warm-gray block mb-2">In Honor or Memory Of *</label>
+              <label className="text-sm platypi-medium text-warm-gray block mb-2">In Honor or Memory Of *</label>
               <Input
                 placeholder="L'ilui Nishmas... or L'kavod..."
                 value={dedicationText}
@@ -130,7 +133,7 @@ export default function TzedakaModals() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-warm-gray block mb-2">Write a short message about the person *</label>
+              <label className="text-sm platypi-medium text-warm-gray block mb-2">Write a short message about the person *</label>
               <Textarea
                 placeholder="A person who always loved torah..."
                 value={sponsorMessage}
@@ -146,7 +149,7 @@ export default function TzedakaModals() {
               <Button 
                 onClick={() => handleDonation()}
                 disabled={!donorName.trim() || !dedicationText.trim() || !sponsorMessage.trim()}
-                className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Sponsor for $180
               </Button>
@@ -156,17 +159,22 @@ export default function TzedakaModals() {
       </Dialog>
 
       {/* Torah Dedication Modal */}
-      <Dialog open={activeModal === 'torah-dedication'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'torah-dedication'} onOpenChange={(open) => {
+        if (!open) {
+          // User clicked X or pressed Escape - don't track completion
+          closeModal();
+        }
+      }}>
         <DialogContent aria-describedby="torah-dedication-description">
           <div className="flex items-center justify-center mb-3 relative">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Torah Dedication</DialogTitle>
+            <DialogTitle className="text-lg platypi-bold text-black">Torah Dedication</DialogTitle>
           </div>
-          <p className="text-sm text-gray-600 text-center mb-4">Dedicate a Letter, Pasuk, Perek or Parsha</p>
+          <p className="text-sm platypi-regular text-gray-600 text-center mb-4">Dedicate a Letter, Pasuk, Perek or Parsha</p>
           <div id="torah-dedication-description" className="sr-only">Torah learning sponsorship and dedication options</div>
           
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium block mb-2">Torah Portion</label>
+              <label className="text-sm platypi-medium block mb-2">Torah Portion</label>
               <Select value={torahPortion} onValueChange={setTorahPortion}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select dedication type" />
@@ -181,7 +189,7 @@ export default function TzedakaModals() {
             </div>
 
             <div>
-              <label className="text-sm font-medium block mb-2">Dedication Name</label>
+              <label className="text-sm platypi-medium block mb-2">Dedication Name</label>
               <Input 
                 placeholder="L'ilui Nishmas..."
                 value={donorName}
@@ -190,7 +198,7 @@ export default function TzedakaModals() {
             </div>
 
             <div>
-              <label className="text-sm font-medium block mb-2">Special Message (Optional)</label>
+              <label className="text-sm platypi-medium block mb-2">Special Message (Optional)</label>
               <Textarea 
                 placeholder="In loving memory of..."
                 value={dedicationText}
@@ -202,7 +210,7 @@ export default function TzedakaModals() {
             <div>
               <Button 
                 onClick={() => handleDonation()}
-                className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
                 disabled={!torahPortion}
               >
                 Continue to Payment
@@ -213,18 +221,23 @@ export default function TzedakaModals() {
       </Dialog>
 
       {/* Infertility Support Modal */}
-      <Dialog open={activeModal === 'infertility-support'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'infertility-support'} onOpenChange={(open) => {
+        if (!open) {
+          // User clicked X or pressed Escape - don't track completion
+          closeModal();
+        }
+      }}>
         <DialogContent aria-describedby="infertility-support-description">
           <div className="flex items-center justify-center mb-3 relative">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Infertility Support</DialogTitle>
+            <DialogTitle className="text-lg platypi-bold text-black">Infertility Support</DialogTitle>
           </div>
-          <p className="text-sm text-gray-600 text-center mb-4">Support couples struggling with fertility challenges</p>
+          <p className="text-sm platypi-regular text-gray-600 text-center mb-4">Support couples struggling with fertility challenges</p>
           <div id="infertility-support-description" className="sr-only">Fertility support and assistance for couples</div>
           
           <div className="space-y-4">
-            <div className="bg-rose-50 p-4 rounded-xl text-sm text-gray-700">
-              <p className="mb-2">Your donation helps provide:</p>
-              <ul className="list-disc list-inside space-y-1 text-xs">
+            <div className="bg-rose-50 p-4 rounded-xl text-sm platypi-regular text-gray-700">
+              <p className="mb-2 platypi-regular">Your donation helps provide:</p>
+              <ul className="list-disc list-inside space-y-1 text-xs platypi-regular">
                 <li>Financial assistance for fertility treatments</li>
                 <li>Emotional support and counseling</li>
                 <li>Educational resources and workshops</li>
@@ -233,7 +246,7 @@ export default function TzedakaModals() {
             </div>
 
             <div>
-              <label className="text-sm font-medium block mb-2">Donation Amount</label>
+              <label className="text-sm platypi-medium block mb-2">Donation Amount</label>
               <Select value={donationAmount} onValueChange={setDonationAmount}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select amount" />
@@ -248,7 +261,7 @@ export default function TzedakaModals() {
               </Select>
               {donationAmount === "custom" && (
                 <div className="relative mt-2">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 font-semibold">$</span>
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 platypi-semibold">$</span>
                   <Input 
                     placeholder="Enter amount" 
                     className="pl-10 bg-white"
@@ -263,7 +276,7 @@ export default function TzedakaModals() {
             <div>
               <Button 
                 onClick={() => handleDonation()}
-                className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
                 disabled={!donationAmount}
               >
                 Donate Now
@@ -274,10 +287,15 @@ export default function TzedakaModals() {
       </Dialog>
 
       {/* Abuse Support Modal */}
-      <Dialog open={activeModal === 'abuse-support'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'abuse-support'} onOpenChange={(open) => {
+        if (!open) {
+          // User clicked X or pressed Escape - don't track completion
+          closeModal();
+        }
+      }}>
         <DialogContent>
           <div className="flex items-center justify-center mb-3 relative">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Abuse Support</DialogTitle>
+            <DialogTitle className="text-lg platypi-bold text-black">Abuse Support</DialogTitle>
           </div>
           <p className="text-sm text-gray-600 text-center mb-4">Support women escaping abusive situations</p>
           
@@ -294,7 +312,7 @@ export default function TzedakaModals() {
             </div>
 
             <div>
-              <label className="text-sm font-medium block mb-2">Donation Amount</label>
+              <label className="text-sm platypi-medium block mb-2">Donation Amount</label>
               <Select value={donationAmount} onValueChange={setDonationAmount}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select amount" />
@@ -309,7 +327,7 @@ export default function TzedakaModals() {
               </Select>
               {donationAmount === "custom" && (
                 <div className="relative mt-2">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 font-semibold">$</span>
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 platypi-semibold">$</span>
                   <Input 
                     placeholder="Enter amount" 
                     className="pl-10 bg-white"
@@ -324,7 +342,7 @@ export default function TzedakaModals() {
             <div>
               <Button 
                 onClick={() => handleDonation()}
-                className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
                 disabled={!donationAmount}
               >
                 Donate Now
@@ -335,10 +353,15 @@ export default function TzedakaModals() {
       </Dialog>
 
       {/* Women's Causes Modal */}
-      <Dialog open={activeModal === 'womens-causes'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'womens-causes'} onOpenChange={(open) => {
+        if (!open) {
+          // User clicked X or pressed Escape - don't track completion
+          closeModal();
+        }
+      }}>
         <DialogContent aria-describedby="womens-causes-description">
           <div className="flex items-center justify-center mb-3 relative">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Support Women's Causes</DialogTitle>
+            <DialogTitle className="text-lg platypi-bold text-black">Support Women's Causes</DialogTitle>
           </div>
           <p className="text-sm text-gray-600 text-center mb-4">Support fertility assistance and abuse prevention</p>
           <div id="womens-causes-description" className="sr-only">Support various women's causes including fertility and abuse prevention</div>
@@ -356,7 +379,7 @@ export default function TzedakaModals() {
             </div>
 
             <div>
-              <label className="text-sm font-medium block mb-2">Donation Amount</label>
+              <label className="text-sm platypi-medium block mb-2">Donation Amount</label>
               <Select value={donationAmount} onValueChange={setDonationAmount}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select amount" />
@@ -371,7 +394,7 @@ export default function TzedakaModals() {
               </Select>
               {donationAmount === "custom" && (
                 <div className="relative mt-2">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 font-semibold">$</span>
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 platypi-semibold">$</span>
                   <Input 
                     placeholder="Enter amount" 
                     className="pl-10 bg-white"
@@ -386,7 +409,7 @@ export default function TzedakaModals() {
             <div>
               <Button 
                 onClick={() => handleDonation()}
-                className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
                 disabled={!donationAmount}
               >
                 Donate Now
@@ -397,10 +420,15 @@ export default function TzedakaModals() {
       </Dialog>
 
       {/* Support Torah Modal */}
-      <Dialog open={activeModal === 'support-torah'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'support-torah'} onOpenChange={(open) => {
+        if (!open) {
+          // User clicked X or pressed Escape - don't track completion
+          closeModal();
+        }
+      }}>
         <DialogContent aria-describedby="support-torah-description">
           <div className="flex items-center justify-center mb-3 relative">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Support Torah</DialogTitle>
+            <DialogTitle className="text-lg platypi-bold text-black">Support Torah</DialogTitle>
           </div>
           <p className="text-sm text-gray-600 text-center mb-4">Support Torah learning and education</p>
           <div id="support-torah-description" className="sr-only">Support Torah learning, kollels, and Jewish education</div>
@@ -418,7 +446,7 @@ export default function TzedakaModals() {
             </div>
 
             <div>
-              <label className="text-sm font-medium block mb-2">Donation Amount</label>
+              <label className="text-sm platypi-medium block mb-2">Donation Amount</label>
               <Select value={donationAmount} onValueChange={setDonationAmount}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select amount" />
@@ -433,7 +461,7 @@ export default function TzedakaModals() {
               </Select>
               {donationAmount === "custom" && (
                 <div className="relative mt-2">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 font-semibold">$</span>
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 platypi-semibold">$</span>
                   <Input 
                     placeholder="Enter amount" 
                     className="pl-10 bg-white"
@@ -448,7 +476,7 @@ export default function TzedakaModals() {
             <div>
               <Button 
                 onClick={() => handleDonation()}
-                className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
                 disabled={!donationAmount}
               >
                 Donate Now

@@ -68,7 +68,7 @@ export const useTrackModalComplete = () => {
 
   const trackModalComplete = (modalType: string) => {
     if (import.meta.env.MODE === 'development') {
-      console.log("Tracking modal completion:", modalType);
+      // Tracking modal completion
     }
     trackEvent("modal_complete", { modalType });
   };

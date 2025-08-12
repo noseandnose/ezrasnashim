@@ -2,11 +2,13 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X, Plus, Minus } from "lucide-react";
-import korenLogo from "@assets/This_is_a_logo_for_Koren_Publishers_Jerusalem_1752581940716.jpg";
-import { useModalStore, useDailyCompletionStore } from "@/lib/types";
+
+import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
-import { useAnalytics } from "@/hooks/use-analytics";
+import { useAnalytics, useTrackModalComplete } from "@/hooks/use-analytics";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
+import { useLocationStore } from '@/hooks/use-jewish-times';
+import { formatTextContent } from "@/lib/text-formatter";
 
 interface BirkatHamazonPrayer {
   id: number;
@@ -17,18 +19,34 @@ interface BirkatHamazonPrayer {
 }
 
 // Koren Thank You Component
-const KorenThankYou = () => (
-  <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-    <div className="flex items-center justify-between">
-      <span className="text-sm platypi-medium text-black">All tefilla texts courtesy of Koren Publishers Jerusalem</span>
-      <img 
-        src={korenLogo} 
-        alt="Koren Publishers" 
-        className="h-6 w-auto ml-2 flex-shrink-0"
-      />
+const KorenThankYou = () => {
+  const { coordinates } = useLocationStore();
+  
+  // Check if user is in Israel based on coordinates
+  const isInIsrael = coordinates && 
+    coordinates.lat >= 29.5 && coordinates.lat <= 33.5 && 
+    coordinates.lng >= 34.0 && coordinates.lng <= 36.0;
+  
+  const korenUrl = isInIsrael 
+    ? "https://korenpub.co.il/collections/siddurim/products/koren-shalem-siddurhardcoverstandardashkenaz"
+    : "https://korenpub.com/collections/siddurim/products/koren-shalem-siddur-ashkenaz-1";
+  
+  return (
+    <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+      <span className="text-sm platypi-medium text-black">
+        All tefilla texts courtesy of{' '}
+        <a 
+          href={korenUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-blue-700"
+        >
+          Koren Publishers Jerusalem
+        </a>
+      </span>
     </div>
-  </div>
-);
+  );
+};
 
 export function BirkatHamazonModal() {
   const { activeModal, closeModal, openModal } = useModalStore();
@@ -36,7 +54,9 @@ export function BirkatHamazonModal() {
   const [fontSize, setFontSize] = useState(20);
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [selectedPrayer, setSelectedPrayer] = useState<string | null>(null);
-  const { markTefillaComplete } = useDailyCompletionStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
   const { trackCompletion } = useAnalytics();
 
   const isOpen = activeModal === 'after-brochas' || activeModal === 'birkat-hamazon' || activeModal === 'al-hamichiya';
@@ -51,15 +71,20 @@ export function BirkatHamazonModal() {
     enabled: activeModal === 'after-brochas' || activeModal === 'al-hamichiya',
   });
 
-  const handleComplete = () => {
+  const handleComplete = (modalType: string) => {
+    if (isModalComplete(modalType)) return;
+    
+    // Track modal completion and mark as completed globally
+    trackModalComplete(modalType);
+    markModalComplete(modalType);
+    
+    completeTask('tefilla');
     setShowHeartExplosion(true);
-    trackCompletion("Birkat Hamazon");
     
     setTimeout(() => {
-      markTefillaComplete();
-      closeModal();
       setShowHeartExplosion(false);
-      // Navigate to home and scroll to progress to show flower growth
+      checkAndShowCongratulations();
+      closeModal();
       window.location.hash = '#/?section=home&scrollToProgress=true';
     }, 2000);
   };
@@ -112,31 +137,32 @@ export function BirkatHamazonModal() {
   const renderPrayerText = (prayer: BirkatHamazonPrayer) => {
     const text = language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation;
     
+    // Apply text formatting to handle ** and ---
+    const formattedText = formatTextContent(text);
+    
     if (language === "hebrew") {
       return (
         <div 
-          className="secular-one-bold text-right leading-relaxed whitespace-pre-line"
-          style={{ fontSize: `${fontSize}px`, direction: 'rtl' }}
-        >
-          {text}
-        </div>
+          className="vc-koren-hebrew leading-relaxed"
+          style={{ fontSize: `${fontSize + 1}px` }}
+          dangerouslySetInnerHTML={{ __html: formattedText.replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
+        />
       );
     }
     
     return (
       <div 
-        className="platypi-regular leading-relaxed whitespace-pre-line text-left"
+        className="koren-siddur-english leading-relaxed text-left"
         style={{ fontSize: `${fontSize}px` }}
-      >
-        {text}
-      </div>
+        dangerouslySetInnerHTML={{ __html: formattedText }}
+      />
     );
   };
 
   // Show After Brochas selection modal
   if (activeModal === 'after-brochas') {
     return (
-      <Dialog open={true} onOpenChange={() => closeModal()}>
+      <Dialog open={true} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 platypi-regular">
           <DialogHeader className="text-center mb-4 pr-8">
             <DialogTitle className="text-lg platypi-bold text-black">After Brochas</DialogTitle>
@@ -145,15 +171,15 @@ export function BirkatHamazonModal() {
 
           <div className="space-y-3">
             <button
-              onClick={() => openModal('al-hamichiya')}
+              onClick={() => openModal('al-hamichiya', 'tefilla')}
               className="w-full bg-white rounded-xl p-4 border border-blush/10 hover:bg-blush/5 transition-colors text-left"
             >
               <h3 className="platypi-medium text-black mb-1">Me'ein Shalosh</h3>
-              <p className="text-sm text-gray-600">Al Hamichiya</p>
+              <p className="text-sm text-gray-600">Al HaMichiya/HaGafen/HaEtz</p>
             </button>
 
             <button
-              onClick={() => openModal('birkat-hamazon')}
+              onClick={() => openModal('birkat-hamazon', 'tefilla')}
               className="w-full bg-white rounded-xl p-4 border border-blush/10 hover:bg-blush/5 transition-colors text-left"
             >
               <h3 className="platypi-medium text-black mb-1">Birkat Hamazon</h3>
@@ -179,8 +205,8 @@ export function BirkatHamazonModal() {
   return (
     <>
       {/* Al Hamichiya Modal */}
-      <Dialog open={activeModal === 'al-hamichiya'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
+      <Dialog open={activeModal === 'al-hamichiya'} onOpenChange={() => closeModal(true)}>
+        <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
           <StandardModalHeader />
           
           <div className="max-h-[60vh] overflow-y-auto">
@@ -190,16 +216,9 @@ export function BirkatHamazonModal() {
               </div>
             ) : (
               <div className="space-y-6">
-                {afterBrochasPrayers?.filter(p => p.prayerName === "Al Hamichiya").map((prayer, index) => (
+                {afterBrochasPrayers?.filter(p => p.prayerName === "Me'ein Shalosh").map((prayer, index) => (
                   <div key={index} className="bg-white rounded-2xl p-4 border border-blush/10">
-                    <div 
-                      className={`text-black leading-relaxed ${
-                        language === "hebrew" ? "text-right heebo-regular" : "text-left platypi-regular"
-                      }`}
-                      style={{ fontSize: `${fontSize}px` }}
-                    >
-                      {language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation}
-                    </div>
+                    {renderPrayerText(prayer as any)}
                   </div>
                 ))}
               </div>
@@ -210,10 +229,15 @@ export function BirkatHamazonModal() {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={handleComplete}
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-4 border-0"
+              onClick={isModalComplete('al-hamichiya') ? undefined : () => handleComplete('al-hamichiya')}
+              disabled={isModalComplete('al-hamichiya')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
+                isModalComplete('al-hamichiya') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('al-hamichiya') ? 'Completed Today' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showHeartExplosion} />
           </div>
@@ -221,8 +245,8 @@ export function BirkatHamazonModal() {
       </Dialog>
 
       {/* Birkat Hamazon Modal */}
-      <Dialog open={activeModal === 'birkat-hamazon'} onOpenChange={() => closeModal()}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
+      <Dialog open={activeModal === 'birkat-hamazon'} onOpenChange={() => closeModal(true)}>
+        <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
           <StandardModalHeader />
           
           <div className="max-h-[60vh] overflow-y-auto">
@@ -234,14 +258,7 @@ export function BirkatHamazonModal() {
               <div className="space-y-6">
                 {prayers?.map((prayer) => (
                   <div key={prayer.id} className="bg-white rounded-2xl p-4 border border-blush/10">
-                    <div 
-                      className={`text-black leading-relaxed ${
-                        language === "hebrew" ? "text-right heebo-regular" : "text-left platypi-regular"
-                      }`}
-                      style={{ fontSize: `${fontSize}px` }}
-                    >
-                      {language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation}
-                    </div>
+                    {renderPrayerText(prayer)}
                   </div>
                 ))}
               </div>
@@ -252,10 +269,15 @@ export function BirkatHamazonModal() {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={handleComplete}
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-4 border-0"
+              onClick={isModalComplete('birkat-hamazon') ? undefined : () => handleComplete('birkat-hamazon')}
+              disabled={isModalComplete('birkat-hamazon')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
+                isModalComplete('birkat-hamazon') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('birkat-hamazon') ? 'Completed Today' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showHeartExplosion} />
           </div>

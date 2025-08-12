@@ -141,7 +141,7 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
               <MapPin className="text-white" size={20} />
             </div>
           </div>
-          <DialogTitle className="text-lg font-serif font-semibold text-black">Change Location</DialogTitle>
+          <DialogTitle className="text-lg platypi-bold platypi-semibold text-black">Change Location</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -174,7 +174,7 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
                   <div className="flex items-center space-x-3">
                     <MapPin className="text-blush" size={16} />
                     <div>
-                      <div className="font-medium text-black">{prediction.structured_formatting.main_text}</div>
+                      <div className="platypi-medium text-black">{prediction.structured_formatting.main_text}</div>
                       <div className="text-sm text-black/60">{prediction.structured_formatting.secondary_text}</div>
                     </div>
                   </div>

@@ -7,24 +7,31 @@ import { useModalStore } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function TimesModals() {
   const { activeModal, closeModal } = useModalStore();
   const [eventTitle, setEventTitle] = useState("");
-  const [englishDate, setEnglishDate] = useState("");
+  const [englishDate, setEnglishDate] = useState(new Date().toISOString().split('T')[0]);
   const [convertedHebrewDate, setConvertedHebrewDate] = useState("");
   const [afterNightfall, setAfterNightfall] = useState(false);
   const [yearDuration, setYearDuration] = useState(10);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Convert today's date on component mount
+  useEffect(() => {
+    if (englishDate && !convertedHebrewDate) {
+      convertToHebrewDate(englishDate, false);
+    }
+  }, [englishDate]);
+
   const handleMobileDownload = async () => {
     if (!eventTitle || !englishDate) {
       throw new Error('Please fill in both event title and English date');
     }
 
-    console.log('Starting calendar download:', { eventTitle, englishDate, yearDuration });
+    // Starting calendar download
     
     try {
       // Build URL with query parameters using the same base URL logic as other API calls
@@ -53,7 +60,7 @@ export default function TimesModals() {
       
       const downloadUrl = `${baseUrl}/api/download-calendar?${params.toString()}`;
       
-      console.log('Downloading from:', downloadUrl);
+      // Downloading calendar file
       
       // Use window.open with a short timeout to handle download
       const downloadWindow = window.open(downloadUrl, '_self');
@@ -73,11 +80,11 @@ export default function TimesModals() {
         }, 100);
       }
       
-      console.log('Calendar download initiated');
+      // Calendar download initiated
       return { success: true };
       
     } catch (error) {
-      console.error('Calendar download error:', error);
+      // Calendar download error occurred
       throw new Error(`Download failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
@@ -99,7 +106,7 @@ export default function TimesModals() {
       window.location.hash = '#/?section=home&scrollToProgress=true';
     },
     onError: (error) => {
-      console.error('Download mutation error:', error);
+      // Download mutation error
       toast({
         title: "Error",
         description: `Failed to download calendar file: ${error.message}`,
@@ -177,16 +184,16 @@ export default function TimesModals() {
   return (
     <>
       {/* Hebrew Date Calculator Modal */}
-      <Dialog open={activeModal === 'date-calculator'} onOpenChange={() => closeModal()}>
-        <DialogContent>
+      <Dialog open={activeModal === 'date-calculator'} onOpenChange={() => closeModal(true)}>
+        <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
           <div className="flex items-center justify-center mb-3 relative">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Hebrew Date Calculator</DialogTitle>
+            <DialogTitle className="text-lg platypi-bold text-black">Hebrew Date Calculator</DialogTitle>
           </div>
           <p className="text-sm text-gray-600 mb-4 text-center">Convert English dates to Hebrew dates and add recurring events to your calendar</p>
           
           <div className="space-y-4">
             <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-1">Event Title</Label>
+              <Label className="block text-sm platypi-medium text-gray-700 mb-1">Event Title</Label>
               <Input 
                 type="text" 
                 placeholder="Anniversary, Yahrzeit, etc." 
@@ -197,13 +204,66 @@ export default function TimesModals() {
             </div>
             
             <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-1">English Date</Label>
-              <Input 
-                type="date" 
-                value={englishDate}
-                onChange={(e) => handleDateChange(e.target.value)}
-                className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white"
-              />
+              <Label className="block text-sm platypi-medium text-gray-700 mb-1">English Date</Label>
+              {typeof navigator !== 'undefined' && /iPhone|iPad|iPod/.test(navigator.userAgent) ? (
+                // iOS Custom Date Picker using select elements (wheel picker style)
+                <div className="flex space-x-2">
+                  <select 
+                    value={englishDate ? new Date(englishDate).getMonth() + 1 : new Date().getMonth() + 1}
+                    onChange={(e) => {
+                      const currentDate = englishDate ? new Date(englishDate) : new Date();
+                      const newDate = new Date(currentDate.getFullYear(), parseInt(e.target.value) - 1, currentDate.getDate());
+                      handleDateChange(newDate.toISOString().split('T')[0]);
+                    }}
+                    className="flex-1 p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700"
+                    style={{ minHeight: '48px' }}
+                  >
+                    {Array.from({length: 12}, (_, i) => (
+                      <option key={i+1} value={i+1}>
+                        {new Date(2000, i, 1).toLocaleDateString('en-US', { month: 'long' })}
+                      </option>
+                    ))}
+                  </select>
+                  <select 
+                    value={englishDate ? new Date(englishDate).getDate() : new Date().getDate()}
+                    onChange={(e) => {
+                      const currentDate = englishDate ? new Date(englishDate) : new Date();
+                      const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), parseInt(e.target.value));
+                      handleDateChange(newDate.toISOString().split('T')[0]);
+                    }}
+                    className="flex-1 p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700"
+                    style={{ minHeight: '48px' }}
+                  >
+                    {Array.from({length: 31}, (_, i) => (
+                      <option key={i+1} value={i+1}>{i+1}</option>
+                    ))}
+                  </select>
+                  <select 
+                    value={englishDate ? new Date(englishDate).getFullYear() : new Date().getFullYear()}
+                    onChange={(e) => {
+                      const currentDate = englishDate ? new Date(englishDate) : new Date();
+                      const newDate = new Date(parseInt(e.target.value), currentDate.getMonth(), currentDate.getDate());
+                      handleDateChange(newDate.toISOString().split('T')[0]);
+                    }}
+                    className="flex-1 p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700"
+                    style={{ minHeight: '48px' }}
+                  >
+                    {Array.from({length: 150}, (_, i) => {
+                      const year = new Date().getFullYear() - 100 + i;
+                      return <option key={year} value={year}>{year}</option>;
+                    })}
+                  </select>
+                </div>
+              ) : (
+                // Standard date input for non-iOS devices
+                <input 
+                  type="date" 
+                  value={englishDate}
+                  onChange={(e) => handleDateChange(e.target.value)}
+                  className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700"
+                  style={{ minHeight: '48px' }}
+                />
+              )}
             </div>
 
             <div className="flex items-center space-x-2">
@@ -239,7 +299,7 @@ export default function TimesModals() {
             
             {convertedHebrewDate && (
               <div>
-                <Label className="block text-sm font-medium text-gray-700 mb-1">Hebrew Date</Label>
+                <Label className="block text-sm platypi-medium text-gray-700 mb-1">Hebrew Date</Label>
                 <div className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700">
                   {convertedHebrewDate}
                 </div>
@@ -247,12 +307,12 @@ export default function TimesModals() {
             )}
             
             <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-1">Add to my calendar for the next:</Label>
+              <Label className="block text-sm platypi-medium text-gray-700 mb-1">Add to my calendar for the next:</Label>
               <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => setYearDuration(1)}
-                  className={`p-2 rounded-xl text-sm font-medium transition-all ${
+                  className={`p-2 rounded-xl text-sm platypi-medium transition-all ${
                     yearDuration === 1
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
@@ -263,7 +323,7 @@ export default function TimesModals() {
                 <button
                   type="button"
                   onClick={() => setYearDuration(10)}
-                  className={`p-2 rounded-xl text-sm font-medium transition-all ${
+                  className={`p-2 rounded-xl text-sm platypi-medium transition-all ${
                     yearDuration === 10
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
@@ -274,7 +334,7 @@ export default function TimesModals() {
                 <button
                   type="button"
                   onClick={() => setYearDuration(120)}
-                  className={`p-2 rounded-xl text-sm font-medium transition-all ${
+                  className={`p-2 rounded-xl text-sm platypi-medium transition-all ${
                     yearDuration === 120
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
@@ -289,23 +349,25 @@ export default function TimesModals() {
               <Button 
                 onClick={handleDownloadCalendar}
                 disabled={downloadCalendarMutation.isPending || !eventTitle || !englishDate}
-                className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 hover:shadow-lg transition-all duration-300"
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
               >
                 {downloadCalendarMutation.isPending ? "Generating..." : "Download Calendar"}
               </Button>
               
               {/* Hebcal Attribution */}
-              <p className="text-xs text-gray-600 text-center">
-                Zmanim and Date Converter are provided by{" "}
-                <a 
-                  href="https://www.hebcal.com/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 underline font-medium"
-                >
-                  Hebcal
-                </a>
-              </p>
+              <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+                <span className="text-sm platypi-medium text-black">
+                  Zmanim and Date Converter are provided by{" "}
+                  <a 
+                    href="https://www.hebcal.com/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 underline"
+                  >
+                    Hebcal
+                  </a>
+                </span>
+              </div>
             </div>
           </div>
         </DialogContent>

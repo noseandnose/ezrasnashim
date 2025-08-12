@@ -8,17 +8,21 @@ import { HeartExplosion } from "@/components/ui/heart-explosion";
 import type { Campaign } from "@shared/schema";
 import type { Section } from "@/pages/home";
 
-// Community Impact Section Component
-function CommunityImpactSection() {
-  const { data: impact, isLoading } = useQuery<{
-    totalDaysSponsored: number;
-    totalCampaigns: number;
-    totalRaised: number;
+// Community Impact Blog-Style Button Component
+function CommunityImpactButton() {
+  const today = new Date().toISOString().split('T')[0];
+  const { openModal } = useModalStore();
+  
+  const { data: impactContent, isLoading } = useQuery<{
+    id: number;
+    title: string;
+    description: string;
+    imageUrl: string;
   }>({
-    queryKey: ['/api/analytics/community-impact'],
+    queryKey: [`/api/community/impact/${today}`],
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/analytics/community-impact`);
-      if (!response.ok) throw new Error('Failed to fetch community impact');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/community/impact/${today}`);
+      if (!response.ok) return null;
       return response.json();
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
@@ -27,20 +31,28 @@ function CommunityImpactSection() {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-3xl p-3 border border-blush/10 shadow-lg">
-        <h3 className="platypi-bold text-sm text-black text-center mb-2">Community Impact</h3>
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div>
-            <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
-            <div className="platypi-regular text-xs text-black mt-1">Days Sponsored</div>
+      <div className="bg-white rounded-3xl p-3 border border-blush/10 shadow-lg animate-pulse">
+        <div className="flex items-center space-x-3">
+          <div className="w-12 h-12 bg-gray-200 rounded-full flex-shrink-0"></div>
+          <div className="flex-grow">
+            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+            <div className="h-3 bg-gray-200 rounded w-full"></div>
           </div>
-          <div>
-            <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
-            <div className="platypi-regular text-xs text-black mt-1">Campaigns</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!impactContent) {
+    return (
+      <div className="bg-white rounded-3xl p-3 border border-blush/10 shadow-lg opacity-50">
+        <div className="flex items-center space-x-3">
+          <div className="w-12 h-12 bg-gray-100 rounded-full flex-shrink-0 flex items-center justify-center">
+            <Users className="text-gray-400" size={20} />
           </div>
-          <div>
-            <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
-            <div className="platypi-regular text-xs text-black mt-1">Raised</div>
+          <div className="flex-grow">
+            <h3 className="platypi-bold text-sm text-black mb-1">Community Impact</h3>
+            <p className="platypi-regular text-xs text-black/60">Check back for inspiring stories</p>
           </div>
         </div>
       </div>
@@ -48,23 +60,24 @@ function CommunityImpactSection() {
   }
 
   return (
-    <div className="bg-white rounded-3xl p-3 border border-blush/10 shadow-lg">
-      <h3 className="platypi-bold text-sm text-black text-center mb-2">Community Impact</h3>
-      <div className="grid grid-cols-3 gap-2 text-center">
-        <div>
-          <div className="platypi-semibold text-lg text-black">{impact?.totalDaysSponsored || 0}</div>
-          <div className="platypi-regular text-xs text-black">Days Sponsored</div>
+    <button
+      onClick={() => openModal('community-impact', 'tzedaka')}
+      className="w-full bg-white rounded-3xl p-3 border border-blush/10 shadow-lg hover:shadow-md transition-all duration-300 text-left"
+    >
+      <div className="flex items-center space-x-3">
+        <div className="w-12 h-12 flex-shrink-0">
+          <img 
+            src={impactContent.imageUrl} 
+            alt={impactContent.title}
+            className="w-full h-full rounded-full object-cover"
+          />
         </div>
-        <div>
-          <div className="platypi-semibold text-lg text-black">{impact?.totalCampaigns || 0}</div>
-          <div className="platypi-regular text-xs text-black">Campaigns</div>
-        </div>
-        <div>
-          <div className="platypi-semibold text-lg text-black">${impact?.totalRaised?.toLocaleString() || 0}</div>
-          <div className="platypi-regular text-xs text-black">Raised</div>
+        <div className="flex-grow">
+          <h3 className="platypi-bold text-sm text-black mb-1 line-clamp-1">{impactContent.title}</h3>
+          <p className="platypi-regular text-xs text-black/60 line-clamp-2">{impactContent.description}</p>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -116,7 +129,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
       // Check if all tasks are completed and show congratulations
       setTimeout(() => {
         if (checkAndShowCongratulations()) {
-          openModal('congratulations');
+          openModal('congratulations', 'tzedaka');
         }
       }, 200);
     }, 500);
@@ -124,7 +137,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
 
   const handleButtonClick = (buttonId: string) => {
     setCompletedButtons(prev => new Set(prev).add(buttonId));
-    openModal(buttonId);
+    openModal(buttonId, 'tzedaka');
   };
 
   // Fetch active campaign data
@@ -166,7 +179,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
       {/* Main Tzedaka Section - ONLY CAMPAIGN */}
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg -mt-1">
         <button 
-          onClick={() => openModal('donate')}
+          onClick={() => openModal('donate', 'tzedaka')}
           className="w-full bg-white/70 rounded-2xl p-3 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
         >
         {isLoading ? (
@@ -196,8 +209,8 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
                 <BookOpen className="text-white" size={20} />
               </div>
               <div className="flex-grow">
-                <h3 className="font-serif text-lg text-black font-bold">{campaign.title}</h3>
-                <p className="font-sans text-sm text-black/70">Support our community</p>
+                <h3 className="platypi-bold text-lg text-black platypi-bold">{campaign.title}</h3>
+                <p className="platypi-regular text-sm text-black/70">Support our community</p>
               </div>
               <div className="bg-gradient-feminine p-2 rounded-full shadow-lg">
                 <HandCoins className="text-white" size={16} />
@@ -208,10 +221,10 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
-                  <span className="font-sans text-sm text-black/70">Progress</span>
-                  <span className="font-serif text-sm text-black font-bold">{progressPercentage}% Complete</span>
+                  <span className="platypi-regular text-sm text-black/70">Progress</span>
+                  <span className="platypi-bold text-sm text-black">{progressPercentage}% Complete</span>
                 </div>
-                <span className="font-serif text-sm text-black font-bold">${campaign.currentAmount.toLocaleString()} / ${campaign.goalAmount.toLocaleString()}</span>
+                <span className="platypi-bold text-sm text-black">${campaign.currentAmount.toLocaleString()} / ${campaign.goalAmount.toLocaleString()}</span>
               </div>
               <div className="w-full bg-blush/20 rounded-full h-3">
                 <div 
@@ -228,14 +241,14 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
       <div className="p-2 space-y-2">
         {/* Large Combined Button: Put a coin in the Pushka */}
         <button
-          onClick={() => openModal('donate')}
+          onClick={() => openModal('donate', 'tzedaka')}
           className="w-full rounded-3xl p-4 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
         >
           <div className="p-3 rounded-full mx-auto mb-3 w-fit bg-gradient-feminine">
             <HandCoins className="text-white" size={24} strokeWidth={1.5} />
           </div>
-          <h3 className="font-serif text-sm text-black mb-2 font-bold">Put a Coin in Tzedaka</h3>
-          <p className="font-sans text-xs text-black/60 leading-relaxed">
+          <h3 className="platypi-bold text-sm text-black mb-2">Put a Coin in Tzedaka</h3>
+          <p className="platypi-regular text-xs text-black/60 leading-relaxed">
             Donations go towards Woman in need and Torah Causes
           </p>
         </button>
@@ -253,8 +266,8 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             }`}>
               <Heart className="text-white" size={18} strokeWidth={1.5} />
             </div>
-            <h3 className="font-serif text-xs text-black mb-1 font-bold">Sponsor a Day</h3>
-            <p className="font-sans text-xs text-black/60 leading-relaxed">
+            <h3 className="platypi-bold text-xs text-black mb-1">Sponsor a Day</h3>
+            <p className="platypi-regular text-xs text-black/60 leading-relaxed">
               {completedButtons.has('sponsor-day') ? 'Completed' : 'Dedicate all mitzvot'}
             </p>
           </button>
@@ -272,8 +285,8 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
               }`}>
                 <HandHeart className="text-white" size={18} strokeWidth={1.5} />
               </div>
-              <h3 className="font-serif text-xs text-black mb-1 font-bold">Gave Tzedaka Elsewhere</h3>
-              <p className="font-sans text-xs text-black/60 leading-relaxed">
+              <h3 className="platypi-bold text-xs text-black mb-1">Gave Tzedaka Elsewhere</h3>
+              <p className="platypi-regular text-xs text-black/60 leading-relaxed">
                 {tzedakaCompleted || completedButtons.has('gave-elsewhere') ? 'Completed' : 'Mark as complete'}
               </p>
               <HeartExplosion trigger={showExplosion} />
@@ -282,7 +295,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
         </div>
 
         {/* Community Impact */}
-        <CommunityImpactSection />
+        <CommunityImpactButton />
 
         {/* Bottom padding */}
         <div className="h-16"></div>

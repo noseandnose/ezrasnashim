@@ -55,6 +55,16 @@ export const tableInspirations = pgTable("table_inspirations", {
 
 
 
+export const communityImpact = pgTable("community_impact", {
+  id: serial("id").primaryKey(),
+  fromDate: date("from_date").notNull(), // Start date for article availability
+  untilDate: date("until_date").notNull(), // End date for article availability
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  imageUrl: text("image_url").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const shopItems = pgTable("shop_items", {
   id: serial("id").primaryKey(),
   storeName: text("store_name").notNull(),
@@ -112,6 +122,14 @@ export const minchaPrayers = pgTable("mincha_prayers", {
 export const maarivPrayers = pgTable("maariv_prayers", {
   id: serial("id").primaryKey(),
   prayerType: text("prayer_type").notNull(), // e.g., "main_prayer", "shema", "shemoneh_esrei", "aleinu"
+  hebrewText: text("hebrew_text").notNull(),
+  englishTranslation: text("english_translation").notNull(),
+  orderIndex: integer("order_index").default(0),
+});
+
+export const morningPrayers = pgTable("morning_prayers", {
+  id: serial("id").primaryKey(),
+  prayerType: text("prayer_type").notNull(), // e.g., "modeh_ani", "netilat_yadayim", "birchot_hashachar", "pesukei_dzimra"
   hebrewText: text("hebrew_text").notNull(),
   englishTranslation: text("english_translation").notNull(),
   orderIndex: integer("order_index").default(0),
@@ -232,18 +250,30 @@ export const featuredContent = pgTable("featured_content", {
   id: serial("id").primaryKey(),
   date: date("date").notNull().unique(),
   title: text("title").notNull(),
-  content: text("content"),
-  audioUrl: text("audio_url").notNull(),
-  speaker: text("speaker"),
-  speakerWebsite: text("speaker_website"),
+  content: text("content").notNull(),
+  provider: text("provider"),
+  footnotes: text("footnotes"),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+// Pirkei Avot table for internal content management
+export const pirkeiAvot = pgTable("pirkei_avot", {
+  id: serial("id").primaryKey(),
+  chapter: integer("chapter").notNull(), // Chapter number (1-6)
+  perek: integer("perek").notNull(), // Verse number within chapter
+  content: text("content").notNull(), // English content
+  orderIndex: integer("order_index").notNull(), // For cycling through in order
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  orderIdx: index("pirkei_avot_order_idx").on(table.orderIndex),
+  chapterIdx: index("pirkei_avot_chapter_idx").on(table.chapter),
+}));
 
 // Pirkei Avot progression tracking
 export const pirkeiAvotProgress = pgTable("pirkei_avot_progress", {
   id: serial("id").primaryKey(),
-  currentChapter: integer("current_chapter").notNull().default(1),
-  currentVerse: integer("current_verse").notNull().default(1),
+  currentOrderIndex: integer("current_order_index").notNull().default(0), // Track by orderIndex for cycling
   lastUpdated: timestamp("last_updated").defaultNow(),
 });
 
@@ -308,6 +338,10 @@ export const insertMaarivPrayerSchema = createInsertSchema(maarivPrayers).omit({
   id: true,
 });
 
+export const insertMorningPrayerSchema = createInsertSchema(morningPrayers).omit({
+  id: true,
+});
+
 export const insertBirkatHamazonPrayerSchema = createInsertSchema(birkatHamazonPrayers).omit({
   id: true,
 });
@@ -355,6 +389,12 @@ export const insertFeaturedContentSchema = createInsertSchema(featuredContent).o
   hebrewDate: z.string().optional(),
 });
 
+export const insertPirkeiAvotSchema = createInsertSchema(pirkeiAvot).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertPirkeiAvotProgressSchema = createInsertSchema(pirkeiAvotProgress).omit({
   id: true,
   lastUpdated: true,
@@ -387,6 +427,11 @@ export const insertParshaVortSchema = createInsertSchema(parshaVorts).omit({
 });
 
 export const insertTableInspirationSchema = createInsertSchema(tableInspirations).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertCommunityImpactSchema = createInsertSchema(communityImpact).omit({
   id: true,
   createdAt: true,
 });
@@ -428,6 +473,8 @@ export type MinchaPrayer = typeof minchaPrayers.$inferSelect;
 export type InsertMinchaPrayer = z.infer<typeof insertMinchaPrayerSchema>;
 export type MaarivPrayer = typeof maarivPrayers.$inferSelect;
 export type InsertMaarivPrayer = z.infer<typeof insertMaarivPrayerSchema>;
+export type MorningPrayer = typeof morningPrayers.$inferSelect;
+export type InsertMorningPrayer = z.infer<typeof insertMorningPrayerSchema>;
 export type BirkatHamazonPrayer = typeof birkatHamazonPrayers.$inferSelect;
 export type InsertBirkatHamazonPrayer = z.infer<typeof insertBirkatHamazonPrayerSchema>;
 export type Sponsor = typeof sponsors.$inferSelect;
@@ -454,6 +501,9 @@ export type InsertParshaVort = z.infer<typeof insertParshaVortSchema>;
 export type TableInspiration = typeof tableInspirations.$inferSelect;
 export type InsertTableInspiration = z.infer<typeof insertTableInspirationSchema>;
 
+export type CommunityImpact = typeof communityImpact.$inferSelect;
+export type InsertCommunityImpact = z.infer<typeof insertCommunityImpactSchema>;
+
 export type Campaign = typeof campaigns.$inferSelect;
 export type InsertCampaign = z.infer<typeof insertCampaignSchema>;
 
@@ -465,6 +515,9 @@ export type InsertWomensPrayer = z.infer<typeof insertWomensPrayerSchema>;
 
 export type DiscountPromotion = typeof discountPromotions.$inferSelect;
 export type InsertDiscountPromotion = z.infer<typeof insertDiscountPromotionSchema>;
+
+export type PirkeiAvot = typeof pirkeiAvot.$inferSelect;
+export type InsertPirkeiAvot = z.infer<typeof insertPirkeiAvotSchema>;
 
 export type PirkeiAvotProgress = typeof pirkeiAvotProgress.$inferSelect;
 export type InsertPirkeiAvotProgress = z.infer<typeof insertPirkeiAvotProgressSchema>;

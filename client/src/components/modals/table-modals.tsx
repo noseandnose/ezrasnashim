@@ -6,6 +6,7 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight, Play, Pause, Volume2 } from "lucide-react";
 import AudioPlayer from "@/components/audio-player";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
+import { formatTextContent } from "@/lib/text-formatter";
 
 export default function TableModals() {
   const { activeModal, closeModal } = useModalStore();
@@ -44,10 +45,10 @@ export default function TableModals() {
   return (
     <>
       {/* Recipe Modal */}
-      <Dialog open={activeModal === 'recipe'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'recipe'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="max-h-[80vh] overflow-y-auto">
           <div className="flex items-center justify-center mb-3 relative">
-            <DialogTitle className="text-lg font-serif font-bold text-black">
+            <DialogTitle className="text-lg platypi-bold text-black">
               {recipeContent?.title || "Daily Recipe"}
             </DialogTitle>
           </div>
@@ -57,7 +58,7 @@ export default function TableModals() {
               {/* Recipe Description */}
               {recipeContent.description && (
                 <div>
-                  <p>{recipeContent.description}</p>
+                  <p dangerouslySetInnerHTML={{ __html: formatTextContent(recipeContent.description) }} />
                 </div>
               )}
               
@@ -67,13 +68,13 @@ export default function TableModals() {
                   <div className="flex gap-4">
                     {recipeContent.cookingTime && (
                       <div>
-                        <span className="font-semibold">Cooking Time: </span>
+                        <span className="platypi-semibold">Cooking Time: </span>
                         <span>{recipeContent.cookingTime}</span>
                       </div>
                     )}
                     {recipeContent.servings && (
                       <div>
-                        <span className="font-semibold">Servings: </span>
+                        <span className="platypi-semibold">Servings: </span>
                         <span>{recipeContent.servings}</span>
                       </div>
                     )}
@@ -84,10 +85,10 @@ export default function TableModals() {
               {/* Ingredients */}
               {recipeContent.ingredients && recipeContent.ingredients.length > 0 && (
                 <div>
-                  <h3 className="font-semibold mb-2">Ingredients:</h3>
+                  <h3 className="platypi-semibold mb-2">Ingredients:</h3>
                   <ul className="list-disc list-inside space-y-1">
                     {recipeContent.ingredients.map((ingredient, index) => (
-                      <li key={index}>{ingredient}</li>
+                      <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(ingredient) }} />
                     ))}
                   </ul>
                 </div>
@@ -96,10 +97,10 @@ export default function TableModals() {
               {/* Instructions */}
               {recipeContent.instructions && recipeContent.instructions.length > 0 && (
                 <div>
-                  <h3 className="font-semibold mb-2">Instructions:</h3>
+                  <h3 className="platypi-semibold mb-2">Instructions:</h3>
                   <ol className="list-decimal list-inside space-y-2">
                     {recipeContent.instructions.map((instruction, index) => (
-                      <li key={index}>{instruction}</li>
+                      <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(instruction) }} />
                     ))}
                   </ol>
                 </div>
@@ -113,7 +114,7 @@ export default function TableModals() {
 
           <Button 
             onClick={() => handleComplete('recipe')}
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 mt-4"
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
           >
             Done
           </Button>
@@ -121,10 +122,10 @@ export default function TableModals() {
       </Dialog>
 
       {/* Table Inspiration Modal */}
-      <Dialog open={activeModal === 'inspiration'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'inspiration'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="inspiration-description">
           <div className="flex items-center justify-center mb-3 relative">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Creative Jewish Living</DialogTitle>
+            <DialogTitle className="text-lg platypi-bold text-black">Creative Jewish Living</DialogTitle>
           </div>
           <div id="inspiration-description" className="sr-only">Creative Jewish living ideas and inspiration</div>
           
@@ -184,13 +185,13 @@ export default function TableModals() {
                         const [isLoading, setIsLoading] = useState(true);
                         
                         const handleVideoError = (e: any) => {
-                          console.error('Video failed to load:', currentMedia.url, e);
+                          // Video failed to load
                           setVideoError(true);
                           setIsLoading(false);
                         };
                         
                         const handleCanPlay = () => {
-                          console.log('Video can play:', currentMedia.url);
+                          // Video can play
                           setIsLoading(false);
                         };
                         
@@ -233,7 +234,7 @@ export default function TableModals() {
                                 className="w-full h-full object-cover"
                                 preload="metadata"
                                 onError={handleVideoError}
-                                onLoadStart={() => console.log('Video loading:', videoUrl)}
+                                onLoadStart={() => { /* Video loading */ }}
                                 onCanPlay={handleCanPlay}
                                 crossOrigin="anonymous"
                                 playsInline
@@ -296,13 +297,13 @@ export default function TableModals() {
 
               {/* Dynamic Title from Database */}
               <div className="mb-3">
-                <h3 className="text-lg font-semibold text-gray-800">{inspirationContent.title}</h3>
+                <h3 className="text-lg platypi-semibold text-gray-800">{inspirationContent.title}</h3>
               </div>
               
               {/* Content Text */}
               <div className="space-y-3 text-sm text-gray-700">
                 <div>
-                  <p>{inspirationContent.content}</p>
+                  <p dangerouslySetInnerHTML={{ __html: formatTextContent(inspirationContent.content) }} />
                 </div>
               </div>
             </>
@@ -322,7 +323,7 @@ export default function TableModals() {
 
           <Button 
             onClick={() => handleComplete('inspiration')}
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 mt-4"
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
           >
             Done
           </Button>
@@ -335,7 +336,7 @@ export default function TableModals() {
                 href="https://www.instagram.com/yidwithakid/" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 underline font-medium"
+                className="text-blue-600 hover:text-blue-800 underline platypi-medium"
               >
                 YidWithAKid
               </a>
@@ -346,10 +347,10 @@ export default function TableModals() {
       </Dialog>
 
       {/* Parsha Shiur Modal */}
-      <Dialog open={activeModal === 'parsha'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'parsha'} onOpenChange={() => closeModal(true)}>
         <DialogContent>
           <div className="flex items-center justify-center mb-3 relative">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Parsha Shiur</DialogTitle>
+            <DialogTitle className="text-lg platypi-bold text-black">Parsha Shiur</DialogTitle>
           </div>
           <p className="text-sm text-gray-600 mb-4 text-center">
             {parshaContent?.title || "This Week's Torah Portion"}
@@ -363,7 +364,7 @@ export default function TableModals() {
 
           <Button 
             onClick={() => handleComplete('parsha')}
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium border-0 mt-4"
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
           >
             Completed Parsha
           </Button>

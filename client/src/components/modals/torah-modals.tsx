@@ -7,6 +7,21 @@ import { useState, useEffect } from "react";
 import AudioPlayer from "@/components/audio-player";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
+import { formatTextContent, formatHalachaContent } from "@/lib/text-formatter";
+
+// Calculate reading time based on word count (average 200 words per minute)
+const calculateReadingTime = (text: string): string => {
+  if (!text) return "0 min";
+  
+  const wordCount = text.trim().split(/\s+/).length;
+  const readingTimeMinutes = Math.ceil(wordCount / 200);
+  
+  if (readingTimeMinutes === 1) {
+    return "1 min";
+  } else {
+    return `${readingTimeMinutes} min`;
+  }
+};
 
 interface TorahModalsProps {
   onSectionChange?: (section: any) => void;
@@ -65,7 +80,7 @@ const StandardModalHeader = ({
 export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   const { activeModal, closeModal, openModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete } = useModalCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const [, setLocation] = useLocation();
   const [showExplosion, setShowExplosion] = useState(false);
   const [fontSize, setFontSize] = useState(16);
@@ -114,7 +129,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
       // Check if all tasks are completed and show congratulations
       setTimeout(() => {
         if (checkAndShowCongratulations()) {
-          openModal('congratulations');
+          openModal('congratulations', 'torah');
         }
       }, 200);
     }, 500);
@@ -143,7 +158,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000
   });
 
-  const { data: featuredContent } = useQuery<{title?: string; content?: string; halachicSource?: string; practicalTip?: string; provider?: string; speakerWebsite?: string}>({
+  const { data: featuredContent } = useQuery<{title?: string; content?: string; provider?: string; footnotes?: string}>({
     queryKey: ['/api/torah/featured', today],
     enabled: activeModal === 'featured',
     staleTime: 5 * 60 * 1000,
@@ -160,18 +175,35 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   return (
     <>
       {/* Halacha Modal */}
-      <Dialog open={activeModal === 'halacha'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'halacha'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="halacha-description">
           <div id="halacha-description" className="sr-only">Daily Jewish law and practice content</div>
           
           <div className="mb-1">
-            <StandardModalHeader 
-              title="Daily Halacha"
-              showHebrew={showHebrew}
-              setShowHebrew={setShowHebrew}
-              fontSize={fontSize}
-              setFontSize={setFontSize}
-            />
+            {/* Custom header with reading time for Halacha */}
+            <div className="flex items-center justify-center mb-1 relative pr-8">
+              <div className="flex items-center gap-4">
+                <div className="flex flex-col items-center">
+                  <DialogTitle className="text-lg platypi-bold text-black">Daily Halacha</DialogTitle>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                    className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                  >
+                    <span className="text-xs platypi-medium">-</span>
+                  </button>
+                  <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
+                  <button
+                    onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+                    className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                  >
+                    <span className="text-xs platypi-medium">+</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
           
           <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
@@ -189,7 +221,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                   className="platypi-regular leading-relaxed text-black whitespace-pre-line"
                   style={{ fontSize: `${fontSize}px` }}
                 >
-                  {halachaContent.content}
+                    <div dangerouslySetInnerHTML={{ __html: formatHalachaContent(halachaContent.content) }} />
                 </div>
               </div>
             )}
@@ -239,10 +271,15 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           
           <div className="heart-explosion-container">
             <Button 
-              onClick={handleTorahComplete} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-4 border-0"
+              onClick={isModalComplete('halacha') ? undefined : handleTorahComplete}
+              disabled={isModalComplete('halacha')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
+                isModalComplete('halacha') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('halacha') ? 'Completed Today' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -250,7 +287,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
       </Dialog>
 
       {/* Emuna Modal */}
-      <Dialog open={activeModal === 'emuna'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'emuna'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="emuna-description">
           <div id="emuna-description" className="sr-only">Daily faith strengthening and spiritual trust content</div>
           
@@ -279,9 +316,10 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             
             {emunaContent && !emunaContent.audioUrl && (
               <div className="space-y-4" style={{ fontSize: `${fontSize}px` }}>
-                <div className="secular-one-bold text-right leading-relaxed text-black">
-                  {emunaContent.content}
-                </div>
+                <div 
+                  className="secular-one-bold text-right leading-relaxed text-black"
+                  dangerouslySetInnerHTML={{ __html: formatTextContent(emunaContent.content) }}
+                />
                 {(emunaContent.author || emunaContent.source) && (
                   <div className="text-xs text-black/60 text-center border-t border-warm-gray/10 pt-3 space-y-1">
                     {emunaContent.author && <p>Author: {emunaContent.author}</p>}
@@ -319,10 +357,15 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={handleTorahComplete} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+              onClick={isModalComplete('emuna') ? undefined : handleTorahComplete}
+              disabled={isModalComplete('emuna')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+                isModalComplete('emuna') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('emuna') ? 'Completed Today' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -330,7 +373,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
       </Dialog>
 
       {/* Chizuk Modal */}
-      <Dialog open={activeModal === 'chizuk'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'chizuk'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="chizuk-description">
           <div id="chizuk-description" className="sr-only">5-minute daily inspiration and spiritual strengthening content</div>
           
@@ -385,10 +428,15 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={handleTorahComplete} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+              onClick={isModalComplete('chizuk') ? undefined : handleTorahComplete}
+              disabled={isModalComplete('chizuk')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+                isModalComplete('chizuk') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('chizuk') ? 'Completed Today' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -396,60 +444,120 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
       </Dialog>
 
       {/* Featured Modal */}
-      <Dialog open={activeModal === 'featured'} onOpenChange={() => closeModal()}>
-        <DialogContent className="max-h-[95vh] overflow-y-auto" aria-describedby="featured-description">
-          <DialogHeader className="text-center mb-4 pr-8">
-            <DialogTitle className="text-lg font-serif font-bold text-black">Featured Content</DialogTitle>
-            {featuredContent && (
-              <DialogDescription className="text-sm text-gray-600 font-sans">{featuredContent.title}</DialogDescription>
-            )}
-          </DialogHeader>
+      <Dialog open={activeModal === 'featured'} onOpenChange={() => closeModal(true)}>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="featured-description">
           <div id="featured-description" className="sr-only">Featured special topics and content</div>
           
-          {featuredContent && (
-            <div className="space-y-3 text-sm text-gray-700 font-sans">
-              <div>
-                <p><strong>Today's Focus:</strong> {featuredContent.content}</p>
-                {featuredContent.halachicSource && (
-                  <p className="mt-2 text-xs text-gray-500">Source: {featuredContent.halachicSource}</p>
-                )}
-                {featuredContent.practicalTip && (
-                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-xs font-medium text-gray-700">Practical Insight:</p>
-                    <p className="text-xs text-gray-600 mt-1">{featuredContent.practicalTip}</p>
-                  </div>
-                )}
+          <div className="mb-1">
+            {/* Custom header with font size controls - matches Halacha modal */}
+            <div className="flex items-center justify-center mb-1 relative pr-8">
+              <div className="flex items-center gap-4">
+                <div className="flex flex-col items-center">
+                  <DialogTitle className="text-lg platypi-bold text-black">Featured Content</DialogTitle>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                    className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                  >
+                    <span className="text-xs platypi-medium">-</span>
+                  </button>
+                  <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
+                  <button
+                    onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+                    className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                  >
+                    <span className="text-xs platypi-medium">+</span>
+                  </button>
+                </div>
               </div>
             </div>
-          )}
+          </div>
           
-          {/* Thank You Section */}
-          {featuredContent?.provider && (
-            <div className="mt-6 p-4 bg-blue-50 rounded-xl">
-              <p className="text-sm text-blue-900 font-medium mb-2">
-                🙏 Thank you to {featuredContent.provider}
-              </p>
-              {featuredContent.speakerWebsite && (
-                <p className="text-sm text-blue-800">
-                  <a 
-                    href={featuredContent.speakerWebsite} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline hover:text-blue-800"
+          <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
+            {featuredContent && (
+              <div className="space-y-4">
+                {/* Title */}
+                {featuredContent.title && (
+                  <h3 className="platypi-bold text-lg text-black text-center mb-4">
+                    {featuredContent.title}
+                  </h3>
+                )}
+                
+                {/* Main Content */}
+                <div 
+                  className="platypi-regular leading-relaxed text-black whitespace-pre-line"
+                  style={{ fontSize: `${fontSize}px` }}
+                >
+                    <div dangerouslySetInnerHTML={{ __html: formatTextContent(featuredContent.content) }} />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footnotes Section - matches Halacha modal */}
+          {featuredContent?.footnotes && (
+            <div className="mb-1">
+              <button
+                onClick={() => setShowFootnotes(!showFootnotes)}
+                className="w-full text-left bg-gray-50 hover:bg-gray-100 rounded-2xl p-3 border border-gray-200 transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="platypi-medium text-black text-sm">Footnotes</span>
+                  <span className="platypi-regular text-black/60 text-lg">
+                    {showFootnotes ? '−' : '+'}
+                  </span>
+                </div>
+              </button>
+              
+              {showFootnotes && (
+                <div className="bg-white rounded-2xl p-4 mt-2 border border-gray-200">
+                  <div 
+                    className="platypi-regular leading-relaxed text-black/80 text-sm whitespace-pre-line"
                   >
-                    Visit Website
-                  </a>
-                </p>
+                    {featuredContent.footnotes}
+                  </div>
+                </div>
               )}
+            </div>
+          )}
+
+          {/* Thank You Section - matches Halacha modal style */}
+          {featuredContent?.provider && (
+            <div className="mb-1 p-4 bg-blue-50 rounded-xl border border-blue-100">
+              <p className="text-sm text-blue-900 platypi-medium">
+                Thank you to{' '}
+                {featuredContent.provider === 'Rabbi Daniel Braude' ? (
+                  <>
+                    Rabbi Daniel Braude from{' '}
+                    <a 
+                      href="https://feldheim.com/learn-hilchos-lashon-hara-in-just-3-minutes-a-day"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline hover:text-blue-800"
+                    >
+                      Learn Hilchos Lashon Hara in just 3 minutes a day
+                    </a>
+                  </>
+                ) : (
+                  featuredContent.provider
+                )}
+              </p>
             </div>
           )}
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={handleTorahComplete} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+              onClick={isModalComplete('featured') ? undefined : handleTorahComplete}
+              disabled={isModalComplete('featured')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+                isModalComplete('featured') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('featured') ? 'Completed Today' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -457,26 +565,34 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
       </Dialog>
 
       {/* Pirkei Avot Modal */}
-      <Dialog open={activeModal === 'pirkei-avot'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'pirkei-avot'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="max-h-[95vh] overflow-y-auto" aria-describedby="pirkei-avot-description">
           <DialogHeader className="text-center mb-4">
-            <DialogTitle className="text-lg font-semibold mb-2">Pirkei Avot</DialogTitle>
+            <DialogTitle className="text-lg platypi-semibold mb-2">Pirkei Avot</DialogTitle>
             <DialogDescription className="text-sm text-gray-600">Ethics of the Fathers</DialogDescription>
           </DialogHeader>
           <div id="pirkei-avot-description" className="sr-only">Ethics of the Fathers - timeless wisdom from Jewish sages</div>
           
-          <div className="space-y-3 text-sm text-gray-700">
+          <div className="space-y-3 text-base">
             <div>
-              <p><strong>Today's Teaching:</strong> {pirkeiAvotContent?.content || "Shimon his son says: All my days I have grown up among the wise, and I have found nothing better for the body than silence."}</p>
-              <p className="mt-2 text-xs text-gray-500">- {pirkeiAvotContent?.source || "Pirkei Avot 1:17"}</p>
-              <p className="mt-3">{pirkeiAvotContent?.explanation || "This mishnah teaches us the value of thoughtful speech and careful listening. True wisdom often comes through quiet contemplation and attentive observation of those wiser than ourselves."}</p>
+              <p className="font-bold text-black">
+                <strong>Today's Teaching:</strong>{' '}
+                <span className="font-bold" dangerouslySetInnerHTML={{ __html: formatTextContent(pirkeiAvotContent?.content || "Shimon his son says: All my days I have grown up among the wise, and I have found nothing better for the body than silence.") }} />
+              </p>
+              <p className="mt-2 text-sm font-semibold text-black/70">
+                - <span dangerouslySetInnerHTML={{ __html: formatTextContent(pirkeiAvotContent?.source || "Pirkei Avot 1:17") }} />
+              </p>
+              <p 
+                className="mt-3 font-bold text-black leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: formatTextContent(pirkeiAvotContent?.explanation || "This mishnah teaches us the value of thoughtful speech and careful listening. True wisdom often comes through quiet contemplation and attentive observation of those wiser than ourselves.") }}
+              />
             </div>
           </div>
           
           <div className="heart-explosion-container">
             <Button 
               onClick={handleTorahComplete} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium mt-6 border-0"
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
             >
               Completed
             </Button>

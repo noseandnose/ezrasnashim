@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { BarChart3, Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins } from "lucide-react";
+import { BarChart3, Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins, DollarSign, Trophy } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
@@ -102,12 +102,23 @@ export default function Statistics() {
     "birkat-hamazon": "Birkat Hamazon",
     "tehillim-text": "Tehillim",
     "special-tehillim": "Special Tehillim",
+    "individual-tehillim": "Individual Tehillim", 
+    "nishmas-campaign": "Nishmas Campaign",
+    "al-hamichiya": "Al Hamichiya",
+    "individual-prayer": "Individual Prayer",
     
     // Torah subcategories  
     chizuk: "Chizuk",
-    emuna: "Emuna",
+    emuna: "Emuna", 
     halacha: "Halacha",
     "featured-content": "Featured Content",
+    featured: "Featured",
+    
+    // Life section
+    recipe: "Daily Recipe",
+    inspiration: "Creative Jewish Living",
+    "sponsor-day": "Day Sponsorship",
+    refuah: "Refuah Names",
     
     // Other
     donate: "Donations",
@@ -129,16 +140,76 @@ export default function Statistics() {
     "birkat-hamazon": Clock3,
     "tehillim-text": ScrollText,
     "special-tehillim": Star,
+    "individual-tehillim": ScrollText,
+    "nishmas-campaign": Heart,
+    "al-hamichiya": Clock3,
+    "individual-prayer": Heart,
     
     // Torah subcategories  
     chizuk: Heart,
     emuna: Shield,
     halacha: BookOpen,
     "featured-content": Star,
+    featured: Star,
+    
+    // Life section
+    recipe: Sparkles,
+    inspiration: Star,
+    "sponsor-day": Trophy,
+    refuah: Heart,
     
     // Other
     donate: HandCoins,
   };
+
+  // Financial Stats Component
+  function FinancialStatsSection() {
+    const { data: financialStats, isLoading: financialLoading } = useQuery<{
+      totalDaysSponsored: number;
+      totalCampaigns: number;
+      totalRaised: number;
+    }>({
+      queryKey: ["/api/analytics/community-impact"],
+      refetchInterval: 60000, // Refresh every minute
+    });
+
+    return (
+      <div>
+        <h2 className="text-base platypi-bold text-black mb-3">Financial Impact</h2>
+        <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center">
+              <div className="flex items-center justify-center mb-2">
+                <Trophy className="h-5 w-5 text-blush" />
+              </div>
+              <div className="text-lg platypi-bold text-black">
+                {financialLoading ? "..." : financialStats?.totalCampaigns?.toLocaleString() || 0}
+              </div>
+              <div className="text-xs platypi-medium text-warm-gray">Campaigns</div>
+            </div>
+            <div className="text-center">
+              <div className="flex items-center justify-center mb-2">
+                <Calendar className="h-5 w-5 text-sage" />
+              </div>
+              <div className="text-lg platypi-bold text-black">
+                {financialLoading ? "..." : financialStats?.totalDaysSponsored?.toLocaleString() || 0}
+              </div>
+              <div className="text-xs platypi-medium text-warm-gray">Days Sponsored</div>
+            </div>
+            <div className="text-center">
+              <div className="flex items-center justify-center mb-2">
+                <DollarSign className="h-5 w-5 text-peach" />
+              </div>
+              <div className="text-lg platypi-bold text-black">
+                ${financialLoading ? "..." : financialStats?.totalRaised?.toLocaleString() || 0}
+              </div>
+              <div className="text-xs platypi-medium text-warm-gray">Money Raised</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mobile-app min-h-screen max-w-md mx-auto bg-white shadow-2xl relative flex flex-col">
@@ -157,114 +228,88 @@ export default function Statistics() {
         </div>
       </header>
       
-      {/* Core Metrics Section - Connected to Top */}
+      {/* Time Period Selector - Connected to Top */}
       <div className="bg-gradient-soft -mt-3 rounded-b-3xl px-4 pt-6 pb-6 border-0 shadow-none flex-shrink-0">
-        <h2 className="text-base platypi-bold text-black mb-3">Core Metrics - All Time</h2>
+        <div className="flex bg-white/20 rounded-xl p-1 mb-4">
+          <Button
+            onClick={() => setSelectedPeriod('today')}
+            variant={selectedPeriod === 'today' ? 'default' : 'ghost'}
+            className={`flex-1 rounded-lg text-sm h-10 ${
+              selectedPeriod === 'today' 
+                ? 'bg-white text-black shadow-sm' 
+                : 'text-black/70 hover:text-black hover:bg-white/10'
+            }`}
+          >
+            Today
+          </Button>
+          <Button
+            onClick={() => setSelectedPeriod('month')}
+            variant={selectedPeriod === 'month' ? 'default' : 'ghost'}
+            className={`flex-1 rounded-lg text-sm h-10 ${
+              selectedPeriod === 'month' 
+                ? 'bg-white text-black shadow-sm' 
+                : 'text-black/70 hover:text-black hover:bg-white/10'
+            }`}
+          >
+            This Month
+          </Button>
+          <Button
+            onClick={() => setSelectedPeriod('alltime')}
+            variant={selectedPeriod === 'alltime' ? 'default' : 'ghost'}
+            className={`flex-1 rounded-lg text-sm h-10 ${
+              selectedPeriod === 'alltime' 
+                ? 'bg-white text-black shadow-sm' 
+                : 'text-black/70 hover:text-black hover:bg-white/10'
+            }`}
+          >
+            All Time
+          </Button>
+        </div>
+
+        {/* Period-Specific Stats */}
+        <h2 className="text-base platypi-bold text-black mb-3">
+          {selectedPeriod === 'today' ? "Today's Activity" : 
+           selectedPeriod === 'month' ? "This Month's Activity" : 
+           "All Time Activity"}
+        </h2>
+        
         <div className="grid grid-cols-2 gap-3">
           <StatCard
             title="Mitzvas Completed"
-            value={totalLoading ? "..." : totalStats?.totalActs?.toLocaleString() || 0}
+            value={currentLoading ? "..." : (currentData as any)?.totalActs?.toLocaleString() || (currentData as any)?.totalActs || 0}
             icon={TrendingUp}
             color="text-blush"
           />
           <StatCard
-            title="Books Completed"
-            value={totalLoading ? "..." : totalStats?.totalBooksCompleted?.toLocaleString() || 0}
-            icon={BookOpen}
-            color="text-sage"
-          />
-          <StatCard
             title="Active Women"
-            value={totalLoading ? "..." : totalStats?.totalUsers?.toLocaleString() || 0}
+            value={currentLoading ? "..." : (currentData as any)?.totalUsers?.toLocaleString() || (currentData as any)?.uniqueUsers || 0}
             icon={Users}
             color="text-peach"
           />
           <StatCard
-            title="People Davened For"
-            value={totalLoading ? "..." : totalStats?.totalNamesProcessed?.toLocaleString() || 0}
-            icon={Heart}
+            title="Tehillim Said"
+            value={currentLoading ? "..." : (() => {
+              const modalCompletions = (currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {};
+              const regularTehillim = modalCompletions['tehillim-text'] || 0;
+              const specialTehillim = modalCompletions['special-tehillim'] || 0;
+              const individualTehillim = Object.keys(modalCompletions).filter(key => key.startsWith('individual-tehillim')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
+              const tehillimEvents = (currentData as any)?.totalTehillimCompleted || (currentData as any)?.tehillimCompleted || 0;
+              return (regularTehillim + specialTehillim + individualTehillim + tehillimEvents).toLocaleString();
+            })()}
+            icon={ScrollText}
             color="text-lavender"
           />
+          <StatCard
+            title="People Davened For"
+            value={currentLoading ? "..." : (currentData as any)?.totalNamesProcessed?.toLocaleString() || (currentData as any)?.namesProcessed || 0}
+            icon={Heart}
+            color="text-sage"
+          />
         </div>
-        
-
       </div>
 
       <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-24">
         <div className="space-y-6">
-          {/* Time Period Tabs */}
-          <div>
-            <div className="flex bg-gray-100 rounded-xl p-1 mb-4">
-              <Button
-                onClick={() => setSelectedPeriod('today')}
-                variant={selectedPeriod === 'today' ? 'default' : 'ghost'}
-                className={`flex-1 rounded-lg text-sm h-10 ${
-                  selectedPeriod === 'today' 
-                    ? 'bg-white text-black shadow-sm' 
-                    : 'text-gray-600 hover:text-black'
-                }`}
-              >
-                Today
-              </Button>
-              <Button
-                onClick={() => setSelectedPeriod('month')}
-                variant={selectedPeriod === 'month' ? 'default' : 'ghost'}
-                className={`flex-1 rounded-lg text-sm h-10 ${
-                  selectedPeriod === 'month' 
-                    ? 'bg-white text-black shadow-sm' 
-                    : 'text-gray-600 hover:text-black'
-                }`}
-              >
-                This Month
-              </Button>
-              <Button
-                onClick={() => setSelectedPeriod('alltime')}
-                variant={selectedPeriod === 'alltime' ? 'default' : 'ghost'}
-                className={`flex-1 rounded-lg text-sm h-10 ${
-                  selectedPeriod === 'alltime' 
-                    ? 'bg-white text-black shadow-sm' 
-                    : 'text-gray-600 hover:text-black'
-                }`}
-              >
-                All Time
-              </Button>
-            </div>
-
-            {/* Period-Specific Stats */}
-            <h2 className="text-base platypi-bold text-black mb-3">
-              {selectedPeriod === 'today' ? "Today's Activity" : 
-               selectedPeriod === 'month' ? "This Month's Activity" : 
-               "All Time Activity"}
-            </h2>
-            
-            <div className="grid grid-cols-2 gap-3">
-              <StatCard
-                title="Mitzvas Completed"
-                value={currentLoading ? "..." : (currentData as any)?.totalActs?.toLocaleString() || (currentData as any)?.totalActs || 0}
-                icon={TrendingUp}
-                color="text-blush"
-              />
-              <StatCard
-                title="Active Women"
-                value={currentLoading ? "..." : (currentData as any)?.totalUsers?.toLocaleString() || (currentData as any)?.uniqueUsers || 0}
-                icon={Users}
-                color="text-peach"
-              />
-              <StatCard
-                title="Tehillim Said"
-                value={currentLoading ? "..." : (currentData as any)?.totalTehillimCompleted?.toLocaleString() || (currentData as any)?.tehillimCompleted || 0}
-                icon={ScrollText}
-                color="text-lavender"
-              />
-              <StatCard
-                title="People Davened For"
-                value={currentLoading ? "..." : (currentData as any)?.totalNamesProcessed?.toLocaleString() || (currentData as any)?.namesProcessed || 0}
-                icon={Heart}
-                color="text-sage"
-              />
-            </div>
-          </div>
-
           {/* Feature Usage */}
           <div>
             <h2 className="text-base platypi-bold text-black mb-3">Feature Usage</h2>
@@ -298,6 +343,9 @@ export default function Statistics() {
               )}
             </div>
           </div>
+
+          {/* Financial Stats */}
+          <FinancialStatsSection />
         </div>
       </main>
 

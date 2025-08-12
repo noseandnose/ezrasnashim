@@ -4,6 +4,94 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Koren Fonts for Tefilla Content */
+@font-face {
+  font-family: 'Koren Siddur';
+  src: url('/fonts/KorenSiddur.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: optional; /* Use fallback immediately if font doesn't load quickly */
+}
+
+@font-face {
+  font-family: 'Arno Koren';
+  src: url('/fonts/ArnoKoren.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: optional; /* Use fallback immediately if font doesn't load quickly */
+}
+
+/* VC Koren Fonts for Hebrew Text in Tefilla Modals */
+@font-face {
+  font-family: 'VC Koren Hebrew';
+  src: url('/fonts/VC_Koren-Light.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: block; /* Wait for font to load to prevent font swapping */
+  unicode-range: U+0590-05FF, U+FB1D-FB4F; /* Hebrew Unicode range */
+}
+
+@font-face {
+  font-family: 'VC Koren Hebrew';
+  src: url('/fonts/VC_Koren-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: block; /* Wait for font to load to prevent font swapping */
+  unicode-range: U+0590-05FF, U+FB1D-FB4F; /* Hebrew Unicode range */
+}
+
+.koren-siddur-hebrew {
+  font-family: 'Koren Siddur', 'Frank Ruhl Libre', 'David Libre', serif;
+  font-weight: 600;
+  font-style: normal;
+  color: #000000;
+  line-height: 1.8;
+  text-align: right !important;
+  direction: rtl;
+  unicode-bidi: embed;
+  letter-spacing: 0.02em;
+}
+
+/* VC Koren Hebrew classes for Tefilla Modals */
+.vc-koren-hebrew {
+  font-family: 'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  color: #000000 !important;
+  line-height: 1.8 !important;
+  text-align: right !important;
+  direction: rtl !important;
+  unicode-bidi: embed !important;
+  letter-spacing: 0.02em !important;
+  /* Prevent flash by ensuring consistent font application */
+  visibility: visible !important;
+}
+
+.vc-koren-hebrew-bold {
+  font-family: 'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif !important;
+  font-weight: 700 !important;
+  font-style: normal !important;
+  color: #000000 !important;
+  text-align: right !important;
+  direction: rtl !important;
+}
+
+/* Ensure bold tags within Hebrew text use the bold font */
+.vc-koren-hebrew strong,
+.vc-koren-hebrew b {
+  font-family: 'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif !important;
+  font-weight: 700 !important;
+}
+
+.koren-siddur-english {
+  font-family: 'Arno Koren', 'Playfair Display', Georgia, serif;
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1.6;
+  text-align: left !important;
+  direction: ltr;
+}
+
 :root {
   --background: hsl(0, 0%, 100%);
   --foreground: hsl(0, 0%, 0%);
@@ -36,6 +124,33 @@
   --blush: hsl(350, 45%, 85%);
   --lavender: hsl(260, 30%, 85%);
   --sage: hsl(120, 20%, 75%);
+}
+
+/* Fix for Hebrew text alignment in modals */
+.text-right {
+  text-align: right !important;
+}
+
+.text-left {
+  text-align: left !important;
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+/* Ensure proper RTL for Hebrew content */
+[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Modal content specific fixes */
+.dialog-content .koren-siddur-hebrew {
+  display: block;
+  width: 100%;
+  text-align: right !important;
+  padding: 0 0.5rem;
 }
 
 /* Gradient Heart Styling */
@@ -108,6 +223,16 @@ h1, h2, h3, h4, h5, h6,
 /* Ensure buttons and interactive elements use black text */
 button, .btn, [role="button"] {
   color: #000000 !important;
+}
+
+/* Fade in animation for Hebrew text to prevent font flash */
+@keyframes fadeInText {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Heart Explosion Animation */

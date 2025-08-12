@@ -807,6 +807,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Community impact routes
+  app.get("/api/community/impact/:date", async (req, res) => {
+    try {
+      const { date } = req.params;
+      const impact = await storage.getCommunityImpactByDate(date);
+      res.json(impact || null);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch community impact" });
+    }
+  });
+
   // Mincha routes
   app.get("/api/mincha/prayers", async (req, res) => {
     try {
@@ -814,6 +825,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(prayers);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch Mincha prayers" });
+    }
+  });
+
+  // Morning prayer routes
+  app.get("/api/morning/prayers", async (req, res) => {
+    try {
+      const prayers = await storage.getMorningPrayers();
+      res.json(prayers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch Morning prayers" });
     }
   });
 
@@ -834,6 +855,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(prayers);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch After Brochas prayers" });
+    }
+  });
+
+  app.post("/api/after-brochas/prayers", async (req, res) => {
+    try {
+      const prayer = await storage.createAfterBrochasPrayer(req.body);
+      res.json(prayer);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create After Brochas prayer" });
     }
   });
 
@@ -1007,20 +1037,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/torah/pirkei-avot/:date", async (req, res) => {
     try {
       const { date } = req.params;
-      const pirkeiAvot = await storage.getPirkeiAvotByDate(date);
-      res.json(pirkeiAvot || null);
+      // Get the current Pirkei Avot content from the database
+      const currentPirkeiAvot = await storage.getCurrentPirkeiAvot();
+      
+      if (currentPirkeiAvot) {
+        // Return formatted response similar to other Torah content
+        res.json({
+          text: currentPirkeiAvot.content,
+          chapter: currentPirkeiAvot.chapter,
+          source: `${currentPirkeiAvot.chapter}.${currentPirkeiAvot.perek}`
+        });
+      } else {
+        res.json(null);
+      }
     } catch (error) {
+      console.error('Error fetching Pirkei Avot:', error);
       res.status(500).json({ message: "Failed to fetch Pirkei Avot content" });
     }
   });
 
   app.post("/api/torah/pirkei-avot/advance", async (req, res) => {
     try {
-      const nextRef = await storage.getNextPirkeiAvotReference();
-      const progress = await storage.updatePirkeiAvotProgress(nextRef.chapter, nextRef.verse);
+      const progress = await storage.advancePirkeiAvotProgress();
       res.json(progress);
     } catch (error) {
       res.status(500).json({ message: "Failed to advance Pirkei Avot progress" });
+    }
+  });
+
+  // New routes for Pirkei Avot management
+  app.get("/api/pirkei-avot", async (req, res) => {
+    try {
+      const allPirkeiAvot = await storage.getAllPirkeiAvot();
+      res.json(allPirkeiAvot);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch all Pirkei Avot content" });
+    }
+  });
+
+  app.post("/api/pirkei-avot", async (req, res) => {
+    try {
+      const newPirkeiAvot = await storage.createPirkeiAvot(req.body);
+      res.json(newPirkeiAvot);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create Pirkei Avot content" });
     }
   });
 
@@ -1396,39 +1456,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Serve Apple Pay domain verification file
+  app.get("/.well-known/apple-developer-merchantid-domain-association", (req, res) => {
+    console.log('Apple Pay domain verification file requested');
+    res.setHeader('Content-Type', 'text/plain');
+    // Send the Apple Pay domain verification content
+    res.send('7B227073704964223A2239373830303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030222C2276657273696F6E223A312C22637265617465644F6E223A313534373531373737393538332C227369676E6174757265223A22333038303036303932613836343838366637306430313037303261303830333038303330383130373061303132383034383336633737326436623638323735333634363736343730373637323734363936633735373332653633366637323265363136663639373332653632373536313639363533363635363237343631366337333265363636313733373436323635373436313265363436353766373436313635373436353733373432653631363933656436656537613738303830333038623135333032303136633737326436623638323735333634363736343730373637323734363936633735373332653633366637323265363136663639373332653632373536313639363533363635363237343631366337333265363636313733373436323635373436313265363436353766373436313635373436353733373432653631363933653465363536333736333230323030316634663932343461353835653935386164633135383334393834333030613036303832613836343836366637306430323031303130353030333038316330313035313030313031303330383161323330613036303832613836343836366637306430323031303130353030613038316138306161613863633763373036346166336535303635633532383336303830343363333462646338663034376335383230653566346165613333383035396430303862343030626536646662366562633036316236636632666637353633643832326231333436326631353638346633343730323666346134623430393231633666643234613432626639316462623366616430666332353265663763306562333062656165663532376338393964633962633934366234336533633633373434656535643333353935373766613730356233323863373330326635313934306433653231656165613730306436636638613039316137383435363237663131373437343832363738623634626238636330373766343439346533336262646633656665353264653331643339363030313531643165353832636166633264373563373737303765373937616636613733356135326431656137356639393737323661666533306531356232616336633330653430313536633737326436623638323735333634363736343730373637323734363936633735373332653633366637323265363136663639373332653632373536313639363533363635363237343631366337333265363636313733373436323635373436313265363436353766373436313635373436353733373432653631363933653065363536333637333230323030316634663932343461353835653935386164633135383334393834333030613036303832613836343836366637306430323031303130353030613038316331393938643831373439373531643362343261646365643234306633373830346264346133316462323334363433356136303237633862303262396336303263363365316462636536613161663833613830326532616461656564396331626437316433313035393864666534393366393736313535653436613436396634353639303936326439633161393836383363653766326364623337613235346136393233383866393264356434633461393034663037333336396334633165386135613833666131363836383461396666343661323633653362643139646431636533393866393862616563643638363930373766626532663465636639326635656565616232393063643235653639336235313936346366656362643134376665383837626635303935333463383562653537653433356235356666616637616163323962303438383230333931643366353661626231633939643437306665636636333066653932383535323732343739613836343030613035646630323030303461616636623334646531646530623234383866326439396436303031646336613739366338373836346564303134356162313036643166363262393438313662373735386365346630363237353332373738343538353937343066343863313565626537623938653735643238633732303530373562306134376233623964333335653838653436346431313265323363376235623564663139653436656162636562373031383862376435376661653865646166393064333330333938656465393230633535643465343831653832353437336336643834303065643464646338643339333366303339636239323763646261626437343763656538316436626137356439313364363338643565653361313564626535303939393035663530396263656633316137653538646537373132333766366632396130303035383936623132366236623766363464656662653032303030333038323033383233303832303162313061303330323031303230323034303031623063653834333038313061303630383261383634383836663730643031303130623035303030613831393733303833363130623330303933303631303433353533343130633033353535333130313133303132303630333535303430613063306236313730373036633635323036393665363332653330316533303163303630333535303430333063313535313631373030366336353230343934343230353137323635373336393734363537363636363936333631373436393666366535333635373237363639363365373330323030353364653532633537326133383833306266656466613763383130333066333734663030653261323963336631383032636330323364353764316132346137663165366161326533623538636566333333356631656337313135623830333264623963643866313131636638303661643038643738653538626236353135316233643439663966303165356535356166383732333738626138623633393436316532623562313638653563393436393932303065643634656531306665336434333433343332356431666336353139613537393966303363623465323734306664316563656265333866376431376539613064653936623138623066383666353662386664663061613730396232653736616439376437616632383464623536646662373164383166653961633635646533613533393837336666373165353966336131373539373765343935393966393337636135626133376232353735343233373938343433373863326564353261343765366338393337376135343764646234633835313039663165383033353631396431623632333738383839333434366531393461653930393065333738373433383863353966373437646434323334646462623633353036303030222C22706F6453223A224D4947654D5167724243674B4A6B69615256596E61517245414151524341444242414C6F33364B675447456469306C656D456D6A526C597A67744C43386B58434B7547456A376F7648733978716E416C736F2B5841343648794A454A4E6B576A69524D415054714B316D786E393253664A39373637336545505567776966357834636C4F76316976726E6E6D3942783947666C4144615A4B5377334E7A4B764B6C6B6E334B484B77324B33494C484C7243525A6857655561613346446D5153413D222C22706F64223A224D4947654D5167724243674B4A6B69615256596E61517245414151524341444242414C6F33364B675447456469306C656D456D6A526C597A67744C43386B58434B7547456A376F7648733978716E416C736F2B5841343648794A454A4E6B576A69524D415054714B316D786E393253664A39373637336545505567776966357834636C4F76316976726E6E6D3942783947666C4144615A4B5377334E7A4B764B6C6B6E334B484B77324B33494C484C7243525A6857655561613346446D5153413D22222C22747261646554223A313534373531373737393030302C22727041223A22456A30334E7A597A4E7A4D304D7A4D794E5463794E4441784E7A45334E6A67354E446B314E6A6C6D4D7A4E6A4D324D7A51794E6D566D4E4463344E324A684F4738325A4755304E7A5530597A466A4E446B314E7A593551413D3D222C227230336B53636F7265223A312C2272336B53636F7265223A312C22723361723053636F7265223A312C2264737377536D34537461747573223A302C227231676D536D34537461747573223A302C22697373756572536D34537461747573223A302C22687638386D74537461747573223A302C2268763838537461747573223A317D');
+  });
+
+  // Test Stripe connection endpoint
+  app.get("/api/stripe-test", async (req, res) => {
+    try {
+      console.log('Testing Stripe connection...');
+      console.log('Stripe key configured:', !!process.env.STRIPE_SECRET_KEY);
+      console.log('Stripe key format:', process.env.STRIPE_SECRET_KEY?.substring(0, 7) + '...');
+      
+      // Try to create a minimal payment intent for testing
+      const testIntent = await stripe.paymentIntents.create({
+        amount: 100, // $1.00
+        currency: 'usd',
+        metadata: { test: 'true' }
+      });
+      
+      console.log('Test payment intent created:', testIntent.id);
+      
+      res.json({
+        success: true,
+        message: 'Stripe connection working',
+        testIntentId: testIntent.id,
+        status: testIntent.status
+      });
+    } catch (error: any) {
+      console.error('Stripe test failed:', {
+        message: error.message,
+        type: error.type,
+        code: error.code,
+        decline_code: error.decline_code
+      });
+      
+      res.status(500).json({
+        success: false,
+        error: error.message,
+        type: error.type,
+        code: error.code
+      });
+    }
+  });
+
   // Stripe payment route for donations
   app.post("/api/create-payment-intent", async (req, res) => {
     try {
       const { amount, donationType, metadata } = req.body;
       
+      console.log('=== PAYMENT INTENT REQUEST ===');
+      console.log('Request body:', { amount, donationType, metadata });
+      console.log('Stripe key exists:', !!process.env.STRIPE_SECRET_KEY);
+      console.log('Stripe key starts with sk_:', process.env.STRIPE_SECRET_KEY?.startsWith('sk_'));
+      
       if (!amount || amount <= 0) {
+        console.log('Invalid amount provided:', amount);
         return res.status(400).json({ message: "Invalid amount" });
       }
 
-      console.log('Creating payment intent with amount:', amount, 'type:', donationType);
+      if (!process.env.STRIPE_SECRET_KEY) {
+        console.error('STRIPE_SECRET_KEY not found in environment');
+        return res.status(500).json({ message: "Stripe not configured" });
+      }
+
+      console.log('Creating payment intent with:', { 
+        amount, 
+        donationType, 
+        metadata,
+        stripeConfigured: !!process.env.STRIPE_SECRET_KEY
+      });
       
-      const paymentIntent = await stripe.paymentIntents.create({
+      const paymentIntentData = {
         amount: Math.round(amount * 100), // Convert to cents
         currency: "usd",
-        payment_method_configuration: "pmc_1Rgkz8FBzwAA3fO1GtotOiNc",
         metadata: {
           source: "ezras-nashim-donation",
           donationType: donationType || "General Donation",
           sponsorName: metadata?.sponsorName || "",
-          dedication: metadata?.dedication || ""
+          dedication: metadata?.dedication || "",
+          timestamp: new Date().toISOString()
+        },
+        // Enable automatic payment methods including Apple Pay and Google Pay
+        automatic_payment_methods: {
+          enabled: true,
+          allow_redirects: 'never' as const // Keep on same page for better UX
         }
-      });
+      };
       
-      console.log('Payment intent created successfully:', paymentIntent.id);
+      console.log('Payment intent configuration:', paymentIntentData);
+      
+      const paymentIntent = await stripe.paymentIntents.create(paymentIntentData);
+      
+      console.log('Payment intent created successfully:', {
+        id: paymentIntent.id,
+        status: paymentIntent.status,
+        amount: paymentIntent.amount,
+        client_secret_exists: !!paymentIntent.client_secret
+      });
 
       res.json({ 
         clientSecret: paymentIntent.client_secret,
-        amount: amount 
+        amount: amount,
+        paymentIntentId: paymentIntent.id
       });
     } catch (error: any) {
-      console.error('Stripe payment intent creation failed:', error);
+      console.error('Stripe payment intent creation failed:', {
+        error: error.message,
+        code: error.code,
+        type: error.type,
+        decline_code: error.decline_code
+      });
       res.status(500).json({ 
-        message: "Error creating payment intent: " + error.message 
+        message: "Error creating payment intent: " + error.message,
+        code: error.code,
+        type: error.type
       });
     }
   });

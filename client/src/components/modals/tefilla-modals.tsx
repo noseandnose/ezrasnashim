@@ -2,36 +2,54 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles } from "lucide-react";
-import korenLogo from "@assets/This_is_a_logo_for_Koren_Publishers_Jerusalem_1752581940716.jpg";
+import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, ArrowUp } from "lucide-react";
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
-import { MinchaPrayer, NishmasText, GlobalTehillimProgress, TehillimName, WomensPrayer } from "@shared/schema";
+import { MinchaPrayer, MorningPrayer, NishmasText, GlobalTehillimProgress, TehillimName, WomensPrayer } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import axiosClient from "@/lib/axiosClient";
 import { useTrackModalComplete, useAnalytics } from "@/hooks/use-analytics";
 import { BirkatHamazonModal } from "@/components/modals/birkat-hamazon-modal";
+import { useLocationStore } from '@/hooks/use-jewish-times';
+import { formatTextContent } from "@/lib/text-formatter";
 
 interface TefillaModalsProps {
   onSectionChange?: (section: any) => void;
 }
 
 // Koren Thank You Component
-const KorenThankYou = () => (
-  <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-    <div className="flex items-center justify-between">
-      <span className="text-sm platypi-medium text-black">All tefilla texts courtesy of Koren Publishers Jerusalem</span>
-      <img 
-        src={korenLogo} 
-        alt="Koren Publishers" 
-        className="h-6 w-auto ml-2 flex-shrink-0"
-      />
+const KorenThankYou = () => {
+  const { coordinates } = useLocationStore();
+  
+  // Check if user is in Israel based on coordinates
+  const isInIsrael = coordinates && 
+    coordinates.lat >= 29.5 && coordinates.lat <= 33.5 && 
+    coordinates.lng >= 34.0 && coordinates.lng <= 36.0;
+  
+  const korenUrl = isInIsrael 
+    ? "https://korenpub.co.il/collections/siddurim/products/koren-shalem-siddurhardcoverstandardashkenaz"
+    : "https://korenpub.com/collections/siddurim/products/koren-shalem-siddur-ashkenaz-1";
+  
+  return (
+    <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+      <span className="text-sm platypi-medium text-black">
+        All tefilla texts courtesy of{' '}
+        <a 
+          href={korenUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-blue-700"
+        >
+          Koren Publishers Jerusalem
+        </a>
+      </span>
     </div>
-  </div>
-);
+  );
+};
 
 // Standardized Modal Header Component for Tefilla Modals
 const StandardModalHeader = ({ 
@@ -87,41 +105,33 @@ const StandardModalHeader = ({
 function MorningBrochasModal() {
   const { activeModal, closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete } = useModalCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [showHebrew, setShowHebrew] = useState(true);
   const [showEnglish, setShowEnglish] = useState(false);
   const [fontSize, setFontSize] = useState(20);
   
-  // Sefaria API URLs for morning blessings
-  // Fetch all morning blessing texts from backend proxy
-  const { data: morningBlessings, isLoading, error } = useQuery({
-    queryKey: ['morning-blessings-fixed-format-v2'],
+  // Fetch morning prayers from database
+  const { data: morningPrayers, isLoading, error } = useQuery({
+    queryKey: ['morning-prayers'],
     queryFn: async () => {
-      console.log('Making API call for morning blessings...');
-      const response = await axiosClient.get('/api/sefaria/morning-brochas');
-      console.log('Frontend received response:', response.data);
-      console.log('Number of blessings:', response.data?.length);
-      console.log('First blessing sample:', response.data?.[0]);
-      return response.data; // Returns array of {hebrew, english, ref} objects
+      // Making API call for morning prayers from database
+      const response = await axiosClient.get('/api/morning/prayers');
+      // Response received from API
+      return response.data; // Returns array of MorningPrayer objects from database
     },
     enabled: activeModal === 'morning-brochas',
     refetchOnMount: true,
-    staleTime: 0,
-    gcTime: 0 // Completely disable caching
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000 // 30 minutes
   });
 
-  console.log('MorningBrochasModal - activeModal:', activeModal);
-  console.log('MorningBrochasModal - isLoading:', isLoading);
-  console.log('MorningBrochasModal - error:', error);
-  console.log('MorningBrochasModal - data:', morningBlessings);
-
-  console.log('MorningBrochasModal - activeModal:', activeModal);
+  // Modal state and data loaded
   
   return (
-    <Dialog open={activeModal === 'morning-brochas'} onOpenChange={() => closeModal()}>
-      <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="morning-brochas-description">
+    <Dialog open={activeModal === 'morning-brochas'} onOpenChange={() => closeModal(true)}>
+      <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="morning-brochas-description">
         <div id="morning-brochas-description" className="sr-only">Daily morning blessings and prayers of gratitude</div>
         
         {/* Standardized Header with centered controls */}
@@ -167,18 +177,22 @@ function MorningBrochasModal() {
               <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
             </div>
           ) : (
-            <div className="space-y-6" style={{ fontSize: `${fontSize}px` }}>
-              {morningBlessings?.map((blessing: {hebrew: string; english: string; ref: string}, index: number) => (
-                <div key={index} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
-                  {blessing.hebrew && showHebrew && (
-                    <div className="secular-one-bold text-right leading-relaxed text-black">
-                      {blessing.hebrew}
-                    </div>
+            <div className="space-y-6">
+              {morningPrayers?.map((prayer: MorningPrayer, index: number) => (
+                <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
+                  {prayer.hebrewText && showHebrew && (
+                    <div 
+                      className="vc-koren-hebrew leading-relaxed"
+                      style={{ fontSize: `${fontSize + 1}px` }}
+                      dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.hebrewText).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
+                    />
                   )}
                   {!showHebrew && (
-                    <div className="text-left leading-relaxed text-black/70">
-                      {blessing.english || "English translation not available"}
-                    </div>
+                    <div 
+                      className="koren-siddur-english text-left leading-relaxed text-black/70"
+                      style={{ fontSize: `${fontSize}px` }}
+                      dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.englishTranslation || "English translation not available") }}
+                    />
                   )}
                 </div>
               ))}
@@ -189,7 +203,7 @@ function MorningBrochasModal() {
         <KorenThankYou />
 
         <Button 
-          onClick={() => {
+          onClick={isModalComplete('morning-brochas') ? undefined : () => {
             // Track modal completion and mark as completed globally
             trackModalComplete('morning-brochas');
             markModalComplete('morning-brochas');
@@ -203,11 +217,15 @@ function MorningBrochasModal() {
               closeModal();
               window.location.hash = '#/?section=home&scrollToProgress=true';
             }, 2000);
-          }} 
-          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0"
-          disabled={isLoading}
+          }}
+          disabled={isLoading || isModalComplete('morning-brochas')}
+          className={`w-full py-3 rounded-xl platypi-medium border-0 ${
+            isModalComplete('morning-brochas') 
+              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+          }`}
         >
-          Completed Morning Brochas
+          {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete Morning Brochas'}
         </Button>
         
         {/* Heart Explosion Animation */}
@@ -223,7 +241,7 @@ function MorningBrochasModal() {
 export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const { activeModal, openModal, closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete } = useModalCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const [, setLocation] = useLocation();
   const { trackModalComplete } = useTrackModalComplete();
   const { trackEvent } = useAnalytics();
@@ -243,7 +261,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const handlePrayerSelect = (prayerId: number) => {
     setSelectedPrayerId(prayerId);
     closeModal();
-    openModal('individual-prayer');
+    openModal('individual-prayer', 'tefilla');
   };
 
   // Complete prayer with task tracking
@@ -283,7 +301,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       // Check if all tasks are completed and show congratulations
       setTimeout(() => {
         if (checkAndShowCongratulations()) {
-          openModal('congratulations');
+          openModal('congratulations', 'tefilla');
         }
       }, 200);
     }, 500);
@@ -304,6 +322,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     return lastCompleted === today;
   });
   const [nishmasFontSize, setNishmasFontSize] = useState(20);
+  const [showNishmasInfo, setShowNishmasInfo] = useState(false);
 
   const { data: minchaPrayers = [], isLoading } = useQuery<MinchaPrayer[]>({
     queryKey: ['/api/mincha/prayers'],
@@ -424,8 +443,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
     return (
       <div 
-        className={`leading-relaxed whitespace-pre-line ${showHebrew ? 'text-right secular-one-bold' : 'font-english text-left'}`}
-        style={{ fontSize: `${fontSize}px` }}
+        className={`leading-relaxed whitespace-pre-line ${showHebrew ? 'koren-siddur-hebrew text-right' : 'koren-siddur-english text-left'}`}
+        style={{ fontSize: `${showHebrew ? fontSize + 1 : fontSize}px` }}
       >
         {tehillimText.text}
       </div>
@@ -477,8 +496,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     
     console.log('Completing Nishmas:', { currentDay: nishmasDay, newDay, todayCompleted });
     
-    // Track Nishmas completion
+    // Track Nishmas completion and mark as completed
     trackModalComplete('nishmas');
+    markModalComplete('nishmas');
     
     if (newDay <= 40) {
       setNishmasDay(newDay);
@@ -494,6 +514,33 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       
       console.log('Nishmas completed, new state:', { newDay, completed: true });
     }
+    
+    // Complete tefilla task and redirect to home
+    completeTask('tefilla');
+    setShowExplosion(true);
+    
+    setTimeout(() => {
+      setShowExplosion(false);
+      checkAndShowCongratulations();
+      closeModal();
+      
+      // Navigate to home section and scroll to progress to show flower growth
+      if (onSectionChange) {
+        onSectionChange('home');
+        setTimeout(() => {
+          const progressElement = document.getElementById('daily-progress-garden');
+          if (progressElement) {
+            progressElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+          }
+        }, 300);
+      } else {
+        // Fallback: redirect to home with scroll parameter
+        window.location.hash = '#/?section=home&scrollToProgress=true';
+      }
+    }, 2000);
   };
 
   // Reset Nishmas campaign
@@ -509,7 +556,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   return (
     <>
       {/* Tehillim Text Modal */}
-      <Dialog open={activeModal === 'tehillim-text'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'tehillim-text'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="tehillim-description">
           <div id="tehillim-description" className="sr-only">Psalms reading and community prayer participation</div>
           
@@ -552,8 +599,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           {/* Standardized Content Area */}
           <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
             <div
-              className={`${showHebrew ? 'secular-one-bold text-right' : 'font-english'} leading-relaxed text-black`}
-              style={{ fontSize: `${fontSize}px` }}
+              className={`${showHebrew ? 'vc-koren-hebrew' : 'koren-siddur-english'} leading-relaxed text-black`}
+              style={{ fontSize: `${showHebrew ? fontSize + 1 : fontSize}px` }}
             >
               {getTehillimDisplayText()}
             </div>
@@ -577,7 +624,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         </DialogContent>
       </Dialog>
       {/* Mincha Modal */}
-      <Dialog open={activeModal === 'mincha'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'mincha'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="mincha-description">
           <div id="mincha-description" className="sr-only">Afternoon prayer service and instructions</div>
           
@@ -595,19 +642,23 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
               </div>
             ) : (
-              <div className="space-y-6" style={{ fontSize: `${fontSize}px` }}>
+              <div className="space-y-6">
                 {minchaPrayers.map((prayer) => (
-                  <div key={prayer.id} className="border-b border-warm-gray/10 pb-4 last:border-b-0">
-                    <div
-                      className={`${language === 'hebrew' ? 'secular-one-bold text-right' : 'text-left'} leading-relaxed whitespace-pre-line text-black`}
-                      dangerouslySetInnerHTML={{
-                        __html: language === 'hebrew' 
-                          ? (prayer.hebrewText || '')
-                              .replace(/\*\*(.*?)\*\*\n\n/g, '**$1**\n')
-                              .replace(/\*\*(.*?)\*\*/g, '<strong class="prayer-header">$1</strong>')
-                          : prayer.englishTranslation
-                      }}
-                    />
+                  <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
+                    {prayer.hebrewText && language === 'hebrew' && (
+                      <div 
+                        className="vc-koren-hebrew leading-relaxed"
+                        style={{ fontSize: `${fontSize + 1}px` }}
+                        dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.hebrewText).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
+                      />
+                    )}
+                    {language === 'english' && (
+                      <div 
+                        className="koren-siddur-english text-left leading-relaxed text-black/70"
+                        style={{ fontSize: `${fontSize}px` }}
+                        dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.englishTranslation || "English translation not available") }}
+                      />
+                    )}
                   </div>
                 ))}
               </div>
@@ -616,17 +667,22 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={completeWithAnimation} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
+              onClick={isModalComplete('mincha') ? undefined : completeWithAnimation}
+              disabled={isModalComplete('mincha')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+                isModalComplete('mincha') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('mincha') ? 'Completed Today' : 'Complete Mincha'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
         </DialogContent>
       </Dialog>
       {/* Women's Prayers Modal */}
-      <Dialog open={activeModal === 'womens-prayers'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'womens-prayers'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] overflow-hidden platypi-regular" aria-describedby="womens-prayers-description">
           <div id="womens-prayers-description" className="sr-only">Special prayers and blessings for women</div>
           
@@ -643,7 +699,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               className="content-card rounded-xl p-4 cursor-pointer"
               onClick={() => {
                 closeModal();
-                openModal('blessings');
+                openModal('blessings', 'tefilla');
               }}
             >
               <div className="flex items-center space-x-3">
@@ -656,7 +712,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               className="content-card rounded-xl p-4 cursor-pointer"
               onClick={() => {
                 closeModal();
-                openModal('tefillos');
+                openModal('tefillos', 'tefilla');
               }}
             >
               <div className="flex items-center space-x-3">
@@ -669,7 +725,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               className="content-card rounded-xl p-4 cursor-pointer"
               onClick={() => {
                 closeModal();
-                openModal('personal-prayers');
+                openModal('personal-prayers', 'tefilla');
               }}
             >
               <div className="flex items-center space-x-3">
@@ -681,17 +737,22 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={completeWithAnimation} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
+              onClick={isModalComplete('womens-prayers') ? undefined : completeWithAnimation}
+              disabled={isModalComplete('womens-prayers')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+                isModalComplete('womens-prayers') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('womens-prayers') ? 'Completed Today' : "Complete Women's Prayers"}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
         </DialogContent>
       </Dialog>
       {/* Blessings Modal */}
-      <Dialog open={activeModal === 'blessings'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'blessings'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[90vh] platypi-regular" aria-describedby="blessings-description">
           <div id="blessings-description" className="sr-only">Daily blessings and their proper recitation</div>
           
@@ -709,17 +770,22 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={completeWithAnimation} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
+              onClick={isModalComplete('blessings') ? undefined : completeWithAnimation}
+              disabled={isModalComplete('blessings')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+                isModalComplete('blessings') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('blessings') ? 'Completed Today' : 'Complete Blessings'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
         </DialogContent>
       </Dialog>
       {/* Tefillos Modal */}
-      <Dialog open={activeModal === 'tefillos'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'tefillos'} onOpenChange={() => closeModal(true)}>
         <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[90vh] platypi-regular ${isAnimating ? 'prayer-ascending' : ''}`} aria-describedby="tefillos-description">
           <div id="tefillos-description" className="sr-only">Traditional prayers and their meanings</div>
           
@@ -737,17 +803,22 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={completeWithAnimation} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
+              onClick={isModalComplete('tefillos') ? undefined : completeWithAnimation}
+              disabled={isModalComplete('tefillos')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+                isModalComplete('tefillos') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('tefillos') ? 'Completed Today' : 'Complete Tefillos'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
         </DialogContent>
       </Dialog>
       {/* Personal Prayers Modal */}
-      <Dialog open={activeModal === 'personal-prayers'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'personal-prayers'} onOpenChange={() => closeModal(true)}>
         <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[90vh] platypi-regular ${isAnimating ? 'prayer-ascending' : ''}`} aria-describedby="personal-prayers-description">
           <div id="personal-prayers-description" className="sr-only">Guidance for personal prayer and connection</div>
           
@@ -765,17 +836,22 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={completeWithAnimation} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
+              onClick={isModalComplete('personal-prayers') ? undefined : completeWithAnimation}
+              disabled={isModalComplete('personal-prayers')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+                isModalComplete('personal-prayers') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('personal-prayers') ? 'Completed Today' : 'Complete Personal Prayers'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
         </DialogContent>
       </Dialog>
       {/* Nishmas Kol Chai Modal */}
-      <Dialog open={activeModal === 'nishmas-campaign'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'nishmas-campaign'} onOpenChange={() => closeModal(true)}>
         <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular ${isAnimating ? 'prayer-ascending' : ''}`}>
           {/* Standardized Header */}
           <div className="flex items-center justify-center mb-3 relative pr-8">
@@ -822,17 +898,45 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             ) : (
               <div 
                 className={`leading-relaxed text-black ${
-                  nishmasLanguage === 'hebrew' ? 'text-right secular-one-bold' : 'font-english text-left'
+                  nishmasLanguage === 'hebrew' ? 'vc-koren-hebrew' : 'koren-siddur-english text-left'
                 }`} 
-                style={{ fontSize: `${nishmasFontSize}px` }}
+                style={{ fontSize: `${nishmasLanguage === 'hebrew' ? nishmasFontSize + 1 : nishmasFontSize}px` }}
               >
                 {nishmasText ? (
-                  <div className="whitespace-pre-wrap leading-relaxed">
-                    {(nishmasText as any)?.fullText || nishmasText.fullText || 'Text not available'}
-                  </div>
+                  <div 
+                    className="whitespace-pre-wrap leading-relaxed"
+                    dangerouslySetInnerHTML={{ 
+                      __html: formatTextContent(
+                        (nishmasText as any)?.fullText || nishmasText.fullText || 'Text not available'
+                      ).replace(/<strong>/g, nishmasLanguage === 'hebrew' ? '<strong class="vc-koren-hebrew-bold">' : '<strong style="font-weight: 700;">')
+                    }}
+                  />
                 ) : (
                   <div className="text-red-600 text-center">Failed to load prayer text</div>
                 )}
+              </div>
+            )}
+          </div>
+
+          {/* Expandable Information Section */}
+          <div className="mb-1">
+            <button
+              onClick={() => setShowNishmasInfo(!showNishmasInfo)}
+              className="w-full text-left bg-gray-50 hover:bg-gray-100 rounded-2xl p-3 border border-gray-200 transition-colors"
+            >
+              <div className="flex items-center justify-between">
+                <span className="platypi-medium text-black text-sm">Information</span>
+                <span className="platypi-regular text-black/60 text-lg">
+                  {showNishmasInfo ? '−' : '+'}
+                </span>
+              </div>
+            </button>
+            
+            {showNishmasInfo && (
+              <div className="bg-white rounded-2xl p-4 mt-2 border border-gray-200">
+                <div className="platypi-regular leading-relaxed text-black/80 text-sm">
+                  Rebbetzin Leah Kolodetsky shared that her mother, Rebbetzin Kanievsky zt"l, believed reciting Nishmas Kol Chai for 40 consecutive days is a powerful segulah for having prayers answered.
+                </div>
               </div>
             )}
           </div>
@@ -849,19 +953,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
-
-
-
-          {/* Rebbetzin Kanievsky Quote */}
-          <div className="mt-2 text-xs text-gray-500 text-center">
-            <p className="leading-relaxed">
-              Rebbetzin Leah Kolodetsky shared that her mother, Rebbetzin Kanievsky zt"l, believed reciting Nishmas Kol Chai for 40 consecutive days is a powerful segulah for having prayers answered.
-            </p>
-          </div>
         </DialogContent>
       </Dialog>
       {/* Refuah Prayers Modal */}
-      <Dialog open={activeModal === 'refuah'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'refuah'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-sm rounded-3xl p-6 platypi-regular" aria-describedby="refuah-description">
           <div id="refuah-description" className="sr-only">Prayers for healing and health</div>
           <div className="flex items-center justify-center mb-3 relative pr-8">
@@ -871,7 +966,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         </DialogContent>
       </Dialog>
       {/* Family Prayers Modal */}
-      <Dialog open={activeModal === 'family'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'family'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-sm rounded-3xl p-6 platypi-regular" aria-describedby="family-description">
           <div id="family-description" className="sr-only">Prayers for family harmony and blessings</div>
           <div className="flex items-center justify-center mb-3 relative pr-8">
@@ -881,7 +976,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         </DialogContent>
       </Dialog>
       {/* Life Prayers Modal */}
-      <Dialog open={activeModal === 'life'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'life'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-sm rounded-3xl p-6 platypi-regular" aria-describedby="life-description">
           <div id="life-description" className="sr-only">Prayers for life events and milestones</div>
           <div className="flex items-center justify-center mb-3 relative pr-8">
@@ -891,7 +986,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         </DialogContent>
       </Dialog>
       {/* Individual Prayer Modal */}
-      <Dialog open={activeModal === 'individual-prayer'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'individual-prayer'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="individual-prayer-description">
           <div id="individual-prayer-description" className="sr-only">Individual prayer text and translation</div>
           <IndividualPrayerContent prayerId={selectedPrayerId} language={language} fontSize={fontSize} setLanguage={setLanguage} setFontSize={setFontSize} />
@@ -899,21 +994,21 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       </Dialog>
 
       {/* Special Tehillim Modal */}
-      <Dialog open={activeModal === 'special-tehillim'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'special-tehillim'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
           <SpecialTehillimModal />
         </DialogContent>
       </Dialog>
 
       {/* Individual Tehillim Modal */}
-      <Dialog open={activeModal === 'individual-tehillim'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'individual-tehillim'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
           <IndividualTehillimModal />
         </DialogContent>
       </Dialog>
 
       {/* Maariv Modal */}
-      <Dialog open={activeModal === 'maariv'} onOpenChange={() => closeModal()}>
+      <Dialog open={activeModal === 'maariv'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="maariv-description">
           <div id="maariv-description" className="sr-only">Evening prayer service and instructions</div>
           
@@ -931,19 +1026,23 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
               </div>
             ) : (
-              <div className="space-y-6" style={{ fontSize: `${fontSize}px` }}>
+              <div className="space-y-6">
                 {maarivPrayers.map((prayer) => (
                   <div key={prayer.id} className="border-b border-warm-gray/10 pb-4 last:border-b-0">
-                    <div
-                      className={`${language === 'hebrew' ? 'secular-one-bold text-right' : 'text-left'} leading-relaxed whitespace-pre-line text-black`}
-                      dangerouslySetInnerHTML={{
-                        __html: language === 'hebrew' 
-                          ? (prayer.hebrewText || '')
-                              .replace(/\*\*(.*?)\*\*\n\n/g, '**$1**\n')
-                              .replace(/\*\*(.*?)\*\*/g, '<strong class="prayer-header">$1</strong>')
-                          : prayer.englishTranslation
-                      }}
-                    />
+                    {prayer.hebrewText && language === 'hebrew' && (
+                      <div 
+                        className="vc-koren-hebrew leading-relaxed"
+                        style={{ fontSize: `${fontSize + 1}px` }}
+                        dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.hebrewText).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
+                      />
+                    )}
+                    {language === 'english' && (
+                      <div 
+                        className="koren-siddur-english text-left leading-relaxed text-black/70"
+                        style={{ fontSize: `${fontSize}px` }}
+                        dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.englishTranslation || "English translation not available") }}
+                      />
+                    )}
                   </div>
                 ))}
               </div>
@@ -954,10 +1053,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={completeWithAnimation} 
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
+              onClick={isModalComplete('maariv') ? undefined : completeWithAnimation}
+              disabled={isModalComplete('maariv')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+                isModalComplete('maariv') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
             >
-              Completed
+              {isModalComplete('maariv') ? 'Completed Today' : 'Complete Maariv'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -969,6 +1073,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       
       {/* Birkat Hamazon Modal */}
       <BirkatHamazonModal />
+      
+      {/* Jerusalem Compass Modal */}
+      <JerusalemCompass />
     </>
   );
 }
@@ -979,7 +1086,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => void }) {
   const { closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete } = useModalCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const { data: prayers, isLoading } = useQuery<WomensPrayer[]>({
@@ -1007,33 +1114,13 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
           </div>
         </div>
       ))}
-      <div className="heart-explosion-container">
+      <div className="mt-6">
         <Button 
-          onClick={() => {
-            // Track modal completion and mark as completed globally
-            trackModalComplete('refuah');
-            markModalComplete('refuah');
-            
-            completeTask('tefilla');
-            setShowHeartExplosion(true);
-            
-            setTimeout(() => {
-              setShowHeartExplosion(false); // Reset explosion state
-              checkAndShowCongratulations();
-              closeModal();
-              window.location.hash = '#/?section=home&scrollToProgress=true';
-            }, 2000);
-          }} 
-          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
+          onClick={() => closeModal()}
+          className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
         >
-          Complete
+          Close
         </Button>
-        
-        {/* Heart Explosion Animation */}
-        <HeartExplosion 
-          trigger={showHeartExplosion}
-          onComplete={() => setShowHeartExplosion(false)} 
-        />
       </div>
     </div>
   );
@@ -1042,7 +1129,7 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
 function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => void }) {
   const { closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete } = useModalCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const { data: prayers, isLoading } = useQuery<WomensPrayer[]>({
@@ -1070,33 +1157,13 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
           </div>
         </div>
       ))}
-      <div className="heart-explosion-container">
+      <div className="mt-6">
         <Button 
-          onClick={() => {
-            // Track modal completion and mark as completed globally
-            trackModalComplete('family');
-            markModalComplete('family');
-            
-            completeTask('tefilla');
-            setShowHeartExplosion(true);
-            
-            setTimeout(() => {
-              setShowHeartExplosion(false); // Reset explosion state
-              checkAndShowCongratulations();
-              closeModal();
-              window.location.hash = '#/?section=home&scrollToProgress=true';
-            }, 2000);
-          }} 
-          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
+          onClick={() => closeModal()}
+          className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
         >
-          Complete
+          Close
         </Button>
-        
-        {/* Heart Explosion Animation */}
-        <HeartExplosion 
-          trigger={showHeartExplosion}
-          onComplete={() => setShowHeartExplosion(false)} 
-        />
       </div>
     </div>
   );
@@ -1105,7 +1172,7 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
 function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => void }) {
   const { closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete } = useModalCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const { data: prayers, isLoading } = useQuery<WomensPrayer[]>({
@@ -1133,33 +1200,13 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
           </div>
         </div>
       ))}
-      <div className="heart-explosion-container">
+      <div className="mt-6">
         <Button 
-          onClick={() => {
-            // Track modal completion and mark as completed globally
-            trackModalComplete('life');
-            markModalComplete('life');
-            
-            completeTask('tefilla');
-            setShowHeartExplosion(true);
-            
-            setTimeout(() => {
-              setShowHeartExplosion(false); // Reset explosion state
-              checkAndShowCongratulations();
-              closeModal();
-              window.location.hash = '#/?section=home&scrollToProgress=true';
-            }, 2000);
-          }} 
-          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
+          onClick={() => closeModal()}
+          className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
         >
-          Complete
+          Close
         </Button>
-        
-        {/* Heart Explosion Animation */}
-        <HeartExplosion 
-          trigger={showHeartExplosion}
-          onComplete={() => setShowHeartExplosion(false)} 
-        />
       </div>
     </div>
   );
@@ -1174,7 +1221,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
 }) {
   const { closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete } = useModalCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const { data: prayer, isLoading } = useQuery<WomensPrayer>({
@@ -1230,11 +1277,10 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
       {/* Standardized Content Area */}
       <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
         <div
-          className={`${language === 'hebrew' ? 'secular-one-bold text-right' : 'font-english'} leading-relaxed text-black`}
-          style={{ fontSize: `${fontSize}px` }}
-        >
-          {language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation}
-        </div>
+          className={`${language === 'hebrew' ? 'vc-koren-hebrew' : 'koren-siddur-english'} leading-relaxed text-black`}
+          style={{ fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px` }}
+          dangerouslySetInnerHTML={{ __html: formatTextContent(language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
+        />
 
       </div>
 
@@ -1242,7 +1288,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
 
       <div className="heart-explosion-container">
         <Button 
-          onClick={() => {
+          onClick={isModalComplete('individual-prayer') ? undefined : () => {
             // Track modal completion and mark as completed globally
             trackModalComplete('individual-prayer');
             markModalComplete('individual-prayer');
@@ -1256,10 +1302,15 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
               closeModal();
               window.location.hash = '#/?section=home&scrollToProgress=true';
             }, 2000);
-          }} 
-          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0"
+          }}
+          disabled={isModalComplete('individual-prayer')}
+          className={`w-full py-3 rounded-xl platypi-medium border-0 ${
+            isModalComplete('individual-prayer') 
+              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+          }`}
         >
-          Complete
+          {isModalComplete('individual-prayer') ? 'Completed Today' : 'Complete'}
         </Button>
         
         {/* Heart Explosion Animation */}
@@ -1282,7 +1333,7 @@ function SpecialTehillimModal() {
   const openTehillimText = (psalmNumber: number) => {
     setSelectedPsalm(psalmNumber);
     closeModal();
-    openModal('individual-tehillim');
+    openModal('individual-tehillim', 'tefilla');
   };
 
   // Categories with psalm numbers
@@ -1346,12 +1397,10 @@ function SpecialTehillimModal() {
       <Button 
         onClick={() => {
           closeModal();
-          // Navigate to home and scroll to progress
-          window.location.hash = '#/?section=home&scrollToProgress=true';
         }} 
         className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
       >
-        Complete
+        Close
       </Button>
     </>
   );
@@ -1361,6 +1410,8 @@ function SpecialTehillimModal() {
 function IndividualTehillimModal() {
   const { closeModal, selectedPsalm } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
   const [fontSize, setFontSize] = useState(20);
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
@@ -1422,8 +1473,8 @@ function IndividualTehillimModal() {
           </div>
         ) : (
           <div
-            className={`${language === 'hebrew' ? 'secular-one-bold text-right' : 'font-english text-left'} leading-relaxed text-black`}
-            style={{ fontSize: `${fontSize}px` }}
+            className={`${language === 'hebrew' ? 'vc-koren-hebrew' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
+            style={{ fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px` }}
           >
             {tehillimText?.text || `Psalm ${selectedPsalm} text loading...`}
           </div>
@@ -1433,22 +1484,29 @@ function IndividualTehillimModal() {
       <KorenThankYou />
 
       <Button 
-        onClick={() => {
-          // Complete the tefilla task and trigger heart explosion
+        onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
+          // Track modal completion and mark as completed globally with specific psalm ID
+          trackModalComplete(`individual-tehillim-${selectedPsalm}`);
+          markModalComplete(`individual-tehillim-${selectedPsalm}`);
+          
           completeTask('tefilla');
           setShowHeartExplosion(true);
           
-          // Check for daily completion and redirect to home after a short delay
           setTimeout(() => {
+            setShowHeartExplosion(false); // Reset explosion state
             checkAndShowCongratulations();
             closeModal();
-            // Navigate to home page and scroll to progress to see flower growth
             window.location.hash = '#/?section=home&scrollToProgress=true';
           }, 2000);
-        }} 
-        className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0"
+        }}
+        disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
+        className={`w-full py-3 rounded-xl platypi-medium border-0 ${
+          isModalComplete(`individual-tehillim-${selectedPsalm}`) 
+            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+        }`}
       >
-        Completed
+        {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed Today' : 'Complete'}
       </Button>
       
       {/* Heart Explosion Animation */}
@@ -1457,5 +1515,364 @@ function IndividualTehillimModal() {
         onComplete={() => setShowHeartExplosion(false)} 
       />
     </>
+  );
+}
+
+// Jerusalem Compass Component
+function JerusalemCompass() {
+  const { activeModal, closeModal } = useModalStore();
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [direction, setDirection] = useState<number | null>(null);
+  const [deviceOrientation, setDeviceOrientation] = useState<number>(0);
+  const [locationName, setLocationName] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [orientationSupported, setOrientationSupported] = useState(true);
+
+  // Western Wall (Kotel) coordinates - verified accurate location
+  const WESTERN_WALL_LAT = 31.7781;
+  const WESTERN_WALL_LNG = 35.2346;
+
+  // Calculate bearing to Western Wall - fixed calculation
+  const calculateBearing = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+    // Convert to radians
+    const lat1Rad = lat1 * Math.PI / 180;
+    const lat2Rad = lat2 * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    
+    // Calculate bearing using proper formula
+    const y = Math.sin(dLng) * Math.cos(lat2Rad);
+    const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) - Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLng);
+    
+    // Convert to degrees and normalize
+    let bearing = Math.atan2(y, x) * 180 / Math.PI;
+    bearing = (bearing + 360) % 360; // Normalize to 0-360
+    
+    console.log(`Bearing calculation: From (${lat1}, ${lng1}) to (${lat2}, ${lng2}) = ${bearing}°`);
+    return bearing;
+  };
+
+  // Get user's location
+  const getUserLocation = () => {
+    setIsLoading(true);
+    setError("");
+    
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by this browser");
+      setIsLoading(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const userLat = position.coords.latitude;
+        const userLng = position.coords.longitude;
+        
+        setLocation({ lat: userLat, lng: userLng });
+        
+        // Calculate direction to Western Wall
+        const bearing = calculateBearing(userLat, userLng, WESTERN_WALL_LAT, WESTERN_WALL_LNG);
+        setDirection(bearing);
+        console.log(`Set direction to: ${bearing}°`);
+        
+        // Get location name using reverse geocoding
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLat}&lon=${userLng}&accept-language=en`
+          );
+          const data = await response.json();
+          const city = data.address?.city || data.address?.town || data.address?.village || data.address?.county || "Unknown location";
+          const country = data.address?.country || "";
+          setLocationName(`${city}, ${country}`);
+        } catch (err) {
+          setLocationName(`${userLat.toFixed(4)}, ${userLng.toFixed(4)}`);
+        }
+        
+        setIsLoading(false);
+      },
+      (error) => {
+        setError("Unable to get your location. Please enable location access.");
+        setIsLoading(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 600000 // 10 minutes
+      }
+    );
+  };
+
+  // Get cardinal direction
+  const getCardinalDirection = (bearing: number): string => {
+    const directions = [
+      "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+      "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"
+    ];
+    const index = Math.round(bearing / 22.5) % 16;
+    return directions[index];
+  };
+
+  // Handle device orientation
+  useEffect(() => {
+    if (activeModal !== 'jerusalem-compass') return;
+
+    getUserLocation();
+
+    // Check if device orientation is supported
+    if (typeof DeviceOrientationEvent !== 'undefined') {
+      const handleOrientation = (event: DeviceOrientationEvent) => {
+        // Get compass heading (alpha gives us the rotation around z-axis)
+        if (event.alpha !== null) {
+          // For a proper compass, we need to invert alpha
+          // as alpha increases when rotating clockwise, but compass degrees increase counter-clockwise
+          let heading = 360 - event.alpha;
+          
+          // Use webkitCompassHeading if available (iOS)
+          if ((event as any).webkitCompassHeading !== undefined && (event as any).webkitCompassHeading !== null) {
+            heading = (event as any).webkitCompassHeading;
+          }
+          
+          setDeviceOrientation(heading % 360);
+        }
+      };
+
+      // Request permission for iOS 13+
+      if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
+        (DeviceOrientationEvent as any).requestPermission()
+          .then((response: string) => {
+            if (response === 'granted') {
+              window.addEventListener('deviceorientation', handleOrientation);
+            } else {
+              setOrientationSupported(false);
+            }
+          })
+          .catch(() => setOrientationSupported(false));
+      } else {
+        // For non-iOS devices
+        window.addEventListener('deviceorientation', handleOrientation);
+      }
+
+      // Cleanup
+      return () => {
+        window.removeEventListener('deviceorientation', handleOrientation);
+      };
+    } else {
+      setOrientationSupported(false);
+    }
+  }, [activeModal]);
+
+  if (activeModal !== 'jerusalem-compass') return null;
+
+  return (
+    <Dialog open={true} onOpenChange={() => closeModal(true)}>
+      <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular"
+      >
+        
+        {/* Header */}
+        <div className="flex items-center justify-center mb-4 relative pr-8">
+          <DialogTitle className="text-xl platypi-bold text-black">Western Wall Compass</DialogTitle>
+        </div>
+
+        <div className="space-y-6">
+          {/* Description */}
+          <div className="text-center">
+            <p className="platypi-regular text-sm text-black/70 mb-4">
+              Find the direction to face when praying towards the Western Wall
+            </p>
+          </div>
+
+          {/* Location Status */}
+          {isLoading ? (
+            <div className="flex flex-col items-center space-y-3 py-8">
+              <div className="animate-spin w-8 h-8 border-3 border-blush/20 border-t-blush rounded-full"></div>
+              <p className="platypi-regular text-sm text-black/60">Getting your location...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <div className="bg-red-50 rounded-2xl p-4 mb-4">
+                <MapPin className="w-6 h-6 text-red-500 mx-auto mb-2" />
+                <p className="platypi-regular text-sm text-red-700">{error}</p>
+              </div>
+              <Button 
+                onClick={getUserLocation}
+                className="bg-gradient-feminine text-white px-6 py-2 rounded-xl platypi-medium hover:opacity-90"
+              >
+                Try Again
+              </Button>
+            </div>
+          ) : direction !== null ? (
+            <div className="space-y-6">
+              {/* Compass Container with Proper Containment */}
+              <div className="relative w-64 h-64 mx-auto overflow-hidden rounded-full select-none"
+                style={{
+                  touchAction: 'none',
+                  userSelect: 'none',
+                  WebkitUserSelect: 'none',
+                  WebkitTouchCallout: 'none',
+                  MozUserSelect: 'none',
+                  msUserSelect: 'none'
+                } as React.CSSProperties}
+              >
+                {/* Rotating Compass Circle */}
+                <div 
+                  className="w-full h-full rounded-full border-4 border-blush/20 bg-gradient-to-br from-white to-blush/5 shadow-lg relative"
+                  style={{ 
+                    transform: orientationSupported 
+                      ? `rotate(${-deviceOrientation}deg)` 
+                      : 'rotate(0deg)',
+                    transition: 'transform 0.3s ease'
+                  }}
+                >
+                  
+                  {/* Cardinal directions - rotate with compass */}
+                  <div className="absolute inset-4 rounded-full border border-blush/10">
+                    <div className="absolute top-2 left-1/2 transform -translate-x-1/2 platypi-bold text-sm text-black">N</div>
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 platypi-bold text-sm text-black">E</div>
+                    <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 platypi-bold text-sm text-black">S</div>
+                    <div className="absolute left-2 top-1/2 transform -translate-y-1/2 platypi-bold text-sm text-black">W</div>
+                  </div>
+                  
+                  {/* Western Wall marker - positioned at calculated bearing, rotates with compass */}
+                  <div 
+                    className="absolute top-1/2 left-1/2 w-full h-full pointer-events-none"
+                    style={{ 
+                      transform: `translate(-50%, -50%) rotate(${direction}deg)`,
+                      maxWidth: '100%',
+                      maxHeight: '100%'
+                    }}
+                  >
+                    <div className="absolute top-2 left-1/2 transform -translate-x-1/2">
+                      <div className="w-3 h-3 bg-sage rounded-full border-2 border-white shadow-md"></div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Fixed arrow pointing up - changes color when aligned */}
+                {(() => {
+                  let angleDiff = Math.abs(direction - deviceOrientation);
+                  if (angleDiff > 180) {
+                    angleDiff = 360 - angleDiff;
+                  }
+                  const isAligned = angleDiff < 10;
+                  
+                  return (
+                    <div className="absolute top-1/2 left-1/2 w-full h-full pointer-events-none" 
+                      style={{ 
+                        transform: 'translate(-50%, -50%)',
+                        maxWidth: '100%',
+                        maxHeight: '100%'
+                      }}
+                    >
+                      <div className="absolute top-6 left-1/2 transform -translate-x-1/2">
+                        <div className="flex flex-col items-center">
+                          <ArrowUp className={`w-4 h-4 ${isAligned ? 'text-sage' : 'text-blue-500'}`} strokeWidth={3} />
+                          <div className={`w-1 h-16 rounded-full ${isAligned ? 'bg-sage' : 'bg-blue-500'}`}></div>
+                          <div className={`text-xs platypi-bold mt-1 ${isAligned ? 'text-sage' : 'text-blue-600'}`}>YOU</div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+                
+                {/* Center dot */}
+                <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-gray-400 rounded-full transform -translate-x-1/2 -translate-y-1/2 z-20"></div>
+              </div>
+
+              {/* Alignment Status */}
+              {orientationSupported && (() => {
+                // For alignment, we need to check if the user (facing north when arrow points up)
+                // is actually facing the direction of the Western Wall
+                // When the compass rotates by -deviceOrientation, north aligns with the top
+                // So the user is facing the deviceOrientation direction
+                let angleDiff = Math.abs(direction - deviceOrientation);
+                if (angleDiff > 180) {
+                  angleDiff = 360 - angleDiff;
+                }
+                const isAligned = angleDiff < 10;
+                
+
+                
+                return (
+                  <div className={`rounded-2xl p-3 border text-center ${
+                    isAligned ? 'bg-sage/20 border-sage' : 'bg-blue-50 border-blue-200'
+                  }`}>
+                    <p className={`platypi-medium text-sm ${
+                      isAligned ? 'text-black' : 'text-blue-800'
+                    }`}>
+                      {isAligned
+                        ? '✓ Aligned!' 
+                        : 'Turn until the wall icon is at the top'
+                      }
+                    </p>
+                  </div>
+                );
+              })()}
+
+              {/* Orientation Status */}
+              {!orientationSupported && (
+                <div className="bg-yellow-50 rounded-2xl p-3 border border-yellow-200">
+                  <p className="platypi-regular text-xs text-yellow-800">
+                    Device orientation not available. Face the direction where the wall icon appears on the circle.
+                  </p>
+                </div>
+              )}
+
+              {/* Direction Info */}
+              <div className="bg-gradient-soft rounded-2xl p-4 text-center">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-center space-x-2">
+                    <Compass className="w-5 h-5 text-blush" />
+                    <span className="platypi-bold text-lg text-black">
+                      {getCardinalDirection(direction)} ({Math.round(direction)}°)
+                    </span>
+                  </div>
+                  <p className="platypi-regular text-sm text-black/70">Direction to the Western Wall</p>
+                </div>
+              </div>
+
+              {/* Location Info */}
+              <div className="bg-white rounded-2xl p-3 border border-blush/10">
+                <div className="flex items-center space-x-2">
+                  <MapPin className="w-4 h-4 text-blush flex-shrink-0" />
+                  <div>
+                    <p className="platypi-medium text-sm text-black">Your Location</p>
+                    <p className="platypi-regular text-xs text-black/60">{locationName}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <Button 
+                onClick={getUserLocation}
+                className="bg-gradient-feminine text-white px-6 py-3 rounded-xl platypi-medium hover:opacity-90"
+              >
+                <MapPin className="w-4 h-4 mr-2" />
+                Get My Location
+              </Button>
+            </div>
+          )}
+
+          {/* Instructions */}
+          <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200">
+            <h4 className="platypi-bold text-sm text-black mb-2">How to Use:</h4>
+            <ol className="platypi-regular text-xs text-black/70 space-y-1">
+              <li>1. Allow location access when prompted</li>
+              <li>2. {orientationSupported ? 'Hold device upright and turn your body' : 'Face the direction where the wall icon appears on the circle'}</li>
+              <li>3. {orientationSupported ? 'The blue "YOU" arrow moves as you turn' : 'The wall icon shows the prayer direction'}</li>
+              <li>4. {orientationSupported ? 'When the blue arrow points directly to the wall icon, you\'re aligned' : 'Face toward the wall icon for prayer'}</li>
+            </ol>
+          </div>
+        </div>
+
+        {/* Complete Button */}
+        <Button
+          onClick={() => closeModal(true)}
+          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
+        >
+          Close
+        </Button>
+      </DialogContent>
+    </Dialog>
   );
 }

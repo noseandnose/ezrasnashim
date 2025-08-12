@@ -66,7 +66,7 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
         try {
           await audioRef.current.play();
         } catch (error) {
-          console.error('Failed to play audio:', error);
+          // Failed to play audio
           setAudioError(true);
         }
       }
@@ -104,7 +104,7 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
     };
 
     const handleError = () => {
-      console.error('Audio failed to load:', audioUrl);
+      // Audio failed to load
       setAudioError(true);
       setIsPlaying(false);
     };
@@ -171,15 +171,15 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
   const directAudioUrl = getDirectAudioUrl(audioUrl);
 
   return (
-    <div className="gradient-blush-peach rounded-2xl p-4 text-white mb-4 audio-controls">
+    <div className="bg-gray-50 rounded-2xl p-4 mb-4 audio-controls border border-gray-200">
       <audio 
         ref={audioRef} 
         src={directAudioUrl} 
         preload="metadata"
-        onError={() => console.error('Audio failed to load:', directAudioUrl)}
+        onError={() => { /* Audio failed to load */ }}
       />
       {audioError && (
-        <div className="text-xs text-white/80 mb-2 text-center">
+        <div className="text-xs text-gray-600 mb-2 text-center">
           Audio temporarily unavailable - please refresh the page
         </div>
       )}
@@ -189,7 +189,7 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
         <Button
           onClick={togglePlay}
           disabled={audioError}
-          className="bg-white bg-opacity-20 rounded-full p-4 hover:bg-opacity-30 transition-all border-0 audio-play-button disabled:opacity-50"
+          className="bg-gradient-feminine rounded-full p-4 hover:scale-105 transition-all border-0 text-white audio-play-button disabled:opacity-50"
           style={{ WebkitTapHighlightColor: 'transparent' }}
         >
           {isPlaying ? (
@@ -199,9 +199,9 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
           )}
         </Button>
         
-        <div className="bg-white bg-opacity-20 rounded-lg p-1">
+        <div className="bg-gray-200 rounded-lg p-1">
           <Select value={playbackSpeed} onValueChange={setPlaybackSpeed}>
-            <SelectTrigger className="bg-transparent border-none text-white text-xs w-14 h-6">
+            <SelectTrigger className="bg-transparent border-none text-black text-xs w-14 h-6">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -216,20 +216,20 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
         </div>
       </div>
       <div className="space-y-4">
-        <div className="flex justify-between text-sm platypi-medium">
+        <div className="flex justify-between text-sm platypi-medium text-black">
           <span>{currentTime}</span>
           <span>{isLoading ? duration : actualDuration}</span>
         </div>
         <div className="audio-progress-bar">
           <div 
-            className="bg-white bg-opacity-20 rounded-full audio-progress-track w-full"
+            className="bg-gray-300 rounded-full audio-progress-track w-full"
             onClick={handleProgressClick}
           >
             <div 
-              className="audio-progress h-full rounded-full transition-all duration-100 relative" 
+              className="audio-progress h-full rounded-full transition-all duration-100 relative bg-gradient-feminine" 
               style={{ width: `${progress}%` }}
             >
-              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg border-2 border-white opacity-90"></div>
+              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg border-2 border-pink-300 opacity-90"></div>
             </div>
           </div>
         </div>

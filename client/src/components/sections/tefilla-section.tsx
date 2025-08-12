@@ -136,9 +136,12 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   const { data: progress } = useQuery<GlobalTehillimProgress>({
     queryKey: ['/api/tehillim/progress'], 
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress?t=${Date.now()}`);
+      const response = await fetch(`/api/tehillim/progress?t=${Date.now()}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch tehillim progress');
+      }
       const data = await response.json();
-      console.log('Fresh progress data (section):', data);
+      // Progress data updated
       return data;
     },
     refetchInterval: 5000, // Refresh every 5 seconds for real-time updates
@@ -148,7 +151,13 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
 
   // Fetch current name for the perek - Only update when perek is completed
   const { data: currentName } = useQuery<TehillimName | null>({
-    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/current-name`).then(res => res.json()),
+    queryFn: async () => {
+      const response = await fetch(`/api/tehillim/current-name`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch current name');
+      }
+      return response.json();
+    },
     queryKey: ['/api/tehillim/current-name'],
     refetchInterval: 10000, // Refresh every 10 seconds
     staleTime: 5000, // Allow 5 seconds of cache
@@ -157,7 +166,13 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
 
   // Fetch all active names for count display
   const { data: allNames } = useQuery<TehillimName[]>({
-    queryFn: () => fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/names`).then(res => res.json()),
+    queryFn: async () => {
+      const response = await fetch(`/api/tehillim/names`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch tehillim names');
+      }
+      return response.json();
+    },
     queryKey: ['/api/tehillim/names'],
     refetchInterval: 60000, // Refresh every minute
   });
@@ -165,7 +180,13 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   // Fetch Tehillim preview (first line) for display
   const { data: tehillimPreview, isLoading: isPreviewLoading } = useQuery<{preview: string; perek: number; language: string}>({
     queryKey: ['/api/tehillim/preview', progress?.currentPerek],
-    queryFn: () => fetch(`/api/tehillim/preview/${progress?.currentPerek}?language=hebrew`).then(res => res.json()),
+    queryFn: async () => {
+      const response = await fetch(`/api/tehillim/preview/${progress?.currentPerek}?language=hebrew`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch tehillim preview');
+      }
+      return response.json();
+    },
     enabled: !!progress?.currentPerek,
     staleTime: 0, // Always consider stale
     gcTime: 0 // Don't cache at all
@@ -334,7 +355,9 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
 
   return (
     <div className="overflow-y-auto h-full pb-20">
-      {/* Main Tefilla Section - Connected to top bar - Only Tehillim */}
+
+
+      {/* Main Tefilla Section - Tehillim */}
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg -mt-1">
         {/* Global Tehillim Chain Card */}
         <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
@@ -361,8 +384,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             </div>
           </div>
 
-          {/* Add Name Form */}
-          {showAddForm && (
+          {/* Add Name Form or Compact Perek Display */}
+          {showAddForm ? (
             <div className="space-y-3 mb-3 p-3 bg-gradient-to-r from-ivory to-lavender/5 rounded-2xl border border-lavender/20">
               <div className="flex items-center space-x-2 text-sm text-blush/80">
                 <AlertCircle size={16} />
@@ -416,60 +439,52 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
                 </Button>
               </div>
             </div>
-          )}
-
-          {/* Compact Perek Display */}
-          <button
-            onClick={() => openModal('tehillim-text')}
-            className="w-full bg-white/90 rounded-2xl p-3 border border-blush/20 hover:bg-white transition-all duration-300 shadow-sm"
-          >
-            {/* Header with perek number */}
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="platypi-bold text-lg text-black">
-                Perek {progress?.currentPerek || 1}
-              </h4>
-              <div className="bg-gradient-feminine p-2 rounded-full">
-                <ArrowRight className="text-white" size={14} strokeWidth={2} />
-              </div>
-            </div>
-            
-            {/* Progress Bar */}
-            <div className="mb-2">
-              <div className="w-full bg-blush/20 rounded-full h-1.5">
-                <div 
-                  className="bg-gradient-feminine h-1.5 rounded-full transition-all duration-500 ease-out"
-                  style={{ width: `${((progress?.currentPerek || 1) / 150) * 100}%` }}
-                ></div>
-              </div>
-            </div>
-
-            {/* Name assignment with reason icon */}
-            {currentName && (
-              <div className="mb-2 p-2 bg-white/60 rounded-xl border border-blush/10">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-1">
-                    <User size={12} className="text-blush" />
-                    <span className="platypi-medium text-sm text-black heebo-regular text-right" dir="rtl">
-                      {currentName.hebrewName}
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    {getReasonIcon(currentName.reason, currentName.reasonEnglish ?? undefined)}
-                    <span className="text-xs text-black/60 platypi-regular">
-                      {getReasonShort(currentName.reason, currentName.reasonEnglish ?? undefined)}
-                    </span>
-                  </div>
+          ) : (
+            <button
+              onClick={() => openModal('tehillim-text', 'tefilla')}
+              className="w-full bg-white/90 rounded-2xl p-3 border border-blush/20 hover:bg-white transition-all duration-300 shadow-sm"
+            >
+              {/* Header with perek number */}
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="platypi-bold text-lg text-black">
+                  Perek {progress?.currentPerek || 1}
+                </h4>
+                <div className="bg-gradient-feminine p-2 rounded-full">
+                  <ArrowRight className="text-white" size={14} strokeWidth={2} />
                 </div>
               </div>
-            )}
-            
-            {/* Hebrew Preview Text - Compact */}
-            {tehillimPreview && (
-              <div className="text-xs text-black/70 heebo-regular text-right bg-white/50 rounded-lg p-2 border border-blush/10 line-clamp-2">
-                {tehillimPreview.preview}
+              
+              {/* Progress Bar */}
+              <div className="mb-2">
+                <div className="w-full bg-blush/20 rounded-full h-1.5">
+                  <div 
+                    className="bg-gradient-feminine h-1.5 rounded-full transition-all duration-500 ease-out"
+                    style={{ width: `${((progress?.currentPerek || 1) / 150) * 100}%` }}
+                  ></div>
+                </div>
               </div>
-            )}
-          </button>
+
+              {/* Name assignment with reason icon */}
+              {currentName && (
+                <div className="mb-2 p-2 bg-white/60 rounded-xl border border-blush/10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-1">
+                      <User size={12} className="text-blush" />
+                      <span className="platypi-medium text-sm text-black heebo-regular text-right" dir="rtl">
+                        {currentName.hebrewName}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      {getReasonIcon(currentName.reason, currentName.reasonEnglish ?? undefined)}
+                      <span className="text-xs text-black/60 platypi-regular">
+                        {getReasonShort(currentName.reason, currentName.reasonEnglish ?? undefined)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </button>
+          )}
 
         </div>
 
@@ -481,8 +496,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
         <div className="grid grid-cols-2 gap-2">
           <button 
             onClick={() => {
-              console.log(`${currentPrayer.title} button clicked`);
-              openModal(currentPrayer.modal);
+              // Prayer button clicked
+              openModal(currentPrayer.modal, 'tefilla');
             }}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
               isModalComplete(currentPrayer.modal) ? 'bg-sage/20' : 'bg-white'
@@ -506,7 +521,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           </button>
 
           <button 
-            onClick={() => openModal('after-brochas')}
+            onClick={() => openModal('after-brochas', 'tefilla')}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
               isModalComplete('after-brochas') ? 'bg-sage/20' : 'bg-white'
             }`}
@@ -526,7 +541,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
         {/* Bottom Row: Special Tehillim and Nishmas */}
         <div className="grid grid-cols-2 gap-2">
           <button 
-            onClick={() => openModal('special-tehillim')}
+            onClick={() => openModal('special-tehillim', 'tefilla')}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
               isModalComplete('special-tehillim') ? 'bg-sage/20' : 'bg-white'
             }`}
@@ -543,7 +558,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           </button>
 
           <button 
-            onClick={() => openModal('nishmas-campaign')}
+            onClick={() => openModal('nishmas-campaign', 'tefilla')}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
               isModalComplete('nishmas-campaign') ? 'bg-sage/20' : 'bg-white'
             }`}
@@ -574,7 +589,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           
           <div className="grid grid-cols-3 gap-2">
             <button 
-              onClick={() => openModal('refuah')}
+              onClick={() => openModal('refuah', 'tefilla')}
               className="bg-gradient-to-br from-blush/10 to-blush/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-blush/20"
             >
               <div className="bg-blush/20 p-2 rounded-full mx-auto mb-1 w-fit">
@@ -585,7 +600,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             </button>
             
             <button 
-              onClick={() => openModal('family')}
+              onClick={() => openModal('family', 'tefilla')}
               className="bg-gradient-to-br from-lavender/10 to-lavender/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-lavender/20"
             >
               <div className="bg-lavender/20 p-2 rounded-full mx-auto mb-1 w-fit">
@@ -596,7 +611,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             </button>
             
             <button 
-              onClick={() => openModal('life')}
+              onClick={() => openModal('life', 'tefilla')}
               className="bg-gradient-to-br from-sage/10 to-sage/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-sage/20"
             >
               <div className="bg-sage/20 p-2 rounded-full mx-auto mb-1 w-fit">
@@ -608,7 +623,26 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           </div>
         </div>
 
-
+        {/* Western Wall Compass Section */}
+        <div className="bg-gradient-soft rounded-3xl p-4 shadow-lg">
+          <button
+            onClick={() => openModal('jerusalem-compass', 'tefilla')}
+            className="w-full bg-white/70 rounded-2xl p-3 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
+          >
+            <div className="flex items-center space-x-3">
+              <div className="bg-gradient-feminine p-3 rounded-full">
+                <Compass className="text-white" size={20} />
+              </div>
+              <div className="flex-grow">
+                <h3 className="platypi-bold text-lg text-black">Western Wall Compass</h3>
+                <p className="platypi-regular text-sm text-black/70">Find the direction to pray</p>
+              </div>
+              <div className="bg-gradient-feminine p-2 rounded-full shadow-lg">
+                <ArrowRight className="text-white" size={16} />
+              </div>
+            </div>
+          </button>
+        </div>
 
         {/* Bottom padding */}
         <div className="h-16"></div>

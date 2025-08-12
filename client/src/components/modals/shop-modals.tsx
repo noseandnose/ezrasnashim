@@ -42,12 +42,12 @@ export default function ShopModals() {
     <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent className="max-h-[80vh] overflow-y-auto">
         <div className="flex items-center justify-center mb-3 relative">
-          <DialogTitle className="text-lg font-serif font-bold text-black">
+          <DialogTitle className="text-lg platypi-bold text-black">
             {shopItem ? shopItem.storeName : 'Store Details'}
           </DialogTitle>
         </div>
         {shopItem && (
-          <p className="text-sm text-gray-600 font-sans text-center mb-4">{shopItem.title}</p>
+          <p className="text-sm text-gray-600 platypi-regular text-center mb-4">{shopItem.title}</p>
         )}
 
         {isLoading ? (
@@ -70,7 +70,7 @@ export default function ShopModals() {
               
               {/* Title overlay */}
               <div className="relative h-full flex items-center justify-center p-6">
-                <h2 className="font-semibold text-white text-lg text-center leading-tight">
+                <h2 className="platypi-semibold text-white text-lg text-center leading-tight">
                   {shopItem.title}
                 </h2>
               </div>
@@ -86,9 +86,9 @@ export default function ShopModals() {
             {/* Coupon section */}
             {shopItem.couponCode && (
               <div className="bg-cream/50 rounded-xl p-4 space-y-3">
-                <h4 className="font-medium text-center text-gray-900">Coupon Code</h4>
+                <h4 className="platypi-medium text-center text-gray-900">Coupon Code</h4>
                 <div className="flex items-center justify-between bg-white rounded-lg p-3 border-2 border-dashed border-blush/30">
-                  <code className="font-mono font-semibold text-blush text-lg">
+                  <code className="font-mono platypi-semibold text-blush text-lg">
                     {shopItem.couponCode}
                   </code>
                   <Button
@@ -103,7 +103,7 @@ export default function ShopModals() {
                 {shopItem.externalUrl && (
                   <div className="text-center">
                     <p className="text-xs text-gray-500 mb-1">Redeem at:</p>
-                    <p className="text-sm text-blush font-medium break-all">
+                    <p className="text-sm text-blush platypi-medium break-all">
                       {shopItem.externalUrl.replace(/^https?:\/\//, '')}
                     </p>
                   </div>

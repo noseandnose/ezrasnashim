@@ -1,14 +1,14 @@
 import serverAxiosClient from "./axiosClient";
 import { 
   shopItems, 
-  tehillimNames, globalTehillimProgress, minchaPrayers, maarivPrayers, birkatHamazonPrayers, afterBrochasPrayers, sponsors, nishmasText,
+  tehillimNames, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, birkatHamazonPrayers, afterBrochasPrayers, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
-  dailyRecipes, parshaVorts, tableInspirations, campaigns, womensPrayers, discountPromotions, pirkeiAvotProgress,
+  dailyRecipes, parshaVorts, tableInspirations, communityImpact, campaigns, womensPrayers, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats,
 
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
-  type MaarivPrayer, type InsertMaarivPrayer,
+  type MaarivPrayer, type InsertMaarivPrayer, type MorningPrayer, type InsertMorningPrayer,
   type BirkatHamazonPrayer, type InsertBirkatHamazonPrayer,
   type AfterBrochasPrayer, type InsertAfterBrochasPrayer,
   type Sponsor, type InsertSponsor, type NishmasText, type InsertNishmasText,
@@ -19,9 +19,11 @@ import {
   type DailyRecipe, type InsertDailyRecipe,
   type ParshaVort, type InsertParshaVort,
   type TableInspiration, type InsertTableInspiration,
+  type CommunityImpact, type InsertCommunityImpact,
   type Campaign, type InsertCampaign,
   type WomensPrayer, type InsertWomensPrayer,
   type DiscountPromotion, type InsertDiscountPromotion,
+  type PirkeiAvot, type InsertPirkeiAvot,
   type PirkeiAvotProgress, type InsertPirkeiAvotProgress,
   type AnalyticsEvent, type InsertAnalyticsEvent,
   type DailyStats, type InsertDailyStats
@@ -49,8 +51,11 @@ export interface IStorage {
   getFeaturedContentByDate(date: string): Promise<FeaturedContent | undefined>;
   createFeaturedContent(featured: InsertFeaturedContent): Promise<FeaturedContent>;
   
-  getPirkeiAvotByDate(date: string): Promise<any | undefined>;
-  createPirkeiAvot(pirkeiAvot: any): Promise<any>;
+  // Pirkei Avot methods
+  getAllPirkeiAvot(): Promise<PirkeiAvot[]>;
+  getPirkeiAvotByOrderIndex(orderIndex: number): Promise<PirkeiAvot | undefined>;
+  createPirkeiAvot(pirkeiAvot: InsertPirkeiAvot): Promise<PirkeiAvot>;
+  getCurrentPirkeiAvot(): Promise<PirkeiAvot | undefined>;
 
   // Daily recipe methods
   getDailyRecipeByDate(date: string): Promise<DailyRecipe | undefined>;
@@ -64,6 +69,10 @@ export interface IStorage {
   getTableInspirationByDate(date: string): Promise<TableInspiration | undefined>;
   createTableInspiration(inspiration: InsertTableInspiration): Promise<TableInspiration>;
 
+  // Community impact methods
+  getCommunityImpactByDate(date: string): Promise<CommunityImpact | undefined>;
+  createCommunityImpact(impact: InsertCommunityImpact): Promise<CommunityImpact>;
+
   // Tehillim methods
   getActiveNames(): Promise<TehillimName[]>;
   createTehillimName(name: InsertTehillimName): Promise<TehillimName>;
@@ -75,13 +84,19 @@ export interface IStorage {
 
   // Mincha methods
   getMinchaPrayers(): Promise<MinchaPrayer[]>;
+  createMinchaPrayer(prayer: InsertMinchaPrayer): Promise<MinchaPrayer>;
+  
+  // Morning prayer methods
+  getMorningPrayers(): Promise<MorningPrayer[]>;
+  createMorningPrayer(prayer: InsertMorningPrayer): Promise<MorningPrayer>;
   
   // Maariv methods
   getMaarivPrayers(): Promise<MaarivPrayer[]>;
-  createMinchaPrayer(prayer: InsertMinchaPrayer): Promise<MinchaPrayer>;
+  createMaarivPrayer(prayer: InsertMaarivPrayer): Promise<MaarivPrayer>;
 
   // After Brochas methods
   getAfterBrochasPrayers(): Promise<AfterBrochasPrayer[]>;
+  createAfterBrochasPrayer(prayer: InsertAfterBrochasPrayer): Promise<AfterBrochasPrayer>;
   
   // Birkat Hamazon methods
   getBirkatHamazonPrayers(): Promise<BirkatHamazonPrayer[]>;
@@ -106,8 +121,8 @@ export interface IStorage {
 
   // Pirkei Avot progression methods
   getPirkeiAvotProgress(): Promise<PirkeiAvotProgress>;
-  updatePirkeiAvotProgress(chapter: number, verse: number): Promise<PirkeiAvotProgress>;
-  getNextPirkeiAvotReference(): Promise<{chapter: number, verse: number}>;
+  updatePirkeiAvotProgress(orderIndex: number): Promise<PirkeiAvotProgress>;
+  advancePirkeiAvotProgress(): Promise<PirkeiAvotProgress>;
 
   // Women's prayer methods
   getWomensPrayersByCategory(category: string): Promise<WomensPrayer[]>;
@@ -283,81 +298,7 @@ export class DatabaseStorage implements IStorage {
     return activeNames[randomIndex];
   }
 
-  async getSefariaPirkeiAvot(chapter: number): Promise<{text: string; chapter: number; source: string}> {
-    // Get current progress from database
-    const progress = await this.getPirkeiAvotProgress();
-    const selectedRef = `${progress.currentChapter}.${progress.currentVerse}`;
 
-    try {
-      // Fetch the entire chapter first
-      const chapterUrl = `https://www.sefaria.org/api/texts/Pirkei_Avot.${progress.currentChapter}`;
-      const response = await serverAxiosClient.get(chapterUrl);
-      const data = response.data;
-      
-      let text = '';
-      let actualSourceRef = selectedRef;
-      
-      // Handle the response based on its structure
-      if (data.text && Array.isArray(data.text)) {
-        // Get the specific verse from the array (verse numbers are 1-indexed, arrays are 0-indexed)
-        const verseIndex = progress.currentVerse - 1;
-        text = data.text[verseIndex] || data.text[0] || '';
-      } else if (typeof data.text === 'string') {
-        text = data.text;
-      }
-      
-      if (!text) {
-        throw new Error('No text content found in API response');
-      }
-      
-      // Clean up HTML formatting and Unicode artifacts with comprehensive filtering
-      let cleanText = text
-        .replace(/<[^>]*>/gi, '')  // Remove HTML tags
-        .replace(/&[a-zA-Z0-9#]+;/gi, '')  // Remove HTML entities
-        .replace(/&thinsp;/g, ' ')  // Remove thin spaces
-        .replace(/&nbsp;/g, ' ')    // Remove non-breaking spaces
-        .replace(/[\u200E\u200F\u202A-\u202E]/g, '')  // Remove Unicode directional marks
-        .replace(/[\u2060\u00A0\u180E\u2000-\u200B\u2028\u2029\uFEFF]/g, '')  // Remove zero-width spaces
-        .replace(/[\u25A0-\u25FF]/g, '')  // Remove geometric shapes (rectangles, squares)
-        .replace(/[\uFFF0-\uFFFF]/g, '')  // Remove specials block characters
-        .replace(/[\uE000-\uF8FF]/g, '')  // Remove private use area characters
-        .replace(/[\u2400-\u243F]/g, '')  // Remove control pictures
-        .replace(/[\u2500-\u257F]/g, '')  // Remove box drawing characters
-        .replace(/[\uFE00-\uFE0F]/g, '')  // Remove variation selectors
-        .replace(/[\u0590-\u05CF]/g, (match) => {
-          // Keep valid Hebrew characters, remove problematic ones
-          const codePoint = match.codePointAt(0);
-          if (!codePoint) return '';
-          if (codePoint >= 0x05D0 && codePoint <= 0x05EA) return match; // Hebrew letters
-          if (codePoint >= 0x05B0 && codePoint <= 0x05BD) return match; // Hebrew points
-          if (codePoint >= 0x05BF && codePoint <= 0x05C2) return match; // Hebrew points
-          if (codePoint >= 0x05C4 && codePoint <= 0x05C5) return match; // Hebrew points
-          if (codePoint === 0x05C7) return match; // Hebrew point
-          return ''; // Remove other characters in Hebrew block
-        })
-        .trim();
-      
-      // Use the actual reference from database
-      actualSourceRef = selectedRef;
-      
-      const actualChapter = parseInt(actualSourceRef.split('.')[0]);
-      
-      return {
-        text: cleanText,
-        chapter: actualChapter,
-        source: actualSourceRef
-      };
-    } catch (error) {
-      console.error('Error fetching from Sefaria API:', error);
-      
-      // Return fallback with the correct reference format
-      return {
-        text: `Pirkei Avot ${selectedRef} - Unable to load from Sefaria API. Please try again later.`,
-        chapter: parseInt(selectedRef.split('.')[0]),
-        source: selectedRef
-      };
-    }
-  }
 
   async getSefariaTehillim(perek: number, language: string): Promise<{text: string; perek: number; language: string}> {
     try {
@@ -454,6 +395,16 @@ export class DatabaseStorage implements IStorage {
     return prayer;
   }
 
+  // Morning prayer methods
+  async getMorningPrayers(): Promise<MorningPrayer[]> {
+    return await db.select().from(morningPrayers).orderBy(morningPrayers.orderIndex);
+  }
+
+  async createMorningPrayer(insertPrayer: InsertMorningPrayer): Promise<MorningPrayer> {
+    const [prayer] = await db.insert(morningPrayers).values(insertPrayer).returning();
+    return prayer;
+  }
+
   // Maariv methods
   async getMaarivPrayers(): Promise<MaarivPrayer[]> {
     return await db.select().from(maarivPrayers).orderBy(maarivPrayers.orderIndex);
@@ -467,6 +418,11 @@ export class DatabaseStorage implements IStorage {
   // After Brochas methods
   async getAfterBrochasPrayers(): Promise<AfterBrochasPrayer[]> {
     return await db.select().from(afterBrochasPrayers);
+  }
+
+  async createAfterBrochasPrayer(insertPrayer: InsertAfterBrochasPrayer): Promise<AfterBrochasPrayer> {
+    const [prayer] = await db.insert(afterBrochasPrayers).values(insertPrayer).returning();
+    return prayer;
   }
 
   // Birkat Hamazon methods
@@ -570,29 +526,40 @@ export class DatabaseStorage implements IStorage {
     return featured;
   }
 
-  async getPirkeiAvotByDate(date: string): Promise<{text: string; chapter: number; source: string} | undefined> {
+  // Pirkei Avot methods  
+  async getAllPirkeiAvot(): Promise<PirkeiAvot[]> {
+    return await db.select().from(pirkeiAvot).orderBy(pirkeiAvot.orderIndex);
+  }
+
+  async getPirkeiAvotByOrderIndex(orderIndex: number): Promise<PirkeiAvot | undefined> {
+    const [result] = await db.select().from(pirkeiAvot).where(eq(pirkeiAvot.orderIndex, orderIndex)).limit(1);
+    return result;
+  }
+
+  async createPirkeiAvot(insertPirkeiAvot: InsertPirkeiAvot): Promise<PirkeiAvot> {
+    const [result] = await db.insert(pirkeiAvot).values(insertPirkeiAvot).returning();
+    return result;
+  }
+
+  async getCurrentPirkeiAvot(): Promise<PirkeiAvot | undefined> {
     try {
-      // Check if we need to advance to next verse for a new day
-      const progress = await this.getPirkeiAvotProgress();
+      // Get or create progress
+      let progress = await this.getPirkeiAvotProgress();
+      
+      // Check if we need to advance (new day)
       const today = new Date().toISOString().split('T')[0];
       const lastUpdated = progress.lastUpdated ? new Date(progress.lastUpdated).toISOString().split('T')[0] : '';
       
-      // If it's a new day, advance to next verse
       if (today !== lastUpdated) {
-        await this.getNextPirkeiAvotReference(); // This will advance and update the database
+        progress = await this.advancePirkeiAvotProgress();
       }
       
-      // Now get the current verse content
-      return await this.getSefariaPirkeiAvot(1); // Pass any number, function calculates based on date internally
+      // Get the current Pirkei Avot content
+      return await this.getPirkeiAvotByOrderIndex(progress.currentOrderIndex);
     } catch (error) {
-      console.error('Error getting Pirkei Avot:', error);
+      console.error('Error getting current Pirkei Avot:', error);
       return undefined;
     }
-  }
-
-  async createPirkeiAvot(pirkeiAvot: any): Promise<any> {
-    // No longer needed since we use Sefaria API, but kept for compatibility
-    return pirkeiAvot;
   }
 
   // Daily recipe methods
@@ -696,24 +663,23 @@ export class DatabaseStorage implements IStorage {
     let [progress] = await db.select().from(pirkeiAvotProgress).limit(1);
     
     if (!progress) {
-      // Initialize with 1:1 if no progress exists
+      // Initialize with orderIndex 0 if no progress exists
       [progress] = await db
         .insert(pirkeiAvotProgress)
-        .values({ currentChapter: 1, currentVerse: 1 })
+        .values({ currentOrderIndex: 0 })
         .returning();
     }
     
     return progress;
   }
 
-  async updatePirkeiAvotProgress(chapter: number, verse: number): Promise<PirkeiAvotProgress> {
+  async updatePirkeiAvotProgress(orderIndex: number): Promise<PirkeiAvotProgress> {
     const progress = await this.getPirkeiAvotProgress();
     
     const [updated] = await db
       .update(pirkeiAvotProgress)
       .set({ 
-        currentChapter: chapter, 
-        currentVerse: verse,
+        currentOrderIndex: orderIndex,
         lastUpdated: new Date()
       })
       .where(eq(pirkeiAvotProgress.id, progress.id))
@@ -722,47 +688,29 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
-  async getNextPirkeiAvotReference(): Promise<{chapter: number, verse: number}> {
+  async advancePirkeiAvotProgress(): Promise<PirkeiAvotProgress> {
     const progress = await this.getPirkeiAvotProgress();
     
-    // Define the structure of Pirkei Avot chapters with correct verse counts
-    const chapterStructure = [
-      { chapter: 1, maxVerse: 18 },
-      { chapter: 2, maxVerse: 21 },  
-      { chapter: 3, maxVerse: 18 },
-      { chapter: 4, maxVerse: 22 },
-      { chapter: 5, maxVerse: 23 },
-      { chapter: 6, maxVerse: 11 }
-    ];
+    // Get all Pirkei Avot content to find the max orderIndex
+    const allContent = await this.getAllPirkeiAvot();
     
-    let { currentChapter, currentVerse } = progress;
-    const currentChapterData = chapterStructure.find(c => c.chapter === currentChapter);
-    
-    if (!currentChapterData) {
-      // Reset to beginning if invalid chapter
-      currentChapter = 1;
-      currentVerse = 1;
-    } else if (currentVerse >= currentChapterData.maxVerse) {
-      // Move to next chapter
-      const nextChapterIndex = chapterStructure.findIndex(c => c.chapter === currentChapter) + 1;
-      if (nextChapterIndex >= chapterStructure.length) {
-        // Cycle back to beginning
-        currentChapter = 1;
-        currentVerse = 1;
-      } else {
-        currentChapter = chapterStructure[nextChapterIndex].chapter;
-        currentVerse = 1;
-      }
-    } else {
-      // Move to next verse in same chapter
-      currentVerse += 1;
+    if (allContent.length === 0) {
+      // No content available, keep progress at 0
+      return progress;
     }
     
-    // Update the progress in database
-    await this.updatePirkeiAvotProgress(currentChapter, currentVerse);
+    const maxOrderIndex = Math.max(...allContent.map(p => p.orderIndex));
+    let nextOrderIndex = progress.currentOrderIndex + 1;
     
-    return { chapter: currentChapter, verse: currentVerse };
+    // Cycle back to beginning if we've reached the end
+    if (nextOrderIndex > maxOrderIndex) {
+      nextOrderIndex = 0;
+    }
+    
+    return await this.updatePirkeiAvotProgress(nextOrderIndex);
   }
+
+
 
   async getWomensPrayersByCategory(category: string): Promise<WomensPrayer[]> {
     return await db
@@ -858,6 +806,29 @@ export class DatabaseStorage implements IStorage {
       .values(insertInspiration)
       .returning();
     return inspiration;
+  }
+
+  async getCommunityImpactByDate(date: string): Promise<CommunityImpact | undefined> {
+    // Find community impact where the given date falls within the date range
+    const [impact] = await db
+      .select()
+      .from(communityImpact)
+      .where(
+        and(
+          lte(communityImpact.fromDate, date),
+          gte(communityImpact.untilDate, date)
+        )
+      )
+      .limit(1);
+    return impact;
+  }
+
+  async createCommunityImpact(insertImpact: InsertCommunityImpact): Promise<CommunityImpact> {
+    const [impact] = await db
+      .insert(communityImpact)
+      .values(insertImpact)
+      .returning();
+    return impact;
   }
 
   // Analytics methods implementation

@@ -23,7 +23,7 @@ export default function AppHeader() {
     <header className="bg-gradient-soft p-3 border-0 shadow-none">
       <div className="flex items-center justify-between px-2">
         <button
-          onClick={() => openModal('about')}
+          onClick={() => openModal('about', 'about')}
           className="p-2 rounded-full hover:bg-white/50 transition-colors"
           aria-label="About Ezras Nashim"
         >
@@ -32,7 +32,7 @@ export default function AppHeader() {
         <img 
           src={logoImage} 
           alt="Ezras Nashim" 
-          className="h-8 w-auto"
+          className="h-7 w-auto"
         />
         <button
           onClick={() => setLocation("/statistics")}
