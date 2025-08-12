@@ -12,7 +12,9 @@ const __dirname = path.dirname(__filename);
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: '2025-07-30.basil',
+});
 import { 
   insertTehillimNameSchema,
   insertDailyHalachaSchema,

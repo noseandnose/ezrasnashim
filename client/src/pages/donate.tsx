@@ -71,39 +71,23 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
       console.log('About to confirm payment with Stripe...');
       console.log('Return URL will be:', `${window.location.origin}/?donation=success`);
       
-      // First, validate that the payment element has been filled
-      const { error: submitError } = await elements.submit();
-      if (submitError) {
-        console.error('Payment element validation error:', submitError);
-        
-        // Handle specific validation errors
-        if (submitError.type === 'validation_error') {
-          toast({
-            title: "Payment Information Required",
-            description: "Please complete all required payment fields.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Payment Error", 
-            description: submitError.message || "Please check your payment information and try again.",
-            variant: "destructive",
-          });
-        }
-        setIsProcessing(false);
-        return;
+      // Directly confirm payment - PaymentElement handles its own validation
+      // The confirmPayment method will automatically validate the form
+      console.log('Confirming payment with Stripe...');
+      
+      let confirmResult;
+      try {
+        confirmResult = await stripe.confirmPayment({
+          elements,
+          confirmParams: {
+            return_url: `${window.location.origin}/?donation=success`,
+          },
+          redirect: "if_required", // Stay on same page when possible
+        });
+      } catch (stripeError) {
+        console.error('Stripe confirmPayment threw an error:', stripeError);
+        throw stripeError; // Re-throw to be caught by outer catch
       }
-      
-      console.log('Payment element validated successfully, confirming payment...');
-      
-      // Enhanced confirmation for Apple Pay compatibility
-      const confirmResult = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/?donation=success`,
-        },
-        redirect: "if_required", // Stay on same page when possible
-      });
       
       console.log('Stripe confirmPayment completed:', confirmResult);
       
@@ -304,27 +288,43 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         });
       }
     } catch (paymentError) {
-      console.error('Payment processing error:', paymentError);
+      console.error('=== PAYMENT PROCESSING ERROR ===');
+      console.error('Error caught in catch block:', paymentError);
       console.error('Error type:', typeof paymentError);
+      console.error('Error constructor:', (paymentError as any)?.constructor?.name);
       console.error('Error details:', {
         name: (paymentError as any)?.name,
         message: (paymentError as any)?.message,
+        code: (paymentError as any)?.code,
+        type: (paymentError as any)?.type,
         stack: (paymentError as any)?.stack
       });
       
+      // Extract error message
+      const errorMessage = (paymentError as any)?.message || 
+                          (paymentError as any)?.error?.message ||
+                          "An error occurred while processing your payment. Please try again.";
+      
       // Special handling for network/connectivity errors
-      if ((paymentError as any)?.message?.includes('network') || 
-          (paymentError as any)?.message?.includes('timeout') ||
+      if (errorMessage.includes('network') || 
+          errorMessage.includes('timeout') ||
           (paymentError as any)?.name === 'NetworkError') {
         toast({
           title: "Connection Error",
           description: "Please check your internet connection and try again.",
           variant: "destructive",
         });
+      } else if (errorMessage.includes('confirm')) {
+        // Specific error for payment confirmation issues
+        toast({
+          title: "Payment Confirmation Error",
+          description: "Unable to confirm the payment. Please ensure your payment details are correct and try again.",
+          variant: "destructive",
+        });
       } else {
         toast({
           title: "Payment Error",
-          description: "An error occurred while processing your payment. Please try again.",
+          description: errorMessage,
           variant: "destructive",
         });
       }
