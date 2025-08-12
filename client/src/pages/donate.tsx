@@ -1,10 +1,12 @@
 import { useStripe, Elements, PaymentElement, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ArrowLeft, CheckCircle, Mail } from "lucide-react";
 import { useLocation } from "wouter";
 import { useDailyCompletionStore, useModalStore } from "@/lib/types";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
@@ -38,6 +40,7 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
   const elements = useElements();
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { openModal } = useModalStore();
   const { trackModalComplete } = useTrackModalComplete();
@@ -71,39 +74,33 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
       console.log('About to confirm payment with Stripe...');
       console.log('Return URL will be:', `${window.location.origin}/?donation=success`);
       
-      // First, validate that the payment element has been filled
-      const { error: submitError } = await elements.submit();
-      if (submitError) {
-        console.error('Payment element validation error:', submitError);
+      // Directly confirm payment - PaymentElement handles its own validation
+      // The confirmPayment method will automatically validate the form
+      console.log('Confirming payment with Stripe...');
+      
+      let confirmResult;
+      try {
+        console.log('About to call stripe.confirmPayment');
         
-        // Handle specific validation errors
-        if (submitError.type === 'validation_error') {
-          toast({
-            title: "Payment Information Required",
-            description: "Please complete all required payment fields.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Payment Error", 
-            description: submitError.message || "Please check your payment information and try again.",
-            variant: "destructive",
-          });
-        }
-        setIsProcessing(false);
-        return;
+        // Use redirect: 'if_required' to handle success without redirect for card payments
+        confirmResult = await stripe.confirmPayment({
+          elements,
+          confirmParams: {
+            return_url: `${window.location.origin}/donate?success=true&amount=${amount}&type=${encodeURIComponent(donationType)}&email=${encodeURIComponent(userEmail || '')}`,
+            receipt_email: userEmail || undefined,
+          },
+          redirect: 'if_required' // This prevents redirect for successful card payments
+        });
+        
+        console.log('confirmPayment returned:', confirmResult);
+      } catch (stripeError) {
+        console.error('Stripe confirmPayment threw an error:', stripeError);
+        console.error('Error name:', (stripeError as any)?.name);
+        console.error('Error code:', (stripeError as any)?.code);
+        console.error('Error type:', (stripeError as any)?.type);
+        console.error('Full error:', stripeError);
+        throw stripeError; // Re-throw to be caught by outer catch
       }
-      
-      console.log('Payment element validated successfully, confirming payment...');
-      
-      // Enhanced confirmation for Apple Pay compatibility
-      const confirmResult = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/?donation=success`,
-        },
-        redirect: "if_required", // Stay on same page when possible
-      });
       
       console.log('Stripe confirmPayment completed:', confirmResult);
       
@@ -222,6 +219,12 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         // Track completion for analytics
         trackModalComplete('donate');
         
+        // Update donation status in database (in case webhook isn't configured)
+        apiRequest("POST", "/api/donations/update-status", {
+          paymentIntentId: paymentIntent.id,
+          status: 'succeeded'
+        }).catch(err => console.log('Could not update donation status:', err));
+        
         const successMessage = paymentIntent.status === 'processing' 
           ? "Your donation is being processed and will be confirmed shortly."
           : paymentIntent.status === 'requires_capture'
@@ -241,6 +244,11 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
             openModal('congratulations');
           }
         }, 1000);
+        
+        // Store email for success modal if available
+        if (userEmail) {
+          localStorage.setItem('lastDonationEmail', userEmail);
+        }
         
         onSuccess();
       } else if (paymentIntent && paymentIntent.status === 'requires_action') {
@@ -304,27 +312,43 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         });
       }
     } catch (paymentError) {
-      console.error('Payment processing error:', paymentError);
+      console.error('=== PAYMENT PROCESSING ERROR ===');
+      console.error('Error caught in catch block:', paymentError);
       console.error('Error type:', typeof paymentError);
+      console.error('Error constructor:', (paymentError as any)?.constructor?.name);
       console.error('Error details:', {
         name: (paymentError as any)?.name,
         message: (paymentError as any)?.message,
+        code: (paymentError as any)?.code,
+        type: (paymentError as any)?.type,
         stack: (paymentError as any)?.stack
       });
       
+      // Extract error message
+      const errorMessage = (paymentError as any)?.message || 
+                          (paymentError as any)?.error?.message ||
+                          "An error occurred while processing your payment. Please try again.";
+      
       // Special handling for network/connectivity errors
-      if ((paymentError as any)?.message?.includes('network') || 
-          (paymentError as any)?.message?.includes('timeout') ||
+      if (errorMessage.includes('network') || 
+          errorMessage.includes('timeout') ||
           (paymentError as any)?.name === 'NetworkError') {
         toast({
           title: "Connection Error",
           description: "Please check your internet connection and try again.",
           variant: "destructive",
         });
+      } else if (errorMessage.includes('confirm')) {
+        // Specific error for payment confirmation issues
+        toast({
+          title: "Payment Confirmation Error",
+          description: "Unable to confirm the payment. Please ensure your payment details are correct and try again.",
+          variant: "destructive",
+        });
       } else {
         toast({
           title: "Payment Error",
-          description: "An error occurred while processing your payment. Please try again.",
+          description: errorMessage,
           variant: "destructive",
         });
       }
@@ -359,13 +383,29 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         return null;
       })()}
 
+      {/* Email field for tax receipt */}
+      <div className="mb-6">
+        <Label htmlFor="email" className="flex items-center gap-2 mb-2">
+          <Mail className="w-4 h-4" />
+          Email for Tax Receipt
+        </Label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="your@email.com"
+          value={userEmail}
+          onChange={(e) => setUserEmail(e.target.value)}
+          className="w-full"
+        />
+        <p className="text-sm text-gray-500 mt-1">
+          We'll send your tax-deductible donation receipt to this email
+        </p>
+      </div>
+
       <PaymentElement 
         options={{
           layout: 'tabs',
           paymentMethodOrder: ['apple_pay', 'google_pay', 'card'],
-          fields: {
-            billingDetails: 'never'
-          },
           wallets: {
             applePay: 'auto',
             googlePay: 'auto'
@@ -438,23 +478,47 @@ export default function Donate() {
   const [, setLocation] = useLocation();
   const [clientSecret, setClientSecret] = useState("");
   const [donationComplete, setDonationComplete] = useState(false);
+  const [userEmailForReceipt, setUserEmailForReceipt] = useState("");
   const { toast } = useToast();
+  
+  // Use ref to track if payment intent has been created
+  const paymentIntentCreatedRef = useRef(false);
 
   // Get donation details from URL params
   const urlParams = new URLSearchParams(window.location.search);
+  const isSuccess = urlParams.get('success') === 'true';
   const amount = parseFloat(urlParams.get('amount') || '0');
   const donationType = urlParams.get('type') || 'General Donation';
   const sponsorName = urlParams.get('sponsor') || '';
   const dedication = urlParams.get('dedication') || '';
+  const emailFromUrl = urlParams.get('email') || '';
 
   useEffect(() => {
+    // Check if returning from successful payment
+    if (isSuccess) {
+      setDonationComplete(true);
+      setUserEmailForReceipt(emailFromUrl);
+      // Clean the URL
+      window.history.replaceState({}, '', '/donate');
+      return;
+    }
+
     if (amount <= 0) {
       setLocation('/');
       return;
     }
 
+    // Use ref to ensure payment intent is only created once
+    if (paymentIntentCreatedRef.current || clientSecret) {
+      console.log('Payment intent already created or in progress, skipping...');
+      return;
+    }
+
+    // Mark as created immediately using ref
+    paymentIntentCreatedRef.current = true;
+
     // Create PaymentIntent when component loads
-    console.log('=== PAYMENT INTENT CREATION ===');
+    console.log('=== PAYMENT INTENT CREATION (SINGLE INSTANCE) ===');
     console.log('Amount:', amount);
     console.log('Donation type:', donationType);
     console.log('Sponsor name:', sponsorName);
@@ -467,7 +531,8 @@ export default function Donate() {
         sponsorName,
         dedication,
         timestamp: new Date().toISOString()
-      }
+      },
+      email: "" // Will be filled by user in the form
     })
       .then((response) => {
         console.log('Payment intent response:', response);
@@ -491,15 +556,24 @@ export default function Donate() {
           statusText: error.response?.statusText
         });
         
+        // Reset the ref on error so user can retry if needed
+        paymentIntentCreatedRef.current = false;
+        
         toast({
           title: "Payment Setup Failed",
           description: `Unable to initialize payment: ${error.response?.data?.message || error.message}`,
           variant: "destructive",
         });
       });
-  }, [amount, donationType, sponsorName, dedication]);
+  }, []); // Empty dependency array - run only once on mount
 
   const handleSuccess = () => {
+    // Get email from localStorage if it was set in the form
+    const savedEmail = localStorage.getItem('lastDonationEmail');
+    if (savedEmail) {
+      setUserEmailForReceipt(savedEmail);
+      localStorage.removeItem('lastDonationEmail'); // Clean up
+    }
     setDonationComplete(true);
   };
 
@@ -510,24 +584,43 @@ export default function Donate() {
 
   if (donationComplete) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blush/10 to-peach/10 flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-white rounded-3xl p-8 text-center shadow-lg">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="text-green-600" size={32} />
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div className="w-full max-w-md bg-white rounded-3xl p-8 text-center shadow-2xl animate-in fade-in zoom-in duration-300">
+          <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <CheckCircle className="text-white" size={40} />
           </div>
           
-          <h1 className="text-2xl font-bold mb-4">Thank You!</h1>
-          <p className="text-gray-600 mb-6">
-            Your donation of ${amount} has been processed successfully. 
-            May your generosity bring many blessings.
+          <h1 className="text-3xl font-bold mb-4 text-gray-800">Thank You!</h1>
+          <p className="text-lg text-gray-600 mb-2">
+            Your donation has been processed successfully.
+          </p>
+          <p className="text-xl font-semibold text-blush mb-6">
+            ${amount || '0'} - {donationType}
+          </p>
+          <p className="text-sm text-gray-500 mb-8">
+            May your generosity bring many blessings and help us reach our goal of 1 million mitzvos monthly.
+            {userEmailForReceipt && (
+              <span className="block mt-2">
+                A tax receipt will be sent to: <strong>{userEmailForReceipt}</strong>
+              </span>
+            )}
           </p>
           
-          <Button
-            onClick={handleBackToApp}
-            className="w-full gradient-blush-peach text-white py-3"
-          >
-            Return to Ezras Nashim
-          </Button>
+          <div className="space-y-3">
+            <Button
+              onClick={handleBackToApp}
+              className="w-full gradient-blush-peach text-white py-3 font-semibold shadow-md hover:shadow-lg transition-shadow"
+            >
+              Return to Ezras Nashim
+            </Button>
+            <Button
+              onClick={() => window.location.reload()}
+              variant="outline"
+              className="w-full py-3"
+            >
+              Make Another Donation
+            </Button>
+          </div>
         </div>
       </div>
     );

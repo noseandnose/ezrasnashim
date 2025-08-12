@@ -12,7 +12,9 @@ const __dirname = path.dirname(__filename);
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: '2025-07-30.basil',
+});
 import { 
   insertTehillimNameSchema,
   insertDailyHalachaSchema,
@@ -1506,7 +1508,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Stripe payment route for donations
   app.post("/api/create-payment-intent", async (req, res) => {
     try {
-      const { amount, donationType, metadata } = req.body;
+      const { amount, donationType, metadata, email } = req.body;
       
       console.log('=== PAYMENT INTENT REQUEST ===');
       console.log('Request body:', { amount, donationType, metadata });
@@ -1530,7 +1532,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         stripeConfigured: !!process.env.STRIPE_SECRET_KEY
       });
       
-      const paymentIntentData = {
+      const paymentIntentData: any = {
         amount: Math.round(amount * 100), // Convert to cents
         currency: "usd",
         metadata: {
@@ -1538,6 +1540,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           donationType: donationType || "General Donation",
           sponsorName: metadata?.sponsorName || "",
           dedication: metadata?.dedication || "",
+          email: email || metadata?.email || "",
           timestamp: new Date().toISOString()
         },
         // Enable automatic payment methods including Apple Pay and Google Pay
@@ -1546,6 +1549,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           allow_redirects: 'never' as const // Keep on same page for better UX
         }
       };
+      
+      // Add receipt_email if provided - this will trigger Stripe to send receipts
+      const receiptEmail = email || metadata?.email;
+      if (receiptEmail && receiptEmail.includes('@')) {
+        paymentIntentData.receipt_email = receiptEmail;
+        console.log('Receipt email will be sent to:', receiptEmail);
+      }
       
       console.log('Payment intent configuration:', paymentIntentData);
       
@@ -1557,6 +1567,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         amount: paymentIntent.amount,
         client_secret_exists: !!paymentIntent.client_secret
       });
+      
+      // Track the donation attempt in our database
+      try {
+        await storage.createDonation({
+          stripePaymentIntentId: paymentIntent.id,
+          amount: paymentIntent.amount, // Already in cents
+          donationType: donationType || "General Donation",
+          sponsorName: metadata?.sponsorName,
+          dedication: metadata?.dedication,
+          email: receiptEmail,
+          status: 'pending'
+        });
+        console.log('Donation tracked in database:', paymentIntent.id);
+      } catch (dbError) {
+        console.error('Error saving donation to database:', dbError);
+        // Continue even if database save fails
+      }
 
       res.json({ 
         clientSecret: paymentIntent.client_secret,
@@ -1658,6 +1685,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } else {
       // Local development
       res.redirect("http://localhost:5173");
+    }
+  });
+
+  // Manual donation success update (for testing when webhook isn't configured)
+  app.post("/api/donations/update-status", async (req, res) => {
+    try {
+      const { paymentIntentId, status } = req.body;
+      
+      if (!paymentIntentId || !status) {
+        return res.status(400).json({ message: "Payment intent ID and status required" });
+      }
+      
+      const donation = await storage.updateDonationStatus(paymentIntentId, status);
+      
+      if (!donation) {
+        // If donation doesn't exist, create it with succeeded status
+        await storage.createDonation({
+          stripePaymentIntentId: paymentIntentId,
+          amount: 100, // Default $1 for testing
+          donationType: "General Donation",
+          status: status
+        });
+      }
+      
+      res.json({ message: "Donation status updated", donation });
+    } catch (error) {
+      console.error('Error updating donation status:', error);
+      res.status(500).json({ message: "Failed to update donation status" });
     }
   });
 
