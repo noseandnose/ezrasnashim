@@ -12,7 +12,7 @@ Ezras Nashim is a mobile-first web application for Jewish women to track and com
 - **Custom Koren Fonts**: Implemented separate fonts for Hebrew (Koren Siddur) and English (Arno Koren) in all Tefilla modals (August 6, 2025)
 - **Pirkei Avot Database**: Migrated from Sefaria API to internal database table with cycling system, displays with Arno Koren font (August 6, 2025)
 - **Tefilla Text Formatting**: Fixed Hebrew text formatting across all Tefilla modals (Mincha, Nishmas, Maariv, Birkat Hamazon) with consistent CSS classes and bold styling (August 11, 2025)
-- **Content Naming**: Renamed "Loshon Horah" modal to "Shmirat Haloshan" for more appropriate terminology (August 11, 2025)
+- **Content Naming**: Renamed "Loshon Horah" modal to "Shmirat Halashon" for more appropriate terminology (August 12, 2025)
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
