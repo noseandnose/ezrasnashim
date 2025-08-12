@@ -219,6 +219,12 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         // Track completion for analytics
         trackModalComplete('donate');
         
+        // Update donation status in database (in case webhook isn't configured)
+        apiRequest("POST", "/api/donations/update-status", {
+          paymentIntentId: paymentIntent.id,
+          status: 'succeeded'
+        }).catch(err => console.log('Could not update donation status:', err));
+        
         const successMessage = paymentIntent.status === 'processing' 
           ? "Your donation is being processed and will be confirmed shortly."
           : paymentIntent.status === 'requires_capture'

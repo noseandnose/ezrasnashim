@@ -185,7 +185,7 @@ export default function Statistics() {
               <div className="text-lg platypi-bold text-black">
                 {financialLoading ? "..." : financialStats?.totalCampaigns?.toLocaleString() || 0}
               </div>
-              <div className="text-xs platypi-medium text-warm-gray">Campaigns</div>
+              <div className="text-xs platypi-medium text-warm-gray">Donations</div>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center mb-2">

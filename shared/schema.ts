@@ -183,6 +183,18 @@ export const campaigns = pgTable("campaigns", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const donations = pgTable("donations", {
+  id: serial("id").primaryKey(),
+  stripePaymentIntentId: text("stripe_payment_intent_id").unique(),
+  amount: integer("amount").notNull(), // Amount in cents
+  donationType: text("donation_type").default("General Donation").notNull(),
+  sponsorName: text("sponsor_name"),
+  dedication: text("dedication"),
+  email: text("email"),
+  status: text("status").notNull(), // 'succeeded', 'pending', 'failed'
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const inspirationalQuotes = pgTable("inspirational_quotes", {
   id: serial("id").primaryKey(),
   text: text("text").notNull(),
