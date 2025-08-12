@@ -69,7 +69,7 @@ export async function withRetry<T>(
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await operation();
-    } catch (error) {
+    } catch (error: unknown) {
       if (attempt === maxRetries) {
         throw error;
       }
