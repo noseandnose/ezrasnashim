@@ -1742,7 +1742,19 @@ function JerusalemCompass() {
                     }}
                   >
                     <div className="absolute top-2 left-1/2 transform -translate-x-1/2">
-                      <div className="w-3 h-3 bg-sage rounded-full border-2 border-white shadow-md"></div>
+                      {(() => {
+                        let angleDiff = Math.abs(direction - deviceOrientation);
+                        if (angleDiff > 180) {
+                          angleDiff = 360 - angleDiff;
+                        }
+                        const isAligned = angleDiff < 10;
+                        
+                        return (
+                          <div className={`w-3 h-3 rounded-full border-2 border-white shadow-md ${
+                            isAligned ? 'bg-sage' : 'bg-blush'
+                          }`}></div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -1775,7 +1787,19 @@ function JerusalemCompass() {
                 })()}
                 
                 {/* Center dot */}
-                <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-gray-400 rounded-full transform -translate-x-1/2 -translate-y-1/2 z-20"></div>
+                {(() => {
+                  let angleDiff = Math.abs(direction - deviceOrientation);
+                  if (angleDiff > 180) {
+                    angleDiff = 360 - angleDiff;
+                  }
+                  const isAligned = angleDiff < 10;
+                  
+                  return (
+                    <div className={`absolute top-1/2 left-1/2 w-3 h-3 rounded-full transform -translate-x-1/2 -translate-y-1/2 z-20 ${
+                      isAligned ? 'bg-sage' : 'bg-blush'
+                    }`}></div>
+                  );
+                })()}
               </div>
 
               {/* Alignment Status */}
