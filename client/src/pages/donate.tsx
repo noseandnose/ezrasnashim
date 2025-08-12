@@ -82,13 +82,14 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
       try {
         console.log('About to call stripe.confirmPayment');
         
-        // Use the simplest possible confirmPayment call - let PaymentElement handle everything
+        // Use redirect: 'if_required' to handle success without redirect for card payments
         confirmResult = await stripe.confirmPayment({
           elements,
           confirmParams: {
             return_url: `${window.location.origin}/donate?success=true&amount=${amount}&type=${encodeURIComponent(donationType)}&email=${encodeURIComponent(userEmail || '')}`,
             receipt_email: userEmail || undefined,
           },
+          redirect: 'if_required' // This prevents redirect for successful card payments
         });
         
         console.log('confirmPayment returned:', confirmResult);
@@ -237,6 +238,11 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
             openModal('congratulations');
           }
         }, 1000);
+        
+        // Store email for success modal if available
+        if (userEmail) {
+          localStorage.setItem('lastDonationEmail', userEmail);
+        }
         
         onSuccess();
       } else if (paymentIntent && paymentIntent.status === 'requires_action') {
@@ -467,6 +473,7 @@ export default function Donate() {
   const [clientSecret, setClientSecret] = useState("");
   const [donationComplete, setDonationComplete] = useState(false);
   const [userEmailForReceipt, setUserEmailForReceipt] = useState("");
+  const [paymentIntentCreated, setPaymentIntentCreated] = useState(false);
   const { toast } = useToast();
 
   // Get donation details from URL params
@@ -493,12 +500,20 @@ export default function Donate() {
       return;
     }
 
+    // Prevent multiple payment intent creation
+    if (paymentIntentCreated || clientSecret) {
+      console.log('Payment intent already created, skipping...');
+      return;
+    }
+
     // Create PaymentIntent when component loads
     console.log('=== PAYMENT INTENT CREATION ===');
     console.log('Amount:', amount);
     console.log('Donation type:', donationType);
     console.log('Sponsor name:', sponsorName);
     console.log('Dedication:', dedication);
+
+    setPaymentIntentCreated(true); // Mark as created immediately to prevent duplicates
 
     apiRequest("POST", "/api/create-payment-intent", {
       amount,
@@ -538,9 +553,15 @@ export default function Donate() {
           variant: "destructive",
         });
       });
-  }, [amount, donationType, sponsorName, dedication]);
+  }, [amount]); // Only depend on amount to prevent re-runs
 
   const handleSuccess = () => {
+    // Get email from localStorage if it was set in the form
+    const savedEmail = localStorage.getItem('lastDonationEmail');
+    if (savedEmail) {
+      setUserEmailForReceipt(savedEmail);
+      localStorage.removeItem('lastDonationEmail'); // Clean up
+    }
     setDonationComplete(true);
   };
 

@@ -1550,9 +1550,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
       
-      // Add receipt_email if provided
-      if (email || metadata?.email) {
-        paymentIntentData.receipt_email = email || metadata?.email;
+      // Add receipt_email if provided - this will trigger Stripe to send receipts
+      const receiptEmail = email || metadata?.email;
+      if (receiptEmail && receiptEmail.includes('@')) {
+        paymentIntentData.receipt_email = receiptEmail;
+        console.log('Receipt email will be sent to:', receiptEmail);
       }
       
       console.log('Payment intent configuration:', paymentIntentData);
