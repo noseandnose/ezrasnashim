@@ -1,6 +1,6 @@
 import { useStripe, Elements, PaymentElement, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -473,8 +473,10 @@ export default function Donate() {
   const [clientSecret, setClientSecret] = useState("");
   const [donationComplete, setDonationComplete] = useState(false);
   const [userEmailForReceipt, setUserEmailForReceipt] = useState("");
-  const [paymentIntentCreated, setPaymentIntentCreated] = useState(false);
   const { toast } = useToast();
+  
+  // Use ref to track if payment intent has been created
+  const paymentIntentCreatedRef = useRef(false);
 
   // Get donation details from URL params
   const urlParams = new URLSearchParams(window.location.search);
@@ -500,20 +502,21 @@ export default function Donate() {
       return;
     }
 
-    // Prevent multiple payment intent creation
-    if (paymentIntentCreated || clientSecret) {
-      console.log('Payment intent already created, skipping...');
+    // Use ref to ensure payment intent is only created once
+    if (paymentIntentCreatedRef.current || clientSecret) {
+      console.log('Payment intent already created or in progress, skipping...');
       return;
     }
 
+    // Mark as created immediately using ref
+    paymentIntentCreatedRef.current = true;
+
     // Create PaymentIntent when component loads
-    console.log('=== PAYMENT INTENT CREATION ===');
+    console.log('=== PAYMENT INTENT CREATION (SINGLE INSTANCE) ===');
     console.log('Amount:', amount);
     console.log('Donation type:', donationType);
     console.log('Sponsor name:', sponsorName);
     console.log('Dedication:', dedication);
-
-    setPaymentIntentCreated(true); // Mark as created immediately to prevent duplicates
 
     apiRequest("POST", "/api/create-payment-intent", {
       amount,
@@ -547,13 +550,16 @@ export default function Donate() {
           statusText: error.response?.statusText
         });
         
+        // Reset the ref on error so user can retry if needed
+        paymentIntentCreatedRef.current = false;
+        
         toast({
           title: "Payment Setup Failed",
           description: `Unable to initialize payment: ${error.response?.data?.message || error.message}`,
           variant: "destructive",
         });
       });
-  }, [amount]); // Only depend on amount to prevent re-runs
+  }, []); // Empty dependency array - run only once on mount
 
   const handleSuccess = () => {
     // Get email from localStorage if it was set in the form
