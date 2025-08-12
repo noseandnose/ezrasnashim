@@ -103,7 +103,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
     {
       id: 'halacha',
       icon: Book,
-      title: 'Learn Shabbos',
+      title: 'Learn Shabbas',
       subtitle: 'Halachic insights',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
