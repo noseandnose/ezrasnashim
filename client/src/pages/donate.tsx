@@ -77,15 +77,23 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
       
       let confirmResult;
       try {
+        console.log('About to call stripe.confirmPayment');
+        
+        // Use the simplest possible confirmPayment call - let PaymentElement handle everything
         confirmResult = await stripe.confirmPayment({
           elements,
           confirmParams: {
             return_url: `${window.location.origin}/?donation=success`,
           },
-          redirect: "if_required", // Stay on same page when possible
         });
+        
+        console.log('confirmPayment returned:', confirmResult);
       } catch (stripeError) {
         console.error('Stripe confirmPayment threw an error:', stripeError);
+        console.error('Error name:', (stripeError as any)?.name);
+        console.error('Error code:', (stripeError as any)?.code);
+        console.error('Error type:', (stripeError as any)?.type);
+        console.error('Full error:', stripeError);
         throw stripeError; // Re-throw to be caught by outer catch
       }
       
@@ -363,9 +371,6 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         options={{
           layout: 'tabs',
           paymentMethodOrder: ['apple_pay', 'google_pay', 'card'],
-          fields: {
-            billingDetails: 'never'
-          },
           wallets: {
             applePay: 'auto',
             googlePay: 'auto'
