@@ -17,13 +17,13 @@ export default function CongratulationsModal() {
 
   return (
     <Dialog open={activeModal === 'congratulations'} onOpenChange={() => closeModal(true)}>
-      <DialogContent className="w-full max-w-sm rounded-3xl p-8 platypi-regular text-center relative overflow-hidden">
+      <DialogContent className="w-full max-w-sm rounded-3xl p-8 platypi-regular text-center relative overflow-hidden bg-white">
         {/* Beautiful Stage 3 Flower Image - Larger and positioned behind content */}
-        <div className="absolute inset-0 flex justify-center items-center pointer-events-none">
+        <div className="absolute inset-0 flex justify-center items-center pointer-events-none z-0">
           <img 
             src={stage3Image} 
             alt="Beautiful flower bouquet - Full completions!" 
-            className="w-56 h-56 object-contain opacity-80"
+            className="w-52 h-52 object-contain opacity-70"
             style={{ marginTop: '20px' }}
           />
         </div>
