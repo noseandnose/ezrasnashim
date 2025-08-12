@@ -1,4 +1,5 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/lib/types";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
@@ -16,42 +17,48 @@ export default function CongratulationsModal() {
   }, [activeModal]);
 
   return (
-    <Dialog open={activeModal === 'congratulations'} onOpenChange={() => closeModal(true)}>
-      <DialogContent className="w-full max-w-sm rounded-3xl p-8 platypi-regular text-center relative overflow-hidden bg-white">
-        {/* Beautiful Stage 3 Flower Image - Larger and positioned behind content */}
-        <div className="absolute inset-0 flex justify-center items-center pointer-events-none z-0">
-          <img 
-            src={stage3Image} 
-            alt="Beautiful flower bouquet - Full completions!" 
-            className="w-52 h-52 object-contain opacity-70"
-            style={{ marginTop: '20px' }}
-          />
-        </div>
-        
-        {/* Content above the flower image */}
-        <div className="relative z-10">
-          <div className="flex items-center justify-center mb-3">
-            <DialogTitle className="text-2xl platypi-bold text-black">
+    <DialogPrimitive.Root open={activeModal === 'congratulations'} onOpenChange={() => closeModal(true)}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Content className="fixed left-[50%] top-[50%] z-50 w-full max-w-sm translate-x-[-50%] translate-y-[-50%] rounded-3xl p-8 bg-white shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
+          {/* Beautiful Stage 3 Flower Image - Larger and positioned behind content */}
+          <div className="absolute inset-0 flex justify-center items-center pointer-events-none">
+            <img 
+              src={stage3Image} 
+              alt="Beautiful flower bouquet - Full completions!" 
+              className="w-56 h-56 object-contain opacity-75"
+              style={{ marginTop: '20px' }}
+            />
+          </div>
+          
+          {/* Content above the flower image */}
+          <div className="relative z-10 text-center">
+            <DialogTitle className="text-2xl platypi-bold text-black mb-3">
               Mazal Tov!
             </DialogTitle>
-          </div>
-          <DialogDescription className="text-warm-gray/80 mb-6 leading-relaxed">
+            <DialogDescription className="text-warm-gray/80 mb-6 leading-relaxed">
               You have completed all three daily Mitzvahs: Torah learning, Tefilla, and Tzedaka. 
               May your spiritual growth continue and bring you and your family abundant blessings.
             </DialogDescription>
-        </div>
+          </div>
 
-        <Button 
-          onClick={() => {
-            closeModal();
-            // Navigate to home and scroll to progress
-            window.location.hash = '#/?section=home&scrollToProgress=true';
-          }} 
-          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 relative z-10"
-        >
-          Continue Your Journey
-        </Button>
-      </DialogContent>
-    </Dialog>
+          <Button 
+            onClick={() => {
+              closeModal();
+              // Navigate to home and scroll to progress
+              window.location.hash = '#/?section=home&scrollToProgress=true';
+            }} 
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 relative z-10"
+          >
+            Continue Your Journey
+          </Button>
+          
+          {/* Close button */}
+          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-full w-8 h-8 bg-warm-gray/10 hover:bg-warm-gray/20 flex items-center justify-center transition-all duration-200">
+            <span className="text-warm-gray text-lg">×</span>
+          </DialogPrimitive.Close>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }
