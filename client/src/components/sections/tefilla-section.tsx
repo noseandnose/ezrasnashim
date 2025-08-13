@@ -136,7 +136,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   const { data: progress } = useQuery<GlobalTehillimProgress>({
     queryKey: ['/api/tehillim/progress'], 
     queryFn: async () => {
-      const response = await fetch(`/api/tehillim/progress?t=${Date.now()}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress?t=${Date.now()}`);
       if (!response.ok) {
         throw new Error('Failed to fetch tehillim progress');
       }
@@ -152,7 +152,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   // Fetch current name for the perek - Only update when perek is completed
   const { data: currentName } = useQuery<TehillimName | null>({
     queryFn: async () => {
-      const response = await fetch(`/api/tehillim/current-name`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/current-name`);
       if (!response.ok) {
         throw new Error('Failed to fetch current name');
       }
@@ -167,7 +167,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   // Fetch all active names for count display
   const { data: allNames } = useQuery<TehillimName[]>({
     queryFn: async () => {
-      const response = await fetch(`/api/tehillim/names`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/names`);
       if (!response.ok) {
         throw new Error('Failed to fetch tehillim names');
       }
@@ -181,7 +181,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   const { data: tehillimPreview, isLoading: isPreviewLoading } = useQuery<{preview: string; perek: number; language: string}>({
     queryKey: ['/api/tehillim/preview', progress?.currentPerek],
     queryFn: async () => {
-      const response = await fetch(`/api/tehillim/preview/${progress?.currentPerek}?language=hebrew`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/preview/${progress?.currentPerek}?language=hebrew`);
       if (!response.ok) {
         throw new Error('Failed to fetch tehillim preview');
       }
