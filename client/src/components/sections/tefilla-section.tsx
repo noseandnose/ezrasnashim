@@ -1,4 +1,4 @@
-import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass, ArrowRight, Baby, HeartHandshake, Briefcase, GraduationCap, Users, Stethoscope, DollarSign, UserCheck, Smile, Zap, TrendingUp, Crown } from "lucide-react";
+import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass, ArrowRight, Baby, HeartHandshake, Briefcase, GraduationCap, Users, Stethoscope, DollarSign, UserCheck, Smile, Zap, TrendingUp, Crown, Sunrise, Sun, Moon, Utensils, Stars } from "lucide-react";
 import korenLogo from "@assets/This_is_a_logo_for_Koren_Publishers_Jerusalem_1752581940716.jpg";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -507,11 +507,11 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               isModalComplete(currentPrayer.modal) ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
               {currentPrayer.modal === 'morning-brochas' ? (
-                <Sparkles className="text-white" size={18} />
+                <Sunrise className="text-white" size={18} />
               ) : currentPrayer.modal === 'mincha' ? (
-                <Clock className="text-white" size={18} />
+                <Sun className="text-white" size={18} />
               ) : (
-                <Star className="text-white" size={18} />
+                <Moon className="text-white" size={18} />
               )}
             </div>
             <h3 className="platypi-bold text-sm text-black mb-1">{currentPrayer.title}</h3>
@@ -529,7 +529,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
               isModalComplete('after-brochas') ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
-              <HandHeart className="text-white" size={18} />
+              <Utensils className="text-white" size={18} />
             </div>
             <h3 className="platypi-bold text-sm text-black mb-1">After Brochas</h3>
             <p className="platypi-regular text-xs text-black/60">
@@ -549,7 +549,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
               isModalComplete('special-tehillim') ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
-              <BookOpen className="text-white" size={18} />
+              <Stars className="text-white" size={18} />
             </div>
             <h3 className="platypi-bold text-sm text-black mb-1">Special Tehillim</h3>
             <p className="platypi-regular text-xs text-black/60">
