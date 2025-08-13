@@ -122,25 +122,11 @@ export default function TableSection() {
             <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
               <p className="platypi-regular text-xs text-black/70 platypi-bold">Candle Lighting</p>
               <div className="flex items-center justify-center space-x-1">
-                <svg width="20" height="14" viewBox="0 0 100 70" className="text-blush">
-                  <g fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    {/* Left candle */}
-                    <path d="M25 12 C25 8, 20 8, 20 12 C20 16, 25 16, 25 12" />
-                    <rect x="22" y="16" width="6" height="4" />
-                    <rect x="20" y="20" width="10" height="6" />
-                    <rect x="23" y="26" width="4" height="20" />
-                    <path d="M18 46 C18 50, 32 50, 32 46" />
-                    <rect x="18" y="50" width="14" height="6" />
-                    
-                    {/* Right candle */}
-                    <path d="M75 12 C75 8, 70 8, 70 12 C70 16, 75 16, 75 12" />
-                    <rect x="72" y="16" width="6" height="4" />
-                    <rect x="70" y="20" width="10" height="6" />
-                    <rect x="73" y="26" width="4" height="20" />
-                    <path d="M68 46 C68 50, 82 50, 82 46" />
-                    <rect x="68" y="50" width="14" height="6" />
-                  </g>
-                </svg>
+                <img 
+                  src="@assets/Untitled design (4)_1755104052747.png" 
+                  alt="Shabbat Candles" 
+                  className="w-5 h-4 object-contain"
+                />
                 <p className="platypi-bold text-base text-black platypi-medium">
                   {showShabbosError ? "--:--" : 
                    shabbosData?.candleLighting || 
