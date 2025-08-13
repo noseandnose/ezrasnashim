@@ -122,11 +122,25 @@ export default function TableSection() {
             <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
               <p className="platypi-regular text-xs text-black/70 platypi-bold">Candle Lighting</p>
               <div className="flex items-center justify-center space-x-1">
-                <img 
-                  src="/attached_assets/Untitled design (4)_1755104052747.png" 
-                  alt="Shabbat Candles" 
-                  className="w-5 h-4 object-contain"
-                />
+                <svg width="20" height="16" viewBox="0 0 64 64" className="text-blush fill-current">
+                  <g>
+                    {/* Left candle */}
+                    <ellipse cx="20" cy="8" rx="3" ry="6" />
+                    <rect x="18" y="12" width="4" height="3" />
+                    <rect x="16" y="15" width="8" height="4" />
+                    <rect x="18.5" y="19" width="3" height="24" />
+                    <ellipse cx="20" cy="43" rx="8" ry="3" />
+                    <rect x="12" y="43" width="16" height="4" />
+                    
+                    {/* Right candle */}
+                    <ellipse cx="44" cy="8" rx="3" ry="6" />
+                    <rect x="42" y="12" width="4" height="3" />
+                    <rect x="40" y="15" width="8" height="4" />
+                    <rect x="42.5" y="19" width="3" height="24" />
+                    <ellipse cx="44" cy="43" rx="8" ry="3" />
+                    <rect x="36" y="43" width="16" height="4" />
+                  </g>
+                </svg>
                 <p className="platypi-bold text-base text-black platypi-medium">
                   {showShabbosError ? "--:--" : 
                    shabbosData?.candleLighting || 
