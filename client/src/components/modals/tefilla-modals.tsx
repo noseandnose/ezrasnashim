@@ -443,7 +443,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
     return (
       <div 
-        className={`leading-relaxed whitespace-pre-line ${showHebrew ? 'koren-siddur-hebrew text-right' : 'koren-siddur-english text-left'}`}
+        className={`leading-relaxed whitespace-pre-line ${showHebrew ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'}`}
         style={{ fontSize: `${showHebrew ? fontSize + 1 : fontSize}px` }}
       >
         {tehillimText.text}
