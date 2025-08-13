@@ -123,7 +123,7 @@ export default function TableSection() {
               <p className="platypi-regular text-xs text-black/70 platypi-bold">Candle Lighting</p>
               <div className="flex items-center justify-center space-x-1">
                 <img 
-                  src="@assets/Untitled design (4)_1755104052747.png" 
+                  src="/attached_assets/Untitled design (4)_1755104052747.png" 
                   alt="Shabbat Candles" 
                   className="w-5 h-4 object-contain"
                 />
