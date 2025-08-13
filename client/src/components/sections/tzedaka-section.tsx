@@ -206,7 +206,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
           <>
             <div className="flex items-center space-x-3 mb-2 relative">
               <div className="bg-gradient-feminine p-3 rounded-full">
-                <BookOpen className="text-white" size={20} />
+                <Target className="text-white" size={20} />
               </div>
               <div className="flex-grow">
                 <h3 className="platypi-bold text-lg text-black platypi-bold">{campaign.title}</h3>
