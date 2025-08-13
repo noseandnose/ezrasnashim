@@ -47,8 +47,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hebrewDate = req.query.hebrewDate as string || "";
       const gregorianDate = req.query.gregorianDate as string || "";
       const years = parseInt(req.query.years as string) || 1;
+      const afterNightfall = req.query.afterNightfall === 'true';
       
-      console.log('Calendar download request:', { title, hebrewDate, gregorianDate, years });
+      console.log('Calendar download request:', { title, hebrewDate, gregorianDate, years, afterNightfall });
       
       // Generate calendar content
       const events: string[] = [];
@@ -57,12 +58,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (gregorianDate && hebrewDate) {
         // First, convert the input date to Hebrew date using Hebcal API
         const inputDate = new Date(gregorianDate);
-        const inputYear = inputDate.getFullYear();
-        const inputMonth = inputDate.getMonth() + 1; // JavaScript months are 0-based
-        const inputDay = inputDate.getDate();
+        let inputYear = inputDate.getFullYear();
+        let inputMonth = inputDate.getMonth() + 1; // JavaScript months are 0-based
+        let inputDay = inputDate.getDate();
+        
+        // If after nightfall, we need to add one day to get the correct Hebrew date
+        if (afterNightfall) {
+          const adjustedDate = new Date(inputDate);
+          adjustedDate.setDate(adjustedDate.getDate() + 1);
+          inputYear = adjustedDate.getFullYear();
+          inputMonth = adjustedDate.getMonth() + 1;
+          inputDay = adjustedDate.getDate();
+        }
         
         try {
-          // Get the Hebrew date from the input Gregorian date
+          // Get the Hebrew date from the input Gregorian date (adjusted if after nightfall)
           const hebcalUrl = `https://www.hebcal.com/converter?cfg=json&gy=${inputYear}&gm=${inputMonth}&gd=${inputDay}&g2h=1`;
           const hebcalResponse = await serverAxiosClient.get(hebcalUrl);
           const hebrewDateInfo = hebcalResponse.data;

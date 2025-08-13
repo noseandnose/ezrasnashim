@@ -39,7 +39,8 @@ export default function TimesModals() {
         title: eventTitle,
         hebrewDate: convertedHebrewDate || '',
         gregorianDate: englishDate,
-        years: yearDuration.toString()
+        years: yearDuration.toString(),
+        afterNightfall: afterNightfall.toString()
       });
       
       // Use the same base URL logic as axiosClient
