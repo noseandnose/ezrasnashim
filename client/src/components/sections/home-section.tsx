@@ -227,16 +227,23 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           <HeartProgress completed={tzedakaCompleted} size={20} />
         </button>
 
-        {/* Daily Progress Tracker - Big Button */}
+        {/* Daily Progress Tracker - Compact Version */}
         <div 
           id="daily-progress-garden"
-          className="rounded-2xl p-6 shadow-lg border border-blush/10 bg-white flex flex-col items-center justify-center min-h-[200px] mt-4"
+          className="rounded-2xl p-3 shadow-lg border border-blush/10 bg-white relative overflow-hidden min-h-[100px] mt-4"
         >
-          <h3 className="platypi-bold text-lg text-black mb-3">Daily Progress Garden</h3>
-          <DailyProgress />
-          <p className="platypi-regular text-xs text-black/60 text-center mt-3 leading-relaxed">
-            Complete one item from each task to see your daily progress Bloom
-          </p>
+          {/* Background image positioned behind text */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-30 z-0">
+            <DailyProgress />
+          </div>
+          
+          {/* Content overlay */}
+          <div className="relative z-10 flex flex-col items-center justify-center h-full">
+            <h3 className="platypi-bold text-lg text-black mb-1">Daily Progress Garden</h3>
+            <p className="platypi-regular text-xs text-black/80 text-center leading-relaxed max-w-[200px]">
+              Complete one item from each task to see your daily progress Bloom
+            </p>
+          </div>
         </div>
       </div>
     </div>
