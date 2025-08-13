@@ -80,10 +80,10 @@ export default function DailyProgress({ size = 36 }: DailyProgressProps) {
             : 'scale-100 opacity-100 transform rotate-0'
         }`}
         style={{
-          width: '180px',
-          height: '180px',
-          maxWidth: '180px',
-          maxHeight: '180px'
+          width: '70px',
+          height: '70px',
+          maxWidth: '70px',
+          maxHeight: '70px'
         }}
       />
       

@@ -230,7 +230,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         {/* Daily Progress Tracker - Compact Version */}
         <div 
           id="daily-progress-garden"
-          className="rounded-2xl p-3 shadow-lg border border-blush/10 bg-white min-h-[100px] mt-4 flex items-center justify-between"
+          className="rounded-2xl px-3 py-2 shadow-lg border border-blush/10 bg-white mt-4 flex items-center justify-between h-[80px]"
         >
           {/* Left side: Title and subtitle */}
           <div className="flex flex-col justify-center flex-1">
