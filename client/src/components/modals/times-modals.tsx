@@ -132,8 +132,6 @@ export default function TimesModals() {
       const month = dateObj.getMonth() + 1; // JavaScript months are 0-indexed
       const day = dateObj.getDate();
       
-      console.log(`Converting date: ${year}-${month}-${day} (after nightfall: ${isAfterNightfall})`);
-      
       const response = await fetch(`https://www.hebcal.com/converter?cfg=json&gy=${year}&gm=${month}&gd=${day}&g2h=1`);
       
       if (!response.ok) {
@@ -148,12 +146,10 @@ export default function TimesModals() {
       
       if (data.hebrew) {
         setConvertedHebrewDate(data.hebrew);
-        console.log(`Converted to Hebrew: ${data.hebrew}`);
       } else {
         throw new Error('No Hebrew date returned from API');
       }
     } catch (error) {
-      console.error('Error converting date:', error);
       toast({
         title: "Conversion Error",
         description: "Unable to convert date. Please check the date and try again.",
@@ -227,17 +223,25 @@ export default function TimesModals() {
                 // iOS Custom Date Picker using select elements (wheel picker style)
                 <div className="flex space-x-2">
                   <select 
-                    value={englishDate ? new Date(englishDate).getMonth() + 1 : new Date().getMonth() + 1}
+                    value={(() => {
+                      if (!englishDate) return new Date().getMonth() + 1;
+                      // Parse date at noon to avoid timezone issues
+                      const date = new Date(englishDate + 'T12:00:00');
+                      return date.getMonth() + 1;
+                    })()}
                     onChange={(e) => {
-                      const currentDate = englishDate ? new Date(englishDate) : new Date();
+                      // Parse current date at noon to avoid timezone issues
+                      const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
                       const selectedMonth = parseInt(e.target.value) - 1; // Convert to 0-indexed
                       const currentDay = currentDate.getDate();
+                      const currentYear = currentDate.getFullYear();
                       
                       // Check if the current day is valid for the new month
-                      const daysInNewMonth = new Date(currentDate.getFullYear(), selectedMonth + 1, 0).getDate();
+                      const daysInNewMonth = new Date(currentYear, selectedMonth + 1, 0).getDate();
                       const validDay = Math.min(currentDay, daysInNewMonth);
                       
-                      const newDate = new Date(currentDate.getFullYear(), selectedMonth, validDay);
+                      // Create new date properly
+                      const newDate = new Date(currentYear, selectedMonth, validDay, 12, 0, 0);
                       handleDateChange(newDate.toISOString().split('T')[0]);
                     }}
                     className="flex-1 p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700"
@@ -250,14 +254,23 @@ export default function TimesModals() {
                     ))}
                   </select>
                   <select 
-                    value={englishDate ? new Date(englishDate).getDate() : new Date().getDate()}
+                    value={(() => {
+                      if (!englishDate) return new Date().getDate();
+                      // Parse date at noon to avoid timezone issues
+                      const date = new Date(englishDate + 'T12:00:00');
+                      return date.getDate();
+                    })()}
                     onChange={(e) => {
-                      const currentDate = englishDate ? new Date(englishDate) : new Date();
-                      // Fix the date construction to avoid off-by-one errors
+                      // Parse current date at noon to avoid timezone issues
+                      const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
                       const selectedDay = parseInt(e.target.value);
-                      const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), selectedDay);
+                      const currentMonth = currentDate.getMonth();
+                      const currentYear = currentDate.getFullYear();
                       
-                      // Ensure we're working with the correct date
+                      // Create new date properly
+                      const newDate = new Date(currentYear, currentMonth, selectedDay, 12, 0, 0);
+                      
+                      // Verify the date was created correctly
                       if (newDate.getDate() === selectedDay) {
                         handleDateChange(newDate.toISOString().split('T')[0]);
                       }
@@ -267,7 +280,7 @@ export default function TimesModals() {
                   >
                     {(() => {
                       // Calculate valid days for the selected month/year
-                      const currentDate = englishDate ? new Date(englishDate) : new Date();
+                      const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
                       const year = currentDate.getFullYear();
                       const month = currentDate.getMonth();
                       const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -278,9 +291,15 @@ export default function TimesModals() {
                     })()}
                   </select>
                   <select 
-                    value={englishDate ? new Date(englishDate).getFullYear() : new Date().getFullYear()}
+                    value={(() => {
+                      if (!englishDate) return new Date().getFullYear();
+                      // Parse date at noon to avoid timezone issues
+                      const date = new Date(englishDate + 'T12:00:00');
+                      return date.getFullYear();
+                    })()}
                     onChange={(e) => {
-                      const currentDate = englishDate ? new Date(englishDate) : new Date();
+                      // Parse current date at noon to avoid timezone issues
+                      const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
                       const selectedYear = parseInt(e.target.value);
                       const currentMonth = currentDate.getMonth();
                       const currentDay = currentDate.getDate();
@@ -289,7 +308,8 @@ export default function TimesModals() {
                       const daysInMonth = new Date(selectedYear, currentMonth + 1, 0).getDate();
                       const validDay = Math.min(currentDay, daysInMonth);
                       
-                      const newDate = new Date(selectedYear, currentMonth, validDay);
+                      // Create new date properly
+                      const newDate = new Date(selectedYear, currentMonth, validDay, 12, 0, 0);
                       handleDateChange(newDate.toISOString().split('T')[0]);
                     }}
                     className="flex-1 p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700"
