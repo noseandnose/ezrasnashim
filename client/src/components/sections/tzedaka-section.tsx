@@ -204,7 +204,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
           </div>
         ) : campaign ? (
           <>
-            <div className="flex items-center space-x-3 mb-4 relative">
+            <div className="flex items-center space-x-3 mb-2 relative">
               <div className="bg-gradient-feminine p-3 rounded-full">
                 <BookOpen className="text-white" size={20} />
               </div>
@@ -218,7 +218,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             </div>
             
             {/* Progress Bar */}
-            <div className="space-y-2">
+            <div className="space-y-1">
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
                   <span className="platypi-regular text-sm text-black/70">Progress</span>
