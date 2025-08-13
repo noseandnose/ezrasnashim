@@ -1,4 +1,4 @@
-import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass, ArrowRight, Baby, HeartHandshake, Briefcase, GraduationCap, Users, Stethoscope, DollarSign, UserCheck, Smile, Zap, TrendingUp, Crown, Sunrise, Sun, Moon, Utensils, Stars } from "lucide-react";
+import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass, ArrowRight, Baby, HeartHandshake, Briefcase, GraduationCap, Users, Stethoscope, DollarSign, UserCheck, Smile, Zap, TrendingUp, Crown, Sunrise, Sun, Moon, Utensils, Stars, Globe } from "lucide-react";
 import korenLogo from "@assets/This_is_a_logo_for_Koren_Publishers_Jerusalem_1752581940716.jpg";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -364,7 +364,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-3">
               <div className="bg-gradient-feminine p-3 rounded-full">
-                <Scroll className="text-white" size={20} />
+                <Globe className="text-white" size={20} />
               </div>
               <div>
                 <h3 className="platypi-bold text-lg text-black">Global Tehillim Chain</h3>
