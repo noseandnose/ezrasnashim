@@ -1,4 +1,4 @@
-import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar, Moon, MapPin, ShoppingBag, MessageSquare, Zap } from "lucide-react";
+import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar, Moon, MapPin, ShoppingBag, MessageSquare, Zap, Lightbulb as Candle } from "lucide-react";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
@@ -123,8 +123,8 @@ export default function TableSection() {
               <p className="platypi-regular text-xs text-black/70 platypi-bold">Candle Lighting</p>
               <div className="flex items-center justify-center space-x-1">
                 <div className="flex items-center space-x-0.5">
-                  <Flame className="text-blush" size={12} />
-                  <Flame className="text-blush" size={12} />
+                  <div className="w-2 h-3 bg-blush rounded-sm"></div>
+                  <div className="w-2 h-3 bg-blush rounded-sm"></div>
                 </div>
                 <p className="platypi-bold text-base text-black platypi-medium">
                   {showShabbosError ? "--:--" : 
