@@ -264,7 +264,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
               completedButtons.has('sponsor-day') ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
-              <Heart className="text-white" size={18} strokeWidth={1.5} />
+              <HandCoins className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <h3 className="platypi-bold text-xs text-black mb-1">Sponsor a Day</h3>
             <p className="platypi-regular text-xs text-black/60 leading-relaxed">
@@ -283,7 +283,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
               <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
                 tzedakaCompleted || completedButtons.has('gave-elsewhere') ? 'bg-sage' : 'bg-gradient-feminine'
               }`}>
-                <HandHeart className="text-white" size={18} strokeWidth={1.5} />
+                <HandCoins className="text-white" size={18} strokeWidth={1.5} />
               </div>
               <h3 className="platypi-bold text-xs text-black mb-1">Gave Tzedaka Elsewhere</h3>
               <p className="platypi-regular text-xs text-black/60 leading-relaxed">
