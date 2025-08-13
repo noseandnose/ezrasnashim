@@ -1,4 +1,4 @@
-import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar, Moon, MapPin, ShoppingBag, MessageSquare } from "lucide-react";
+import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar, Moon, MapPin, ShoppingBag, MessageSquare, Zap } from "lucide-react";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
@@ -122,7 +122,10 @@ export default function TableSection() {
             <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
               <p className="platypi-regular text-xs text-black/70 platypi-bold">Candle Lighting</p>
               <div className="flex items-center justify-center space-x-1">
-                <Flame className="text-blush" size={14} />
+                <div className="flex items-center space-x-0.5">
+                  <Flame className="text-blush" size={12} />
+                  <Flame className="text-blush" size={12} />
+                </div>
                 <p className="platypi-bold text-base text-black platypi-medium">
                   {showShabbosError ? "--:--" : 
                    shabbosData?.candleLighting || 
@@ -133,7 +136,7 @@ export default function TableSection() {
             <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
               <p className="platypi-regular text-xs text-black/70 platypi-bold">Havdalah</p>
               <div className="flex items-center justify-center space-x-1">
-                <Moon className="text-lavender" size={14} />
+                <Flame className="text-lavender" size={14} />
                 <p className="platypi-bold text-base text-black platypi-medium">
                   {showShabbosError ? "--:--" : 
                    shabbosData?.havdalah || 
