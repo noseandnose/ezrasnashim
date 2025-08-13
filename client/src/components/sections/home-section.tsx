@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Clock, Heart, BookOpen, HandHeart, Coins, MapPin, ArrowRight, Sparkles, Star } from "lucide-react";
+import { Calendar, Clock, Heart, BookOpen, HandHeart, Coins, MapPin, ArrowRight, Sparkles, Star, Sunrise, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
@@ -63,7 +63,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   // Time-based prayer logic (same as Tefilla section)
   const getCurrentPrayer = () => {
     if (!jewishTimesQuery.data || jewishTimesQuery.isLoading) {
-      return { title: "Morning Brochas", subtitle: "Loading times...", modal: "morning-brochas", icon: Sparkles };
+      return { title: "Morning Brochas", subtitle: "Loading times...", modal: "morning-brochas", icon: Sunrise };
     }
 
     const now = new Date();
@@ -73,28 +73,28 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     const shkia = new Date(`${now.toDateString()} ${times.shkia}`);
 
     if (now >= neitz && now < minchaGedola) {
-      // Morning Brochas time
+      // Morning Brochas time - sunrise icon
       return {
         title: "Morning Brochas",
         subtitle: `${times.sunrise} - ${times.minchaGedolah}`,
         modal: "morning-brochas" as const,
-        icon: Sparkles
+        icon: Sunrise
       };
     } else if (now >= minchaGedola && now < shkia) {
-      // Mincha time
+      // Mincha time - midday sun icon
       return {
         title: "Mincha",
         subtitle: `${times.minchaGedolah} - ${times.shkia}`,
         modal: "mincha" as const,
-        icon: Clock
+        icon: Sun
       };
     } else {
-      // Maariv time (from Shkia until next morning's Neitz)
+      // Maariv time - night moon icon
       return {
         title: "Maariv",
         subtitle: `${times.shkia} - ${times.sunrise}`,
         modal: "maariv" as const,
-        icon: Star
+        icon: Moon
       };
     }
   };
