@@ -14,6 +14,7 @@ Ezras Nashim is a mobile-first web application for Jewish women to track and com
 - **Tefilla Text Formatting**: Fixed Hebrew text formatting across all Tefilla modals (Mincha, Nishmas, Maariv, Birkat Hamazon) with consistent CSS classes and bold styling (August 11, 2025)
 - **Content Naming**: Renamed "Loshon Horah" modal to "Shmirat Halashon" for more appropriate terminology (August 12, 2025)
 - **Payment System Fixes**: Resolved Stripe payment issues - added email field for tax receipts, fixed success modal display, prevented duplicate payment intent creation using useRef pattern (August 12, 2025)
+- **Placeholder Text Removal**: Eliminated all placeholder text from Tefilla modals (Blessings, Tefillos, Personal Prayers), ensuring only authentic database content is displayed. Added proper empty state handling for prayer categories (August 13, 2025)
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.

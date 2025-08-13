@@ -764,9 +764,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             setFontSize={setFontSize}
           />
           
-          <div className="text-center text-gray-600 platypi-regular">
-            Daily blessings and their proper recitation...
-          </div>
+
 
           <div className="heart-explosion-container">
             <Button 
@@ -797,9 +795,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             setFontSize={setFontSize}
           />
           
-          <div className="text-center text-gray-600 platypi-regular">
-            Traditional prayers and their meanings...
-          </div>
+
 
           <div className="heart-explosion-container">
             <Button 
@@ -830,9 +826,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             setFontSize={setFontSize}
           />
           
-          <div className="text-center text-gray-600 platypi-regular">
-            Guidance for personal prayer and connection...
-          </div>
+
 
           <div className="heart-explosion-container">
             <Button 
@@ -1094,10 +1088,23 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
   });
 
   if (isLoading) return <div className="text-center">Loading prayers...</div>;
+  if (!prayers || prayers.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500 platypi-regular">No prayers available</p>
+        <Button 
+          onClick={() => closeModal()}
+          className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform mt-4"
+        >
+          Close
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
-      {prayers?.map((prayer) => (
+      {prayers.map((prayer) => (
         <div 
           key={prayer.id}
           className="content-card rounded-xl p-4 cursor-pointer"
@@ -1137,10 +1144,23 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
   });
 
   if (isLoading) return <div className="text-center">Loading prayers...</div>;
+  if (!prayers || prayers.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500 platypi-regular">No prayers available</p>
+        <Button 
+          onClick={() => closeModal()}
+          className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform mt-4"
+        >
+          Close
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
-      {prayers?.map((prayer) => (
+      {prayers.map((prayer) => (
         <div 
           key={prayer.id}
           className="content-card rounded-xl p-4 cursor-pointer"
@@ -1180,10 +1200,23 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
   });
 
   if (isLoading) return <div className="text-center">Loading prayers...</div>;
+  if (!prayers || prayers.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500 platypi-regular">No prayers available</p>
+        <Button 
+          onClick={() => closeModal()}
+          className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform mt-4"
+        >
+          Close
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
-      {prayers?.map((prayer) => (
+      {prayers.map((prayer) => (
         <div 
           key={prayer.id}
           className="content-card rounded-xl p-4 cursor-pointer"
