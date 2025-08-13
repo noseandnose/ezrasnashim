@@ -241,7 +241,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           </div>
           
           {/* Right side: Progress image */}
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center -mr-2">
             <DailyProgress />
           </div>
         </div>
