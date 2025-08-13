@@ -29,6 +29,15 @@ import {
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Schedule periodic cleanup of expired names (every hour)
+  setInterval(async () => {
+    try {
+      await storage.cleanupExpiredNames();
+      console.log('Cleaned up expired Tehillim names');
+    } catch (error) {
+      console.error('Error cleaning up expired names:', error);
+    }
+  }, 60 * 60 * 1000); // Run every hour
 
   // Calendar download endpoint using GET request to avoid CORS issues
   app.get("/api/download-calendar", async (req, res) => {
@@ -1208,17 +1217,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Tehillim routes
+  // Tehillim routes - Optimized for faster response
   app.get("/api/tehillim/progress", async (req, res) => {
     try {
-      await storage.cleanupExpiredNames();
-      const progress = await storage.getGlobalTehillimProgress();
-      const randomName = await storage.getRandomNameForPerek();
+      // Get progress with assigned name in a single optimized call
+      const progressWithName = await storage.getProgressWithAssignedName();
       
-      res.json({
-        ...progress,
-        assignedName: randomName?.hebrewName || null
-      });
+      res.json(progressWithName);
     } catch (error) {
       console.error('Error fetching Tehillim progress:', error);
       res.status(500).json({ error: "Failed to fetch Tehillim progress" });

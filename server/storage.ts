@@ -80,6 +80,7 @@ export interface IStorage {
   getGlobalTehillimProgress(): Promise<GlobalTehillimProgress>;
   updateGlobalTehillimProgress(currentPerek: number, language: string, completedBy?: string): Promise<GlobalTehillimProgress>;
   getRandomNameForPerek(): Promise<TehillimName | undefined>;
+  getProgressWithAssignedName(): Promise<any>;
   getSefariaTehillim(perek: number, language: string): Promise<{text: string; perek: number; language: string}>;
 
   // Mincha methods
@@ -191,6 +192,8 @@ export class DatabaseStorage implements IStorage {
 
   // Tehillim methods
   async getActiveNames(): Promise<TehillimName[]> {
+    // Cleanup expired names only when fetching all names
+    // This happens less frequently than progress checks
     await this.cleanupExpiredNames();
     const now = new Date();
     return await db.select().from(tehillimNames).where(gt(tehillimNames.expiresAt, now));
@@ -265,6 +268,51 @@ export class DatabaseStorage implements IStorage {
     return this.getGlobalTehillimProgress();
   }
 
+  async getProgressWithAssignedName(): Promise<any> {
+    // Optimized method to get progress and assigned name in fewer queries
+    const [progress] = await db.select().from(globalTehillimProgress).limit(1);
+    
+    if (!progress) {
+      // Initialize progress if it doesn't exist
+      const initialName = await this.getRandomNameForInitialAssignment();
+      const [newProgress] = await db.insert(globalTehillimProgress).values({
+        currentPerek: 1,
+        currentNameId: initialName?.id || null,
+        completedBy: null
+      }).returning();
+      
+      return {
+        ...newProgress,
+        assignedName: initialName?.hebrewName || null
+      };
+    }
+    
+    // If there's an assigned name, fetch it
+    let assignedName = null;
+    if (progress.currentNameId) {
+      const [name] = await db.select().from(tehillimNames).where(eq(tehillimNames.id, progress.currentNameId));
+      if (name) {
+        assignedName = name.hebrewName;
+      }
+    }
+    
+    // If no assigned name, assign one now
+    if (!assignedName) {
+      const newName = await this.getRandomNameForInitialAssignment();
+      if (newName && progress.id) {
+        await db.update(globalTehillimProgress)
+          .set({ currentNameId: newName.id })
+          .where(eq(globalTehillimProgress.id, progress.id));
+        assignedName = newName.hebrewName;
+      }
+    }
+    
+    return {
+      ...progress,
+      assignedName: assignedName || null
+    };
+  }
+
   async getRandomNameForPerek(): Promise<TehillimName | undefined> {
     // First get the current progress to see if there's already an assigned name
     const progress = await this.getGlobalTehillimProgress();
@@ -290,8 +338,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRandomNameForInitialAssignment(): Promise<TehillimName | undefined> {
-    await this.cleanupExpiredNames();
-    const activeNames = await this.getActiveNames();
+    // Don't cleanup here - avoid redundant cleanup operations
+    const now = new Date();
+    const activeNames = await db.select().from(tehillimNames).where(gt(tehillimNames.expiresAt, now));
     if (activeNames.length === 0) return undefined;
     
     const randomIndex = Math.floor(Math.random() * activeNames.length);

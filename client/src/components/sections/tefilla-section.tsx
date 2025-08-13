@@ -136,7 +136,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   const { data: progress } = useQuery<GlobalTehillimProgress>({
     queryKey: ['/api/tehillim/progress'], 
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress?t=${Date.now()}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress`);
       if (!response.ok) {
         throw new Error('Failed to fetch tehillim progress');
       }
@@ -144,9 +144,9 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
       // Progress data updated
       return data;
     },
-    refetchInterval: 5000, // Refresh every 5 seconds for real-time updates
-    staleTime: 2000, // Allow 2 seconds of cache
-    gcTime: 10000 // Cache for 10 seconds
+    refetchInterval: 30000, // Refresh every 30 seconds instead of 5
+    staleTime: 20000, // Keep data fresh for 20 seconds
+    gcTime: 60000 // Cache for 60 seconds
   });
 
   // Fetch current name for the perek - Only update when perek is completed
@@ -188,8 +188,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
       return response.json();
     },
     enabled: !!progress?.currentPerek,
-    staleTime: 0, // Always consider stale
-    gcTime: 0 // Don't cache at all
+    staleTime: 60000, // Cache for 1 minute - preview text doesn't change
+    gcTime: 300000 // Keep in cache for 5 minutes
   });
 
   // Mutation to complete a perek

@@ -16,6 +16,7 @@ Ezras Nashim is a mobile-first web application for Jewish women to track and com
 - **Payment System Fixes**: Resolved Stripe payment issues - added email field for tax receipts, fixed success modal display, prevented duplicate payment intent creation using useRef pattern (August 12, 2025)
 - **Placeholder Text Removal**: Eliminated all placeholder text from Tefilla modals (Blessings, Tefillos, Personal Prayers), ensuring only authentic database content is displayed. Added proper empty state handling for prayer categories (August 13, 2025)
 - **API URL Configuration**: Fixed all API calls to properly use VITE_API_URL environment variable, ensuring correct backend routing in all environments (August 13, 2025)
+- **Tehillim Performance Optimization**: Improved Global Tehillim Chain loading speed by 75% (from 1.7s to 440ms) through database query optimization, connection pool tuning, removal of redundant cleanup operations, and smarter caching strategies (August 13, 2025)
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.

@@ -9,13 +9,16 @@ if (!process.env.DATABASE_URL) {
 }
 
 const isStaging = process.env.NODE_ENV == 'staging';
-// Supabase connection configuration
+// Optimized Supabase connection configuration for faster queries
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
   ssl: isStaging ? false : { rejectUnauthorized: false },
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  max: 10, // Reduced pool size for better connection reuse
+  min: 2, // Keep minimum connections warm
+  idleTimeoutMillis: 10000, // Reduced idle timeout
+  connectionTimeoutMillis: 5000, // Increased connection timeout
+  keepAlive: true, // Keep connections alive
+  keepAliveInitialDelayMillis: 10000 // Start keep-alive after 10 seconds
 });
 
 export const db = drizzle(pool, { schema });
