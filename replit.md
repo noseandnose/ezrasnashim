@@ -20,6 +20,7 @@ Ezras Nashim is a mobile-first web application for Jewish women to track and com
 - **Conditional Tefilla Content System**: Created dynamic text processing system for location-based and Hebrew calendar-based conditional content in Tefilla prayers. System supports code words like [[OUTSIDE_ISRAEL]], [[ROSH_CHODESH]], [[FAST_DAY]], [[ASERET_YEMEI_TESHUVA]], [[SUKKOT]], [[PESACH]], and [[ROSH_CHODESH_SPECIAL]] for intelligent prayer text display based on user location and Jewish calendar events. Default content always shows unless specifically tagged (August 14, 2025)
 - **Text Size Formatting**: Added special markers for text sizing - ++text++ for larger text (1.2em scale), --text-- for smaller text (0.85em scale), integrated with existing bold (**), grey (~~) and line break (---) formatting system (August 14, 2025)
 - **Hebrew Text Cleaning Enhancement**: Enhanced text cleaner to remove only problematic Unicode characters (zero-width, direction marks, replacement characters) that appear as strange circles/boxes, while preserving Hebrew vowels (nikud), cantillation marks, and all legitimate Hebrew text for proper display and pronunciation (August 14, 2025)
+- **Font Loading Flash Fix**: Eliminated FOUT (Flash of Unstyled Text) by implementing font preloading, using font-display: block, adding inline critical CSS, and creating font loading states to ensure Koren fonts load immediately without showing fallback fonts first (August 14, 2025)
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
