@@ -71,7 +71,11 @@ const useTefillaConditions = () => {
         setConditions({
           isInIsrael: false,
           isRoshChodesh: false,
-          isFastDay: false
+          isFastDay: false,
+          isAseretYemeiTeshuva: false,
+          isSukkot: false,
+          isPesach: false,
+          isRoshChodeshSpecial: false
         });
       }
     };
@@ -365,6 +369,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   });
   const [nishmasFontSize, setNishmasFontSize] = useState(20);
   const [showNishmasInfo, setShowNishmasInfo] = useState(false);
+
+  // Get Tefilla conditions for conditional content processing
+  const conditions = useTefillaConditions();
 
   const { data: minchaPrayers = [], isLoading } = useQuery<MinchaPrayer[]>({
     queryKey: ['/api/mincha/prayers'],
@@ -691,7 +698,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                       <div 
                         className="vc-koren-hebrew leading-relaxed"
                         style={{ fontSize: `${fontSize + 1}px` }}
-                        dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.hebrewText).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
+                        dangerouslySetInnerHTML={{ 
+                          __html: processTefillaContent(prayer.hebrewText, conditions).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') 
+                        }}
                       />
                     )}
                     {language === 'english' && (

@@ -1,4 +1,22 @@
 /**
+ * Cleans Hebrew text by removing problematic Unicode characters that show as black boxes
+ */
+function cleanHebrewText(text: string): string {
+  // Remove common problematic Unicode characters that cause black glyph boxes
+  return text
+    // Remove zero-width characters
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    // Remove direction marks that can cause issues
+    .replace(/[\u202A-\u202E]/g, '')
+    // Remove problematic punctuation that VC Koren doesn't support
+    .replace(/[\u2010-\u2015]/g, '-') // Replace various dashes with simple dash
+    .replace(/[\u2018-\u2019]/g, "'") // Replace smart quotes
+    .replace(/[\u201C-\u201D]/g, '"') // Replace smart quotes
+    // Clean up any remaining problem characters
+    .replace(/[^\u0000-\u007F\u0590-\u05FF\u200C\u200D\u0020-\u007E]/g, '');
+}
+
+/**
  * Formats text content to handle special markers:
  * - ** for bold text
  * - --- for line breaks
@@ -10,7 +28,8 @@
 export function formatTextContent(text: string | null | undefined): string {
   if (!text) return '';
   
-  let formatted = text;
+  // Clean Hebrew text first to remove problematic characters
+  let formatted = cleanHebrewText(text);
   
   // Replace --- with line breaks first
   formatted = formatted.replace(/---/g, '<br /><br />');
