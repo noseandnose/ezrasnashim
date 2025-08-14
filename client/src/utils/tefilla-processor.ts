@@ -31,7 +31,7 @@ export interface TefillaConditions {
  * [[ASERET_YEMEI_TESHUVA]]content[[/ASERET_YEMEI_TESHUVA]] - Only shows during days between Rosh Hashana and Yom Kippur
  * [[SUKKOT]]content[[/SUKKOT]] - Only shows during Sukkot
  * [[PESACH]]content[[/PESACH]] - Only shows during Pesach
- * [[ROSH_CHODESH_SPECIAL]]content[[/ROSH_CHODESH_SPECIAL]] - Shows during Rosh Chodesh that falls on Pesach, Sukkot, or Aseret Yemei Teshuva
+ * [[ROSH_CHODESH_SPECIAL]]content[[/ROSH_CHODESH_SPECIAL]] - HIDES content during Rosh Chodesh, Pesach, Sukkot, or Aseret Yemei Teshuva
  * 
  * You can combine conditions:
  * [[OUTSIDE_ISRAEL,ROSH_CHODESH]]content[[/OUTSIDE_ISRAEL,ROSH_CHODESH]] - Shows only for users outside Israel on Rosh Chodesh
@@ -49,7 +49,7 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     ASERET_YEMEI_TESHUVA: () => conditions.isAseretYemeiTeshuva,
     SUKKOT: () => conditions.isSukkot,
     PESACH: () => conditions.isPesach,
-    ROSH_CHODESH_SPECIAL: () => conditions.isRoshChodeshSpecial
+    ROSH_CHODESH_SPECIAL: () => !conditions.isRoshChodeshSpecial // Exclusion logic: shows when NOT in special periods
   };
 
   // Process all conditional sections
@@ -184,8 +184,8 @@ export async function getCurrentTefillaConditions(
           event.toLowerCase().includes('seder')
         );
         
-        // Check for Rosh Chodesh during special periods
-        isRoshChodeshSpecial = isRoshChodesh && (isPesach || isSukkot || isAseretYemeiTeshuva);
+        // Check if we're in any special period (for exclusion logic)
+        isRoshChodeshSpecial = isRoshChodesh || isPesach || isSukkot || isAseretYemeiTeshuva;
       }
     } catch (error) {
       console.warn('Could not fetch Hebrew date data:', error);
