@@ -1,45 +1,18 @@
 /**
- * Cleans Hebrew text by removing problematic Unicode characters that appear as strange circles
- * while preserving legitimate Hebrew vowel marks (nikud) and proper spacing
+ * Cleans Hebrew text by removing only the most problematic Unicode characters
+ * while preserving Hebrew text, spaces, and legitimate formatting
  */
 function cleanHebrewText(text: string): string {
   return text
-    // Remove zero-width characters
-    .replace(/[\u200B-\u200D\uFEFF]/g, '')
-    // Remove direction marks that can cause layout issues
-    .replace(/[\u202A-\u202E]/g, '')
-    // Remove problematic spacing characters but preserve normal spaces
-    .replace(/[\u2060\u00A0\u180E\u2028\u2029]/g, '')
-    // Remove geometric shapes (squares, circles, rectangles)
-    .replace(/[\u25A0-\u25FF]/g, '')
-    // Remove miscellaneous symbols that appear as circles
-    .replace(/[\u2600-\u26FF]/g, '')
-    // Remove dingbats
-    .replace(/[\u2700-\u27BF]/g, '')
-    // Remove replacement characters (appear as squares)
-    .replace(/[\uFFFD]/g, '')
-    // Remove dotted circles specifically
-    .replace(/[\u25CC]/g, '')
-    // Remove bullet points and other circles
-    .replace(/[\u2022\u2023\u25E6]/g, '')
-    // Remove control characters
-    .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
-    // Remove problematic punctuation that Koren font doesn't support well
-    .replace(/[\u2010-\u2015]/g, '-') // Replace various dashes with simple dash
-    .replace(/[\u2018-\u2019]/g, "'") // Replace smart quotes
-    .replace(/[\u201C-\u201D]/g, '"') // Replace smart quotes
-    // Remove combining characters that might appear as circles (but preserve Hebrew)
-    .replace(/[\u0300-\u036F]/g, '')
-    // Remove modifier symbols that might appear as strange marks
-    .replace(/[\u02B0-\u02FF]/g, '')
-    // Replace pipe with proper Hebrew divider
-    .replace(/\|/g, '׀')
-    // Clean multiple spaces
-    .replace(/\s{2,}/g, ' ')
-    // Remove private use area and specials that cause display issues
-    .replace(/[\uE000-\uF8FF\uFFF0-\uFFFF]/g, '')
-    // Keep only safe characters: Latin, Hebrew block, basic punctuation, and spaces
-    .replace(/[^\u0000-\u007F\u0590-\u05FF\u0020-\u007E\u00A0-\u00FF]/g, '')
+    // Remove only the most problematic characters that cause display issues
+    .replace(/[\uFFFD]/g, '')  // Remove replacement characters (squares)
+    .replace(/[\u25CC]/g, '')  // Remove dotted circles specifically
+    .replace(/[\u200B\u200C\u200D]/g, '')  // Remove zero-width spaces only
+    .replace(/[\u2060\uFEFF]/g, '')  // Remove word joiner and zero-width no-break space
+    .replace(/[\uE000-\uF8FF]/g, '')  // Remove private use area characters that show as squares
+    .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')  // Remove control characters
+    // Clean multiple spaces but preserve single spaces
+    .replace(/\s{3,}/g, ' ')  // Only replace 3+ spaces with single space
     .trim();
 }
 
