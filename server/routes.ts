@@ -1899,6 +1899,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Location API endpoint for Tefilla conditional processing
+  app.get("/api/location/:lat/:lon", async (req, res) => {
+    try {
+      const { lat, lon } = req.params;
+      const latitude = parseFloat(lat);
+      const longitude = parseFloat(lon);
+
+      if (isNaN(latitude) || isNaN(longitude)) {
+        return res.status(400).json({ message: "Invalid coordinates" });
+      }
+
+      // Use OpenStreetMap Nominatim for reverse geocoding
+      const response = await serverAxiosClient.get(
+        `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`
+      );
+
+      if (response.data) {
+        res.json({
+          country: response.data.address?.country || 'Unknown',
+          city: response.data.address?.city || response.data.address?.town || response.data.address?.village || 'Unknown',
+          state: response.data.address?.state || response.data.address?.province || null,
+          coordinates: { latitude, longitude }
+        });
+      } else {
+        res.status(404).json({ message: "Location not found" });
+      }
+    } catch (error) {
+      console.error('Error fetching location:', error);
+      res.status(500).json({ message: "Failed to fetch location data" });
+    }
+  });
+
+  // Hebrew date API endpoint for Tefilla conditional processing
+  app.get("/api/hebrew-date/:date", async (req, res) => {
+    try {
+      const { date } = req.params;
+      const inputDate = new Date(date);
+      
+      if (isNaN(inputDate.getTime())) {
+        return res.status(400).json({ message: "Invalid date format" });
+      }
+
+      const year = inputDate.getFullYear();
+      const month = inputDate.getMonth() + 1;
+      const day = inputDate.getDate();
+
+      // Get Hebrew date conversion
+      const hebrewResponse = await serverAxiosClient.get(
+        `https://www.hebcal.com/converter?cfg=json&gy=${year}&gm=${month}&gd=${day}&g2h=1`
+      );
+
+      // Get events and holidays for this date
+      const eventsResponse = await serverAxiosClient.get(
+        `https://www.hebcal.com/hebcal?v=1&cfg=json&year=${year}&month=${month}&mf=on&ss=on&mod=on&nx=on&o=on&s=on`
+      );
+
+      let isRoshChodesh = false;
+      let events: string[] = [];
+
+      if (eventsResponse.data && eventsResponse.data.items) {
+        // Filter events for the specific date
+        const dateString = inputDate.toISOString().split('T')[0];
+        const dayEvents = eventsResponse.data.items.filter((item: any) => {
+          if (item.date) {
+            const eventDate = new Date(item.date).toISOString().split('T')[0];
+            return eventDate === dateString;
+          }
+          return false;
+        });
+
+        events = dayEvents.map((item: any) => item.title || item.hebrew || '');
+        isRoshChodesh = events.some(event => 
+          event.toLowerCase().includes('rosh chodesh') ||
+          event.toLowerCase().includes('ראש חודש')
+        );
+      }
+
+      if (hebrewResponse.data) {
+        res.json({
+          hebrew: hebrewResponse.data.hebrew || '',
+          date: date,
+          isRoshChodesh,
+          events,
+          hebrewDay: hebrewResponse.data.hd,
+          hebrewMonth: hebrewResponse.data.hm,
+          hebrewYear: hebrewResponse.data.hy
+        });
+      } else {
+        res.status(404).json({ message: "Hebrew date not found" });
+      }
+    } catch (error) {
+      console.error('Error fetching Hebrew date:', error);
+      res.status(500).json({ message: "Failed to fetch Hebrew date data" });
+    }
+  });
+
   app.get("/healthcheck", (req, res) => {
     res.json({ status: "OK" });
   })

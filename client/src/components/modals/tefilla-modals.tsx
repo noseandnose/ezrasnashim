@@ -16,6 +16,7 @@ import { useTrackModalComplete, useAnalytics } from "@/hooks/use-analytics";
 import { BirkatHamazonModal } from "@/components/modals/birkat-hamazon-modal";
 import { useLocationStore } from '@/hooks/use-jewish-times';
 import { formatTextContent } from "@/lib/text-formatter";
+import { processTefillaText, getCurrentTefillaConditions, type TefillaConditions } from "@/utils/tefilla-processor";
 
 interface TefillaModalsProps {
   onSectionChange?: (section: any) => void;
@@ -49,6 +50,44 @@ const KorenThankYou = () => {
       </span>
     </div>
   );
+};
+
+// Custom hook to manage Tefilla conditions
+const useTefillaConditions = () => {
+  const { coordinates } = useLocationStore();
+  const [conditions, setConditions] = useState<TefillaConditions | null>(null);
+
+  useEffect(() => {
+    const loadConditions = async () => {
+      try {
+        const tefillaConditions = await getCurrentTefillaConditions(
+          coordinates?.lat,
+          coordinates?.lng
+        );
+        setConditions(tefillaConditions);
+      } catch (error) {
+        console.warn('Could not load Tefilla conditions:', error);
+        // Set default conditions
+        setConditions({
+          isInIsrael: false,
+          isRoshChodesh: false,
+          isFastDay: false
+        });
+      }
+    };
+
+    loadConditions();
+  }, [coordinates]);
+
+  return conditions;
+};
+
+// Enhanced text processing function for Tefilla content
+const processTefillaContent = (text: string, conditions: TefillaConditions | null): string => {
+  if (!conditions || !text) return formatTextContent(text);
+  
+  const processedText = processTefillaText(text, conditions);
+  return formatTextContent(processedText);
 };
 
 // Standardized Modal Header Component for Tefilla Modals
@@ -111,6 +150,9 @@ function MorningBrochasModal() {
   const [showHebrew, setShowHebrew] = useState(true);
   const [showEnglish, setShowEnglish] = useState(false);
   const [fontSize, setFontSize] = useState(20);
+  
+  // Load Tefilla conditions for conditional content processing
+  const tefillaConditions = useTefillaConditions();
   
   // Fetch morning prayers from database
   const { data: morningPrayers, isLoading, error } = useQuery({
@@ -184,14 +226,14 @@ function MorningBrochasModal() {
                     <div 
                       className="vc-koren-hebrew leading-relaxed"
                       style={{ fontSize: `${fontSize + 1}px` }}
-                      dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.hebrewText).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
+                      dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText, tefillaConditions).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
                     />
                   )}
                   {!showHebrew && (
                     <div 
                       className="koren-siddur-english text-left leading-relaxed text-black/70"
                       style={{ fontSize: `${fontSize}px` }}
-                      dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.englishTranslation || "English translation not available") }}
+                      dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
                     />
                   )}
                 </div>
