@@ -18,6 +18,7 @@ Ezras Nashim is a mobile-first web application for Jewish women to track and com
 - **API URL Configuration**: Fixed all API calls to properly use VITE_API_URL environment variable, ensuring correct backend routing in all environments (August 13, 2025)
 - **Tehillim Performance Optimization**: Improved Global Tehillim Chain loading speed by 75% (from 1.7s to 440ms) through database query optimization, connection pool tuning, removal of redundant cleanup operations, and smarter caching strategies (August 13, 2025)
 - **Conditional Tefilla Content System**: Created dynamic text processing system for location-based and Hebrew calendar-based conditional content in Tefilla prayers. System supports code words like [[OUTSIDE_ISRAEL]], [[ROSH_CHODESH]], [[FAST_DAY]], [[ASERET_YEMEI_TESHUVA]], [[SUKKOT]], [[PESACH]], and [[ROSH_CHODESH_SPECIAL]] for intelligent prayer text display based on user location and Jewish calendar events. Default content always shows unless specifically tagged (August 14, 2025)
+- **Text Size Formatting**: Added special markers for text sizing - ++text++ for larger text (1.2em scale), --text-- for smaller text (0.85em scale), integrated with existing bold (**), grey (~~) and line break (---) formatting system (August 14, 2025)
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -26,7 +27,7 @@ Font testing: Currently testing Platypi serif font as potential replacement for 
 Tefilla font: All prayer content in Tefilla modals now uses Koren Siddur font for authentic prayer experience (August 6, 2025).
 Reading time display: User requested reading time estimation for text content, implemented for Halacha content using 200 words per minute calculation (August 1, 2025).
 Community feedback form: Updated to new Google Forms link (August 5, 2025).
-Text formatting: Database content supports markdown-style formatting - **text** for bold, --- for line breaks, ~~text~~ for greyed out text (August 6, 2025).
+Text formatting: Database content supports markdown-style formatting - **text** for bold, --- for line breaks, ~~text~~ for greyed out text, ++text++ for larger text (1.2em), --text-- for smaller text (0.85em) (August 14, 2025).
 
 ## System Architecture
 ### Frontend

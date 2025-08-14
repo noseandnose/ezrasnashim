@@ -21,6 +21,8 @@ function cleanHebrewText(text: string): string {
  * - ** for bold text
  * - --- for line breaks
  * - ~~ for greyed out text
+ * - ++ for larger text
+ * - -- for smaller text
  * - [[ ]] for conditional content (processed by tefilla processor)
  * @param text - The raw text to format
  * @returns The formatted HTML string
@@ -36,11 +38,13 @@ export function formatTextContent(text: string | null | undefined): string {
   
   // Removed [[ ]] grey box processing to allow conditional content system to work
   
-  // Process the text character by character to handle ** and ~~ markers
+  // Process the text character by character to handle formatting markers
   let result = '';
   let lastIndex = 0;
   let isInBold = false;
   let isInGrey = false;
+  let isInLarger = false;
+  let isInSmaller = false;
   
   for (let i = 0; i < formatted.length - 1; i++) {
     // Check for ** (bold) markers
@@ -69,6 +73,35 @@ export function formatTextContent(text: string | null | undefined): string {
       
       isInGrey = !isInGrey;
       i++; // Skip the second ~
+      lastIndex = i + 1;
+    }
+    // Check for ++ (larger text) markers
+    else if (formatted[i] === '+' && formatted[i + 1] === '+') {
+      result += formatted.substring(lastIndex, i);
+      
+      if (!isInLarger) {
+        result += '<span style="font-size: 1.2em;">';
+      } else {
+        result += '</span>';
+      }
+      
+      isInLarger = !isInLarger;
+      i++; // Skip the second +
+      lastIndex = i + 1;
+    }
+    // Check for -- (smaller text) markers - but avoid conflicts with line breaks
+    else if (formatted[i] === '-' && formatted[i + 1] === '-' && 
+             (i + 2 >= formatted.length || formatted[i + 2] !== '-')) {
+      result += formatted.substring(lastIndex, i);
+      
+      if (!isInSmaller) {
+        result += '<span style="font-size: 0.85em;">';
+      } else {
+        result += '</span>';
+      }
+      
+      isInSmaller = !isInSmaller;
+      i++; // Skip the second -
       lastIndex = i + 1;
     }
   }
