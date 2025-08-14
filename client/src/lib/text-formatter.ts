@@ -1,32 +1,26 @@
 /**
- * Cleans Hebrew text by removing problematic Unicode characters and Hebrew vowel marks (nikud)
- * that may appear as strange circles or boxes in the Koren font
+ * Cleans Hebrew text by removing only problematic Unicode characters that appear as strange circles
+ * while preserving legitimate Hebrew vowel marks (nikud) and letters
  */
 function cleanHebrewText(text: string): string {
-  // Remove common problematic Unicode characters that cause display issues
+  // Remove only truly problematic Unicode characters that cause display issues, not Hebrew vowels
   return text
-    // Remove Hebrew vowel marks (nikud/nikkudot) - Unicode range U+05B0 to U+05C7
-    .replace(/[\u05B0-\u05C7]/g, '')
-    // Remove Hebrew accent marks - Unicode range U+0591 to U+05AF
-    .replace(/[\u0591-\u05AF]/g, '')
-    // Remove Hebrew cantillation marks - Unicode range U+05A0 to U+05AC
-    .replace(/[\u05A0-\u05AC]/g, '')
-    // Remove Hebrew presentation forms and additional diacritics (but preserve Hebrew letters)
-    .replace(/[\u05C8-\u05CF]/g, '')
     // Remove zero-width characters
     .replace(/[\u200B-\u200D\uFEFF]/g, '')
-    // Remove direction marks that can cause issues
+    // Remove direction marks that can cause layout issues
     .replace(/[\u202A-\u202E]/g, '')
     // Remove problematic punctuation that Koren font doesn't support well
     .replace(/[\u2010-\u2015]/g, '-') // Replace various dashes with simple dash
     .replace(/[\u2018-\u2019]/g, "'") // Replace smart quotes
     .replace(/[\u201C-\u201D]/g, '"') // Replace smart quotes
-    // Remove combining characters that might appear as circles
+    // Remove combining characters that might appear as circles (but not Hebrew vowels)
     .replace(/[\u0300-\u036F]/g, '')
     // Remove modifier symbols that might appear as strange marks
     .replace(/[\u02B0-\u02FF]/g, '')
-    // Keep Hebrew letters (U+05D0-U+05EA), Latin characters, numbers, and basic punctuation
-    .replace(/[^\u0000-\u007F\u05D0-\u05EA\u200C\u200D\u0020-\u007E]/g, '');
+    // Remove specific problematic characters that show as boxes/circles in some fonts
+    .replace(/[\uFFFD\u25CC]/g, '') // Replacement character and dotted circle
+    // Keep Hebrew letters, Hebrew vowels (nikud), cantillation marks, Latin characters, and punctuation
+    .replace(/[^\u0000-\u007F\u0590-\u05FF\u200C\u200D\u0020-\u007E]/g, '');
 }
 
 /**
