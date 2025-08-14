@@ -16,11 +16,17 @@ You can use these code words in your Tefilla text within double square brackets:
 ### Hebrew Calendar-Based
 - `[[ROSH_CHODESH]]content[[/ROSH_CHODESH]]` - Shows only on Rosh Chodesh days
 - `[[FAST_DAY]]content[[/FAST_DAY]]` - Shows only on fast days
+- `[[ASERET_YEMEI_TESHUVA]]content[[/ASERET_YEMEI_TESHUVA]]` - Shows only during the days between Rosh Hashana and Yom Kippur
+- `[[SUKKOT]]content[[/SUKKOT]]` - Shows only during Sukkot
+- `[[PESACH]]content[[/PESACH]]` - Shows only during Pesach
+- `[[ROSH_CHODESH_SPECIAL]]content[[/ROSH_CHODESH_SPECIAL]]` - Shows during Rosh Chodesh that falls on Pesach, Sukkot, or Aseret Yemei Teshuva
 
 ### Combining Conditions
 You can combine multiple conditions using commas (AND logic):
 - `[[OUTSIDE_ISRAEL,ROSH_CHODESH]]content[[/OUTSIDE_ISRAEL,ROSH_CHODESH]]` - Shows only for users outside Israel on Rosh Chodesh
 - `[[OUTSIDE_ISRAEL,FAST_DAY]]content[[/OUTSIDE_ISRAEL,FAST_DAY]]` - Shows only for users outside Israel on fast days
+- `[[ROSH_CHODESH,PESACH]]content[[/ROSH_CHODESH,PESACH]]` - Shows only during Rosh Chodesh that occurs during Pesach
+- `[[OUTSIDE_ISRAEL,ASERET_YEMEI_TESHUVA]]content[[/OUTSIDE_ISRAEL,ASERET_YEMEI_TESHUVA]]` - Shows only for users outside Israel during the Ten Days of Repentance
 
 ## Example Usage in Supabase
 

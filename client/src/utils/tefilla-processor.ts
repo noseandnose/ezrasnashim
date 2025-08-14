@@ -4,6 +4,10 @@ export interface TefillaConditions {
   isInIsrael: boolean;
   isRoshChodesh: boolean;
   isFastDay: boolean;
+  isAseretYemeiTeshuva: boolean;
+  isSukkot: boolean;
+  isPesach: boolean;
+  isRoshChodeshSpecial: boolean;
   hebrewDate?: {
     hebrew: string;
     date: string;
@@ -24,6 +28,10 @@ export interface TefillaConditions {
  * [[OUTSIDE_ISRAEL]]content[[/OUTSIDE_ISRAEL]] - Only shows for users outside Israel
  * [[ROSH_CHODESH]]content[[/ROSH_CHODESH]] - Only shows on Rosh Chodesh
  * [[FAST_DAY]]content[[/FAST_DAY]] - Only shows on fast days
+ * [[ASERET_YEMEI_TESHUVA]]content[[/ASERET_YEMEI_TESHUVA]] - Only shows during days between Rosh Hashana and Yom Kippur
+ * [[SUKKOT]]content[[/SUKKOT]] - Only shows during Sukkot
+ * [[PESACH]]content[[/PESACH]] - Only shows during Pesach
+ * [[ROSH_CHODESH_SPECIAL]]content[[/ROSH_CHODESH_SPECIAL]] - Shows during Rosh Chodesh that falls on Pesach, Sukkot, or Aseret Yemei Teshuva
  * 
  * You can combine conditions:
  * [[OUTSIDE_ISRAEL,ROSH_CHODESH]]content[[/OUTSIDE_ISRAEL,ROSH_CHODESH]] - Shows only for users outside Israel on Rosh Chodesh
@@ -33,11 +41,15 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
 
   let processedText = text;
 
-  // Define condition checkers - only the three special conditions
+  // Define condition checkers for all special conditions
   const conditionCheckers = {
     OUTSIDE_ISRAEL: () => !conditions.isInIsrael,
     ROSH_CHODESH: () => conditions.isRoshChodesh,
-    FAST_DAY: () => conditions.isFastDay
+    FAST_DAY: () => conditions.isFastDay,
+    ASERET_YEMEI_TESHUVA: () => conditions.isAseretYemeiTeshuva,
+    SUKKOT: () => conditions.isSukkot,
+    PESACH: () => conditions.isPesach,
+    ROSH_CHODESH_SPECIAL: () => conditions.isRoshChodeshSpecial
   };
 
   // Process all conditional sections
@@ -113,6 +125,10 @@ export async function getCurrentTefillaConditions(
     // Get Hebrew calendar information
     let isRoshChodesh = false;
     let isFastDay = false;
+    let isAseretYemeiTeshuva = false;
+    let isSukkot = false;
+    let isPesach = false;
+    let isRoshChodeshSpecial = false;
     let hebrewDate = undefined;
 
     try {
@@ -125,8 +141,10 @@ export async function getCurrentTefillaConditions(
         hebrewDate = await hebrewResponse.json();
         isRoshChodesh = hebrewDate.isRoshChodesh || false;
         
-        // Check for fast days in events
+        // Check for events in Hebrew calendar
         const events = hebrewDate.events || [];
+        
+        // Check for fast days
         isFastDay = events.some((event: string) => 
           event.toLowerCase().includes('fast') ||
           event.toLowerCase().includes('tzom') ||
@@ -136,6 +154,38 @@ export async function getCurrentTefillaConditions(
           event.toLowerCase().includes('gedaliah') ||
           event.toLowerCase().includes('esther')
         );
+        
+        // Check for Aseret Yemei Teshuva (between Rosh Hashana and Yom Kippur)
+        isAseretYemeiTeshuva = events.some((event: string) => 
+          event.toLowerCase().includes('rosh hashana') ||
+          event.toLowerCase().includes('tzom gedaliah') ||
+          event.toLowerCase().includes('yom kippur')
+        ) || (hebrewDate.hebrew && (
+          hebrewDate.hebrew.includes('תשרי') && 
+          (hebrewDate.hebrew.includes('א׳') || hebrewDate.hebrew.includes('ב׳') || 
+           hebrewDate.hebrew.includes('ג׳') || hebrewDate.hebrew.includes('ד׳') || 
+           hebrewDate.hebrew.includes('ה׳') || hebrewDate.hebrew.includes('ו׳') || 
+           hebrewDate.hebrew.includes('ז׳') || hebrewDate.hebrew.includes('ח׳') || 
+           hebrewDate.hebrew.includes('ט׳') || hebrewDate.hebrew.includes('י׳'))
+        ));
+        
+        // Check for Sukkot
+        isSukkot = events.some((event: string) => 
+          event.toLowerCase().includes('sukkot') ||
+          event.toLowerCase().includes('hoshanah') ||
+          event.toLowerCase().includes('simchat torah') ||
+          event.toLowerCase().includes('shemini atzeret')
+        );
+        
+        // Check for Pesach
+        isPesach = events.some((event: string) => 
+          event.toLowerCase().includes('pesach') ||
+          event.toLowerCase().includes('passover') ||
+          event.toLowerCase().includes('seder')
+        );
+        
+        // Check for Rosh Chodesh during special periods
+        isRoshChodeshSpecial = isRoshChodesh && (isPesach || isSukkot || isAseretYemeiTeshuva);
       }
     } catch (error) {
       console.warn('Could not fetch Hebrew date data:', error);
@@ -145,6 +195,10 @@ export async function getCurrentTefillaConditions(
       isInIsrael,
       isRoshChodesh,
       isFastDay,
+      isAseretYemeiTeshuva,
+      isSukkot,
+      isPesach,
+      isRoshChodeshSpecial,
       hebrewDate,
       location
     };
@@ -155,7 +209,11 @@ export async function getCurrentTefillaConditions(
     return {
       isInIsrael: false,
       isRoshChodesh: false,
-      isFastDay: false
+      isFastDay: false,
+      isAseretYemeiTeshuva: false,
+      isSukkot: false,
+      isPesach: false,
+      isRoshChodeshSpecial: false
     };
   }
 }
@@ -168,6 +226,10 @@ export function debugTefillaConditions(conditions: TefillaConditions): void {
     isInIsrael: conditions.isInIsrael,
     isRoshChodesh: conditions.isRoshChodesh,
     isFastDay: conditions.isFastDay,
+    isAseretYemeiTeshuva: conditions.isAseretYemeiTeshuva,
+    isSukkot: conditions.isSukkot,
+    isPesach: conditions.isPesach,
+    isRoshChodeshSpecial: conditions.isRoshChodeshSpecial,
     location: conditions.location,
     hebrewDate: conditions.hebrewDate
   });
