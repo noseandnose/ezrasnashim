@@ -26,6 +26,7 @@ export interface TefillaConditions {
  * Code words you can use in Supabase (default content always shows):
  * 
  * [[OUTSIDE_ISRAEL]]content[[/OUTSIDE_ISRAEL]] - Only shows for users outside Israel
+ * [[ONLY_ISRAEL]]content[[/ONLY_ISRAEL]] - Only shows for users in Israel
  * [[ROSH_CHODESH]]content[[/ROSH_CHODESH]] - Only shows on Rosh Chodesh
  * [[FAST_DAY]]content[[/FAST_DAY]] - Only shows on fast days
  * [[ASERET_YEMEI_TESHUVA]]content[[/ASERET_YEMEI_TESHUVA]] - Only shows during days between Rosh Hashana and Yom Kippur
@@ -35,6 +36,7 @@ export interface TefillaConditions {
  * 
  * You can combine conditions:
  * [[OUTSIDE_ISRAEL,ROSH_CHODESH]]content[[/OUTSIDE_ISRAEL,ROSH_CHODESH]] - Shows only for users outside Israel on Rosh Chodesh
+ * [[ONLY_ISRAEL,SUKKOT]]content[[/ONLY_ISRAEL,SUKKOT]] - Shows only for users in Israel during Sukkot
  */
 export function processTefillaText(text: string, conditions: TefillaConditions): string {
   if (!text) return text;
@@ -44,6 +46,7 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
   // Define condition checkers for all special conditions
   const conditionCheckers = {
     OUTSIDE_ISRAEL: () => !conditions.isInIsrael,
+    ONLY_ISRAEL: () => conditions.isInIsrael,
     ROSH_CHODESH: () => conditions.isRoshChodesh,
     FAST_DAY: () => conditions.isFastDay,
     ASERET_YEMEI_TESHUVA: () => conditions.isAseretYemeiTeshuva,
