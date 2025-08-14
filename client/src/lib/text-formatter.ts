@@ -87,16 +87,18 @@ export function formatTextContent(text: string | null | undefined): string {
     return match.split('').map(() => '&nbsp;').join('');
   });
   
+  // Apply English text wrapping for better font handling
+  result = wrapEnglishText(result);
+  
   return result;
 }
 
 /**
- * Wrap English text segments with appropriate CSS class for Arno Koren font
+ * Wrap English text segments with appropriate font styling for mixed Hebrew/English content
  */
 function wrapEnglishText(html: string): string {
-  // Only match longer sequences of English words (not single letters or short fragments)
-  // Match patterns like "After grain products" or "wine or grape juice"
-  const englishPattern = /\b([a-zA-Z]{2,}(?:\s+[a-zA-Z]{2,})*(?:\s*[a-zA-Z0-9\.,;:!?'"()\-–—\/]*)?)\b/g;
+  // Match complete English phrases and words, but be more specific about context
+  const englishPattern = /\b([A-Za-z][a-zA-Z0-9\s,.\-']*[a-zA-Z])\b/g;
   
   return html.replace(englishPattern, (match) => {
     // Skip if it's already wrapped in HTML tags
@@ -109,9 +111,10 @@ function wrapEnglishText(html: string): string {
       return match;
     }
     
-    // Only wrap if it's a meaningful English phrase (at least 4 characters)
-    if (match.trim().length >= 4) {
-      return `<em class="english-text">${match}</em>`;
+    // Only wrap substantial English text (at least 3 characters and meaningful words)
+    const cleanMatch = match.trim();
+    if (cleanMatch.length >= 3 && /[A-Za-z]{2,}/.test(cleanMatch)) {
+      return `<span style="font-family: 'Arno Koren', serif; direction: ltr; display: inline-block;">${match}</span>`;
     }
     
     return match;

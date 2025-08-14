@@ -1549,19 +1549,23 @@ function IndividualTehillimModal() {
         </div>
       </div>
 
-      {/* Standardized Content Area */}
-      <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
+      {/* Standardized Content Area - Fixed scrolling */}
+      <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto scrollbar-thin">
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
           </div>
         ) : (
           <div
-            className={`${language === 'hebrew' ? 'vc-koren-hebrew' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
-            style={{ fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px` }}
-          >
-            {tehillimText?.text || `Psalm ${selectedPsalm} text loading...`}
-          </div>
+            className={`${language === 'hebrew' ? 'vc-koren-hebrew' : 'koren-siddur-english text-left'} leading-relaxed text-black pb-4`}
+            style={{ 
+              fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px`,
+              minHeight: 'fit-content'
+            }}
+            dangerouslySetInnerHTML={{
+              __html: formatTextContent(tehillimText?.text || `Psalm ${selectedPsalm} text loading...`)
+            }}
+          />
         )}
       </div>
 
