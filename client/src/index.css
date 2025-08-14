@@ -31,9 +31,9 @@
   font-display: block; /* Prevent font flash */
 }
 
-/* Hebrew prayer text using mixed Koren fonts */
+/* Hebrew prayer text using Koren Siddur with Arno Koren fallback for English */
 .vc-koren-hebrew {
-  font-family: 'Koren Siddur', 'Arno Koren' !important;
+  font-family: 'Koren Siddur', 'Arno Koren', serif !important;
   font-weight: normal !important;
   font-style: normal !important;
   color: #000000 !important;
@@ -92,9 +92,9 @@
   direction: ltr !important;
 }
 
-/* Update old class to use mixed Koren fonts */
+/* Update old class to use Koren fonts with proper fallback */
 .koren-siddur-hebrew {
-  font-family: 'Koren Siddur', 'Arno Koren' !important;
+  font-family: 'Koren Siddur', 'Arno Koren', serif !important;
   font-weight: normal !important;
   font-style: normal !important;
   color: #000000 !important;

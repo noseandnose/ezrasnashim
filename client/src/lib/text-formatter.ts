@@ -87,9 +87,6 @@ export function formatTextContent(text: string | null | undefined): string {
     return match.split('').map(() => '&nbsp;').join('');
   });
   
-  // Wrap English text segments with proper class for Arno Koren font
-  result = wrapEnglishText(result);
-  
   return result;
 }
 
@@ -97,9 +94,9 @@ export function formatTextContent(text: string | null | undefined): string {
  * Wrap English text segments with appropriate CSS class for Arno Koren font
  */
 function wrapEnglishText(html: string): string {
-  // Pattern to match Latin characters, numbers, and common English punctuation
-  // This pattern matches sequences of Latin text that should use Arno Koren font
-  const englishPattern = /([a-zA-Z][a-zA-Z0-9\s\.,;:!?'"()\-–—\/]*[a-zA-Z0-9])/g;
+  // Only match longer sequences of English words (not single letters or short fragments)
+  // Match patterns like "After grain products" or "wine or grape juice"
+  const englishPattern = /\b([a-zA-Z]{2,}(?:\s+[a-zA-Z]{2,})*(?:\s*[a-zA-Z0-9\.,;:!?'"()\-–—\/]*)?)\b/g;
   
   return html.replace(englishPattern, (match) => {
     // Skip if it's already wrapped in HTML tags
@@ -107,13 +104,17 @@ function wrapEnglishText(html: string): string {
       return match;
     }
     
-    // Skip very short matches that might be abbreviations mixed with Hebrew
-    if (match.length < 3) {
+    // Skip if it contains Hebrew characters (mixed content)
+    if (/[\u0590-\u05FF]/.test(match)) {
       return match;
     }
     
-    // Wrap with English text class for Arno Koren font
-    return `<em class="english-text">${match}</em>`;
+    // Only wrap if it's a meaningful English phrase (at least 4 characters)
+    if (match.trim().length >= 4) {
+      return `<em class="english-text">${match}</em>`;
+    }
+    
+    return match;
   });
 }
 
