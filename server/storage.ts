@@ -385,20 +385,38 @@ export class DatabaseStorage implements IStorage {
         throw new Error('No text content found in API response');
       }
       
-      // Simple and conservative Hebrew text cleaning to preserve spaces and content
+      // Comprehensive Hebrew text cleaning to remove display issues while preserving content
       const cleanText = text
         .replace(/<br\s*\/?>/gi, '\n')  // Replace <br> tags with newlines
         .replace(/<[^>]*>/gi, '')  // Remove any HTML tags
         .replace(/&nbsp;/gi, ' ')  // Replace non-breaking spaces with regular spaces
         .replace(/&[a-zA-Z0-9#]+;/gi, '')  // Remove HTML entities
         .replace(/\{[פס]\}/g, '')  // Remove Hebrew paragraph markers like {פ} and {ס}
-        // Only remove the most problematic characters that cause circles/squares
-        .replace(/[\uFFFD]/g, '')  // Remove replacement characters (squares)
-        .replace(/[\u25CC]/g, '')  // Remove dotted circles specifically
-        .replace(/[\u200B\u200C\u200D]/g, '')  // Remove zero-width spaces only
-        .replace(/[\u2060\uFEFF]/g, '')  // Remove word joiner and zero-width no-break space
+        // Remove characters that appear as circles or squares in Koren font
+        .replace(/[\uFFFD\uFFFC]/g, '')  // Remove replacement and object replacement characters
+        .replace(/[\u25CC\u25CF\u25CB]/g, '')  // Remove dotted circles, black circles, white circles
+        .replace(/[\u25A0-\u25A9\u25AA-\u25AC]/g, '')  // Remove squares and rectangles
+        .replace(/[\u2022\u2023\u2043\u204C\u204D]/g, '')  // Remove bullet points and dots
+        .replace(/[\u200B\u200C\u200D\u200E\u200F]/g, '')  // Remove zero-width and directional characters
+        .replace(/[\u2060\u2061\u2062\u2063\u2064]/g, '')  // Remove word joiner and invisible operators
+        .replace(/[\uFEFF\u180E]/g, '')  // Remove zero-width no-break space and Mongolian vowel separator
+        .replace(/[\u202A-\u202E\u2066-\u2069]/g, '')  // Remove directional formatting characters
         .replace(/[\uE000-\uF8FF]/g, '')  // Remove private use area characters
         .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')  // Remove control characters
+        // Remove specific Unicode blocks that cause display issues but preserve Hebrew
+        .replace(/[\u2100-\u214F]/g, '')  // Remove letterlike symbols
+        .replace(/[\u2190-\u21FF]/g, '')  // Remove arrows
+        .replace(/[\u2200-\u22FF]/g, '')  // Remove mathematical operators
+        .replace(/[\u2300-\u23FF]/g, '')  // Remove miscellaneous technical
+        .replace(/[\u2400-\u243F]/g, '')  // Remove control pictures
+        .replace(/[\u2500-\u257F]/g, '')  // Remove box drawing
+        .replace(/[\u2580-\u259F]/g, '')  // Remove block elements
+        .replace(/[\u25A0-\u25FF]/g, '')  // Remove geometric shapes
+        .replace(/[\u2600-\u26FF]/g, '')  // Remove miscellaneous symbols
+        .replace(/[\u2700-\u27BF]/g, '')  // Remove dingbats
+        .replace(/[\u2800-\u28FF]/g, '')  // Remove braille patterns
+        .replace(/[\uFE00-\uFE0F]/g, '')  // Remove variation selectors
+        .replace(/[\uFFF0-\uFFFF]/g, '')  // Remove specials
         .replace(/\n\s*\n/g, '\n')  // Remove multiple consecutive newlines
         .trim();
       
