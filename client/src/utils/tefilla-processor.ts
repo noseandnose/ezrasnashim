@@ -109,6 +109,15 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     return match; // Keep non-conditional content in brackets
   });
 
+  // Clean up excessive whitespace and empty lines left by hidden content
+  processedText = processedText
+    // Remove multiple consecutive line breaks (more than 2)
+    .replace(/\n\s*\n\s*\n/g, '\n\n')
+    // Remove trailing whitespace from lines
+    .replace(/[ \t]+$/gm, '')
+    // Remove leading/trailing empty lines
+    .trim();
+
   return processedText;
 }
 

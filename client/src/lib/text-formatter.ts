@@ -76,8 +76,20 @@ export function formatTextContent(text: string | null | undefined): string {
   // Add any remaining text
   result += formatted.substring(lastIndex);
   
+  // Clean up excessive whitespace and empty lines BEFORE converting to HTML
+  result = result
+    .replace(/\n\s*\n\s*\n/g, '\n\n')  // Reduce multiple line breaks
+    .replace(/[ \t]+$/gm, '')          // Remove trailing whitespace
+    .replace(/^\s+|\s+$/g, '');        // Remove leading/trailing whitespace
+
   // Convert newlines to <br> tags for proper HTML rendering
   result = result.replace(/\n/g, '<br />');
+  
+  // Clean up multiple consecutive <br> tags (more than 2)
+  result = result.replace(/(<br\s*\/?>){3,}/gi, '<br /><br />');
+  
+  // Remove empty <br> tags at the start and end
+  result = result.replace(/^(<br\s*\/?>)+/gi, '').replace(/(<br\s*\/?>)+$/gi, '');
   
   // Preserve multiple spaces by replacing them with non-breaking spaces
   result = result.replace(/  +/g, (match) => {
