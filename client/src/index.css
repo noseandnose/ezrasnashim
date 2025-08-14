@@ -40,9 +40,9 @@
   font-style: normal !important;
   color: #000000 !important;
   line-height: 1.8 !important;
-  text-align: right !important;
+  text-align: start !important; /* Use start for natural alignment based on text direction */
   direction: rtl !important;
-  unicode-bidi: embed !important;
+  unicode-bidi: plaintext !important; /* Let browser handle mixed content naturally */
   letter-spacing: 0.02em !important;
   text-rendering: optimizeLegibility !important;
   -webkit-font-smoothing: antialiased !important;
@@ -68,8 +68,9 @@
   font-weight: normal !important;
   font-style: normal !important;
   line-height: 1.6 !important;
-  text-align: left !important;
+  text-align: start !important; /* Use start for natural left alignment */
   direction: ltr !important;
+  unicode-bidi: plaintext !important;
 }
 
 /* Update old class to use Koren fonts with proper fallback */
@@ -79,9 +80,9 @@
   font-style: normal !important;
   color: #000000 !important;
   line-height: 1.8 !important;
-  text-align: right !important;
+  text-align: start !important; /* Use start for natural alignment based on text direction */
   direction: rtl !important;
-  unicode-bidi: embed !important;
+  unicode-bidi: plaintext !important; /* Better handling of mixed Hebrew/English content */
   letter-spacing: 0.02em !important;
   text-rendering: optimizeLegibility !important;
   -webkit-font-smoothing: antialiased !important;
