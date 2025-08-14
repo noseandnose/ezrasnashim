@@ -87,39 +87,10 @@ export function formatTextContent(text: string | null | undefined): string {
     return match.split('').map(() => '&nbsp;').join('');
   });
   
-  // Apply English text wrapping for better font handling
-  result = wrapEnglishText(result);
-  
   return result;
 }
 
-/**
- * Wrap English text segments with appropriate font styling for mixed Hebrew/English content
- */
-function wrapEnglishText(html: string): string {
-  // Match complete English phrases and words, but be more specific about context
-  const englishPattern = /\b([A-Za-z][a-zA-Z0-9\s,.\-']*[a-zA-Z])\b/g;
-  
-  return html.replace(englishPattern, (match) => {
-    // Skip if it's already wrapped in HTML tags
-    if (match.includes('<') || match.includes('>')) {
-      return match;
-    }
-    
-    // Skip if it contains Hebrew characters (mixed content)
-    if (/[\u0590-\u05FF]/.test(match)) {
-      return match;
-    }
-    
-    // Only wrap substantial English text (at least 3 characters and meaningful words)
-    const cleanMatch = match.trim();
-    if (cleanMatch.length >= 3 && /[A-Za-z]{2,}/.test(cleanMatch)) {
-      return `<span style="font-family: 'Arno Koren', serif; direction: ltr; display: inline-block;">${match}</span>`;
-    }
-    
-    return match;
-  });
-}
+// Removed problematic English text wrapping function
 
 /**
  * Formats text content with additional processing for apostrophes and footnotes

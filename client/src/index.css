@@ -33,8 +33,11 @@
   font-display: block; /* Prevent font flash */
 }
 
-/* Hebrew prayer text using explicit font assignments */
+/* Hebrew prayer text - let browser handle font fallback automatically */
 .vc-koren-hebrew {
+  font-family: 'Koren Siddur', 'Arno Koren', serif !important;
+  font-weight: normal !important;
+  font-style: normal !important;
   color: #000000 !important;
   line-height: 1.8 !important;
   text-align: right !important;
@@ -46,52 +49,17 @@
   -moz-osx-font-smoothing: grayscale !important;
 }
 
-/* Use CSS to explicitly assign fonts based on character ranges */
-.vc-koren-hebrew * {
-  font-family: 'Koren Siddur', serif !important;
-}
-
-/* English characters should use Arno Koren */
-.vc-koren-hebrew *:lang(en),
-.vc-koren-hebrew [dir="ltr"] {
-  font-family: 'Arno Koren', serif !important;
-  direction: ltr !important;
-  text-align: left !important;
-}
-
-/* Specific styling for English text within Hebrew prayers */
-.vc-koren-hebrew .english-text,
-.vc-koren-hebrew em,
-.vc-koren-hebrew i {
-  font-family: 'Arno Koren' !important;
-  font-style: italic !important;
-  direction: ltr !important;
-  text-align: left !important;
-}
-
 /* Bold Hebrew text using increased font size instead of font-weight */
 .vc-koren-hebrew strong,
 .vc-koren-hebrew b,
 .vc-koren-hebrew-bold {
-  font-family: 'Koren Siddur' !important;
+  font-family: 'Koren Siddur', 'Arno Koren', serif !important;
   font-weight: normal !important;
   font-style: normal !important;
   color: #000000 !important;
   text-align: right !important;
   direction: rtl !important;
   font-size: 1.05em !important; /* 5% larger for emphasis */
-}
-
-/* Bold English text within Hebrew prayers */
-.vc-koren-hebrew strong .english-text,
-.vc-koren-hebrew b .english-text,
-.vc-koren-hebrew strong em,
-.vc-koren-hebrew b em {
-  font-family: 'Arno Koren' !important;
-  font-style: italic !important;
-  direction: ltr !important;
-  text-align: left !important;
-  font-size: 1.05em !important;
 }
 
 /* English prayer text */
@@ -120,15 +88,7 @@
   -moz-osx-font-smoothing: grayscale !important;
 }
 
-/* English text within the old Hebrew class */
-.koren-siddur-hebrew .english-text,
-.koren-siddur-hebrew em,
-.koren-siddur-hebrew i {
-  font-family: 'Arno Koren' !important;
-  font-style: italic !important;
-  direction: ltr !important;
-  text-align: left !important;
-}
+/* Removed old English text styling */
 
 :root {
   --background: hsl(0, 0%, 100%);
