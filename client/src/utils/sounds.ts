@@ -80,10 +80,10 @@ export const playCoinClinkSound = async () => {
 // Alternative method using HTML5 Audio (for actual audio files)
 export const playCoinClinkSoundFromFile = () => {
   try {
-    const audio = new Audio('/sounds/coin-clink.mp3');
+    const audio = new Audio('/sounds/coin-jingle.mp3');
     audio.volume = 0.3;
     audio.play().catch(error => {
-      console.warn('Could not play coin clink sound file:', error);
+      console.warn('Could not play coin jingle sound file:', error);
     });
   } catch (error) {
     console.warn('Could not create audio element:', error);
@@ -94,7 +94,7 @@ export const playCoinClinkSoundFromFile = () => {
 export const playCoinSound = () => {
   // Try to play from file first
   try {
-    const audio = new Audio('/sounds/coin-clink.mp3');
+    const audio = new Audio('/sounds/coin-jingle.mp3');
     audio.volume = 0.3;
     audio.play().catch(() => {
       // If file doesn't exist or fails, use generated sound
