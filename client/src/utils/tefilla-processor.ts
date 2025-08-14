@@ -19,18 +19,13 @@ export interface TefillaConditions {
 /**
  * Process Tefilla text with conditional sections
  * 
- * Code words you can use in Supabase:
+ * Code words you can use in Supabase (default content always shows):
  * 
  * [[OUTSIDE_ISRAEL]]content[[/OUTSIDE_ISRAEL]] - Only shows for users outside Israel
- * [[ISRAEL_ONLY]]content[[/ISRAEL_ONLY]] - Only shows for users in Israel
  * [[ROSH_CHODESH]]content[[/ROSH_CHODESH]] - Only shows on Rosh Chodesh
  * [[FAST_DAY]]content[[/FAST_DAY]] - Only shows on fast days
- * [[NOT_FAST_DAY]]content[[/NOT_FAST_DAY]] - Only shows when it's NOT a fast day
- * [[WEEKDAY]]content[[/WEEKDAY]] - Only shows on weekdays (not Shabbat/Yom Tov)
- * [[SHABBAT]]content[[/SHABBAT]] - Only shows on Shabbat
- * [[YOM_TOV]]content[[/YOM_TOV]] - Only shows on Jewish holidays
  * 
- * You can also combine conditions:
+ * You can combine conditions:
  * [[OUTSIDE_ISRAEL,ROSH_CHODESH]]content[[/OUTSIDE_ISRAEL,ROSH_CHODESH]] - Shows only for users outside Israel on Rosh Chodesh
  */
 export function processTefillaText(text: string, conditions: TefillaConditions): string {
@@ -38,44 +33,11 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
 
   let processedText = text;
 
-  // Define condition checkers
+  // Define condition checkers - only the three special conditions
   const conditionCheckers = {
     OUTSIDE_ISRAEL: () => !conditions.isInIsrael,
-    ISRAEL_ONLY: () => conditions.isInIsrael,
     ROSH_CHODESH: () => conditions.isRoshChodesh,
-    FAST_DAY: () => conditions.isFastDay,
-    NOT_FAST_DAY: () => !conditions.isFastDay,
-    WEEKDAY: () => {
-      // Check if it's not Shabbat or Yom Tov
-      const events = conditions.hebrewDate?.events || [];
-      const isShabbat = events.some(event => event.toLowerCase().includes('shabbat'));
-      const isYomTov = events.some(event => 
-        event.toLowerCase().includes('rosh hashana') ||
-        event.toLowerCase().includes('yom kippur') ||
-        event.toLowerCase().includes('sukkot') ||
-        event.toLowerCase().includes('pesach') ||
-        event.toLowerCase().includes('shavuot') ||
-        event.toLowerCase().includes('purim') ||
-        event.toLowerCase().includes('chanukah')
-      );
-      return !isShabbat && !isYomTov;
-    },
-    SHABBAT: () => {
-      const events = conditions.hebrewDate?.events || [];
-      return events.some(event => event.toLowerCase().includes('shabbat'));
-    },
-    YOM_TOV: () => {
-      const events = conditions.hebrewDate?.events || [];
-      return events.some(event => 
-        event.toLowerCase().includes('rosh hashana') ||
-        event.toLowerCase().includes('yom kippur') ||
-        event.toLowerCase().includes('sukkot') ||
-        event.toLowerCase().includes('pesach') ||
-        event.toLowerCase().includes('shavuot') ||
-        event.toLowerCase().includes('purim') ||
-        event.toLowerCase().includes('chanukah')
-      );
-    }
+    FAST_DAY: () => conditions.isFastDay
   };
 
   // Process all conditional sections

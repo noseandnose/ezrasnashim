@@ -1,9 +1,10 @@
 # Tefilla Conditional Content System
 
 This system allows you to create dynamic Tefilla content in Supabase that displays different text based on:
-- User location (Israel vs Outside Israel)
-- Hebrew calendar events (Rosh Chodesh, Fast Days, etc.)
-- Time-based conditions (Weekday, Shabbat, Yom Tov)
+- User location (Outside Israel only)
+- Hebrew calendar events (Rosh Chodesh and Fast Days)
+
+**Important**: Default content always shows unless specifically tagged with conditional markers.
 
 ## Code Words for Supabase Content
 
@@ -11,21 +12,15 @@ You can use these code words in your Tefilla text within double square brackets:
 
 ### Location-Based
 - `[[OUTSIDE_ISRAEL]]content[[/OUTSIDE_ISRAEL]]` - Shows only for users outside Israel
-- `[[ISRAEL_ONLY]]content[[/ISRAEL_ONLY]]` - Shows only for users in Israel
 
 ### Hebrew Calendar-Based
 - `[[ROSH_CHODESH]]content[[/ROSH_CHODESH]]` - Shows only on Rosh Chodesh days
 - `[[FAST_DAY]]content[[/FAST_DAY]]` - Shows only on fast days
-- `[[NOT_FAST_DAY]]content[[/NOT_FAST_DAY]]` - Shows when it's NOT a fast day
-
-### Time/Day-Based
-- `[[WEEKDAY]]content[[/WEEKDAY]]` - Shows only on weekdays (not Shabbat/Yom Tov)
-- `[[SHABBAT]]content[[/SHABBAT]]` - Shows only on Shabbat
-- `[[YOM_TOV]]content[[/YOM_TOV]]` - Shows only on Jewish holidays
 
 ### Combining Conditions
 You can combine multiple conditions using commas (AND logic):
 - `[[OUTSIDE_ISRAEL,ROSH_CHODESH]]content[[/OUTSIDE_ISRAEL,ROSH_CHODESH]]` - Shows only for users outside Israel on Rosh Chodesh
+- `[[OUTSIDE_ISRAEL,FAST_DAY]]content[[/OUTSIDE_ISRAEL,FAST_DAY]]` - Shows only for users outside Israel on fast days
 
 ## Example Usage in Supabase
 
