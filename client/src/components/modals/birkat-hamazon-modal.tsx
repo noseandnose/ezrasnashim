@@ -9,6 +9,8 @@ import { useAnalytics, useTrackModalComplete } from "@/hooks/use-analytics";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useLocationStore } from '@/hooks/use-jewish-times';
 import { formatTextContent } from "@/lib/text-formatter";
+import { processTefillaText, getCurrentTefillaConditions, type TefillaConditions } from '@/utils/tefilla-processor';
+import { useEffect, useState as useStateForConditions } from "react";
 
 interface BirkatHamazonPrayer {
   id: number;
@@ -54,12 +56,41 @@ export function BirkatHamazonModal() {
   const [fontSize, setFontSize] = useState(20);
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [selectedPrayer, setSelectedPrayer] = useState<string | null>(null);
+  const [conditions, setConditions] = useStateForConditions<TefillaConditions | null>(null);
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { trackCompletion } = useAnalytics();
+  const { coordinates } = useLocationStore();
 
   const isOpen = activeModal === 'after-brochas' || activeModal === 'birkat-hamazon' || activeModal === 'al-hamichiya';
+
+  // Load Tefilla conditions for conditional content processing
+  useEffect(() => {
+    const loadConditions = async () => {
+      try {
+        const tefillaConditions = await getCurrentTefillaConditions(
+          coordinates?.lat,
+          coordinates?.lng
+        );
+        setConditions(tefillaConditions);
+      } catch (error) {
+        console.warn('Could not load Tefilla conditions:', error);
+        // Set default conditions
+        setConditions({
+          isInIsrael: false,
+          isRoshChodesh: false,
+          isFastDay: false,
+          isAseretYemeiTeshuva: false,
+          isSukkot: false,
+          isPesach: false,
+          isRoshChodeshSpecial: false
+        });
+      }
+    };
+
+    loadConditions();
+  }, [coordinates]);
 
   const { data: prayers, isLoading } = useQuery<BirkatHamazonPrayer[]>({
     queryKey: ["/api/birkat-hamazon/prayers"],
@@ -134,11 +165,17 @@ export function BirkatHamazonModal() {
     </div>
   );
 
-  const renderPrayerText = (prayer: BirkatHamazonPrayer) => {
+  const renderPrayerText = (prayer: BirkatHamazonPrayer | any) => {
     const text = language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation;
     
+    // Apply conditional processing first if conditions are available
+    let processedText = text;
+    if (conditions && text) {
+      processedText = processTefillaText(text, conditions);
+    }
+    
     // Apply text formatting to handle ** and ---
-    const formattedText = formatTextContent(text);
+    const formattedText = formatTextContent(processedText);
     
     if (language === "hebrew") {
       return (
