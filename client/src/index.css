@@ -1,22 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Secular+One:wght@400&family=David+Libre:wght@400;500;700&family=Noto+Sans+Hebrew:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Secular+One:wght@400&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* VC Koren Fonts for All Tefilla Content */
+/* Koren Siddur Font for All Hebrew Tefilla Content */
 @font-face {
-  font-family: 'VC Koren';
-  src: url('./fonts/VC_Koren-Light.otf') format('opentype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: block; /* Prevent font flash */
-}
-
-@font-face {
-  font-family: 'VC Koren';
-  src: url('./fonts/VC_Koren-Bold.otf') format('opentype');
-  font-weight: 700;
+  font-family: 'Koren Siddur';
+  src: url('./fonts/KorenSiddur.otf') format('opentype');
+  font-weight: normal;
   font-style: normal;
   font-display: block; /* Prevent font flash */
 }
@@ -30,10 +22,10 @@
   font-display: block; /* Prevent font flash */
 }
 
-/* Single unified class for Hebrew prayer text with comprehensive fallbacks */
+/* Single unified class for Hebrew prayer text using Koren Siddur only */
 .vc-koren-hebrew {
-  font-family: 'VC Koren', 'David Libre', 'Noto Sans Hebrew', 'SBL Hebrew', 'Ezra SIL', 'Times New Roman', serif !important;
-  font-weight: 400 !important;
+  font-family: 'Koren Siddur' !important;
+  font-weight: normal !important;
   font-style: normal !important;
   color: #000000 !important;
   line-height: 1.8 !important;
@@ -41,22 +33,22 @@
   direction: rtl !important;
   unicode-bidi: embed !important;
   letter-spacing: 0.02em !important;
-  font-feature-settings: "kern" 1, "liga" 1 !important;
-  -webkit-font-feature-settings: "kern" 1, "liga" 1 !important;
+  text-rendering: optimizeLegibility !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
 }
 
-/* Bold Hebrew text using VC Koren Bold with fallbacks */
+/* Bold Hebrew text using increased font size instead of font-weight */
 .vc-koren-hebrew strong,
 .vc-koren-hebrew b,
 .vc-koren-hebrew-bold {
-  font-family: 'VC Koren', 'David Libre', 'Noto Sans Hebrew', 'SBL Hebrew', 'Ezra SIL', 'Times New Roman', serif !important;
-  font-weight: 700 !important;
+  font-family: 'Koren Siddur' !important;
+  font-weight: normal !important;
   font-style: normal !important;
   color: #000000 !important;
   text-align: right !important;
   direction: rtl !important;
-  font-feature-settings: "kern" 1, "liga" 1 !important;
-  -webkit-font-feature-settings: "kern" 1, "liga" 1 !important;
+  font-size: 1.05em !important; /* 5% larger for emphasis */
 }
 
 /* English prayer text */
@@ -69,10 +61,10 @@
   direction: ltr !important;
 }
 
-/* Remove old conflicting class */
+/* Update old class to use Koren Siddur */
 .koren-siddur-hebrew {
-  font-family: 'VC Koren', 'David Libre', 'Noto Sans Hebrew', 'SBL Hebrew', 'Ezra SIL', 'Times New Roman', serif !important;
-  font-weight: 400 !important;
+  font-family: 'Koren Siddur' !important;
+  font-weight: normal !important;
   font-style: normal !important;
   color: #000000 !important;
   line-height: 1.8 !important;
@@ -80,8 +72,9 @@
   direction: rtl !important;
   unicode-bidi: embed !important;
   letter-spacing: 0.02em !important;
-  font-feature-settings: "kern" 1, "liga" 1 !important;
-  -webkit-font-feature-settings: "kern" 1, "liga" 1 !important;
+  text-rendering: optimizeLegibility !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
 }
 
 :root {
@@ -131,15 +124,12 @@
   text-align: center !important;
 }
 
-/* Hide missing glyph characters and fix font rendering issues */
+/* Enhanced Hebrew font rendering for Koren Siddur */
 .vc-koren-hebrew,
 .koren-siddur-hebrew {
   font-variant-ligatures: normal !important;
   font-variant-numeric: normal !important;
   font-variant: normal !important;
-  text-rendering: optimizeLegibility !important;
-  -webkit-font-smoothing: antialiased !important;
-  -moz-osx-font-smoothing: grayscale !important;
 }
 
 /* Hide problematic Unicode characters that show as black boxes */

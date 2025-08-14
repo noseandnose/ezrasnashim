@@ -51,9 +51,9 @@ export function formatTextContent(text: string | null | undefined): string {
       result += formatted.substring(lastIndex, i);
       
       if (!isInBold) {
-        result += '<strong>';
+        result += '<span style="font-size: 1.05em;">';
       } else {
-        result += '</strong>';
+        result += '</span>';
       }
       
       isInBold = !isInBold;

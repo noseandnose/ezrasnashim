@@ -699,7 +699,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                         className="vc-koren-hebrew leading-relaxed"
                         style={{ fontSize: `${fontSize + 1}px` }}
                         dangerouslySetInnerHTML={{ 
-                          __html: processTefillaContent(prayer.hebrewText, conditions).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') 
+                          __html: processTefillaContent(prayer.hebrewText, conditions)
                         }}
                       />
                     )}
