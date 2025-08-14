@@ -65,6 +65,18 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     // Split conditions by comma for multiple conditions (AND logic)
     const conditions_list = openTag.split(',').map((c: string) => c.trim());
     
+    // Debug logging
+    console.log(`Processing conditional tag: ${openTag}`);
+    console.log(`Current conditions:`, {
+      isInIsrael: conditions.isInIsrael,
+      isRoshChodesh: conditions.isRoshChodesh,
+      isFastDay: conditions.isFastDay,
+      isAseretYemeiTeshuva: conditions.isAseretYemeiTeshuva,
+      isSukkot: conditions.isSukkot,
+      isPesach: conditions.isPesach,
+      isRoshChodeshSpecial: conditions.isRoshChodeshSpecial
+    });
+    
     // Check if all conditions are met
     const allConditionsMet = conditions_list.every((condition: string) => {
       const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
@@ -72,8 +84,12 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
         console.warn(`Unknown condition: ${condition}`);
         return false;
       }
-      return checker();
+      const result = checker();
+      console.log(`Condition ${condition}: ${result}`);
+      return result;
     });
+
+    console.log(`All conditions met: ${allConditionsMet}, returning:`, allConditionsMet ? content : '[HIDDEN]');
 
     // Return content if all conditions are met, otherwise return empty string
     return allConditionsMet ? content : '';
@@ -104,8 +120,9 @@ export async function getCurrentTefillaConditions(
 
       // Get more precise location data
       try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         const locationResponse = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/location/${latitude}/${longitude}`
+          `${apiUrl}/api/location/${latitude}/${longitude}`
         );
         if (locationResponse.ok) {
           const locationData = await locationResponse.json();
@@ -133,9 +150,12 @@ export async function getCurrentTefillaConditions(
 
     try {
       const today = new Date().toISOString().split('T')[0];
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const hebrewResponse = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/hebrew-date/${today}`
+        `${apiUrl}/api/hebrew-date/${today}`
       );
+      
+      console.log(`Fetching Hebrew date from: ${apiUrl}/api/hebrew-date/${today}`);
       
       if (hebrewResponse.ok) {
         hebrewDate = await hebrewResponse.json();
@@ -186,12 +206,23 @@ export async function getCurrentTefillaConditions(
         
         // Check if we're in any special period (for exclusion logic)
         isRoshChodeshSpecial = isRoshChodesh || isPesach || isSukkot || isAseretYemeiTeshuva;
+        
+        console.log('Hebrew calendar conditions loaded:', {
+          isRoshChodesh,
+          isFastDay,
+          isAseretYemeiTeshuva,
+          isSukkot,
+          isPesach,
+          isRoshChodeshSpecial,
+          events,
+          hebrewDate: hebrewDate.hebrew
+        });
       }
     } catch (error) {
       console.warn('Could not fetch Hebrew date data:', error);
     }
 
-    return {
+    const finalConditions = {
       isInIsrael,
       isRoshChodesh,
       isFastDay,
@@ -202,6 +233,9 @@ export async function getCurrentTefillaConditions(
       hebrewDate,
       location
     };
+    
+    console.log('Final Tefilla conditions:', finalConditions);
+    return finalConditions;
   } catch (error) {
     console.error('Error getting Tefilla conditions:', error);
     
