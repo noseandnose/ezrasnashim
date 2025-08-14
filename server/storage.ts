@@ -397,7 +397,8 @@ export class DatabaseStorage implements IStorage {
         .replace(/&[a-zA-Z0-9#]+;/gi, '')  // Remove HTML entities
         .replace(/\{[פס]\}/g, '')  // Remove Hebrew paragraph markers like {פ} and {ס}
         .replace(/[\u200E\u200F\u202A-\u202E]/g, '')  // Remove Unicode directional marks
-        .replace(/[\u2060\u00A0\u180E\u2000-\u200B\u2028\u2029\uFEFF]/g, '')  // Remove zero-width spaces
+        .replace(/[\u2060\u00A0\u180E\u2028\u2029\uFEFF]/g, '')  // Remove only specific zero-width spaces, not Hebrew spaces
+        .replace(/[\u200B\u200C\u200D]/g, '')  // Remove zero-width spaces but preserve regular Hebrew spacing
         .replace(/[\u25A0-\u25FF]/g, '')  // Remove geometric shapes (rectangles, squares)
         .replace(/[\uFFF0-\uFFFF]/g, '')  // Remove specials block characters
         .replace(/[\uE000-\uF8FF]/g, '')  // Remove private use area characters
@@ -409,10 +410,11 @@ export class DatabaseStorage implements IStorage {
           const codePoint = match.codePointAt(0);
           if (!codePoint) return '';
           if (codePoint >= 0x05D0 && codePoint <= 0x05EA) return match; // Hebrew letters
-          if (codePoint >= 0x05B0 && codePoint <= 0x05BD) return match; // Hebrew points
+          if (codePoint >= 0x05B0 && codePoint <= 0x05BD) return match; // Hebrew points (nikud)
           if (codePoint >= 0x05BF && codePoint <= 0x05C2) return match; // Hebrew points
           if (codePoint >= 0x05C4 && codePoint <= 0x05C5) return match; // Hebrew points
           if (codePoint === 0x05C7) return match; // Hebrew point
+          if (codePoint >= 0x0591 && codePoint <= 0x05AF) return match; // Hebrew cantillation marks
           return ''; // Remove other characters in Hebrew block
         })
         .replace(/\n\s*\n/g, '\n')  // Remove multiple consecutive newlines
