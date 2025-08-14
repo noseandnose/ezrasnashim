@@ -5,6 +5,7 @@ import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
+import { playCoinSound } from "@/utils/sounds";
 import type { Campaign } from "@shared/schema";
 import type { Section } from "@/pages/home";
 
@@ -100,6 +101,9 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
   const handleTzedakaComplete = () => {
     if (tzedakaCompleted) return; // Prevent double execution
     
+    // Play coin clink sound effect
+    playCoinSound();
+    
     setShowExplosion(true);
     setCompletedButtons(prev => new Set(prev).add('gave-elsewhere'));
     
@@ -179,7 +183,10 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
       {/* Main Tzedaka Section - ONLY CAMPAIGN */}
       <div className="bg-gradient-soft rounded-b-3xl px-3 pt-3 pb-2 shadow-lg -mt-1">
         <button 
-          onClick={() => openModal('donate', 'tzedaka')}
+          onClick={() => {
+            playCoinSound();
+            openModal('donate', 'tzedaka');
+          }}
           className="w-full bg-white/70 rounded-2xl px-3 pt-3 pb-2 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
         >
         {isLoading ? (
@@ -241,7 +248,10 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
       <div className="p-2 space-y-2">
         {/* Large Combined Button: Put a coin in the Pushka */}
         <button
-          onClick={() => openModal('donate', 'tzedaka')}
+          onClick={() => {
+            playCoinSound();
+            openModal('donate', 'tzedaka');
+          }}
           className="w-full rounded-3xl p-4 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
         >
           <div className="p-3 rounded-full mx-auto mb-3 w-fit bg-gradient-feminine">
