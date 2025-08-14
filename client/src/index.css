@@ -4,10 +4,19 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Koren Siddur Font for All Hebrew Tefilla Content */
+/* Koren Siddur Font for Hebrew Tefilla Content */
 @font-face {
   font-family: 'Koren Siddur';
   src: url('./fonts/KorenSiddur.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block; /* Prevent font flash */
+}
+
+/* Arno Koren Font for English text within Hebrew prayers */
+@font-face {
+  font-family: 'Arno Koren';
+  src: url('./fonts/ArnoKoren.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
   font-display: block; /* Prevent font flash */
@@ -22,9 +31,9 @@
   font-display: block; /* Prevent font flash */
 }
 
-/* Single unified class for Hebrew prayer text using Koren Siddur only */
+/* Hebrew prayer text using mixed Koren fonts */
 .vc-koren-hebrew {
-  font-family: 'Koren Siddur' !important;
+  font-family: 'Koren Siddur', 'Arno Koren' !important;
   font-weight: normal !important;
   font-style: normal !important;
   color: #000000 !important;
@@ -36,6 +45,16 @@
   text-rendering: optimizeLegibility !important;
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Specific styling for English text within Hebrew prayers */
+.vc-koren-hebrew .english-text,
+.vc-koren-hebrew em,
+.vc-koren-hebrew i {
+  font-family: 'Arno Koren' !important;
+  font-style: italic !important;
+  direction: ltr !important;
+  text-align: left !important;
 }
 
 /* Bold Hebrew text using increased font size instead of font-weight */
@@ -51,6 +70,18 @@
   font-size: 1.05em !important; /* 5% larger for emphasis */
 }
 
+/* Bold English text within Hebrew prayers */
+.vc-koren-hebrew strong .english-text,
+.vc-koren-hebrew b .english-text,
+.vc-koren-hebrew strong em,
+.vc-koren-hebrew b em {
+  font-family: 'Arno Koren' !important;
+  font-style: italic !important;
+  direction: ltr !important;
+  text-align: left !important;
+  font-size: 1.05em !important;
+}
+
 /* English prayer text */
 .koren-siddur-english {
   font-family: 'Arno Koren', 'Playfair Display', Georgia, serif !important;
@@ -61,9 +92,9 @@
   direction: ltr !important;
 }
 
-/* Update old class to use Koren Siddur */
+/* Update old class to use mixed Koren fonts */
 .koren-siddur-hebrew {
-  font-family: 'Koren Siddur' !important;
+  font-family: 'Koren Siddur', 'Arno Koren' !important;
   font-weight: normal !important;
   font-style: normal !important;
   color: #000000 !important;
@@ -75,6 +106,16 @@
   text-rendering: optimizeLegibility !important;
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* English text within the old Hebrew class */
+.koren-siddur-hebrew .english-text,
+.koren-siddur-hebrew em,
+.koren-siddur-hebrew i {
+  font-family: 'Arno Koren' !important;
+  font-style: italic !important;
+  direction: ltr !important;
+  text-align: left !important;
 }
 
 :root {

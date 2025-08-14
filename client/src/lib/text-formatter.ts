@@ -87,7 +87,34 @@ export function formatTextContent(text: string | null | undefined): string {
     return match.split('').map(() => '&nbsp;').join('');
   });
   
+  // Wrap English text segments with proper class for Arno Koren font
+  result = wrapEnglishText(result);
+  
   return result;
+}
+
+/**
+ * Wrap English text segments with appropriate CSS class for Arno Koren font
+ */
+function wrapEnglishText(html: string): string {
+  // Pattern to match Latin characters, numbers, and common English punctuation
+  // This pattern matches sequences of Latin text that should use Arno Koren font
+  const englishPattern = /([a-zA-Z][a-zA-Z0-9\s\.,;:!?'"()\-–—\/]*[a-zA-Z0-9])/g;
+  
+  return html.replace(englishPattern, (match) => {
+    // Skip if it's already wrapped in HTML tags
+    if (match.includes('<') || match.includes('>')) {
+      return match;
+    }
+    
+    // Skip very short matches that might be abbreviations mixed with Hebrew
+    if (match.length < 3) {
+      return match;
+    }
+    
+    // Wrap with English text class for Arno Koren font
+    return `<em class="english-text">${match}</em>`;
+  });
 }
 
 /**
