@@ -52,7 +52,7 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     ROSH_CHODESH_SPECIAL: () => !conditions.isRoshChodeshSpecial // Exclusion logic: shows when NOT in special periods
   };
 
-  // Process all conditional sections
+  // Process all conditional sections with opening and closing tags
   const conditionalPattern = /\[\[([^\]]+)\]\]([\s\S]*?)\[\[\/([^\]]+)\]\]/g;
   
   processedText = processedText.replace(conditionalPattern, (match, openTag, content, closeTag) => {
@@ -93,6 +93,20 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
 
     // Return content if all conditions are met, otherwise return empty string
     return allConditionsMet ? content : '';
+  });
+
+  // Also remove any malformed single bracket conditional tags that don't have proper format
+  processedText = processedText.replace(/\[\[([^\]]*(?:ROSH_CHODESH|PESACH|SUKKOT|FAST_DAY|ASERET_YEMEI_TESHUVA|OUTSIDE_ISRAEL|ROSH_CHODESH_SPECIAL)[^\]]*)\]\]/g, (match, content) => {
+    // If it looks like a malformed condition tag without proper opening/closing, remove it
+    const knownConditions = ['ROSH_CHODESH', 'PESACH', 'SUKKOT', 'FAST_DAY', 'ASERET_YEMEI_TESHUVA', 'OUTSIDE_ISRAEL', 'ROSH_CHODESH_SPECIAL'];
+    const hasKnownCondition = knownConditions.some(condition => content.includes(condition));
+    
+    if (hasKnownCondition) {
+      console.log(`Removing malformed conditional tag: ${match}`);
+      return ''; // Remove malformed conditional tags
+    }
+    
+    return match; // Keep non-conditional content in brackets
   });
 
   return processedText;
