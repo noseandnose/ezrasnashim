@@ -392,12 +392,13 @@ export class DatabaseStorage implements IStorage {
         .replace(/&nbsp;/gi, ' ')  // Replace non-breaking spaces with regular spaces
         .replace(/&[a-zA-Z0-9#]+;/gi, '')  // Remove HTML entities
         .replace(/\{[פס]\}/g, '')  // Remove Hebrew paragraph markers like {פ} and {ס}
-        // Remove all problematic Unicode ranges
+        // Remove all problematic Unicode ranges - but preserve specific Hebrew punctuation
         .replace(/[\u2000-\u206F]/g, (char) => {
           const code = char.charCodeAt(0);
           // Keep only normal spaces and Hebrew punctuation
           if (code === 0x2000 || code === 0x2002 || code === 0x2003 || code === 0x2009) return ' '; // Convert spaces
           if (code === 0x2013 || code === 0x2014) return '-'; // Keep dashes
+          if (code === 0x05BE) return char; // Keep Hebrew maqaf (hyphen)
           return ''; // Remove everything else in this range
         })
         .replace(/[\u2100-\u27BF]/g, '')  // Remove all symbols, shapes, and technical characters
@@ -424,6 +425,10 @@ export class DatabaseStorage implements IStorage {
         // Keep Hebrew block and related blocks for proper text rendering
         if ((code >= 0x0590 && code <= 0x05FF) ||  // Hebrew
             (code >= 0xFB1D && code <= 0xFB4F)) {   // Hebrew Presentation Forms
+          // Skip specific problematic characters that appear as circles
+          if (code === 0x05C4 || code === 0x05C5 || code === 0x05C6) {
+            continue; // Skip these specific combining marks
+          }
           result += char;
           continue;
         }

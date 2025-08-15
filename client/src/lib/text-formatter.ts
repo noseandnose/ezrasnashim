@@ -4,12 +4,13 @@
 function cleanHebrewText(text: string): string {
   // First pass: Remove all problematic Unicode ranges
   let cleaned = text
-    // Remove all geometric shapes, symbols, and technical characters
+    // Remove all geometric shapes, symbols, and technical characters - but preserve specific Hebrew punctuation
     .replace(/[\u2000-\u206F]/g, (char) => {
       const code = char.charCodeAt(0);
       // Keep only normal spaces and Hebrew punctuation
       if (code === 0x2000 || code === 0x2002 || code === 0x2003 || code === 0x2009) return ' '; // Convert spaces
       if (code === 0x2013 || code === 0x2014) return '-'; // Keep dashes
+      if (code === 0x05BE) return char; // Keep Hebrew maqaf (hyphen)
       return ''; // Remove everything else in this range
     })
     .replace(/[\u2100-\u21FF]/g, '')  // Remove letterlike symbols and arrows
@@ -41,6 +42,10 @@ function cleanHebrewText(text: string): string {
     // Keep Hebrew block and related blocks for proper text rendering
     if ((code >= 0x0590 && code <= 0x05FF) ||  // Hebrew
         (code >= 0xFB1D && code <= 0xFB4F)) {   // Hebrew Presentation Forms
+      // Skip specific problematic characters that appear as circles
+      if (code === 0x05C4 || code === 0x05C5 || code === 0x05C6) {
+        continue; // Skip these specific combining marks
+      }
       result += char;
       continue;
     }
@@ -160,11 +165,11 @@ export function formatTextContent(text: string | null | undefined): string {
     .replace(/[ \t]+$/gm, '')          // Remove trailing whitespace
     .replace(/^\s+|\s+$/g, '');        // Remove leading/trailing whitespace
 
-  // Convert newlines to <br> tags for proper HTML rendering
+  // Convert newlines to <br> tags for proper HTML rendering with preserved spacing
   result = result.replace(/\n/g, '<br />');
   
-  // Clean up multiple consecutive <br> tags (more than 2)
-  result = result.replace(/(<br\s*\/?>){3,}/gi, '<br /><br />');
+  // Clean up multiple consecutive <br> tags but preserve double line breaks
+  result = result.replace(/(<br\s*\/?>){4,}/gi, '<br /><br /><br />'); // Max 3 line breaks
   
   // Remove empty <br> tags at the start and end
   result = result.replace(/^(<br\s*\/?>)+/gi, '').replace(/(<br\s*\/?>)+$/gi, '');

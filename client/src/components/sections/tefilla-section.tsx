@@ -551,9 +551,9 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             }`}>
               <Stars className="text-white" size={18} />
             </div>
-            <h3 className="platypi-bold text-sm text-black mb-1">Special Tehillim</h3>
+            <h3 className="platypi-bold text-sm text-black mb-1">Tehillim</h3>
             <p className="platypi-regular text-xs text-black/60">
-              {isModalComplete('special-tehillim') ? 'Completed' : 'For Specific Occasions'}
+              {isModalComplete('special-tehillim') ? 'Completed' : 'All & Special'}
             </p>
           </button>
 
