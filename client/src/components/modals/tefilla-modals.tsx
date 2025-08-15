@@ -1409,9 +1409,10 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
   );
 }
 
-// Special Tehillim Modal Component
+// Tehillim Modal Component (previously Special Tehillim)
 function SpecialTehillimModal() {
   const { closeModal, openModal, setSelectedPsalm } = useModalStore();
+  const [activeTab, setActiveTab] = useState<'all' | 'special'>('all');
 
   // Open individual Tehillim text
   const openTehillimText = (psalmNumber: number) => {
@@ -1420,8 +1421,11 @@ function SpecialTehillimModal() {
     openModal('individual-tehillim', 'tefilla');
   };
 
-  // Categories with psalm numbers
-  const categories = [
+  // Generate array of all 150 psalms
+  const allPsalms = Array.from({ length: 150 }, (_, i) => i + 1);
+
+  // Special categories with psalm numbers
+  const specialCategories = [
     { title: "Bris milah", psalms: [12] },
     { title: "Cemetery", psalms: [33, 16, 17, 72, 91, 104, 130, 119] },
     { title: "Children's success", psalms: [127, 128] },
@@ -1453,29 +1457,70 @@ function SpecialTehillimModal() {
   return (
     <>
       <DialogHeader className="text-center mb-4">
-        <DialogTitle className="text-lg platypi-semibold text-black">Special Tehillim</DialogTitle>
+        <DialogTitle className="text-lg platypi-semibold text-black">Tehillim</DialogTitle>
         <DialogDescription className="text-xs text-black/70">
-          Specific psalms for different needs and occasions
+          Complete book of Psalms (1-150)
         </DialogDescription>
       </DialogHeader>
 
-      <div className="max-h-[60vh] overflow-y-auto space-y-3">
-        {categories.map((category, index) => (
-          <div key={index} className="bg-white/80 rounded-2xl p-3 border border-blush/10">
-            <h3 className="platypi-bold text-sm text-black mb-2">{category.title}</h3>
-            <div className="flex flex-wrap gap-2">
-              {category.psalms.map((psalm) => (
-                <button
-                  key={psalm}
-                  onClick={() => openTehillimText(psalm)}
-                  className="bg-gradient-feminine text-white px-3 py-1 rounded-xl text-sm platypi-medium hover:opacity-90 transition-opacity"
-                >
-                  {psalm}
-                </button>
-              ))}
-            </div>
+      {/* Tab Navigation */}
+      <div className="flex bg-warm-gray/10 rounded-xl p-1 mb-4">
+        <button
+          onClick={() => setActiveTab('all')}
+          className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
+            activeTab === 'all'
+              ? 'bg-white text-black shadow-sm'
+              : 'text-black/60 hover:text-black'
+          }`}
+        >
+          All Psalms
+        </button>
+        <button
+          onClick={() => setActiveTab('special')}
+          className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
+            activeTab === 'special'
+              ? 'bg-white text-black shadow-sm'
+              : 'text-black/60 hover:text-black'
+          }`}
+        >
+          Special Occasions
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      <div className="max-h-[50vh] overflow-y-auto">
+        {activeTab === 'all' ? (
+          <div className="grid grid-cols-10 gap-2 p-2">
+            {allPsalms.map((psalm) => (
+              <button
+                key={psalm}
+                onClick={() => openTehillimText(psalm)}
+                className="bg-gradient-feminine text-white w-10 h-10 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center"
+              >
+                {psalm}
+              </button>
+            ))}
           </div>
-        ))}
+        ) : (
+          <div className="space-y-3">
+            {specialCategories.map((category, index) => (
+              <div key={index} className="bg-white/80 rounded-2xl p-3 border border-blush/10">
+                <h3 className="platypi-bold text-sm text-black mb-2">{category.title}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {category.psalms.map((psalm) => (
+                    <button
+                      key={psalm}
+                      onClick={() => openTehillimText(psalm)}
+                      className="bg-gradient-feminine text-white px-3 py-1 rounded-xl text-sm platypi-medium hover:opacity-90 transition-opacity"
+                    >
+                      {psalm}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <Button 

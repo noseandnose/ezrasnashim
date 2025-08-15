@@ -421,8 +421,9 @@ export class DatabaseStorage implements IStorage {
           continue;
         }
         
-        // Keep Hebrew block (0x0590-0x05FF)
-        if (code >= 0x0590 && code <= 0x05FF) {
+        // Keep Hebrew block and related blocks for proper text rendering
+        if ((code >= 0x0590 && code <= 0x05FF) ||  // Hebrew
+            (code >= 0xFB1D && code <= 0xFB4F)) {   // Hebrew Presentation Forms
           result += char;
           continue;
         }
@@ -436,10 +437,10 @@ export class DatabaseStorage implements IStorage {
         // Skip all other characters (removes circles, squares, etc.)
       }
       
-      // Final cleanup
+      // Final cleanup - preserve line breaks and spacing
       cleanText = result
-        .replace(/\s{2,}/g, ' ')     // Replace multiple spaces with single space
-        .replace(/\n\s*\n/g, '\n')  // Remove multiple consecutive newlines
+        .replace(/[ \t]{2,}/g, ' ')     // Replace multiple spaces/tabs with single space (but not newlines)
+        .replace(/\n{3,}/g, '\n\n')    // Limit to max 2 consecutive newlines
         .trim();
       
       return {

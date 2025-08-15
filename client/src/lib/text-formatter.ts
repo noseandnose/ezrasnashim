@@ -38,8 +38,9 @@ function cleanHebrewText(text: string): string {
       continue;
     }
     
-    // Keep Hebrew block (1424-1535, 0x0590-0x05FF)
-    if (code >= 0x0590 && code <= 0x05FF) {
+    // Keep Hebrew block and related blocks for proper text rendering
+    if ((code >= 0x0590 && code <= 0x05FF) ||  // Hebrew
+        (code >= 0xFB1D && code <= 0xFB4F)) {   // Hebrew Presentation Forms
       result += char;
       continue;
     }
@@ -53,10 +54,10 @@ function cleanHebrewText(text: string): string {
     // Skip all other characters (this removes circles, squares, etc.)
   }
   
-  // Final cleanup
+  // Final cleanup - preserve line breaks and spacing
   return result
-    .replace(/\s{2,}/g, ' ')  // Replace multiple spaces with single space
-    .replace(/^\s+|\s+$/g, '') // Trim
+    .replace(/[ \t]{2,}/g, ' ')  // Replace multiple spaces/tabs with single space (but not newlines)
+    .replace(/^\s+|\s+$/g, '') // Trim start and end
     .trim();
 }
 
