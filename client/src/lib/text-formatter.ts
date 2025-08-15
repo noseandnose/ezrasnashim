@@ -39,14 +39,47 @@ function cleanHebrewText(text: string): string {
       continue;
     }
     
-    // Keep Hebrew block and related blocks for proper text rendering
-    if ((code >= 0x0590 && code <= 0x05FF) ||  // Hebrew
-        (code >= 0xFB1D && code <= 0xFB4F)) {   // Hebrew Presentation Forms
-      // Skip specific problematic characters that appear as circles
-      if (code === 0x05C4 || code === 0x05C5 || code === 0x05C6) {
-        continue; // Skip these specific combining marks
+    // Keep Hebrew block but filter problematic characters
+    if (code >= 0x0590 && code <= 0x05FF) {
+      // Skip paseq and sof pasuq which appear as vertical bars or colons
+      if (code === 0x05C0 || code === 0x05C3) {
+        result += ' '; // Replace with space to maintain word separation
+        continue;
       }
+      
+      // Only keep Hebrew letters and most common vowels
+      if ((code >= 0x05D0 && code <= 0x05EA) || // Hebrew letters
+          code === 0x05B0 || // Sheva
+          code === 0x05B1 || // Hataf Segol
+          code === 0x05B2 || // Hataf Patah
+          code === 0x05B3 || // Hataf Qamats
+          code === 0x05B4 || // Hiriq
+          code === 0x05B5 || // Tsere
+          code === 0x05B6 || // Segol
+          code === 0x05B7 || // Patah
+          code === 0x05B8 || // Qamats
+          code === 0x05B9 || // Holam
+          code === 0x05BA || // Holam Haser for Vav
+          code === 0x05BB || // Qubuts
+          code === 0x05BC || // Dagesh or Mappiq
+          code === 0x05BE || // Maqaf (Hebrew hyphen)
+          code === 0x05C1 || // Shin Dot
+          code === 0x05C2) { // Sin Dot
+        result += char;
+      }
+      // Skip ALL other marks that cause display issues
+      continue;
+    }
+    
+    // Keep Hebrew presentation forms
+    if (code >= 0xFB1D && code <= 0xFB4F) {
       result += char;
+      continue;
+    }
+    
+    // Special handling for vertical bar character
+    if (code === 0x007C) { // Vertical bar |
+      result += ' '; // Replace with space
       continue;
     }
     

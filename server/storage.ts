@@ -388,9 +388,15 @@ export class DatabaseStorage implements IStorage {
       // Aggressive Hebrew text cleaning to eliminate all display issues
       let cleanText = text
         .replace(/<br\s*\/?>/gi, '\n')  // Replace <br> tags with newlines
+        .replace(/<b>\s*\|\s*<\/b>/gi, ' ')  // Replace vertical bar in bold tags with space
+        .replace(/<b>\s*׀\s*<\/b>/gi, ' ')  // Replace Hebrew paseq in bold tags with space
         .replace(/<[^>]*>/gi, '')  // Remove any HTML tags
         .replace(/&nbsp;/gi, ' ')  // Replace non-breaking spaces with regular spaces
-        .replace(/&[a-zA-Z0-9#]+;/gi, '')  // Remove HTML entities
+        .replace(/&thinsp;/gi, ' ')  // Replace thin spaces with regular spaces
+        .replace(/&ensp;/gi, ' ')  // Replace en spaces with regular spaces
+        .replace(/&emsp;/gi, ' ')  // Replace em spaces with regular spaces
+        .replace(/&middot;/gi, ' ')  // Replace middle dot with space
+        .replace(/&[a-zA-Z0-9#]+;/gi, ' ')  // Replace remaining HTML entities with space
         .replace(/\{[פס]\}/g, '')  // Remove Hebrew paragraph markers like {פ} and {ס}
         // Remove all problematic Unicode ranges - but preserve specific Hebrew punctuation
         .replace(/[\u2000-\u206F]/g, (char) => {
@@ -416,36 +422,79 @@ export class DatabaseStorage implements IStorage {
         const char = cleanText[i];
         const code = char.charCodeAt(0);
         
-        // Keep basic ASCII (0-127)
-        if (code <= 127) {
+        // Keep basic ASCII (0-127) except control chars
+        if (code >= 32 && code <= 126) {
+          result += char;
+          continue;
+        }
+        if (code === 10 || code === 13) { // Keep newlines
           result += char;
           continue;
         }
         
-        // Keep Hebrew block and related blocks for proper text rendering
-        if ((code >= 0x0590 && code <= 0x05FF) ||  // Hebrew
-            (code >= 0xFB1D && code <= 0xFB4F)) {   // Hebrew Presentation Forms
-          // Skip specific problematic characters that appear as circles
-          if (code === 0x05C4 || code === 0x05C5 || code === 0x05C6) {
-            continue; // Skip these specific combining marks
+        // Keep Hebrew block but filter problematic characters
+        if (code >= 0x0590 && code <= 0x05FF) {
+          // Skip paseq and sof pasuq which appear as vertical bars or colons
+          if (code === 0x05C0 || code === 0x05C3) {
+            result += ' '; // Replace with space to maintain word separation
+            continue;
           }
+          
+          // Only keep Hebrew letters and most common vowels
+          if ((code >= 0x05D0 && code <= 0x05EA) || // Hebrew letters
+              code === 0x05B0 || // Sheva
+              code === 0x05B1 || // Hataf Segol
+              code === 0x05B2 || // Hataf Patah
+              code === 0x05B3 || // Hataf Qamats
+              code === 0x05B4 || // Hiriq
+              code === 0x05B5 || // Tsere
+              code === 0x05B6 || // Segol
+              code === 0x05B7 || // Patah
+              code === 0x05B8 || // Qamats
+              code === 0x05B9 || // Holam
+              code === 0x05BA || // Holam Haser for Vav
+              code === 0x05BB || // Qubuts
+              code === 0x05BC || // Dagesh or Mappiq
+              code === 0x05BE || // Maqaf (Hebrew hyphen)
+              code === 0x05C1 || // Shin Dot
+              code === 0x05C2) { // Sin Dot
+            result += char;
+          }
+          // Skip ALL other marks that cause display issues
+          continue;
+        }
+        
+        // Keep Hebrew presentation forms but be selective
+        if (code >= 0xFB1D && code <= 0xFB4F) {
           result += char;
           continue;
         }
         
-        // Convert any extended space to regular space
-        if (code >= 0x00A0 && code <= 0x00FF && char.match(/\s/)) {
+        // Convert various space characters to regular space
+        if (code === 0x00A0 || // Non-breaking space
+            code === 0x2000 || code === 0x2001 || code === 0x2002 || // Various width spaces
+            code === 0x2003 || code === 0x2004 || code === 0x2005 ||
+            code === 0x2006 || code === 0x2007 || code === 0x2008 ||
+            code === 0x2009 || code === 0x200A || code === 0x202F ||
+            code === 0x205F || code === 0x3000) { // Various other spaces
           result += ' ';
           continue;
         }
         
-        // Skip all other characters (removes circles, squares, etc.)
+        // Special handling for vertical bar character
+        if (code === 0x007C) { // Vertical bar |
+          result += ' '; // Replace with space
+          continue;
+        }
+        
+        // Skip everything else (all other Unicode blocks that cause issues)
       }
       
       // Final cleanup - preserve line breaks and spacing
       cleanText = result
         .replace(/[ \t]{2,}/g, ' ')     // Replace multiple spaces/tabs with single space (but not newlines)
         .replace(/\n{3,}/g, '\n\n')    // Limit to max 2 consecutive newlines
+        .replace(/׃/g, ':')           // Replace Hebrew sof pasuq with regular colon
         .trim();
       
       return {
