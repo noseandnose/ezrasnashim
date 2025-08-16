@@ -413,15 +413,6 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               >
                 Rabbi David Ashear
               </a>
-              {' '}and{' '}
-              <a 
-                href="https://outorah.org/author/133215/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-blue-600 underline hover:text-blue-800"
-              >
-                the OU
-              </a>
               {' '}for providing this content
             </p>
           </div>
