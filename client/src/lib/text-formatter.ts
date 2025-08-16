@@ -25,7 +25,7 @@ function cleanHebrewText(text: string): string {
     // Remove specific problematic characters that cause circles
     .replace(/[\uFFFD\uFFFC]/g, '')  // Remove replacement characters
     .replace(/[\u00A0]/g, ' ')       // Convert non-breaking space to regular space
-    .replace(/[\u0000-\u001F\u007F-\u009F]/g, ''); // Remove control characters
+    .replace(/[\u0000-\u0009\u000B-\u001F\u007F-\u009F]/g, ''); // Remove control characters but keep newline (0x0A)
   
   // Second pass: Character-by-character filtering to keep only safe characters
   let result = '';

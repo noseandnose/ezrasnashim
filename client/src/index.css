@@ -38,6 +38,7 @@
   text-rendering: optimizeLegibility !important;
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
+  white-space: pre-line !important; /* Preserve line breaks from database */
 }
 
 /* Bold Hebrew text using increased font size instead of font-weight */
@@ -62,6 +63,7 @@
   text-align: start !important; /* Use start for natural left alignment */
   direction: ltr !important;
   unicode-bidi: plaintext !important;
+  white-space: pre-line !important; /* Preserve line breaks from database */
 }
 
 /* Update old class to use Koren fonts with proper fallback */
