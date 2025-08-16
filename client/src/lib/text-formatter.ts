@@ -95,7 +95,6 @@ function cleanHebrewText(text: string): string {
   // Final cleanup - preserve line breaks and spacing
   return result
     .replace(/[ \t]{2,}/g, ' ')  // Replace multiple spaces/tabs with single space (but not newlines)
-    .replace(/^\s+|\s+$/g, '') // Trim start and end
     .trim();
 }
 
@@ -116,7 +115,10 @@ export function formatTextContent(text: string | null | undefined): string {
   // Clean Hebrew text first to remove problematic characters
   let formatted = cleanHebrewText(text);
   
-  // Replace --- with line breaks first
+  // Convert newlines to HTML breaks FIRST before any other processing
+  formatted = formatted.replace(/\n/g, '<br />');
+  
+  // Replace --- with line breaks (double breaks for spacing)
   formatted = formatted.replace(/---/g, '<br /><br />');
   
   // Removed [[ ]] grey box processing to allow conditional content system to work
