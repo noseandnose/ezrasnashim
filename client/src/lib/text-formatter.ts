@@ -33,7 +33,7 @@ function cleanHebrewText(text: string): string {
     const char = cleaned[i];
     const code = char.charCodeAt(0);
     
-    // Keep basic ASCII (0-127)
+    // Keep basic ASCII (0-127) including newlines
     if (code <= 127) {
       result += char;
       continue;
@@ -95,6 +95,7 @@ function cleanHebrewText(text: string): string {
   // Final cleanup - preserve line breaks and spacing
   return result
     .replace(/[ \t]{2,}/g, ' ')  // Replace multiple spaces/tabs with single space (but not newlines)
+    .replace(/\n{3,}/g, '\n\n')  // Limit to max 2 consecutive newlines
     .trim();
 }
 
