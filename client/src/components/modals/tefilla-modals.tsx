@@ -66,8 +66,7 @@ const useTefillaConditions = () => {
         );
         setConditions(tefillaConditions);
       } catch (error) {
-        console.warn('Could not load Tefilla conditions:', error);
-        // Set default conditions
+        // Could not load Tefilla conditions - Set default conditions
         setConditions({
           isInIsrael: false,
           isRoshChodesh: false,

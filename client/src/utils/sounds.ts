@@ -73,7 +73,7 @@ export const playCoinClinkSound = async () => {
     
     source.start();
   } catch (error) {
-    console.warn('Could not play coin clink sound:', error);
+    // Could not play coin clink sound
   }
 };
 
@@ -83,10 +83,10 @@ export const playCoinClinkSoundFromFile = () => {
     const audio = new Audio('/sounds/coin-jingle.mp3');
     audio.volume = 0.3;
     audio.play().catch(error => {
-      console.warn('Could not play coin jingle sound file:', error);
+      // Could not play coin jingle sound file
     });
   } catch (error) {
-    console.warn('Could not create audio element:', error);
+    // Could not create audio element
   }
 };
 

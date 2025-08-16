@@ -3,7 +3,7 @@
 ## Overview
 Ezras Nashim is a mobile-first web application for Jewish women to track and complete daily spiritual practices across Torah study, Tefilla (prayer), and Tzedaka (charity). The app aims to foster consistent spiritual growth through daily engagement with Jewish learning, prayer, and giving, with a vision to facilitate one million mitzvos monthly.
 
-## Recent Major Updates (December 2025 - August 2025)
+## Recent Major Updates (August 2025)
 - **Performance Optimization**: Removed all console statements, implemented lazy loading for modals, created centralized query configuration
 - **Bundle Size Reduction**: ~40% reduction through code splitting, compression (gzip/brotli), and component optimization
 - **TypeScript Improvements**: Fixed all `any` types for better type safety
@@ -21,6 +21,9 @@ Ezras Nashim is a mobile-first web application for Jewish women to track and com
 - **Text Size Formatting**: Added special markers for text sizing - ++text++ for larger text (1.2em scale), --text-- for smaller text (0.85em scale), integrated with existing bold (**), grey (~~) and line break (---) formatting system (August 14, 2025)
 - **Hebrew Text Cleaning Enhancement**: Enhanced text cleaner to remove only problematic Unicode characters (zero-width, direction marks, replacement characters) that appear as strange circles/boxes, while preserving Hebrew vowels (nikud), cantillation marks, and all legitimate Hebrew text for proper display and pronunciation (August 14, 2025)
 - **Font Loading Flash Fix**: Eliminated FOUT (Flash of Unstyled Text) by implementing font preloading, using font-display: block, adding inline critical CSS, and creating font loading states to ensure Koren fonts load immediately without showing fallback fonts first (August 14, 2025)
+- **Line Break Display Fix**: Resolved issue where newlines from database weren't displaying in Tefilla prayers. Updated text cleaning to preserve newlines (0x0A), added white-space: pre-line CSS, and ensured proper \n to <br /> conversion in formatTextContent function (August 16, 2025)
+- **Button Text Update**: Changed "Special Tehillim" button to "Tehillim" with subtitle "All & Special" for clearer user understanding (August 16, 2025)
+- **Production Code Cleanup**: Removed all console.log statements from production code, maintaining debug logging only in designated logger modules for cleaner production environment (August 16, 2025)
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.

@@ -49,38 +49,17 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
     e.preventDefault();
 
     if (!stripe || !elements) {
-      console.error('Stripe or Elements not ready:', { stripe: !!stripe, elements: !!elements });
       return;
     }
 
     setIsProcessing(true);
-
-    console.log('=== PAYMENT SUBMISSION STARTED ===');
-    console.log('Elements ready:', !!elements);
-    console.log('Stripe ready:', !!stripe);
-    console.log('Amount:', amount);
-    console.log('Donation type:', donationType);
-    console.log('User agent:', navigator.userAgent);
-    console.log('Current URL:', window.location.href);
-    console.log('Payment environment:', {
-      isApplePay: /iPhone|iPad|iPod/.test(navigator.userAgent) && window.ApplePaySession,
-      isSafari: /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent),
-      isIOS: /iPhone|iPad|iPod/.test(navigator.userAgent),
-      protocol: window.location.protocol,
-      hostname: window.location.hostname
-    });
     
     try {
-      console.log('About to confirm payment with Stripe...');
-      console.log('Return URL will be:', `${window.location.origin}/?donation=success`);
-      
       // Directly confirm payment - PaymentElement handles its own validation
       // The confirmPayment method will automatically validate the form
-      console.log('Confirming payment with Stripe...');
       
       let confirmResult;
       try {
-        console.log('About to call stripe.confirmPayment');
         
         // Use redirect: 'if_required' to handle success without redirect for card payments
         confirmResult = await stripe.confirmPayment({

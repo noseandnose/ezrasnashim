@@ -15,8 +15,7 @@ export default function DebugPayment() {
       message: 'Test Message'
     });
     
-    console.log('=== TESTING SPONSOR DAY FLOW ===');
-    console.log('Redirecting to donate page with params:', params.toString());
+    // Testing sponsor day flow
     
     setLocation(`/donate?${params.toString()}`);
   };
@@ -30,8 +29,7 @@ export default function DebugPayment() {
       dedication: 'Test Campaign Donation'
     });
     
-    console.log('=== TESTING CAMPAIGN FLOW ===');
-    console.log('Redirecting to donate page with params:', params.toString());
+    // Testing campaign flow
     
     setLocation(`/donate?${params.toString()}`);
   };
@@ -45,8 +43,7 @@ export default function DebugPayment() {
       dedication: ''
     });
     
-    console.log('=== TESTING PUT COIN FLOW ===');
-    console.log('Redirecting to donate page with params:', params.toString());
+    // Testing put coin flow
     
     setLocation(`/donate?${params.toString()}`);
   };
