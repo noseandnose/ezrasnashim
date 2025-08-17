@@ -3,7 +3,7 @@ import {
   shopItems, 
   tehillimNames, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, birkatHamazonPrayers, afterBrochasPrayers, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
-  dailyRecipes, parshaVorts, tableInspirations, communityImpact, campaigns, womensPrayers, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
+  dailyRecipes, parshaVorts, tableInspirations, communityImpact, campaigns, donations, womensPrayers, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats,
 
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
@@ -659,6 +659,32 @@ export class DatabaseStorage implements IStorage {
     return campaign;
   }
 
+  // Donation methods
+  async createDonation(donation: {
+    stripePaymentIntentId?: string;
+    amount: number;
+    donationType: string;
+    sponsorName?: string;
+    dedication?: string;
+    email?: string;
+    status: string;
+  }) {
+    const [result] = await db
+      .insert(donations)
+      .values(donation)
+      .returning();
+    return result;
+  }
+
+  async updateDonationStatus(stripePaymentIntentId: string, status: string) {
+    const [result] = await db
+      .update(donations)
+      .set({ status })
+      .where(eq(donations.stripePaymentIntentId, stripePaymentIntentId))
+      .returning();
+    return result;
+  }
+
   async getPirkeiAvotProgress(): Promise<PirkeiAvotProgress> {
     let [progress] = await db.select().from(pirkeiAvotProgress).limit(1);
     
@@ -1132,12 +1158,12 @@ export class DatabaseStorage implements IStorage {
     const activeSponsors = await db.select().from(sponsors).where(eq(sponsors.isActive, true));
     const totalDaysSponsored = activeSponsors.length;
 
-    // Count total campaigns
-    const allCampaigns = await db.select().from(campaigns);
-    const totalCampaigns = allCampaigns.length;
+    // Count successful donations
+    const successfulDonations = await db.select().from(donations).where(eq(donations.status, 'succeeded'));
+    const totalCampaigns = successfulDonations.length; // Using number of donations as "campaigns" for now
 
-    // Sum total raised from all campaigns
-    const totalRaised = allCampaigns.reduce((sum, campaign) => sum + (campaign.currentAmount || 0), 0);
+    // Sum total raised from actual donations (convert from cents to dollars)
+    const totalRaised = successfulDonations.reduce((sum, donation) => sum + (donation.amount || 0), 0) / 100;
 
     return {
       totalDaysSponsored,

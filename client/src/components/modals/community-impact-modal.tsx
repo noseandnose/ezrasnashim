@@ -35,7 +35,7 @@ export function CommunityImpactModal() {
             Community Impact
           </DialogTitle>
           <button
-            onClick={closeModal}
+            onClick={() => closeModal()}
             className="p-1 hover:bg-gray-100 rounded-full transition-colors"
           >
             <X size={20} className="text-black" />
@@ -74,7 +74,7 @@ export function CommunityImpactModal() {
 
               {/* Close Button */}
               <Button
-                onClick={closeModal}
+                onClick={() => closeModal()}
                 className="w-full bg-gradient-feminine hover:opacity-90 text-white platypi-medium rounded-2xl py-3"
               >
                 Close
@@ -84,7 +84,7 @@ export function CommunityImpactModal() {
             <div className="text-center py-8">
               <p className="platypi-regular text-black/60">No community impact story available today.</p>
               <Button
-                onClick={closeModal}
+                onClick={() => closeModal()}
                 className="w-full mt-4 bg-gradient-feminine hover:opacity-90 text-white platypi-medium rounded-2xl py-3"
               >
                 Close

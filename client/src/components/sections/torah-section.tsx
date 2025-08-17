@@ -103,8 +103,8 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
     {
       id: 'halacha',
       icon: Book,
-      title: 'Halacha',
-      subtitle: 'Learn Shabbos',
+      title: 'Learn Shabbas',
+      subtitle: 'Halachic insights',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
@@ -138,7 +138,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
               <h3 className="platypi-bold text-sm text-black">Pirkei Avot</h3>
               <span className="text-xs text-black/60 platypi-regular">{pirkeiAvot.source.replace('.', ':')}</span>
             </div>
-            <p className="koren-siddur-english text-sm text-black/90 leading-relaxed text-justify">
+            <p className="koren-siddur-english text-base text-black font-bold leading-relaxed text-justify">
               {pirkeiAvot.text}
             </p>
           </div>

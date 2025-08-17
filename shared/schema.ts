@@ -183,6 +183,18 @@ export const campaigns = pgTable("campaigns", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const donations = pgTable("donations", {
+  id: serial("id").primaryKey(),
+  stripePaymentIntentId: text("stripe_payment_intent_id").unique(),
+  amount: integer("amount").notNull(), // Amount in cents
+  donationType: text("donation_type").default("General Donation").notNull(),
+  sponsorName: text("sponsor_name"),
+  dedication: text("dedication"),
+  email: text("email"),
+  status: text("status").notNull(), // 'succeeded', 'pending', 'failed'
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const inspirationalQuotes = pgTable("inspirational_quotes", {
   id: serial("id").primaryKey(),
   text: text("text").notNull(),
@@ -527,3 +539,16 @@ export type InsertAnalyticsEvent = z.infer<typeof insertAnalyticsEventSchema>;
 
 export type DailyStats = typeof dailyStats.$inferSelect;
 export type InsertDailyStats = z.infer<typeof insertDailyStatsSchema>;
+
+// Tehillim table
+export const tehillim = pgTable("tehillim", {
+  id: serial("id").primaryKey(),
+  englishNumber: integer("english_number").notNull(),
+  hebrewNumber: text("hebrew_number").notNull(),
+  englishText: text("english_text").notNull(),
+  hebrewText: text("hebrew_text").notNull(),
+});
+
+export const insertTehillimSchema = createInsertSchema(tehillim);
+export type Tehillim = typeof tehillim.$inferSelect;
+export type InsertTehillim = z.infer<typeof insertTehillimSchema>;

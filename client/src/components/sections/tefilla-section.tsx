@@ -447,7 +447,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               {/* Header with perek number */}
               <div className="flex items-center justify-between mb-2">
                 <h4 className="platypi-bold text-lg text-black">
-                  Perek {progress?.currentPerek || 1}
+                  {progress?.currentPerek ? `Perek ${progress.currentPerek}` : 'Loading...'}
                 </h4>
                 <div className="bg-gradient-feminine p-2 rounded-full">
                   <ArrowRight className="text-white" size={14} strokeWidth={2} />
@@ -459,7 +459,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
                 <div className="w-full bg-blush/20 rounded-full h-1.5">
                   <div 
                     className="bg-gradient-feminine h-1.5 rounded-full transition-all duration-500 ease-out"
-                    style={{ width: `${((progress?.currentPerek || 1) / 150) * 100}%` }}
+                    style={{ width: `${((progress?.currentPerek || 0) / 150) * 100}%` }}
                   ></div>
                 </div>
               </div>
