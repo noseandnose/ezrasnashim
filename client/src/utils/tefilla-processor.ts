@@ -61,38 +61,20 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
   processedText = processedText.replace(conditionalPattern, (match, openTag, content, closeTag) => {
     // Ensure opening and closing tags match
     if (openTag !== closeTag) {
-      console.warn(`Mismatched conditional tags: ${openTag} !== ${closeTag}`);
       return match; // Return original if tags don't match
     }
 
     // Split conditions by comma for multiple conditions (AND logic)
     const conditions_list = openTag.split(',').map((c: string) => c.trim());
     
-    // Debug logging
-    console.log(`Processing conditional tag: ${openTag}`);
-    console.log(`Current conditions:`, {
-      isInIsrael: conditions.isInIsrael,
-      isRoshChodesh: conditions.isRoshChodesh,
-      isFastDay: conditions.isFastDay,
-      isAseretYemeiTeshuva: conditions.isAseretYemeiTeshuva,
-      isSukkot: conditions.isSukkot,
-      isPesach: conditions.isPesach,
-      isRoshChodeshSpecial: conditions.isRoshChodeshSpecial
-    });
-    
     // Check if all conditions are met
     const allConditionsMet = conditions_list.every((condition: string) => {
       const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
       if (!checker) {
-        console.warn(`Unknown condition: ${condition}`);
         return false;
       }
-      const result = checker();
-      console.log(`Condition ${condition}: ${result}`);
-      return result;
+      return checker();
     });
-
-    console.log(`All conditions met: ${allConditionsMet}, returning:`, allConditionsMet ? content : '[HIDDEN]');
 
     // Return content if all conditions are met, otherwise return empty string
     return allConditionsMet ? content : '';

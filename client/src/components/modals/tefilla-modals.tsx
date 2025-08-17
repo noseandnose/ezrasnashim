@@ -297,6 +297,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const [isAnimating, setIsAnimating] = useState(false);
   const [showExplosion, setShowExplosion] = useState(false);
   const queryClient = useQueryClient();
+  
+  // Load Tefilla conditions for conditional content processing
+  const tefillaConditions = useTefillaConditions();
 
   // Reset explosion state when modal changes
   useEffect(() => {
@@ -1091,14 +1094,14 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                       <div 
                         className="vc-koren-hebrew leading-relaxed"
                         style={{ fontSize: `${fontSize + 1}px` }}
-                        dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.hebrewText).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
+                        dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText, tefillaConditions).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
                       />
                     )}
                     {language === 'english' && (
                       <div 
                         className="koren-siddur-english text-left leading-relaxed text-black/70"
                         style={{ fontSize: `${fontSize}px` }}
-                        dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.englishTranslation || "English translation not available") }}
+                        dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
                       />
                     )}
                   </div>
