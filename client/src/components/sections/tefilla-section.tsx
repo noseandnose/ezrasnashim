@@ -149,6 +149,24 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
     gcTime: 60000 // Cache for 60 seconds
   });
 
+  // Get the actual Tehillim info to display English number and part
+  const { data: tehillimInfo } = useQuery<{
+    id: number;
+    englishNumber: number;
+    partNumber: number;
+    hebrewNumber: string;
+  }>({
+    queryKey: ['/api/tehillim/info', progress?.currentPerek],
+    queryFn: async () => {
+      if (!progress?.currentPerek) return null;
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/info/${progress.currentPerek}`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    enabled: !!progress?.currentPerek,
+    staleTime: 60000
+  });
+
   // Fetch current name for the perek - Only update when perek is completed
   const { data: currentName } = useQuery<TehillimName | null>({
     queryFn: async () => {
@@ -465,7 +483,11 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               {/* Header with perek number */}
               <div className="flex items-center justify-between mb-2">
                 <h4 className="platypi-bold text-lg text-black">
-                  {progress?.currentPerek ? `Perek ${progress.currentPerek}` : 'Loading...'}
+                  {tehillimInfo ? (
+                    tehillimInfo.partNumber > 1 
+                      ? `Perek ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber}`
+                      : `Perek ${tehillimInfo.englishNumber}`
+                  ) : 'Loading...'}
                 </h4>
                 <div className="bg-gradient-feminine p-2 rounded-full">
                   <ArrowRight className="text-white" size={14} strokeWidth={2} />

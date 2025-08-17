@@ -1,7 +1,7 @@
 import serverAxiosClient from "./axiosClient";
 import { 
   shopItems, 
-  tehillimNames, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, birkatHamazonPrayers, afterBrochasPrayers, sponsors, nishmasText,
+  tehillimNames, tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, birkatHamazonPrayers, afterBrochasPrayers, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
   dailyRecipes, parshaVorts, tableInspirations, communityImpact, campaigns, donations, womensPrayers, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats,
@@ -29,7 +29,7 @@ import {
   type DailyStats, type InsertDailyStats
 } from "../shared/schema";
 import { db, pool } from "./db";
-import { eq, gt, lt, gte, lte, and } from "drizzle-orm";
+import { eq, gt, lt, gte, lte, and, sql } from "drizzle-orm";
 import { cleanHebrewText, memoize, withRetry, formatDate } from './typeHelpers';
 
 export interface IStorage {
@@ -232,13 +232,21 @@ export class DatabaseStorage implements IStorage {
   async updateGlobalTehillimProgress(currentPerek: number, language: string, completedBy?: string): Promise<GlobalTehillimProgress> {
     const [progress] = await db.select().from(globalTehillimProgress).limit(1);
     if (progress) {
-      // Check if we're completing the entire book (perek 150)
-      const isBookComplete = currentPerek === 150;
+      // Now currentPerek is actually the ID in the tehillim table
+      // Get the max ID to know when to reset
+      const [maxRow] = await db
+        .select({ maxId: sql<number>`MAX(id)` })
+        .from(tehillim);
       
-      // Calculate next perek (1-150, cycling)
-      const nextPerek = currentPerek >= 150 ? 1 : currentPerek + 1;
+      const maxId = maxRow?.maxId || 171; // 171 is the total with Psalm 119 having 22 parts
       
-      // Log book completion event when finishing perek 150
+      // Check if we're completing the entire book
+      const isBookComplete = currentPerek >= maxId;
+      
+      // Calculate next ID (cycling through all rows)
+      const nextId = currentPerek >= maxId ? 1 : currentPerek + 1;
+      
+      // Log book completion event when finishing the last row
       if (isBookComplete) {
         await this.trackEvent({
           eventType: 'tehillim_book_complete',
@@ -256,7 +264,7 @@ export class DatabaseStorage implements IStorage {
       
       const [updated] = await db.update(globalTehillimProgress)
         .set({
-          currentPerek: nextPerek,
+          currentPerek: nextId, // Now storing the row ID, not psalm number
           currentNameId: nextName?.id || null,
           lastUpdated: new Date(),
           completedBy: completedBy || null
@@ -349,6 +357,90 @@ export class DatabaseStorage implements IStorage {
 
 
 
+  // Get Tehillim from Supabase database by English number (1-150)
+  async getSupabaseTehillim(englishNumber: number, language: string): Promise<{text: string; perek: number; language: string}> {
+    try {
+      // Get all parts for this English number
+      const rows = await db
+        .select()
+        .from(tehillim)
+        .where(eq(tehillim.englishNumber, englishNumber))
+        .orderBy(tehillim.partNumber);
+
+      if (!rows || rows.length === 0) {
+        throw new Error(`Tehillim ${englishNumber} not found in database`);
+      }
+
+      // Combine all parts into one text
+      let combinedText = '';
+      if (language === 'hebrew') {
+        combinedText = rows.map((row: any) => row.hebrewText).join('\n\n');
+      } else {
+        combinedText = rows.map((row: any) => row.englishText).join('\n\n');
+      }
+
+      return {
+        text: combinedText,
+        perek: englishNumber,
+        language
+      };
+    } catch (error) {
+      console.error('Error fetching Tehillim from Supabase:', error);
+      // Fallback to Sefaria if needed
+      return this.getSefariaTehillim(englishNumber, language);
+    }
+  }
+
+  // Get single Tehillim row by ID for Global Tehillim display
+  async getSupabaseTehillimById(id: number): Promise<{
+    id: number;
+    englishNumber: number;
+    partNumber: number;
+    hebrewNumber: string;
+    hebrewText: string;
+    englishText: string;
+  } | null> {
+    try {
+      const [row] = await db
+        .select()
+        .from(tehillim)
+        .where(eq(tehillim.id, id));
+
+      return row || null;
+    } catch (error) {
+      console.error('Error fetching Tehillim by ID:', error);
+      return null;
+    }
+  }
+
+  // Get Tehillim preview for Global display
+  async getSupabaseTehillimPreview(id: number, language: string): Promise<{
+    preview: string;
+    englishNumber: number;
+    partNumber: number;
+    language: string;
+  } | null> {
+    try {
+      const row = await this.getSupabaseTehillimById(id);
+      if (!row) return null;
+
+      const text = language === 'hebrew' ? row.hebrewText : row.englishText;
+      // Get first line or first 100 characters
+      const firstLine = text.split('\n')[0] || text.substring(0, 100) + '...';
+
+      return {
+        preview: firstLine,
+        englishNumber: row.englishNumber,
+        partNumber: row.partNumber,
+        language
+      };
+    } catch (error) {
+      console.error('Error getting Tehillim preview:', error);
+      return null;
+    }
+  }
+
+  // DEPRECATED - Use getSupabaseTehillim instead
   async getSefariaTehillim(perek: number, language: string): Promise<{text: string; perek: number; language: string}> {
     try {
       // Use the correct Sefaria API endpoint

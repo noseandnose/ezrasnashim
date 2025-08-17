@@ -416,14 +416,33 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     gcTime: 0 // Don't cache at all
   });
 
-  // Fetch Tehillim text from Sefaria API
-  const { data: tehillimText, refetch: refetchTehillimText } = useQuery<{text: string; perek: number; language: string}>({
-    queryKey: ['/api/tehillim/text', progress?.currentPerek, showHebrew ? 'hebrew' : 'english'],
+  // Get the tehillim info first to get the English number
+  const { data: tehillimInfo } = useQuery<{
+    id: number;
+    englishNumber: number;
+    partNumber: number;
+    hebrewNumber: string;
+  }>({
+    queryKey: ['/api/tehillim/info', progress?.currentPerek],
     queryFn: async () => {
-      const response = await axiosClient.get(`/api/tehillim/text/${progress?.currentPerek}?language=${showHebrew ? 'hebrew' : 'english'}`);
-      return response.data;
+      if (!progress?.currentPerek) return null;
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/info/${progress.currentPerek}`);
+      if (!response.ok) return null;
+      return response.json();
     },
     enabled: activeModal === 'tehillim-text' && !!progress?.currentPerek,
+    staleTime: 60000
+  });
+
+  // Fetch Tehillim text from Supabase using English number
+  const { data: tehillimText, refetch: refetchTehillimText } = useQuery<{text: string; perek: number; language: string}>({
+    queryKey: ['/api/tehillim/text', tehillimInfo?.englishNumber, showHebrew ? 'hebrew' : 'english'],
+    queryFn: async () => {
+      if (!tehillimInfo?.englishNumber) return null;
+      const response = await axiosClient.get(`/api/tehillim/text/${tehillimInfo.englishNumber}?language=${showHebrew ? 'hebrew' : 'english'}`);
+      return response.data;
+    },
+    enabled: activeModal === 'tehillim-text' && !!tehillimInfo?.englishNumber,
     refetchInterval: 2000, // Very frequent refresh to get new perek text
     staleTime: 0, // Always consider data stale to force fresh fetches
     gcTime: 0 // Don't cache at all
@@ -457,7 +476,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       
       toast({
         title: "Perek Completed!",
-        description: `Perek ${progress?.currentPerek || 'current'} has been completed. Moving to the next perek.`,
+        description: tehillimInfo?.partNumber && tehillimInfo.partNumber > 1 
+          ? `Perek ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber} has been completed. Moving to the next section.`
+          : `Perek ${tehillimInfo?.englishNumber || 'current'} has been completed. Moving to the next perek.`,
       });
       // Force complete cache reset for Tehillim data
       queryClient.resetQueries({ queryKey: ['/api/tehillim/progress'] });

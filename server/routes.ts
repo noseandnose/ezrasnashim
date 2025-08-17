@@ -1289,7 +1289,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get Tehillim text from Sefaria API
+  // Get Tehillim info by ID for Global display
+  app.get("/api/tehillim/info/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id) || id < 1) {
+        return res.status(400).json({ error: "Invalid ID" });
+      }
+      
+      const tehillimInfo = await storage.getSupabaseTehillimById(id);
+      if (!tehillimInfo) {
+        return res.status(404).json({ error: "Tehillim not found" });
+      }
+      
+      res.json(tehillimInfo);
+    } catch (error) {
+      console.error('Error fetching Tehillim info:', error);
+      res.status(500).json({ error: "Failed to fetch Tehillim info" });
+    }
+  });
+
+  // Get Tehillim text from Supabase
   app.get("/api/tehillim/text/:perek", async (req, res) => {
     try {
       const perek = parseInt(req.params.perek);
@@ -1303,7 +1324,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Language must be 'english' or 'hebrew'" });
       }
       
-      const tehillimData = await storage.getSefariaTehillim(perek, language);
+      // Use new Supabase method instead of Sefaria
+      const tehillimData = await storage.getSupabaseTehillim(perek, language);
       res.json(tehillimData);
     } catch (error) {
       console.error('Error fetching Tehillim text:', error);

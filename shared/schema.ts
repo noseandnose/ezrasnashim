@@ -544,6 +544,7 @@ export type InsertDailyStats = z.infer<typeof insertDailyStatsSchema>;
 export const tehillim = pgTable("tehillim", {
   id: serial("id").primaryKey(),
   englishNumber: integer("english_number").notNull(),
+  partNumber: integer("part_number").notNull(),
   hebrewNumber: text("hebrew_number").notNull(),
   englishText: text("english_text").notNull(),
   hebrewText: text("hebrew_text").notNull(),
