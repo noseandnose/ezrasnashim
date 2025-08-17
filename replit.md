@@ -5,6 +5,7 @@ Ezras Nashim is a mobile-first web application for Jewish women to track and com
 
 ## Recent Major Updates (August 2025)
 - **Tehillim Database Migration** (August 17, 2025): Migrated from Sefaria API to Supabase `tehillim` table with ID-based tracking. Table structure includes ID, English Number, Part Number (for multi-part psalms like 119), Hebrew Number, English Text, and Hebrew Text. Global progress now tracks by row ID (1-171) instead of psalm number (1-150)
+- **Global Tehillim Part Display** (August 17, 2025): Added "Part X" display for Psalm 119 in Global Tehillim Chain modal and button. Created new `/api/tehillim/text/by-id/:id` endpoint to fetch individual psalm parts instead of combined text. Enhanced Hebrew text cleaning to remove cantillation marks and problematic Unicode characters that display as squares/blocks
 - **Performance Optimization**: Removed all console statements, implemented lazy loading for modals, created centralized query configuration
 - **Bundle Size Reduction**: ~40% reduction through code splitting, compression (gzip/brotli), and component optimization
 - **TypeScript Improvements**: Fixed all `any` types for better type safety

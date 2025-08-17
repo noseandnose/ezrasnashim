@@ -650,7 +650,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 {showHebrew ? 'עב' : 'EN'}
               </Button>
               
-              <DialogTitle className="text-lg platypi-bold text-black">Tehillim {progress?.currentPerek || 1}</DialogTitle>
+              <DialogTitle className="text-lg platypi-bold text-black">
+                Tehillim {tehillimInfo?.englishNumber || progress?.currentPerek || 1}
+                {tehillimInfo?.englishNumber === 119 && tehillimInfo?.partNumber ? ` - Part ${tehillimInfo.partNumber}` : ''}
+              </DialogTitle>
               
               <div className="flex items-center gap-2">
                 <button

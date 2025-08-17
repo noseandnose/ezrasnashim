@@ -4,13 +4,17 @@
 function cleanHebrewText(text: string): string {
   // First pass: Remove all problematic Unicode ranges
   let cleaned = text
+    // Replace Hebrew sof pasuq with period (better visual)
+    .replace(/׃/g, '.')
+    // Remove all cantillation marks (ta'amim) - they cause display issues
+    .replace(/[\u0591-\u05AF]/g, '')
+    .replace(/[\u05BD\u05BF\u05C0\u05C3\u05C4\u05C5\u05C6]/g, '') // Additional Hebrew punctuation
     // Remove all geometric shapes, symbols, and technical characters - but preserve specific Hebrew punctuation
     .replace(/[\u2000-\u206F]/g, (char) => {
       const code = char.charCodeAt(0);
       // Keep only normal spaces and Hebrew punctuation
       if (code === 0x2000 || code === 0x2002 || code === 0x2003 || code === 0x2009) return ' '; // Convert spaces
       if (code === 0x2013 || code === 0x2014) return '-'; // Keep dashes
-      if (code === 0x05BE) return char; // Keep Hebrew maqaf (hyphen)
       return ''; // Remove everything else in this range
     })
     .replace(/[\u2100-\u21FF]/g, '')  // Remove letterlike symbols and arrows
@@ -39,35 +43,14 @@ function cleanHebrewText(text: string): string {
       continue;
     }
     
-    // Keep Hebrew block but filter problematic characters
+    // Keep Hebrew block but be very selective - only letters and hyphen
     if (code >= 0x0590 && code <= 0x05FF) {
-      // Skip paseq and sof pasuq which appear as vertical bars or colons
-      if (code === 0x05C0 || code === 0x05C3) {
-        result += ' '; // Replace with space to maintain word separation
-        continue;
-      }
-      
-      // Only keep Hebrew letters and most common vowels
-      if ((code >= 0x05D0 && code <= 0x05EA) || // Hebrew letters
-          code === 0x05B0 || // Sheva
-          code === 0x05B1 || // Hataf Segol
-          code === 0x05B2 || // Hataf Patah
-          code === 0x05B3 || // Hataf Qamats
-          code === 0x05B4 || // Hiriq
-          code === 0x05B5 || // Tsere
-          code === 0x05B6 || // Segol
-          code === 0x05B7 || // Patah
-          code === 0x05B8 || // Qamats
-          code === 0x05B9 || // Holam
-          code === 0x05BA || // Holam Haser for Vav
-          code === 0x05BB || // Qubuts
-          code === 0x05BC || // Dagesh or Mappiq
-          code === 0x05BE || // Maqaf (Hebrew hyphen)
-          code === 0x05C1 || // Shin Dot
-          code === 0x05C2) { // Sin Dot
+      // Only keep Hebrew letters and maqaf (hyphen)
+      if ((code >= 0x05D0 && code <= 0x05EA) || // Hebrew letters only
+          code === 0x05BE) { // Maqaf (Hebrew hyphen)
         result += char;
       }
-      // Skip ALL other marks that cause display issues
+      // Skip ALL vowels and marks - they're already removed in first pass
       continue;
     }
     
