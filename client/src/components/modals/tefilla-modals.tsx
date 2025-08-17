@@ -868,13 +868,27 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[90vh] platypi-regular ${isAnimating ? 'prayer-ascending' : ''}`} aria-describedby="personal-prayers-description">
           <div id="personal-prayers-description" className="sr-only">Guidance for personal prayer and connection</div>
           
-          <StandardModalHeader 
-            title="Personal Prayers"
-            showHebrew={showHebrew}
-            setShowHebrew={setShowHebrew}
-            fontSize={fontSize}
-            setFontSize={setFontSize}
-          />
+          <div className="flex items-center justify-center mb-3 relative">
+            <div className="flex items-center gap-4">
+              <DialogTitle className="text-lg platypi-bold text-black">Personal Prayers</DialogTitle>
+              
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                >
+                  <span className="text-xs platypi-medium">-</span>
+                </button>
+                <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
+                <button
+                  onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                >
+                  <span className="text-xs platypi-medium">+</span>
+                </button>
+              </div>
+            </div>
+          </div>
           
 
 
@@ -1033,7 +1047,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       <Dialog open={activeModal === 'individual-prayer'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="individual-prayer-description">
           <div id="individual-prayer-description" className="sr-only">Individual prayer text and translation</div>
-          <IndividualPrayerContent prayerId={selectedPrayerId} language={language} fontSize={fontSize} setLanguage={setLanguage} setFontSize={setFontSize} />
+          <IndividualPrayerContent prayerId={selectedPrayerId} fontSize={fontSize} setFontSize={setFontSize} />
         </DialogContent>
       </Dialog>
 
@@ -1295,11 +1309,9 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
   );
 }
 
-function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, setFontSize }: {
+function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
   prayerId: number | null;
-  language: 'hebrew' | 'english';
   fontSize: number;
-  setLanguage: (lang: 'hebrew' | 'english') => void;
   setFontSize: (size: number) => void;
 }) {
   const { closeModal } = useModalStore();
@@ -1322,21 +1334,8 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
       </VisuallyHidden>
       
       {/* Standardized Header */}
-      <div className="flex items-center justify-center mb-3 relative pr-8">
+      <div className="flex items-center justify-center mb-3 relative">
         <div className="flex items-center gap-4">
-          <Button
-            onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
-            variant="ghost"
-            size="sm"
-            className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
-              language === 'hebrew' 
-                ? 'bg-blush text-white' 
-                : 'text-black/60 hover:text-black hover:bg-white/50'
-            }`}
-          >
-            {language === 'hebrew' ? 'עב' : 'EN'}
-          </Button>
-          
           <h2 className="text-lg platypi-bold text-black">{prayer.prayerName}</h2>
           
           <div className="flex items-center gap-2">
@@ -1360,9 +1359,9 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
       {/* Standardized Content Area */}
       <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
         <div
-          className={`${language === 'hebrew' ? 'vc-koren-hebrew' : 'koren-siddur-english'} leading-relaxed text-black`}
-          style={{ fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px` }}
-          dangerouslySetInnerHTML={{ __html: formatTextContent(language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
+          className="vc-koren-hebrew leading-relaxed text-black"
+          style={{ fontSize: `${fontSize + 1}px` }}
+          dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.hebrewText).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
         />
 
       </div>
