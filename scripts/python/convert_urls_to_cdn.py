@@ -294,7 +294,6 @@ def main():
     print(f"Rows to process: {total}")
 
     updates = []   # (cdn_url, id) only for successful uploads
-    failed_updates = []
     failed = 0
     skipped = 0
     submitted = 0
@@ -327,7 +326,6 @@ def main():
                 updates.append((cdn_url, rec_id))
             except Exception as e:
                 failed += 1
-                failed_updates.append((cdn_url, rec_id))
                 print(f"[error] id={rid}: {e}")
 
     print(f"Uploads done. success={len(updates)}, failed={failed}, skipped={skipped}, submitted={submitted}")
@@ -350,24 +348,6 @@ def main():
     else:
         cur.close()
         conn.close()
-
-    if failed_updates:
-        print("Failed to upload some rows:")
-        for url, id in failed_updates:
-            print(f"id={id}, url={url}")
-            sql = f'DELETE FROM "{table}" WHERE "{id_col}" = %s'
-            try:
-                print(f"Deleting failed row {id} from {table}")
-                # cur.execute(sql, (id))
-                # conn.commit()
-                print("Deleted row from DB")
-            except Exception as e:
-                conn.rollback()
-                print("Failed to delete row from DB:", e)
-                sys.exit(2)
-            finally:
-                cur.close()
-                conn.close()
 
     print(f"Done. db_updates={len(updates)}")
 
