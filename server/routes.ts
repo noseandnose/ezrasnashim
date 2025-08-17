@@ -1333,6 +1333,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get Tehillim text by ID (for proper part handling of Psalm 119)
+  app.get("/api/tehillim/text/by-id/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const language = req.query.language as string || 'english';
+      
+      if (isNaN(id) || id < 1 || id > 171) {
+        return res.status(400).json({ error: "Invalid ID" });
+      }
+      
+      if (!['english', 'hebrew'].includes(language)) {
+        return res.status(400).json({ error: "Language must be 'english' or 'hebrew'" });
+      }
+      
+      // Get the specific part by ID
+      const tehillimData = await storage.getTehillimById(id, language);
+      res.json(tehillimData);
+    } catch (error) {
+      console.error('Error fetching Tehillim text by ID:', error);
+      res.status(500).json({ error: "Failed to fetch Tehillim text" });
+    }
+  });
+
   // Get Tehillim preview (first line) from Sefaria API
   app.get("/api/tehillim/preview/:perek", async (req, res) => {
     try {

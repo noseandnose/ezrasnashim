@@ -413,6 +413,31 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getTehillimById(id: number, language: string): Promise<{text: string; perek: number; language: string}> {
+    try {
+      const [row] = await db
+        .select()
+        .from(tehillim)
+        .where(eq(tehillim.id, id));
+
+      if (!row) {
+        throw new Error(`Tehillim with ID ${id} not found in database`);
+      }
+
+      const text = language === 'hebrew' ? row.hebrewText : row.englishText;
+
+      return {
+        text: text || '',
+        perek: row.englishNumber || 1,
+        language
+      };
+    } catch (error) {
+      console.error('Error fetching Tehillim by ID:', error);
+      // Fallback to Sefaria if needed
+      throw error;
+    }
+  }
+
   // Get Tehillim preview for Global display
   async getSupabaseTehillimPreview(id: number, language: string): Promise<{
     preview: string;

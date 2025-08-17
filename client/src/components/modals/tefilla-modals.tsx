@@ -434,15 +434,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     staleTime: 60000
   });
 
-  // Fetch Tehillim text from Supabase using English number
+  // Fetch Tehillim text from Supabase using ID (for proper part handling)
   const { data: tehillimText, refetch: refetchTehillimText } = useQuery<{text: string; perek: number; language: string}>({
-    queryKey: ['/api/tehillim/text', tehillimInfo?.englishNumber, showHebrew ? 'hebrew' : 'english'],
+    queryKey: ['/api/tehillim/text/by-id', progress?.currentPerek, showHebrew ? 'hebrew' : 'english'],
     queryFn: async () => {
-      if (!tehillimInfo?.englishNumber) return null;
-      const response = await axiosClient.get(`/api/tehillim/text/${tehillimInfo.englishNumber}?language=${showHebrew ? 'hebrew' : 'english'}`);
+      if (!progress?.currentPerek) return null;
+      const response = await axiosClient.get(`/api/tehillim/text/by-id/${progress.currentPerek}?language=${showHebrew ? 'hebrew' : 'english'}`);
       return response.data;
     },
-    enabled: activeModal === 'tehillim-text' && !!tehillimInfo?.englishNumber,
+    enabled: activeModal === 'tehillim-text' && !!progress?.currentPerek,
     refetchInterval: 2000, // Very frequent refresh to get new perek text
     staleTime: 0, // Always consider data stale to force fresh fetches
     gcTime: 0 // Don't cache at all
@@ -507,8 +507,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const getTehillimDisplayText = () => {
     if (!tehillimText) {
       return (
-        <div className="text-sm text-gray-600 italic text-center">
-          Loading Tehillim text from Sefaria...
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
         </div>
       );
     }
