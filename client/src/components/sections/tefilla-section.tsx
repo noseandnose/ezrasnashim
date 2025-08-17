@@ -152,11 +152,16 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   // Fetch current name for the perek - Only update when perek is completed
   const { data: currentName } = useQuery<TehillimName | null>({
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/current-name`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch current name');
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/current-name`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch current name');
+        }
+        return response.json();
+      } catch (error) {
+        console.warn('Failed to fetch current name:', error);
+        return null; // Return null as fallback
       }
-      return response.json();
     },
     queryKey: ['/api/tehillim/current-name'],
     refetchInterval: 10000, // Refresh every 10 seconds
@@ -167,25 +172,38 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   // Fetch all active names for count display
   const { data: allNames } = useQuery<TehillimName[]>({
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/names`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch tehillim names');
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/names`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch tehillim names');
+        }
+        return response.json();
+      } catch (error) {
+        // Silent error handling - don't show runtime error modal
+        console.warn('Failed to fetch tehillim names:', error);
+        return []; // Return empty array as fallback
       }
-      return response.json();
     },
     queryKey: ['/api/tehillim/names'],
     refetchInterval: 60000, // Refresh every minute
+    retry: 3, // Retry failed requests 3 times
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 
   // Fetch Tehillim preview (first line) for display
   const { data: tehillimPreview, isLoading: isPreviewLoading } = useQuery<{preview: string; perek: number; language: string}>({
     queryKey: ['/api/tehillim/preview', progress?.currentPerek],
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/preview/${progress?.currentPerek}?language=hebrew`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch tehillim preview');
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/preview/${progress?.currentPerek}?language=hebrew`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch tehillim preview');
+        }
+        return response.json();
+      } catch (error) {
+        console.warn('Failed to fetch tehillim preview:', error);
+        return { preview: '', perek: progress?.currentPerek || 0, language: 'hebrew' }; // Return empty preview as fallback
       }
-      return response.json();
     },
     enabled: !!progress?.currentPerek,
     staleTime: 60000, // Cache for 1 minute - preview text doesn't change
