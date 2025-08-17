@@ -242,10 +242,10 @@ export default function TableSection() {
                 ? 'bg-gray-300' 
                 : isModalComplete('inspiration') ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
-              <Lightbulb className={`${!inspirationContent ? 'text-gray-500' : 'text-white'}`} size={18} strokeWidth={1.5} />
+              <Star className={`${!inspirationContent ? 'text-gray-500' : 'text-white'}`} size={18} strokeWidth={1.5} />
             </div>
             <h3 className={`platypi-bold text-xs mb-1 platypi-bold ${!inspirationContent ? 'text-gray-500' : 'text-black'}`}>
-              Creative Jewish Living
+              Special Feature
             </h3>
             <p className={`platypi-regular text-xs leading-relaxed ${!inspirationContent ? 'text-gray-400' : 'text-black/60'}`}>
               {!inspirationContent ? 'Coming Soon' : isModalComplete('inspiration') ? 'Completed' : inspirationContent.title}
