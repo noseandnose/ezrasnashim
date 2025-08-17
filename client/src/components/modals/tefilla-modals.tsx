@@ -709,7 +709,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                       <div 
                         className="koren-siddur-english text-left leading-relaxed text-black/70"
                         style={{ fontSize: `${fontSize}px` }}
-                        dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.englishTranslation || "English translation not available") }}
+                        dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
                       />
                     )}
                   </div>
@@ -1322,6 +1322,10 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
+  
+  // Load Tefilla conditions for conditional content processing
+  const tefillaConditions = useTefillaConditions();
+  
   const { data: prayer, isLoading } = useQuery<WomensPrayer>({
     queryKey: [`/api/womens-prayers/prayer/${prayerId}`],
     enabled: !!prayerId,
@@ -1364,7 +1368,7 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
         <div
           className="vc-koren-hebrew leading-relaxed text-black"
           style={{ fontSize: `${fontSize + 1}px` }}
-          dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.hebrewText).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
+          dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText || '', tefillaConditions).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
         />
 
       </div>
@@ -1550,6 +1554,9 @@ function IndividualTehillimModal() {
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
   const [fontSize, setFontSize] = useState(20);
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
+  
+  // Load Tefilla conditions for conditional content processing
+  const tefillaConditions = useTefillaConditions();
 
   const { data: tehillimText, isLoading } = useQuery({
     queryKey: ['/api/tehillim/text', selectedPsalm, language],
@@ -1614,7 +1621,7 @@ function IndividualTehillimModal() {
               minHeight: 'fit-content'
             }}
             dangerouslySetInnerHTML={{
-              __html: formatTextContent(tehillimText?.text || `Psalm ${selectedPsalm} text loading...`)
+              __html: processTefillaContent(tehillimText?.text || `Psalm ${selectedPsalm} text loading...`, tefillaConditions)
             }}
           />
         )}
