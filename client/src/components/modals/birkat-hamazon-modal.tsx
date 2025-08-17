@@ -163,7 +163,9 @@ export function BirkatHamazonModal() {
           {language === "hebrew" ? 'עב' : 'EN'}
         </Button>
         
-        <DialogTitle className="text-lg platypi-bold text-black">Birkat Hamazon</DialogTitle>
+        <DialogTitle className="text-lg platypi-bold text-black">
+          {activeModal === 'al-hamichiya' ? 'Me\'ein Shalosh' : 'Birkat Hamazon'}
+        </DialogTitle>
         
         <div className="flex items-center gap-2">
           <button
