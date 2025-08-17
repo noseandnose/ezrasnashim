@@ -1411,6 +1411,7 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
 // Tehillim Modal Component (previously Special Tehillim)
 function SpecialTehillimModal() {
   const { closeModal, openModal, setSelectedPsalm } = useModalStore();
+  const { isModalComplete } = useModalCompletionStore();
   const [activeTab, setActiveTab] = useState<'all' | 'special'>('all');
 
   // Open individual Tehillim text
@@ -1489,12 +1490,16 @@ function SpecialTehillimModal() {
       {/* Tab Content */}
       <div className="max-h-[50vh] overflow-y-auto">
         {activeTab === 'all' ? (
-          <div className="grid grid-cols-10 gap-2 p-2">
+          <div className="grid grid-cols-7 gap-2 p-2">
             {allPsalms.map((psalm) => (
               <button
                 key={psalm}
                 onClick={() => openTehillimText(psalm)}
-                className="bg-gradient-feminine text-white w-10 h-10 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center"
+                className={`w-12 h-12 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center ${
+                  isModalComplete(`individual-tehillim-${psalm}`)
+                    ? 'bg-sage text-white'
+                    : 'bg-gradient-feminine text-white'
+                }`}
               >
                 {psalm}
               </button>
@@ -1536,7 +1541,7 @@ function SpecialTehillimModal() {
 
 // Individual Tehillim Modal Component
 function IndividualTehillimModal() {
-  const { closeModal, selectedPsalm } = useModalStore();
+  const { closeModal, openModal, selectedPsalm } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
@@ -1628,7 +1633,7 @@ function IndividualTehillimModal() {
             setShowHeartExplosion(false); // Reset explosion state
             checkAndShowCongratulations();
             closeModal();
-            window.location.hash = '#/?section=home&scrollToProgress=true';
+            openModal('tehillim', 'tefilla'); // Return to All Psalms modal
           }, 2000);
         }}
         disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
