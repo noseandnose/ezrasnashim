@@ -102,15 +102,16 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   const getReasonIcon = (reason: string, reasonEnglish?: string) => {
     // Map Hebrew reasons and English translations to icons
     const reasonToCode = (r: string, eng?: string): string => {
-      if (r === "רפואה שלמה" || eng === "Complete Healing") return "health";
-      if (r === "שידוך" || eng === "Finding a mate") return "shidduch";
-      if (r === "זרע של קיימא" || eng === "Children") return "children";
-      if (r === "פרנסה" || eng === "Livelihood") return "parnassa";
-      if (r === "הצלחה" || eng === "Success") return "success";
-      if (r === "שלום בית" || eng === "Family") return "family";
-      if (r === "חכמה" || eng === "Education") return "education";
-      if (r === "עליית נשמה" || eng === "Peace") return "peace";
-      if (r === "חטופים" || eng === "Hostages") return "hostages";
+      // Handle both Hebrew and English reasons, plus common variations
+      if (r === "רפואה שלמה" || eng === "Complete Healing" || r === "health" || eng === "health" || r === "Health") return "health";
+      if (r === "שידוך" || eng === "Finding a mate" || r === "shidduch" || eng === "shidduch") return "shidduch";
+      if (r === "זרע של קיימא" || eng === "Children" || r === "children" || eng === "children") return "children";
+      if (r === "פרנסה" || eng === "Livelihood" || r === "parnassa" || eng === "parnassa") return "parnassa";
+      if (r === "הצלחה" || eng === "Success" || r === "success" || eng === "success") return "success";
+      if (r === "שלום בית" || eng === "Family" || r === "family" || eng === "family") return "family";
+      if (r === "חכמה" || eng === "Education" || r === "education" || eng === "education") return "education";
+      if (r === "עליית נשמה" || eng === "Peace" || r === "peace" || eng === "peace") return "peace";
+      if (r === "חטופים" || eng === "Hostages" || r === "hostages" || eng === "hostages") return "hostages";
       return "general";
     };
     
@@ -134,15 +135,16 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   const getReasonShort = (reason: string, reasonEnglish?: string) => {
     // Map Hebrew reasons and English translations to short text
     const reasonToCode = (r: string, eng?: string): string => {
-      if (r === "רפואה שלמה" || eng === "Complete Healing") return "health";
-      if (r === "שידוך" || eng === "Finding a mate") return "shidduch";
-      if (r === "זרע של קיימא" || eng === "Children") return "children";
-      if (r === "פרנסה" || eng === "Livelihood") return "parnassa";
-      if (r === "הצלחה" || eng === "Success") return "success";
-      if (r === "שלום בית" || eng === "Family") return "family";
-      if (r === "חכמה" || eng === "Education") return "education";
-      if (r === "עליית נשמה" || eng === "Peace") return "peace";
-      if (r === "חטופים" || eng === "Hostages") return "hostages";
+      // Handle both Hebrew and English reasons, plus common variations
+      if (r === "רפואה שלמה" || eng === "Complete Healing" || r === "health" || eng === "health" || r === "Health") return "health";
+      if (r === "שידוך" || eng === "Finding a mate" || r === "shidduch" || eng === "shidduch") return "shidduch";
+      if (r === "זרע של קיימא" || eng === "Children" || r === "children" || eng === "children") return "children";
+      if (r === "פרנסה" || eng === "Livelihood" || r === "parnassa" || eng === "parnassa") return "parnassa";
+      if (r === "הצלחה" || eng === "Success" || r === "success" || eng === "success") return "success";
+      if (r === "שלום בית" || eng === "Family" || r === "family" || eng === "family") return "family";
+      if (r === "חכמה" || eng === "Education" || r === "education" || eng === "education") return "education";
+      if (r === "עליית נשמה" || eng === "Peace" || r === "peace" || eng === "peace") return "peace";
+      if (r === "חטופים" || eng === "Hostages" || r === "hostages" || eng === "hostages") return "hostages";
       return "general";
     };
     

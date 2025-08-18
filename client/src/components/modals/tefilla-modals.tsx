@@ -98,15 +98,16 @@ const processTefillaContent = (text: string, conditions: TefillaConditions | nul
 const getReasonIcon = (reason: string, reasonEnglish?: string) => {
   // Map Hebrew reasons and English translations to icons
   const reasonToCode = (r: string, eng?: string): string => {
-    if (r === "רפואה שלמה" || eng === "Complete Healing") return "health";
-    if (r === "שידוך" || eng === "Finding a mate") return "shidduch";
-    if (r === "זרע של קיימא" || eng === "Children") return "children";
-    if (r === "פרנסה" || eng === "Livelihood") return "parnassa";
-    if (r === "הצלחה" || eng === "Success") return "success";
-    if (r === "שלום בית" || eng === "Family") return "family";
-    if (r === "חכמה" || eng === "Education") return "education";
-    if (r === "עליית נשמה" || eng === "Peace") return "peace";
-    if (r === "חטופים" || eng === "Hostages") return "hostages";
+    // Handle both Hebrew and English reasons, plus common variations
+    if (r === "רפואה שלמה" || eng === "Complete Healing" || r === "health" || eng === "health" || r === "Health") return "health";
+    if (r === "שידוך" || eng === "Finding a mate" || r === "shidduch" || eng === "shidduch") return "shidduch";
+    if (r === "זרע של קיימא" || eng === "Children" || r === "children" || eng === "children") return "children";
+    if (r === "פרנסה" || eng === "Livelihood" || r === "parnassa" || eng === "parnassa") return "parnassa";
+    if (r === "הצלחה" || eng === "Success" || r === "success" || eng === "success") return "success";
+    if (r === "שלום בית" || eng === "Family" || r === "family" || eng === "family") return "family";
+    if (r === "חכמה" || eng === "Education" || r === "education" || eng === "education") return "education";
+    if (r === "עליית נשמה" || eng === "Peace" || r === "peace" || eng === "peace") return "peace";
+    if (r === "חטופים" || eng === "Hostages" || r === "hostages" || eng === "hostages") return "hostages";
     return "general";
   };
   
@@ -130,15 +131,16 @@ const getReasonIcon = (reason: string, reasonEnglish?: string) => {
 const getReasonShort = (reason: string, reasonEnglish?: string) => {
   // Map Hebrew reasons and English translations to short text
   const reasonToCode = (r: string, eng?: string): string => {
-    if (r === "רפואה שלמה" || eng === "Complete Healing") return "health";
-    if (r === "שידוך" || eng === "Finding a mate") return "shidduch";
-    if (r === "זרע של קיימא" || eng === "Children") return "children";
-    if (r === "פרנסה" || eng === "Livelihood") return "parnassa";
-    if (r === "הצלחה" || eng === "Success") return "success";
-    if (r === "שלום בית" || eng === "Family") return "family";
-    if (r === "חכמה" || eng === "Education") return "education";
-    if (r === "עליית נשמה" || eng === "Peace") return "peace";
-    if (r === "חטופים" || eng === "Hostages") return "hostages";
+    // Handle both Hebrew and English reasons, plus common variations
+    if (r === "רפואה שלמה" || eng === "Complete Healing" || r === "health" || eng === "health" || r === "Health") return "health";
+    if (r === "שידוך" || eng === "Finding a mate" || r === "shidduch" || eng === "shidduch") return "shidduch";
+    if (r === "זרע של קיימא" || eng === "Children" || r === "children" || eng === "children") return "children";
+    if (r === "פרנסה" || eng === "Livelihood" || r === "parnassa" || eng === "parnassa") return "parnassa";
+    if (r === "הצלחה" || eng === "Success" || r === "success" || eng === "success") return "success";
+    if (r === "שלום בית" || eng === "Family" || r === "family" || eng === "family") return "family";
+    if (r === "חכמה" || eng === "Education" || r === "education" || eng === "education") return "education";
+    if (r === "עליית נשמה" || eng === "Peace" || r === "peace" || eng === "peace") return "peace";
+    if (r === "חטופים" || eng === "Hostages" || r === "hostages" || eng === "hostages") return "hostages";
     return "general";
   };
   
@@ -715,20 +717,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 {showHebrew ? 'עב' : 'EN'}
               </Button>
               
-              <div className="flex flex-col items-center">
-                <DialogTitle className="text-lg platypi-bold text-black">
-                  Tehillim {tehillimInfo?.englishNumber || progress?.currentPerek || 1}
-                  {tehillimInfo?.englishNumber === 119 && tehillimInfo?.partNumber ? ` - Part ${tehillimInfo.partNumber}` : ''}
-                </DialogTitle>
-                {currentName && (
-                  <div className="flex items-center gap-1 mt-1">
-                    {getReasonIcon(currentName.reason, currentName.reasonEnglish || undefined)}
-                    <span className="text-xs platypi-medium text-black/70">
-                      {currentName.hebrewName} - {getReasonShort(currentName.reason, currentName.reasonEnglish || undefined)}
-                    </span>
-                  </div>
-                )}
-              </div>
+              <DialogTitle className="text-lg platypi-bold text-black">
+                Tehillim {tehillimInfo?.englishNumber || progress?.currentPerek || 1}
+                {tehillimInfo?.englishNumber === 119 && tehillimInfo?.partNumber ? ` - Part ${tehillimInfo.partNumber}` : ''}
+              </DialogTitle>
               
               <div className="flex items-center gap-2">
                 <button
@@ -760,7 +752,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           {/* Prayer Name Display Bar */}
           {currentName && (
-            <div className="bg-gradient-to-r from-blush/5 to-peach/5 rounded-xl p-3 mx-1 border border-blush/10">
+            <div className="bg-gradient-to-r from-blush/2 to-peach/2 rounded-xl p-3 mx-1 border border-blush/5">
               <div className="flex items-center justify-center gap-2">
                 {getReasonIcon(currentName.reason, currentName.reasonEnglish || undefined)}
                 <span className="text-sm platypi-medium text-black">
