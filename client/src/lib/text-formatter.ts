@@ -43,14 +43,16 @@ function cleanHebrewText(text: string): string {
       continue;
     }
     
-    // Keep Hebrew block but be very selective - only letters and hyphen
+    // Keep Hebrew block including letters, vowels (nekudot), and essential punctuation
     if (code >= 0x0590 && code <= 0x05FF) {
-      // Only keep Hebrew letters and maqaf (hyphen)
-      if ((code >= 0x05D0 && code <= 0x05EA) || // Hebrew letters only
-          code === 0x05BE) { // Maqaf (Hebrew hyphen)
+      // Keep Hebrew letters, vowels (nekudot), and essential punctuation
+      if ((code >= 0x05D0 && code <= 0x05EA) || // Hebrew letters
+          (code >= 0x05B0 && code <= 0x05BC) || // Hebrew vowels (nekudot) - restore these!
+          (code >= 0x05C1 && code <= 0x05C2) || // Additional vowel marks
+          code === 0x05BE || // Maqaf (Hebrew hyphen)
+          code === 0x05C7) { // Hebrew vowel qamatz qatan
         result += char;
       }
-      // Skip ALL vowels and marks - they're already removed in first pass
       continue;
     }
     

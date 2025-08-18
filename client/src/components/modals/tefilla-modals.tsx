@@ -1667,7 +1667,8 @@ function IndividualTehillimModal() {
           setTimeout(() => {
             setShowHeartExplosion(false); // Reset explosion state
             checkAndShowCongratulations();
-            openModal('tehillim', 'tefilla'); // Return to All Psalms modal immediately
+            // Switch back to the main Tehillim selection modal without closing
+            openModal('special-tehillim', 'tefilla');
           }, 2000);
         }}
         disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
