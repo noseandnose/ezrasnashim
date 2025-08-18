@@ -247,6 +247,85 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
   };
 });
 
+// Store for tracking completed donations
+export interface DonationCompletionState {
+  completedDonations: Set<string>;
+  addCompletedDonation: (donationType: string) => void;
+  isCompleted: (donationType: string) => boolean;
+  resetDaily: () => void;
+}
+
+export const useDonationCompletionStore = create<DonationCompletionState>((set, get) => {
+  // Load from localStorage on initialization
+  const today = new Date().toDateString();
+  let initialCompleted = new Set<string>();
+  
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = localStorage.getItem('donationCompletion');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.date === today && Array.isArray(parsed.completed)) {
+          initialCompleted = new Set(parsed.completed);
+        }
+      }
+    } catch (e) {
+      // Silently handle localStorage errors
+    }
+  }
+
+  return {
+    completedDonations: initialCompleted,
+    addCompletedDonation: (donationType: string) => {
+      const newCompleted = new Set(get().completedDonations);
+      newCompleted.add(donationType);
+      set({ completedDonations: newCompleted });
+      
+      // Save to localStorage
+      if (typeof window !== 'undefined') {
+        try {
+          const today = new Date().toDateString();
+          localStorage.setItem('donationCompletion', JSON.stringify({
+            date: today,
+            completed: Array.from(newCompleted)
+          }));
+        } catch (e) {
+          // Silently handle localStorage errors
+        }
+      }
+    },
+    isCompleted: (donationType: string) => {
+      return get().completedDonations.has(donationType);
+    },
+    resetDaily: () => {
+      if (typeof window !== 'undefined') {
+        try {
+          const today = new Date().toDateString();
+          const stored = localStorage.getItem('donationCompletion');
+          
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed.date !== today) {
+              // Reset if different day
+              set({ completedDonations: new Set() });
+              localStorage.removeItem('donationCompletion');
+            }
+          }
+        } catch (e) {
+          set({ completedDonations: new Set() });
+          if (localStorage) {
+            try {
+              localStorage.removeItem('donationCompletion');
+            } catch (cleanupError) {
+              // Silently handle cleanup errors
+            }
+          }
+        }
+      }
+    }
+  };
+});
+
 export interface JewishTimes {
   sunrise: string;
   shkia: string;

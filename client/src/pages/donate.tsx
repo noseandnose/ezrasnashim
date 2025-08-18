@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, CheckCircle, Mail } from "lucide-react";
 import { useLocation } from "wouter";
-import { useDailyCompletionStore, useModalStore } from "@/lib/types";
+import { useDailyCompletionStore, useModalStore, useDonationCompletionStore } from "@/lib/types";
+import { playCoinSound } from "@/utils/sounds";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 // Removed Apple Pay button import - now using integrated PaymentElement
 
@@ -42,6 +43,7 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
   const [isProcessing, setIsProcessing] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { addCompletedDonation } = useDonationCompletionStore();
   const { openModal } = useModalStore();
   const { trackModalComplete } = useTrackModalComplete();
 
@@ -190,6 +192,16 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
           } catch (error) {
             console.error('Failed to create sponsor record:', error);
           }
+        }
+        
+        // Play coin sound on successful donation
+        playCoinSound();
+        
+        // Mark specific donation type as completed
+        if (donationType === 'Sponsor a Day of Ezras Nashim') {
+          addCompletedDonation('sponsor-day');
+        } else {
+          addCompletedDonation('general-donation');
         }
         
         // Complete tzedaka task when payment is successful/processing
