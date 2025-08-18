@@ -752,7 +752,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           {/* Prayer Name Display Bar */}
           {currentName && (
-            <div className="bg-gradient-to-r from-blush/[0.03] to-peach/[0.03] rounded-xl p-3 mx-1 border border-blush/[0.08]">
+            <div className="bg-gradient-to-r from-blush/[0.015] to-peach/[0.015] rounded-xl p-3 mx-1 border border-blush/[0.04]">
               <div className="flex items-center justify-center gap-2">
                 {getReasonIcon(currentName.reason, currentName.reasonEnglish || undefined)}
                 <span className="text-sm platypi-medium text-black">
