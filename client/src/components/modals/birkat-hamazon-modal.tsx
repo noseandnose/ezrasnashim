@@ -45,6 +45,7 @@ const KorenThankYou = () => {
         >
           Koren Publishers Jerusalem
         </a>
+        {' '}and Rabbi Sacks Legacy
       </span>
     </div>
   );

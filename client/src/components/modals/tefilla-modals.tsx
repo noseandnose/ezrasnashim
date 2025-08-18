@@ -47,6 +47,7 @@ const KorenThankYou = () => {
         >
           Koren Publishers Jerusalem
         </a>
+        {' '}and Rabbi Sacks Legacy
       </span>
     </div>
   );
@@ -742,6 +743,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               </div>
             )}
           </div>
+
+          <KorenThankYou />
 
           <div className="heart-explosion-container">
             <Button 
