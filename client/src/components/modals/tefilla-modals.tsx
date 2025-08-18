@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, ArrowUp, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Link, Shield } from "lucide-react";
+import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, ArrowUp, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Link, Shield, Unlock } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
@@ -107,7 +107,7 @@ const getReasonIcon = (reason: string, reasonEnglish?: string) => {
     if (r === "שלום בית" || eng === "Family" || r === "family" || eng === "family") return "family";
     if (r === "חכמה" || eng === "Education" || r === "education" || eng === "education") return "education";
     if (r === "עליית נשמה" || eng === "Peace" || r === "peace" || eng === "peace") return "peace";
-    if (r === "חטופים" || eng === "Hostages" || r === "hostages" || eng === "hostages") return "hostages";
+    if (r === "פדיון שבויים" || eng === "Release from Captivity" || r === "hostages" || eng === "hostages") return "hostages";
     return "general";
   };
   
@@ -121,7 +121,7 @@ const getReasonIcon = (reason: string, reasonEnglish?: string) => {
     'family': <Users size={12} className="text-purple-500" />,
     'education': <GraduationCap size={12} className="text-indigo-500" />,
     'peace': <Smile size={12} className="text-teal-500" />,
-    'hostages': <Link size={12} className="text-orange-600" />,
+    'hostages': <Unlock size={12} className="text-orange-600" />,
     'general': <Heart size={12} className="text-blush" />
   };
   
@@ -140,7 +140,7 @@ const getReasonShort = (reason: string, reasonEnglish?: string) => {
     if (r === "שלום בית" || eng === "Family" || r === "family" || eng === "family") return "family";
     if (r === "חכמה" || eng === "Education" || r === "education" || eng === "education") return "education";
     if (r === "עליית נשמה" || eng === "Peace" || r === "peace" || eng === "peace") return "peace";
-    if (r === "חטופים" || eng === "Hostages" || r === "hostages" || eng === "hostages") return "hostages";
+    if (r === "פדיון שבויים" || eng === "Release from Captivity" || r === "hostages" || eng === "hostages") return "hostages";
     return "general";
   };
   
@@ -154,7 +154,7 @@ const getReasonShort = (reason: string, reasonEnglish?: string) => {
     'family': 'Family',
     'education': 'Study',
     'peace': 'Peace',
-    'hostages': 'Hostages',
+    'hostages': 'Release',
     'general': 'Prayer'
   };
   

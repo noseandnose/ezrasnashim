@@ -27,6 +27,7 @@ Ezras Nashim is a mobile-first web application for Jewish women to track and com
 - **Button Text Update**: Changed "Special Tehillim" button to "Tehillim" with subtitle "All & Special" for clearer user understanding (August 16, 2025)
 - **Production Code Cleanup**: Removed all console.log statements from production code, maintaining debug logging only in designated logger modules for cleaner production environment (August 16, 2025)
 - **Personal Prayer UI Fixes**: Fixed personal prayer button styling to use white clickable backgrounds, standardized icons (Shield for Refuah, Users for Family, Heart for Life), and added proper gradient circle backgrounds matching app design consistency (August 18, 2025)
+- **Global Tehillim Prayer Reason Update**: Changed prayer reason from "חטופים/Hostages" to "פדיון שבויים/Release from Captivity" as requested, updated all mappings, icons (Link to Unlock), and short display text across both tefilla modals and section components (August 18, 2025)
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
