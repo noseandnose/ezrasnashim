@@ -246,6 +246,13 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
       </div>
       {/* 3 Tzedaka Action Buttons */}
       <div className="p-2 space-y-2">
+        {/* Tax Deductible Information Bar */}
+        <div className="bg-sage/10 border border-sage/20 rounded-2xl px-4 py-2 text-center">
+          <p className="platypi-regular text-xs text-sage font-medium">
+            All Donations are US Tax Deductible
+          </p>
+        </div>
+        
         {/* Large Combined Button: Put a coin in the Pushka */}
         <button
           onClick={() => {
