@@ -67,6 +67,10 @@ export default function TzedakaModals() {
         amount = getDonationAmount();
         typeDescription = "Torah Learning Support";
         break;
+      case "donate":
+        amount = getDonationAmount();
+        typeDescription = "General Donation";
+        break;
     }
 
     if (amount > 0) {
@@ -456,6 +460,74 @@ export default function TzedakaModals() {
                   <SelectItem value="54">$54 - Learning</SelectItem>
                   <SelectItem value="108">$108 - Scholarship</SelectItem>
                   <SelectItem value="270">$270 - Monthly Support</SelectItem>
+                  <SelectItem value="custom">Custom Amount</SelectItem>
+                </SelectContent>
+              </Select>
+              {donationAmount === "custom" && (
+                <div className="relative mt-2">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 platypi-semibold">$</span>
+                  <Input 
+                    placeholder="Enter amount" 
+                    className="pl-10 bg-white"
+                    type="number"
+                    value={customAmount}
+                    onChange={(e) => setCustomAmount(e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div>
+              <Button 
+                onClick={() => handleDonation()}
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
+                disabled={!donationAmount}
+              >
+                Donate Now
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* General Donation Modal - "Put a Coin in Tzedaka" */}
+      <Dialog open={activeModal === 'donate'} onOpenChange={(open) => {
+        if (!open) {
+          // User clicked X or pressed Escape - don't track completion
+          closeModal();
+        }
+      }}>
+        <DialogContent aria-describedby="donate-description">
+          <div className="flex items-center justify-center mb-3 relative">
+            <DialogTitle className="text-lg platypi-bold text-black">Put a Coin in Tzedaka</DialogTitle>
+          </div>
+          <p className="text-sm platypi-regular text-gray-600 text-center mb-4">Donations go towards Woman in need and Torah Causes</p>
+          <div id="donate-description" className="sr-only">General tzedaka donations for women in need and Torah causes</div>
+          
+          <div className="space-y-4">
+            <div className="bg-gradient-to-r from-rose-50 to-purple-50 p-4 rounded-xl text-sm text-gray-700">
+              <p className="mb-2 platypi-medium">Your donation supports:</p>
+              <ul className="list-disc list-inside space-y-1 text-xs platypi-regular">
+                <li>Women and families in financial need</li>
+                <li>Torah learning and educational programs</li>
+                <li>Community support initiatives</li>
+                <li>Emergency assistance for Jewish families</li>
+              </ul>
+            </div>
+
+            <div>
+              <label className="text-sm platypi-medium block mb-2">Donation Amount</label>
+              <Select value={donationAmount} onValueChange={setDonationAmount}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select amount" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">$1 - Every coin counts</SelectItem>
+                  <SelectItem value="5">$5 - Small blessing</SelectItem>
+                  <SelectItem value="18">$18 - Chai</SelectItem>
+                  <SelectItem value="36">$36 - Double Chai</SelectItem>
+                  <SelectItem value="72">$72 - Quadruple Chai</SelectItem>
+                  <SelectItem value="180">$180 - Ten Chai</SelectItem>
                   <SelectItem value="custom">Custom Amount</SelectItem>
                 </SelectContent>
               </Select>
