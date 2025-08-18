@@ -51,6 +51,14 @@ function cleanHebrewText(text: string): string {
           (code >= 0x05C1 && code <= 0x05C2) || // Additional vowel marks
           code === 0x05BE || // Maqaf (Hebrew hyphen)
           code === 0x05C7) { // Hebrew vowel qamatz qatan
+        
+        // Skip specific problematic vowel combinations that display as squares
+        if (code === 0x05BA || // holam haser for vav - causes squares
+            code === 0x05C4 || // upper dot (mark upper dot) - can cause display issues
+            code === 0x05C5) { // lower dot (mark lower dot) - can cause display issues
+          continue;
+        }
+        
         result += char;
       }
       continue;
