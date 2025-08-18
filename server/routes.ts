@@ -217,10 +217,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Determine timezone based on coordinates
       let tzid = 'America/New_York'; // Default
       
+      // Log coordinates for debugging
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Zmanim request for coordinates: lat=${latitude}, lng=${longitude}`);
+      }
+      
       // Basic timezone detection based on longitude and known regions
       if (latitude >= 29 && latitude <= 33.5 && longitude >= 34 && longitude <= 36) {
         // Israel region
         tzid = 'Asia/Jerusalem';
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`Detected Israel region, using timezone: ${tzid}`);
+        }
       } else if (longitude >= -125 && longitude <= -66) {
         // North America
         if (longitude >= -125 && longitude <= -120) tzid = 'America/Los_Angeles';
@@ -240,20 +248,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const response = await serverAxiosClient.get(hebcalUrl);
       const data = response.data;
       
-      // Format times to 12-hour format with AM/PM
+      // Format times to 12-hour format with AM/PM - properly handling timezone
       const formatTime = (timeStr: string) => {
         if (!timeStr) return null;
         try {
-          // Parse ISO timestamp and extract local time components
-          const match = timeStr.match(/T(\d{2}):(\d{2}):/);
-          if (match) {
-            const hours = parseInt(match[1]);
-            const minutes = match[2];
-            const period = hours >= 12 ? 'PM' : 'AM';
-            const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-            return `${displayHours}:${minutes} ${period}`;
+          // Parse the ISO string as a Date object to handle timezone correctly
+          const date = new Date(timeStr);
+          
+          // Check if date is valid
+          if (isNaN(date.getTime())) {
+            // Fallback to simple string extraction if not a valid date
+            const match = timeStr.match(/(\d{1,2}):(\d{2})/);
+            if (match) {
+              const hours = parseInt(match[1]);
+              const minutes = match[2];
+              const period = hours >= 12 ? 'PM' : 'AM';
+              const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+              return `${displayHours}:${minutes} ${period}`;
+            }
+            return timeStr;
           }
-          return timeStr;
+          
+          // Use toLocaleTimeString with the correct timezone to get local time
+          const localTime = date.toLocaleTimeString('en-US', {
+            timeZone: tzid,
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+          });
+          
+          return localTime;
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
             console.error('Time formatting error:', error, 'for time:', timeStr);
@@ -371,6 +395,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // - Sephardic vs Ashkenazi customs for zmanim
         // - Custom candle lighting time preferences
       };
+      
+      // Debug logging
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Formatted times for ${locationName}:`, {
+          sunrise: formattedTimes.sunrise,
+          minchaGedolah: formattedTimes.minchaGedolah,
+          shkia: formattedTimes.shkia,
+          tzid: tzid
+        });
+      }
 
       res.json(formattedTimes);
     } catch (error) {

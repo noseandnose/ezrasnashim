@@ -29,9 +29,44 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
     }
 
     const now = new Date();
-    const neitz = new Date(`${now.toDateString()} ${times.sunrise}`);
-    const minchaGedola = new Date(`${now.toDateString()} ${times.minchaGedolah}`);
-    const shkia = new Date(`${now.toDateString()} ${times.shkia}`);
+    
+    // Helper function to parse time strings like "6:30 AM" into today's date
+    const parseTimeToday = (timeStr: string) => {
+      if (!timeStr) return null;
+      
+      // Parse the time string (e.g., "6:30 AM" or "7:45 PM")
+      const match = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+      if (!match) return null;
+      
+      let hours = parseInt(match[1]);
+      const minutes = parseInt(match[2]);
+      const period = match[3].toUpperCase();
+      
+      // Convert to 24-hour format
+      if (period === 'PM' && hours !== 12) {
+        hours += 12;
+      } else if (period === 'AM' && hours === 12) {
+        hours = 0;
+      }
+      
+      // Create a date object for today with the specified time
+      const date = new Date();
+      date.setHours(hours, minutes, 0, 0);
+      return date;
+    };
+    
+    const neitz = parseTimeToday(times.sunrise);
+    const minchaGedola = parseTimeToday(times.minchaGedolah);
+    const shkia = parseTimeToday(times.shkia);
+    
+    // Handle null times gracefully
+    if (!neitz || !minchaGedola || !shkia) {
+      return {
+        title: "Morning Brochas",
+        subtitle: "Times unavailable",
+        modal: "morning-brochas"
+      };
+    }
     
     // Calculate next day's neitz for Maariv end time
     const tomorrow = new Date(now);
