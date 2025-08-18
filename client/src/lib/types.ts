@@ -36,9 +36,11 @@ export interface ModalState {
   activeModal: string | null;
   selectedPsalm: number | null;
   previousSection: string | null;
+  tehillimActiveTab: 'all' | 'special';
   openModal: (modalId: string, fromSection?: string) => void;
   closeModal: (returnToPrevious?: boolean) => void;
   setSelectedPsalm: (psalmNumber: number) => void;
+  setTehillimActiveTab: (tab: 'all' | 'special') => void;
   
   // Convenience methods for specific modals
   isBirkatHamazonModalOpen: boolean;
@@ -50,6 +52,7 @@ export const useModalStore = create<ModalState>((set, get) => ({
   activeModal: null,
   selectedPsalm: null,
   previousSection: null,
+  tehillimActiveTab: 'all',
   openModal: (modalId: string, fromSection?: string) => set({ 
     activeModal: modalId, 
     previousSection: fromSection || get().previousSection 
@@ -70,6 +73,7 @@ export const useModalStore = create<ModalState>((set, get) => ({
     }
   },
   setSelectedPsalm: (psalmNumber: number) => set({ selectedPsalm: psalmNumber }),
+  setTehillimActiveTab: (tab: 'all' | 'special') => set({ tehillimActiveTab: tab }),
   
   // Convenience methods for specific modals
   get isBirkatHamazonModalOpen() {

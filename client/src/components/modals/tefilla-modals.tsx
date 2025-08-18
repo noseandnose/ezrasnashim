@@ -793,7 +793,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             setShowHebrew={(show) => setLanguage(show ? 'hebrew' : 'english')}
             fontSize={fontSize}
             setFontSize={setFontSize}
-            hasEnglishText={true}
           />
 
           <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
@@ -1190,7 +1189,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             setShowHebrew={(show) => setLanguage(show ? 'hebrew' : 'english')}
             fontSize={fontSize}
             setFontSize={setFontSize}
-            hasEnglishText={maarivPrayers?.some(prayer => prayer.englishTranslation && prayer.englishTranslation.trim() !== '' && prayer.englishTranslation !== 'English translation not available')}
           />
 
           <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
@@ -1540,12 +1538,13 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
 
 // Tehillim Modal Component (previously Special Tehillim)
 function SpecialTehillimModal() {
-  const { closeModal, openModal, setSelectedPsalm } = useModalStore();
+  const { closeModal, openModal, setSelectedPsalm, tehillimActiveTab, setTehillimActiveTab } = useModalStore();
   const { isModalComplete } = useModalCompletionStore();
-  const [activeTab, setActiveTab] = useState<'all' | 'special'>('all');
 
   // Open individual Tehillim text
   const openTehillimText = (psalmNumber: number) => {
+    // Remember the current tab before navigating to individual Tehillim
+    setTehillimActiveTab(tehillimActiveTab);
     setSelectedPsalm(psalmNumber);
     closeModal();
     openModal('individual-tehillim', 'tefilla');
@@ -1596,9 +1595,9 @@ function SpecialTehillimModal() {
       {/* Tab Navigation */}
       <div className="flex bg-warm-gray/10 rounded-xl p-1 mb-4">
         <button
-          onClick={() => setActiveTab('all')}
+          onClick={() => setTehillimActiveTab('all')}
           className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
-            activeTab === 'all'
+            tehillimActiveTab === 'all'
               ? 'bg-white text-black shadow-sm'
               : 'text-black/60 hover:text-black'
           }`}
@@ -1606,9 +1605,9 @@ function SpecialTehillimModal() {
           All Psalms
         </button>
         <button
-          onClick={() => setActiveTab('special')}
+          onClick={() => setTehillimActiveTab('special')}
           className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
-            activeTab === 'special'
+            tehillimActiveTab === 'special'
               ? 'bg-white text-black shadow-sm'
               : 'text-black/60 hover:text-black'
           }`}
@@ -1619,7 +1618,7 @@ function SpecialTehillimModal() {
 
       {/* Tab Content */}
       <div className="max-h-[50vh] overflow-y-auto">
-        {activeTab === 'all' ? (
+        {tehillimActiveTab === 'all' ? (
           <div className="grid grid-cols-7 gap-2 p-2 overflow-hidden tehillim-button-grid">
             {allPsalms.map((psalm) => (
               <button
