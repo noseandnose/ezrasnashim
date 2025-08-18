@@ -685,7 +685,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               className="bg-gradient-to-br from-lavender/10 to-lavender/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-lavender/20"
             >
               <div className="bg-lavender/20 p-2 rounded-full mx-auto mb-1 w-fit">
-                <Home className="text-lavender" size={16} strokeWidth={1.5} />
+                <Users className="text-lavender" size={16} strokeWidth={1.5} />
               </div>
               <h4 className="platypi-bold text-sm text-black">Family</h4>
               <p className="platypi-regular text-xs text-black/60 mt-1">Shalom Bayis</p>
@@ -696,7 +696,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               className="bg-gradient-to-br from-sage/10 to-sage/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-sage/20"
             >
               <div className="bg-sage/20 p-2 rounded-full mx-auto mb-1 w-fit">
-                <Compass className="text-sage" size={16} strokeWidth={1.5} />
+                <Heart className="text-sage" size={16} strokeWidth={1.5} />
               </div>
               <h4 className="platypi-bold text-sm text-black">Life</h4>
               <p className="platypi-regular text-xs text-black/60 mt-1">Guidance</p>

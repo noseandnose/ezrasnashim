@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, ArrowUp, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Link } from "lucide-react";
+import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, ArrowUp, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Link, Shield } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
@@ -1284,11 +1284,11 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
       {prayers.map((prayer) => (
         <div 
           key={prayer.id}
-          className="content-card rounded-xl p-4 cursor-pointer"
+          className="bg-white rounded-xl p-4 cursor-pointer hover:bg-white/90 transition-all duration-300 shadow-sm border border-blush/20"
           onClick={() => onPrayerSelect(prayer.id)}
         >
           <div className="flex items-center space-x-3">
-            <Heart className="text-blush" size={20} />
+            <Shield className="text-red-500" size={20} />
             <div>
               <span className="platypi-medium">{prayer.prayerName}</span>
               {prayer.description && (
@@ -1340,11 +1340,11 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
       {prayers.map((prayer) => (
         <div 
           key={prayer.id}
-          className="content-card rounded-xl p-4 cursor-pointer"
+          className="bg-white rounded-xl p-4 cursor-pointer hover:bg-white/90 transition-all duration-300 shadow-sm border border-blush/20"
           onClick={() => onPrayerSelect(prayer.id)}
         >
           <div className="flex items-center space-x-3">
-            <HandHeart className="text-peach" size={20} />
+            <Users className="text-purple-500" size={20} />
             <div>
               <span className="platypi-medium">{prayer.prayerName}</span>
               {prayer.description && (
@@ -1396,11 +1396,11 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
       {prayers.map((prayer) => (
         <div 
           key={prayer.id}
-          className="content-card rounded-xl p-4 cursor-pointer"
+          className="bg-white rounded-xl p-4 cursor-pointer hover:bg-white/90 transition-all duration-300 shadow-sm border border-blush/20"
           onClick={() => onPrayerSelect(prayer.id)}
         >
           <div className="flex items-center space-x-3">
-            <Scroll className="text-sage" size={20} />
+            <Heart className="text-pink-500" size={20} />
             <div>
               <span className="platypi-medium">{prayer.prayerName}</span>
               {prayer.description && (
