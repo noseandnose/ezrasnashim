@@ -185,7 +185,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
       <div className="bg-gradient-soft rounded-b-3xl px-3 pt-3 pb-2 shadow-lg -mt-1">
         <button 
           onClick={() => {
-            openModal('donate', 'tzedaka');
+            openModal('wedding-campaign', 'tzedaka');
           }}
           className="w-full bg-white/70 rounded-2xl px-3 pt-3 pb-2 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
         >

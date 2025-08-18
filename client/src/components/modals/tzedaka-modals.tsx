@@ -71,6 +71,10 @@ export default function TzedakaModals() {
         amount = getDonationAmount();
         typeDescription = "General Donation";
         break;
+      case "wedding-campaign":
+        amount = getDonationAmount();
+        typeDescription = "Wedding Campaign Support";
+        break;
     }
 
     if (amount > 0) {
@@ -552,6 +556,73 @@ export default function TzedakaModals() {
                 disabled={!donationAmount}
               >
                 Donate Now
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Wedding Campaign Modal - "Sponsor a Wedding for a Couple" */}
+      <Dialog open={activeModal === 'wedding-campaign'} onOpenChange={(open) => {
+        if (!open) {
+          // User clicked X or pressed Escape - don't track completion
+          closeModal();
+        }
+      }}>
+        <DialogContent aria-describedby="wedding-campaign-description">
+          <div className="flex items-center justify-center mb-3 relative">
+            <DialogTitle className="text-lg platypi-bold text-black">Sponsor a Wedding for a Couple</DialogTitle>
+          </div>
+          <p className="text-sm platypi-regular text-gray-600 text-center mb-4">Help us raise $50,000 to sponsor an entire wedding for a young couple in need in Eretz Yisrael</p>
+          <div id="wedding-campaign-description" className="sr-only">Wedding sponsorship campaign for couples in need</div>
+          
+          <div className="space-y-4">
+            <div className="bg-gradient-to-r from-pink-50 to-rose-50 p-4 rounded-xl text-sm text-gray-700">
+              <p className="mb-2 platypi-medium">Your donation helps provide:</p>
+              <ul className="list-disc list-inside space-y-1 text-xs platypi-regular">
+                <li>Complete wedding venue and catering</li>
+                <li>Chuppah and wedding ceremony arrangements</li>
+                <li>Kallah preparation and wedding dress</li>
+                <li>Photography and music for the celebration</li>
+                <li>A beautiful start to their married life</li>
+              </ul>
+            </div>
+
+            <div>
+              <label className="text-sm platypi-medium block mb-2">Select Amount</label>
+              <Select value={donationAmount} onValueChange={setDonationAmount}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select amount" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">$1</SelectItem>
+                  <SelectItem value="18">$18</SelectItem>
+                  <SelectItem value="180">$180</SelectItem>
+                  <SelectItem value="1800">$1800</SelectItem>
+                  <SelectItem value="custom">Custom Amount</SelectItem>
+                </SelectContent>
+              </Select>
+              {donationAmount === "custom" && (
+                <div className="relative mt-2">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 platypi-semibold">$</span>
+                  <Input 
+                    placeholder="Enter amount" 
+                    className="pl-10 bg-white"
+                    type="number"
+                    value={customAmount}
+                    onChange={(e) => setCustomAmount(e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div>
+              <Button 
+                onClick={() => handleDonation()}
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
+                disabled={!donationAmount}
+              >
+                Donate $1
               </Button>
             </div>
           </div>
