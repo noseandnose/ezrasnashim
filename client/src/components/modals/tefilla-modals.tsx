@@ -1256,10 +1256,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 // Helper components for prayer lists
 function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => void }) {
   const { closeModal } = useModalStore();
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete, isModalComplete } = useModalCompletionStore();
-  const { trackModalComplete } = useTrackModalComplete();
-  const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const { data: prayers, isLoading } = useQuery<WomensPrayer[]>({
     queryKey: ['/api/womens-prayers/refuah'],
   });
@@ -1312,10 +1308,6 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
 
 function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => void }) {
   const { closeModal } = useModalStore();
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete, isModalComplete } = useModalCompletionStore();
-  const { trackModalComplete } = useTrackModalComplete();
-  const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const { data: prayers, isLoading } = useQuery<WomensPrayer[]>({
     queryKey: ['/api/womens-prayers/family'],
   });
@@ -1368,10 +1360,6 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
 
 function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => void }) {
   const { closeModal } = useModalStore();
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete, isModalComplete } = useModalCompletionStore();
-  const { trackModalComplete } = useTrackModalComplete();
-  const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const { data: prayers, isLoading } = useQuery<WomensPrayer[]>({
     queryKey: ['/api/womens-prayers/life'],
   });
