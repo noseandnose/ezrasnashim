@@ -484,7 +484,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               <div className="flex items-center justify-between mb-2">
                 <h4 className="platypi-bold text-lg text-black">
                   {tehillimInfo ? (
-                    tehillimInfo.partNumber > 1 
+                    tehillimInfo.englishNumber === 119 && tehillimInfo.partNumber
                       ? `Perek ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber}`
                       : `Perek ${tehillimInfo.englishNumber}`
                   ) : 'Loading...'}
