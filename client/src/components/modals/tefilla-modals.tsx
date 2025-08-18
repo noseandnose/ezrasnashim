@@ -187,7 +187,7 @@ const StandardModalHeader = ({
             : 'text-black/60 hover:text-black hover:bg-white/50'
         }`}
       >
-        {showHebrew ? 'עב' : 'EN'}
+        {showHebrew ? 'EN' : 'עב'}
       </Button>
       
       <DialogTitle className="text-lg platypi-bold text-black">{title}</DialogTitle>
@@ -260,7 +260,7 @@ function MorningBrochasModal() {
                   : 'text-black/60 hover:text-black hover:bg-white/50'
               }`}
             >
-              {showHebrew ? 'עב' : 'EN'}
+              {showHebrew ? 'EN' : 'עב'}
             </Button>
             
             <DialogTitle className="text-lg platypi-bold text-black">Morning Brochas</DialogTitle>
@@ -714,7 +714,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                     : 'text-black/60 hover:text-black hover:bg-white/50'
                 }`}
               >
-                {showHebrew ? 'עב' : 'EN'}
+                {showHebrew ? 'EN' : 'עב'}
               </Button>
               
               <DialogTitle className="text-lg platypi-bold text-black">
@@ -793,6 +793,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             setShowHebrew={(show) => setLanguage(show ? 'hebrew' : 'english')}
             fontSize={fontSize}
             setFontSize={setFontSize}
+            hasEnglishText={true}
           />
 
           <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
@@ -1037,7 +1038,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                     : 'text-black/60 hover:text-black hover:bg-white/50'
                 }`}
               >
-                {nishmasLanguage === 'hebrew' ? 'עב' : 'EN'}
+                {nishmasLanguage === 'hebrew' ? 'EN' : 'עב'}
               </Button>
               
               <DialogTitle className="text-lg platypi-bold text-black">Nishmas Kol Chai</DialogTitle>
@@ -1189,6 +1190,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             setShowHebrew={(show) => setLanguage(show ? 'hebrew' : 'english')}
             fontSize={fontSize}
             setFontSize={setFontSize}
+            hasEnglishText={maarivPrayers?.some(prayer => prayer.englishTranslation && prayer.englishTranslation.trim() !== '' && prayer.englishTranslation !== 'English translation not available')}
           />
 
           <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
@@ -1420,6 +1422,7 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
+  const [showHebrew, setShowHebrew] = useState(true);
   
   // Load Tefilla conditions for conditional content processing
   const tefillaConditions = useTefillaConditions();
@@ -1441,6 +1444,22 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
       {/* Standardized Header */}
       <div className="flex items-center justify-center mb-3 relative">
         <div className="flex items-center gap-4">
+          {/* Conditional translate button - only show if English text exists */}
+          {prayer.englishTranslation && prayer.englishTranslation.trim() !== '' && prayer.englishTranslation !== 'English translation not available' && (
+            <Button
+              onClick={() => setShowHebrew(!showHebrew)}
+              variant="ghost"
+              size="sm"
+              className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
+                showHebrew 
+                  ? 'bg-blush text-white' 
+                  : 'text-black/60 hover:text-black hover:bg-white/50'
+              }`}
+            >
+              {showHebrew ? 'EN' : 'עב'}
+            </Button>
+          )}
+          
           <h2 className="text-lg platypi-bold text-black">{prayer.prayerName}</h2>
           
           <div className="flex items-center gap-2">
@@ -1463,12 +1482,19 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
 
       {/* Standardized Content Area */}
       <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
-        <div
-          className="vc-koren-hebrew leading-relaxed text-black"
-          style={{ fontSize: `${fontSize + 1}px` }}
-          dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText || '', tefillaConditions).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
-        />
-
+        {showHebrew ? (
+          <div
+            className="vc-koren-hebrew leading-relaxed text-black"
+            style={{ fontSize: `${fontSize + 1}px` }}
+            dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText || '', tefillaConditions).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
+          />
+        ) : (
+          <div
+            className="koren-siddur-english text-left leading-relaxed text-black/70"
+            style={{ fontSize: `${fontSize}px` }}
+            dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || 'English translation not available', tefillaConditions) }}
+          />
+        )}
       </div>
 
       <KorenThankYou />
@@ -1683,7 +1709,7 @@ function IndividualTehillimModal() {
                 : 'text-black/60 hover:text-black hover:bg-white/50'
             }`}
           >
-            {language === 'hebrew' ? 'עב' : 'EN'}
+            {language === 'hebrew' ? 'EN' : 'עב'}
           </Button>
           
           <DialogTitle className="text-lg platypi-bold text-black">Tehillim {selectedPsalm}</DialogTitle>
