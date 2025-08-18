@@ -71,7 +71,7 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
           redirect: 'if_required' // This prevents redirect for successful card payments
         });
         
-        console.log('confirmPayment returned:', confirmResult);
+
       } catch (stripeError) {
         console.error('Stripe confirmPayment threw an error:', stripeError);
         console.error('Error name:', (stripeError as any)?.name);
@@ -81,7 +81,7 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         throw stripeError; // Re-throw to be caught by outer catch
       }
       
-      console.log('Stripe confirmPayment completed:', confirmResult);
+
       
       // Handle the TypeScript typing issue - confirmResult may have different structures
       const error = (confirmResult as any)?.error;

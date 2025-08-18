@@ -398,7 +398,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     queryFn: async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress?t=${Date.now()}`);
       const data = await response.json();
-      console.log('Fresh progress data:', data);
       return data;
     },
     refetchInterval: 1000, // Very frequent refresh
@@ -568,7 +567,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     const today = new Date().toDateString();
     const newDay = nishmasDay + 1;
     
-    console.log('Completing Nishmas:', { currentDay: nishmasDay, newDay, todayCompleted });
+
     
     // Track Nishmas completion and mark as completed
     trackModalComplete('nishmas');
@@ -586,7 +585,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         localStorage.setItem('nishmas-start-date', startDate);
       }
       
-      console.log('Nishmas completed, new state:', { newDay, completed: true });
+
     }
     
     // Complete tefilla task and redirect to home
@@ -1720,7 +1719,7 @@ function JerusalemCompass() {
     let bearing = Math.atan2(y, x) * 180 / Math.PI;
     bearing = (bearing + 360) % 360; // Normalize to 0-360
     
-    console.log(`Bearing calculation: From (${lat1}, ${lng1}) to (${lat2}, ${lng2}) = ${bearing}°`);
+
     return bearing;
   };
 
@@ -1745,7 +1744,7 @@ function JerusalemCompass() {
         // Calculate direction to Western Wall
         const bearing = calculateBearing(userLat, userLng, WESTERN_WALL_LAT, WESTERN_WALL_LNG);
         setDirection(bearing);
-        console.log(`Set direction to: ${bearing}°`);
+
         
         // Get location name using reverse geocoding
         try {
