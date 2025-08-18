@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, ArrowUp } from "lucide-react";
+import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, ArrowUp, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Link } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
@@ -92,6 +92,71 @@ const processTefillaContent = (text: string, conditions: TefillaConditions | nul
   
   const processedText = processTefillaText(text, conditions);
   return formatTextContent(processedText);
+};
+
+// Helper functions for prayer reason icons and short text
+const getReasonIcon = (reason: string, reasonEnglish?: string) => {
+  // Map Hebrew reasons and English translations to icons
+  const reasonToCode = (r: string, eng?: string): string => {
+    if (r === "רפואה שלמה" || eng === "Complete Healing") return "health";
+    if (r === "שידוך" || eng === "Finding a mate") return "shidduch";
+    if (r === "זרע של קיימא" || eng === "Children") return "children";
+    if (r === "פרנסה" || eng === "Livelihood") return "parnassa";
+    if (r === "הצלחה" || eng === "Success") return "success";
+    if (r === "שלום בית" || eng === "Family") return "family";
+    if (r === "חכמה" || eng === "Education") return "education";
+    if (r === "עליית נשמה" || eng === "Peace") return "peace";
+    if (r === "חטופים" || eng === "Hostages") return "hostages";
+    return "general";
+  };
+  
+  const code = reasonToCode(reason, reasonEnglish);
+  const iconMap: Record<string, JSX.Element> = {
+    'health': <Stethoscope size={12} className="text-red-500" />,
+    'shidduch': <HeartHandshake size={12} className="text-pink-500" />,
+    'children': <Baby size={12} className="text-blue-500" />,
+    'parnassa': <DollarSign size={12} className="text-green-500" />,
+    'success': <Star size={12} className="text-yellow-500" />,
+    'family': <Users size={12} className="text-purple-500" />,
+    'education': <GraduationCap size={12} className="text-indigo-500" />,
+    'peace': <Smile size={12} className="text-teal-500" />,
+    'hostages': <Link size={12} className="text-orange-600" />,
+    'general': <Heart size={12} className="text-blush" />
+  };
+  
+  return iconMap[code];
+};
+
+const getReasonShort = (reason: string, reasonEnglish?: string) => {
+  // Map Hebrew reasons and English translations to short text
+  const reasonToCode = (r: string, eng?: string): string => {
+    if (r === "רפואה שלמה" || eng === "Complete Healing") return "health";
+    if (r === "שידוך" || eng === "Finding a mate") return "shidduch";
+    if (r === "זרע של קיימא" || eng === "Children") return "children";
+    if (r === "פרנסה" || eng === "Livelihood") return "parnassa";
+    if (r === "הצלחה" || eng === "Success") return "success";
+    if (r === "שלום בית" || eng === "Family") return "family";
+    if (r === "חכמה" || eng === "Education") return "education";
+    if (r === "עליית נשמה" || eng === "Peace") return "peace";
+    if (r === "חטופים" || eng === "Hostages") return "hostages";
+    return "general";
+  };
+  
+  const code = reasonToCode(reason, reasonEnglish);
+  const shortMap: Record<string, string> = {
+    'health': 'Health',
+    'shidduch': 'Match',
+    'children': 'Kids',
+    'parnassa': 'Income',
+    'success': 'Success',
+    'family': 'Family',
+    'education': 'Study',
+    'peace': 'Peace',
+    'hostages': 'Hostages',
+    'general': 'Prayer'
+  };
+  
+  return shortMap[code];
 };
 
 // Standardized Modal Header Component for Tefilla Modals
@@ -650,10 +715,20 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 {showHebrew ? 'עב' : 'EN'}
               </Button>
               
-              <DialogTitle className="text-lg platypi-bold text-black">
-                Tehillim {tehillimInfo?.englishNumber || progress?.currentPerek || 1}
-                {tehillimInfo?.englishNumber === 119 && tehillimInfo?.partNumber ? ` - Part ${tehillimInfo.partNumber}` : ''}
-              </DialogTitle>
+              <div className="flex flex-col items-center">
+                <DialogTitle className="text-lg platypi-bold text-black">
+                  Tehillim {tehillimInfo?.englishNumber || progress?.currentPerek || 1}
+                  {tehillimInfo?.englishNumber === 119 && tehillimInfo?.partNumber ? ` - Part ${tehillimInfo.partNumber}` : ''}
+                </DialogTitle>
+                {currentName && (
+                  <div className="flex items-center gap-1 mt-1">
+                    {getReasonIcon(currentName.reason, currentName.reasonEnglish || undefined)}
+                    <span className="text-xs platypi-medium text-black/70">
+                      {currentName.hebrewName} - {getReasonShort(currentName.reason, currentName.reasonEnglish || undefined)}
+                    </span>
+                  </div>
+                )}
+              </div>
               
               <div className="flex items-center gap-2">
                 <button
@@ -682,6 +757,21 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               {getTehillimDisplayText()}
             </div>
           </div>
+
+          {/* Prayer Name Display Bar */}
+          {currentName && (
+            <div className="bg-gradient-to-r from-blush/5 to-peach/5 rounded-xl p-3 mx-1 border border-blush/10">
+              <div className="flex items-center justify-center gap-2">
+                {getReasonIcon(currentName.reason, currentName.reasonEnglish || undefined)}
+                <span className="text-sm platypi-medium text-black">
+                  Praying for: {currentName.hebrewName}
+                </span>
+                <span className="text-xs platypi-regular text-black/60">
+                  ({getReasonShort(currentName.reason, currentName.reasonEnglish || undefined)})
+                </span>
+              </div>
+            </div>
+          )}
 
           <KorenThankYou />
 

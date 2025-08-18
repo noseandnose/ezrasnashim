@@ -1,4 +1,4 @@
-import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass, ArrowRight, Baby, HeartHandshake, Briefcase, GraduationCap, Users, Stethoscope, DollarSign, UserCheck, Smile, Zap, TrendingUp, Crown, Sunrise, Sun, Moon, Utensils, Stars, Globe } from "lucide-react";
+import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass, ArrowRight, Baby, HeartHandshake, Briefcase, GraduationCap, Users, Stethoscope, DollarSign, UserCheck, Smile, Zap, TrendingUp, Crown, Sunrise, Sun, Moon, Utensils, Stars, Globe, Link } from "lucide-react";
 import korenLogo from "@assets/This_is_a_logo_for_Koren_Publishers_Jerusalem_1752581940716.jpg";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -110,6 +110,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
       if (r === "שלום בית" || eng === "Family") return "family";
       if (r === "חכמה" || eng === "Education") return "education";
       if (r === "עליית נשמה" || eng === "Peace") return "peace";
+      if (r === "חטופים" || eng === "Hostages") return "hostages";
       return "general";
     };
     
@@ -123,6 +124,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
       'family': <Users size={12} className="text-purple-500" />,
       'education': <GraduationCap size={12} className="text-indigo-500" />,
       'peace': <Smile size={12} className="text-teal-500" />,
+      'hostages': <Link size={12} className="text-orange-600" />,
       'general': <Heart size={12} className="text-blush" />
     };
     
@@ -140,6 +142,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
       if (r === "שלום בית" || eng === "Family") return "family";
       if (r === "חכמה" || eng === "Education") return "education";
       if (r === "עליית נשמה" || eng === "Peace") return "peace";
+      if (r === "חטופים" || eng === "Hostages") return "hostages";
       return "general";
     };
     
@@ -153,6 +156,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
       'family': 'Family',
       'education': 'Study',
       'peace': 'Peace',
+      'hostages': 'Hostages',
       'general': 'Prayer'
     };
     
