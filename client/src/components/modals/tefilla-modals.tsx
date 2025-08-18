@@ -1678,6 +1678,7 @@ function IndividualTehillimModal() {
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
   const [fontSize, setFontSize] = useState(20);
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
+  const queryClient = useQueryClient();
   
   // Load Tefilla conditions for conditional content processing
   const tefillaConditions = useTefillaConditions();
@@ -1754,10 +1755,26 @@ function IndividualTehillimModal() {
       <KorenThankYou />
 
       <Button 
-        onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
+        onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : async () => {
           // Track modal completion and mark as completed globally with specific psalm ID
           trackModalComplete(`individual-tehillim-${selectedPsalm}`);
           markModalComplete(`individual-tehillim-${selectedPsalm}`);
+          
+          try {
+            // Also update global Tehillim progress
+            await axiosClient.post('/api/tehillim/complete', {
+              currentPerek: selectedPsalm,
+              language: language,
+              completedBy: 'user'
+            });
+            
+            // Immediately update progress cache to show new number
+            queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
+            queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+          } catch (error) {
+            console.error('Error updating global progress:', error);
+            // Continue with local completion even if global update fails
+          }
           
           completeTask('tefilla');
           setShowHeartExplosion(true);
