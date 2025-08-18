@@ -247,7 +247,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
       {/* 3 Tzedaka Action Buttons */}
       <div className="p-2 space-y-2">
         {/* Tax Deductible Information Bar */}
-        <div className="bg-gradient-feminine rounded-2xl px-4 py-3 text-center shadow-lg border border-blush/10">
+        <div className="bg-gradient-feminine rounded-2xl px-4 py-2 text-center shadow-lg border border-blush/10">
           <p className="platypi-bold text-sm text-white">
             All Donations are US Tax Deductible
           </p>
