@@ -673,7 +673,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               onClick={() => openModal('refuah', 'tefilla')}
               className="bg-gradient-to-br from-blush/10 to-blush/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-blush/20"
             >
-              <div className="bg-gradient-to-r from-red-500 to-red-600 p-2 rounded-full mx-auto mb-1 w-fit shadow-md">
+              <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-1 w-fit">
                 <Shield className="text-white" size={16} strokeWidth={1.5} />
               </div>
               <h4 className="platypi-bold text-sm text-black">Refuah</h4>
@@ -684,7 +684,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               onClick={() => openModal('family', 'tefilla')}
               className="bg-gradient-to-br from-lavender/10 to-lavender/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-lavender/20"
             >
-              <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-2 rounded-full mx-auto mb-1 w-fit shadow-md">
+              <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-1 w-fit">
                 <Users className="text-white" size={16} strokeWidth={1.5} />
               </div>
               <h4 className="platypi-bold text-sm text-black">Family</h4>
@@ -695,7 +695,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               onClick={() => openModal('life', 'tefilla')}
               className="bg-gradient-to-br from-sage/10 to-sage/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-sage/20"
             >
-              <div className="bg-gradient-to-r from-pink-500 to-pink-600 p-2 rounded-full mx-auto mb-1 w-fit shadow-md">
+              <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-1 w-fit">
                 <Heart className="text-white" size={16} strokeWidth={1.5} />
               </div>
               <h4 className="platypi-bold text-sm text-black">Life</h4>
