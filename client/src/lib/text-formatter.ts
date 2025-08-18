@@ -2,12 +2,12 @@
  * Aggressively cleans Hebrew text to eliminate all display issues while preserving legitimate Hebrew content
  */
 function cleanHebrewText(text: string): string {
-  // First pass: Remove all problematic Unicode ranges
+  // First pass: Remove only problematic characters while preserving Hebrew vowels (nekudot)
   let cleaned = text
     // Replace Hebrew sof pasuq with period (better visual)
     .replace(/׃/g, '.')
-    // Remove all cantillation marks (ta'amim) - they cause display issues
-    .replace(/[\u0591-\u05AF]/g, '')
+    // Remove only cantillation marks (ta'amim) that cause display issues - preserve vowels
+    .replace(/[\u0591-\u05AE]/g, '') // Remove ta'amim but keep vowels (05AF and above)
     .replace(/[\u05BD\u05BF\u05C0\u05C3\u05C4\u05C5\u05C6]/g, '') // Additional Hebrew punctuation
     // Remove all geometric shapes, symbols, and technical characters - but preserve specific Hebrew punctuation
     .replace(/[\u2000-\u206F]/g, (char) => {

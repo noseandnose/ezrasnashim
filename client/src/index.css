@@ -702,3 +702,29 @@ html, body, #root {
     touch-action: manipulation;
   }
 }
+
+/* Prevent Tehillim buttons from being draggable outside modal */
+.tehillim-button-grid {
+  contain: layout style paint;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.tehillim-button-grid button {
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  position: relative;
+  pointer-events: auto;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+}

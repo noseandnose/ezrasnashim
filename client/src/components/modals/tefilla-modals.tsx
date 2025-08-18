@@ -1521,16 +1521,17 @@ function SpecialTehillimModal() {
       {/* Tab Content */}
       <div className="max-h-[50vh] overflow-y-auto">
         {activeTab === 'all' ? (
-          <div className="grid grid-cols-7 gap-2 p-2">
+          <div className="grid grid-cols-7 gap-2 p-2 overflow-hidden tehillim-button-grid">
             {allPsalms.map((psalm) => (
               <button
                 key={psalm}
                 onClick={() => openTehillimText(psalm)}
-                className={`w-12 h-12 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center ${
+                className={`w-12 h-12 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center flex-shrink-0 ${
                   isModalComplete(`individual-tehillim-${psalm}`)
                     ? 'bg-sage text-white'
                     : 'bg-gradient-feminine text-white'
                 }`}
+                style={{ touchAction: 'manipulation' }}
               >
                 {psalm}
               </button>
@@ -1666,8 +1667,7 @@ function IndividualTehillimModal() {
           setTimeout(() => {
             setShowHeartExplosion(false); // Reset explosion state
             checkAndShowCongratulations();
-            closeModal();
-            openModal('tehillim', 'tefilla'); // Return to All Psalms modal
+            openModal('tehillim', 'tefilla'); // Return to All Psalms modal immediately
           }, 2000);
         }}
         disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
