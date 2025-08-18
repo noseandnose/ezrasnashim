@@ -232,7 +232,9 @@ export class DatabaseStorage implements IStorage {
   async updateGlobalTehillimProgress(currentPerek: number, language: string, completedBy?: string): Promise<GlobalTehillimProgress> {
     const [progress] = await db.select().from(globalTehillimProgress).limit(1);
     if (progress) {
-      // Now currentPerek is actually the ID in the tehillim table
+      // Use the database progress value, not the parameter
+      const currentDbPerek = progress.currentPerek;
+      
       // Get the max ID to know when to reset
       const [maxRow] = await db
         .select({ maxId: sql<number>`MAX(id)` })
@@ -240,11 +242,11 @@ export class DatabaseStorage implements IStorage {
       
       const maxId = maxRow?.maxId || 171; // 171 is the total with Psalm 119 having 22 parts
       
-      // Check if we're completing the entire book
-      const isBookComplete = currentPerek >= maxId;
+      // Check if we're completing the entire book (use database value)
+      const isBookComplete = currentDbPerek >= maxId;
       
-      // Calculate next ID (cycling through all rows)
-      const nextId = currentPerek >= maxId ? 1 : currentPerek + 1;
+      // Calculate next ID (cycling through all rows) - use database value
+      const nextId = currentDbPerek >= maxId ? 1 : currentDbPerek + 1;
       
       // Log book completion event when finishing the last row
       if (isBookComplete) {
