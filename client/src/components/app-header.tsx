@@ -1,9 +1,9 @@
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate } from "@/hooks/use-hebrew-date";
-import { BarChart3, Info, Share2 } from "lucide-react";
+import { BarChart3, Info, Share2, Share } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import logoImage from "@assets/6LO_1753613081319.png";
 import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
 
@@ -14,6 +14,13 @@ export default function AppHeader() {
   const [, setLocation] = useLocation();
   const { openModal } = useModalStore();
   const [showAddToHomeScreen, setShowAddToHomeScreen] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+
+  useEffect(() => {
+    // Detect if iOS device
+    const userAgent = navigator.userAgent.toLowerCase();
+    setIsIOS(/iphone|ipad|ipod/.test(userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+  }, []);
 
   const getCurrentTime = () => {
     return new Date().toLocaleTimeString('en-US', { 
@@ -45,7 +52,11 @@ export default function AppHeader() {
             className="p-2 rounded-full hover:bg-white/50 transition-colors"
             aria-label="Add to Home Screen"
           >
-            <Share2 className="h-5 w-5 text-black/70" />
+            {isIOS ? (
+              <Share className="h-5 w-5 text-black/70" />
+            ) : (
+              <Share2 className="h-5 w-5 text-black/70" />
+            )}
           </button>
           <button
             onClick={() => setLocation("/statistics")}

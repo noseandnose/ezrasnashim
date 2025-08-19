@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Share2, Smartphone, X, Download, Plus, Home } from "lucide-react";
+import { Share, Smartphone, X, Download, Plus, Home } from "lucide-react";
 
 interface AddToHomeScreenModalProps {
   isOpen: boolean;
@@ -10,7 +9,6 @@ interface AddToHomeScreenModalProps {
 
 export default function AddToHomeScreenModal({ isOpen, onClose }: AddToHomeScreenModalProps) {
   const [deviceType, setDeviceType] = useState<'ios' | 'android' | 'desktop'>('desktop');
-  const [showShareError, setShowShareError] = useState(false);
 
   useEffect(() => {
     // Detect device type
@@ -27,33 +25,6 @@ export default function AddToHomeScreenModal({ isOpen, onClose }: AddToHomeScree
     }
   }, []);
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'Ezras Nashim',
-          text: 'Daily Jewish spiritual app for women',
-          url: window.location.origin
-        });
-      } catch (error) {
-        // User cancelled or error occurred
-        if (error instanceof Error && error.name !== 'AbortError') {
-          setShowShareError(true);
-          setTimeout(() => setShowShareError(false), 3000);
-        }
-      }
-    } else {
-      // Fallback - copy URL to clipboard
-      try {
-        await navigator.clipboard.writeText(window.location.origin);
-        alert('Link copied to clipboard!');
-      } catch {
-        setShowShareError(true);
-        setTimeout(() => setShowShareError(false), 3000);
-      }
-    }
-  };
-
   const getInstructions = () => {
     if (deviceType === 'ios') {
       return (
@@ -62,12 +33,18 @@ export default function AddToHomeScreenModal({ isOpen, onClose }: AddToHomeScree
           <ol className="space-y-3 text-left">
             <li className="flex items-start space-x-3">
               <span className="flex-shrink-0 w-7 h-7 bg-gradient-feminine text-white rounded-full flex items-center justify-center text-sm font-semibold">1</span>
-              <span className="text-warm-gray">Click the <strong>Share</strong> button below</span>
+              <div className="space-y-1">
+                <span className="text-warm-gray">Tap the <strong>Share</strong> button</span>
+                <div className="flex items-center space-x-2 bg-ivory p-2 rounded-lg">
+                  <Share className="w-4 h-4" />
+                  <span className="text-sm text-warm-gray/70">Located at the bottom of Safari</span>
+                </div>
+              </div>
             </li>
             <li className="flex items-start space-x-3">
               <span className="flex-shrink-0 w-7 h-7 bg-gradient-feminine text-white rounded-full flex items-center justify-center text-sm font-semibold">2</span>
               <div className="space-y-1">
-                <span className="text-warm-gray">In the share menu, scroll down and tap</span>
+                <span className="text-warm-gray">Scroll down and tap</span>
                 <div className="flex items-center space-x-2 bg-ivory p-2 rounded-lg">
                   <Plus className="w-4 h-4" />
                   <span className="font-medium">Add to Home Screen</span>
@@ -93,7 +70,13 @@ export default function AddToHomeScreenModal({ isOpen, onClose }: AddToHomeScree
           <ol className="space-y-3 text-left">
             <li className="flex items-start space-x-3">
               <span className="flex-shrink-0 w-7 h-7 bg-gradient-feminine text-white rounded-full flex items-center justify-center text-sm font-semibold">1</span>
-              <span className="text-warm-gray">Click the <strong>Share</strong> button below</span>
+              <div className="space-y-1">
+                <span className="text-warm-gray">Tap the <strong>Menu</strong> button</span>
+                <div className="flex items-center space-x-2 bg-ivory p-2 rounded-lg">
+                  <span className="text-lg">⋮</span>
+                  <span className="text-sm text-warm-gray/70">Three dots in browser</span>
+                </div>
+              </div>
             </li>
             <li className="flex items-start space-x-3">
               <span className="flex-shrink-0 w-7 h-7 bg-gradient-feminine text-white rounded-full flex items-center justify-center text-sm font-semibold">2</span>
@@ -112,7 +95,7 @@ export default function AddToHomeScreenModal({ isOpen, onClose }: AddToHomeScree
           </ol>
           <div className="bg-sage/10 p-3 rounded-lg">
             <p className="text-sm text-warm-gray">
-              💡 <strong>Tip:</strong> You can also tap the menu (⋮) in your browser and select "Add to Home screen"
+              💡 <strong>Tip:</strong> The app icon will be added to your home screen instantly!
             </p>
           </div>
         </div>
@@ -146,17 +129,9 @@ export default function AddToHomeScreenModal({ isOpen, onClose }: AddToHomeScree
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md mx-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Smartphone className="w-5 h-5 text-blush" />
-              <span className="platypi-bold text-xl">Add to Home Screen</span>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-1 rounded-full hover:bg-gray-100 transition-colors"
-            >
-              <X className="w-5 h-5 text-gray-500" />
-            </button>
+          <DialogTitle className="flex items-center space-x-2">
+            <Smartphone className="w-5 h-5 text-blush" />
+            <span className="platypi-bold text-xl">Add to Home Screen</span>
           </DialogTitle>
         </DialogHeader>
         
@@ -168,31 +143,6 @@ export default function AddToHomeScreenModal({ isOpen, onClose }: AddToHomeScree
           </div>
 
           {getInstructions()}
-
-          {showShareError && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600">
-                Unable to share. Please copy the URL manually from your browser's address bar.
-              </p>
-            </div>
-          )}
-
-          <div className="mt-6 space-y-3">
-            <Button
-              onClick={handleShare}
-              className="w-full bg-gradient-feminine text-white hover:scale-105 transition-transform"
-            >
-              <Share2 className="w-4 h-4 mr-2" />
-              Share App Link
-            </Button>
-            
-            <button
-              onClick={onClose}
-              className="w-full py-2 text-warm-gray hover:text-black transition-colors"
-            >
-              Maybe Later
-            </button>
-          </div>
         </div>
       </DialogContent>
     </Dialog>
