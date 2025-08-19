@@ -27,7 +27,7 @@ export default function TableModals() {
     return new Date().toISOString().split('T')[0];
   };
 
-  const { data: recipeContent } = useQuery<{title?: string; description?: string; ingredients?: string[]; instructions?: string[]; cookingTime?: string; servings?: number}>({
+  const { data: recipeContent } = useQuery<{title?: string; description?: string; ingredients?: string[]; instructions?: string[]; cookingTime?: string; servings?: number; imageUrl?: string; prepTime?: string; cookTime?: string; difficulty?: string}>({
     queryKey: ['/api/table/recipe'],
     enabled: activeModal === 'recipe'
   });
@@ -55,6 +55,20 @@ export default function TableModals() {
           
           {recipeContent ? (
             <div className="space-y-4 text-sm text-gray-700">
+              {/* Recipe Image */}
+              {recipeContent.imageUrl && (
+                <div className="w-full rounded-lg overflow-hidden">
+                  <img 
+                    src={recipeContent.imageUrl} 
+                    alt={recipeContent.title || "Recipe"} 
+                    className="w-full h-48 object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
+              
               {/* Recipe Description */}
               {recipeContent.description && (
                 <div>
@@ -63,19 +77,31 @@ export default function TableModals() {
               )}
               
               {/* Cooking Info */}
-              {(recipeContent.cookingTime || recipeContent.servings) && (
+              {(recipeContent.prepTime || recipeContent.cookTime || recipeContent.servings || recipeContent.difficulty) && (
                 <div className="bg-blush/10 p-3 rounded-lg">
-                  <div className="flex gap-4">
-                    {recipeContent.cookingTime && (
+                  <div className="grid grid-cols-2 gap-2">
+                    {recipeContent.prepTime && (
                       <div>
-                        <span className="platypi-semibold">Cooking Time: </span>
-                        <span>{recipeContent.cookingTime}</span>
+                        <span className="platypi-semibold">Prep Time: </span>
+                        <span>{recipeContent.prepTime}</span>
+                      </div>
+                    )}
+                    {recipeContent.cookTime && (
+                      <div>
+                        <span className="platypi-semibold">Cook Time: </span>
+                        <span>{recipeContent.cookTime}</span>
                       </div>
                     )}
                     {recipeContent.servings && (
                       <div>
                         <span className="platypi-semibold">Servings: </span>
                         <span>{recipeContent.servings}</span>
+                      </div>
+                    )}
+                    {recipeContent.difficulty && (
+                      <div>
+                        <span className="platypi-semibold">Difficulty: </span>
+                        <span>{recipeContent.difficulty}</span>
                       </div>
                     )}
                   </div>
