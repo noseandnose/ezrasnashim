@@ -71,9 +71,9 @@ export function FullscreenModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-white">
+    <div className="fixed inset-0 z-[100] bg-white flex flex-col">
       {/* Header */}
-      <div className="fixed top-0 left-0 right-0 z-[101] bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-900 truncate flex-1 mr-4">
           {title}
         </h2>
@@ -87,7 +87,7 @@ export function FullscreenModal({
       </div>
 
       {/* Content */}
-      <div className={`pt-16 pb-4 px-4 h-full overflow-y-auto ${className}`}>
+      <div className={`flex-1 overflow-y-auto px-4 py-4 ${className}`}>
         <div className="max-w-4xl mx-auto">
           {children}
         </div>
