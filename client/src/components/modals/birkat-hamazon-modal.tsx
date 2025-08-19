@@ -149,7 +149,7 @@ export function BirkatHamazonModal() {
   };
 
   const StandardModalHeader = () => (
-    <div className="mb-4 space-y-3">
+    <div className="mb-2 space-y-2">
       {/* First Row: Language Toggle and Title */}
       <div className="flex items-center justify-center gap-4">
         <Button

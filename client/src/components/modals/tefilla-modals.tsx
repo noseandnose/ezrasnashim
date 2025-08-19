@@ -175,7 +175,7 @@ const StandardModalHeader = ({
   fontSize: number;
   setFontSize: (size: number) => void;
 }) => (
-  <div className="mb-4 space-y-3">
+  <div className="mb-2 space-y-2">
     {/* First Row: Language Toggle and Title */}
     <div className="flex items-center justify-center gap-4">
       <Button
@@ -252,7 +252,7 @@ function MorningBrochasModal() {
         <div id="morning-brochas-description" className="sr-only">Daily morning blessings and prayers of gratitude</div>
         
         {/* Standardized Header with centered controls */}
-        <div className="mb-4 space-y-3">
+        <div className="mb-2 space-y-2">
           {/* First Row: Language Toggle and Title */}
           <div className="flex items-center justify-center gap-4">
             <Button
@@ -710,7 +710,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           <div id="tehillim-description" className="sr-only">Psalms reading and community prayer participation</div>
           
           {/* Standardized Header with two-row layout */}
-          <div className="mb-4 space-y-3">
+          <div className="mb-2 space-y-2">
             {/* First Row: Language Toggle and Title */}
             <div className="flex items-center justify-center gap-4">
               <Button
@@ -1037,7 +1037,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       <Dialog open={activeModal === 'nishmas-campaign'} onOpenChange={() => closeModal(true)}>
         <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular ${isAnimating ? 'prayer-ascending' : ''}`}>
           {/* Standardized Header with two-row layout */}
-          <div className="mb-4 space-y-3">
+          <div className="mb-2 space-y-2">
             {/* First Row: Language Toggle and Title */}
             <div className="flex items-center justify-center gap-4">
               <Button
@@ -1456,7 +1456,7 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
       </VisuallyHidden>
       
       {/* Standardized Header with two-row layout */}
-      <div className="mb-4 space-y-3">
+      <div className="mb-2 space-y-2">
         {/* First Row: Language Toggle and Title */}
         <div className="flex items-center justify-center gap-4">
           {/* Conditional translate button - only show if English text exists */}
@@ -1717,7 +1717,7 @@ function IndividualTehillimModal() {
   return (
     <>
       {/* Standardized Header */}
-      <div className="mb-4 space-y-3">
+      <div className="mb-2 space-y-2">
         {/* First Row: Language Toggle and Title */}
         <div className="flex items-center justify-center gap-4">
           <Button

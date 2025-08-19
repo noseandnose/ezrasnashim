@@ -41,7 +41,7 @@ const StandardModalHeader = ({
   fontSize: number;
   setFontSize: (size: number) => void;
 }) => (
-  <div className="mb-4 space-y-3">
+  <div className="mb-2 space-y-2">
     {/* First Row: Language Toggle and Title */}
     <div className="flex items-center justify-center gap-4">
       <Button
@@ -445,12 +445,14 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           
           <div className="mb-1">
             {/* Custom header with font size controls - matches Halacha modal */}
-            <div className="flex items-center justify-center mb-1 relative pr-8">
-              <div className="flex items-center gap-4">
-                <div className="flex flex-col items-center">
-                  <DialogTitle className="text-lg platypi-bold text-black">Featured Content</DialogTitle>
-                </div>
-                
+            <div className="mb-2 space-y-2">
+              {/* First Row: Title */}
+              <div className="flex items-center justify-center">
+                <DialogTitle className="text-lg platypi-bold text-black">Featured Content</DialogTitle>
+              </div>
+              
+              {/* Second Row: Font Size Controls */}
+              <div className="flex items-center justify-center">
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setFontSize(Math.max(12, fontSize - 2))}
