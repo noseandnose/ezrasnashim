@@ -352,6 +352,34 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="emuna-description">
           <div id="emuna-description" className="sr-only">Daily faith strengthening and spiritual trust content</div>
           
+          {/* Fullscreen button */}
+          {emunaContent && !emunaContent.audioUrl && (
+            <button
+              onClick={() => {
+                setFullscreenContent({
+                  isOpen: true,
+                  title: 'Daily Emuna',
+                  content: (
+                    <div className="space-y-4">
+                      {emunaContent.title && (
+                        <h3 className="platypi-bold text-2xl text-black text-center mb-4">
+                          {emunaContent.title}
+                        </h3>
+                      )}
+                      <div className="secular-one-bold text-right leading-relaxed text-black text-xl">
+                        <div dangerouslySetInnerHTML={{ __html: formatTextContent(emunaContent.content) }} />
+                      </div>
+                    </div>
+                  )
+                });
+              }}
+              className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 transition-colors z-10"
+              aria-label="Open fullscreen"
+            >
+              <Expand className="h-4 w-4 text-gray-600" />
+            </button>
+          )}
+          
           {/* Simple Header for Audio Content */}
           <div className="flex items-center justify-center mb-1 relative">
             <DialogTitle className="text-lg platypi-bold text-black">Daily Emuna</DialogTitle>
@@ -499,6 +527,34 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
       <Dialog open={activeModal === 'featured'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="featured-description">
           <div id="featured-description" className="sr-only">Featured special topics and content</div>
+          
+          {/* Fullscreen button */}
+          <button
+            onClick={() => {
+              if (featuredContent) {
+                setFullscreenContent({
+                  isOpen: true,
+                  title: 'Featured Content',
+                  content: (
+                    <div className="space-y-4">
+                      {featuredContent.title && (
+                        <h3 className="platypi-bold text-2xl text-black text-center mb-4">
+                          {featuredContent.title}
+                        </h3>
+                      )}
+                      <div className="platypi-regular leading-relaxed text-black whitespace-pre-line text-xl">
+                        <div dangerouslySetInnerHTML={{ __html: formatTextContent(featuredContent.content) }} />
+                      </div>
+                    </div>
+                  )
+                });
+              }
+            }}
+            className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 transition-colors z-10"
+            aria-label="Open fullscreen"
+          >
+            <Expand className="h-4 w-4 text-gray-600" />
+          </button>
           
           <div className="mb-1">
             {/* Custom header with font size controls - matches Halacha modal */}

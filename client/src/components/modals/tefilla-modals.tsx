@@ -253,6 +253,40 @@ function MorningBrochasModal() {
       <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="morning-brochas-description">
         <div id="morning-brochas-description" className="sr-only">Daily morning blessings and prayers of gratitude</div>
         
+        {/* Fullscreen button */}
+        <button
+          onClick={() => {
+            setFullscreenContent({
+              isOpen: true,
+              title: 'Morning Brochas',
+              content: (
+                <div className="space-y-6">
+                  {morningPrayers?.map((prayer: MorningPrayer) => (
+                    <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
+                      {showHebrew && prayer.hebrewText && (
+                        <div 
+                          className="vc-koren-hebrew leading-relaxed text-2xl"
+                          dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText, tefillaConditions) }}
+                        />
+                      )}
+                      {!showHebrew && (
+                        <div 
+                          className="koren-siddur-english text-left leading-relaxed text-black/70 text-xl"
+                          dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )
+            });
+          }}
+          className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 transition-colors z-10"
+          aria-label="Open fullscreen"
+        >
+          <Expand className="h-4 w-4 text-gray-600" />
+        </button>
+        
         {/* Standardized Header with centered controls */}
         <div className="mb-2 space-y-2">
           {/* First Row: Language Toggle and Title */}
@@ -813,6 +847,42 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="mincha-description">
           <div id="mincha-description" className="sr-only">Afternoon prayer service and instructions</div>
           
+          {/* Fullscreen button */}
+          <button
+            onClick={() => {
+              setFullscreenContent({
+                isOpen: true,
+                title: 'Mincha Prayer',
+                content: (
+                  <div className="space-y-6">
+                    {minchaPrayers.map((prayer) => (
+                      <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
+                        {prayer.hebrewText && language === 'hebrew' && (
+                          <div 
+                            className="vc-koren-hebrew leading-relaxed text-2xl"
+                            dangerouslySetInnerHTML={{ 
+                              __html: processTefillaContent(prayer.hebrewText, tefillaConditions)
+                            }}
+                          />
+                        )}
+                        {language === 'english' && (
+                          <div 
+                            className="koren-siddur-english text-left leading-relaxed text-black/70 text-xl"
+                            dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )
+              });
+            }}
+            className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 transition-colors z-10"
+            aria-label="Open fullscreen"
+          >
+            <Expand className="h-4 w-4 text-gray-600" />
+          </button>
+          
           <StandardModalHeader 
             title="Mincha Prayer"
             showHebrew={language === 'hebrew'}
@@ -1244,6 +1314,40 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       <Dialog open={activeModal === 'maariv'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="maariv-description">
           <div id="maariv-description" className="sr-only">Evening prayer service and instructions</div>
+          
+          {/* Fullscreen button */}
+          <button
+            onClick={() => {
+              setFullscreenContent({
+                isOpen: true,
+                title: 'Maariv Prayer',
+                content: (
+                  <div className="space-y-6">
+                    {maarivPrayers.map((prayer) => (
+                      <div key={prayer.id} className="border-b border-warm-gray/10 pb-4 last:border-b-0">
+                        {prayer.hebrewText && language === 'hebrew' && (
+                          <div 
+                            className="vc-koren-hebrew leading-relaxed text-2xl"
+                            dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText, tefillaConditions).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
+                          />
+                        )}
+                        {language === 'english' && (
+                          <div 
+                            className="koren-siddur-english text-left leading-relaxed text-black/70 text-xl"
+                            dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )
+              });
+            }}
+            className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 transition-colors z-10"
+            aria-label="Open fullscreen"
+          >
+            <Expand className="h-4 w-4 text-gray-600" />
+          </button>
           
           <StandardModalHeader 
             title="Maariv Prayer"
