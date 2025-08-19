@@ -31,22 +31,6 @@ export function FullscreenModal({
         onClose();
       }
     };
-
-    // Create a fullscreen container that blocks everything
-    const fullscreenContainer = document.createElement('div');
-    fullscreenContainer.id = 'fullscreen-modal-container';
-    fullscreenContainer.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 2147483647;
-      background: white;
-      pointer-events: all;
-    `;
-    
-    document.body.appendChild(fullscreenContainer);
     
     // Prevent body scroll
     const originalOverflow = document.body.style.overflow;
@@ -55,10 +39,6 @@ export function FullscreenModal({
     document.addEventListener('keydown', handleEscape, true);
 
     return () => {
-      const container = document.getElementById('fullscreen-modal-container');
-      if (container) {
-        document.body.removeChild(container);
-      }
       document.body.style.overflow = originalOverflow;
       document.removeEventListener('keydown', handleEscape, true);
     };
@@ -77,123 +57,90 @@ export function FullscreenModal({
 
   if (!isOpen) return null;
 
-  const modalContent = (
-    <>
-      {/* Blocking Overlay */}
+  // Render modal directly to body portal
+  return createPortal(
+    <div 
+      style={{ 
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        zIndex: 2147483647,
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: 'white'
+      }}
+    >
+      {/* Header */}
       <div 
-        style={{ 
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          background: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 2147483646,
-          pointerEvents: 'all'
-        }}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onClose();
-        }}
-      />
-      
-      {/* Modal Content */}
-      <div 
-        ref={containerRef}
-        style={{ 
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: 2147483647,
-          display: 'flex',
-          flexDirection: 'column',
+        style={{
           backgroundColor: 'white',
-          pointerEvents: 'all'
+          borderBottom: '1px solid #e5e7eb',
+          padding: '12px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          minHeight: '56px',
+          flexShrink: 0
         }}
-        onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div 
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+          <img 
+            src={logoImage} 
+            alt="Ezras Nashim" 
+            style={{ height: '20px', width: 'auto' }}
+          />
+          <h1 style={{ 
+            fontSize: '1.125rem',
+            fontWeight: 600,
+            color: '#111827',
+            textAlign: 'center',
+            flex: 1,
+            margin: 0
+          }}>
+            {title}
+          </h1>
+        </div>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onClose();
+          }}
           style={{
-            backgroundColor: 'white',
-            borderBottom: '1px solid #e5e7eb',
-            padding: '12px 16px',
+            width: '40px',
+            height: '40px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            minHeight: '56px',
-            flexShrink: 0
+            justifyContent: 'center',
+            backgroundColor: 'transparent',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer'
           }}
+          aria-label="Close fullscreen"
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-            <img 
-              src={logoImage} 
-              alt="Ezras Nashim" 
-              style={{ height: '20px', width: 'auto' }}
-            />
-            <h1 style={{ 
-              fontSize: '1.125rem',
-              fontWeight: 600,
-              color: '#111827',
-              textAlign: 'center',
-              flex: 1,
-              margin: 0
-            }}>
-              {title}
-            </h1>
-          </div>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onClose();
-            }}
-            style={{
-              width: '40px',
-              height: '40px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: 'transparent',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer'
-            }}
-            aria-label="Close fullscreen"
-          >
-            <X style={{ height: '20px', width: '20px', color: '#4b5563' }} />
-          </button>
-        </div>
+          <X style={{ height: '20px', width: '20px', color: '#4b5563' }} />
+        </button>
+      </div>
 
-        {/* Scrollable Content */}
-        <div 
-          style={{ 
-            flex: '1 1 auto',
-            overflow: 'auto',
-            padding: '16px',
-            height: '100%',
-            pointerEvents: 'all'
-          }}
-          onScroll={(e) => e.stopPropagation()}
-        >
-          <div style={{ maxWidth: '56rem', margin: '0 auto' }} className={className}>
-            {children}
-          </div>
+      {/* Scrollable Content */}
+      <div 
+        style={{ 
+          flex: '1 1 auto',
+          overflow: 'auto',
+          padding: '16px',
+          WebkitOverflowScrolling: 'touch'
+        }}
+      >
+        <div style={{ maxWidth: '56rem', margin: '0 auto' }} className={className}>
+          {children}
         </div>
       </div>
-    </>
+    </div>,
+    document.body
   );
-
-  // Render to portal
-  const portalContainer = document.getElementById('fullscreen-modal-container');
-  if (portalContainer) {
-    return createPortal(modalContent, portalContainer);
-  }
-  
-  return createPortal(modalContent, document.body);
 }
 
 interface FullscreenButtonProps {
