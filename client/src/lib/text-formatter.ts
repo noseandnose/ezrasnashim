@@ -115,7 +115,8 @@ function cleanHebrewText(text: string): string {
  * - ~~ for greyed out text
  * - ++ for larger text
  * - -- for smaller text
- * - [[ ]] for conditional content (processed by tefilla processor)
+ * - [[ ]] for grey box content
+ * - Conditional content with [[ ]] tags is processed separately by tefilla processor
  * @param text - The raw text to format
  * @returns The formatted HTML string
  */
@@ -131,7 +132,23 @@ export function formatTextContent(text: string | null | undefined): string {
   // Replace --- with line breaks (double breaks for spacing)
   formatted = formatted.replace(/---/g, '<br /><br />');
   
-  // Removed [[ ]] grey box processing to allow conditional content system to work
+  // Process [[ ]] for grey boxes (only simple text, not conditional content)
+  // This handles [[text]] that doesn't contain conditional keywords
+  formatted = formatted.replace(/\[\[([^\]]+?)\]\]/g, (match, content) => {
+    // Check if this is conditional content (contains known keywords)
+    const conditionalKeywords = [
+      'OUTSIDE_ISRAEL', 'ONLY_ISRAEL', 'ROSH_CHODESH', 'FAST_DAY', 
+      'ASERET_YEMEI_TESHUVA', 'SUKKOT', 'PESACH', 'ROSH_CHODESH_SPECIAL'
+    ];
+    
+    if (conditionalKeywords.some(keyword => content.includes(keyword))) {
+      // This is conditional content, leave it for tefilla processor
+      return match;
+    }
+    
+    // This is regular grey box content
+    return `<div style="background-color: #f3f4f6; padding: 12px; border-radius: 8px; margin: 8px 0; border-left: 4px solid #d1d5db;">${content}</div>`;
+  });
   
   // Process the text character by character to handle formatting markers
   let result = '';

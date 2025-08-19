@@ -43,7 +43,7 @@ Font testing: Currently testing Platypi serif font as potential replacement for 
 Tefilla font: All prayer content in Tefilla modals now uses Koren Siddur font for authentic prayer experience (August 6, 2025).
 Reading time display: User requested reading time estimation for text content, implemented for Halacha content using 200 words per minute calculation (August 1, 2025).
 Community feedback form: Updated to new Google Forms link (August 5, 2025).
-Text formatting: Database content supports markdown-style formatting - **text** for bold, --- for line breaks, ~~text~~ for greyed out text, ++text++ for larger text (1.2em), --text-- for smaller text (0.85em) (August 14, 2025).
+Text formatting: Database content supports markdown-style formatting - **text** for bold, --- for line breaks, ~~text~~ for greyed out text, ++text++ for larger text (1.2em), --text-- for smaller text (0.85em), [[text]] for grey box content (August 19, 2025).
 
 ## System Architecture
 ### Frontend
