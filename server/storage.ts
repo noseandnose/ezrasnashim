@@ -811,16 +811,11 @@ export class DatabaseStorage implements IStorage {
 
   // Daily recipe methods
   async getDailyRecipeByDate(date: string): Promise<DailyRecipe | undefined> {
-    // Find recipe where the given date falls within the date range
+    // Find recipe for the specific date
     const [recipe] = await db
       .select()
       .from(dailyRecipes)
-      .where(
-        and(
-          lte(dailyRecipes.fromDate, date),
-          gte(dailyRecipes.untilDate, date)
-        )
-      )
+      .where(eq(dailyRecipes.date, date))
       .limit(1);
     return recipe;
   }

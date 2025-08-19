@@ -83,25 +83,35 @@ export default function TableModals() {
               )}
               
               {/* Ingredients */}
-              {recipeContent.ingredients && recipeContent.ingredients.length > 0 && (
+              {recipeContent.ingredients && (
                 <div>
                   <h3 className="platypi-semibold mb-2">Ingredients:</h3>
                   <ul className="list-disc list-inside space-y-1">
-                    {recipeContent.ingredients.map((ingredient, index) => (
-                      <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(ingredient) }} />
-                    ))}
+                    {(() => {
+                      const ingredientsList = typeof recipeContent.ingredients === 'string' 
+                        ? JSON.parse(recipeContent.ingredients) 
+                        : recipeContent.ingredients;
+                      return Array.isArray(ingredientsList) ? ingredientsList.map((ingredient, index) => (
+                        <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(ingredient) }} />
+                      )) : null;
+                    })()}
                   </ul>
                 </div>
               )}
               
               {/* Instructions */}
-              {recipeContent.instructions && recipeContent.instructions.length > 0 && (
+              {recipeContent.instructions && (
                 <div>
                   <h3 className="platypi-semibold mb-2">Instructions:</h3>
                   <ol className="list-decimal list-inside space-y-2">
-                    {recipeContent.instructions.map((instruction, index) => (
-                      <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(instruction) }} />
-                    ))}
+                    {(() => {
+                      const instructionsList = typeof recipeContent.instructions === 'string' 
+                        ? JSON.parse(recipeContent.instructions) 
+                        : recipeContent.instructions;
+                      return Array.isArray(instructionsList) ? instructionsList.map((instruction, index) => (
+                        <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(instruction) }} />
+                      )) : null;
+                    })()}
                   </ol>
                 </div>
               )}

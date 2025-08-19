@@ -31,6 +31,7 @@ Ezras Nashim is a mobile-first web application for Jewish women to track and com
 - **Tefilla English Text Overflow Fix**: Fixed horizontal scrolling issue in all Tefilla modals where English text could overflow container width. Added proper width constraints, word wrapping, and overflow handling to `.koren-siddur-english` CSS class (August 18, 2025)
 - **Tehillim Tab Navigation Fix**: Fixed bug where completing a Tehillim from Special Occasions tab would return to All Psalms tab. Added persistent `tehillimActiveTab` state to modal store to maintain tab selection when navigating between individual Tehillim and main modal (August 18, 2025)
 - **Global Tehillim Progress System Fix**: Fixed critical bug where global Tehillim progress would revert to 1 instead of progressing sequentially. Updated `updateGlobalTehillimProgress` function to use database current progress value instead of API parameter for calculating next progression, ensuring proper sequential advancement through all 171 Tehillim entries (August 18, 2025)
+- **Recipe Database Migration**: Migrated daily_recipes table from fromDate/untilDate fields to single date field for true daily recipe functionality. Fixed recipe display errors on life page by properly parsing JSON ingredients and instructions arrays (August 19, 2025)
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
