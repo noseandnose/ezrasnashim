@@ -1,5 +1,5 @@
 import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar, Moon, MapPin, ShoppingBag, MessageSquare, Zap, Lightbulb as Candle } from "lucide-react";
-import customCandleIcon from "@assets/Untitled design (5)_1755629947676.png";
+import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
