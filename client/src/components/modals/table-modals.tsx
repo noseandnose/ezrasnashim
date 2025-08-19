@@ -57,13 +57,16 @@ export default function TableModals() {
             <div className="space-y-4 text-sm text-gray-700">
               {/* Recipe Image */}
               {recipeContent.imageUrl && (
-                <div className="w-full rounded-lg overflow-hidden">
+                <div className="w-full rounded-lg overflow-hidden mb-4">
                   <img 
                     src={recipeContent.imageUrl} 
                     alt={recipeContent.title || "Recipe"} 
                     className="w-full h-48 object-cover"
+                    crossOrigin="anonymous"
                     onError={(e) => {
-                      e.currentTarget.style.display = 'none';
+                      console.warn('Failed to load recipe image:', recipeContent.imageUrl);
+                      const parent = e.currentTarget.parentElement;
+                      if (parent) parent.style.display = 'none';
                     }}
                   />
                 </div>
