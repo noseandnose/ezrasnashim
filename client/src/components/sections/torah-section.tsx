@@ -81,7 +81,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
     {
       id: 'chizuk',
       icon: Heart,
-      title: 'Chizuk',
+      title: 'Daily Chizuk',
       subtitle: '5 minute inspiration',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
