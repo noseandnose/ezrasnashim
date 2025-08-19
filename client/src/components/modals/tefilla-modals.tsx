@@ -2032,11 +2032,11 @@ function JerusalemCompass() {
   const [isLoading, setIsLoading] = useState(false);
   const [orientationSupported, setOrientationSupported] = useState(true);
 
-  // Western Wall (Kotel) coordinates - verified accurate location
+  // Kotel coordinates - verified accurate location
   const WESTERN_WALL_LAT = 31.7781;
   const WESTERN_WALL_LNG = 35.2346;
 
-  // Calculate bearing to Western Wall - fixed calculation
+  // Calculate bearing to Kotel - fixed calculation
   const calculateBearing = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
     // Convert to radians
     const lat1Rad = lat1 * Math.PI / 180;
@@ -2073,7 +2073,7 @@ function JerusalemCompass() {
         
         setLocation({ lat: userLat, lng: userLng });
         
-        // Calculate direction to Western Wall
+        // Calculate direction to Kotel
         const bearing = calculateBearing(userLat, userLng, WESTERN_WALL_LAT, WESTERN_WALL_LNG);
         setDirection(bearing);
 
@@ -2173,14 +2173,14 @@ function JerusalemCompass() {
         
         {/* Header */}
         <div className="flex items-center justify-center mb-4 relative pr-8">
-          <DialogTitle className="text-xl platypi-bold text-black">Western Wall Compass</DialogTitle>
+          <DialogTitle className="text-xl platypi-bold text-black">The Kotel Compass</DialogTitle>
         </div>
 
         <div className="space-y-6">
           {/* Description */}
           <div className="text-center">
             <p className="platypi-regular text-sm text-black/70 mb-4">
-              Find the direction to face when praying towards the Western Wall
+              Find the direction to face when praying towards the Kotel
             </p>
           </div>
 
@@ -2235,7 +2235,7 @@ function JerusalemCompass() {
                     <div className="absolute left-2 top-1/2 transform -translate-y-1/2 platypi-bold text-sm text-black">W</div>
                   </div>
                   
-                  {/* Western Wall marker - positioned at calculated bearing, rotates with compass */}
+                  {/* Kotel marker - positioned at calculated bearing, rotates with compass */}
                   <div 
                     className="absolute top-1/2 left-1/2 w-full h-full pointer-events-none"
                     style={{ 
@@ -2308,7 +2308,7 @@ function JerusalemCompass() {
               {/* Alignment Status */}
               {orientationSupported && (() => {
                 // For alignment, we need to check if the user (facing north when arrow points up)
-                // is actually facing the direction of the Western Wall
+                // is actually facing the direction of the Kotel
                 // When the compass rotates by -deviceOrientation, north aligns with the top
                 // So the user is facing the deviceOrientation direction
                 let angleDiff = Math.abs(direction - deviceOrientation);
@@ -2353,7 +2353,7 @@ function JerusalemCompass() {
                       {getCardinalDirection(direction)} ({Math.round(direction)}°)
                     </span>
                   </div>
-                  <p className="platypi-regular text-sm text-black/70">Direction to the Western Wall</p>
+                  <p className="platypi-regular text-sm text-black/70">Direction to the Kotel</p>
                 </div>
               </div>
 

@@ -42,7 +42,7 @@ Text formatting: Database content supports markdown-style formatting - **text** 
 - **Daily Completion Tracking**: Torah, Tefilla, Tzedaka.
 - **Jewish Times Integration**: Real-time zmanim (Jewish prayer times) using Hebcal API, location-based accuracy.
 - **Content Management**: Daily Torah (Halacha, Mussar/Emuna, Chizuk), prayers (Mincha, Nishmas, Tehillim, Morning Brochas, Birkat Hamazon, Maariv), Shabbat resources, Pirkei Avot. Supports text and audio.
-- **Western Wall Compass**: Geolocation-based compass for prayer orientation.
+- **The Kotel Compass**: Geolocation-based compass for prayer orientation.
 - **Donation System**: Stripe integration for tzedaka campaigns.
 - **Tehillim Global Progress**: Community-wide Tehillim completion tracking with internal database management.
 - **Sponsorship System**: Daily content sponsorship.

@@ -782,7 +782,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           </div>
         </div>
 
-        {/* Western Wall Compass Section */}
+        {/* The Kotel Compass Section */}
         <div className="bg-gradient-soft rounded-3xl p-4 shadow-lg">
           <button
             onClick={() => openModal('jerusalem-compass', 'tefilla')}
@@ -793,7 +793,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
                 <Compass className="text-white" size={20} />
               </div>
               <div className="flex-grow">
-                <h3 className="platypi-bold text-lg text-black">Western Wall Compass</h3>
+                <h3 className="platypi-bold text-lg text-black">The Kotel Compass</h3>
                 <p className="platypi-regular text-sm text-black/70">Find the direction to pray</p>
               </div>
               <div className="bg-gradient-feminine p-2 rounded-full shadow-lg">
