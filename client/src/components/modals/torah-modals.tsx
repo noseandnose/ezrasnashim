@@ -8,6 +8,8 @@ import AudioPlayer from "@/components/audio-player";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { formatTextContent, formatHalachaContent } from "@/lib/text-formatter";
+import { FullscreenModal } from "@/components/ui/fullscreen-modal";
+import { Expand } from "lucide-react";
 
 // Calculate reading time based on word count (average 200 words per minute)
 const calculateReadingTime = (text: string): string => {
@@ -33,15 +35,28 @@ const StandardModalHeader = ({
   showHebrew, 
   setShowHebrew, 
   fontSize, 
-  setFontSize 
+  setFontSize,
+  onFullscreen
 }: {
   title: string;
   showHebrew: boolean;
   setShowHebrew: (show: boolean) => void;
   fontSize: number;
   setFontSize: (size: number) => void;
+  onFullscreen?: () => void;
 }) => (
   <div className="mb-2 space-y-2">
+    {/* Fullscreen button in top left */}
+    {onFullscreen && (
+      <button
+        onClick={onFullscreen}
+        className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 transition-colors z-10"
+        aria-label="Open fullscreen"
+      >
+        <Expand className="h-4 w-4 text-gray-600" />
+      </button>
+    )}
+    
     {/* First Row: Language Toggle and Title */}
     <div className="flex items-center justify-center gap-4">
       <Button
@@ -90,6 +105,11 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   const [fontSize, setFontSize] = useState(16);
   const [showHebrew, setShowHebrew] = useState(true);
   const [showFootnotes, setShowFootnotes] = useState(false);
+  const [fullscreenContent, setFullscreenContent] = useState<{
+    isOpen: boolean;
+    title: string;
+    content: React.ReactNode;
+  }>({ isOpen: false, title: '', content: null });
   const { trackModalComplete } = useTrackModalComplete();
 
   // Reset explosion state when modal changes
@@ -182,6 +202,43 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
       <Dialog open={activeModal === 'halacha'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="halacha-description">
           <div id="halacha-description" className="sr-only">Daily Jewish law and practice content</div>
+          
+          {/* Fullscreen button in top left */}
+          <button
+            onClick={() => {
+              if (halachaContent) {
+                setFullscreenContent({
+                  isOpen: true,
+                  title: 'Daily Halacha',
+                  content: (
+                    <div className="space-y-4">
+                      {halachaContent.title && (
+                        <h3 className="platypi-bold text-2xl text-black text-center mb-6">
+                          {halachaContent.title}
+                        </h3>
+                      )}
+                      <div 
+                        className="platypi-regular leading-relaxed text-black whitespace-pre-line text-lg"
+                        dangerouslySetInnerHTML={{ __html: formatHalachaContent(halachaContent.content) }}
+                      />
+                      {halachaContent.footnotes && (
+                        <div className="border-t pt-4 mt-6">
+                          <h4 className="platypi-medium text-black text-base mb-2">Footnotes</h4>
+                          <div className="platypi-regular leading-relaxed text-black/80 text-sm whitespace-pre-line">
+                            {halachaContent.footnotes}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                });
+              }
+            }}
+            className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 transition-colors z-10"
+            aria-label="Open fullscreen"
+          >
+            <Expand className="h-4 w-4 text-gray-600" />
+          </button>
           
           <div className="mb-1">
             {/* Custom header with reading time for Halacha */}
@@ -597,6 +654,15 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Fullscreen Modal */}
+      <FullscreenModal
+        isOpen={fullscreenContent.isOpen}
+        onClose={() => setFullscreenContent({ isOpen: false, title: '', content: null })}
+        title={fullscreenContent.title}
+      >
+        {fullscreenContent.content}
+      </FullscreenModal>
     </>
   );
 }

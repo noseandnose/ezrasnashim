@@ -17,6 +17,8 @@ import { BirkatHamazonModal } from "@/components/modals/birkat-hamazon-modal";
 import { useLocationStore } from '@/hooks/use-jewish-times';
 import { formatTextContent } from "@/lib/text-formatter";
 import { processTefillaText, getCurrentTefillaConditions, type TefillaConditions } from "@/utils/tefilla-processor";
+import { FullscreenModal } from "@/components/ui/fullscreen-modal";
+import { Expand } from "lucide-react";
 
 interface TefillaModalsProps {
   onSectionChange?: (section: 'torah' | 'tefilla' | 'tzedaka' | 'home' | 'table') => void;
@@ -372,6 +374,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const [selectedPrayerId, setSelectedPrayerId] = useState<number | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [showExplosion, setShowExplosion] = useState(false);
+  const [fullscreenContent, setFullscreenContent] = useState<{
+    isOpen: boolean;
+    title: string;
+    content: React.ReactNode;
+  }>({ isOpen: false, title: '', content: null });
   const queryClient = useQueryClient();
   
   // Load Tefilla conditions for conditional content processing
@@ -1043,6 +1050,38 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       {/* Nishmas Kol Chai Modal */}
       <Dialog open={activeModal === 'nishmas-campaign'} onOpenChange={() => closeModal(true)}>
         <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular ${isAnimating ? 'prayer-ascending' : ''}`}>
+          {/* Fullscreen button in top left */}
+          <button
+            onClick={() => {
+              if (nishmasText) {
+                setFullscreenContent({
+                  isOpen: true,
+                  title: 'Nishmas Kol Chai',
+                  content: (
+                    <div 
+                      className={`leading-relaxed text-black ${
+                        nishmasLanguage === 'hebrew' ? 'vc-koren-hebrew text-2xl' : 'koren-siddur-english text-left text-xl'
+                      }`}
+                    >
+                      <div 
+                        className="whitespace-pre-wrap leading-relaxed"
+                        dangerouslySetInnerHTML={{ 
+                          __html: formatTextContent(
+                            nishmasText.fullText || 'Text not available'
+                          ).replace(/<strong>/g, nishmasLanguage === 'hebrew' ? '<strong class="vc-koren-hebrew-bold">' : '<strong style="font-weight: 700;">')
+                        }}
+                      />
+                    </div>
+                  )
+                });
+              }
+            }}
+            className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 transition-colors z-10"
+            aria-label="Open fullscreen"
+          >
+            <Expand className="h-4 w-4 text-gray-600" />
+          </button>
+          
           {/* Standardized Header with two-row layout */}
           <div className="mb-2 space-y-2">
             {/* First Row: Language Toggle and Title */}
@@ -1270,6 +1309,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       
       {/* Jerusalem Compass Modal */}
       <JerusalemCompass />
+
+      {/* Fullscreen Modal */}
+      <FullscreenModal
+        isOpen={fullscreenContent.isOpen}
+        onClose={() => setFullscreenContent({ isOpen: false, title: '', content: null })}
+        title={fullscreenContent.title}
+      >
+        {fullscreenContent.content}
+      </FullscreenModal>
     </>
   );
 }
