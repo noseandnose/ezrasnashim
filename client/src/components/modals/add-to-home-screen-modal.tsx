@@ -33,12 +33,9 @@ export default function AddToHomeScreenModal({ isOpen, onClose }: AddToHomeScree
           <ol className="space-y-3 text-left">
             <li className="flex items-start space-x-3">
               <span className="flex-shrink-0 w-7 h-7 bg-gradient-feminine text-white rounded-full flex items-center justify-center text-sm font-semibold">1</span>
-              <div className="space-y-1">
+              <div className="flex items-center space-x-2">
                 <span className="text-warm-gray">Tap the <strong>Share</strong> button</span>
-                <div className="flex items-center space-x-2 bg-ivory p-2 rounded-lg">
-                  <Share className="w-4 h-4" />
-                  <span className="text-sm text-warm-gray/70">Located at the bottom of Safari</span>
-                </div>
+                <Share className="w-5 h-5 text-blush" />
               </div>
             </li>
             <li className="flex items-start space-x-3">
