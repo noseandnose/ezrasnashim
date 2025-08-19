@@ -192,6 +192,27 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
     refetchOnMount: 'always' // Always refetch when component mounts
   });
   
+  // Fetch current name for the perek - MUST be defined before useEffect hooks that use it
+  const { data: currentName, refetch: refetchCurrentName } = useQuery<TehillimName | null>({
+    queryFn: async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/current-name`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch current name');
+        }
+        return response.json();
+      } catch (error) {
+        // Failed to fetch current name
+        return null; // Return null as fallback
+      }
+    },
+    queryKey: ['/api/tehillim/current-name', progress?.currentPerek], // Include perek in key to force refetch
+    refetchInterval: 5000, // Refresh every 5 seconds
+    staleTime: 0, // Always consider stale to force refetch
+    gcTime: 10000, // Shorter cache time
+    enabled: !!progress?.currentPerek // Only fetch when we have progress
+  });
+  
   // Refetch progress when returning to this section or when modal opens/closes
   useEffect(() => {
     // Small delay to ensure any server updates have completed
@@ -265,26 +286,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
     staleTime: 60000
   });
 
-  // Fetch current name for the perek - refresh frequently to show updated names
-  const { data: currentName, refetch: refetchCurrentName } = useQuery<TehillimName | null>({
-    queryFn: async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/current-name`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch current name');
-        }
-        return response.json();
-      } catch (error) {
-        // Failed to fetch current name
-        return null; // Return null as fallback
-      }
-    },
-    queryKey: ['/api/tehillim/current-name', progress?.currentPerek], // Include perek in key to force refetch
-    refetchInterval: 5000, // Refresh every 5 seconds
-    staleTime: 0, // Always consider stale to force refetch
-    gcTime: 10000, // Shorter cache time
-    enabled: !!progress?.currentPerek // Only fetch when we have progress
-  });
+
 
   // Fetch all active names for count display
   const { data: allNames } = useQuery<TehillimName[]>({
