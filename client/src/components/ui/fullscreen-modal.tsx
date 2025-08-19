@@ -21,25 +21,27 @@ export function FullscreenModal({
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape') {
         onClose();
       }
     };
 
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      // Prevent body scroll when modal is open
-      const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-      
-      return () => {
-        document.removeEventListener('keydown', handleEscape);
-        document.body.style.overflow = originalOverflow;
-      };
-    }
+    // Prevent body scroll and add event listener
+    const originalOverflow = document.body.style.overflow;
+    const originalPosition = document.body.style.position;
+    
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.addEventListener('keydown', handleEscape);
 
     return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.position = originalPosition;
+      document.body.style.width = '';
       document.removeEventListener('keydown', handleEscape);
     };
   }, [isOpen, onClose]);
@@ -76,46 +78,49 @@ export function FullscreenModal({
 
   if (!isOpen) return null;
 
+  const handleCloseClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onClose();
+  };
+
   return (
     <div 
-      className="fixed inset-0 z-[100] bg-white"
+      className="fixed inset-0 bg-white"
+      style={{ zIndex: 9999 }}
     >
-      {/* Header - absolutely positioned at top */}
-      <div 
-        className="absolute top-0 left-0 right-0 bg-white border-b border-gray-200 px-4 py-3 z-10"
-      >
-        <div className="grid grid-cols-[40px_1fr_40px] items-center gap-3">
-          <img 
-            src={logoImage} 
-            alt="Ezras Nashim" 
-            className="h-5 w-auto"
-          />
-          <h2 className="text-lg font-semibold text-gray-900 truncate text-center">
-            {title}
-          </h2>
+      {/* Fixed Header */}
+      <header className="bg-white border-b border-gray-200 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 flex-1">
+            <img 
+              src={logoImage} 
+              alt="Ezras Nashim" 
+              className="h-5 w-auto"
+            />
+            <h1 className="text-lg font-semibold text-gray-900 truncate text-center flex-1">
+              {title}
+            </h1>
+          </div>
           <button
-            onClick={() => {
-              onClose();
-            }}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors justify-self-end"
-            aria-label="Close"
-            type="button"
+            onClick={handleCloseClick}
+            className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100 transition-colors"
+            aria-label="Close fullscreen"
           >
             <X className="h-5 w-5 text-gray-600" />
           </button>
         </div>
-      </div>
+      </header>
 
-      {/* Scrollable Content - with padding for header */}
-      <div 
-        className="absolute inset-0 pt-[60px] overflow-y-auto overflow-x-hidden"
+      {/* Scrollable Main Content */}
+      <main 
+        className="h-[calc(100vh-68px)] overflow-y-scroll overflow-x-hidden p-4"
+        style={{ WebkitOverflowScrolling: 'touch' }}
       >
-        <div className={`px-4 py-4 ${className}`}>
-          <div className="max-w-4xl mx-auto">
-            {children}
-          </div>
+        <div className={`max-w-4xl mx-auto ${className}`}>
+          {children}
         </div>
-      </div>
+      </main>
     </div>
   );
 }
