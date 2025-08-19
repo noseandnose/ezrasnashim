@@ -1810,7 +1810,7 @@ function SpecialTehillimModal() {
                 <button
                   key={psalm}
                   onClick={() => openTehillimText(psalm)}
-                  className={`w-12 h-12 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center flex-shrink-0 ${
+                  className={`w-11 h-11 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center flex-shrink-0 ${
                     isModalComplete(`individual-tehillim-${psalm}`)
                       ? 'bg-sage text-white'
                       : 'bg-gradient-feminine text-white'
