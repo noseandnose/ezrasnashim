@@ -53,7 +53,7 @@ function CommunityImpactButton() {
           </div>
           <div className="flex-grow">
             <h3 className="platypi-bold text-sm text-black mb-1">Community Impact</h3>
-            <p className="platypi-regular text-xs text-black/60">Check back for inspiring stories</p>
+            <p className="platypi-regular text-xs text-black/60">Check back for inspiring stories of where your Tzedaka went.</p>
           </div>
         </div>
       </div>
