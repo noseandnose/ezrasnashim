@@ -173,7 +173,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
       id: "sponsor-day",
       icon: Heart,
       title: "Sponsor a Day",
-      description: "Dedicate all Mitzvot done on the app - choose 1 day, 1 week, or 1 month",
+      description: "Dedicate all Mitzvas done on the app - choose 1 day, 1 week, or 1 month",
       color: "text-sage",
       bgColor: "bg-sage/10",
     },
@@ -284,7 +284,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             </div>
             <h3 className="platypi-bold text-xs text-black mb-1">Sponsor a Day</h3>
             <p className="platypi-regular text-xs text-black/60 leading-relaxed">
-              {isDonationCompleted('sponsor-day') ? 'Completed' : 'Dedicate all mitzvot'}
+              {isDonationCompleted('sponsor-day') ? 'Completed' : 'Dedicate all Mitzvas'}
             </p>
           </button>
 

@@ -107,7 +107,7 @@ export default function TzedakaModals() {
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg platypi-bold text-black">Sponsor a Day</DialogTitle>
           </div>
-          <p className="text-xs text-warm-gray/70 platypi-regular text-center mb-4">Dedicate all mitzvot done on the app for one day - $180</p>
+          <p className="text-xs text-warm-gray/70 platypi-regular text-center mb-4">Dedicate all Mitzvas done on the app for one day - $180</p>
           <div id="sponsor-day-description" className="sr-only">Daily sponsorship and dedication options</div>
           
           <div className="space-y-4">
