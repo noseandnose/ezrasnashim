@@ -266,13 +266,15 @@ function MorningBrochasModal({ setFullscreenContent }: { setFullscreenContent?: 
                       <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
                         {showHebrew && prayer.hebrewText && (
                           <div 
-                            className="vc-koren-hebrew leading-relaxed text-2xl"
+                            className="vc-koren-hebrew leading-relaxed"
+                            style={{ fontSize: `${fontSize + 1}px` }}
                             dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText, tefillaConditions) }}
                           />
                         )}
                         {!showHebrew && (
                           <div 
-                            className="koren-siddur-english text-left leading-relaxed text-black/70 text-xl"
+                            className="koren-siddur-english text-left leading-relaxed text-black/70"
+                            style={{ fontSize: `${fontSize}px` }}
                             dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
                           />
                         )}
@@ -861,7 +863,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                       <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
                         {prayer.hebrewText && language === 'hebrew' && (
                           <div 
-                            className="vc-koren-hebrew leading-relaxed text-2xl"
+                            className="vc-koren-hebrew leading-relaxed"
+                            style={{ fontSize: `${fontSize + 1}px` }}
                             dangerouslySetInnerHTML={{ 
                               __html: processTefillaContent(prayer.hebrewText, tefillaConditions)
                             }}
@@ -869,7 +872,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                         )}
                         {language === 'english' && (
                           <div 
-                            className="koren-siddur-english text-left leading-relaxed text-black/70 text-xl"
+                            className="koren-siddur-english text-left leading-relaxed text-black/70"
+                            style={{ fontSize: `${fontSize}px` }}
                             dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
                           />
                         )}
@@ -1132,8 +1136,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                   content: (
                     <div 
                       className={`leading-relaxed text-black ${
-                        nishmasLanguage === 'hebrew' ? 'vc-koren-hebrew text-2xl' : 'koren-siddur-english text-left text-xl'
+                        nishmasLanguage === 'hebrew' ? 'vc-koren-hebrew' : 'koren-siddur-english text-left'
                       }`}
+                      style={{ fontSize: nishmasLanguage === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
                     >
                       <div 
                         className="whitespace-pre-wrap leading-relaxed"
@@ -1329,13 +1334,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                       <div key={prayer.id} className="border-b border-warm-gray/10 pb-4 last:border-b-0">
                         {prayer.hebrewText && language === 'hebrew' && (
                           <div 
-                            className="vc-koren-hebrew leading-relaxed text-2xl"
+                            className="vc-koren-hebrew leading-relaxed"
+                            style={{ fontSize: `${fontSize + 1}px` }}
                             dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText, tefillaConditions).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
                           />
                         )}
                         {language === 'english' && (
                           <div 
-                            className="koren-siddur-english text-left leading-relaxed text-black/70 text-xl"
+                            className="koren-siddur-english text-left leading-relaxed text-black/70"
+                            style={{ fontSize: `${fontSize}px` }}
                             dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
                           />
                         )}
@@ -1886,7 +1893,8 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
               title: `Tehillim ${selectedPsalm}`,
               content: (
                 <div
-                  className={`${language === 'hebrew' ? 'vc-koren-hebrew' : 'koren-siddur-english text-left'} leading-relaxed text-black text-2xl`}
+                  className={`${language === 'hebrew' ? 'vc-koren-hebrew' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
+                  style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
                   dangerouslySetInnerHTML={{
                     __html: processTefillaContent(tehillimText?.text || '', tefillaConditions)
                   }}
