@@ -76,9 +76,25 @@ function cleanHebrewText(text: string): string {
       continue;
     }
     
+    // Keep Latin Extended-A characters (includes ĥ and other diacritical marks)
+    if (code >= 0x0100 && code <= 0x017F) {
+      result += char;
+      continue;
+    }
+    
+    // Keep Latin-1 Supplement characters (accented letters like é, ñ, etc.)
+    if (code >= 0x00C0 && code <= 0x00FF) {
+      result += char;
+      continue;
+    }
+    
     // Keep specific Latin extended characters that might be needed
-    if ((code >= 0x00A0 && code <= 0x00FF) && char === ' ') {
-      result += ' '; // Convert any extended space to regular space
+    if ((code >= 0x00A0 && code <= 0x00BF)) {
+      if (char === ' ' || code === 0x00A0) {
+        result += ' '; // Convert non-breaking space to regular space
+      } else {
+        result += char; // Keep other characters in this range
+      }
       continue;
     }
     
