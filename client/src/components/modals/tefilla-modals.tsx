@@ -514,30 +514,28 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   });
 
   // Fetch global Tehillim progress
-  const { data: progress } = useQuery<GlobalTehillimProgress>({
+  const { data: progress, refetch: refetchProgress } = useQuery<GlobalTehillimProgress>({
     queryKey: ['/api/tehillim/progress'], 
     queryFn: async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress?t=${Date.now()}`);
       const data = await response.json();
       return data;
     },
-    refetchInterval: 1000, // Very frequent refresh
     enabled: activeModal === 'tehillim-text',
     staleTime: 0, // Always consider stale
     gcTime: 0 // Don't cache at all
   });
 
   // Fetch current name for the perek
-  const { data: currentName } = useQuery<TehillimName | null>({
+  const { data: currentName, refetch: refetchCurrentName } = useQuery<TehillimName | null>({
     queryKey: ['/api/tehillim/current-name'],
-    refetchInterval: 2000, // Very frequent refresh for real-time updates
     enabled: activeModal === 'tehillim-text',
     staleTime: 0, // Always consider stale
     gcTime: 0 // Don't cache at all
   });
 
   // Get the tehillim info first to get the English number
-  const { data: tehillimInfo } = useQuery<{
+  const { data: tehillimInfo, refetch: refetchTehillimInfo } = useQuery<{
     id: number;
     englishNumber: number;
     partNumber: number;
@@ -551,7 +549,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       return response.json();
     },
     enabled: activeModal === 'tehillim-text' && !!progress?.currentPerek,
-    staleTime: 60000
+    staleTime: 0
   });
 
   // Fetch Tehillim text from Supabase using ID (for proper part handling)
@@ -563,9 +561,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       return response.data;
     },
     enabled: activeModal === 'tehillim-text' && !!progress?.currentPerek,
-    refetchInterval: 2000, // Very frequent refresh to get new perek text
-    staleTime: 0, // Always consider data stale to force fresh fetches
-    gcTime: 0 // Don't cache at all
+    staleTime: 0 // Always consider data stale to force fresh fetches
   });
 
   // Store closeModal reference to ensure it's available in mutation callbacks
@@ -584,7 +580,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         completedBy: 'user' 
       });
     },
-    onSuccess: () => {
+    onSuccess: async (response) => {
       // Track tehillim completion
       trackEvent("tehillim_complete", { 
         perek: progress?.currentPerek,
@@ -606,23 +602,18 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           ? `Perek ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber} has been completed. Moving to the next section.`
           : `Perek ${tehillimInfo?.englishNumber || 'current'} has been completed. Moving to the next perek.`,
       });
-      // Force complete cache reset for Tehillim data in both modal and section
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/text'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/preview'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/info'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/text/by-id'] });
       
-      // Wait a moment for the server update to complete, then close modal
-      setTimeout(() => {
-        // Force refetch all tehillim queries after modal closes
-        queryClient.refetchQueries({ queryKey: ['/api/tehillim/progress'] });
-        queryClient.refetchQueries({ queryKey: ['/api/tehillim/info'] });
-        queryClient.refetchQueries({ queryKey: ['/api/tehillim/preview'] });
-        queryClient.refetchQueries({ queryKey: ['/api/tehillim/current-name'] });
-        closeModalRef.current();
-      }, 500);
+      // Immediately refetch all data to show the new perek
+      await Promise.all([
+        refetchProgress(),
+        refetchCurrentName(),
+        refetchTehillimInfo(),
+        refetchTehillimText()
+      ]);
+      
+      // Also invalidate queries for other components
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/preview'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/text'] });
     },
     onError: () => {
       toast({
