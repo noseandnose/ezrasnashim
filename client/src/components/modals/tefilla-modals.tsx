@@ -608,7 +608,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/info'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/text/by-id'] });
       
-      // Wait a moment for the server update to complete, then close modal
+      // Wait a moment for the server update to complete, then close modal and redirect home
       setTimeout(() => {
         // Force refetch all tehillim queries after modal closes
         queryClient.refetchQueries({ queryKey: ['/api/tehillim/progress'] });
@@ -616,6 +616,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         queryClient.refetchQueries({ queryKey: ['/api/tehillim/preview'] });
         queryClient.refetchQueries({ queryKey: ['/api/tehillim/current-name'] });
         closeModal();
+        window.location.hash = '#/?section=home&scrollToProgress=true';
       }, 500);
     },
     onError: () => {
@@ -1999,8 +2000,8 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
           setTimeout(() => {
             setShowHeartExplosion(false); // Reset explosion state
             checkAndShowCongratulations();
-            // Switch back to the main Tehillim selection modal without closing
-            openModal('special-tehillim', 'tefilla');
+            closeModal();
+            window.location.hash = '#/?section=home&scrollToProgress=true';
           }, 2000);
         }}
         disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
@@ -2127,16 +2128,21 @@ function JerusalemCompass() {
       const handleOrientation = (event: DeviceOrientationEvent) => {
         // Get compass heading (alpha gives us the rotation around z-axis)
         if (event.alpha !== null) {
-          // For a proper compass, we need to invert alpha
-          // as alpha increases when rotating clockwise, but compass degrees increase counter-clockwise
-          let heading = 360 - event.alpha;
+          let heading: number;
           
           // Use webkitCompassHeading if available (iOS)
           if ((event as any).webkitCompassHeading !== undefined && (event as any).webkitCompassHeading !== null) {
             heading = (event as any).webkitCompassHeading;
+          } else if (event.absolute) {
+            // For Android devices with absolute orientation
+            heading = event.alpha;
+          } else {
+            // For Android devices without absolute orientation
+            // Alpha is relative to initial device orientation, not true north
+            heading = (360 - event.alpha) % 360;
           }
           
-          setDeviceOrientation(heading % 360);
+          setDeviceOrientation(heading);
         }
       };
 
