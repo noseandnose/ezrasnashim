@@ -568,6 +568,12 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     gcTime: 0 // Don't cache at all
   });
 
+  // Store closeModal reference to ensure it's available in mutation callbacks
+  const closeModalRef = useRef(closeModal);
+  useEffect(() => {
+    closeModalRef.current = closeModal;
+  }, [closeModal]);
+
   // Mutation to complete a perek
   const completePerekMutation = useMutation({
     mutationFn: async () => {
@@ -615,7 +621,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         queryClient.refetchQueries({ queryKey: ['/api/tehillim/info'] });
         queryClient.refetchQueries({ queryKey: ['/api/tehillim/preview'] });
         queryClient.refetchQueries({ queryKey: ['/api/tehillim/current-name'] });
-        closeModal();
+        closeModalRef.current();
       }, 500);
     },
     onError: () => {
