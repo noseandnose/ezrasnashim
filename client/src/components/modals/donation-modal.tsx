@@ -43,16 +43,16 @@ export default function DonationModal() {
 
   const createPaymentMutation = useMutation({
     mutationFn: async (donationAmount: number) => {
-      const response = await apiRequest('POST', '/api/create-payment-intent', {
-        amount: donationAmount
-      });
-      return response.data;
+      // const response = await apiRequest('POST', '/api/create-payment-intent', {
+      //   amount: donationAmount
+      // });
+      // return response.data;
     },
     onSuccess: (data) => {
       // Don't track completion or mark task complete here - only after successful payment
       closeModal();
       
-      if (data.clientSecret) {
+      // if (data.clientSecret) {
         // Navigate to donation page with amount and type
         const params = new URLSearchParams({
           amount: (isCustom ? customAmount : amount),
@@ -61,7 +61,7 @@ export default function DonationModal() {
           dedication: ""
         });
         setLocation(`/donate?${params.toString()}`);
-      }
+      // }
     },
     onError: (error) => {
       toast({

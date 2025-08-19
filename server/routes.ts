@@ -1600,76 +1600,139 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Stripe payment route for donations
-  app.post("/api/create-payment-intent", async (req, res) => {
+  app.post("/api/create-session-checkout", async (req, res) => {
     try {
-      const { amount, donationType, metadata, email } = req.body;
+      const { amount, donationType, metadata } = req.body;
       
-      console.log('=== PAYMENT INTENT REQUEST ===');
-      console.log('Request body:', { amount, donationType, metadata });
-      console.log('Stripe key exists:', !!process.env.STRIPE_SECRET_KEY);
-      console.log('Stripe key starts with sk_:', process.env.STRIPE_SECRET_KEY?.startsWith('sk_'));
+      // console.log('=== PAYMENT INTENT REQUEST ===');
+      // console.log('Request body:', { amount, donationType, metadata });
+      // console.log('Stripe key exists:', !!process.env.STRIPE_SECRET_KEY);
+      // console.log('Stripe key starts with sk_:', process.env.STRIPE_SECRET_KEY?.startsWith('sk_'));
       
-      if (!amount || amount <= 0) {
-        console.log('Invalid amount provided:', amount);
-        return res.status(400).json({ message: "Invalid amount" });
-      }
+      // if (!amount || amount <= 0) {
+      //   console.log('Invalid amount provided:', amount);
+      //   return res.status(400).json({ message: "Invalid amount" });
+      // }
 
-      if (!process.env.STRIPE_SECRET_KEY) {
-        console.error('STRIPE_SECRET_KEY not found in environment');
-        return res.status(500).json({ message: "Stripe not configured" });
-      }
+      // if (!process.env.STRIPE_SECRET_KEY) {
+      //   console.error('STRIPE_SECRET_KEY not found in environment');
+      //   return res.status(500).json({ message: "Stripe not configured" });
+      // }
 
-      console.log('Creating payment intent with:', { 
-        amount, 
-        donationType, 
-        metadata,
-        stripeConfigured: !!process.env.STRIPE_SECRET_KEY
-      });
+      // console.log('Creating payment intent with:', { 
+      //   amount, 
+      //   donationType, 
+      //   metadata,
+      //   stripeConfigured: !!process.env.STRIPE_SECRET_KEY
+      // });
       
-      const paymentIntentData: any = {
-        amount: Math.round(amount * 100), // Convert to cents
-        currency: "usd",
-        metadata: {
-          source: "ezras-nashim-donation",
-          donationType: donationType || "General Donation",
-          sponsorName: metadata?.sponsorName || "",
-          dedication: metadata?.dedication || "",
-          email: email || metadata?.email || "",
-          timestamp: new Date().toISOString()
+      // const paymentIntentData: any = {
+      //   amount: Math.round(amount * 100), // Convert to cents
+      //   currency: "usd",
+      //   metadata: {
+      //     source: "ezras-nashim-donation",
+      //     donationType: donationType || "General Donation",
+      //     sponsorName: metadata?.sponsorName || "",
+      //     dedication: metadata?.dedication || "",
+      //     email: email || metadata?.email || "",
+      //     timestamp: new Date().toISOString()
+      //   },
+      //   // Enable automatic payment methods including Apple Pay and Google Pay
+      //   automatic_payment_methods: {
+      //     enabled: true,
+      //     allow_redirects: 'never' as const // Keep on same page for better UX
+      //   }
+      // };
+      
+      // // Add receipt_email if provided - this will trigger Stripe to send receipts
+      // const receiptEmail = email || metadata?.email;
+      // if (receiptEmail && receiptEmail.includes('@')) {
+      //   paymentIntentData.receipt_email = receiptEmail;
+      //   console.log('Receipt email will be sent to:', receiptEmail);
+      // }
+      
+      // console.log('Payment intent configuration:', paymentIntentData);
+      
+      // const paymentIntent = await stripe.paymentIntents.create(paymentIntentData);
+      
+      // console.log('Payment intent created successfully:', {
+      //   id: paymentIntent.id,
+      //   status: paymentIntent.status,
+      //   amount: paymentIntent.amount,
+      //   client_secret_exists: !!paymentIntent.client_secret
+      // });
+      
+      // // Track the donation attempt in our database
+      // try {
+      //   await storage.createDonation({
+      //     stripePaymentIntentId: paymentIntent.id,
+      //     amount: paymentIntent.amount, // Already in cents
+      //     donationType: donationType || "General Donation",
+      //     sponsorName: metadata?.sponsorName,
+      //     dedication: metadata?.dedication,
+      //     email: receiptEmail,
+      //     status: 'pending'
+      //   });
+      //   console.log('Donation tracked in database:', paymentIntent.id);
+      // } catch (dbError) {
+      //   console.error('Error saving donation to database:', dbError);
+      //   // Continue even if database save fails
+      // }
+
+      const returnUrl = req.body.returnUrl;
+      const session = await stripe.checkout.sessions.create({
+        currency: 'usd',
+        line_items: [{
+          quantity: 1,
+          price_data: {
+            currency: 'usd',
+            unit_amount_decimal: Math.round(parseFloat(amount) * 100).toString(),
+            product_data: {
+              name: "Ezras Nashim Donation",
+            }
+          }
+        }],
+        ui_mode: 'custom',
+        mode: 'payment',
+        return_url: returnUrl,
+        payment_intent_data: {
+          description: 'Just One Chesed Inc.\nEIN: 47-5615860\nNo tangible benefits were received from this donation.',
+          metadata: {
+            source: "ezras-nashim-donation",
+            donationType:  donationType || "Ezras Nashim Donation",
+            sponsorName:  metadata?.sponsorName || "",
+            dedication: metadata?.dedication || "",
+            timestamp: new Date().toISOString(),
+          },
         },
-        // Enable automatic payment methods including Apple Pay and Google Pay
-        automatic_payment_methods: {
-          enabled: true,
-          allow_redirects: 'never' as const // Keep on same page for better UX
-        }
-      };
-      
-      // Add receipt_email if provided - this will trigger Stripe to send receipts
-      const receiptEmail = email || metadata?.email;
-      if (receiptEmail && receiptEmail.includes('@')) {
-        paymentIntentData.receipt_email = receiptEmail;
-        console.log('Receipt email will be sent to:', receiptEmail);
-      }
-      
-      console.log('Payment intent configuration:', paymentIntentData);
-      
-      const paymentIntent = await stripe.paymentIntents.create(paymentIntentData);
-      
-      console.log('Payment intent created successfully:', {
-        id: paymentIntent.id,
-        status: paymentIntent.status,
-        amount: paymentIntent.amount,
-        client_secret_exists: !!paymentIntent.client_secret
+        invoice_creation: {
+          enabled: false,
+          invoice_data: {
+            description: 'Just One Chesed Inc.\nEIN: 47-5615860\nNo tangible benefits were received from this donation.',
+          },
+        },
       });
-      
-      // Don't create donation record here - only after successful payment
-      // This prevents incomplete donations from being stored in the database
-      console.log('Payment intent created:', paymentIntent.id);
 
+      // Track the donation attempt in our database
+      try {
+        await storage.createDonation({
+          stripePaymentIntentId: session.id,
+          amount: amount, // Already in cents
+          donationType: donationType || "General Donation",
+          sponsorName: metadata?.sponsorName,
+          dedication: metadata?.dedication,
+          status: 'pending'
+        });
+        console.log('Donation tracked in database:', session.id);
+      } catch (dbError) {
+        console.error('Error saving donation to database:', dbError);
+        // Continue even if database save fails
+      }
+
+      console.log('Session created successfully:', session.id)
       res.json({ 
-        clientSecret: paymentIntent.client_secret,
+        sessionId: session.id,
         amount: amount,
-        paymentIntentId: paymentIntent.id
       });
     } catch (error: any) {
       console.error('Stripe payment intent creation failed:', {

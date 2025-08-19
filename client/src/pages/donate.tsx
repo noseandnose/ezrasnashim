@@ -11,6 +11,7 @@ import { useLocation } from "wouter";
 import { useDailyCompletionStore, useModalStore, useDonationCompletionStore } from "@/lib/types";
 import { playCoinSound } from "@/utils/sounds";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
+import Stripe from 'stripe';
 // Removed Apple Pay button import - now using integrated PaymentElement
 
 // Add Apple Pay types
@@ -33,8 +34,10 @@ interface DonationFormProps {
   donationType: string;
   sponsorName: string;
   dedication: string;
+  clientSecret: string;
   onSuccess: () => void;
 }
+
 
 const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess }: DonationFormProps) => {
   const stripe = useStripe();
@@ -46,6 +49,7 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
   const { addCompletedDonation } = useDonationCompletionStore();
   const { openModal } = useModalStore();
   const { trackModalComplete } = useTrackModalComplete();
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -464,7 +468,7 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
 
 export default function Donate() {
   const [, setLocation] = useLocation();
-  const [clientSecret, setClientSecret] = useState("");
+  //const [clientSecret, setClientSecret] = useState("");
   const [donationComplete, setDonationComplete] = useState(false);
   const [userEmailForReceipt, setUserEmailForReceipt] = useState("");
   const { toast } = useToast();
@@ -479,15 +483,12 @@ export default function Donate() {
   const donationType = urlParams.get('type') || 'General Donation';
   const sponsorName = urlParams.get('sponsor') || '';
   const dedication = urlParams.get('dedication') || '';
-  const emailFromUrl = urlParams.get('email') || '';
+  //const emailFromUrl = urlParams.get('email') || '';
 
   useEffect(() => {
     // Check if returning from successful payment
     if (isSuccess) {
       setDonationComplete(true);
-      setUserEmailForReceipt(emailFromUrl);
-      // Clean the URL
-      window.history.replaceState({}, '', '/donate');
       return;
     }
 
@@ -496,23 +497,24 @@ export default function Donate() {
       return;
     }
 
-    // Use ref to ensure payment intent is only created once
-    if (paymentIntentCreatedRef.current || clientSecret) {
-      console.log('Payment intent already created or in progress, skipping...');
-      return;
-    }
+    // // Use ref to ensure payment intent is only created once
+    // if (paymentIntentCreatedRef.current || clientSecret) {
+    //   console.log('Payment intent already created or in progress, skipping...');
+    //   return;
+    // }
 
-    // Mark as created immediately using ref
-    paymentIntentCreatedRef.current = true;
+    // // Mark as created immediately using ref
+    // paymentIntentCreatedRef.current = true;
 
     // Create PaymentIntent when component loads
-    console.log('=== PAYMENT INTENT CREATION (SINGLE INSTANCE) ===');
-    console.log('Amount:', amount);
-    console.log('Donation type:', donationType);
-    console.log('Sponsor name:', sponsorName);
-    console.log('Dedication:', dedication);
+    // console.log('=== PAYMENT INTENT CREATION (SINGLE INSTANCE) ===');
+    // console.log('Amount:', amount);
+    // console.log('Donation type:', donationType);
+    // console.log('Sponsor name:', sponsorName);
+    // console.log('Dedication:', dedication);
 
-    apiRequest("POST", "/api/create-payment-intent", {
+    // console.log('Creating session checkout with data: ', amount, donationType, sponsorName, dedication);
+    apiRequest("POST", "/api/create-session-checkout", {
       amount,
       donationType,
       metadata: {
@@ -520,23 +522,29 @@ export default function Donate() {
         dedication,
         timestamp: new Date().toISOString()
       },
+      returnUrl: `${window.location.origin}/donate?success=true&amount=${amount}&type=${donationType}&sponsor=${sponsorName}&dedication=${dedication}`,
       email: "" // Will be filled by user in the form
     })
-      .then((response) => {
-        console.log('Payment intent response:', response);
-        const data = response.data;
-        console.log('Payment intent data:', data);
-        
-        if (data.clientSecret) {
-          console.log('Client secret received successfully');
-          setClientSecret(data.clientSecret);
-        } else {
-          console.error('No client secret in response:', data);
-          throw new Error('No client secret received');
-        }
+      .then(async (response) => {
+        const stripe = await stripePromise;
+        const sessionId = response.data.sessionId;
+        console.log('Redirecting to Stripe Checkout with session ID:', sessionId);
+        return stripe && stripe.redirectToCheckout({ sessionId: sessionId });
+        // console.log('Payment intent response:', response);
+        // const data = response.data;
+        // console.log('Payment intent data:', data);
+        // const decoded = decodeURIComponent(data.id);
+        // setClientSecret(decoded);
+        // if (data.clientSecret) {
+        //   console.log('Client secret received successfully');
+        //   setClientSecret(decodeURIComponent(data.id));
+        // } else {
+        //   console.error('No client secret in response:', data);
+        //   throw new Error('No client secret received');
+        // }
       })
       .catch((error) => {
-        console.error('Error creating payment intent:', error);
+        console.error('Error creating session:', error);
         console.error('Error details:', {
           message: error.message,
           response: error.response?.data,
@@ -601,26 +609,26 @@ export default function Donate() {
             >
               Return to Ezras Nashim
             </Button>
-            <Button
-              onClick={() => window.location.reload()}
+            {/* <Button
+              onClick={() => setLocation('/donate')}
               variant="outline"
               className="w-full py-3"
             >
               Make Another Donation
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>
     );
   }
 
-  if (!clientSecret) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blush/10 to-peach/10 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-blush border-t-transparent rounded-full" />
-      </div>
-    );
-  }
+  // if (!clientSecret) {
+  //   return (
+  //     <div className="min-h-screen bg-gradient-to-br from-blush/10 to-peach/10 flex items-center justify-center">
+  //       <div className="animate-spin w-8 h-8 border-4 border-blush border-t-transparent rounded-full" />
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blush/10 to-peach/10 p-4">
@@ -637,11 +645,11 @@ export default function Donate() {
           <h1 className="text-xl font-bold">Complete Donation</h1>
         </div>
 
-        <div className="bg-white rounded-3xl p-6 shadow-lg">
+        {/* <div className="bg-white rounded-3xl p-6 shadow-lg">
           <Elements 
             stripe={stripePromise} 
-            options={{ 
-              clientSecret,
+            options={{
+              clientSecret: clientSecret,
               appearance: {
                 theme: 'stripe',
                 variables: {
@@ -658,7 +666,7 @@ export default function Donate() {
               onSuccess={handleSuccess}
             />
           </Elements>
-        </div>
+        </div> */}
       </div>
     </div>
   );
