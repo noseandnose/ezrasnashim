@@ -2031,6 +2031,10 @@ function JerusalemCompass() {
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [orientationSupported, setOrientationSupported] = useState(true);
+  const [permissionRequested, setPermissionRequested] = useState(false);
+  const [isCalibrated, setIsCalibrated] = useState(false);
+  const [magneticDeclination, setMagneticDeclination] = useState(0);
+  const orientationEventRef = useRef<((event: DeviceOrientationEvent) => void) | null>(null);
 
   // Kotel coordinates - verified accurate location
   const WESTERN_WALL_LAT = 31.7781;
@@ -2077,6 +2081,10 @@ function JerusalemCompass() {
         const bearing = calculateBearing(userLat, userLng, WESTERN_WALL_LAT, WESTERN_WALL_LNG);
         setDirection(bearing);
 
+        // Calculate approximate magnetic declination (simplified)
+        // For more accuracy, would need a magnetic declination API
+        const declinationAngle = getMagneticDeclination(userLat, userLng);
+        setMagneticDeclination(declinationAngle);
         
         // Get location name using reverse geocoding
         try {
@@ -2105,6 +2113,25 @@ function JerusalemCompass() {
     );
   };
 
+  // Simplified magnetic declination calculation
+  const getMagneticDeclination = (lat: number, lng: number): number => {
+    // This is a very simplified approximation
+    // For Israel/Middle East region, magnetic declination is approximately 4-5 degrees east
+    if (lat >= 29 && lat <= 34 && lng >= 34 && lng <= 36) {
+      return 4.5; // Israel region
+    }
+    // For US East Coast
+    if (lat >= 25 && lat <= 50 && lng >= -85 && lng <= -65) {
+      return -10; // Negative means west declination
+    }
+    // For US West Coast
+    if (lat >= 30 && lat <= 50 && lng >= -125 && lng <= -110) {
+      return 12; // Positive means east declination
+    }
+    // Default to 0 for other regions (would need proper API for accuracy)
+    return 0;
+  };
+
   // Get cardinal direction
   const getCardinalDirection = (bearing: number): string => {
     const directions = [
@@ -2115,6 +2142,78 @@ function JerusalemCompass() {
     return directions[index];
   };
 
+  // Request orientation permission (for iOS 13+)
+  const requestOrientationPermission = async () => {
+    if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
+      try {
+        const response = await (DeviceOrientationEvent as any).requestPermission();
+        if (response === 'granted') {
+          setPermissionRequested(true);
+          initializeOrientation();
+        } else {
+          setOrientationSupported(false);
+          setError("Please enable motion sensors in your device settings");
+        }
+      } catch (error) {
+        setOrientationSupported(false);
+        setError("Unable to access motion sensors");
+      }
+    } else {
+      // Not iOS 13+, proceed directly
+      setPermissionRequested(true);
+      initializeOrientation();
+    }
+  };
+
+  // Initialize device orientation
+  const initializeOrientation = () => {
+    const handleOrientation = (event: DeviceOrientationEvent) => {
+      if (event.absolute === false && !isCalibrated) {
+        setIsCalibrated(false);
+      } else {
+        setIsCalibrated(true);
+      }
+
+      let heading = 0;
+      
+      // iOS devices with webkitCompassHeading
+      if ((event as any).webkitCompassHeading !== undefined && (event as any).webkitCompassHeading !== null) {
+        heading = (event as any).webkitCompassHeading;
+      }
+      // Android and other devices using alpha
+      else if (event.alpha !== null) {
+        // Different handling for different browsers/devices
+        const userAgent = navigator.userAgent.toLowerCase();
+        
+        if (userAgent.includes('android')) {
+          // Android Chrome/WebView
+          heading = (360 - event.alpha + magneticDeclination) % 360;
+        } else if (userAgent.includes('firefox')) {
+          // Firefox has different orientation
+          heading = event.alpha;
+        } else {
+          // Default for other browsers
+          heading = (360 - event.alpha) % 360;
+        }
+      } else {
+        setOrientationSupported(false);
+        return;
+      }
+      
+      setDeviceOrientation(heading);
+    };
+
+    orientationEventRef.current = handleOrientation;
+    
+    // Add event listeners
+    window.addEventListener('deviceorientation', handleOrientation);
+    
+    // Also listen for absolute orientation if available
+    if ('ondeviceorientationabsolute' in window) {
+      window.addEventListener('deviceorientationabsolute', handleOrientation as any);
+    }
+  };
+
   // Handle device orientation
   useEffect(() => {
     if (activeModal !== 'jerusalem-compass') return;
@@ -2123,46 +2222,27 @@ function JerusalemCompass() {
 
     // Check if device orientation is supported
     if (typeof DeviceOrientationEvent !== 'undefined') {
-      const handleOrientation = (event: DeviceOrientationEvent) => {
-        // Get compass heading (alpha gives us the rotation around z-axis)
-        if (event.alpha !== null) {
-          // For a proper compass, we need to invert alpha
-          // as alpha increases when rotating clockwise, but compass degrees increase counter-clockwise
-          let heading = 360 - event.alpha;
-          
-          // Use webkitCompassHeading if available (iOS)
-          if ((event as any).webkitCompassHeading !== undefined && (event as any).webkitCompassHeading !== null) {
-            heading = (event as any).webkitCompassHeading;
-          }
-          
-          setDeviceOrientation(heading % 360);
-        }
-      };
-
-      // Request permission for iOS 13+
-      if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
-        (DeviceOrientationEvent as any).requestPermission()
-          .then((response: string) => {
-            if (response === 'granted') {
-              window.addEventListener('deviceorientation', handleOrientation);
-            } else {
-              setOrientationSupported(false);
-            }
-          })
-          .catch(() => setOrientationSupported(false));
+      // For iOS 13+, we need user interaction to request permission
+      // This will be handled by a button click
+      if (typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested) {
+        // Don't auto-request, wait for user interaction
+        setOrientationSupported(true);
       } else {
-        // For non-iOS devices
-        window.addEventListener('deviceorientation', handleOrientation);
+        // For non-iOS devices or already permitted
+        requestOrientationPermission();
       }
-
-      // Cleanup
-      return () => {
-        window.removeEventListener('deviceorientation', handleOrientation);
-      };
     } else {
       setOrientationSupported(false);
     }
-  }, [activeModal]);
+
+    // Cleanup
+    return () => {
+      if (orientationEventRef.current) {
+        window.removeEventListener('deviceorientation', orientationEventRef.current);
+        window.removeEventListener('deviceorientationabsolute', orientationEventRef.current as any);
+      }
+    };
+  }, [activeModal, magneticDeclination]);
 
   if (activeModal !== 'jerusalem-compass') return null;
 
@@ -2183,6 +2263,21 @@ function JerusalemCompass() {
               Find the direction to face when praying towards the Kotel
             </p>
           </div>
+
+          {/* iOS Permission Request */}
+          {typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested && !isLoading && (
+            <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200 mb-4">
+              <p className="platypi-regular text-sm text-black mb-3">
+                To use the compass on iOS, we need your permission to access motion sensors.
+              </p>
+              <Button
+                onClick={requestOrientationPermission}
+                className="w-full bg-gradient-feminine text-white py-2 rounded-xl platypi-medium"
+              >
+                Enable Compass
+              </Button>
+            </div>
+          )}
 
           {/* Location Status */}
           {isLoading ? (
@@ -2305,6 +2400,18 @@ function JerusalemCompass() {
                 })()}
               </div>
 
+              {/* Calibration Warning */}
+              {orientationSupported && !isCalibrated && (
+                <div className="bg-yellow-50 rounded-2xl p-3 border border-yellow-200 mb-3">
+                  <p className="platypi-medium text-xs text-yellow-800 mb-2">
+                    Compass needs calibration
+                  </p>
+                  <p className="platypi-regular text-xs text-yellow-700">
+                    Move your device in a figure-8 pattern to calibrate the compass sensor.
+                  </p>
+                </div>
+              )}
+
               {/* Alignment Status */}
               {orientationSupported && (() => {
                 // For alignment, we need to check if the user (facing north when arrow points up)
@@ -2317,8 +2424,6 @@ function JerusalemCompass() {
                 }
                 const isAligned = angleDiff < 10;
                 
-
-                
                 return (
                   <div className={`rounded-2xl p-3 border text-center ${
                     isAligned ? 'bg-sage/20 border-sage' : 'bg-blue-50 border-blue-200'
@@ -2327,7 +2432,7 @@ function JerusalemCompass() {
                       isAligned ? 'text-black' : 'text-blue-800'
                     }`}>
                       {isAligned
-                        ? '✓ Aligned!' 
+                        ? '✓ Aligned with the Kotel!' 
                         : 'Turn until the wall icon is at the top'
                       }
                     </p>
@@ -2339,7 +2444,7 @@ function JerusalemCompass() {
               {!orientationSupported && (
                 <div className="bg-yellow-50 rounded-2xl p-3 border border-yellow-200">
                   <p className="platypi-regular text-xs text-yellow-800">
-                    Device orientation not available. Face the direction where the wall icon appears on the circle.
+                    Compass not available on this device. The wall icon shows the direction to face for prayer.
                   </p>
                 </div>
               )}
@@ -2385,10 +2490,25 @@ function JerusalemCompass() {
             <h4 className="platypi-bold text-sm text-black mb-2">How to Use:</h4>
             <ol className="platypi-regular text-xs text-black/70 space-y-1">
               <li>1. Allow location access when prompted</li>
-              <li>2. {orientationSupported ? 'Hold device upright and turn your body' : 'Face the direction where the wall icon appears on the circle'}</li>
-              <li>3. {orientationSupported ? 'The blue "YOU" arrow moves as you turn' : 'The wall icon shows the prayer direction'}</li>
-              <li>4. {orientationSupported ? 'When the blue arrow points directly to the wall icon, you\'re aligned' : 'Face toward the wall icon for prayer'}</li>
+              {typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested && (
+                <li>2. Tap "Enable Compass" button above for iOS</li>
+              )}
+              <li>{typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested ? '3' : '2'}. {orientationSupported ? 'Hold device upright and turn your body' : 'Look at the compass to find the Kotel direction'}</li>
+              <li>{typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested ? '4' : '3'}. {orientationSupported ? 'The "YOU" arrow stays fixed while compass rotates' : 'The pink dot shows the Kotel direction'}</li>
+              <li>{typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested ? '5' : '4'}. {orientationSupported ? 'Align the pink Kotel marker with the "YOU" arrow' : 'Face the direction of the pink dot to pray'}</li>
             </ol>
+            
+            {/* Device-specific tips */}
+            <div className="mt-3 pt-3 border-t border-blue-200">
+              <p className="platypi-medium text-xs text-black mb-1">Tips:</p>
+              <ul className="platypi-regular text-xs text-black/60 space-y-1">
+                <li>• Keep device away from metal objects</li>
+                <li>• Works best outdoors or near windows</li>
+                {!isCalibrated && orientationSupported && (
+                  <li>• Move device in figure-8 to calibrate</li>
+                )}
+              </ul>
+            </div>
           </div>
         </div>
 
