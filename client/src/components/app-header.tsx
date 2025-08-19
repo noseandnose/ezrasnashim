@@ -59,19 +59,14 @@ export default function AppHeader() {
     <>
       <header className="bg-gradient-soft p-3 border-0 shadow-none">
         <div className="flex items-center justify-between px-2">
-        <button
-          onClick={() => openModal('about', 'about')}
-          className="p-2 rounded-full hover:bg-white/50 transition-colors"
-          aria-label="About Ezras Nashim"
-        >
-          <Info className="h-5 w-5 text-blush" />
-        </button>
-        <div className="flex items-center gap-2">
-          <img 
-            src={logoImage} 
-            alt="Ezras Nashim" 
-            className="h-7 w-auto"
-          />
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => openModal('about', 'about')}
+            className="p-2 rounded-full hover:bg-white/50 transition-colors"
+            aria-label="About Ezras Nashim"
+          >
+            <Info className="h-5 w-5 text-blush" />
+          </button>
           <button
             onClick={handleOpenMessage}
             className="p-2 rounded-full hover:bg-white/50 transition-colors relative"
@@ -83,6 +78,11 @@ export default function AppHeader() {
             )}
           </button>
         </div>
+        <img 
+          src={logoImage} 
+          alt="Ezras Nashim" 
+          className="h-7 w-auto"
+        />
         <div className="flex items-center space-x-1">
           <button
             onClick={() => setShowAddToHomeScreen(true)}
