@@ -218,7 +218,7 @@ const StandardModalHeader = ({
 );
 
 // Morning Brochas Modal Component
-function MorningBrochasModal() {
+function MorningBrochasModal({ setFullscreenContent }: { setFullscreenContent?: (content: any) => void }) {
   const { activeModal, closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
@@ -254,38 +254,40 @@ function MorningBrochasModal() {
         <div id="morning-brochas-description" className="sr-only">Daily morning blessings and prayers of gratitude</div>
         
         {/* Fullscreen button */}
-        <button
-          onClick={() => {
-            setFullscreenContent({
-              isOpen: true,
-              title: 'Morning Brochas',
-              content: (
-                <div className="space-y-6">
-                  {morningPrayers?.map((prayer: MorningPrayer) => (
-                    <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
-                      {showHebrew && prayer.hebrewText && (
-                        <div 
-                          className="vc-koren-hebrew leading-relaxed text-2xl"
-                          dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText, tefillaConditions) }}
-                        />
-                      )}
-                      {!showHebrew && (
-                        <div 
-                          className="koren-siddur-english text-left leading-relaxed text-black/70 text-xl"
-                          dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )
-            });
-          }}
-          className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 transition-colors z-10"
-          aria-label="Open fullscreen"
-        >
-          <Expand className="h-4 w-4 text-gray-600" />
-        </button>
+        {setFullscreenContent && (
+          <button
+            onClick={() => {
+              setFullscreenContent({
+                isOpen: true,
+                title: 'Morning Brochas',
+                content: (
+                  <div className="space-y-6">
+                    {morningPrayers?.map((prayer: MorningPrayer) => (
+                      <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
+                        {showHebrew && prayer.hebrewText && (
+                          <div 
+                            className="vc-koren-hebrew leading-relaxed text-2xl"
+                            dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText, tefillaConditions) }}
+                          />
+                        )}
+                        {!showHebrew && (
+                          <div 
+                            className="koren-siddur-english text-left leading-relaxed text-black/70 text-xl"
+                            dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )
+              });
+            }}
+            className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 transition-colors z-10"
+            aria-label="Open fullscreen"
+          >
+            <Expand className="h-4 w-4 text-gray-600" />
+          </button>
+        )}
         
         {/* Standardized Header with centered controls */}
         <div className="mb-2 space-y-2">
@@ -1406,7 +1408,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       </Dialog>
 
       {/* Morning Brochas Modal */}
-      <MorningBrochasModal />
+      <MorningBrochasModal setFullscreenContent={setFullscreenContent} />
       
       {/* Birkat Hamazon Modal */}
       <BirkatHamazonModal />
