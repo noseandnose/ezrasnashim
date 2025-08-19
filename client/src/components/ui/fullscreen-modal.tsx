@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Minimize2, Maximize2 } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import logoImage from "@assets/1LO_1755590090315.png";
@@ -84,55 +85,94 @@ export function FullscreenModal({
     onClose();
   };
 
-  return (
-    <>
-      {/* Overlay to block interaction with background */}
+  const modalContent = (
+    <div 
+      style={{ 
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 999999,
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: 'white'
+      }}
+    >
+      {/* Header */}
       <div 
-        className="fixed inset-0 bg-black/50"
-        style={{ zIndex: 9998 }}
-        onClick={handleCloseClick}
-      />
-      
-      {/* Fullscreen Modal */}
-      <div 
-        className="fixed inset-0 bg-white"
-        style={{ zIndex: 9999, isolation: 'isolate' }}
+        style={{
+          backgroundColor: 'white',
+          borderBottom: '1px solid #e5e7eb',
+          padding: '12px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexShrink: 0
+        }}
       >
-        {/* Fixed Header */}
-        <header className="bg-white border-b border-gray-200 px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 flex-1">
-              <img 
-                src={logoImage} 
-                alt="Ezras Nashim" 
-                className="h-5 w-auto"
-              />
-              <h1 className="text-lg font-semibold text-gray-900 truncate text-center flex-1">
-                {title}
-              </h1>
-            </div>
-            <button
-              onClick={handleCloseClick}
-              className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100 transition-colors"
-              aria-label="Close fullscreen"
-            >
-              <X className="h-5 w-5 text-gray-600" />
-            </button>
-          </div>
-        </header>
-
-        {/* Scrollable Main Content */}
-        <main 
-          className="h-[calc(100vh-68px)] overflow-y-auto overflow-x-hidden p-4"
-          style={{ WebkitOverflowScrolling: 'touch' }}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+          <img 
+            src={logoImage} 
+            alt="Ezras Nashim" 
+            style={{ height: '20px', width: 'auto' }}
+          />
+          <h1 style={{ 
+            fontSize: '1.125rem',
+            fontWeight: 600,
+            color: '#111827',
+            textAlign: 'center',
+            flex: 1,
+            margin: 0
+          }}>
+            {title}
+          </h1>
+        </div>
+        <button
+          onClick={handleCloseClick}
+          style={{
+            width: '40px',
+            height: '40px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'transparent',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            transition: 'background-color 0.2s'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#f3f4f6';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
+          aria-label="Close fullscreen"
         >
-          <div className={`max-w-4xl mx-auto ${className}`}>
-            {children}
-          </div>
-        </main>
+          <X style={{ height: '20px', width: '20px', color: '#4b5563' }} />
+        </button>
       </div>
-    </>
+
+      {/* Scrollable Content */}
+      <div 
+        style={{ 
+          flex: 1,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          padding: '16px',
+          WebkitOverflowScrolling: 'touch'
+        }}
+      >
+        <div style={{ maxWidth: '56rem', margin: '0 auto' }} className={className}>
+          {children}
+        </div>
+      </div>
+    </div>
   );
+
+  // Use React Portal to render outside normal DOM hierarchy
+  return createPortal(modalContent, document.body);
 }
 
 interface FullscreenButtonProps {
