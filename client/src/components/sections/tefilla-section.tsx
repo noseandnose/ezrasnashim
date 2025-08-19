@@ -752,7 +752,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               className="bg-gradient-to-br from-blush/10 to-blush/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-blush/20"
             >
               <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-1 w-fit">
-                <Shield className="text-white" size={16} strokeWidth={1.5} />
+                <Stethoscope className="text-white" size={16} strokeWidth={1.5} />
               </div>
               <h4 className="platypi-bold text-sm text-black">Refuah</h4>
               <p className="platypi-regular text-xs text-black/60 mt-1">Healing</p>

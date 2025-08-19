@@ -1468,7 +1468,7 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
           onClick={() => onPrayerSelect(prayer.id)}
         >
           <div className="flex items-center space-x-3">
-            <Shield className="text-red-500" size={20} />
+            <Stethoscope className="text-red-500" size={20} />
             <div>
               <span className="platypi-medium">{prayer.prayerName}</span>
               {prayer.description && (
