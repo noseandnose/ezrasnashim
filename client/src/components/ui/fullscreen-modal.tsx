@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import { useState, useEffect, useRef } from 'react';
 import { X, Minimize2, Maximize2 } from 'lucide-react';
 import logoImage from "@assets/1LO_1755590090315.png";
 
@@ -19,63 +18,50 @@ export function FullscreenModal({
   className = '' 
 }: FullscreenModalProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [portalElement, setPortalElement] = useState<HTMLElement | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isOpen) {
-      setPortalElement(null);
-      return;
-    }
-
-    // Create a portal container
-    const portal = document.createElement('div');
-    portal.style.position = 'fixed';
-    portal.style.top = '0';
-    portal.style.left = '0';
-    portal.style.width = '100vw';
-    portal.style.height = '100vh';
-    portal.style.zIndex = '2147483647';
-    portal.style.isolation = 'isolate';
-    
-    document.body.appendChild(portal);
-    setPortalElement(portal);
+    if (!isOpen) return;
 
     // Handle escape key
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         onClose();
       }
     };
     
-    // Prevent body scroll and save original styles
-    const originalStyles = {
+    // Save and fix body styles
+    const scrollY = window.scrollY;
+    const originalBodyStyle = {
       overflow: document.body.style.overflow,
       position: document.body.style.position,
-      width: document.body.style.width,
-      height: document.body.style.height
+      top: document.body.style.top,
+      width: document.body.style.width
     };
     
-    document.body.style.overflow = 'hidden';
+    // Prevent body from scrolling
     document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
     document.body.style.width = '100%';
-    document.body.style.height = '100%';
+    document.body.style.overflow = 'hidden';
     
-    window.addEventListener('keydown', handleEscape, true);
+    // Add escape listener with capture
+    document.addEventListener('keydown', handleEscape, true);
 
     return () => {
-      if (portal && portal.parentNode) {
-        portal.parentNode.removeChild(portal);
-      }
+      // Restore body styles
+      document.body.style.overflow = originalBodyStyle.overflow;
+      document.body.style.position = originalBodyStyle.position;
+      document.body.style.top = originalBodyStyle.top;
+      document.body.style.width = originalBodyStyle.width;
       
-      // Restore original body styles
-      document.body.style.overflow = originalStyles.overflow;
-      document.body.style.position = originalStyles.position;
-      document.body.style.width = originalStyles.width;
-      document.body.style.height = originalStyles.height;
+      // Restore scroll position
+      window.scrollTo(0, scrollY);
       
-      window.removeEventListener('keydown', handleEscape, true);
+      document.removeEventListener('keydown', handleEscape, true);
     };
   }, [isOpen, onClose]);
 
@@ -90,105 +76,82 @@ export function FullscreenModal({
     };
   }, []);
 
-  if (!isOpen || !portalElement) return null;
+  if (!isOpen) return null;
 
-  const modalContent = (
+  // Render directly without portal to ensure it works
+  return (
     <div 
+      className="fixed inset-0 bg-white"
       style={{ 
-        position: 'absolute',
+        zIndex: 2147483647,
+        position: 'fixed',
         top: 0,
         left: 0,
-        width: '100%',
-        height: '100%',
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: 'white',
-        isolation: 'isolate'
+        isolation: 'isolate',
+        pointerEvents: 'auto'
       }}
-      onClick={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.stopPropagation();
+        e.nativeEvent.stopImmediatePropagation();
+      }}
     >
       {/* Header */}
       <div 
+        className="bg-white border-b border-gray-200 px-4 py-3"
         style={{
-          backgroundColor: 'white',
-          borderBottom: '1px solid #e5e7eb',
-          padding: '12px 16px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          minHeight: '56px',
-          flexShrink: 0
+          flexShrink: 0,
+          minHeight: '56px'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-          <img 
-            src={logoImage} 
-            alt="Ezras Nashim" 
-            style={{ height: '20px', width: 'auto' }}
-          />
-          <h1 style={{ 
-            fontSize: '1.125rem',
-            fontWeight: 600,
-            color: '#111827',
-            textAlign: 'center',
-            flex: 1,
-            margin: 0
-          }}>
-            {title}
-          </h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 flex-1">
+            <img 
+              src={logoImage} 
+              alt="Ezras Nashim" 
+              className="h-5 w-auto"
+            />
+            <h1 className="text-lg font-semibold text-gray-900 truncate text-center flex-1">
+              {title}
+            </h1>
+          </div>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              e.nativeEvent.stopImmediatePropagation();
+              onClose();
+            }}
+            className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+            aria-label="Close fullscreen"
+            type="button"
+          >
+            <X className="h-5 w-5 text-gray-600" />
+          </button>
         </div>
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onClose();
-          }}
-          style={{
-            width: '40px',
-            height: '40px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: 'transparent',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            transition: 'background-color 0.2s'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#f3f4f6';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-          }}
-          aria-label="Close fullscreen"
-        >
-          <X style={{ height: '20px', width: '20px', color: '#4b5563' }} />
-        </button>
       </div>
 
-      {/* Scrollable Content Container */}
+      {/* Scrollable Content */}
       <div 
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto overflow-x-hidden p-4"
         style={{ 
-          position: 'relative',
-          flex: '1',
-          minHeight: 0,
-          overflow: 'auto',
           WebkitOverflowScrolling: 'touch',
-          msOverflowStyle: 'scrollbar',
-          scrollbarWidth: 'auto'
+          overscrollBehavior: 'contain'
         }}
       >
-        <div style={{ padding: '16px' }}>
-          <div style={{ maxWidth: '56rem', margin: '0 auto' }} className={className}>
-            {children}
-          </div>
+        <div className={`max-w-4xl mx-auto ${className}`}>
+          {children}
         </div>
       </div>
     </div>
   );
-
-  return createPortal(modalContent, portalElement);
 }
 
 interface FullscreenButtonProps {
