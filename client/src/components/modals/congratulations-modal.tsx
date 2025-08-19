@@ -53,7 +53,7 @@ export default function CongratulationsModal() {
             }} 
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-inter font-medium border-0 relative z-10"
           >
-            Continue Your Journey
+            Do more Mitzvas
           </Button>
           
           {/* Close button */}
