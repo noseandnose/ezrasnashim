@@ -33,20 +33,26 @@ export function FullscreenModal({
       }
     };
     
-    // Save and fix body styles
+    // Save current scroll position and body styles
     const scrollY = window.scrollY;
     const originalBodyStyle = {
       overflow: document.body.style.overflow,
       position: document.body.style.position,
       top: document.body.style.top,
-      width: document.body.style.width
+      width: document.body.style.width,
+      touchAction: document.body.style.touchAction
     };
     
-    // Prevent body from scrolling
+    // Prevent body from scrolling on both desktop and mobile
     document.body.style.position = 'fixed';
     document.body.style.top = `-${scrollY}px`;
     document.body.style.width = '100%';
     document.body.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
+    
+    // Also prevent scrolling on the document element for iOS
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
     
     // Add escape listener with capture
     document.addEventListener('keydown', handleEscape, true);
@@ -57,6 +63,10 @@ export function FullscreenModal({
       document.body.style.position = originalBodyStyle.position;
       document.body.style.top = originalBodyStyle.top;
       document.body.style.width = originalBodyStyle.width;
+      document.body.style.touchAction = originalBodyStyle.touchAction;
+      
+      // Restore html overflow
+      document.documentElement.style.overflow = originalHtmlOverflow;
       
       // Restore scroll position
       window.scrollTo(0, scrollY);
@@ -95,11 +105,18 @@ export function FullscreenModal({
         flexDirection: 'column',
         backgroundColor: 'white',
         isolation: 'isolate',
-        pointerEvents: 'auto'
+        pointerEvents: 'auto',
+        touchAction: 'none' // Prevent any touch actions on the container
       }}
       onClick={(e) => {
         e.stopPropagation();
         e.nativeEvent.stopImmediatePropagation();
+      }}
+      onTouchStart={(e) => {
+        // Prevent default touch behavior except in scrollable area
+        if (!scrollContainerRef.current?.contains(e.target as Node)) {
+          e.preventDefault();
+        }
       }}
     >
       {/* Header */}
@@ -143,7 +160,15 @@ export function FullscreenModal({
         className="flex-1 overflow-y-auto overflow-x-hidden p-4"
         style={{ 
           WebkitOverflowScrolling: 'touch',
-          overscrollBehavior: 'contain'
+          overscrollBehavior: 'contain',
+          touchAction: 'pan-y',
+          // Ensure scrolling works on iOS
+          position: 'relative',
+          height: '100%'
+        }}
+        onTouchMove={(e) => {
+          // Allow touch scrolling within this container
+          e.stopPropagation();
         }}
       >
         <div className={`max-w-4xl mx-auto ${className}`}>
