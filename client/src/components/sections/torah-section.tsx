@@ -1,4 +1,5 @@
 import { Book, Heart, Play, Shield, BookOpen, Sparkles, Star, Scroll, Triangle } from "lucide-react";
+import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import type { Section } from "@/pages/home";
@@ -213,7 +214,15 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
                 )}
                 
                 <div className={`${isCompleted ? 'bg-sage' : hasContent ? iconBg : 'bg-gray-300'} p-2 rounded-full mx-auto mb-2 w-fit`}>
-                  <Icon className={`${hasContent ? iconColor : 'text-gray-500'}`} size={18} strokeWidth={1.5} />
+                  {id === 'halacha' ? (
+                    <img 
+                      src={customCandleIcon} 
+                      alt="Learn Shabbas" 
+                      className="w-[18px] h-[18px] object-contain"
+                    />
+                  ) : (
+                    <Icon className={`${hasContent ? iconColor : 'text-gray-500'}`} size={18} strokeWidth={1.5} />
+                  )}
                 </div>
                 <h3 className="platypi-bold text-xs text-black mb-1 tracking-wide">{title}</h3>
                 <div className="platypi-regular text-xs text-black/60 leading-relaxed">
