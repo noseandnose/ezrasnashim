@@ -29,7 +29,7 @@ import {
   type DailyStats, type InsertDailyStats
 } from "../shared/schema";
 import { db, pool } from "./db";
-import { eq, gt, lt, gte, lte, and, sql } from "drizzle-orm";
+import { eq, gt, lt, gte, lte, and, sql, like } from "drizzle-orm";
 import { cleanHebrewText, memoize, withRetry, formatDate } from './typeHelpers';
 
 export interface IStorage {
@@ -1405,27 +1405,85 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getCommunityImpact(): Promise<{
+  async getCommunityImpact(period: string = 'alltime'): Promise<{
     totalDaysSponsored: number;
     totalCampaigns: number;
     totalRaised: number;
   }> {
-    // Count total active sponsors (days sponsored)
-    const activeSponsors = await db.select().from(sponsors).where(eq(sponsors.isActive, true));
+    let dateFilter;
+    const now = new Date();
+    
+    if (period === 'today') {
+      // Today only
+      const today = now.toISOString().split('T')[0];
+      dateFilter = and(
+        gte(donations.createdAt, new Date(today + 'T00:00:00')),
+        lte(donations.createdAt, new Date(today + 'T23:59:59'))
+      );
+    } else if (period === 'month') {
+      // Current month
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+      dateFilter = and(
+        gte(donations.createdAt, firstDay),
+        lte(donations.createdAt, lastDay)
+      );
+    }
+
+    // Get sponsors based on period
+    let sponsorFilter;
+    if (period === 'today') {
+      const today = now.toISOString().split('T')[0];
+      sponsorFilter = and(
+        eq(sponsors.isActive, true),
+        eq(sponsors.sponsorshipDate, today)
+      );
+    } else if (period === 'month') {
+      const year = now.getFullYear();
+      const month = (now.getMonth() + 1).toString().padStart(2, '0');
+      sponsorFilter = and(
+        eq(sponsors.isActive, true),
+        like(sponsors.sponsorshipDate, `${year}-${month}-%`)
+      );
+    } else {
+      sponsorFilter = eq(sponsors.isActive, true);
+    }
+
+    const activeSponsors = await db.select().from(sponsors).where(sponsorFilter);
     const totalDaysSponsored = activeSponsors.length;
 
-    // Count successful donations
-    const successfulDonations = await db.select().from(donations).where(eq(donations.status, 'succeeded'));
-    const totalCampaigns = successfulDonations.length; // Using number of donations as "campaigns" for now
-
-    // Sum total raised from actual donations (convert from cents to dollars)
-    const totalRaised = successfulDonations.reduce((sum, donation) => sum + (donation.amount || 0), 0) / 100;
-
-    return {
-      totalDaysSponsored,
-      totalCampaigns,
-      totalRaised
-    };
+    // Get donations based on period
+    let donationQuery = db.select().from(donations).where(eq(donations.status, 'succeeded'));
+    
+    if (period === 'today' || period === 'month') {
+      const successfulDonations = await db
+        .select()
+        .from(donations)
+        .where(and(
+          eq(donations.status, 'succeeded'),
+          dateFilter!
+        ));
+      
+      const totalCampaigns = successfulDonations.length;
+      const totalRaised = successfulDonations.reduce((sum, donation) => sum + (donation.amount || 0), 0) / 100;
+      
+      return {
+        totalDaysSponsored,
+        totalCampaigns,
+        totalRaised
+      };
+    } else {
+      // All time - original logic
+      const successfulDonations = await donationQuery;
+      const totalCampaigns = successfulDonations.length;
+      const totalRaised = successfulDonations.reduce((sum, donation) => sum + (donation.amount || 0), 0) / 100;
+      
+      return {
+        totalDaysSponsored,
+        totalCampaigns,
+        totalRaised
+      };
+    }
   }
 }
 

@@ -1943,7 +1943,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/analytics/community-impact", async (req, res) => {
     try {
-      const impact = await storage.getCommunityImpact();
+      const period = req.query.period as string || 'alltime';
+      const impact = await storage.getCommunityImpact(period);
       res.json(impact);
     } catch (error) {
       console.error('Error fetching community impact:', error);
