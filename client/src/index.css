@@ -4,10 +4,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Koren Siddur Font for Hebrew Tefilla Content */
+/* TEST: VC Koren Light Font for Hebrew Tefilla Content */
 @font-face {
   font-family: 'Koren Siddur';
-  src: url('./fonts/KorenSiddur.otf') format('opentype');
+  src: url('/fonts/VC-Koren-Light.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
   font-display: block; /* Prevent font flash - wait for font to load */
@@ -73,7 +73,7 @@
   overflow-x: hidden !important; /* Hide any horizontal overflow */
 }
 
-/* Update old class to use Koren fonts with proper fallback */
+/* Update old class to use VC Koren Light font (TEST) */
 .koren-siddur-hebrew {
   font-family: 'Koren Siddur', 'Arno Koren', serif !important;
   font-weight: normal !important;
