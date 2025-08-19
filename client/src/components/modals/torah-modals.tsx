@@ -41,8 +41,9 @@ const StandardModalHeader = ({
   fontSize: number;
   setFontSize: (size: number) => void;
 }) => (
-  <div className="flex items-center justify-center mb-1 relative pr-8">
-    <div className="flex items-center gap-4">
+  <div className="mb-4 space-y-3">
+    {/* First Row: Language Toggle and Title */}
+    <div className="flex items-center justify-center gap-4">
       <Button
         onClick={() => setShowHebrew(!showHebrew)}
         variant="ghost"
@@ -57,7 +58,10 @@ const StandardModalHeader = ({
       </Button>
       
       <DialogTitle className="text-lg platypi-bold text-black">{title}</DialogTitle>
-      
+    </div>
+    
+    {/* Second Row: Font Size Controls */}
+    <div className="flex items-center justify-center">
       <div className="flex items-center gap-2">
         <button
           onClick={() => setFontSize(Math.max(12, fontSize - 2))}

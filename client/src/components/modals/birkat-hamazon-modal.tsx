@@ -149,8 +149,9 @@ export function BirkatHamazonModal() {
   };
 
   const StandardModalHeader = () => (
-    <div className="flex items-center justify-center mb-3 relative">
-      <div className="flex items-center gap-4">
+    <div className="mb-4 space-y-3">
+      {/* First Row: Language Toggle and Title */}
+      <div className="flex items-center justify-center gap-4">
         <Button
           onClick={() => setLanguage(language === "hebrew" ? "english" : "hebrew")}
           variant="ghost"
@@ -167,7 +168,10 @@ export function BirkatHamazonModal() {
         <DialogTitle className="text-lg platypi-bold text-black">
           {activeModal === 'al-hamichiya' ? 'Me\'ein Shalosh' : 'Birkat Hamazon'}
         </DialogTitle>
-        
+      </div>
+      
+      {/* Second Row: Font Size Controls */}
+      <div className="flex items-center justify-center">
         <div className="flex items-center gap-2">
           <button
             onClick={decreaseFontSize}

@@ -175,8 +175,9 @@ const StandardModalHeader = ({
   fontSize: number;
   setFontSize: (size: number) => void;
 }) => (
-  <div className="flex items-center justify-center mb-3 relative pr-8">
-    <div className="flex items-center gap-4">
+  <div className="mb-4 space-y-3">
+    {/* First Row: Language Toggle and Title */}
+    <div className="flex items-center justify-center gap-4">
       <Button
         onClick={() => setShowHebrew(!showHebrew)}
         variant="ghost"
@@ -191,7 +192,10 @@ const StandardModalHeader = ({
       </Button>
       
       <DialogTitle className="text-lg platypi-bold text-black">{title}</DialogTitle>
-      
+    </div>
+    
+    {/* Second Row: Font Size Controls */}
+    <div className="flex items-center justify-center">
       <div className="flex items-center gap-2">
         <button
           onClick={() => setFontSize(Math.max(12, fontSize - 2))}
@@ -248,8 +252,9 @@ function MorningBrochasModal() {
         <div id="morning-brochas-description" className="sr-only">Daily morning blessings and prayers of gratitude</div>
         
         {/* Standardized Header with centered controls */}
-        <div className="flex items-center justify-center mb-3 relative pr-8">
-          <div className="flex items-center gap-4">
+        <div className="mb-4 space-y-3">
+          {/* First Row: Language Toggle and Title */}
+          <div className="flex items-center justify-center gap-4">
             <Button
               onClick={() => setShowHebrew(!showHebrew)}
               variant="ghost"
@@ -264,7 +269,10 @@ function MorningBrochasModal() {
             </Button>
             
             <DialogTitle className="text-lg platypi-bold text-black">Morning Brochas</DialogTitle>
-            
+          </div>
+          
+          {/* Second Row: Font Size Controls */}
+          <div className="flex items-center justify-center">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setFontSize(Math.max(12, fontSize - 2))}
@@ -701,9 +709,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="tehillim-description">
           <div id="tehillim-description" className="sr-only">Psalms reading and community prayer participation</div>
           
-          {/* Standardized Header */}
-          <div className="flex items-center justify-center mb-3 relative pr-8">
-            <div className="flex items-center gap-4">
+          {/* Standardized Header with two-row layout */}
+          <div className="mb-4 space-y-3">
+            {/* First Row: Language Toggle and Title */}
+            <div className="flex items-center justify-center gap-4">
               <Button
                 onClick={() => setShowHebrew(!showHebrew)}
                 variant="ghost"
@@ -721,7 +730,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 Tehillim {tehillimInfo?.englishNumber || progress?.currentPerek || 1}
                 {tehillimInfo?.englishNumber === 119 && tehillimInfo?.partNumber ? ` - Part ${tehillimInfo.partNumber}` : ''}
               </DialogTitle>
-              
+            </div>
+            
+            {/* Second Row: Font Size Controls */}
+            <div className="flex items-center justify-center">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setFontSize(Math.max(12, fontSize - 2))}
@@ -1024,9 +1036,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       {/* Nishmas Kol Chai Modal */}
       <Dialog open={activeModal === 'nishmas-campaign'} onOpenChange={() => closeModal(true)}>
         <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular ${isAnimating ? 'prayer-ascending' : ''}`}>
-          {/* Standardized Header */}
-          <div className="flex items-center justify-center mb-3 relative pr-8">
-            <div className="flex items-center gap-4">
+          {/* Standardized Header with two-row layout */}
+          <div className="mb-4 space-y-3">
+            {/* First Row: Language Toggle and Title */}
+            <div className="flex items-center justify-center gap-4">
               <Button
                 onClick={() => setNishmasLanguage(nishmasLanguage === 'hebrew' ? 'english' : 'hebrew')}
                 variant="ghost"
@@ -1041,7 +1054,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               </Button>
               
               <DialogTitle className="text-lg platypi-bold text-black">Nishmas Kol Chai</DialogTitle>
-              
+            </div>
+            
+            {/* Second Row: Font Size Controls */}
+            <div className="flex items-center justify-center">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setNishmasFontSize(Math.max(12, nishmasFontSize - 2))}
@@ -1439,9 +1455,10 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
         <DialogTitle>{prayer.prayerName}</DialogTitle>
       </VisuallyHidden>
       
-      {/* Standardized Header */}
-      <div className="flex items-center justify-center mb-3 relative">
-        <div className="flex items-center gap-4">
+      {/* Standardized Header with two-row layout */}
+      <div className="mb-4 space-y-3">
+        {/* First Row: Language Toggle and Title */}
+        <div className="flex items-center justify-center gap-4">
           {/* Conditional translate button - only show if English text exists */}
           {prayer.englishTranslation && prayer.englishTranslation.trim() !== '' && prayer.englishTranslation !== 'English translation not available' && (
             <Button
@@ -1459,7 +1476,10 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
           )}
           
           <h2 className="text-lg platypi-bold text-black">{prayer.prayerName}</h2>
-          
+        </div>
+        
+        {/* Second Row: Font Size Controls */}
+        <div className="flex items-center justify-center">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setFontSize(Math.max(12, fontSize - 2))}
@@ -1697,8 +1717,9 @@ function IndividualTehillimModal() {
   return (
     <>
       {/* Standardized Header */}
-      <div className="flex items-center justify-center mb-3 relative pr-8">
-        <div className="flex items-center gap-4">
+      <div className="mb-4 space-y-3">
+        {/* First Row: Language Toggle and Title */}
+        <div className="flex items-center justify-center gap-4">
           <Button
             onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
             variant="ghost"
@@ -1713,7 +1734,10 @@ function IndividualTehillimModal() {
           </Button>
           
           <DialogTitle className="text-lg platypi-bold text-black">Tehillim {selectedPsalm}</DialogTitle>
-          
+        </div>
+        
+        {/* Second Row: Font Size Controls */}
+        <div className="flex items-center justify-center">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setFontSize(Math.max(12, fontSize - 2))}
