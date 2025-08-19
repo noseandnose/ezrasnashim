@@ -2091,6 +2091,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "OK" });
   })
 
+  // Messages routes
+  app.get("/api/messages/:date", async (req, res) => {
+    try {
+      const { date } = req.params;
+      const message = await storage.getMessageByDate(date);
+      
+      if (!message) {
+        return res.status(404).json({ message: "No message found for this date" });
+      }
+      
+      res.json(message);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch message" });
+    }
+  });
+  
+  app.post("/api/messages", async (req, res) => {
+    try {
+      const messageData = req.body;
+      const newMessage = await storage.createMessage(messageData);
+      res.json(newMessage);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create message" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

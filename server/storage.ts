@@ -26,7 +26,8 @@ import {
   type PirkeiAvot, type InsertPirkeiAvot,
   type PirkeiAvotProgress, type InsertPirkeiAvotProgress,
   type AnalyticsEvent, type InsertAnalyticsEvent,
-  type DailyStats, type InsertDailyStats
+  type DailyStats, type InsertDailyStats,
+  type Message, type InsertMessage, messages
 } from "../shared/schema";
 import { db, pool } from "./db";
 import { eq, gt, lt, gte, lte, and, sql, like } from "drizzle-orm";
@@ -155,6 +156,10 @@ export interface IStorage {
     totalCampaigns: number;
     totalRaised: number;
   }>;
+  
+  // Message methods
+  getMessageByDate(date: string): Promise<Message | undefined>;
+  createMessage(message: InsertMessage): Promise<Message>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1479,6 +1484,24 @@ export class DatabaseStorage implements IStorage {
         totalRaised
       };
     }
+  }
+  
+  // Message methods
+  async getMessageByDate(date: string): Promise<Message | undefined> {
+    const [message] = await db
+      .select()
+      .from(messages)
+      .where(eq(messages.date, date))
+      .limit(1);
+    return message;
+  }
+  
+  async createMessage(message: InsertMessage): Promise<Message> {
+    const [newMessage] = await db
+      .insert(messages)
+      .values(message)
+      .returning();
+    return newMessage;
   }
 }
 

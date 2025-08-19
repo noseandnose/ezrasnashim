@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, date, index, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, date, index, jsonb, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -552,3 +552,17 @@ export const tehillim = pgTable("tehillim", {
 export const insertTehillimSchema = createInsertSchema(tehillim);
 export type Tehillim = typeof tehillim.$inferSelect;
 export type InsertTehillim = z.infer<typeof insertTehillimSchema>;
+
+// Messages table for daily messages to users
+export const messages = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull().unique(),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertMessagesSchema = createInsertSchema(messages);
+export type Message = typeof messages.$inferSelect;
+export type InsertMessage = z.infer<typeof insertMessagesSchema>;
