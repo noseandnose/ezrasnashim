@@ -133,6 +133,10 @@ export function formatTextContent(text: string | null | undefined): string {
   
   // Removed [[ ]] grey box processing to allow conditional content system to work
   
+  // First, handle {{grey}} blocks before character-by-character processing
+  formatted = formatted.replace(/\{\{grey\}\}([\s\S]*?)\{\{\/grey\}\}/g, 
+    '<div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg border-l-4 border-gray-300 dark:border-gray-600 my-2 text-gray-700 dark:text-gray-300">$1</div>');
+
   // Process the text character by character to handle formatting markers
   let result = '';
   let lastIndex = 0;
