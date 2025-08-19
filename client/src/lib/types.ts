@@ -59,7 +59,16 @@ export const useModalStore = create<ModalState>((set, get) => ({
   }),
   closeModal: (returnToPrevious?: boolean) => {
     const state = get();
+    const wasTefilaModal = state.activeModal === 'tehillim-text';
     set({ activeModal: null });
+    
+    // If closing tehillim modal, trigger a custom event to refresh data
+    if (wasTefilaModal && typeof window !== 'undefined') {
+      setTimeout(() => {
+        const refreshEvent = new CustomEvent('tehillimCompleted');
+        window.dispatchEvent(refreshEvent);
+      }, 50);
+    }
     
     // Handle navigation based on close type
     if (returnToPrevious && state.previousSection && typeof window !== 'undefined') {

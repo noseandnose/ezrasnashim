@@ -7,7 +7,7 @@ interface TefillaSectionProps {
   onSectionChange?: (section: Section) => void;
 }
 import { useJewishTimes } from "@/hooks/use-jewish-times";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -174,7 +174,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   const [showHebrew, setShowHebrew] = useState(true);
 
   // Fetch global Tehillim progress
-  const { data: progress } = useQuery<GlobalTehillimProgress>({
+  const { data: progress, refetch: refetchProgress } = useQuery<GlobalTehillimProgress>({
     queryKey: ['/api/tehillim/progress'], 
     queryFn: async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress`);
@@ -187,8 +187,34 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
     },
     refetchInterval: 10000, // Refresh every 10 seconds for better responsiveness
     staleTime: 5000, // Keep data fresh for 5 seconds
-    gcTime: 30000 // Cache for 30 seconds
+    gcTime: 30000, // Cache for 30 seconds
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    refetchOnMount: 'always' // Always refetch when component mounts
   });
+  
+  // Refetch progress when returning to this section
+  useEffect(() => {
+    // Small delay to ensure any server updates have completed
+    const timer = setTimeout(() => {
+      refetchProgress();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []); // Run once on mount
+  
+  // Listen for tehillim completion event
+  useEffect(() => {
+    const handleTehillimCompleted = () => {
+      // Refetch all tehillim-related data
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/info'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/preview'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+      refetchProgress();
+    };
+    
+    window.addEventListener('tehillimCompleted', handleTehillimCompleted);
+    return () => window.removeEventListener('tehillimCompleted', handleTehillimCompleted);
+  }, [refetchProgress, queryClient]);
 
   // Get the actual Tehillim info to display English number and part
   const { data: tehillimInfo } = useQuery<{

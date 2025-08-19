@@ -563,11 +563,13 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/info'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/text/by-id'] });
       
-      // Force refetch immediately to get updated progress
-      queryClient.refetchQueries({ queryKey: ['/api/tehillim/progress'] });
-      
-      // Wait a moment then close modal to trigger fresh data load
+      // Wait a moment for the server update to complete, then close modal
       setTimeout(() => {
+        // Force refetch all tehillim queries after modal closes
+        queryClient.refetchQueries({ queryKey: ['/api/tehillim/progress'] });
+        queryClient.refetchQueries({ queryKey: ['/api/tehillim/info'] });
+        queryClient.refetchQueries({ queryKey: ['/api/tehillim/preview'] });
+        queryClient.refetchQueries({ queryKey: ['/api/tehillim/current-name'] });
         closeModal();
       }, 500);
     },
