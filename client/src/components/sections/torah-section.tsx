@@ -155,17 +155,16 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
             let content = null;
             let hasContent = false;
             let displaySubtitle = subtitle;
+            let readingTime = '';
             
             switch(id) {
               case 'halacha':
                 content = halachaContent;
                 hasContent = !!halachaContent?.content;
                 if (hasContent && !isCompleted && halachaContent) {
-                  const readingTime = calculateReadingTime(halachaContent.content || '');
+                  readingTime = calculateReadingTime(halachaContent.content || '');
                   const camelCaseTitle = toCamelCase(halachaContent.title || '');
-                  displaySubtitle = camelCaseTitle ? 
-                    `${camelCaseTitle} (${readingTime})` : 
-                    `Learn Shabbos (${readingTime})`;
+                  displaySubtitle = camelCaseTitle || 'Learn Shabbos';
                 }
                 break;
               case 'chizuk':
@@ -186,11 +185,9 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
                 content = featuredContent;
                 hasContent = !!featuredContent?.content;
                 if (hasContent && !isCompleted && featuredContent) {
-                  const readingTime = calculateReadingTime(featuredContent.content || '');
+                  readingTime = calculateReadingTime(featuredContent.content || '');
                   const camelCaseTitle = toCamelCase(featuredContent.title || '');
-                  displaySubtitle = camelCaseTitle ? 
-                    `${camelCaseTitle} (${readingTime})` : 
-                    `Special Topics (${readingTime})`;
+                  displaySubtitle = camelCaseTitle || 'Special Topics';
                 }
                 // Always show text indicator for featured content
                 contentType = hasContent ? 'text' : contentType;
@@ -219,9 +216,20 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
                   <Icon className={`${hasContent ? iconColor : 'text-gray-500'}`} size={18} strokeWidth={1.5} />
                 </div>
                 <h3 className="platypi-bold text-xs text-black mb-1 tracking-wide">{title}</h3>
-                <p className="platypi-regular text-xs text-black/60 leading-relaxed">
-                  {!hasContent ? 'Coming Soon' : isCompleted ? 'Completed' : displaySubtitle}
-                </p>
+                <div className="platypi-regular text-xs text-black/60 leading-relaxed">
+                  {!hasContent ? (
+                    'Coming Soon'
+                  ) : isCompleted ? (
+                    'Completed'
+                  ) : (
+                    <>
+                      <div>{displaySubtitle}</div>
+                      {readingTime && (
+                        <div className="text-xs text-black/50 mt-0.5">({readingTime})</div>
+                      )}
+                    </>
+                  )}
+                </div>
               </button>
             );
           })}
