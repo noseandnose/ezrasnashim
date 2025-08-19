@@ -29,6 +29,15 @@ import {
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Schedule periodic cleanup of expired names (every hour)
+  setInterval(async () => {
+    try {
+      await storage.cleanupExpiredNames();
+      console.log('Cleaned up expired Tehillim names');
+    } catch (error) {
+      console.error('Error cleaning up expired names:', error);
+    }
+  }, 60 * 60 * 1000); // Run every hour
 
   // Calendar download endpoint using GET request to avoid CORS issues
   app.get("/api/download-calendar", async (req, res) => {
@@ -38,8 +47,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hebrewDate = req.query.hebrewDate as string || "";
       const gregorianDate = req.query.gregorianDate as string || "";
       const years = parseInt(req.query.years as string) || 1;
+      const afterNightfall = req.query.afterNightfall === 'true';
       
-      console.log('Calendar download request:', { title, hebrewDate, gregorianDate, years });
+      console.log('Calendar download request:', { title, hebrewDate, gregorianDate, years, afterNightfall });
       
       // Generate calendar content
       const events: string[] = [];
@@ -48,12 +58,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (gregorianDate && hebrewDate) {
         // First, convert the input date to Hebrew date using Hebcal API
         const inputDate = new Date(gregorianDate);
-        const inputYear = inputDate.getFullYear();
-        const inputMonth = inputDate.getMonth() + 1; // JavaScript months are 0-based
-        const inputDay = inputDate.getDate();
+        let inputYear = inputDate.getFullYear();
+        let inputMonth = inputDate.getMonth() + 1; // JavaScript months are 0-based
+        let inputDay = inputDate.getDate();
+        
+        // If after nightfall, we need to add one day to get the correct Hebrew date
+        if (afterNightfall) {
+          const adjustedDate = new Date(inputDate);
+          adjustedDate.setDate(adjustedDate.getDate() + 1);
+          inputYear = adjustedDate.getFullYear();
+          inputMonth = adjustedDate.getMonth() + 1;
+          inputDay = adjustedDate.getDate();
+        }
         
         try {
-          // Get the Hebrew date from the input Gregorian date
+          // Get the Hebrew date from the input Gregorian date (adjusted if after nightfall)
           const hebcalUrl = `https://www.hebcal.com/converter?cfg=json&gy=${inputYear}&gm=${inputMonth}&gd=${inputDay}&g2h=1`;
           const hebcalResponse = await serverAxiosClient.get(hebcalUrl);
           const hebrewDateInfo = hebcalResponse.data;
@@ -198,10 +217,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Determine timezone based on coordinates
       let tzid = 'America/New_York'; // Default
       
+      // Log coordinates for debugging
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Zmanim request for coordinates: lat=${latitude}, lng=${longitude}`);
+      }
+      
       // Basic timezone detection based on longitude and known regions
       if (latitude >= 29 && latitude <= 33.5 && longitude >= 34 && longitude <= 36) {
         // Israel region
         tzid = 'Asia/Jerusalem';
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`Detected Israel region, using timezone: ${tzid}`);
+        }
       } else if (longitude >= -125 && longitude <= -66) {
         // North America
         if (longitude >= -125 && longitude <= -120) tzid = 'America/Los_Angeles';
@@ -221,20 +248,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const response = await serverAxiosClient.get(hebcalUrl);
       const data = response.data;
       
-      // Format times to 12-hour format with AM/PM
+      // Format times to 12-hour format with AM/PM - properly handling timezone
       const formatTime = (timeStr: string) => {
         if (!timeStr) return null;
         try {
-          // Parse ISO timestamp and extract local time components
-          const match = timeStr.match(/T(\d{2}):(\d{2}):/);
-          if (match) {
-            const hours = parseInt(match[1]);
-            const minutes = match[2];
-            const period = hours >= 12 ? 'PM' : 'AM';
-            const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-            return `${displayHours}:${minutes} ${period}`;
+          // Parse the ISO string as a Date object to handle timezone correctly
+          const date = new Date(timeStr);
+          
+          // Check if date is valid
+          if (isNaN(date.getTime())) {
+            // Fallback to simple string extraction if not a valid date
+            const match = timeStr.match(/(\d{1,2}):(\d{2})/);
+            if (match) {
+              const hours = parseInt(match[1]);
+              const minutes = match[2];
+              const period = hours >= 12 ? 'PM' : 'AM';
+              const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+              return `${displayHours}:${minutes} ${period}`;
+            }
+            return timeStr;
           }
-          return timeStr;
+          
+          // Use toLocaleTimeString with the correct timezone to get local time
+          const localTime = date.toLocaleTimeString('en-US', {
+            timeZone: tzid,
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+          });
+          
+          return localTime;
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
             console.error('Time formatting error:', error, 'for time:', timeStr);
@@ -352,6 +395,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // - Sephardic vs Ashkenazi customs for zmanim
         // - Custom candle lighting time preferences
       };
+      
+      // Debug logging
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Formatted times for ${locationName}:`, {
+          sunrise: formattedTimes.sunrise,
+          minchaGedolah: formattedTimes.minchaGedolah,
+          shkia: formattedTimes.shkia,
+          tzid: tzid
+        });
+      }
 
       res.json(formattedTimes);
     } catch (error) {
@@ -1208,17 +1261,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Tehillim routes
+  // Tehillim routes - Optimized for faster response
   app.get("/api/tehillim/progress", async (req, res) => {
     try {
-      await storage.cleanupExpiredNames();
-      const progress = await storage.getGlobalTehillimProgress();
-      const randomName = await storage.getRandomNameForPerek();
+      // Get progress with assigned name in a single optimized call
+      const progressWithName = await storage.getProgressWithAssignedName();
       
-      res.json({
-        ...progress,
-        assignedName: randomName?.hebrewName || null
-      });
+      res.json(progressWithName);
     } catch (error) {
       console.error('Error fetching Tehillim progress:', error);
       res.status(500).json({ error: "Failed to fetch Tehillim progress" });
@@ -1274,7 +1323,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get Tehillim text from Sefaria API
+  // Get Tehillim info by ID for Global display
+  app.get("/api/tehillim/info/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id) || id < 1) {
+        return res.status(400).json({ error: "Invalid ID" });
+      }
+      
+      const tehillimInfo = await storage.getSupabaseTehillimById(id);
+      if (!tehillimInfo) {
+        return res.status(404).json({ error: "Tehillim not found" });
+      }
+      
+      res.json(tehillimInfo);
+    } catch (error) {
+      console.error('Error fetching Tehillim info:', error);
+      res.status(500).json({ error: "Failed to fetch Tehillim info" });
+    }
+  });
+
+  // Get Tehillim text from Supabase
   app.get("/api/tehillim/text/:perek", async (req, res) => {
     try {
       const perek = parseInt(req.params.perek);
@@ -1288,10 +1358,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Language must be 'english' or 'hebrew'" });
       }
       
-      const tehillimData = await storage.getSefariaTehillim(perek, language);
+      // Use new Supabase method instead of Sefaria
+      const tehillimData = await storage.getSupabaseTehillim(perek, language);
       res.json(tehillimData);
     } catch (error) {
       console.error('Error fetching Tehillim text:', error);
+      res.status(500).json({ error: "Failed to fetch Tehillim text" });
+    }
+  });
+
+  // Get Tehillim text by ID (for proper part handling of Psalm 119)
+  app.get("/api/tehillim/text/by-id/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const language = req.query.language as string || 'english';
+      
+      if (isNaN(id) || id < 1 || id > 171) {
+        return res.status(400).json({ error: "Invalid ID" });
+      }
+      
+      if (!['english', 'hebrew'].includes(language)) {
+        return res.status(400).json({ error: "Language must be 'english' or 'hebrew'" });
+      }
+      
+      // Get the specific part by ID
+      const tehillimData = await storage.getTehillimById(id, language);
+      res.json(tehillimData);
+    } catch (error) {
+      console.error('Error fetching Tehillim text by ID:', error);
       res.status(500).json({ error: "Failed to fetch Tehillim text" });
     }
   });
@@ -1568,22 +1662,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         client_secret_exists: !!paymentIntent.client_secret
       });
       
-      // Track the donation attempt in our database
-      try {
-        await storage.createDonation({
-          stripePaymentIntentId: paymentIntent.id,
-          amount: paymentIntent.amount, // Already in cents
-          donationType: donationType || "General Donation",
-          sponsorName: metadata?.sponsorName,
-          dedication: metadata?.dedication,
-          email: receiptEmail,
-          status: 'pending'
-        });
-        console.log('Donation tracked in database:', paymentIntent.id);
-      } catch (dbError) {
-        console.error('Error saving donation to database:', dbError);
-        // Continue even if database save fails
-      }
+      // Don't create donation record here - only after successful payment
+      // This prevents incomplete donations from being stored in the database
+      console.log('Payment intent created:', paymentIntent.id);
 
       res.json({ 
         clientSecret: paymentIntent.client_secret,
@@ -1697,16 +1778,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Payment intent ID and status required" });
       }
       
-      const donation = await storage.updateDonationStatus(paymentIntentId, status);
+      // First check if donation exists
+      let donation = await storage.getDonationByPaymentIntentId(paymentIntentId);
       
-      if (!donation) {
-        // If donation doesn't exist, create it with succeeded status
-        await storage.createDonation({
-          stripePaymentIntentId: paymentIntentId,
-          amount: 100, // Default $1 for testing
-          donationType: "General Donation",
-          status: status
-        });
+      if (donation) {
+        // Update existing donation status
+        donation = await storage.updateDonationStatus(paymentIntentId, status);
+      } else if (status === 'succeeded') {
+        // Only create donation record if payment succeeded
+        // Get payment intent details from Stripe to get accurate amount and metadata
+        try {
+          const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+          donation = await storage.createDonation({
+            stripePaymentIntentId: paymentIntentId,
+            amount: paymentIntent.amount, // Amount in cents from Stripe
+            donationType: paymentIntent.metadata?.donationType || "General Donation",
+            sponsorName: paymentIntent.metadata?.sponsorName,
+            dedication: paymentIntent.metadata?.dedication,
+            email: paymentIntent.receipt_email || paymentIntent.metadata?.email,
+            status: 'succeeded'
+          });
+          console.log('Created donation record for successful payment:', paymentIntentId);
+        } catch (err) {
+          console.error('Error retrieving payment intent from Stripe:', err);
+          // Fallback - create with minimal info
+          donation = await storage.createDonation({
+            stripePaymentIntentId: paymentIntentId,
+            amount: 100, // Default $1
+            donationType: "General Donation",
+            status: status
+          });
+        }
+      } else {
+        // Don't create donation records for failed/pending payments
+        console.log(`Skipping donation creation for ${status} payment:`, paymentIntentId);
+        return res.json({ message: `Payment status: ${status}`, created: false });
       }
       
       res.json({ message: "Donation status updated", donation });
@@ -1837,7 +1943,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/analytics/community-impact", async (req, res) => {
     try {
-      const impact = await storage.getCommunityImpact();
+      const period = req.query.period as string || 'alltime';
+      const impact = await storage.getCommunityImpact(period);
       res.json(impact);
     } catch (error) {
       console.error('Error fetching community impact:', error);
@@ -1884,9 +1991,131 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Location API endpoint for Tefilla conditional processing
+  app.get("/api/location/:lat/:lon", async (req, res) => {
+    try {
+      const { lat, lon } = req.params;
+      const latitude = parseFloat(lat);
+      const longitude = parseFloat(lon);
+
+      if (isNaN(latitude) || isNaN(longitude)) {
+        return res.status(400).json({ message: "Invalid coordinates" });
+      }
+
+      // Use OpenStreetMap Nominatim for reverse geocoding
+      const response = await serverAxiosClient.get(
+        `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`
+      );
+
+      if (response.data) {
+        res.json({
+          country: response.data.address?.country || 'Unknown',
+          city: response.data.address?.city || response.data.address?.town || response.data.address?.village || 'Unknown',
+          state: response.data.address?.state || response.data.address?.province || null,
+          coordinates: { latitude, longitude }
+        });
+      } else {
+        res.status(404).json({ message: "Location not found" });
+      }
+    } catch (error) {
+      console.error('Error fetching location:', error);
+      res.status(500).json({ message: "Failed to fetch location data" });
+    }
+  });
+
+  // Hebrew date API endpoint for Tefilla conditional processing
+  app.get("/api/hebrew-date/:date", async (req, res) => {
+    try {
+      const { date } = req.params;
+      const inputDate = new Date(date);
+      
+      if (isNaN(inputDate.getTime())) {
+        return res.status(400).json({ message: "Invalid date format" });
+      }
+
+      const year = inputDate.getFullYear();
+      const month = inputDate.getMonth() + 1;
+      const day = inputDate.getDate();
+
+      // Get Hebrew date conversion
+      const hebrewResponse = await serverAxiosClient.get(
+        `https://www.hebcal.com/converter?cfg=json&gy=${year}&gm=${month}&gd=${day}&g2h=1`
+      );
+
+      // Get events and holidays for this date
+      const eventsResponse = await serverAxiosClient.get(
+        `https://www.hebcal.com/hebcal?v=1&cfg=json&year=${year}&month=${month}&mf=on&ss=on&mod=on&nx=on&o=on&s=on`
+      );
+
+      let isRoshChodesh = false;
+      let events: string[] = [];
+
+      if (eventsResponse.data && eventsResponse.data.items) {
+        // Filter events for the specific date
+        const dateString = inputDate.toISOString().split('T')[0];
+        const dayEvents = eventsResponse.data.items.filter((item: any) => {
+          if (item.date) {
+            const eventDate = new Date(item.date).toISOString().split('T')[0];
+            return eventDate === dateString;
+          }
+          return false;
+        });
+
+        events = dayEvents.map((item: any) => item.title || item.hebrew || '');
+        isRoshChodesh = events.some(event => 
+          event.toLowerCase().includes('rosh chodesh') ||
+          event.toLowerCase().includes('ראש חודש')
+        );
+      }
+
+      if (hebrewResponse.data) {
+        res.json({
+          hebrew: hebrewResponse.data.hebrew || '',
+          date: date,
+          isRoshChodesh,
+          events,
+          hebrewDay: hebrewResponse.data.hd,
+          hebrewMonth: hebrewResponse.data.hm,
+          hebrewYear: hebrewResponse.data.hy
+        });
+      } else {
+        res.status(404).json({ message: "Hebrew date not found" });
+      }
+    } catch (error) {
+      console.error('Error fetching Hebrew date:', error);
+      res.status(500).json({ message: "Failed to fetch Hebrew date data" });
+    }
+  });
+
   app.get("/healthcheck", (req, res) => {
     res.json({ status: "OK" });
   })
+
+  // Messages routes
+  app.get("/api/messages/:date", async (req, res) => {
+    try {
+      const { date } = req.params;
+      const message = await storage.getMessageByDate(date);
+      
+      if (!message) {
+        return res.status(404).json({ message: "No message found for this date" });
+      }
+      
+      res.json(message);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch message" });
+    }
+  });
+  
+  app.post("/api/messages", async (req, res) => {
+    try {
+      const messageData = req.body;
+      const newMessage = await storage.createMessage(messageData);
+      res.json(newMessage);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create message" });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;

@@ -4,91 +4,92 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Koren Fonts for Tefilla Content */
+/* TEST: VC Koren Light Font for Hebrew Tefilla Content */
 @font-face {
   font-family: 'Koren Siddur';
-  src: url('./fonts/KorenSiddur.otf') format('opentype');
+  src: url('/fonts/VC-Koren-Light.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
-  font-display: swap;
+  font-display: block; /* Prevent font flash - wait for font to load */
+  unicode-range: U+0590-05FF, U+FB1D-FB4F; /* Hebrew characters only */
 }
 
+/* Arno Koren Font for English text within Hebrew prayers */
 @font-face {
   font-family: 'Arno Koren';
   src: url('./fonts/ArnoKoren.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
-  font-display: swap;
+  font-display: block; /* Prevent font flash - wait for font to load */
+  unicode-range: U+0020-007F, U+00A0-00FF; /* Latin characters only */
 }
 
-/* VC Koren Fonts for Hebrew Text in Tefilla Modals */
-@font-face {
-  font-family: 'VC Koren Hebrew';
-  src: url('./fonts/VC_Koren-Light.otf') format('opentype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'VC Koren Hebrew';
-  src: url('./fonts/VC_Koren-Bold.otf') format('opentype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-.koren-siddur-hebrew {
-  font-family: 'Koren Siddur', 'Frank Ruhl Libre', 'David Libre', serif;
-  font-weight: 600;
-  font-style: normal;
-  color: #000000;
-  line-height: 1.8;
-  text-align: right !important;
-  direction: rtl;
-  unicode-bidi: embed;
-  letter-spacing: 0.02em;
-}
-
-/* VC Koren Hebrew classes for Tefilla Modals */
+/* Hebrew prayer text - let browser handle font fallback automatically */
 .vc-koren-hebrew {
-  font-family: 'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif !important;
-  font-weight: 400 !important;
+  font-family: 'Koren Siddur', 'Arno Koren', serif !important;
+  font-weight: normal !important;
   font-style: normal !important;
   color: #000000 !important;
   line-height: 1.8 !important;
-  text-align: right !important;
+  text-align: start !important; /* Use start for natural alignment based on text direction */
   direction: rtl !important;
-  unicode-bidi: embed !important;
+  unicode-bidi: plaintext !important; /* Let browser handle mixed content naturally */
   letter-spacing: 0.02em !important;
-  /* Prevent flash by ensuring consistent font application */
-  visibility: visible !important;
+  text-rendering: optimizeLegibility !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  white-space: pre-line !important; /* Preserve line breaks from database */
 }
 
+/* Bold Hebrew text using increased font size instead of font-weight */
+.vc-koren-hebrew strong,
+.vc-koren-hebrew b,
 .vc-koren-hebrew-bold {
-  font-family: 'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif !important;
-  font-weight: 700 !important;
+  font-family: 'Koren Siddur', 'Arno Koren', serif !important;
+  font-weight: normal !important;
   font-style: normal !important;
   color: #000000 !important;
   text-align: right !important;
   direction: rtl !important;
+  font-size: 1.05em !important; /* 5% larger for emphasis */
 }
 
-/* Ensure bold tags within Hebrew text use the bold font */
-.vc-koren-hebrew strong,
-.vc-koren-hebrew b {
-  font-family: 'VC Koren Hebrew', 'Frank Ruhl Libre', 'David Libre', serif !important;
-  font-weight: 700 !important;
-}
-
+/* English prayer text */
 .koren-siddur-english {
-  font-family: 'Arno Koren', 'Playfair Display', Georgia, serif;
-  font-weight: normal;
-  font-style: normal;
-  line-height: 1.6;
-  text-align: left !important;
-  direction: ltr;
+  font-family: 'Arno Koren', 'Playfair Display', Georgia, serif !important;
+  font-weight: normal !important;
+  font-style: normal !important;
+  line-height: 1.6 !important;
+  text-align: start !important; /* Use start for natural left alignment */
+  direction: ltr !important;
+  unicode-bidi: plaintext !important;
+  white-space: pre-line !important; /* Preserve line breaks from database */
+  width: 100% !important; /* Constrain to container width */
+  max-width: 100% !important; /* Additional width constraint */
+  word-wrap: break-word !important; /* Break long words */
+  overflow-wrap: break-word !important; /* Modern standard for word wrapping */
+  word-break: break-word !important; /* Backup for very long words */
+  box-sizing: border-box !important; /* Include padding in width calculation */
+  overflow-x: hidden !important; /* Hide any horizontal overflow */
 }
+
+/* Update old class to use VC Koren Light font (TEST) */
+.koren-siddur-hebrew {
+  font-family: 'Koren Siddur', 'Arno Koren', serif !important;
+  font-weight: normal !important;
+  font-style: normal !important;
+  color: #000000 !important;
+  line-height: 1.8 !important;
+  text-align: start !important; /* Use start for natural alignment based on text direction */
+  direction: rtl !important;
+  unicode-bidi: plaintext !important; /* Better handling of mixed Hebrew/English content */
+  letter-spacing: 0.02em !important;
+  text-rendering: optimizeLegibility !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Removed old English text styling */
 
 :root {
   --background: hsl(0, 0%, 100%);
@@ -135,6 +136,74 @@
 
 .text-center {
   text-align: center !important;
+}
+
+/* Enhanced Hebrew font rendering for Koren Siddur */
+.vc-koren-hebrew,
+.koren-siddur-hebrew {
+  font-variant-ligatures: normal !important;
+  font-variant-numeric: normal !important;
+  font-variant: normal !important;
+}
+
+/* Scrollbar styling for better UX */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.7);
+}
+
+/* Hide problematic Unicode characters that show as black boxes */
+.vc-koren-hebrew .notdef,
+.koren-siddur-hebrew .notdef,
+.vc-koren-hebrew *[class*="notdef"],
+.koren-siddur-hebrew *[class*="notdef"] {
+  display: none !important;
+}
+
+/* Hide specific problematic Hebrew Unicode characters that show as black boxes */
+.vc-koren-hebrew::before,
+.vc-koren-hebrew::after,
+.koren-siddur-hebrew::before,
+.koren-siddur-hebrew::after {
+  content: none !important;
+}
+
+/* Filter out specific Unicode points that cause black boxes */
+.vc-koren-hebrew,
+.koren-siddur-hebrew {
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+/* Handle missing glyphs gracefully */
+@supports (font-variant-emoji: text) {
+  .vc-koren-hebrew,
+  .koren-siddur-hebrew {
+    font-variant-emoji: text !important;
+  }
+}
+
+/* Specific rules for Hebrew Unicode ranges */
+.vc-koren-hebrew,
+.koren-siddur-hebrew {
+  font-display: swap !important;
 }
 
 /* Ensure proper RTL for Hebrew content */
@@ -639,4 +708,30 @@ html, body, #root {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
+}
+
+/* Prevent Tehillim buttons from being draggable outside modal */
+.tehillim-button-grid {
+  contain: layout style paint;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.tehillim-button-grid button {
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  position: relative;
+  pointer-events: auto;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
 }

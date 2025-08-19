@@ -1,4 +1,4 @@
-import { Book, HandHeart, Home, Heart, Sparkles, ShoppingBag, Coins } from "lucide-react";
+import { BookOpen, HandHeart, Home, Heart, Sparkles, ShoppingBag, Coins } from "lucide-react";
 import type { Section } from "@/pages/home";
 
 interface BottomNavigationProps {
@@ -8,7 +8,7 @@ interface BottomNavigationProps {
 
 export default function BottomNavigation({ activeSection, onSectionChange }: BottomNavigationProps) {
   const navItems = [
-    { id: 'torah' as Section, icon: Book, label: 'Torah', isCenter: false },
+    { id: 'torah' as Section, icon: BookOpen, label: 'Torah', isCenter: false },
     { id: 'tefilla' as Section, icon: HandHeart, label: 'Tefilla', isCenter: false },
     { id: 'home' as Section, icon: Heart, label: 'Home', isCenter: true },
     { id: 'tzedaka' as Section, icon: Coins, label: 'Tzedaka', isCenter: false },
@@ -28,7 +28,7 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
 
 
   return (
-    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-gradient-soft backdrop-blur-sm border-t border-rose-blush/15 shadow-2xl rounded-t-3xl transition-gentle">
+    <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-gradient-soft backdrop-blur-sm border-t border-rose-blush/15 shadow-2xl rounded-t-3xl transition-gentle z-50">
       <div className="flex items-center justify-around py-2 px-2">
         {navItems.map(({ id, icon: Icon, label, isCenter }) => (
           <button

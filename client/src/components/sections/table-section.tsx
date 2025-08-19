@@ -1,4 +1,4 @@
-import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar, Moon, MapPin, ShoppingBag, MessageSquare } from "lucide-react";
+import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar, Moon, MapPin, ShoppingBag, MessageSquare, Zap, Lightbulb as Candle } from "lucide-react";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
@@ -122,7 +122,25 @@ export default function TableSection() {
             <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
               <p className="platypi-regular text-xs text-black/70 platypi-bold">Candle Lighting</p>
               <div className="flex items-center justify-center space-x-1">
-                <Flame className="text-blush" size={14} />
+                <svg width="20" height="16" viewBox="0 0 64 64" className="text-blush fill-current">
+                  <g>
+                    {/* Left candle */}
+                    <ellipse cx="20" cy="8" rx="3" ry="6" />
+                    <rect x="18" y="12" width="4" height="3" />
+                    <rect x="16" y="15" width="8" height="4" />
+                    <rect x="18.5" y="19" width="3" height="24" />
+                    <ellipse cx="20" cy="43" rx="8" ry="3" />
+                    <rect x="12" y="43" width="16" height="4" />
+                    
+                    {/* Right candle */}
+                    <ellipse cx="44" cy="8" rx="3" ry="6" />
+                    <rect x="42" y="12" width="4" height="3" />
+                    <rect x="40" y="15" width="8" height="4" />
+                    <rect x="42.5" y="19" width="3" height="24" />
+                    <ellipse cx="44" cy="43" rx="8" ry="3" />
+                    <rect x="36" y="43" width="16" height="4" />
+                  </g>
+                </svg>
                 <p className="platypi-bold text-base text-black platypi-medium">
                   {showShabbosError ? "--:--" : 
                    shabbosData?.candleLighting || 
@@ -133,7 +151,7 @@ export default function TableSection() {
             <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
               <p className="platypi-regular text-xs text-black/70 platypi-bold">Havdalah</p>
               <div className="flex items-center justify-center space-x-1">
-                <Moon className="text-lavender" size={14} />
+                <Flame className="text-lavender" size={14} />
                 <p className="platypi-bold text-base text-black platypi-medium">
                   {showShabbosError ? "--:--" : 
                    shabbosData?.havdalah || 
@@ -224,10 +242,10 @@ export default function TableSection() {
                 ? 'bg-gray-300' 
                 : isModalComplete('inspiration') ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
-              <Lightbulb className={`${!inspirationContent ? 'text-gray-500' : 'text-white'}`} size={18} strokeWidth={1.5} />
+              <Star className={`${!inspirationContent ? 'text-gray-500' : 'text-white'}`} size={18} strokeWidth={1.5} />
             </div>
             <h3 className={`platypi-bold text-xs mb-1 platypi-bold ${!inspirationContent ? 'text-gray-500' : 'text-black'}`}>
-              Creative Jewish Living
+              Special Feature
             </h3>
             <p className={`platypi-regular text-xs leading-relaxed ${!inspirationContent ? 'text-gray-400' : 'text-black/60'}`}>
               {!inspirationContent ? 'Coming Soon' : isModalComplete('inspiration') ? 'Completed' : inspirationContent.title}

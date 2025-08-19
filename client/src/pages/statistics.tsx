@@ -163,13 +163,13 @@ export default function Statistics() {
   };
 
   // Financial Stats Component
-  function FinancialStatsSection() {
+  function FinancialStatsSection({ period }: { period: 'today' | 'month' | 'alltime' }) {
     const { data: financialStats, isLoading: financialLoading } = useQuery<{
       totalDaysSponsored: number;
       totalCampaigns: number;
       totalRaised: number;
     }>({
-      queryKey: ["/api/analytics/community-impact"],
+      queryKey: [`/api/analytics/community-impact?period=${period}`],
       refetchInterval: 60000, // Refresh every minute
     });
 
@@ -345,7 +345,7 @@ export default function Statistics() {
           </div>
 
           {/* Financial Stats */}
-          <FinancialStatsSection />
+          <FinancialStatsSection period={selectedPeriod} />
         </div>
       </main>
 

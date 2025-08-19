@@ -112,12 +112,10 @@ export default function DonationModal() {
     }}>
       <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto gradient-soft-glow rounded-3xl p-6 platypi-regular border border-blush/20">
         <div className="flex items-center justify-center mb-3 relative">
-          <DialogTitle className="text-lg platypi-bold text-black">
-            {campaign?.title || "Support Causes"}
-          </DialogTitle>
+          <DialogTitle className="text-lg platypi-bold text-black">Put a Coin in Tzedaka</DialogTitle>
         </div>
         <p className="text-xs text-warm-gray/70 platypi-regular text-center mb-4">
-          {campaign?.description || "Support our community with your generous contribution"}
+          Donations go towards Woman in need and Torah Causes
         </p>
         
         {/* Apple Pay development notice */}

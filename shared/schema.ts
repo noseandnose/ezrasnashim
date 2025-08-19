@@ -1,12 +1,11 @@
-import { pgTable, text, serial, integer, boolean, timestamp, date, index, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, date, index, jsonb, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Weekly Torah content tables
 export const dailyRecipes = pgTable("daily_recipes", {
   id: serial("id").primaryKey(),
-  fromDate: date("from_date").notNull(), // Start date for recipe availability
-  untilDate: date("until_date").notNull(), // End date for recipe availability (same as fromDate if daily)
+  date: date("date").notNull(), // The date this recipe should be displayed
   title: text("title").notNull(),
   description: text("description"),
   ingredients: text("ingredients").notNull(), // JSON array as text
@@ -544,6 +543,7 @@ export type InsertDailyStats = z.infer<typeof insertDailyStatsSchema>;
 export const tehillim = pgTable("tehillim", {
   id: serial("id").primaryKey(),
   englishNumber: integer("english_number").notNull(),
+  partNumber: integer("part_number").notNull(),
   hebrewNumber: text("hebrew_number").notNull(),
   englishText: text("english_text").notNull(),
   hebrewText: text("hebrew_text").notNull(),
@@ -552,3 +552,17 @@ export const tehillim = pgTable("tehillim", {
 export const insertTehillimSchema = createInsertSchema(tehillim);
 export type Tehillim = typeof tehillim.$inferSelect;
 export type InsertTehillim = z.infer<typeof insertTehillimSchema>;
+
+// Messages table for daily messages to users
+export const messages = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull().unique(),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertMessagesSchema = createInsertSchema(messages);
+export type Message = typeof messages.$inferSelect;
+export type InsertMessage = z.infer<typeof insertMessagesSchema>;

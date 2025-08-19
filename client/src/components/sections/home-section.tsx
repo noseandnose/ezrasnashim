@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Clock, Heart, BookOpen, HandHeart, Coins, MapPin, ArrowRight, Sparkles, Star } from "lucide-react";
+import { Calendar, Clock, Heart, BookOpen, HandHeart, Coins, MapPin, ArrowRight, Sparkles, Star, Sunrise, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
@@ -63,38 +63,74 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   // Time-based prayer logic (same as Tefilla section)
   const getCurrentPrayer = () => {
     if (!jewishTimesQuery.data || jewishTimesQuery.isLoading) {
-      return { title: "Morning Brochas", subtitle: "Loading times...", modal: "morning-brochas", icon: Sparkles };
+      return { title: "Morning Brochas", subtitle: "Loading times...", modal: "morning-brochas", icon: Sunrise };
     }
 
     const now = new Date();
     const times = jewishTimesQuery.data;
-    const neitz = new Date(`${now.toDateString()} ${times.sunrise}`);
-    const minchaGedola = new Date(`${now.toDateString()} ${times.minchaGedolah}`);
-    const shkia = new Date(`${now.toDateString()} ${times.shkia}`);
+    
+    // Helper function to parse time strings like "6:30 AM" into today's date
+    const parseTimeToday = (timeStr: string) => {
+      if (!timeStr) return null;
+      
+      // Parse the time string (e.g., "6:30 AM" or "7:45 PM")
+      const match = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+      if (!match) return null;
+      
+      let hours = parseInt(match[1]);
+      const minutes = parseInt(match[2]);
+      const period = match[3].toUpperCase();
+      
+      // Convert to 24-hour format
+      if (period === 'PM' && hours !== 12) {
+        hours += 12;
+      } else if (period === 'AM' && hours === 12) {
+        hours = 0;
+      }
+      
+      // Create a date object for today with the specified time
+      const date = new Date();
+      date.setHours(hours, minutes, 0, 0);
+      return date;
+    };
+    
+    const neitz = parseTimeToday(times.sunrise);
+    const minchaGedola = parseTimeToday(times.minchaGedolah);
+    const shkia = parseTimeToday(times.shkia);
+    
+    // Handle null times gracefully
+    if (!neitz || !minchaGedola || !shkia) {
+      return {
+        title: "Morning Brochas",
+        subtitle: "Times unavailable",
+        modal: "morning-brochas" as const,
+        icon: Sunrise
+      };
+    }
 
     if (now >= neitz && now < minchaGedola) {
-      // Morning Brochas time
+      // Morning Brochas time - sunrise icon
       return {
         title: "Morning Brochas",
         subtitle: `${times.sunrise} - ${times.minchaGedolah}`,
         modal: "morning-brochas" as const,
-        icon: Sparkles
+        icon: Sunrise
       };
     } else if (now >= minchaGedola && now < shkia) {
-      // Mincha time
+      // Mincha time - midday sun icon
       return {
         title: "Mincha",
         subtitle: `${times.minchaGedolah} - ${times.shkia}`,
         modal: "mincha" as const,
-        icon: Clock
+        icon: Sun
       };
     } else {
-      // Maariv time (from Shkia until next morning's Neitz)
+      // Maariv time - night moon icon
       return {
         title: "Maariv",
         subtitle: `${times.shkia} - ${times.sunrise}`,
         modal: "maariv" as const,
-        icon: Star
+        icon: Moon
       };
     }
   };
@@ -203,7 +239,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
         >
           <div className={`p-3 rounded-full ${tefillaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-blush to-lavender'}`}>
-            <Heart className="text-white" size={20} strokeWidth={1.5} />
+            <HandHeart className="text-white" size={20} strokeWidth={1.5} />
           </div>
           <div className="flex-grow">
             <h3 className="platypi-bold text-sm text-black">Daily Tefilla</h3>
@@ -227,16 +263,23 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           <HeartProgress completed={tzedakaCompleted} size={20} />
         </button>
 
-        {/* Daily Progress Tracker - Big Button */}
+        {/* Daily Progress Tracker - Compact Version */}
         <div 
           id="daily-progress-garden"
-          className="rounded-2xl p-6 shadow-lg border border-blush/10 bg-white flex flex-col items-center justify-center min-h-[200px] mt-4"
+          className="rounded-2xl px-4 py-3 shadow-lg border border-blush/10 bg-white mt-4 flex items-center justify-between min-h-[90px]"
         >
-          <h3 className="platypi-bold text-lg text-black mb-3">Daily Progress Garden</h3>
-          <DailyProgress />
-          <p className="platypi-regular text-xs text-black/60 text-center mt-3 leading-relaxed">
-            Complete one item from each task to see your daily progress Bloom
-          </p>
+          {/* Left side: Title and subtitle */}
+          <div className="flex flex-col justify-center flex-1">
+            <h3 className="platypi-bold text-lg text-black mb-1 text-left">Daily Progress Garden</h3>
+            <p className="platypi-regular text-xs text-black/80 leading-relaxed text-left max-w-[160px]">
+              Complete one item from each task to see your daily progress Bloom
+            </p>
+          </div>
+          
+          {/* Right side: Progress image */}
+          <div className="flex items-center justify-center -mr-2">
+            <DailyProgress />
+          </div>
         </div>
       </div>
     </div>

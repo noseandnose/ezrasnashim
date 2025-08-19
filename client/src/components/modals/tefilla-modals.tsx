@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, ArrowUp } from "lucide-react";
+import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, ArrowUp, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Link, Shield, Unlock } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
@@ -16,9 +16,12 @@ import { useTrackModalComplete, useAnalytics } from "@/hooks/use-analytics";
 import { BirkatHamazonModal } from "@/components/modals/birkat-hamazon-modal";
 import { useLocationStore } from '@/hooks/use-jewish-times';
 import { formatTextContent } from "@/lib/text-formatter";
+import { processTefillaText, getCurrentTefillaConditions, type TefillaConditions } from "@/utils/tefilla-processor";
+import { FullscreenModal } from "@/components/ui/fullscreen-modal";
+import { Expand } from "lucide-react";
 
 interface TefillaModalsProps {
-  onSectionChange?: (section: any) => void;
+  onSectionChange?: (section: 'torah' | 'tefilla' | 'tzedaka' | 'home' | 'table') => void;
 }
 
 // Koren Thank You Component
@@ -46,9 +49,118 @@ const KorenThankYou = () => {
         >
           Koren Publishers Jerusalem
         </a>
+        {' '}and Rabbi Sacks Legacy
       </span>
     </div>
   );
+};
+
+// Custom hook to manage Tefilla conditions
+const useTefillaConditions = () => {
+  const { coordinates } = useLocationStore();
+  const [conditions, setConditions] = useState<TefillaConditions | null>(null);
+
+  useEffect(() => {
+    const loadConditions = async () => {
+      try {
+        const tefillaConditions = await getCurrentTefillaConditions(
+          coordinates?.lat,
+          coordinates?.lng
+        );
+        setConditions(tefillaConditions);
+      } catch (error) {
+        // Could not load Tefilla conditions - Set default conditions
+        setConditions({
+          isInIsrael: false,
+          isRoshChodesh: false,
+          isFastDay: false,
+          isAseretYemeiTeshuva: false,
+          isSukkot: false,
+          isPesach: false,
+          isRoshChodeshSpecial: false
+        });
+      }
+    };
+
+    loadConditions();
+  }, [coordinates]);
+
+  return conditions;
+};
+
+// Enhanced text processing function for Tefilla content
+const processTefillaContent = (text: string, conditions: TefillaConditions | null): string => {
+  if (!conditions || !text) return formatTextContent(text);
+  
+  const processedText = processTefillaText(text, conditions);
+  return formatTextContent(processedText);
+};
+
+// Helper functions for prayer reason icons and short text
+const getReasonIcon = (reason: string, reasonEnglish?: string) => {
+  // Map Hebrew reasons and English translations to icons
+  const reasonToCode = (r: string, eng?: string): string => {
+    // Handle both Hebrew and English reasons, plus common variations
+    if (r === "רפואה שלמה" || eng === "Complete Healing" || r === "health" || eng === "health" || r === "Health") return "health";
+    if (r === "שידוך" || eng === "Finding a mate" || r === "shidduch" || eng === "shidduch") return "shidduch";
+    if (r === "זרע של קיימא" || eng === "Children" || r === "children" || eng === "children") return "children";
+    if (r === "פרנסה" || eng === "Livelihood" || r === "parnassa" || eng === "parnassa") return "parnassa";
+    if (r === "הצלחה" || eng === "Success" || r === "success" || eng === "success") return "success";
+    if (r === "שלום בית" || eng === "Family" || r === "family" || eng === "family") return "family";
+    if (r === "חכמה" || eng === "Education" || r === "education" || eng === "education") return "education";
+    if (r === "עליית נשמה" || eng === "Peace" || r === "peace" || eng === "peace") return "peace";
+    if (r === "פדיון שבויים" || eng === "Release from Captivity" || r === "hostages" || eng === "hostages") return "hostages";
+    return "general";
+  };
+  
+  const code = reasonToCode(reason, reasonEnglish);
+  const iconMap: Record<string, JSX.Element> = {
+    'health': <Stethoscope size={12} className="text-red-500" />,
+    'shidduch': <HeartHandshake size={12} className="text-pink-500" />,
+    'children': <Baby size={12} className="text-blue-500" />,
+    'parnassa': <DollarSign size={12} className="text-green-500" />,
+    'success': <Star size={12} className="text-yellow-500" />,
+    'family': <Users size={12} className="text-purple-500" />,
+    'education': <GraduationCap size={12} className="text-indigo-500" />,
+    'peace': <Smile size={12} className="text-teal-500" />,
+    'hostages': <Unlock size={12} className="text-orange-600" />,
+    'general': <Heart size={12} className="text-blush" />
+  };
+  
+  return iconMap[code];
+};
+
+const getReasonShort = (reason: string, reasonEnglish?: string) => {
+  // Map Hebrew reasons and English translations to short text
+  const reasonToCode = (r: string, eng?: string): string => {
+    // Handle both Hebrew and English reasons, plus common variations
+    if (r === "רפואה שלמה" || eng === "Complete Healing" || r === "health" || eng === "health" || r === "Health") return "health";
+    if (r === "שידוך" || eng === "Finding a mate" || r === "shidduch" || eng === "shidduch") return "shidduch";
+    if (r === "זרע של קיימא" || eng === "Children" || r === "children" || eng === "children") return "children";
+    if (r === "פרנסה" || eng === "Livelihood" || r === "parnassa" || eng === "parnassa") return "parnassa";
+    if (r === "הצלחה" || eng === "Success" || r === "success" || eng === "success") return "success";
+    if (r === "שלום בית" || eng === "Family" || r === "family" || eng === "family") return "family";
+    if (r === "חכמה" || eng === "Education" || r === "education" || eng === "education") return "education";
+    if (r === "עליית נשמה" || eng === "Peace" || r === "peace" || eng === "peace") return "peace";
+    if (r === "פדיון שבויים" || eng === "Release from Captivity" || r === "hostages" || eng === "hostages") return "hostages";
+    return "general";
+  };
+  
+  const code = reasonToCode(reason, reasonEnglish);
+  const shortMap: Record<string, string> = {
+    'health': 'Health',
+    'shidduch': 'Match',
+    'children': 'Kids',
+    'parnassa': 'Income',
+    'success': 'Success',
+    'family': 'Family',
+    'education': 'Study',
+    'peace': 'Peace',
+    'hostages': 'Release',
+    'general': 'Prayer'
+  };
+  
+  return shortMap[code];
 };
 
 // Standardized Modal Header Component for Tefilla Modals
@@ -65,8 +177,9 @@ const StandardModalHeader = ({
   fontSize: number;
   setFontSize: (size: number) => void;
 }) => (
-  <div className="flex items-center justify-center mb-3 relative pr-8">
-    <div className="flex items-center gap-4">
+  <div className="mb-2 space-y-2">
+    {/* First Row: Language Toggle and Title */}
+    <div className="flex items-center justify-center gap-4">
       <Button
         onClick={() => setShowHebrew(!showHebrew)}
         variant="ghost"
@@ -77,11 +190,14 @@ const StandardModalHeader = ({
             : 'text-black/60 hover:text-black hover:bg-white/50'
         }`}
       >
-        {showHebrew ? 'עב' : 'EN'}
+        {showHebrew ? 'EN' : 'עב'}
       </Button>
       
       <DialogTitle className="text-lg platypi-bold text-black">{title}</DialogTitle>
-      
+    </div>
+    
+    {/* Second Row: Font Size Controls */}
+    <div className="flex items-center justify-center">
       <div className="flex items-center gap-2">
         <button
           onClick={() => setFontSize(Math.max(12, fontSize - 2))}
@@ -102,7 +218,7 @@ const StandardModalHeader = ({
 );
 
 // Morning Brochas Modal Component
-function MorningBrochasModal() {
+function MorningBrochasModal({ setFullscreenContent }: { setFullscreenContent?: (content: any) => void }) {
   const { activeModal, closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
@@ -111,6 +227,9 @@ function MorningBrochasModal() {
   const [showHebrew, setShowHebrew] = useState(true);
   const [showEnglish, setShowEnglish] = useState(false);
   const [fontSize, setFontSize] = useState(20);
+  
+  // Load Tefilla conditions for conditional content processing
+  const tefillaConditions = useTefillaConditions();
   
   // Fetch morning prayers from database
   const { data: morningPrayers, isLoading, error } = useQuery({
@@ -134,9 +253,48 @@ function MorningBrochasModal() {
       <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="morning-brochas-description">
         <div id="morning-brochas-description" className="sr-only">Daily morning blessings and prayers of gratitude</div>
         
+        {/* Fullscreen button */}
+        {setFullscreenContent && (
+          <button
+            onClick={() => {
+              setFullscreenContent({
+                isOpen: true,
+                title: 'Morning Brochas',
+                content: (
+                  <div className="space-y-6">
+                    {morningPrayers?.map((prayer: MorningPrayer) => (
+                      <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
+                        {showHebrew && prayer.hebrewText && (
+                          <div 
+                            className="vc-koren-hebrew leading-relaxed"
+                            style={{ fontSize: `${fontSize + 1}px` }}
+                            dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText, tefillaConditions) }}
+                          />
+                        )}
+                        {!showHebrew && (
+                          <div 
+                            className="koren-siddur-english text-left leading-relaxed text-black/70"
+                            style={{ fontSize: `${fontSize}px` }}
+                            dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )
+              });
+            }}
+            className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 transition-colors z-10"
+            aria-label="Open fullscreen"
+          >
+            <Expand className="h-4 w-4 text-gray-600" />
+          </button>
+        )}
+        
         {/* Standardized Header with centered controls */}
-        <div className="flex items-center justify-center mb-3 relative pr-8">
-          <div className="flex items-center gap-4">
+        <div className="mb-2 space-y-2">
+          {/* First Row: Language Toggle and Title */}
+          <div className="flex items-center justify-center gap-4">
             <Button
               onClick={() => setShowHebrew(!showHebrew)}
               variant="ghost"
@@ -147,11 +305,14 @@ function MorningBrochasModal() {
                   : 'text-black/60 hover:text-black hover:bg-white/50'
               }`}
             >
-              {showHebrew ? 'עב' : 'EN'}
+              {showHebrew ? 'EN' : 'עב'}
             </Button>
             
             <DialogTitle className="text-lg platypi-bold text-black">Morning Brochas</DialogTitle>
-            
+          </div>
+          
+          {/* Second Row: Font Size Controls */}
+          <div className="flex items-center justify-center">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setFontSize(Math.max(12, fontSize - 2))}
@@ -184,14 +345,14 @@ function MorningBrochasModal() {
                     <div 
                       className="vc-koren-hebrew leading-relaxed"
                       style={{ fontSize: `${fontSize + 1}px` }}
-                      dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.hebrewText).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
+                      dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText, tefillaConditions).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
                     />
                   )}
                   {!showHebrew && (
                     <div 
                       className="koren-siddur-english text-left leading-relaxed text-black/70"
                       style={{ fontSize: `${fontSize}px` }}
-                      dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.englishTranslation || "English translation not available") }}
+                      dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
                     />
                   )}
                 </div>
@@ -251,7 +412,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const [selectedPrayerId, setSelectedPrayerId] = useState<number | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [showExplosion, setShowExplosion] = useState(false);
+  const [fullscreenContent, setFullscreenContent] = useState<{
+    isOpen: boolean;
+    title: string;
+    content: React.ReactNode;
+  }>({ isOpen: false, title: '', content: null });
   const queryClient = useQueryClient();
+  
+  // Load Tefilla conditions for conditional content processing
+  const tefillaConditions = useTefillaConditions();
 
   // Reset explosion state when modal changes
   useEffect(() => {
@@ -324,6 +493,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const [nishmasFontSize, setNishmasFontSize] = useState(20);
   const [showNishmasInfo, setShowNishmasInfo] = useState(false);
 
+  // Get Tefilla conditions for conditional content processing
+  const conditions = useTefillaConditions();
+
   const { data: minchaPrayers = [], isLoading } = useQuery<MinchaPrayer[]>({
     queryKey: ['/api/mincha/prayers'],
     enabled: activeModal === 'mincha'
@@ -347,7 +519,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     queryFn: async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress?t=${Date.now()}`);
       const data = await response.json();
-      console.log('Fresh progress data:', data);
       return data;
     },
     refetchInterval: 1000, // Very frequent refresh
@@ -365,11 +536,30 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     gcTime: 0 // Don't cache at all
   });
 
-  // Fetch Tehillim text from Sefaria API
-  const { data: tehillimText, refetch: refetchTehillimText } = useQuery<{text: string; perek: number; language: string}>({
-    queryKey: ['/api/tehillim/text', progress?.currentPerek, showHebrew ? 'hebrew' : 'english'],
+  // Get the tehillim info first to get the English number
+  const { data: tehillimInfo } = useQuery<{
+    id: number;
+    englishNumber: number;
+    partNumber: number;
+    hebrewNumber: string;
+  }>({
+    queryKey: ['/api/tehillim/info', progress?.currentPerek],
     queryFn: async () => {
-      const response = await axiosClient.get(`/api/tehillim/text/${progress?.currentPerek}?language=${showHebrew ? 'hebrew' : 'english'}`);
+      if (!progress?.currentPerek) return null;
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/info/${progress.currentPerek}`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    enabled: activeModal === 'tehillim-text' && !!progress?.currentPerek,
+    staleTime: 60000
+  });
+
+  // Fetch Tehillim text from Supabase using ID (for proper part handling)
+  const { data: tehillimText, refetch: refetchTehillimText } = useQuery<{text: string; perek: number; language: string}>({
+    queryKey: ['/api/tehillim/text/by-id', progress?.currentPerek, showHebrew ? 'hebrew' : 'english'],
+    queryFn: async () => {
+      if (!progress?.currentPerek) return null;
+      const response = await axiosClient.get(`/api/tehillim/text/by-id/${progress.currentPerek}?language=${showHebrew ? 'hebrew' : 'english'}`);
       return response.data;
     },
     enabled: activeModal === 'tehillim-text' && !!progress?.currentPerek,
@@ -406,16 +596,25 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       
       toast({
         title: "Perek Completed!",
-        description: `Perek ${progress?.currentPerek || 'current'} has been completed. Moving to the next perek.`,
+        description: tehillimInfo?.partNumber && tehillimInfo.partNumber > 1 
+          ? `Perek ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber} has been completed. Moving to the next section.`
+          : `Perek ${tehillimInfo?.englishNumber || 'current'} has been completed. Moving to the next perek.`,
       });
-      // Force complete cache reset for Tehillim data
-      queryClient.resetQueries({ queryKey: ['/api/tehillim/progress'] });
-      queryClient.resetQueries({ queryKey: ['/api/tehillim/current-name'] });
-      queryClient.resetQueries({ queryKey: ['/api/tehillim/text'] });
-      queryClient.resetQueries({ queryKey: ['/api/tehillim/preview'] });
+      // Force complete cache reset for Tehillim data in both modal and section
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/text'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/preview'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/info'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/text/by-id'] });
       
-      // Wait a moment then close modal to trigger fresh data load
+      // Wait a moment for the server update to complete, then close modal
       setTimeout(() => {
+        // Force refetch all tehillim queries after modal closes
+        queryClient.refetchQueries({ queryKey: ['/api/tehillim/progress'] });
+        queryClient.refetchQueries({ queryKey: ['/api/tehillim/info'] });
+        queryClient.refetchQueries({ queryKey: ['/api/tehillim/preview'] });
+        queryClient.refetchQueries({ queryKey: ['/api/tehillim/current-name'] });
         closeModal();
       }, 500);
     },
@@ -435,19 +634,21 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const getTehillimDisplayText = () => {
     if (!tehillimText) {
       return (
-        <div className="text-sm text-gray-600 italic text-center">
-          Loading Tehillim text from Sefaria...
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
         </div>
       );
     }
 
+    // Apply text formatting to clean Hebrew text
+    const formattedText = formatTextContent(tehillimText.text);
+
     return (
       <div 
-        className={`leading-relaxed whitespace-pre-line ${showHebrew ? 'koren-siddur-hebrew text-right' : 'koren-siddur-english text-left'}`}
+        className={`leading-relaxed whitespace-pre-line ${showHebrew ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'}`}
         style={{ fontSize: `${showHebrew ? fontSize + 1 : fontSize}px` }}
-      >
-        {tehillimText.text}
-      </div>
+        dangerouslySetInnerHTML={{ __html: formattedText }}
+      />
     );
   };
 
@@ -494,7 +695,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     const today = new Date().toDateString();
     const newDay = nishmasDay + 1;
     
-    console.log('Completing Nishmas:', { currentDay: nishmasDay, newDay, todayCompleted });
+
     
     // Track Nishmas completion and mark as completed
     trackModalComplete('nishmas');
@@ -512,7 +713,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         localStorage.setItem('nishmas-start-date', startDate);
       }
       
-      console.log('Nishmas completed, new state:', { newDay, completed: true });
+
     }
     
     // Complete tefilla task and redirect to home
@@ -560,9 +761,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="tehillim-description">
           <div id="tehillim-description" className="sr-only">Psalms reading and community prayer participation</div>
           
-          {/* Standardized Header */}
-          <div className="flex items-center justify-center mb-3 relative pr-8">
-            <div className="flex items-center gap-4">
+          {/* Standardized Header with two-row layout */}
+          <div className="mb-2 space-y-2">
+            {/* First Row: Language Toggle and Title */}
+            <div className="flex items-center justify-center gap-4">
               <Button
                 onClick={() => setShowHebrew(!showHebrew)}
                 variant="ghost"
@@ -573,11 +775,17 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                     : 'text-black/60 hover:text-black hover:bg-white/50'
                 }`}
               >
-                {showHebrew ? 'עב' : 'EN'}
+                {showHebrew ? 'EN' : 'עב'}
               </Button>
               
-              <DialogTitle className="text-lg platypi-bold text-black">Tehillim {progress?.currentPerek || 1}</DialogTitle>
-              
+              <DialogTitle className="text-lg platypi-bold text-black">
+                Tehillim {tehillimInfo?.englishNumber || progress?.currentPerek || 1}
+                {tehillimInfo?.englishNumber === 119 && tehillimInfo?.partNumber ? ` - Part ${tehillimInfo.partNumber}` : ''}
+              </DialogTitle>
+            </div>
+            
+            {/* Second Row: Font Size Controls */}
+            <div className="flex items-center justify-center">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setFontSize(Math.max(12, fontSize - 2))}
@@ -606,6 +814,21 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             </div>
           </div>
 
+          {/* Prayer Name Display Bar */}
+          {currentName && (
+            <div className="bg-gray-50/10 rounded-xl p-3 mx-1 border border-blush/10">
+              <div className="flex items-center justify-center gap-2">
+                {getReasonIcon(currentName.reason, currentName.reasonEnglish || undefined)}
+                <span className="text-sm platypi-medium text-black">
+                  Praying for: {currentName.hebrewName}
+                </span>
+                <span className="text-xs platypi-regular text-black/60">
+                  ({getReasonShort(currentName.reason, currentName.reasonEnglish || undefined)})
+                </span>
+              </div>
+            </div>
+          )}
+
           <KorenThankYou />
 
           <div className="heart-explosion-container">
@@ -628,6 +851,44 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="mincha-description">
           <div id="mincha-description" className="sr-only">Afternoon prayer service and instructions</div>
           
+          {/* Fullscreen button */}
+          <button
+            onClick={() => {
+              setFullscreenContent({
+                isOpen: true,
+                title: 'Mincha Prayer',
+                content: (
+                  <div className="space-y-6">
+                    {minchaPrayers.map((prayer) => (
+                      <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
+                        {prayer.hebrewText && language === 'hebrew' && (
+                          <div 
+                            className="vc-koren-hebrew leading-relaxed"
+                            style={{ fontSize: `${fontSize + 1}px` }}
+                            dangerouslySetInnerHTML={{ 
+                              __html: processTefillaContent(prayer.hebrewText, tefillaConditions)
+                            }}
+                          />
+                        )}
+                        {language === 'english' && (
+                          <div 
+                            className="koren-siddur-english text-left leading-relaxed text-black/70"
+                            style={{ fontSize: `${fontSize}px` }}
+                            dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )
+              });
+            }}
+            className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 transition-colors z-10"
+            aria-label="Open fullscreen"
+          >
+            <Expand className="h-4 w-4 text-gray-600" />
+          </button>
+          
           <StandardModalHeader 
             title="Mincha Prayer"
             showHebrew={language === 'hebrew'}
@@ -649,14 +910,16 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                       <div 
                         className="vc-koren-hebrew leading-relaxed"
                         style={{ fontSize: `${fontSize + 1}px` }}
-                        dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.hebrewText).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
+                        dangerouslySetInnerHTML={{ 
+                          __html: processTefillaContent(prayer.hebrewText, conditions)
+                        }}
                       />
                     )}
                     {language === 'english' && (
                       <div 
                         className="koren-siddur-english text-left leading-relaxed text-black/70"
                         style={{ fontSize: `${fontSize}px` }}
-                        dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.englishTranslation || "English translation not available") }}
+                        dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
                       />
                     )}
                   </div>
@@ -664,6 +927,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               </div>
             )}
           </div>
+
+          <KorenThankYou />
 
           <div className="heart-explosion-container">
             <Button 
@@ -764,9 +1029,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             setFontSize={setFontSize}
           />
           
-          <div className="text-center text-gray-600 platypi-regular">
-            Daily blessings and their proper recitation...
-          </div>
+
 
           <div className="heart-explosion-container">
             <Button 
@@ -797,9 +1060,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             setFontSize={setFontSize}
           />
           
-          <div className="text-center text-gray-600 platypi-regular">
-            Traditional prayers and their meanings...
-          </div>
+
 
           <div className="heart-explosion-container">
             <Button 
@@ -822,17 +1083,29 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[90vh] platypi-regular ${isAnimating ? 'prayer-ascending' : ''}`} aria-describedby="personal-prayers-description">
           <div id="personal-prayers-description" className="sr-only">Guidance for personal prayer and connection</div>
           
-          <StandardModalHeader 
-            title="Personal Prayers"
-            showHebrew={showHebrew}
-            setShowHebrew={setShowHebrew}
-            fontSize={fontSize}
-            setFontSize={setFontSize}
-          />
-          
-          <div className="text-center text-gray-600 platypi-regular">
-            Guidance for personal prayer and connection...
+          <div className="flex items-center justify-center mb-3 relative">
+            <div className="flex items-center gap-4">
+              <DialogTitle className="text-lg platypi-bold text-black">Personal Prayers</DialogTitle>
+              
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                >
+                  <span className="text-xs platypi-medium">-</span>
+                </button>
+                <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
+                <button
+                  onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                >
+                  <span className="text-xs platypi-medium">+</span>
+                </button>
+              </div>
+            </div>
           </div>
+          
+
 
           <div className="heart-explosion-container">
             <Button 
@@ -853,9 +1126,43 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       {/* Nishmas Kol Chai Modal */}
       <Dialog open={activeModal === 'nishmas-campaign'} onOpenChange={() => closeModal(true)}>
         <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular ${isAnimating ? 'prayer-ascending' : ''}`}>
-          {/* Standardized Header */}
-          <div className="flex items-center justify-center mb-3 relative pr-8">
-            <div className="flex items-center gap-4">
+          {/* Fullscreen button in top left */}
+          <button
+            onClick={() => {
+              if (nishmasText) {
+                setFullscreenContent({
+                  isOpen: true,
+                  title: 'Nishmas Kol Chai',
+                  content: (
+                    <div 
+                      className={`leading-relaxed text-black ${
+                        nishmasLanguage === 'hebrew' ? 'vc-koren-hebrew' : 'koren-siddur-english text-left'
+                      }`}
+                      style={{ fontSize: nishmasLanguage === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
+                    >
+                      <div 
+                        className="whitespace-pre-wrap leading-relaxed"
+                        dangerouslySetInnerHTML={{ 
+                          __html: formatTextContent(
+                            nishmasText.fullText || 'Text not available'
+                          ).replace(/<strong>/g, nishmasLanguage === 'hebrew' ? '<strong class="vc-koren-hebrew-bold">' : '<strong style="font-weight: 700;">')
+                        }}
+                      />
+                    </div>
+                  )
+                });
+              }
+            }}
+            className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 transition-colors z-10"
+            aria-label="Open fullscreen"
+          >
+            <Expand className="h-4 w-4 text-gray-600" />
+          </button>
+          
+          {/* Standardized Header with two-row layout */}
+          <div className="mb-2 space-y-2">
+            {/* First Row: Language Toggle and Title */}
+            <div className="flex items-center justify-center gap-4">
               <Button
                 onClick={() => setNishmasLanguage(nishmasLanguage === 'hebrew' ? 'english' : 'hebrew')}
                 variant="ghost"
@@ -866,11 +1173,14 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                     : 'text-black/60 hover:text-black hover:bg-white/50'
                 }`}
               >
-                {nishmasLanguage === 'hebrew' ? 'עב' : 'EN'}
+                {nishmasLanguage === 'hebrew' ? 'EN' : 'עב'}
               </Button>
               
               <DialogTitle className="text-lg platypi-bold text-black">Nishmas Kol Chai</DialogTitle>
-              
+            </div>
+            
+            {/* Second Row: Font Size Controls */}
+            <div className="flex items-center justify-center">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setNishmasFontSize(Math.max(12, nishmasFontSize - 2))}
@@ -907,7 +1217,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                     className="whitespace-pre-wrap leading-relaxed"
                     dangerouslySetInnerHTML={{ 
                       __html: formatTextContent(
-                        (nishmasText as any)?.fullText || nishmasText.fullText || 'Text not available'
+                        nishmasText.fullText || 'Text not available'
                       ).replace(/<strong>/g, nishmasLanguage === 'hebrew' ? '<strong class="vc-koren-hebrew-bold">' : '<strong style="font-weight: 700;">')
                     }}
                   />
@@ -989,7 +1299,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       <Dialog open={activeModal === 'individual-prayer'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="individual-prayer-description">
           <div id="individual-prayer-description" className="sr-only">Individual prayer text and translation</div>
-          <IndividualPrayerContent prayerId={selectedPrayerId} language={language} fontSize={fontSize} setLanguage={setLanguage} setFontSize={setFontSize} />
+          <IndividualPrayerContent prayerId={selectedPrayerId} fontSize={fontSize} setFontSize={setFontSize} />
         </DialogContent>
       </Dialog>
 
@@ -1003,7 +1313,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       {/* Individual Tehillim Modal */}
       <Dialog open={activeModal === 'individual-tehillim'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
-          <IndividualTehillimModal />
+          <IndividualTehillimModal setFullscreenContent={setFullscreenContent} />
         </DialogContent>
       </Dialog>
 
@@ -1011,6 +1321,42 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       <Dialog open={activeModal === 'maariv'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="maariv-description">
           <div id="maariv-description" className="sr-only">Evening prayer service and instructions</div>
+          
+          {/* Fullscreen button */}
+          <button
+            onClick={() => {
+              setFullscreenContent({
+                isOpen: true,
+                title: 'Maariv Prayer',
+                content: (
+                  <div className="space-y-6">
+                    {maarivPrayers.map((prayer) => (
+                      <div key={prayer.id} className="border-b border-warm-gray/10 pb-4 last:border-b-0">
+                        {prayer.hebrewText && language === 'hebrew' && (
+                          <div 
+                            className="vc-koren-hebrew leading-relaxed"
+                            style={{ fontSize: `${fontSize + 1}px` }}
+                            dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText, tefillaConditions).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
+                          />
+                        )}
+                        {language === 'english' && (
+                          <div 
+                            className="koren-siddur-english text-left leading-relaxed text-black/70"
+                            style={{ fontSize: `${fontSize}px` }}
+                            dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )
+              });
+            }}
+            className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 transition-colors z-10"
+            aria-label="Open fullscreen"
+          >
+            <Expand className="h-4 w-4 text-gray-600" />
+          </button>
           
           <StandardModalHeader 
             title="Maariv Prayer"
@@ -1033,14 +1379,14 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                       <div 
                         className="vc-koren-hebrew leading-relaxed"
                         style={{ fontSize: `${fontSize + 1}px` }}
-                        dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.hebrewText).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
+                        dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText, tefillaConditions).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
                       />
                     )}
                     {language === 'english' && (
                       <div 
                         className="koren-siddur-english text-left leading-relaxed text-black/70"
                         style={{ fontSize: `${fontSize}px` }}
-                        dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.englishTranslation || "English translation not available") }}
+                        dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
                       />
                     )}
                   </div>
@@ -1069,13 +1415,22 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       </Dialog>
 
       {/* Morning Brochas Modal */}
-      <MorningBrochasModal />
+      <MorningBrochasModal setFullscreenContent={setFullscreenContent} />
       
       {/* Birkat Hamazon Modal */}
       <BirkatHamazonModal />
       
       {/* Jerusalem Compass Modal */}
       <JerusalemCompass />
+
+      {/* Fullscreen Modal */}
+      <FullscreenModal
+        isOpen={fullscreenContent.isOpen}
+        onClose={() => setFullscreenContent({ isOpen: false, title: '', content: null })}
+        title={fullscreenContent.title}
+      >
+        {fullscreenContent.content}
+      </FullscreenModal>
     </>
   );
 }
@@ -1085,26 +1440,35 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 // Helper components for prayer lists
 function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => void }) {
   const { closeModal } = useModalStore();
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete, isModalComplete } = useModalCompletionStore();
-  const { trackModalComplete } = useTrackModalComplete();
-  const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const { data: prayers, isLoading } = useQuery<WomensPrayer[]>({
     queryKey: ['/api/womens-prayers/refuah'],
   });
 
   if (isLoading) return <div className="text-center">Loading prayers...</div>;
+  if (!prayers || prayers.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500 platypi-regular">No prayers available</p>
+        <Button 
+          onClick={() => closeModal()}
+          className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform mt-4"
+        >
+          Close
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
-      {prayers?.map((prayer) => (
+      {prayers.map((prayer) => (
         <div 
           key={prayer.id}
-          className="content-card rounded-xl p-4 cursor-pointer"
+          className="bg-white rounded-xl p-4 cursor-pointer hover:bg-white/90 transition-all duration-300 shadow-sm border border-blush/20"
           onClick={() => onPrayerSelect(prayer.id)}
         >
           <div className="flex items-center space-x-3">
-            <Heart className="text-blush" size={20} />
+            <Shield className="text-red-500" size={20} />
             <div>
               <span className="platypi-medium">{prayer.prayerName}</span>
               {prayer.description && (
@@ -1128,26 +1492,35 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
 
 function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => void }) {
   const { closeModal } = useModalStore();
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete, isModalComplete } = useModalCompletionStore();
-  const { trackModalComplete } = useTrackModalComplete();
-  const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const { data: prayers, isLoading } = useQuery<WomensPrayer[]>({
     queryKey: ['/api/womens-prayers/family'],
   });
 
   if (isLoading) return <div className="text-center">Loading prayers...</div>;
+  if (!prayers || prayers.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500 platypi-regular">No prayers available</p>
+        <Button 
+          onClick={() => closeModal()}
+          className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform mt-4"
+        >
+          Close
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
-      {prayers?.map((prayer) => (
+      {prayers.map((prayer) => (
         <div 
           key={prayer.id}
-          className="content-card rounded-xl p-4 cursor-pointer"
+          className="bg-white rounded-xl p-4 cursor-pointer hover:bg-white/90 transition-all duration-300 shadow-sm border border-blush/20"
           onClick={() => onPrayerSelect(prayer.id)}
         >
           <div className="flex items-center space-x-3">
-            <HandHeart className="text-peach" size={20} />
+            <Users className="text-purple-500" size={20} />
             <div>
               <span className="platypi-medium">{prayer.prayerName}</span>
               {prayer.description && (
@@ -1171,26 +1544,35 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
 
 function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => void }) {
   const { closeModal } = useModalStore();
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete, isModalComplete } = useModalCompletionStore();
-  const { trackModalComplete } = useTrackModalComplete();
-  const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const { data: prayers, isLoading } = useQuery<WomensPrayer[]>({
     queryKey: ['/api/womens-prayers/life'],
   });
 
   if (isLoading) return <div className="text-center">Loading prayers...</div>;
+  if (!prayers || prayers.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500 platypi-regular">No prayers available</p>
+        <Button 
+          onClick={() => closeModal()}
+          className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform mt-4"
+        >
+          Close
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
-      {prayers?.map((prayer) => (
+      {prayers.map((prayer) => (
         <div 
           key={prayer.id}
-          className="content-card rounded-xl p-4 cursor-pointer"
+          className="bg-white rounded-xl p-4 cursor-pointer hover:bg-white/90 transition-all duration-300 shadow-sm border border-blush/20"
           onClick={() => onPrayerSelect(prayer.id)}
         >
           <div className="flex items-center space-x-3">
-            <Scroll className="text-sage" size={20} />
+            <Heart className="text-pink-500" size={20} />
             <div>
               <span className="platypi-medium">{prayer.prayerName}</span>
               {prayer.description && (
@@ -1212,11 +1594,9 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
   );
 }
 
-function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, setFontSize }: {
+function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
   prayerId: number | null;
-  language: 'hebrew' | 'english';
   fontSize: number;
-  setLanguage: (lang: 'hebrew' | 'english') => void;
   setFontSize: (size: number) => void;
 }) {
   const { closeModal } = useModalStore();
@@ -1224,6 +1604,11 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
+  const [showHebrew, setShowHebrew] = useState(true);
+  
+  // Load Tefilla conditions for conditional content processing
+  const tefillaConditions = useTefillaConditions();
+  
   const { data: prayer, isLoading } = useQuery<WomensPrayer>({
     queryKey: [`/api/womens-prayers/prayer/${prayerId}`],
     enabled: !!prayerId,
@@ -1238,24 +1623,31 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
         <DialogTitle>{prayer.prayerName}</DialogTitle>
       </VisuallyHidden>
       
-      {/* Standardized Header */}
-      <div className="flex items-center justify-center mb-3 relative pr-8">
-        <div className="flex items-center gap-4">
-          <Button
-            onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
-            variant="ghost"
-            size="sm"
-            className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
-              language === 'hebrew' 
-                ? 'bg-blush text-white' 
-                : 'text-black/60 hover:text-black hover:bg-white/50'
-            }`}
-          >
-            {language === 'hebrew' ? 'עב' : 'EN'}
-          </Button>
+      {/* Standardized Header with two-row layout */}
+      <div className="mb-2 space-y-2">
+        {/* First Row: Language Toggle and Title */}
+        <div className="flex items-center justify-center gap-4">
+          {/* Conditional translate button - only show if English text exists */}
+          {prayer.englishTranslation && prayer.englishTranslation.trim() !== '' && prayer.englishTranslation !== 'English translation not available' && (
+            <Button
+              onClick={() => setShowHebrew(!showHebrew)}
+              variant="ghost"
+              size="sm"
+              className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
+                showHebrew 
+                  ? 'bg-blush text-white' 
+                  : 'text-black/60 hover:text-black hover:bg-white/50'
+              }`}
+            >
+              {showHebrew ? 'EN' : 'עב'}
+            </Button>
+          )}
           
           <h2 className="text-lg platypi-bold text-black">{prayer.prayerName}</h2>
-          
+        </div>
+        
+        {/* Second Row: Font Size Controls */}
+        <div className="flex items-center justify-center">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setFontSize(Math.max(12, fontSize - 2))}
@@ -1276,12 +1668,19 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
 
       {/* Standardized Content Area */}
       <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
-        <div
-          className={`${language === 'hebrew' ? 'vc-koren-hebrew' : 'koren-siddur-english'} leading-relaxed text-black`}
-          style={{ fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px` }}
-          dangerouslySetInnerHTML={{ __html: formatTextContent(language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
-        />
-
+        {showHebrew ? (
+          <div
+            className="vc-koren-hebrew leading-relaxed text-black"
+            style={{ fontSize: `${fontSize + 1}px` }}
+            dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText || '', tefillaConditions).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
+          />
+        ) : (
+          <div
+            className="koren-siddur-english text-left leading-relaxed text-black/70"
+            style={{ fontSize: `${fontSize}px` }}
+            dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || 'English translation not available', tefillaConditions) }}
+          />
+        )}
       </div>
 
       <KorenThankYou />
@@ -1325,19 +1724,25 @@ function IndividualPrayerContent({ prayerId, language, fontSize, setLanguage, se
   );
 }
 
-// Special Tehillim Modal Component
+// Tehillim Modal Component (previously Special Tehillim)
 function SpecialTehillimModal() {
-  const { closeModal, openModal, setSelectedPsalm } = useModalStore();
+  const { closeModal, openModal, setSelectedPsalm, tehillimActiveTab, setTehillimActiveTab } = useModalStore();
+  const { isModalComplete } = useModalCompletionStore();
 
   // Open individual Tehillim text
   const openTehillimText = (psalmNumber: number) => {
+    // Remember the current tab before navigating to individual Tehillim
+    setTehillimActiveTab(tehillimActiveTab);
     setSelectedPsalm(psalmNumber);
     closeModal();
     openModal('individual-tehillim', 'tefilla');
   };
 
-  // Categories with psalm numbers
-  const categories = [
+  // Generate array of all 150 psalms
+  const allPsalms = Array.from({ length: 150 }, (_, i) => i + 1);
+
+  // Special categories with psalm numbers
+  const specialCategories = [
     { title: "Bris milah", psalms: [12] },
     { title: "Cemetery", psalms: [33, 16, 17, 72, 91, 104, 130, 119] },
     { title: "Children's success", psalms: [127, 128] },
@@ -1369,29 +1774,75 @@ function SpecialTehillimModal() {
   return (
     <>
       <DialogHeader className="text-center mb-4">
-        <DialogTitle className="text-lg platypi-semibold text-black">Special Tehillim</DialogTitle>
+        <DialogTitle className="text-lg platypi-semibold text-black">Tehillim</DialogTitle>
         <DialogDescription className="text-xs text-black/70">
-          Specific psalms for different needs and occasions
+          Complete book of Psalms (1-150)
         </DialogDescription>
       </DialogHeader>
 
-      <div className="max-h-[60vh] overflow-y-auto space-y-3">
-        {categories.map((category, index) => (
-          <div key={index} className="bg-white/80 rounded-2xl p-3 border border-blush/10">
-            <h3 className="platypi-bold text-sm text-black mb-2">{category.title}</h3>
-            <div className="flex flex-wrap gap-2">
-              {category.psalms.map((psalm) => (
-                <button
-                  key={psalm}
-                  onClick={() => openTehillimText(psalm)}
-                  className="bg-gradient-feminine text-white px-3 py-1 rounded-xl text-sm platypi-medium hover:opacity-90 transition-opacity"
-                >
-                  {psalm}
-                </button>
-              ))}
-            </div>
+      {/* Tab Navigation */}
+      <div className="flex bg-warm-gray/10 rounded-xl p-1 mb-4">
+        <button
+          onClick={() => setTehillimActiveTab('all')}
+          className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
+            tehillimActiveTab === 'all'
+              ? 'bg-white text-black shadow-sm'
+              : 'text-black/60 hover:text-black'
+          }`}
+        >
+          All Psalms
+        </button>
+        <button
+          onClick={() => setTehillimActiveTab('special')}
+          className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
+            tehillimActiveTab === 'special'
+              ? 'bg-white text-black shadow-sm'
+              : 'text-black/60 hover:text-black'
+          }`}
+        >
+          Special Occasions
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      <div className="max-h-[50vh] overflow-y-auto">
+        {tehillimActiveTab === 'all' ? (
+          <div className="grid grid-cols-7 gap-2 p-2 overflow-hidden tehillim-button-grid">
+            {allPsalms.map((psalm) => (
+              <button
+                key={psalm}
+                onClick={() => openTehillimText(psalm)}
+                className={`w-12 h-12 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center flex-shrink-0 ${
+                  isModalComplete(`individual-tehillim-${psalm}`)
+                    ? 'bg-sage text-white'
+                    : 'bg-gradient-feminine text-white'
+                }`}
+                style={{ touchAction: 'manipulation' }}
+              >
+                {psalm}
+              </button>
+            ))}
           </div>
-        ))}
+        ) : (
+          <div className="space-y-3">
+            {specialCategories.map((category, index) => (
+              <div key={index} className="bg-white/80 rounded-2xl p-3 border border-blush/10">
+                <h3 className="platypi-bold text-sm text-black mb-2">{category.title}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {category.psalms.map((psalm) => (
+                    <button
+                      key={psalm}
+                      onClick={() => openTehillimText(psalm)}
+                      className="bg-gradient-feminine text-white px-3 py-1 rounded-xl text-sm platypi-medium hover:opacity-90 transition-opacity"
+                    >
+                      {psalm}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <Button 
@@ -1407,14 +1858,18 @@ function SpecialTehillimModal() {
 }
 
 // Individual Tehillim Modal Component
-function IndividualTehillimModal() {
-  const { closeModal, selectedPsalm } = useModalStore();
+function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenContent?: (content: any) => void }) {
+  const { closeModal, openModal, selectedPsalm } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
   const [fontSize, setFontSize] = useState(20);
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
+  const queryClient = useQueryClient();
+  
+  // Load Tefilla conditions for conditional content processing
+  const tefillaConditions = useTefillaConditions();
 
   const { data: tehillimText, isLoading } = useQuery({
     queryKey: ['/api/tehillim/text', selectedPsalm, language],
@@ -1429,9 +1884,35 @@ function IndividualTehillimModal() {
 
   return (
     <>
+      {/* Fullscreen button */}
+      {setFullscreenContent && tehillimText && (
+        <button
+          onClick={() => {
+            setFullscreenContent({
+              isOpen: true,
+              title: `Tehillim ${selectedPsalm}`,
+              content: (
+                <div
+                  className={`${language === 'hebrew' ? 'vc-koren-hebrew' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
+                  style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
+                  dangerouslySetInnerHTML={{
+                    __html: processTefillaContent(tehillimText?.text || '', tefillaConditions)
+                  }}
+                />
+              )
+            });
+          }}
+          className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 transition-colors z-10"
+          aria-label="Open fullscreen"
+        >
+          <Expand className="h-4 w-4 text-gray-600" />
+        </button>
+      )}
+      
       {/* Standardized Header */}
-      <div className="flex items-center justify-center mb-3 relative pr-8">
-        <div className="flex items-center gap-4">
+      <div className="mb-2 space-y-2">
+        {/* First Row: Language Toggle and Title */}
+        <div className="flex items-center justify-center gap-4">
           <Button
             onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
             variant="ghost"
@@ -1442,11 +1923,14 @@ function IndividualTehillimModal() {
                 : 'text-black/60 hover:text-black hover:bg-white/50'
             }`}
           >
-            {language === 'hebrew' ? 'עב' : 'EN'}
+            {language === 'hebrew' ? 'EN' : 'עב'}
           </Button>
           
           <DialogTitle className="text-lg platypi-bold text-black">Tehillim {selectedPsalm}</DialogTitle>
-          
+        </div>
+        
+        {/* Second Row: Font Size Controls */}
+        <div className="flex items-center justify-center">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setFontSize(Math.max(12, fontSize - 2))}
@@ -1465,29 +1949,49 @@ function IndividualTehillimModal() {
         </div>
       </div>
 
-      {/* Standardized Content Area */}
-      <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
+      {/* Standardized Content Area - Fixed scrolling */}
+      <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto scrollbar-thin">
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
           </div>
         ) : (
           <div
-            className={`${language === 'hebrew' ? 'vc-koren-hebrew' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
-            style={{ fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px` }}
-          >
-            {tehillimText?.text || `Psalm ${selectedPsalm} text loading...`}
-          </div>
+            className={`${language === 'hebrew' ? 'vc-koren-hebrew' : 'koren-siddur-english text-left'} leading-relaxed text-black pb-4`}
+            style={{ 
+              fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px`,
+              minHeight: 'fit-content'
+            }}
+            dangerouslySetInnerHTML={{
+              __html: processTefillaContent(tehillimText?.text || `Psalm ${selectedPsalm} text loading...`, tefillaConditions)
+            }}
+          />
         )}
       </div>
 
       <KorenThankYou />
 
       <Button 
-        onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
+        onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : async () => {
           // Track modal completion and mark as completed globally with specific psalm ID
           trackModalComplete(`individual-tehillim-${selectedPsalm}`);
           markModalComplete(`individual-tehillim-${selectedPsalm}`);
+          
+          try {
+            // Also update global Tehillim progress
+            await axiosClient.post('/api/tehillim/complete', {
+              currentPerek: selectedPsalm,
+              language: language,
+              completedBy: 'user'
+            });
+            
+            // Immediately update progress cache to show new number
+            queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
+            queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+          } catch (error) {
+            // Error updating global progress
+            // Continue with local completion even if global update fails
+          }
           
           completeTask('tefilla');
           setShowHeartExplosion(true);
@@ -1495,8 +1999,8 @@ function IndividualTehillimModal() {
           setTimeout(() => {
             setShowHeartExplosion(false); // Reset explosion state
             checkAndShowCongratulations();
-            closeModal();
-            window.location.hash = '#/?section=home&scrollToProgress=true';
+            // Switch back to the main Tehillim selection modal without closing
+            openModal('special-tehillim', 'tefilla');
           }, 2000);
         }}
         disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
@@ -1548,7 +2052,7 @@ function JerusalemCompass() {
     let bearing = Math.atan2(y, x) * 180 / Math.PI;
     bearing = (bearing + 360) % 360; // Normalize to 0-360
     
-    console.log(`Bearing calculation: From (${lat1}, ${lng1}) to (${lat2}, ${lng2}) = ${bearing}°`);
+
     return bearing;
   };
 
@@ -1573,7 +2077,7 @@ function JerusalemCompass() {
         // Calculate direction to Western Wall
         const bearing = calculateBearing(userLat, userLng, WESTERN_WALL_LAT, WESTERN_WALL_LNG);
         setDirection(bearing);
-        console.log(`Set direction to: ${bearing}°`);
+
         
         // Get location name using reverse geocoding
         try {

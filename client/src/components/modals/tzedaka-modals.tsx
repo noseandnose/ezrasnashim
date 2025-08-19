@@ -67,6 +67,14 @@ export default function TzedakaModals() {
         amount = getDonationAmount();
         typeDescription = "Torah Learning Support";
         break;
+      case "donate":
+        amount = getDonationAmount();
+        typeDescription = "General Donation";
+        break;
+      case "wedding-campaign":
+        amount = getDonationAmount();
+        typeDescription = "Wedding Campaign Support";
+        break;
     }
 
     if (amount > 0) {
@@ -480,6 +488,102 @@ export default function TzedakaModals() {
                 disabled={!donationAmount}
               >
                 Donate Now
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Wedding Campaign Modal - "Sponsor a Wedding for a Couple" - Restored Original Style */}
+      <Dialog open={activeModal === 'wedding-campaign'} onOpenChange={(open) => {
+        if (!open) {
+          // User clicked X or pressed Escape - don't track completion
+          closeModal();
+        }
+      }}>
+        <DialogContent aria-describedby="wedding-campaign-description">
+          <div className="flex items-center justify-center mb-3 relative">
+            <DialogTitle className="text-lg platypi-bold text-black">Sponsor a Wedding for a Couple</DialogTitle>
+          </div>
+          <p className="text-sm platypi-regular text-gray-600 text-center mb-4">Help us raise $50,000 to sponsor an entire wedding for a young couple in need in Eretz Yisrael</p>
+          <div id="wedding-campaign-description" className="sr-only">Wedding sponsorship campaign for couples in need</div>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm platypi-medium block mb-2">Select Amount</label>
+              <div className="grid grid-cols-5 gap-2">
+                <button
+                  onClick={() => setDonationAmount("1")}
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                    donationAmount === "1"
+                      ? 'bg-gradient-feminine text-white shadow-soft'
+                      : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
+                  }`}
+                >
+                  $1
+                </button>
+                <button
+                  onClick={() => setDonationAmount("18")}
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                    donationAmount === "18"
+                      ? 'bg-gradient-feminine text-white shadow-soft'
+                      : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
+                  }`}
+                >
+                  $18
+                </button>
+                <button
+                  onClick={() => setDonationAmount("180")}
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                    donationAmount === "180"
+                      ? 'bg-gradient-feminine text-white shadow-soft'
+                      : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
+                  }`}
+                >
+                  $180
+                </button>
+                <button
+                  onClick={() => setDonationAmount("1800")}
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                    donationAmount === "1800"
+                      ? 'bg-gradient-feminine text-white shadow-soft'
+                      : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
+                  }`}
+                >
+                  $1800
+                </button>
+                <button
+                  onClick={() => setDonationAmount("custom")}
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                    donationAmount === "custom"
+                      ? 'bg-gradient-feminine text-white shadow-soft'
+                      : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
+                  }`}
+                >
+                  Custom
+                </button>
+              </div>
+              {donationAmount === "custom" && (
+                <div className="relative mt-2">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 platypi-semibold">$</span>
+                  <Input 
+                    placeholder="Enter amount" 
+                    className="pl-10 bg-white"
+                    type="number"
+                    value={customAmount}
+                    onChange={(e) => setCustomAmount(e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div>
+              <Button 
+                onClick={() => handleDonation()}
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
+                disabled={!donationAmount}
+              >
+                Donate {donationAmount === "custom" ? `$${customAmount || ""}` : `$${donationAmount || "1"}`}
               </Button>
             </div>
           </div>

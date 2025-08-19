@@ -27,17 +27,43 @@ export default function TableModals() {
     return new Date().toISOString().split('T')[0];
   };
 
-  const { data: recipeContent } = useQuery<{title?: string; description?: string; ingredients?: string[]; instructions?: string[]; cookingTime?: string; servings?: number}>({
+  const { data: recipeContent } = useQuery<{title?: string; description?: string; ingredients?: string[]; instructions?: string[]; cookingTime?: string; servings?: number; imageUrl?: string; prepTime?: string; cookTime?: string; difficulty?: string}>({
     queryKey: ['/api/table/recipe'],
     enabled: activeModal === 'recipe'
   });
 
-  const { data: inspirationContent } = useQuery<Record<string, any>>({
+  interface InspirationContent {
+    id: number;
+    date: string;
+    title: string;
+    content: string;
+    mediaType1?: string;
+    mediaUrl1?: string;
+    mediaType2?: string;
+    mediaUrl2?: string;
+    mediaType3?: string;
+    mediaUrl3?: string;
+    mediaType4?: string;
+    mediaUrl4?: string;
+    mediaType5?: string;
+    mediaUrl5?: string;
+  }
+
+  const { data: inspirationContent } = useQuery<InspirationContent>({
     queryKey: [`/api/table/inspiration/${new Date().toISOString().split('T')[0]}`],
     enabled: activeModal === 'inspiration'
   });
 
-  const { data: parshaContent } = useQuery<Record<string, any>>({
+  interface ParshaContent {
+    id: number;
+    week: string;
+    title: string;
+    content: string;
+    duration?: string;
+    audioUrl?: string;
+  }
+
+  const { data: parshaContent } = useQuery<ParshaContent>({
     queryKey: ['/api/table/vort'],
     enabled: activeModal === 'parsha'
   });
@@ -55,6 +81,22 @@ export default function TableModals() {
           
           {recipeContent ? (
             <div className="space-y-4 text-sm text-gray-700">
+              {/* Recipe Image */}
+              {recipeContent.imageUrl && (
+                <div className="w-full rounded-lg overflow-hidden mb-4">
+                  <img 
+                    src={recipeContent.imageUrl} 
+                    alt={recipeContent.title || "Recipe"} 
+                    className="w-full h-48 object-cover"
+                    crossOrigin="anonymous"
+                    onError={(e) => {
+                      const parent = e.currentTarget.parentElement;
+                      if (parent) parent.style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
+              
               {/* Recipe Description */}
               {recipeContent.description && (
                 <div>
@@ -63,13 +105,19 @@ export default function TableModals() {
               )}
               
               {/* Cooking Info */}
-              {(recipeContent.cookingTime || recipeContent.servings) && (
+              {(recipeContent.prepTime || recipeContent.cookTime || recipeContent.servings || recipeContent.difficulty) && (
                 <div className="bg-blush/10 p-3 rounded-lg">
-                  <div className="flex gap-4">
-                    {recipeContent.cookingTime && (
+                  <div className="grid grid-cols-2 gap-2">
+                    {recipeContent.prepTime && (
                       <div>
-                        <span className="platypi-semibold">Cooking Time: </span>
-                        <span>{recipeContent.cookingTime}</span>
+                        <span className="platypi-semibold">Prep Time: </span>
+                        <span>{recipeContent.prepTime}</span>
+                      </div>
+                    )}
+                    {recipeContent.cookTime && (
+                      <div>
+                        <span className="platypi-semibold">Cook Time: </span>
+                        <span>{recipeContent.cookTime}</span>
                       </div>
                     )}
                     {recipeContent.servings && (
@@ -78,30 +126,46 @@ export default function TableModals() {
                         <span>{recipeContent.servings}</span>
                       </div>
                     )}
+                    {recipeContent.difficulty && (
+                      <div>
+                        <span className="platypi-semibold">Difficulty: </span>
+                        <span>{recipeContent.difficulty}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
               
               {/* Ingredients */}
-              {recipeContent.ingredients && recipeContent.ingredients.length > 0 && (
+              {recipeContent.ingredients && (
                 <div>
                   <h3 className="platypi-semibold mb-2">Ingredients:</h3>
                   <ul className="list-disc list-inside space-y-1">
-                    {recipeContent.ingredients.map((ingredient, index) => (
-                      <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(ingredient) }} />
-                    ))}
+                    {(() => {
+                      const ingredientsList = typeof recipeContent.ingredients === 'string' 
+                        ? JSON.parse(recipeContent.ingredients) 
+                        : recipeContent.ingredients;
+                      return Array.isArray(ingredientsList) ? ingredientsList.map((ingredient, index) => (
+                        <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(ingredient) }} />
+                      )) : null;
+                    })()}
                   </ul>
                 </div>
               )}
               
               {/* Instructions */}
-              {recipeContent.instructions && recipeContent.instructions.length > 0 && (
+              {recipeContent.instructions && (
                 <div>
                   <h3 className="platypi-semibold mb-2">Instructions:</h3>
                   <ol className="list-decimal list-inside space-y-2">
-                    {recipeContent.instructions.map((instruction, index) => (
-                      <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(instruction) }} />
-                    ))}
+                    {(() => {
+                      const instructionsList = typeof recipeContent.instructions === 'string' 
+                        ? JSON.parse(recipeContent.instructions) 
+                        : recipeContent.instructions;
+                      return Array.isArray(instructionsList) ? instructionsList.map((instruction, index) => (
+                        <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(instruction) }} />
+                      )) : null;
+                    })()}
                   </ol>
                 </div>
               )}
@@ -172,7 +236,7 @@ export default function TableModals() {
                           <Volume2 size={48} className="text-rose-400 mb-4" />
                           <div className="w-full px-4">
                             <AudioPlayer 
-                              audioUrl={currentMedia.url} 
+                              audioUrl={currentMedia.url || ''} 
                               title="Creative Jewish Living Audio"
                               duration="0:00"
                             />
@@ -203,9 +267,9 @@ export default function TableModals() {
                         };
                         
                         // Try direct URL first, fallback to proxy for .mov files
-                        const videoUrl = currentMedia.url.includes('.mov') ? 
+                        const videoUrl = currentMedia.url && currentMedia.url.includes('.mov') ? 
                           `/api/media-proxy/cloudinary/${currentMedia.url.split('/').slice(4).join('/')}` : 
-                          currentMedia.url;
+                          (currentMedia.url || '');
                         
                         return (
                           <div className="w-full h-full relative">
@@ -220,7 +284,7 @@ export default function TableModals() {
                                 <div className="text-gray-500 text-center">
                                   <p className="mb-2">Video unavailable</p>
                                   <button 
-                                    onClick={() => window.open(currentMedia.url, '_blank')}
+                                    onClick={() => currentMedia.url && window.open(currentMedia.url, '_blank')}
                                     className="text-blush underline text-sm"
                                   >
                                     Open in new tab
@@ -239,8 +303,8 @@ export default function TableModals() {
                                 crossOrigin="anonymous"
                                 playsInline
                               >
-                                <source src={currentMedia.url} type={getVideoType(currentMedia.url)} />
-                                {currentMedia.url.includes('.mov') && (
+                                <source src={currentMedia.url || ''} type={getVideoType(currentMedia.url || '')} />
+                                {currentMedia.url && currentMedia.url.includes('.mov') && (
                                   <source src={videoUrl} type="video/mp4" />
                                 )}
                                 Your browser does not support the video tag.

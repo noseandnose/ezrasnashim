@@ -26,17 +26,17 @@ export default function CongratulationsModal() {
             <img 
               src={stage3Image} 
               alt="Beautiful flower bouquet - Full completions!" 
-              className="w-56 h-56 object-contain opacity-75"
+              className="w-56 h-56 object-contain opacity-40"
               style={{ marginTop: '20px' }}
             />
           </div>
           
           {/* Content above the flower image */}
           <div className="relative z-10 text-center">
-            <DialogTitle className="text-2xl platypi-bold text-black mb-3">
+            <DialogTitle className="text-2xl font-playfair font-bold text-black mb-3">
               Mazal Tov!
             </DialogTitle>
-            <DialogDescription className="text-warm-gray/80 mb-6 leading-relaxed">
+            <DialogDescription className="text-black/80 mb-6 leading-relaxed font-inter">
               You have completed all three daily Mitzvahs: Torah learning, Tefilla, and Tzedaka. 
               May your spiritual growth continue and bring you and your family abundant blessings.
             </DialogDescription>
@@ -48,7 +48,7 @@ export default function CongratulationsModal() {
               // Navigate to home and scroll to progress
               window.location.hash = '#/?section=home&scrollToProgress=true';
             }} 
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 relative z-10"
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-inter font-medium border-0 relative z-10"
           >
             Continue Your Journey
           </Button>

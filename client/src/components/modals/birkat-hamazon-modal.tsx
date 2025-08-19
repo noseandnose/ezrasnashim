@@ -9,6 +9,8 @@ import { useAnalytics, useTrackModalComplete } from "@/hooks/use-analytics";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useLocationStore } from '@/hooks/use-jewish-times';
 import { formatTextContent } from "@/lib/text-formatter";
+import { processTefillaText, getCurrentTefillaConditions, type TefillaConditions } from '@/utils/tefilla-processor';
+import { useEffect, useState as useStateForConditions } from "react";
 
 interface BirkatHamazonPrayer {
   id: number;
@@ -43,6 +45,7 @@ const KorenThankYou = () => {
         >
           Koren Publishers Jerusalem
         </a>
+        {' '}and Rabbi Sacks Legacy
       </span>
     </div>
   );
@@ -54,12 +57,60 @@ export function BirkatHamazonModal() {
   const [fontSize, setFontSize] = useState(20);
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [selectedPrayer, setSelectedPrayer] = useState<string | null>(null);
+  const [conditions, setConditions] = useStateForConditions<TefillaConditions | null>(null);
+  const [fontsLoaded, setFontsLoaded] = useStateForConditions(false);
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { trackCompletion } = useAnalytics();
+  const { coordinates } = useLocationStore();
 
   const isOpen = activeModal === 'after-brochas' || activeModal === 'birkat-hamazon' || activeModal === 'al-hamichiya';
+
+  // Ensure fonts are loaded before showing content
+  useEffect(() => {
+    const checkFonts = async () => {
+      try {
+        // Wait for fonts to load
+        await document.fonts.load('normal 1em "Koren Siddur"');
+        await document.fonts.load('normal 1em "Arno Koren"');
+        setFontsLoaded(true);
+      } catch (error) {
+        // Fallback after 500ms if font loading fails
+        setTimeout(() => setFontsLoaded(true), 500);
+      }
+    };
+    
+    if (isOpen) {
+      checkFonts();
+    }
+  }, [isOpen]);
+
+  // Load Tefilla conditions for conditional content processing
+  useEffect(() => {
+    const loadConditions = async () => {
+      try {
+        const tefillaConditions = await getCurrentTefillaConditions(
+          coordinates?.lat,
+          coordinates?.lng
+        );
+        setConditions(tefillaConditions);
+      } catch (error) {
+        // Could not load Tefilla conditions - Set default conditions
+        setConditions({
+          isInIsrael: false,
+          isRoshChodesh: false,
+          isFastDay: false,
+          isAseretYemeiTeshuva: false,
+          isSukkot: false,
+          isPesach: false,
+          isRoshChodeshSpecial: false
+        });
+      }
+    };
+
+    loadConditions();
+  }, [coordinates]);
 
   const { data: prayers, isLoading } = useQuery<BirkatHamazonPrayer[]>({
     queryKey: ["/api/birkat-hamazon/prayers"],
@@ -98,8 +149,9 @@ export function BirkatHamazonModal() {
   };
 
   const StandardModalHeader = () => (
-    <div className="flex items-center justify-center mb-3 relative">
-      <div className="flex items-center gap-4">
+    <div className="mb-2 space-y-2">
+      {/* First Row: Language Toggle and Title */}
+      <div className="flex items-center justify-center gap-4">
         <Button
           onClick={() => setLanguage(language === "hebrew" ? "english" : "hebrew")}
           variant="ghost"
@@ -113,8 +165,13 @@ export function BirkatHamazonModal() {
           {language === "hebrew" ? 'עב' : 'EN'}
         </Button>
         
-        <DialogTitle className="text-lg platypi-bold text-black">Birkat Hamazon</DialogTitle>
-        
+        <DialogTitle className="text-lg platypi-bold text-black">
+          {activeModal === 'al-hamichiya' ? 'Me\'ein Shalosh' : 'Birkat Hamazon'}
+        </DialogTitle>
+      </div>
+      
+      {/* Second Row: Font Size Controls */}
+      <div className="flex items-center justify-center">
         <div className="flex items-center gap-2">
           <button
             onClick={decreaseFontSize}
@@ -134,17 +191,35 @@ export function BirkatHamazonModal() {
     </div>
   );
 
-  const renderPrayerText = (prayer: BirkatHamazonPrayer) => {
+  const renderPrayerText = (prayer: BirkatHamazonPrayer | any) => {
     const text = language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation;
     
+    // Apply conditional processing first if conditions are available
+    let processedText = text;
+    if (conditions && text) {
+      processedText = processTefillaText(text, conditions);
+    }
+    
     // Apply text formatting to handle ** and ---
-    const formattedText = formatTextContent(text);
+    const formattedText = formatTextContent(processedText);
+    
+    // Show loading state if fonts aren't loaded yet
+    if (!fontsLoaded) {
+      return (
+        <div className="flex justify-center py-4">
+          <div className="text-sm text-gray-500">Loading prayer...</div>
+        </div>
+      );
+    }
     
     if (language === "hebrew") {
       return (
         <div 
           className="vc-koren-hebrew leading-relaxed"
-          style={{ fontSize: `${fontSize + 1}px` }}
+          style={{ 
+            fontSize: `${fontSize + 1}px`,
+            visibility: fontsLoaded ? 'visible' : 'hidden'
+          }}
           dangerouslySetInnerHTML={{ __html: formattedText.replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
         />
       );
@@ -153,7 +228,10 @@ export function BirkatHamazonModal() {
     return (
       <div 
         className="koren-siddur-english leading-relaxed text-left"
-        style={{ fontSize: `${fontSize}px` }}
+        style={{ 
+          fontSize: `${fontSize}px`,
+          visibility: fontsLoaded ? 'visible' : 'hidden'
+        }}
         dangerouslySetInnerHTML={{ __html: formattedText }}
       />
     );

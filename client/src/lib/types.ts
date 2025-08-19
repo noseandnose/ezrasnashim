@@ -36,9 +36,11 @@ export interface ModalState {
   activeModal: string | null;
   selectedPsalm: number | null;
   previousSection: string | null;
+  tehillimActiveTab: 'all' | 'special';
   openModal: (modalId: string, fromSection?: string) => void;
   closeModal: (returnToPrevious?: boolean) => void;
   setSelectedPsalm: (psalmNumber: number) => void;
+  setTehillimActiveTab: (tab: 'all' | 'special') => void;
   
   // Convenience methods for specific modals
   isBirkatHamazonModalOpen: boolean;
@@ -50,13 +52,23 @@ export const useModalStore = create<ModalState>((set, get) => ({
   activeModal: null,
   selectedPsalm: null,
   previousSection: null,
+  tehillimActiveTab: 'all',
   openModal: (modalId: string, fromSection?: string) => set({ 
     activeModal: modalId, 
     previousSection: fromSection || get().previousSection 
   }),
   closeModal: (returnToPrevious?: boolean) => {
     const state = get();
+    const wasTefilaModal = state.activeModal === 'tehillim-text';
     set({ activeModal: null });
+    
+    // If closing tehillim modal, trigger a custom event to refresh data
+    if (wasTefilaModal && typeof window !== 'undefined') {
+      setTimeout(() => {
+        const refreshEvent = new CustomEvent('tehillimCompleted');
+        window.dispatchEvent(refreshEvent);
+      }, 50);
+    }
     
     // Handle navigation based on close type
     if (returnToPrevious && state.previousSection && typeof window !== 'undefined') {
@@ -70,6 +82,7 @@ export const useModalStore = create<ModalState>((set, get) => ({
     }
   },
   setSelectedPsalm: (psalmNumber: number) => set({ selectedPsalm: psalmNumber }),
+  setTehillimActiveTab: (tab: 'all' | 'special') => set({ tehillimActiveTab: tab }),
   
   // Convenience methods for specific modals
   get isBirkatHamazonModalOpen() {
@@ -243,6 +256,85 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
         return true;
       }
       return false;
+    }
+  };
+});
+
+// Store for tracking completed donations
+export interface DonationCompletionState {
+  completedDonations: Set<string>;
+  addCompletedDonation: (donationType: string) => void;
+  isCompleted: (donationType: string) => boolean;
+  resetDaily: () => void;
+}
+
+export const useDonationCompletionStore = create<DonationCompletionState>((set, get) => {
+  // Load from localStorage on initialization
+  const today = new Date().toDateString();
+  let initialCompleted = new Set<string>();
+  
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = localStorage.getItem('donationCompletion');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.date === today && Array.isArray(parsed.completed)) {
+          initialCompleted = new Set(parsed.completed);
+        }
+      }
+    } catch (e) {
+      // Silently handle localStorage errors
+    }
+  }
+
+  return {
+    completedDonations: initialCompleted,
+    addCompletedDonation: (donationType: string) => {
+      const newCompleted = new Set(get().completedDonations);
+      newCompleted.add(donationType);
+      set({ completedDonations: newCompleted });
+      
+      // Save to localStorage
+      if (typeof window !== 'undefined') {
+        try {
+          const today = new Date().toDateString();
+          localStorage.setItem('donationCompletion', JSON.stringify({
+            date: today,
+            completed: Array.from(newCompleted)
+          }));
+        } catch (e) {
+          // Silently handle localStorage errors
+        }
+      }
+    },
+    isCompleted: (donationType: string) => {
+      return get().completedDonations.has(donationType);
+    },
+    resetDaily: () => {
+      if (typeof window !== 'undefined') {
+        try {
+          const today = new Date().toDateString();
+          const stored = localStorage.getItem('donationCompletion');
+          
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed.date !== today) {
+              // Reset if different day
+              set({ completedDonations: new Set() });
+              localStorage.removeItem('donationCompletion');
+            }
+          }
+        } catch (e) {
+          set({ completedDonations: new Set() });
+          if (localStorage) {
+            try {
+              localStorage.removeItem('donationCompletion');
+            } catch (cleanupError) {
+              // Silently handle cleanup errors
+            }
+          }
+        }
+      }
     }
   };
 });

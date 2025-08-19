@@ -1,4 +1,4 @@
-import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass, ArrowRight, Baby, HeartHandshake, Briefcase, GraduationCap, Users, Stethoscope, DollarSign, UserCheck, Smile, Zap, TrendingUp, Crown } from "lucide-react";
+import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass, ArrowRight, Baby, HeartHandshake, Briefcase, GraduationCap, Users, Stethoscope, DollarSign, UserCheck, Smile, Zap, TrendingUp, Crown, Sunrise, Sun, Moon, Utensils, Stars, Globe, Link, Unlock } from "lucide-react";
 import korenLogo from "@assets/This_is_a_logo_for_Koren_Publishers_Jerusalem_1752581940716.jpg";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -7,7 +7,7 @@ interface TefillaSectionProps {
   onSectionChange?: (section: Section) => void;
 }
 import { useJewishTimes } from "@/hooks/use-jewish-times";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -29,9 +29,44 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
     }
 
     const now = new Date();
-    const neitz = new Date(`${now.toDateString()} ${times.sunrise}`);
-    const minchaGedola = new Date(`${now.toDateString()} ${times.minchaGedolah}`);
-    const shkia = new Date(`${now.toDateString()} ${times.shkia}`);
+    
+    // Helper function to parse time strings like "6:30 AM" into today's date
+    const parseTimeToday = (timeStr: string) => {
+      if (!timeStr) return null;
+      
+      // Parse the time string (e.g., "6:30 AM" or "7:45 PM")
+      const match = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+      if (!match) return null;
+      
+      let hours = parseInt(match[1]);
+      const minutes = parseInt(match[2]);
+      const period = match[3].toUpperCase();
+      
+      // Convert to 24-hour format
+      if (period === 'PM' && hours !== 12) {
+        hours += 12;
+      } else if (period === 'AM' && hours === 12) {
+        hours = 0;
+      }
+      
+      // Create a date object for today with the specified time
+      const date = new Date();
+      date.setHours(hours, minutes, 0, 0);
+      return date;
+    };
+    
+    const neitz = parseTimeToday(times.sunrise);
+    const minchaGedola = parseTimeToday(times.minchaGedolah);
+    const shkia = parseTimeToday(times.shkia);
+    
+    // Handle null times gracefully
+    if (!neitz || !minchaGedola || !shkia) {
+      return {
+        title: "Morning Brochas",
+        subtitle: "Times unavailable",
+        modal: "morning-brochas"
+      };
+    }
     
     // Calculate next day's neitz for Maariv end time
     const tomorrow = new Date(now);
@@ -67,14 +102,16 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   const getReasonIcon = (reason: string, reasonEnglish?: string) => {
     // Map Hebrew reasons and English translations to icons
     const reasonToCode = (r: string, eng?: string): string => {
-      if (r === "רפואה שלמה" || eng === "Complete Healing") return "health";
-      if (r === "שידוך" || eng === "Finding a mate") return "shidduch";
-      if (r === "זרע של קיימא" || eng === "Children") return "children";
-      if (r === "פרנסה" || eng === "Livelihood") return "parnassa";
-      if (r === "הצלחה" || eng === "Success") return "success";
-      if (r === "שלום בית" || eng === "Family") return "family";
-      if (r === "חכמה" || eng === "Education") return "education";
-      if (r === "עליית נשמה" || eng === "Peace") return "peace";
+      // Handle both Hebrew and English reasons, plus common variations
+      if (r === "רפואה שלמה" || eng === "Complete Healing" || r === "health" || eng === "health" || r === "Health") return "health";
+      if (r === "שידוך" || eng === "Finding a mate" || r === "shidduch" || eng === "shidduch") return "shidduch";
+      if (r === "זרע של קיימא" || eng === "Children" || r === "children" || eng === "children") return "children";
+      if (r === "פרנסה" || eng === "Livelihood" || r === "parnassa" || eng === "parnassa") return "parnassa";
+      if (r === "הצלחה" || eng === "Success" || r === "success" || eng === "success") return "success";
+      if (r === "שלום בית" || eng === "Family" || r === "family" || eng === "family") return "family";
+      if (r === "חכמה" || eng === "Education" || r === "education" || eng === "education") return "education";
+      if (r === "עליית נשמה" || eng === "Peace" || r === "peace" || eng === "peace") return "peace";
+      if (r === "פדיון שבויים" || eng === "Release from Captivity" || r === "hostages" || eng === "hostages") return "hostages";
       return "general";
     };
     
@@ -88,6 +125,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
       'family': <Users size={12} className="text-purple-500" />,
       'education': <GraduationCap size={12} className="text-indigo-500" />,
       'peace': <Smile size={12} className="text-teal-500" />,
+      'hostages': <Unlock size={12} className="text-orange-600" />,
       'general': <Heart size={12} className="text-blush" />
     };
     
@@ -97,14 +135,16 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   const getReasonShort = (reason: string, reasonEnglish?: string) => {
     // Map Hebrew reasons and English translations to short text
     const reasonToCode = (r: string, eng?: string): string => {
-      if (r === "רפואה שלמה" || eng === "Complete Healing") return "health";
-      if (r === "שידוך" || eng === "Finding a mate") return "shidduch";
-      if (r === "זרע של קיימא" || eng === "Children") return "children";
-      if (r === "פרנסה" || eng === "Livelihood") return "parnassa";
-      if (r === "הצלחה" || eng === "Success") return "success";
-      if (r === "שלום בית" || eng === "Family") return "family";
-      if (r === "חכמה" || eng === "Education") return "education";
-      if (r === "עליית נשמה" || eng === "Peace") return "peace";
+      // Handle both Hebrew and English reasons, plus common variations
+      if (r === "רפואה שלמה" || eng === "Complete Healing" || r === "health" || eng === "health" || r === "Health") return "health";
+      if (r === "שידוך" || eng === "Finding a mate" || r === "shidduch" || eng === "shidduch") return "shidduch";
+      if (r === "זרע של קיימא" || eng === "Children" || r === "children" || eng === "children") return "children";
+      if (r === "פרנסה" || eng === "Livelihood" || r === "parnassa" || eng === "parnassa") return "parnassa";
+      if (r === "הצלחה" || eng === "Success" || r === "success" || eng === "success") return "success";
+      if (r === "שלום בית" || eng === "Family" || r === "family" || eng === "family") return "family";
+      if (r === "חכמה" || eng === "Education" || r === "education" || eng === "education") return "education";
+      if (r === "עליית נשמה" || eng === "Peace" || r === "peace" || eng === "peace") return "peace";
+      if (r === "פדיון שבויים" || eng === "Release from Captivity" || r === "hostages" || eng === "hostages") return "hostages";
       return "general";
     };
     
@@ -118,6 +158,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
       'family': 'Family',
       'education': 'Study',
       'peace': 'Peace',
+      'hostages': 'Release',
       'general': 'Prayer'
     };
     
@@ -133,10 +174,10 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   const [showHebrew, setShowHebrew] = useState(true);
 
   // Fetch global Tehillim progress
-  const { data: progress } = useQuery<GlobalTehillimProgress>({
+  const { data: progress, refetch: refetchProgress } = useQuery<GlobalTehillimProgress>({
     queryKey: ['/api/tehillim/progress'], 
     queryFn: async () => {
-      const response = await fetch(`/api/tehillim/progress?t=${Date.now()}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress`);
       if (!response.ok) {
         throw new Error('Failed to fetch tehillim progress');
       }
@@ -144,19 +185,68 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
       // Progress data updated
       return data;
     },
-    refetchInterval: 5000, // Refresh every 5 seconds for real-time updates
-    staleTime: 2000, // Allow 2 seconds of cache
-    gcTime: 10000 // Cache for 10 seconds
+    refetchInterval: 10000, // Refresh every 10 seconds for better responsiveness
+    staleTime: 5000, // Keep data fresh for 5 seconds
+    gcTime: 30000, // Cache for 30 seconds
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    refetchOnMount: 'always' // Always refetch when component mounts
+  });
+  
+  // Refetch progress when returning to this section
+  useEffect(() => {
+    // Small delay to ensure any server updates have completed
+    const timer = setTimeout(() => {
+      refetchProgress();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []); // Run once on mount
+  
+  // Listen for tehillim completion event
+  useEffect(() => {
+    const handleTehillimCompleted = () => {
+      // Refetch all tehillim-related data
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/info'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/preview'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+      refetchProgress();
+    };
+    
+    window.addEventListener('tehillimCompleted', handleTehillimCompleted);
+    return () => window.removeEventListener('tehillimCompleted', handleTehillimCompleted);
+  }, [refetchProgress, queryClient]);
+
+  // Get the actual Tehillim info to display English number and part
+  const { data: tehillimInfo } = useQuery<{
+    id: number;
+    englishNumber: number;
+    partNumber: number;
+    hebrewNumber: string;
+  }>({
+    queryKey: ['/api/tehillim/info', progress?.currentPerek],
+    queryFn: async () => {
+      if (!progress?.currentPerek) return null;
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/info/${progress.currentPerek}`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    enabled: !!progress?.currentPerek,
+    staleTime: 60000
   });
 
   // Fetch current name for the perek - Only update when perek is completed
   const { data: currentName } = useQuery<TehillimName | null>({
     queryFn: async () => {
-      const response = await fetch(`/api/tehillim/current-name`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch current name');
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/current-name`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch current name');
+        }
+        return response.json();
+      } catch (error) {
+        // Failed to fetch current name
+        return null; // Return null as fallback
       }
-      return response.json();
     },
     queryKey: ['/api/tehillim/current-name'],
     refetchInterval: 10000, // Refresh every 10 seconds
@@ -167,29 +257,42 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   // Fetch all active names for count display
   const { data: allNames } = useQuery<TehillimName[]>({
     queryFn: async () => {
-      const response = await fetch(`/api/tehillim/names`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch tehillim names');
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/names`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch tehillim names');
+        }
+        return response.json();
+      } catch (error) {
+        // Silent error handling - don't show runtime error modal
+        // Failed to fetch tehillim names
+        return []; // Return empty array as fallback
       }
-      return response.json();
     },
     queryKey: ['/api/tehillim/names'],
     refetchInterval: 60000, // Refresh every minute
+    retry: 3, // Retry failed requests 3 times
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 
   // Fetch Tehillim preview (first line) for display
   const { data: tehillimPreview, isLoading: isPreviewLoading } = useQuery<{preview: string; perek: number; language: string}>({
     queryKey: ['/api/tehillim/preview', progress?.currentPerek],
     queryFn: async () => {
-      const response = await fetch(`/api/tehillim/preview/${progress?.currentPerek}?language=hebrew`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch tehillim preview');
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/preview/${progress?.currentPerek}?language=hebrew`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch tehillim preview');
+        }
+        return response.json();
+      } catch (error) {
+        // Failed to fetch tehillim preview
+        return { preview: '', perek: progress?.currentPerek || 0, language: 'hebrew' }; // Return empty preview as fallback
       }
-      return response.json();
     },
     enabled: !!progress?.currentPerek,
-    staleTime: 0, // Always consider stale
-    gcTime: 0 // Don't cache at all
+    staleTime: 60000, // Cache for 1 minute - preview text doesn't change
+    gcTime: 300000 // Keep in cache for 5 minutes
   });
 
   // Mutation to complete a perek
@@ -202,9 +305,14 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
         title: "Perek Completed!",
         description: `Perek ${progress?.currentPerek || 'current'} has been completed. Moving to the next perek.`,
       });
-      // Invalidate queries to refresh data
+      // Invalidate all tehillim-related queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/info'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/preview'] });
+      
+      // Force immediate refetch to update display
+      queryClient.refetchQueries({ queryKey: ['/api/tehillim/progress'] });
     },
     onError: () => {
       toast({
@@ -305,6 +413,12 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
       label: "עליית נשמה (Soul Elevation)", 
       english: "Peace",
       icon: <Smile size={16} className="text-teal-500" />
+    },
+    { 
+      value: "hostages", 
+      label: "פדיון שבויים (Release from Captivity)", 
+      english: "Release from Captivity",
+      icon: <Unlock size={16} className="text-orange-600" />
     }
   ];
 
@@ -364,7 +478,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-3">
               <div className="bg-gradient-feminine p-3 rounded-full">
-                <Scroll className="text-white" size={20} />
+                <Globe className="text-white" size={20} />
               </div>
               <div>
                 <h3 className="platypi-bold text-lg text-black">Global Tehillim Chain</h3>
@@ -447,7 +561,11 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               {/* Header with perek number */}
               <div className="flex items-center justify-between mb-2">
                 <h4 className="platypi-bold text-lg text-black">
-                  {progress?.currentPerek ? `Perek ${progress.currentPerek}` : 'Loading...'}
+                  {tehillimInfo ? (
+                    tehillimInfo.englishNumber === 119 && tehillimInfo.partNumber
+                      ? `Perek ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber}`
+                      : `Perek ${tehillimInfo.englishNumber}`
+                  ) : 'Loading...'}
                 </h4>
                 <div className="bg-gradient-feminine p-2 rounded-full">
                   <ArrowRight className="text-white" size={14} strokeWidth={2} />
@@ -507,11 +625,11 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               isModalComplete(currentPrayer.modal) ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
               {currentPrayer.modal === 'morning-brochas' ? (
-                <Sparkles className="text-white" size={18} />
+                <Sunrise className="text-white" size={18} />
               ) : currentPrayer.modal === 'mincha' ? (
-                <Clock className="text-white" size={18} />
+                <Sun className="text-white" size={18} />
               ) : (
-                <Star className="text-white" size={18} />
+                <Moon className="text-white" size={18} />
               )}
             </div>
             <h3 className="platypi-bold text-sm text-black mb-1">{currentPrayer.title}</h3>
@@ -529,7 +647,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
               isModalComplete('after-brochas') ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
-              <HandHeart className="text-white" size={18} />
+              <Utensils className="text-white" size={18} />
             </div>
             <h3 className="platypi-bold text-sm text-black mb-1">After Brochas</h3>
             <p className="platypi-regular text-xs text-black/60">
@@ -549,11 +667,11 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
               isModalComplete('special-tehillim') ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
-              <BookOpen className="text-white" size={18} />
+              <Stars className="text-white" size={18} />
             </div>
-            <h3 className="platypi-bold text-sm text-black mb-1">Special Tehillim</h3>
+            <h3 className="platypi-bold text-sm text-black mb-1">Tehillim</h3>
             <p className="platypi-regular text-xs text-black/60">
-              {isModalComplete('special-tehillim') ? 'Completed' : 'For Specific Occasions'}
+              {isModalComplete('special-tehillim') ? 'Completed' : 'All & Special'}
             </p>
           </button>
 
@@ -592,8 +710,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               onClick={() => openModal('refuah', 'tefilla')}
               className="bg-gradient-to-br from-blush/10 to-blush/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-blush/20"
             >
-              <div className="bg-blush/20 p-2 rounded-full mx-auto mb-1 w-fit">
-                <Shield className="text-blush" size={16} strokeWidth={1.5} />
+              <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-1 w-fit">
+                <Shield className="text-white" size={16} strokeWidth={1.5} />
               </div>
               <h4 className="platypi-bold text-sm text-black">Refuah</h4>
               <p className="platypi-regular text-xs text-black/60 mt-1">Healing</p>
@@ -603,8 +721,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               onClick={() => openModal('family', 'tefilla')}
               className="bg-gradient-to-br from-lavender/10 to-lavender/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-lavender/20"
             >
-              <div className="bg-lavender/20 p-2 rounded-full mx-auto mb-1 w-fit">
-                <Home className="text-lavender" size={16} strokeWidth={1.5} />
+              <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-1 w-fit">
+                <Users className="text-white" size={16} strokeWidth={1.5} />
               </div>
               <h4 className="platypi-bold text-sm text-black">Family</h4>
               <p className="platypi-regular text-xs text-black/60 mt-1">Shalom Bayis</p>
@@ -614,8 +732,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               onClick={() => openModal('life', 'tefilla')}
               className="bg-gradient-to-br from-sage/10 to-sage/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-sage/20"
             >
-              <div className="bg-sage/20 p-2 rounded-full mx-auto mb-1 w-fit">
-                <Compass className="text-sage" size={16} strokeWidth={1.5} />
+              <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-1 w-fit">
+                <Heart className="text-white" size={16} strokeWidth={1.5} />
               </div>
               <h4 className="platypi-bold text-sm text-black">Life</h4>
               <p className="platypi-regular text-xs text-black/60 mt-1">Guidance</p>

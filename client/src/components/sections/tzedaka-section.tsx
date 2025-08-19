@@ -1,10 +1,11 @@
 import { Heart, BookOpen, Shield, Plus, HandHeart, Gift, Star, Sparkles, Target, Users, DollarSign, TrendingUp, HandCoins } from "lucide-react";
-import { useModalStore, useDailyCompletionStore } from "@/lib/types";
+import { useModalStore, useDailyCompletionStore, useDonationCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
+import { playCoinSound } from "@/utils/sounds";
 import type { Campaign } from "@shared/schema";
 import type { Section } from "@/pages/home";
 
@@ -88,20 +89,24 @@ interface TzedakaSectionProps {
 export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps) {
   const { openModal, activeModal } = useModalStore();
   const { tzedakaCompleted, completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { isCompleted: isDonationCompleted, resetDaily } = useDonationCompletionStore();
   const [, setLocation] = useLocation();
   const [showExplosion, setShowExplosion] = useState(false);
-  const [completedButtons, setCompletedButtons] = useState<Set<string>>(new Set());
 
-  // Reset explosion state when modal changes
+  // Reset explosion state when modal changes and check daily reset
   useEffect(() => {
     setShowExplosion(false);
-  }, [activeModal]);
+    resetDaily(); // Reset donation completion tracking if new day
+  }, [activeModal, resetDaily]);
 
   const handleTzedakaComplete = () => {
     if (tzedakaCompleted) return; // Prevent double execution
     
+    // Play coin clink sound effect
+    playCoinSound();
+    
     setShowExplosion(true);
-    setCompletedButtons(prev => new Set(prev).add('gave-elsewhere'));
+    // Mark gave-elsewhere as completed immediately (different from donation buttons)
     
     // Wait for animation to complete before proceeding
     setTimeout(() => {
@@ -136,7 +141,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
   };
 
   const handleButtonClick = (buttonId: string) => {
-    setCompletedButtons(prev => new Set(prev).add(buttonId));
+    // Don't set completed state immediately - only after successful donation
     openModal(buttonId, 'tzedaka');
   };
 
@@ -177,10 +182,12 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
   return (
     <div className="overflow-y-auto h-full pb-20">
       {/* Main Tzedaka Section - ONLY CAMPAIGN */}
-      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg -mt-1">
+      <div className="bg-gradient-soft rounded-b-3xl px-3 pt-3 pb-2 shadow-lg -mt-1">
         <button 
-          onClick={() => openModal('donate', 'tzedaka')}
-          className="w-full bg-white/70 rounded-2xl p-3 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
+          onClick={() => {
+            openModal('wedding-campaign', 'tzedaka');
+          }}
+          className="w-full bg-white/70 rounded-2xl px-3 pt-3 pb-2 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
         >
         {isLoading ? (
           <div className="animate-pulse">
@@ -204,9 +211,9 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
           </div>
         ) : campaign ? (
           <>
-            <div className="flex items-center space-x-3 mb-4 relative">
+            <div className="flex items-center space-x-3 mb-2 relative">
               <div className="bg-gradient-feminine p-3 rounded-full">
-                <BookOpen className="text-white" size={20} />
+                <Target className="text-white" size={20} />
               </div>
               <div className="flex-grow">
                 <h3 className="platypi-bold text-lg text-black platypi-bold">{campaign.title}</h3>
@@ -218,7 +225,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             </div>
             
             {/* Progress Bar */}
-            <div className="space-y-2">
+            <div className="space-y-1">
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
                   <span className="platypi-regular text-sm text-black/70">Progress</span>
@@ -239,9 +246,18 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
       </div>
       {/* 3 Tzedaka Action Buttons */}
       <div className="p-2 space-y-2">
+        {/* Tax Deductible Information Bar */}
+        <div className="bg-gradient-feminine rounded-2xl px-4 py-2 text-center shadow-lg border border-blush/10">
+          <p className="platypi-bold text-sm text-white">
+            All Donations are US Tax Deductible
+          </p>
+        </div>
+        
         {/* Large Combined Button: Put a coin in the Pushka */}
         <button
-          onClick={() => openModal('donate', 'tzedaka')}
+          onClick={() => {
+            openModal('donate', 'tzedaka');
+          }}
           className="w-full rounded-3xl p-4 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
         >
           <div className="p-3 rounded-full mx-auto mb-3 w-fit bg-gradient-feminine">
@@ -258,17 +274,17 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
           <button
             onClick={() => handleButtonClick('sponsor-day')}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              completedButtons.has('sponsor-day') ? 'bg-sage/20' : 'bg-white'
+              isDonationCompleted('sponsor-day') ? 'bg-sage/20' : 'bg-white'
             }`}
           >
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              completedButtons.has('sponsor-day') ? 'bg-sage' : 'bg-gradient-feminine'
+              isDonationCompleted('sponsor-day') ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
-              <Heart className="text-white" size={18} strokeWidth={1.5} />
+              <HandCoins className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <h3 className="platypi-bold text-xs text-black mb-1">Sponsor a Day</h3>
             <p className="platypi-regular text-xs text-black/60 leading-relaxed">
-              {completedButtons.has('sponsor-day') ? 'Completed' : 'Dedicate all mitzvot'}
+              {isDonationCompleted('sponsor-day') ? 'Completed' : 'Dedicate all mitzvot'}
             </p>
           </button>
 
@@ -276,18 +292,18 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
           <button
             onClick={handleTzedakaComplete}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              tzedakaCompleted || completedButtons.has('gave-elsewhere') ? 'bg-sage/20' : 'bg-white'
+              tzedakaCompleted ? 'bg-sage/20' : 'bg-white'
             }`}
           >
             <div className="heart-explosion-container relative">
               <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-                tzedakaCompleted || completedButtons.has('gave-elsewhere') ? 'bg-sage' : 'bg-gradient-feminine'
+                tzedakaCompleted ? 'bg-sage' : 'bg-gradient-feminine'
               }`}>
-                <HandHeart className="text-white" size={18} strokeWidth={1.5} />
+                <HandCoins className="text-white" size={18} strokeWidth={1.5} />
               </div>
               <h3 className="platypi-bold text-xs text-black mb-1">Gave Tzedaka Elsewhere</h3>
               <p className="platypi-regular text-xs text-black/60 leading-relaxed">
-                {tzedakaCompleted || completedButtons.has('gave-elsewhere') ? 'Completed' : 'Mark as complete'}
+                {tzedakaCompleted ? 'Completed' : 'Mark as complete'}
               </p>
               <HeartExplosion trigger={showExplosion} />
             </div>

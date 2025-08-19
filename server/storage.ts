@@ -1,7 +1,7 @@
 import serverAxiosClient from "./axiosClient";
 import { 
   shopItems, 
-  tehillimNames, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, birkatHamazonPrayers, afterBrochasPrayers, sponsors, nishmasText,
+  tehillimNames, tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, birkatHamazonPrayers, afterBrochasPrayers, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
   dailyRecipes, parshaVorts, tableInspirations, communityImpact, campaigns, donations, womensPrayers, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats,
@@ -26,10 +26,11 @@ import {
   type PirkeiAvot, type InsertPirkeiAvot,
   type PirkeiAvotProgress, type InsertPirkeiAvotProgress,
   type AnalyticsEvent, type InsertAnalyticsEvent,
-  type DailyStats, type InsertDailyStats
+  type DailyStats, type InsertDailyStats,
+  type Message, type InsertMessage, messages
 } from "../shared/schema";
 import { db, pool } from "./db";
-import { eq, gt, lt, gte, lte, and } from "drizzle-orm";
+import { eq, gt, lt, gte, lte, and, sql, like } from "drizzle-orm";
 import { cleanHebrewText, memoize, withRetry, formatDate } from './typeHelpers';
 
 export interface IStorage {
@@ -80,6 +81,7 @@ export interface IStorage {
   getGlobalTehillimProgress(): Promise<GlobalTehillimProgress>;
   updateGlobalTehillimProgress(currentPerek: number, language: string, completedBy?: string): Promise<GlobalTehillimProgress>;
   getRandomNameForPerek(): Promise<TehillimName | undefined>;
+  getProgressWithAssignedName(): Promise<any>;
   getSefariaTehillim(perek: number, language: string): Promise<{text: string; perek: number; language: string}>;
 
   // Mincha methods
@@ -154,6 +156,10 @@ export interface IStorage {
     totalCampaigns: number;
     totalRaised: number;
   }>;
+  
+  // Message methods
+  getMessageByDate(date: string): Promise<Message | undefined>;
+  createMessage(message: InsertMessage): Promise<Message>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -191,6 +197,8 @@ export class DatabaseStorage implements IStorage {
 
   // Tehillim methods
   async getActiveNames(): Promise<TehillimName[]> {
+    // Cleanup expired names only when fetching all names
+    // This happens less frequently than progress checks
     await this.cleanupExpiredNames();
     const now = new Date();
     return await db.select().from(tehillimNames).where(gt(tehillimNames.expiresAt, now));
@@ -229,13 +237,23 @@ export class DatabaseStorage implements IStorage {
   async updateGlobalTehillimProgress(currentPerek: number, language: string, completedBy?: string): Promise<GlobalTehillimProgress> {
     const [progress] = await db.select().from(globalTehillimProgress).limit(1);
     if (progress) {
-      // Check if we're completing the entire book (perek 150)
-      const isBookComplete = currentPerek === 150;
+      // Use the database progress value, not the parameter
+      const currentDbPerek = progress.currentPerek;
       
-      // Calculate next perek (1-150, cycling)
-      const nextPerek = currentPerek >= 150 ? 1 : currentPerek + 1;
+      // Get the max ID to know when to reset
+      const [maxRow] = await db
+        .select({ maxId: sql<number>`MAX(id)` })
+        .from(tehillim);
       
-      // Log book completion event when finishing perek 150
+      const maxId = maxRow?.maxId || 171; // 171 is the total with Psalm 119 having 22 parts
+      
+      // Check if we're completing the entire book (use database value)
+      const isBookComplete = currentDbPerek >= maxId;
+      
+      // Calculate next ID (cycling through all rows) - use database value
+      const nextId = currentDbPerek >= maxId ? 1 : currentDbPerek + 1;
+      
+      // Log book completion event when finishing the last row
       if (isBookComplete) {
         await this.trackEvent({
           eventType: 'tehillim_book_complete',
@@ -253,7 +271,7 @@ export class DatabaseStorage implements IStorage {
       
       const [updated] = await db.update(globalTehillimProgress)
         .set({
-          currentPerek: nextPerek,
+          currentPerek: nextId, // Now storing the row ID, not psalm number
           currentNameId: nextName?.id || null,
           lastUpdated: new Date(),
           completedBy: completedBy || null
@@ -263,6 +281,51 @@ export class DatabaseStorage implements IStorage {
       return updated;
     }
     return this.getGlobalTehillimProgress();
+  }
+
+  async getProgressWithAssignedName(): Promise<any> {
+    // Optimized method to get progress and assigned name in fewer queries
+    const [progress] = await db.select().from(globalTehillimProgress).limit(1);
+    
+    if (!progress) {
+      // Initialize progress if it doesn't exist
+      const initialName = await this.getRandomNameForInitialAssignment();
+      const [newProgress] = await db.insert(globalTehillimProgress).values({
+        currentPerek: 1,
+        currentNameId: initialName?.id || null,
+        completedBy: null
+      }).returning();
+      
+      return {
+        ...newProgress,
+        assignedName: initialName?.hebrewName || null
+      };
+    }
+    
+    // If there's an assigned name, fetch it
+    let assignedName = null;
+    if (progress.currentNameId) {
+      const [name] = await db.select().from(tehillimNames).where(eq(tehillimNames.id, progress.currentNameId));
+      if (name) {
+        assignedName = name.hebrewName;
+      }
+    }
+    
+    // If no assigned name, assign one now
+    if (!assignedName) {
+      const newName = await this.getRandomNameForInitialAssignment();
+      if (newName && progress.id) {
+        await db.update(globalTehillimProgress)
+          .set({ currentNameId: newName.id })
+          .where(eq(globalTehillimProgress.id, progress.id));
+        assignedName = newName.hebrewName;
+      }
+    }
+    
+    return {
+      ...progress,
+      assignedName: assignedName || null
+    };
   }
 
   async getRandomNameForPerek(): Promise<TehillimName | undefined> {
@@ -290,8 +353,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRandomNameForInitialAssignment(): Promise<TehillimName | undefined> {
-    await this.cleanupExpiredNames();
-    const activeNames = await this.getActiveNames();
+    // Don't cleanup here - avoid redundant cleanup operations
+    const now = new Date();
+    const activeNames = await db.select().from(tehillimNames).where(gt(tehillimNames.expiresAt, now));
     if (activeNames.length === 0) return undefined;
     
     const randomIndex = Math.floor(Math.random() * activeNames.length);
@@ -300,6 +364,115 @@ export class DatabaseStorage implements IStorage {
 
 
 
+  // Get Tehillim from Supabase database by English number (1-150)
+  async getSupabaseTehillim(englishNumber: number, language: string): Promise<{text: string; perek: number; language: string}> {
+    try {
+      // Get all parts for this English number
+      const rows = await db
+        .select()
+        .from(tehillim)
+        .where(eq(tehillim.englishNumber, englishNumber))
+        .orderBy(tehillim.partNumber);
+
+      if (!rows || rows.length === 0) {
+        throw new Error(`Tehillim ${englishNumber} not found in database`);
+      }
+
+      // Combine all parts into one text
+      let combinedText = '';
+      if (language === 'hebrew') {
+        combinedText = rows.map((row: any) => row.hebrewText).join('\n\n');
+      } else {
+        combinedText = rows.map((row: any) => row.englishText).join('\n\n');
+      }
+
+      return {
+        text: combinedText,
+        perek: englishNumber,
+        language
+      };
+    } catch (error) {
+      console.error('Error fetching Tehillim from Supabase:', error);
+      // Fallback to Sefaria if needed
+      return this.getSefariaTehillim(englishNumber, language);
+    }
+  }
+
+  // Get single Tehillim row by ID for Global Tehillim display
+  async getSupabaseTehillimById(id: number): Promise<{
+    id: number;
+    englishNumber: number;
+    partNumber: number;
+    hebrewNumber: string;
+    hebrewText: string;
+    englishText: string;
+  } | null> {
+    try {
+      const [row] = await db
+        .select()
+        .from(tehillim)
+        .where(eq(tehillim.id, id));
+
+      return row || null;
+    } catch (error) {
+      console.error('Error fetching Tehillim by ID:', error);
+      return null;
+    }
+  }
+
+  async getTehillimById(id: number, language: string): Promise<{text: string; perek: number; language: string}> {
+    try {
+      const [row] = await db
+        .select()
+        .from(tehillim)
+        .where(eq(tehillim.id, id));
+
+      if (!row) {
+        throw new Error(`Tehillim with ID ${id} not found in database`);
+      }
+
+      const text = language === 'hebrew' ? row.hebrewText : row.englishText;
+
+      return {
+        text: text || '',
+        perek: row.englishNumber || 1,
+        language
+      };
+    } catch (error) {
+      console.error('Error fetching Tehillim by ID:', error);
+      // Fallback to Sefaria if needed
+      throw error;
+    }
+  }
+
+  // Get Tehillim preview for Global display
+  async getSupabaseTehillimPreview(id: number, language: string): Promise<{
+    preview: string;
+    englishNumber: number;
+    partNumber: number;
+    language: string;
+  } | null> {
+    try {
+      const row = await this.getSupabaseTehillimById(id);
+      if (!row) return null;
+
+      const text = language === 'hebrew' ? row.hebrewText : row.englishText;
+      // Get first line or first 100 characters
+      const firstLine = text.split('\n')[0] || text.substring(0, 100) + '...';
+
+      return {
+        preview: firstLine,
+        englishNumber: row.englishNumber,
+        partNumber: row.partNumber,
+        language
+      };
+    } catch (error) {
+      console.error('Error getting Tehillim preview:', error);
+      return null;
+    }
+  }
+
+  // DEPRECATED - Use getSupabaseTehillim instead
   async getSefariaTehillim(perek: number, language: string): Promise<{text: string; perek: number; language: string}> {
     try {
       // Use the correct Sefaria API endpoint
@@ -336,37 +509,116 @@ export class DatabaseStorage implements IStorage {
         throw new Error('No text content found in API response');
       }
       
-      // Clean up HTML formatting and Hebrew-specific markers from Sefaria text
-      const cleanText = text
+      // Aggressive Hebrew text cleaning to eliminate all display issues
+      let cleanText = text
         .replace(/<br\s*\/?>/gi, '\n')  // Replace <br> tags with newlines
-        .replace(/<small>(.*?)<\/small>/gi, '$1')  // Remove <small> tags but keep content
-        .replace(/<sup[^>]*>.*?<\/sup>/gi, '')  // Remove footnote superscripts
-        .replace(/<i[^>]*>.*?<\/i>/gi, '')  // Remove footnote italic text
-        .replace(/<[^>]*>/gi, '')  // Remove any remaining HTML tags
-        .replace(/&thinsp;/gi, '')  // Remove thin space HTML entities
+        .replace(/<b>\s*\|\s*<\/b>/gi, ' ')  // Replace vertical bar in bold tags with space
+        .replace(/<b>\s*׀\s*<\/b>/gi, ' ')  // Replace Hebrew paseq in bold tags with space
+        .replace(/<[^>]*>/gi, '')  // Remove any HTML tags
         .replace(/&nbsp;/gi, ' ')  // Replace non-breaking spaces with regular spaces
-        .replace(/&[a-zA-Z0-9#]+;/gi, '')  // Remove HTML entities
+        .replace(/&thinsp;/gi, ' ')  // Replace thin spaces with regular spaces
+        .replace(/&ensp;/gi, ' ')  // Replace en spaces with regular spaces
+        .replace(/&emsp;/gi, ' ')  // Replace em spaces with regular spaces
+        .replace(/&middot;/gi, ' ')  // Replace middle dot with space
+        .replace(/&[a-zA-Z0-9#]+;/gi, ' ')  // Replace remaining HTML entities with space
         .replace(/\{[פס]\}/g, '')  // Remove Hebrew paragraph markers like {פ} and {ס}
-        .replace(/[\u200E\u200F\u202A-\u202E]/g, '')  // Remove Unicode directional marks
-        .replace(/[\u2060\u00A0\u180E\u2000-\u200B\u2028\u2029\uFEFF]/g, '')  // Remove zero-width spaces
-        .replace(/[\u25A0-\u25FF]/g, '')  // Remove geometric shapes (rectangles, squares)
-        .replace(/[\uFFF0-\uFFFF]/g, '')  // Remove specials block characters
-        .replace(/[\uE000-\uF8FF]/g, '')  // Remove private use area characters
-        .replace(/[\u2400-\u243F]/g, '')  // Remove control pictures
-        .replace(/[\u2500-\u257F]/g, '')  // Remove box drawing characters
-        .replace(/[\uFE00-\uFE0F]/g, '')  // Remove variation selectors
-        .replace(/[\u0590-\u05CF]/g, (match) => {
-          // Keep valid Hebrew characters, remove problematic ones
-          const codePoint = match.codePointAt(0);
-          if (!codePoint) return '';
-          if (codePoint >= 0x05D0 && codePoint <= 0x05EA) return match; // Hebrew letters
-          if (codePoint >= 0x05B0 && codePoint <= 0x05BD) return match; // Hebrew points
-          if (codePoint >= 0x05BF && codePoint <= 0x05C2) return match; // Hebrew points
-          if (codePoint >= 0x05C4 && codePoint <= 0x05C5) return match; // Hebrew points
-          if (codePoint === 0x05C7) return match; // Hebrew point
-          return ''; // Remove other characters in Hebrew block
+        // Remove all problematic Unicode ranges - but preserve specific Hebrew punctuation
+        .replace(/[\u2000-\u206F]/g, (char) => {
+          const code = char.charCodeAt(0);
+          // Keep only normal spaces and Hebrew punctuation
+          if (code === 0x2000 || code === 0x2002 || code === 0x2003 || code === 0x2009) return ' '; // Convert spaces
+          if (code === 0x2013 || code === 0x2014) return '-'; // Keep dashes
+          if (code === 0x05BE) return char; // Keep Hebrew maqaf (hyphen)
+          return ''; // Remove everything else in this range
         })
-        .replace(/\n\s*\n/g, '\n')  // Remove multiple consecutive newlines
+        .replace(/[\u2100-\u27BF]/g, '')  // Remove all symbols, shapes, and technical characters
+        .replace(/[\u2800-\u28FF]/g, '')  // Remove braille patterns
+        .replace(/[\uE000-\uF8FF]/g, '')  // Remove private use area
+        .replace(/[\uFE00-\uFE0F]/g, '')  // Remove variation selectors
+        .replace(/[\uFFF0-\uFFFF]/g, '')  // Remove specials
+        .replace(/[\uFFFD\uFFFC]/g, '')  // Remove replacement characters
+        .replace(/[\u00A0]/g, ' ')       // Convert non-breaking space to regular space
+        .replace(/[\u0000-\u001F\u007F-\u009F]/g, ''); // Remove control characters
+      
+      // Character-by-character filtering to keep only safe characters
+      let result = '';
+      for (let i = 0; i < cleanText.length; i++) {
+        const char = cleanText[i];
+        const code = char.charCodeAt(0);
+        
+        // Keep basic ASCII (0-127) except control chars
+        if (code >= 32 && code <= 126) {
+          result += char;
+          continue;
+        }
+        if (code === 10 || code === 13) { // Keep newlines
+          result += char;
+          continue;
+        }
+        
+        // Keep Hebrew block but filter problematic characters
+        if (code >= 0x0590 && code <= 0x05FF) {
+          // Skip paseq and sof pasuq which appear as vertical bars or colons
+          if (code === 0x05C0 || code === 0x05C3) {
+            result += ' '; // Replace with space to maintain word separation
+            continue;
+          }
+          
+          // Only keep Hebrew letters and most common vowels
+          if ((code >= 0x05D0 && code <= 0x05EA) || // Hebrew letters
+              code === 0x05B0 || // Sheva
+              code === 0x05B1 || // Hataf Segol
+              code === 0x05B2 || // Hataf Patah
+              code === 0x05B3 || // Hataf Qamats
+              code === 0x05B4 || // Hiriq
+              code === 0x05B5 || // Tsere
+              code === 0x05B6 || // Segol
+              code === 0x05B7 || // Patah
+              code === 0x05B8 || // Qamats
+              code === 0x05B9 || // Holam
+              code === 0x05BA || // Holam Haser for Vav
+              code === 0x05BB || // Qubuts
+              code === 0x05BC || // Dagesh or Mappiq
+              code === 0x05BE || // Maqaf (Hebrew hyphen)
+              code === 0x05C1 || // Shin Dot
+              code === 0x05C2) { // Sin Dot
+            result += char;
+          }
+          // Skip ALL other marks that cause display issues
+          continue;
+        }
+        
+        // Keep Hebrew presentation forms but be selective
+        if (code >= 0xFB1D && code <= 0xFB4F) {
+          result += char;
+          continue;
+        }
+        
+        // Convert various space characters to regular space
+        if (code === 0x00A0 || // Non-breaking space
+            code === 0x2000 || code === 0x2001 || code === 0x2002 || // Various width spaces
+            code === 0x2003 || code === 0x2004 || code === 0x2005 ||
+            code === 0x2006 || code === 0x2007 || code === 0x2008 ||
+            code === 0x2009 || code === 0x200A || code === 0x202F ||
+            code === 0x205F || code === 0x3000) { // Various other spaces
+          result += ' ';
+          continue;
+        }
+        
+        // Special handling for vertical bar character
+        if (code === 0x007C) { // Vertical bar |
+          result += ' '; // Replace with space
+          continue;
+        }
+        
+        // Skip everything else (all other Unicode blocks that cause issues)
+      }
+      
+      // Final cleanup - preserve line breaks and spacing
+      cleanText = result
+        .replace(/[ \t]{2,}/g, ' ')     // Replace multiple spaces/tabs with single space (but not newlines)
+        .replace(/\n{3,}/g, '\n\n')    // Limit to max 2 consecutive newlines
+        .replace(/׃/g, ':')           // Replace Hebrew sof pasuq with regular colon
         .trim();
       
       return {
@@ -564,16 +816,11 @@ export class DatabaseStorage implements IStorage {
 
   // Daily recipe methods
   async getDailyRecipeByDate(date: string): Promise<DailyRecipe | undefined> {
-    // Find recipe where the given date falls within the date range
+    // Find recipe for the specific date
     const [recipe] = await db
       .select()
       .from(dailyRecipes)
-      .where(
-        and(
-          lte(dailyRecipes.fromDate, date),
-          gte(dailyRecipes.untilDate, date)
-        )
-      )
+      .where(eq(dailyRecipes.date, date))
       .limit(1);
     return recipe;
   }
@@ -674,6 +921,15 @@ export class DatabaseStorage implements IStorage {
       .values(donation)
       .returning();
     return result;
+  }
+
+  async getDonationByPaymentIntentId(stripePaymentIntentId: string) {
+    const [result] = await db
+      .select()
+      .from(donations)
+      .where(eq(donations.stripePaymentIntentId, stripePaymentIntentId))
+      .limit(1);
+    return result || null;
   }
 
   async updateDonationStatus(stripePaymentIntentId: string, status: string) {
@@ -1149,27 +1405,103 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getCommunityImpact(): Promise<{
+  async getCommunityImpact(period: string = 'alltime'): Promise<{
     totalDaysSponsored: number;
     totalCampaigns: number;
     totalRaised: number;
   }> {
-    // Count total active sponsors (days sponsored)
-    const activeSponsors = await db.select().from(sponsors).where(eq(sponsors.isActive, true));
+    let dateFilter;
+    const now = new Date();
+    
+    if (period === 'today') {
+      // Today only
+      const today = now.toISOString().split('T')[0];
+      dateFilter = and(
+        gte(donations.createdAt, new Date(today + 'T00:00:00')),
+        lte(donations.createdAt, new Date(today + 'T23:59:59'))
+      );
+    } else if (period === 'month') {
+      // Current month
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+      dateFilter = and(
+        gte(donations.createdAt, firstDay),
+        lte(donations.createdAt, lastDay)
+      );
+    }
+
+    // Get sponsors based on period
+    let sponsorFilter;
+    if (period === 'today') {
+      const today = now.toISOString().split('T')[0];
+      sponsorFilter = and(
+        eq(sponsors.isActive, true),
+        eq(sponsors.sponsorshipDate, today)
+      );
+    } else if (period === 'month') {
+      const year = now.getFullYear();
+      const month = (now.getMonth() + 1).toString().padStart(2, '0');
+      sponsorFilter = and(
+        eq(sponsors.isActive, true),
+        like(sponsors.sponsorshipDate, `${year}-${month}-%`)
+      );
+    } else {
+      sponsorFilter = eq(sponsors.isActive, true);
+    }
+
+    const activeSponsors = await db.select().from(sponsors).where(sponsorFilter);
     const totalDaysSponsored = activeSponsors.length;
 
-    // Count successful donations
-    const successfulDonations = await db.select().from(donations).where(eq(donations.status, 'succeeded'));
-    const totalCampaigns = successfulDonations.length; // Using number of donations as "campaigns" for now
-
-    // Sum total raised from actual donations (convert from cents to dollars)
-    const totalRaised = successfulDonations.reduce((sum, donation) => sum + (donation.amount || 0), 0) / 100;
-
-    return {
-      totalDaysSponsored,
-      totalCampaigns,
-      totalRaised
-    };
+    // Get donations based on period
+    let donationQuery = db.select().from(donations).where(eq(donations.status, 'succeeded'));
+    
+    if (period === 'today' || period === 'month') {
+      const successfulDonations = await db
+        .select()
+        .from(donations)
+        .where(and(
+          eq(donations.status, 'succeeded'),
+          dateFilter!
+        ));
+      
+      const totalCampaigns = successfulDonations.length;
+      const totalRaised = successfulDonations.reduce((sum, donation) => sum + (donation.amount || 0), 0) / 100;
+      
+      return {
+        totalDaysSponsored,
+        totalCampaigns,
+        totalRaised
+      };
+    } else {
+      // All time - original logic
+      const successfulDonations = await donationQuery;
+      const totalCampaigns = successfulDonations.length;
+      const totalRaised = successfulDonations.reduce((sum, donation) => sum + (donation.amount || 0), 0) / 100;
+      
+      return {
+        totalDaysSponsored,
+        totalCampaigns,
+        totalRaised
+      };
+    }
+  }
+  
+  // Message methods
+  async getMessageByDate(date: string): Promise<Message | undefined> {
+    const [message] = await db
+      .select()
+      .from(messages)
+      .where(eq(messages.date, date))
+      .limit(1);
+    return message;
+  }
+  
+  async createMessage(message: InsertMessage): Promise<Message> {
+    const [newMessage] = await db
+      .insert(messages)
+      .values(message)
+      .returning();
+    return newMessage;
   }
 }
 

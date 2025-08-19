@@ -13,6 +13,9 @@ export const lazyLoad = <T extends Record<string, any>>(
  * Remove unused CSS classes and styles
  */
 export function cleanupUnusedStyles(): void {
+  // Disabled for now - may be removing needed styles
+  return;
+  
   const stylesheets = Array.from(document.styleSheets);
   
   stylesheets.forEach(stylesheet => {
@@ -101,10 +104,10 @@ export function initializeOptimizations(): void {
     preloadCriticalResources();
   }
   
-  // Run cleanup after page is fully loaded
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      cleanupUnusedStyles();
-    }, 1000);
-  });
+  // Cleanup disabled for now - may be causing issues
+  // window.addEventListener('load', () => {
+  //   setTimeout(() => {
+  //     cleanupUnusedStyles();
+  //   }, 1000);
+  // });
 }

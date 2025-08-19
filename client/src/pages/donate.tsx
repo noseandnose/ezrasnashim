@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, CheckCircle, Mail } from "lucide-react";
 import { useLocation } from "wouter";
-import { useDailyCompletionStore, useModalStore } from "@/lib/types";
+import { useDailyCompletionStore, useModalStore, useDonationCompletionStore } from "@/lib/types";
+import { playCoinSound } from "@/utils/sounds";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 // Removed Apple Pay button import - now using integrated PaymentElement
 
@@ -42,6 +43,7 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
   const [isProcessing, setIsProcessing] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { addCompletedDonation } = useDonationCompletionStore();
   const { openModal } = useModalStore();
   const { trackModalComplete } = useTrackModalComplete();
 
@@ -49,38 +51,17 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
     e.preventDefault();
 
     if (!stripe || !elements) {
-      console.error('Stripe or Elements not ready:', { stripe: !!stripe, elements: !!elements });
       return;
     }
 
     setIsProcessing(true);
-
-    console.log('=== PAYMENT SUBMISSION STARTED ===');
-    console.log('Elements ready:', !!elements);
-    console.log('Stripe ready:', !!stripe);
-    console.log('Amount:', amount);
-    console.log('Donation type:', donationType);
-    console.log('User agent:', navigator.userAgent);
-    console.log('Current URL:', window.location.href);
-    console.log('Payment environment:', {
-      isApplePay: /iPhone|iPad|iPod/.test(navigator.userAgent) && window.ApplePaySession,
-      isSafari: /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent),
-      isIOS: /iPhone|iPad|iPod/.test(navigator.userAgent),
-      protocol: window.location.protocol,
-      hostname: window.location.hostname
-    });
     
     try {
-      console.log('About to confirm payment with Stripe...');
-      console.log('Return URL will be:', `${window.location.origin}/?donation=success`);
-      
       // Directly confirm payment - PaymentElement handles its own validation
       // The confirmPayment method will automatically validate the form
-      console.log('Confirming payment with Stripe...');
       
       let confirmResult;
       try {
-        console.log('About to call stripe.confirmPayment');
         
         // Use redirect: 'if_required' to handle success without redirect for card payments
         confirmResult = await stripe.confirmPayment({
@@ -92,17 +73,14 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
           redirect: 'if_required' // This prevents redirect for successful card payments
         });
         
-        console.log('confirmPayment returned:', confirmResult);
+
       } catch (stripeError) {
-        console.error('Stripe confirmPayment threw an error:', stripeError);
-        console.error('Error name:', (stripeError as any)?.name);
-        console.error('Error code:', (stripeError as any)?.code);
-        console.error('Error type:', (stripeError as any)?.type);
-        console.error('Full error:', stripeError);
+        // Stripe confirmPayment threw an error
+        // Error details captured but not logged to console
         throw stripeError; // Re-throw to be caught by outer catch
       }
       
-      console.log('Stripe confirmPayment completed:', confirmResult);
+
       
       // Handle the TypeScript typing issue - confirmResult may have different structures
       const error = (confirmResult as any)?.error;
@@ -211,6 +189,16 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
           } catch (error) {
             console.error('Failed to create sponsor record:', error);
           }
+        }
+        
+        // Play coin sound on successful donation
+        playCoinSound();
+        
+        // Mark specific donation type as completed
+        if (donationType === 'Sponsor a Day of Ezras Nashim') {
+          addCompletedDonation('sponsor-day');
+        } else {
+          addCompletedDonation('general-donation');
         }
         
         // Complete tzedaka task when payment is successful/processing
