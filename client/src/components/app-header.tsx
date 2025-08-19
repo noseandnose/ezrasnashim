@@ -1,15 +1,19 @@
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate } from "@/hooks/use-hebrew-date";
-import { BarChart3, Info } from "lucide-react";
+import { BarChart3, Info, Share2 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
+import { useState } from "react";
 import logoImage from "@assets/6LO_1753613081319.png";
+import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
+
 
 export default function AppHeader() {
   const { data: times, isLoading: timesLoading } = useJewishTimes();
   const { data: hebrewDate, isLoading: dateLoading } = useHebrewDate();
   const [, setLocation] = useLocation();
   const { openModal } = useModalStore();
+  const [showAddToHomeScreen, setShowAddToHomeScreen] = useState(false);
 
   const getCurrentTime = () => {
     return new Date().toLocaleTimeString('en-US', { 
@@ -20,8 +24,9 @@ export default function AppHeader() {
   };
 
   return (
-    <header className="bg-gradient-soft p-3 border-0 shadow-none">
-      <div className="flex items-center justify-between px-2">
+    <>
+      <header className="bg-gradient-soft p-3 border-0 shadow-none">
+        <div className="flex items-center justify-between px-2">
         <button
           onClick={() => openModal('about', 'about')}
           className="p-2 rounded-full hover:bg-white/50 transition-colors"
@@ -34,14 +39,29 @@ export default function AppHeader() {
           alt="Ezras Nashim" 
           className="h-7 w-auto"
         />
-        <button
-          onClick={() => setLocation("/statistics")}
-          className="p-2 rounded-full hover:bg-white/50 transition-colors"
-          aria-label="View Statistics"
-        >
-          <BarChart3 className="h-5 w-5 text-black/70" />
-        </button>
-      </div>
-    </header>
+        <div className="flex items-center space-x-1">
+          <button
+            onClick={() => setShowAddToHomeScreen(true)}
+            className="p-2 rounded-full hover:bg-white/50 transition-colors"
+            aria-label="Add to Home Screen"
+          >
+            <Share2 className="h-5 w-5 text-black/70" />
+          </button>
+          <button
+            onClick={() => setLocation("/statistics")}
+            className="p-2 rounded-full hover:bg-white/50 transition-colors"
+            aria-label="View Statistics"
+          >
+            <BarChart3 className="h-5 w-5 text-black/70" />
+          </button>
+        </div>
+        </div>
+      </header>
+      
+      <AddToHomeScreenModal 
+        isOpen={showAddToHomeScreen}
+        onClose={() => setShowAddToHomeScreen(false)}
+      />
+    </>
   );
 }

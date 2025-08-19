@@ -28,9 +28,22 @@ function Router() {
   useGeolocation();
   useJewishTimes();
   
-  // Initialize cache system
+  // Initialize cache system and register service worker
   useEffect(() => {
     initializeCache();
+    
+    // Register service worker for PWA functionality
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            // Service worker registered successfully
+          })
+          .catch(error => {
+            // Service worker registration failed
+          });
+      });
+    }
   }, []);
   
   return (
