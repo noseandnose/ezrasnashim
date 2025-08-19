@@ -756,52 +756,58 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     <>
       {/* Tehillim Text Modal */}
       <Dialog open={activeModal === 'tehillim-text'} onOpenChange={() => closeModal(true)}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="tehillim-description">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular relative" aria-describedby="tehillim-description">
           <div id="tehillim-description" className="sr-only">Psalms reading and community prayer participation</div>
-          
-          {/* Fullscreen button */}
-          <button
-            onClick={() => {
-              setFullscreenContent({
-                isOpen: true,
-                title: `Tehillim ${tehillimInfo?.englishNumber || progress?.currentPerek || 1}${tehillimInfo?.englishNumber === 119 && tehillimInfo?.partNumber ? ` - Part ${tehillimInfo.partNumber}` : ''}`,
-                content: (
-                  <div
-                    className={`${showHebrew ? 'vc-koren-hebrew' : 'koren-siddur-english'} leading-relaxed text-black`}
-                    style={{ fontSize: `${showHebrew ? fontSize + 1 : fontSize}px` }}
-                  >
-                    {getTehillimDisplayText()}
-                  </div>
-                )
-              });
-            }}
-            className="absolute left-3 top-3 p-2 rounded-lg hover:bg-warm-gray/10 transition-colors z-10"
-            aria-label="Fullscreen"
-          >
-            <Maximize2 className="w-4 h-4 text-black/60" />
-          </button>
           
           {/* Standardized Header with two-row layout */}
           <div className="mb-2 space-y-2">
-            {/* First Row: Language Toggle and Title */}
-            <div className="flex items-center justify-center gap-4">
-              <Button
-                onClick={() => setShowHebrew(!showHebrew)}
-                variant="ghost"
-                size="sm"
-                className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
-                  showHebrew 
-                    ? 'bg-blush text-white' 
-                    : 'text-black/60 hover:text-black hover:bg-white/50'
-                }`}
+            {/* First Row: Language Toggle, Title, and Fullscreen button */}
+            <div className="flex items-center justify-between w-full">
+              {/* Fullscreen button on the left */}
+              <button
+                onClick={() => {
+                  setFullscreenContent({
+                    isOpen: true,
+                    title: `Tehillim ${tehillimInfo?.englishNumber || progress?.currentPerek || 1}${tehillimInfo?.englishNumber === 119 && tehillimInfo?.partNumber ? ` - Part ${tehillimInfo.partNumber}` : ''}`,
+                    content: (
+                      <div
+                        className={`${showHebrew ? 'vc-koren-hebrew' : 'koren-siddur-english'} leading-relaxed text-black`}
+                        style={{ fontSize: `${showHebrew ? fontSize + 1 : fontSize}px` }}
+                      >
+                        {getTehillimDisplayText()}
+                      </div>
+                    )
+                  });
+                }}
+                className="p-2 rounded-lg hover:bg-warm-gray/10 transition-colors"
+                aria-label="Fullscreen"
               >
-                {showHebrew ? 'EN' : 'עב'}
-              </Button>
+                <Maximize2 className="w-4 h-4 text-black/60" />
+              </button>
               
-              <DialogTitle className="text-lg platypi-bold text-black">
-                Tehillim {tehillimInfo?.englishNumber || progress?.currentPerek || 1}
-                {tehillimInfo?.englishNumber === 119 && tehillimInfo?.partNumber ? ` - Part ${tehillimInfo.partNumber}` : ''}
-              </DialogTitle>
+              {/* Center content with Language Toggle and Title */}
+              <div className="flex items-center gap-4 flex-1 justify-center">
+                <Button
+                  onClick={() => setShowHebrew(!showHebrew)}
+                  variant="ghost"
+                  size="sm"
+                  className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
+                    showHebrew 
+                      ? 'bg-blush text-white' 
+                      : 'text-black/60 hover:text-black hover:bg-white/50'
+                  }`}
+                >
+                  {showHebrew ? 'EN' : 'עב'}
+                </Button>
+                
+                <DialogTitle className="text-lg platypi-bold text-black">
+                  Tehillim {tehillimInfo?.englishNumber || progress?.currentPerek || 1}
+                  {tehillimInfo?.englishNumber === 119 && tehillimInfo?.partNumber ? ` - Part ${tehillimInfo.partNumber}` : ''}
+                </DialogTitle>
+              </div>
+              
+              {/* Spacer for balance */}
+              <div className="w-10"></div>
             </div>
             
             {/* Second Row: Font Size Controls */}
@@ -2153,12 +2159,14 @@ function JerusalemCompass() {
           if ((event as any).webkitCompassHeading !== undefined && (event as any).webkitCompassHeading !== null) {
             heading = (event as any).webkitCompassHeading;
           } else if (event.absolute) {
-            // For Android devices with absolute orientation
-            heading = event.alpha;
+            // For Android devices with absolute orientation (relative to Earth's coordinate frame)
+            // Alpha is the compass heading directly
+            heading = (360 - event.alpha) % 360;
           } else {
             // For Android devices without absolute orientation
-            // Alpha is relative to initial device orientation, not true north
-            heading = (360 - event.alpha) % 360;
+            // Alpha is relative to arbitrary starting position
+            // We need to use it as-is since we can't determine true north
+            heading = event.alpha;
           }
           
           setDeviceOrientation(heading);
