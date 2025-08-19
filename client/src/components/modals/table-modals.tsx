@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, Play, Pause, Volume2 } from "lucide-react";
 import AudioPlayer from "@/components/audio-player";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { formatTextContent } from "@/lib/text-formatter";
+import { LazyImage } from "@/components/ui/lazy-image";
 
 export default function TableModals() {
   const { activeModal, closeModal } = useModalStore();
@@ -84,14 +85,12 @@ export default function TableModals() {
               {/* Recipe Image */}
               {recipeContent.imageUrl && (
                 <div className="w-full rounded-lg overflow-hidden mb-4">
-                  <img 
+                  <LazyImage 
                     src={recipeContent.imageUrl} 
                     alt={recipeContent.title || "Recipe"} 
                     className="w-full h-48 object-cover"
-                    crossOrigin="anonymous"
-                    onError={(e) => {
-                      const parent = e.currentTarget.parentElement;
-                      if (parent) parent.style.display = 'none';
+                    onError={() => {
+                      // Image failed to load, could hide the container
                     }}
                   />
                 </div>

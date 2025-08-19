@@ -1296,8 +1296,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/tehillim/current-name", async (req, res) => {
     try {
-      const name = await storage.getRandomNameForPerek();
-      res.json(name || null);
+      // Get the progress with the currently assigned name
+      const progressWithName = await storage.getProgressWithAssignedName();
+      
+      // If there's an assigned name ID, fetch the full name details
+      if (progressWithName.currentNameId) {
+        const names = await storage.getActiveNames();
+        const assignedName = names.find(n => n.id === progressWithName.currentNameId);
+        res.json(assignedName || null);
+      } else {
+        res.json(null);
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch current name" });
     }

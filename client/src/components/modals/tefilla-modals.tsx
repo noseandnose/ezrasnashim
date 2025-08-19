@@ -614,6 +614,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       // Also invalidate queries for other components
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/preview'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/text'] });
+      
+      // Dispatch event for the tefilla section to refresh
+      window.dispatchEvent(new Event('tehillimCompleted'));
     },
     onError: () => {
       toast({

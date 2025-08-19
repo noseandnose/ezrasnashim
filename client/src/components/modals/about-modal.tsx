@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/lib/types";
+import { LazyImage } from "@/components/ui/lazy-image";
 import justOneChesedImage from '@assets/Second print Photo Signs - Chamal  copy_1753336662272.png';
 
 export default function AboutModal() {
@@ -72,7 +73,7 @@ export default function AboutModal() {
               rel="noopener noreferrer"
               className="hover:opacity-80 transition-opacity"
             >
-              <img 
+              <LazyImage 
                 src={justOneChesedImage} 
                 alt="JustOneChesed Logo" 
                 className="max-w-full h-auto rounded-lg cursor-pointer"
