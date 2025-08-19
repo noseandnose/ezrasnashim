@@ -1662,22 +1662,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         client_secret_exists: !!paymentIntent.client_secret
       });
       
-      // Track the donation attempt in our database
-      try {
-        await storage.createDonation({
-          stripePaymentIntentId: paymentIntent.id,
-          amount: paymentIntent.amount, // Already in cents
-          donationType: donationType || "General Donation",
-          sponsorName: metadata?.sponsorName,
-          dedication: metadata?.dedication,
-          email: receiptEmail,
-          status: 'pending'
-        });
-        console.log('Donation tracked in database:', paymentIntent.id);
-      } catch (dbError) {
-        console.error('Error saving donation to database:', dbError);
-        // Continue even if database save fails
-      }
+      // Don't create donation record here - only after successful payment
+      // This prevents incomplete donations from being stored in the database
+      console.log('Payment intent created:', paymentIntent.id);
 
       res.json({ 
         clientSecret: paymentIntent.client_secret,
@@ -1791,16 +1778,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Payment intent ID and status required" });
       }
       
-      const donation = await storage.updateDonationStatus(paymentIntentId, status);
+      // First check if donation exists
+      let donation = await storage.getDonationByPaymentIntentId(paymentIntentId);
       
-      if (!donation) {
-        // If donation doesn't exist, create it with succeeded status
-        await storage.createDonation({
-          stripePaymentIntentId: paymentIntentId,
-          amount: 100, // Default $1 for testing
-          donationType: "General Donation",
-          status: status
-        });
+      if (donation) {
+        // Update existing donation status
+        donation = await storage.updateDonationStatus(paymentIntentId, status);
+      } else if (status === 'succeeded') {
+        // Only create donation record if payment succeeded
+        // Get payment intent details from Stripe to get accurate amount and metadata
+        try {
+          const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+          donation = await storage.createDonation({
+            stripePaymentIntentId: paymentIntentId,
+            amount: paymentIntent.amount, // Amount in cents from Stripe
+            donationType: paymentIntent.metadata?.donationType || "General Donation",
+            sponsorName: paymentIntent.metadata?.sponsorName,
+            dedication: paymentIntent.metadata?.dedication,
+            email: paymentIntent.receipt_email || paymentIntent.metadata?.email,
+            status: 'succeeded'
+          });
+          console.log('Created donation record for successful payment:', paymentIntentId);
+        } catch (err) {
+          console.error('Error retrieving payment intent from Stripe:', err);
+          // Fallback - create with minimal info
+          donation = await storage.createDonation({
+            stripePaymentIntentId: paymentIntentId,
+            amount: 100, // Default $1
+            donationType: "General Donation",
+            status: status
+          });
+        }
+      } else {
+        // Don't create donation records for failed/pending payments
+        console.log(`Skipping donation creation for ${status} payment:`, paymentIntentId);
+        return res.json({ message: `Payment status: ${status}`, created: false });
       }
       
       res.json({ message: "Donation status updated", donation });

@@ -923,6 +923,15 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
+  async getDonationByPaymentIntentId(stripePaymentIntentId: string) {
+    const [result] = await db
+      .select()
+      .from(donations)
+      .where(eq(donations.stripePaymentIntentId, stripePaymentIntentId))
+      .limit(1);
+    return result || null;
+  }
+
   async updateDonationStatus(stripePaymentIntentId: string, status: string) {
     const [result] = await db
       .update(donations)
