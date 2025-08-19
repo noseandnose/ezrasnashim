@@ -244,7 +244,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
         }
         return response.json();
       } catch (error) {
-        console.warn('Failed to fetch current name:', error);
+        // Failed to fetch current name
         return null; // Return null as fallback
       }
     },
@@ -265,7 +265,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
         return response.json();
       } catch (error) {
         // Silent error handling - don't show runtime error modal
-        console.warn('Failed to fetch tehillim names:', error);
+        // Failed to fetch tehillim names
         return []; // Return empty array as fallback
       }
     },
@@ -286,7 +286,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
         }
         return response.json();
       } catch (error) {
-        console.warn('Failed to fetch tehillim preview:', error);
+        // Failed to fetch tehillim preview
         return { preview: '', perek: progress?.currentPerek || 0, language: 'hebrew' }; // Return empty preview as fallback
       }
     },

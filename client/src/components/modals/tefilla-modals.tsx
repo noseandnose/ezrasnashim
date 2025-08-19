@@ -19,7 +19,7 @@ import { formatTextContent } from "@/lib/text-formatter";
 import { processTefillaText, getCurrentTefillaConditions, type TefillaConditions } from "@/utils/tefilla-processor";
 
 interface TefillaModalsProps {
-  onSectionChange?: (section: any) => void;
+  onSectionChange?: (section: 'torah' | 'tefilla' | 'tzedaka' | 'home' | 'table') => void;
 }
 
 // Koren Thank You Component
@@ -1101,7 +1101,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                     className="whitespace-pre-wrap leading-relaxed"
                     dangerouslySetInnerHTML={{ 
                       __html: formatTextContent(
-                        (nishmasText as any)?.fullText || nishmasText.fullText || 'Text not available'
+                        nishmasText.fullText || 'Text not available'
                       ).replace(/<strong>/g, nishmasLanguage === 'hebrew' ? '<strong class="vc-koren-hebrew-bold">' : '<strong style="font-weight: 700;">')
                     }}
                   />
@@ -1803,7 +1803,7 @@ function IndividualTehillimModal() {
             queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
             queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
           } catch (error) {
-            console.error('Error updating global progress:', error);
+            // Error updating global progress
             // Continue with local completion even if global update fails
           }
           

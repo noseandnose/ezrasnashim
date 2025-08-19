@@ -32,12 +32,38 @@ export default function TableModals() {
     enabled: activeModal === 'recipe'
   });
 
-  const { data: inspirationContent } = useQuery<Record<string, any>>({
+  interface InspirationContent {
+    id: number;
+    date: string;
+    title: string;
+    content: string;
+    mediaType1?: string;
+    mediaUrl1?: string;
+    mediaType2?: string;
+    mediaUrl2?: string;
+    mediaType3?: string;
+    mediaUrl3?: string;
+    mediaType4?: string;
+    mediaUrl4?: string;
+    mediaType5?: string;
+    mediaUrl5?: string;
+  }
+
+  const { data: inspirationContent } = useQuery<InspirationContent>({
     queryKey: [`/api/table/inspiration/${new Date().toISOString().split('T')[0]}`],
     enabled: activeModal === 'inspiration'
   });
 
-  const { data: parshaContent } = useQuery<Record<string, any>>({
+  interface ParshaContent {
+    id: number;
+    week: string;
+    title: string;
+    content: string;
+    duration?: string;
+    audioUrl?: string;
+  }
+
+  const { data: parshaContent } = useQuery<ParshaContent>({
     queryKey: ['/api/table/vort'],
     enabled: activeModal === 'parsha'
   });
@@ -64,7 +90,6 @@ export default function TableModals() {
                     className="w-full h-48 object-cover"
                     crossOrigin="anonymous"
                     onError={(e) => {
-                      console.warn('Failed to load recipe image:', recipeContent.imageUrl);
                       const parent = e.currentTarget.parentElement;
                       if (parent) parent.style.display = 'none';
                     }}
@@ -211,7 +236,7 @@ export default function TableModals() {
                           <Volume2 size={48} className="text-rose-400 mb-4" />
                           <div className="w-full px-4">
                             <AudioPlayer 
-                              audioUrl={currentMedia.url} 
+                              audioUrl={currentMedia.url || ''} 
                               title="Creative Jewish Living Audio"
                               duration="0:00"
                             />
@@ -242,9 +267,9 @@ export default function TableModals() {
                         };
                         
                         // Try direct URL first, fallback to proxy for .mov files
-                        const videoUrl = currentMedia.url.includes('.mov') ? 
+                        const videoUrl = currentMedia.url && currentMedia.url.includes('.mov') ? 
                           `/api/media-proxy/cloudinary/${currentMedia.url.split('/').slice(4).join('/')}` : 
-                          currentMedia.url;
+                          (currentMedia.url || '');
                         
                         return (
                           <div className="w-full h-full relative">
@@ -259,7 +284,7 @@ export default function TableModals() {
                                 <div className="text-gray-500 text-center">
                                   <p className="mb-2">Video unavailable</p>
                                   <button 
-                                    onClick={() => window.open(currentMedia.url, '_blank')}
+                                    onClick={() => currentMedia.url && window.open(currentMedia.url, '_blank')}
                                     className="text-blush underline text-sm"
                                   >
                                     Open in new tab
@@ -278,8 +303,8 @@ export default function TableModals() {
                                 crossOrigin="anonymous"
                                 playsInline
                               >
-                                <source src={currentMedia.url} type={getVideoType(currentMedia.url)} />
-                                {currentMedia.url.includes('.mov') && (
+                                <source src={currentMedia.url || ''} type={getVideoType(currentMedia.url || '')} />
+                                {currentMedia.url && currentMedia.url.includes('.mov') && (
                                   <source src={videoUrl} type="video/mp4" />
                                 )}
                                 Your browser does not support the video tag.

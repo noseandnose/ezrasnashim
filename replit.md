@@ -4,6 +4,7 @@
 Ezras Nashim is a mobile-first web application for Jewish women to track and complete daily spiritual practices across Torah study, Tefilla (prayer), and Tzedaka (charity). The app aims to foster consistent spiritual growth through daily engagement with Jewish learning, prayer, and giving, with a vision to facilitate one million mitzvos monthly.
 
 ## Recent Major Updates (August 2025)
+- **Complete Code Audit** (August 19, 2025): Removed all console statements from production code, fixed TypeScript `: any` types with proper interfaces, improved error handling without logging, fixed recipe image display with CORS support
 - **Tehillim Database Migration** (August 17, 2025): Migrated from Sefaria API to Supabase `tehillim` table with ID-based tracking. Table structure includes ID, English Number, Part Number (for multi-part psalms like 119), Hebrew Number, English Text, and Hebrew Text. Global progress now tracks by row ID (1-171) instead of psalm number (1-150)
 - **Global Tehillim Part Display** (August 17, 2025): Added "Part X" display for Psalm 119 in Global Tehillim Chain modal and button. Created new `/api/tehillim/text/by-id/:id` endpoint to fetch individual psalm parts instead of combined text. Enhanced Hebrew text cleaning to remove cantillation marks and problematic Unicode characters that display as squares/blocks
 - **Performance Optimization**: Removed all console statements, implemented lazy loading for modals, created centralized query configuration

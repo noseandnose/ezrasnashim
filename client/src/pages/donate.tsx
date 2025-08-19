@@ -75,11 +75,8 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         
 
       } catch (stripeError) {
-        console.error('Stripe confirmPayment threw an error:', stripeError);
-        console.error('Error name:', (stripeError as any)?.name);
-        console.error('Error code:', (stripeError as any)?.code);
-        console.error('Error type:', (stripeError as any)?.type);
-        console.error('Full error:', stripeError);
+        // Stripe confirmPayment threw an error
+        // Error details captured but not logged to console
         throw stripeError; // Re-throw to be caught by outer catch
       }
       
