@@ -1775,9 +1775,6 @@ function SpecialTehillimModal() {
     <>
       <DialogHeader className="text-center mb-4">
         <DialogTitle className="text-lg platypi-semibold text-black">Tehillim</DialogTitle>
-        <DialogDescription className="text-xs text-black/70">
-          Complete book of Psalms (1-150)
-        </DialogDescription>
       </DialogHeader>
 
       {/* Tab Navigation */}
@@ -1790,7 +1787,7 @@ function SpecialTehillimModal() {
               : 'text-black/60 hover:text-black'
           }`}
         >
-          All Psalms
+          Sefer Tehillim
         </button>
         <button
           onClick={() => setTehillimActiveTab('special')}
