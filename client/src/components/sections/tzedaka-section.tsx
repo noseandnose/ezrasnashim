@@ -217,7 +217,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
               </div>
               <div className="flex-grow">
                 <h3 className="platypi-bold text-lg text-black platypi-bold">{campaign.title}</h3>
-                <p className="platypi-regular text-sm text-black/70">Support our community</p>
+                <p className="platypi-regular text-sm text-black/70">Campaign</p>
               </div>
               <div className="bg-gradient-feminine p-2 rounded-full shadow-lg">
                 <HandCoins className="text-white" size={16} />
