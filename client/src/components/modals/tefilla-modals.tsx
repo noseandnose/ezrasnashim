@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, ArrowUp, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Link, Shield, Unlock } from "lucide-react";
+import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, ArrowUp, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Link, Shield, Unlock, Maximize2 } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
@@ -517,23 +517,21 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const { data: progress } = useQuery<GlobalTehillimProgress>({
     queryKey: ['/api/tehillim/progress'], 
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress?t=${Date.now()}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress`);
       const data = await response.json();
       return data;
     },
-    refetchInterval: 1000, // Very frequent refresh
     enabled: activeModal === 'tehillim-text',
-    staleTime: 0, // Always consider stale
-    gcTime: 0 // Don't cache at all
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000 // Keep in cache for 10 minutes
   });
 
   // Fetch current name for the perek
   const { data: currentName } = useQuery<TehillimName | null>({
     queryKey: ['/api/tehillim/current-name'],
-    refetchInterval: 2000, // Very frequent refresh for real-time updates
     enabled: activeModal === 'tehillim-text',
-    staleTime: 0, // Always consider stale
-    gcTime: 0 // Don't cache at all
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000 // Keep in cache for 10 minutes
   });
 
   // Get the tehillim info first to get the English number
@@ -563,9 +561,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       return response.data;
     },
     enabled: activeModal === 'tehillim-text' && !!progress?.currentPerek,
-    refetchInterval: 2000, // Very frequent refresh to get new perek text
-    staleTime: 0, // Always consider data stale to force fresh fetches
-    gcTime: 0 // Don't cache at all
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
+    gcTime: 30 * 60 * 1000 // Keep in cache for 30 minutes
   });
 
   // Mutation to complete a perek
@@ -761,6 +758,28 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       <Dialog open={activeModal === 'tehillim-text'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="tehillim-description">
           <div id="tehillim-description" className="sr-only">Psalms reading and community prayer participation</div>
+          
+          {/* Fullscreen button */}
+          <button
+            onClick={() => {
+              setFullscreenContent({
+                isOpen: true,
+                title: `Tehillim ${tehillimInfo?.englishNumber || progress?.currentPerek || 1}${tehillimInfo?.englishNumber === 119 && tehillimInfo?.partNumber ? ` - Part ${tehillimInfo.partNumber}` : ''}`,
+                content: (
+                  <div
+                    className={`${showHebrew ? 'vc-koren-hebrew' : 'koren-siddur-english'} leading-relaxed text-black`}
+                    style={{ fontSize: `${showHebrew ? fontSize + 1 : fontSize}px` }}
+                  >
+                    {getTehillimDisplayText()}
+                  </div>
+                )
+              });
+            }}
+            className="absolute left-3 top-3 p-2 rounded-lg hover:bg-warm-gray/10 transition-colors z-10"
+            aria-label="Fullscreen"
+          >
+            <Maximize2 className="w-4 h-4 text-black/60" />
+          </button>
           
           {/* Standardized Header with two-row layout */}
           <div className="mb-2 space-y-2">
