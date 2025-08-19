@@ -510,8 +510,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
                 placeholder="Hebrew Name"
                 value={hebrewName}
                 onChange={(e) => setHebrewName(e.target.value)}
-                className="text-right rounded-2xl border-blush/20 focus:border-blush bg-white"
-                dir="rtl"
+                className="text-left rounded-2xl border-blush/20 focus:border-blush bg-white"
+                dir="ltr"
               />
               
               <Select value={reason} onValueChange={(value) => {
