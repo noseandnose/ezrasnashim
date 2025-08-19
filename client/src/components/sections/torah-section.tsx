@@ -92,7 +92,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
     {
       id: 'emuna',
       icon: Shield,
-      title: 'Emuna',
+      title: 'Daily Emuna',
       subtitle: 'Faith & Trust',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
