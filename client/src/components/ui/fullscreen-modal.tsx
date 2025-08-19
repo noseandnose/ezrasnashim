@@ -77,30 +77,17 @@ export function FullscreenModal({
         <h2 className="text-lg font-semibold text-gray-900 truncate flex-1 mr-4">
           {title}
         </h2>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={toggleFullscreen}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-          >
-            {isFullscreen ? (
-              <Minimize2 className="h-5 w-5 text-gray-600" />
-            ) : (
-              <Maximize2 className="h-5 w-5 text-gray-600" />
-            )}
-          </button>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            aria-label="Close"
-          >
-            <X className="h-5 w-5 text-gray-600" />
-          </button>
-        </div>
+        <button
+          onClick={onClose}
+          className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          aria-label="Close"
+        >
+          <X className="h-5 w-5 text-gray-600" />
+        </button>
       </div>
 
       {/* Content */}
-      <div className={`pt-16 pb-4 px-4 h-full overflow-auto ${className}`}>
+      <div className={`pt-16 pb-4 px-4 h-full overflow-y-auto ${className}`}>
         <div className="max-w-4xl mx-auto">
           {children}
         </div>

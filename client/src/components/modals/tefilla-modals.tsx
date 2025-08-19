@@ -1308,7 +1308,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       {/* Individual Tehillim Modal */}
       <Dialog open={activeModal === 'individual-tehillim'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
-          <IndividualTehillimModal />
+          <IndividualTehillimModal setFullscreenContent={setFullscreenContent} />
         </DialogContent>
       </Dialog>
 
@@ -1851,7 +1851,7 @@ function SpecialTehillimModal() {
 }
 
 // Individual Tehillim Modal Component
-function IndividualTehillimModal() {
+function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenContent?: (content: any) => void }) {
   const { closeModal, openModal, selectedPsalm } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
@@ -1877,6 +1877,30 @@ function IndividualTehillimModal() {
 
   return (
     <>
+      {/* Fullscreen button */}
+      {setFullscreenContent && tehillimText && (
+        <button
+          onClick={() => {
+            setFullscreenContent({
+              isOpen: true,
+              title: `Tehillim ${selectedPsalm}`,
+              content: (
+                <div
+                  className={`${language === 'hebrew' ? 'vc-koren-hebrew' : 'koren-siddur-english text-left'} leading-relaxed text-black text-2xl`}
+                  dangerouslySetInnerHTML={{
+                    __html: processTefillaContent(tehillimText?.text || '', tefillaConditions)
+                  }}
+                />
+              )
+            });
+          }}
+          className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 transition-colors z-10"
+          aria-label="Open fullscreen"
+        >
+          <Expand className="h-4 w-4 text-gray-600" />
+        </button>
+      )}
+      
       {/* Standardized Header */}
       <div className="mb-2 space-y-2">
         {/* First Row: Language Toggle and Title */}
