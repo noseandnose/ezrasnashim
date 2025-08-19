@@ -185,9 +185,9 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
       // Progress data updated
       return data;
     },
-    refetchInterval: 30000, // Refresh every 30 seconds instead of 5
-    staleTime: 20000, // Keep data fresh for 20 seconds
-    gcTime: 60000 // Cache for 60 seconds
+    refetchInterval: 10000, // Refresh every 10 seconds for better responsiveness
+    staleTime: 5000, // Keep data fresh for 5 seconds
+    gcTime: 30000 // Cache for 30 seconds
   });
 
   // Get the actual Tehillim info to display English number and part
@@ -279,9 +279,14 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
         title: "Perek Completed!",
         description: `Perek ${progress?.currentPerek || 'current'} has been completed. Moving to the next perek.`,
       });
-      // Invalidate queries to refresh data
+      // Invalidate all tehillim-related queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/info'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/preview'] });
+      
+      // Force immediate refetch to update display
+      queryClient.refetchQueries({ queryKey: ['/api/tehillim/progress'] });
     },
     onError: () => {
       toast({

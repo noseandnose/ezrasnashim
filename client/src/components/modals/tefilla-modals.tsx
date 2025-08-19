@@ -555,11 +555,16 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           ? `Perek ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber} has been completed. Moving to the next section.`
           : `Perek ${tehillimInfo?.englishNumber || 'current'} has been completed. Moving to the next perek.`,
       });
-      // Force complete cache reset for Tehillim data
-      queryClient.resetQueries({ queryKey: ['/api/tehillim/progress'] });
-      queryClient.resetQueries({ queryKey: ['/api/tehillim/current-name'] });
-      queryClient.resetQueries({ queryKey: ['/api/tehillim/text'] });
-      queryClient.resetQueries({ queryKey: ['/api/tehillim/preview'] });
+      // Force complete cache reset for Tehillim data in both modal and section
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/text'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/preview'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/info'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/text/by-id'] });
+      
+      // Force refetch immediately to get updated progress
+      queryClient.refetchQueries({ queryKey: ['/api/tehillim/progress'] });
       
       // Wait a moment then close modal to trigger fresh data load
       setTimeout(() => {
