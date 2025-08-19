@@ -85,43 +85,53 @@ export function FullscreenModal({
   };
 
   return (
-    <div 
-      className="fixed inset-0 bg-white"
-      style={{ zIndex: 9999 }}
-    >
-      {/* Fixed Header */}
-      <header className="bg-white border-b border-gray-200 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 flex-1">
-            <img 
-              src={logoImage} 
-              alt="Ezras Nashim" 
-              className="h-5 w-auto"
-            />
-            <h1 className="text-lg font-semibold text-gray-900 truncate text-center flex-1">
-              {title}
-            </h1>
-          </div>
-          <button
-            onClick={handleCloseClick}
-            className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100 transition-colors"
-            aria-label="Close fullscreen"
-          >
-            <X className="h-5 w-5 text-gray-600" />
-          </button>
-        </div>
-      </header>
-
-      {/* Scrollable Main Content */}
-      <main 
-        className="h-[calc(100vh-68px)] overflow-y-scroll overflow-x-hidden p-4"
-        style={{ WebkitOverflowScrolling: 'touch' }}
+    <>
+      {/* Overlay to block interaction with background */}
+      <div 
+        className="fixed inset-0 bg-black/50"
+        style={{ zIndex: 9998 }}
+        onClick={handleCloseClick}
+      />
+      
+      {/* Fullscreen Modal */}
+      <div 
+        className="fixed inset-0 bg-white"
+        style={{ zIndex: 9999, isolation: 'isolate' }}
       >
-        <div className={`max-w-4xl mx-auto ${className}`}>
-          {children}
-        </div>
-      </main>
-    </div>
+        {/* Fixed Header */}
+        <header className="bg-white border-b border-gray-200 px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 flex-1">
+              <img 
+                src={logoImage} 
+                alt="Ezras Nashim" 
+                className="h-5 w-auto"
+              />
+              <h1 className="text-lg font-semibold text-gray-900 truncate text-center flex-1">
+                {title}
+              </h1>
+            </div>
+            <button
+              onClick={handleCloseClick}
+              className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100 transition-colors"
+              aria-label="Close fullscreen"
+            >
+              <X className="h-5 w-5 text-gray-600" />
+            </button>
+          </div>
+        </header>
+
+        {/* Scrollable Main Content */}
+        <main 
+          className="h-[calc(100vh-68px)] overflow-y-auto overflow-x-hidden p-4"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
+          <div className={`max-w-4xl mx-auto ${className}`}>
+            {children}
+          </div>
+        </main>
+      </div>
+    </>
   );
 }
 
