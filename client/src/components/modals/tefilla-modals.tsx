@@ -1804,21 +1804,23 @@ function SpecialTehillimModal() {
       {/* Tab Content */}
       <div className="max-h-[50vh] overflow-y-auto">
         {tehillimActiveTab === 'all' ? (
-          <div className="grid grid-cols-7 gap-2 p-2 overflow-hidden tehillim-button-grid">
-            {allPsalms.map((psalm) => (
-              <button
-                key={psalm}
-                onClick={() => openTehillimText(psalm)}
-                className={`w-12 h-12 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center flex-shrink-0 ${
-                  isModalComplete(`individual-tehillim-${psalm}`)
-                    ? 'bg-sage text-white'
-                    : 'bg-gradient-feminine text-white'
-                }`}
-                style={{ touchAction: 'manipulation' }}
-              >
-                {psalm}
-              </button>
-            ))}
+          <div className="bg-white/80 rounded-2xl p-3 border border-blush/10">
+            <div className="grid grid-cols-7 gap-2 overflow-hidden tehillim-button-grid">
+              {allPsalms.map((psalm) => (
+                <button
+                  key={psalm}
+                  onClick={() => openTehillimText(psalm)}
+                  className={`w-12 h-12 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center flex-shrink-0 ${
+                    isModalComplete(`individual-tehillim-${psalm}`)
+                      ? 'bg-sage text-white'
+                      : 'bg-gradient-feminine text-white'
+                  }`}
+                  style={{ touchAction: 'manipulation' }}
+                >
+                  {psalm}
+                </button>
+              ))}
+            </div>
           </div>
         ) : (
           <div className="space-y-3">
