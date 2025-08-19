@@ -2400,18 +2400,6 @@ function JerusalemCompass() {
                 })()}
               </div>
 
-              {/* Calibration Warning */}
-              {orientationSupported && !isCalibrated && (
-                <div className="bg-yellow-50 rounded-2xl p-3 border border-yellow-200 mb-3">
-                  <p className="platypi-medium text-xs text-yellow-800 mb-2">
-                    Compass needs calibration
-                  </p>
-                  <p className="platypi-regular text-xs text-yellow-700">
-                    Move your device in a figure-8 pattern to calibrate the compass sensor.
-                  </p>
-                </div>
-              )}
-
               {/* Alignment Status */}
               {orientationSupported && (() => {
                 // For alignment, we need to check if the user (facing north when arrow points up)
@@ -2504,9 +2492,6 @@ function JerusalemCompass() {
               <ul className="platypi-regular text-xs text-black/60 space-y-1">
                 <li>• Keep device away from metal objects</li>
                 <li>• Works best outdoors or near windows</li>
-                {!isCalibrated && orientationSupported && (
-                  <li>• Move device in figure-8 to calibrate</li>
-                )}
               </ul>
             </div>
           </div>
