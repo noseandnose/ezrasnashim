@@ -29,24 +29,13 @@ export function FullscreenModal({
 
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
-      // Prevent body scroll when modal is open - critical for mobile
-      const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
+      // Simply prevent body scroll
       document.body.style.overflow = 'hidden';
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      const scrollY = document.body.style.top;
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
       document.body.style.overflow = '';
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1);
-      }
     };
   }, [isOpen, onClose]);
 
@@ -83,47 +72,68 @@ export function FullscreenModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-white" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <div 
+      className="fixed inset-0 z-[100] bg-white"
+      style={{ 
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        width: '100vw'
+      }}
+    >
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between" style={{ flexShrink: 0 }}>
-        <div className="flex items-center gap-3 flex-1">
-          <img 
-            src={logoImage} 
-            alt="Ezras Nashim" 
-            className="h-5 w-auto"
-            style={{ height: '20px', width: 'auto' }}
-          />
-          <h2 className="text-lg font-semibold text-gray-900 truncate">
-            {title}
-          </h2>
-        </div>
+      <div 
+        className="bg-white border-b border-gray-200 px-4 py-3"
+        style={{ 
+          flexShrink: 0,
+          display: 'grid',
+          gridTemplateColumns: '40px 1fr 40px',
+          alignItems: 'center',
+          gap: '12px'
+        }}
+      >
+        <img 
+          src={logoImage} 
+          alt="Ezras Nashim" 
+          style={{ height: '20px', width: 'auto' }}
+        />
+        <h2 className="text-lg font-semibold text-gray-900 truncate text-center">
+          {title}
+        </h2>
         <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onClose();
+          onClick={() => {
+            setTimeout(() => {
+              onClose();
+            }, 0);
           }}
-          className="p-3 rounded-lg hover:bg-gray-100 transition-colors"
+          className="p-2 rounded-lg hover:bg-gray-100 transition-colors justify-self-end"
           aria-label="Close"
-          style={{ marginLeft: '8px' }}
+          type="button"
         >
           <X className="h-5 w-5 text-gray-600" />
         </button>
       </div>
 
-      {/* Content - using inline styles to ensure scrolling works */}
+      {/* Content - fixed scrolling container */}
       <div 
-        className={`px-4 py-4 ${className}`}
         style={{ 
-          flex: 1,
-          overflowY: 'auto',
+          flex: '1 1 auto',
+          overflowY: 'scroll',
           overflowX: 'hidden',
           WebkitOverflowScrolling: 'touch',
-          minHeight: 0
+          height: 'calc(100vh - 60px)',
+          position: 'relative'
         }}
       >
-        <div className="max-w-4xl mx-auto">
-          {children}
+        <div className={`px-4 py-4 ${className}`}>
+          <div className="max-w-4xl mx-auto">
+            {children}
+          </div>
         </div>
       </div>
     </div>
