@@ -805,9 +805,23 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     trackModalComplete(completionKey);
     markModalComplete(completionKey);
     completeTask('tefilla');
-    // Close fullscreen
-    const event = new CustomEvent('closeFullscreen');
-    window.dispatchEvent(event);
+    
+    // For 1-150 section, return to the Tehillim modal
+    if (isFromAllTab) {
+      // Close fullscreen and return to Tehillim modal
+      const event = new CustomEvent('closeFullscreen');
+      window.dispatchEvent(event);
+      // Small delay to ensure fullscreen closes, then open special-tehillim modal
+      setTimeout(() => {
+        const { openModal, setTehillimActiveTab } = useModalStore.getState();
+        setTehillimActiveTab('all'); // Ensure we're on the "Sefer Tehillim" tab
+        openModal('special-tehillim', 'tefilla');
+      }, 100);
+    } else {
+      // For special occasions, close fullscreen and return to home
+      const event = new CustomEvent('closeFullscreen');
+      window.dispatchEvent(event);
+    }
   };
 
   const handleCompleteAndNext = () => {
