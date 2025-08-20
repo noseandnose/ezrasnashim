@@ -766,7 +766,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
                 <Users className="text-white" size={16} strokeWidth={1.5} />
               </div>
               <h4 className="platypi-bold text-sm text-black">Family</h4>
-              <p className="platypi-regular text-xs text-black/60 mt-1">Shalom Bayis</p>
+              <p className="platypi-regular text-xs text-black/60 mt-1">Home</p>
             </button>
             
             <button 
