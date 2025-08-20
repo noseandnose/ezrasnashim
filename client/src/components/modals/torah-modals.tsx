@@ -216,7 +216,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                   isOpen: true,
                   title: 'Daily Halacha',
                   contentType: 'halacha',
-                  content: ({ language: currentLanguage, fontSize: currentFontSize }) => (
+                  content: (
                     <div className="space-y-4">
                       <div className="bg-white rounded-2xl p-6 border border-blush/10">
                         {halachaContent.title && (
@@ -226,7 +226,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                         )}
                         <div 
                           className="platypi-regular leading-relaxed text-black whitespace-pre-line"
-                          style={{ fontSize: `${currentFontSize}px` }}
+                          style={{ fontSize: `${fontSize}px` }}
                           dangerouslySetInnerHTML={{ __html: formatHalachaContent(halachaContent.content) }}
                         />
                         {halachaContent.footnotes && (
@@ -626,6 +626,30 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                           <div dangerouslySetInnerHTML={{ __html: formatTextContent(featuredContent.content) }} />
                         </div>
                       </div>
+                      
+                      {/* Thank You Section for Featured Content */}
+                      {featuredContent.provider && (
+                        <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                          <p className="text-sm text-blue-900 platypi-medium">
+                            Thank you to{' '}
+                            {featuredContent.provider === 'Rabbi Daniel Braude' ? (
+                              <>
+                                Rabbi Daniel Braude from{' '}
+                                <a 
+                                  href="https://feldheim.com/learn-hilchos-lashon-hara-in-just-3-minutes-a-day"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 underline hover:text-blue-800"
+                                >
+                                  Learn Hilchos Lashon Hara in just 3 minutes a day
+                                </a>
+                              </>
+                            ) : (
+                              featuredContent.provider
+                            )}
+                          </p>
+                        </div>
+                      )}
                       
                       <div className="heart-explosion-container">
                         <Button 
