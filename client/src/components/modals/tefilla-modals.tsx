@@ -2157,36 +2157,31 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                     <div className={tehillimActiveTab === 'all' ? 'flex gap-2' : ''}>
                       {/* Complete button - returns to Tehillim selector */}
                       <Button 
-                        onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : async () => {
-                          // Track modal completion and mark as completed globally with specific psalm ID
+                        onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
+                          // Track modal completion immediately
                           trackModalComplete(`individual-tehillim-${selectedPsalm}`);
                           markModalComplete(`individual-tehillim-${selectedPsalm}`);
-                          
-                          try {
-                            // Also update global Tehillim progress
-                            await axiosClient.post('/api/tehillim/complete', {
-                              currentPerek: selectedPsalm,
-                              language: language,
-                              completedBy: 'user'
-                            });
-                            
-                            // Immediately update progress cache to show new number
-                            queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
-                            queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
-                          } catch (error) {
-                            // Error updating global progress
-                            // Continue with local completion even if global update fails
-                          }
-                          
                           completeTask('tefilla');
                           setShowHeartExplosion(true);
+                          
+                          // Update global progress in background without waiting
+                          axiosClient.post('/api/tehillim/complete', {
+                            currentPerek: selectedPsalm,
+                            language: language,
+                            completedBy: 'user'
+                          }).then(() => {
+                            queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
+                            queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+                          }).catch(() => {
+                            // Silently handle errors - local completion is already done
+                          });
                           
                           setTimeout(() => {
                             setShowHeartExplosion(false);
                             setFullscreenContent({ isOpen: false, title: '', content: null });
                             checkAndShowCongratulations();
                             openModal('special-tehillim', 'tefilla');
-                          }, 800);
+                          }, 400);
                         }}
                         disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
                         className={`${tehillimActiveTab === 'all' ? 'flex-1' : 'w-full'} py-3 rounded-xl platypi-medium border-0 ${
@@ -2201,37 +2196,42 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                       {/* Complete and Next button - only show when coming from 1-150 tab */}
                       {tehillimActiveTab === 'all' && (
                         <Button 
-                          onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : async () => {
-                            // Track modal completion and mark as completed globally with specific psalm ID
+                          onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
+                            // Track modal completion immediately
                             trackModalComplete(`individual-tehillim-${selectedPsalm}`);
                             markModalComplete(`individual-tehillim-${selectedPsalm}`);
+                            completeTask('tefilla');
                             const nextPsalm = selectedPsalm && selectedPsalm < 150 ? selectedPsalm + 1 : 1;
+                            setShowHeartExplosion(true);
                             
-                            try {
-                              // Also update global Tehillim progress
-                              await axiosClient.post('/api/tehillim/complete', {
-                                currentPerek: selectedPsalm,
-                                language: language,
-                                completedBy: 'user'
-                              });
-                              
-                              // Immediately update progress cache to show new number
+                            // Update global progress in background without waiting
+                            axiosClient.post('/api/tehillim/complete', {
+                              currentPerek: selectedPsalm,
+                              language: language,
+                              completedBy: 'user'
+                            }).then(() => {
                               queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
                               queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
-                            } catch (error) {
-                              // Error updating global progress
-                              // Continue with local completion even if global update fails
-                            }
-                            
-                            completeTask('tefilla');
-                            setShowHeartExplosion(true);
+                            }).catch(() => {
+                              // Silently handle errors - local completion is already done
+                            });
                             
                             setTimeout(() => {
                               setShowHeartExplosion(false);
-                              setFullscreenContent({ isOpen: false, title: '', content: null });
+                              // Stay in fullscreen and load next psalm
+                              setFullscreenContent({
+                                isOpen: true,
+                                title: `Tehillim ${nextPsalm}`,
+                                content: (
+                                  <div className="flex items-center justify-center py-8">
+                                    <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
+                                    <span className="ml-3 text-black/60">Loading next Tehillim...</span>
+                                  </div>
+                                )
+                              });
                               checkAndShowCongratulations();
                               openModal('individual-tehillim', 'tefilla', nextPsalm);
-                            }, 800);
+                            }, 400);
                           }}
                           disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
                           className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
@@ -2327,36 +2327,30 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
       <div className={tehillimActiveTab === 'all' ? 'flex gap-2' : ''}>
         {/* Complete button - returns to Tehillim selector */}
         <Button 
-          onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : async () => {
-            // Track modal completion and mark as completed globally with specific psalm ID
+          onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
+            // Track modal completion immediately
             trackModalComplete(`individual-tehillim-${selectedPsalm}`);
             markModalComplete(`individual-tehillim-${selectedPsalm}`);
-            
-            try {
-              // Also update global Tehillim progress
-              await axiosClient.post('/api/tehillim/complete', {
-                currentPerek: selectedPsalm,
-                language: language,
-                completedBy: 'user'
-              });
-              
-              // Immediately update progress cache to show new number
-              queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
-              queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
-            } catch (error) {
-              // Error updating global progress
-              // Continue with local completion even if global update fails
-            }
-            
             completeTask('tefilla');
             setShowHeartExplosion(true);
             
+            // Update global progress in background without waiting
+            axiosClient.post('/api/tehillim/complete', {
+              currentPerek: selectedPsalm,
+              language: language,
+              completedBy: 'user'
+            }).then(() => {
+              queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+            }).catch(() => {
+              // Silently handle errors - local completion is already done
+            });
+            
             setTimeout(() => {
-              setShowHeartExplosion(false); // Reset explosion state
+              setShowHeartExplosion(false);
               checkAndShowCongratulations();
-              // Switch back to the main Tehillim selection modal 
               openModal('special-tehillim', 'tefilla');
-            }, 1500);
+            }, 400);
           }}
           disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
           className={`${tehillimActiveTab === 'all' ? 'flex-1' : 'w-full'} py-3 rounded-xl platypi-medium border-0 ${
@@ -2371,42 +2365,35 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
         {/* Complete and Next button - only show when coming from 1-150 tab */}
         {tehillimActiveTab === 'all' && (
           <Button 
-            onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : async () => {
-              // Track modal completion and mark as completed globally with specific psalm ID
+            onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
+              // Track modal completion immediately
               trackModalComplete(`individual-tehillim-${selectedPsalm}`);
               markModalComplete(`individual-tehillim-${selectedPsalm}`);
-              
-              try {
-                // Also update global Tehillim progress
-                await axiosClient.post('/api/tehillim/complete', {
-                  currentPerek: selectedPsalm,
-                  language: language,
-                  completedBy: 'user'
-                });
-                
-                // Immediately update progress cache to show new number
-                queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
-                queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
-              } catch (error) {
-                // Error updating global progress
-                // Continue with local completion even if global update fails
-              }
-              
               completeTask('tefilla');
+              const nextPsalm = selectedPsalm ? Math.min(selectedPsalm + 1, 150) : 1;
               setShowHeartExplosion(true);
               
+              // Update global progress in background without waiting
+              axiosClient.post('/api/tehillim/complete', {
+                currentPerek: selectedPsalm,
+                language: language,
+                completedBy: 'user'
+              }).then(() => {
+                queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
+                queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+              }).catch(() => {
+                // Silently handle errors - local completion is already done
+              });
+              
               setTimeout(() => {
-                setShowHeartExplosion(false); // Reset explosion state
+                setShowHeartExplosion(false);
                 checkAndShowCongratulations();
-                // Open the next Tehillim
-                const nextPsalm = selectedPsalm ? Math.min(selectedPsalm + 1, 150) : 1;
                 if (nextPsalm <= 150) {
                   openModal('individual-tehillim', 'special-tehillim', nextPsalm);
                 } else {
-                  // If we've reached the end, go back to selector
                   openModal('special-tehillim', 'tefilla');
                 }
-              }, 1500);
+              }, 400);
             }}
             disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
             className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
