@@ -269,7 +269,7 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
                 isOpen: true,
                 title: 'Morning Brochas',
                 contentType: 'morning-brochas',
-                content: ({ language: currentLanguage, fontSize: currentFontSize }) => (
+                content: ({ language: currentLanguage, fontSize: currentFontSize }: { language: string; fontSize: number }) => (
                   <div className="space-y-4">
                     <div className="space-y-6">
                       {morningPrayers?.map((prayer: any) => (
@@ -1861,7 +1861,7 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
-  const [showHebrew, setShowHebrew] = useState(true);
+  const [language, setLanguage] = useState<"hebrew" | "english">("hebrew");
   
   // Load Tefilla conditions for conditional content processing
   const tefillaConditions = useTefillaConditions();
@@ -1925,7 +1925,7 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
 
       {/* Standardized Content Area */}
       <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
-        {showHebrew ? (
+        {language === 'hebrew' ? (
           <div
             className="vc-koren-hebrew leading-relaxed text-black"
             style={{ fontSize: `${fontSize + 1}px` }}

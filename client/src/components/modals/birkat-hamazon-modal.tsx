@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X, Plus, Minus, Expand } from "lucide-react";
@@ -10,7 +10,6 @@ import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useLocationStore } from '@/hooks/use-jewish-times';
 import { formatTextContent } from "@/lib/text-formatter";
 import { processTefillaText, getCurrentTefillaConditions, type TefillaConditions } from '@/utils/tefilla-processor';
-import { useEffect, useState as useStateForConditions } from "react";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 
 interface BirkatHamazonPrayer {
@@ -58,8 +57,8 @@ export function BirkatHamazonModal() {
   const [fontSize, setFontSize] = useState(20);
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [selectedPrayer, setSelectedPrayer] = useState<string | null>(null);
-  const [conditions, setConditions] = useStateForConditions<TefillaConditions | null>(null);
-  const [fontsLoaded, setFontsLoaded] = useStateForConditions(false);
+  const [conditions, setConditions] = useState<TefillaConditions | null>(null);
+  const [fontsLoaded, setFontsLoaded] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();

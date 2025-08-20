@@ -241,14 +241,13 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         onSuccess();
       } else if (paymentIntent && paymentIntent.status === 'requires_action') {
         // Handle payments that require additional authentication (3D Secure, etc.)
-        console.log('Payment requires additional action');
+
         toast({
           title: "Additional Authentication Required",
           description: "Please complete the authentication process to finalize your payment.",
         });
       } else if (paymentIntent) {
-        console.warn('Unexpected payment intent status:', paymentIntent.status);
-        console.log('Full payment intent object:', paymentIntent);
+
         
         // Check if this might be a successful payment with an unexpected status
         if (paymentIntent.status === 'canceled') {
@@ -259,11 +258,11 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
           });
         } else {
           // For any other status, be more optimistic about Apple Pay/Google Pay
-          console.log('Unexpected payment status, checking if Apple Pay succeeded:', paymentIntent.status);
+
           
           // If payment method exists and amount matches, likely successful
           if (paymentIntent.payment_method && paymentIntent.amount) {
-            console.log('Payment method and amount exist, treating as successful');
+
             
             // Complete tzedaka task optimistically
             completeTask('tzedaka');
@@ -285,10 +284,10 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         }
       } else {
         // This shouldn't happen but handle it gracefully
-        console.log('Unexpected payment state:', { error, paymentIntent });
+
         if (!error && !paymentIntent) {
           // User may have cancelled or form needs input
-          console.log('Payment form needs completion');
+
           setIsProcessing(false);
           return;
         }
@@ -300,18 +299,6 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         });
       }
     } catch (paymentError) {
-      console.error('=== PAYMENT PROCESSING ERROR ===');
-      console.error('Error caught in catch block:', paymentError);
-      console.error('Error type:', typeof paymentError);
-      console.error('Error constructor:', (paymentError as any)?.constructor?.name);
-      console.error('Error details:', {
-        name: (paymentError as any)?.name,
-        message: (paymentError as any)?.message,
-        code: (paymentError as any)?.code,
-        type: (paymentError as any)?.type,
-        stack: (paymentError as any)?.stack
-      });
-      
       // Extract error message
       const errorMessage = (paymentError as any)?.message || 
                           (paymentError as any)?.error?.message ||
