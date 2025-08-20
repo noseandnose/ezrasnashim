@@ -153,56 +153,7 @@ export function FullscreenModal({
             </h1>
           </div>
           
-          {/* Font and Language Controls */}
-          <div className="flex items-center gap-2 mr-4">
-            {showLanguageControls && onLanguageChange && (
-              <Button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  console.log('Language button clicked, current:', language);
-                  onLanguageChange(language === "hebrew" ? "english" : "hebrew");
-                }}
-                variant="ghost"
-                size="sm"
-                className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
-                  language === "hebrew" 
-                    ? 'bg-blush text-white' 
-                    : 'text-black/60 hover:text-black hover:bg-white/50'
-                }`}
-              >
-                {language === "hebrew" ? 'EN' : 'עב'}
-              </Button>
-            )}
-            
-            {showFontControls && onFontSizeChange && (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Font decrease clicked, current:', fontSize);
-                    onFontSizeChange(Math.max(fontSize - 2, 12));
-                  }}
-                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
-                >
-                  <span className="text-xs platypi-medium">-</span>
-                </button>
-                <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Font increase clicked, current:', fontSize);
-                    onFontSizeChange(Math.min(fontSize + 2, 24));
-                  }}
-                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
-                >
-                  <span className="text-xs platypi-medium">+</span>
-                </button>
-              </div>
-            )}
-          </div>
+
           
           <button
             onClick={(e) => {

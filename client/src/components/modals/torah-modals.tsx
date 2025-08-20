@@ -821,12 +821,8 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
         isOpen={fullscreenContent.isOpen}
         onClose={() => setFullscreenContent({ isOpen: false, title: '', content: null })}
         title={fullscreenContent.title}
-        showFontControls={true}
-        fontSize={fontSize}
-        onFontSizeChange={setFontSize}
-        showLanguageControls={true}
-        language={showHebrew ? 'hebrew' : 'english'}
-        onLanguageChange={(lang) => setShowHebrew(lang === 'hebrew')}
+        showFontControls={false}
+        showLanguageControls={false}
       >
         {fullscreenContent.content}
       </FullscreenModal>
