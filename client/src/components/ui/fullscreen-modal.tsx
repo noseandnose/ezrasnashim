@@ -151,30 +151,91 @@ export function FullscreenModal({
         }}
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 flex-1">
+          <div className="flex items-center gap-2">
             <img 
               src={logoImage} 
               alt="Ezras Nashim" 
               className="h-5 w-auto"
             />
-            <h1 className="text-lg font-semibold text-gray-900 truncate text-center flex-1">
-              {title}
-            </h1>
+            
+            {/* Language Selector */}
+            {showLanguageControls && onLanguageChange && (
+              <div className="flex bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onLanguageChange('hebrew');
+                  }}
+                  className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                    language === 'hebrew' 
+                      ? 'bg-white text-black shadow-sm' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  עב
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onLanguageChange('english');
+                  }}
+                  className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                    language === 'english' 
+                      ? 'bg-white text-black shadow-sm' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  EN
+                </button>
+              </div>
+            )}
           </div>
+
+          <h1 className="text-lg font-semibold text-gray-900 truncate text-center flex-1 mx-4">
+            {title}
+          </h1>
           
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              e.nativeEvent.stopImmediatePropagation();
-              onClose();
-            }}
-            className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
-            aria-label="Close fullscreen"
-            type="button"
-          >
-            <X className="h-5 w-5 text-gray-600" />
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Font Size Controls */}
+            {showFontControls && onFontSizeChange && (
+              <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onFontSizeChange(Math.max(12, (fontSize || 16) - 2));
+                  }}
+                  className="w-6 h-6 flex items-center justify-center rounded text-xs font-bold text-gray-600 hover:text-gray-900 hover:bg-white transition-colors"
+                  aria-label="Decrease font size"
+                >
+                  A-
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onFontSizeChange(Math.min(28, (fontSize || 16) + 2));
+                  }}
+                  className="w-6 h-6 flex items-center justify-center rounded text-xs font-bold text-gray-600 hover:text-gray-900 hover:bg-white transition-colors"
+                  aria-label="Increase font size"
+                >
+                  A+
+                </button>
+              </div>
+            )}
+            
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                e.nativeEvent.stopImmediatePropagation();
+                onClose();
+              }}
+              className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+              aria-label="Close fullscreen"
+              type="button"
+            >
+              <X className="h-5 w-5 text-gray-600" />
+            </button>
+          </div>
         </div>
       </div>
 
