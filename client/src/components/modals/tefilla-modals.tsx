@@ -447,6 +447,8 @@ function renderPrayerContent(contentType: string | undefined, language: 'hebrew'
       return <MinchaFullscreenContent language={language} fontSize={fontSize} />;
     case 'morning-brochas':
       return <MorningBrochasFullscreenContent language={language} fontSize={fontSize} />;
+    case 'nishmas-campaign':
+      return <NishmasFullscreenContent language={language} fontSize={fontSize} />;
     default:
       return null;
   }
@@ -630,6 +632,165 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
   );
 }
 
+// Nishmas Fullscreen Content Component
+function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  const { data: nishmasText, isLoading } = useQuery<NishmasText>({
+    queryKey: [`/api/nishmas/${language}`],
+  });
+
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+  const { completeTask } = useDailyCompletionStore();
+  
+  // Nishmas 40-Day Campaign state with localStorage persistence
+  const [nishmasDay, setNishmasDay] = useState(() => {
+    const saved = localStorage.getItem('nishmas-day');
+    return saved ? parseInt(saved, 10) : 0;
+  });
+  const [nishmasStartDate, setNishmasStartDate] = useState<string | null>(() => {
+    return localStorage.getItem('nishmas-start-date');
+  });
+  const [todayCompleted, setTodayCompleted] = useState(() => {
+    const today = new Date().toDateString();
+    const lastCompleted = localStorage.getItem('nishmas-last-completed');
+    return lastCompleted === today;
+  });
+
+  // Load Nishmas progress from localStorage
+  useEffect(() => {
+    const savedDay = localStorage.getItem('nishmas-day');
+    const savedStartDate = localStorage.getItem('nishmas-start-date');
+    const savedLastCompleted = localStorage.getItem('nishmas-last-completed');
+    const today = new Date().toDateString();
+    
+    // Check if today's prayer has already been completed
+    setTodayCompleted(savedLastCompleted === today);
+    
+    if (savedDay && savedStartDate) {
+      const startDate = new Date(savedStartDate);
+      const currentDate = new Date(today);
+      const daysDiff = Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (daysDiff > 40) {
+        // Campaign completed
+        if (daysDiff > 1) {
+          // Missed a day, reset campaign
+          setNishmasDay(0);
+          setNishmasStartDate(null);
+          setTodayCompleted(false);
+          localStorage.removeItem('nishmas-day');
+          localStorage.removeItem('nishmas-start-date');
+          localStorage.removeItem('nishmas-last-completed');
+          return;
+        }
+      }
+      
+      setNishmasDay(parseInt(savedDay));
+      setNishmasStartDate(savedStartDate);
+    }
+  }, []);
+
+  // Mark today's Nishmas as completed
+  const markNishmasCompleted = () => {
+    if (todayCompleted) return; // Prevent multiple completions on same day
+    
+    const today = new Date().toDateString();
+    const newDay = nishmasDay + 1;
+    
+    // Track Nishmas completion and mark as completed
+    trackModalComplete('nishmas');
+    markModalComplete('nishmas');
+    completeTask('tefilla');
+    
+    if (newDay <= 40) {
+      setNishmasDay(newDay);
+      setTodayCompleted(true);
+      localStorage.setItem('nishmas-day', newDay.toString());
+      localStorage.setItem('nishmas-last-completed', today);
+      
+      if (!nishmasStartDate) {
+        const startDate = today;
+        setNishmasStartDate(startDate);
+        localStorage.setItem('nishmas-start-date', startDate);
+      }
+    }
+    
+    // Close fullscreen
+    const event = new CustomEvent('closeFullscreen');
+    window.dispatchEvent(event);
+  };
+
+  if (isLoading) return <div className="text-center py-8">Loading prayer...</div>;
+
+  const daysRemaining = Math.max(0, 40 - nishmasDay);
+  const progressPercentage = Math.min(100, (nishmasDay / 40) * 100);
+
+  return (
+    <div className="space-y-6">
+      {/* Campaign Progress Section */}
+      <div className="bg-gradient-to-r from-rose-50 to-blush-50 rounded-2xl p-6 border border-blush/20">
+        <div className="text-center">
+          <h3 className="platypi-bold text-lg text-black mb-2">40-Day Nishmas Campaign</h3>
+          <div className="flex justify-center items-center gap-4 mb-3">
+            <span className="platypi-medium text-black">Day {nishmasDay} of 40</span>
+            <div className="w-32 bg-white rounded-full h-2 shadow-inner">
+              <div 
+                className="bg-gradient-feminine h-2 rounded-full transition-all duration-500"
+                style={{ width: `${progressPercentage}%` }}
+              ></div>
+            </div>
+            <span className="platypi-medium text-black text-sm">{daysRemaining} days left</span>
+          </div>
+          {nishmasDay === 40 && (
+            <p className="platypi-medium text-sage mb-2">🌸 Campaign Complete! Congratulations! 🌸</p>
+          )}
+        </div>
+      </div>
+
+      {/* Prayer Content */}
+      <div className="bg-white rounded-2xl p-6 border border-blush/10">
+        <div 
+          className={`leading-relaxed text-black ${
+            language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'
+          }`} 
+          style={{ fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px` }}
+        >
+          {nishmasText ? (
+            <div 
+              className="whitespace-pre-wrap leading-relaxed"
+              dangerouslySetInnerHTML={{ 
+                __html: formatTextContent(
+                  nishmasText.fullText || 'Text not available'
+                ).replace(/<strong>/g, language === 'hebrew' ? '<strong class="vc-koren-hebrew-bold">' : '<strong style="font-weight: 700;">')
+              }}
+            />
+          ) : (
+            <div className="text-red-600 text-center">Failed to load prayer text</div>
+          )}
+        </div>
+      </div>
+      
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+        </span>
+      </div>
+
+      <Button
+        onClick={todayCompleted ? undefined : markNishmasCompleted}
+        disabled={todayCompleted}
+        className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
+          todayCompleted 
+            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+        }`}
+      >
+        {todayCompleted ? 'Completed Today' : 'Complete Nishmas'}
+      </Button>
+    </div>
+  );
+}
+
 export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const { activeModal, openModal, closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
@@ -665,7 +826,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
   // Auto-redirect prayer modals to fullscreen
   useEffect(() => {
-    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv'];
+    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign'];
     
     if (activeModal && fullscreenPrayerModals.includes(activeModal)) {
       // Close the regular modal immediately
@@ -685,6 +846,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             break;
           case 'maariv':
             title = 'Maariv Prayer';
+            break;
+          case 'nishmas-campaign':
+            title = 'Nishmas Kol Chai';
             break;
         }
         
