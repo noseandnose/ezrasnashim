@@ -166,7 +166,7 @@ export function FullscreenModal({
                     : 'text-black/60 hover:text-black hover:bg-white/50'
                 }`}
               >
-                {language === "hebrew" ? 'עב' : 'EN'}
+                {language === "hebrew" ? 'EN' : 'עב'}
               </Button>
             )}
             
@@ -223,7 +223,7 @@ export function FullscreenModal({
         }}
       >
         <div className={`max-w-4xl mx-auto ${className}`}>
-          {typeof children === 'function' ? children() : children}
+          {typeof children === 'function' ? children({ language, fontSize }) : children}
         </div>
       </div>
     </div>

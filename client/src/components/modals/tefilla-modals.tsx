@@ -269,22 +269,22 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
                 isOpen: true,
                 title: 'Morning Brochas',
                 contentType: 'morning-brochas',
-                content: () => (
+                content: ({ language: currentLanguage, fontSize: currentFontSize }) => (
                   <div className="space-y-4">
                     <div className="space-y-6">
                       {morningPrayers?.map((prayer: any) => (
                         <div key={prayer.id} className="bg-white rounded-2xl p-4 border border-blush/10">
-                          {language === 'hebrew' && prayer.hebrewText && (
+                          {currentLanguage === 'hebrew' && prayer.hebrewText && (
                             <div 
                               className="vc-koren-hebrew leading-relaxed"
-                              style={{ fontSize: `${fontSize + 1}px` }}
+                              style={{ fontSize: `${currentFontSize + 1}px` }}
                               dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText, tefillaConditions) }}
                             />
                           )}
-                          {language === 'english' && (
+                          {currentLanguage === 'english' && (
                             <div 
                               className="koren-siddur-english text-left leading-relaxed text-black/70"
-                              style={{ fontSize: `${fontSize}px` }}
+                              style={{ fontSize: `${currentFontSize}px` }}
                               dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
                             />
                           )}

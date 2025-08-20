@@ -216,7 +216,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                   isOpen: true,
                   title: 'Daily Halacha',
                   contentType: 'halacha',
-                  content: () => (
+                  content: ({ language: currentLanguage, fontSize: currentFontSize }) => (
                     <div className="space-y-4">
                       <div className="bg-white rounded-2xl p-6 border border-blush/10">
                         {halachaContent.title && (
@@ -226,7 +226,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                         )}
                         <div 
                           className="platypi-regular leading-relaxed text-black whitespace-pre-line"
-                          style={{ fontSize: `${fontSize}px` }}
+                          style={{ fontSize: `${currentFontSize}px` }}
                           dangerouslySetInnerHTML={{ __html: formatHalachaContent(halachaContent.content) }}
                         />
                         {halachaContent.footnotes && (
