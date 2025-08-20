@@ -135,10 +135,19 @@ export function FullscreenModal({
     >
       {/* Header */}
       <div 
-        className="bg-white border-b border-gray-200 px-4 py-3"
+        className="bg-white border-b border-gray-200 px-4 py-3 cursor-pointer"
         style={{
           flexShrink: 0,
           minHeight: '56px'
+        }}
+        onClick={(e) => {
+          // Only scroll to top if not clicking the close button
+          if (!(e.target as Element).closest('button[aria-label="Close fullscreen"]')) {
+            scrollContainerRef.current?.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
+          }
         }}
       >
         <div className="flex items-center justify-between">
@@ -152,8 +161,6 @@ export function FullscreenModal({
               {title}
             </h1>
           </div>
-          
-
           
           <button
             onClick={(e) => {
