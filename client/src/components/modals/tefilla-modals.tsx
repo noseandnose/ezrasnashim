@@ -436,6 +436,194 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
   );
 }
 
+// Helper function to render prayer content in fullscreen
+function renderPrayerContent(contentType: string | undefined, language: 'hebrew' | 'english', fontSize: number) {
+  if (!contentType) return null;
+
+  switch (contentType) {
+    case 'maariv':
+      return <MaarivFullscreenContent language={language} fontSize={fontSize} />;
+    case 'mincha':
+      return <MinchaFullscreenContent language={language} fontSize={fontSize} />;
+    case 'morning-brochas':
+      return <MorningBrochasFullscreenContent language={language} fontSize={fontSize} />;
+    default:
+      return null;
+  }
+}
+
+// Fullscreen content components for prayers
+function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  const { data: prayers = [], isLoading } = useQuery<any[]>({
+    queryKey: ['/api/maariv/prayers'],
+  });
+
+  const tefillaConditions = useTefillaConditions();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+
+  if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
+
+  const handleComplete = () => {
+    trackModalComplete('maariv');
+    markModalComplete('maariv');
+    completeTask('tefilla');
+    // Close fullscreen
+    const event = new CustomEvent('closeFullscreen');
+    window.dispatchEvent(event);
+  };
+
+  return (
+    <div className="space-y-6">
+      {prayers.map((prayer, index) => (
+        <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
+          <div
+            className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
+            style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
+            dangerouslySetInnerHTML={{
+              __html: processTefillaContent(prayer.text || '', tefillaConditions)
+            }}
+          />
+        </div>
+      ))}
+      
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+        </span>
+      </div>
+
+      <Button
+        onClick={isModalComplete('maariv') ? undefined : handleComplete}
+        disabled={isModalComplete('maariv')}
+        className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
+          isModalComplete('maariv') 
+            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+        }`}
+      >
+        {isModalComplete('maariv') ? 'Completed Today' : 'Complete Maariv'}
+      </Button>
+    </div>
+  );
+}
+
+function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  const { data: prayers = [], isLoading } = useQuery<MinchaPrayer[]>({
+    queryKey: ['/api/mincha/prayers'],
+  });
+
+  const tefillaConditions = useTefillaConditions();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+
+  if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
+
+  const handleComplete = () => {
+    trackModalComplete('mincha');
+    markModalComplete('mincha');
+    completeTask('tefilla');
+    // Close fullscreen
+    const event = new CustomEvent('closeFullscreen');
+    window.dispatchEvent(event);
+  };
+
+  return (
+    <div className="space-y-6">
+      {prayers.map((prayer, index) => (
+        <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
+          <div
+            className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
+            style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
+            dangerouslySetInnerHTML={{
+              __html: processTefillaContent(
+                language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation, 
+                tefillaConditions
+              )
+            }}
+          />
+        </div>
+      ))}
+      
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+        </span>
+      </div>
+
+      <Button
+        onClick={isModalComplete('mincha') ? undefined : handleComplete}
+        disabled={isModalComplete('mincha')}
+        className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
+          isModalComplete('mincha') 
+            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+        }`}
+      >
+        {isModalComplete('mincha') ? 'Completed Today' : 'Complete Mincha'}
+      </Button>
+    </div>
+  );
+}
+
+function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  const { data: prayers = [], isLoading } = useQuery<any[]>({
+    queryKey: ['/api/morning-brochas/prayers'],
+  });
+
+  const tefillaConditions = useTefillaConditions();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+
+  if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
+
+  const handleComplete = () => {
+    trackModalComplete('morning-brochas');
+    markModalComplete('morning-brochas');
+    completeTask('tefilla');
+    // Close fullscreen
+    const event = new CustomEvent('closeFullscreen');
+    window.dispatchEvent(event);
+  };
+
+  return (
+    <div className="space-y-6">
+      {prayers.map((prayer, index) => (
+        <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
+          <div
+            className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
+            style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
+            dangerouslySetInnerHTML={{
+              __html: processTefillaContent(prayer.text || '', tefillaConditions)
+            }}
+          />
+        </div>
+      ))}
+      
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+        </span>
+      </div>
+
+      <Button
+        onClick={isModalComplete('morning-brochas') ? undefined : handleComplete}
+        disabled={isModalComplete('morning-brochas')}
+        className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
+          isModalComplete('morning-brochas') 
+            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+        }`}
+      >
+        {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete Morning Brochas'}
+      </Button>
+    </div>
+  );
+}
+
 export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const { activeModal, openModal, closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
@@ -468,6 +656,64 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   useEffect(() => {
     setShowExplosion(false);
   }, [activeModal]);
+
+  // Auto-redirect prayer modals to fullscreen
+  useEffect(() => {
+    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv'];
+    
+    if (activeModal && fullscreenPrayerModals.includes(activeModal)) {
+      // Close the regular modal immediately
+      closeModal();
+      
+      // Open in fullscreen with a small delay to ensure modal closes
+      setTimeout(() => {
+        let title = '';
+        let contentType = activeModal;
+        
+        switch (activeModal) {
+          case 'morning-brochas':
+            title = 'Morning Brochas';
+            break;
+          case 'mincha':
+            title = 'Mincha Prayer';
+            break;
+          case 'maariv':
+            title = 'Maariv Prayer';
+            break;
+        }
+        
+        setFullscreenContent({
+          isOpen: true,
+          title,
+          contentType,
+          content: null // Content will be rendered based on contentType
+        });
+      }, 50);
+    }
+  }, [activeModal, closeModal]);
+
+  // Listen for custom close fullscreen events
+  useEffect(() => {
+    const handleCloseFullscreen = () => {
+      setFullscreenContent({ isOpen: false, title: '', content: null });
+      // Navigate to home section and show flower growth
+      if (onSectionChange) {
+        onSectionChange('home');
+        setTimeout(() => {
+          const progressElement = document.getElementById('daily-progress-garden');
+          if (progressElement) {
+            progressElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+          }
+        }, 300);
+      }
+    };
+
+    window.addEventListener('closeFullscreen', handleCloseFullscreen);
+    return () => window.removeEventListener('closeFullscreen', handleCloseFullscreen);
+  }, [onSectionChange]);
 
   const handlePrayerSelect = (prayerId: number) => {
     setSelectedPrayerId(prayerId);
@@ -1689,10 +1935,14 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         isOpen={fullscreenContent.isOpen}
         onClose={() => setFullscreenContent({ isOpen: false, title: '', content: null })}
         title={fullscreenContent.title}
-        showFontControls={false}
-        showLanguageControls={false}
+        showFontControls={true}
+        showLanguageControls={true}
+        fontSize={fontSize}
+        onFontSizeChange={setFontSize}
+        language={language}
+        onLanguageChange={setLanguage}
       >
-        {fullscreenContent.content}
+        {fullscreenContent.content || renderPrayerContent(fullscreenContent.contentType, language, fontSize)}
       </FullscreenModal>
     </>
   );
