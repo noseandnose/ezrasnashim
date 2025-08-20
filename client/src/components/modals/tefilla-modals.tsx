@@ -746,12 +746,6 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
           )}
         </div>
       </div>
-      
-      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-        <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
-        </span>
-      </div>
 
       {/* Segulah Information Section */}
       <div className="bg-gradient-to-r from-lavender-50 to-rose-50 rounded-2xl p-4 border border-lavender/20">
@@ -759,12 +753,11 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
           Rebbetzin Leah Kolodetsky shared that her mother, Rebbetzin Kanievsky zt"l, believed reciting Nishmas Kol Chai for 40 consecutive days is a powerful segulah for having prayers answered.
         </p>
       </div>
-
-      {/* Thank You Message */}
-      <div className="bg-gradient-to-r from-sage-50 to-blush-50 rounded-2xl p-4 border border-sage/20">
-        <p className="text-sm platypi-medium text-black text-center leading-relaxed">
-          Thank you for taking the time to daven and connect with Hashem through this beautiful prayer.
-        </p>
+      
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+        </span>
       </div>
 
       <Button
