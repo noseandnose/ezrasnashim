@@ -1385,13 +1385,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       </Dialog>
 
       {/* Individual Tehillim Modal */}
-      <Dialog open={activeModal === 'individual-tehillim'} onOpenChange={() => {
-        // When closing individual Tehillim, return to the previous modal (Sefer Tehillim or Special Occasion)
-        const { previousModal } = useModalStore.getState();
-        if (previousModal === 'special-tehillim') {
+      <Dialog open={activeModal === 'individual-tehillim'} onOpenChange={(open) => {
+        if (!open) {
+          // When closing individual Tehillim, return to the special-tehillim modal
           openModal('special-tehillim', 'tefilla');
-        } else {
-          closeModal(true);
         }
       }}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
@@ -1817,7 +1814,7 @@ function SpecialTehillimModal() {
     setTehillimActiveTab(tehillimActiveTab);
     setSelectedPsalm(psalmNumber);
     closeModal();
-    openModal('individual-tehillim', 'tefilla');
+    openModal('individual-tehillim', 'tefilla', psalmNumber);
   };
 
   // Generate array of all 150 psalms
@@ -2136,7 +2133,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
               setShowHeartExplosion(false); // Reset explosion state
               checkAndShowCongratulations();
               // Open the next Tehillim
-              const nextPsalm = Math.min(selectedPsalm + 1, 150);
+              const nextPsalm = selectedPsalm ? Math.min(selectedPsalm + 1, 150) : 1;
               if (nextPsalm <= 150) {
                 openModal('individual-tehillim', 'special-tehillim', nextPsalm);
               } else {
@@ -2148,8 +2145,8 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
           disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
           className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
             isModalComplete(`individual-tehillim-${selectedPsalm}`) 
-              ? 'bg-gray-400 text-white cursor-not-allowed opacity-70' 
-              : 'bg-gradient-to-r from-sage to-sage/90 text-white hover:scale-105 transition-transform'
+              ? 'bg-muted-lavender text-white cursor-not-allowed opacity-70' 
+              : 'bg-muted-lavender text-white hover:scale-105 transition-transform'
           }`}
         >
           {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Next' : 'Complete & Next'}
