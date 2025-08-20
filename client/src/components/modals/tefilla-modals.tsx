@@ -292,8 +292,10 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
                       ))}
                     </div>
                     
-                    <div className="text-center text-xs text-gray-500 mt-4">
-                      All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+                    <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+                      <span className="text-sm platypi-medium text-black">
+                        All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+                      </span>
                     </div>
                     
                     <div className="heart-explosion-container">
@@ -885,8 +887,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                       </div>
                     )}
 
-                    <div className="text-center text-xs text-gray-500 mt-4">
-                      All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+                    <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+                      <span className="text-sm platypi-medium text-black">
+                        All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+                      </span>
                     </div>
                     
                     <div className="heart-explosion-container">
@@ -1371,8 +1375,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                         </div>
                       </div>
                       
-                      <div className="text-center text-xs text-gray-500 mt-4">
-                        All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+                      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+                        <span className="text-sm platypi-medium text-black">
+                          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+                        </span>
                       </div>
                       
                       <div className="heart-explosion-container">
@@ -2169,8 +2175,10 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                   />
                 </div>
                 
-                <div className="text-center text-xs text-gray-500">
-                  All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+                <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+                  <span className="text-sm platypi-medium text-black">
+                    All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+                  </span>
                 </div>
                 
                 <div className="heart-explosion-container">
@@ -2291,8 +2299,10 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                     />
                   </div>
                   
-                  <div className="text-center text-xs text-gray-500 mt-4">
-                    All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+                  <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+                    <span className="text-sm platypi-medium text-black">
+                      All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+                    </span>
                   </div>
                   
                   <div className="heart-explosion-container">
