@@ -223,7 +223,7 @@ export function FullscreenModal({
         }}
       >
         <div className={`max-w-4xl mx-auto ${className}`}>
-          {children}
+          {typeof children === 'function' ? children() : children}
         </div>
       </div>
     </div>

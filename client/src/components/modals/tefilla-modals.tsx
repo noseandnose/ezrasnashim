@@ -265,10 +265,10 @@ function MorningBrochasModal({ setFullscreenContent }: { setFullscreenContent?: 
                 isOpen: true,
                 title: 'Morning Brochas',
                 contentType: 'morning-brochas',
-                content: (
+                content: () => (
                   <div className="space-y-4">
                     <div className="space-y-6">
-                      {morningPrayers?.map((prayer: MorningPrayer) => (
+                      {morningPrayers?.map((prayer: any) => (
                         <div key={prayer.id} className="bg-white rounded-2xl p-4 border border-blush/10">
                           {showHebrew && prayer.hebrewText && (
                             <div 
@@ -463,62 +463,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     setShowExplosion(false);
   }, [activeModal]);
 
-  // Update fullscreen content when language changes for Morning Brochas
-  useEffect(() => {
-    if (fullscreenContent.isOpen && fullscreenContent.contentType === 'morning-brochas' && morningPrayers) {
-      setFullscreenContent(prev => ({
-        ...prev,
-        content: (
-          <div className="space-y-4">
-            <div className="space-y-6">
-              {morningPrayers?.map((prayer: any) => (
-                <div key={prayer.id} className="bg-white rounded-2xl p-4 border border-blush/10">
-                  {showHebrew && prayer.hebrewText && (
-                    <div 
-                      className="vc-koren-hebrew leading-relaxed"
-                      style={{ fontSize: `${fontSize + 1}px` }}
-                      dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText, tefillaConditions) }}
-                    />
-                  )}
-                  {!showHebrew && (
-                    <div 
-                      className="koren-siddur-english text-left leading-relaxed text-black/70"
-                      style={{ fontSize: `${fontSize}px` }}
-                      dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-            
-            <div className="text-center text-xs text-gray-500 mt-4">
-              All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
-            </div>
-            
-            <div className="heart-explosion-container">
-              <Button 
-                onClick={isModalComplete('morning-brochas') ? undefined : () => {
-                  trackModalComplete('morning-brochas');
-                  markModalComplete('morning-brochas');
-                  completeTask('tefilla');
-                  setFullscreenContent({ isOpen: false, title: '', content: null });
-                  checkAndShowCongratulations();
-                }}
-                disabled={isModalComplete('morning-brochas')}
-                className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
-                  isModalComplete('morning-brochas') 
-                    ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                    : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
-                }`}
-              >
-                {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete'}
-              </Button>
-            </div>
-          </div>
-        )
-      }));
-    }
-  }, [showHebrew, fontSize, fullscreenContent.isOpen, fullscreenContent.contentType, morningPrayers, tefillaConditions]);
+
 
   const handlePrayerSelect = (prayerId: number) => {
     setSelectedPrayerId(prayerId);
