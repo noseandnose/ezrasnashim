@@ -449,6 +449,8 @@ function renderPrayerContent(contentType: string | undefined, language: 'hebrew'
       return <MorningBrochasFullscreenContent language={language} fontSize={fontSize} />;
     case 'nishmas-campaign':
       return <NishmasFullscreenContent language={language} fontSize={fontSize} />;
+    case 'individual-tehillim':
+      return <TehillimFullscreenContent language={language} fontSize={fontSize} />;
     default:
       return null;
   }
@@ -775,6 +777,68 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
   );
 }
 
+function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  const { selectedPsalm, tehillimActiveTab } = useModalStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+  const tefillaConditions = useTefillaConditions();
+
+  const { data: tehillimText, isLoading } = useQuery({
+    queryKey: ['/api/tehillim/text', selectedPsalm, language],
+    queryFn: async () => {
+      const response = await axiosClient.get(`/api/tehillim/text/${selectedPsalm}?language=${language}`);
+      return response.data;
+    },
+    enabled: !!selectedPsalm,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000 // 30 minutes
+  });
+
+  if (isLoading) return <div className="text-center py-8">Loading Tehillim...</div>;
+
+  const handleComplete = () => {
+    trackModalComplete('individual-tehillim');
+    markModalComplete('individual-tehillim');
+    completeTask('tefilla');
+    // Close fullscreen
+    const event = new CustomEvent('closeFullscreen');
+    window.dispatchEvent(event);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-2xl p-6 border border-blush/10">
+        <div
+          className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
+          style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
+          dangerouslySetInnerHTML={{
+            __html: processTefillaContent(tehillimText?.text || '', tefillaConditions)
+          }}
+        />
+      </div>
+      
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+        </span>
+      </div>
+
+      <Button
+        onClick={isModalComplete('individual-tehillim') ? undefined : handleComplete}
+        disabled={isModalComplete('individual-tehillim')}
+        className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
+          isModalComplete('individual-tehillim') 
+            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+        }`}
+      >
+        {isModalComplete('individual-tehillim') ? 'Completed Today' : `Complete Tehillim ${selectedPsalm}`}
+      </Button>
+    </div>
+  );
+}
+
 export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const { activeModal, openModal, closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
@@ -810,7 +874,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
   // Auto-redirect prayer modals to fullscreen
   useEffect(() => {
-    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign'];
+    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'individual-tehillim'];
     
     if (activeModal && fullscreenPrayerModals.includes(activeModal)) {
       // Close the regular modal immediately
@@ -833,6 +897,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             break;
           case 'nishmas-campaign':
             title = 'Nishmas Kol Chai';
+            break;
+          case 'individual-tehillim':
+            title = `Tehillim ${selectedPsalm}`;
+            contentType = 'individual-tehillim';
             break;
         }
         
