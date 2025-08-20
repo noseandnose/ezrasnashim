@@ -796,15 +796,38 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
   });
 
   if (isLoading) return <div className="text-center py-8">Loading Tehillim...</div>;
+  if (!selectedPsalm) return <div className="text-center py-8">No Tehillim selected</div>;
+
+  const completionKey = `individual-tehillim-${selectedPsalm}`;
+  const isCompleted = isModalComplete(completionKey);
 
   const handleComplete = () => {
-    trackModalComplete('individual-tehillim');
-    markModalComplete('individual-tehillim');
+    trackModalComplete(completionKey);
+    markModalComplete(completionKey);
     completeTask('tefilla');
     // Close fullscreen
     const event = new CustomEvent('closeFullscreen');
     window.dispatchEvent(event);
   };
+
+  const handleCompleteAndNext = () => {
+    if (!selectedPsalm) return;
+    
+    trackModalComplete(completionKey);
+    markModalComplete(completionKey);
+    completeTask('tefilla');
+    
+    // Move to next psalm (only for 1-150 sequence)
+    const nextPsalm = selectedPsalm < 150 ? selectedPsalm + 1 : 1;
+    
+    // Update the selected psalm in the store
+    const { setSelectedPsalm } = useModalStore.getState();
+    setSelectedPsalm(nextPsalm);
+    
+    // The fullscreen content will automatically update due to the dependency on selectedPsalm
+  };
+
+  const isFromAllTab = tehillimActiveTab === 'all';
 
   return (
     <div className="space-y-6">
@@ -824,17 +847,43 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
         </span>
       </div>
 
-      <Button
-        onClick={isModalComplete('individual-tehillim') ? undefined : handleComplete}
-        disabled={isModalComplete('individual-tehillim')}
-        className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
-          isModalComplete('individual-tehillim') 
-            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
-        }`}
-      >
-        {isModalComplete('individual-tehillim') ? 'Completed Today' : `Complete Tehillim ${selectedPsalm}`}
-      </Button>
+      {/* Button(s) based on whether it's from 1-150 or special occasions */}
+      {isFromAllTab ? (
+        <div className="space-y-3">
+          <Button
+            onClick={isCompleted ? undefined : handleComplete}
+            disabled={isCompleted}
+            className={`w-full py-3 rounded-xl platypi-medium border-0 ${
+              isCompleted 
+                ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+            }`}
+          >
+            {isCompleted ? 'Completed Today' : `Complete Tehillim ${selectedPsalm}`}
+          </Button>
+          
+          {!isCompleted && (
+            <Button
+              onClick={handleCompleteAndNext}
+              className="w-full py-3 rounded-xl platypi-medium border-0 bg-blush text-white hover:scale-105 transition-transform"
+            >
+              Complete & Next ({selectedPsalm && selectedPsalm < 150 ? selectedPsalm + 1 : 1})
+            </Button>
+          )}
+        </div>
+      ) : (
+        <Button
+          onClick={isCompleted ? undefined : handleComplete}
+          disabled={isCompleted}
+          className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
+            isCompleted 
+              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+          }`}
+        >
+          {isCompleted ? 'Completed Today' : `Complete Tehillim ${selectedPsalm}`}
+        </Button>
+      )}
     </div>
   );
 }
