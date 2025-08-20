@@ -2,8 +2,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, Play, Pause, Volume2 } from "lucide-react";
+import { useState, useRef } from "react";
+import { ChevronLeft, ChevronRight, Play, Pause, Volume2, Maximize2 } from "lucide-react";
 import AudioPlayer from "@/components/audio-player";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { formatTextContent } from "@/lib/text-formatter";
@@ -14,6 +14,9 @@ export default function TableModals() {
   const { markModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
 
   const handleComplete = (modalId: string) => {
     trackModalComplete(modalId);
@@ -299,6 +302,33 @@ export default function TableModals() {
                 const prevMedia = () => {
                   setCurrentMediaIndex((prev) => (prev - 1 + mediaItems.length) % mediaItems.length);
                 };
+
+                // Touch handlers for swipe navigation
+                const handleTouchStart = (e: React.TouchEvent) => {
+                  touchStartX.current = e.targetTouches[0].clientX;
+                };
+
+                const handleTouchMove = (e: React.TouchEvent) => {
+                  touchEndX.current = e.targetTouches[0].clientX;
+                };
+
+                const handleTouchEnd = () => {
+                  if (!touchStartX.current || !touchEndX.current) return;
+                  
+                  const distance = touchStartX.current - touchEndX.current;
+                  const isLeftSwipe = distance > 50;
+                  const isRightSwipe = distance < -50;
+
+                  if (isLeftSwipe && mediaItems.length > 1) {
+                    nextMedia();
+                  }
+                  if (isRightSwipe && mediaItems.length > 1) {
+                    prevMedia();
+                  }
+                  
+                  touchStartX.current = null;
+                  touchEndX.current = null;
+                };
                 
                 const currentMedia = mediaItems[currentMediaIndex];
                 
@@ -308,12 +338,20 @@ export default function TableModals() {
                   switch (currentMedia.type) {
                     case 'image':
                       return (
-                        <img 
-                          src={currentMedia.url} 
-                          alt={`Creative Jewish Living ${currentMediaIndex + 1}`}
-                          className="w-full h-full object-cover cursor-pointer"
-                          onClick={nextMedia}
-                        />
+                        <div className="relative w-full h-full">
+                          <img 
+                            src={currentMedia.url} 
+                            alt={`Creative Jewish Living ${currentMediaIndex + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            onClick={() => setFullscreenImage(currentMedia.url || null)}
+                            className="absolute top-2 right-2 bg-black/50 text-white p-1.5 rounded-full hover:bg-black/70 transition-colors"
+                            title="View fullscreen"
+                          >
+                            <Maximize2 size={16} />
+                          </button>
+                        </div>
                       );
                     case 'audio':
                       return (
@@ -351,10 +389,25 @@ export default function TableModals() {
                           return 'video/mp4'; // default
                         };
                         
-                        // Try direct URL first, fallback to proxy for .mov files
-                        const videoUrl = currentMedia.url && currentMedia.url.includes('.mov') ? 
-                          `/api/media-proxy/cloudinary/${currentMedia.url.split('/').slice(4).join('/')}` : 
-                          (currentMedia.url || '');
+                        // Optimize video URLs for faster loading
+                        const getOptimizedVideoUrl = (url: string) => {
+                          if (!url) return '';
+                          
+                          // For Supabase URLs, add quality and format parameters for faster loading
+                          if (url.includes('supabase')) {
+                            const baseUrl = url.split('?')[0];
+                            return `${baseUrl}?quality=auto&format=mp4`;
+                          }
+                          
+                          // For .mov files, use proxy
+                          if (url.includes('.mov')) {
+                            return `/api/media-proxy/cloudinary/${url.split('/').slice(4).join('/')}`;
+                          }
+                          
+                          return url;
+                        };
+
+                        const videoUrl = getOptimizedVideoUrl(currentMedia.url || '');
                         
                         return (
                           <div className="w-full h-full relative">
@@ -381,17 +434,15 @@ export default function TableModals() {
                                 src={videoUrl}
                                 controls
                                 className="w-full h-full object-cover"
-                                preload="metadata"
+                                preload="none"
+                                poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Cpolygon points='40,30 70,50 40,70' fill='%23d1d5db'/%3E%3C/svg%3E"
                                 onError={handleVideoError}
-                                onLoadStart={() => { /* Video loading */ }}
-                                onCanPlay={handleCanPlay}
-                                crossOrigin="anonymous"
+                                onLoadedData={handleCanPlay}
+                                onLoadStart={() => setIsLoading(true)}
                                 playsInline
+                                muted
                               >
-                                <source src={currentMedia.url || ''} type={getVideoType(currentMedia.url || '')} />
-                                {currentMedia.url && currentMedia.url.includes('.mov') && (
-                                  <source src={videoUrl} type="video/mp4" />
-                                )}
+                                <source src={videoUrl} type={getVideoType(videoUrl)} />
                                 Your browser does not support the video tag.
                               </video>
                             )}
@@ -407,7 +458,12 @@ export default function TableModals() {
                 
                 return (
                   <div className="mb-4 relative">
-                    <div className="w-full h-64 bg-gray-100 rounded-lg overflow-hidden relative">
+                    <div 
+                      className="w-full h-64 bg-gray-100 rounded-lg overflow-hidden relative touch-pan-y"
+                      onTouchStart={handleTouchStart}
+                      onTouchMove={handleTouchMove}
+                      onTouchEnd={handleTouchEnd}
+                    >
                       {renderMedia()}
                       
                       {mediaItems.length > 1 && (
@@ -455,6 +511,22 @@ export default function TableModals() {
                   <p dangerouslySetInnerHTML={{ __html: formatTextContent(inspirationContent.content) }} />
                 </div>
               </div>
+
+              {/* Thank You Attribution - Moved BEFORE Done button */}
+              <div className="bg-blue-50 p-3 rounded-xl mt-4 text-center">
+                <p className="text-sm text-blue-800">
+                  Thank you to{' '}
+                  <a 
+                    href="https://www.instagram.com/yidwithakid/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 underline platypi-medium"
+                  >
+                    YidWithAKid
+                  </a>
+                  {' '}for providing this.
+                </p>
+              </div>
             </>
           ) : (
             <div className="text-center py-8">
@@ -476,24 +548,32 @@ export default function TableModals() {
           >
             Done
           </Button>
-          
-          {/* Thank You Attribution */}
-          <div className="bg-blue-50 p-3 rounded-xl mt-1 text-center">
-            <p className="text-sm text-blue-800">
-              Thank you to{' '}
-              <a 
-                href="https://www.instagram.com/yidwithakid/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 underline platypi-medium"
-              >
-                YidWithAKid
-              </a>
-              {' '}for providing this.
-            </p>
-          </div>
         </DialogContent>
       </Dialog>
+
+      {/* Fullscreen Image Modal */}
+      {fullscreenImage && (
+        <div 
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          onClick={() => setFullscreenImage(null)}
+        >
+          <div className="relative max-w-full max-h-full">
+            <img 
+              src={fullscreenImage} 
+              alt="Fullscreen view"
+              className="max-w-full max-h-full object-contain"
+            />
+            <button
+              onClick={() => setFullscreenImage(null)}
+              className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Parsha Shiur Modal */}
       <Dialog open={activeModal === 'parsha'} onOpenChange={() => closeModal(true)}>
