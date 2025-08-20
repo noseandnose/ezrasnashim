@@ -213,6 +213,22 @@ export default function TableModals() {
             </div>
           )}
 
+          {/* Kosher.com Attribution */}
+          <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-4 border border-blue-200">
+            <span className="text-sm platypi-medium text-black">
+              Thank you to{' '}
+              <a 
+                href="https://www.kosher.com/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 underline"
+              >
+                Kosher.com
+              </a>
+              {' '}for providing this Recipe
+            </span>
+          </div>
+
           <Button 
             onClick={() => handleComplete('recipe')}
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
