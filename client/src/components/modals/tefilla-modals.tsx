@@ -261,25 +261,51 @@ function MorningBrochasModal({ setFullscreenContent }: { setFullscreenContent?: 
                 isOpen: true,
                 title: 'Morning Brochas',
                 content: (
-                  <div className="space-y-6">
-                    {morningPrayers?.map((prayer: MorningPrayer) => (
-                      <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
-                        {showHebrew && prayer.hebrewText && (
-                          <div 
-                            className="vc-koren-hebrew leading-relaxed"
-                            style={{ fontSize: `${fontSize + 1}px` }}
-                            dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText, tefillaConditions) }}
-                          />
-                        )}
-                        {!showHebrew && (
-                          <div 
-                            className="koren-siddur-english text-left leading-relaxed text-black/70"
-                            style={{ fontSize: `${fontSize}px` }}
-                            dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
-                          />
-                        )}
-                      </div>
-                    ))}
+                  <div className="space-y-4">
+                    <div className="space-y-6">
+                      {morningPrayers?.map((prayer: MorningPrayer) => (
+                        <div key={prayer.id} className="bg-white rounded-2xl p-4 border border-blush/10">
+                          {showHebrew && prayer.hebrewText && (
+                            <div 
+                              className="vc-koren-hebrew leading-relaxed"
+                              style={{ fontSize: `${fontSize + 1}px` }}
+                              dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText, tefillaConditions) }}
+                            />
+                          )}
+                          {!showHebrew && (
+                            <div 
+                              className="koren-siddur-english text-left leading-relaxed text-black/70"
+                              style={{ fontSize: `${fontSize}px` }}
+                              dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div className="text-center text-xs text-gray-500 mt-4">
+                      All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+                    </div>
+                    
+                    <div className="heart-explosion-container">
+                      <Button 
+                        onClick={isModalComplete('morning-brochas') ? undefined : () => {
+                          trackModalComplete('morning-brochas');
+                          markModalComplete('morning-brochas');
+                          completeTask('tefilla');
+                          setFullscreenContent({ isOpen: false, title: '', content: null });
+                          checkAndShowCongratulations();
+                        }}
+                        disabled={isModalComplete('morning-brochas')}
+                        className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
+                          isModalComplete('morning-brochas') 
+                            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                        }`}
+                      >
+                        {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete'}
+                      </Button>
+                    </div>
                   </div>
                 )
               });
@@ -932,27 +958,53 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 isOpen: true,
                 title: 'Mincha Prayer',
                 content: (
-                  <div className="space-y-6">
-                    {minchaPrayers.map((prayer) => (
-                      <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
-                        {prayer.hebrewText && language === 'hebrew' && (
-                          <div 
-                            className="vc-koren-hebrew leading-relaxed"
-                            style={{ fontSize: `${fontSize + 1}px` }}
-                            dangerouslySetInnerHTML={{ 
-                              __html: processTefillaContent(prayer.hebrewText, tefillaConditions)
-                            }}
-                          />
-                        )}
-                        {language === 'english' && (
-                          <div 
-                            className="koren-siddur-english text-left leading-relaxed text-black/70"
-                            style={{ fontSize: `${fontSize}px` }}
-                            dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
-                          />
-                        )}
-                      </div>
-                    ))}
+                  <div className="space-y-4">
+                    <div className="space-y-6">
+                      {minchaPrayers.map((prayer) => (
+                        <div key={prayer.id} className="bg-white rounded-2xl p-4 border border-blush/10">
+                          {prayer.hebrewText && language === 'hebrew' && (
+                            <div 
+                              className="vc-koren-hebrew leading-relaxed"
+                              style={{ fontSize: `${fontSize + 1}px` }}
+                              dangerouslySetInnerHTML={{ 
+                                __html: processTefillaContent(prayer.hebrewText, tefillaConditions)
+                              }}
+                            />
+                          )}
+                          {language === 'english' && (
+                            <div 
+                              className="koren-siddur-english text-left leading-relaxed text-black/70"
+                              style={{ fontSize: `${fontSize}px` }}
+                              dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div className="text-center text-xs text-gray-500 mt-4">
+                      All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+                    </div>
+                    
+                    <div className="heart-explosion-container">
+                      <Button 
+                        onClick={isModalComplete('mincha') ? undefined : () => {
+                          trackModalComplete('mincha');
+                          markModalComplete('mincha');
+                          completeTask('tefilla');
+                          setFullscreenContent({ isOpen: false, title: '', content: null });
+                          checkAndShowCongratulations();
+                        }}
+                        disabled={isModalComplete('mincha')}
+                        className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
+                          isModalComplete('mincha') 
+                            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                        }`}
+                      >
+                        {isModalComplete('mincha') ? 'Completed Today' : 'Complete'}
+                      </Button>
+                    </div>
                   </div>
                 )
               });
@@ -1208,20 +1260,48 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                   isOpen: true,
                   title: 'Nishmas Kol Chai',
                   content: (
-                    <div 
-                      className={`leading-relaxed text-black ${
-                        nishmasLanguage === 'hebrew' ? 'vc-koren-hebrew' : 'koren-siddur-english text-left'
-                      }`}
-                      style={{ fontSize: nishmasLanguage === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
-                    >
-                      <div 
-                        className="whitespace-pre-wrap leading-relaxed"
-                        dangerouslySetInnerHTML={{ 
-                          __html: formatTextContent(
-                            nishmasText.fullText || 'Text not available'
-                          ).replace(/<strong>/g, nishmasLanguage === 'hebrew' ? '<strong class="vc-koren-hebrew-bold">' : '<strong style="font-weight: 700;">')
-                        }}
-                      />
+                    <div className="space-y-4">
+                      <div className="bg-white rounded-2xl p-4 border border-blush/10">
+                        <div 
+                          className={`leading-relaxed text-black ${
+                            nishmasLanguage === 'hebrew' ? 'vc-koren-hebrew' : 'koren-siddur-english text-left'
+                          }`}
+                          style={{ fontSize: nishmasLanguage === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
+                        >
+                          <div 
+                            className="whitespace-pre-wrap leading-relaxed"
+                            dangerouslySetInnerHTML={{ 
+                              __html: formatTextContent(
+                                nishmasText.fullText || 'Text not available'
+                              ).replace(/<strong>/g, nishmasLanguage === 'hebrew' ? '<strong class="vc-koren-hebrew-bold">' : '<strong style="font-weight: 700;">')
+                            }}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="text-center text-xs text-gray-500 mt-4">
+                        All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+                      </div>
+                      
+                      <div className="heart-explosion-container">
+                        <Button 
+                          onClick={isModalComplete('nishmas-campaign') ? undefined : () => {
+                            trackModalComplete('nishmas-campaign');
+                            markModalComplete('nishmas-campaign');
+                            completeTask('tefilla');
+                            setFullscreenContent({ isOpen: false, title: '', content: null });
+                            checkAndShowCongratulations();
+                          }}
+                          disabled={isModalComplete('nishmas-campaign')}
+                          className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
+                            isModalComplete('nishmas-campaign') 
+                              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                          }`}
+                        >
+                          {isModalComplete('nishmas-campaign') ? 'Completed Today' : 'Complete'}
+                        </Button>
+                      </div>
                     </div>
                   )
                 });

@@ -212,23 +212,64 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                   title: 'Daily Halacha',
                   content: (
                     <div className="space-y-4">
-                      {halachaContent.title && (
-                        <h3 className="platypi-bold text-2xl text-black text-center mb-6">
-                          {halachaContent.title}
-                        </h3>
-                      )}
-                      <div 
-                        className="platypi-regular leading-relaxed text-black whitespace-pre-line text-lg"
-                        dangerouslySetInnerHTML={{ __html: formatHalachaContent(halachaContent.content) }}
-                      />
-                      {halachaContent.footnotes && (
-                        <div className="border-t pt-4 mt-6">
-                          <h4 className="platypi-medium text-black text-base mb-2">Footnotes</h4>
-                          <div className="platypi-regular leading-relaxed text-black/80 text-sm whitespace-pre-line">
-                            {halachaContent.footnotes}
+                      <div className="bg-white rounded-2xl p-6 border border-blush/10">
+                        {halachaContent.title && (
+                          <h3 className="platypi-bold text-lg text-black text-center mb-4">
+                            {halachaContent.title}
+                          </h3>
+                        )}
+                        <div 
+                          className="platypi-regular leading-relaxed text-black whitespace-pre-line"
+                          style={{ fontSize: `${fontSize}px` }}
+                          dangerouslySetInnerHTML={{ __html: formatHalachaContent(halachaContent.content) }}
+                        />
+                        {halachaContent.footnotes && (
+                          <div className="border-t pt-4 mt-6">
+                            <h4 className="platypi-medium text-black text-base mb-2">Footnotes</h4>
+                            <div className="platypi-regular leading-relaxed text-black/80 text-sm whitespace-pre-line">
+                              {halachaContent.footnotes}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
+                      
+                      <div className="mt-4 p-4 bg-blue-50 rounded-2xl border border-blue-200">
+                        <p className="text-sm text-black platypi-medium">
+                          Provided by Rabbi Daniel Braude from{' '}
+                          <a 
+                            href="https://www.feldheim.com/learn-shabbos-in-just-3-minutes-a-day"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 underline"
+                          >
+                            Feldheim Publishers
+                          </a>
+                        </p>
+                      </div>
+                      
+                      <div className="heart-explosion-container">
+                        <Button 
+                          onClick={isModalComplete('halacha') ? undefined : () => {
+                            trackModalComplete('halacha');
+                            markModalComplete('halacha');
+                            setShowExplosion(true);
+                            setTimeout(() => {
+                              setShowExplosion(false);
+                              completeTask('torah');
+                              setFullscreenContent({ isOpen: false, title: '', content: null });
+                              checkAndShowCongratulations();
+                            }, 1500);
+                          }}
+                          disabled={isModalComplete('halacha')}
+                          className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
+                            isModalComplete('halacha') 
+                              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                          }`}
+                        >
+                          {isModalComplete('halacha') ? 'Completed Today' : 'Complete'}
+                        </Button>
+                      </div>
                     </div>
                   )
                 });
@@ -361,13 +402,42 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                   title: 'Daily Emuna',
                   content: (
                     <div className="space-y-4">
-                      {emunaContent.title && (
-                        <h3 className="platypi-bold text-2xl text-black text-center mb-4">
-                          {emunaContent.title}
-                        </h3>
-                      )}
-                      <div className="secular-one-bold text-right leading-relaxed text-black text-xl">
-                        <div dangerouslySetInnerHTML={{ __html: formatTextContent(emunaContent.content) }} />
+                      <div className="bg-white rounded-2xl p-6 border border-blush/10">
+                        {emunaContent.title && (
+                          <h3 className="platypi-bold text-lg text-black text-center mb-4">
+                            {emunaContent.title}
+                          </h3>
+                        )}
+                        <div 
+                          className="secular-one-bold text-right leading-relaxed text-black"
+                          style={{ fontSize: `${fontSize + 2}px` }}
+                        >
+                          <div dangerouslySetInnerHTML={{ __html: formatTextContent(emunaContent.content) }} />
+                        </div>
+                      </div>
+                      
+                      <div className="heart-explosion-container">
+                        <Button 
+                          onClick={isModalComplete('emuna') ? undefined : () => {
+                            trackModalComplete('emuna');
+                            markModalComplete('emuna');
+                            setShowExplosion(true);
+                            setTimeout(() => {
+                              setShowExplosion(false);
+                              completeTask('torah');
+                              setFullscreenContent({ isOpen: false, title: '', content: null });
+                              checkAndShowCongratulations();
+                            }, 1500);
+                          }}
+                          disabled={isModalComplete('emuna')}
+                          className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
+                            isModalComplete('emuna') 
+                              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                          }`}
+                        >
+                          {isModalComplete('emuna') ? 'Completed Today' : 'Complete'}
+                        </Button>
                       </div>
                     </div>
                   )
@@ -537,13 +607,42 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                   title: 'Featured Content',
                   content: (
                     <div className="space-y-4">
-                      {featuredContent.title && (
-                        <h3 className="platypi-bold text-2xl text-black text-center mb-4">
-                          {featuredContent.title}
-                        </h3>
-                      )}
-                      <div className="platypi-regular leading-relaxed text-black whitespace-pre-line text-xl">
-                        <div dangerouslySetInnerHTML={{ __html: formatTextContent(featuredContent.content) }} />
+                      <div className="bg-white rounded-2xl p-6 border border-blush/10">
+                        {featuredContent.title && (
+                          <h3 className="platypi-bold text-lg text-black text-center mb-4">
+                            {featuredContent.title}
+                          </h3>
+                        )}
+                        <div 
+                          className="platypi-regular leading-relaxed text-black whitespace-pre-line"
+                          style={{ fontSize: `${fontSize}px` }}
+                        >
+                          <div dangerouslySetInnerHTML={{ __html: formatTextContent(featuredContent.content) }} />
+                        </div>
+                      </div>
+                      
+                      <div className="heart-explosion-container">
+                        <Button 
+                          onClick={isModalComplete('featured') ? undefined : () => {
+                            trackModalComplete('featured');
+                            markModalComplete('featured');
+                            setShowExplosion(true);
+                            setTimeout(() => {
+                              setShowExplosion(false);
+                              completeTask('torah');
+                              setFullscreenContent({ isOpen: false, title: '', content: null });
+                              checkAndShowCongratulations();
+                            }, 1500);
+                          }}
+                          disabled={isModalComplete('featured')}
+                          className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
+                            isModalComplete('featured') 
+                              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                          }`}
+                        >
+                          {isModalComplete('featured') ? 'Completed Today' : 'Complete'}
+                        </Button>
                       </div>
                     </div>
                   )
