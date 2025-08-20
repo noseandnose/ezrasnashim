@@ -28,6 +28,38 @@ export default function TableModals() {
     return new Date().toISOString().split('T')[0];
   };
 
+  // Function to format time display (convert minutes > 59 to hours and minutes)
+  const formatTimeDisplay = (timeString: string) => {
+    if (!timeString) return timeString;
+    
+    // Check if the string contains only numbers (indicating minutes)
+    const minutesMatch = timeString.match(/^(\d+)$/);
+    if (minutesMatch) {
+      const totalMinutes = parseInt(minutesMatch[1]);
+      if (totalMinutes > 59) {
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        return minutes > 0 ? `${hours}h${minutes}m` : `${hours}h`;
+      }
+      return `${totalMinutes}m`;
+    }
+    
+    // Check if string ends with "min" or "mins" and extract number
+    const minMatch = timeString.match(/^(\d+)\s*mins?$/i);
+    if (minMatch) {
+      const totalMinutes = parseInt(minMatch[1]);
+      if (totalMinutes > 59) {
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        return minutes > 0 ? `${hours}h${minutes}m` : `${hours}h`;
+      }
+      return `${totalMinutes}m`;
+    }
+    
+    // Return original string if no conversion needed
+    return timeString;
+  };
+
   const { data: recipeContent } = useQuery<{title?: string; description?: string; ingredients?: string[]; instructions?: string[]; cookingTime?: string; servings?: number; imageUrl?: string; prepTime?: string; cookTime?: string; difficulty?: string}>({
     queryKey: ['/api/table/recipe'],
     enabled: activeModal === 'recipe'
@@ -110,13 +142,13 @@ export default function TableModals() {
                     {recipeContent.prepTime && (
                       <div>
                         <span className="platypi-semibold">Prep Time: </span>
-                        <span>{recipeContent.prepTime}</span>
+                        <span>{formatTimeDisplay(recipeContent.prepTime)}</span>
                       </div>
                     )}
                     {recipeContent.cookTime && (
                       <div>
                         <span className="platypi-semibold">Cook Time: </span>
-                        <span>{recipeContent.cookTime}</span>
+                        <span>{formatTimeDisplay(recipeContent.cookTime)}</span>
                       </div>
                     )}
                     {recipeContent.servings && (
