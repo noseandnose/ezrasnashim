@@ -722,31 +722,8 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
 
   if (isLoading) return <div className="text-center py-8">Loading prayer...</div>;
 
-  const daysRemaining = Math.max(0, 40 - nishmasDay);
-  const progressPercentage = Math.min(100, (nishmasDay / 40) * 100);
-
   return (
     <div className="space-y-6">
-      {/* Campaign Progress Section */}
-      <div className="bg-gradient-to-r from-rose-50 to-blush-50 rounded-2xl p-6 border border-blush/20">
-        <div className="text-center">
-          <h3 className="platypi-bold text-lg text-black mb-2">40-Day Nishmas Campaign</h3>
-          <div className="flex justify-center items-center gap-4 mb-3">
-            <span className="platypi-medium text-black">Day {nishmasDay} of 40</span>
-            <div className="w-32 bg-white rounded-full h-2 shadow-inner">
-              <div 
-                className="bg-gradient-feminine h-2 rounded-full transition-all duration-500"
-                style={{ width: `${progressPercentage}%` }}
-              ></div>
-            </div>
-            <span className="platypi-medium text-black text-sm">{daysRemaining} days left</span>
-          </div>
-          {nishmasDay === 40 && (
-            <p className="platypi-medium text-sage mb-2">🌸 Campaign Complete! Congratulations! 🌸</p>
-          )}
-        </div>
-      </div>
-
       {/* Prayer Content */}
       <div className="bg-white rounded-2xl p-6 border border-blush/10">
         <div 
@@ -774,6 +751,13 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
         <span className="text-sm platypi-medium text-black">
           All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
         </span>
+      </div>
+
+      {/* Segulah Information Section */}
+      <div className="bg-gradient-to-r from-lavender-50 to-rose-50 rounded-2xl p-4 border border-lavender/20">
+        <p className="text-sm platypi-medium text-black text-center leading-relaxed">
+          Rebbetzin Leah Kolodetsky shared that her mother, Rebbetzin Kanievsky zt"l, believed reciting Nishmas Kol Chai for 40 consecutive days is a powerful segulah for having prayers answered.
+        </p>
       </div>
 
       <Button
