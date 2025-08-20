@@ -2885,11 +2885,11 @@ function JerusalemCompass() {
                         const isAligned = angleDiff < 10;
                         
                         return (
-                          <div className="w-7 h-7 rounded-full bg-white shadow-md border-2 border-white flex items-center justify-center relative">
+                          <div className="w-8 h-8 rounded-full bg-white shadow-md border-2 border-white flex items-center justify-center relative">
                             <img 
                               src={isAligned ? bhGreenIcon : bhPinkIcon}
                               alt={isAligned ? "Aligned" : "Not aligned"}
-                              className="w-5 h-5"
+                              className="w-6 h-6"
                               style={{
                                 transform: `rotate(${-direction + deviceOrientation}deg)`,
                                 transition: 'transform 0.3s ease'
