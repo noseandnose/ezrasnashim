@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Minimize2, Maximize2 } from 'lucide-react';
+import { Button } from './button';
 import logoImage from "@assets/1LO_1755590090315.png";
 
 interface FullscreenModalProps {
@@ -8,6 +9,13 @@ interface FullscreenModalProps {
   title: string;
   children: React.ReactNode;
   className?: string;
+  // Font and Language Controls
+  showFontControls?: boolean;
+  fontSize?: number;
+  onFontSizeChange?: (size: number) => void;
+  showLanguageControls?: boolean;
+  language?: 'hebrew' | 'english';
+  onLanguageChange?: (lang: 'hebrew' | 'english') => void;
 }
 
 export function FullscreenModal({ 
@@ -15,7 +23,13 @@ export function FullscreenModal({
   onClose, 
   title, 
   children, 
-  className = '' 
+  className = '',
+  showFontControls = false,
+  fontSize = 16,
+  onFontSizeChange,
+  showLanguageControls = false,
+  language = 'hebrew',
+  onLanguageChange
 }: FullscreenModalProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -138,6 +152,43 @@ export function FullscreenModal({
               {title}
             </h1>
           </div>
+          
+          {/* Font and Language Controls */}
+          <div className="flex items-center gap-2 mr-4">
+            {showLanguageControls && onLanguageChange && (
+              <Button
+                onClick={() => onLanguageChange(language === "hebrew" ? "english" : "hebrew")}
+                variant="ghost"
+                size="sm"
+                className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
+                  language === "hebrew" 
+                    ? 'bg-blush text-white' 
+                    : 'text-black/60 hover:text-black hover:bg-white/50'
+                }`}
+              >
+                {language === "hebrew" ? 'עב' : 'EN'}
+              </Button>
+            )}
+            
+            {showFontControls && onFontSizeChange && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onFontSizeChange(Math.max(fontSize - 2, 12))}
+                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                >
+                  <span className="text-xs platypi-medium">-</span>
+                </button>
+                <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
+                <button
+                  onClick={() => onFontSizeChange(Math.min(fontSize + 2, 24))}
+                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                >
+                  <span className="text-xs platypi-medium">+</span>
+                </button>
+              </div>
+            )}
+          </div>
+          
           <button
             onClick={(e) => {
               e.preventDefault();

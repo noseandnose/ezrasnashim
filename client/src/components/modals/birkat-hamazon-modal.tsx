@@ -300,39 +300,14 @@ export function BirkatHamazonModal() {
             closeModal(true);
           }}
           title="Me'ein Shalosh"
+          showFontControls={true}
+          fontSize={fontSize}
+          onFontSizeChange={(size) => setFontSize(size)}
+          showLanguageControls={true}
+          language={language}
+          onLanguageChange={setLanguage}
         >
           <div className="space-y-4">
-            {/* Language and Font Controls in Fullscreen */}
-            <div className="flex items-center justify-between mb-4">
-              <Button
-                onClick={() => setLanguage(language === "hebrew" ? "english" : "hebrew")}
-                variant="ghost"
-                size="sm"
-                className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
-                  language === "hebrew" 
-                    ? 'bg-blush text-white' 
-                    : 'text-black/60 hover:text-black hover:bg-white/50'
-                }`}
-              >
-                {language === "hebrew" ? 'עב' : 'EN'}
-              </Button>
-              
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={decreaseFontSize}
-                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
-                >
-                  <span className="text-xs platypi-medium">-</span>
-                </button>
-                <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
-                <button
-                  onClick={increaseFontSize}
-                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
-                >
-                  <span className="text-xs platypi-medium">+</span>
-                </button>
-              </div>
-            </div>
             
             {isAfterBrochasLoading ? (
               <div className="flex justify-center py-8">
@@ -416,39 +391,14 @@ export function BirkatHamazonModal() {
             closeModal(true);
           }}
           title="Birkat Hamazon"
+          showFontControls={true}
+          fontSize={fontSize}
+          onFontSizeChange={(size) => setFontSize(size)}
+          showLanguageControls={true}
+          language={language}
+          onLanguageChange={setLanguage}
         >
           <div className="space-y-4">
-            {/* Language and Font Controls in Fullscreen */}
-            <div className="flex items-center justify-between mb-4">
-              <Button
-                onClick={() => setLanguage(language === "hebrew" ? "english" : "hebrew")}
-                variant="ghost"
-                size="sm"
-                className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
-                  language === "hebrew" 
-                    ? 'bg-blush text-white' 
-                    : 'text-black/60 hover:text-black hover:bg-white/50'
-                }`}
-              >
-                {language === "hebrew" ? 'עב' : 'EN'}
-              </Button>
-              
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={decreaseFontSize}
-                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
-                >
-                  <span className="text-xs platypi-medium">-</span>
-                </button>
-                <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
-                <button
-                  onClick={increaseFontSize}
-                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
-                >
-                  <span className="text-xs platypi-medium">+</span>
-                </button>
-              </div>
-            </div>
             
             {isLoading ? (
               <div className="flex justify-center py-8">
