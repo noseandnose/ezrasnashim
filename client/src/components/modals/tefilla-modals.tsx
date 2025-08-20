@@ -482,7 +482,10 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
             className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
             style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
             dangerouslySetInnerHTML={{
-              __html: processTefillaContent(prayer.text || '', tefillaConditions)
+              __html: processTefillaContent(
+                language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation, 
+                tefillaConditions
+              )
             }}
           />
         </div>
@@ -570,7 +573,7 @@ function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
 
 function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
   const { data: prayers = [], isLoading } = useQuery<any[]>({
-    queryKey: ['/api/morning-brochas/prayers'],
+    queryKey: ['/api/morning/prayers'],
   });
 
   const tefillaConditions = useTefillaConditions();
@@ -597,7 +600,10 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
             className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
             style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
             dangerouslySetInnerHTML={{
-              __html: processTefillaContent(prayer.text || '', tefillaConditions)
+              __html: processTefillaContent(
+                language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation, 
+                tefillaConditions
+              )
             }}
           />
         </div>
