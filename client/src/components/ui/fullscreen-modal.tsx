@@ -7,7 +7,7 @@ interface FullscreenModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  children: React.ReactNode;
+  children: React.ReactNode | ((params: { language: 'hebrew' | 'english', fontSize: number }) => React.ReactNode);
   className?: string;
   // Font and Language Controls
   showFontControls?: boolean;
@@ -213,17 +213,23 @@ export function FullscreenModal({
           WebkitOverflowScrolling: 'touch',
           overscrollBehavior: 'contain',
           touchAction: 'pan-y',
-          // Ensure scrolling works on iOS
+          // Ensure scrolling works on iOS and prevent bounce
           position: 'relative',
-          height: '100%'
+          height: '100%',
+          // Fix iOS Safari scroll bounce issues
+          overscrollBehaviorY: 'contain',
+          // Add extra padding bottom for iOS safe area
+          paddingBottom: 'env(safe-area-inset-bottom, 20px)'
         }}
         onTouchMove={(e) => {
           // Allow touch scrolling within this container
           e.stopPropagation();
         }}
       >
-        <div className={`max-w-4xl mx-auto ${className}`}>
-          {typeof children === 'function' ? children({ language, fontSize }) : children}
+        <div className={`max-w-4xl mx-auto ${className}`} style={{ paddingBottom: '100px' }}>
+          {typeof children === 'function' 
+            ? (children as (params: { language: 'hebrew' | 'english', fontSize: number }) => React.ReactNode)({ language: language || 'hebrew', fontSize: fontSize || 16 }) 
+            : children}
         </div>
       </div>
     </div>
