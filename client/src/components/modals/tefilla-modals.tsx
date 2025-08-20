@@ -1685,10 +1685,16 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         title={fullscreenContent.title}
         showFontControls={true}
         fontSize={fontSize}
-        onFontSizeChange={setFontSize}
+        onFontSizeChange={(newSize) => {
+          console.log('Fullscreen font size changing from', fontSize, 'to', newSize);
+          setFontSize(newSize);
+        }}
         showLanguageControls={true}
         language={language}
-        onLanguageChange={setLanguage}
+        onLanguageChange={(newLang) => {
+          console.log('Fullscreen language changing from', language, 'to', newLang);
+          setLanguage(newLang);
+        }}
       >
         {fullscreenContent.content}
       </FullscreenModal>
