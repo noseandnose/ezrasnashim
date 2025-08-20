@@ -2863,11 +2863,11 @@ function JerusalemCompass() {
                         const isAligned = angleDiff < 10;
                         
                         return (
-                          <div className="w-5 h-5 rounded-full bg-white shadow-md border-2 border-white flex items-center justify-center relative">
+                          <div className="w-7 h-7 rounded-full bg-white shadow-md border-2 border-white flex items-center justify-center relative">
                             <img 
                               src={isAligned ? bhGreenIcon : bhPinkIcon}
                               alt={isAligned ? "Aligned" : "Not aligned"}
-                              className="w-3 h-3"
+                              className="w-5 h-5"
                               style={{
                                 transform: `rotate(${-direction + deviceOrientation}deg)`,
                                 transition: 'transform 0.3s ease'
@@ -2907,28 +2907,8 @@ function JerusalemCompass() {
                   );
                 })()}
                 
-                {/* Center icon */}
-                {(() => {
-                  let angleDiff = Math.abs(direction - deviceOrientation);
-                  if (angleDiff > 180) {
-                    angleDiff = 360 - angleDiff;
-                  }
-                  const isAligned = angleDiff < 10;
-                  
-                  return (
-                    <div className="absolute top-1/2 left-1/2 w-5 h-5 rounded-full bg-white shadow-md transform -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center border-2 border-white">
-                      <img 
-                        src={isAligned ? bhGreenIcon : bhPinkIcon}
-                        alt={isAligned ? "Aligned" : "Not aligned"}
-                        className="w-3 h-3"
-                        style={{
-                          transform: 'rotate(0deg)',
-                          transition: 'none'
-                        }}
-                      />
-                    </div>
-                  );
-                })()}
+                {/* Center dot */}
+                <div className="absolute top-1/2 left-1/2 w-2 h-2 rounded-full bg-black/20 transform -translate-x-1/2 -translate-y-1/2 z-20"></div>
               </div>
 
               {/* Alignment Status */}
