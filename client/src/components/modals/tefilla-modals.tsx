@@ -698,8 +698,8 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
     const newDay = nishmasDay + 1;
     
     // Track Nishmas completion and mark as completed
-    trackModalComplete('nishmas');
-    markModalComplete('nishmas');
+    trackModalComplete('nishmas-campaign');
+    markModalComplete('nishmas-campaign');
     completeTask('tefilla');
     
     if (newDay <= 40) {
@@ -757,6 +757,13 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
       <div className="bg-gradient-to-r from-lavender-50 to-rose-50 rounded-2xl p-4 border border-lavender/20">
         <p className="text-sm platypi-medium text-black text-center leading-relaxed">
           Rebbetzin Leah Kolodetsky shared that her mother, Rebbetzin Kanievsky zt"l, believed reciting Nishmas Kol Chai for 40 consecutive days is a powerful segulah for having prayers answered.
+        </p>
+      </div>
+
+      {/* Thank You Message */}
+      <div className="bg-gradient-to-r from-sage-50 to-blush-50 rounded-2xl p-4 border border-sage/20">
+        <p className="text-sm platypi-medium text-black text-center leading-relaxed">
+          Thank you for taking the time to daven and connect with Hashem through this beautiful prayer.
         </p>
       </div>
 
