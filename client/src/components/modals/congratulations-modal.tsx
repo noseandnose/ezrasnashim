@@ -21,13 +21,12 @@ export default function CongratulationsModal() {
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
         <DialogPrimitive.Content className="fixed left-[50%] top-[50%] z-50 w-full max-w-sm translate-x-[-50%] translate-y-[-50%] rounded-3xl p-8 bg-white shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
-          {/* Beautiful Stage 3 Flower Image - Larger and positioned behind content */}
-          <div className="absolute inset-0 flex justify-center items-center pointer-events-none">
+          {/* Beautiful Stage 3 Flower Image - Fill entire modal */}
+          <div className="absolute inset-0 pointer-events-none rounded-3xl overflow-hidden">
             <img 
               src={stage3Image} 
               alt="Beautiful flower bouquet - Full completions!" 
-              className="w-56 h-56 object-contain opacity-40"
-              style={{ marginTop: '20px' }}
+              className="w-full h-full object-cover opacity-30"
             />
           </div>
           
@@ -37,8 +36,11 @@ export default function CongratulationsModal() {
               Mazal Tov!
             </DialogTitle>
             <DialogDescription className="text-black/80 mb-6 leading-relaxed font-inter">
-              You have completed all three daily Mitzvahs: Torah learning, Tefilla, and Tzedaka. 
-              May your spiritual growth continue and bring you and your family abundant blessings.
+              You have completed all three daily Mitzvas: Torah, Tefilla, and Tzedaka.
+              <br /><br />
+              On three things the world stands: on the Torah, on divine worship, and on acts of loving-kindness. (Pirkei Avot 1:2)
+              <br /><br />
+              Thank you for keeping it standing.
             </DialogDescription>
           </div>
 
@@ -50,7 +52,7 @@ export default function CongratulationsModal() {
             }} 
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-inter font-medium border-0 relative z-10"
           >
-            Continue Your Journey
+            Do more Mitzvas
           </Button>
           
           {/* Close button */}

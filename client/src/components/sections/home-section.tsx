@@ -272,7 +272,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           <div className="flex flex-col justify-center flex-1">
             <h3 className="platypi-bold text-lg text-black mb-1 text-left">Daily Progress Garden</h3>
             <p className="platypi-regular text-xs text-black/80 leading-relaxed text-left max-w-[160px]">
-              Complete one item from each task to see your daily progress Bloom
+              Complete one item from each Mitzva to see your daily progress Bloom
             </p>
           </div>
           

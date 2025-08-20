@@ -185,36 +185,88 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
       // Progress data updated
       return data;
     },
-    refetchInterval: 10000, // Refresh every 10 seconds for better responsiveness
-    staleTime: 5000, // Keep data fresh for 5 seconds
-    gcTime: 30000, // Cache for 30 seconds
+    refetchInterval: 5000, // Refresh every 5 seconds for even better responsiveness
+    staleTime: 0, // Always consider data stale to force refetch
+    gcTime: 10000, // Shorter cache time
     refetchOnWindowFocus: true, // Refetch when window regains focus
     refetchOnMount: 'always' // Always refetch when component mounts
   });
   
-  // Refetch progress when returning to this section
+  // Fetch current name for the perek - MUST be defined before useEffect hooks that use it
+  const { data: currentName, refetch: refetchCurrentName } = useQuery<TehillimName | null>({
+    queryFn: async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/current-name`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch current name');
+        }
+        return response.json();
+      } catch (error) {
+        // Failed to fetch current name
+        return null; // Return null as fallback
+      }
+    },
+    queryKey: ['/api/tehillim/current-name', progress?.currentPerek], // Include perek in key to force refetch
+    refetchInterval: 5000, // Refresh every 5 seconds
+    staleTime: 0, // Always consider stale to force refetch
+    gcTime: 10000, // Shorter cache time
+    enabled: !!progress?.currentPerek // Only fetch when we have progress
+  });
+  
+  // Refetch progress when returning to this section or when modal opens/closes
   useEffect(() => {
     // Small delay to ensure any server updates have completed
     const timer = setTimeout(() => {
       refetchProgress();
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/info'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
     }, 100);
     return () => clearTimeout(timer);
   }, []); // Run once on mount
   
+  // Also refetch when the section becomes visible again after modal closes
+  useEffect(() => {
+    // Check if no modal is open (returned to section)
+    const checkModalState = () => {
+      const modalStore = useModalStore.getState();
+      if (!modalStore.activeModal) {
+        // Modal was closed, refetch all data
+        setTimeout(() => {
+          refetchProgress();
+          queryClient.invalidateQueries({ queryKey: ['/api/tehillim/info'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+        }, 200);
+      }
+    };
+    
+    // Subscribe to modal state changes
+    const unsubscribe = useModalStore.subscribe((state, prevState) => {
+      if (prevState.activeModal && !state.activeModal) {
+        checkModalState();
+      }
+    });
+    
+    return unsubscribe;
+  }, [refetchProgress, queryClient]);
+  
   // Listen for tehillim completion event
   useEffect(() => {
     const handleTehillimCompleted = () => {
-      // Refetch all tehillim-related data
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/info'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/preview'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
-      refetchProgress();
+      // Add a delay to ensure backend has updated
+      setTimeout(() => {
+        // Refetch all tehillim-related data with forced refresh
+        queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/tehillim/info'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/tehillim/preview'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+        refetchProgress();
+        refetchCurrentName();
+      }, 500); // Half second delay to ensure backend has updated
     };
     
     window.addEventListener('tehillimCompleted', handleTehillimCompleted);
     return () => window.removeEventListener('tehillimCompleted', handleTehillimCompleted);
-  }, [refetchProgress, queryClient]);
+  }, [refetchProgress, refetchCurrentName, queryClient]);
 
   // Get the actual Tehillim info to display English number and part
   const { data: tehillimInfo } = useQuery<{
@@ -234,25 +286,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
     staleTime: 60000
   });
 
-  // Fetch current name for the perek - Only update when perek is completed
-  const { data: currentName } = useQuery<TehillimName | null>({
-    queryFn: async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/current-name`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch current name');
-        }
-        return response.json();
-      } catch (error) {
-        // Failed to fetch current name
-        return null; // Return null as fallback
-      }
-    },
-    queryKey: ['/api/tehillim/current-name'],
-    refetchInterval: 10000, // Refresh every 10 seconds
-    staleTime: 5000, // Allow 5 seconds of cache
-    gcTime: 15000 // Cache for 15 seconds
-  });
+
 
   // Fetch all active names for count display
   const { data: allNames } = useQuery<TehillimName[]>({
@@ -510,8 +544,8 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
                 placeholder="Hebrew Name"
                 value={hebrewName}
                 onChange={(e) => setHebrewName(e.target.value)}
-                className="text-right rounded-2xl border-blush/20 focus:border-blush bg-white"
-                dir="rtl"
+                className="text-left rounded-2xl border-blush/20 focus:border-blush bg-white"
+                dir="ltr"
               />
               
               <Select value={reason} onValueChange={(value) => {
@@ -583,7 +617,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               </div>
 
               {/* Name assignment with reason icon */}
-              {currentName && (
+              {currentName ? (
                 <div className="mb-2 p-2 bg-white/60 rounded-xl border border-blush/10">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-1">
@@ -598,6 +632,13 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
                         {getReasonShort(currentName.reason, currentName.reasonEnglish ?? undefined)}
                       </span>
                     </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="mb-2 p-2 bg-white/60 rounded-xl border border-blush/10">
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="animate-spin w-3 h-3 border border-blush border-t-transparent rounded-full"></div>
+                    <span className="platypi-regular text-xs text-black/50">Loading name...</span>
                   </div>
                 </div>
               )}
@@ -711,7 +752,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               className="bg-gradient-to-br from-blush/10 to-blush/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-blush/20"
             >
               <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-1 w-fit">
-                <Shield className="text-white" size={16} strokeWidth={1.5} />
+                <Stethoscope className="text-white" size={16} strokeWidth={1.5} />
               </div>
               <h4 className="platypi-bold text-sm text-black">Refuah</h4>
               <p className="platypi-regular text-xs text-black/60 mt-1">Healing</p>
@@ -725,7 +766,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
                 <Users className="text-white" size={16} strokeWidth={1.5} />
               </div>
               <h4 className="platypi-bold text-sm text-black">Family</h4>
-              <p className="platypi-regular text-xs text-black/60 mt-1">Shalom Bayis</p>
+              <p className="platypi-regular text-xs text-black/60 mt-1">Home</p>
             </button>
             
             <button 
@@ -741,7 +782,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           </div>
         </div>
 
-        {/* Western Wall Compass Section */}
+        {/* The Kotel Compass Section */}
         <div className="bg-gradient-soft rounded-3xl p-4 shadow-lg">
           <button
             onClick={() => openModal('jerusalem-compass', 'tefilla')}
@@ -752,7 +793,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
                 <Compass className="text-white" size={20} />
               </div>
               <div className="flex-grow">
-                <h3 className="platypi-bold text-lg text-black">Western Wall Compass</h3>
+                <h3 className="platypi-bold text-lg text-black">The Kotel Compass</h3>
                 <p className="platypi-regular text-sm text-black/70">Find the direction to pray</p>
               </div>
               <div className="bg-gradient-feminine p-2 rounded-full shadow-lg">

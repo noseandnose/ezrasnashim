@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, Play, Pause, Volume2 } from "lucide-react";
 import AudioPlayer from "@/components/audio-player";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { formatTextContent } from "@/lib/text-formatter";
+import { LazyImage } from "@/components/ui/lazy-image";
 
 export default function TableModals() {
   const { activeModal, closeModal } = useModalStore();
@@ -84,14 +85,12 @@ export default function TableModals() {
               {/* Recipe Image */}
               {recipeContent.imageUrl && (
                 <div className="w-full rounded-lg overflow-hidden mb-4">
-                  <img 
+                  <LazyImage 
                     src={recipeContent.imageUrl} 
                     alt={recipeContent.title || "Recipe"} 
                     className="w-full h-48 object-cover"
-                    crossOrigin="anonymous"
-                    onError={(e) => {
-                      const parent = e.currentTarget.parentElement;
-                      if (parent) parent.style.display = 'none';
+                    onError={() => {
+                      // Image failed to load, could hide the container
                     }}
                   />
                 </div>
@@ -142,12 +141,31 @@ export default function TableModals() {
                   <h3 className="platypi-semibold mb-2">Ingredients:</h3>
                   <ul className="list-disc list-inside space-y-1">
                     {(() => {
-                      const ingredientsList = typeof recipeContent.ingredients === 'string' 
-                        ? JSON.parse(recipeContent.ingredients) 
-                        : recipeContent.ingredients;
-                      return Array.isArray(ingredientsList) ? ingredientsList.map((ingredient, index) => (
-                        <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(ingredient) }} />
-                      )) : null;
+                      // Handle ingredients as plain text with bullet points
+                      if (typeof recipeContent.ingredients === 'string') {
+                        // Split by newlines and filter out empty lines
+                        const lines = recipeContent.ingredients
+                          .split('\n')
+                          .map((line: string) => line.trim())
+                          .filter((line: string) => line && line !== '*');
+                        
+                        return lines.map((ingredient: string, index: number) => {
+                          // Remove leading asterisk or bullet point if present
+                          const cleaned = ingredient.replace(/^\*\s*/, '').trim();
+                          return cleaned ? (
+                            <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(cleaned) }} />
+                          ) : null;
+                        });
+                      }
+                      
+                      // If it's already an array
+                      if (Array.isArray(recipeContent.ingredients)) {
+                        return recipeContent.ingredients.map((ingredient: any, index: number) => (
+                          <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(String(ingredient)) }} />
+                        ));
+                      }
+                      
+                      return null;
                     })()}
                   </ul>
                 </div>
@@ -159,12 +177,31 @@ export default function TableModals() {
                   <h3 className="platypi-semibold mb-2">Instructions:</h3>
                   <ol className="list-decimal list-inside space-y-2">
                     {(() => {
-                      const instructionsList = typeof recipeContent.instructions === 'string' 
-                        ? JSON.parse(recipeContent.instructions) 
-                        : recipeContent.instructions;
-                      return Array.isArray(instructionsList) ? instructionsList.map((instruction, index) => (
-                        <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(instruction) }} />
-                      )) : null;
+                      // Handle instructions as plain text with numbered steps
+                      if (typeof recipeContent.instructions === 'string') {
+                        // Split by newlines and numbers
+                        const lines = recipeContent.instructions
+                          .split(/(?=\d+\.\s)|\n/)
+                          .map((line: string) => line.trim())
+                          .filter((line: string) => line && line !== '.');
+                        
+                        return lines.map((instruction: string, index: number) => {
+                          // Remove leading numbers and periods
+                          const cleaned = instruction.replace(/^\d+\.\s*/, '').trim();
+                          return cleaned ? (
+                            <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(cleaned) }} />
+                          ) : null;
+                        });
+                      }
+                      
+                      // If it's already an array
+                      if (Array.isArray(recipeContent.instructions)) {
+                        return recipeContent.instructions.map((instruction: any, index: number) => (
+                          <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(String(instruction)) }} />
+                        ));
+                      }
+                      
+                      return null;
                     })()}
                   </ol>
                 </div>

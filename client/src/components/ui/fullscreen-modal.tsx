@@ -1,13 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Minimize2, Maximize2 } from 'lucide-react';
+import { Button } from './button';
 import logoImage from "@assets/1LO_1755590090315.png";
 
 interface FullscreenModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  children: React.ReactNode;
+  children: React.ReactNode | ((params: { language: 'hebrew' | 'english', fontSize: number }) => React.ReactNode);
   className?: string;
+  // Font and Language Controls
+  showFontControls?: boolean;
+  fontSize?: number;
+  onFontSizeChange?: (size: number) => void;
+  showLanguageControls?: boolean;
+  language?: 'hebrew' | 'english';
+  onLanguageChange?: (lang: 'hebrew' | 'english') => void;
 }
 
 export function FullscreenModal({ 
@@ -15,7 +23,13 @@ export function FullscreenModal({
   onClose, 
   title, 
   children, 
-  className = '' 
+  className = '',
+  showFontControls = false,
+  fontSize = 16,
+  onFontSizeChange,
+  showLanguageControls = false,
+  language = 'hebrew',
+  onLanguageChange
 }: FullscreenModalProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -121,10 +135,19 @@ export function FullscreenModal({
     >
       {/* Header */}
       <div 
-        className="bg-white border-b border-gray-200 px-4 py-3"
+        className="bg-white border-b border-gray-200 px-4 py-3 cursor-pointer"
         style={{
           flexShrink: 0,
           minHeight: '56px'
+        }}
+        onClick={(e) => {
+          // Only scroll to top if not clicking the close button
+          if (!(e.target as Element).closest('button[aria-label="Close fullscreen"]')) {
+            scrollContainerRef.current?.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
+          }
         }}
       >
         <div className="flex items-center justify-between">
@@ -138,6 +161,7 @@ export function FullscreenModal({
               {title}
             </h1>
           </div>
+          
           <button
             onClick={(e) => {
               e.preventDefault();
@@ -162,17 +186,23 @@ export function FullscreenModal({
           WebkitOverflowScrolling: 'touch',
           overscrollBehavior: 'contain',
           touchAction: 'pan-y',
-          // Ensure scrolling works on iOS
+          // Ensure scrolling works on iOS and prevent bounce
           position: 'relative',
-          height: '100%'
+          height: '100%',
+          // Fix iOS Safari scroll bounce issues
+          overscrollBehaviorY: 'contain',
+          // Add extra padding bottom for iOS safe area
+          paddingBottom: 'env(safe-area-inset-bottom, 20px)'
         }}
         onTouchMove={(e) => {
           // Allow touch scrolling within this container
           e.stopPropagation();
         }}
       >
-        <div className={`max-w-4xl mx-auto ${className}`}>
-          {children}
+        <div className={`max-w-4xl mx-auto ${className}`} style={{ paddingBottom: '100px' }}>
+          {typeof children === 'function' 
+            ? (children as (params: { language: 'hebrew' | 'english', fontSize: number }) => React.ReactNode)({ language: language || 'hebrew', fontSize: fontSize || 16 }) 
+            : children}
         </div>
       </div>
     </div>
