@@ -141,17 +141,31 @@ export default function TableModals() {
                   <h3 className="platypi-semibold mb-2">Ingredients:</h3>
                   <ul className="list-disc list-inside space-y-1">
                     {(() => {
-                      try {
-                        const ingredientsList = typeof recipeContent.ingredients === 'string' 
-                          ? JSON.parse(recipeContent.ingredients) 
-                          : recipeContent.ingredients;
-                        return Array.isArray(ingredientsList) ? ingredientsList.map((ingredient, index) => (
-                          <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(ingredient) }} />
-                        )) : null;
-                      } catch (e) {
-                        // If JSON parsing fails, treat it as a single string
-                        return <li dangerouslySetInnerHTML={{ __html: formatTextContent(recipeContent.ingredients) }} />;
+                      // Handle ingredients as plain text with bullet points
+                      if (typeof recipeContent.ingredients === 'string') {
+                        // Split by newlines and filter out empty lines
+                        const lines = recipeContent.ingredients
+                          .split('\n')
+                          .map((line: string) => line.trim())
+                          .filter((line: string) => line && line !== '*');
+                        
+                        return lines.map((ingredient: string, index: number) => {
+                          // Remove leading asterisk or bullet point if present
+                          const cleaned = ingredient.replace(/^\*\s*/, '').trim();
+                          return cleaned ? (
+                            <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(cleaned) }} />
+                          ) : null;
+                        });
                       }
+                      
+                      // If it's already an array
+                      if (Array.isArray(recipeContent.ingredients)) {
+                        return recipeContent.ingredients.map((ingredient: any, index: number) => (
+                          <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(String(ingredient)) }} />
+                        ));
+                      }
+                      
+                      return null;
                     })()}
                   </ul>
                 </div>
@@ -163,17 +177,31 @@ export default function TableModals() {
                   <h3 className="platypi-semibold mb-2">Instructions:</h3>
                   <ol className="list-decimal list-inside space-y-2">
                     {(() => {
-                      try {
-                        const instructionsList = typeof recipeContent.instructions === 'string' 
-                          ? JSON.parse(recipeContent.instructions) 
-                          : recipeContent.instructions;
-                        return Array.isArray(instructionsList) ? instructionsList.map((instruction, index) => (
-                          <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(instruction) }} />
-                        )) : null;
-                      } catch (e) {
-                        // If JSON parsing fails, treat it as a single string
-                        return <li dangerouslySetInnerHTML={{ __html: formatTextContent(recipeContent.instructions) }} />;
+                      // Handle instructions as plain text with numbered steps
+                      if (typeof recipeContent.instructions === 'string') {
+                        // Split by newlines and numbers
+                        const lines = recipeContent.instructions
+                          .split(/(?=\d+\.\s)|\n/)
+                          .map((line: string) => line.trim())
+                          .filter((line: string) => line && line !== '.');
+                        
+                        return lines.map((instruction: string, index: number) => {
+                          // Remove leading numbers and periods
+                          const cleaned = instruction.replace(/^\d+\.\s*/, '').trim();
+                          return cleaned ? (
+                            <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(cleaned) }} />
+                          ) : null;
+                        });
                       }
+                      
+                      // If it's already an array
+                      if (Array.isArray(recipeContent.instructions)) {
+                        return recipeContent.instructions.map((instruction: any, index: number) => (
+                          <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(String(instruction)) }} />
+                        ));
+                      }
+                      
+                      return null;
                     })()}
                   </ol>
                 </div>
