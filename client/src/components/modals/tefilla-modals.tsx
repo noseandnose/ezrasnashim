@@ -222,15 +222,19 @@ const StandardModalHeader = ({
 );
 
 // Morning Brochas Modal Component
-function MorningBrochasModal({ setFullscreenContent }: { setFullscreenContent?: (content: any) => void }) {
+function MorningBrochasModal({ setFullscreenContent, language, setLanguage, fontSize, setFontSize }: { 
+  setFullscreenContent?: (content: any) => void; 
+  language: 'hebrew' | 'english';
+  setLanguage: (lang: 'hebrew' | 'english') => void;
+  fontSize: number;
+  setFontSize: (size: number) => void;
+}) {
   const { activeModal, closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
-  const [showHebrew, setShowHebrew] = useState(true);
   const [showEnglish, setShowEnglish] = useState(false);
-  const [fontSize, setFontSize] = useState(20);
   
   // Load Tefilla conditions for conditional content processing
   const tefillaConditions = useTefillaConditions();
@@ -270,14 +274,14 @@ function MorningBrochasModal({ setFullscreenContent }: { setFullscreenContent?: 
                     <div className="space-y-6">
                       {morningPrayers?.map((prayer: any) => (
                         <div key={prayer.id} className="bg-white rounded-2xl p-4 border border-blush/10">
-                          {showHebrew && prayer.hebrewText && (
+                          {language === 'hebrew' && prayer.hebrewText && (
                             <div 
                               className="vc-koren-hebrew leading-relaxed"
                               style={{ fontSize: `${fontSize + 1}px` }}
                               dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText, tefillaConditions) }}
                             />
                           )}
-                          {!showHebrew && (
+                          {language === 'english' && (
                             <div 
                               className="koren-siddur-english text-left leading-relaxed text-black/70"
                               style={{ fontSize: `${fontSize}px` }}
@@ -327,16 +331,16 @@ function MorningBrochasModal({ setFullscreenContent }: { setFullscreenContent?: 
           {/* First Row: Language Toggle and Title */}
           <div className="flex items-center justify-center gap-4">
             <Button
-              onClick={() => setShowHebrew(!showHebrew)}
+              onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
               variant="ghost"
               size="sm"
               className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
-                showHebrew 
+                language === 'hebrew' 
                   ? 'bg-blush text-white' 
                   : 'text-black/60 hover:text-black hover:bg-white/50'
               }`}
             >
-              {showHebrew ? 'EN' : 'עב'}
+              {language === 'hebrew' ? 'EN' : 'עב'}
             </Button>
             
             <DialogTitle className="text-lg platypi-bold text-black">Morning Brochas</DialogTitle>
@@ -372,14 +376,14 @@ function MorningBrochasModal({ setFullscreenContent }: { setFullscreenContent?: 
             <div className="space-y-6">
               {morningPrayers?.map((prayer: MorningPrayer, index: number) => (
                 <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
-                  {prayer.hebrewText && showHebrew && (
+                  {prayer.hebrewText && language === 'hebrew' && (
                     <div 
                       className="vc-koren-hebrew leading-relaxed"
                       style={{ fontSize: `${fontSize + 1}px` }}
                       dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText, tefillaConditions).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
                     />
                   )}
-                  {!showHebrew && (
+                  {language === 'english' && (
                     <div 
                       className="koren-siddur-english text-left leading-relaxed text-black/70"
                       style={{ fontSize: `${fontSize}px` }}
@@ -1660,7 +1664,13 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       </Dialog>
 
       {/* Morning Brochas Modal */}
-      <MorningBrochasModal setFullscreenContent={setFullscreenContent} />
+      <MorningBrochasModal 
+        setFullscreenContent={setFullscreenContent} 
+        language={language}
+        setLanguage={setLanguage}
+        fontSize={fontSize}
+        setFontSize={setFontSize}
+      />
       
       {/* Birkat Hamazon Modal */}
       <BirkatHamazonModal />
@@ -1881,16 +1891,16 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
           {/* Conditional translate button - only show if English text exists */}
           {prayer.englishTranslation && prayer.englishTranslation.trim() !== '' && prayer.englishTranslation !== 'English translation not available' && (
             <Button
-              onClick={() => setShowHebrew(!showHebrew)}
+              onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
               variant="ghost"
               size="sm"
               className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
-                showHebrew 
+                language === 'hebrew' 
                   ? 'bg-blush text-white' 
                   : 'text-black/60 hover:text-black hover:bg-white/50'
               }`}
             >
-              {showHebrew ? 'EN' : 'עב'}
+              {language === 'hebrew' ? 'EN' : 'עב'}
             </Button>
           )}
           
