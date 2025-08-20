@@ -841,6 +841,84 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="tehillim-description">
           <div id="tehillim-description" className="sr-only">Psalms reading and community prayer participation</div>
           
+          {/* Fullscreen button */}
+          <button
+            onClick={() => {
+              setFullscreenContent({
+                isOpen: true,
+                title: `Tehillim ${tehillimInfo?.englishNumber || progress?.currentPerek || 1}${tehillimInfo?.englishNumber === 119 && tehillimInfo?.partNumber ? ` - Part ${tehillimInfo.partNumber}` : ''}`,
+                content: (
+                  <div className="space-y-4">
+                    <div className="bg-white rounded-2xl p-6 border border-blush/10">
+                      <div
+                        className={`${showHebrew ? 'vc-koren-hebrew' : 'koren-siddur-english'} leading-relaxed text-black`}
+                        style={{ fontSize: `${showHebrew ? fontSize + 1 : fontSize}px` }}
+                      >
+                        {getTehillimDisplayText()}
+                      </div>
+                    </div>
+
+                    {/* Prayer Name Display Bar */}
+                    {currentName && (
+                      <div className="bg-gray-50/10 rounded-xl p-3 border border-blush/10">
+                        <div className="flex items-center justify-center gap-2">
+                          {getReasonIcon(currentName.reason, currentName.reasonEnglish || undefined)}
+                          <span className="text-sm platypi-medium text-black">
+                            Praying for: {currentName.hebrewName}
+                          </span>
+                          <span className="text-xs platypi-regular text-black/60">
+                            ({getReasonShort(currentName.reason, currentName.reasonEnglish || undefined)})
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="text-center text-xs text-gray-500 mt-4">
+                      All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+                    </div>
+                    
+                    <div className="heart-explosion-container">
+                      <div className="flex gap-2">
+                        {/* Complete button - returns to Tehillim selector */}
+                        <Button 
+                          onClick={() => {
+                            completePerek();
+                            trackModalComplete('tehillim-text');
+                            markModalComplete('tehillim-text');
+                            completeTask('tefilla');
+                            setFullscreenContent({ isOpen: false, title: '', content: null });
+                            checkAndShowCongratulations();
+                          }}
+                          disabled={completePerekMutation.isPending || completeAndNextMutation.isPending}
+                          className="flex-1 bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0"
+                        >
+                          {completePerekMutation.isPending ? 'Completing...' : 'Complete'}
+                        </Button>
+                        
+                        {/* Complete and Next button - goes to next tehillim */}
+                        <Button 
+                          onClick={() => {
+                            // Complete current perek and immediately refetch to get next one
+                            completeAndNextMutation.mutate();
+                            setFullscreenContent({ isOpen: false, title: '', content: null });
+                          }}
+                          disabled={completePerekMutation.isPending || completeAndNextMutation.isPending}
+                          className="flex-1 bg-gradient-to-r from-sage to-sage/90 text-white py-3 rounded-xl platypi-medium border-0"
+                        >
+                          {completeAndNextMutation.isPending ? 'Loading Next...' : 'Complete & Next'}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )
+              });
+            }}
+            className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 transition-colors z-10"
+            aria-label="Open fullscreen"
+          >
+            <Expand className="h-4 w-4 text-gray-600" />
+          </button>
+          
           {/* Standardized Header with two-row layout */}
           <div className="mb-2 space-y-2">
             {/* First Row: Language Toggle and Title */}
