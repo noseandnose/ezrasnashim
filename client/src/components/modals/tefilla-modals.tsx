@@ -408,7 +408,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const { trackEvent } = useAnalytics();
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
   const [fontSize, setFontSize] = useState(20);
-  const [showHebrew, setShowHebrew] = useState(true);
+  const [showHebrew, setShowHebrew] = useState(() => {
+    // Check for saved language preference for Tehillim
+    const savedLang = localStorage.getItem('tehillim-language');
+    return savedLang !== 'english';
+  });
   const [selectedPrayerId, setSelectedPrayerId] = useState<number | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [showExplosion, setShowExplosion] = useState(false);
@@ -570,7 +574,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     closeModalRef.current = closeModal;
   }, [closeModal]);
 
-  // Mutation to complete a perek
+  // Mutation to complete a perek and return to selector
   const completePerekMutation = useMutation({
     mutationFn: async () => {
       if (!progress) throw new Error('No progress data');
@@ -599,8 +603,58 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       toast({
         title: "Perek Completed!",
         description: tehillimInfo?.partNumber && tehillimInfo.partNumber > 1 
-          ? `Perek ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber} has been completed. Moving to the next section.`
-          : `Perek ${tehillimInfo?.englishNumber || 'current'} has been completed. Moving to the next perek.`,
+          ? `Perek ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber} has been completed.`
+          : `Perek ${tehillimInfo?.englishNumber || 'current'} has been completed.`,
+      });
+      
+      // Dispatch event for the tefilla section to refresh
+      window.dispatchEvent(new Event('tehillimCompleted'));
+      
+      // Close modal after short delay to show toast
+      setTimeout(() => {
+        closeModal();
+      }, 1000);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to complete perek. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Mutation to complete and go to next
+  const completeAndNextMutation = useMutation({
+    mutationFn: async () => {
+      if (!progress) throw new Error('No progress data');
+      return apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/tehillim/complete`, { 
+        currentPerek: progress.currentPerek,
+        language: showHebrew ? 'hebrew' : 'english',
+        completedBy: 'user' 
+      });
+    },
+    onSuccess: async (response) => {
+      // Track tehillim completion
+      trackEvent("tehillim_complete", { 
+        perek: progress?.currentPerek,
+        language: showHebrew ? 'hebrew' : 'english'
+      });
+      
+      // Track name prayed for if there was one
+      if (currentName) {
+        trackEvent("name_prayed", {
+          nameId: currentName.id,
+          reason: currentName.reason,
+          perek: progress?.currentPerek
+        });
+      }
+      
+      toast({
+        title: "Perek Completed!",
+        description: tehillimInfo?.partNumber && tehillimInfo.partNumber > 1 
+          ? `Perek ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber} has been completed. Loading next section...`
+          : `Perek ${tehillimInfo?.englishNumber || 'current'} has been completed. Loading next perek...`,
       });
       
       // Immediately refetch all data to show the new perek
@@ -766,7 +820,12 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             {/* First Row: Language Toggle and Title */}
             <div className="flex items-center justify-center gap-4">
               <Button
-                onClick={() => setShowHebrew(!showHebrew)}
+                onClick={() => {
+                  const newShowHebrew = !showHebrew;
+                  setShowHebrew(newShowHebrew);
+                  // Save language preference for Tehillim
+                  localStorage.setItem('tehillim-language', newShowHebrew ? 'hebrew' : 'english');
+                }}
                 variant="ghost"
                 size="sm"
                 className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
@@ -832,16 +891,31 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           <KorenThankYou />
 
           <div className="heart-explosion-container">
-            <Button 
-              onClick={() => {
-                completePerek();
-                completeWithAnimation();
-              }}
-              disabled={completePerekMutation.isPending}
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0"
-            >
-              {completePerekMutation.isPending ? 'Completing...' : 'Completed'}
-            </Button>
+            <div className="flex gap-2">
+              {/* Complete button - returns to Tehillim selector */}
+              <Button 
+                onClick={() => {
+                  completePerek();
+                  completeWithAnimation();
+                }}
+                disabled={completePerekMutation.isPending || completeAndNextMutation.isPending}
+                className="flex-1 bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0"
+              >
+                {completePerekMutation.isPending ? 'Completing...' : 'Complete'}
+              </Button>
+              
+              {/* Complete and Next button - goes to next tehillim */}
+              <Button 
+                onClick={() => {
+                  // Complete current perek and immediately refetch to get next one
+                  completeAndNextMutation.mutate();
+                }}
+                disabled={completePerekMutation.isPending || completeAndNextMutation.isPending}
+                className="flex-1 bg-gradient-to-r from-sage to-sage/90 text-white py-3 rounded-xl platypi-medium border-0"
+              >
+                {completeAndNextMutation.isPending ? 'Loading Next...' : 'Complete & Next'}
+              </Button>
+            </div>
             <HeartExplosion trigger={showExplosion} />
           </div>
         </DialogContent>
