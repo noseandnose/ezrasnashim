@@ -849,28 +849,30 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
 
       {/* Button(s) based on whether it's from 1-150 or special occasions */}
       {isFromAllTab ? (
-        <div className="space-y-3">
-          <Button
-            onClick={isCompleted ? undefined : handleComplete}
-            disabled={isCompleted}
-            className={`w-full py-3 rounded-xl platypi-medium border-0 ${
-              isCompleted 
-                ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
-            }`}
-          >
-            {isCompleted ? 'Completed Today' : `Complete Tehillim ${selectedPsalm}`}
-          </Button>
-          
-          {!isCompleted && (
+        !isCompleted ? (
+          <div className="flex gap-2">
+            <Button
+              onClick={handleComplete}
+              className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
+            >
+              Complete
+            </Button>
+            
             <Button
               onClick={handleCompleteAndNext}
-              className="w-full py-3 rounded-xl platypi-medium border-0 bg-blush text-white hover:scale-105 transition-transform"
+              className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-blush text-white hover:scale-105 transition-transform"
             >
               Complete & Next ({selectedPsalm && selectedPsalm < 150 ? selectedPsalm + 1 : 1})
             </Button>
-          )}
-        </div>
+          </div>
+        ) : (
+          <Button
+            disabled
+            className="w-full py-3 rounded-xl platypi-medium border-0 bg-sage text-white cursor-not-allowed opacity-70"
+          >
+            Completed Today
+          </Button>
+        )
       ) : (
         <Button
           onClick={isCompleted ? undefined : handleComplete}
