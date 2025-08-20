@@ -469,8 +469,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     setShowExplosion(false);
   }, [activeModal]);
 
-
-
   const handlePrayerSelect = (prayerId: number) => {
     setSelectedPrayerId(prayerId);
     closeModal();
