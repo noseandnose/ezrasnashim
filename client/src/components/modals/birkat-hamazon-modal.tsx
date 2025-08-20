@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { X, Plus, Minus } from "lucide-react";
+import { X, Plus, Minus, Maximize2, Minimize2 } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
@@ -59,6 +59,7 @@ export function BirkatHamazonModal() {
   const [selectedPrayer, setSelectedPrayer] = useState<string | null>(null);
   const [conditions, setConditions] = useStateForConditions<TefillaConditions | null>(null);
   const [fontsLoaded, setFontsLoaded] = useStateForConditions(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
@@ -150,8 +151,8 @@ export function BirkatHamazonModal() {
 
   const StandardModalHeader = () => (
     <div className="mb-2 space-y-2">
-      {/* First Row: Language Toggle and Title */}
-      <div className="flex items-center justify-center gap-4">
+      {/* First Row: Language Toggle, Title, and Fullscreen */}
+      <div className="flex items-center justify-between">
         <Button
           onClick={() => setLanguage(language === "hebrew" ? "english" : "hebrew")}
           variant="ghost"
@@ -165,9 +166,16 @@ export function BirkatHamazonModal() {
           {language === "hebrew" ? 'עב' : 'EN'}
         </Button>
         
-        <DialogTitle className="text-lg platypi-bold text-black">
+        <DialogTitle className="text-lg platypi-bold text-black flex-1 text-center">
           {activeModal === 'al-hamichiya' ? 'Me\'ein Shalosh' : 'Birkat Hamazon'}
         </DialogTitle>
+        
+        <button
+          onClick={() => setIsFullscreen(!isFullscreen)}
+          className="w-8 h-8 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+        >
+          {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+        </button>
       </div>
       
       {/* Second Row: Font Size Controls */}
@@ -284,10 +292,14 @@ export function BirkatHamazonModal() {
     <>
       {/* Al Hamichiya Modal */}
       <Dialog open={activeModal === 'al-hamichiya'} onOpenChange={() => closeModal(true)}>
-        <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
+        <DialogContent className={`dialog-content platypi-regular ${
+          isFullscreen 
+            ? 'fixed inset-0 w-full h-full max-w-none rounded-none p-4' 
+            : 'w-full max-w-md rounded-3xl p-6 max-h-[95vh]'
+        } overflow-y-auto`}>
           <StandardModalHeader />
           
-          <div className="max-h-[60vh] overflow-y-auto">
+          <div className={isFullscreen ? "h-[calc(100vh-200px)] overflow-y-auto" : "max-h-[60vh] overflow-y-auto"}>
             {isAfterBrochasLoading ? (
               <div className="flex justify-center py-8">
                 <span className="text-sm text-gray-500">Loading prayer...</span>
@@ -324,10 +336,14 @@ export function BirkatHamazonModal() {
 
       {/* Birkat Hamazon Modal */}
       <Dialog open={activeModal === 'birkat-hamazon'} onOpenChange={() => closeModal(true)}>
-        <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
+        <DialogContent className={`dialog-content platypi-regular ${
+          isFullscreen 
+            ? 'fixed inset-0 w-full h-full max-w-none rounded-none p-4' 
+            : 'w-full max-w-md rounded-3xl p-6 max-h-[95vh]'
+        } overflow-y-auto`}>
           <StandardModalHeader />
           
-          <div className="max-h-[60vh] overflow-y-auto">
+          <div className={isFullscreen ? "h-[calc(100vh-200px)] overflow-y-auto" : "max-h-[60vh] overflow-y-auto"}>
             {isLoading ? (
               <div className="flex justify-center py-8">
                 <span className="text-sm text-gray-500">Loading prayers...</span>
