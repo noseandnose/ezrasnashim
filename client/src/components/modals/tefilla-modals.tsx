@@ -20,6 +20,10 @@ import { processTefillaText, getCurrentTefillaConditions, type TefillaConditions
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { Expand } from "lucide-react";
 
+// Import compass icons
+import bhPinkIcon from '@assets/BH_Pink_1755681221620.png';
+import bhGreenIcon from '@assets/BH_Green_1755681221619.png';
+
 interface TefillaModalsProps {
   onSectionChange?: (section: 'torah' | 'tefilla' | 'tzedaka' | 'home' | 'table') => void;
 }
@@ -2859,9 +2863,17 @@ function JerusalemCompass() {
                         const isAligned = angleDiff < 10;
                         
                         return (
-                          <div className={`w-3 h-3 rounded-full border-2 border-white shadow-md ${
-                            isAligned ? 'bg-sage' : 'bg-blush'
-                          }`}></div>
+                          <div className="w-5 h-5 rounded-full bg-white shadow-md border-2 border-white flex items-center justify-center relative">
+                            <img 
+                              src={isAligned ? bhGreenIcon : bhPinkIcon}
+                              alt={isAligned ? "Aligned" : "Not aligned"}
+                              className="w-3 h-3"
+                              style={{
+                                transform: `rotate(${-direction + deviceOrientation}deg)`,
+                                transition: 'transform 0.3s ease'
+                              }}
+                            />
+                          </div>
                         );
                       })()}
                     </div>
@@ -2895,7 +2907,7 @@ function JerusalemCompass() {
                   );
                 })()}
                 
-                {/* Center dot */}
+                {/* Center icon */}
                 {(() => {
                   let angleDiff = Math.abs(direction - deviceOrientation);
                   if (angleDiff > 180) {
@@ -2904,9 +2916,17 @@ function JerusalemCompass() {
                   const isAligned = angleDiff < 10;
                   
                   return (
-                    <div className={`absolute top-1/2 left-1/2 w-3 h-3 rounded-full transform -translate-x-1/2 -translate-y-1/2 z-20 ${
-                      isAligned ? 'bg-sage' : 'bg-blush'
-                    }`}></div>
+                    <div className="absolute top-1/2 left-1/2 w-5 h-5 rounded-full bg-white shadow-md transform -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center border-2 border-white">
+                      <img 
+                        src={isAligned ? bhGreenIcon : bhPinkIcon}
+                        alt={isAligned ? "Aligned" : "Not aligned"}
+                        className="w-3 h-3"
+                        style={{
+                          transform: 'rotate(0deg)',
+                          transition: 'none'
+                        }}
+                      />
+                    </div>
                   );
                 })()}
               </div>
