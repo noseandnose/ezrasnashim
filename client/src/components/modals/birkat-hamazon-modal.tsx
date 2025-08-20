@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { X, Plus, Minus, Maximize2, Minimize2 } from "lucide-react";
+import { X, Plus, Minus, Expand } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
@@ -11,6 +11,7 @@ import { useLocationStore } from '@/hooks/use-jewish-times';
 import { formatTextContent } from "@/lib/text-formatter";
 import { processTefillaText, getCurrentTefillaConditions, type TefillaConditions } from '@/utils/tefilla-processor';
 import { useEffect, useState as useStateForConditions } from "react";
+import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 
 interface BirkatHamazonPrayer {
   id: number;
@@ -151,8 +152,19 @@ export function BirkatHamazonModal() {
 
   const StandardModalHeader = () => (
     <div className="mb-2 space-y-2">
-      {/* First Row: Language Toggle, Title, and Fullscreen */}
+      {/* First Row: Fullscreen, Title, and Language Toggle */}
       <div className="flex items-center justify-between">
+        <button
+          onClick={() => setIsFullscreen(!isFullscreen)}
+          className="w-8 h-8 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+        >
+          <Expand className="w-4 h-4" />
+        </button>
+        
+        <DialogTitle className="text-lg platypi-bold text-black flex-1 text-center">
+          {activeModal === 'al-hamichiya' ? 'Me\'ein Shalosh' : 'Birkat Hamazon'}
+        </DialogTitle>
+        
         <Button
           onClick={() => setLanguage(language === "hebrew" ? "english" : "hebrew")}
           variant="ghost"
@@ -165,17 +177,6 @@ export function BirkatHamazonModal() {
         >
           {language === "hebrew" ? 'עב' : 'EN'}
         </Button>
-        
-        <DialogTitle className="text-lg platypi-bold text-black flex-1 text-center">
-          {activeModal === 'al-hamichiya' ? 'Me\'ein Shalosh' : 'Birkat Hamazon'}
-        </DialogTitle>
-        
-        <button
-          onClick={() => setIsFullscreen(!isFullscreen)}
-          className="w-8 h-8 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
-        >
-          {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-        </button>
       </div>
       
       {/* Second Row: Font Size Controls */}
@@ -291,15 +292,86 @@ export function BirkatHamazonModal() {
   return (
     <>
       {/* Al Hamichiya Modal */}
-      <Dialog open={activeModal === 'al-hamichiya'} onOpenChange={() => closeModal(true)}>
-        <DialogContent className={`dialog-content platypi-regular ${
-          isFullscreen 
-            ? 'fixed inset-0 w-full h-full max-w-none rounded-none p-4' 
-            : 'w-full max-w-md rounded-3xl p-6 max-h-[95vh]'
-        } overflow-y-auto`}>
-          <StandardModalHeader />
-          
-          <div className={isFullscreen ? "h-[calc(100vh-200px)] overflow-y-auto" : "max-h-[60vh] overflow-y-auto"}>
+      {isFullscreen ? (
+        <FullscreenModal
+          isOpen={activeModal === 'al-hamichiya'}
+          onClose={() => {
+            setIsFullscreen(false);
+            closeModal(true);
+          }}
+          title="Me'ein Shalosh"
+        >
+          <div className="space-y-4">
+            {/* Language and Font Controls in Fullscreen */}
+            <div className="flex items-center justify-between mb-4">
+              <Button
+                onClick={() => setLanguage(language === "hebrew" ? "english" : "hebrew")}
+                variant="ghost"
+                size="sm"
+                className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
+                  language === "hebrew" 
+                    ? 'bg-blush text-white' 
+                    : 'text-black/60 hover:text-black hover:bg-white/50'
+                }`}
+              >
+                {language === "hebrew" ? 'עב' : 'EN'}
+              </Button>
+              
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={decreaseFontSize}
+                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                >
+                  <span className="text-xs platypi-medium">-</span>
+                </button>
+                <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
+                <button
+                  onClick={increaseFontSize}
+                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                >
+                  <span className="text-xs platypi-medium">+</span>
+                </button>
+              </div>
+            </div>
+            
+            {isAfterBrochasLoading ? (
+              <div className="flex justify-center py-8">
+                <span className="text-sm text-gray-500">Loading prayer...</span>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {afterBrochasPrayers?.filter(p => p.prayerName === "Me'ein Shalosh").map((prayer, index) => (
+                  <div key={index} className="bg-white rounded-2xl p-4 border border-blush/10">
+                    {renderPrayerText(prayer as any)}
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            <KorenThankYou />
+            
+            <div className="heart-explosion-container">
+              <Button 
+                onClick={isModalComplete('al-hamichiya') ? undefined : () => handleComplete('al-hamichiya')}
+                disabled={isModalComplete('al-hamichiya')}
+                className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
+                  isModalComplete('al-hamichiya') 
+                    ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                    : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                }`}
+              >
+                {isModalComplete('al-hamichiya') ? 'Completed Today' : 'Complete'}
+              </Button>
+              <HeartExplosion trigger={showHeartExplosion} />
+            </div>
+          </div>
+        </FullscreenModal>
+      ) : (
+        <Dialog open={activeModal === 'al-hamichiya'} onOpenChange={() => closeModal(true)}>
+          <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
+            <StandardModalHeader />
+            
+            <div className="max-h-[60vh] overflow-y-auto">
             {isAfterBrochasLoading ? (
               <div className="flex justify-center py-8">
                 <span className="text-sm text-gray-500">Loading prayer...</span>
@@ -333,17 +405,51 @@ export function BirkatHamazonModal() {
           </div>
         </DialogContent>
       </Dialog>
+      )}
 
       {/* Birkat Hamazon Modal */}
-      <Dialog open={activeModal === 'birkat-hamazon'} onOpenChange={() => closeModal(true)}>
-        <DialogContent className={`dialog-content platypi-regular ${
-          isFullscreen 
-            ? 'fixed inset-0 w-full h-full max-w-none rounded-none p-4' 
-            : 'w-full max-w-md rounded-3xl p-6 max-h-[95vh]'
-        } overflow-y-auto`}>
-          <StandardModalHeader />
-          
-          <div className={isFullscreen ? "h-[calc(100vh-200px)] overflow-y-auto" : "max-h-[60vh] overflow-y-auto"}>
+      {isFullscreen ? (
+        <FullscreenModal
+          isOpen={activeModal === 'birkat-hamazon'}
+          onClose={() => {
+            setIsFullscreen(false);
+            closeModal(true);
+          }}
+          title="Birkat Hamazon"
+        >
+          <div className="space-y-4">
+            {/* Language and Font Controls in Fullscreen */}
+            <div className="flex items-center justify-between mb-4">
+              <Button
+                onClick={() => setLanguage(language === "hebrew" ? "english" : "hebrew")}
+                variant="ghost"
+                size="sm"
+                className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
+                  language === "hebrew" 
+                    ? 'bg-blush text-white' 
+                    : 'text-black/60 hover:text-black hover:bg-white/50'
+                }`}
+              >
+                {language === "hebrew" ? 'עב' : 'EN'}
+              </Button>
+              
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={decreaseFontSize}
+                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                >
+                  <span className="text-xs platypi-medium">-</span>
+                </button>
+                <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
+                <button
+                  onClick={increaseFontSize}
+                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                >
+                  <span className="text-xs platypi-medium">+</span>
+                </button>
+              </div>
+            </div>
+            
             {isLoading ? (
               <div className="flex justify-center py-8">
                 <span className="text-sm text-gray-500">Loading prayers...</span>
@@ -357,7 +463,45 @@ export function BirkatHamazonModal() {
                 ))}
               </div>
             )}
+            
+            <KorenThankYou />
+            
+            <div className="heart-explosion-container">
+              <Button 
+                onClick={isModalComplete('birkat-hamazon') ? undefined : () => handleComplete('birkat-hamazon')}
+                disabled={isModalComplete('birkat-hamazon')}
+                className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
+                  isModalComplete('birkat-hamazon') 
+                    ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                    : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                }`}
+              >
+                {isModalComplete('birkat-hamazon') ? 'Completed Today' : 'Complete'}
+              </Button>
+              <HeartExplosion trigger={showHeartExplosion} />
+            </div>
           </div>
+        </FullscreenModal>
+      ) : (
+        <Dialog open={activeModal === 'birkat-hamazon'} onOpenChange={() => closeModal(true)}>
+          <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
+            <StandardModalHeader />
+            
+            <div className="max-h-[60vh] overflow-y-auto">
+              {isLoading ? (
+                <div className="flex justify-center py-8">
+                  <span className="text-sm text-gray-500">Loading prayers...</span>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {prayers?.map((prayer) => (
+                    <div key={prayer.id} className="bg-white rounded-2xl p-4 border border-blush/10">
+                      {renderPrayerText(prayer)}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
           <KorenThankYou />
 
@@ -377,6 +521,7 @@ export function BirkatHamazonModal() {
           </div>
         </DialogContent>
       </Dialog>
+      )}
     </>
   );
 }
