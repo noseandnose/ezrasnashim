@@ -840,7 +840,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
 }
 
 export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
-  const { activeModal, openModal, closeModal } = useModalStore();
+  const { activeModal, openModal, closeModal, selectedPsalm } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const [, setLocation] = useLocation();
@@ -912,7 +912,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         });
       }, 50);
     }
-  }, [activeModal, closeModal]);
+  }, [activeModal, closeModal, selectedPsalm]);
 
   // Listen for custom close fullscreen events
   useEffect(() => {
