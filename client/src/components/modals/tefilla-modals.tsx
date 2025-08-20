@@ -979,6 +979,16 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     }
   }, [activeModal, closeModal, selectedPsalm]);
 
+  // Update fullscreen title when selectedPsalm changes for individual Tehillim
+  useEffect(() => {
+    if (fullscreenContent.isOpen && fullscreenContent.contentType === 'individual-tehillim' && selectedPsalm) {
+      setFullscreenContent(current => ({
+        ...current,
+        title: `Tehillim ${selectedPsalm}`
+      }));
+    }
+  }, [selectedPsalm, fullscreenContent.isOpen, fullscreenContent.contentType]);
+
   // Listen for custom close fullscreen events
   useEffect(() => {
     const handleCloseFullscreen = () => {
