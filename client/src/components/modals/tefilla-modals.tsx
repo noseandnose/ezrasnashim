@@ -1385,7 +1385,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       </Dialog>
 
       {/* Individual Tehillim Modal */}
-      <Dialog open={activeModal === 'individual-tehillim'} onOpenChange={() => closeModal(true)}>
+      <Dialog open={activeModal === 'individual-tehillim'} onOpenChange={() => {
+        // When closing individual Tehillim, return to the previous modal (Sefer Tehillim or Special Occasion)
+        const { previousModal } = useModalStore.getState();
+        if (previousModal === 'special-tehillim') {
+          openModal('special-tehillim', 'tefilla');
+        } else {
+          closeModal(true);
+        }
+      }}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
           <IndividualTehillimModal setFullscreenContent={setFullscreenContent} />
         </DialogContent>
@@ -1932,11 +1940,15 @@ function SpecialTehillimModal() {
 
 // Individual Tehillim Modal Component
 function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenContent?: (content: any) => void }) {
-  const { closeModal, openModal, selectedPsalm } = useModalStore();
+  const { closeModal, openModal, selectedPsalm, previousModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
-  const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
+  const [language, setLanguage] = useState<'hebrew' | 'english'>(() => {
+    // Check for saved language preference for Tehillim
+    const savedLang = localStorage.getItem('tehillim-language');
+    return savedLang === 'english' ? 'english' : 'hebrew';
+  });
   const [fontSize, setFontSize] = useState(20);
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const queryClient = useQueryClient();
@@ -1987,7 +1999,12 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
         {/* First Row: Language Toggle and Title */}
         <div className="flex items-center justify-center gap-4">
           <Button
-            onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
+            onClick={() => {
+              const newLanguage = language === 'hebrew' ? 'english' : 'hebrew';
+              setLanguage(newLanguage);
+              // Save language preference for Tehillim
+              localStorage.setItem('tehillim-language', newLanguage);
+            }}
             variant="ghost"
             size="sm"
             className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
@@ -2044,47 +2061,100 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
 
       <KorenThankYou />
 
-      <Button 
-        onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : async () => {
-          // Track modal completion and mark as completed globally with specific psalm ID
-          trackModalComplete(`individual-tehillim-${selectedPsalm}`);
-          markModalComplete(`individual-tehillim-${selectedPsalm}`);
-          
-          try {
-            // Also update global Tehillim progress
-            await axiosClient.post('/api/tehillim/complete', {
-              currentPerek: selectedPsalm,
-              language: language,
-              completedBy: 'user'
-            });
+      {/* Split Complete Buttons */}
+      <div className="flex gap-2">
+        {/* Complete button - returns to Tehillim selector */}
+        <Button 
+          onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : async () => {
+            // Track modal completion and mark as completed globally with specific psalm ID
+            trackModalComplete(`individual-tehillim-${selectedPsalm}`);
+            markModalComplete(`individual-tehillim-${selectedPsalm}`);
             
-            // Immediately update progress cache to show new number
-            queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
-            queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
-          } catch (error) {
-            // Error updating global progress
-            // Continue with local completion even if global update fails
-          }
-          
-          completeTask('tefilla');
-          setShowHeartExplosion(true);
-          
-          setTimeout(() => {
-            setShowHeartExplosion(false); // Reset explosion state
-            checkAndShowCongratulations();
-            // Switch back to the main Tehillim selection modal without closing
-            openModal('special-tehillim', 'tefilla');
-          }, 2000);
-        }}
-        disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
-        className={`w-full py-3 rounded-xl platypi-medium border-0 ${
-          isModalComplete(`individual-tehillim-${selectedPsalm}`) 
-            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
-        }`}
-      >
-        {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed Today' : 'Complete'}
-      </Button>
+            try {
+              // Also update global Tehillim progress
+              await axiosClient.post('/api/tehillim/complete', {
+                currentPerek: selectedPsalm,
+                language: language,
+                completedBy: 'user'
+              });
+              
+              // Immediately update progress cache to show new number
+              queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+            } catch (error) {
+              // Error updating global progress
+              // Continue with local completion even if global update fails
+            }
+            
+            completeTask('tefilla');
+            setShowHeartExplosion(true);
+            
+            setTimeout(() => {
+              setShowHeartExplosion(false); // Reset explosion state
+              checkAndShowCongratulations();
+              // Switch back to the main Tehillim selection modal 
+              openModal('special-tehillim', 'tefilla');
+            }, 1500);
+          }}
+          disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
+          className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
+            isModalComplete(`individual-tehillim-${selectedPsalm}`) 
+              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+          }`}
+        >
+          {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete'}
+        </Button>
+
+        {/* Complete and Next button - goes to next tehillim */}
+        <Button 
+          onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : async () => {
+            // Track modal completion and mark as completed globally with specific psalm ID
+            trackModalComplete(`individual-tehillim-${selectedPsalm}`);
+            markModalComplete(`individual-tehillim-${selectedPsalm}`);
+            
+            try {
+              // Also update global Tehillim progress
+              await axiosClient.post('/api/tehillim/complete', {
+                currentPerek: selectedPsalm,
+                language: language,
+                completedBy: 'user'
+              });
+              
+              // Immediately update progress cache to show new number
+              queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+            } catch (error) {
+              // Error updating global progress
+              // Continue with local completion even if global update fails
+            }
+            
+            completeTask('tefilla');
+            setShowHeartExplosion(true);
+            
+            setTimeout(() => {
+              setShowHeartExplosion(false); // Reset explosion state
+              checkAndShowCongratulations();
+              // Open the next Tehillim
+              const nextPsalm = Math.min(selectedPsalm + 1, 150);
+              if (nextPsalm <= 150) {
+                openModal('individual-tehillim', 'special-tehillim', nextPsalm);
+              } else {
+                // If we've reached the end, go back to selector
+                openModal('special-tehillim', 'tefilla');
+              }
+            }, 1500);
+          }}
+          disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
+          className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
+            isModalComplete(`individual-tehillim-${selectedPsalm}`) 
+              ? 'bg-gray-400 text-white cursor-not-allowed opacity-70' 
+              : 'bg-gradient-to-r from-sage to-sage/90 text-white hover:scale-105 transition-transform'
+          }`}
+        >
+          {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Next' : 'Complete & Next'}
+        </Button>
+      </div>
       
       {/* Heart Explosion Animation */}
       <HeartExplosion 

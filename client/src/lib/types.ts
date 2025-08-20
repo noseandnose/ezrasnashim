@@ -36,8 +36,9 @@ export interface ModalState {
   activeModal: string | null;
   selectedPsalm: number | null;
   previousSection: string | null;
+  previousModal: string | null;
   tehillimActiveTab: 'all' | 'special';
-  openModal: (modalId: string, fromSection?: string) => void;
+  openModal: (modalId: string, fromSection?: string, psalmNumber?: number) => void;
   closeModal: (returnToPrevious?: boolean) => void;
   setSelectedPsalm: (psalmNumber: number) => void;
   setTehillimActiveTab: (tab: 'all' | 'special') => void;
@@ -52,11 +53,17 @@ export const useModalStore = create<ModalState>((set, get) => ({
   activeModal: null,
   selectedPsalm: null,
   previousSection: null,
+  previousModal: null,
   tehillimActiveTab: 'all',
-  openModal: (modalId: string, fromSection?: string) => set({ 
-    activeModal: modalId, 
-    previousSection: fromSection || get().previousSection 
-  }),
+  openModal: (modalId: string, fromSection?: string, psalmNumber?: number) => {
+    const currentModal = get().activeModal;
+    set({ 
+      activeModal: modalId, 
+      previousSection: fromSection || get().previousSection,
+      previousModal: currentModal,
+      selectedPsalm: psalmNumber || get().selectedPsalm
+    });
+  },
   closeModal: (returnToPrevious?: boolean) => {
     const state = get();
     const wasTefilaModal = state.activeModal === 'tehillim-text';
