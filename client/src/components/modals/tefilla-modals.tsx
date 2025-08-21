@@ -3687,6 +3687,11 @@ function JerusalemCompass() {
 
   // Initialize device orientation - simplified to use native heading only
   const initializeOrientation = () => {
+    let lastHeading = 0;
+    let headingBuffer: number[] = [];
+    const BUFFER_SIZE = 3; // Keep last 3 readings for averaging
+    const UPDATE_THRESHOLD = 2; // Only update if change is more than 2 degrees
+    
     const handleOrientation = (event: DeviceOrientationEvent) => {
       let heading = 0;
       
@@ -3703,7 +3708,21 @@ function JerusalemCompass() {
         return;
       }
       
-      setDeviceOrientation(heading);
+      // Add to buffer for averaging
+      headingBuffer.push(heading);
+      if (headingBuffer.length > BUFFER_SIZE) {
+        headingBuffer.shift();
+      }
+      
+      // Calculate average heading from buffer
+      const avgHeading = headingBuffer.reduce((sum, h) => sum + h, 0) / headingBuffer.length;
+      
+      // Only update if change is significant
+      const headingDiff = Math.abs(avgHeading - lastHeading);
+      if (headingDiff > UPDATE_THRESHOLD && headingDiff < (360 - UPDATE_THRESHOLD)) {
+        lastHeading = avgHeading;
+        setDeviceOrientation(Math.round(avgHeading));
+      }
     };
 
     orientationEventRef.current = handleOrientation;
@@ -3818,7 +3837,7 @@ function JerusalemCompass() {
                     transform: orientationSupported 
                       ? `rotate(${-deviceOrientation}deg)` 
                       : 'rotate(0deg)',
-                    transition: 'transform 0.3s ease'
+                    transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
                 >
                   
@@ -3855,7 +3874,7 @@ function JerusalemCompass() {
                               className="w-6 h-6"
                               style={{
                                 transform: `rotate(${-direction + deviceOrientation}deg)`,
-                                transition: 'transform 0.3s ease'
+                                transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
                               }}
                             />
                           </div>
