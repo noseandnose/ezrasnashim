@@ -2,12 +2,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Play, Pause, Volume2, Maximize2 } from "lucide-react";
 import AudioPlayer from "@/components/audio-player";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { formatTextContent } from "@/lib/text-formatter";
 import { LazyImage } from "@/components/ui/lazy-image";
+import FullscreenModal from "@/components/ui/fullscreen-modal";
 
 export default function TableModals() {
   const { activeModal, closeModal } = useModalStore();
@@ -15,6 +16,12 @@ export default function TableModals() {
   const { trackModalComplete } = useTrackModalComplete();
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  const [fullscreenContent, setFullscreenContent] = useState<{
+    isOpen: boolean;
+    title: string;
+    content: React.ReactNode;
+    contentType?: string;
+  }>({ isOpen: false, title: '', content: null });
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
 
@@ -62,6 +69,37 @@ export default function TableModals() {
     // Return original string if no conversion needed
     return timeString;
   };
+
+  // Auto-redirect table modals to fullscreen
+  useEffect(() => {
+    const fullscreenTableModals = ['recipe', 'inspiration'];
+    
+    if (activeModal && fullscreenTableModals.includes(activeModal)) {
+      let title = '';
+      let contentType = '';
+      
+      switch (activeModal) {
+        case 'recipe':
+          title = 'Daily Recipe';
+          contentType = 'recipe';
+          break;
+        case 'inspiration':
+          title = 'Creative Jewish Living';
+          contentType = 'inspiration';
+          break;
+      }
+      
+      // Small delay to ensure content is loaded
+      setTimeout(() => {
+        setFullscreenContent({
+          isOpen: true,
+          title,
+          contentType,
+          content: null // Content will be rendered by fullscreen modal
+        });
+      }, 50);
+    }
+  }, [activeModal, setFullscreenContent]);
 
   const { data: recipeContent } = useQuery<{title?: string; description?: string; ingredients?: string[]; instructions?: string[]; cookingTime?: string; servings?: number; imageUrl?: string; prepTime?: string; cookTime?: string; difficulty?: string}>({
     queryKey: ['/api/table/recipe'],
@@ -599,6 +637,239 @@ export default function TableModals() {
           </Button>
         </DialogContent>
       </Dialog>
+
+      {/* Fullscreen Modal */}
+      <FullscreenModal
+        isOpen={fullscreenContent.isOpen}
+        onClose={() => setFullscreenContent({ isOpen: false, title: '', content: null })}
+        title={fullscreenContent.title}
+        showFontControls={false}
+        showLanguageControls={false}
+      >
+        {fullscreenContent.contentType === 'recipe' ? (
+          recipeContent && (
+            <div className="space-y-4">
+              <div className="bg-white rounded-2xl p-6 border border-blush/10">
+                {recipeContent.title && (
+                  <h3 className="platypi-bold text-lg text-black text-center mb-4">
+                    {recipeContent.title}
+                  </h3>
+                )}
+                
+                {/* Recipe Image */}
+                {recipeContent.imageUrl && (
+                  <div className="w-full rounded-lg overflow-hidden mb-4">
+                    <LazyImage 
+                      src={recipeContent.imageUrl} 
+                      alt={recipeContent.title || "Recipe"} 
+                      className="w-full h-48 object-cover"
+                    />
+                  </div>
+                )}
+                
+                {/* Recipe Description */}
+                {recipeContent.description && (
+                  <div className="mb-4">
+                    <p className="platypi-regular leading-relaxed text-black whitespace-pre-line" dangerouslySetInnerHTML={{ __html: formatTextContent(recipeContent.description) }} />
+                  </div>
+                )}
+                
+                {/* Cooking Info */}
+                {(recipeContent.prepTime || recipeContent.cookTime || recipeContent.servings || recipeContent.difficulty) && (
+                  <div className="bg-blush/10 p-4 rounded-lg mb-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      {recipeContent.prepTime && (
+                        <div>
+                          <span className="platypi-semibold text-black">Prep Time: </span>
+                          <span className="platypi-regular text-black">{formatTimeDisplay(recipeContent.prepTime)}</span>
+                        </div>
+                      )}
+                      {recipeContent.cookTime && (
+                        <div>
+                          <span className="platypi-semibold text-black">Cook Time: </span>
+                          <span className="platypi-regular text-black">{formatTimeDisplay(recipeContent.cookTime)}</span>
+                        </div>
+                      )}
+                      {recipeContent.servings && (
+                        <div>
+                          <span className="platypi-semibold text-black">Servings: </span>
+                          <span className="platypi-regular text-black">{recipeContent.servings}</span>
+                        </div>
+                      )}
+                      {recipeContent.difficulty && (
+                        <div>
+                          <span className="platypi-semibold text-black">Difficulty: </span>
+                          <span className="platypi-regular text-black">{recipeContent.difficulty}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Ingredients */}
+                {recipeContent.ingredients && recipeContent.ingredients.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="platypi-bold text-black text-base mb-3">Ingredients</h4>
+                    <ul className="space-y-2">
+                      {recipeContent.ingredients.map((ingredient, index) => (
+                        <li key={index} className="flex items-start">
+                          <span className="text-rose-400 mr-2 mt-1.5">•</span>
+                          <span className="platypi-regular text-black text-sm flex-1">{ingredient}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {/* Instructions */}
+                {recipeContent.instructions && recipeContent.instructions.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="platypi-bold text-black text-base mb-3">Instructions</h4>
+                    <ol className="space-y-3">
+                      {recipeContent.instructions.map((instruction, index) => (
+                        <li key={index} className="flex items-start">
+                          <span className="platypi-bold text-rose-400 mr-3 mt-0.5 min-w-[1.5rem]">{index + 1}.</span>
+                          <span className="platypi-regular text-black text-sm flex-1 leading-relaxed">{instruction}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
+              </div>
+              
+              {/* Thank You Section for Recipe */}
+              <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                <p className="text-sm text-blue-900 platypi-medium">
+                  Recipe provided with permission by{' '}
+                  <a 
+                    href="https://kosher.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    Kosher.com
+                  </a>
+                  . Visit Kosher.com for thousands more delicious kosher recipes!
+                </p>
+              </div>
+              
+              <div className="heart-explosion-container">
+                <Button 
+                  onClick={() => {
+                    trackModalComplete('recipe');
+                    markModalComplete('recipe');
+                    setFullscreenContent({ isOpen: false, title: '', content: null });
+                    // Navigate to home and scroll to progress to show flower growth
+                    window.location.hash = '#/?section=home&scrollToProgress=true';
+                  }}
+                  className="w-full py-3 rounded-xl platypi-medium mt-4 border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
+                >
+                  Done
+                </Button>
+              </div>
+            </div>
+          )
+        ) : fullscreenContent.contentType === 'inspiration' ? (
+          inspirationContent && (
+            <div className="space-y-4">
+              <div className="bg-white rounded-2xl p-6 border border-blush/10">
+                {inspirationContent.title && (
+                  <h3 className="platypi-bold text-lg text-black text-center mb-4">
+                    {inspirationContent.title}
+                  </h3>
+                )}
+                
+                {inspirationContent.content && (
+                  <div 
+                    className="platypi-regular leading-relaxed text-black whitespace-pre-line mb-4"
+                    dangerouslySetInnerHTML={{ __html: formatTextContent(inspirationContent.content) }}
+                  />
+                )}
+                
+                {/* Media Gallery */}
+                {(() => {
+                  const mediaItems = [
+                    { url: inspirationContent.mediaUrl1, type: inspirationContent.mediaType1 },
+                    { url: inspirationContent.mediaUrl2, type: inspirationContent.mediaType2 },
+                    { url: inspirationContent.mediaUrl3, type: inspirationContent.mediaType3 },
+                    { url: inspirationContent.mediaUrl4, type: inspirationContent.mediaType4 },
+                    { url: inspirationContent.mediaUrl5, type: inspirationContent.mediaType5 }
+                  ].filter(item => item.url && item.type);
+                  
+                  if (mediaItems.length > 0) {
+                    return (
+                      <div className="mb-6">
+                        <div className="relative bg-gray-100 rounded-lg overflow-hidden">
+                          {mediaItems[currentMediaIndex]?.type === 'image' ? (
+                            <LazyImage
+                              src={mediaItems[currentMediaIndex].url!}
+                              alt="Inspiration content"
+                              className="w-full h-64 object-cover cursor-pointer"
+                              onClick={() => setFullscreenImage(mediaItems[currentMediaIndex].url!)}
+                            />
+                          ) : mediaItems[currentMediaIndex]?.type === 'video' ? (
+                            <video 
+                              controls 
+                              className="w-full h-64 object-cover"
+                              src={mediaItems[currentMediaIndex].url}
+                            />
+                          ) : null}
+                          
+                          {mediaItems.length > 1 && (
+                            <>
+                              <button
+                                onClick={() => setCurrentMediaIndex((prev) => (prev - 1 + mediaItems.length) % mediaItems.length)}
+                                className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+                              >
+                                <ChevronLeft size={20} />
+                              </button>
+                              <button
+                                onClick={() => setCurrentMediaIndex((prev) => (prev + 1) % mediaItems.length)}
+                                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+                              >
+                                <ChevronRight size={20} />
+                              </button>
+                              <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                                {mediaItems.map((_, index) => (
+                                  <button
+                                    key={index}
+                                    onClick={() => setCurrentMediaIndex(index)}
+                                    className={`w-2 h-2 rounded-full transition-colors ${
+                                      index === currentMediaIndex ? 'bg-white' : 'bg-white/50'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+              </div>
+              
+              <div className="heart-explosion-container">
+                <Button 
+                  onClick={() => {
+                    trackModalComplete('inspiration');
+                    markModalComplete('inspiration');
+                    setFullscreenContent({ isOpen: false, title: '', content: null });
+                    // Navigate to home and scroll to progress to show flower growth
+                    window.location.hash = '#/?section=home&scrollToProgress=true';
+                  }}
+                  className="w-full py-3 rounded-xl platypi-medium mt-4 border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
+                >
+                  Done
+                </Button>
+              </div>
+            </div>
+          )
+        ) : (
+          fullscreenContent.content
+        )}
+      </FullscreenModal>
     </>
   );
 }
