@@ -29,6 +29,11 @@ Text formatting: Database content supports markdown-style formatting - **text** 
 - **Data Cleanup**: Added automatic cleanup of stale completion data older than yesterday
 - **Verified Working**: User confirmed all prayers now track completion independently as expected
 
+### UI Enhancements (August 21, 2025)
+- **Mazel Tov Modal**: Text now bold with improved visibility using font-bold class and pure black color
+- **Share Modal Browser Detection**: iPhone users now see browser-specific instructions - Safari shows "at the bottom of the screen", Chrome shows "at the top right corner of your screen"
+- **Console Cleanup**: Removed all debug console.log statements, fixed deprecated meta tag warning
+
 ## System Architecture
 ### Frontend
 - **Framework**: React 18 with TypeScript, Vite for build.
