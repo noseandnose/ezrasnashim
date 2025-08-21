@@ -640,7 +640,13 @@ export default function TableModals() {
       {/* Fullscreen Modal */}
       <FullscreenModal
         isOpen={fullscreenContent.isOpen}
-        onClose={() => setFullscreenContent({ isOpen: false, title: '', content: null })}
+        onClose={() => {
+          setFullscreenContent({ isOpen: false, title: '', content: null });
+          // Navigate back to the Life page (table section)
+          window.dispatchEvent(new CustomEvent('navigateToSection', { 
+            detail: { section: 'table' } 
+          }));
+        }}
         title={fullscreenContent.title}
         showFontControls={false}
         showLanguageControls={false}
