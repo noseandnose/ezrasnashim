@@ -1076,13 +1076,16 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
+  const tefillaConditions = useTefillaConditions();
   
-  // Get the prayer data from global window property set in handlePrayerSelect
-  const prayer = (window as any).currentPrayerData;
+  // Get the prayer ID from global window property set in handlePrayerSelect
+  const selectedPrayerId = (window as any).selectedPrayerId;
   
-  if (!prayer) {
-    return <div className="text-center py-8">Prayer not found</div>;
-  }
+  // Use TanStack Query to fetch prayer data - same pattern as IndividualPrayerContent
+  const { data: prayer, isLoading } = useQuery<WomensPrayer>({
+    queryKey: [`/api/womens-prayers/prayer/${selectedPrayerId}`],
+    enabled: !!selectedPrayerId,
+  });
 
   const handleComplete = () => {
     trackModalComplete('individual-prayer');
@@ -1097,6 +1100,9 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
     }, 100);
   };
 
+  if (isLoading) return <div className="text-center py-8">Loading prayer...</div>;
+  if (!prayer) return <div className="text-center py-8">Prayer not found</div>;
+
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-2xl p-6 border border-blush/10">
@@ -1105,7 +1111,7 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
             className="vc-koren-hebrew leading-relaxed"
             style={{ fontSize: `${fontSize + 1}px` }}
             dangerouslySetInnerHTML={{ 
-              __html: formatTextContent(prayer.hebrewText).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">')
+              __html: processTefillaContent(prayer.hebrewText, tefillaConditions).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">')
             }}
           />
         )}
@@ -1113,7 +1119,7 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
           <div 
             className="koren-siddur-english text-left leading-relaxed"
             style={{ fontSize: `${fontSize}px` }}
-            dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.englishTranslation) }}
+            dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || 'English translation not available', tefillaConditions) }}
           />
         )}
       </div>
@@ -1284,33 +1290,14 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     setSelectedPrayerId(prayerId);
     closeModal();
     
-    // Fetch prayer data and open directly in fullscreen
-    const fetchPrayerAndOpenFullscreen = async () => {
-      try {
-        console.log('Fetching prayer data for ID:', prayerId);
-        const response = await fetch(`/api/womens-prayers/prayer/${prayerId}`);
-        console.log('Response status:', response.status);
-        const prayer = await response.json();
-        console.log('Received prayer data:', prayer);
-        
-        if (prayer) {
-          console.log('Opening fullscreen for prayer:', prayer.prayerName);
-          setFullscreenContent({
-            isOpen: true,
-            title: prayer.prayerName,
-            contentType: 'individual-prayer',
-            content: null
-          });
-          
-          // Store the prayer data for use in renderPrayerContent
-          (window as any).currentPrayerData = prayer;
-        }
-      } catch (error) {
-        console.error('Error fetching prayer:', error);
-      }
-    };
-    
-    fetchPrayerAndOpenFullscreen();
+    // Open fullscreen directly with the prayer ID stored globally for access by the fullscreen component
+    (window as any).selectedPrayerId = prayerId;
+    setFullscreenContent({
+      isOpen: true,
+      title: 'Prayer', // Will be updated when prayer data loads
+      contentType: 'individual-prayer',
+      content: null
+    });
   };
 
   // Complete prayer with task tracking
