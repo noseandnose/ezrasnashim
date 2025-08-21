@@ -59,6 +59,25 @@ const KorenThankYou = () => {
   );
 };
 
+const ChuppahThankYou = () => {
+  return (
+    <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+      <span className="text-sm platypi-medium text-black">
+        Thank you to{' '}
+        <a 
+          href="https://www.chuppah.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-blue-700"
+        >
+          Chuppah.org
+        </a>
+        {' '}for providing this Teffila
+      </span>
+    </div>
+  );
+};
+
 // Custom hook to manage Tefilla conditions
 const useTefillaConditions = () => {
   const { coordinates } = useLocationStore();
@@ -2836,7 +2855,10 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
         )}
       </div>
 
-      <KorenThankYou />
+      {/* Conditional attribution based on prayer name */}
+      {prayer.prayerName !== "Parshat Hamann" && prayer.prayerName !== "Hafrashas Challah" && (
+        <ChuppahThankYou />
+      )}
 
       <div className="heart-explosion-container">
         <Button 
