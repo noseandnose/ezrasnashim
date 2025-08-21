@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, ArrowUp, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Link, Shield, Unlock } from "lucide-react";
+import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, ArrowUp, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Link, Shield, Unlock, Check } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
@@ -2030,41 +2030,74 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           
           <div className="space-y-3">
             <div 
-              className="content-card rounded-xl p-4 cursor-pointer"
+              className={`content-card rounded-xl p-4 ${
+                isModalComplete('blessings') 
+                  ? 'bg-sage/20 border-sage cursor-not-allowed' 
+                  : 'cursor-pointer hover:bg-gray-50'
+              }`}
               onClick={() => {
-                closeModal();
-                openModal('blessings', 'tefilla');
+                if (!isModalComplete('blessings')) {
+                  closeModal();
+                  openModal('blessings', 'tefilla');
+                }
               }}
             >
-              <div className="flex items-center space-x-3">
-                <HandHeart className="text-blush" size={20} />
-                <span className="platypi-medium">Blessings</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <HandHeart className={isModalComplete('blessings') ? "text-sage" : "text-blush"} size={20} />
+                  <span className="platypi-medium">Blessings</span>
+                </div>
+                {isModalComplete('blessings') && (
+                  <Check className="text-sage" size={20} />
+                )}
               </div>
             </div>
             
             <div 
-              className="content-card rounded-xl p-4 cursor-pointer"
+              className={`content-card rounded-xl p-4 ${
+                isModalComplete('tefillos') 
+                  ? 'bg-sage/20 border-sage cursor-not-allowed' 
+                  : 'cursor-pointer hover:bg-gray-50'
+              }`}
               onClick={() => {
-                closeModal();
-                openModal('tefillos', 'tefilla');
+                if (!isModalComplete('tefillos')) {
+                  closeModal();
+                  openModal('tefillos', 'tefilla');
+                }
               }}
             >
-              <div className="flex items-center space-x-3">
-                <Scroll className="text-peach" size={20} />
-                <span className="platypi-medium">Tefillos</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Scroll className={isModalComplete('tefillos') ? "text-sage" : "text-peach"} size={20} />
+                  <span className="platypi-medium">Tefillos</span>
+                </div>
+                {isModalComplete('tefillos') && (
+                  <Check className="text-sage" size={20} />
+                )}
               </div>
             </div>
             
             <div 
-              className="content-card rounded-xl p-4 cursor-pointer"
+              className={`content-card rounded-xl p-4 ${
+                isModalComplete('personal-prayers') 
+                  ? 'bg-sage/20 border-sage cursor-not-allowed' 
+                  : 'cursor-pointer hover:bg-gray-50'
+              }`}
               onClick={() => {
-                closeModal();
-                openModal('personal-prayers', 'tefilla');
+                if (!isModalComplete('personal-prayers')) {
+                  closeModal();
+                  openModal('personal-prayers', 'tefilla');
+                }
               }}
             >
-              <div className="flex items-center space-x-3">
-                <Heart className="text-blush" size={20} />
-                <span className="platypi-medium">Personal Prayers</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Heart className={isModalComplete('personal-prayers') ? "text-sage" : "text-blush"} size={20} />
+                  <span className="platypi-medium">Personal Prayers</span>
+                </div>
+                {isModalComplete('personal-prayers') && (
+                  <Check className="text-sage" size={20} />
+                )}
               </div>
             </div>
           </div>
