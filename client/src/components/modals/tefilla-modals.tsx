@@ -819,7 +819,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     
     // Get the saved return tab preference from Zustand store
     const returnTab = tehillimReturnTab || 'all';
-    console.log('Completing individual Tehillim, returning to tab:', returnTab); // Debug log
+
     
     // Set the correct tab first, BEFORE triggering the fullscreen event
     setTehillimActiveTab(returnTab);
@@ -859,7 +859,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
   // Determine button layout based on stored return tab from Zustand store
   const isFromSpecialTab = tehillimReturnTab === 'special';
   const isFromAllTab = tehillimReturnTab === 'all' || !tehillimReturnTab; // Default to all if not set
-  console.log('Individual Tehillim button logic - tehillimReturnTab:', tehillimReturnTab, 'isFromAllTab:', isFromAllTab, 'isFromSpecialTab:', isFromSpecialTab); // Debug log
+
 
   return (
     <div className="space-y-6">
@@ -2613,7 +2613,7 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
           key={prayer.id}
           className="bg-white rounded-xl p-4 cursor-pointer hover:bg-white/90 transition-all duration-300 shadow-sm border border-blush/20"
           onClick={() => {
-            console.log('Refuah prayer clicked, ID:', prayer.id);
+
             onPrayerSelect(prayer.id);
           }}
         >
@@ -2883,12 +2883,12 @@ function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'h
   const { isModalComplete } = useModalCompletionStore();
 
   // Debug log to track active tab
-  console.log('SpecialTehillimFullscreenContent rendering with active tab:', tehillimActiveTab);
+
 
   // Open individual Tehillim text
   const openTehillimText = (psalmNumber: number) => {
     // Store the current tab so we can return to it after completion
-    console.log('Opening Tehillim from tab:', tehillimActiveTab); // Debug log
+
     setTehillimReturnTab(tehillimActiveTab); // Store in Zustand instead of localStorage
     setSelectedPsalm(psalmNumber);
     
