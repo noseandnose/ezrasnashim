@@ -1325,11 +1325,14 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   };
 
   // Complete prayer with task tracking
-  const completeWithAnimation = () => {
+  const completeWithAnimation = (specificModal?: string) => {
+    // Use specific modal if provided, otherwise use activeModal
+    const modalToComplete = specificModal || activeModal;
+    
     // Track modal completion and mark as completed globally
-    if (activeModal) {
-      trackModalComplete(activeModal);
-      markModalComplete(activeModal);
+    if (modalToComplete) {
+      trackModalComplete(modalToComplete);
+      markModalComplete(modalToComplete);
     }
     
     setShowExplosion(true);
@@ -2135,7 +2138,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={isModalComplete('blessings') ? undefined : completeWithAnimation}
+              onClick={isModalComplete('blessings') ? undefined : () => completeWithAnimation('blessings')}
               disabled={isModalComplete('blessings')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('blessings') 
@@ -2166,7 +2169,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={isModalComplete('tefillos') ? undefined : completeWithAnimation}
+              onClick={isModalComplete('tefillos') ? undefined : () => completeWithAnimation('tefillos')}
               disabled={isModalComplete('tefillos')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('tefillos') 
@@ -2211,7 +2214,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={isModalComplete('personal-prayers') ? undefined : completeWithAnimation}
+              onClick={isModalComplete('personal-prayers') ? undefined : () => completeWithAnimation('personal-prayers')}
               disabled={isModalComplete('personal-prayers')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('personal-prayers') 
