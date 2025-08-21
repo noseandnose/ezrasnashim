@@ -161,7 +161,19 @@ export default function TableSection() {
                 ? 'bg-gray-100 cursor-not-allowed' 
                 : isModalComplete('recipe') ? 'bg-sage/20 hover:scale-105' : 'bg-white hover:scale-105'
             }`}
-            onClick={() => recipeContent && openModal('recipe', 'table')}
+            onClick={() => {
+              if (recipeContent) {
+                // Open directly in fullscreen without modal flash
+                const fullscreenEvent = new CustomEvent('navigateToSection', { 
+                  detail: { 
+                    section: 'table', 
+                    openFullscreen: 'recipe',
+                    content: recipeContent
+                  } 
+                });
+                window.dispatchEvent(fullscreenEvent);
+              }
+            }}
             disabled={!recipeContent}
           >
             {/* Banner overlay for when no content */}
@@ -212,7 +224,19 @@ export default function TableSection() {
                 ? 'bg-gray-100 cursor-not-allowed' 
                 : isModalComplete('inspiration') ? 'bg-sage/20 hover:scale-105' : 'bg-white hover:scale-105'
             }`}
-            onClick={() => inspirationContent && openModal('inspiration', 'table')}
+            onClick={() => {
+              if (inspirationContent) {
+                // Open directly in fullscreen without modal flash
+                const fullscreenEvent = new CustomEvent('navigateToSection', { 
+                  detail: { 
+                    section: 'table', 
+                    openFullscreen: 'inspiration',
+                    content: inspirationContent
+                  } 
+                });
+                window.dispatchEvent(fullscreenEvent);
+              }
+            }}
             disabled={!inspirationContent}
           >
             {/* Banner overlay for when no content */}

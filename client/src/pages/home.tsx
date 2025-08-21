@@ -46,9 +46,22 @@ export default function Home() {
   // Listen for custom navigation events from modal closures
   useEffect(() => {
     const handleNavigateToSection = (event: CustomEvent) => {
-      const { section } = event.detail;
+      const { section, openFullscreen, content } = event.detail;
       if (['torah', 'tefilla', 'tzedaka', 'home', 'table'].includes(section)) {
         setActiveSection(section);
+        
+        // If openFullscreen is specified, dispatch the openDirectFullscreen event
+        if (openFullscreen && content) {
+          setTimeout(() => {
+            const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
+              detail: {
+                modalKey: openFullscreen,
+                content: content
+              }
+            });
+            window.dispatchEvent(fullscreenEvent);
+          }, 100); // Small delay to ensure section is rendered
+        }
       }
     };
 

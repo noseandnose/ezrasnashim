@@ -101,6 +101,40 @@ export default function TableModals() {
     }
   }, [activeModal, setFullscreenContent]);
 
+  // Listen for direct fullscreen opening from buttons
+  useEffect(() => {
+    const handleDirectFullscreen = (event: CustomEvent) => {
+      const { modalKey, content } = event.detail;
+      
+      if (['recipe', 'inspiration'].includes(modalKey)) {
+        let title = '';
+        
+        switch (modalKey) {
+          case 'recipe':
+            title = 'Daily Recipe';
+            break;
+          case 'inspiration':
+            title = 'Creative Jewish Living';
+            break;
+        }
+        
+        // Open directly in fullscreen without modal flash
+        setFullscreenContent({
+          isOpen: true,
+          title,
+          contentType: modalKey,
+          content: null
+        });
+      }
+    };
+
+    window.addEventListener('openDirectFullscreen', handleDirectFullscreen as EventListener);
+    
+    return () => {
+      window.removeEventListener('openDirectFullscreen', handleDirectFullscreen as EventListener);
+    };
+  }, [setFullscreenContent]);
+
   const { data: recipeContent } = useQuery<{title?: string; description?: string; ingredients?: string[]; instructions?: string[]; cookingTime?: string; servings?: number; imageUrl?: string; prepTime?: string; cookTime?: string; difficulty?: string}>({
     queryKey: ['/api/table/recipe'],
     enabled: activeModal === 'recipe'
