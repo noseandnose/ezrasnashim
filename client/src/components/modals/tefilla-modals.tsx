@@ -1095,15 +1095,8 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
     }
   }, [prayer]);
 
-  // Determine which specific modal to check and mark complete based on prayer category
-  let modalKey = 'individual-prayer';
-  if (prayer?.category === 'refuah' || prayer?.category === 'family' || prayer?.category === 'life') {
-    modalKey = 'tefillos';
-  } else if (prayer?.category === 'blessings') {
-    modalKey = 'blessings';
-  } else if (prayer?.category === 'personal') {
-    modalKey = 'personal-prayers';
-  }
+  // Use unique key per prayer for proper individual tracking
+  const modalKey = `womens-prayer-${prayer?.id || selectedPrayerId}`;
 
   const handleComplete = () => {
     trackModalComplete(modalKey);
@@ -2773,15 +2766,8 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
   if (isLoading) return <div className="text-center">Loading prayer...</div>;
   if (!prayer) return <div className="text-center">Prayer not found</div>;
   
-  // Determine which specific modal to check and mark complete based on prayer category
-  let modalKey = 'individual-prayer';
-  if (prayer?.category === 'refuah' || prayer?.category === 'family' || prayer?.category === 'life') {
-    modalKey = 'tefillos';
-  } else if (prayer?.category === 'blessings') {
-    modalKey = 'blessings';
-  } else if (prayer?.category === 'personal') {
-    modalKey = 'personal-prayers';
-  }
+  // Use unique key per prayer for proper individual tracking
+  const modalKey = `womens-prayer-${prayer?.id || prayerId}`;
 
   return (
     <>
