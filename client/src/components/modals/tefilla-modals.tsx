@@ -1046,6 +1046,21 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
 
   return (
     <div className="space-y-4">
+      {/* Current name being prayed for - moved above Tehillim text */}
+      {currentName && (
+        <div className="bg-sage/10 rounded-xl p-3 border border-sage/20">
+          <div className="flex items-center justify-center gap-2">
+            {getReasonIcon(currentName.reasonEnglish || currentName.reason)}
+            <span className="text-sm platypi-medium text-black">
+              Davening for: {currentName.hebrewName}
+            </span>
+            <span className="text-xs platypi-regular text-black/60">
+              ({currentName.reasonEnglish || currentName.reason})
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-2xl p-6 border border-blush/10">
         <div
           className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
@@ -1055,21 +1070,6 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
           }}
         />
       </div>
-
-      {/* Current name being prayed for */}
-      {currentName && (
-        <div className="bg-sage/10 rounded-xl p-3 border border-sage/20">
-          <div className="flex items-center justify-center gap-2">
-            <Heart className="w-4 h-4 text-sage" />
-            <span className="text-sm platypi-medium text-black">
-              Praying for: {currentName.hebrewName}
-            </span>
-            <span className="text-xs platypi-regular text-black/60">
-              ({currentName.reasonEnglish || currentName.reason})
-            </span>
-          </div>
-        </div>
-      )}
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
