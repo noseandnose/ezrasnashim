@@ -1225,7 +1225,13 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     };
 
     const handleDirectFullscreen = (event: CustomEvent) => {
-      const { title, contentType } = event.detail;
+      const { title, contentType, modalKey } = event.detail;
+      
+      // Only handle tefilla-related fullscreen requests
+      if (modalKey && ['recipe', 'inspiration'].includes(modalKey)) {
+        return; // Let table-modals handle these
+      }
+      
       setFullscreenContent({
         isOpen: true,
         title,
