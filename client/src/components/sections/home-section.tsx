@@ -192,7 +192,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         <div className="grid grid-cols-2 gap-2">
           {/* Time-based Prayer - Dynamic based on current time */}
           <button 
-            onClick={() => openModal(currentPrayer.modal, 'home')}
+            onClick={() => openModal(currentPrayer.modal, 'tefilla')}
             className="bg-white/80 rounded-xl p-3 text-center border border-blush/20 hover:scale-105 transition-all duration-300 hover:bg-white/95"
           >
             <div className="flex items-center justify-center mb-1">

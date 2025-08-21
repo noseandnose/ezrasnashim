@@ -12,6 +12,14 @@ Reading time display: User requested reading time estimation for text content, i
 Community feedback form: Updated to new Google Forms link.
 Text formatting: Database content supports markdown-style formatting - **text** for bold, --- for line breaks, ~~text~~ for greyed out text, ++text++ for larger text (1.2em), --text-- for smaller text (0.85em), [[text]] for grey box content.
 
+## Recent Changes (August 21, 2025)
+### Launch Preparation Optimizations
+- **Compass Stabilization**: Enhanced with weighted averaging (5-reading buffer), time-based throttling (100ms intervals), and smoother CSS transitions (0.8s cubic-bezier). Eliminates jumping and floating issues.
+- **Compass Simplification**: Removed magnetic declination, smoothing filters, and tilt compensation. Now uses native device heading only with Jerusalem fallback (31.7767, 35.2345).
+- **Modal System**: All major content modals migrated to fullscreen. Translation buttons now conditionally shown only when translations exist.
+- **Performance**: Implemented lazy loading for all routes, added PWA service worker for offline support, optimized event handlers with debouncing.
+- **Bug Fixes**: Fixed Personal Prayers JSON parsing error, resolved TypeScript compilation issues.
+
 ## System Architecture
 ### Frontend
 - **Framework**: React 18 with TypeScript, Vite for build.
@@ -51,6 +59,8 @@ Text formatting: Database content supports markdown-style formatting - **text** 
 - **Time-based Prayer System**: Dynamic prayer buttons changing based on zmanim.
 - **Conditional Tefilla Content System**: Dynamic text processing based on location (Israel/Outside Israel) and Hebrew calendar events (Rosh Chodesh, Fast Day, etc.) for intelligent prayer text display.
 - **Fullscreen Modals**: Fullscreen viewing capability for major text modals in Torah and Tefilla sections.
+- **Direct Fullscreen Prayer Access**: Prayer modals (Morning Brochas, Mincha, Maariv, Nishmas) and Tehillim selections open directly in fullscreen mode when clicked from home page, bypassing regular modal view.
+- **Global Tehillim Chain Integration**: Global Tehillim chain opens directly in fullscreen with proper completion tracking and automatic advancement to next psalm in sequence.
 
 ### UI/UX Design Decisions
 - **Color Scheme**: Quiet Joy spiritual retreat palette (rose blush, ivory, lavender).

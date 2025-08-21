@@ -13,7 +13,7 @@ import { toast } from "@/hooks/use-toast";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import axiosClient from "@/lib/axiosClient";
 import { useTrackModalComplete, useAnalytics } from "@/hooks/use-analytics";
-import { BirkatHamazonModal } from "@/components/modals/birkat-hamazon-modal";
+import { BirkatHamazonModal, MeeinShaloshFullscreenContent, BirkatHamazonFullscreenContent } from "@/components/modals/birkat-hamazon-modal";
 import { useLocationStore } from '@/hooks/use-jewish-times';
 import { formatTextContent } from "@/lib/text-formatter";
 import { processTefillaText, getCurrentTefillaConditions, type TefillaConditions } from "@/utils/tefilla-processor";
@@ -436,8 +436,725 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
   );
 }
 
+// Helper function to render prayer content in fullscreen
+function renderPrayerContent(contentType: string | undefined, language: 'hebrew' | 'english', fontSize: number) {
+  if (!contentType) return null;
+
+  switch (contentType) {
+    case 'maariv':
+      return <MaarivFullscreenContent language={language} fontSize={fontSize} />;
+    case 'mincha':
+      return <MinchaFullscreenContent language={language} fontSize={fontSize} />;
+    case 'morning-brochas':
+      return <MorningBrochasFullscreenContent language={language} fontSize={fontSize} />;
+    case 'nishmas-campaign':
+      return <NishmasFullscreenContent language={language} fontSize={fontSize} />;
+    case 'individual-tehillim':
+      return <TehillimFullscreenContent language={language} fontSize={fontSize} />;
+    case 'global-tehillim':
+      return <GlobalTehillimFullscreenContent language={language} fontSize={fontSize} />;
+    case 'special-tehillim':
+      return <SpecialTehillimFullscreenContent language={language} fontSize={fontSize} />;
+    case 'me-ein-shalosh':
+      return <MeeinShaloshFullscreenContent language={language} fontSize={fontSize} />;
+    case 'birkat-hamazon':
+      return <BirkatHamazonFullscreenContent language={language} fontSize={fontSize} />;
+    case 'individual-prayer':
+      return <IndividualPrayerFullscreenContent language={language} fontSize={fontSize} />;
+    default:
+      return null;
+  }
+}
+
+// Fullscreen content components for prayers
+function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  const { data: prayers = [], isLoading } = useQuery<any[]>({
+    queryKey: ['/api/maariv/prayers'],
+  });
+
+  const tefillaConditions = useTefillaConditions();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+
+  if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
+
+  const handleComplete = () => {
+    trackModalComplete('maariv');
+    markModalComplete('maariv');
+    completeTask('tefilla');
+    // Close fullscreen
+    const event = new CustomEvent('closeFullscreen');
+    window.dispatchEvent(event);
+  };
+
+  return (
+    <div className="space-y-6">
+      {prayers.map((prayer, index) => (
+        <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
+          <div
+            className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
+            style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
+            dangerouslySetInnerHTML={{
+              __html: processTefillaContent(
+                language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation, 
+                tefillaConditions
+              )
+            }}
+          />
+        </div>
+      ))}
+      
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+        </span>
+      </div>
+
+      <Button
+        onClick={isModalComplete('maariv') ? undefined : handleComplete}
+        disabled={isModalComplete('maariv')}
+        className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
+          isModalComplete('maariv') 
+            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+        }`}
+      >
+        {isModalComplete('maariv') ? 'Completed Today' : 'Complete Maariv'}
+      </Button>
+    </div>
+  );
+}
+
+function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  const { data: prayers = [], isLoading } = useQuery<MinchaPrayer[]>({
+    queryKey: ['/api/mincha/prayers'],
+  });
+
+  const tefillaConditions = useTefillaConditions();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+
+  if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
+
+  const handleComplete = () => {
+    trackModalComplete('mincha');
+    markModalComplete('mincha');
+    completeTask('tefilla');
+    // Close fullscreen
+    const event = new CustomEvent('closeFullscreen');
+    window.dispatchEvent(event);
+  };
+
+  return (
+    <div className="space-y-6">
+      {prayers.map((prayer, index) => (
+        <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
+          <div
+            className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
+            style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
+            dangerouslySetInnerHTML={{
+              __html: processTefillaContent(
+                language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation, 
+                tefillaConditions
+              )
+            }}
+          />
+        </div>
+      ))}
+      
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+        </span>
+      </div>
+
+      <Button
+        onClick={isModalComplete('mincha') ? undefined : handleComplete}
+        disabled={isModalComplete('mincha')}
+        className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
+          isModalComplete('mincha') 
+            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+        }`}
+      >
+        {isModalComplete('mincha') ? 'Completed Today' : 'Complete Mincha'}
+      </Button>
+    </div>
+  );
+}
+
+function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  const { data: prayers = [], isLoading } = useQuery<any[]>({
+    queryKey: ['/api/morning/prayers'],
+  });
+
+  const tefillaConditions = useTefillaConditions();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+
+  if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
+
+  const handleComplete = () => {
+    trackModalComplete('morning-brochas');
+    markModalComplete('morning-brochas');
+    completeTask('tefilla');
+    // Close fullscreen
+    const event = new CustomEvent('closeFullscreen');
+    window.dispatchEvent(event);
+  };
+
+  return (
+    <div className="space-y-6">
+      {prayers.map((prayer, index) => (
+        <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
+          <div
+            className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
+            style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
+            dangerouslySetInnerHTML={{
+              __html: processTefillaContent(
+                language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation, 
+                tefillaConditions
+              )
+            }}
+          />
+        </div>
+      ))}
+      
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+        </span>
+      </div>
+
+      <Button
+        onClick={isModalComplete('morning-brochas') ? undefined : handleComplete}
+        disabled={isModalComplete('morning-brochas')}
+        className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
+          isModalComplete('morning-brochas') 
+            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+        }`}
+      >
+        {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete Morning Brochas'}
+      </Button>
+    </div>
+  );
+}
+
+// Nishmas Fullscreen Content Component
+function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  const { data: nishmasText, isLoading } = useQuery<NishmasText>({
+    queryKey: [`/api/nishmas/${language}`],
+  });
+
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+  const { completeTask } = useDailyCompletionStore();
+  
+  // Nishmas 40-Day Campaign state with localStorage persistence
+  const [nishmasDay, setNishmasDay] = useState(() => {
+    const saved = localStorage.getItem('nishmas-day');
+    return saved ? parseInt(saved, 10) : 0;
+  });
+  const [nishmasStartDate, setNishmasStartDate] = useState<string | null>(() => {
+    return localStorage.getItem('nishmas-start-date');
+  });
+  const [todayCompleted, setTodayCompleted] = useState(() => {
+    const today = new Date().toDateString();
+    const lastCompleted = localStorage.getItem('nishmas-last-completed');
+    return lastCompleted === today;
+  });
+
+  // Load Nishmas progress from localStorage
+  useEffect(() => {
+    const savedDay = localStorage.getItem('nishmas-day');
+    const savedStartDate = localStorage.getItem('nishmas-start-date');
+    const savedLastCompleted = localStorage.getItem('nishmas-last-completed');
+    const today = new Date().toDateString();
+    
+    // Check if today's prayer has already been completed
+    setTodayCompleted(savedLastCompleted === today);
+    
+    if (savedDay && savedStartDate) {
+      const startDate = new Date(savedStartDate);
+      const currentDate = new Date(today);
+      const daysDiff = Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (daysDiff > 40) {
+        // Campaign completed
+        if (daysDiff > 1) {
+          // Missed a day, reset campaign
+          setNishmasDay(0);
+          setNishmasStartDate(null);
+          setTodayCompleted(false);
+          localStorage.removeItem('nishmas-day');
+          localStorage.removeItem('nishmas-start-date');
+          localStorage.removeItem('nishmas-last-completed');
+          return;
+        }
+      }
+      
+      setNishmasDay(parseInt(savedDay));
+      setNishmasStartDate(savedStartDate);
+    }
+  }, []);
+
+  // Mark today's Nishmas as completed
+  const markNishmasCompleted = () => {
+    if (todayCompleted) return; // Prevent multiple completions on same day
+    
+    const today = new Date().toDateString();
+    const newDay = nishmasDay + 1;
+    
+    // Track Nishmas completion and mark as completed
+    trackModalComplete('nishmas-campaign');
+    markModalComplete('nishmas-campaign');
+    completeTask('tefilla');
+    
+    if (newDay <= 40) {
+      setNishmasDay(newDay);
+      setTodayCompleted(true);
+      localStorage.setItem('nishmas-day', newDay.toString());
+      localStorage.setItem('nishmas-last-completed', today);
+      
+      if (!nishmasStartDate) {
+        const startDate = today;
+        setNishmasStartDate(startDate);
+        localStorage.setItem('nishmas-start-date', startDate);
+      }
+    }
+    
+    // Close fullscreen
+    const event = new CustomEvent('closeFullscreen');
+    window.dispatchEvent(event);
+  };
+
+  if (isLoading) return <div className="text-center py-8">Loading prayer...</div>;
+
+  return (
+    <div className="space-y-6">
+      {/* Prayer Content */}
+      <div className="bg-white rounded-2xl p-6 border border-blush/10">
+        <div 
+          className={`leading-relaxed text-black ${
+            language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'
+          }`} 
+          style={{ fontSize: `${language === 'hebrew' ? fontSize + 1 : fontSize}px` }}
+        >
+          {nishmasText ? (
+            <div 
+              className="whitespace-pre-wrap leading-relaxed"
+              dangerouslySetInnerHTML={{ 
+                __html: formatTextContent(
+                  nishmasText.fullText || 'Text not available'
+                ).replace(/<strong>/g, language === 'hebrew' ? '<strong class="vc-koren-hebrew-bold">' : '<strong style="font-weight: 700;">')
+              }}
+            />
+          ) : (
+            <div className="text-red-600 text-center">Failed to load prayer text</div>
+          )}
+        </div>
+      </div>
+
+      {/* Segulah Information Section */}
+      <div className="bg-gradient-to-r from-lavender-50 to-rose-50 rounded-2xl p-4 border border-lavender/20">
+        <p className="text-sm platypi-medium text-black text-center leading-relaxed">
+          Rebbetzin Leah Kolodetsky shared that her mother, Rebbetzin Kanievsky zt"l, believed reciting Nishmas Kol Chai for 40 consecutive days is a powerful segulah for having prayers answered.
+        </p>
+      </div>
+      
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+        </span>
+      </div>
+
+      <Button
+        onClick={todayCompleted ? undefined : markNishmasCompleted}
+        disabled={todayCompleted}
+        className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
+          todayCompleted 
+            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+        }`}
+      >
+        {todayCompleted ? 'Completed Today' : 'Complete Nishmas'}
+      </Button>
+    </div>
+  );
+}
+
+function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  const { selectedPsalm, tehillimActiveTab, tehillimReturnTab, setTehillimActiveTab } = useModalStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+  const tefillaConditions = useTefillaConditions();
+
+  const { data: tehillimText, isLoading } = useQuery({
+    queryKey: ['/api/tehillim/text', selectedPsalm, language],
+    queryFn: async () => {
+      const response = await axiosClient.get(`/api/tehillim/text/${selectedPsalm}?language=${language}`);
+      return response.data;
+    },
+    enabled: !!selectedPsalm,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000 // 30 minutes
+  });
+
+  if (isLoading) return <div className="text-center py-8">Loading Tehillim...</div>;
+  if (!selectedPsalm) return <div className="text-center py-8">No Tehillim selected</div>;
+
+  const completionKey = `individual-tehillim-${selectedPsalm}`;
+  const isCompleted = isModalComplete(completionKey);
+
+  const handleComplete = () => {
+    trackModalComplete(completionKey);
+    markModalComplete(completionKey);
+    completeTask('tefilla');
+    checkAndShowCongratulations();
+    
+    // Get the saved return tab preference from Zustand store
+    const returnTab = tehillimReturnTab || 'all';
+    console.log('Completing individual Tehillim, returning to tab:', returnTab); // Debug log
+    
+    // Set the correct tab first, BEFORE triggering the fullscreen event
+    setTehillimActiveTab(returnTab);
+    
+    // Use setTimeout to ensure tab state is set before triggering fullscreen
+    setTimeout(() => {
+      // Switch back to special-tehillim fullscreen content
+      const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
+        detail: {
+          title: 'Tehillim',
+          contentType: 'special-tehillim',
+          activeTab: returnTab // Pass the return tab to ensure correct display
+        }
+      });
+      window.dispatchEvent(fullscreenEvent);
+    }, 50);
+  };
+
+  const handleCompleteAndNext = () => {
+    if (!selectedPsalm) return;
+    
+    trackModalComplete(completionKey);
+    markModalComplete(completionKey);
+    completeTask('tefilla');
+    checkAndShowCongratulations();
+    
+    // Move to next psalm (only for 1-150 sequence)
+    const nextPsalm = selectedPsalm < 150 ? selectedPsalm + 1 : 1;
+    
+    // Update the selected psalm in the store
+    const { setSelectedPsalm } = useModalStore.getState();
+    setSelectedPsalm(nextPsalm);
+    
+    // The fullscreen content will automatically update due to the dependency on selectedPsalm
+  };
+
+  // Determine button layout based on stored return tab from Zustand store
+  const isFromSpecialTab = tehillimReturnTab === 'special';
+  const isFromAllTab = tehillimReturnTab === 'all' || !tehillimReturnTab; // Default to all if not set
+  console.log('Individual Tehillim button logic - tehillimReturnTab:', tehillimReturnTab, 'isFromAllTab:', isFromAllTab, 'isFromSpecialTab:', isFromSpecialTab); // Debug log
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-2xl p-6 border border-blush/10">
+        <div
+          className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
+          style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
+          dangerouslySetInnerHTML={{
+            __html: processTefillaContent(tehillimText?.text || '', tefillaConditions)
+          }}
+        />
+      </div>
+      
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+        </span>
+      </div>
+
+      {/* Button(s) based on whether it's from 1-150 or special occasions */}
+      {isFromSpecialTab ? (
+        // Special occasions: Only show "Complete" button
+        <Button
+          onClick={isCompleted ? undefined : handleComplete}
+          disabled={isCompleted}
+          className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
+            isCompleted 
+              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+          }`}
+        >
+          {isCompleted ? 'Completed Today' : `Complete Tehillim ${selectedPsalm}`}
+        </Button>
+      ) : (
+        // All psalms (1-150): Show both "Complete" and "Complete & Next" buttons
+        !isCompleted ? (
+          <div className="flex gap-2">
+            <Button
+              onClick={handleComplete}
+              className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
+            >
+              Complete
+            </Button>
+            
+            <Button
+              onClick={handleCompleteAndNext}
+              className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-blush text-white hover:scale-105 transition-transform"
+            >
+              Complete & Next ({selectedPsalm && selectedPsalm < 150 ? selectedPsalm + 1 : 1})
+            </Button>
+          </div>
+        ) : (
+          <Button
+            disabled
+            className="w-full py-3 rounded-xl platypi-medium border-0 bg-sage text-white cursor-not-allowed opacity-70"
+          >
+            Completed Today
+          </Button>
+        )
+      )}
+    </div>
+  );
+}
+
+function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+  const tefillaConditions = useTefillaConditions();
+  const queryClient = useQueryClient();
+
+  // Get current global Tehillim progress
+  const { data: progress } = useQuery<GlobalTehillimProgress>({
+    queryKey: ['/api/tehillim/progress'],
+    queryFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress`);
+      if (!response.ok) throw new Error('Failed to fetch progress');
+      return response.json();
+    },
+    staleTime: 30000, // 30 seconds
+    refetchInterval: 60000 // Refetch every minute
+  });
+
+  // Get current psalm text
+  const { data: tehillimText, isLoading } = useQuery({
+    queryKey: ['/api/tehillim/text', progress?.currentPerek, language],
+    queryFn: async () => {
+      const response = await axiosClient.get(`/api/tehillim/text/${progress?.currentPerek}?language=${language}`);
+      return response.data;
+    },
+    enabled: !!progress?.currentPerek,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000 // 30 minutes
+  });
+
+  // Get current name being prayed for
+  const { data: currentName } = useQuery<TehillimName>({
+    queryKey: ['/api/tehillim/current-name'],
+    queryFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/current-name`);
+      if (!response.ok) throw new Error('Failed to fetch current name');
+      return response.json();
+    },
+    staleTime: 60000, // 1 minute
+    refetchInterval: 30000 // Refetch every 30 seconds
+  });
+
+  // Define mutation before any conditional returns (hooks rule)
+  const advanceChainMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/complete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPerek: progress?.currentPerek,
+          language: language,
+          completedBy: 'Anonymous'
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to advance chain');
+      return response.json();
+    },
+    onSuccess: () => {
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+    },
+    onError: (error) => {
+      console.error('Failed to advance chain:', error);
+      toast({
+        title: "Error",
+        description: "Failed to advance Tehillim chain",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Early returns after all hooks are defined
+  if (isLoading) return <div className="text-center py-8">Loading Tehillim...</div>;
+  if (!progress?.currentPerek) return <div className="text-center py-8">No Tehillim available</div>;
+
+  const completionKey = 'tehillim-chain';
+  const isCompleted = isModalComplete(completionKey);
+
+  const handleComplete = () => {
+    trackModalComplete(completionKey);
+    markModalComplete(completionKey);
+    completeTask('tefilla');
+    
+    // Advance the chain
+    advanceChainMutation.mutate();
+    
+    // Close fullscreen and return to home
+    const event = new CustomEvent('closeFullscreen');
+    window.dispatchEvent(event);
+    
+    // Show congratulations
+    setTimeout(() => {
+      checkAndShowCongratulations();
+    }, 100);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-white rounded-2xl p-6 border border-blush/10">
+        <div
+          className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
+          style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
+          dangerouslySetInnerHTML={{
+            __html: processTefillaContent(tehillimText?.text || '', tefillaConditions)
+          }}
+        />
+      </div>
+
+      {/* Current name being prayed for */}
+      {currentName && (
+        <div className="bg-sage/10 rounded-xl p-3 border border-sage/20">
+          <div className="flex items-center justify-center gap-2">
+            <Heart className="w-4 h-4 text-sage" />
+            <span className="text-sm platypi-medium text-black">
+              Praying for: {currentName.hebrewName}
+            </span>
+            <span className="text-xs platypi-regular text-black/60">
+              ({currentName.reasonEnglish || currentName.reason})
+            </span>
+          </div>
+        </div>
+      )}
+      
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+        </span>
+      </div>
+
+      <Button
+        onClick={isCompleted ? undefined : handleComplete}
+        disabled={isCompleted}
+        className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
+          isCompleted 
+            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+        }`}
+      >
+        {isCompleted ? 'Completed Today' : `Complete Tehillim ${progress?.currentPerek}`}
+      </Button>
+    </div>
+  );
+}
+
+function IndividualPrayerFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+  const tefillaConditions = useTefillaConditions();
+  
+  // Get the prayer ID from global window property set in handlePrayerSelect
+  const selectedPrayerId = (window as any).selectedPrayerId;
+  
+  // Use TanStack Query to fetch prayer data - same pattern as IndividualPrayerContent
+  const { data: prayer, isLoading } = useQuery<WomensPrayer>({
+    queryKey: [`/api/womens-prayers/prayer/${selectedPrayerId}`],
+    enabled: !!selectedPrayerId,
+  });
+
+  // Update fullscreen content translation availability when prayer loads
+  useEffect(() => {
+    if (prayer && (window as any).updateFullscreenHasTranslation) {
+      const hasTranslation = !!(prayer.englishTranslation?.trim());
+      (window as any).updateFullscreenHasTranslation(hasTranslation);
+    }
+  }, [prayer]);
+
+  const handleComplete = () => {
+    trackModalComplete('individual-prayer');
+    markModalComplete('individual-prayer');
+    completeTask('tefilla');
+    
+    // Close fullscreen and navigate home
+    const event = new CustomEvent('closeFullscreen');
+    window.dispatchEvent(event);
+    setTimeout(() => {
+      window.location.hash = '#/?section=home&scrollToProgress=true';
+    }, 100);
+  };
+
+  if (isLoading) return <div className="text-center py-8">Loading prayer...</div>;
+  if (!prayer) return <div className="text-center py-8">Prayer not found</div>;
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-2xl p-6 border border-blush/10">
+        {prayer.hebrewText && language === 'hebrew' && (
+          <div 
+            className="vc-koren-hebrew leading-relaxed"
+            style={{ fontSize: `${fontSize + 1}px` }}
+            dangerouslySetInnerHTML={{ 
+              __html: processTefillaContent(prayer.hebrewText, tefillaConditions).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">')
+            }}
+          />
+        )}
+        {language === 'english' && prayer.englishTranslation && (
+          <div 
+            className="koren-siddur-english text-left leading-relaxed"
+            style={{ fontSize: `${fontSize}px` }}
+            dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || 'English translation not available', tefillaConditions) }}
+          />
+        )}
+      </div>
+      
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+        </span>
+      </div>
+      
+      <Button 
+        onClick={isModalComplete('individual-prayer') ? undefined : handleComplete}
+        disabled={isModalComplete('individual-prayer')}
+        className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+          isModalComplete('individual-prayer') 
+            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+        }`}
+      >
+        {isModalComplete('individual-prayer') ? 'Completed Today' : 'Complete'}
+      </Button>
+    </div>
+  );
+}
+
 export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
-  const { activeModal, openModal, closeModal } = useModalStore();
+  const { activeModal, openModal, closeModal, selectedPsalm } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const [, setLocation] = useLocation();
@@ -458,23 +1175,153 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     title: string;
     content: React.ReactNode;
     contentType?: string;
+    hasTranslation?: boolean;
   }>({ isOpen: false, title: '', content: null });
+
+  // Function to update fullscreen translation availability
+  const updateFullscreenHasTranslation = (hasTranslation: boolean) => {
+    setFullscreenContent(prev => ({ ...prev, hasTranslation }));
+  };
+
+  // Make function available globally for the fullscreen content component
+  useEffect(() => {
+    (window as any).updateFullscreenHasTranslation = updateFullscreenHasTranslation;
+    return () => {
+      delete (window as any).updateFullscreenHasTranslation;
+    };
+  }, []);
   const queryClient = useQueryClient();
   
   // Load Tefilla conditions for conditional content processing
   const tefillaConditions = useTefillaConditions();
+
+  // Listen for fullscreen close events from fullscreen components
+  useEffect(() => {
+    const handleCloseFullscreen = () => {
+      setFullscreenContent({ isOpen: false, title: '', content: null, hasTranslation: undefined });
+    };
+
+    const handleDirectFullscreen = (event: CustomEvent) => {
+      const { title, contentType } = event.detail;
+      setFullscreenContent({
+        isOpen: true,
+        title,
+        contentType,
+        content: null,
+        hasTranslation: undefined
+      });
+    };
+
+    window.addEventListener('closeFullscreen', handleCloseFullscreen);
+    window.addEventListener('openDirectFullscreen', handleDirectFullscreen as EventListener);
+    return () => {
+      window.removeEventListener('closeFullscreen', handleCloseFullscreen);
+      window.removeEventListener('openDirectFullscreen', handleDirectFullscreen as EventListener);
+    };
+  }, []);
 
   // Reset explosion state when modal changes
   useEffect(() => {
     setShowExplosion(false);
   }, [activeModal]);
 
+  // Auto-redirect prayer modals to fullscreen
+  useEffect(() => {
+    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'individual-tehillim', 'tehillim-text', 'special-tehillim'];
+    
+    if (activeModal && fullscreenPrayerModals.includes(activeModal)) {
+      let title = '';
+      let contentType = activeModal;
+      
+      switch (activeModal) {
+        case 'morning-brochas':
+          title = 'Morning Brochas';
+          break;
+        case 'mincha':
+          title = 'Mincha Prayer';
+          break;
+        case 'maariv':
+          title = 'Maariv Prayer';
+          break;
+        case 'nishmas-campaign':
+          title = 'Nishmas Kol Chai';
+          break;
+        case 'individual-tehillim':
+          title = `Tehillim ${selectedPsalm}`;
+          contentType = 'individual-tehillim';
+          break;
+        case 'special-tehillim':
+          title = 'Tehillim';
+          contentType = 'special-tehillim';
+          break;
+        case 'tehillim-text':
+          title = 'Global Tehillim Chain';
+          contentType = 'global-tehillim';
+          break;
+      }
+      
+      // Open fullscreen immediately without closing modal first
+      setFullscreenContent({
+        isOpen: true,
+        title,
+        contentType,
+        content: null // Content will be rendered based on contentType
+      });
+      
+      // Close the regular modal after fullscreen opens
+      setTimeout(() => {
+        closeModal();
+      }, 10);
+    }
+  }, [activeModal, closeModal, selectedPsalm]);
 
+  // Update fullscreen title when selectedPsalm changes for individual Tehillim
+  useEffect(() => {
+    if (fullscreenContent.isOpen && fullscreenContent.contentType === 'individual-tehillim' && selectedPsalm) {
+      setFullscreenContent(current => ({
+        ...current,
+        title: `Tehillim ${selectedPsalm}`
+      }));
+    }
+  }, [selectedPsalm, fullscreenContent.isOpen, fullscreenContent.contentType]);
+
+  // Listen for custom close fullscreen events
+  useEffect(() => {
+    const handleCloseFullscreen = () => {
+      setFullscreenContent({ isOpen: false, title: '', content: null });
+      // Navigate to home section and show flower growth
+      if (onSectionChange) {
+        onSectionChange('home');
+        setTimeout(() => {
+          const progressElement = document.getElementById('daily-progress-garden');
+          if (progressElement) {
+            progressElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+          }
+        }, 300);
+      }
+    };
+
+    window.addEventListener('closeFullscreen', handleCloseFullscreen);
+    return () => window.removeEventListener('closeFullscreen', handleCloseFullscreen);
+  }, [onSectionChange]);
 
   const handlePrayerSelect = (prayerId: number) => {
+    console.log('handlePrayerSelect called with prayerId:', prayerId);
     setSelectedPrayerId(prayerId);
     closeModal();
-    openModal('individual-prayer', 'tefilla');
+    
+    // Open fullscreen directly with the prayer ID stored globally for access by the fullscreen component
+    (window as any).selectedPrayerId = prayerId;
+    setFullscreenContent({
+      isOpen: true,
+      title: 'Prayer', // Will be updated when prayer data loads
+      contentType: 'individual-prayer',
+      content: null,
+      hasTranslation: undefined // Will be determined when prayer data loads
+    });
   };
 
   // Complete prayer with task tracking
@@ -1689,12 +2536,19 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       {/* Fullscreen Modal */}
       <FullscreenModal
         isOpen={fullscreenContent.isOpen}
-        onClose={() => setFullscreenContent({ isOpen: false, title: '', content: null })}
+        onClose={() => setFullscreenContent({ isOpen: false, title: '', content: null, hasTranslation: undefined })}
         title={fullscreenContent.title}
-        showFontControls={false}
-        showLanguageControls={false}
+        showFontControls={fullscreenContent.contentType !== 'special-tehillim'}
+        showLanguageControls={
+          fullscreenContent.contentType !== 'special-tehillim' && 
+          (fullscreenContent.contentType !== 'individual-prayer' || fullscreenContent.hasTranslation !== false)
+        }
+        fontSize={fontSize}
+        onFontSizeChange={setFontSize}
+        language={language}
+        onLanguageChange={setLanguage}
       >
-        {fullscreenContent.content}
+        {fullscreenContent.content || renderPrayerContent(fullscreenContent.contentType, language, fontSize)}
       </FullscreenModal>
     </>
   );
@@ -1730,7 +2584,10 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
         <div 
           key={prayer.id}
           className="bg-white rounded-xl p-4 cursor-pointer hover:bg-white/90 transition-all duration-300 shadow-sm border border-blush/20"
-          onClick={() => onPrayerSelect(prayer.id)}
+          onClick={() => {
+            console.log('Refuah prayer clicked, ID:', prayer.id);
+            onPrayerSelect(prayer.id);
+          }}
         >
           <div className="flex items-center space-x-3">
             <Stethoscope className="text-red-500" size={20} />
@@ -1989,6 +2846,157 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
   );
 }
 
+// Special Tehillim Fullscreen Content Component
+function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english'; fontSize: number }) {
+  const { openModal, setSelectedPsalm, tehillimActiveTab, setTehillimActiveTab, setTehillimReturnTab } = useModalStore();
+  const { isModalComplete } = useModalCompletionStore();
+
+  // Debug log to track active tab
+  console.log('SpecialTehillimFullscreenContent rendering with active tab:', tehillimActiveTab);
+
+  // Open individual Tehillim text
+  const openTehillimText = (psalmNumber: number) => {
+    // Store the current tab so we can return to it after completion
+    console.log('Opening Tehillim from tab:', tehillimActiveTab); // Debug log
+    setTehillimReturnTab(tehillimActiveTab); // Store in Zustand instead of localStorage
+    setSelectedPsalm(psalmNumber);
+    
+    // Directly switch to individual Tehillim content without modal transitions
+    const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
+      detail: {
+        title: `Tehillim ${psalmNumber}`,
+        contentType: 'individual-tehillim',
+        returnTab: tehillimActiveTab // Pass the current tab in the event detail
+      }
+    });
+    window.dispatchEvent(fullscreenEvent);
+  };
+
+  // Generate array of all 150 psalms
+  const allPsalms = Array.from({ length: 150 }, (_, i) => i + 1);
+
+  // Special categories with psalm numbers
+  const specialCategories = [
+    { title: "Bris milah", psalms: [12] },
+    { title: "Cemetery", psalms: [33, 16, 17, 72, 91, 104, 130, 119] },
+    { title: "Children's success", psalms: [127, 128] },
+    { title: "Finding a mate", psalms: [32, 38, 70, 71, 121, 124] },
+    { title: "For having children", psalms: [102, 103, 128] },
+    { title: "Forgiveness", psalms: [25] },
+    { title: "Giving birth", psalms: [20, 139] },
+    { title: "Gratitude", psalms: [9, 17, 18, 21, 23, 33, 42, 57, 63, 65, 68, 71, 72, 95, 100, 103, 104, 105, 107, 108, 116, 124, 136, 138, 145, 146, 147, 148, 149, 150] },
+    { title: "Graves of righteous", psalms: [16, 17, 20, 23] },
+    { title: "Guidance", psalms: [16, 19, 139] },
+    { title: "Heavenly mercy", psalms: [89, 98, 107] },
+    { title: "House of mourning", psalms: [49] },
+    { title: "Illness", psalms: [6, 30, 41, 88, 103] },
+    { title: "Jerusalem", psalms: [87, 122, 125, 137] },
+    { title: "Land of Israel", psalms: [74, 79, 80, 83, 102, 127, 130, 136, 142] },
+    { title: "Longevity", psalms: [23, 90, 92] },
+    { title: "Wedding day", psalms: [19, 33, 45, 49, 128] },
+    { title: "Peace", psalms: [46, 98, 120] },
+    { title: "Protection from harm", psalms: [3, 5, 7, 20, 23, 27, 31, 35, 40, 48, 55, 59, 69, 70, 91, 109, 119, 121] },
+    { title: "Redemption, Rebuilding of Temple", psalms: [42, 43, 84, 96, 132, 138] },
+    { title: "Repentance", psalms: [25, 32, 47, 51, 90] },
+    { title: "Success", psalms: [4, 57, 108, 112, 122] },
+    { title: "Sustenance", psalms: [4, 24, 41] },
+    { title: "Times of trouble", psalms: [16, 20, 22, 25, 26, 38, 54, 81, 85, 86, 87, 102] },
+    { title: "Torah study", psalms: [1, 19, 119, 134] },
+    { title: "Travel", psalms: [17, 91] }
+  ];
+
+  return (
+    <div className="space-y-4">
+      {/* Tab Navigation */}
+      <div className="flex bg-warm-gray/10 rounded-xl p-1 mb-4">
+        <button
+          onClick={() => setTehillimActiveTab('all')}
+          className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
+            tehillimActiveTab === 'all'
+              ? 'bg-white text-black shadow-sm'
+              : 'text-black/60 hover:text-black'
+          }`}
+        >
+          Sefer Tehillim
+        </button>
+        <button
+          onClick={() => setTehillimActiveTab('special')}
+          className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
+            tehillimActiveTab === 'special'
+              ? 'bg-white text-black shadow-sm'
+              : 'text-black/60 hover:text-black'
+          }`}
+        >
+          Special Occasions
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      <div className="space-y-4">
+        {tehillimActiveTab === 'all' ? (
+          <div className="bg-white/80 rounded-2xl p-3 border border-blush/10">
+            <div className="grid grid-cols-6 gap-2 overflow-hidden tehillim-button-grid">
+              {allPsalms.map((psalm) => (
+                <button
+                  key={psalm}
+                  onClick={() => openTehillimText(psalm)}
+                  className={`w-11 h-11 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center flex-shrink-0 ${
+                    isModalComplete(`individual-tehillim-${psalm}`)
+                      ? 'bg-sage text-white'
+                      : 'bg-gradient-feminine text-white'
+                  }`}
+                  style={{ touchAction: 'manipulation' }}
+                >
+                  {psalm}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {specialCategories.map((category, index) => (
+              <div key={index} className="bg-white/80 rounded-2xl p-3 border border-blush/10">
+                <h3 className="platypi-bold text-sm text-black mb-2">{category.title}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {category.psalms.map((psalm) => (
+                    <button
+                      key={psalm}
+                      onClick={() => openTehillimText(psalm)}
+                      className={`w-11 h-11 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center ${
+                        isModalComplete(`individual-tehillim-${psalm}`)
+                          ? 'bg-sage text-white'
+                          : 'bg-gradient-feminine text-white'
+                      }`}
+                      style={{ touchAction: 'manipulation' }}
+                    >
+                      {psalm}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+        </span>
+      </div>
+
+      <Button 
+        onClick={() => {
+          window.dispatchEvent(new Event('closeFullscreen'));
+        }} 
+        className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
+      >
+        Close
+      </Button>
+    </div>
+  );
+}
+
 // Tehillim Modal Component (previously Special Tehillim)
 function SpecialTehillimModal() {
   const { closeModal, openModal, setSelectedPsalm, tehillimActiveTab, setTehillimActiveTab } = useModalStore();
@@ -2070,7 +3078,7 @@ function SpecialTehillimModal() {
       <div className="max-h-[50vh] overflow-y-auto">
         {tehillimActiveTab === 'all' ? (
           <div className="bg-white/80 rounded-2xl p-3 border border-blush/10">
-            <div className="grid grid-cols-7 gap-2 overflow-hidden tehillim-button-grid">
+            <div className="grid grid-cols-6 gap-2 overflow-hidden tehillim-button-grid">
               {allPsalms.map((psalm) => (
                 <button
                   key={psalm}
@@ -2569,34 +3577,26 @@ function JerusalemCompass() {
   const [isLoading, setIsLoading] = useState(false);
   const [orientationSupported, setOrientationSupported] = useState(true);
   const [permissionRequested, setPermissionRequested] = useState(false);
-  const [isCalibrated, setIsCalibrated] = useState(false);
-  const [magneticDeclination, setMagneticDeclination] = useState(0);
   const orientationEventRef = useRef<((event: DeviceOrientationEvent) => void) | null>(null);
 
-  // Kotel coordinates - verified accurate location
-  const WESTERN_WALL_LAT = 31.7781;
-  const WESTERN_WALL_LNG = 35.2346;
+  // Jerusalem coordinates for fallback (31.7767, 35.2345 as specified)
+  const JERUSALEM_LAT = 31.7767;
+  const JERUSALEM_LNG = 35.2345;
 
-  // Calculate bearing to Kotel - fixed calculation
+  // Simple bearing calculation to Jerusalem
   const calculateBearing = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
-    // Convert to radians
     const lat1Rad = lat1 * Math.PI / 180;
     const lat2Rad = lat2 * Math.PI / 180;
     const dLng = (lng2 - lng1) * Math.PI / 180;
     
-    // Calculate bearing using proper formula
     const y = Math.sin(dLng) * Math.cos(lat2Rad);
     const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) - Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLng);
     
-    // Convert to degrees and normalize
     let bearing = Math.atan2(y, x) * 180 / Math.PI;
-    bearing = (bearing + 360) % 360; // Normalize to 0-360
-    
-
-    return bearing;
+    return (bearing + 360) % 360;
   };
 
-  // Get user's location
+  // Get user's location - simplified
   const getUserLocation = () => {
     setIsLoading(true);
     setError("");
@@ -2604,6 +3604,8 @@ function JerusalemCompass() {
     if (!navigator.geolocation) {
       setError("Geolocation is not supported by this browser");
       setIsLoading(false);
+      // Fallback to Jerusalem bearing calculation
+      setDirection(0); // Default north when no location available
       return;
     }
 
@@ -2614,60 +3616,41 @@ function JerusalemCompass() {
         
         setLocation({ lat: userLat, lng: userLng });
         
-        // Calculate direction to Kotel
-        const bearing = calculateBearing(userLat, userLng, WESTERN_WALL_LAT, WESTERN_WALL_LNG);
+        // Calculate bearing to Jerusalem
+        const bearing = calculateBearing(userLat, userLng, JERUSALEM_LAT, JERUSALEM_LNG);
         setDirection(bearing);
-
-        // Calculate approximate magnetic declination (simplified)
-        // For more accuracy, would need a magnetic declination API
-        const declinationAngle = getMagneticDeclination(userLat, userLng);
-        setMagneticDeclination(declinationAngle);
-        
-        // Get location name using reverse geocoding
-        try {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLat}&lon=${userLng}&accept-language=en`
-          );
-          const data = await response.json();
-          const city = data.address?.city || data.address?.town || data.address?.village || data.address?.county || "Unknown location";
-          const country = data.address?.country || "";
-          setLocationName(`${city}, ${country}`);
-        } catch (err) {
-          setLocationName(`${userLat.toFixed(4)}, ${userLng.toFixed(4)}`);
-        }
         
         setIsLoading(false);
       },
       (error) => {
-        setError("Unable to get your location. Please enable location access.");
+        let errorMessage = "Unable to get your location. Using default Jerusalem direction.";
+        
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = "Location access denied. Showing default Jerusalem direction.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = "Location unavailable. Using compass only.";
+            break;
+          case error.TIMEOUT:
+            errorMessage = "Location request timed out. Using compass only.";
+            break;
+        }
+        
+        setError(errorMessage);
         setIsLoading(false);
+        // Fallback: show compass without specific bearing
+        setDirection(90); // Default east direction to Jerusalem from most places
       },
       {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 600000 // 10 minutes
+        enableHighAccuracy: false, // Faster response, less battery drain
+        timeout: 5000,
+        maximumAge: 60000 // Allow cached location for 1 minute
       }
     );
   };
 
-  // Simplified magnetic declination calculation
-  const getMagneticDeclination = (lat: number, lng: number): number => {
-    // This is a very simplified approximation
-    // For Israel/Middle East region, magnetic declination is approximately 4-5 degrees east
-    if (lat >= 29 && lat <= 34 && lng >= 34 && lng <= 36) {
-      return 4.5; // Israel region
-    }
-    // For US East Coast
-    if (lat >= 25 && lat <= 50 && lng >= -85 && lng <= -65) {
-      return -10; // Negative means west declination
-    }
-    // For US West Coast
-    if (lat >= 30 && lat <= 50 && lng >= -125 && lng <= -110) {
-      return 12; // Positive means east declination
-    }
-    // Default to 0 for other regions (would need proper API for accuracy)
-    return 0;
-  };
+
 
   // Get cardinal direction
   const getCardinalDirection = (bearing: number): string => {
@@ -2702,42 +3685,65 @@ function JerusalemCompass() {
     }
   };
 
-  // Initialize device orientation
+  // Initialize device orientation - simplified to use native heading only
   const initializeOrientation = () => {
+    let lastHeading = 0;
+    let headingBuffer: number[] = [];
+    const BUFFER_SIZE = 5; // Increased buffer for more stable averaging
+    const UPDATE_THRESHOLD = 3; // Increased threshold to reduce jitter
+    let lastUpdateTime = Date.now();
+    const MIN_UPDATE_INTERVAL = 100; // Minimum 100ms between updates
+    
     const handleOrientation = (event: DeviceOrientationEvent) => {
-      if (event.absolute === false && !isCalibrated) {
-        setIsCalibrated(false);
-      } else {
-        setIsCalibrated(true);
-      }
-
       let heading = 0;
       
-      // iOS devices with webkitCompassHeading
+      // iOS devices with webkitCompassHeading (true heading)
       if ((event as any).webkitCompassHeading !== undefined && (event as any).webkitCompassHeading !== null) {
         heading = (event as any).webkitCompassHeading;
       }
-      // Android and other devices using alpha
+      // Android and other devices using alpha (magnetic heading)
       else if (event.alpha !== null) {
-        // Different handling for different browsers/devices
-        const userAgent = navigator.userAgent.toLowerCase();
-        
-        if (userAgent.includes('android')) {
-          // Android Chrome/WebView
-          heading = (360 - event.alpha + magneticDeclination) % 360;
-        } else if (userAgent.includes('firefox')) {
-          // Firefox has different orientation
-          heading = event.alpha;
-        } else {
-          // Default for other browsers
-          heading = (360 - event.alpha) % 360;
-        }
+        // Use native alpha value directly without modifications
+        heading = (360 - event.alpha) % 360;
       } else {
         setOrientationSupported(false);
         return;
       }
       
-      setDeviceOrientation(heading);
+      // Add to buffer for averaging
+      headingBuffer.push(heading);
+      if (headingBuffer.length > BUFFER_SIZE) {
+        headingBuffer.shift();
+      }
+      
+      // Wait for buffer to fill before calculating
+      if (headingBuffer.length < BUFFER_SIZE) {
+        return;
+      }
+      
+      // Calculate weighted average (recent readings have more weight)
+      const weights = [0.1, 0.15, 0.2, 0.25, 0.3]; // More weight to recent readings
+      let weightedSum = 0;
+      let totalWeight = 0;
+      headingBuffer.forEach((h, i) => {
+        weightedSum += h * weights[i];
+        totalWeight += weights[i];
+      });
+      const avgHeading = weightedSum / totalWeight;
+      
+      // Check time constraint
+      const now = Date.now();
+      if (now - lastUpdateTime < MIN_UPDATE_INTERVAL) {
+        return;
+      }
+      
+      // Only update if change is significant
+      const headingDiff = Math.abs(avgHeading - lastHeading);
+      if (headingDiff > UPDATE_THRESHOLD && headingDiff < (360 - UPDATE_THRESHOLD)) {
+        lastHeading = avgHeading;
+        lastUpdateTime = now;
+        setDeviceOrientation(Math.round(avgHeading));
+      }
     };
 
     orientationEventRef.current = handleOrientation;
@@ -2772,14 +3778,14 @@ function JerusalemCompass() {
       setOrientationSupported(false);
     }
 
-    // Cleanup
+    // Cleanup - remove only the single event listener
     return () => {
       if (orientationEventRef.current) {
         window.removeEventListener('deviceorientation', orientationEventRef.current);
         window.removeEventListener('deviceorientationabsolute', orientationEventRef.current as any);
       }
     };
-  }, [activeModal, magneticDeclination]);
+  }, [activeModal, permissionRequested]);
 
   if (activeModal !== 'jerusalem-compass') return null;
 
@@ -2789,17 +3795,14 @@ function JerusalemCompass() {
       >
         
         {/* Header */}
-        <div className="flex items-center justify-center mb-4 relative pr-8">
-          <DialogTitle className="text-xl platypi-bold text-black">The Kotel Compass</DialogTitle>
+        <div className="flex flex-col items-center justify-center mb-6 relative pr-8">
+          <DialogTitle className="text-xl platypi-bold text-black mb-2">The Kotel Compass</DialogTitle>
+          <p className="platypi-regular text-sm text-black/70">
+            Face your Heart Home
+          </p>
         </div>
 
         <div className="space-y-6">
-          {/* Description */}
-          <div className="text-center">
-            <p className="platypi-regular text-sm text-black/70 mb-4">
-              Find the direction to face when praying towards the Kotel
-            </p>
-          </div>
 
           {/* iOS Permission Request */}
           {typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested && !isLoading && (
@@ -2835,7 +3838,7 @@ function JerusalemCompass() {
                 Try Again
               </Button>
             </div>
-          ) : direction !== null ? (
+          ) : location && direction !== null ? (
             <div className="space-y-6">
               {/* Compass Container with Proper Containment */}
               <div className="relative w-64 h-64 mx-auto overflow-hidden rounded-full select-none"
@@ -2855,7 +3858,8 @@ function JerusalemCompass() {
                     transform: orientationSupported 
                       ? `rotate(${-deviceOrientation}deg)` 
                       : 'rotate(0deg)',
-                    transition: 'transform 0.3s ease'
+                    transition: 'transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)',
+                    willChange: 'transform'
                   }}
                 >
                   
@@ -2872,6 +3876,8 @@ function JerusalemCompass() {
                     className="absolute top-1/2 left-1/2 w-full h-full pointer-events-none"
                     style={{ 
                       transform: `translate(-50%, -50%) rotate(${direction}deg)`,
+                      transition: 'transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)',
+                      willChange: 'transform',
                       maxWidth: '100%',
                       maxHeight: '100%'
                     }}
@@ -2885,14 +3891,15 @@ function JerusalemCompass() {
                         const isAligned = angleDiff < 10;
                         
                         return (
-                          <div className="w-7 h-7 rounded-full bg-white shadow-md border-2 border-white flex items-center justify-center relative">
+                          <div className="w-8 h-8 rounded-full bg-white shadow-md border-2 border-white flex items-center justify-center relative">
                             <img 
                               src={isAligned ? bhGreenIcon : bhPinkIcon}
                               alt={isAligned ? "Aligned" : "Not aligned"}
-                              className="w-5 h-5"
+                              className="w-6 h-6"
                               style={{
                                 transform: `rotate(${-direction + deviceOrientation}deg)`,
-                                transition: 'transform 0.3s ease'
+                                transition: 'transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)',
+                                willChange: 'transform'
                               }}
                             />
                           </div>
@@ -2929,8 +3936,27 @@ function JerusalemCompass() {
                   );
                 })()}
                 
-                {/* Center dot */}
-                <div className="absolute top-1/2 left-1/2 w-2 h-2 rounded-full bg-black/20 transform -translate-x-1/2 -translate-y-1/2 z-20"></div>
+                {/* Center heart - changes color when aligned */}
+                {(() => {
+                  let angleDiff = Math.abs(direction - deviceOrientation);
+                  if (angleDiff > 180) {
+                    angleDiff = 360 - angleDiff;
+                  }
+                  const isAligned = angleDiff < 10;
+                  
+                  return (
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
+                      <Heart 
+                        className="w-4 h-4" 
+                        style={{
+                          color: isAligned ? '#b6cdb5' : '#eacbd2',
+                          fill: isAligned ? '#b6cdb5' : '#eacbd2'
+                        }}
+                        strokeWidth={0} 
+                      />
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Alignment Status */}
@@ -2954,7 +3980,7 @@ function JerusalemCompass() {
                     }`}>
                       {isAligned
                         ? '✓ Aligned with the Kotel!' 
-                        : 'Turn until the wall icon is at the top'
+                        : 'Turn until the Icon is at the top'
                       }
                     </p>
                   </div>
@@ -2969,30 +3995,6 @@ function JerusalemCompass() {
                   </p>
                 </div>
               )}
-
-              {/* Direction Info */}
-              <div className="bg-gradient-soft rounded-2xl p-4 text-center">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-center space-x-2">
-                    <Compass className="w-5 h-5 text-blush" />
-                    <span className="platypi-bold text-lg text-black">
-                      {getCardinalDirection(direction)} ({Math.round(direction)}°)
-                    </span>
-                  </div>
-                  <p className="platypi-regular text-sm text-black/70">Direction to the Kotel</p>
-                </div>
-              </div>
-
-              {/* Location Info */}
-              <div className="bg-white rounded-2xl p-3 border border-blush/10">
-                <div className="flex items-center space-x-2">
-                  <MapPin className="w-4 h-4 text-blush flex-shrink-0" />
-                  <div>
-                    <p className="platypi-medium text-sm text-black">Your Location</p>
-                    <p className="platypi-regular text-xs text-black/60">{locationName}</p>
-                  </div>
-                </div>
-              </div>
             </div>
           ) : (
             <div className="text-center py-8">

@@ -2,18 +2,28 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, Play, Pause, Volume2 } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { ChevronLeft, ChevronRight, Play, Pause, Volume2, Maximize2 } from "lucide-react";
 import AudioPlayer from "@/components/audio-player";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { formatTextContent } from "@/lib/text-formatter";
 import { LazyImage } from "@/components/ui/lazy-image";
+import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 
 export default function TableModals() {
   const { activeModal, closeModal } = useModalStore();
   const { markModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  const [fullscreenContent, setFullscreenContent] = useState<{
+    isOpen: boolean;
+    title: string;
+    content: React.ReactNode;
+    contentType?: string;
+  }>({ isOpen: false, title: '', content: null });
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
 
   const handleComplete = (modalId: string) => {
     trackModalComplete(modalId);
@@ -27,6 +37,69 @@ export default function TableModals() {
   const getCurrentDate = () => {
     return new Date().toISOString().split('T')[0];
   };
+
+  // Function to format time display (convert minutes > 59 to hours and minutes)
+  const formatTimeDisplay = (timeString: string) => {
+    if (!timeString) return timeString;
+    
+    // Check if the string contains only numbers (indicating minutes)
+    const minutesMatch = timeString.match(/^(\d+)$/);
+    if (minutesMatch) {
+      const totalMinutes = parseInt(minutesMatch[1]);
+      if (totalMinutes > 59) {
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        return minutes > 0 ? `${hours}h${minutes}m` : `${hours}h`;
+      }
+      return `${totalMinutes}m`;
+    }
+    
+    // Check if string ends with "min" or "mins" and extract number
+    const minMatch = timeString.match(/^(\d+)\s*mins?$/i);
+    if (minMatch) {
+      const totalMinutes = parseInt(minMatch[1]);
+      if (totalMinutes > 59) {
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        return minutes > 0 ? `${hours}h${minutes}m` : `${hours}h`;
+      }
+      return `${totalMinutes}m`;
+    }
+    
+    // Return original string if no conversion needed
+    return timeString;
+  };
+
+  // Auto-redirect table modals to fullscreen
+  useEffect(() => {
+    const fullscreenTableModals = ['recipe', 'inspiration'];
+    
+    if (activeModal && fullscreenTableModals.includes(activeModal)) {
+      let title = '';
+      let contentType = '';
+      
+      switch (activeModal) {
+        case 'recipe':
+          title = 'Daily Recipe';
+          contentType = 'recipe';
+          break;
+        case 'inspiration':
+          title = 'Creative Jewish Living';
+          contentType = 'inspiration';
+          break;
+      }
+      
+      // Small delay to ensure content is loaded
+      setTimeout(() => {
+        setFullscreenContent({
+          isOpen: true,
+          title,
+          contentType,
+          content: null // Content will be rendered by fullscreen modal
+        });
+      }, 50);
+    }
+  }, [activeModal, setFullscreenContent]);
 
   const { data: recipeContent } = useQuery<{title?: string; description?: string; ingredients?: string[]; instructions?: string[]; cookingTime?: string; servings?: number; imageUrl?: string; prepTime?: string; cookTime?: string; difficulty?: string}>({
     queryKey: ['/api/table/recipe'],
@@ -110,13 +183,13 @@ export default function TableModals() {
                     {recipeContent.prepTime && (
                       <div>
                         <span className="platypi-semibold">Prep Time: </span>
-                        <span>{recipeContent.prepTime}</span>
+                        <span>{formatTimeDisplay(recipeContent.prepTime)}</span>
                       </div>
                     )}
                     {recipeContent.cookTime && (
                       <div>
                         <span className="platypi-semibold">Cook Time: </span>
-                        <span>{recipeContent.cookTime}</span>
+                        <span>{formatTimeDisplay(recipeContent.cookTime)}</span>
                       </div>
                     )}
                     {recipeContent.servings && (
@@ -213,6 +286,22 @@ export default function TableModals() {
             </div>
           )}
 
+          {/* Kosher.com Attribution */}
+          <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-4 border border-blue-200">
+            <span className="text-sm platypi-medium text-black">
+              Thank you to{' '}
+              <a 
+                href="https://www.kosher.com/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 underline"
+              >
+                Kosher.com
+              </a>
+              {' '}for providing this Recipe
+            </span>
+          </div>
+
           <Button 
             onClick={() => handleComplete('recipe')}
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
@@ -251,6 +340,33 @@ export default function TableModals() {
                 const prevMedia = () => {
                   setCurrentMediaIndex((prev) => (prev - 1 + mediaItems.length) % mediaItems.length);
                 };
+
+                // Touch handlers for swipe navigation
+                const handleTouchStart = (e: React.TouchEvent) => {
+                  touchStartX.current = e.targetTouches[0].clientX;
+                };
+
+                const handleTouchMove = (e: React.TouchEvent) => {
+                  touchEndX.current = e.targetTouches[0].clientX;
+                };
+
+                const handleTouchEnd = () => {
+                  if (!touchStartX.current || !touchEndX.current) return;
+                  
+                  const distance = touchStartX.current - touchEndX.current;
+                  const isLeftSwipe = distance > 50;
+                  const isRightSwipe = distance < -50;
+
+                  if (isLeftSwipe && mediaItems.length > 1) {
+                    nextMedia();
+                  }
+                  if (isRightSwipe && mediaItems.length > 1) {
+                    prevMedia();
+                  }
+                  
+                  touchStartX.current = null;
+                  touchEndX.current = null;
+                };
                 
                 const currentMedia = mediaItems[currentMediaIndex];
                 
@@ -260,12 +376,20 @@ export default function TableModals() {
                   switch (currentMedia.type) {
                     case 'image':
                       return (
-                        <img 
-                          src={currentMedia.url} 
-                          alt={`Creative Jewish Living ${currentMediaIndex + 1}`}
-                          className="w-full h-full object-cover cursor-pointer"
-                          onClick={nextMedia}
-                        />
+                        <div className="relative w-full h-full">
+                          <img 
+                            src={currentMedia.url} 
+                            alt={`Creative Jewish Living ${currentMediaIndex + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            onClick={() => setFullscreenImage(currentMedia.url || null)}
+                            className="absolute top-2 right-2 bg-black/50 text-white p-1.5 rounded-full hover:bg-black/70 transition-colors"
+                            title="View fullscreen"
+                          >
+                            <Maximize2 size={16} />
+                          </button>
+                        </div>
                       );
                     case 'audio':
                       return (
@@ -303,10 +427,25 @@ export default function TableModals() {
                           return 'video/mp4'; // default
                         };
                         
-                        // Try direct URL first, fallback to proxy for .mov files
-                        const videoUrl = currentMedia.url && currentMedia.url.includes('.mov') ? 
-                          `/api/media-proxy/cloudinary/${currentMedia.url.split('/').slice(4).join('/')}` : 
-                          (currentMedia.url || '');
+                        // Optimize video URLs for faster loading
+                        const getOptimizedVideoUrl = (url: string) => {
+                          if (!url) return '';
+                          
+                          // For Supabase URLs, add quality and format parameters for faster loading
+                          if (url.includes('supabase')) {
+                            const baseUrl = url.split('?')[0];
+                            return `${baseUrl}?quality=auto&format=mp4`;
+                          }
+                          
+                          // For .mov files, use proxy
+                          if (url.includes('.mov')) {
+                            return `/api/media-proxy/cloudinary/${url.split('/').slice(4).join('/')}`;
+                          }
+                          
+                          return url;
+                        };
+
+                        const videoUrl = getOptimizedVideoUrl(currentMedia.url || '');
                         
                         return (
                           <div className="w-full h-full relative">
@@ -333,17 +472,15 @@ export default function TableModals() {
                                 src={videoUrl}
                                 controls
                                 className="w-full h-full object-cover"
-                                preload="metadata"
+                                preload="none"
+                                poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Cpolygon points='40,30 70,50 40,70' fill='%23d1d5db'/%3E%3C/svg%3E"
                                 onError={handleVideoError}
-                                onLoadStart={() => { /* Video loading */ }}
-                                onCanPlay={handleCanPlay}
-                                crossOrigin="anonymous"
+                                onLoadedData={handleCanPlay}
+                                onLoadStart={() => setIsLoading(true)}
                                 playsInline
+                                muted
                               >
-                                <source src={currentMedia.url || ''} type={getVideoType(currentMedia.url || '')} />
-                                {currentMedia.url && currentMedia.url.includes('.mov') && (
-                                  <source src={videoUrl} type="video/mp4" />
-                                )}
+                                <source src={videoUrl} type={getVideoType(videoUrl)} />
                                 Your browser does not support the video tag.
                               </video>
                             )}
@@ -359,7 +496,12 @@ export default function TableModals() {
                 
                 return (
                   <div className="mb-4 relative">
-                    <div className="w-full h-64 bg-gray-100 rounded-lg overflow-hidden relative">
+                    <div 
+                      className="w-full h-64 bg-gray-100 rounded-lg overflow-hidden relative touch-pan-y"
+                      onTouchStart={handleTouchStart}
+                      onTouchMove={handleTouchMove}
+                      onTouchEnd={handleTouchEnd}
+                    >
                       {renderMedia()}
                       
                       {mediaItems.length > 1 && (
@@ -407,6 +549,22 @@ export default function TableModals() {
                   <p dangerouslySetInnerHTML={{ __html: formatTextContent(inspirationContent.content) }} />
                 </div>
               </div>
+
+              {/* Thank You Attribution - Moved BEFORE Done button */}
+              <div className="bg-blue-50 p-3 rounded-xl mt-4 text-center">
+                <p className="text-sm text-blue-800">
+                  Thank you to{' '}
+                  <a 
+                    href="https://www.instagram.com/yidwithakid/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 underline platypi-medium"
+                  >
+                    YidWithAKid
+                  </a>
+                  {' '}for providing this.
+                </p>
+              </div>
             </>
           ) : (
             <div className="text-center py-8">
@@ -428,24 +586,32 @@ export default function TableModals() {
           >
             Done
           </Button>
-          
-          {/* Thank You Attribution */}
-          <div className="bg-blue-50 p-3 rounded-xl mt-1 text-center">
-            <p className="text-sm text-blue-800">
-              Thank you to{' '}
-              <a 
-                href="https://www.instagram.com/yidwithakid/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 underline platypi-medium"
-              >
-                YidWithAKid
-              </a>
-              {' '}for providing this.
-            </p>
-          </div>
         </DialogContent>
       </Dialog>
+
+      {/* Fullscreen Image Modal */}
+      {fullscreenImage && (
+        <div 
+          className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-4"
+          onClick={() => setFullscreenImage(null)}
+        >
+          <div className="relative max-w-full max-h-full">
+            <img 
+              src={fullscreenImage} 
+              alt="Fullscreen view"
+              className="max-w-full max-h-full object-contain"
+            />
+            <button
+              onClick={() => setFullscreenImage(null)}
+              className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Parsha Shiur Modal */}
       <Dialog open={activeModal === 'parsha'} onOpenChange={() => closeModal(true)}>
@@ -471,6 +637,309 @@ export default function TableModals() {
           </Button>
         </DialogContent>
       </Dialog>
+
+      {/* Fullscreen Modal */}
+      <FullscreenModal
+        isOpen={fullscreenContent.isOpen}
+        onClose={() => setFullscreenContent({ isOpen: false, title: '', content: null })}
+        title={fullscreenContent.title}
+        showFontControls={false}
+        showLanguageControls={false}
+      >
+        {fullscreenContent.contentType === 'recipe' ? (
+          recipeContent && (
+            <div className="space-y-4">
+              <div className="bg-white rounded-2xl p-6 border border-blush/10">
+                {recipeContent.title && (
+                  <h3 className="platypi-bold text-lg text-black text-center mb-4">
+                    {recipeContent.title}
+                  </h3>
+                )}
+                
+                {/* Recipe Image */}
+                {recipeContent.imageUrl && (
+                  <div className="w-full rounded-lg overflow-hidden mb-4">
+                    <LazyImage 
+                      src={recipeContent.imageUrl} 
+                      alt={recipeContent.title || "Recipe"} 
+                      className="w-full h-48 object-cover"
+                    />
+                  </div>
+                )}
+                
+                {/* Recipe Description */}
+                {recipeContent.description && (
+                  <div className="mb-4">
+                    <p className="platypi-regular leading-relaxed text-black whitespace-pre-line" dangerouslySetInnerHTML={{ __html: formatTextContent(recipeContent.description) }} />
+                  </div>
+                )}
+                
+                {/* Cooking Info */}
+                {(recipeContent.prepTime || recipeContent.cookTime || recipeContent.servings || recipeContent.difficulty) && (
+                  <div className="bg-blush/10 p-4 rounded-lg mb-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      {recipeContent.prepTime && (
+                        <div>
+                          <span className="platypi-semibold text-black">Prep Time: </span>
+                          <span className="platypi-regular text-black">{formatTimeDisplay(recipeContent.prepTime)}</span>
+                        </div>
+                      )}
+                      {recipeContent.cookTime && (
+                        <div>
+                          <span className="platypi-semibold text-black">Cook Time: </span>
+                          <span className="platypi-regular text-black">{formatTimeDisplay(recipeContent.cookTime)}</span>
+                        </div>
+                      )}
+                      {recipeContent.servings && (
+                        <div>
+                          <span className="platypi-semibold text-black">Servings: </span>
+                          <span className="platypi-regular text-black">{recipeContent.servings}</span>
+                        </div>
+                      )}
+                      {recipeContent.difficulty && (
+                        <div>
+                          <span className="platypi-semibold text-black">Difficulty: </span>
+                          <span className="platypi-regular text-black">{recipeContent.difficulty}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Ingredients */}
+                {recipeContent.ingredients && (
+                  <div className="mb-6">
+                    <h4 className="platypi-bold text-black text-base mb-3">Ingredients</h4>
+                    <ul className="space-y-2">
+                      {(() => {
+                        // Handle ingredients as plain text with bullet points
+                        if (typeof recipeContent.ingredients === 'string') {
+                          // Split by newlines and filter out empty lines
+                          const lines = recipeContent.ingredients
+                            .split('\n')
+                            .map((line: string) => line.trim())
+                            .filter((line: string) => line && line !== '*');
+                          
+                          return lines.map((ingredient: string, index: number) => {
+                            // Remove leading asterisk or bullet point if present
+                            const cleaned = ingredient.replace(/^\*\s*/, '').trim();
+                            return cleaned ? (
+                              <li key={index} className="flex items-start">
+                                <span className="text-rose-400 mr-2 mt-1.5">•</span>
+                                <span className="platypi-regular text-black text-sm flex-1" dangerouslySetInnerHTML={{ __html: formatTextContent(cleaned) }} />
+                              </li>
+                            ) : null;
+                          });
+                        }
+                        
+                        // If it's already an array
+                        if (Array.isArray(recipeContent.ingredients)) {
+                          return recipeContent.ingredients.map((ingredient: any, index: number) => (
+                            <li key={index} className="flex items-start">
+                              <span className="text-rose-400 mr-2 mt-1.5">•</span>
+                              <span className="platypi-regular text-black text-sm flex-1" dangerouslySetInnerHTML={{ __html: formatTextContent(String(ingredient)) }} />
+                            </li>
+                          ));
+                        }
+                        
+                        return null;
+                      })()}
+                    </ul>
+                  </div>
+                )}
+                
+                {/* Instructions */}
+                {recipeContent.instructions && (
+                  <div className="mb-6">
+                    <h4 className="platypi-bold text-black text-base mb-3">Instructions</h4>
+                    <ol className="space-y-3">
+                      {(() => {
+                        // Handle instructions as plain text with numbered steps
+                        if (typeof recipeContent.instructions === 'string') {
+                          // Split by newlines and numbers
+                          const lines = recipeContent.instructions
+                            .split(/(?=\d+\.\s)|\n/)
+                            .map((line: string) => line.trim())
+                            .filter((line: string) => line && line !== '.');
+                          
+                          return lines.map((instruction: string, index: number) => {
+                            // Remove leading numbers and periods
+                            const cleaned = instruction.replace(/^\d+\.\s*/, '').trim();
+                            return cleaned ? (
+                              <li key={index} className="flex items-start">
+                                <span className="platypi-bold text-rose-400 mr-3 mt-0.5 min-w-[1.5rem]">{index + 1}.</span>
+                                <span className="platypi-regular text-black text-sm flex-1 leading-relaxed" dangerouslySetInnerHTML={{ __html: formatTextContent(cleaned) }} />
+                              </li>
+                            ) : null;
+                          });
+                        }
+                        
+                        // If it's already an array
+                        if (Array.isArray(recipeContent.instructions)) {
+                          return recipeContent.instructions.map((instruction: any, index: number) => (
+                            <li key={index} className="flex items-start">
+                              <span className="platypi-bold text-rose-400 mr-3 mt-0.5 min-w-[1.5rem]">{index + 1}.</span>
+                              <span className="platypi-regular text-black text-sm flex-1 leading-relaxed" dangerouslySetInnerHTML={{ __html: formatTextContent(String(instruction)) }} />
+                            </li>
+                          ));
+                        }
+                        
+                        return null;
+                      })()}
+                    </ol>
+                  </div>
+                )}
+              </div>
+              
+              {/* Thank You Section for Recipe */}
+              <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                <p className="text-sm text-blue-900 platypi-medium">
+                  Recipe provided with permission by{' '}
+                  <a 
+                    href="https://kosher.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    Kosher.com
+                  </a>
+                  . Visit Kosher.com for thousands more delicious kosher recipes!
+                </p>
+              </div>
+              
+              <div className="heart-explosion-container">
+                <Button 
+                  onClick={() => {
+                    trackModalComplete('recipe');
+                    markModalComplete('recipe');
+                    setFullscreenContent({ isOpen: false, title: '', content: null });
+                    // Navigate to home and scroll to progress to show flower growth
+                    window.location.hash = '#/?section=home&scrollToProgress=true';
+                  }}
+                  className="w-full py-3 rounded-xl platypi-medium mt-4 border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
+                >
+                  Done
+                </Button>
+              </div>
+            </div>
+          )
+        ) : fullscreenContent.contentType === 'inspiration' ? (
+          inspirationContent && (
+            <div className="space-y-4">
+              <div className="bg-white rounded-2xl p-6 border border-blush/10">
+                {inspirationContent.title && (
+                  <h3 className="platypi-bold text-lg text-black text-center mb-4">
+                    {inspirationContent.title}
+                  </h3>
+                )}
+                
+                {/* Media Gallery - Moved to top */}
+                {(() => {
+                  const mediaItems = [
+                    { url: inspirationContent.mediaUrl1, type: inspirationContent.mediaType1 },
+                    { url: inspirationContent.mediaUrl2, type: inspirationContent.mediaType2 },
+                    { url: inspirationContent.mediaUrl3, type: inspirationContent.mediaType3 },
+                    { url: inspirationContent.mediaUrl4, type: inspirationContent.mediaType4 },
+                    { url: inspirationContent.mediaUrl5, type: inspirationContent.mediaType5 }
+                  ].filter(item => item.url && item.type);
+                  
+                  if (mediaItems.length > 0) {
+                    return (
+                      <div className="mb-6">
+                        <div className="relative bg-gray-100 rounded-lg overflow-hidden">
+                          {mediaItems[currentMediaIndex]?.type === 'image' ? (
+                            <LazyImage
+                              src={mediaItems[currentMediaIndex].url!}
+                              alt="Inspiration content"
+                              className="w-full h-64 object-cover cursor-pointer"
+                              onClick={() => setFullscreenImage(mediaItems[currentMediaIndex].url!)}
+                            />
+                          ) : mediaItems[currentMediaIndex]?.type === 'video' ? (
+                            <video 
+                              controls 
+                              className="w-full h-64 object-cover"
+                              src={mediaItems[currentMediaIndex].url}
+                            />
+                          ) : null}
+                          
+                          {mediaItems.length > 1 && (
+                            <>
+                              <button
+                                onClick={() => setCurrentMediaIndex((prev) => (prev - 1 + mediaItems.length) % mediaItems.length)}
+                                className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+                              >
+                                <ChevronLeft size={20} />
+                              </button>
+                              <button
+                                onClick={() => setCurrentMediaIndex((prev) => (prev + 1) % mediaItems.length)}
+                                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+                              >
+                                <ChevronRight size={20} />
+                              </button>
+                              <div className="absolute top-2 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                                {mediaItems.map((_, index) => (
+                                  <button
+                                    key={index}
+                                    onClick={() => setCurrentMediaIndex(index)}
+                                    className={`w-2 h-2 rounded-full transition-colors ${
+                                      index === currentMediaIndex ? 'bg-white' : 'bg-white/50'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+                
+                {inspirationContent.content && (
+                  <div 
+                    className="platypi-regular leading-relaxed text-black whitespace-pre-line mb-4"
+                    dangerouslySetInnerHTML={{ __html: formatTextContent(inspirationContent.content) }}
+                  />
+                )}
+              </div>
+              
+              {/* Thank You Section for Creative Jewish Living */}
+              <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                <p className="text-sm text-blue-900 platypi-medium">
+                  Thank you to{' '}
+                  <a 
+                    href="https://www.instagram.com/yidwithakid/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    YidWithAKid
+                  </a>
+                  {' '}for providing this Table inspiration
+                </p>
+              </div>
+              
+              <div className="heart-explosion-container">
+                <Button 
+                  onClick={() => {
+                    trackModalComplete('inspiration');
+                    markModalComplete('inspiration');
+                    setFullscreenContent({ isOpen: false, title: '', content: null });
+                    // Navigate to home and scroll to progress to show flower growth
+                    window.location.hash = '#/?section=home&scrollToProgress=true';
+                  }}
+                  className="w-full py-3 rounded-xl platypi-medium mt-4 border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
+                >
+                  Done
+                </Button>
+              </div>
+            </div>
+          )
+        ) : (
+          fullscreenContent.content
+        )}
+      </FullscreenModal>
     </>
   );
 }

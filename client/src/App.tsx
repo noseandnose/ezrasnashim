@@ -35,12 +35,12 @@ function Router() {
     // Register service worker for PWA functionality
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
+        navigator.serviceWorker.register('/service-worker.js')
           .then(registration => {
-            // Service worker registered successfully
+            console.log('ServiceWorker registered:', registration.scope);
           })
           .catch(error => {
-            // Service worker registration failed
+            console.error('ServiceWorker registration failed:', error);
           });
       });
     }

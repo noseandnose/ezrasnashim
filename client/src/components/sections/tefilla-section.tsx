@@ -1,4 +1,4 @@
-import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass, ArrowRight, Baby, HeartHandshake, Briefcase, GraduationCap, Users, Stethoscope, DollarSign, UserCheck, Smile, Zap, TrendingUp, Crown, Sunrise, Sun, Moon, Utensils, Stars, Globe, Link, Unlock } from "lucide-react";
+import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass, ArrowRight, Baby, HeartHandshake, Briefcase, GraduationCap, Users, Stethoscope, DollarSign, UserCheck, Smile, Zap, TrendingUp, Crown, Sunrise, Sun, Moon, Utensils, Stars, Globe, Link, Unlock, Apple, Wheat } from "lucide-react";
 import korenLogo from "@assets/This_is_a_logo_for_Koren_Publishers_Jerusalem_1752581940716.jpg";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -19,8 +19,23 @@ import type { TehillimName, GlobalTehillimProgress } from "@shared/schema";
 export default function TefillaSection({ onSectionChange }: TefillaSectionProps) {
   const { openModal } = useModalStore();
   const { tefillaCompleted } = useDailyCompletionStore();
-  const { isModalComplete } = useModalCompletionStore();
+  const { isModalComplete, completedModals } = useModalCompletionStore();
   const { data: times, isLoading } = useJewishTimes();
+
+  // Helper function to check if any individual Tehillim has been completed
+  const hasAnyTehillimCompleted = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const todaysCompletions = completedModals[today];
+    if (!todaysCompletions) return false;
+    
+    // Check for any completion key that starts with 'individual-tehillim-'
+    for (const modalId of Array.from(todaysCompletions)) {
+      if (modalId.startsWith('individual-tehillim-')) {
+        return true;
+      }
+    }
+    return false;
+  };
 
   // Time-based prayer logic
   const getCurrentPrayer = () => {
@@ -682,17 +697,17 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           <button 
             onClick={() => openModal('after-brochas', 'tefilla')}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              isModalComplete('after-brochas') ? 'bg-sage/20' : 'bg-white'
+              (isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'bg-sage/20' : 'bg-white'
             }`}
           >
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              isModalComplete('after-brochas') ? 'bg-sage' : 'bg-gradient-feminine'
+              (isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
               <Utensils className="text-white" size={18} />
             </div>
             <h3 className="platypi-bold text-sm text-black mb-1">After Brochas</h3>
             <p className="platypi-regular text-xs text-black/60">
-              {isModalComplete('after-brochas') ? 'Completed' : 'Prayers of Thanks'}
+              {(isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'Completed' : 'Prayers of Thanks'}
             </p>
           </button>
         </div>
@@ -702,17 +717,17 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           <button 
             onClick={() => openModal('special-tehillim', 'tefilla')}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              isModalComplete('special-tehillim') ? 'bg-sage/20' : 'bg-white'
+              hasAnyTehillimCompleted() ? 'bg-sage/20' : 'bg-white'
             }`}
           >
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              isModalComplete('special-tehillim') ? 'bg-sage' : 'bg-gradient-feminine'
+              hasAnyTehillimCompleted() ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
               <Stars className="text-white" size={18} />
             </div>
             <h3 className="platypi-bold text-sm text-black mb-1">Tehillim</h3>
             <p className="platypi-regular text-xs text-black/60">
-              {isModalComplete('special-tehillim') ? 'Completed' : 'All & Special'}
+              {hasAnyTehillimCompleted() ? 'Completed' : 'All & Special'}
             </p>
           </button>
 
@@ -794,7 +809,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
               </div>
               <div className="flex-grow">
                 <h3 className="platypi-bold text-lg text-black">The Kotel Compass</h3>
-                <p className="platypi-regular text-sm text-black/70">Find the direction to pray</p>
+                <p className="platypi-regular text-sm text-black/70">Face your Heart Home</p>
               </div>
               <div className="bg-gradient-feminine p-2 rounded-full shadow-lg">
                 <ArrowRight className="text-white" size={16} />
