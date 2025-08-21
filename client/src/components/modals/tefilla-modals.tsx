@@ -1155,11 +1155,10 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
         )}
       </div>
       
-      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-        <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
-        </span>
-      </div>
+      {/* Conditional attribution based on prayer name */}
+      {prayer.prayerName !== "Parshat Hamann" && prayer.prayerName !== "Hafrashas Challah" && (
+        <ChuppahThankYou />
+      )}
       
       <Button 
         onClick={isModalComplete(modalKey) ? undefined : handleComplete}
