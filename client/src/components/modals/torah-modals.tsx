@@ -291,8 +291,15 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                             setTimeout(() => {
                               setShowExplosion(false);
                               completeTask('torah');
-                              setFullscreenContent({ isOpen: false, title: '', content: null });
                               checkAndShowCongratulations();
+                              
+                              // Close fullscreen and navigate home
+                              const event = new CustomEvent('closeFullscreen');
+                              window.dispatchEvent(event);
+                              // Small delay to ensure fullscreen closes, then navigate to home
+                              setTimeout(() => {
+                                window.location.hash = '#/?section=home&scrollToProgress=true';
+                              }, 100);
                             }, 1500);
                           }}
                           disabled={isModalComplete('halacha')}
@@ -460,8 +467,15 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                             setTimeout(() => {
                               setShowExplosion(false);
                               completeTask('torah');
-                              setFullscreenContent({ isOpen: false, title: '', content: null });
                               checkAndShowCongratulations();
+                              
+                              // Close fullscreen and navigate home
+                              const event = new CustomEvent('closeFullscreen');
+                              window.dispatchEvent(event);
+                              // Small delay to ensure fullscreen closes, then navigate to home
+                              setTimeout(() => {
+                                window.location.hash = '#/?section=home&scrollToProgress=true';
+                              }, 100);
                             }, 1500);
                           }}
                           disabled={isModalComplete('emuna')}
@@ -689,8 +703,15 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                             setTimeout(() => {
                               setShowExplosion(false);
                               completeTask('torah');
-                              setFullscreenContent({ isOpen: false, title: '', content: null });
                               checkAndShowCongratulations();
+                              
+                              // Close fullscreen and navigate home
+                              const event = new CustomEvent('closeFullscreen');
+                              window.dispatchEvent(event);
+                              // Small delay to ensure fullscreen closes, then navigate to home
+                              setTimeout(() => {
+                                window.location.hash = '#/?section=home&scrollToProgress=true';
+                              }, 100);
                             }, 1500);
                           }}
                           disabled={isModalComplete('featured')}
@@ -943,30 +964,15 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                     setTimeout(() => {
                       setShowExplosion(false);
                       completeTask('torah');
-                      setFullscreenContent({ isOpen: false, title: '', content: null });
-                      // Navigate to home section and scroll to progress to show flower growth
-                      if (onSectionChange) {
-                        onSectionChange('home');
-                        // Also scroll to progress section
-                        setTimeout(() => {
-                          const progressElement = document.getElementById('daily-progress-garden');
-                          if (progressElement) {
-                            progressElement.scrollIntoView({ 
-                              behavior: 'smooth', 
-                              block: 'center' 
-                            });
-                          }
-                        }, 300);
-                      } else {
-                        // Fallback: redirect to home with scroll parameter
-                        window.location.hash = '#/?section=home&scrollToProgress=true';
-                      }
-                      // Check if all tasks are completed and show congratulations
+                      checkAndShowCongratulations();
+                      
+                      // Close fullscreen and navigate home
+                      const event = new CustomEvent('closeFullscreen');
+                      window.dispatchEvent(event);
+                      // Small delay to ensure fullscreen closes, then navigate to home
                       setTimeout(() => {
-                        if (checkAndShowCongratulations()) {
-                          openModal('congratulations', 'torah');
-                        }
-                      }, 200);
+                        window.location.hash = '#/?section=home&scrollToProgress=true';
+                      }, 100);
                     }, 1500);
                   }}
                   disabled={isModalComplete('halacha')}
@@ -1055,30 +1061,15 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                     setTimeout(() => {
                       setShowExplosion(false);
                       completeTask('torah');
-                      setFullscreenContent({ isOpen: false, title: '', content: null });
-                      // Navigate to home section and scroll to progress to show flower growth
-                      if (onSectionChange) {
-                        onSectionChange('home');
-                        // Also scroll to progress section
-                        setTimeout(() => {
-                          const progressElement = document.getElementById('daily-progress-garden');
-                          if (progressElement) {
-                            progressElement.scrollIntoView({ 
-                              behavior: 'smooth', 
-                              block: 'center' 
-                            });
-                          }
-                        }, 300);
-                      } else {
-                        // Fallback: redirect to home with scroll parameter
-                        window.location.hash = '#/?section=home&scrollToProgress=true';
-                      }
-                      // Check if all tasks are completed and show congratulations
+                      checkAndShowCongratulations();
+                      
+                      // Close fullscreen and navigate home
+                      const event = new CustomEvent('closeFullscreen');
+                      window.dispatchEvent(event);
+                      // Small delay to ensure fullscreen closes, then navigate to home
                       setTimeout(() => {
-                        if (checkAndShowCongratulations()) {
-                          openModal('congratulations', 'torah');
-                        }
-                      }, 200);
+                        window.location.hash = '#/?section=home&scrollToProgress=true';
+                      }, 100);
                     }, 1500);
                   }}
                   disabled={isModalComplete('featured')}
