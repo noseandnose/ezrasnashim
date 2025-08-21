@@ -131,15 +131,25 @@ export const useModalCompletionStore = create<ModalCompletionState>((set, get) =
       const stored = localStorage.getItem('modalCompletions');
       if (stored) {
         const parsed = JSON.parse(stored);
-        // Convert arrays back to Sets
+        const today = new Date().toISOString().split('T')[0];
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        
+        // Convert arrays back to Sets, but only keep today and yesterday
         const completedModals: Record<string, Set<string>> = {};
         for (const [date, modals] of Object.entries(parsed)) {
-          completedModals[date] = new Set(modals as string[]);
+          // Only load today's and yesterday's data (for midnight transition)
+          if (date === today || date === yesterdayStr) {
+            completedModals[date] = new Set(modals as string[]);
+          }
         }
         return completedModals;
       }
     } catch (e) {
       console.error('Failed to load modal completions from storage:', e);
+      // Clear corrupted data
+      localStorage.removeItem('modalCompletions');
     }
     return {};
   };

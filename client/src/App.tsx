@@ -32,6 +32,35 @@ function Router() {
   useEffect(() => {
     initializeCache();
     
+    // One-time cleanup of stale modal completion data
+    const cleanupModalCompletions = () => {
+      try {
+        const stored = localStorage.getItem('modalCompletions');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const today = new Date().toISOString().split('T')[0];
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          const yesterdayStr = yesterday.toISOString().split('T')[0];
+          
+          // Keep only today and yesterday
+          const cleaned: Record<string, string[]> = {};
+          for (const [date, modals] of Object.entries(parsed)) {
+            if (date === today || date === yesterdayStr) {
+              cleaned[date] = modals as string[];
+            }
+          }
+          
+          localStorage.setItem('modalCompletions', JSON.stringify(cleaned));
+        }
+      } catch (e) {
+        // If data is corrupted, clear it
+        localStorage.removeItem('modalCompletions');
+      }
+    };
+    
+    cleanupModalCompletions();
+    
     // Register service worker for PWA functionality
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
