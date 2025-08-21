@@ -46,6 +46,11 @@ export function FullscreenModal({
         onClose();
       }
     };
+
+    // Handle custom close event
+    const handleCloseFullscreen = () => {
+      onClose();
+    };
     
     // Save current scroll position and body styles
     const scrollY = window.scrollY;
@@ -70,6 +75,8 @@ export function FullscreenModal({
     
     // Add escape listener with capture
     document.addEventListener('keydown', handleEscape, true);
+    // Add custom close event listener
+    window.addEventListener('closeFullscreen', handleCloseFullscreen);
 
     return () => {
       // Restore body styles
@@ -86,6 +93,7 @@ export function FullscreenModal({
       window.scrollTo(0, scrollY);
       
       document.removeEventListener('keydown', handleEscape, true);
+      window.removeEventListener('closeFullscreen', handleCloseFullscreen);
     };
   }, [isOpen, onClose]);
 
