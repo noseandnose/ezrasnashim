@@ -2772,6 +2772,16 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
 
   if (isLoading) return <div className="text-center">Loading prayer...</div>;
   if (!prayer) return <div className="text-center">Prayer not found</div>;
+  
+  // Determine which specific modal to check and mark complete based on prayer category
+  let modalKey = 'individual-prayer';
+  if (prayer?.category === 'refuah' || prayer?.category === 'family' || prayer?.category === 'life') {
+    modalKey = 'tefillos';
+  } else if (prayer?.category === 'blessings') {
+    modalKey = 'blessings';
+  } else if (prayer?.category === 'personal') {
+    modalKey = 'personal-prayers';
+  }
 
   return (
     <>
@@ -2843,10 +2853,10 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
 
       <div className="heart-explosion-container">
         <Button 
-          onClick={isModalComplete('individual-prayer') ? undefined : () => {
+          onClick={isModalComplete(modalKey) ? undefined : () => {
             // Track modal completion and mark as completed globally
-            trackModalComplete('individual-prayer');
-            markModalComplete('individual-prayer');
+            trackModalComplete(modalKey);
+            markModalComplete(modalKey);
             
             completeTask('tefilla');
             setShowHeartExplosion(true);
@@ -2858,14 +2868,14 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
               window.location.hash = '#/?section=home&scrollToProgress=true';
             }, 2000);
           }}
-          disabled={isModalComplete('individual-prayer')}
+          disabled={isModalComplete(modalKey)}
           className={`w-full py-3 rounded-xl platypi-medium border-0 ${
-            isModalComplete('individual-prayer') 
+            isModalComplete(modalKey) 
               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
               : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
           }`}
         >
-          {isModalComplete('individual-prayer') ? 'Completed Today' : 'Complete'}
+          {isModalComplete(modalKey) ? 'Completed Today' : 'Complete'}
         </Button>
         
         {/* Heart Explosion Animation */}

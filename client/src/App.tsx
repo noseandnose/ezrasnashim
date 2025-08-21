@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useGeolocation, useJewishTimes } from "@/hooks/use-jewish-times";
 import { initializeCache } from "@/lib/cache";
 import { useEffect, lazy, Suspense } from "react";
+import "@/utils/clear-modal-completions";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));
