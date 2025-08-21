@@ -4008,10 +4008,11 @@ function JerusalemCompass() {
                   return (
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
                       <Heart 
-                        className="w-4 h-4" 
+                        className={`w-4 h-4 ${isAligned ? 'animate-pulse' : ''}`}
                         style={{
                           color: isAligned ? '#b6cdb5' : '#eacbd2',
-                          fill: isAligned ? '#b6cdb5' : '#eacbd2'
+                          fill: isAligned ? '#b6cdb5' : '#eacbd2',
+                          animationDuration: isAligned ? '1s' : undefined
                         }}
                         strokeWidth={0} 
                       />
