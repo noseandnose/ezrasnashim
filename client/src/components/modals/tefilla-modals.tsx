@@ -3642,8 +3642,10 @@ function JerusalemCompass() {
                   );
                 })()}
                 
-                {/* Center dot */}
-                <div className="absolute top-1/2 left-1/2 w-2 h-2 rounded-full bg-black/20 transform -translate-x-1/2 -translate-y-1/2 z-20"></div>
+                {/* Center heart */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
+                  <Heart className="w-4 h-4 text-rose-400 fill-rose-400" />
+                </div>
               </div>
 
               {/* Alignment Status */}
@@ -3667,7 +3669,7 @@ function JerusalemCompass() {
                     }`}>
                       {isAligned
                         ? '✓ Aligned with the Kotel!' 
-                        : 'Turn until the wall icon is at the top'
+                        : 'Turn until the Icon is at the top'
                       }
                     </p>
                   </div>
@@ -3683,18 +3685,7 @@ function JerusalemCompass() {
                 </div>
               )}
 
-              {/* Direction Info */}
-              <div className="bg-gradient-soft rounded-2xl p-4 text-center">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-center space-x-2">
-                    <Compass className="w-5 h-5 text-blush" />
-                    <span className="platypi-bold text-lg text-black">
-                      {getCardinalDirection(direction)} ({Math.round(direction)}°)
-                    </span>
-                  </div>
-                  <p className="platypi-regular text-sm text-black/70">Direction to the Kotel</p>
-                </div>
-              </div>
+
 
               {/* Location Info */}
               <div className="bg-white rounded-2xl p-3 border border-blush/10">
