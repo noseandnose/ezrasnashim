@@ -163,13 +163,12 @@ export default function TableSection() {
             }`}
             onClick={() => {
               if (recipeContent) {
-                // Open directly in fullscreen without modal flash
-                const fullscreenEvent = new CustomEvent('navigateToSection', { 
-                  detail: { 
-                    section: 'table', 
-                    openFullscreen: 'recipe',
+                // Open directly in fullscreen without setting activeModal
+                const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
+                  detail: {
+                    modalKey: 'recipe',
                     content: recipeContent
-                  } 
+                  }
                 });
                 window.dispatchEvent(fullscreenEvent);
               }
@@ -226,13 +225,12 @@ export default function TableSection() {
             }`}
             onClick={() => {
               if (inspirationContent) {
-                // Open directly in fullscreen without modal flash
-                const fullscreenEvent = new CustomEvent('navigateToSection', { 
-                  detail: { 
-                    section: 'table', 
-                    openFullscreen: 'inspiration',
+                // Open directly in fullscreen without setting activeModal
+                const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
+                  detail: {
+                    modalKey: 'inspiration',
                     content: inspirationContent
-                  } 
+                  }
                 });
                 window.dispatchEvent(fullscreenEvent);
               }
