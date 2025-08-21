@@ -707,7 +707,7 @@ export default function TableModals() {
                 )}
                 
                 {/* Ingredients */}
-                {recipeContent.ingredients && recipeContent.ingredients.length > 0 && (
+                {recipeContent.ingredients && Array.isArray(recipeContent.ingredients) && recipeContent.ingredients.length > 0 && (
                   <div className="mb-6">
                     <h4 className="platypi-bold text-black text-base mb-3">Ingredients</h4>
                     <ul className="space-y-2">
@@ -722,7 +722,7 @@ export default function TableModals() {
                 )}
                 
                 {/* Instructions */}
-                {recipeContent.instructions && recipeContent.instructions.length > 0 && (
+                {recipeContent.instructions && Array.isArray(recipeContent.instructions) && recipeContent.instructions.length > 0 && (
                   <div className="mb-6">
                     <h4 className="platypi-bold text-black text-base mb-3">Instructions</h4>
                     <ol className="space-y-3">
