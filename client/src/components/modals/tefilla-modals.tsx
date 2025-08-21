@@ -3689,8 +3689,10 @@ function JerusalemCompass() {
   const initializeOrientation = () => {
     let lastHeading = 0;
     let headingBuffer: number[] = [];
-    const BUFFER_SIZE = 3; // Keep last 3 readings for averaging
-    const UPDATE_THRESHOLD = 2; // Only update if change is more than 2 degrees
+    const BUFFER_SIZE = 5; // Increased buffer for more stable averaging
+    const UPDATE_THRESHOLD = 3; // Increased threshold to reduce jitter
+    let lastUpdateTime = Date.now();
+    const MIN_UPDATE_INTERVAL = 100; // Minimum 100ms between updates
     
     const handleOrientation = (event: DeviceOrientationEvent) => {
       let heading = 0;
@@ -3714,13 +3716,32 @@ function JerusalemCompass() {
         headingBuffer.shift();
       }
       
-      // Calculate average heading from buffer
-      const avgHeading = headingBuffer.reduce((sum, h) => sum + h, 0) / headingBuffer.length;
+      // Wait for buffer to fill before calculating
+      if (headingBuffer.length < BUFFER_SIZE) {
+        return;
+      }
+      
+      // Calculate weighted average (recent readings have more weight)
+      const weights = [0.1, 0.15, 0.2, 0.25, 0.3]; // More weight to recent readings
+      let weightedSum = 0;
+      let totalWeight = 0;
+      headingBuffer.forEach((h, i) => {
+        weightedSum += h * weights[i];
+        totalWeight += weights[i];
+      });
+      const avgHeading = weightedSum / totalWeight;
+      
+      // Check time constraint
+      const now = Date.now();
+      if (now - lastUpdateTime < MIN_UPDATE_INTERVAL) {
+        return;
+      }
       
       // Only update if change is significant
       const headingDiff = Math.abs(avgHeading - lastHeading);
       if (headingDiff > UPDATE_THRESHOLD && headingDiff < (360 - UPDATE_THRESHOLD)) {
         lastHeading = avgHeading;
+        lastUpdateTime = now;
         setDeviceOrientation(Math.round(avgHeading));
       }
     };
@@ -3837,7 +3858,8 @@ function JerusalemCompass() {
                     transform: orientationSupported 
                       ? `rotate(${-deviceOrientation}deg)` 
                       : 'rotate(0deg)',
-                    transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
+                    transition: 'transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)',
+                    willChange: 'transform'
                   }}
                 >
                   
@@ -3854,6 +3876,8 @@ function JerusalemCompass() {
                     className="absolute top-1/2 left-1/2 w-full h-full pointer-events-none"
                     style={{ 
                       transform: `translate(-50%, -50%) rotate(${direction}deg)`,
+                      transition: 'transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)',
+                      willChange: 'transform',
                       maxWidth: '100%',
                       maxHeight: '100%'
                     }}
@@ -3874,7 +3898,8 @@ function JerusalemCompass() {
                               className="w-6 h-6"
                               style={{
                                 transform: `rotate(${-direction + deviceOrientation}deg)`,
-                                transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
+                                transition: 'transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)',
+                                willChange: 'transform'
                               }}
                             />
                           </div>

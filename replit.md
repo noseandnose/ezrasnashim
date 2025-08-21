@@ -14,6 +14,7 @@ Text formatting: Database content supports markdown-style formatting - **text** 
 
 ## Recent Changes (August 21, 2025)
 ### Launch Preparation Optimizations
+- **Compass Stabilization**: Enhanced with weighted averaging (5-reading buffer), time-based throttling (100ms intervals), and smoother CSS transitions (0.8s cubic-bezier). Eliminates jumping and floating issues.
 - **Compass Simplification**: Removed magnetic declination, smoothing filters, and tilt compensation. Now uses native device heading only with Jerusalem fallback (31.7767, 35.2345).
 - **Modal System**: All major content modals migrated to fullscreen. Translation buttons now conditionally shown only when translations exist.
 - **Performance**: Implemented lazy loading for all routes, added PWA service worker for offline support, optimized event handlers with debouncing.
