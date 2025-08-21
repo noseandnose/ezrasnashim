@@ -2104,21 +2104,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               </div>
             </div>
           </div>
-
-          <div className="heart-explosion-container">
-            <Button 
-              onClick={isModalComplete('womens-prayers') ? undefined : completeWithAnimation}
-              disabled={isModalComplete('womens-prayers')}
-              className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
-                isModalComplete('womens-prayers') 
-                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
-              }`}
-            >
-              {isModalComplete('womens-prayers') ? 'Completed Today' : "Complete Women's Prayers"}
-            </Button>
-            <HeartExplosion trigger={showExplosion} />
-          </div>
         </DialogContent>
       </Dialog>
       {/* Blessings Modal */}

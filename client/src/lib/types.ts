@@ -132,6 +132,9 @@ export const useModalCompletionStore = create<ModalCompletionState>((set, get) =
       const newState = { ...state.completedModals };
       if (!newState[today]) {
         newState[today] = new Set();
+      } else {
+        // Clone the existing Set to ensure proper state update
+        newState[today] = new Set(newState[today]);
       }
       newState[today].add(modalId);
       return { completedModals: newState };
