@@ -70,7 +70,7 @@ export function BirkatHamazonModal() {
   const [fullscreenContent, setFullscreenContent] = useState<{
     isOpen: boolean;
     title: string;
-    content: React.ReactNode;
+    content: React.ReactNode | ((params: { language: 'hebrew' | 'english', fontSize: number }) => React.ReactNode);
     contentType?: string;
   }>({ isOpen: false, title: '', content: null });
 
@@ -271,7 +271,8 @@ export function BirkatHamazonModal() {
                   isOpen: true,
                   title: 'Me\'ein Shalosh',
                   contentType: 'me-ein-shalosh',
-                  content: <MeeinShaloshFullscreenContent language={language} fontSize={fontSize} />
+                  content: ({ language: currentLang, fontSize: currentFontSize }: { language: 'hebrew' | 'english', fontSize: number }) => 
+                    <MeeinShaloshFullscreenContent language={currentLang} fontSize={currentFontSize} />
                 });
                 closeModal(); // Close the After Brochas selection modal
               }}
@@ -288,7 +289,8 @@ export function BirkatHamazonModal() {
                   isOpen: true,
                   title: 'Birkat Hamazon',
                   contentType: 'birkat-hamazon',
-                  content: <BirkatHamazonFullscreenContent language={language} fontSize={fontSize} />
+                  content: ({ language: currentLang, fontSize: currentFontSize }: { language: 'hebrew' | 'english', fontSize: number }) => 
+                    <BirkatHamazonFullscreenContent language={currentLang} fontSize={currentFontSize} />
                 });
                 closeModal(); // Close the After Brochas selection modal
               }}
@@ -511,7 +513,10 @@ export function BirkatHamazonModal() {
         language={language}
         onLanguageChange={setLanguage}
       >
-        {fullscreenContent.content}
+        {typeof fullscreenContent.content === 'function' 
+          ? fullscreenContent.content({ language, fontSize })
+          : fullscreenContent.content
+        }
       </FullscreenModal>
     )}
     </>
