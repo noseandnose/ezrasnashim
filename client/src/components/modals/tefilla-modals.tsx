@@ -949,12 +949,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
     refetchInterval: 30000 // Refetch every 30 seconds
   });
 
-  if (isLoading) return <div className="text-center py-8">Loading Tehillim...</div>;
-  if (!progress?.currentPerek) return <div className="text-center py-8">No Tehillim available</div>;
-
-  const completionKey = 'tehillim-chain';
-  const isCompleted = isModalComplete(completionKey);
-
+  // Define mutation before any conditional returns (hooks rule)
   const advanceChainMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/complete/${progress?.currentPerek}`, {
@@ -977,6 +972,13 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
       });
     }
   });
+
+  // Early returns after all hooks are defined
+  if (isLoading) return <div className="text-center py-8">Loading Tehillim...</div>;
+  if (!progress?.currentPerek) return <div className="text-center py-8">No Tehillim available</div>;
+
+  const completionKey = 'tehillim-chain';
+  const isCompleted = isModalComplete(completionKey);
 
   const handleComplete = () => {
     trackModalComplete(completionKey);
