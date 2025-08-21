@@ -818,16 +818,18 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     // Get the saved return tab preference
     const returnTab = localStorage.getItem('tehillim-return-tab') || 'all';
     
-    // Close fullscreen and return to Tehillim modal with correct tab
-    const event = new CustomEvent('closeFullscreen');
-    window.dispatchEvent(event);
+    // Directly switch back to special-tehillim with the correct tab
+    const { setTehillimActiveTab } = useModalStore.getState();
+    setTehillimActiveTab(returnTab as 'all' | 'special'); // Set the correct tab first
     
-    // Small delay to ensure fullscreen closes, then open special-tehillim modal
-    setTimeout(() => {
-      const { openModal, setTehillimActiveTab } = useModalStore.getState();
-      setTehillimActiveTab(returnTab as 'all' | 'special'); // Return to the saved tab
-      openModal('special-tehillim', 'tefilla');
-    }, 100);
+    // Switch back to special-tehillim fullscreen content
+    const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
+      detail: {
+        title: 'Tehillim',
+        contentType: 'special-tehillim'
+      }
+    });
+    window.dispatchEvent(fullscreenEvent);
   };
 
   const handleCompleteAndNext = () => {
@@ -848,7 +850,9 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     // The fullscreen content will automatically update due to the dependency on selectedPsalm
   };
 
-  const isFromAllTab = tehillimActiveTab === 'all';
+  // Determine button layout based on stored return tab
+  const returnTab = localStorage.getItem('tehillim-return-tab') || 'all';
+  const isFromAllTab = returnTab === 'all';
 
   return (
     <div className="space-y-6">
@@ -1093,8 +1097,22 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       setFullscreenContent({ isOpen: false, title: '', content: null });
     };
 
+    const handleDirectFullscreen = (event: CustomEvent) => {
+      const { title, contentType } = event.detail;
+      setFullscreenContent({
+        isOpen: true,
+        title,
+        contentType,
+        content: null
+      });
+    };
+
     window.addEventListener('closeFullscreen', handleCloseFullscreen);
-    return () => window.removeEventListener('closeFullscreen', handleCloseFullscreen);
+    window.addEventListener('openDirectFullscreen', handleDirectFullscreen as EventListener);
+    return () => {
+      window.removeEventListener('closeFullscreen', handleCloseFullscreen);
+      window.removeEventListener('openDirectFullscreen', handleDirectFullscreen as EventListener);
+    };
   }, []);
 
   // Reset explosion state when modal changes
@@ -2729,18 +2747,18 @@ function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'h
 
   // Open individual Tehillim text
   const openTehillimText = (psalmNumber: number) => {
-    // Remember the current tab before navigating to individual Tehillim
-    setTehillimActiveTab(tehillimActiveTab);
+    // Store the current tab so we can return to it after completion
+    localStorage.setItem('tehillim-return-tab', tehillimActiveTab);
     setSelectedPsalm(psalmNumber);
     
-    // Store the current tab in localStorage so we can return to it
-    localStorage.setItem('tehillim-return-tab', tehillimActiveTab);
-    
-    // Close current fullscreen and open individual tehillim in fullscreen
-    window.dispatchEvent(new Event('closeFullscreen'));
-    setTimeout(() => {
-      openModal('individual-tehillim', 'special-tehillim', psalmNumber);
-    }, 100);
+    // Directly switch to individual Tehillim content without modal transitions
+    const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
+      detail: {
+        title: `Tehillim ${psalmNumber}`,
+        contentType: 'individual-tehillim'
+      }
+    });
+    window.dispatchEvent(fullscreenEvent);
   };
 
   // Generate array of all 150 psalms
