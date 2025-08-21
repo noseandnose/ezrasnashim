@@ -1170,6 +1170,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const [selectedPrayerId, setSelectedPrayerId] = useState<number | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [showExplosion, setShowExplosion] = useState(false);
+  const [activeExplosionModal, setActiveExplosionModal] = useState<string | null>(null);
   const [fullscreenContent, setFullscreenContent] = useState<{
     isOpen: boolean;
     title: string;
@@ -1329,17 +1330,23 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     // Use specific modal if provided, otherwise use activeModal
     const modalToComplete = specificModal || activeModal;
     
+    console.log('[DEBUG] completeWithAnimation called with:', specificModal, 'activeModal:', activeModal, 'modalToComplete:', modalToComplete);
+    
     // Track modal completion and mark as completed globally
     if (modalToComplete) {
+      // Only complete the specific modal that was clicked
+      console.log('[DEBUG] Marking modal complete:', modalToComplete);
       trackModalComplete(modalToComplete);
       markModalComplete(modalToComplete);
     }
     
     setShowExplosion(true);
+    setActiveExplosionModal(modalToComplete);
     
     // Wait for animation to complete before proceeding
     setTimeout(() => {
       setShowExplosion(false); // Reset explosion state
+      setActiveExplosionModal(null);
       completeTask('tefilla');
       closeModal();
       
@@ -2133,7 +2140,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             >
               {isModalComplete('blessings') ? 'Completed Today' : 'Complete Blessings'}
             </Button>
-            <HeartExplosion trigger={showExplosion} />
+            <HeartExplosion trigger={showExplosion && activeExplosionModal === 'blessings'} />
           </div>
         </DialogContent>
       </Dialog>
@@ -2164,7 +2171,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             >
               {isModalComplete('tefillos') ? 'Completed Today' : 'Complete Tefillos'}
             </Button>
-            <HeartExplosion trigger={showExplosion} />
+            <HeartExplosion trigger={showExplosion && activeExplosionModal === 'tefillos'} />
           </div>
         </DialogContent>
       </Dialog>
@@ -2209,7 +2216,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             >
               {isModalComplete('personal-prayers') ? 'Completed Today' : 'Complete Personal Prayers'}
             </Button>
-            <HeartExplosion trigger={showExplosion} />
+            <HeartExplosion trigger={showExplosion && activeExplosionModal === 'personal-prayers'} />
           </div>
         </DialogContent>
       </Dialog>
