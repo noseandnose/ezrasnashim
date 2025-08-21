@@ -115,7 +115,8 @@ function cleanHebrewText(text: string): string {
  * - ~~ for greyed out text
  * - ++ for larger text
  * - -- for smaller text
- * - [[ ]] for grey box content
+ * - [[ ]] for grey box content (Hebrew/conditional content)
+ * - {{ }} for grey box content (English content)
  * - Conditional content with [[ ]] tags is processed separately by tefilla processor
  * @param text - The raw text to format
  * @returns The formatted HTML string
@@ -147,6 +148,13 @@ export function formatTextContent(text: string | null | undefined): string {
     }
     
     // This is regular grey box content
+    return `<div style="background-color: #f3f4f6; padding: 12px; border-radius: 8px; margin: 8px 0; border-left: 4px solid #d1d5db;">${content}</div>`;
+  });
+
+  // Process {{ }} for grey boxes (English content)
+  // This handles {{text}} for regular grey box content
+  formatted = formatted.replace(/\{\{([^}]+?)\}\}/g, (match, content) => {
+    // This is regular grey box content for English text
     return `<div style="background-color: #f3f4f6; padding: 12px; border-radius: 8px; margin: 8px 0; border-left: 4px solid #d1d5db;">${content}</div>`;
   });
   
