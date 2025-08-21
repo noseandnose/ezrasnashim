@@ -144,8 +144,8 @@ export default function TableModals() {
 
   return (
     <>
-      {/* Recipe Modal */}
-      <Dialog open={activeModal === 'recipe'} onOpenChange={() => closeModal(true)}>
+      {/* Recipe Modal - Only show if not using fullscreen */}
+      <Dialog open={activeModal === 'recipe' && !fullscreenContent.isOpen} onOpenChange={() => closeModal(true)}>
         <DialogContent className="max-h-[80vh] overflow-y-auto">
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg platypi-bold text-black">
@@ -310,8 +310,8 @@ export default function TableModals() {
         </DialogContent>
       </Dialog>
 
-      {/* Table Inspiration Modal */}
-      <Dialog open={activeModal === 'inspiration'} onOpenChange={() => closeModal(true)}>
+      {/* Table Inspiration Modal - Only show if not using fullscreen */}
+      <Dialog open={activeModal === 'inspiration' && !fullscreenContent.isOpen} onOpenChange={() => closeModal(true)}>
         <DialogContent className="max-h-[80vh] overflow-y-auto" aria-describedby="inspiration-description">
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg platypi-bold text-black">Creative Jewish Living</DialogTitle>
@@ -642,6 +642,8 @@ export default function TableModals() {
         isOpen={fullscreenContent.isOpen}
         onClose={() => {
           setFullscreenContent({ isOpen: false, title: '', content: null });
+          // Close the underlying modal as well
+          closeModal();
           // Navigate back to the Life page (table section)
           window.dispatchEvent(new CustomEvent('navigateToSection', { 
             detail: { section: 'table' } 
