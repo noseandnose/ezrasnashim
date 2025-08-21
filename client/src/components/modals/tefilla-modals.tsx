@@ -3309,7 +3309,7 @@ function JerusalemCompass() {
     return bearing;
   };
 
-  // Get user's location
+  // Get user's location with robust error handling
   const getUserLocation = () => {
     setIsLoading(true);
     setError("");
@@ -3332,33 +3332,64 @@ function JerusalemCompass() {
         setDirection(bearing);
 
         // Calculate approximate magnetic declination (simplified)
-        // For more accuracy, would need a magnetic declination API
         const declinationAngle = getMagneticDeclination(userLat, userLng);
         setMagneticDeclination(declinationAngle);
         
-        // Get location name using reverse geocoding
-        try {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLat}&lon=${userLng}&accept-language=en`
-          );
-          const data = await response.json();
-          const city = data.address?.city || data.address?.town || data.address?.village || data.address?.county || "Unknown location";
-          const country = data.address?.country || "";
-          setLocationName(`${city}, ${country}`);
-        } catch (err) {
-          setLocationName(`${userLat.toFixed(4)}, ${userLng.toFixed(4)}`);
-        }
+        // Get location name with timeout and fallback
+        const getLocationName = async () => {
+          try {
+            // Try the backend API first with a 5-second timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            
+            const response = await fetch(`/api/location/${userLat}/${userLng}`, {
+              signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            
+            if (response.ok) {
+              const locationData = await response.json();
+              return `${locationData.city || 'Unknown'}, ${locationData.country || 'Unknown'}`;
+            }
+            throw new Error('Backend API failed');
+          } catch (err) {
+            // Fallback to coordinates if all fails
+            return `Location: ${userLat.toFixed(3)}°, ${userLng.toFixed(3)}°`;
+          }
+        };
         
+        // Set location name (don't wait for it to complete the compass)
+        getLocationName().then(name => setLocationName(name));
+        
+        // Set a basic location name immediately so compass works
+        setLocationName("Your Location");
         setIsLoading(false);
       },
       (error) => {
-        setError("Unable to get your location. Please enable location access.");
+        let errorMessage = "Unable to get your location.";
+        
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = "Location access denied. Please enable location access in your browser settings.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = "Location information unavailable. Please try again.";
+            break;
+          case error.TIMEOUT:
+            errorMessage = "Location request timed out. Please try again.";
+            break;
+          default:
+            errorMessage = "Error getting location. Please try again.";
+            break;
+        }
+        
+        setError(errorMessage);
         setIsLoading(false);
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 600000 // 10 minutes
+        timeout: 15000, // Increased timeout to 15 seconds
+        maximumAge: 300000 // 5 minutes cache
       }
     );
   };
@@ -3545,7 +3576,7 @@ function JerusalemCompass() {
                 Try Again
               </Button>
             </div>
-          ) : direction !== null ? (
+          ) : location && direction !== null ? (
             <div className="space-y-6">
               {/* Compass Container with Proper Containment */}
               <div className="relative w-64 h-64 mx-auto overflow-hidden rounded-full select-none"
