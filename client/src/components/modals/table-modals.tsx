@@ -217,7 +217,7 @@ export default function TableModals() {
                       // Handle ingredients as plain text with bullet points
                       if (typeof recipeContent.ingredients === 'string') {
                         // Split by newlines and filter out empty lines
-                        const lines = recipeContent.ingredients
+                        const lines = (recipeContent.ingredients as string)
                           .split('\n')
                           .map((line: string) => line.trim())
                           .filter((line: string) => line && line !== '*');
@@ -252,18 +252,17 @@ export default function TableModals() {
                     {(() => {
                       // Handle instructions as plain text with numbered steps
                       if (typeof recipeContent.instructions === 'string') {
-                        // Split by newlines and numbers
-                        const lines = recipeContent.instructions
-                          .split(/(?=\d+\.\s)|\n/)
-                          .map((line: string) => line.trim())
-                          .filter((line: string) => line && line !== '.');
+                        // Split by numbered steps: look for patterns like "1.", "2.", etc. at start of line or after newline
+                        const steps = (recipeContent.instructions as string)
+                          .split(/\n?\d+\.\s*/)
+                          .map((step: string) => step.trim())
+                          .filter((step: string) => step); // Remove empty strings
                         
-                        return lines.map((instruction: string, index: number) => {
-                          // Remove leading numbers and periods
-                          const cleaned = instruction.replace(/^\d+\.\s*/, '').trim();
-                          return cleaned ? (
-                            <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(cleaned) }} />
-                          ) : null;
+                        return steps.map((instruction: string, index: number) => {
+                          // The instruction is already cleaned (numbers removed by split)
+                          return (
+                            <li key={index} dangerouslySetInnerHTML={{ __html: formatTextContent(instruction) }} />
+                          );
                         });
                       }
                       
@@ -715,7 +714,7 @@ export default function TableModals() {
                         // Handle ingredients as plain text with bullet points
                         if (typeof recipeContent.ingredients === 'string') {
                           // Split by newlines and filter out empty lines
-                          const lines = recipeContent.ingredients
+                          const lines = (recipeContent.ingredients as string)
                             .split('\n')
                             .map((line: string) => line.trim())
                             .filter((line: string) => line && line !== '*');
@@ -756,21 +755,20 @@ export default function TableModals() {
                       {(() => {
                         // Handle instructions as plain text with numbered steps
                         if (typeof recipeContent.instructions === 'string') {
-                          // Split by newlines and numbers
-                          const lines = recipeContent.instructions
-                            .split(/(?=\d+\.\s)|\n/)
-                            .map((line: string) => line.trim())
-                            .filter((line: string) => line && line !== '.');
+                          // Split by numbered steps: look for patterns like "1.", "2.", etc. at start of line or after newline
+                          const steps = (recipeContent.instructions as string)
+                            .split(/\n?\d+\.\s*/)
+                            .map((step: string) => step.trim())
+                            .filter((step: string) => step); // Remove empty strings
                           
-                          return lines.map((instruction: string, index: number) => {
-                            // Remove leading numbers and periods
-                            const cleaned = instruction.replace(/^\d+\.\s*/, '').trim();
-                            return cleaned ? (
+                          return steps.map((instruction: string, index: number) => {
+                            // The instruction is already cleaned (numbers removed by split)
+                            return (
                               <li key={index} className="flex items-start">
                                 <span className="platypi-bold text-rose-400 mr-3 mt-0.5 min-w-[1.5rem]">{index + 1}.</span>
-                                <span className="platypi-regular text-black text-sm flex-1 leading-relaxed" dangerouslySetInnerHTML={{ __html: formatTextContent(cleaned) }} />
+                                <span className="platypi-regular text-black text-sm flex-1 leading-relaxed" dangerouslySetInnerHTML={{ __html: formatTextContent(instruction) }} />
                               </li>
-                            ) : null;
+                            );
                           });
                         }
                         
@@ -848,12 +846,16 @@ export default function TableModals() {
                       <div className="mb-6">
                         <div className="relative bg-gray-100 rounded-lg overflow-hidden">
                           {mediaItems[currentMediaIndex]?.type === 'image' ? (
-                            <LazyImage
-                              src={mediaItems[currentMediaIndex].url!}
-                              alt="Inspiration content"
-                              className="w-full h-64 object-cover cursor-pointer"
+                            <div
+                              className="cursor-pointer"
                               onClick={() => setFullscreenImage(mediaItems[currentMediaIndex].url!)}
-                            />
+                            >
+                              <LazyImage
+                                src={mediaItems[currentMediaIndex].url!}
+                                alt="Inspiration content"
+                                className="w-full h-64 object-cover"
+                              />
+                            </div>
                           ) : mediaItems[currentMediaIndex]?.type === 'video' ? (
                             <video 
                               controls 
