@@ -707,31 +707,85 @@ export default function TableModals() {
                 )}
                 
                 {/* Ingredients */}
-                {recipeContent.ingredients && Array.isArray(recipeContent.ingredients) && recipeContent.ingredients.length > 0 && (
+                {recipeContent.ingredients && (
                   <div className="mb-6">
                     <h4 className="platypi-bold text-black text-base mb-3">Ingredients</h4>
                     <ul className="space-y-2">
-                      {recipeContent.ingredients.map((ingredient, index) => (
-                        <li key={index} className="flex items-start">
-                          <span className="text-rose-400 mr-2 mt-1.5">•</span>
-                          <span className="platypi-regular text-black text-sm flex-1">{ingredient}</span>
-                        </li>
-                      ))}
+                      {(() => {
+                        // Handle ingredients as plain text with bullet points
+                        if (typeof recipeContent.ingredients === 'string') {
+                          // Split by newlines and filter out empty lines
+                          const lines = recipeContent.ingredients
+                            .split('\n')
+                            .map((line: string) => line.trim())
+                            .filter((line: string) => line && line !== '*');
+                          
+                          return lines.map((ingredient: string, index: number) => {
+                            // Remove leading asterisk or bullet point if present
+                            const cleaned = ingredient.replace(/^\*\s*/, '').trim();
+                            return cleaned ? (
+                              <li key={index} className="flex items-start">
+                                <span className="text-rose-400 mr-2 mt-1.5">•</span>
+                                <span className="platypi-regular text-black text-sm flex-1" dangerouslySetInnerHTML={{ __html: formatTextContent(cleaned) }} />
+                              </li>
+                            ) : null;
+                          });
+                        }
+                        
+                        // If it's already an array
+                        if (Array.isArray(recipeContent.ingredients)) {
+                          return recipeContent.ingredients.map((ingredient: any, index: number) => (
+                            <li key={index} className="flex items-start">
+                              <span className="text-rose-400 mr-2 mt-1.5">•</span>
+                              <span className="platypi-regular text-black text-sm flex-1" dangerouslySetInnerHTML={{ __html: formatTextContent(String(ingredient)) }} />
+                            </li>
+                          ));
+                        }
+                        
+                        return null;
+                      })()}
                     </ul>
                   </div>
                 )}
                 
                 {/* Instructions */}
-                {recipeContent.instructions && Array.isArray(recipeContent.instructions) && recipeContent.instructions.length > 0 && (
+                {recipeContent.instructions && (
                   <div className="mb-6">
                     <h4 className="platypi-bold text-black text-base mb-3">Instructions</h4>
                     <ol className="space-y-3">
-                      {recipeContent.instructions.map((instruction, index) => (
-                        <li key={index} className="flex items-start">
-                          <span className="platypi-bold text-rose-400 mr-3 mt-0.5 min-w-[1.5rem]">{index + 1}.</span>
-                          <span className="platypi-regular text-black text-sm flex-1 leading-relaxed">{instruction}</span>
-                        </li>
-                      ))}
+                      {(() => {
+                        // Handle instructions as plain text with numbered steps
+                        if (typeof recipeContent.instructions === 'string') {
+                          // Split by newlines and numbers
+                          const lines = recipeContent.instructions
+                            .split(/(?=\d+\.\s)|\n/)
+                            .map((line: string) => line.trim())
+                            .filter((line: string) => line && line !== '.');
+                          
+                          return lines.map((instruction: string, index: number) => {
+                            // Remove leading numbers and periods
+                            const cleaned = instruction.replace(/^\d+\.\s*/, '').trim();
+                            return cleaned ? (
+                              <li key={index} className="flex items-start">
+                                <span className="platypi-bold text-rose-400 mr-3 mt-0.5 min-w-[1.5rem]">{index + 1}.</span>
+                                <span className="platypi-regular text-black text-sm flex-1 leading-relaxed" dangerouslySetInnerHTML={{ __html: formatTextContent(cleaned) }} />
+                              </li>
+                            ) : null;
+                          });
+                        }
+                        
+                        // If it's already an array
+                        if (Array.isArray(recipeContent.instructions)) {
+                          return recipeContent.instructions.map((instruction: any, index: number) => (
+                            <li key={index} className="flex items-start">
+                              <span className="platypi-bold text-rose-400 mr-3 mt-0.5 min-w-[1.5rem]">{index + 1}.</span>
+                              <span className="platypi-regular text-black text-sm flex-1 leading-relaxed" dangerouslySetInnerHTML={{ __html: formatTextContent(String(instruction)) }} />
+                            </li>
+                          ));
+                        }
+                        
+                        return null;
+                      })()}
                     </ol>
                   </div>
                 )}
@@ -779,14 +833,7 @@ export default function TableModals() {
                   </h3>
                 )}
                 
-                {inspirationContent.content && (
-                  <div 
-                    className="platypi-regular leading-relaxed text-black whitespace-pre-line mb-4"
-                    dangerouslySetInnerHTML={{ __html: formatTextContent(inspirationContent.content) }}
-                  />
-                )}
-                
-                {/* Media Gallery */}
+                {/* Media Gallery - Moved to top */}
                 {(() => {
                   const mediaItems = [
                     { url: inspirationContent.mediaUrl1, type: inspirationContent.mediaType1 },
@@ -829,7 +876,7 @@ export default function TableModals() {
                               >
                                 <ChevronRight size={20} />
                               </button>
-                              <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                              <div className="absolute top-2 left-1/2 transform -translate-x-1/2 flex space-x-2">
                                 {mediaItems.map((_, index) => (
                                   <button
                                     key={index}
@@ -848,6 +895,29 @@ export default function TableModals() {
                   }
                   return null;
                 })()}
+                
+                {inspirationContent.content && (
+                  <div 
+                    className="platypi-regular leading-relaxed text-black whitespace-pre-line mb-4"
+                    dangerouslySetInnerHTML={{ __html: formatTextContent(inspirationContent.content) }}
+                  />
+                )}
+              </div>
+              
+              {/* Thank You Section for Creative Jewish Living */}
+              <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                <p className="text-sm text-blue-900 platypi-medium">
+                  Thank you to{' '}
+                  <a 
+                    href="https://www.instagram.com/yidwithakid/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    YidWithAKid
+                  </a>
+                  {' '}for providing this Table inspiration
+                </p>
               </div>
               
               <div className="heart-explosion-container">
