@@ -35,7 +35,7 @@ export default function CongratulationsModal() {
             <DialogTitle className="text-2xl font-playfair font-bold text-black mb-3">
               Mazal Tov!
             </DialogTitle>
-            <DialogDescription className="text-black/80 mb-6 leading-relaxed font-inter">
+            <DialogDescription className="text-black font-bold mb-6 leading-relaxed font-inter">
               You have completed all three daily Mitzvas: Torah, Tefilla, and Tzedaka.
               <br /><br />
               On three things the world stands: on the Torah, on divine worship, and on acts of loving-kindness. (Pirkei Avot 1:2)
