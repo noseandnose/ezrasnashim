@@ -829,7 +829,8 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
       const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
         detail: {
           title: 'Tehillim',
-          contentType: 'special-tehillim'
+          contentType: 'special-tehillim',
+          activeTab: returnTab // Pass the return tab to ensure correct display
         }
       });
       window.dispatchEvent(fullscreenEvent);
@@ -857,6 +858,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
   // Determine button layout based on stored return tab
   const returnTab = localStorage.getItem('tehillim-return-tab') || 'all';
   const isFromAllTab = returnTab === 'all';
+  console.log('Individual Tehillim button logic - returnTab:', returnTab, 'isFromAllTab:', isFromAllTab); // Debug log
 
   return (
     <div className="space-y-6">
@@ -2763,7 +2765,8 @@ function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'h
     const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
       detail: {
         title: `Tehillim ${psalmNumber}`,
-        contentType: 'individual-tehillim'
+        contentType: 'individual-tehillim',
+        returnTab: tehillimActiveTab // Pass the current tab in the event detail
       }
     });
     window.dispatchEvent(fullscreenEvent);
@@ -2832,7 +2835,7 @@ function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'h
       <div className="space-y-4">
         {tehillimActiveTab === 'all' ? (
           <div className="bg-white/80 rounded-2xl p-3 border border-blush/10">
-            <div className="grid grid-cols-7 gap-2 overflow-hidden tehillim-button-grid">
+            <div className="grid grid-cols-6 gap-2 overflow-hidden tehillim-button-grid">
               {allPsalms.map((psalm) => (
                 <button
                   key={psalm}
@@ -2975,7 +2978,7 @@ function SpecialTehillimModal() {
       <div className="max-h-[50vh] overflow-y-auto">
         {tehillimActiveTab === 'all' ? (
           <div className="bg-white/80 rounded-2xl p-3 border border-blush/10">
-            <div className="grid grid-cols-7 gap-2 overflow-hidden tehillim-button-grid">
+            <div className="grid grid-cols-6 gap-2 overflow-hidden tehillim-button-grid">
               {allPsalms.map((psalm) => (
                 <button
                   key={psalm}
