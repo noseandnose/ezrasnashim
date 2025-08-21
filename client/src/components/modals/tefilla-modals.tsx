@@ -1103,7 +1103,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
   // Auto-redirect prayer modals to fullscreen
   useEffect(() => {
-    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'individual-tehillim', 'tehillim-text', 'al-hamichiya', 'birkat-hamazon'];
+    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'individual-tehillim', 'tehillim-text'];
     
     if (activeModal && fullscreenPrayerModals.includes(activeModal)) {
       // Close the regular modal immediately
@@ -1134,14 +1134,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           case 'tehillim-text':
             title = 'Global Tehillim Chain';
             contentType = 'global-tehillim';
-            break;
-          case 'al-hamichiya':
-            title = 'Me\'ein Shalosh';
-            contentType = 'me-ein-shalosh';
-            break;
-          case 'birkat-hamazon':
-            title = 'Birkat Hamazon';
-            contentType = 'birkat-hamazon';
             break;
         }
         
