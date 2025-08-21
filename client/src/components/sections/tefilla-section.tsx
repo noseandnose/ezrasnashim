@@ -29,7 +29,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
     if (!todaysCompletions) return false;
     
     // Check for any completion key that starts with 'individual-tehillim-'
-    for (const modalId of todaysCompletions) {
+    for (const modalId of Array.from(todaysCompletions)) {
       if (modalId.startsWith('individual-tehillim-')) {
         return true;
       }

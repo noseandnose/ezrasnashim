@@ -451,6 +451,8 @@ function renderPrayerContent(contentType: string | undefined, language: 'hebrew'
       return <NishmasFullscreenContent language={language} fontSize={fontSize} />;
     case 'individual-tehillim':
       return <TehillimFullscreenContent language={language} fontSize={fontSize} />;
+    case 'global-tehillim':
+      return <GlobalTehillimFullscreenContent language={language} fontSize={fontSize} />;
     default:
       return null;
   }
@@ -904,6 +906,117 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
   );
 }
 
+function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+  const tefillaConditions = useTefillaConditions();
+
+  // Get current global Tehillim progress
+  const { data: progress } = useQuery<GlobalTehillimProgress>({
+    queryKey: ['/api/tehillim/progress'],
+    queryFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress`);
+      if (!response.ok) throw new Error('Failed to fetch progress');
+      return response.json();
+    },
+    staleTime: 30000, // 30 seconds
+    refetchInterval: 60000 // Refetch every minute
+  });
+
+  // Get current psalm text
+  const { data: tehillimText, isLoading } = useQuery({
+    queryKey: ['/api/tehillim/text', progress?.currentPerek, language],
+    queryFn: async () => {
+      const response = await axiosClient.get(`/api/tehillim/text/${progress?.currentPerek}?language=${language}`);
+      return response.data;
+    },
+    enabled: !!progress?.currentPerek,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000 // 30 minutes
+  });
+
+  // Get current name being prayed for
+  const { data: currentName } = useQuery<TehillimName>({
+    queryKey: ['/api/tehillim/current-name'],
+    queryFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/current-name`);
+      if (!response.ok) throw new Error('Failed to fetch current name');
+      return response.json();
+    },
+    staleTime: 60000, // 1 minute
+    refetchInterval: 30000 // Refetch every 30 seconds
+  });
+
+  if (isLoading) return <div className="text-center py-8">Loading Tehillim...</div>;
+  if (!progress?.currentPerek) return <div className="text-center py-8">No Tehillim available</div>;
+
+  const completionKey = 'tehillim-chain';
+  const isCompleted = isModalComplete(completionKey);
+
+  const handleComplete = () => {
+    trackModalComplete(completionKey);
+    markModalComplete(completionKey);
+    completeTask('tefilla');
+    
+    // Close fullscreen and return to home
+    const event = new CustomEvent('closeFullscreen');
+    window.dispatchEvent(event);
+    
+    // Show congratulations
+    setTimeout(() => {
+      checkAndShowCongratulations();
+    }, 100);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-white rounded-2xl p-6 border border-blush/10">
+        <div
+          className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
+          style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
+          dangerouslySetInnerHTML={{
+            __html: processTefillaContent(tehillimText?.text || '', tefillaConditions)
+          }}
+        />
+      </div>
+
+      {/* Current name being prayed for */}
+      {currentName && (
+        <div className="bg-sage/10 rounded-xl p-3 border border-sage/20">
+          <div className="flex items-center justify-center gap-2">
+            <Heart className="w-4 h-4 text-sage" />
+            <span className="text-sm platypi-medium text-black">
+              Praying for: {currentName.hebrewName}
+            </span>
+            <span className="text-xs platypi-regular text-black/60">
+              ({currentName.reasonEnglish || currentName.reason})
+            </span>
+          </div>
+        </div>
+      )}
+      
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+        </span>
+      </div>
+
+      <Button
+        onClick={isCompleted ? undefined : handleComplete}
+        disabled={isCompleted}
+        className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
+          isCompleted 
+            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+        }`}
+      >
+        {isCompleted ? 'Completed Today' : `Complete Tehillim ${progress?.currentPerek}`}
+      </Button>
+    </div>
+  );
+}
+
 export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const { activeModal, openModal, closeModal, selectedPsalm } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
@@ -939,7 +1052,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
   // Auto-redirect prayer modals to fullscreen
   useEffect(() => {
-    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'individual-tehillim'];
+    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'individual-tehillim', 'tehillim-text'];
     
     if (activeModal && fullscreenPrayerModals.includes(activeModal)) {
       // Close the regular modal immediately
@@ -966,6 +1079,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           case 'individual-tehillim':
             title = `Tehillim ${selectedPsalm}`;
             contentType = 'individual-tehillim';
+            break;
+          case 'tehillim-text':
+            title = 'Global Tehillim Chain';
+            contentType = 'global-tehillim';
             break;
         }
         
