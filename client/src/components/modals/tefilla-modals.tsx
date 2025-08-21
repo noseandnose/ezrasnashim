@@ -813,23 +813,21 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     trackModalComplete(completionKey);
     markModalComplete(completionKey);
     completeTask('tefilla');
+    checkAndShowCongratulations();
     
-    // For 1-150 section, return to the Tehillim modal
-    if (isFromAllTab) {
-      // Close fullscreen and return to Tehillim modal
-      const event = new CustomEvent('closeFullscreen');
-      window.dispatchEvent(event);
-      // Small delay to ensure fullscreen closes, then open special-tehillim modal
-      setTimeout(() => {
-        const { openModal, setTehillimActiveTab } = useModalStore.getState();
-        setTehillimActiveTab('all'); // Ensure we're on the "Sefer Tehillim" tab
-        openModal('special-tehillim', 'tefilla');
-      }, 100);
-    } else {
-      // For special occasions, close fullscreen and return to home
-      const event = new CustomEvent('closeFullscreen');
-      window.dispatchEvent(event);
-    }
+    // Get the saved return tab preference
+    const returnTab = localStorage.getItem('tehillim-return-tab') || 'all';
+    
+    // Close fullscreen and return to Tehillim modal with correct tab
+    const event = new CustomEvent('closeFullscreen');
+    window.dispatchEvent(event);
+    
+    // Small delay to ensure fullscreen closes, then open special-tehillim modal
+    setTimeout(() => {
+      const { openModal, setTehillimActiveTab } = useModalStore.getState();
+      setTehillimActiveTab(returnTab as 'all' | 'special'); // Return to the saved tab
+      openModal('special-tehillim', 'tefilla');
+    }, 100);
   };
 
   const handleCompleteAndNext = () => {
@@ -838,6 +836,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     trackModalComplete(completionKey);
     markModalComplete(completionKey);
     completeTask('tefilla');
+    checkAndShowCongratulations();
     
     // Move to next psalm (only for 1-150 sequence)
     const nextPsalm = selectedPsalm < 150 ? selectedPsalm + 1 : 1;
@@ -1108,48 +1107,48 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'individual-tehillim', 'tehillim-text', 'special-tehillim'];
     
     if (activeModal && fullscreenPrayerModals.includes(activeModal)) {
-      // Close the regular modal immediately
-      closeModal();
+      let title = '';
+      let contentType = activeModal;
       
-      // Open in fullscreen with a small delay to ensure modal closes
+      switch (activeModal) {
+        case 'morning-brochas':
+          title = 'Morning Brochas';
+          break;
+        case 'mincha':
+          title = 'Mincha Prayer';
+          break;
+        case 'maariv':
+          title = 'Maariv Prayer';
+          break;
+        case 'nishmas-campaign':
+          title = 'Nishmas Kol Chai';
+          break;
+        case 'individual-tehillim':
+          title = `Tehillim ${selectedPsalm}`;
+          contentType = 'individual-tehillim';
+          break;
+        case 'special-tehillim':
+          title = 'Tehillim';
+          contentType = 'special-tehillim';
+          break;
+        case 'tehillim-text':
+          title = 'Global Tehillim Chain';
+          contentType = 'global-tehillim';
+          break;
+      }
+      
+      // Open fullscreen immediately without closing modal first
+      setFullscreenContent({
+        isOpen: true,
+        title,
+        contentType,
+        content: null // Content will be rendered based on contentType
+      });
+      
+      // Close the regular modal after fullscreen opens
       setTimeout(() => {
-        let title = '';
-        let contentType = activeModal;
-        
-        switch (activeModal) {
-          case 'morning-brochas':
-            title = 'Morning Brochas';
-            break;
-          case 'mincha':
-            title = 'Mincha Prayer';
-            break;
-          case 'maariv':
-            title = 'Maariv Prayer';
-            break;
-          case 'nishmas-campaign':
-            title = 'Nishmas Kol Chai';
-            break;
-          case 'individual-tehillim':
-            title = `Tehillim ${selectedPsalm}`;
-            contentType = 'individual-tehillim';
-            break;
-          case 'special-tehillim':
-            title = 'Tehillim';
-            contentType = 'special-tehillim';
-            break;
-          case 'tehillim-text':
-            title = 'Global Tehillim Chain';
-            contentType = 'global-tehillim';
-            break;
-        }
-        
-        setFullscreenContent({
-          isOpen: true,
-          title,
-          contentType,
-          content: null // Content will be rendered based on contentType
-        });
-      }, 50);
+        closeModal();
+      }, 10);
     }
   }, [activeModal, closeModal, selectedPsalm]);
 
@@ -2713,16 +2712,34 @@ function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'h
   const { openModal, setSelectedPsalm, tehillimActiveTab, setTehillimActiveTab } = useModalStore();
   const { isModalComplete } = useModalCompletionStore();
 
+  // Clean up localStorage when component unmounts or tab changes
+  useEffect(() => {
+    return () => {
+      // Clean up the stored tab when leaving this modal
+      localStorage.removeItem('tehillim-return-tab');
+    };
+  }, []);
+
+  // Initialize the tab tracking when the modal opens
+  useEffect(() => {
+    if (!localStorage.getItem('tehillim-return-tab')) {
+      localStorage.setItem('tehillim-return-tab', tehillimActiveTab);
+    }
+  }, [tehillimActiveTab]);
+
   // Open individual Tehillim text
   const openTehillimText = (psalmNumber: number) => {
     // Remember the current tab before navigating to individual Tehillim
     setTehillimActiveTab(tehillimActiveTab);
     setSelectedPsalm(psalmNumber);
     
+    // Store the current tab in localStorage so we can return to it
+    localStorage.setItem('tehillim-return-tab', tehillimActiveTab);
+    
     // Close current fullscreen and open individual tehillim in fullscreen
     window.dispatchEvent(new Event('closeFullscreen'));
     setTimeout(() => {
-      openModal('individual-tehillim', 'tefilla', psalmNumber);
+      openModal('individual-tehillim', 'special-tehillim', psalmNumber);
     }, 100);
   };
 
