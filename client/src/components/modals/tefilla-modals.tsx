@@ -1003,7 +1003,8 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
   if (isLoading) return <div className="text-center py-8">Loading Tehillim...</div>;
   if (!progress?.currentPerek) return <div className="text-center py-8">No Tehillim available</div>;
 
-  const completionKey = 'tehillim-chain';
+  // Use unique key per Tehillim number for proper individual tracking
+  const completionKey = `tehillim-chain-${progress?.currentPerek}`;
   const isCompleted = isModalComplete(completionKey);
 
   const handleComplete = () => {
