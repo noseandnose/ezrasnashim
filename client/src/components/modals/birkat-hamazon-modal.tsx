@@ -584,9 +584,13 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
     trackModalComplete('al-hamichiya');
     markModalComplete('al-hamichiya');
     completeTask('tefilla');
-    // Close fullscreen
+    // Close fullscreen and navigate home
     const event = new CustomEvent('closeFullscreen');
     window.dispatchEvent(event);
+    // Small delay to ensure fullscreen closes, then navigate to home
+    setTimeout(() => {
+      window.location.hash = '#/?section=home&scrollToProgress=true';
+    }, 100);
   };
 
   if (isLoading) return <div className="text-center py-8">Loading prayer...</div>;
@@ -685,9 +689,13 @@ export function BirkatHamazonFullscreenContent({ language, fontSize }: { languag
     trackModalComplete('birkat-hamazon');
     markModalComplete('birkat-hamazon');
     completeTask('tefilla');
-    // Close fullscreen
+    // Close fullscreen and navigate home
     const event = new CustomEvent('closeFullscreen');
     window.dispatchEvent(event);
+    // Small delay to ensure fullscreen closes, then navigate to home
+    setTimeout(() => {
+      window.location.hash = '#/?section=home&scrollToProgress=true';
+    }, 100);
   };
 
   if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
