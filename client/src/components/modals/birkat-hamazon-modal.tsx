@@ -623,7 +623,7 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
             : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
         }`}
       >
-        {isModalComplete('al-hamichiya') ? 'Completed Today' : 'Complete Me\'ein Shalosh'}
+        {isModalComplete('al-hamichiya') ? 'Completed Today' : 'Complete'}
       </Button>
     </div>
   );
@@ -728,7 +728,7 @@ export function BirkatHamazonFullscreenContent({ language, fontSize }: { languag
             : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
         }`}
       >
-        {isModalComplete('birkat-hamazon') ? 'Completed Today' : 'Complete Birkat Hamazon'}
+        {isModalComplete('birkat-hamazon') ? 'Completed Today' : 'Complete'}
       </Button>
     </div>
   );
