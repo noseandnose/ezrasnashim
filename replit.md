@@ -12,6 +12,13 @@ Reading time display: User requested reading time estimation for text content, i
 Community feedback form: Updated to new Google Forms link.
 Text formatting: Database content supports markdown-style formatting - **text** for bold, --- for line breaks, ~~text~~ for greyed out text, ++text++ for larger text (1.2em), --text-- for smaller text (0.85em), [[text]] for grey box content.
 
+## Recent Changes (August 21, 2025)
+### Launch Preparation Optimizations
+- **Compass Simplification**: Removed magnetic declination, smoothing filters, and tilt compensation. Now uses native device heading only with Jerusalem fallback (31.7767, 35.2345).
+- **Modal System**: All major content modals migrated to fullscreen. Translation buttons now conditionally shown only when translations exist.
+- **Performance**: Implemented lazy loading for all routes, added PWA service worker for offline support, optimized event handlers with debouncing.
+- **Bug Fixes**: Fixed Personal Prayers JSON parsing error, resolved TypeScript compilation issues.
+
 ## System Architecture
 ### Frontend
 - **Framework**: React 18 with TypeScript, Vite for build.

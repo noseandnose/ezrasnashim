@@ -3577,34 +3577,26 @@ function JerusalemCompass() {
   const [isLoading, setIsLoading] = useState(false);
   const [orientationSupported, setOrientationSupported] = useState(true);
   const [permissionRequested, setPermissionRequested] = useState(false);
-  const [isCalibrated, setIsCalibrated] = useState(false);
-  const [magneticDeclination, setMagneticDeclination] = useState(0);
   const orientationEventRef = useRef<((event: DeviceOrientationEvent) => void) | null>(null);
 
-  // Kotel coordinates - verified accurate location
-  const WESTERN_WALL_LAT = 31.7781;
-  const WESTERN_WALL_LNG = 35.2346;
+  // Jerusalem coordinates for fallback (31.7767, 35.2345 as specified)
+  const JERUSALEM_LAT = 31.7767;
+  const JERUSALEM_LNG = 35.2345;
 
-  // Calculate bearing to Kotel - fixed calculation
+  // Simple bearing calculation to Jerusalem
   const calculateBearing = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
-    // Convert to radians
     const lat1Rad = lat1 * Math.PI / 180;
     const lat2Rad = lat2 * Math.PI / 180;
     const dLng = (lng2 - lng1) * Math.PI / 180;
     
-    // Calculate bearing using proper formula
     const y = Math.sin(dLng) * Math.cos(lat2Rad);
     const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) - Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLng);
     
-    // Convert to degrees and normalize
     let bearing = Math.atan2(y, x) * 180 / Math.PI;
-    bearing = (bearing + 360) % 360; // Normalize to 0-360
-    
-
-    return bearing;
+    return (bearing + 360) % 360;
   };
 
-  // Get user's location with robust error handling
+  // Get user's location - simplified
   const getUserLocation = () => {
     setIsLoading(true);
     setError("");
@@ -3612,6 +3604,8 @@ function JerusalemCompass() {
     if (!navigator.geolocation) {
       setError("Geolocation is not supported by this browser");
       setIsLoading(false);
+      // Fallback to Jerusalem bearing calculation
+      setDirection(0); // Default north when no location available
       return;
     }
 
@@ -3622,63 +3616,41 @@ function JerusalemCompass() {
         
         setLocation({ lat: userLat, lng: userLng });
         
-        // Calculate direction to Kotel
-        const bearing = calculateBearing(userLat, userLng, WESTERN_WALL_LAT, WESTERN_WALL_LNG);
+        // Calculate bearing to Jerusalem
+        const bearing = calculateBearing(userLat, userLng, JERUSALEM_LAT, JERUSALEM_LNG);
         setDirection(bearing);
-
-        // Calculate approximate magnetic declination (simplified)
-        const declinationAngle = getMagneticDeclination(userLat, userLng);
-        setMagneticDeclination(declinationAngle);
         
         setIsLoading(false);
       },
       (error) => {
-        let errorMessage = "Unable to get your location.";
+        let errorMessage = "Unable to get your location. Using default Jerusalem direction.";
         
         switch(error.code) {
           case error.PERMISSION_DENIED:
-            errorMessage = "Location access denied. Please enable location access in your browser settings.";
+            errorMessage = "Location access denied. Showing default Jerusalem direction.";
             break;
           case error.POSITION_UNAVAILABLE:
-            errorMessage = "Location information unavailable. Please try again.";
+            errorMessage = "Location unavailable. Using compass only.";
             break;
           case error.TIMEOUT:
-            errorMessage = "Location request timed out. Please try again.";
-            break;
-          default:
-            errorMessage = "Error getting location. Please try again.";
+            errorMessage = "Location request timed out. Using compass only.";
             break;
         }
         
         setError(errorMessage);
         setIsLoading(false);
+        // Fallback: show compass without specific bearing
+        setDirection(90); // Default east direction to Jerusalem from most places
       },
       {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0 // Always get fresh location from device GPS
+        enableHighAccuracy: false, // Faster response, less battery drain
+        timeout: 5000,
+        maximumAge: 60000 // Allow cached location for 1 minute
       }
     );
   };
 
-  // Simplified magnetic declination calculation
-  const getMagneticDeclination = (lat: number, lng: number): number => {
-    // This is a very simplified approximation
-    // For Israel/Middle East region, magnetic declination is approximately 4-5 degrees east
-    if (lat >= 29 && lat <= 34 && lng >= 34 && lng <= 36) {
-      return 4.5; // Israel region
-    }
-    // For US East Coast
-    if (lat >= 25 && lat <= 50 && lng >= -85 && lng <= -65) {
-      return -10; // Negative means west declination
-    }
-    // For US West Coast
-    if (lat >= 30 && lat <= 50 && lng >= -125 && lng <= -110) {
-      return 12; // Positive means east declination
-    }
-    // Default to 0 for other regions (would need proper API for accuracy)
-    return 0;
-  };
+
 
   // Get cardinal direction
   const getCardinalDirection = (bearing: number): string => {
@@ -3713,36 +3685,19 @@ function JerusalemCompass() {
     }
   };
 
-  // Initialize device orientation
+  // Initialize device orientation - simplified to use native heading only
   const initializeOrientation = () => {
     const handleOrientation = (event: DeviceOrientationEvent) => {
-      if (event.absolute === false && !isCalibrated) {
-        setIsCalibrated(false);
-      } else {
-        setIsCalibrated(true);
-      }
-
       let heading = 0;
       
-      // iOS devices with webkitCompassHeading
+      // iOS devices with webkitCompassHeading (true heading)
       if ((event as any).webkitCompassHeading !== undefined && (event as any).webkitCompassHeading !== null) {
         heading = (event as any).webkitCompassHeading;
       }
-      // Android and other devices using alpha
+      // Android and other devices using alpha (magnetic heading)
       else if (event.alpha !== null) {
-        // Different handling for different browsers/devices
-        const userAgent = navigator.userAgent.toLowerCase();
-        
-        if (userAgent.includes('android')) {
-          // Android Chrome/WebView
-          heading = (360 - event.alpha + magneticDeclination) % 360;
-        } else if (userAgent.includes('firefox')) {
-          // Firefox has different orientation
-          heading = event.alpha;
-        } else {
-          // Default for other browsers
-          heading = (360 - event.alpha) % 360;
-        }
+        // Use native alpha value directly without modifications
+        heading = (360 - event.alpha) % 360;
       } else {
         setOrientationSupported(false);
         return;
@@ -3783,14 +3738,14 @@ function JerusalemCompass() {
       setOrientationSupported(false);
     }
 
-    // Cleanup
+    // Cleanup - remove only the single event listener
     return () => {
       if (orientationEventRef.current) {
         window.removeEventListener('deviceorientation', orientationEventRef.current);
         window.removeEventListener('deviceorientationabsolute', orientationEventRef.current as any);
       }
     };
-  }, [activeModal, magneticDeclination]);
+  }, [activeModal, permissionRequested]);
 
   if (activeModal !== 'jerusalem-compass') return null;
 
