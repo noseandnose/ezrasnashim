@@ -51,6 +51,8 @@ Text formatting: Database content supports markdown-style formatting - **text** 
 - **Time-based Prayer System**: Dynamic prayer buttons changing based on zmanim.
 - **Conditional Tefilla Content System**: Dynamic text processing based on location (Israel/Outside Israel) and Hebrew calendar events (Rosh Chodesh, Fast Day, etc.) for intelligent prayer text display.
 - **Fullscreen Modals**: Fullscreen viewing capability for major text modals in Torah and Tefilla sections.
+- **Direct Fullscreen Prayer Access**: Prayer modals (Morning Brochas, Mincha, Maariv, Nishmas) and Tehillim selections open directly in fullscreen mode when clicked from home page, bypassing regular modal view.
+- **Global Tehillim Chain Integration**: Global Tehillim chain opens directly in fullscreen with proper completion tracking and automatic advancement to next psalm in sequence.
 
 ### UI/UX Design Decisions
 - **Color Scheme**: Quiet Joy spiritual retreat palette (rose blush, ivory, lavender).
