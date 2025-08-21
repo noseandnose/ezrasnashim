@@ -911,6 +911,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const tefillaConditions = useTefillaConditions();
+  const queryClient = useQueryClient();
 
   // Get current global Tehillim progress
   const { data: progress } = useQuery<GlobalTehillimProgress>({
@@ -954,10 +955,36 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
   const completionKey = 'tehillim-chain';
   const isCompleted = isModalComplete(completionKey);
 
+  const advanceChainMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/complete/${progress?.currentPerek}`, {
+        method: 'POST',
+      });
+      if (!response.ok) throw new Error('Failed to advance chain');
+      return response.json();
+    },
+    onSuccess: () => {
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+    },
+    onError: (error) => {
+      console.error('Failed to advance chain:', error);
+      toast({
+        title: "Error",
+        description: "Failed to advance Tehillim chain",
+        variant: "destructive",
+      });
+    }
+  });
+
   const handleComplete = () => {
     trackModalComplete(completionKey);
     markModalComplete(completionKey);
     completeTask('tefilla');
+    
+    // Advance the chain
+    advanceChainMutation.mutate();
     
     // Close fullscreen and return to home
     const event = new CustomEvent('closeFullscreen');
