@@ -1155,8 +1155,8 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
         )}
       </div>
       
-      {/* Conditional attribution based on prayer name */}
-      {prayer.prayerName !== "Parshat Hamann" && prayer.prayerName !== "Hafrashas Challah" && (
+      {/* Conditional attribution based on prayer name and ID */}
+      {prayer.prayerName !== "Parshat Hamann" && prayer.prayerName !== "Hafrashas Challah" && prayer.id !== 10 && (
         <ChuppahThankYou />
       )}
       
@@ -2857,8 +2857,8 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
         )}
       </div>
 
-      {/* Conditional attribution based on prayer name */}
-      {prayer.prayerName !== "Parshat Hamann" && prayer.prayerName !== "Hafrashas Challah" && (
+      {/* Conditional attribution based on prayer name and ID */}
+      {prayer.prayerName !== "Parshat Hamann" && prayer.prayerName !== "Hafrashas Challah" && prayer.id !== 10 && (
         <ChuppahThankYou />
       )}
 
