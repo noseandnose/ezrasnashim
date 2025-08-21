@@ -3642,10 +3642,20 @@ function JerusalemCompass() {
                   );
                 })()}
                 
-                {/* Center heart */}
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
-                  <Heart className="w-4 h-4 text-rose-400 fill-rose-400" />
-                </div>
+                {/* Center heart - changes color when aligned */}
+                {(() => {
+                  let angleDiff = Math.abs(direction - deviceOrientation);
+                  if (angleDiff > 180) {
+                    angleDiff = 360 - angleDiff;
+                  }
+                  const isAligned = angleDiff < 10;
+                  
+                  return (
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
+                      <Heart className={`w-4 h-4 ${isAligned ? 'text-sage fill-sage' : 'text-rose-400 fill-rose-400'}`} />
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Alignment Status */}
