@@ -2647,6 +2647,9 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
           </div>
         </div>
       ))}
+      
+      <ChuppahThankYou />
+      
       <div className="mt-6">
         <Button 
           onClick={() => closeModal()}
@@ -2699,6 +2702,9 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
           </div>
         </div>
       ))}
+      
+      <ChuppahThankYou />
+      
       <div className="mt-6">
         <Button 
           onClick={() => closeModal()}
@@ -2751,6 +2757,9 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
           </div>
         </div>
       ))}
+      
+      <ChuppahThankYou />
+      
       <div className="mt-6">
         <Button 
           onClick={() => closeModal()}
