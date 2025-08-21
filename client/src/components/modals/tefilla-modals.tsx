@@ -786,7 +786,7 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
 }
 
 function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
-  const { selectedPsalm, tehillimActiveTab } = useModalStore();
+  const { selectedPsalm, tehillimActiveTab, tehillimReturnTab, setTehillimActiveTab } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
@@ -815,13 +815,12 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     completeTask('tefilla');
     checkAndShowCongratulations();
     
-    // Get the saved return tab preference
-    const returnTab = localStorage.getItem('tehillim-return-tab') || 'all';
+    // Get the saved return tab preference from Zustand store
+    const returnTab = tehillimReturnTab || 'all';
     console.log('Completing individual Tehillim, returning to tab:', returnTab); // Debug log
     
     // Set the correct tab first, BEFORE triggering the fullscreen event
-    const { setTehillimActiveTab } = useModalStore.getState();
-    setTehillimActiveTab(returnTab as 'all' | 'special');
+    setTehillimActiveTab(returnTab);
     
     // Use setTimeout to ensure tab state is set before triggering fullscreen
     setTimeout(() => {
@@ -855,11 +854,10 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     // The fullscreen content will automatically update due to the dependency on selectedPsalm
   };
 
-  // Determine button layout based on stored return tab
-  const returnTab = localStorage.getItem('tehillim-return-tab');
-  const isFromAllTab = returnTab === 'all';
-  const isFromSpecialTab = returnTab === 'special';
-  console.log('Individual Tehillim button logic - returnTab:', returnTab, 'isFromAllTab:', isFromAllTab, 'isFromSpecialTab:', isFromSpecialTab); // Debug log
+  // Determine button layout based on stored return tab from Zustand store
+  const isFromSpecialTab = tehillimReturnTab === 'special';
+  const isFromAllTab = tehillimReturnTab === 'all' || !tehillimReturnTab; // Default to all if not set
+  console.log('Individual Tehillim button logic - tehillimReturnTab:', tehillimReturnTab, 'isFromAllTab:', isFromAllTab, 'isFromSpecialTab:', isFromSpecialTab); // Debug log
 
   return (
     <div className="space-y-6">
@@ -2736,32 +2734,17 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
 
 // Special Tehillim Fullscreen Content Component
 function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english'; fontSize: number }) {
-  const { openModal, setSelectedPsalm, tehillimActiveTab, setTehillimActiveTab } = useModalStore();
+  const { openModal, setSelectedPsalm, tehillimActiveTab, setTehillimActiveTab, setTehillimReturnTab } = useModalStore();
   const { isModalComplete } = useModalCompletionStore();
 
   // Debug log to track active tab
   console.log('SpecialTehillimFullscreenContent rendering with active tab:', tehillimActiveTab);
 
-  // Clean up localStorage when component unmounts or tab changes
-  useEffect(() => {
-    return () => {
-      // Clean up the stored tab when leaving this modal
-      localStorage.removeItem('tehillim-return-tab');
-    };
-  }, []);
-
-  // Initialize the tab tracking when the modal opens
-  useEffect(() => {
-    if (!localStorage.getItem('tehillim-return-tab')) {
-      localStorage.setItem('tehillim-return-tab', tehillimActiveTab);
-    }
-  }, [tehillimActiveTab]);
-
   // Open individual Tehillim text
   const openTehillimText = (psalmNumber: number) => {
     // Store the current tab so we can return to it after completion
     console.log('Opening Tehillim from tab:', tehillimActiveTab); // Debug log
-    localStorage.setItem('tehillim-return-tab', tehillimActiveTab);
+    setTehillimReturnTab(tehillimActiveTab); // Store in Zustand instead of localStorage
     setSelectedPsalm(psalmNumber);
     
     // Directly switch to individual Tehillim content without modal transitions
