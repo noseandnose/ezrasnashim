@@ -3335,34 +3335,6 @@ function JerusalemCompass() {
         const declinationAngle = getMagneticDeclination(userLat, userLng);
         setMagneticDeclination(declinationAngle);
         
-        // Get location name with timeout and fallback
-        const getLocationName = async () => {
-          try {
-            // Try the backend API first with a 5-second timeout
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
-            
-            const response = await fetch(`/api/location/${userLat}/${userLng}`, {
-              signal: controller.signal
-            });
-            clearTimeout(timeoutId);
-            
-            if (response.ok) {
-              const locationData = await response.json();
-              return `${locationData.city || 'Unknown'}, ${locationData.country || 'Unknown'}`;
-            }
-            throw new Error('Backend API failed');
-          } catch (err) {
-            // Fallback to coordinates if all fails
-            return `Location: ${userLat.toFixed(3)}°, ${userLng.toFixed(3)}°`;
-          }
-        };
-        
-        // Set location name (don't wait for it to complete the compass)
-        getLocationName().then(name => setLocationName(name));
-        
-        // Set a basic location name immediately so compass works
-        setLocationName("Your Location");
         setIsLoading(false);
       },
       (error) => {
@@ -3388,8 +3360,8 @@ function JerusalemCompass() {
       },
       {
         enableHighAccuracy: true,
-        timeout: 15000, // Increased timeout to 15 seconds
-        maximumAge: 300000 // 5 minutes cache
+        timeout: 10000,
+        maximumAge: 0 // Always get fresh location from device GPS
       }
     );
   };
@@ -3680,7 +3652,14 @@ function JerusalemCompass() {
                   
                   return (
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
-                      <Heart className={`w-4 h-4 ${isAligned ? 'text-sage fill-sage' : 'text-rose-400 fill-rose-400'}`} strokeWidth={0} />
+                      <Heart 
+                        className="w-4 h-4" 
+                        style={{
+                          color: isAligned ? '#b6cdb5' : '#eacbd2',
+                          fill: isAligned ? '#b6cdb5' : '#eacbd2'
+                        }}
+                        strokeWidth={0} 
+                      />
                     </div>
                   );
                 })()}
@@ -3722,19 +3701,6 @@ function JerusalemCompass() {
                   </p>
                 </div>
               )}
-
-
-
-              {/* Location Info */}
-              <div className="bg-white rounded-2xl p-3 border border-blush/10">
-                <div className="flex items-center space-x-2">
-                  <MapPin className="w-4 h-4 text-blush flex-shrink-0" />
-                  <div>
-                    <p className="platypi-medium text-sm text-black">Your Location</p>
-                    <p className="platypi-regular text-xs text-black/60">{locationName}</p>
-                  </div>
-                </div>
-              </div>
             </div>
           ) : (
             <div className="text-center py-8">
