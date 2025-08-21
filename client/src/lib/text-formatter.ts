@@ -164,7 +164,7 @@ export function formatTextContent(text: string | null | undefined): string {
       result += formatted.substring(lastIndex, i);
       
       if (!isInBold) {
-        result += '<span style="font-size: 1.05em;">';
+        result += '<span style="font-weight: bold;">';
       } else {
         result += '</span>';
       }
