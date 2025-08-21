@@ -856,9 +856,10 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
   };
 
   // Determine button layout based on stored return tab
-  const returnTab = localStorage.getItem('tehillim-return-tab') || 'all';
+  const returnTab = localStorage.getItem('tehillim-return-tab');
   const isFromAllTab = returnTab === 'all';
-  console.log('Individual Tehillim button logic - returnTab:', returnTab, 'isFromAllTab:', isFromAllTab); // Debug log
+  const isFromSpecialTab = returnTab === 'special';
+  console.log('Individual Tehillim button logic - returnTab:', returnTab, 'isFromAllTab:', isFromAllTab, 'isFromSpecialTab:', isFromSpecialTab); // Debug log
 
   return (
     <div className="space-y-6">
@@ -879,7 +880,21 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
       </div>
 
       {/* Button(s) based on whether it's from 1-150 or special occasions */}
-      {isFromAllTab ? (
+      {isFromSpecialTab ? (
+        // Special occasions: Only show "Complete" button
+        <Button
+          onClick={isCompleted ? undefined : handleComplete}
+          disabled={isCompleted}
+          className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
+            isCompleted 
+              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+          }`}
+        >
+          {isCompleted ? 'Completed Today' : `Complete Tehillim ${selectedPsalm}`}
+        </Button>
+      ) : (
+        // All psalms (1-150): Show both "Complete" and "Complete & Next" buttons
         !isCompleted ? (
           <div className="flex gap-2">
             <Button
@@ -904,18 +919,6 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
             Completed Today
           </Button>
         )
-      ) : (
-        <Button
-          onClick={isCompleted ? undefined : handleComplete}
-          disabled={isCompleted}
-          className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
-            isCompleted 
-              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
-          }`}
-        >
-          {isCompleted ? 'Completed Today' : `Complete Tehillim ${selectedPsalm}`}
-        </Button>
       )}
     </div>
   );
