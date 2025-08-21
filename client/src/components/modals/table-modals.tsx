@@ -8,7 +8,7 @@ import AudioPlayer from "@/components/audio-player";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { formatTextContent } from "@/lib/text-formatter";
 import { LazyImage } from "@/components/ui/lazy-image";
-import FullscreenModal from "@/components/ui/fullscreen-modal";
+import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 
 export default function TableModals() {
   const { activeModal, closeModal } = useModalStore();
