@@ -118,7 +118,36 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     setShowExplosion(false);
   }, [activeModal]);
 
-
+  // Auto-redirect Torah modals to fullscreen
+  useEffect(() => {
+    const fullscreenTorahModals = ['halacha', 'featured'];
+    
+    if (activeModal && fullscreenTorahModals.includes(activeModal)) {
+      let title = '';
+      let contentType = '';
+      
+      switch (activeModal) {
+        case 'halacha':
+          title = 'Daily Halacha';
+          contentType = 'halacha';
+          break;
+        case 'featured':
+          title = 'Featured Content';
+          contentType = 'featured';
+          break;
+      }
+      
+      // Small delay to ensure content is loaded
+      setTimeout(() => {
+        setFullscreenContent({
+          isOpen: true,
+          title,
+          contentType,
+          content: null // Content will be rendered by fullscreen modal
+        });
+      }, 50);
+    }
+  }, [activeModal, setFullscreenContent]);
 
   const handleTorahComplete = () => {
     // Track modal completion and mark as completed globally
@@ -845,10 +874,184 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
         isOpen={fullscreenContent.isOpen}
         onClose={() => setFullscreenContent({ isOpen: false, title: '', content: null })}
         title={fullscreenContent.title}
-        showFontControls={false}
+        showFontControls={true}
+        fontSize={fontSize}
+        onFontSizeChange={setFontSize}
         showLanguageControls={false}
       >
-        {fullscreenContent.content}
+        {fullscreenContent.contentType === 'halacha' ? (
+          halachaContent && (
+            <div className="space-y-4">
+              <div className="bg-white rounded-2xl p-6 border border-blush/10">
+                {halachaContent.title && (
+                  <h3 className="platypi-bold text-lg text-black text-center mb-4">
+                    {halachaContent.title}
+                  </h3>
+                )}
+                <div 
+                  className="platypi-regular leading-relaxed text-black whitespace-pre-line"
+                  style={{ fontSize: `${fontSize}px` }}
+                >
+                  <div dangerouslySetInnerHTML={{ __html: formatHalachaContent(halachaContent.content) }} />
+                </div>
+              </div>
+              
+              {/* Thank You Section for Halacha */}
+              <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                <p className="text-sm text-blue-900 platypi-medium">
+                  Thank you to{' '}
+                  <a 
+                    href="https://korenpub.com/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    Koren Publishers
+                  </a>
+                  {' '}for providing this content
+                </p>
+              </div>
+              
+              <div className="heart-explosion-container">
+                <Button 
+                  onClick={isModalComplete('halacha') ? undefined : () => {
+                    trackModalComplete('halacha');
+                    markModalComplete('halacha');
+                    setShowExplosion(true);
+                    setTimeout(() => {
+                      setShowExplosion(false);
+                      completeTask('torah');
+                      setFullscreenContent({ isOpen: false, title: '', content: null });
+                      // Navigate to home section and scroll to progress to show flower growth
+                      if (onSectionChange) {
+                        onSectionChange('home');
+                        // Also scroll to progress section
+                        setTimeout(() => {
+                          const progressElement = document.getElementById('daily-progress-garden');
+                          if (progressElement) {
+                            progressElement.scrollIntoView({ 
+                              behavior: 'smooth', 
+                              block: 'center' 
+                            });
+                          }
+                        }, 300);
+                      } else {
+                        // Fallback: redirect to home with scroll parameter
+                        window.location.hash = '#/?section=home&scrollToProgress=true';
+                      }
+                      // Check if all tasks are completed and show congratulations
+                      setTimeout(() => {
+                        if (checkAndShowCongratulations()) {
+                          openModal('congratulations', 'torah');
+                        }
+                      }, 200);
+                    }, 1500);
+                  }}
+                  disabled={isModalComplete('halacha')}
+                  className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
+                    isModalComplete('halacha') 
+                      ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                  }`}
+                >
+                  {isModalComplete('halacha') ? 'Completed Today' : 'Complete'}
+                </Button>
+                <HeartExplosion trigger={showExplosion} />
+              </div>
+            </div>
+          )
+        ) : fullscreenContent.contentType === 'featured' ? (
+          featuredContent && (
+            <div className="space-y-4">
+              <div className="bg-white rounded-2xl p-6 border border-blush/10">
+                {featuredContent.title && (
+                  <h3 className="platypi-bold text-lg text-black text-center mb-4">
+                    {featuredContent.title}
+                  </h3>
+                )}
+                <div 
+                  className="platypi-regular leading-relaxed text-black whitespace-pre-line"
+                  style={{ fontSize: `${fontSize}px` }}
+                >
+                  <div dangerouslySetInnerHTML={{ __html: formatTextContent(featuredContent.content) }} />
+                </div>
+              </div>
+              
+              {/* Thank You Section for Featured Content */}
+              {featuredContent.provider && (
+                <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                  <p className="text-sm text-blue-900 platypi-medium">
+                    Thank you to{' '}
+                    {featuredContent.provider === 'Rabbi Daniel Braude' ? (
+                      <>
+                        Rabbi Daniel Braude from{' '}
+                        <a 
+                          href="https://feldheim.com/learn-hilchos-lashon-hara-in-just-3-minutes-a-day"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 underline hover:text-blue-800"
+                        >
+                          Learn Hilchos Lashon Hara in just 3 minutes a day
+                        </a>
+                      </>
+                    ) : (
+                      featuredContent.provider
+                    )}
+                  </p>
+                </div>
+              )}
+              
+              <div className="heart-explosion-container">
+                <Button 
+                  onClick={isModalComplete('featured') ? undefined : () => {
+                    trackModalComplete('featured');
+                    markModalComplete('featured');
+                    setShowExplosion(true);
+                    setTimeout(() => {
+                      setShowExplosion(false);
+                      completeTask('torah');
+                      setFullscreenContent({ isOpen: false, title: '', content: null });
+                      // Navigate to home section and scroll to progress to show flower growth
+                      if (onSectionChange) {
+                        onSectionChange('home');
+                        // Also scroll to progress section
+                        setTimeout(() => {
+                          const progressElement = document.getElementById('daily-progress-garden');
+                          if (progressElement) {
+                            progressElement.scrollIntoView({ 
+                              behavior: 'smooth', 
+                              block: 'center' 
+                            });
+                          }
+                        }, 300);
+                      } else {
+                        // Fallback: redirect to home with scroll parameter
+                        window.location.hash = '#/?section=home&scrollToProgress=true';
+                      }
+                      // Check if all tasks are completed and show congratulations
+                      setTimeout(() => {
+                        if (checkAndShowCongratulations()) {
+                          openModal('congratulations', 'torah');
+                        }
+                      }, 200);
+                    }, 1500);
+                  }}
+                  disabled={isModalComplete('featured')}
+                  className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
+                    isModalComplete('featured') 
+                      ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                  }`}
+                >
+                  {isModalComplete('featured') ? 'Completed Today' : 'Complete'}
+                </Button>
+                <HeartExplosion trigger={showExplosion} />
+              </div>
+            </div>
+          )
+        ) : (
+          fullscreenContent.content
+        )}
       </FullscreenModal>
     </>
   );
