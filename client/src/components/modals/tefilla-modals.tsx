@@ -453,6 +453,8 @@ function renderPrayerContent(contentType: string | undefined, language: 'hebrew'
       return <TehillimFullscreenContent language={language} fontSize={fontSize} />;
     case 'global-tehillim':
       return <GlobalTehillimFullscreenContent language={language} fontSize={fontSize} />;
+    case 'special-tehillim':
+      return <SpecialTehillimFullscreenContent language={language} fontSize={fontSize} />;
     case 'me-ein-shalosh':
       return <MeeinShaloshFullscreenContent language={language} fontSize={fontSize} />;
     case 'birkat-hamazon':
@@ -1103,7 +1105,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
   // Auto-redirect prayer modals to fullscreen
   useEffect(() => {
-    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'individual-tehillim', 'tehillim-text'];
+    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'individual-tehillim', 'tehillim-text', 'special-tehillim'];
     
     if (activeModal && fullscreenPrayerModals.includes(activeModal)) {
       // Close the regular modal immediately
@@ -1130,6 +1132,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           case 'individual-tehillim':
             title = `Tehillim ${selectedPsalm}`;
             contentType = 'individual-tehillim';
+            break;
+          case 'special-tehillim':
+            title = 'Tehillim';
+            contentType = 'special-tehillim';
             break;
           case 'tehillim-text':
             title = 'Global Tehillim Chain';
@@ -2699,6 +2705,149 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
 
 
     </>
+  );
+}
+
+// Special Tehillim Fullscreen Content Component
+function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english'; fontSize: number }) {
+  const { openModal, setSelectedPsalm, tehillimActiveTab, setTehillimActiveTab } = useModalStore();
+  const { isModalComplete } = useModalCompletionStore();
+
+  // Open individual Tehillim text
+  const openTehillimText = (psalmNumber: number) => {
+    // Remember the current tab before navigating to individual Tehillim
+    setTehillimActiveTab(tehillimActiveTab);
+    setSelectedPsalm(psalmNumber);
+    
+    // Close current fullscreen and open individual tehillim in fullscreen
+    window.dispatchEvent(new Event('closeFullscreen'));
+    setTimeout(() => {
+      openModal('individual-tehillim', 'tefilla', psalmNumber);
+    }, 100);
+  };
+
+  // Generate array of all 150 psalms
+  const allPsalms = Array.from({ length: 150 }, (_, i) => i + 1);
+
+  // Special categories with psalm numbers
+  const specialCategories = [
+    { title: "Bris milah", psalms: [12] },
+    { title: "Cemetery", psalms: [33, 16, 17, 72, 91, 104, 130, 119] },
+    { title: "Children's success", psalms: [127, 128] },
+    { title: "Finding a mate", psalms: [32, 38, 70, 71, 121, 124] },
+    { title: "For having children", psalms: [102, 103, 128] },
+    { title: "Forgiveness", psalms: [25] },
+    { title: "Giving birth", psalms: [20, 139] },
+    { title: "Gratitude", psalms: [9, 17, 18, 21, 23, 33, 42, 57, 63, 65, 68, 71, 72, 95, 100, 103, 104, 105, 107, 108, 116, 124, 136, 138, 145, 146, 147, 148, 149, 150] },
+    { title: "Graves of righteous", psalms: [16, 17, 20, 23] },
+    { title: "Guidance", psalms: [16, 19, 139] },
+    { title: "Heavenly mercy", psalms: [89, 98, 107] },
+    { title: "House of mourning", psalms: [49] },
+    { title: "Illness", psalms: [6, 30, 41, 88, 103] },
+    { title: "Jerusalem", psalms: [87, 122, 125, 137] },
+    { title: "Land of Israel", psalms: [74, 79, 80, 83, 102, 127, 130, 136, 142] },
+    { title: "Longevity", psalms: [23, 90, 92] },
+    { title: "Wedding day", psalms: [19, 33, 45, 49, 128] },
+    { title: "Peace", psalms: [46, 98, 120] },
+    { title: "Protection from harm", psalms: [3, 5, 7, 20, 23, 27, 31, 35, 40, 48, 55, 59, 69, 70, 91, 109, 119, 121] },
+    { title: "Redemption, Rebuilding of Temple", psalms: [42, 43, 84, 96, 132, 138] },
+    { title: "Repentance", psalms: [25, 32, 47, 51, 90] },
+    { title: "Success", psalms: [4, 57, 108, 112, 122] },
+    { title: "Sustenance", psalms: [4, 24, 41] },
+    { title: "Times of trouble", psalms: [16, 20, 22, 25, 26, 38, 54, 81, 85, 86, 87, 102] },
+    { title: "Torah study", psalms: [1, 19, 119, 134] },
+    { title: "Travel", psalms: [17, 91] }
+  ];
+
+  return (
+    <div className="space-y-4">
+      {/* Tab Navigation */}
+      <div className="flex bg-warm-gray/10 rounded-xl p-1 mb-4">
+        <button
+          onClick={() => setTehillimActiveTab('all')}
+          className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
+            tehillimActiveTab === 'all'
+              ? 'bg-white text-black shadow-sm'
+              : 'text-black/60 hover:text-black'
+          }`}
+        >
+          Sefer Tehillim
+        </button>
+        <button
+          onClick={() => setTehillimActiveTab('special')}
+          className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
+            tehillimActiveTab === 'special'
+              ? 'bg-white text-black shadow-sm'
+              : 'text-black/60 hover:text-black'
+          }`}
+        >
+          Special Occasions
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      <div className="space-y-4">
+        {tehillimActiveTab === 'all' ? (
+          <div className="bg-white/80 rounded-2xl p-3 border border-blush/10">
+            <div className="grid grid-cols-7 gap-2 overflow-hidden tehillim-button-grid">
+              {allPsalms.map((psalm) => (
+                <button
+                  key={psalm}
+                  onClick={() => openTehillimText(psalm)}
+                  className={`w-11 h-11 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center flex-shrink-0 ${
+                    isModalComplete(`individual-tehillim-${psalm}`)
+                      ? 'bg-sage text-white'
+                      : 'bg-gradient-feminine text-white'
+                  }`}
+                  style={{ touchAction: 'manipulation' }}
+                >
+                  {psalm}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {specialCategories.map((category, index) => (
+              <div key={index} className="bg-white/80 rounded-2xl p-3 border border-blush/10">
+                <h3 className="platypi-bold text-sm text-black mb-2">{category.title}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {category.psalms.map((psalm) => (
+                    <button
+                      key={psalm}
+                      onClick={() => openTehillimText(psalm)}
+                      className={`w-11 h-11 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center ${
+                        isModalComplete(`individual-tehillim-${psalm}`)
+                          ? 'bg-sage text-white'
+                          : 'bg-gradient-feminine text-white'
+                      }`}
+                      style={{ touchAction: 'manipulation' }}
+                    >
+                      {psalm}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+        </span>
+      </div>
+
+      <Button 
+        onClick={() => {
+          window.dispatchEvent(new Event('closeFullscreen'));
+        }} 
+        className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
+      >
+        Close
+      </Button>
+    </div>
   );
 }
 
