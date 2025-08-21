@@ -2430,8 +2430,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         isOpen={fullscreenContent.isOpen}
         onClose={() => setFullscreenContent({ isOpen: false, title: '', content: null })}
         title={fullscreenContent.title}
-        showFontControls={true}
-        showLanguageControls={true}
+        showFontControls={fullscreenContent.contentType !== 'special-tehillim'}
+        showLanguageControls={fullscreenContent.contentType !== 'special-tehillim'}
         fontSize={fontSize}
         onFontSizeChange={setFontSize}
         language={language}
