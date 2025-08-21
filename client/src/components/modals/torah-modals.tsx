@@ -894,6 +894,29 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                 >
                   <div dangerouslySetInnerHTML={{ __html: formatHalachaContent(halachaContent.content) }} />
                 </div>
+
+                {/* Footnotes Section */}
+                {halachaContent.footnotes && showFootnotes && (
+                  <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <h4 className="platypi-bold text-sm text-black mb-3">Footnotes</h4>
+                    <div 
+                      className="platypi-regular text-sm text-black/80 leading-relaxed whitespace-pre-line"
+                      dangerouslySetInnerHTML={{ __html: formatTextContent(halachaContent.footnotes) }}
+                    />
+                  </div>
+                )}
+
+                {/* Footnotes Toggle */}
+                {halachaContent.footnotes && (
+                  <div className="mt-4 flex justify-center">
+                    <button
+                      onClick={() => setShowFootnotes(!showFootnotes)}
+                      className="text-xs platypi-medium text-black/60 hover:text-black transition-colors underline"
+                    >
+                      {showFootnotes ? 'Hide Footnotes' : 'Show Footnotes'}
+                    </button>
+                  </div>
+                )}
               </div>
               
               {/* Thank You Section for Halacha */}
@@ -975,6 +998,29 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                 >
                   <div dangerouslySetInnerHTML={{ __html: formatTextContent(featuredContent.content) }} />
                 </div>
+
+                {/* Footnotes Section */}
+                {featuredContent.footnotes && showFootnotes && (
+                  <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <h4 className="platypi-bold text-sm text-black mb-3">Footnotes</h4>
+                    <div 
+                      className="platypi-regular text-sm text-black/80 leading-relaxed whitespace-pre-line"
+                      dangerouslySetInnerHTML={{ __html: formatTextContent(featuredContent.footnotes) }}
+                    />
+                  </div>
+                )}
+
+                {/* Footnotes Toggle */}
+                {featuredContent.footnotes && (
+                  <div className="mt-4 flex justify-center">
+                    <button
+                      onClick={() => setShowFootnotes(!showFootnotes)}
+                      className="text-xs platypi-medium text-black/60 hover:text-black transition-colors underline"
+                    >
+                      {showFootnotes ? 'Hide Footnotes' : 'Show Footnotes'}
+                    </button>
+                  </div>
+                )}
               </div>
               
               {/* Thank You Section for Featured Content */}
