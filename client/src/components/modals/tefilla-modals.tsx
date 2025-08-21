@@ -1280,16 +1280,21 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   }, [onSectionChange]);
 
   const handlePrayerSelect = (prayerId: number) => {
+    console.log('handlePrayerSelect called with prayerId:', prayerId);
     setSelectedPrayerId(prayerId);
     closeModal();
     
     // Fetch prayer data and open directly in fullscreen
     const fetchPrayerAndOpenFullscreen = async () => {
       try {
+        console.log('Fetching prayer data for ID:', prayerId);
         const response = await fetch(`/api/womens-prayers/prayer/${prayerId}`);
+        console.log('Response status:', response.status);
         const prayer = await response.json();
+        console.log('Received prayer data:', prayer);
         
         if (prayer) {
+          console.log('Opening fullscreen for prayer:', prayer.prayerName);
           setFullscreenContent({
             isOpen: true,
             title: prayer.prayerName,
@@ -1298,7 +1303,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           });
           
           // Store the prayer data for use in renderPrayerContent
-          window.currentPrayerData = prayer;
+          (window as any).currentPrayerData = prayer;
         }
       } catch (error) {
         console.error('Error fetching prayer:', error);
@@ -2565,7 +2570,10 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
         <div 
           key={prayer.id}
           className="bg-white rounded-xl p-4 cursor-pointer hover:bg-white/90 transition-all duration-300 shadow-sm border border-blush/20"
-          onClick={() => onPrayerSelect(prayer.id)}
+          onClick={() => {
+            console.log('Refuah prayer clicked, ID:', prayer.id);
+            onPrayerSelect(prayer.id);
+          }}
         >
           <div className="flex items-center space-x-3">
             <Stethoscope className="text-red-500" size={20} />
