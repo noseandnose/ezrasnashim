@@ -143,9 +143,7 @@ export const useModalCompletionStore = create<ModalCompletionState>((set, get) =
   isModalComplete: (modalId: string) => {
     const today = new Date().toISOString().split('T')[0];
     const todaysCompletions = get().completedModals[today];
-    const result = todaysCompletions ? todaysCompletions.has(modalId) : false;
-    console.log('[DEBUG] isModalComplete check:', modalId, '-> ', result, 'Completions:', todaysCompletions ? Array.from(todaysCompletions) : []);
-    return result;
+    return todaysCompletions ? todaysCompletions.has(modalId) : false;
   },
   resetModalCompletions: () => {
     set({ completedModals: {} });

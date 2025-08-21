@@ -1096,8 +1096,18 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
   }, [prayer]);
 
   const handleComplete = () => {
-    trackModalComplete('individual-prayer');
-    markModalComplete('individual-prayer');
+    // Determine which specific modal to mark complete based on prayer category
+    let modalToComplete = 'individual-prayer';
+    if (prayer?.category === 'refuah' || prayer?.category === 'family' || prayer?.category === 'life') {
+      modalToComplete = 'tefillos';
+    } else if (prayer?.category === 'blessings') {
+      modalToComplete = 'blessings';
+    } else if (prayer?.category === 'personal') {
+      modalToComplete = 'personal-prayers';
+    }
+    
+    trackModalComplete(modalToComplete);
+    markModalComplete(modalToComplete);
     completeTask('tefilla');
     
     // Close fullscreen and navigate home
@@ -1310,7 +1320,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   }, [onSectionChange]);
 
   const handlePrayerSelect = (prayerId: number) => {
-    console.log('handlePrayerSelect called with prayerId:', prayerId);
     setSelectedPrayerId(prayerId);
     closeModal();
     
@@ -1330,12 +1339,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     // Use specific modal if provided, otherwise use activeModal
     const modalToComplete = specificModal || activeModal;
     
-    console.log('[DEBUG] completeWithAnimation called with:', specificModal, 'activeModal:', activeModal, 'modalToComplete:', modalToComplete);
-    
     // Track modal completion and mark as completed globally
     if (modalToComplete) {
       // Only complete the specific modal that was clicked
-      console.log('[DEBUG] Marking modal complete:', modalToComplete);
       trackModalComplete(modalToComplete);
       markModalComplete(modalToComplete);
     }
@@ -2011,7 +2017,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={isModalComplete('mincha') ? undefined : completeWithAnimation}
+              onClick={isModalComplete('mincha') ? undefined : () => completeWithAnimation()}
               disabled={isModalComplete('mincha')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('mincha') 
@@ -2383,7 +2389,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           {/* Complete Button */}
           <div className="heart-explosion-container">
             <Button 
-              onClick={completeWithAnimation} 
+              onClick={() => completeWithAnimation()} 
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-3 border-0"
             >
               Completed
@@ -2531,7 +2537,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={isModalComplete('maariv') ? undefined : completeWithAnimation}
+              onClick={isModalComplete('maariv') ? undefined : () => completeWithAnimation()}
               disabled={isModalComplete('maariv')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('maariv') 
