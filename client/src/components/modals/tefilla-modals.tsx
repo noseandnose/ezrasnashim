@@ -817,19 +817,23 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     
     // Get the saved return tab preference
     const returnTab = localStorage.getItem('tehillim-return-tab') || 'all';
+    console.log('Completing individual Tehillim, returning to tab:', returnTab); // Debug log
     
-    // Directly switch back to special-tehillim with the correct tab
+    // Set the correct tab first, BEFORE triggering the fullscreen event
     const { setTehillimActiveTab } = useModalStore.getState();
-    setTehillimActiveTab(returnTab as 'all' | 'special'); // Set the correct tab first
+    setTehillimActiveTab(returnTab as 'all' | 'special');
     
-    // Switch back to special-tehillim fullscreen content
-    const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
-      detail: {
-        title: 'Tehillim',
-        contentType: 'special-tehillim'
-      }
-    });
-    window.dispatchEvent(fullscreenEvent);
+    // Use setTimeout to ensure tab state is set before triggering fullscreen
+    setTimeout(() => {
+      // Switch back to special-tehillim fullscreen content
+      const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
+        detail: {
+          title: 'Tehillim',
+          contentType: 'special-tehillim'
+        }
+      });
+      window.dispatchEvent(fullscreenEvent);
+    }, 50);
   };
 
   const handleCompleteAndNext = () => {
@@ -2730,6 +2734,9 @@ function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'h
   const { openModal, setSelectedPsalm, tehillimActiveTab, setTehillimActiveTab } = useModalStore();
   const { isModalComplete } = useModalCompletionStore();
 
+  // Debug log to track active tab
+  console.log('SpecialTehillimFullscreenContent rendering with active tab:', tehillimActiveTab);
+
   // Clean up localStorage when component unmounts or tab changes
   useEffect(() => {
     return () => {
@@ -2748,6 +2755,7 @@ function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'h
   // Open individual Tehillim text
   const openTehillimText = (psalmNumber: number) => {
     // Store the current tab so we can return to it after completion
+    console.log('Opening Tehillim from tab:', tehillimActiveTab); // Debug log
     localStorage.setItem('tehillim-return-tab', tehillimActiveTab);
     setSelectedPsalm(psalmNumber);
     
