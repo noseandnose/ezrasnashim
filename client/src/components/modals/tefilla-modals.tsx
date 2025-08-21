@@ -1087,6 +1087,14 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
     enabled: !!selectedPrayerId,
   });
 
+  // Update fullscreen content translation availability when prayer loads
+  useEffect(() => {
+    if (prayer && (window as any).updateFullscreenHasTranslation) {
+      const hasTranslation = !!(prayer.englishTranslation?.trim());
+      (window as any).updateFullscreenHasTranslation(hasTranslation);
+    }
+  }, [prayer]);
+
   const handleComplete = () => {
     trackModalComplete('individual-prayer');
     markModalComplete('individual-prayer');
@@ -1167,7 +1175,21 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     title: string;
     content: React.ReactNode;
     contentType?: string;
+    hasTranslation?: boolean;
   }>({ isOpen: false, title: '', content: null });
+
+  // Function to update fullscreen translation availability
+  const updateFullscreenHasTranslation = (hasTranslation: boolean) => {
+    setFullscreenContent(prev => ({ ...prev, hasTranslation }));
+  };
+
+  // Make function available globally for the fullscreen content component
+  useEffect(() => {
+    (window as any).updateFullscreenHasTranslation = updateFullscreenHasTranslation;
+    return () => {
+      delete (window as any).updateFullscreenHasTranslation;
+    };
+  }, []);
   const queryClient = useQueryClient();
   
   // Load Tefilla conditions for conditional content processing
@@ -1176,7 +1198,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   // Listen for fullscreen close events from fullscreen components
   useEffect(() => {
     const handleCloseFullscreen = () => {
-      setFullscreenContent({ isOpen: false, title: '', content: null });
+      setFullscreenContent({ isOpen: false, title: '', content: null, hasTranslation: undefined });
     };
 
     const handleDirectFullscreen = (event: CustomEvent) => {
@@ -1185,7 +1207,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         isOpen: true,
         title,
         contentType,
-        content: null
+        content: null,
+        hasTranslation: undefined
       });
     };
 
@@ -1296,7 +1319,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       isOpen: true,
       title: 'Prayer', // Will be updated when prayer data loads
       contentType: 'individual-prayer',
-      content: null
+      content: null,
+      hasTranslation: undefined // Will be determined when prayer data loads
     });
   };
 
@@ -2512,10 +2536,13 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       {/* Fullscreen Modal */}
       <FullscreenModal
         isOpen={fullscreenContent.isOpen}
-        onClose={() => setFullscreenContent({ isOpen: false, title: '', content: null })}
+        onClose={() => setFullscreenContent({ isOpen: false, title: '', content: null, hasTranslation: undefined })}
         title={fullscreenContent.title}
         showFontControls={fullscreenContent.contentType !== 'special-tehillim'}
-        showLanguageControls={fullscreenContent.contentType !== 'special-tehillim'}
+        showLanguageControls={
+          fullscreenContent.contentType !== 'special-tehillim' && 
+          (fullscreenContent.contentType !== 'individual-prayer' || fullscreenContent.hasTranslation !== false)
+        }
         fontSize={fontSize}
         onFontSizeChange={setFontSize}
         language={language}
