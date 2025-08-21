@@ -13,7 +13,7 @@ import { toast } from "@/hooks/use-toast";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import axiosClient from "@/lib/axiosClient";
 import { useTrackModalComplete, useAnalytics } from "@/hooks/use-analytics";
-import { BirkatHamazonModal } from "@/components/modals/birkat-hamazon-modal";
+import { BirkatHamazonModal, MeeinShaloshFullscreenContent, BirkatHamazonFullscreenContent } from "@/components/modals/birkat-hamazon-modal";
 import { useLocationStore } from '@/hooks/use-jewish-times';
 import { formatTextContent } from "@/lib/text-formatter";
 import { processTefillaText, getCurrentTefillaConditions, type TefillaConditions } from "@/utils/tefilla-processor";
@@ -453,6 +453,10 @@ function renderPrayerContent(contentType: string | undefined, language: 'hebrew'
       return <TehillimFullscreenContent language={language} fontSize={fontSize} />;
     case 'global-tehillim':
       return <GlobalTehillimFullscreenContent language={language} fontSize={fontSize} />;
+    case 'me-ein-shalosh':
+      return <MeeinShaloshFullscreenContent language={language} fontSize={fontSize} />;
+    case 'birkat-hamazon':
+      return <BirkatHamazonFullscreenContent language={language} fontSize={fontSize} />;
     default:
       return null;
   }
@@ -1082,6 +1086,16 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   // Load Tefilla conditions for conditional content processing
   const tefillaConditions = useTefillaConditions();
 
+  // Listen for fullscreen close events from fullscreen components
+  useEffect(() => {
+    const handleCloseFullscreen = () => {
+      setFullscreenContent({ isOpen: false, title: '', content: null });
+    };
+
+    window.addEventListener('closeFullscreen', handleCloseFullscreen);
+    return () => window.removeEventListener('closeFullscreen', handleCloseFullscreen);
+  }, []);
+
   // Reset explosion state when modal changes
   useEffect(() => {
     setShowExplosion(false);
@@ -1089,7 +1103,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
   // Auto-redirect prayer modals to fullscreen
   useEffect(() => {
-    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'individual-tehillim', 'tehillim-text'];
+    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'individual-tehillim', 'tehillim-text', 'al-hamichiya', 'birkat-hamazon'];
     
     if (activeModal && fullscreenPrayerModals.includes(activeModal)) {
       // Close the regular modal immediately
@@ -1120,6 +1134,14 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           case 'tehillim-text':
             title = 'Global Tehillim Chain';
             contentType = 'global-tehillim';
+            break;
+          case 'al-hamichiya':
+            title = 'Me\'ein Shalosh';
+            contentType = 'me-ein-shalosh';
+            break;
+          case 'birkat-hamazon':
+            title = 'Birkat Hamazon';
+            contentType = 'birkat-hamazon';
             break;
         }
         

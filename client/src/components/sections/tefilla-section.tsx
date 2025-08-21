@@ -1,4 +1,4 @@
-import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass, ArrowRight, Baby, HeartHandshake, Briefcase, GraduationCap, Users, Stethoscope, DollarSign, UserCheck, Smile, Zap, TrendingUp, Crown, Sunrise, Sun, Moon, Utensils, Stars, Globe, Link, Unlock } from "lucide-react";
+import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass, ArrowRight, Baby, HeartHandshake, Briefcase, GraduationCap, Users, Stethoscope, DollarSign, UserCheck, Smile, Zap, TrendingUp, Crown, Sunrise, Sun, Moon, Utensils, Stars, Globe, Link, Unlock, Apple, Wheat } from "lucide-react";
 import korenLogo from "@assets/This_is_a_logo_for_Koren_Publishers_Jerusalem_1752581940716.jpg";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -695,25 +695,42 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
           </button>
 
           <button 
-            onClick={() => openModal('after-brochas', 'tefilla')}
+            onClick={() => openModal('al-hamichiya', 'tefilla')}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              isModalComplete('after-brochas') ? 'bg-sage/20' : 'bg-white'
+              isModalComplete('al-hamichiya') ? 'bg-sage/20' : 'bg-white'
             }`}
           >
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              isModalComplete('after-brochas') ? 'bg-sage' : 'bg-gradient-feminine'
+              isModalComplete('al-hamichiya') ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
-              <Utensils className="text-white" size={18} />
+              <Apple className="text-white" size={18} />
             </div>
-            <h3 className="platypi-bold text-sm text-black mb-1">After Brochas</h3>
+            <h3 className="platypi-bold text-sm text-black mb-1">Me'ein Shalosh</h3>
             <p className="platypi-regular text-xs text-black/60">
-              {isModalComplete('after-brochas') ? 'Completed' : 'Prayers of Thanks'}
+              {isModalComplete('al-hamichiya') ? 'Completed' : 'After Snacks'}
             </p>
           </button>
         </div>
 
-        {/* Bottom Row: Special Tehillim and Nishmas */}
-        <div className="grid grid-cols-2 gap-2">
+        {/* Bottom Row: Birkat Hamazon, Tehillim and Nishmas */}
+        <div className="grid grid-cols-3 gap-2">
+          <button 
+            onClick={() => openModal('birkat-hamazon', 'tefilla')}
+            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
+              isModalComplete('birkat-hamazon') ? 'bg-sage/20' : 'bg-white'
+            }`}
+          >
+            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
+              isModalComplete('birkat-hamazon') ? 'bg-sage' : 'bg-gradient-feminine'
+            }`}>
+              <Wheat className="text-white" size={18} />
+            </div>
+            <h3 className="platypi-bold text-xs text-black mb-1">Birkat Hamazon</h3>
+            <p className="platypi-regular text-xs text-black/60">
+              {isModalComplete('birkat-hamazon') ? 'Completed' : 'After Bread'}
+            </p>
+          </button>
+
           <button 
             onClick={() => openModal('special-tehillim', 'tefilla')}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
@@ -725,7 +742,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             }`}>
               <Stars className="text-white" size={18} />
             </div>
-            <h3 className="platypi-bold text-sm text-black mb-1">Tehillim</h3>
+            <h3 className="platypi-bold text-xs text-black mb-1">Tehillim</h3>
             <p className="platypi-regular text-xs text-black/60">
               {hasAnyTehillimCompleted() ? 'Completed' : 'All & Special'}
             </p>
@@ -742,9 +759,9 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
             }`}>
               <Heart className="text-white" size={18} />
             </div>
-            <h3 className="platypi-bold text-sm text-black mb-1">Nishmas Kol Chai</h3>
+            <h3 className="platypi-bold text-xs text-black mb-1">Nishmas</h3>
             <p className="platypi-regular text-xs text-black/60">
-              {isModalComplete('nishmas-campaign') ? 'Completed' : 'Prayer of Gratitude'}
+              {isModalComplete('nishmas-campaign') ? 'Completed' : 'Gratitude'}
             </p>
           </button>
         </div>
