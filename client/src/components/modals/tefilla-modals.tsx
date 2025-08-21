@@ -3502,17 +3502,14 @@ function JerusalemCompass() {
       >
         
         {/* Header */}
-        <div className="flex items-center justify-center mb-4 relative pr-8">
-          <DialogTitle className="text-xl platypi-bold text-black">The Kotel Compass</DialogTitle>
+        <div className="flex flex-col items-center justify-center mb-6 relative pr-8">
+          <DialogTitle className="text-xl platypi-bold text-black mb-2">The Kotel Compass</DialogTitle>
+          <p className="platypi-regular text-sm text-black/70">
+            Face your Heart Home
+          </p>
         </div>
 
         <div className="space-y-6">
-          {/* Description */}
-          <div className="text-center">
-            <p className="platypi-regular text-sm text-black/70 mb-4">
-              Find the direction to face when praying towards the Kotel
-            </p>
-          </div>
 
           {/* iOS Permission Request */}
           {typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested && !isLoading && (
@@ -3652,7 +3649,7 @@ function JerusalemCompass() {
                   
                   return (
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
-                      <Heart className={`w-4 h-4 ${isAligned ? 'text-sage fill-sage' : 'text-rose-400 fill-rose-400'}`} />
+                      <Heart className={`w-4 h-4 ${isAligned ? 'text-sage fill-sage' : 'text-rose-400 fill-rose-400'}`} strokeWidth={0} />
                     </div>
                   );
                 })()}
