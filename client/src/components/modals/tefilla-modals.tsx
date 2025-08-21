@@ -459,6 +459,8 @@ function renderPrayerContent(contentType: string | undefined, language: 'hebrew'
       return <MeeinShaloshFullscreenContent language={language} fontSize={fontSize} />;
     case 'birkat-hamazon':
       return <BirkatHamazonFullscreenContent language={language} fontSize={fontSize} />;
+    case 'individual-prayer':
+      return <IndividualPrayerFullscreenContent language={language} fontSize={fontSize} />;
     default:
       return null;
   }
@@ -1070,6 +1072,73 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
   );
 }
 
+function IndividualPrayerFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+  
+  // Get the prayer data from global window property set in handlePrayerSelect
+  const prayer = (window as any).currentPrayerData;
+  
+  if (!prayer) {
+    return <div className="text-center py-8">Prayer not found</div>;
+  }
+
+  const handleComplete = () => {
+    trackModalComplete('individual-prayer');
+    markModalComplete('individual-prayer');
+    completeTask('tefilla');
+    
+    // Close fullscreen and navigate home
+    const event = new CustomEvent('closeFullscreen');
+    window.dispatchEvent(event);
+    setTimeout(() => {
+      window.location.hash = '#/?section=home&scrollToProgress=true';
+    }, 100);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-2xl p-6 border border-blush/10">
+        {prayer.hebrewText && language === 'hebrew' && (
+          <div 
+            className="vc-koren-hebrew leading-relaxed"
+            style={{ fontSize: `${fontSize + 1}px` }}
+            dangerouslySetInnerHTML={{ 
+              __html: formatTextContent(prayer.hebrewText).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">')
+            }}
+          />
+        )}
+        {language === 'english' && prayer.englishTranslation && (
+          <div 
+            className="koren-siddur-english text-left leading-relaxed"
+            style={{ fontSize: `${fontSize}px` }}
+            dangerouslySetInnerHTML={{ __html: formatTextContent(prayer.englishTranslation) }}
+          />
+        )}
+      </div>
+      
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+        </span>
+      </div>
+      
+      <Button 
+        onClick={isModalComplete('individual-prayer') ? undefined : handleComplete}
+        disabled={isModalComplete('individual-prayer')}
+        className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+          isModalComplete('individual-prayer') 
+            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+        }`}
+      >
+        {isModalComplete('individual-prayer') ? 'Completed Today' : 'Complete'}
+      </Button>
+    </div>
+  );
+}
+
 export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const { activeModal, openModal, closeModal, selectedPsalm } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
@@ -1213,7 +1282,30 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const handlePrayerSelect = (prayerId: number) => {
     setSelectedPrayerId(prayerId);
     closeModal();
-    openModal('individual-prayer', 'tefilla');
+    
+    // Fetch prayer data and open directly in fullscreen
+    const fetchPrayerAndOpenFullscreen = async () => {
+      try {
+        const response = await fetch(`/api/womens-prayers/prayer/${prayerId}`);
+        const prayer = await response.json();
+        
+        if (prayer) {
+          setFullscreenContent({
+            isOpen: true,
+            title: prayer.prayerName,
+            contentType: 'individual-prayer',
+            content: null
+          });
+          
+          // Store the prayer data for use in renderPrayerContent
+          window.currentPrayerData = prayer;
+        }
+      } catch (error) {
+        console.error('Error fetching prayer:', error);
+      }
+    };
+    
+    fetchPrayerAndOpenFullscreen();
   };
 
   // Complete prayer with task tracking
