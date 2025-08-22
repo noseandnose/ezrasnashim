@@ -11,6 +11,7 @@ Tefilla font: All prayer content in Tefilla modals now uses Koren Siddur font fo
 Reading time display: User requested reading time estimation for text content, implemented for Halacha content using 200 words per minute calculation.
 Community feedback form: Updated to new Google Forms link.
 Text formatting: Database content supports markdown-style formatting - **text** for bold, --- for line breaks, ~~text~~ for greyed out text, ++text++ for larger text (1.2em), --text-- for smaller text (0.85em), [[text]] for grey box content.
+Compass alignment message: When compass is aligned with Jerusalem, displays "Your heart is in the right place" instead of technical alignment message.
 
 ## Recent Changes (August 22, 2025)
 ### Android Compass Fix Implementation (August 22, 2025)

@@ -4136,7 +4136,7 @@ function JerusalemCompass() {
                       isAligned ? 'text-black' : 'text-blue-800'
                     }`}>
                       {isAligned
-                        ? '✓ Aligned with the Kotel!' 
+                        ? '✓ Your heart is in the right place' 
                         : 'Turn until the Icon is at the top'
                       }
                     </p>
