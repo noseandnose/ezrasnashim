@@ -202,7 +202,7 @@ export default function TableSection() {
           {/* Jewish Date Converter Button */}
           <button
             className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
-            onClick={() => openModal('date-calculator', 'table')}
+            onClick={() => openModal('date-calculator-fullscreen', 'table')}
           >
             <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-feminine">
               <Calendar className="text-white" size={18} strokeWidth={1.5} />
