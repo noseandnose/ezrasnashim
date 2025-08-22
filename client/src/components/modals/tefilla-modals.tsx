@@ -3829,14 +3829,14 @@ function JerusalemCompass() {
         // Enhanced Android handling based on device type and version
         if (isAndroid) {
           if (isOldAndroid) {
-            // Android 4.x and older - direct alpha value
-            heading = event.alpha;
+            // Android 4.x and older - direct alpha value with 180° correction
+            heading = (event.alpha + 180) % 360;
           } else if (isChrome) {
-            // Modern Android Chrome - use compass heading calculation
-            heading = event.alpha;
+            // Modern Android Chrome - use compass heading calculation with 180° correction
+            heading = (event.alpha + 180) % 360;
           } else {
-            // Other Android browsers - use standard calculation
-            heading = (360 - event.alpha) % 360;
+            // Other Android browsers - use standard calculation with 180° correction
+            heading = ((360 - event.alpha) + 180) % 360;
           }
         } else {
           // Non-Android devices - use standard calculation
@@ -4192,7 +4192,7 @@ function JerusalemCompass() {
                 {/Android/i.test(navigator.userAgent) ? (
                   <>
                     <li>• Hold phone flat like a traditional compass</li>
-                    <li>• If direction seems wrong, close and reopen compass</li>
+                    <li>• Direction automatically corrected for Android</li>
                     <li>• Avoid areas with magnetic interference</li>
                     <li>• Calibrate by moving in figure-8 motion</li>
                   </>

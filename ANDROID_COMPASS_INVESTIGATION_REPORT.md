@@ -137,10 +137,28 @@ To verify these fixes work properly on Android devices:
 - Indoor vs outdoor accuracy
 - Battery optimization impacts
 
+### Final Fix Applied (180° Correction)
+
+**Issue**: Compass was pointing in exact opposite direction on Android
+**Solution**: Added 180-degree offset correction for all Android devices
+
+```typescript
+// Android direction correction applied
+if (isAndroid) {
+  if (isOldAndroid) {
+    heading = (event.alpha + 180) % 360; // 180° correction
+  } else if (isChrome) {
+    heading = (event.alpha + 180) % 360; // 180° correction
+  } else {
+    heading = ((360 - event.alpha) + 180) % 360; // 180° correction
+  }
+}
+```
+
 ### Expected Improvements
 
 After these fixes, Android users should experience:
-- ✅ Correct compass direction pointing to Jerusalem
+- ✅ Correct compass direction pointing to Jerusalem (with 180° correction)
 - ✅ Stable location that persists when reopening compass
 - ✅ Smooth compass rotation without jumping
 - ✅ Proper alignment detection with 5° tolerance
