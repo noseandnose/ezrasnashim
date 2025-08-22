@@ -30,6 +30,7 @@ export type ModalType =
   | 'location'
   | 'sponsor-details'
   | 'community-impact'
+  | 'date-calculator-fullscreen'
   | null;
 
 export interface ModalState {

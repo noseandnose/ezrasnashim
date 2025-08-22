@@ -20,6 +20,12 @@ Text formatting: Database content supports markdown-style formatting - **text** 
 - **Enhanced Fallback**: Ocean areas use intelligent UTC offset calculation when exact timezone unavailable
 - **Performance**: Fast timezone lookup with detailed logging for debugging and verification
 
+### Hebrew Date Calculator Fullscreen Conversion (August 22, 2025)
+- **Fullscreen Experience**: Converted Hebrew Date Calculator from modal to fullscreen display for better usability
+- **Enhanced Design**: Larger text, improved spacing, better visual hierarchy with same functionality
+- **Consistent UI**: Matches other fullscreen modals with proper background gradient and responsive design
+- **Accessibility**: Larger touch targets and clearer labels for mobile users
+
 ## Recent Changes (August 21, 2025)
 ### Launch Preparation Optimizations
 - **Compass Stabilization**: Enhanced with weighted averaging (5-reading buffer), time-based throttling (100ms intervals), and smoother CSS transitions (0.8s cubic-bezier). Eliminates jumping and floating issues.
