@@ -81,7 +81,7 @@ export default function TimesSection() {
         {/* Hebrew Date Calculator */}
         <div 
           className="content-card rounded-2xl p-4 cursor-pointer"
-          onClick={() => openModal('date-calculator', 'times')}
+          onClick={() => openModal('date-calculator-fullscreen', 'times')}
         >
           <div className="flex items-center space-x-3">
             <Calendar className="text-xl text-blush" size={24} />

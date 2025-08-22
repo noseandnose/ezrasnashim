@@ -12,6 +12,23 @@ Reading time display: User requested reading time estimation for text content, i
 Community feedback form: Updated to new Google Forms link.
 Text formatting: Database content supports markdown-style formatting - **text** for bold, --- for line breaks, ~~text~~ for greyed out text, ++text++ for larger text (1.2em), --text-- for smaller text (0.85em), [[text]] for grey box content.
 
+## Recent Changes (August 22, 2025)
+### Comprehensive Worldwide Timezone Detection (August 22, 2025)
+- **Global Timezone Coverage**: Replaced basic coordinate-based timezone detection with comprehensive worldwide system using geo-tz library
+- **Accurate Detection**: Now properly detects timezones for all countries and regions worldwide including India, China, Brazil, Australia, Africa, etc.
+- **Previous Issue**: South Africa was incorrectly using Europe/London instead of Africa/Johannesburg causing 1+ hour prayer time errors
+- **Enhanced Fallback**: Ocean areas use intelligent UTC offset calculation when exact timezone unavailable
+- **Performance**: Fast timezone lookup with detailed logging for debugging and verification
+
+### Hebrew Date Calculator Fullscreen Conversion (August 22, 2025)
+- **Fullscreen Experience**: Converted Hebrew Date Calculator from modal to fullscreen display for better usability
+- **Enhanced Design**: Larger text, improved spacing, better visual hierarchy with same functionality
+- **Consistent UI**: Matches other fullscreen modals with proper background gradient and responsive design
+- **Accessibility**: Larger touch targets and clearer labels for mobile users
+- **Fixed Button Trigger**: Updated Life page button to trigger correct fullscreen modal instead of old modal
+- **Compact Layout**: Hebrew Date display now shows label and date on same line to save space
+- **Better Date Selection**: Restored separate month/day/year dropdowns for easier year selection instead of single date input
+
 ## Recent Changes (August 21, 2025)
 ### Launch Preparation Optimizations
 - **Compass Stabilization**: Enhanced with weighted averaging (5-reading buffer), time-based throttling (100ms intervals), and smoother CSS transitions (0.8s cubic-bezier). Eliminates jumping and floating issues.
@@ -19,6 +36,20 @@ Text formatting: Database content supports markdown-style formatting - **text** 
 - **Modal System**: All major content modals migrated to fullscreen. Translation buttons now conditionally shown only when translations exist.
 - **Performance**: Implemented lazy loading for all routes, added PWA service worker for offline support, optimized event handlers with debouncing.
 - **Bug Fixes**: Fixed Personal Prayers JSON parsing error, resolved TypeScript compilation issues.
+
+### Women's Prayers Completion Tracking Fix (August 21, 2025)
+- **Fixed Critical Bug**: Resolved issue where all Women's Prayers were marking each other as complete
+- **Unique Prayer Tracking**: Each individual prayer now uses unique ID-based keys (`womens-prayer-${id}`) instead of shared category keys
+- **Individual Tracking**: Every prayer tracks its completion status completely independently
+- **LocalStorage Persistence**: Modal completions persist across page refreshes and navigation with date-based tracking
+- **Automatic Reset**: All completions automatically reset at midnight for the new day
+- **Data Cleanup**: Added automatic cleanup of stale completion data older than yesterday
+- **Verified Working**: User confirmed all prayers now track completion independently as expected
+
+### UI Enhancements (August 21, 2025)
+- **Mazel Tov Modal**: Text now bold with improved visibility using font-bold class and pure black color
+- **Share Modal Browser Detection**: iPhone users now see browser-specific instructions - Safari shows "at the bottom of the screen", Chrome shows "at the top right corner of your screen"
+- **Console Cleanup**: Removed all debug console.log statements, fixed deprecated meta tag warning
 
 ## System Architecture
 ### Frontend

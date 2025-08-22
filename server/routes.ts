@@ -5,6 +5,7 @@ import { storage } from "./storage.js";
 import serverAxiosClient from "./axiosClient.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import { find as findTimezone } from "geo-tz";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -214,33 +215,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const latitude = parseFloat(lat);
       const longitude = parseFloat(lng);
       
-      // Determine timezone based on coordinates
-      let tzid = 'America/New_York'; // Default
+      // Comprehensive worldwide timezone detection using geo-tz library
+      let tzid = 'America/New_York'; // Default fallback
       
       // Log coordinates for debugging
       if (process.env.NODE_ENV === 'development') {
         console.log(`Zmanim request for coordinates: lat=${latitude}, lng=${longitude}`);
       }
       
-      // Basic timezone detection based on longitude and known regions
-      if (latitude >= 29 && latitude <= 33.5 && longitude >= 34 && longitude <= 36) {
-        // Israel region
-        tzid = 'Asia/Jerusalem';
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`Detected Israel region, using timezone: ${tzid}`);
+      try {
+        // Use geo-tz library for accurate worldwide timezone detection
+        const timezones = findTimezone(latitude, longitude);
+        
+        if (timezones && timezones.length > 0) {
+          tzid = timezones[0]; // Use the first (most accurate) timezone
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`geo-tz detected timezone: ${tzid} for coordinates lat=${latitude}, lng=${longitude}`);
+            if (timezones.length > 1) {
+              console.log(`Alternative timezones available: ${timezones.slice(1).join(', ')}`);
+            }
+          }
+        } else {
+          // Fallback to basic detection for edge cases
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`geo-tz returned no timezones, using fallback detection`);
+          }
+          
+          // Basic fallback detection for ocean areas
+          if (latitude >= 29 && latitude <= 33.5 && longitude >= 34 && longitude <= 36) {
+            tzid = 'Asia/Jerusalem'; // Israel
+          } else if (longitude >= -125 && longitude <= -66) {
+            // North America basic zones
+            if (longitude >= -125 && longitude <= -120) tzid = 'America/Los_Angeles';
+            else if (longitude >= -120 && longitude <= -105) tzid = 'America/Denver';
+            else if (longitude >= -105 && longitude <= -90) tzid = 'America/Chicago';
+            else tzid = 'America/New_York';
+          } else if (longitude >= -10 && longitude <= 30 && latitude >= 35) {
+            tzid = 'Europe/London'; // Basic Europe
+          } else {
+            // UTC offset-based fallback for ocean areas
+            const utcOffset = Math.round(longitude / 15);
+            if (utcOffset >= -12 && utcOffset <= 14) {
+              tzid = `Etc/GMT${utcOffset <= 0 ? '+' : '-'}${Math.abs(utcOffset)}`;
+            }
+          }
         }
-      } else if (longitude >= -125 && longitude <= -66) {
-        // North America
-        if (longitude >= -125 && longitude <= -120) tzid = 'America/Los_Angeles';
-        else if (longitude >= -120 && longitude <= -105) tzid = 'America/Denver';
-        else if (longitude >= -105 && longitude <= -90) tzid = 'America/Chicago';
-        else if (longitude >= -90 && longitude <= -66) tzid = 'America/New_York';
-      } else if (longitude >= -10 && longitude <= 30) {
-        // Europe
-        tzid = 'Europe/London';
-      } else if (longitude >= -80 && longitude <= -60) {
-        // Eastern Canada
-        tzid = 'America/Toronto';
+      } catch (error) {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('geo-tz timezone detection error:', error);
+        }
+        // Keep default fallback timezone
+      }
+      
+      // Log final timezone selection
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Final selected timezone: ${tzid} for coordinates lat=${latitude}, lng=${longitude}`);
       }
       
       // Call Hebcal with exact coordinates

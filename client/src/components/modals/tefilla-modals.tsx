@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, ArrowUp, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Link, Shield, Unlock } from "lucide-react";
+import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, ArrowUp, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Link, Shield, Unlock, Check } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
@@ -54,6 +54,44 @@ const KorenThankYou = () => {
           Koren Publishers Jerusalem
         </a>
         {' '}and Rabbi Sacks Legacy
+      </span>
+    </div>
+  );
+};
+
+const ChuppahThankYou = () => {
+  return (
+    <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+      <span className="text-sm platypi-medium text-black">
+        Thank you to{' '}
+        <a 
+          href="https://www.chuppah.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-blue-700"
+        >
+          Chuppah.org
+        </a>
+        {' '}for providing this Teffila
+      </span>
+    </div>
+  );
+};
+
+const NishmasThankYou = () => {
+  return (
+    <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+      <span className="text-sm platypi-medium text-black">
+        Thank you to{' '}
+        <a 
+          href="https://www.nishmas.net/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-blue-700"
+        >
+          Nishmas.net
+        </a>
+        {' '}for providing this Tefilla
       </span>
     </div>
   );
@@ -768,7 +806,16 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+          Thank you to{' '}
+          <a 
+            href="https://www.nishmas.net/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-700"
+          >
+            Nishmas.net
+          </a>
+          {' '}for providing this Tefilla
         </span>
       </div>
 
@@ -819,7 +866,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     
     // Get the saved return tab preference from Zustand store
     const returnTab = tehillimReturnTab || 'all';
-    console.log('Completing individual Tehillim, returning to tab:', returnTab); // Debug log
+
     
     // Set the correct tab first, BEFORE triggering the fullscreen event
     setTehillimActiveTab(returnTab);
@@ -859,7 +906,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
   // Determine button layout based on stored return tab from Zustand store
   const isFromSpecialTab = tehillimReturnTab === 'special';
   const isFromAllTab = tehillimReturnTab === 'all' || !tehillimReturnTab; // Default to all if not set
-  console.log('Individual Tehillim button logic - tehillimReturnTab:', tehillimReturnTab, 'isFromAllTab:', isFromAllTab, 'isFromSpecialTab:', isFromSpecialTab); // Debug log
+
 
   return (
     <div className="space-y-6">
@@ -1003,7 +1050,8 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
   if (isLoading) return <div className="text-center py-8">Loading Tehillim...</div>;
   if (!progress?.currentPerek) return <div className="text-center py-8">No Tehillim available</div>;
 
-  const completionKey = 'tehillim-chain';
+  // Use unique key per Tehillim number for proper individual tracking
+  const completionKey = `tehillim-chain-${progress?.currentPerek}`;
   const isCompleted = isModalComplete(completionKey);
 
   const handleComplete = () => {
@@ -1026,6 +1074,21 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
 
   return (
     <div className="space-y-4">
+      {/* Current name being prayed for - moved above Tehillim text */}
+      {currentName && (
+        <div className="bg-sage/10 rounded-xl p-3 border border-sage/20">
+          <div className="flex items-center justify-center gap-2">
+            {getReasonIcon(currentName.reasonEnglish || currentName.reason)}
+            <span className="text-sm platypi-medium text-black">
+              Davening for: {currentName.hebrewName}
+            </span>
+            <span className="text-xs platypi-regular text-black/60">
+              ({currentName.reasonEnglish || currentName.reason})
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-2xl p-6 border border-blush/10">
         <div
           className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
@@ -1035,21 +1098,6 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
           }}
         />
       </div>
-
-      {/* Current name being prayed for */}
-      {currentName && (
-        <div className="bg-sage/10 rounded-xl p-3 border border-sage/20">
-          <div className="flex items-center justify-center gap-2">
-            <Heart className="w-4 h-4 text-sage" />
-            <span className="text-sm platypi-medium text-black">
-              Praying for: {currentName.hebrewName}
-            </span>
-            <span className="text-xs platypi-regular text-black/60">
-              ({currentName.reasonEnglish || currentName.reason})
-            </span>
-          </div>
-        </div>
-      )}
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
@@ -1095,9 +1143,12 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
     }
   }, [prayer]);
 
+  // Use unique key per prayer for proper individual tracking
+  const modalKey = `womens-prayer-${prayer?.id || selectedPrayerId}`;
+
   const handleComplete = () => {
-    trackModalComplete('individual-prayer');
-    markModalComplete('individual-prayer');
+    trackModalComplete(modalKey);
+    markModalComplete(modalKey);
     completeTask('tefilla');
     
     // Close fullscreen and navigate home
@@ -1132,22 +1183,21 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
         )}
       </div>
       
-      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-        <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
-        </span>
-      </div>
+      {/* Conditional attribution based on prayer name and ID */}
+      {prayer.prayerName !== "Parshat Hamann" && prayer.prayerName !== "Hafrashas Challah" && prayer.id !== 10 && (
+        <ChuppahThankYou />
+      )}
       
       <Button 
-        onClick={isModalComplete('individual-prayer') ? undefined : handleComplete}
-        disabled={isModalComplete('individual-prayer')}
+        onClick={isModalComplete(modalKey) ? undefined : handleComplete}
+        disabled={isModalComplete(modalKey)}
         className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
-          isModalComplete('individual-prayer') 
+          isModalComplete(modalKey) 
             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
             : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
         }`}
       >
-        {isModalComplete('individual-prayer') ? 'Completed Today' : 'Complete'}
+        {isModalComplete(modalKey) ? 'Completed Today' : 'Complete'}
       </Button>
     </div>
   );
@@ -1170,6 +1220,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const [selectedPrayerId, setSelectedPrayerId] = useState<number | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [showExplosion, setShowExplosion] = useState(false);
+  const [activeExplosionModal, setActiveExplosionModal] = useState<string | null>(null);
   const [fullscreenContent, setFullscreenContent] = useState<{
     isOpen: boolean;
     title: string;
@@ -1202,7 +1253,13 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     };
 
     const handleDirectFullscreen = (event: CustomEvent) => {
-      const { title, contentType } = event.detail;
+      const { title, contentType, modalKey } = event.detail;
+      
+      // Only handle tefilla-related fullscreen requests
+      if (modalKey && ['recipe', 'inspiration'].includes(modalKey)) {
+        return; // Let table-modals handle these
+      }
+      
       setFullscreenContent({
         isOpen: true,
         title,
@@ -1309,7 +1366,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   }, [onSectionChange]);
 
   const handlePrayerSelect = (prayerId: number) => {
-    console.log('handlePrayerSelect called with prayerId:', prayerId);
     setSelectedPrayerId(prayerId);
     closeModal();
     
@@ -1325,18 +1381,24 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   };
 
   // Complete prayer with task tracking
-  const completeWithAnimation = () => {
+  const completeWithAnimation = (specificModal?: string) => {
+    // Use specific modal if provided, otherwise use activeModal
+    const modalToComplete = specificModal || activeModal;
+    
     // Track modal completion and mark as completed globally
-    if (activeModal) {
-      trackModalComplete(activeModal);
-      markModalComplete(activeModal);
+    if (modalToComplete) {
+      // Only complete the specific modal that was clicked
+      trackModalComplete(modalToComplete);
+      markModalComplete(modalToComplete);
     }
     
     setShowExplosion(true);
+    setActiveExplosionModal(modalToComplete);
     
     // Wait for animation to complete before proceeding
     setTimeout(() => {
       setShowExplosion(false); // Reset explosion state
+      setActiveExplosionModal(null);
       completeTask('tefilla');
       closeModal();
       
@@ -2001,7 +2063,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={isModalComplete('mincha') ? undefined : completeWithAnimation}
+              onClick={isModalComplete('mincha') ? undefined : () => completeWithAnimation()}
               disabled={isModalComplete('mincha')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('mincha') 
@@ -2030,58 +2092,76 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           
           <div className="space-y-3">
             <div 
-              className="content-card rounded-xl p-4 cursor-pointer"
-              onClick={() => {
-                closeModal();
-                openModal('blessings', 'tefilla');
-              }}
-            >
-              <div className="flex items-center space-x-3">
-                <HandHeart className="text-blush" size={20} />
-                <span className="platypi-medium">Blessings</span>
-              </div>
-            </div>
-            
-            <div 
-              className="content-card rounded-xl p-4 cursor-pointer"
-              onClick={() => {
-                closeModal();
-                openModal('tefillos', 'tefilla');
-              }}
-            >
-              <div className="flex items-center space-x-3">
-                <Scroll className="text-peach" size={20} />
-                <span className="platypi-medium">Tefillos</span>
-              </div>
-            </div>
-            
-            <div 
-              className="content-card rounded-xl p-4 cursor-pointer"
-              onClick={() => {
-                closeModal();
-                openModal('personal-prayers', 'tefilla');
-              }}
-            >
-              <div className="flex items-center space-x-3">
-                <Heart className="text-blush" size={20} />
-                <span className="platypi-medium">Personal Prayers</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="heart-explosion-container">
-            <Button 
-              onClick={isModalComplete('womens-prayers') ? undefined : completeWithAnimation}
-              disabled={isModalComplete('womens-prayers')}
-              className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
-                isModalComplete('womens-prayers') 
-                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              className={`content-card rounded-xl p-4 ${
+                isModalComplete('blessings') 
+                  ? 'bg-sage/20 border-sage cursor-not-allowed' 
+                  : 'cursor-pointer hover:bg-gray-50'
               }`}
+              onClick={() => {
+                if (!isModalComplete('blessings')) {
+                  closeModal();
+                  openModal('blessings', 'tefilla');
+                }
+              }}
             >
-              {isModalComplete('womens-prayers') ? 'Completed Today' : "Complete Women's Prayers"}
-            </Button>
-            <HeartExplosion trigger={showExplosion} />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <HandHeart className={isModalComplete('blessings') ? "text-sage" : "text-blush"} size={20} />
+                  <span className="platypi-medium">Blessings</span>
+                </div>
+                {isModalComplete('blessings') && (
+                  <Check className="text-sage" size={20} />
+                )}
+              </div>
+            </div>
+            
+            <div 
+              className={`content-card rounded-xl p-4 ${
+                isModalComplete('tefillos') 
+                  ? 'bg-sage/20 border-sage cursor-not-allowed' 
+                  : 'cursor-pointer hover:bg-gray-50'
+              }`}
+              onClick={() => {
+                if (!isModalComplete('tefillos')) {
+                  closeModal();
+                  openModal('tefillos', 'tefilla');
+                }
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Scroll className={isModalComplete('tefillos') ? "text-sage" : "text-peach"} size={20} />
+                  <span className="platypi-medium">Tefillos</span>
+                </div>
+                {isModalComplete('tefillos') && (
+                  <Check className="text-sage" size={20} />
+                )}
+              </div>
+            </div>
+            
+            <div 
+              className={`content-card rounded-xl p-4 ${
+                isModalComplete('personal-prayers') 
+                  ? 'bg-sage/20 border-sage cursor-not-allowed' 
+                  : 'cursor-pointer hover:bg-gray-50'
+              }`}
+              onClick={() => {
+                if (!isModalComplete('personal-prayers')) {
+                  closeModal();
+                  openModal('personal-prayers', 'tefilla');
+                }
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Heart className={isModalComplete('personal-prayers') ? "text-sage" : "text-blush"} size={20} />
+                  <span className="platypi-medium">Personal Prayers</span>
+                </div>
+                {isModalComplete('personal-prayers') && (
+                  <Check className="text-sage" size={20} />
+                )}
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
@@ -2102,7 +2182,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={isModalComplete('blessings') ? undefined : completeWithAnimation}
+              onClick={isModalComplete('blessings') ? undefined : () => completeWithAnimation('blessings')}
               disabled={isModalComplete('blessings')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('blessings') 
@@ -2112,7 +2192,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             >
               {isModalComplete('blessings') ? 'Completed Today' : 'Complete Blessings'}
             </Button>
-            <HeartExplosion trigger={showExplosion} />
+            <HeartExplosion trigger={showExplosion && activeExplosionModal === 'blessings'} />
           </div>
         </DialogContent>
       </Dialog>
@@ -2133,7 +2213,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={isModalComplete('tefillos') ? undefined : completeWithAnimation}
+              onClick={isModalComplete('tefillos') ? undefined : () => completeWithAnimation('tefillos')}
               disabled={isModalComplete('tefillos')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('tefillos') 
@@ -2143,7 +2223,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             >
               {isModalComplete('tefillos') ? 'Completed Today' : 'Complete Tefillos'}
             </Button>
-            <HeartExplosion trigger={showExplosion} />
+            <HeartExplosion trigger={showExplosion && activeExplosionModal === 'tefillos'} />
           </div>
         </DialogContent>
       </Dialog>
@@ -2178,7 +2258,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={isModalComplete('personal-prayers') ? undefined : completeWithAnimation}
+              onClick={isModalComplete('personal-prayers') ? undefined : () => completeWithAnimation('personal-prayers')}
               disabled={isModalComplete('personal-prayers')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('personal-prayers') 
@@ -2188,7 +2268,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             >
               {isModalComplete('personal-prayers') ? 'Completed Today' : 'Complete Personal Prayers'}
             </Button>
-            <HeartExplosion trigger={showExplosion} />
+            <HeartExplosion trigger={showExplosion && activeExplosionModal === 'personal-prayers'} />
           </div>
         </DialogContent>
       </Dialog>
@@ -2350,12 +2430,12 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             )}
           </div>
 
-          <KorenThankYou />
+          <NishmasThankYou />
 
           {/* Complete Button */}
           <div className="heart-explosion-container">
             <Button 
-              onClick={completeWithAnimation} 
+              onClick={() => completeWithAnimation()} 
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-3 border-0"
             >
               Completed
@@ -2503,7 +2583,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={isModalComplete('maariv') ? undefined : completeWithAnimation}
+              onClick={isModalComplete('maariv') ? undefined : () => completeWithAnimation()}
               disabled={isModalComplete('maariv')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('maariv') 
@@ -2585,7 +2665,7 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
           key={prayer.id}
           className="bg-white rounded-xl p-4 cursor-pointer hover:bg-white/90 transition-all duration-300 shadow-sm border border-blush/20"
           onClick={() => {
-            console.log('Refuah prayer clicked, ID:', prayer.id);
+
             onPrayerSelect(prayer.id);
           }}
         >
@@ -2600,6 +2680,7 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
           </div>
         </div>
       ))}
+      
       <div className="mt-6">
         <Button 
           onClick={() => closeModal()}
@@ -2652,6 +2733,7 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
           </div>
         </div>
       ))}
+      
       <div className="mt-6">
         <Button 
           onClick={() => closeModal()}
@@ -2704,6 +2786,7 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
           </div>
         </div>
       ))}
+      
       <div className="mt-6">
         <Button 
           onClick={() => closeModal()}
@@ -2738,6 +2821,9 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
 
   if (isLoading) return <div className="text-center">Loading prayer...</div>;
   if (!prayer) return <div className="text-center">Prayer not found</div>;
+  
+  // Use unique key per prayer for proper individual tracking
+  const modalKey = `womens-prayer-${prayer?.id || prayerId}`;
 
   return (
     <>
@@ -2805,14 +2891,17 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
         )}
       </div>
 
-      <KorenThankYou />
+      {/* Conditional attribution based on prayer name and ID */}
+      {prayer.prayerName !== "Parshat Hamann" && prayer.prayerName !== "Hafrashas Challah" && prayer.id !== 10 && (
+        <ChuppahThankYou />
+      )}
 
       <div className="heart-explosion-container">
         <Button 
-          onClick={isModalComplete('individual-prayer') ? undefined : () => {
+          onClick={isModalComplete(modalKey) ? undefined : () => {
             // Track modal completion and mark as completed globally
-            trackModalComplete('individual-prayer');
-            markModalComplete('individual-prayer');
+            trackModalComplete(modalKey);
+            markModalComplete(modalKey);
             
             completeTask('tefilla');
             setShowHeartExplosion(true);
@@ -2824,14 +2913,14 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
               window.location.hash = '#/?section=home&scrollToProgress=true';
             }, 2000);
           }}
-          disabled={isModalComplete('individual-prayer')}
+          disabled={isModalComplete(modalKey)}
           className={`w-full py-3 rounded-xl platypi-medium border-0 ${
-            isModalComplete('individual-prayer') 
+            isModalComplete(modalKey) 
               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
               : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
           }`}
         >
-          {isModalComplete('individual-prayer') ? 'Completed Today' : 'Complete'}
+          {isModalComplete(modalKey) ? 'Completed Today' : 'Complete'}
         </Button>
         
         {/* Heart Explosion Animation */}
@@ -2852,12 +2941,12 @@ function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'h
   const { isModalComplete } = useModalCompletionStore();
 
   // Debug log to track active tab
-  console.log('SpecialTehillimFullscreenContent rendering with active tab:', tehillimActiveTab);
+
 
   // Open individual Tehillim text
   const openTehillimText = (psalmNumber: number) => {
     // Store the current tab so we can return to it after completion
-    console.log('Opening Tehillim from tab:', tehillimActiveTab); // Debug log
+
     setTehillimReturnTab(tehillimActiveTab); // Store in Zustand instead of localStorage
     setSelectedPsalm(psalmNumber);
     
@@ -3947,10 +4036,11 @@ function JerusalemCompass() {
                   return (
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
                       <Heart 
-                        className="w-4 h-4" 
+                        className={`w-4 h-4 ${isAligned ? 'animate-pulse' : ''}`}
                         style={{
-                          color: isAligned ? '#b6cdb5' : '#eacbd2',
-                          fill: isAligned ? '#b6cdb5' : '#eacbd2'
+                          color: '#eacbd2',
+                          fill: '#eacbd2',
+                          animationDuration: isAligned ? '1s' : undefined
                         }}
                         strokeWidth={0} 
                       />

@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useGeolocation, useJewishTimes } from "@/hooks/use-jewish-times";
 import { initializeCache } from "@/lib/cache";
 import { useEffect, lazy, Suspense } from "react";
+import "@/utils/clear-modal-completions";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));
@@ -31,6 +32,35 @@ function Router() {
   // Initialize cache system and register service worker
   useEffect(() => {
     initializeCache();
+    
+    // One-time cleanup of stale modal completion data
+    const cleanupModalCompletions = () => {
+      try {
+        const stored = localStorage.getItem('modalCompletions');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const today = new Date().toISOString().split('T')[0];
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          const yesterdayStr = yesterday.toISOString().split('T')[0];
+          
+          // Keep only today and yesterday
+          const cleaned: Record<string, string[]> = {};
+          for (const [date, modals] of Object.entries(parsed)) {
+            if (date === today || date === yesterdayStr) {
+              cleaned[date] = modals as string[];
+            }
+          }
+          
+          localStorage.setItem('modalCompletions', JSON.stringify(cleaned));
+        }
+      } catch (e) {
+        // If data is corrupted, clear it
+        localStorage.removeItem('modalCompletions');
+      }
+    };
+    
+    cleanupModalCompletions();
     
     // Register service worker for PWA functionality
     if ('serviceWorker' in navigator) {

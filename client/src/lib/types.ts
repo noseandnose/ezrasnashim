@@ -30,6 +30,7 @@ export type ModalType =
   | 'location'
   | 'sponsor-details'
   | 'community-impact'
+  | 'date-calculator-fullscreen'
   | null;
 
 export interface ModalState {
@@ -124,35 +125,97 @@ export interface ModalCompletionState {
   resetModalCompletions: () => void;
 }
 
-export const useModalCompletionStore = create<ModalCompletionState>((set, get) => ({
-  completedModals: {},
-  markModalComplete: (modalId: string) => {
-    const today = new Date().toISOString().split('T')[0];
-    set(state => {
-      const newState = { ...state.completedModals };
-      if (!newState[today]) {
-        newState[today] = new Set();
+export const useModalCompletionStore = create<ModalCompletionState>((set, get) => {
+  // Load initial state from localStorage
+  const loadFromStorage = () => {
+    try {
+      const stored = localStorage.getItem('modalCompletions');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const today = new Date().toISOString().split('T')[0];
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        
+        // Convert arrays back to Sets, but only keep today and yesterday
+        const completedModals: Record<string, Set<string>> = {};
+        for (const [date, modals] of Object.entries(parsed)) {
+          // Only load today's and yesterday's data (for midnight transition)
+          if (date === today || date === yesterdayStr) {
+            completedModals[date] = new Set(modals as string[]);
+          }
+        }
+        return completedModals;
       }
-      newState[today].add(modalId);
-      return { completedModals: newState };
-    });
-  },
-  isModalComplete: (modalId: string) => {
-    const today = new Date().toISOString().split('T')[0];
-    const todaysCompletions = get().completedModals[today];
-    return todaysCompletions ? todaysCompletions.has(modalId) : false;
-  },
-  resetModalCompletions: () => {
-    set({ completedModals: {} });
-  }
-}));
+    } catch (e) {
+      console.error('Failed to load modal completions from storage:', e);
+      // Clear corrupted data
+      localStorage.removeItem('modalCompletions');
+    }
+    return {};
+  };
+
+  // Save to localStorage whenever state changes
+  const saveToStorage = (completedModals: Record<string, Set<string>>) => {
+    try {
+      // Convert Sets to arrays for JSON serialization
+      const toStore: Record<string, string[]> = {};
+      for (const [date, modals] of Object.entries(completedModals)) {
+        toStore[date] = Array.from(modals);
+      }
+      localStorage.setItem('modalCompletions', JSON.stringify(toStore));
+    } catch (e) {
+      console.error('Failed to save modal completions to storage:', e);
+    }
+  };
+
+  return {
+    completedModals: loadFromStorage(),
+    markModalComplete: (modalId: string) => {
+      const today = new Date().toISOString().split('T')[0];
+      set(state => {
+        const newState = { ...state.completedModals };
+        if (!newState[today]) {
+          newState[today] = new Set();
+        } else {
+          // Clone the existing Set to ensure proper state update
+          newState[today] = new Set(newState[today]);
+        }
+        newState[today].add(modalId);
+        
+        // Clean up old dates (keep only today and yesterday for transition period)
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        
+        for (const date in newState) {
+          if (date !== today && date !== yesterdayStr) {
+            delete newState[date];
+          }
+        }
+        
+        saveToStorage(newState);
+        return { completedModals: newState };
+      });
+    },
+    isModalComplete: (modalId: string) => {
+      const today = new Date().toISOString().split('T')[0];
+      const todaysCompletions = get().completedModals[today];
+      return todaysCompletions ? todaysCompletions.has(modalId) : false;
+    },
+    resetModalCompletions: () => {
+      localStorage.removeItem('modalCompletions');
+      set({ completedModals: {} });
+    }
+  };
+});
 
 export const useDailyCompletionStore = create<DailyCompletionState>((set, get) => {
   const today = new Date().toISOString().split('T')[0];
   
   // For testing: reset on every page load/restart
   // For production: comment out the line below and uncomment the localStorage logic
-  const isTestMode = true; // Set to false for production
+  const isTestMode = false; // Set to false for production
   
   if (isTestMode) {
     // Reset on every restart for testing

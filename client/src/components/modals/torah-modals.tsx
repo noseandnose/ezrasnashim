@@ -118,8 +118,10 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     setShowExplosion(false);
   }, [activeModal]);
 
-  // Auto-redirect Torah modals to fullscreen
+  // Auto-redirect Torah modals to fullscreen - RE-ENABLED for halacha and featured
+  // These now open modal briefly and auto-redirect to fullscreen immediately
   useEffect(() => {
+    // Re-enable halacha and featured to auto-redirect to fullscreen
     const fullscreenTorahModals = ['halacha', 'featured'];
     
     if (activeModal && fullscreenTorahModals.includes(activeModal)) {
@@ -128,26 +130,27 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
       
       switch (activeModal) {
         case 'halacha':
-          title = 'Daily Halacha';
+          title = 'Learn Shabbas';
           contentType = 'halacha';
           break;
         case 'featured':
-          title = 'Featured Content';
+          title = 'Shmirat Halashon';
           contentType = 'featured';
           break;
       }
       
-      // Small delay to ensure content is loaded
-      setTimeout(() => {
-        setFullscreenContent({
-          isOpen: true,
-          title,
-          contentType,
-          content: null // Content will be rendered by fullscreen modal
-        });
-      }, 50);
+      // Immediate redirect to fullscreen (no delay)
+      setFullscreenContent({
+        isOpen: true,
+        title,
+        contentType,
+        content: null // Content will be rendered by fullscreen modal
+      });
+      
+      // Close the modal immediately to prevent any flash
+      closeModal();
     }
-  }, [activeModal, setFullscreenContent]);
+  }, [activeModal, setFullscreenContent, closeModal]);
 
   const handleTorahComplete = () => {
     // Track modal completion and mark as completed globally

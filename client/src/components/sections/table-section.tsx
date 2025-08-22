@@ -161,7 +161,18 @@ export default function TableSection() {
                 ? 'bg-gray-100 cursor-not-allowed' 
                 : isModalComplete('recipe') ? 'bg-sage/20 hover:scale-105' : 'bg-white hover:scale-105'
             }`}
-            onClick={() => recipeContent && openModal('recipe', 'table')}
+            onClick={() => {
+              if (recipeContent) {
+                // Open directly in fullscreen without setting activeModal
+                const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
+                  detail: {
+                    modalKey: 'recipe',
+                    content: recipeContent
+                  }
+                });
+                window.dispatchEvent(fullscreenEvent);
+              }
+            }}
             disabled={!recipeContent}
           >
             {/* Banner overlay for when no content */}
@@ -191,7 +202,7 @@ export default function TableSection() {
           {/* Jewish Date Converter Button */}
           <button
             className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
-            onClick={() => openModal('date-calculator', 'table')}
+            onClick={() => openModal('date-calculator-fullscreen', 'table')}
           >
             <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-feminine">
               <Calendar className="text-white" size={18} strokeWidth={1.5} />
@@ -212,7 +223,18 @@ export default function TableSection() {
                 ? 'bg-gray-100 cursor-not-allowed' 
                 : isModalComplete('inspiration') ? 'bg-sage/20 hover:scale-105' : 'bg-white hover:scale-105'
             }`}
-            onClick={() => inspirationContent && openModal('inspiration', 'table')}
+            onClick={() => {
+              if (inspirationContent) {
+                // Open directly in fullscreen without setting activeModal
+                const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
+                  detail: {
+                    modalKey: 'inspiration',
+                    content: inspirationContent
+                  }
+                });
+                window.dispatchEvent(fullscreenEvent);
+              }
+            }}
             disabled={!inspirationContent}
           >
             {/* Banner overlay for when no content */}
