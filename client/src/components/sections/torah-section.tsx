@@ -85,8 +85,8 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
     event.preventDefault();
     event.stopPropagation();
     
-    // Navigate directly to fullscreen route
-    setLocation(`/fullscreen/${modalType}`);
+    // Open modal first to trigger state and data loading, then the modal will auto-redirect to fullscreen
+    openModal(modalType, 'torah');
   };
 
   const torahItems = [
