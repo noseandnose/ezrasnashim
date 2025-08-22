@@ -3826,20 +3826,15 @@ function JerusalemCompass() {
       }
       // Android and other devices using alpha (magnetic heading)
       else if (event.alpha !== null) {
-        // Enhanced Android handling based on device type and version
+        // For absolute compass direction, we need the actual magnetic heading
+        // not relative to device orientation when opened
         if (isAndroid) {
-          if (isOldAndroid) {
-            // Android 4.x and older - direct alpha value with 180° correction
-            heading = (event.alpha + 180) % 360;
-          } else if (isChrome) {
-            // Modern Android Chrome - use compass heading calculation with 180° correction
-            heading = (event.alpha + 180) % 360;
-          } else {
-            // Other Android browsers - use standard calculation with 180° correction
-            heading = ((360 - event.alpha) + 180) % 360;
-          }
+          // Android uses alpha as magnetic north heading
+          // Alpha = 0 means device top points to magnetic north
+          // We want absolute compass direction
+          heading = event.alpha;
         } else {
-          // Non-Android devices - use standard calculation
+          // Non-Android devices - standard compass calculation
           heading = (360 - event.alpha) % 360;
         }
         
@@ -4192,9 +4187,9 @@ function JerusalemCompass() {
                 {/Android/i.test(navigator.userAgent) ? (
                   <>
                     <li>• Hold phone flat like a traditional compass</li>
-                    <li>• Direction automatically corrected for Android</li>
+                    <li>• Uses device's magnetic compass sensor</li>
                     <li>• Avoid areas with magnetic interference</li>
-                    <li>• Calibrate by moving in figure-8 motion</li>
+                    <li>• Calibrate by moving in figure-8 motion if needed</li>
                   </>
                 ) : (
                   <>

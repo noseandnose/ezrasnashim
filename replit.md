@@ -15,7 +15,7 @@ Text formatting: Database content supports markdown-style formatting - **text** 
 ## Recent Changes (August 22, 2025)
 ### Android Compass Fix Implementation (August 22, 2025)
 - **Critical Issue**: Fixed major Android compass problems - wrong direction, inconsistent location, unable to align
-- **Direction Correction**: Applied 180-degree offset correction for Android devices to fix opposite direction pointing
+- **Direction Correction**: Fixed Android compass to use absolute magnetic heading instead of relative device orientation
 - **Android Detection**: Enhanced device and version detection for proper orientation handling across Android 4.x to modern versions
 - **Location Stability**: Implemented Android-optimized geolocation with caching (5-minute cache) to prevent location jumping
 - **Coordinate System**: Fixed coordinate system handling for different Android browsers (Chrome vs others) and versions
