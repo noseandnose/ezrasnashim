@@ -218,19 +218,191 @@ export default function TimesModals() {
             
             <div>
               <Label className="block text-lg platypi-semibold text-black mb-3">English Date</Label>
-              <Input
-                type="date"
-                value={englishDate}
-                onChange={(e) => handleDateChange(e.target.value)}
-                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-lg"
-              />
+              {typeof navigator !== 'undefined' && /iPhone|iPad|iPod/.test(navigator.userAgent) ? (
+                // iOS Custom Date Picker using select elements (wheel picker style)
+                <div className="flex space-x-3">
+                  <select 
+                    value={(() => {
+                      if (!englishDate) return new Date().getMonth() + 1;
+                      const date = new Date(englishDate + 'T12:00:00');
+                      return date.getMonth() + 1;
+                    })()}
+                    onChange={(e) => {
+                      const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
+                      const selectedMonth = parseInt(e.target.value) - 1;
+                      const currentDay = currentDate.getDate();
+                      const currentYear = currentDate.getFullYear();
+                      
+                      const daysInNewMonth = new Date(currentYear, selectedMonth + 1, 0).getDate();
+                      const validDay = Math.min(currentDay, daysInNewMonth);
+                      
+                      const newDate = new Date(currentYear, selectedMonth, validDay, 12, 0, 0);
+                      handleDateChange(newDate.toISOString().split('T')[0]);
+                    }}
+                    className="flex-1 p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700 text-lg"
+                    style={{ minHeight: '56px' }}
+                  >
+                    {Array.from({length: 12}, (_, i) => (
+                      <option key={i+1} value={i+1}>
+                        {new Date(2000, i, 1).toLocaleDateString('en-US', { month: 'long' })}
+                      </option>
+                    ))}
+                  </select>
+                  <select 
+                    value={(() => {
+                      if (!englishDate) return new Date().getDate();
+                      const date = new Date(englishDate + 'T12:00:00');
+                      return date.getDate();
+                    })()}
+                    onChange={(e) => {
+                      const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
+                      const selectedDay = parseInt(e.target.value);
+                      const currentMonth = currentDate.getMonth();
+                      const currentYear = currentDate.getFullYear();
+                      
+                      const newDate = new Date(currentYear, currentMonth, selectedDay, 12, 0, 0);
+                      
+                      if (newDate.getDate() === selectedDay) {
+                        handleDateChange(newDate.toISOString().split('T')[0]);
+                      }
+                    }}
+                    className="flex-1 p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700 text-lg"
+                    style={{ minHeight: '56px' }}
+                  >
+                    {(() => {
+                      const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
+                      const year = currentDate.getFullYear();
+                      const month = currentDate.getMonth();
+                      const daysInMonth = new Date(year, month + 1, 0).getDate();
+                      
+                      return Array.from({length: daysInMonth}, (_, i) => (
+                        <option key={i+1} value={i+1}>{i+1}</option>
+                      ));
+                    })()}
+                  </select>
+                  <select 
+                    value={(() => {
+                      if (!englishDate) return new Date().getFullYear();
+                      const date = new Date(englishDate + 'T12:00:00');
+                      return date.getFullYear();
+                    })()}
+                    onChange={(e) => {
+                      const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
+                      const selectedYear = parseInt(e.target.value);
+                      const currentMonth = currentDate.getMonth();
+                      const currentDay = currentDate.getDate();
+                      
+                      const daysInMonth = new Date(selectedYear, currentMonth + 1, 0).getDate();
+                      const validDay = Math.min(currentDay, daysInMonth);
+                      
+                      const newDate = new Date(selectedYear, currentMonth, validDay, 12, 0, 0);
+                      handleDateChange(newDate.toISOString().split('T')[0]);
+                    }}
+                    className="flex-1 p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700 text-lg"
+                    style={{ minHeight: '56px' }}
+                  >
+                    {Array.from({length: 21}, (_, i) => {
+                      const year = new Date().getFullYear() - 10 + i;
+                      return <option key={year} value={year}>{year}</option>;
+                    })}
+                  </select>
+                </div>
+              ) : (
+                // Non-iOS: Use separate dropdowns for better year selection
+                <div className="flex space-x-3">
+                  <select 
+                    value={(() => {
+                      if (!englishDate) return new Date().getMonth() + 1;
+                      const date = new Date(englishDate + 'T12:00:00');
+                      return date.getMonth() + 1;
+                    })()}
+                    onChange={(e) => {
+                      const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
+                      const selectedMonth = parseInt(e.target.value) - 1;
+                      const currentDay = currentDate.getDate();
+                      const currentYear = currentDate.getFullYear();
+                      
+                      const daysInNewMonth = new Date(currentYear, selectedMonth + 1, 0).getDate();
+                      const validDay = Math.min(currentDay, daysInNewMonth);
+                      
+                      const newDate = new Date(currentYear, selectedMonth, validDay, 12, 0, 0);
+                      handleDateChange(newDate.toISOString().split('T')[0]);
+                    }}
+                    className="flex-1 p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700 text-lg"
+                  >
+                    {Array.from({length: 12}, (_, i) => (
+                      <option key={i+1} value={i+1}>
+                        {new Date(2000, i, 1).toLocaleDateString('en-US', { month: 'long' })}
+                      </option>
+                    ))}
+                  </select>
+                  <select 
+                    value={(() => {
+                      if (!englishDate) return new Date().getDate();
+                      const date = new Date(englishDate + 'T12:00:00');
+                      return date.getDate();
+                    })()}
+                    onChange={(e) => {
+                      const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
+                      const selectedDay = parseInt(e.target.value);
+                      const currentMonth = currentDate.getMonth();
+                      const currentYear = currentDate.getFullYear();
+                      
+                      const newDate = new Date(currentYear, currentMonth, selectedDay, 12, 0, 0);
+                      
+                      if (newDate.getDate() === selectedDay) {
+                        handleDateChange(newDate.toISOString().split('T')[0]);
+                      }
+                    }}
+                    className="flex-1 p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700 text-lg"
+                  >
+                    {(() => {
+                      const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
+                      const year = currentDate.getFullYear();
+                      const month = currentDate.getMonth();
+                      const daysInMonth = new Date(year, month + 1, 0).getDate();
+                      
+                      return Array.from({length: daysInMonth}, (_, i) => (
+                        <option key={i+1} value={i+1}>{i+1}</option>
+                      ));
+                    })()}
+                  </select>
+                  <select 
+                    value={(() => {
+                      if (!englishDate) return new Date().getFullYear();
+                      const date = new Date(englishDate + 'T12:00:00');
+                      return date.getFullYear();
+                    })()}
+                    onChange={(e) => {
+                      const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
+                      const selectedYear = parseInt(e.target.value);
+                      const currentMonth = currentDate.getMonth();
+                      const currentDay = currentDate.getDate();
+                      
+                      const daysInMonth = new Date(selectedYear, currentMonth + 1, 0).getDate();
+                      const validDay = Math.min(currentDay, daysInMonth);
+                      
+                      const newDate = new Date(selectedYear, currentMonth, validDay, 12, 0, 0);
+                      handleDateChange(newDate.toISOString().split('T')[0]);
+                    }}
+                    className="flex-1 p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700 text-lg"
+                  >
+                    {Array.from({length: 21}, (_, i) => {
+                      const year = new Date().getFullYear() - 10 + i;
+                      return <option key={year} value={year}>{year}</option>;
+                    })}
+                  </select>
+                </div>
+              )}
             </div>
 
             {convertedHebrewDate && (
               <div className="p-4 bg-gradient-feminine/10 border border-blush/20 rounded-xl">
-                <Label className="block text-lg platypi-semibold text-black mb-2">Hebrew Date</Label>
-                <div className="text-xl text-black platypi-medium bg-white/50 p-3 rounded-lg text-center">
-                  {convertedHebrewDate}
+                <div className="flex items-center justify-between">
+                  <Label className="text-lg platypi-semibold text-black">Hebrew Date</Label>
+                  <div className="text-lg text-black platypi-medium">
+                    {convertedHebrewDate}
+                  </div>
                 </div>
               </div>
             )}

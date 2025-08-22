@@ -26,6 +26,8 @@ Text formatting: Database content supports markdown-style formatting - **text** 
 - **Consistent UI**: Matches other fullscreen modals with proper background gradient and responsive design
 - **Accessibility**: Larger touch targets and clearer labels for mobile users
 - **Fixed Button Trigger**: Updated Life page button to trigger correct fullscreen modal instead of old modal
+- **Compact Layout**: Hebrew Date display now shows label and date on same line to save space
+- **Better Date Selection**: Restored separate month/day/year dropdowns for easier year selection instead of single date input
 
 ## Recent Changes (August 21, 2025)
 ### Launch Preparation Optimizations
