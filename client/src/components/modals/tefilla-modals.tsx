@@ -4047,15 +4047,16 @@ function JerusalemCompass() {
                         const isAligned = angleDiff < 10;
                         
                         return (
-                          <div className="w-8 h-8 rounded-full bg-white shadow-md border-2 border-white flex items-center justify-center relative">
+                          <div className="w-10 h-10 rounded-full bg-white shadow-md border-2 border-white flex items-center justify-center relative">
                             <img 
                               src={isAligned ? bhGreenIcon : bhPinkIcon}
                               alt={isAligned ? "Aligned" : "Not aligned"}
-                              className="w-6 h-6"
+                              className={`w-8 h-8 ${isAligned ? 'animate-pulse' : ''}`}
                               style={{
                                 transform: `rotate(${-direction + deviceOrientation}deg)`,
                                 transition: 'transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)',
-                                willChange: 'transform'
+                                willChange: 'transform',
+                                animationDuration: isAligned ? '1s' : undefined
                               }}
                             />
                           </div>
@@ -4103,7 +4104,7 @@ function JerusalemCompass() {
                   return (
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
                       <Heart 
-                        className={`w-4 h-4 ${isAligned ? 'animate-pulse' : ''}`}
+                        className={`w-8 h-8 ${isAligned ? 'animate-pulse' : ''}`}
                         style={{
                           color: '#eacbd2',
                           fill: '#eacbd2',

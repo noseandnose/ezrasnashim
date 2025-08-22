@@ -12,6 +12,7 @@ Reading time display: User requested reading time estimation for text content, i
 Community feedback form: Updated to new Google Forms link.
 Text formatting: Database content supports markdown-style formatting - **text** for bold, --- for line breaks, ~~text~~ for greyed out text, ++text++ for larger text (1.2em), --text-- for smaller text (0.85em), [[text]] for grey box content.
 Compass alignment message: When compass is aligned with Jerusalem, displays "Your heart is in the right place" instead of technical alignment message.
+Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20% bigger (w-8 h-8), both BH Green icon and center heart pulse when aligned.
 
 ## Recent Changes (August 22, 2025)
 ### Android Compass Fix Implementation (August 22, 2025)
