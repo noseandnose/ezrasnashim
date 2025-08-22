@@ -34,7 +34,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   setInterval(async () => {
     try {
       await storage.cleanupExpiredNames();
-      console.log('Cleaned up expired Tehillim names');
+      // Cleaned up expired Tehillim names
     } catch (error) {
       console.error('Error cleaning up expired names:', error);
     }

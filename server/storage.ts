@@ -1149,7 +1149,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Efficient session tracking - only record unique sessions once per day
-  async recordActiveSession(sessionId: string): Promise<void> {
+  async recordActiveSession(_sessionId: string): Promise<void> {
     const today = formatDate(new Date());
     
     // Update daily stats to include this unique session

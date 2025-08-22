@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useGeolocation, useJewishTimes } from "@/hooks/use-jewish-times";
 import { initializeCache } from "@/lib/cache";
 import { useEffect, lazy, Suspense } from "react";
+import ErrorBoundary from "@/components/ui/error-boundary";
 import "@/utils/clear-modal-completions";
 
 // Lazy load components for better initial load performance
@@ -66,8 +67,8 @@ function Router() {
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js')
-          .then(registration => {
-            console.log('ServiceWorker registered:', registration.scope);
+          .then(() => {
+            // ServiceWorker registered successfully
           })
           .catch(error => {
             console.error('ServiceWorker registration failed:', error);
@@ -93,12 +94,14 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

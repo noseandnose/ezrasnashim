@@ -102,7 +102,7 @@ export async function preloadCriticalData(): Promise<void> {
     }
   } catch (error) {
     if (import.meta.env.MODE === 'development') {
-      console.log('Preload failed:', error);
+      logger.log('Preload failed:', error);
     }
   }
 }
