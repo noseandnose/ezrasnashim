@@ -222,12 +222,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`Zmanim request for coordinates: lat=${latitude}, lng=${longitude}`);
       }
       
-      // Basic timezone detection based on longitude and known regions
+      // Enhanced timezone detection based on coordinates and known regions
       if (latitude >= 29 && latitude <= 33.5 && longitude >= 34 && longitude <= 36) {
         // Israel region
         tzid = 'Asia/Jerusalem';
         if (process.env.NODE_ENV === 'development') {
           console.log(`Detected Israel region, using timezone: ${tzid}`);
+        }
+      } else if (latitude >= -35 && latitude <= -20 && longitude >= 15 && longitude <= 35) {
+        // South Africa region
+        tzid = 'Africa/Johannesburg';
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`Detected South Africa region, using timezone: ${tzid}`);
         }
       } else if (longitude >= -125 && longitude <= -66) {
         // North America
@@ -235,12 +241,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         else if (longitude >= -120 && longitude <= -105) tzid = 'America/Denver';
         else if (longitude >= -105 && longitude <= -90) tzid = 'America/Chicago';
         else if (longitude >= -90 && longitude <= -66) tzid = 'America/New_York';
-      } else if (longitude >= -10 && longitude <= 30) {
-        // Europe
+      } else if (latitude >= 35 && latitude <= 70 && longitude >= -10 && longitude <= 30) {
+        // Europe (refined to exclude Africa)
         tzid = 'Europe/London';
       } else if (longitude >= -80 && longitude <= -60) {
         // Eastern Canada
         tzid = 'America/Toronto';
+      } else if (latitude >= -40 && latitude <= -10 && longitude >= 110 && longitude <= 155) {
+        // Australia
+        tzid = 'Australia/Sydney';
+      } else if (latitude >= 30 && latitude <= 50 && longitude >= 70 && longitude <= 140) {
+        // Central Asia / Russia
+        tzid = 'Asia/Moscow';
+      }
+      
+      // Log final timezone selection for debugging
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Selected timezone: ${tzid} for coordinates lat=${latitude}, lng=${longitude}`);
       }
       
       // Call Hebcal with exact coordinates
