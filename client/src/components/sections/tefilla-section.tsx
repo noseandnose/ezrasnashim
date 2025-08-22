@@ -1,5 +1,5 @@
-import { Scroll, Clock, HandHeart, Plus, CheckCircle, User, AlertCircle, Calendar, Heart, ChevronRight, BookOpen, Sparkles, Star, Timer, Settings, Shield, Home, Compass, ArrowRight, Baby, HeartHandshake, Briefcase, GraduationCap, Users, Stethoscope, DollarSign, UserCheck, Smile, Zap, TrendingUp, Crown, Sunrise, Sun, Moon, Utensils, Stars, Globe, Link, Unlock, Apple, Wheat } from "lucide-react";
-import korenLogo from "@assets/This_is_a_logo_for_Koren_Publishers_Jerusalem_1752581940716.jpg";
+import { HandHeart, Plus, User, AlertCircle, Heart, Star, Compass, ArrowRight, Baby, HeartHandshake, GraduationCap, Users, Stethoscope, DollarSign, Smile, TrendingUp, Sunrise, Sun, Moon, Utensils, Stars, Globe, Unlock } from "lucide-react";
+
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
 
@@ -16,9 +16,9 @@ import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
 import type { TehillimName, GlobalTehillimProgress } from "@shared/schema";
 
-export default function TefillaSection({ onSectionChange }: TefillaSectionProps) {
+export default function TefillaSection({ onSectionChange: _onSectionChange }: TefillaSectionProps) {
   const { openModal } = useModalStore();
-  const { tefillaCompleted } = useDailyCompletionStore();
+  const { tefillaCompleted: _tefillaCompleted } = useDailyCompletionStore();
   const { isModalComplete, completedModals } = useModalCompletionStore();
   const { data: times, isLoading } = useJewishTimes();
 
@@ -186,7 +186,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   const [reason, setReason] = useState("");
   const [reasonEnglish, setReasonEnglish] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showHebrew, setShowHebrew] = useState(true);
+  const [_showHebrew, _setShowHebrew] = useState(true);
 
   // Fetch global Tehillim progress
   const { data: progress, refetch: refetchProgress } = useQuery<GlobalTehillimProgress>({
@@ -304,7 +304,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
 
 
   // Fetch all active names for count display
-  const { data: allNames } = useQuery<TehillimName[]>({
+  const { data: _allNames } = useQuery<TehillimName[]>({
     queryFn: async () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/names`);
@@ -325,7 +325,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
   });
 
   // Fetch Tehillim preview (first line) for display
-  const { data: tehillimPreview, isLoading: isPreviewLoading } = useQuery<{preview: string; perek: number; language: string}>({
+  const { data: _tehillimPreview, isLoading: _isPreviewLoading } = useQuery<{preview: string; perek: number; language: string}>({
     queryKey: ['/api/tehillim/preview', progress?.currentPerek],
     queryFn: async () => {
       try {
@@ -411,13 +411,11 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
     addNameMutation.mutate({
       hebrewName: hebrewName.trim(),
       reason: reason.trim(),
-      reasonEnglish: reasonEnglish.trim() || undefined
+      reasonEnglish: reasonEnglish.trim() || ""
     });
   };
 
-  const completePerek = () => {
-    completePerekMutation.mutate();
-  };
+  // Removed unused completePerek function
 
   // Reason options for the dropdown with proper icons
   const reasonOptions = [
@@ -471,7 +469,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
     }
   ];
 
-  const getTehillimText = (perekNumber: number, isHebrew: boolean) => {
+  const _getTehillimText = (perekNumber: number, isHebrew: boolean) => {
     // Authentic Tehillim texts for the first few perakim
     const tehillimTexts: Record<number, { hebrew: string; english: string }> = {
       1: {
@@ -504,7 +502,7 @@ export default function TefillaSection({ onSectionChange }: TefillaSectionProps)
     );
   };
 
-  const getTehillimFirstLine = (perekNumber: number) => {
+  const _getTehillimFirstLine = (perekNumber: number) => {
     const tehillimTexts: Record<number, string> = {
       1: "אַשְׁרֵי הָאִישׁ אֲשֶׁר לֹא הָלַךְ בַּעֲצַת רְשָׁעִים...",
       2: "לָמָּה רָגְשׁוּ גוֹיִם וּלְאֻמִּים יֶהְגּוּ רִיק...",
