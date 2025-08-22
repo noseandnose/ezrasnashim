@@ -12,6 +12,14 @@ Reading time display: User requested reading time estimation for text content, i
 Community feedback form: Updated to new Google Forms link.
 Text formatting: Database content supports markdown-style formatting - **text** for bold, --- for line breaks, ~~text~~ for greyed out text, ++text++ for larger text (1.2em), --text-- for smaller text (0.85em), [[text]] for grey box content.
 
+## Recent Changes (August 22, 2025)
+### Comprehensive Worldwide Timezone Detection (August 22, 2025)
+- **Global Timezone Coverage**: Replaced basic coordinate-based timezone detection with comprehensive worldwide system using geo-tz library
+- **Accurate Detection**: Now properly detects timezones for all countries and regions worldwide including India, China, Brazil, Australia, Africa, etc.
+- **Previous Issue**: South Africa was incorrectly using Europe/London instead of Africa/Johannesburg causing 1+ hour prayer time errors
+- **Enhanced Fallback**: Ocean areas use intelligent UTC offset calculation when exact timezone unavailable
+- **Performance**: Fast timezone lookup with detailed logging for debugging and verification
+
 ## Recent Changes (August 21, 2025)
 ### Launch Preparation Optimizations
 - **Compass Stabilization**: Enhanced with weighted averaging (5-reading buffer), time-based throttling (100ms intervals), and smoother CSS transitions (0.8s cubic-bezier). Eliminates jumping and floating issues.
