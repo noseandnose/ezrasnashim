@@ -118,24 +118,15 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     setShowExplosion(false);
   }, [activeModal]);
 
-  // Auto-redirect Torah modals to fullscreen
+  // Auto-redirect Torah modals to fullscreen - DISABLED for halacha and featured
+  // These now open directly in fullscreen from the section buttons
   useEffect(() => {
-    const fullscreenTorahModals = ['halacha', 'featured'];
+    // Remove halacha and featured from auto-redirect since they bypass modals completely
+    const fullscreenTorahModals: string[] = [];
     
     if (activeModal && fullscreenTorahModals.includes(activeModal)) {
       let title = '';
       let contentType = '';
-      
-      switch (activeModal) {
-        case 'halacha':
-          title = 'Daily Halacha';
-          contentType = 'halacha';
-          break;
-        case 'featured':
-          title = 'Featured Content';
-          contentType = 'featured';
-          break;
-      }
       
       // Small delay to ensure content is loaded
       setTimeout(() => {

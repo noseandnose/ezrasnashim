@@ -3,6 +3,7 @@ import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import type { Section } from "@/pages/home";
+import { useLocation } from "wouter";
 
 // Calculate reading time based on word count (average 200 words per minute)
 const calculateReadingTime = (text: string): string => {
@@ -34,6 +35,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
   const { openModal } = useModalStore();
   const { torahCompleted } = useDailyCompletionStore();
   const { isModalComplete } = useModalCompletionStore();
+  const [, setLocation] = useLocation();
   
   // Fetch today's Pirkei Avot for daily inspiration
   const today = new Date().toISOString().split('T')[0];
@@ -77,6 +79,15 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000
   });
+
+  // Handle direct fullscreen opening for specific modals (bypassing modal completely)
+  const handleDirectFullscreen = (modalType: string, event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    // Navigate directly to fullscreen route
+    setLocation(`/fullscreen/${modalType}`);
+  };
 
   const torahItems = [
     {
@@ -199,7 +210,17 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
               <button
                 key={id}
                 className={`${isCompleted ? 'bg-sage/20' : hasContent ? gradient : 'bg-gray-100'} rounded-3xl p-3 text-center ${hasContent ? 'glow-hover' : ''} transition-gentle shadow-lg border ${hasContent ? border : 'border-gray-200'} relative ${!hasContent ? 'cursor-not-allowed' : ''}`}
-                onClick={() => hasContent && openModal(id, 'torah')}
+                onClick={(event) => {
+                  if (!hasContent) return;
+                  
+                  // For halacha and featured content, open directly in fullscreen
+                  if (id === 'halacha' || id === 'featured') {
+                    handleDirectFullscreen(id, event);
+                  } else {
+                    // For other content types, use regular modal
+                    openModal(id, 'torah');
+                  }
+                }}
                 disabled={!hasContent}
               >
                 {/* Content Type Indicator */}
