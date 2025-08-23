@@ -183,7 +183,7 @@ export default function AppHeader() {
               </h3>
               
               <p className="text-lg platypi-medium text-black leading-relaxed">
-                "To Heasy and Brozi, it was all for you. Its always been all for you."
+                "To Heasy and Brosi, it was all for you. Its always been all for you."
               </p>
               
               <div className="flex justify-center mt-6">
