@@ -7,6 +7,7 @@ import { useGeolocation, useJewishTimes } from "@/hooks/use-jewish-times";
 import { initializeCache } from "@/lib/cache";
 import { useEffect, lazy, Suspense } from "react";
 import ErrorBoundary from "@/components/ui/error-boundary";
+import UpdateNotification from "@/components/UpdateNotification";
 import "@/utils/clear-modal-completions";
 
 // Lazy load components for better initial load performance
@@ -97,6 +98,7 @@ function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
+          <UpdateNotification />
           <Toaster />
           <Router />
         </TooltipProvider>

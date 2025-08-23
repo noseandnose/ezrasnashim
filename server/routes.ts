@@ -2128,6 +2128,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/healthcheck", (req, res) => {
     res.json({ status: "OK" });
   })
+  
+  // Version endpoint for PWA update checking
+  app.get("/api/version", (req, res) => {
+    const version = {
+      timestamp: Date.now(),
+      version: process.env.APP_VERSION || '1.0.0',
+      buildDate: new Date().toISOString()
+    };
+    res.json(version);
+  });
 
   // Messages routes
   app.get("/api/messages/:date", async (req, res) => {
