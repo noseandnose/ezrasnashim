@@ -23,7 +23,7 @@ export const useLocationStore = create<LocationState>((set) => ({
   permissionDenied: false,
   setLocation: (location: string) => set({ location }),
   setCoordinates: (coordinates: { lat: number; lng: number }) =>
-    set({ coordinates }),
+    set({ coordinates, permissionDenied: false }),
   setLocationRequested: (locationRequested: boolean) =>
     set({ locationRequested }),
   setPermissionDenied: (permissionDenied: boolean) => set({ permissionDenied }),
