@@ -12,7 +12,7 @@ import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 
 export default function TableModals() {
   const { activeModal, closeModal } = useModalStore();
-  const { markModalComplete } = useModalCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
@@ -859,13 +859,18 @@ export default function TableModals() {
               
               <div className="heart-explosion-container">
                 <Button 
-                  onClick={() => {
+                  onClick={isModalComplete('recipe') ? undefined : () => {
                     handleComplete('recipe');
                     setFullscreenContent({ isOpen: false, title: '', content: null });
                   }}
-                  className="w-full py-3 rounded-xl platypi-medium mt-4 border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
+                  disabled={isModalComplete('recipe')}
+                  className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
+                    isModalComplete('recipe') 
+                      ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                  }`}
                 >
-                  Done
+                  {isModalComplete('recipe') ? 'Completed Today' : 'Done'}
                 </Button>
               </div>
             </div>
@@ -1013,13 +1018,18 @@ export default function TableModals() {
               
               <div className="heart-explosion-container">
                 <Button 
-                  onClick={() => {
+                  onClick={isModalComplete('inspiration') ? undefined : () => {
                     handleComplete('inspiration');
                     setFullscreenContent({ isOpen: false, title: '', content: null });
                   }}
-                  className="w-full py-3 rounded-xl platypi-medium mt-4 border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
+                  disabled={isModalComplete('inspiration')}
+                  className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
+                    isModalComplete('inspiration') 
+                      ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                  }`}
                 >
-                  Done
+                  {isModalComplete('inspiration') ? 'Completed Today' : 'Done'}
                 </Button>
               </div>
             </div>
