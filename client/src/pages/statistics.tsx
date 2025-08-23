@@ -3,7 +3,7 @@ import { BarChart3, Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, Ar
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import BottomNavigation from "@/components/bottom-navigation";
 import type { Section } from "@/pages/home";
 
@@ -33,6 +33,14 @@ type TimePeriod = 'today' | 'month' | 'alltime';
 export default function Statistics() {
   const [, setLocation] = useLocation();
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('today');
+  
+  // Force refresh all stats when component mounts or when period changes
+  useEffect(() => {
+    // Force invalidate and refetch all queries when page loads
+    refetchToday();
+    refetchMonthly();
+    refetchTotal();
+  }, [selectedPeriod]); // Also refresh when period changes
 
   // Fetch today's stats
   const { data: todayStats, isLoading: todayLoading, refetch: refetchToday } = useQuery<DailyStats>({

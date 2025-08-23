@@ -1076,8 +1076,8 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
   const isCompleted = isModalComplete(completionKey);
 
   const handleComplete = () => {
-    // Track modal completion for feature usage
-    trackModalComplete('tehillim-text');
+    // Track modal completion for feature usage (use unique key to avoid double counting)
+    trackModalComplete('global-tehillim-chain');
     markModalComplete('tehillim-text');
     completeTask('tefilla');
     
