@@ -8,7 +8,11 @@ export default function TimesSection() {
   const { coordinates, permissionDenied } = useGeolocation();
   
   // Debug: Check permission state
-  console.log('Location Debug:', { coordinates, permissionDenied, shouldPulse: (permissionDenied || !coordinates) });
+  console.log('=== LOCATION DEBUG START ===');
+  console.log('coordinates:', coordinates);
+  console.log('permissionDenied:', permissionDenied);
+  console.log('shouldPulse:', (permissionDenied || !coordinates));
+  console.log('=== LOCATION DEBUG END ===');
 
   const getLocationDisplay = () => {
     if (permissionDenied) {

@@ -58,40 +58,64 @@ export function useGeolocation() {
   } = useLocationStore();
 
   useEffect(() => {
-    if (!locationRequested && !coordinates && !permissionDenied) {
-      setLocationRequested(true);
-
-      if (!navigator.geolocation) {
-
-        setPermissionDenied(true);
-        return;
+    const checkLocationPermission = async () => {
+      // Check if browser supports permissions API
+      if (navigator.permissions) {
+        try {
+          const permission = await navigator.permissions.query({ name: 'geolocation' });
+          console.log('Browser permission state:', permission.state);
+          
+          if (permission.state === 'denied') {
+            console.log('Permission is denied by browser');
+            setPermissionDenied(true);
+            setLocationRequested(true);
+            return;
+          }
+        } catch (err) {
+          console.log('Could not check permission:', err);
+        }
       }
 
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCoordinates({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-        },
-        (error) => {
-          if (error.code === error.PERMISSION_DENIED) {
+      if (!locationRequested && !coordinates && !permissionDenied) {
+        setLocationRequested(true);
 
-          } else if (error.code === error.POSITION_UNAVAILABLE) {
-
-          } else if (error.code === error.TIMEOUT) {
-
-          }
+        if (!navigator.geolocation) {
+          console.log('Geolocation not supported');
           setPermissionDenied(true);
-          // Don't set fallback coordinates - require accurate location
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0, // Always get fresh location
-        },
-      );
-    }
+          return;
+        }
+
+        console.log('Requesting geolocation...');
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            console.log('Geolocation success:', position);
+            setCoordinates({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            });
+          },
+          (error) => {
+            console.log('Geolocation error:', error.code, error.message);
+            if (error.code === error.PERMISSION_DENIED) {
+              console.log('User denied location permission');
+            } else if (error.code === error.POSITION_UNAVAILABLE) {
+              console.log('Location unavailable');
+            } else if (error.code === error.TIMEOUT) {
+              console.log('Location request timeout');
+            }
+            setPermissionDenied(true);
+            // Don't set fallback coordinates - require accurate location
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0, // Always get fresh location
+          },
+        );
+      }
+    };
+
+    checkLocationPermission();
   }, [
     locationRequested,
     coordinates,
