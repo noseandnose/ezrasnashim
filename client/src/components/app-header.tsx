@@ -129,7 +129,7 @@ export default function AppHeader() {
           <button
             onClick={handleShareClick}
             className={`p-2 rounded-full hover:bg-white/50 transition-colors ${
-              !hasClickedShare ? 'animate-pulse' : ''
+              !hasClickedShare ? 'animate-pulse border-2 border-blush' : ''
             }`}
             aria-label="Add to Home Screen"
           >
