@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { BarChart3, Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins, DollarSign, Trophy } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,43 +33,47 @@ type TimePeriod = 'today' | 'month' | 'alltime';
 export default function Statistics() {
   const [, setLocation] = useLocation();
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('today');
+  const queryClient = useQueryClient();
   
-  // Force refresh all stats when component mounts or when period changes
+  // Force refresh all stats when component mounts
   useEffect(() => {
     // Force invalidate and refetch all queries when page loads
-    refetchToday();
-    refetchMonthly();
-    refetchTotal();
-  }, [selectedPeriod]); // Also refresh when period changes
+    queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/today"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/month"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/total"] });
+  }, []); // Empty dependency array = runs on every mount
 
   // Fetch today's stats
-  const { data: todayStats, isLoading: todayLoading, refetch: refetchToday } = useQuery<DailyStats>({
+  const { data: todayStats, isLoading: todayLoading } = useQuery<DailyStats>({
     queryKey: ["/api/analytics/stats/today"],
     staleTime: 0, // Always consider data stale for live updates
     gcTime: 0, // Don't cache data (TanStack Query v5)
-    refetchInterval: 15000, // Refresh every 15 seconds for faster updates
+    refetchInterval: 10000, // Refresh every 10 seconds for faster updates
     refetchOnMount: 'always', // Always refetch when component mounts
     refetchOnWindowFocus: true, // Refetch when window gets focus
+    refetchIntervalInBackground: true, // Keep refetching even when tab not focused
   });
 
   // Fetch monthly stats
-  const { data: monthlyStats, isLoading: monthlyLoading, refetch: refetchMonthly } = useQuery<PeriodStats>({
+  const { data: monthlyStats, isLoading: monthlyLoading } = useQuery<PeriodStats>({
     queryKey: ["/api/analytics/stats/month"],
     staleTime: 0, // Always consider data stale for live updates
     gcTime: 0, // Don't cache data (TanStack Query v5)
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 15000, // Refresh every 15 seconds
     refetchOnMount: 'always', // Always refetch when component mounts
     refetchOnWindowFocus: true, // Refetch when window gets focus
+    refetchIntervalInBackground: true, // Keep refetching even when tab not focused
   });
 
   // Fetch total stats
-  const { data: totalStats, isLoading: totalLoading, refetch: refetchTotal } = useQuery<PeriodStats>({
+  const { data: totalStats, isLoading: totalLoading } = useQuery<PeriodStats>({
     queryKey: ["/api/analytics/stats/total"],
     staleTime: 0, // Always consider data stale for live updates
     gcTime: 0, // Don't cache data (TanStack Query v5)
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 15000, // Refresh every 15 seconds
     refetchOnMount: 'always', // Always refetch when component mounts
     refetchOnWindowFocus: true, // Refetch when window gets focus
+    refetchIntervalInBackground: true, // Keep refetching even when tab not focused
   });
 
   // Get current data based on selected period
