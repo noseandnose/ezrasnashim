@@ -63,16 +63,13 @@ export function useGeolocation() {
       if (navigator.permissions) {
         try {
           const permission = await navigator.permissions.query({ name: 'geolocation' });
-          console.log('Browser permission state:', permission.state);
-          
           if (permission.state === 'denied') {
-            console.log('Permission is denied by browser');
             setPermissionDenied(true);
             setLocationRequested(true);
             return;
           }
         } catch (err) {
-          console.log('Could not check permission:', err);
+          // Could not check permission
         }
       }
 
@@ -80,28 +77,23 @@ export function useGeolocation() {
         setLocationRequested(true);
 
         if (!navigator.geolocation) {
-          console.log('Geolocation not supported');
           setPermissionDenied(true);
           return;
         }
-
-        console.log('Requesting geolocation...');
         navigator.geolocation.getCurrentPosition(
           (position) => {
-            console.log('Geolocation success:', position);
             setCoordinates({
               lat: position.coords.latitude,
               lng: position.coords.longitude,
             });
           },
           (error) => {
-            console.log('Geolocation error:', error.code, error.message);
             if (error.code === error.PERMISSION_DENIED) {
-              console.log('User denied location permission');
+              // User denied location permission
             } else if (error.code === error.POSITION_UNAVAILABLE) {
-              console.log('Location unavailable');
+              // Location unavailable
             } else if (error.code === error.TIMEOUT) {
-              console.log('Location request timeout');
+              // Location request timeout
             }
             setPermissionDenied(true);
             // Don't set fallback coordinates - require accurate location
