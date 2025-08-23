@@ -1564,6 +1564,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       // Dispatch event for the tefilla section to refresh
       window.dispatchEvent(new Event('tehillimCompleted'));
       
+      // Invalidate analytics stats to show updated counts immediately
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/today'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/month'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/total'] });
+      
       // Check for congratulations after completion
       setTimeout(() => {
         checkAndShowCongratulations();
@@ -1637,6 +1642,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       // Also invalidate queries for other components
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/preview'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/text'] });
+      
+      // Invalidate analytics stats to show updated counts immediately
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/today'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/month'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/total'] });
       
       // Dispatch event for the tefilla section to refresh
       window.dispatchEvent(new Event('tehillimCompleted'));

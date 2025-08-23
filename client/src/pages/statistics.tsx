@@ -37,18 +37,24 @@ export default function Statistics() {
   // Fetch today's stats
   const { data: todayStats, isLoading: todayLoading } = useQuery<DailyStats>({
     queryKey: ["/api/analytics/stats/today"],
+    staleTime: 0, // Always consider data stale for live updates
+    gcTime: 0, // Don't cache data (TanStack Query v5)
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   // Fetch monthly stats
   const { data: monthlyStats, isLoading: monthlyLoading } = useQuery<PeriodStats>({
     queryKey: ["/api/analytics/stats/month"],
+    staleTime: 0, // Always consider data stale for live updates
+    gcTime: 0, // Don't cache data (TanStack Query v5)
     refetchInterval: 60000, // Refresh every minute
   });
 
   // Fetch total stats
   const { data: totalStats, isLoading: totalLoading } = useQuery<PeriodStats>({
     queryKey: ["/api/analytics/stats/total"],
+    staleTime: 0, // Always consider data stale for live updates
+    gcTime: 0, // Don't cache data (TanStack Query v5)
     refetchInterval: 60000, // Refresh every minute
   });
 
