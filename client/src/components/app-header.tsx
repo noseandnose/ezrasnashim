@@ -22,6 +22,7 @@ export default function AppHeader() {
   const [showEasterEgg, setShowEasterEgg] = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const [lastClickTime, setLastClickTime] = useState(0);
+  const [hasClickedShare, setHasClickedShare] = useState(false);
   
   const today = new Date().toISOString().split('T')[0];
   
@@ -36,6 +37,12 @@ export default function AppHeader() {
     const readKey = `message-read-${today}`;
     setHasReadMessage(localStorage.getItem(readKey) === 'true');
   }, [today]);
+  
+  // Check if user has ever clicked the share button
+  useEffect(() => {
+    const shareClickedKey = 'share-button-clicked';
+    setHasClickedShare(localStorage.getItem(shareClickedKey) === 'true');
+  }, []);
 
   useEffect(() => {
     // Detect if iOS device
@@ -58,6 +65,16 @@ export default function AppHeader() {
     });
   };
 
+  const handleShareClick = () => {
+    // Mark share button as clicked and save to localStorage
+    const shareClickedKey = 'share-button-clicked';
+    localStorage.setItem(shareClickedKey, 'true');
+    setHasClickedShare(true);
+    
+    // Open the add to home screen modal
+    setShowAddToHomeScreen(true);
+  };
+  
   const handleLogoClick = () => {
     const now = Date.now();
     const timeSinceLastClick = now - lastClickTime;
@@ -110,8 +127,10 @@ export default function AppHeader() {
         />
         <div className="flex items-center space-x-1">
           <button
-            onClick={() => setShowAddToHomeScreen(true)}
-            className="p-2 rounded-full hover:bg-white/50 transition-colors"
+            onClick={handleShareClick}
+            className={`p-2 rounded-full hover:bg-white/50 transition-colors ${
+              !hasClickedShare ? 'animate-pulse' : ''
+            }`}
             aria-label="Add to Home Screen"
           >
             {isIOS ? (
