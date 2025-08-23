@@ -35,27 +35,33 @@ export default function Statistics() {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('today');
 
   // Fetch today's stats
-  const { data: todayStats, isLoading: todayLoading } = useQuery<DailyStats>({
+  const { data: todayStats, isLoading: todayLoading, refetch: refetchToday } = useQuery<DailyStats>({
     queryKey: ["/api/analytics/stats/today"],
     staleTime: 0, // Always consider data stale for live updates
     gcTime: 0, // Don't cache data (TanStack Query v5)
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 15000, // Refresh every 15 seconds for faster updates
+    refetchOnMount: 'always', // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gets focus
   });
 
   // Fetch monthly stats
-  const { data: monthlyStats, isLoading: monthlyLoading } = useQuery<PeriodStats>({
+  const { data: monthlyStats, isLoading: monthlyLoading, refetch: refetchMonthly } = useQuery<PeriodStats>({
     queryKey: ["/api/analytics/stats/month"],
     staleTime: 0, // Always consider data stale for live updates
     gcTime: 0, // Don't cache data (TanStack Query v5)
-    refetchInterval: 60000, // Refresh every minute
+    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchOnMount: 'always', // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gets focus
   });
 
   // Fetch total stats
-  const { data: totalStats, isLoading: totalLoading } = useQuery<PeriodStats>({
+  const { data: totalStats, isLoading: totalLoading, refetch: refetchTotal } = useQuery<PeriodStats>({
     queryKey: ["/api/analytics/stats/total"],
     staleTime: 0, // Always consider data stale for live updates
     gcTime: 0, // Don't cache data (TanStack Query v5)
-    refetchInterval: 60000, // Refresh every minute
+    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchOnMount: 'always', // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gets focus
   });
 
   // Get current data based on selected period
@@ -72,7 +78,8 @@ export default function Statistics() {
     }
   };
 
-  const { data: currentData, isLoading: currentLoading } = getCurrentData();
+  const currentDataResult = getCurrentData();
+  const { data: currentData, isLoading: currentLoading } = currentDataResult;
 
 
 

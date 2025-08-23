@@ -1878,6 +1878,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sessionId
       });
       
+      // Immediately recalculate today's stats to show live updates
+      const today = new Date().toISOString().split('T')[0];
+      await storage.recalculateDailyStats(today);
+      
       res.json(event);
     } catch (error) {
       console.error('Error tracking analytics event:', error);
