@@ -4086,7 +4086,6 @@ function JerusalemCompass() {
                         <div className="flex flex-col items-center">
                           <ArrowUp className={`w-4 h-4 ${isAligned ? 'text-sage' : 'text-blue-500'}`} strokeWidth={3} />
                           <div className={`w-1 h-16 rounded-full ${isAligned ? 'bg-sage' : 'bg-blue-500'}`}></div>
-                          <div className={`text-xs platypi-bold mt-1 ${isAligned ? 'text-sage' : 'text-blue-600'}`}>YOU</div>
                         </div>
                       </div>
                     </div>
@@ -4175,8 +4174,8 @@ function JerusalemCompass() {
                 <li>2. Tap "Enable Compass" button above for iOS</li>
               )}
               <li>{typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested ? '3' : '2'}. {orientationSupported ? 'Hold device upright and turn your body' : 'Look at the compass to find the Kotel direction'}</li>
-              <li>{typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested ? '4' : '3'}. {orientationSupported ? 'The "YOU" arrow stays fixed while compass rotates' : 'The pink dot shows the Kotel direction'}</li>
-              <li>{typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested ? '5' : '4'}. {orientationSupported ? 'Align the pink Kotel marker with the "YOU" arrow' : 'Face the direction of the pink dot to pray'}</li>
+              <li>{typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested ? '4' : '3'}. {orientationSupported ? 'The arrow stays fixed while compass rotates' : 'The pink dot shows the Kotel direction'}</li>
+              <li>{typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested ? '5' : '4'}. {orientationSupported ? 'Align the pink Kotel marker with the arrow' : 'Face the direction of the pink dot to pray'}</li>
             </ol>
             
             {/* Android-specific tips */}
