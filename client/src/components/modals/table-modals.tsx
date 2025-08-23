@@ -1,9 +1,9 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useRef, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Play, Pause, Volume2, Maximize2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Volume2, Maximize2 } from "lucide-react";
 import AudioPlayer from "@/components/audio-player";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { formatTextContent } from "@/lib/text-formatter";
@@ -34,9 +34,6 @@ export default function TableModals() {
     window.location.hash = '#/?section=home&scrollToProgress=true';
   };
   
-  const getCurrentDate = () => {
-    return new Date().toISOString().split('T')[0];
-  };
 
   // Function to format time display (convert minutes > 59 to hours and minutes)
   const formatTimeDisplay = (timeString: string) => {
@@ -104,7 +101,7 @@ export default function TableModals() {
   // Listen for direct fullscreen opening from buttons
   useEffect(() => {
     const handleDirectFullscreen = (event: CustomEvent) => {
-      const { modalKey, content } = event.detail;
+      const { modalKey } = event.detail;
       
       if (['recipe', 'inspiration'].includes(modalKey)) {
         let title = '';
