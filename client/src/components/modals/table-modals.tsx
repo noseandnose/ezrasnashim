@@ -195,7 +195,7 @@ export default function TableModals() {
                   <LazyImage 
                     src={recipeContent.imageUrl} 
                     alt={recipeContent.title || "Recipe"} 
-                    className="w-full h-48 object-cover"
+                    className="w-full h-80 object-cover"
                     onError={() => {
                       // Image failed to load, could hide the container
                     }}
@@ -530,7 +530,7 @@ export default function TableModals() {
                 return (
                   <div className="mb-4 relative">
                     <div 
-                      className="w-full h-64 bg-gray-100 rounded-lg overflow-hidden relative touch-pan-y"
+                      className="w-full h-80 bg-gray-100 rounded-lg overflow-hidden relative touch-pan-y"
                       onTouchStart={handleTouchStart}
                       onTouchMove={handleTouchMove}
                       onTouchEnd={handleTouchEnd}
@@ -541,15 +541,25 @@ export default function TableModals() {
                         <>
                           <button
                             onClick={prevMedia}
-                            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70 transition-colors"
+                            className="absolute left-2 top-1/2 transform -translate-y-1/2 p-2 transition-transform hover:scale-110"
+                            style={{
+                              filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.8)) drop-shadow(0 0 1px rgba(255,255,255,1))',
+                              color: '#000',
+                              fontWeight: 'bold'
+                            }}
                           >
-                            <ChevronLeft size={20} />
+                            <ChevronLeft size={24} strokeWidth={3} />
                           </button>
                           <button
                             onClick={nextMedia}
-                            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70 transition-colors"
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 transition-transform hover:scale-110"
+                            style={{
+                              filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.8)) drop-shadow(0 0 1px rgba(255,255,255,1))',
+                              color: '#000',
+                              fontWeight: 'bold'
+                            }}
                           >
-                            <ChevronRight size={20} />
+                            <ChevronRight size={24} strokeWidth={3} />
                           </button>
                           
                           {/* Media counter dots with type indicators */}
@@ -703,7 +713,7 @@ export default function TableModals() {
                     <LazyImage 
                       src={recipeContent.imageUrl} 
                       alt={recipeContent.title || "Recipe"} 
-                      className="w-full h-48 object-cover"
+                      className="w-full h-80 object-cover"
                     />
                   </div>
                 )}
@@ -850,11 +860,8 @@ export default function TableModals() {
               <div className="heart-explosion-container">
                 <Button 
                   onClick={() => {
-                    trackModalComplete('recipe');
-                    markModalComplete('recipe');
+                    handleComplete('recipe');
                     setFullscreenContent({ isOpen: false, title: '', content: null });
-                    // Navigate to home and scroll to progress to show flower growth
-                    window.location.hash = '#/?section=home&scrollToProgress=true';
                   }}
                   className="w-full py-3 rounded-xl platypi-medium mt-4 border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
                 >
@@ -886,7 +893,37 @@ export default function TableModals() {
                   if (mediaItems.length > 0) {
                     return (
                       <div className="mb-6">
-                        <div className="relative bg-gray-100 rounded-lg overflow-hidden">
+                        <div 
+                          className="relative bg-gray-100 rounded-lg overflow-hidden touch-pan-y"
+                          onTouchStart={(e) => {
+                            touchStartX.current = e.targetTouches[0].clientX;
+                          }}
+                          onTouchMove={(e) => {
+                            touchEndX.current = e.targetTouches[0].clientX;
+                          }}
+                          onTouchEnd={(e) => {
+                            if (!touchStartX.current || !touchEndX.current) return;
+                            
+                            const distance = touchStartX.current - touchEndX.current;
+                            const isLeftSwipe = distance > 50;
+                            const isRightSwipe = distance < -50;
+          
+                            if (isLeftSwipe && mediaItems.length > 1) {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setCurrentMediaIndex((prev) => (prev + 1) % mediaItems.length);
+                            }
+                            if (isRightSwipe && mediaItems.length > 1) {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setCurrentMediaIndex((prev) => (prev - 1 + mediaItems.length) % mediaItems.length);
+                            }
+                            
+                            // Reset values
+                            touchStartX.current = null;
+                            touchEndX.current = null;
+                          }}
+                        >
                           {mediaItems[currentMediaIndex]?.type === 'image' ? (
                             <div
                               className="cursor-pointer"
@@ -895,13 +932,13 @@ export default function TableModals() {
                               <LazyImage
                                 src={mediaItems[currentMediaIndex].url!}
                                 alt="Inspiration content"
-                                className="w-full h-64 object-cover"
+                                className="w-full h-80 object-cover"
                               />
                             </div>
                           ) : mediaItems[currentMediaIndex]?.type === 'video' ? (
                             <video 
                               controls 
-                              className="w-full h-64 object-cover"
+                              className="w-full h-80 object-cover"
                               src={mediaItems[currentMediaIndex].url}
                             />
                           ) : null}
@@ -910,24 +947,34 @@ export default function TableModals() {
                             <>
                               <button
                                 onClick={() => setCurrentMediaIndex((prev) => (prev - 1 + mediaItems.length) % mediaItems.length)}
-                                className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+                                className="absolute left-2 top-1/2 transform -translate-y-1/2 p-2 transition-transform hover:scale-110"
+                                style={{
+                                  filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.8)) drop-shadow(0 0 1px rgba(255,255,255,1))',
+                                  color: '#000',
+                                  fontWeight: 'bold'
+                                }}
                               >
-                                <ChevronLeft size={20} />
+                                <ChevronLeft size={24} strokeWidth={3} />
                               </button>
                               <button
                                 onClick={() => setCurrentMediaIndex((prev) => (prev + 1) % mediaItems.length)}
-                                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+                                className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 transition-transform hover:scale-110"
+                                style={{
+                                  filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.8)) drop-shadow(0 0 1px rgba(255,255,255,1))',
+                                  color: '#000',
+                                  fontWeight: 'bold'
+                                }}
                               >
-                                <ChevronRight size={20} />
+                                <ChevronRight size={24} strokeWidth={3} />
                               </button>
-                              <div className="absolute top-2 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                              <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
                                 {mediaItems.map((_, index) => (
-                                  <button
+                                  <div
                                     key={index}
-                                    onClick={() => setCurrentMediaIndex(index)}
-                                    className={`w-2 h-2 rounded-full transition-colors ${
+                                    className={`w-2 h-2 rounded-full ${
                                       index === currentMediaIndex ? 'bg-white' : 'bg-white/50'
                                     }`}
+                                    title={`Media ${index + 1}`}
                                   />
                                 ))}
                               </div>
@@ -967,11 +1014,8 @@ export default function TableModals() {
               <div className="heart-explosion-container">
                 <Button 
                   onClick={() => {
-                    trackModalComplete('inspiration');
-                    markModalComplete('inspiration');
+                    handleComplete('inspiration');
                     setFullscreenContent({ isOpen: false, title: '', content: null });
-                    // Navigate to home and scroll to progress to show flower growth
-                    window.location.hash = '#/?section=home&scrollToProgress=true';
                   }}
                   className="w-full py-3 rounded-xl platypi-medium mt-4 border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
                 >
