@@ -6,6 +6,9 @@ export default function TimesSection() {
   const { data: times, isLoading } = useJewishTimes();
   const { openModal } = useModalStore();
   const { coordinates, permissionDenied } = useGeolocation();
+  
+  // Debug: Check permission state
+  console.log('Location Debug:', { coordinates, permissionDenied, shouldPulse: (permissionDenied || !coordinates) });
 
   const getLocationDisplay = () => {
     if (permissionDenied) {
@@ -31,7 +34,7 @@ export default function TimesSection() {
               <h3 className="platypi-semibold text-sm">Today's Times</h3>
             </div>
             <button 
-              className={`text-xs text-blush cursor-pointer hover:text-blush/80 hover:bg-blush/10 px-3 py-2 rounded-lg transition-colors border border-blush/30 platypi-medium ${(permissionDenied || !coordinates) ? 'animate-pulse' : ''}`}
+              className={`text-xs text-blush cursor-pointer hover:text-blush/80 hover:bg-blush/10 px-3 py-2 rounded-lg transition-colors border border-blush/30 platypi-medium ${(permissionDenied || !coordinates) ? 'animate-pulse bg-red-50 border-red-300' : ''}`}
               onClick={() => {
 
                 openModal('location', 'times');
