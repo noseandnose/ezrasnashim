@@ -975,6 +975,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
+  const { trackEvent } = useAnalytics();
   const tefillaConditions = useTefillaConditions();
   const queryClient = useQueryClient();
 
@@ -1032,9 +1033,29 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
       return response.json();
     },
     onSuccess: () => {
+      // Track tehillim completion for analytics
+      trackEvent("tehillim_complete", { 
+        perek: progress?.currentPerek,
+        language: language
+      });
+      
+      // Track name prayed for if there was one
+      if (currentName) {
+        trackEvent("name_prayed", {
+          nameId: currentName.id,
+          reason: currentName.reason,
+          perek: progress?.currentPerek
+        });
+      }
+      
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+      
+      // Invalidate analytics stats to show updated counts immediately
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/today'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/month'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/total'] });
     },
     onError: (error) => {
       console.error('Failed to advance chain:', error);
@@ -1055,11 +1076,12 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
   const isCompleted = isModalComplete(completionKey);
 
   const handleComplete = () => {
-    trackModalComplete(completionKey);
-    markModalComplete(completionKey);
+    // Track modal completion for feature usage
+    trackModalComplete('tehillim-text');
+    markModalComplete('tehillim-text');
     completeTask('tefilla');
     
-    // Advance the chain
+    // Advance the chain (this will trigger the analytics tracking in onSuccess)
     advanceChainMutation.mutate();
     
     // Close fullscreen and return to home
