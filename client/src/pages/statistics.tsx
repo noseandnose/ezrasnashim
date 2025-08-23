@@ -347,7 +347,7 @@ export default function Statistics() {
           {/* Financial Stats */}
           <FinancialStatsSection period={selectedPeriod} />
         </div>
-      </main>
+      </div>
 
       <BottomNavigation 
         activeSection={null} 
