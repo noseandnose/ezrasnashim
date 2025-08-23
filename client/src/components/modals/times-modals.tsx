@@ -212,7 +212,7 @@ export default function TimesModals() {
                 placeholder="Anniversary, Yahrzeit, etc." 
                 value={eventTitle}
                 onChange={(e) => setEventTitle(e.target.value)}
-                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-lg"
+                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-lg placeholder:text-gray-400"
               />
             </div>
             
@@ -420,9 +420,6 @@ export default function TimesModals() {
                     onCheckedChange={handleNightfallChange}
                     className="w-6 h-6"
                   />
-                  <Label htmlFor="nightfall-fullscreen" className="text-lg platypi-medium text-black cursor-pointer">
-                    {afterNightfall ? 'Yes' : 'No'}
-                  </Label>
                 </div>
               </div>
             </div>
