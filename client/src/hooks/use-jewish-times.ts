@@ -59,6 +59,11 @@ export function useGeolocation() {
 
   useEffect(() => {
     const checkLocationPermission = async () => {
+      // If coordinates are already set (manually), don't override with browser permission check
+      if (coordinates) {
+        return;
+      }
+
       // Check if browser supports permissions API
       if (navigator.permissions) {
         try {
