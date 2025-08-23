@@ -1,6 +1,6 @@
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate } from "@/hooks/use-hebrew-date";
-import { BarChart3, Info, Share2, Share, Mail } from "lucide-react";
+import { BarChart3, Info, Share2, Share, Mail, X, Heart } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
 import { useState, useEffect } from "react";
@@ -19,6 +19,9 @@ export default function AppHeader() {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [hasReadMessage, setHasReadMessage] = useState(false);
+  const [showEasterEgg, setShowEasterEgg] = useState(false);
+  const [clickCount, setClickCount] = useState(0);
+  const [lastClickTime, setLastClickTime] = useState(0);
   
   const today = new Date().toISOString().split('T')[0];
   
@@ -55,6 +58,26 @@ export default function AppHeader() {
     });
   };
 
+  const handleLogoClick = () => {
+    const now = Date.now();
+    const timeSinceLastClick = now - lastClickTime;
+    
+    // Reset if more than 2 seconds since last click
+    if (timeSinceLastClick > 2000) {
+      setClickCount(1);
+    } else {
+      setClickCount(prev => prev + 1);
+    }
+    
+    setLastClickTime(now);
+    
+    // Show easter egg after 5 consecutive quick clicks
+    if (clickCount >= 4) { // 4 because we're about to increment to 5
+      setShowEasterEgg(true);
+      setClickCount(0); // Reset counter
+    }
+  };
+
   return (
     <>
       <header className="bg-gradient-soft p-3 border-0 shadow-none">
@@ -81,7 +104,9 @@ export default function AppHeader() {
         <img 
           src={logoImage} 
           alt="Ezras Nashim" 
-          className="h-7 w-auto"
+          className="h-7 w-auto cursor-pointer select-none"
+          onClick={handleLogoClick}
+          draggable={false}
         />
         <div className="flex items-center space-x-1">
           <button
@@ -116,6 +141,41 @@ export default function AppHeader() {
         onClose={() => setShowMessageModal(false)}
         date={today}
       />
+      
+      {/* Easter Egg Modal */}
+      {showEasterEgg && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full mx-4 p-8 text-center relative">
+            <button
+              onClick={() => setShowEasterEgg(false)}
+              className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
+              aria-label="Close"
+            >
+              <X className="h-5 w-5 text-gray-500" />
+            </button>
+            
+            <div className="flex justify-center mb-4">
+              <Heart className="h-12 w-12 text-rose-500 animate-pulse" />
+            </div>
+            
+            <div className="space-y-4">
+              <h3 className="text-xl platypi-bold text-black">
+                A Special Message
+              </h3>
+              
+              <p className="text-lg platypi-medium text-black leading-relaxed">
+                "To Heasy and Brozi, it was all for you. Its always been all for you."
+              </p>
+              
+              <div className="flex justify-center mt-6">
+                <Heart className="h-6 w-6 text-rose-400 mx-1" />
+                <Heart className="h-6 w-6 text-rose-500 mx-1" />
+                <Heart className="h-6 w-6 text-rose-600 mx-1" />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
