@@ -25,6 +25,9 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   const { torahCompleted, tefillaCompleted, tzedakaCompleted } = useDailyCompletionStore();
   const jewishTimesQuery = useJewishTimes();
   const { coordinates, permissionDenied } = useGeolocation();
+  
+  // Debug: Check current state
+  console.log('Home Section Debug:', { coordinates, permissionDenied, shouldPulse: (permissionDenied || !coordinates) });
   const { data: hebrewDate } = useHebrewDateWithShkia(jewishTimesQuery.data?.shkia);
 
   // Get time-appropriate greeting
