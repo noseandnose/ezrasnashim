@@ -75,26 +75,46 @@ export function useVersionCheck() {
   }, [currentVersion]);
   
   const refreshApp = () => {
-    // Clear service worker cache and reload
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then((registrations) => {
-        registrations.forEach(registration => {
-          registration.update();
-        });
-      });
-    }
+    // Update service workers and clear browser caches, but preserve user data
+    const performRefresh = async () => {
+      // Update service worker registrations
+      if ('serviceWorker' in navigator) {
+        try {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(
+            registrations.map(registration => registration.update())
+          );
+        } catch (error) {
+          console.error('Error updating service workers:', error);
+        }
+      }
+      
+      // Clear browser caches (but NOT localStorage)
+      if ('caches' in window) {
+        try {
+          const cacheNames = await caches.keys();
+          await Promise.all(
+            cacheNames.map(cacheName => caches.delete(cacheName))
+          );
+        } catch (error) {
+          console.error('Error clearing caches:', error);
+        }
+      }
+      
+      // Note: We explicitly do NOT clear localStorage to preserve:
+      // - modalCompletions (daily modal completion tracking)
+      // - dailyCompletion (daily task progress)
+      // - share-button-clicked (user preferences)  
+      // - message-read-* (daily message read status)
+      // - lastDonationEmail (donation form data)
+      // - ezras-nashim-compass-location* (location cache)
+      // - app-version (version tracking)
+      
+      // Force page reload to get fresh content
+      window.location.reload();
+    };
     
-    // Clear app cache
-    if ('caches' in window) {
-      caches.keys().then(names => {
-        names.forEach(name => {
-          caches.delete(name);
-        });
-      });
-    }
-    
-    // Force reload
-    window.location.reload();
+    performRefresh();
   };
   
   const dismissUpdate = () => {
