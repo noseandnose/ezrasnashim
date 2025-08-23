@@ -1,5 +1,5 @@
-import { Sun, Calendar, Plus, MapPin, Clock, Moon, Sunrise, Sunset, Star, Timer } from "lucide-react";
-import { useJewishTimes, useGeolocation, useLocationStore } from "@/hooks/use-jewish-times";
+import { Sun, Calendar, Plus } from "lucide-react";
+import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
 import { useModalStore } from "@/lib/types";
 
 export default function TimesSection() {
@@ -31,7 +31,7 @@ export default function TimesSection() {
               <h3 className="platypi-semibold text-sm">Today's Times</h3>
             </div>
             <button 
-              className="text-xs text-blush cursor-pointer hover:text-blush/80 hover:bg-blush/10 px-3 py-2 rounded-lg transition-colors border border-blush/30 platypi-medium"
+              className={`text-xs text-blush cursor-pointer hover:text-blush/80 hover:bg-blush/10 px-3 py-2 rounded-lg transition-colors border border-blush/30 platypi-medium ${(permissionDenied || !coordinates) ? 'animate-pulse' : ''}`}
               onClick={() => {
 
                 openModal('location', 'times');
