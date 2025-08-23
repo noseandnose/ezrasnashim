@@ -686,6 +686,8 @@ export default function TableModals() {
         isOpen={fullscreenContent.isOpen}
         onClose={() => {
           setFullscreenContent({ isOpen: false, title: '', content: null });
+          // Also close any open fullscreen image
+          setFullscreenImage(null);
           // Close the underlying modal as well
           closeModal();
           // Navigate back to the Life page (table section)
@@ -862,6 +864,8 @@ export default function TableModals() {
                   onClick={isModalComplete('recipe') ? undefined : () => {
                     handleComplete('recipe');
                     setFullscreenContent({ isOpen: false, title: '', content: null });
+                    // Also close any open fullscreen image
+                    setFullscreenImage(null);
                   }}
                   disabled={isModalComplete('recipe')}
                   className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
@@ -1021,6 +1025,8 @@ export default function TableModals() {
                   onClick={isModalComplete('inspiration') ? undefined : () => {
                     handleComplete('inspiration');
                     setFullscreenContent({ isOpen: false, title: '', content: null });
+                    // Also close any open fullscreen image
+                    setFullscreenImage(null);
                   }}
                   disabled={isModalComplete('inspiration')}
                   className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
