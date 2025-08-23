@@ -4,6 +4,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Safari mobile viewport fix */
+html, body {
+  height: 100%;
+  height: 100dvh;
+  height: -webkit-fill-available;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+}
+
+#root {
+  height: 100%;
+  height: 100dvh;  
+  height: -webkit-fill-available;
+}
+
 /* TEST: VC Koren Light Font for Hebrew Tefilla Content */
 @font-face {
   font-family: 'Koren Siddur';
@@ -551,8 +566,16 @@ html, body, #root {
 }
 
 .mobile-app {
+  /* Use dynamic viewport height for better mobile support */
+  min-height: 100dvh;
+  min-height: -webkit-fill-available; /* Safari fallback */
+  /* Custom Safari viewport height fix */
+  min-height: calc(var(--vh, 1vh) * 100);
+  /* Fallback for older browsers */
   min-height: 100vh;
   overflow: auto;
+  /* Ensure proper safe area handling on iOS */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* Prayer completion animation */
@@ -601,9 +624,19 @@ html, body, #root {
 }
 
 .content-area {
+  /* Use dynamic viewport height and safe area for mobile Safari */
+  min-height: calc(100dvh - 120px);
+  min-height: calc(-webkit-fill-available - 120px); /* Safari fallback */
+  /* Custom Safari viewport height fix */
+  min-height: calc((var(--vh, 1vh) * 100) - 120px);
+  /* Fallback for older browsers */
   min-height: calc(100vh - 120px);
   overflow: auto;
-  padding-bottom: 1rem;
+  /* Add safe area padding plus regular padding */
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
+  /* Prevent scroll bounce on iOS */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
 }
 
 /* Custom scrollbar for modals */
