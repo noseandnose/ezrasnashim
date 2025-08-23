@@ -264,7 +264,7 @@ export default function TableSection() {
           {/* Community Feedback Button */}
           <button
             className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
-            onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSeN5R13KeGNC9Fw4llh_ISYWJGgOyhNcFcDhaM3jUGZEOLrNg/viewform', '_blank')}
+            onClick={() => window.open('https://tally.so/r/3xqAEy', '_blank')}
           >
             <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-feminine">
               <MessageSquare className="text-white" size={18} strokeWidth={1.5} />
