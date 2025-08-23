@@ -3667,6 +3667,9 @@ function JerusalemCompass() {
   const [orientationSupported, setOrientationSupported] = useState(true);
   const [permissionRequested, setPermissionRequested] = useState(false);
   const orientationEventRef = useRef<((event: DeviceOrientationEvent) => void) | null>(null);
+  
+  // Android detection for UI elements
+  const isAndroid = /Android/i.test(navigator.userAgent);
 
   // Jerusalem coordinates for fallback (31.7767, 35.2345 as specified)
   const JERUSALEM_LAT = 31.7767;
@@ -3698,32 +3701,45 @@ function JerusalemCompass() {
       return;
     }
 
-    // Check if we have cached location first
-    const cachedLocation = localStorage.getItem('ezras-nashim-compass-location');
-    const cachedTime = localStorage.getItem('ezras-nashim-compass-location-time');
+    // Enhanced location caching for Android stability
+    const cacheKey = 'ezras-nashim-compass-location-v2'; // New cache version
+    const cacheTimeKey = 'ezras-nashim-compass-location-time-v2';
+    const cachedLocation = localStorage.getItem(cacheKey);
+    const cachedTime = localStorage.getItem(cacheTimeKey);
     
     if (cachedLocation && cachedTime) {
       const locationAge = Date.now() - parseInt(cachedTime);
-      if (locationAge < 300000) { // 5 minutes cache
+      const maxAge = isAndroid ? 900000 : 300000; // 15 min for Android, 5 min for others
+      
+      if (locationAge < maxAge) {
         try {
           const parsed = JSON.parse(cachedLocation);
-          setLocation(parsed);
-          const bearing = calculateBearing(parsed.lat, parsed.lng, JERUSALEM_LAT, JERUSALEM_LNG);
-          setDirection(bearing);
-          setIsLoading(false);
-          return;
+          // Validate cached location
+          if (parsed.lat && parsed.lng && 
+              Math.abs(parsed.lat) <= 90 && Math.abs(parsed.lng) <= 180) {
+            setLocation(parsed);
+            const bearing = calculateBearing(parsed.lat, parsed.lng, JERUSALEM_LAT, JERUSALEM_LNG);
+            setDirection(bearing);
+            setIsLoading(false);
+            return;
+          }
         } catch (e) {
-          // Invalid cache, proceed with fresh location
+          // Invalid cache, clear it and proceed
+          localStorage.removeItem(cacheKey);
+          localStorage.removeItem(cacheTimeKey);
         }
+      } else {
+        // Expired cache, clear it
+        localStorage.removeItem(cacheKey);
+        localStorage.removeItem(cacheTimeKey);
       }
     }
 
-    // Android-optimized geolocation settings
-    const androidDevice = /Android/i.test(navigator.userAgent);
+    // Comprehensive Android geolocation optimization
     const geoOptions = {
-      enableHighAccuracy: !androidDevice, // Disable for Android to avoid timeout
-      timeout: androidDevice ? 8000 : 5000, // Longer timeout for Android
-      maximumAge: androidDevice ? 180000 : 60000 // Longer cache for Android (3 min)
+      enableHighAccuracy: isAndroid ? false : true, // Android often fails with high accuracy
+      timeout: isAndroid ? 12000 : 6000, // Much longer timeout for Android
+      maximumAge: isAndroid ? 300000 : 120000 // 5 min cache for Android, 2 min for others
     };
 
     navigator.geolocation.getCurrentPosition(
@@ -3734,9 +3750,22 @@ function JerusalemCompass() {
         const locationData = { lat: userLat, lng: userLng };
         setLocation(locationData);
         
-        // Cache location for Android reliability
-        localStorage.setItem('ezras-nashim-compass-location', JSON.stringify(locationData));
-        localStorage.setItem('ezras-nashim-compass-location-time', Date.now().toString());
+        // Enhanced caching for Android reliability
+        localStorage.setItem(cacheKey, JSON.stringify(locationData));
+        localStorage.setItem(cacheTimeKey, Date.now().toString());
+        
+        // Store location name for display consistency
+        try {
+          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLat}&lon=${userLng}&format=json&addressdetails=1`);
+          const data = await response.json();
+          const name = data.display_name?.split(',')[0] || `${userLat.toFixed(2)}, ${userLng.toFixed(2)}`;
+          setLocationName(name);
+          localStorage.setItem('ezras-nashim-compass-location-name', name);
+        } catch (e) {
+          // Location name fetch failed, use coordinates
+          const coordName = `${userLat.toFixed(2)}, ${userLng.toFixed(2)}`;
+          setLocationName(coordName);
+        }
         
         // Calculate bearing to Jerusalem
         const bearing = calculateBearing(userLat, userLng, JERUSALEM_LAT, JERUSALEM_LNG);
@@ -3803,36 +3832,66 @@ function JerusalemCompass() {
     }
   };
 
-  // Enhanced device orientation for Android compatibility
+  // Comprehensive Android orientation handling for all versions and browsers
   const initializeOrientation = () => {
     let lastHeading = 0;
     let headingBuffer: number[] = [];
-    const BUFFER_SIZE = 8; // Larger buffer for Android stability
-    const UPDATE_THRESHOLD = 2; // Reduced threshold for more responsive updates
+    const BUFFER_SIZE = 12; // Larger buffer for Android stability
+    const UPDATE_THRESHOLD = 1.5; // Fine-tuned for responsiveness
     let lastUpdateTime = Date.now();
-    const MIN_UPDATE_INTERVAL = 50; // Faster updates for Android
+    const MIN_UPDATE_INTERVAL = 40; // Optimized for smooth updates
     
-    // Detect device type and Android version
-    const isAndroid = /Android/i.test(navigator.userAgent);
-    const isOldAndroid = isAndroid && /Android [1-4]/i.test(navigator.userAgent);
-    const isChrome = /Chrome/i.test(navigator.userAgent);
+    // Enhanced Android detection - covers all versions and browsers
+    const userAgent = navigator.userAgent;
+    const isAndroid = /Android/i.test(userAgent);
+    const androidVersion = isAndroid ? parseFloat(userAgent.match(/Android ([0-9.]+)/)?.[1] || '0') : 0;
+    const isOldAndroid = androidVersion > 0 && androidVersion < 5.0; // Android 4.x and below
+    const isModernAndroid = androidVersion >= 5.0;
+    const isChrome = /Chrome/i.test(userAgent);
+    const isFirefox = /Firefox/i.test(userAgent);
+    const isSamsung = /SM-/i.test(userAgent) || /Samsung/i.test(userAgent);
     
     const handleOrientation = (event: DeviceOrientationEvent) => {
       let heading = 0;
+      let isValidHeading = false;
       
-      // iOS devices with webkitCompassHeading (true heading)
+      // iOS devices with webkitCompassHeading (most accurate)
       if ((event as any).webkitCompassHeading !== undefined && (event as any).webkitCompassHeading !== null) {
         heading = (event as any).webkitCompassHeading;
+        isValidHeading = true;
       }
-      // Android and other devices using alpha (magnetic heading)
-      else if (event.alpha !== null) {
-        // For absolute compass direction, we need the actual magnetic heading
-        // not relative to device orientation when opened
+      // Android and other devices - complex handling for different versions
+      else if (event.alpha !== null && event.alpha !== undefined) {
         if (isAndroid) {
-          // Android uses alpha as magnetic north heading
-          // Alpha = 0 means device top points to magnetic north
-          // We want absolute compass direction
-          heading = event.alpha;
+          // Android compass handling - completely rewritten for accuracy
+          if (isOldAndroid) {
+            // Android 4.x and older - use direct alpha but invert
+            heading = (360 - event.alpha) % 360;
+          } else if (isModernAndroid) {
+            if (isChrome) {
+              // Modern Android Chrome - alpha is already magnetic north
+              // But we need to account for device orientation
+              if (event.absolute) {
+                // Absolute orientation available - use alpha directly
+                heading = event.alpha;
+              } else {
+                // Relative orientation - invert alpha
+                heading = (360 - event.alpha) % 360;
+              }
+            } else if (isFirefox) {
+              // Firefox on Android - different handling
+              heading = event.alpha || 0;
+            } else if (isSamsung) {
+              // Samsung Internet browser - special handling
+              heading = (360 - event.alpha) % 360;
+            } else {
+              // Other Android browsers - use inverted alpha
+              heading = (360 - event.alpha) % 360;
+            }
+          } else {
+            // Unknown Android version - default handling
+            heading = (360 - event.alpha) % 360;
+          }
         } else {
           // Non-Android devices - standard compass calculation
           heading = (360 - event.alpha) % 360;
@@ -3840,8 +3899,20 @@ function JerusalemCompass() {
         
         // Ensure heading is within 0-360 range
         heading = ((heading % 360) + 360) % 360;
+        isValidHeading = true;
       } else {
-        setOrientationSupported(false);
+        // Try to get heading from other sources
+        if ((event as any).webkitCompassHeading !== undefined) {
+          heading = (event as any).webkitCompassHeading || 0;
+          isValidHeading = true;
+        } else {
+          setOrientationSupported(false);
+          return;
+        }
+      }
+      
+      // Validate heading is reasonable
+      if (!isValidHeading || isNaN(heading) || heading < 0 || heading >= 360) {
         return;
       }
       
@@ -3892,25 +3963,47 @@ function JerusalemCompass() {
 
     orientationEventRef.current = handleOrientation;
     
-    // Android-specific event listener optimization
-    const deviceIsAndroid = /Android/i.test(navigator.userAgent);
-    
-    if (deviceIsAndroid) {
-      // For Android, prefer deviceorientationabsolute if available
-      if ('ondeviceorientationabsolute' in window) {
-        window.addEventListener('deviceorientationabsolute', handleOrientation as any);
+    // Enhanced Android event listener setup for maximum compatibility
+    const setupEventListeners = () => {
+      if (isAndroid) {
+        // Android-specific event handling
+        if (isModernAndroid && 'DeviceOrientationEvent' in window) {
+          // Try absolute orientation first for modern Android
+          if ('ondeviceorientationabsolute' in window) {
+            try {
+              window.addEventListener('deviceorientationabsolute', handleOrientation as any, { passive: true });
+              // Also add regular orientation as fallback
+              window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+            } catch (e) {
+              // Fallback to regular deviceorientation
+              window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+            }
+          } else {
+            // No absolute orientation, use regular
+            window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+          }
+        } else if (isOldAndroid) {
+          // Old Android - simple deviceorientation
+          window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+        } else {
+          // Unknown Android version - try both
+          window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+          if ('ondeviceorientationabsolute' in window) {
+            window.addEventListener('deviceorientationabsolute', handleOrientation as any, { passive: true });
+          }
+        }
       } else {
-        window.addEventListener('deviceorientation', handleOrientation);
+        // Non-Android devices - standard setup
+        window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+        
+        // Also listen for absolute orientation if available
+        if ('ondeviceorientationabsolute' in window) {
+          window.addEventListener('deviceorientationabsolute', handleOrientation as any, { passive: true });
+        }
       }
-    } else {
-      // For non-Android devices, use standard deviceorientation
-      window.addEventListener('deviceorientation', handleOrientation);
-      
-      // Also listen for absolute orientation if available
-      if ('ondeviceorientationabsolute' in window) {
-        window.addEventListener('deviceorientationabsolute', handleOrientation as any);
-      }
-    }
+    };
+    
+    setupEventListeners();
   };
 
   // Handle device orientation
@@ -3934,11 +4027,16 @@ function JerusalemCompass() {
       setOrientationSupported(false);
     }
 
-    // Cleanup - remove only the single event listener
+    // Enhanced cleanup for Android compatibility
     return () => {
       if (orientationEventRef.current) {
-        window.removeEventListener('deviceorientation', orientationEventRef.current);
-        window.removeEventListener('deviceorientationabsolute', orientationEventRef.current as any);
+        // Remove all possible event listeners that might have been added
+        try {
+          window.removeEventListener('deviceorientation', orientationEventRef.current);
+          window.removeEventListener('deviceorientationabsolute', orientationEventRef.current as any);
+        } catch (e) {
+          // Ignore cleanup errors
+        }
       }
     };
   }, [activeModal, permissionRequested]);
@@ -4176,6 +4274,9 @@ function JerusalemCompass() {
               <li>{typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested ? '3' : '2'}. {orientationSupported ? 'Hold device upright and turn your body' : 'Look at the compass to find the Kotel direction'}</li>
               <li>{typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested ? '4' : '3'}. {orientationSupported ? 'The arrow stays fixed while compass rotates' : 'The pink dot shows the Kotel direction'}</li>
               <li>{typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested ? '5' : '4'}. {orientationSupported ? 'Align the pink Kotel marker with the arrow' : 'Face the direction of the pink dot to pray'}</li>
+              {isAndroid && orientationSupported && (
+                <li className="text-xs text-black/60 mt-2">📱 Android tip: For best accuracy, hold device flat and move in a figure-8 pattern to calibrate</li>
+              )}
             </ol>
             
             {/* Android-specific tips */}
