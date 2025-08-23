@@ -1836,10 +1836,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                       <div className="flex gap-2">
                         {/* Complete button - returns to Tehillim selector */}
                         <Button 
-                          onClick={() => {
+                          onClick={async () => {
                             // Use the proper completion mutation to ensure analytics tracking
-                            completePerekMutation.mutate();
-                            setFullscreenContent({ isOpen: false, title: '', content: null });
+                            try {
+                              await completePerekMutation.mutateAsync();
+                              // Only close fullscreen after successful completion
+                              setFullscreenContent({ isOpen: false, title: '', content: null });
+                            } catch (error) {
+                              console.error('Failed to complete perek:', error);
+                            }
                           }}
                           disabled={completePerekMutation.isPending || completeAndNextMutation.isPending}
                           className="flex-1 bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0"
@@ -1849,10 +1854,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                         
                         {/* Complete and Next button - goes to next tehillim */}
                         <Button 
-                          onClick={() => {
+                          onClick={async () => {
                             // Complete current perek and immediately refetch to get next one
-                            completeAndNextMutation.mutate();
-                            setFullscreenContent({ isOpen: false, title: '', content: null });
+                            try {
+                              await completeAndNextMutation.mutateAsync();
+                              // Only close fullscreen after successful completion
+                              setFullscreenContent({ isOpen: false, title: '', content: null });
+                            } catch (error) {
+                              console.error('Failed to complete and advance perek:', error);
+                            }
                           }}
                           disabled={completePerekMutation.isPending || completeAndNextMutation.isPending}
                           className="flex-1 bg-gradient-to-r from-sage to-sage/90 text-white py-3 rounded-xl platypi-medium border-0"
