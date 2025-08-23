@@ -1807,12 +1807,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                         {/* Complete button - returns to Tehillim selector */}
                         <Button 
                           onClick={() => {
-                            completePerek();
-                            trackModalComplete('tehillim-text');
-                            markModalComplete('tehillim-text');
-                            completeTask('tefilla');
+                            // Use the proper completion mutation to ensure analytics tracking
+                            completePerekMutation.mutate();
                             setFullscreenContent({ isOpen: false, title: '', content: null });
-                            checkAndShowCongratulations();
                           }}
                           disabled={completePerekMutation.isPending || completeAndNextMutation.isPending}
                           className="flex-1 bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0"
