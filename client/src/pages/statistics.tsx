@@ -228,88 +228,88 @@ export default function Statistics() {
         </div>
       </header>
       
-      {/* Time Period Selector - Connected to Top */}
-      <div className="bg-gradient-soft -mt-3 rounded-b-3xl px-4 pt-6 pb-6 border-0 shadow-none flex-shrink-0">
-        <div className="flex bg-white/20 rounded-xl p-1 mb-4">
-          <Button
-            onClick={() => setSelectedPeriod('today')}
-            variant={selectedPeriod === 'today' ? 'default' : 'ghost'}
-            className={`flex-1 rounded-lg text-sm h-10 ${
-              selectedPeriod === 'today' 
-                ? 'bg-white text-black shadow-sm' 
-                : 'text-black/70 hover:text-black hover:bg-white/10'
-            }`}
-          >
-            Today
-          </Button>
-          <Button
-            onClick={() => setSelectedPeriod('month')}
-            variant={selectedPeriod === 'month' ? 'default' : 'ghost'}
-            className={`flex-1 rounded-lg text-sm h-10 ${
-              selectedPeriod === 'month' 
-                ? 'bg-white text-black shadow-sm' 
-                : 'text-black/70 hover:text-black hover:bg-white/10'
-            }`}
-          >
-            This Month
-          </Button>
-          <Button
-            onClick={() => setSelectedPeriod('alltime')}
-            variant={selectedPeriod === 'alltime' ? 'default' : 'ghost'}
-            className={`flex-1 rounded-lg text-sm h-10 ${
-              selectedPeriod === 'alltime' 
-                ? 'bg-white text-black shadow-sm' 
-                : 'text-black/70 hover:text-black hover:bg-white/10'
-            }`}
-          >
-            All Time
-          </Button>
+      <div className="flex-1 overflow-y-auto overflow-x-hidden pb-24">
+        {/* Time Period Selector */}
+        <div className="bg-gradient-soft -mt-3 rounded-b-3xl px-4 pt-6 pb-6 border-0 shadow-none">
+          <div className="flex bg-white/20 rounded-xl p-1 mb-4">
+            <Button
+              onClick={() => setSelectedPeriod('today')}
+              variant={selectedPeriod === 'today' ? 'default' : 'ghost'}
+              className={`flex-1 rounded-lg text-sm h-10 ${
+                selectedPeriod === 'today' 
+                  ? 'bg-white text-black shadow-sm' 
+                  : 'text-black/70 hover:text-black hover:bg-white/10'
+              }`}
+            >
+              Today
+            </Button>
+            <Button
+              onClick={() => setSelectedPeriod('month')}
+              variant={selectedPeriod === 'month' ? 'default' : 'ghost'}
+              className={`flex-1 rounded-lg text-sm h-10 ${
+                selectedPeriod === 'month' 
+                  ? 'bg-white text-black shadow-sm' 
+                  : 'text-black/70 hover:text-black hover:bg-white/10'
+              }`}
+            >
+              This Month
+            </Button>
+            <Button
+              onClick={() => setSelectedPeriod('alltime')}
+              variant={selectedPeriod === 'alltime' ? 'default' : 'ghost'}
+              className={`flex-1 rounded-lg text-sm h-10 ${
+                selectedPeriod === 'alltime' 
+                  ? 'bg-white text-black shadow-sm' 
+                  : 'text-black/70 hover:text-black hover:bg-white/10'
+              }`}
+            >
+              All Time
+            </Button>
+          </div>
+
+          {/* Period-Specific Stats */}
+          <h2 className="text-base platypi-bold text-black mb-3">
+            {selectedPeriod === 'today' ? "Today's Activity" : 
+             selectedPeriod === 'month' ? "This Month's Activity" : 
+             "All Time Activity"}
+          </h2>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <StatCard
+              title="Mitzvas Completed"
+              value={currentLoading ? "..." : (currentData as any)?.totalActs?.toLocaleString() || (currentData as any)?.totalActs || 0}
+              icon={TrendingUp}
+              color="text-blush"
+            />
+            <StatCard
+              title="Active Women"
+              value={currentLoading ? "..." : (currentData as any)?.totalUsers?.toLocaleString() || (currentData as any)?.uniqueUsers || 0}
+              icon={Users}
+              color="text-peach"
+            />
+            <StatCard
+              title="Tehillim Said"
+              value={currentLoading ? "..." : (() => {
+                const modalCompletions = (currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {};
+                const regularTehillim = modalCompletions['tehillim-text'] || 0;
+                const specialTehillim = modalCompletions['special-tehillim'] || 0;
+                const individualTehillim = Object.keys(modalCompletions).filter(key => key.startsWith('individual-tehillim')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
+                const tehillimEvents = (currentData as any)?.totalTehillimCompleted || (currentData as any)?.tehillimCompleted || 0;
+                return (regularTehillim + specialTehillim + individualTehillim + tehillimEvents).toLocaleString();
+              })()}
+              icon={ScrollText}
+              color="text-lavender"
+            />
+            <StatCard
+              title="People Davened For"
+              value={currentLoading ? "..." : (currentData as any)?.totalNamesProcessed?.toLocaleString() || (currentData as any)?.namesProcessed || 0}
+              icon={Heart}
+              color="text-sage"
+            />
+          </div>
         </div>
 
-        {/* Period-Specific Stats */}
-        <h2 className="text-base platypi-bold text-black mb-3">
-          {selectedPeriod === 'today' ? "Today's Activity" : 
-           selectedPeriod === 'month' ? "This Month's Activity" : 
-           "All Time Activity"}
-        </h2>
-        
-        <div className="grid grid-cols-2 gap-3">
-          <StatCard
-            title="Mitzvas Completed"
-            value={currentLoading ? "..." : (currentData as any)?.totalActs?.toLocaleString() || (currentData as any)?.totalActs || 0}
-            icon={TrendingUp}
-            color="text-blush"
-          />
-          <StatCard
-            title="Active Women"
-            value={currentLoading ? "..." : (currentData as any)?.totalUsers?.toLocaleString() || (currentData as any)?.uniqueUsers || 0}
-            icon={Users}
-            color="text-peach"
-          />
-          <StatCard
-            title="Tehillim Said"
-            value={currentLoading ? "..." : (() => {
-              const modalCompletions = (currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {};
-              const regularTehillim = modalCompletions['tehillim-text'] || 0;
-              const specialTehillim = modalCompletions['special-tehillim'] || 0;
-              const individualTehillim = Object.keys(modalCompletions).filter(key => key.startsWith('individual-tehillim')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
-              const tehillimEvents = (currentData as any)?.totalTehillimCompleted || (currentData as any)?.tehillimCompleted || 0;
-              return (regularTehillim + specialTehillim + individualTehillim + tehillimEvents).toLocaleString();
-            })()}
-            icon={ScrollText}
-            color="text-lavender"
-          />
-          <StatCard
-            title="People Davened For"
-            value={currentLoading ? "..." : (currentData as any)?.totalNamesProcessed?.toLocaleString() || (currentData as any)?.namesProcessed || 0}
-            icon={Heart}
-            color="text-sage"
-          />
-        </div>
-      </div>
-
-      <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-24">
-        <div className="space-y-6">
+        <div className="p-4 space-y-6">
           {/* Feature Usage */}
           <div>
             <h2 className="text-base platypi-bold text-black mb-3">Feature Usage</h2>

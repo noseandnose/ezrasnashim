@@ -1534,11 +1534,16 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       });
     },
     onSuccess: async (response) => {
-      // Track tehillim completion
+      // Track tehillim completion for analytics
       trackEvent("tehillim_complete", { 
         perek: progress?.currentPerek,
         language: showHebrew ? 'hebrew' : 'english'
       });
+      
+      // Track modal completion for daily tracking
+      trackModalComplete('tehillim-text');
+      markModalComplete('tehillim-text');
+      completeTask('tefilla');
       
       // Track name prayed for if there was one
       if (currentName) {
@@ -1558,6 +1563,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       
       // Dispatch event for the tefilla section to refresh
       window.dispatchEvent(new Event('tehillimCompleted'));
+      
+      // Check for congratulations after completion
+      setTimeout(() => {
+        checkAndShowCongratulations();
+      }, 100);
       
       // Close modal after short delay to show toast
       setTimeout(() => {
@@ -1584,11 +1594,16 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       });
     },
     onSuccess: async (response) => {
-      // Track tehillim completion
+      // Track tehillim completion for analytics
       trackEvent("tehillim_complete", { 
         perek: progress?.currentPerek,
         language: showHebrew ? 'hebrew' : 'english'
       });
+      
+      // Track modal completion for daily tracking
+      trackModalComplete('tehillim-text');
+      markModalComplete('tehillim-text');
+      completeTask('tefilla');
       
       // Track name prayed for if there was one
       if (currentName) {
@@ -1605,6 +1620,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           ? `Perek ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber} has been completed. Loading next section...`
           : `Perek ${tehillimInfo?.englishNumber || 'current'} has been completed. Loading next perek...`,
       });
+      
+      // Check for congratulations after completion
+      setTimeout(() => {
+        checkAndShowCongratulations();
+      }, 100);
       
       // Immediately refetch all data to show the new perek
       await Promise.all([
