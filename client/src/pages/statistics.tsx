@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import type { Section } from "@/pages/home";
+import BottomNavigation from "@/components/bottom-navigation";
 
 interface DailyStats {
   date: string;
