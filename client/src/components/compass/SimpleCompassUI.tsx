@@ -175,15 +175,14 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
             <div 
               className={`w-1.5 h-20 ${
                 state.isAligned 
-                  ? 'bg-blush animate-pulse' 
+                  ? 'bg-blush' 
                   : 'bg-gray-400'
               }`}
               style={{
                 position: 'absolute',
                 left: '50%',
                 bottom: '50%',
-                transform: 'translateX(-50%)',
-                animationDuration: state.isAligned ? '1.5s' : undefined
+                transform: 'translateX(-50%)'
               }}
             />
           </div>
