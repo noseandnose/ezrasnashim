@@ -36,7 +36,8 @@ export function useVersionCheck() {
       try {
         setCurrentVersion(JSON.parse(storedVersion));
       } catch (error) {
-        console.error('Error parsing stored version:', error);
+        // Clear corrupted version data
+        localStorage.removeItem('app-version');
       }
     }
   }, [currentVersion]);
@@ -52,11 +53,10 @@ export function useVersionCheck() {
         
         // Compare timestamps to detect updates
         if (latestVersion.timestamp > currentVersion.timestamp) {
-          console.log('New version detected:', latestVersion);
           setShowUpdatePrompt(true);
         }
       } catch (error) {
-        console.error('Error checking for updates:', error);
+        // Silently fail update checks to avoid console noise
       }
     };
     
@@ -85,7 +85,7 @@ export function useVersionCheck() {
             registrations.map(registration => registration.update())
           );
         } catch (error) {
-          console.error('Error updating service workers:', error);
+          // Service worker update failed, continue with page refresh
         }
       }
       
@@ -97,7 +97,7 @@ export function useVersionCheck() {
             cacheNames.map(cacheName => caches.delete(cacheName))
           );
         } catch (error) {
-          console.error('Error clearing caches:', error);
+          // Cache clearing failed, continue with page refresh
         }
       }
       

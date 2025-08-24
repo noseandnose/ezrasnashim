@@ -2134,11 +2134,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   })
   
   // Version endpoint for PWA update checking
+  // Use a fixed build timestamp instead of current time to prevent infinite update loops
+  const BUILD_TIMESTAMP = 1756015000000; // Fixed build time: August 24, 2025
+  
   app.get("/api/version", (req, res) => {
     const version = {
-      timestamp: Date.now(),
-      version: process.env.APP_VERSION || '1.0.0',
-      buildDate: new Date().toISOString()
+      timestamp: BUILD_TIMESTAMP,
+      version: process.env.APP_VERSION || '1.0.1',
+      buildDate: new Date(BUILD_TIMESTAMP).toISOString()
     };
     res.json(version);
   });

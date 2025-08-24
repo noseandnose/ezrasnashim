@@ -20,10 +20,10 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('[ServiceWorker] Pre-caching static assets');
+        // Pre-caching static assets
         return cache.addAll(STATIC_ASSETS);
       })
-      .catch(err => console.error('[ServiceWorker] Install failed:', err))
+      .catch(err => { /* Install failed */ })
   );
   // Force immediate activation
   self.skipWaiting();
@@ -37,7 +37,7 @@ self.addEventListener('activate', (event) => {
         cacheNames
           .filter(cacheName => cacheName !== CACHE_NAME && cacheName !== DYNAMIC_CACHE)
           .map(cacheName => {
-            console.log('[ServiceWorker] Removing old cache:', cacheName);
+            // Removing old cache
             return caches.delete(cacheName);
           })
       );
