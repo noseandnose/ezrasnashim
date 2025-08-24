@@ -92,6 +92,13 @@ export default function Statistics() {
   const currentDataResult = getCurrentData();
   const { data: currentData, isLoading: currentLoading } = currentDataResult;
 
+  // Debug logging
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`Selected period: ${selectedPeriod}`);
+    console.log(`Current data for ${selectedPeriod}:`, currentData);
+    console.log(`Is loading: ${currentLoading}`);
+  }
+
 
 
   // Handler for bottom navigation - navigate back to home page with section
@@ -338,7 +345,7 @@ export default function Statistics() {
 
         <div className="p-4 space-y-6">
           {/* Feature Usage */}
-          <div>
+          <div key={`feature-usage-${selectedPeriod}`}>
             <h2 className="text-base platypi-bold text-black mb-3">Feature Usage</h2>
             <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
               {currentLoading ? (
@@ -350,7 +357,10 @@ export default function Statistics() {
                     
                     // Debug logging for period-specific data 
                     if (process.env.NODE_ENV === 'development') {
-                      console.log(`Feature Usage for ${selectedPeriod}:`, modalCompletions);
+                      console.log(`=== Feature Usage Debug for ${selectedPeriod} ===`);
+                      console.log('Raw modalCompletions:', modalCompletions);
+                      console.log('Individual tehillim entries:', Object.entries(modalCompletions).filter(([key]) => key.startsWith('individual-tehillim')));
+                      console.log('Current data object:', currentData);
                     }
                     
                     // Create a processed entries array with individual tehillim aggregated
