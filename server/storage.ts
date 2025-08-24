@@ -1256,6 +1256,7 @@ export class DatabaseStorage implements IStorage {
     const tehillimCompleted = todayEvents.filter(e => e.eventType === 'tehillim_complete').length;
     const namesProcessed = todayEvents.filter(e => e.eventType === 'name_prayed').length;
     const booksCompleted = todayEvents.filter(e => e.eventType === 'tehillim_book_complete').length;
+    const tzedakaActs = todayEvents.filter(e => e.eventType === 'tzedaka_completion').length;
     
     // Count modal completions by type
     const modalCompletions: Record<string, number> = {};
@@ -1278,7 +1279,8 @@ export class DatabaseStorage implements IStorage {
           tehillimCompleted,
           namesProcessed,
           booksCompleted,
-          totalActs: this.calculateTotalActs(modalCompletions, tehillimCompleted),
+          tzedakaActs,
+          totalActs: this.calculateTotalActs(modalCompletions, tehillimCompleted, tzedakaActs),
           modalCompletions,
           updatedAt: new Date()
         })
@@ -1295,7 +1297,8 @@ export class DatabaseStorage implements IStorage {
           tehillimCompleted,
           namesProcessed,
           booksCompleted,
-          totalActs: this.calculateTotalActs(modalCompletions, tehillimCompleted),
+          tzedakaActs,
+          totalActs: this.calculateTotalActs(modalCompletions, tehillimCompleted, tzedakaActs),
           modalCompletions
         })
         .returning();
@@ -1324,7 +1327,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Helper method to calculate total acts
-  private calculateTotalActs(modalCompletions: Record<string, number>, tehillimCompleted: number): number {
+  private calculateTotalActs(modalCompletions: Record<string, number>, tehillimCompleted: number, tzedakaActsCount: number = 0): number {
     const torahActs = ['torah', 'chizuk', 'emuna', 'halacha', 'featured-content'];
     const tefillaActs = ['tefilla', 'morning-brochas', 'mincha', 'maariv', 'nishmas', 'birkat-hamazon', 'special-tehillim', 'global-tehillim-chain', 'tehillim-text'];
     const tzedakaActs = ['tzedaka', 'donate'];
@@ -1345,6 +1348,9 @@ export class DatabaseStorage implements IStorage {
     // Add tehillim completions as acts
     totalActs += tehillimCompleted || 0;
     
+    // Add tzedaka completions as acts 
+    totalActs += tzedakaActsCount || 0;
+    
     return totalActs;
   }
 
@@ -1354,6 +1360,7 @@ export class DatabaseStorage implements IStorage {
     totalTehillimCompleted: number;
     totalNamesProcessed: number;
     totalBooksCompleted: number;
+    totalTzedakaActs: number;
     totalActs: number;
     totalModalCompletions: Record<string, number>;
   }> {
@@ -1378,6 +1385,7 @@ export class DatabaseStorage implements IStorage {
       let totalTehillimCompleted = 0;
       let totalNamesProcessed = 0;
       let totalBooksCompleted = 0;
+      let totalTzedakaActs = 0;
       let totalActs = 0;
       const totalModalCompletions: Record<string, number> = {};
       
@@ -1387,6 +1395,7 @@ export class DatabaseStorage implements IStorage {
         totalTehillimCompleted += stats.tehillimCompleted || 0;
         totalNamesProcessed += stats.namesProcessed || 0;
         totalBooksCompleted += stats.booksCompleted || 0;
+        totalTzedakaActs += stats.tzedakaActs || 0;
         totalActs += stats.totalActs || 0;
         
         // Merge modal completions
@@ -1402,6 +1411,7 @@ export class DatabaseStorage implements IStorage {
         totalTehillimCompleted,
         totalNamesProcessed,
         totalBooksCompleted,
+        totalTzedakaActs,
         totalActs,
         totalModalCompletions
       };
@@ -1414,6 +1424,7 @@ export class DatabaseStorage implements IStorage {
         totalTehillimCompleted: 0,
         totalNamesProcessed: 0,
         totalBooksCompleted: 0,
+        totalTzedakaActs: 0,
         totalActs: 0,
         totalModalCompletions: {}
       };
@@ -1426,6 +1437,7 @@ export class DatabaseStorage implements IStorage {
     totalTehillimCompleted: number;
     totalNamesProcessed: number;
     totalBooksCompleted: number;
+    totalTzedakaActs: number;
     totalActs: number;
     totalModalCompletions: Record<string, number>;
   }> {
@@ -1438,6 +1450,7 @@ export class DatabaseStorage implements IStorage {
     let totalTehillimCompleted = 0;
     let totalNamesProcessed = 0;
     let totalBooksCompleted = 0;
+    let totalTzedakaCompleted = 0;
     let totalActs = 0;
     const totalModalCompletions: Record<string, number> = {};
     
@@ -1447,6 +1460,7 @@ export class DatabaseStorage implements IStorage {
       totalTehillimCompleted += stats.tehillimCompleted || 0;
       totalNamesProcessed += stats.namesProcessed || 0;
       totalBooksCompleted += stats.booksCompleted || 0;
+      totalTzedakaCompleted += stats.tzedakaCompleted || 0;
       totalActs += stats.totalActs || 0;
       
       // Merge modal completions
@@ -1462,6 +1476,7 @@ export class DatabaseStorage implements IStorage {
       totalTehillimCompleted,
       totalNamesProcessed,
       totalBooksCompleted,
+      totalTzedakaCompleted,
       totalActs,
       totalModalCompletions
     };

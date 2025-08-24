@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart, BookOpen, Baby, Shield, DollarSign } from "lucide-react";
 import { useLocation } from "wouter";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
@@ -20,6 +20,13 @@ export default function TzedakaModals() {
   const [sponsorMessage, setSponsorMessage] = useState("");
   const [torahPortion, setTorahPortion] = useState("");
   const { trackModalComplete } = useTrackModalComplete();
+
+  // Preselect $1 when wedding-campaign modal opens
+  useEffect(() => {
+    if (activeModal === 'wedding-campaign') {
+      setDonationAmount("1");
+    }
+  }, [activeModal]);
 
   const getDonationAmount = () => {
     if (donationAmount === "custom") {

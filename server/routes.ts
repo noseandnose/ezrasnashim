@@ -1920,6 +1920,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
             
             console.log(`Created act record for ${buttonType} completion`);
+
+            // Track tzedaka completion in analytics for stats counting
+            await storage.trackEvent({
+              eventType: 'tzedaka_completion',
+              eventData: {
+                buttonType: buttonType,
+                amount: paymentIntent.amount / 100, // Convert from cents to dollars
+                donationId: donation.id
+              },
+              sessionId: null // We don't have session context in webhook
+            });
+
+            // Update campaign progress if this is an active_campaign donation
+            if (buttonType === 'active_campaign') {
+              try {
+                // Get current active campaign
+                const activeCampaign = await storage.getActiveCampaign();
+                if (activeCampaign) {
+                  const newAmount = activeCampaign.currentAmount + (paymentIntent.amount / 100); // Convert from cents
+                  await storage.updateCampaignProgress(activeCampaign.id, newAmount);
+                  console.log(`Updated campaign progress: $${newAmount}`);
+                }
+              } catch (campaignError) {
+                console.error('Error updating campaign progress:', campaignError);
+              }
+            }
           }
           break;
           
@@ -2069,7 +2095,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { eventType, eventData, sessionId } = req.body;
       
       // Only allow completion events, reject high-volume events like page_view
-      const allowedEvents = ['modal_complete', 'tehillim_complete', 'name_prayed', 'tehillim_book_complete'];
+      const allowedEvents = ['modal_complete', 'tehillim_complete', 'name_prayed', 'tehillim_book_complete', 'tzedaka_completion'];
       if (!allowedEvents.includes(eventType)) {
         return res.status(400).json({ message: "Event type not tracked" });
       }
