@@ -123,17 +123,6 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
               <div className="absolute left-2 top-1/2 transform -translate-y-1/2 font-bold text-sm text-black">W</div>
             </div>
             
-            {/* Heart fixed to north on compass */}
-            <div className="absolute top-2 left-1/2 transform -translate-x-1/2">
-              <Heart 
-                className={`w-8 h-8 text-blush fill-current ${
-                  state.isAligned ? 'animate-pulse' : ''
-                }`}
-                style={{
-                  animationDuration: state.isAligned ? '1s' : undefined
-                }}
-              />
-            </div>
             
             {/* Jerusalem direction marker - rotates with compass */}
             <div 
@@ -154,20 +143,36 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
             </div>
           </div>
           
-          {/* Fixed center dot */}
-          <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-gray-800 rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
+          {/* Center heart that rotates with device heading */}
+          <div 
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+            style={{ 
+              transform: `translate(-50%, -50%) rotate(${deviceHeadingRotation}deg)`,
+              transition: state.hasPermission ? 'transform 0.3s ease-out' : 'none',
+              willChange: 'transform'
+            }}
+          >
+            <Heart 
+              className={`w-7 h-7 text-blush fill-current ${
+                state.isAligned ? 'animate-pulse' : ''
+              }`}
+              style={{
+                animationDuration: state.isAligned ? '1s' : undefined
+              }}
+            />
+          </div>
           
-          {/* Fixed direction line showing "up" */}
+          {/* Fixed direction line showing "up" - starts closer to center */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <div 
-              className={`h-16 w-0.5 origin-bottom ${
+              className={`h-12 w-0.5 origin-bottom ${
                 state.isAligned 
                   ? 'bg-blush animate-pulse' 
                   : 'bg-gray-400'
               }`}
               style={{
                 transformOrigin: 'bottom center',
-                transform: 'translateY(-100%)',
+                transform: 'translateY(-80%)',
                 animationDuration: state.isAligned ? '1.5s' : undefined
               }}
             />
