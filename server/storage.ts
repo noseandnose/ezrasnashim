@@ -127,6 +127,7 @@ export interface IStorage {
   createDonation(donation: InsertDonation): Promise<Donation>;
   getDonationByPaymentIntentId(stripePaymentIntentId: string): Promise<Donation | null>;
   updateDonationStatus(stripePaymentIntentId: string, status: string): Promise<Donation>;
+  updateDonation(id: number, updates: Partial<InsertDonation>): Promise<Donation>;
 
   // Acts tracking methods - New for individual button completion tracking
   createAct(act: InsertAct): Promise<Act>;
@@ -1004,6 +1005,15 @@ export class DatabaseStorage implements IStorage {
       .update(donations)
       .set({ status })
       .where(eq(donations.stripePaymentIntentId, stripePaymentIntentId))
+      .returning();
+    return result;
+  }
+
+  async updateDonation(id: number, updates: Partial<InsertDonation>): Promise<Donation> {
+    const [result] = await db
+      .update(donations)
+      .set(updates)
+      .where(eq(donations.id, id))
       .returning();
     return result;
   }

@@ -1992,6 +1992,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           break;
           
+        case 'checkout.session.completed':
+          const session = event.data.object;
+          console.log('Checkout session completed:', session.id);
+          
+          // Get the payment intent from the session
+          const paymentIntentId = session.payment_intent;
+          console.log('Payment intent from session:', paymentIntentId);
+          
+          // Find donation by session ID (stored in stripe_payment_intent_id field incorrectly)
+          const sessionDonation = await storage.getDonationByPaymentIntentId(session.id);
+          if (sessionDonation) {
+            // Update the donation with correct payment intent ID and status
+            await storage.updateDonation(sessionDonation.id, {
+              stripePaymentIntentId: paymentIntentId as string,
+              status: 'succeeded'
+            });
+            console.log('Updated donation with correct payment intent ID');
+            
+            // Extract metadata from session
+            const buttonType = session.metadata?.buttonType || 'active_campaign';
+            const amount = session.amount_total || 100;
+            
+            // Create an act record for tracking
+            await storage.createAct({
+              userId: null,
+              category: 'tzedaka',
+              subtype: buttonType,
+              amount: amount
+            });
+            
+            console.log(`Created act record for ${buttonType} completion from checkout session`);
+
+            // Track tzedaka completion in analytics
+            await storage.trackEvent({
+              eventType: 'tzedaka_completion',
+              eventData: {
+                buttonType: buttonType,
+                amount: amount / 100,
+                donationId: sessionDonation.id,
+                sessionId: session.id
+              },
+              sessionId: null
+            });
+
+            // Track as modal_complete for Feature Usage
+            await storage.trackEvent({
+              eventType: 'modal_complete',
+              eventData: {
+                modalType: 'tzedaka',
+                buttonType: buttonType,
+                amount: amount / 100,
+                donationId: sessionDonation.id
+              },
+              sessionId: null
+            });
+            console.log('Tracked checkout donation as modal_complete for Feature Usage');
+
+            // Update campaign progress if this is an active_campaign donation
+            if (buttonType === 'active_campaign') {
+              try {
+                const activeCampaign = await storage.getActiveCampaign();
+                if (activeCampaign) {
+                  const newAmount = activeCampaign.currentAmount + (amount / 100);
+                  await storage.updateCampaignProgress(activeCampaign.id, newAmount);
+                  console.log(`Updated campaign progress from checkout: $${newAmount}`);
+                }
+              } catch (campaignError) {
+                console.error('Error updating campaign progress:', campaignError);
+              }
+            }
+
+            // Recalculate daily stats
+            const today = new Date().toISOString().split('T')[0];
+            try {
+              await storage.recalculateDailyStats(today);
+              console.log('Recalculated daily stats after checkout donation');
+            } catch (statsError) {
+              console.error('Error recalculating daily stats:', statsError);
+            }
+          } else {
+            console.warn('No donation found for checkout session:', session.id);
+          }
+          break;
+
         case 'payment_intent.payment_failed':
           const failedPayment = event.data.object;
           console.log('Payment failed:', failedPayment.id);
