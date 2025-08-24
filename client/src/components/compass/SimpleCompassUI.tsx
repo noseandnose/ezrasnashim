@@ -165,8 +165,8 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
               }`}
               style={{
                 transformOrigin: 'bottom center',
-                height: '100px',
-                transform: 'translateY(-100%)',
+                height: '80px',
+                transform: 'translateY(-50%)',
                 animationDuration: state.isAligned ? '1.5s' : undefined
               }}
             />
