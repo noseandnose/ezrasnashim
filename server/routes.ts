@@ -1982,6 +1982,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/analytics/stats/today", async (req, res) => {
     try {
+      // Force no caching for real-time analytics
+      res.set({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store'
+      });
+      
       const today = new Date().toISOString().split('T')[0];
       const stats = await storage.getDailyStats(today);
       res.json(stats || {
@@ -2000,6 +2008,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/analytics/stats/month", async (req, res) => {
     try {
+      // Force no caching for real-time analytics
+      res.set({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store'
+      });
+      
       const now = new Date();
       const year = parseInt(req.query.year as string) || now.getFullYear();
       const month = parseInt(req.query.month as string) || (now.getMonth() + 1);
@@ -2014,6 +2030,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/analytics/stats/total", async (req, res) => {
     try {
+      // Force no caching for real-time analytics
+      res.set({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store'
+      });
+      
       const totals = await storage.getTotalStats();
       res.json(totals);
     } catch (error) {
