@@ -159,10 +159,9 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
                   <img 
                     src={state.isAligned ? bhGreenIcon : bhPinkIcon}
                     alt="Jerusalem direction"
-                    className={`w-8 h-8 ${state.isAligned ? 'animate-bounce' : ''}`}
+                    className="w-8 h-8"
                     style={{
-                      transform: `rotate(${deviceHeadingRotation - jerusalemArrowRotation}deg)`,
-                      animationDuration: state.isAligned ? '1s' : undefined
+                      transform: `rotate(${deviceHeadingRotation - jerusalemArrowRotation}deg)`
                     }}
                   />
                 </div>
@@ -192,15 +191,16 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
           <div className="absolute top-1/2 left-1/2 z-40 pointer-events-none" style={{ transform: 'translate(-50%, -50%)' }}>
             {/* Heart at the exact center */}
             <Heart 
-              className={`w-7 h-7 text-blush fill-blush ${
-                state.isAligned ? 'animate-bounce' : ''
-              }`}
+              className="w-7 h-7 text-blush fill-blush"
               style={{
                 position: 'absolute',
                 left: '50%',
                 top: '50%',
-                transform: 'translate(-50%, -50%)',
-                animationDuration: state.isAligned ? '1s' : undefined
+                transform: state.isAligned 
+                  ? 'translate(-50%, -50%) scale(1.2)' 
+                  : 'translate(-50%, -50%)',
+                transition: state.isAligned ? 'transform 0.6s ease-in-out' : 'none',
+                animation: state.isAligned ? 'heartPulse 1s ease-in-out infinite' : 'none'
               }}
             />
           </div>
@@ -231,6 +231,12 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
   
   return (
     <div className="space-y-6">
+      <style jsx>{`
+        @keyframes heartPulse {
+          0%, 100% { transform: translate(-50%, -50%) scale(1); }
+          50% { transform: translate(-50%, -50%) scale(1.2); }
+        }
+      `}</style>
       {/* Header */}
       <div className="text-center">
         <h2 className="text-xl font-bold text-black mb-2">The Kotel Compass</h2>
