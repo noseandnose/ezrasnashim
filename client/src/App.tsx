@@ -15,7 +15,6 @@ import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
 const Home = lazy(() => import("@/pages/home"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const Donate = lazy(() => import("@/pages/donate"));
-const Checkout = lazy(() => import("@/pages/checkout"));
 const Statistics = lazy(() => import("@/pages/statistics"));
 const TestPayment = lazy(() => import("@/pages/test-payment"));
 const DebugPayment = lazy(() => import("@/pages/debug-payment"));
@@ -82,7 +81,6 @@ function Router() {
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/donate" component={Donate} />
-        <Route path="/checkout" component={Checkout} />
         <Route path="/statistics" component={Statistics} />
         <Route path="/test-payment" component={TestPayment} />
         <Route path="/debug-payment" component={DebugPayment} />
