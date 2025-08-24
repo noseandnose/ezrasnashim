@@ -1976,7 +1976,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Get donation by session ID
-      const donation = await storage.getDonationByPaymentIntentId(sessionId);
+      const donation = await storage.getDonationBySessionId(sessionId);
       
       if (!donation) {
         return res.status(404).json({ message: "Donation not found" });

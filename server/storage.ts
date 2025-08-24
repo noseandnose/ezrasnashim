@@ -990,6 +990,15 @@ export class DatabaseStorage implements IStorage {
     return result || null;
   }
 
+  async getDonationBySessionId(stripeSessionId: string) {
+    const [result] = await db
+      .select()
+      .from(donations)
+      .where(eq(donations.stripeSessionId, stripeSessionId))
+      .limit(1);
+    return result || null;
+  }
+
   async updateDonationStatus(stripePaymentIntentId: string, status: string) {
     const [result] = await db
       .update(donations)
