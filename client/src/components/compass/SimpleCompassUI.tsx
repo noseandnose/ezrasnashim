@@ -173,7 +173,7 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
           <div className="absolute top-1/2 left-1/2 z-10 pointer-events-none" style={{ transform: 'translate(-50%, -50%)' }}>
             {/* Line extending upward from center */}
             <div 
-              className={`w-1.5 h-20 ${
+              className={`w-1.5 h-16 ${
                 state.isAligned 
                   ? 'bg-blush' 
                   : 'bg-gray-400'
@@ -200,7 +200,7 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
                   ? 'translate(-50%, -50%) scale(1.2)' 
                   : 'translate(-50%, -50%)',
                 transition: state.isAligned ? 'transform 0.6s ease-in-out' : 'none',
-                animation: state.isAligned ? 'heartPulse 1s ease-in-out infinite' : 'none'
+                animation: state.isAligned ? 'heartPulse 1.5s ease-in-out infinite' : 'none'
               }}
             />
           </div>
@@ -231,10 +231,13 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
   
   return (
     <div className="space-y-6">
-      <style jsx>{`
+      <style>{`
         @keyframes heartPulse {
-          0%, 100% { transform: translate(-50%, -50%) scale(1); }
-          50% { transform: translate(-50%, -50%) scale(1.2); }
+          0% { transform: translate(-50%, -50%) scale(1); }
+          14% { transform: translate(-50%, -50%) scale(1.3); }
+          28% { transform: translate(-50%, -50%) scale(1); }
+          42% { transform: translate(-50%, -50%) scale(1.3); }
+          70% { transform: translate(-50%, -50%) scale(1); }
         }
       `}</style>
       {/* Header */}
