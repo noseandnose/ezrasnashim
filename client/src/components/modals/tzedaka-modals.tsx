@@ -80,13 +80,13 @@ export default function TzedakaModals() {
     if (amount > 0) {
       // Don't track completion here - only after successful payment
       // Completion will be tracked in the donate page after payment succeeds
-      
       const params = new URLSearchParams({
         amount: amount.toString(),
         type: typeDescription,
         sponsor: donorName,
         dedication: dedicationText,
-        message: sponsorMessage
+        message: sponsorMessage,
+        modal: activeModal || '',
       });
 
       closeModal();
@@ -153,7 +153,6 @@ export default function TzedakaModals() {
                 required
               />
             </div>
-
 
 
             <div>

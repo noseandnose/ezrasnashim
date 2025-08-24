@@ -8,10 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, CheckCircle, Mail } from "lucide-react";
 import { useLocation } from "wouter";
-import { useDailyCompletionStore, useModalStore, useDonationCompletionStore } from "@/lib/types";
+import { useDailyCompletionStore, useModalStore, useDonationCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { playCoinSound } from "@/utils/sounds";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import Stripe from 'stripe';
+import { HeartExplosion } from '@/components/ui/heart-explosion';
 // Removed Apple Pay button import - now using integrated PaymentElement
 
 // Add Apple Pay types
@@ -415,6 +416,11 @@ export default function Donate() {
   //const [clientSecret, setClientSecret] = useState("");
   const [donationComplete, setDonationComplete] = useState(false);
   const [userEmailForReceipt, setUserEmailForReceipt] = useState("");
+  const { closeModal } = useModalStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+  const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const { toast } = useToast();
   
   // Use ref to track if payment intent has been created
@@ -427,6 +433,7 @@ export default function Donate() {
   const donationType = urlParams.get('type') || 'General Donation';
   const sponsorName = urlParams.get('sponsor') || '';
   const dedication = urlParams.get('dedication') || '';
+  const modal = urlParams.get('modal') || '';
   //const emailFromUrl = urlParams.get('email') || '';
 
   
@@ -466,7 +473,7 @@ export default function Donate() {
         dedication,
         timestamp: new Date().toISOString()
       },
-      returnUrl: `${window.location.origin}/donate?success=true&amount=${amount}&type=${donationType}&sponsor=${sponsorName}&dedication=${dedication}`,
+      returnUrl: `${window.location.origin}/donate?success=true&amount=${amount}&type=${donationType}&sponsor=${sponsorName}&dedication=${dedication}&modal=${modal}`,
       email: "" // Will be filled by user in the form
     })
       .then(async (response) => {
@@ -518,6 +525,17 @@ export default function Donate() {
   };
 
   const handleBackToApp = () => {
+    console.log(modal)
+    if (!isModalComplete(modal)){
+      // Track modal completion and mark as completed globally
+      trackModalComplete(modal);
+      markModalComplete(modal);
+      setDonationComplete(true);
+      completeTask('tzedaka');
+      checkAndShowCongratulations();
+    }
+           
+    closeModal();
     // Navigate to home with scroll to progress to show flower growth
     setLocation('/?scrollToProgress=true');
   };

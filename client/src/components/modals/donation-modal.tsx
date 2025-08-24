@@ -58,7 +58,8 @@ export default function DonationModal() {
           amount: (isCustom ? customAmount : amount),
           type: "General Donation",
           sponsor: "",
-          dedication: ""
+          dedication: "",
+          modal: activeModal || 'donate',
         });
         setLocation(`/donate?${params.toString()}`);
       // }
