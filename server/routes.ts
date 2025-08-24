@@ -2462,16 +2462,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   })
   
   // Version endpoint for PWA update checking
-  // Use a fixed build timestamp instead of current time to prevent infinite update loops
-  const BUILD_TIMESTAMP = 1756015000000; // Fixed build time: August 24, 2025
+  // Use server start time as the build timestamp to detect actual deployments
+  let SERVER_START_TIME = Date.now();
+  
+  // Update build timestamp when server restarts (deployment detection)
+  const updateBuildTimestamp = () => {
+    SERVER_START_TIME = Date.now();
+    console.log('Updated build timestamp to:', new Date(SERVER_START_TIME).toISOString());
+  };
   
   app.get("/api/version", (req, res) => {
     const version = {
-      timestamp: BUILD_TIMESTAMP,
+      timestamp: SERVER_START_TIME,
       version: process.env.APP_VERSION || '1.0.1',
-      buildDate: new Date(BUILD_TIMESTAMP).toISOString()
+      buildDate: new Date(SERVER_START_TIME).toISOString(),
+      serverUptime: Date.now() - SERVER_START_TIME
     };
     res.json(version);
+  });
+  
+  // Endpoint to manually trigger version update (for testing)
+  app.post("/api/version/update", (req, res) => {
+    updateBuildTimestamp();
+    res.json({ message: "Build timestamp updated", timestamp: SERVER_START_TIME });
   });
 
   // Messages routes
