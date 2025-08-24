@@ -427,7 +427,7 @@ export default function TimesModals() {
                 <button
                   type="button"
                   onClick={() => setYearDuration(1)}
-                  className={`p-3 rounded-lg text-sm platypi-medium transition-all ${
+                  className={`py-2 px-3 rounded-lg text-sm platypi-medium transition-all ${
                     yearDuration === 1
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
@@ -438,7 +438,7 @@ export default function TimesModals() {
                 <button
                   type="button"
                   onClick={() => setYearDuration(10)}
-                  className={`p-3 rounded-lg text-sm platypi-medium transition-all ${
+                  className={`py-2 px-3 rounded-lg text-sm platypi-medium transition-all ${
                     yearDuration === 10
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
@@ -449,7 +449,7 @@ export default function TimesModals() {
                 <button
                   type="button"
                   onClick={() => setYearDuration(120)}
-                  className={`p-3 rounded-lg text-sm platypi-medium transition-all ${
+                  className={`py-2 px-3 rounded-lg text-sm platypi-medium transition-all ${
                     yearDuration === 120
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
