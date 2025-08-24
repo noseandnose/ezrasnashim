@@ -110,14 +110,9 @@ const useTefillaConditions = () => {
           coordinates?.lng
         );
         
-        // DEBUG: Log successful conditions loading
-        if (import.meta.env.MODE === 'development') {
-          console.log('✅ Tefilla Conditions Loaded Successfully:', tefillaConditions);
-        }
         
         setConditions(tefillaConditions);
       } catch (error) {
-        console.error('❌ Failed to load Tefilla conditions:', error);
         
         // Could not load Tefilla conditions - Set default conditions
         setConditions({
@@ -140,16 +135,6 @@ const useTefillaConditions = () => {
 
 // Enhanced text processing function for Tefilla content
 const processTefillaContent = (text: string, conditions: TefillaConditions | null): string => {
-  // DEBUG: Log conditions to see what's happening
-  if (import.meta.env.MODE === 'development') {
-    console.log('🔍 ProcessTefillaContent Debug:', {
-      hasConditions: !!conditions,
-      conditions: conditions,
-      hasText: !!text,
-      textLength: text?.length,
-      containsRoshChodesh: text?.includes('ROSH_CHODESH')
-    });
-  }
   
   if (!conditions || !text) return formatTextContent(text);
   

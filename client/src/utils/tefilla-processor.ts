@@ -55,35 +55,13 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     ROSH_CHODESH_SPECIAL: () => !conditions.isRoshChodeshSpecial // Exclusion logic: shows when NOT in special periods
   };
 
-  // DEBUG: Log the text processing details
-  if (text.includes('ROSH_CHODESH')) {
-    console.log('🔍 CRITICAL DEBUG - Processing ROSH_CHODESH text:', {
-      inputText: text.substring(0, 200) + '...',
-      conditions: conditions,
-      hasRoshChodeshText: text.includes('ROSH_CHODESH'),
-      isRoshChodesh: conditions.isRoshChodesh,
-      conditionChecker: conditionCheckers.ROSH_CHODESH(),
-    });
-  }
 
   // Process all conditional sections with opening and closing tags
   const conditionalPattern = /\[\[([^\]]+)\]\]([\s\S]*?)\[\[\/([^\]]+)\]\]/g;
   
   processedText = processedText.replace(conditionalPattern, (match, openTag, content, closeTag) => {
-    // DEBUG: Log each conditional match found
-    if (openTag.includes('ROSH_CHODESH')) {
-      console.log('🔍 CONDITIONAL MATCH DEBUG:', {
-        match: match.substring(0, 100) + '...',
-        openTag,
-        closeTag,
-        content: content.substring(0, 50) + '...',
-        tagsMatch: openTag === closeTag
-      });
-    }
-    
     // Ensure opening and closing tags match
     if (openTag !== closeTag) {
-      console.log('❌ TAG MISMATCH:', { openTag, closeTag });
       return match; // Return original if tags don't match
     }
 
@@ -94,33 +72,10 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     const allConditionsMet = conditions_list.every((condition: string) => {
       const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
       if (!checker) {
-        console.log('❌ NO CHECKER FOUND FOR:', condition);
         return false;
       }
-      const result = checker();
-      
-      // DEBUG: Log each condition check for ROSH_CHODESH
-      if (condition === 'ROSH_CHODESH') {
-        console.log('🔍 ROSH_CHODESH CONDITION CHECK:', {
-          condition,
-          result,
-          checkerExists: !!checker,
-          conditionsValue: conditions.isRoshChodesh
-        });
-      }
-      
-      return result;
+      return checker();
     });
-
-    // DEBUG: Log final decision for ROSH_CHODESH
-    if (openTag.includes('ROSH_CHODESH')) {
-      console.log('🔍 FINAL DECISION:', {
-        conditions_list,
-        allConditionsMet,
-        willShowContent: allConditionsMet,
-        contentLength: content.length
-      });
-    }
 
     // Return content if all conditions are met, otherwise return empty string
     return allConditionsMet ? content : '';

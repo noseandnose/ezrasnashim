@@ -104,14 +104,9 @@ export function BirkatHamazonModal() {
           coordinates?.lng
         );
         
-        // DEBUG: Log successful conditions loading in Birkat Hamazon
-        if (import.meta.env.MODE === 'development') {
-          console.log('✅ Birkat Hamazon Conditions Loaded Successfully:', tefillaConditions);
-        }
         
         setConditions(tefillaConditions);
       } catch (error) {
-        console.error('❌ Failed to load Birkat Hamazon conditions:', error);
         
         // Could not load Tefilla conditions - Set default conditions
         setConditions({
@@ -218,17 +213,6 @@ export function BirkatHamazonModal() {
   const renderPrayerText = (prayer: BirkatHamazonPrayer | any) => {
     const text = language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation;
     
-    // DEBUG: Log processing details in Birkat Hamazon
-    if (import.meta.env.MODE === 'development') {
-      console.log('🔍 Birkat Hamazon Text Processing:', {
-        hasConditions: !!conditions,
-        conditions: conditions,
-        hasText: !!text,
-        textLength: text?.length,
-        containsRoshChodesh: text?.includes('ROSH_CHODESH'),
-        prayerType: prayer.prayerType
-      });
-    }
     
     // Apply conditional processing first if conditions are available
     let processedText = text;
