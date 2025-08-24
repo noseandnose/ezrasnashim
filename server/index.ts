@@ -91,7 +91,10 @@ app.use(
   }),
 );
 
-// Increase JSON limit for large payloads
+// Raw body for Stripe webhooks (must come before JSON parsing)
+app.use('/api/webhooks/stripe', express.raw({ type: 'application/json' }));
+
+// Increase JSON limit for large payloads (for all other routes)
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
