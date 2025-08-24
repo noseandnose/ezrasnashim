@@ -196,28 +196,28 @@ export default function TimesModals() {
       <FullscreenModal
         isOpen={activeModal === 'date-calculator-fullscreen'}
         onClose={() => closeModal()}
-        title="Hebrew Date Calculator"
+        title="Hebrew Date Converter"
         className="bg-gradient-to-br from-cream via-ivory to-sand"
       >
-        <div className="max-w-2xl mx-auto p-6 space-y-6">
-          <div className="text-center mb-6">
-            <p className="text-lg text-gray-700 platypi-medium">Convert English dates to Hebrew dates and add recurring events to your calendar</p>
+        <div className="max-w-xl mx-auto p-4 space-y-4">
+          <div className="text-center mb-4">
+            <p className="text-sm text-gray-700 platypi-medium">Convert English dates to Hebrew dates and add recurring events to your calendar</p>
           </div>
           
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div>
-              <Label className="block text-lg platypi-semibold text-black mb-3">Event Title</Label>
+              <Label className="block text-sm platypi-semibold text-black mb-2">Event Title</Label>
               <Input 
                 type="text" 
                 placeholder="Anniversary, Yahrzeit, etc." 
                 value={eventTitle}
                 onChange={(e) => setEventTitle(e.target.value)}
-                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-lg placeholder:text-gray-400"
+                className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blush bg-white text-sm placeholder:text-gray-400"
               />
             </div>
             
             <div>
-              <Label className="block text-lg platypi-semibold text-black mb-3">English Date</Label>
+              <Label className="block text-sm platypi-semibold text-black mb-2">English Date</Label>
               {typeof navigator !== 'undefined' && /iPhone|iPad|iPod/.test(navigator.userAgent) ? (
                 // iOS Custom Date Picker using select elements (wheel picker style)
                 <div className="flex space-x-3">
@@ -239,8 +239,7 @@ export default function TimesModals() {
                       const newDate = new Date(currentYear, selectedMonth, validDay, 12, 0, 0);
                       handleDateChange(newDate.toISOString().split('T')[0]);
                     }}
-                    className="flex-1 p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700 text-lg"
-                    style={{ minHeight: '56px' }}
+                    className="flex-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blush bg-white text-gray-700 text-sm"
                   >
                     {Array.from({length: 12}, (_, i) => (
                       <option key={i+1} value={i+1}>
@@ -266,8 +265,7 @@ export default function TimesModals() {
                         handleDateChange(newDate.toISOString().split('T')[0]);
                       }
                     }}
-                    className="flex-1 p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700 text-lg"
-                    style={{ minHeight: '56px' }}
+                    className="flex-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blush bg-white text-gray-700 text-sm"
                   >
                     {(() => {
                       const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
@@ -298,8 +296,7 @@ export default function TimesModals() {
                       const newDate = new Date(selectedYear, currentMonth, validDay, 12, 0, 0);
                       handleDateChange(newDate.toISOString().split('T')[0]);
                     }}
-                    className="flex-1 p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700 text-lg"
-                    style={{ minHeight: '56px' }}
+                    className="flex-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blush bg-white text-gray-700 text-sm"
                   >
                     {Array.from({length: 200}, (_, i) => {
                       const year = new Date().getFullYear() + 10 - i;
@@ -328,7 +325,7 @@ export default function TimesModals() {
                       const newDate = new Date(currentYear, selectedMonth, validDay, 12, 0, 0);
                       handleDateChange(newDate.toISOString().split('T')[0]);
                     }}
-                    className="flex-1 p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700 text-lg"
+                    className="flex-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blush bg-white text-gray-700 text-sm"
                   >
                     {Array.from({length: 12}, (_, i) => (
                       <option key={i+1} value={i+1}>
@@ -354,7 +351,7 @@ export default function TimesModals() {
                         handleDateChange(newDate.toISOString().split('T')[0]);
                       }
                     }}
-                    className="flex-1 p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700 text-lg"
+                    className="flex-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blush bg-white text-gray-700 text-sm"
                   >
                     {(() => {
                       const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
@@ -385,7 +382,7 @@ export default function TimesModals() {
                       const newDate = new Date(selectedYear, currentMonth, validDay, 12, 0, 0);
                       handleDateChange(newDate.toISOString().split('T')[0]);
                     }}
-                    className="flex-1 p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700 text-lg"
+                    className="flex-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blush bg-white text-gray-700 text-sm"
                   >
                     {Array.from({length: 200}, (_, i) => {
                       const year = new Date().getFullYear() + 10 - i;
@@ -397,10 +394,10 @@ export default function TimesModals() {
             </div>
 
             {convertedHebrewDate && (
-              <div className="p-4 bg-gradient-feminine/10 border border-blush/20 rounded-xl">
+              <div className="p-3 bg-gradient-feminine/10 border border-blush/20 rounded-lg">
                 <div className="flex items-center justify-between">
-                  <Label className="text-lg platypi-semibold text-black">Hebrew Date</Label>
-                  <div className="text-lg text-black platypi-medium">
+                  <Label className="text-sm platypi-semibold text-black">Hebrew Date</Label>
+                  <div className="text-sm text-black platypi-medium">
                     {convertedHebrewDate}
                   </div>
                 </div>
@@ -408,32 +405,32 @@ export default function TimesModals() {
             )}
 
             <div>
-              <div className="flex items-center justify-between p-4 bg-blue-50/50 rounded-xl border border-blue-200/50">
+              <div className="flex items-center justify-between p-3 bg-blue-50/50 rounded-lg border border-blue-200/50">
                 <div>
-                  <Label className="text-lg platypi-semibold text-black">After nightfall?</Label>
-                  <p className="text-sm text-gray-600 mt-1">Select if the event occurs after sunset</p>
+                  <Label className="text-sm platypi-semibold text-black">After nightfall?</Label>
+                  <p className="text-xs text-gray-600 mt-1">Select if the event occurs after sunset</p>
                 </div>
                 <div className="flex items-center space-x-3">
                   <Checkbox
                     id="nightfall-fullscreen"
                     checked={afterNightfall}
                     onCheckedChange={handleNightfallChange}
-                    className="w-6 h-6"
+                    className="w-5 h-5"
                   />
                 </div>
               </div>
             </div>
             
             <div>
-              <Label className="block text-lg platypi-semibold text-black mb-3">Add to my calendar for the next:</Label>
-              <div className="grid grid-cols-3 gap-3">
+              <Label className="block text-sm platypi-semibold text-black mb-2">Add to my calendar for the next:</Label>
+              <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => setYearDuration(1)}
-                  className={`p-4 rounded-xl text-lg platypi-medium transition-all ${
+                  className={`p-3 rounded-lg text-sm platypi-medium transition-all ${
                     yearDuration === 1
                       ? 'bg-gradient-feminine text-white shadow-soft'
-                      : 'bg-white/70 backdrop-blur-sm border-2 border-blush/20 text-warm-gray hover:bg-white/90'
+                      : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
                   }`}
                 >
                   1 Year
@@ -441,10 +438,10 @@ export default function TimesModals() {
                 <button
                   type="button"
                   onClick={() => setYearDuration(10)}
-                  className={`p-4 rounded-xl text-lg platypi-medium transition-all ${
+                  className={`p-3 rounded-lg text-sm platypi-medium transition-all ${
                     yearDuration === 10
                       ? 'bg-gradient-feminine text-white shadow-soft'
-                      : 'bg-white/70 backdrop-blur-sm border-2 border-blush/20 text-warm-gray hover:bg-white/90'
+                      : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
                   }`}
                 >
                   10 Years
@@ -452,10 +449,10 @@ export default function TimesModals() {
                 <button
                   type="button"
                   onClick={() => setYearDuration(120)}
-                  className={`p-4 rounded-xl text-lg platypi-medium transition-all ${
+                  className={`p-3 rounded-lg text-sm platypi-medium transition-all ${
                     yearDuration === 120
                       ? 'bg-gradient-feminine text-white shadow-soft'
-                      : 'bg-white/70 backdrop-blur-sm border-2 border-blush/20 text-warm-gray hover:bg-white/90'
+                      : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
                   }`}
                 >
                   120 Years
@@ -463,17 +460,17 @@ export default function TimesModals() {
               </div>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-3">
               <Button 
                 onClick={handleDownloadCalendar}
                 disabled={downloadCalendarMutation.isPending || !eventTitle || !englishDate}
-                className="w-full bg-gradient-feminine text-white py-4 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300 text-lg"
+                className="w-full bg-gradient-feminine text-white py-3 rounded-lg platypi-medium border-0 hover:shadow-lg transition-all duration-300 text-sm"
               >
                 {downloadCalendarMutation.isPending ? "Generating..." : "Download Calendar"}
               </Button>
               
-              <div className="bg-blue-50 rounded-2xl px-4 py-4 mt-4 border border-blue-200">
-                <span className="text-lg platypi-medium text-black">
+              <div className="bg-blue-50 rounded-lg px-3 py-2 border border-blue-200">
+                <span className="text-sm platypi-medium text-black">
                   Date converter powered by{" "}
                   <a 
                     href="https://www.hebcal.com/" 
