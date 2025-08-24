@@ -4,7 +4,7 @@ import {
   tehillimNames, tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, birkatHamazonPrayers, afterBrochasPrayers, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
   dailyRecipes, parshaVorts, tableInspirations, communityImpact, campaigns, donations, womensPrayers, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
-  analyticsEvents, dailyStats,
+  analyticsEvents, dailyStats, acts,
 
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
@@ -21,6 +21,8 @@ import {
   type TableInspiration, type InsertTableInspiration,
   type CommunityImpact, type InsertCommunityImpact,
   type Campaign, type InsertCampaign,
+  type Donation, type InsertDonation,
+  type Act, type InsertAct,
   type WomensPrayer, type InsertWomensPrayer,
   type DiscountPromotion, type InsertDiscountPromotion,
   type PirkeiAvot, type InsertPirkeiAvot,
@@ -120,6 +122,14 @@ export interface IStorage {
   getAllCampaigns(): Promise<Campaign[]>;
   createCampaign(campaign: InsertCampaign): Promise<Campaign>;
   updateCampaignProgress(id: number, amount: number): Promise<Campaign>;
+
+  // Donation methods - Enhanced for new schema
+  createDonation(donation: InsertDonation): Promise<Donation>;
+  getDonationByPaymentIntentId(stripePaymentIntentId: string): Promise<Donation | null>;
+  updateDonationStatus(stripePaymentIntentId: string, status: string): Promise<Donation>;
+
+  // Acts tracking methods - New for individual button completion tracking
+  createAct(act: InsertAct): Promise<Act>;
 
   // Pirkei Avot progression methods
   getPirkeiAvotProgress(): Promise<PirkeiAvotProgress>;
@@ -953,19 +963,20 @@ export class DatabaseStorage implements IStorage {
     return campaign;
   }
 
-  // Donation methods
-  async createDonation(donation: {
-    stripePaymentIntentId?: string;
-    amount: number;
-    donationType: string;
-    sponsorName?: string;
-    dedication?: string;
-    email?: string;
-    status: string;
-  }) {
+  // Donation methods - Enhanced for new schema
+  async createDonation(donation: InsertDonation): Promise<Donation> {
     const [result] = await db
       .insert(donations)
       .values(donation)
+      .returning();
+    return result;
+  }
+
+  // Acts tracking methods - New for individual button completion tracking
+  async createAct(act: InsertAct): Promise<Act> {
+    const [result] = await db
+      .insert(acts)
+      .values(act)
       .returning();
     return result;
   }

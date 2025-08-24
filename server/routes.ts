@@ -1738,8 +1738,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           metadata: {
             source: "ezras-nashim-donation",
             donationType:  donationType || "Ezras Nashim Donation",
+            buttonType: metadata?.buttonType || "put_a_coin", // Track which button was clicked
             sponsorName:  metadata?.sponsorName || "",
             dedication: metadata?.dedication || "",
+            message: metadata?.message || "",
             timestamp: new Date().toISOString(),
           },
         },
@@ -1751,17 +1753,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
 
-      // Track the donation attempt in our database
+      // Track the donation attempt in our database with enhanced schema
       try {
         await storage.createDonation({
+          userId: null, // We don't have user auth yet
           stripePaymentIntentId: session.id,
-          amount: amount, // Already in cents
+          stripeSessionId: session.id,
+          amount: Math.round(parseFloat(amount) * 100), // Convert to cents
+          type: metadata?.buttonType || "put_a_coin",
           donationType: donationType || "General Donation",
-          sponsorName: metadata?.sponsorName,
-          dedication: metadata?.dedication,
+          metadata: {
+            buttonType: metadata?.buttonType || "put_a_coin",
+            sponsorName: metadata?.sponsorName || "",
+            dedication: metadata?.dedication || "",
+            message: metadata?.message || "",
+            source: "ezras-nashim-donation",
+            timestamp: new Date().toISOString()
+          },
           status: 'pending'
         });
-        console.log('Donation tracked in database:', session.id);
+        console.log('Donation tracked in database with enhanced schema:', session.id);
       } catch (dbError) {
         console.error('Error saving donation to database:', dbError);
         // Continue even if database save fails
@@ -1870,6 +1881,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Stripe webhook handler for processing successful payments
+  app.post("/api/webhooks/stripe", async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    let event;
+
+    try {
+      // Verify webhook signature
+      event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    } catch (err) {
+      console.error('Webhook signature verification failed:', err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    try {
+      // Handle the event
+      switch (event.type) {
+        case 'payment_intent.succeeded':
+          const paymentIntent = event.data.object;
+          console.log('Payment succeeded:', paymentIntent.id);
+          
+          // Update donation status to succeeded
+          const donation = await storage.getDonationByPaymentIntentId(paymentIntent.id);
+          if (donation) {
+            await storage.updateDonationStatus(paymentIntent.id, 'succeeded');
+            
+            // Create an act record for tracking individual button completion
+            const buttonType = paymentIntent.metadata?.buttonType || 'put_a_coin';
+            await storage.createAct({
+              userId: null, // We don't have user auth yet
+              type: 'tzedaka_completion',
+              details: {
+                buttonType: buttonType,
+                amount: paymentIntent.amount,
+                donationId: donation.id,
+                timestamp: new Date().toISOString()
+              }
+            });
+            
+            console.log(`Created act record for ${buttonType} completion`);
+          }
+          break;
+          
+        case 'payment_intent.payment_failed':
+          const failedPayment = event.data.object;
+          console.log('Payment failed:', failedPayment.id);
+          await storage.updateDonationStatus(failedPayment.id, 'failed');
+          break;
+          
+        default:
+          console.log(`Unhandled event type ${event.type}`);
+      }
+
+      res.json({ received: true });
+    } catch (error) {
+      console.error('Error processing webhook:', error);
+      res.status(500).json({ error: 'Webhook processing failed' });
+    }
+  });
+
+  // Donation success callback - marks individual button as complete
+  app.post("/api/donations/success", async (req, res) => {
+    try {
+      const { sessionId } = req.body;
+      
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID required" });
+      }
+      
+      // Get donation by session ID
+      const donation = await storage.getDonationByPaymentIntentId(sessionId);
+      
+      if (!donation) {
+        return res.status(404).json({ message: "Donation not found" });
+      }
+      
+      // Extract button type from metadata
+      const buttonType = donation.metadata?.buttonType || donation.type || 'put_a_coin';
+      
+      // Create an act record if it doesn't exist already
+      await storage.createAct({
+        userId: null,
+        type: 'tzedaka_completion',
+        details: {
+          buttonType: buttonType,
+          amount: donation.amount,
+          donationId: donation.id,
+          timestamp: new Date().toISOString(),
+          source: 'success_callback'
+        }
+      });
+      
+      res.json({ 
+        success: true, 
+        buttonType: buttonType,
+        message: `${buttonType} completion recorded successfully` 
+      });
+    } catch (error) {
+      console.error('Error processing donation success:', error);
+      res.status(500).json({ message: "Failed to process donation success" });
+    }
+  });
+
   // Manual donation success update (for testing when webhook isn't configured)
   app.post("/api/donations/update-status", async (req, res) => {
     try {
@@ -1891,21 +2004,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
           donation = await storage.createDonation({
+            userId: null,
             stripePaymentIntentId: paymentIntentId,
+            stripeSessionId: paymentIntent.metadata?.sessionId,
             amount: paymentIntent.amount, // Amount in cents from Stripe
+            type: paymentIntent.metadata?.buttonType || "put_a_coin",
             donationType: paymentIntent.metadata?.donationType || "General Donation",
             sponsorName: paymentIntent.metadata?.sponsorName,
             dedication: paymentIntent.metadata?.dedication,
             email: paymentIntent.receipt_email || paymentIntent.metadata?.email,
+            metadata: {
+              buttonType: paymentIntent.metadata?.buttonType || "put_a_coin",
+              sponsorName: paymentIntent.metadata?.sponsorName || "",
+              dedication: paymentIntent.metadata?.dedication || "",
+              message: paymentIntent.metadata?.message || "",
+              source: "ezras-nashim-donation",
+              timestamp: new Date().toISOString()
+            },
             status: 'succeeded'
           });
-          console.log('Created donation record for successful payment:', paymentIntentId);
+          
+          // Create an act record for tracking individual button completion
+          await storage.createAct({
+            userId: null,
+            type: 'tzedaka_completion',
+            details: {
+              buttonType: paymentIntent.metadata?.buttonType || 'put_a_coin',
+              amount: paymentIntent.amount,
+              donationId: donation.id,
+              timestamp: new Date().toISOString()
+            }
+          });
+          
+          console.log('Created donation record and act for successful payment:', paymentIntentId);
         } catch (err) {
           console.error('Error retrieving payment intent from Stripe:', err);
           // Fallback - create with minimal info
           donation = await storage.createDonation({
+            userId: null,
             stripePaymentIntentId: paymentIntentId,
             amount: 100, // Default $1
+            type: "put_a_coin",
             donationType: "General Donation",
             status: status
           });

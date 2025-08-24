@@ -41,39 +41,48 @@ export default function TzedakaModals() {
   const handleDonation = () => {
     let amount = 0;
     let typeDescription = "";
+    let buttonType = ""; // New field for Stripe metadata
 
     switch (activeModal) {
       case "sponsor-day":
         amount = 180;
         typeDescription = "Sponsor a Day of Ezras Nashim";
+        buttonType = "sponsor_a_day";
         break;
       case "torah-dedication":
         amount = getTorahAmount();
         typeDescription = `Torah Dedication - ${torahPortion}`;
+        buttonType = "put_a_coin"; // Torah dedication falls under general donation
         break;
       case "infertility-support":
         amount = getDonationAmount();
         typeDescription = "Women's Infertility Support";
+        buttonType = "put_a_coin"; // General donation category
         break;
       case "abuse-support":
         amount = getDonationAmount();
         typeDescription = "Women's Abuse Support";
+        buttonType = "put_a_coin"; // General donation category
         break;
       case "womens-causes":
         amount = getDonationAmount();
         typeDescription = "Women's Causes Support";
+        buttonType = "put_a_coin"; // General donation category
         break;
       case "support-torah":
         amount = getDonationAmount();
         typeDescription = "Torah Learning Support";
+        buttonType = "put_a_coin"; // General donation category
         break;
       case "donate":
         amount = getDonationAmount();
         typeDescription = "General Donation";
+        buttonType = "put_a_coin";
         break;
       case "wedding-campaign":
         amount = getDonationAmount();
         typeDescription = "Wedding Campaign Support";
+        buttonType = "active_campaign";
         break;
     }
 
@@ -84,6 +93,7 @@ export default function TzedakaModals() {
       const params = new URLSearchParams({
         amount: amount.toString(),
         type: typeDescription,
+        buttonType: buttonType, // Include button type for Stripe metadata
         sponsor: donorName,
         dedication: dedicationText,
         message: sponsorMessage

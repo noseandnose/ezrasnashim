@@ -192,6 +192,22 @@ export const donations = pgTable("donations", {
   email: text("email"),
   status: text("status").notNull(), // 'succeeded', 'pending', 'failed'
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  // Existing fields from database
+  fundraiseUpId: varchar("fundraise_up_id"),
+  supporterId: varchar("supporter_id"),
+  currency: varchar("currency").default("USD"),
+  recurring: boolean("recurring").default(false),
+  livemode: boolean("livemode").default(true),
+  campaign: text("campaign"),
+  rawData: jsonb("raw_data"),
+  // New fields for comprehensive tracking
+  userId: text("user_id"), // User who made the donation
+  type: text("type"), // 'active_campaign', 'put_a_coin', 'sponsor_a_day', 'gave_elsewhere'
+  inHonorOf: text("in_honor_of"), // For sponsor a day
+  message: text("message"), // For sponsor a day
+  campaignId: text("campaign_id"), // Reference to campaign
+  stripeSessionId: text("stripe_session_id"), // Stripe checkout session ID
+  metadata: jsonb("metadata"), // Additional metadata from Stripe
 });
 
 export const inspirationalQuotes = pgTable("inspirational_quotes", {
@@ -300,6 +316,16 @@ export const analyticsEvents = pgTable("analytics_events", {
   createdAtIdx: index("analytics_events_created_idx").on(table.createdAt),
 }));
 
+// Acts table for tracking individual Tzedaka acts  
+export const acts = pgTable("acts", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id"), // User who performed the act
+  category: text("category").notNull(), // 'tzedaka', 'torah', 'tefilla'
+  subtype: text("subtype"), // 'active_campaign', 'put_a_coin', 'sponsor_a_day', 'gave_elsewhere'
+  amount: integer("amount").default(0), // Amount in cents, 0 for "gave elsewhere"
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const dailyStats = pgTable("daily_stats", {
   id: serial("id").primaryKey(),
   date: date("date").notNull().unique(),
@@ -310,6 +336,13 @@ export const dailyStats = pgTable("daily_stats", {
   booksCompleted: integer("books_completed").default(0), // Track complete Tehillim book finishes
   totalActs: integer("total_acts").default(0), // New field for total acts (Torah + Tefilla + Tzedaka)
   modalCompletions: jsonb("modal_completions").default({}), // { "torah": 10, "tefilla": 20, etc }
+  // Enhanced financial tracking
+  tzedakaActs: integer("tzedaka_acts").default(0), // Total tzedaka acts count
+  moneyRaised: integer("money_raised").default(0), // Total money raised in cents
+  activeCampaignTotal: integer("active_campaign_total").default(0), // Active campaign donations
+  putACoinTotal: integer("put_a_coin_total").default(0), // Put a coin donations  
+  sponsorADayTotal: integer("sponsor_a_day_total").default(0), // Sponsor a day donations
+  gaveElsewhereCount: integer("gave_elsewhere_count").default(0), // Count of "gave elsewhere" acts
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -420,6 +453,16 @@ export const insertDailyStatsSchema = createInsertSchema(dailyStats).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+export const insertDonationSchema = createInsertSchema(donations).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertActSchema = createInsertSchema(acts).omit({
+  id: true,
+  createdAt: true,
 });
 
 // Types
@@ -538,6 +581,12 @@ export type InsertAnalyticsEvent = z.infer<typeof insertAnalyticsEventSchema>;
 
 export type DailyStats = typeof dailyStats.$inferSelect;
 export type InsertDailyStats = z.infer<typeof insertDailyStatsSchema>;
+
+export type Donation = typeof donations.$inferSelect;
+export type InsertDonation = z.infer<typeof insertDonationSchema>;
+
+export type Act = typeof acts.$inferSelect;
+export type InsertAct = z.infer<typeof insertActSchema>;
 
 // Tehillim table
 export const tehillim = pgTable("tehillim", {

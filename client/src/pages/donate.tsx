@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, CheckCircle, Mail } from "lucide-react";
 import { useLocation } from "wouter";
-import { useDailyCompletionStore, useModalStore, useDonationCompletionStore } from "@/lib/types";
+import { useDailyCompletionStore, useModalStore, useDonationCompletionStore, TzedakaButtonType } from "@/lib/types";
 import { playCoinSound } from "@/utils/sounds";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import Stripe from 'stripe';
@@ -425,15 +425,78 @@ export default function Donate() {
   const isSuccess = urlParams.get('success') === 'true';
   const amount = parseFloat(urlParams.get('amount') || '0');
   const donationType = urlParams.get('type') || 'General Donation';
+  const buttonType = urlParams.get('buttonType') || 'put_a_coin'; // New field for tracking
   const sponsorName = urlParams.get('sponsor') || '';
   const dedication = urlParams.get('dedication') || '';
+  const message = urlParams.get('message') || '';
   //const emailFromUrl = urlParams.get('email') || '';
 
   
+  // Function to mark individual button as complete (from tzedaka-section)
+  const markTzedakaButtonCompleted = (buttonType: TzedakaButtonType) => {
+    const getLocalDateString = () => {
+      return new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD format in local timezone
+    };
+
+    const today = getLocalDateString();
+    const completions = JSON.parse(localStorage.getItem('tzedaka_button_completions') || '{}');
+    
+    if (!completions[today]) {
+      completions[today] = {};
+    }
+    
+    completions[today][buttonType] = true;
+    
+    // Clean up old data (keep only last 2 days)
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toLocaleDateString('en-CA');
+    
+    Object.keys(completions).forEach(date => {
+      if (date !== today && date !== yesterdayStr) {
+        delete completions[date];
+      }
+    });
+    
+    localStorage.setItem('tzedaka_button_completions', JSON.stringify(completions));
+  };
+
+  // Function to call backend success endpoint
+  const handleDonationSuccess = async (sessionId: string, buttonType: string) => {
+    try {
+      const response = await apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/donations/success`, {
+        sessionId: sessionId
+      });
+      
+      if (response.data && response.data.success) {
+        // Mark the individual button as complete using the button type
+        markTzedakaButtonCompleted(buttonType as TzedakaButtonType);
+        
+        toast({
+          title: "Donation Complete!",
+          description: `Your ${buttonType.replace('_', ' ')} action has been recorded.`,
+        });
+        
+        console.log(`Successfully recorded ${buttonType} completion`);
+      }
+    } catch (error) {
+      console.error('Error processing donation success:', error);
+      // Still mark button complete locally even if backend fails
+      markTzedakaButtonCompleted(buttonType as TzedakaButtonType);
+    }
+  };
+
   useEffect(() => {
     // Check if returning from successful payment
     if (isSuccess) {
       setDonationComplete(true);
+      
+      // Get session ID from URL (passed back from Stripe Checkout)
+      const sessionId = urlParams.get('session_id') || urlParams.get('payment_intent') || 'unknown';
+      
+      // Call backend success endpoint and mark individual button complete
+      handleDonationSuccess(sessionId, buttonType);
+      
       return;
     }
 
@@ -462,11 +525,13 @@ export default function Donate() {
       amount,
       donationType,
       metadata: {
+        buttonType, // Essential for tracking which button was clicked
         sponsorName,
         dedication,
+        message,
         timestamp: new Date().toISOString()
       },
-      returnUrl: `${window.location.origin}/donate?success=true&amount=${amount}&type=${donationType}&sponsor=${sponsorName}&dedication=${dedication}`,
+      returnUrl: `${window.location.origin}/donate?success=true&amount=${amount}&type=${donationType}&buttonType=${buttonType}&sponsor=${sponsorName}&dedication=${dedication}&message=${message}`,
       email: "" // Will be filled by user in the form
     })
       .then(async (response) => {
