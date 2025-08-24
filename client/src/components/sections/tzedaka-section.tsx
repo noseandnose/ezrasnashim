@@ -179,13 +179,9 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
   };
 
   const handleTzedakaButtonClick = (buttonType: TzedakaButtonType) => {
-    console.log('Tzedaka button clicked:', buttonType);
-    console.log('Is completed:', isTzedakaButtonCompleted(buttonType));
-    
     // Only prevent "gave_elsewhere" from being clicked again (it's a one-time acknowledgment)
     // Allow donation buttons to be clicked multiple times
     if (buttonType === 'gave_elsewhere' && isTzedakaButtonCompleted(buttonType)) {
-      console.log('Gave elsewhere already completed, not opening modal');
       return;
     }
     
@@ -234,7 +230,6 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
           modalId = 'sponsor-day';
           break;
       }
-      console.log('Opening modal:', modalId);
       openModal(modalId, 'tzedaka');
     }
   };

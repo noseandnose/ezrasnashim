@@ -8,6 +8,8 @@ import { useState, useEffect } from "react";
 import { Heart, BookOpen, Baby, Shield, DollarSign } from "lucide-react";
 import { useLocation } from "wouter";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
+import { useQuery } from "@tanstack/react-query";
+import type { Campaign } from "@shared/schema";
 
 export default function TzedakaModals() {
   const { activeModal, closeModal, openModal } = useModalStore();
@@ -27,6 +29,18 @@ export default function TzedakaModals() {
       setDonationAmount("1");
     }
   }, [activeModal]);
+
+  // Fetch active campaign data for the wedding campaign modal
+  const { data: activeCampaign, isLoading: isCampaignLoading } = useQuery<Campaign>({
+    queryKey: ['/api/campaigns/active'],
+    queryFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/campaigns/active`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 60 * 60 * 1000 // 60 minutes
+  });
 
   const getDonationAmount = () => {
     if (donationAmount === "custom") {
@@ -523,10 +537,16 @@ export default function TzedakaModals() {
       }}>
         <DialogContent aria-describedby="wedding-campaign-description">
           <div className="flex items-center justify-center mb-3 relative">
-            <DialogTitle className="text-lg platypi-bold text-black">Sponsor a Wedding for a Couple</DialogTitle>
+            <DialogTitle className="text-lg platypi-bold text-black">
+              {isCampaignLoading ? "Loading..." : activeCampaign?.title || "Active Campaign"}
+            </DialogTitle>
           </div>
-          <p className="text-sm platypi-regular text-gray-600 text-center mb-4">Help us raise $50,000 to sponsor an entire wedding for a young couple in need in Eretz Yisrael</p>
-          <div id="wedding-campaign-description" className="sr-only">Wedding sponsorship campaign for couples in need</div>
+          <p className="text-sm platypi-regular text-gray-600 text-center mb-4">
+            {isCampaignLoading ? "Loading campaign details..." : activeCampaign?.description || "Support our active campaign"}
+          </p>
+          <div id="wedding-campaign-description" className="sr-only">
+            {activeCampaign?.description || "Active campaign sponsorship"}
+          </div>
           
           <div className="space-y-4">
             <div>
