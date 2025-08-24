@@ -169,8 +169,8 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
             </div>
           </div>
           
-          {/* Fixed center heart and line - INSIDE compass container, stays fixed while compass rotates */}
-          <div className="absolute top-1/2 left-1/2 z-30 pointer-events-none" style={{ transform: 'translate(-50%, -50%)' }}>
+          {/* Fixed center line - BEHIND everything */}
+          <div className="absolute top-1/2 left-1/2 z-10 pointer-events-none" style={{ transform: 'translate(-50%, -50%)' }}>
             {/* Line extending upward from center */}
             <div 
               className={`w-1.5 h-20 ${
@@ -186,7 +186,10 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
                 animationDuration: state.isAligned ? '1.5s' : undefined
               }}
             />
-            
+          </div>
+          
+          {/* Fixed center heart - ON TOP of everything */}
+          <div className="absolute top-1/2 left-1/2 z-30 pointer-events-none" style={{ transform: 'translate(-50%, -50%)' }}>
             {/* Heart at the exact center */}
             <Heart 
               className={`w-7 h-7 text-blush fill-blush ${
