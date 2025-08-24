@@ -422,6 +422,7 @@ export default function Donate() {
   
   // Use ref to track if payment intent has been created
   const paymentIntentCreatedRef = useRef(false);
+  const hasRedirectedToStripeRef = useRef(false);
 
   // Get donation details from URL params
   const urlParams = new URLSearchParams(window.location.search);
@@ -531,12 +532,40 @@ export default function Donate() {
       setDonationComplete(true);
       setShowLoadingScreen(false);
       
+      // Clear redirect flag on successful completion
+      localStorage.removeItem('has_been_redirected_to_stripe');
+      
       // Get session ID from URL (passed back from Stripe Checkout)
       const sessionId = urlParams.get('session_id') || urlParams.get('payment_intent') || 'unknown';
       console.log('Calling success endpoint with sessionId:', sessionId, 'buttonType:', buttonType);
       
       // Call backend success endpoint and mark individual button complete
       handleDonationSuccess(sessionId, buttonType);
+      
+      return;
+    }
+
+    // Check if we've already been redirected to Stripe (to prevent recreation on return)
+    const hasBeenRedirected = localStorage.getItem('has_been_redirected_to_stripe');
+    if (hasBeenRedirected && !isSuccess) {
+      console.log('CANCELLED: User returned from Stripe without success - clearing and redirecting home');
+      setShowLoadingScreen(false);
+      
+      // Clear the redirect flag and any pending donation
+      localStorage.removeItem('has_been_redirected_to_stripe');
+      localStorage.removeItem('pending_donation');
+      
+      // Show cancellation message
+      toast({
+        title: "Donation Cancelled",
+        description: "No worries! You can try donating again anytime.",
+        variant: "default",
+      });
+      
+      // Redirect to home after a short delay
+      setTimeout(() => {
+        setLocation('/');
+      }, 1500);
       
       return;
     }
@@ -596,32 +625,24 @@ export default function Donate() {
               });
           }
         } else {
-          // Clear old pending donations
+          // Clear old pending donations and redirect flag
           localStorage.removeItem('pending_donation');
+          localStorage.removeItem('has_been_redirected_to_stripe');
+          setShowLoadingScreen(false);
         }
       } catch (error) {
         console.error('Error processing pending donation:', error);
         localStorage.removeItem('pending_donation');
+        localStorage.removeItem('has_been_redirected_to_stripe');
+        setShowLoadingScreen(false);
       }
     }
 
-    // Check if user returned from Stripe without completing payment
-    if (amount <= 0 && !donationType && !buttonType && !pendingDonation) {
-      console.log('CANCELLED: User returned from Stripe without completing payment - redirecting to home');
-      setShowLoadingScreen(false);
-      
-      // Show a message and redirect to home
-      toast({
-        title: "Donation Cancelled",
-        description: "No worries! You can try donating again anytime.",
-        variant: "default",
-      });
-      
-      // Redirect to home after a short delay
-      setTimeout(() => {
-        setLocation('/');
-      }, 1500);
-      
+    // (Old cancellation logic removed - now handled above with hasBeenRedirected check)
+
+    // Prevent session recreation if we've already redirected to Stripe
+    if (hasRedirectedToStripeRef.current || hasBeenRedirected) {
+      console.log('Already redirected to Stripe, preventing recreation...');
       return;
     }
 
@@ -629,6 +650,10 @@ export default function Donate() {
       setLocation('/');
       return;
     }
+
+    // Mark that we're about to redirect to Stripe
+    hasRedirectedToStripeRef.current = true;
+    localStorage.setItem('has_been_redirected_to_stripe', 'true');
 
     // // Use ref to ensure payment intent is only created once
     // if (paymentIntentCreatedRef.current || clientSecret) {
@@ -695,8 +720,10 @@ export default function Donate() {
           statusText: error.response?.statusText
         });
         
-        // Reset the ref on error so user can retry if needed
+        // Reset the refs on error so user can retry if needed
         paymentIntentCreatedRef.current = false;
+        hasRedirectedToStripeRef.current = false;
+        localStorage.removeItem('has_been_redirected_to_stripe');
         
         toast({
           title: "Payment Setup Failed",
