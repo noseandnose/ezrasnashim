@@ -466,7 +466,7 @@ export default function Donate() {
   // Function to call backend success endpoint
   const handleDonationSuccess = async (sessionId: string, buttonType: string) => {
     try {
-      const response = await apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/donations/success`, {
+      const response = await apiRequest('POST', '/api/donations/success', {
         sessionId: sessionId
       });
       
