@@ -182,9 +182,10 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
     console.log('Tzedaka button clicked:', buttonType);
     console.log('Is completed:', isTzedakaButtonCompleted(buttonType));
     
-    // Check if already completed
-    if (isTzedakaButtonCompleted(buttonType)) {
-      console.log('Button already completed, not opening modal');
+    // Only prevent "gave_elsewhere" from being clicked again (it's a one-time acknowledgment)
+    // Allow donation buttons to be clicked multiple times
+    if (buttonType === 'gave_elsewhere' && isTzedakaButtonCompleted(buttonType)) {
+      console.log('Gave elsewhere already completed, not opening modal');
       return;
     }
     
