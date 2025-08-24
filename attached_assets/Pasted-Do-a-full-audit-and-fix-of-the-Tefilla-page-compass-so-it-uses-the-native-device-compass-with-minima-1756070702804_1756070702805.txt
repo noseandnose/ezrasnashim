@@ -1,0 +1,55 @@
+Do a full audit and fix of the Tefilla page compass so it uses the native device compass with minimal extra logic, and works on older/newer iPhones and older/newer Android.
+
+What to do (keep it simple):
+
+Find & list all compass/location code and CSS transforms; remove any duplicate math/rotations so only one transform rotates the arrow.
+
+Use native sensors, in this order:
+
+iOS: webkitCompassHeading if present; otherwise DeviceOrientationEvent with permission.
+
+Android: prefer deviceorientationabsolute (or Generic Sensor API); fallback to deviceorientation.
+
+Map alpha to heading correctly (typically heading = 360 - alpha) and correct for screen orientation (0/90/180/270).
+
+Permissions UX: On iOS 13+, show a simple “Enable Compass” button that calls DeviceOrientationEvent.requestPermission() during a user tap. If denied/unavailable, show a GPS-bearing-only fallback arrow with a short tip.
+
+Bearing math: From current lat/lon to target (Kotel). Rotation = normalize(bearing - deviceHeading).
+
+Stability (fix vibrating & jumps):
+
+Apply a small median filter (3–5 samples) then exponential smoothing (alpha ~0.2–0.35, dynamic if noisy).
+
+Throttle UI updates with requestAnimationFrame.
+
+Pause listeners when tab hidden; resume cleanly.
+
+Location jitter: Use watchPosition({ high accuracy }), keep a rolling median of positions, and ignore moves smaller than reported accuracy (e.g., <8–12m).
+
+Android wrong-direction guard: Verify/invert only if needed; add a tiny calibration offset option stored in localStorage.
+
+Minimal UI only: Keep current look; no extra animations that fight the sensor.
+
+Debug toggle: ?debug=compass shows raw alpha/absolute/accuracy, computed deviceHeading, bearing, appliedRotation, event rate, geolocation, and which path is active.
+
+Tests & acceptance:
+
+Unit-test bearing/normalize functions and orientation mapping.
+
+Must point within ±10–15° in normal conditions.
+
+Old iPhones: no visible “vibration.”
+
+Android: no 180°/90° mistakes; rotation matches screen orientation.
+
+No TypeScript or console errors.
+
+Deliverables:
+
+Short audit note (what changed/why).
+
+Refactored compass module (sensors + math + tiny UI hook).
+
+Debug toggle.
+
+Tests for math/orientation mapping.
