@@ -44,10 +44,10 @@ export default function MessageModal({ isOpen, onClose, date }: MessageModalProp
           )}
         </div>
         
-        <div className="flex-shrink-0 pt-4 border-t border-warm-gray/10">
+        <div className="flex-shrink-0 pt-4">
           <Button 
             onClick={onClose}
-            className="w-full bg-blush hover:bg-blush/90 text-white platypi-medium"
+            className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
           >
             Done
           </Button>
