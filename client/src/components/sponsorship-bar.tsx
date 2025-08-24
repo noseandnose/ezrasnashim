@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { getLocalDateString } from "@/lib/dateUtils";
 
 interface SponsorshipBarProps {
   className?: string;
@@ -16,7 +17,7 @@ interface Sponsor {
 }
 
 export default function SponsorshipBar({ className = "" }: SponsorshipBarProps) {
-  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+  const today = getLocalDateString(); // YYYY-MM-DD format
 
   const { data: sponsor, isLoading } = useQuery<Sponsor | null>({
     queryKey: ['daily-sponsor', today],

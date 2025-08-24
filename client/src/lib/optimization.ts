@@ -63,7 +63,7 @@ export function optimizeImages(): void {
 /**
  * Preload critical resources
  */
-export function preloadCriticalResources(): void {
+export async function preloadCriticalResources(): Promise<void> {
   // Preload critical fonts
   const fontLink = document.createElement('link');
   fontLink.rel = 'preload';
@@ -73,7 +73,8 @@ export function preloadCriticalResources(): void {
   
   // Preload critical API endpoints with proper VITE_API_URL
   const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-  const today = new Date().toISOString().split('T')[0];
+  const { getLocalDateString } = await import('./dateUtils');
+  const today = getLocalDateString();
   
   const criticalEndpoints = [
     `${baseUrl}/api/torah/halacha/${today}`,

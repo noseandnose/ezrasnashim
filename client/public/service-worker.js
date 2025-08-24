@@ -1,8 +1,8 @@
 // Service Worker for Ezras Nashim PWA
-// Version 1.0.0 - Launch Ready
+// Version 1.1.0 - Auto-Update Ready
 
-const CACHE_NAME = 'ezras-nashim-v1';
-const DYNAMIC_CACHE = 'ezras-nashim-dynamic-v1';
+const CACHE_NAME = 'ezras-nashim-v1.1';
+const DYNAMIC_CACHE = 'ezras-nashim-dynamic-v1.1';
 
 // Core files to cache for offline functionality
 const STATIC_ASSETS = [
@@ -20,10 +20,10 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('[ServiceWorker] Pre-caching static assets');
+        // Pre-caching static assets
         return cache.addAll(STATIC_ASSETS);
       })
-      .catch(err => console.error('[ServiceWorker] Install failed:', err))
+      .catch(err => { /* Install failed */ })
   );
   // Force immediate activation
   self.skipWaiting();
@@ -37,7 +37,7 @@ self.addEventListener('activate', (event) => {
         cacheNames
           .filter(cacheName => cacheName !== CACHE_NAME && cacheName !== DYNAMIC_CACHE)
           .map(cacheName => {
-            console.log('[ServiceWorker] Removing old cache:', cacheName);
+            // Removing old cache
             return caches.delete(cacheName);
           })
       );

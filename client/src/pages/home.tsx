@@ -77,10 +77,10 @@ export default function Home() {
   };
 
   return (
-    <div className="mobile-app min-h-screen max-w-md mx-auto bg-white shadow-2xl relative">
+    <div className="mobile-app max-w-md mx-auto bg-white shadow-2xl">
       <AppHeader />
       
-      <main className="content-area overflow-y-auto overflow-x-hidden">
+      <main className="content-area">
         {renderSection()}
       </main>
 

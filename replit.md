@@ -11,8 +11,32 @@ Tefilla font: All prayer content in Tefilla modals now uses Koren Siddur font fo
 Reading time display: User requested reading time estimation for text content, implemented for Halacha content using 200 words per minute calculation.
 Community feedback form: Updated to new Google Forms link.
 Text formatting: Database content supports markdown-style formatting - **text** for bold, --- for line breaks, ~~text~~ for greyed out text, ++text++ for larger text (1.2em), --text-- for smaller text (0.85em), [[text]] for grey box content.
+Compass alignment message: When compass is aligned with Jerusalem, displays "Your heart is in the right place" instead of technical alignment message.
+Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20% bigger (w-8 h-8), both BH Green icon and center heart pulse when aligned.
 
-## Recent Changes (August 22, 2025)
+## Recent Changes (August 24, 2025)
+### Critical Timezone Consistency Fix (August 24, 2025)
+- **FIXED MAJOR BUG**: Resolved timezone inconsistency where different user activities reset at different times
+- **Problem**: Main daily tasks used UTC midnight while donations used local midnight, creating user confusion
+- **Solution**: Created centralized date utility (`getLocalDateString()`) ensuring ALL systems use local timezone
+- **Impact**: Torah, Tefilla, Tzedaka completions, modal tracking, donations, and content caching now all reset at same local midnight
+- **Files Updated**: Core completion stores, cache systems, analytics, and content modals standardized to local timezone
+- **User Experience**: Eliminates confusion about when daily progress resets - everything now resets intuitively at local midnight
+- **Foundation**: Prepares codebase for future Jewish day boundaries (Shkia-based transitions) if desired
+
+## Previous Changes (August 23, 2025)
+### Comprehensive Android Compass System Overhaul (August 23, 2025)
+- **MAJOR REWRITE**: Complete Android compass system rebuilt from ground up to fix all critical issues
+- **Universal Android Support**: Fixed compass for Android 4.x through modern versions across all browsers (Chrome, Firefox, Samsung Internet)
+- **Direction Accuracy**: Implemented proper magnetic heading calculation specific to each Android version and browser type
+- **Location Stability**: Enhanced 15-minute caching system prevents location jumping, validates coordinates, caches location names
+- **Smart Event Handling**: Comprehensive event listener selection (deviceorientationabsolute vs deviceorientation) based on device capabilities
+- **Enhanced Buffering**: 12-reading buffer with circular mean calculation and exponential decay weighting for stable compass readings
+- **Robust Error Recovery**: Multiple fallback systems ensure compass works even with permission/hardware issues
+- **Android UX**: Added device-specific calibration tips and optimized geolocation timeouts for Android reliability
+- **Performance**: 40ms updates, validated heading ranges, enhanced cleanup for memory efficiency
+
+## Previous Changes (August 22, 2025)
 ### Comprehensive Pre-Launch Audit (August 22, 2025)
 - **Code Quality**: Enhanced TypeScript with strict mode, fixed 247+ errors, removed 164+ console statements
 - **Performance**: Added performance monitoring, enhanced service worker, production build optimization

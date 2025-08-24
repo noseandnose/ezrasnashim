@@ -212,7 +212,7 @@ export default function TimesModals() {
                 placeholder="Anniversary, Yahrzeit, etc." 
                 value={eventTitle}
                 onChange={(e) => setEventTitle(e.target.value)}
-                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-lg"
+                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-lg placeholder:text-gray-400"
               />
             </div>
             
@@ -301,8 +301,8 @@ export default function TimesModals() {
                     className="flex-1 p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700 text-lg"
                     style={{ minHeight: '56px' }}
                   >
-                    {Array.from({length: 21}, (_, i) => {
-                      const year = new Date().getFullYear() - 10 + i;
+                    {Array.from({length: 200}, (_, i) => {
+                      const year = new Date().getFullYear() + 10 - i;
                       return <option key={year} value={year}>{year}</option>;
                     })}
                   </select>
@@ -387,8 +387,8 @@ export default function TimesModals() {
                     }}
                     className="flex-1 p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blush bg-white text-gray-700 text-lg"
                   >
-                    {Array.from({length: 21}, (_, i) => {
-                      const year = new Date().getFullYear() - 10 + i;
+                    {Array.from({length: 200}, (_, i) => {
+                      const year = new Date().getFullYear() + 10 - i;
                       return <option key={year} value={year}>{year}</option>;
                     })}
                   </select>
@@ -420,9 +420,6 @@ export default function TimesModals() {
                     onCheckedChange={handleNightfallChange}
                     className="w-6 h-6"
                   />
-                  <Label htmlFor="nightfall-fullscreen" className="text-lg platypi-medium text-black cursor-pointer">
-                    {afterNightfall ? 'Yes' : 'No'}
-                  </Label>
                 </div>
               </div>
             </div>

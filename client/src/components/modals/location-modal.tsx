@@ -100,9 +100,8 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
             lng: place.geometry.location.lng()
           };
           
-          // Update the location store directly
+          // Update the location store directly (setCoordinates now automatically resets permissionDenied)
           setCoordinates(coordinates);
-          setPermissionDenied(false);
           setInputValue(description);
           setPredictions([]);
           onClose();

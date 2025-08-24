@@ -109,8 +109,11 @@ const useTefillaConditions = () => {
           coordinates?.lat,
           coordinates?.lng
         );
+        
+        
         setConditions(tefillaConditions);
       } catch (error) {
+        
         // Could not load Tefilla conditions - Set default conditions
         setConditions({
           isInIsrael: false,
@@ -132,6 +135,7 @@ const useTefillaConditions = () => {
 
 // Enhanced text processing function for Tefilla content
 const processTefillaContent = (text: string, conditions: TefillaConditions | null): string => {
+  
   if (!conditions || !text) return formatTextContent(text);
   
   const processedText = processTefillaText(text, conditions);
@@ -975,6 +979,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
+  const { trackEvent } = useAnalytics();
   const tefillaConditions = useTefillaConditions();
   const queryClient = useQueryClient();
 
@@ -1032,9 +1037,29 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
       return response.json();
     },
     onSuccess: () => {
+      // Track tehillim completion for analytics
+      trackEvent("tehillim_complete", { 
+        perek: progress?.currentPerek,
+        language: language
+      });
+      
+      // Track name prayed for if there was one
+      if (currentName) {
+        trackEvent("name_prayed", {
+          nameId: currentName.id,
+          reason: currentName.reason,
+          perek: progress?.currentPerek
+        });
+      }
+      
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+      
+      // Invalidate analytics stats to show updated counts immediately
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/today'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/month'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/total'] });
     },
     onError: (error) => {
       console.error('Failed to advance chain:', error);
@@ -1055,11 +1080,12 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
   const isCompleted = isModalComplete(completionKey);
 
   const handleComplete = () => {
-    trackModalComplete(completionKey);
-    markModalComplete(completionKey);
+    // Track modal completion for feature usage (use unique key to avoid double counting)
+    trackModalComplete('global-tehillim-chain');
+    markModalComplete('tehillim-text');
     completeTask('tefilla');
     
-    // Advance the chain
+    // Advance the chain (this will trigger the analytics tracking in onSuccess)
     advanceChainMutation.mutate();
     
     // Close fullscreen and return to home
@@ -1534,11 +1560,16 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       });
     },
     onSuccess: async (response) => {
-      // Track tehillim completion
+      // Track tehillim completion for analytics
       trackEvent("tehillim_complete", { 
         perek: progress?.currentPerek,
         language: showHebrew ? 'hebrew' : 'english'
       });
+      
+      // Track modal completion for daily tracking
+      trackModalComplete('tehillim-text');
+      markModalComplete('tehillim-text');
+      completeTask('tefilla');
       
       // Track name prayed for if there was one
       if (currentName) {
@@ -1558,6 +1589,16 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       
       // Dispatch event for the tefilla section to refresh
       window.dispatchEvent(new Event('tehillimCompleted'));
+      
+      // Invalidate analytics stats to show updated counts immediately
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/today'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/month'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/total'] });
+      
+      // Check for congratulations after completion
+      setTimeout(() => {
+        checkAndShowCongratulations();
+      }, 100);
       
       // Close modal after short delay to show toast
       setTimeout(() => {
@@ -1584,11 +1625,16 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       });
     },
     onSuccess: async (response) => {
-      // Track tehillim completion
+      // Track tehillim completion for analytics
       trackEvent("tehillim_complete", { 
         perek: progress?.currentPerek,
         language: showHebrew ? 'hebrew' : 'english'
       });
+      
+      // Track modal completion for daily tracking
+      trackModalComplete('tehillim-text');
+      markModalComplete('tehillim-text');
+      completeTask('tefilla');
       
       // Track name prayed for if there was one
       if (currentName) {
@@ -1606,6 +1652,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           : `Perek ${tehillimInfo?.englishNumber || 'current'} has been completed. Loading next perek...`,
       });
       
+      // Check for congratulations after completion
+      setTimeout(() => {
+        checkAndShowCongratulations();
+      }, 100);
+      
       // Immediately refetch all data to show the new perek
       await Promise.all([
         refetchProgress(),
@@ -1617,6 +1668,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       // Also invalidate queries for other components
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/preview'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/text'] });
+      
+      // Invalidate analytics stats to show updated counts immediately
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/today'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/month'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/total'] });
       
       // Dispatch event for the tefilla section to refresh
       window.dispatchEvent(new Event('tehillimCompleted'));
@@ -1806,13 +1862,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                       <div className="flex gap-2">
                         {/* Complete button - returns to Tehillim selector */}
                         <Button 
-                          onClick={() => {
-                            completePerek();
-                            trackModalComplete('tehillim-text');
-                            markModalComplete('tehillim-text');
-                            completeTask('tefilla');
-                            setFullscreenContent({ isOpen: false, title: '', content: null });
-                            checkAndShowCongratulations();
+                          onClick={async () => {
+                            // Use the proper completion mutation to ensure analytics tracking
+                            try {
+                              await completePerekMutation.mutateAsync();
+                              // Only close fullscreen after successful completion
+                              setFullscreenContent({ isOpen: false, title: '', content: null });
+                            } catch (error) {
+                              console.error('Failed to complete perek:', error);
+                            }
                           }}
                           disabled={completePerekMutation.isPending || completeAndNextMutation.isPending}
                           className="flex-1 bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0"
@@ -1822,10 +1880,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                         
                         {/* Complete and Next button - goes to next tehillim */}
                         <Button 
-                          onClick={() => {
+                          onClick={async () => {
                             // Complete current perek and immediately refetch to get next one
-                            completeAndNextMutation.mutate();
-                            setFullscreenContent({ isOpen: false, title: '', content: null });
+                            try {
+                              await completeAndNextMutation.mutateAsync();
+                              // Only close fullscreen after successful completion
+                              setFullscreenContent({ isOpen: false, title: '', content: null });
+                            } catch (error) {
+                              console.error('Failed to complete and advance perek:', error);
+                            }
                           }}
                           disabled={completePerekMutation.isPending || completeAndNextMutation.isPending}
                           className="flex-1 bg-gradient-to-r from-sage to-sage/90 text-white py-3 rounded-xl platypi-medium border-0"
@@ -3667,6 +3730,9 @@ function JerusalemCompass() {
   const [orientationSupported, setOrientationSupported] = useState(true);
   const [permissionRequested, setPermissionRequested] = useState(false);
   const orientationEventRef = useRef<((event: DeviceOrientationEvent) => void) | null>(null);
+  
+  // Android detection for UI elements
+  const isAndroid = /Android/i.test(navigator.userAgent);
 
   // Jerusalem coordinates for fallback (31.7767, 35.2345 as specified)
   const JERUSALEM_LAT = 31.7767;
@@ -3685,7 +3751,7 @@ function JerusalemCompass() {
     return (bearing + 360) % 360;
   };
 
-  // Get user's location - simplified
+  // Enhanced location handling for Android stability
   const getUserLocation = () => {
     setIsLoading(true);
     setError("");
@@ -3698,12 +3764,71 @@ function JerusalemCompass() {
       return;
     }
 
+    // Enhanced location caching for Android stability
+    const cacheKey = 'ezras-nashim-compass-location-v2'; // New cache version
+    const cacheTimeKey = 'ezras-nashim-compass-location-time-v2';
+    const cachedLocation = localStorage.getItem(cacheKey);
+    const cachedTime = localStorage.getItem(cacheTimeKey);
+    
+    if (cachedLocation && cachedTime) {
+      const locationAge = Date.now() - parseInt(cachedTime);
+      const maxAge = isAndroid ? 900000 : 300000; // 15 min for Android, 5 min for others
+      
+      if (locationAge < maxAge) {
+        try {
+          const parsed = JSON.parse(cachedLocation);
+          // Validate cached location
+          if (parsed.lat && parsed.lng && 
+              Math.abs(parsed.lat) <= 90 && Math.abs(parsed.lng) <= 180) {
+            setLocation(parsed);
+            const bearing = calculateBearing(parsed.lat, parsed.lng, JERUSALEM_LAT, JERUSALEM_LNG);
+            setDirection(bearing);
+            setIsLoading(false);
+            return;
+          }
+        } catch (e) {
+          // Invalid cache, clear it and proceed
+          localStorage.removeItem(cacheKey);
+          localStorage.removeItem(cacheTimeKey);
+        }
+      } else {
+        // Expired cache, clear it
+        localStorage.removeItem(cacheKey);
+        localStorage.removeItem(cacheTimeKey);
+      }
+    }
+
+    // Comprehensive Android geolocation optimization
+    const geoOptions = {
+      enableHighAccuracy: isAndroid ? false : true, // Android often fails with high accuracy
+      timeout: isAndroid ? 12000 : 6000, // Much longer timeout for Android
+      maximumAge: isAndroid ? 300000 : 120000 // 5 min cache for Android, 2 min for others
+    };
+
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const userLat = position.coords.latitude;
         const userLng = position.coords.longitude;
         
-        setLocation({ lat: userLat, lng: userLng });
+        const locationData = { lat: userLat, lng: userLng };
+        setLocation(locationData);
+        
+        // Enhanced caching for Android reliability
+        localStorage.setItem(cacheKey, JSON.stringify(locationData));
+        localStorage.setItem(cacheTimeKey, Date.now().toString());
+        
+        // Store location name for display consistency
+        try {
+          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLat}&lon=${userLng}&format=json&addressdetails=1`);
+          const data = await response.json();
+          const name = data.display_name?.split(',')[0] || `${userLat.toFixed(2)}, ${userLng.toFixed(2)}`;
+          setLocationName(name);
+          localStorage.setItem('ezras-nashim-compass-location-name', name);
+        } catch (e) {
+          // Location name fetch failed, use coordinates
+          const coordName = `${userLat.toFixed(2)}, ${userLng.toFixed(2)}`;
+          setLocationName(coordName);
+        }
         
         // Calculate bearing to Jerusalem
         const bearing = calculateBearing(userLat, userLng, JERUSALEM_LAT, JERUSALEM_LNG);
@@ -3731,11 +3856,7 @@ function JerusalemCompass() {
         // Fallback: show compass without specific bearing
         setDirection(90); // Default east direction to Jerusalem from most places
       },
-      {
-        enableHighAccuracy: false, // Faster response, less battery drain
-        timeout: 5000,
-        maximumAge: 60000 // Allow cached location for 1 minute
-      }
+      geoOptions
     );
   };
 
@@ -3774,51 +3895,114 @@ function JerusalemCompass() {
     }
   };
 
-  // Initialize device orientation - simplified to use native heading only
+  // Comprehensive Android orientation handling for all versions and browsers
   const initializeOrientation = () => {
     let lastHeading = 0;
     let headingBuffer: number[] = [];
-    const BUFFER_SIZE = 5; // Increased buffer for more stable averaging
-    const UPDATE_THRESHOLD = 3; // Increased threshold to reduce jitter
+    const BUFFER_SIZE = 12; // Larger buffer for Android stability
+    const UPDATE_THRESHOLD = 1.5; // Fine-tuned for responsiveness
     let lastUpdateTime = Date.now();
-    const MIN_UPDATE_INTERVAL = 100; // Minimum 100ms between updates
+    const MIN_UPDATE_INTERVAL = 40; // Optimized for smooth updates
+    
+    // Enhanced Android detection - covers all versions and browsers
+    const userAgent = navigator.userAgent;
+    const isAndroid = /Android/i.test(userAgent);
+    const androidVersion = isAndroid ? parseFloat(userAgent.match(/Android ([0-9.]+)/)?.[1] || '0') : 0;
+    const isOldAndroid = androidVersion > 0 && androidVersion < 5.0; // Android 4.x and below
+    const isModernAndroid = androidVersion >= 5.0;
+    const isChrome = /Chrome/i.test(userAgent);
+    const isFirefox = /Firefox/i.test(userAgent);
+    const isSamsung = /SM-/i.test(userAgent) || /Samsung/i.test(userAgent);
     
     const handleOrientation = (event: DeviceOrientationEvent) => {
       let heading = 0;
+      let isValidHeading = false;
       
-      // iOS devices with webkitCompassHeading (true heading)
+      // iOS devices with webkitCompassHeading (most accurate)
       if ((event as any).webkitCompassHeading !== undefined && (event as any).webkitCompassHeading !== null) {
         heading = (event as any).webkitCompassHeading;
+        isValidHeading = true;
       }
-      // Android and other devices using alpha (magnetic heading)
-      else if (event.alpha !== null) {
-        // Use native alpha value directly without modifications
-        heading = (360 - event.alpha) % 360;
+      // Android and other devices - complex handling for different versions
+      else if (event.alpha !== null && event.alpha !== undefined) {
+        if (isAndroid) {
+          // Android compass handling - completely rewritten for accuracy
+          if (isOldAndroid) {
+            // Android 4.x and older - use direct alpha but invert
+            heading = (360 - event.alpha) % 360;
+          } else if (isModernAndroid) {
+            if (isChrome) {
+              // Modern Android Chrome - alpha is already magnetic north
+              // But we need to account for device orientation
+              if (event.absolute) {
+                // Absolute orientation available - use alpha directly
+                heading = event.alpha;
+              } else {
+                // Relative orientation - invert alpha
+                heading = (360 - event.alpha) % 360;
+              }
+            } else if (isFirefox) {
+              // Firefox on Android - different handling
+              heading = event.alpha || 0;
+            } else if (isSamsung) {
+              // Samsung Internet browser - special handling
+              heading = (360 - event.alpha) % 360;
+            } else {
+              // Other Android browsers - use inverted alpha
+              heading = (360 - event.alpha) % 360;
+            }
+          } else {
+            // Unknown Android version - default handling
+            heading = (360 - event.alpha) % 360;
+          }
+        } else {
+          // Non-Android devices - standard compass calculation
+          heading = (360 - event.alpha) % 360;
+        }
+        
+        // Ensure heading is within 0-360 range
+        heading = ((heading % 360) + 360) % 360;
+        isValidHeading = true;
       } else {
-        setOrientationSupported(false);
+        // Try to get heading from other sources
+        if ((event as any).webkitCompassHeading !== undefined) {
+          heading = (event as any).webkitCompassHeading || 0;
+          isValidHeading = true;
+        } else {
+          setOrientationSupported(false);
+          return;
+        }
+      }
+      
+      // Validate heading is reasonable
+      if (!isValidHeading || isNaN(heading) || heading < 0 || heading >= 360) {
         return;
       }
       
-      // Add to buffer for averaging
+      // Add to buffer for averaging with circular mean calculation
       headingBuffer.push(heading);
       if (headingBuffer.length > BUFFER_SIZE) {
         headingBuffer.shift();
       }
       
       // Wait for buffer to fill before calculating
-      if (headingBuffer.length < BUFFER_SIZE) {
+      if (headingBuffer.length < 3) { // Start calculating earlier
         return;
       }
       
-      // Calculate weighted average (recent readings have more weight)
-      const weights = [0.1, 0.15, 0.2, 0.25, 0.3]; // More weight to recent readings
-      let weightedSum = 0;
-      let totalWeight = 0;
+      // Calculate circular mean for compass headings (handles 359° to 1° transitions)
+      let sinSum = 0;
+      let cosSum = 0;
+      const weights = headingBuffer.map((_, i) => Math.pow(0.9, headingBuffer.length - 1 - i)); // Exponential decay
+      
       headingBuffer.forEach((h, i) => {
-        weightedSum += h * weights[i];
-        totalWeight += weights[i];
+        const radians = (h * Math.PI) / 180;
+        const weight = weights[i];
+        sinSum += Math.sin(radians) * weight;
+        cosSum += Math.cos(radians) * weight;
       });
-      const avgHeading = weightedSum / totalWeight;
+      
+      const avgHeading = ((Math.atan2(sinSum, cosSum) * 180) / Math.PI + 360) % 360;
       
       // Check time constraint
       const now = Date.now();
@@ -3826,9 +4010,14 @@ function JerusalemCompass() {
         return;
       }
       
+      // Calculate circular difference for compass headings
+      let headingDiff = Math.abs(avgHeading - lastHeading);
+      if (headingDiff > 180) {
+        headingDiff = 360 - headingDiff;
+      }
+      
       // Only update if change is significant
-      const headingDiff = Math.abs(avgHeading - lastHeading);
-      if (headingDiff > UPDATE_THRESHOLD && headingDiff < (360 - UPDATE_THRESHOLD)) {
+      if (headingDiff > UPDATE_THRESHOLD) {
         lastHeading = avgHeading;
         lastUpdateTime = now;
         setDeviceOrientation(Math.round(avgHeading));
@@ -3837,13 +4026,47 @@ function JerusalemCompass() {
 
     orientationEventRef.current = handleOrientation;
     
-    // Add event listeners
-    window.addEventListener('deviceorientation', handleOrientation);
+    // Enhanced Android event listener setup for maximum compatibility
+    const setupEventListeners = () => {
+      if (isAndroid) {
+        // Android-specific event handling
+        if (isModernAndroid && 'DeviceOrientationEvent' in window) {
+          // Try absolute orientation first for modern Android
+          if ('ondeviceorientationabsolute' in window) {
+            try {
+              window.addEventListener('deviceorientationabsolute', handleOrientation as any, { passive: true });
+              // Also add regular orientation as fallback
+              window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+            } catch (e) {
+              // Fallback to regular deviceorientation
+              window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+            }
+          } else {
+            // No absolute orientation, use regular
+            window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+          }
+        } else if (isOldAndroid) {
+          // Old Android - simple deviceorientation
+          window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+        } else {
+          // Unknown Android version - try both
+          window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+          if ('ondeviceorientationabsolute' in window) {
+            window.addEventListener('deviceorientationabsolute', handleOrientation as any, { passive: true });
+          }
+        }
+      } else {
+        // Non-Android devices - standard setup
+        window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+        
+        // Also listen for absolute orientation if available
+        if ('ondeviceorientationabsolute' in window) {
+          window.addEventListener('deviceorientationabsolute', handleOrientation as any, { passive: true });
+        }
+      }
+    };
     
-    // Also listen for absolute orientation if available
-    if ('ondeviceorientationabsolute' in window) {
-      window.addEventListener('deviceorientationabsolute', handleOrientation as any);
-    }
+    setupEventListeners();
   };
 
   // Handle device orientation
@@ -3867,11 +4090,16 @@ function JerusalemCompass() {
       setOrientationSupported(false);
     }
 
-    // Cleanup - remove only the single event listener
+    // Enhanced cleanup for Android compatibility
     return () => {
       if (orientationEventRef.current) {
-        window.removeEventListener('deviceorientation', orientationEventRef.current);
-        window.removeEventListener('deviceorientationabsolute', orientationEventRef.current as any);
+        // Remove all possible event listeners that might have been added
+        try {
+          window.removeEventListener('deviceorientation', orientationEventRef.current);
+          window.removeEventListener('deviceorientationabsolute', orientationEventRef.current as any);
+        } catch (e) {
+          // Ignore cleanup errors
+        }
       }
     };
   }, [activeModal, permissionRequested]);
@@ -3980,15 +4208,16 @@ function JerusalemCompass() {
                         const isAligned = angleDiff < 10;
                         
                         return (
-                          <div className="w-8 h-8 rounded-full bg-white shadow-md border-2 border-white flex items-center justify-center relative">
+                          <div className="w-10 h-10 rounded-full bg-white shadow-md border-2 border-white flex items-center justify-center relative">
                             <img 
                               src={isAligned ? bhGreenIcon : bhPinkIcon}
                               alt={isAligned ? "Aligned" : "Not aligned"}
-                              className="w-6 h-6"
+                              className={`w-8 h-8 ${isAligned ? 'animate-pulse' : ''}`}
                               style={{
                                 transform: `rotate(${-direction + deviceOrientation}deg)`,
                                 transition: 'transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)',
-                                willChange: 'transform'
+                                willChange: 'transform',
+                                animationDuration: isAligned ? '1s' : undefined
                               }}
                             />
                           </div>
@@ -4018,7 +4247,6 @@ function JerusalemCompass() {
                         <div className="flex flex-col items-center">
                           <ArrowUp className={`w-4 h-4 ${isAligned ? 'text-sage' : 'text-blue-500'}`} strokeWidth={3} />
                           <div className={`w-1 h-16 rounded-full ${isAligned ? 'bg-sage' : 'bg-blue-500'}`}></div>
-                          <div className={`text-xs platypi-bold mt-1 ${isAligned ? 'text-sage' : 'text-blue-600'}`}>YOU</div>
                         </div>
                       </div>
                     </div>
@@ -4036,7 +4264,7 @@ function JerusalemCompass() {
                   return (
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
                       <Heart 
-                        className={`w-4 h-4 ${isAligned ? 'animate-pulse' : ''}`}
+                        className={`w-8 h-8 ${isAligned ? 'animate-pulse' : ''}`}
                         style={{
                           color: '#eacbd2',
                           fill: '#eacbd2',
@@ -4069,7 +4297,7 @@ function JerusalemCompass() {
                       isAligned ? 'text-black' : 'text-blue-800'
                     }`}>
                       {isAligned
-                        ? '✓ Aligned with the Kotel!' 
+                        ? '✓ Your heart is in the right place' 
                         : 'Turn until the Icon is at the top'
                       }
                     </p>
@@ -4107,16 +4335,32 @@ function JerusalemCompass() {
                 <li>2. Tap "Enable Compass" button above for iOS</li>
               )}
               <li>{typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested ? '3' : '2'}. {orientationSupported ? 'Hold device upright and turn your body' : 'Look at the compass to find the Kotel direction'}</li>
-              <li>{typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested ? '4' : '3'}. {orientationSupported ? 'The "YOU" arrow stays fixed while compass rotates' : 'The pink dot shows the Kotel direction'}</li>
-              <li>{typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested ? '5' : '4'}. {orientationSupported ? 'Align the pink Kotel marker with the "YOU" arrow' : 'Face the direction of the pink dot to pray'}</li>
+              <li>{typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested ? '4' : '3'}. {orientationSupported ? 'The arrow stays fixed while compass rotates' : 'The pink dot shows the Kotel direction'}</li>
+              <li>{typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested ? '5' : '4'}. {orientationSupported ? 'Align the pink Kotel marker with the arrow' : 'Face the direction of the pink dot to pray'}</li>
+              {isAndroid && orientationSupported && (
+                <li className="text-xs text-black/60 mt-2">📱 Android tip: For best accuracy, hold device flat and move in a figure-8 pattern to calibrate</li>
+              )}
             </ol>
             
-            {/* Device-specific tips */}
+            {/* Android-specific tips */}
             <div className="mt-3 pt-3 border-t border-blue-200">
-              <p className="platypi-medium text-xs text-black mb-1">Tips:</p>
+              <p className="platypi-medium text-xs text-black mb-1">
+                {/Android/i.test(navigator.userAgent) ? 'Android Tips:' : 'Tips:'}
+              </p>
               <ul className="platypi-regular text-xs text-black/60 space-y-1">
-                <li>• Keep device away from metal objects</li>
-                <li>• Works best outdoors or near windows</li>
+                {/Android/i.test(navigator.userAgent) ? (
+                  <>
+                    <li>• Hold phone flat like a traditional compass</li>
+                    <li>• Uses device's magnetic compass sensor</li>
+                    <li>• Avoid areas with magnetic interference</li>
+                    <li>• Calibrate by moving in figure-8 motion if needed</li>
+                  </>
+                ) : (
+                  <>
+                    <li>• Keep device away from metal objects</li>
+                    <li>• Works best outdoors or near windows</li>
+                  </>
+                )}
               </ul>
             </div>
           </div>

@@ -103,8 +103,11 @@ export function BirkatHamazonModal() {
           coordinates?.lat,
           coordinates?.lng
         );
+        
+        
         setConditions(tefillaConditions);
       } catch (error) {
+        
         // Could not load Tefilla conditions - Set default conditions
         setConditions({
           isInIsrael: false,
@@ -209,6 +212,7 @@ export function BirkatHamazonModal() {
 
   const renderPrayerText = (prayer: BirkatHamazonPrayer | any) => {
     const text = language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation;
+    
     
     // Apply conditional processing first if conditions are available
     let processedText = text;

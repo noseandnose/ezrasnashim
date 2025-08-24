@@ -3,7 +3,7 @@ import { Calendar, Clock, Heart, BookOpen, HandHeart, Coins, MapPin, ArrowRight,
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
-import { useJewishTimes } from "@/hooks/use-jewish-times";
+import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
 import { useHebrewDate, useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
 import HeartProgress from "@/components/heart-progress";
 import DailyProgress from "@/components/daily-progress";
@@ -24,6 +24,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   const { openModal } = useModalStore();
   const { torahCompleted, tefillaCompleted, tzedakaCompleted } = useDailyCompletionStore();
   const jewishTimesQuery = useJewishTimes();
+  const { coordinates, permissionDenied } = useGeolocation();
   const { data: hebrewDate } = useHebrewDateWithShkia(jewishTimesQuery.data?.shkia);
 
   // Get time-appropriate greeting
@@ -151,7 +152,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <p className="platypi-regular text-xs text-black">{hebrewDate || "Loading..."}</p>
             <button 
               onClick={() => openModal('location', 'home')}
-              className="flex items-center justify-end space-x-1 hover:bg-white/80 px-2 py-1 rounded-xl transition-colors border border-gray-200 bg-white/60"
+              className={`flex items-center justify-end space-x-1 hover:bg-white/80 px-2 py-1 rounded-xl transition-colors ${(permissionDenied || !coordinates) ? 'animate-pulse border-2 border-blush bg-blush/10' : 'border border-gray-200 bg-white/60'}`}
             >
               <MapPin className="text-gray-600" size={10} />
               <p className="platypi-medium text-xs text-gray-700">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>

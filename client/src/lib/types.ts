@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { getLocalDateString } from './dateUtils';
 
 export type ModalType = 
   | 'halacha' 
@@ -132,10 +133,13 @@ export const useModalCompletionStore = create<ModalCompletionState>((set, get) =
       const stored = localStorage.getItem('modalCompletions');
       if (stored) {
         const parsed = JSON.parse(stored);
-        const today = new Date().toISOString().split('T')[0];
+        const today = getLocalDateString();
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        const yesterdayYear = yesterday.getFullYear();
+        const yesterdayMonth = String(yesterday.getMonth() + 1).padStart(2, '0');
+        const yesterdayDay = String(yesterday.getDate()).padStart(2, '0');
+        const yesterdayStr = `${yesterdayYear}-${yesterdayMonth}-${yesterdayDay}`;
         
         // Convert arrays back to Sets, but only keep today and yesterday
         const completedModals: Record<string, Set<string>> = {};
@@ -172,7 +176,7 @@ export const useModalCompletionStore = create<ModalCompletionState>((set, get) =
   return {
     completedModals: loadFromStorage(),
     markModalComplete: (modalId: string) => {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getLocalDateString();
       set(state => {
         const newState = { ...state.completedModals };
         if (!newState[today]) {
@@ -186,7 +190,10 @@ export const useModalCompletionStore = create<ModalCompletionState>((set, get) =
         // Clean up old dates (keep only today and yesterday for transition period)
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        const yesterdayYear = yesterday.getFullYear();
+        const yesterdayMonth = String(yesterday.getMonth() + 1).padStart(2, '0');
+        const yesterdayDay = String(yesterday.getDate()).padStart(2, '0');
+        const yesterdayStr = `${yesterdayYear}-${yesterdayMonth}-${yesterdayDay}`;
         
         for (const date in newState) {
           if (date !== today && date !== yesterdayStr) {
@@ -199,7 +206,7 @@ export const useModalCompletionStore = create<ModalCompletionState>((set, get) =
       });
     },
     isModalComplete: (modalId: string) => {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getLocalDateString();
       const todaysCompletions = get().completedModals[today];
       return todaysCompletions ? todaysCompletions.has(modalId) : false;
     },
@@ -211,7 +218,7 @@ export const useModalCompletionStore = create<ModalCompletionState>((set, get) =
 });
 
 export const useDailyCompletionStore = create<DailyCompletionState>((set, get) => {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateString();
   
   // For testing: reset on every page load/restart
   // For production: comment out the line below and uncomment the localStorage logic
@@ -344,7 +351,7 @@ export interface DonationCompletionState {
 
 export const useDonationCompletionStore = create<DonationCompletionState>((set, get) => {
   // Load from localStorage on initialization
-  const today = new Date().toDateString();
+  const today = getLocalDateString();
   let initialCompleted = new Set<string>();
   
   if (typeof window !== 'undefined') {
@@ -371,7 +378,7 @@ export const useDonationCompletionStore = create<DonationCompletionState>((set, 
       // Save to localStorage
       if (typeof window !== 'undefined') {
         try {
-          const today = new Date().toDateString();
+          const today = getLocalDateString();
           localStorage.setItem('donationCompletion', JSON.stringify({
             date: today,
             completed: Array.from(newCompleted)
@@ -387,7 +394,7 @@ export const useDonationCompletionStore = create<DonationCompletionState>((set, 
     resetDaily: () => {
       if (typeof window !== 'undefined') {
         try {
-          const today = new Date().toDateString();
+          const today = getLocalDateString();
           const stored = localStorage.getItem('donationCompletion');
           
           if (stored) {

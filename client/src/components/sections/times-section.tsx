@@ -1,11 +1,12 @@
-import { Sun, Calendar, Plus, MapPin, Clock, Moon, Sunrise, Sunset, Star, Timer } from "lucide-react";
-import { useJewishTimes, useGeolocation, useLocationStore } from "@/hooks/use-jewish-times";
+import { Sun, Calendar, Plus } from "lucide-react";
+import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
 import { useModalStore } from "@/lib/types";
 
 export default function TimesSection() {
   const { data: times, isLoading } = useJewishTimes();
   const { openModal } = useModalStore();
   const { coordinates, permissionDenied } = useGeolocation();
+  
 
   const getLocationDisplay = () => {
     if (permissionDenied) {

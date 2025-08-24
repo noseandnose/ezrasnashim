@@ -1878,6 +1878,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sessionId
       });
       
+      // Immediately recalculate today's stats to show live updates
+      const today = new Date().toISOString().split('T')[0];
+      await storage.recalculateDailyStats(today);
+      
       res.json(event);
     } catch (error) {
       console.error('Error tracking analytics event:', error);
@@ -2128,6 +2132,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/healthcheck", (req, res) => {
     res.json({ status: "OK" });
   })
+  
+  // Version endpoint for PWA update checking
+  // Use a fixed build timestamp instead of current time to prevent infinite update loops
+  const BUILD_TIMESTAMP = 1756015000000; // Fixed build time: August 24, 2025
+  
+  app.get("/api/version", (req, res) => {
+    const version = {
+      timestamp: BUILD_TIMESTAMP,
+      version: process.env.APP_VERSION || '1.0.1',
+      buildDate: new Date(BUILD_TIMESTAMP).toISOString()
+    };
+    res.json(version);
+  });
 
   // Messages routes
   app.get("/api/messages/:date", async (req, res) => {
