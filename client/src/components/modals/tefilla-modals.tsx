@@ -1169,6 +1169,13 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
     }
   }, [prayer]);
 
+  // Update fullscreen title when prayer loads
+  useEffect(() => {
+    if (prayer && prayer.prayerName && (window as any).updateFullscreenTitle) {
+      (window as any).updateFullscreenTitle(prayer.prayerName);
+    }
+  }, [prayer]);
+
   // Use unique key per prayer for proper individual tracking
   const modalKey = `womens-prayer-${prayer?.id || selectedPrayerId}`;
 
@@ -1260,11 +1267,18 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     setFullscreenContent(prev => ({ ...prev, hasTranslation }));
   };
 
-  // Make function available globally for the fullscreen content component
+  // Function to update fullscreen title
+  const updateFullscreenTitle = (title: string) => {
+    setFullscreenContent(prev => ({ ...prev, title }));
+  };
+
+  // Make functions available globally for the fullscreen content component
   useEffect(() => {
     (window as any).updateFullscreenHasTranslation = updateFullscreenHasTranslation;
+    (window as any).updateFullscreenTitle = updateFullscreenTitle;
     return () => {
       delete (window as any).updateFullscreenHasTranslation;
+      delete (window as any).updateFullscreenTitle;
     };
   }, []);
   const queryClient = useQueryClient();
