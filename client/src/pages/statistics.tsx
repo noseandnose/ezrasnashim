@@ -82,26 +82,11 @@ export default function Statistics() {
 
   // Refresh function for manual refresh
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const handleRefresh = async () => {
+  const handleRefresh = () => {
     setIsRefreshing(true);
     
-    // NUCLEAR REFRESH: Remove all cache entirely and force refetch
-    queryClient.removeQueries({ queryKey: ["/api/analytics/stats/today"] });
-    queryClient.removeQueries({ queryKey: ["/api/analytics/stats/month"] });
-    queryClient.removeQueries({ queryKey: ["/api/analytics/stats/total"] });
-    queryClient.removeQueries({ 
-      predicate: (query) => query.queryKey[0]?.toString().includes('/api/analytics/') 
-    });
-    
-    // Force immediate refetch with no cache
-    await Promise.all([
-      queryClient.refetchQueries({ queryKey: ["/api/analytics/stats/today"] }),
-      queryClient.refetchQueries({ queryKey: ["/api/analytics/stats/month"] }),
-      queryClient.refetchQueries({ queryKey: ["/api/analytics/stats/total"] }),
-    ]);
-    
-    // Short delay to show refresh animation
-    setTimeout(() => setIsRefreshing(false), 1000);
+    // TOTAL CACHE CLEAR: Force page reload to guarantee fresh data
+    window.location.reload();
   };
 
 
