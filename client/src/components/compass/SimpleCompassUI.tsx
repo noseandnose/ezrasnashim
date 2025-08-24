@@ -146,26 +146,27 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
           {/* Center heart - fixed pointing up, aligned with line */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <Heart 
-              className={`w-7 h-7 text-pink-400 fill-current ${
+              className={`w-7 h-7 fill-current ${
                 state.isAligned ? 'animate-pulse' : ''
               }`}
               style={{
+                color: '#EC4899', // pink-500 color
                 animationDuration: state.isAligned ? '1s' : undefined
               }}
             />
           </div>
           
-          {/* Fixed direction line showing "up" - starts closer to center, bolder */}
+          {/* Fixed direction line showing "up" - starts closer to center, bolder, longer */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <div 
-              className={`h-12 w-1.5 origin-bottom ${
+              className={`h-16 w-1.5 origin-bottom ${
                 state.isAligned 
                   ? 'bg-blush animate-pulse' 
                   : 'bg-gray-400'
               }`}
               style={{
                 transformOrigin: 'bottom center',
-                transform: 'translateY(-80%)',
+                transform: 'translateY(-85%)',
                 animationDuration: state.isAligned ? '1.5s' : undefined
               }}
             />
