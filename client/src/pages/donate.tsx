@@ -485,14 +485,21 @@ export default function Donate() {
         // CRITICAL FIX: Also complete the overall daily tzedaka task
         completeTask('tzedaka');
         
-        // CACHE INVALIDATION: Force refresh of all financial data after successful donation
+        // ENHANCED CACHE INVALIDATION: Force refresh ALL donation-related data immediately
         const today = new Date().toISOString().split('T')[0];
-        queryClient.invalidateQueries({ queryKey: ['/api/campaigns/active'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/today'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/month'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/total'] });
-        queryClient.invalidateQueries({ queryKey: [`/api/community/impact/${today}`] });
-        console.log('Invalidated financial data queries to show fresh data');
+        // Campaign data
+        await queryClient.invalidateQueries({ queryKey: ['/api/campaigns/active'] });
+        // Statistics data  
+        await queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/today'] });
+        await queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/month'] });
+        await queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/total'] });
+        // Community impact data
+        await queryClient.invalidateQueries({ queryKey: [`/api/analytics/community-impact`] });
+        await queryClient.invalidateQueries({ queryKey: [`/api/community/impact/${today}`] });
+        
+        // Force immediate refetch of campaign data to show updated progress bar
+        await queryClient.refetchQueries({ queryKey: ['/api/campaigns/active'] });
+        console.log('Invalidated and refetched all donation data for immediate UI update');
         
         toast({
           title: "Donation Complete!",

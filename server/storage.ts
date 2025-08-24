@@ -1550,23 +1550,24 @@ export class DatabaseStorage implements IStorage {
           dateFilter!
         ));
       
-      const totalCampaigns = successfulDonations.length;
+      // FIX: Count all successful donations as "Donations" (renamed from totalCampaigns for clarity)
+      const totalDonations = successfulDonations.length;
       const totalRaised = successfulDonations.reduce((sum, donation) => sum + (donation.amount || 0), 0) / 100;
       
       return {
         totalDaysSponsored,
-        totalCampaigns,
+        totalCampaigns: totalDonations, // Using totalCampaigns field to mean total donations
         totalRaised
       };
     } else {
       // All time - original logic
       const successfulDonations = await donationQuery;
-      const totalCampaigns = successfulDonations.length;
+      const totalDonations = successfulDonations.length;
       const totalRaised = successfulDonations.reduce((sum, donation) => sum + (donation.amount || 0), 0) / 100;
       
       return {
         totalDaysSponsored,
-        totalCampaigns,
+        totalCampaigns: totalDonations, // Using totalCampaigns field to mean total donations
         totalRaised
       };
     }

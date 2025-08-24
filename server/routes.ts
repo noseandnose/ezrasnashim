@@ -1935,6 +1935,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
               sessionId: null // We don't have session context in webhook
             });
 
+            // CRITICAL FIX: Also track as modal_complete so it appears in Feature Usage section
+            await storage.trackEvent({
+              eventType: 'modal_complete',
+              eventData: {
+                modalType: 'tzedaka',
+                buttonType: buttonType,
+                amount: paymentIntent.amount / 100,
+                donationId: donation.id
+              },
+              sessionId: null
+            });
+            console.log('Tracked donation as modal_complete for Feature Usage display');
+
             // Update campaign progress if this is an active_campaign donation
             if (buttonType === 'active_campaign') {
               try {
