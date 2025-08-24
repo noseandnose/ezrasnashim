@@ -28,14 +28,37 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
     error: null
   });
   const [debugMode] = useState(new URLSearchParams(window.location.search).get('debug') === 'compass');
+  const [vibrationInterval, setVibrationInterval] = useState<NodeJS.Timeout | null>(null);
   
   useEffect(() => {
     const unsubscribe = compass.subscribe(setState);
     return () => {
       unsubscribe();
       compass.dispose();
+      if (vibrationInterval) {
+        clearInterval(vibrationInterval);
+      }
     };
-  }, [compass]);
+  }, [compass, vibrationInterval]);
+  
+  // Handle vibration when aligned (68bpm = ~882ms intervals)
+  useEffect(() => {
+    if (state.isAligned && navigator.vibrate) {
+      const interval = setInterval(() => {
+        navigator.vibrate(100); // 100ms vibration pulse
+      }, 882); // 68bpm = 60000ms/68 = ~882ms
+      setVibrationInterval(interval);
+    } else if (vibrationInterval) {
+      clearInterval(vibrationInterval);
+      setVibrationInterval(null);
+    }
+    
+    return () => {
+      if (vibrationInterval) {
+        clearInterval(vibrationInterval);
+      }
+    };
+  }, [state.isAligned, vibrationInterval]);
   
   const deviceInfo = getDeviceInfo();
   
@@ -146,34 +169,36 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
             </div>
           </div>
           
-          {/* Fixed direction line extending from heart toward BH icon - behind heart and BH */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-0">
-            <div 
-              className={`w-1.5 origin-bottom ${
-                state.isAligned 
-                  ? 'bg-blush animate-pulse' 
-                  : 'bg-gray-400'
-              }`}
-              style={{
-                transformOrigin: 'bottom center',
-                height: '80px',
-                transform: 'translateY(-50%)',
-                animationDuration: state.isAligned ? '1.5s' : undefined
-              }}
-            />
-          </div>
-          
-          {/* Center heart - fixed pointing up, aligned with line */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-            <Heart 
-              className={`w-7 h-7 text-blush fill-blush ${
-                state.isAligned ? 'animate-pulse' : ''
-              }`}
-              style={{
-                animationDuration: state.isAligned ? '1s' : undefined
-              }}
-            />
-          </div>
+        </div>
+        
+        {/* Fixed direction line extending from heart toward BH icon - behind everything */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-0">
+          <div 
+            className={`w-1.5 origin-bottom ${
+              state.isAligned 
+                ? 'bg-blush animate-pulse' 
+                : 'bg-gray-400'
+            }`}
+            style={{
+              transformOrigin: 'bottom center',
+              height: '80px',
+              transform: 'translateY(-50%)',
+              animationDuration: state.isAligned ? '1.5s' : undefined
+            }}
+          />
+        </div>
+        
+        {/* Center heart - fixed pointing up, aligned with line */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+          <Heart 
+            className={`w-7 h-7 text-blush fill-blush ${
+              state.isAligned ? 'animate-pulse' : ''
+            }`}
+            style={{
+              animationDuration: state.isAligned ? '1s' : undefined
+            }}
+          />
+        </div>
         </div>
         
         {/* Status and alignment message */}
