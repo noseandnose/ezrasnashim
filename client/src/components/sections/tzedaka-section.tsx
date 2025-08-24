@@ -350,9 +350,16 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
         {/* Put a Coin - Long Button at Top */}
         <button
           onClick={() => handleTzedakaButtonClick('put_a_coin')}
-          className={`w-full rounded-3xl p-4 text-center hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 animate-pulse ${
-            isTzedakaButtonCompleted('put_a_coin') ? 'bg-sage/20' : 'bg-white'
+          className={`w-full rounded-3xl p-4 text-center hover:scale-[1.02] transition-all duration-300 shadow-lg border-2 ${
+            isTzedakaButtonCompleted('put_a_coin') 
+              ? 'bg-sage/20 border-sage/30' 
+              : 'bg-white border-blush/30 shadow-blush/20 animate-pulse'
           }`}
+          style={{
+            boxShadow: isTzedakaButtonCompleted('put_a_coin') 
+              ? undefined 
+              : '0 0 20px rgba(244, 63, 94, 0.15), 0 0 40px rgba(244, 63, 94, 0.1)'
+          }}
         >
           <div className="flex items-center justify-center space-x-4">
             <div className={`p-3 rounded-full ${
@@ -363,7 +370,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             <div className="text-left">
               <h3 className="platypi-bold text-lg text-black mb-1">Put a Coin</h3>
               <p className="platypi-regular text-sm text-black/60">
-                {isTzedakaButtonCompleted('put_a_coin') ? 'Completed' : 'General donation'}
+                {isTzedakaButtonCompleted('put_a_coin') ? 'Completed' : 'Women Causes and Torah'}
               </p>
             </div>
           </div>
