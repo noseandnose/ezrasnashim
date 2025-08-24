@@ -539,6 +539,70 @@ export default function Donate() {
       return;
     }
 
+    // BACKUP: Check for pending donation completion (in case URL redirect fails)
+    const pendingDonation = localStorage.getItem('pending_donation');
+    if (pendingDonation && !isSuccess) {
+      try {
+        const donation = JSON.parse(pendingDonation);
+        const donationAge = Date.now() - new Date(donation.timestamp).getTime();
+        
+        // If donation is less than 5 minutes old, check for completion
+        if (donationAge < 5 * 60 * 1000) {
+          console.log('BACKUP: Checking for completed donation:', donation);
+          
+          // Check backend for completion status
+          if (amount <= 0) { // We're on the donate page without parameters - likely returned from Stripe
+            console.log('BACKUP: Checking backend for donation completion');
+            
+            // Check if donation was completed
+            apiRequest('GET', `/api/donations/check-completion/${donation.sessionId}`)
+              .then((response) => {
+                if (response.data && response.data.completed) {
+                  console.log('BACKUP: Backend confirms donation completion');
+                  
+                  // Clear pending donation and mark complete
+                  localStorage.removeItem('pending_donation');
+                  markTzedakaButtonCompleted(donation.buttonType as TzedakaButtonType);
+                  completeTask('tzedaka');
+                  
+                  // Force cache refresh for all financial data
+                  const today = new Date().toISOString().split('T')[0];
+                  queryClient.invalidateQueries({ queryKey: ['/api/campaigns/active'] });
+                  queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/today'] });
+                  queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/month'] });
+                  queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/total'] });
+                  queryClient.invalidateQueries({ queryKey: [`/api/community/impact/${today}`] });
+                  
+                  // Show success toast
+                  toast({
+                    title: "Donation Complete!",
+                    description: `Your ${donation.buttonType.replace('_', ' ')} action has been recorded.`,
+                  });
+                  
+                  // Navigate back to home
+                  setTimeout(() => {
+                    setLocation('/?scrollToProgress=true');
+                  }, 1000);
+                } else {
+                  console.log('BACKUP: No completion found yet');
+                }
+              })
+              .catch((error) => {
+                console.error('BACKUP: Error checking completion:', error);
+                // Fallback - just clear the pending donation
+                localStorage.removeItem('pending_donation');
+              });
+          }
+        } else {
+          // Clear old pending donations
+          localStorage.removeItem('pending_donation');
+        }
+      } catch (error) {
+        console.error('Error processing pending donation:', error);
+        localStorage.removeItem('pending_donation');
+      }
+    }
+
     if (amount <= 0) {
       setLocation('/');
       return;
@@ -577,6 +641,15 @@ export default function Donate() {
         const stripe = await stripePromise;
         const sessionId = response.data.sessionId;
         console.log('Redirecting to Stripe Checkout with session ID:', sessionId);
+        
+        // Store session info for completion tracking backup
+        localStorage.setItem('pending_donation', JSON.stringify({
+          sessionId: sessionId,
+          buttonType: buttonType,
+          amount: amount,
+          timestamp: new Date().toISOString()
+        }));
+        
         return stripe && stripe.redirectToCheckout({ sessionId: sessionId });
         // console.log('Payment intent response:', response);
         // const data = response.data;

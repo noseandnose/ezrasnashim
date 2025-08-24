@@ -1946,6 +1946,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 console.error('Error updating campaign progress:', campaignError);
               }
             }
+
+            // Update today's analytics stats to show immediate impact
+            const today = new Date().toISOString().split('T')[0];
+            try {
+              await storage.recalculateDailyStats(today);
+              console.log('Recalculated daily stats after donation');
+            } catch (statsError) {
+              console.error('Error recalculating daily stats:', statsError);
+            }
+
+            // Store completion in database for frontend to pick up (backup to URL redirect)
+            try {
+              await storage.trackEvent({
+                eventType: 'tzedaka_button_completion',
+                eventData: {
+                  buttonType: buttonType,
+                  paymentIntentId: paymentIntent.id,
+                  amount: paymentIntent.amount / 100,
+                  timestamp: new Date().toISOString(),
+                  source: 'webhook'
+                },
+                sessionId: null
+              });
+              console.log(`Stored ${buttonType} completion event for frontend pickup`);
+            } catch (completionError) {
+              console.error('Error storing completion event:', completionError);
+            }
           }
           break;
           
@@ -1963,6 +1990,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error processing webhook:', error);
       res.status(500).json({ error: 'Webhook processing failed' });
+    }
+  });
+
+  // Check for recent donation completions (backup endpoint)
+  app.get("/api/donations/check-completion/:sessionId", async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      
+      console.log('Checking completion for session:', sessionId);
+      
+      // Look for completion events in the last 10 minutes
+      const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+      
+      // Check if donation exists and was completed
+      const donation = await storage.getDonationBySessionId(sessionId);
+      
+      if (donation && donation.status === 'succeeded') {
+        console.log('Found completed donation:', donation.id);
+        
+        const buttonType = donation.metadata?.buttonType || donation.type || 'put_a_coin';
+        
+        res.json({
+          completed: true,
+          buttonType: buttonType,
+          amount: donation.amount,
+          timestamp: donation.createdAt
+        });
+      } else {
+        res.json({ completed: false });
+      }
+    } catch (error) {
+      console.error('Error checking donation completion:', error);
+      res.status(500).json({ completed: false, error: 'Failed to check completion' });
     }
   });
 
