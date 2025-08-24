@@ -1,4 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import type { Message } from "@shared/schema";
@@ -41,6 +42,15 @@ export default function MessageModal({ isOpen, onClose, date }: MessageModalProp
               No message available for today.
             </p>
           )}
+        </div>
+        
+        <div className="flex-shrink-0 pt-4 border-t border-warm-gray/10">
+          <Button 
+            onClick={onClose}
+            className="w-full bg-blush hover:bg-blush/90 text-white platypi-medium"
+          >
+            Done
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
