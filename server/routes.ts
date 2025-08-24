@@ -1968,17 +1968,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Donation success callback - marks individual button as complete
   app.post("/api/donations/success", async (req, res) => {
+    console.log('=== DONATIONS SUCCESS ENDPOINT CALLED ===');
+    console.log('Request body:', req.body);
+    
     try {
       const { sessionId } = req.body;
       
       if (!sessionId) {
+        console.log('ERROR: No session ID provided');
         return res.status(400).json({ message: "Session ID required" });
       }
+      
+      console.log('Looking up donation with session ID:', sessionId);
       
       // Get donation by session ID
       const donation = await storage.getDonationBySessionId(sessionId);
       
+      console.log('Donation found:', donation ? 'YES' : 'NO');
+      if (donation) {
+        console.log('Donation details:', {
+          id: donation.id,
+          amount: donation.amount,
+          type: donation.type,
+          metadata: donation.metadata
+        });
+      }
+      
       if (!donation) {
+        console.log('ERROR: Donation not found in database');
         return res.status(404).json({ message: "Donation not found" });
       }
       
@@ -1997,6 +2014,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           source: 'success_callback'
         }
       });
+      
+      console.log('SUCCESS: Donation success processing complete');
+      console.log('Button type processed:', buttonType);
       
       res.json({ 
         success: true, 

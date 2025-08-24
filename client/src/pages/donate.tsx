@@ -465,10 +465,16 @@ export default function Donate() {
 
   // Function to call backend success endpoint
   const handleDonationSuccess = async (sessionId: string, buttonType: string) => {
+    console.log('=== CALLING DONATION SUCCESS ENDPOINT ===');
+    console.log('Session ID:', sessionId);
+    console.log('Button Type:', buttonType);
+    
     try {
       const response = await apiRequest('POST', '/api/donations/success', {
         sessionId: sessionId
       });
+      
+      console.log('Success endpoint response:', response);
       
       if (response.data && response.data.success) {
         // Mark the individual button as complete using the button type
@@ -512,10 +518,20 @@ export default function Donate() {
   useEffect(() => {
     // Check if returning from successful payment
     if (isSuccess) {
+      console.log('SUCCESS DETECTED - Processing donation completion...');
+      console.log('URL Params:', {
+        success: urlParams.get('success'),
+        session_id: urlParams.get('session_id'),
+        payment_intent: urlParams.get('payment_intent'),
+        buttonType: urlParams.get('buttonType'),
+        amount: urlParams.get('amount')
+      });
+      
       setDonationComplete(true);
       
       // Get session ID from URL (passed back from Stripe Checkout)
       const sessionId = urlParams.get('session_id') || urlParams.get('payment_intent') || 'unknown';
+      console.log('Calling success endpoint with sessionId:', sessionId, 'buttonType:', buttonType);
       
       // Call backend success endpoint and mark individual button complete
       handleDonationSuccess(sessionId, buttonType);
@@ -544,7 +560,7 @@ export default function Donate() {
     // console.log('Sponsor name:', sponsorName);
     // console.log('Dedication:', dedication);
 
-    apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/create-session-checkout`, {
+    apiRequest('POST', '/api/create-session-checkout', {
       amount,
       donationType,
       metadata: {
