@@ -143,17 +143,10 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
             </div>
           </div>
           
-          {/* Center heart that rotates with device heading */}
-          <div 
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-            style={{ 
-              transform: `translate(-50%, -50%) rotate(${deviceHeadingRotation}deg)`,
-              transition: state.hasPermission ? 'transform 0.3s ease-out' : 'none',
-              willChange: 'transform'
-            }}
-          >
+          {/* Center heart - fixed pointing up, aligned with line */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <Heart 
-              className={`w-7 h-7 text-blush fill-current ${
+              className={`w-7 h-7 text-pink-400 fill-current ${
                 state.isAligned ? 'animate-pulse' : ''
               }`}
               style={{
@@ -162,10 +155,10 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
             />
           </div>
           
-          {/* Fixed direction line showing "up" - starts closer to center */}
+          {/* Fixed direction line showing "up" - starts closer to center, bolder */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <div 
-              className={`h-12 w-0.5 origin-bottom ${
+              className={`h-12 w-1.5 origin-bottom ${
                 state.isAligned 
                   ? 'bg-blush animate-pulse' 
                   : 'bg-gray-400'
