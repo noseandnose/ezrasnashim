@@ -235,23 +235,48 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateGlobalTehillimProgress(currentPerek: number, language: string, completedBy?: string): Promise<GlobalTehillimProgress> {
-    const [progress] = await db.select().from(globalTehillimProgress).limit(1);
-    if (progress) {
-      // Use the database progress value, not the parameter
-      const currentDbPerek = progress.currentPerek;
+    // CRITICAL FIX: Use atomic database operation to prevent concurrent update issues
+    // When multiple users complete the same perek simultaneously, this ensures 
+    // the progress only advances by 1, not by the number of simultaneous completions
+    
+    return db.transaction(async (tx) => {
+      // Lock the row for update to prevent concurrent modifications
+      const [progress] = await tx.select()
+        .from(globalTehillimProgress)
+        .where(sql`id = (SELECT id FROM global_tehillim_progress LIMIT 1)`)
+        .for('update');
+      
+      if (!progress) {
+        // Initialize progress if it doesn't exist
+        const initialName = await this.getNextNameForAssignment();
+        const [newProgress] = await tx.insert(globalTehillimProgress).values({
+          currentPerek: 1,
+          currentNameId: initialName?.id || null,
+          completedBy: null
+        }).returning();
+        return newProgress;
+      }
+      
+      // ONLY advance if the request matches the current database perek
+      // This prevents multiple simultaneous completions of the same perek from 
+      // causing the chain to jump multiple steps ahead
+      if (currentPerek !== progress.currentPerek) {
+        // Someone else already advanced this perek, return current state without advancing
+        return progress;
+      }
       
       // Get the max ID to know when to reset
-      const [maxRow] = await db
+      const [maxRow] = await tx
         .select({ maxId: sql<number>`MAX(id)` })
         .from(tehillim);
       
       const maxId = maxRow?.maxId || 171; // 171 is the total with Psalm 119 having 22 parts
       
-      // Check if we're completing the entire book (use database value)
-      const isBookComplete = currentDbPerek >= maxId;
+      // Check if we're completing the entire book
+      const isBookComplete = progress.currentPerek >= maxId;
       
-      // Calculate next ID (cycling through all rows) - use database value
-      const nextId = currentDbPerek >= maxId ? 1 : currentDbPerek + 1;
+      // Calculate next ID (cycling through all rows)
+      const nextId = progress.currentPerek >= maxId ? 1 : progress.currentPerek + 1;
       
       // Log book completion event when finishing the last row
       if (isBookComplete) {
@@ -269,18 +294,19 @@ export class DatabaseStorage implements IStorage {
       // Assign a new random name for the next perek
       const nextName = await this.getNextNameForAssignment();
       
-      const [updated] = await db.update(globalTehillimProgress)
+      // Atomically update to the next perek
+      const [updated] = await tx.update(globalTehillimProgress)
         .set({
-          currentPerek: nextId, // Now storing the row ID, not psalm number
+          currentPerek: nextId,
           currentNameId: nextName?.id || null,
           lastUpdated: new Date(),
           completedBy: completedBy || null
         })
         .where(eq(globalTehillimProgress.id, progress.id))
         .returning();
+        
       return updated;
-    }
-    return this.getGlobalTehillimProgress();
+    });
   }
 
   async getProgressWithAssignedName(): Promise<any> {
