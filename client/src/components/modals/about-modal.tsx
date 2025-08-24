@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/lib/types";
+import { LazyImage } from "@/components/ui/lazy-image";
 import justOneChesedImage from '@assets/Second print Photo Signs - Chamal  copy_1753336662272.png';
 
 export default function AboutModal() {
@@ -17,39 +18,55 @@ export default function AboutModal() {
 
         {/* Content Area - expanded white area */}
         <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[65vh] overflow-y-auto">
-          <p className="text-sm text-black leading-relaxed mb-4">
-            Ezras Nashim is a project of{" "}
-            <a 
-              href="https://justonechesed.org/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 underline platypi-medium"
-            >
-              Just One Chesed
-            </a>
-            , created to uplift Jewish women through Torah, tefillah, and tzedaka—woven into everyday life.
-          </p>
-          
-          <p className="text-sm text-black leading-relaxed mb-4">
-            This app is here to be your quiet companion. A soft space to grow, reconnect, and add light to your home and heart—one small moment at a time.
-          </p>
-          
-          <p className="text-sm text-black leading-relaxed mb-4">
-            Our vision is clear and beautiful:<br />
-            To reach one million mitzvos every month.
-          </p>
-          
-          <p className="text-sm text-black leading-relaxed mb-4">
-            Not through pressure or perfection.<br />
-            But through the quiet power of women doing what they do best—<br />
-            bringing Hashem into the world through kindness, prayer, and love.
-          </p>
-          
-          <p className="text-sm text-black leading-relaxed mb-4">
-            Every mitzvah counts.<br />
-            Every moment matters.<br />
-            And together, we can create something truly extraordinary.
-          </p>
+          <div className="text-sm text-black leading-relaxed mb-4">
+            <p className="platypi-semibold mb-3">Ezras Nashim</p>
+            
+            <p className="mb-3">
+              Ezras Nashim is a project of{" "}
+              <a 
+                href="https://justonechesed.org/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 underline platypi-medium"
+              >
+                Just One Chesed
+              </a>
+              .<br />
+              We help Jewish women bring Torah, tefillah, and tzedaka into everyday life.
+            </p>
+            
+            <p className="mb-3">
+              A quiet companion.<br />
+              A soft place to breathe and grow.<br />
+              Simple pure connection.
+            </p>
+            
+            <p className="mb-3">
+              From a compass that points your heart to Yerushalayim,<br />
+              to a minute of daily chizuk,<br />
+              to a recipe that turns a house into Shabbos.<br />
+              One small step. One bright moment.
+            </p>
+            
+            <p className="mb-3">
+              Our mission is simple - one million mitzvas every month.
+            </p>
+            
+            <p className="mb-3">
+              Through the quiet strength of women.<br />
+              Through kindness, prayer, and love.
+            </p>
+            
+            <p className="mb-3">
+              Every mitzvah counts.<br />
+              Every moment matters.<br />
+              Begin with one, and light spreads.
+            </p>
+            
+            <p className="mb-4 platypi-medium">
+              Ezras Nashim. Simple pure connection
+            </p>
+          </div>
           
           <p className="text-sm text-black leading-relaxed mb-4">
             Zmanim and Date Converter are powered by{" "}
@@ -72,7 +89,7 @@ export default function AboutModal() {
               rel="noopener noreferrer"
               className="hover:opacity-80 transition-opacity"
             >
-              <img 
+              <LazyImage 
                 src={justOneChesedImage} 
                 alt="JustOneChesed Logo" 
                 className="max-w-full h-auto rounded-lg cursor-pointer"

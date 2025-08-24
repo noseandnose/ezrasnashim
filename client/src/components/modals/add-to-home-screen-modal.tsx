@@ -9,15 +9,27 @@ interface AddToHomeScreenModalProps {
 
 export default function AddToHomeScreenModal({ isOpen, onClose }: AddToHomeScreenModalProps) {
   const [deviceType, setDeviceType] = useState<'ios' | 'android' | 'desktop'>('desktop');
+  const [iOSBrowser, setIOSBrowser] = useState<'safari' | 'chrome' | 'other'>('safari');
 
   useEffect(() => {
-    // Detect device type
+    // Detect device type and browser
     const userAgent = navigator.userAgent.toLowerCase();
     const isIOS = /iphone|ipad|ipod/.test(userAgent);
     const isAndroid = /android/.test(userAgent);
     
     if (isIOS) {
       setDeviceType('ios');
+      
+      // Detect browser on iOS
+      // Chrome on iOS includes "CriOS" in the user agent
+      // Safari on iOS doesn't have "CriOS" or "FxiOS" (Firefox) in user agent
+      if (userAgent.includes('crios')) {
+        setIOSBrowser('chrome');
+      } else if (userAgent.includes('fxios')) {
+        setIOSBrowser('other');
+      } else {
+        setIOSBrowser('safari');
+      }
     } else if (isAndroid) {
       setDeviceType('android');
     } else {
@@ -34,8 +46,15 @@ export default function AddToHomeScreenModal({ isOpen, onClose }: AddToHomeScree
             <li className="flex items-start space-x-3">
               <span className="flex-shrink-0 w-7 h-7 bg-gradient-feminine text-white rounded-full flex items-center justify-center text-sm font-semibold">1</span>
               <div className="flex items-center space-x-2">
-                <span className="text-warm-gray">Tap the <strong>Share</strong> button</span>
-                <Share className="w-5 h-5 text-blush" />
+                <span className="text-warm-gray">
+                  {iOSBrowser === 'safari' ? (
+                    <>Tap the <strong>Share</strong> button at the bottom of the screen</>
+                  ) : iOSBrowser === 'chrome' ? (
+                    <>Tap the <strong>Share</strong> button at the top right corner of your screen</>
+                  ) : (
+                    <>Tap the <strong>Share</strong> button in your browser</>
+                  )}
+                </span>
               </div>
             </li>
             <li className="flex items-start space-x-3">

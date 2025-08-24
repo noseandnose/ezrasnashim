@@ -103,11 +103,11 @@ export default function TzedakaModals() {
           closeModal();
         }
       }}>
-        <DialogContent aria-describedby="sponsor-day-description">
+        <DialogContent aria-describedby="sponsor-day-description" onOpenAutoFocus={(e) => e.preventDefault()}>
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg platypi-bold text-black">Sponsor a Day</DialogTitle>
           </div>
-          <p className="text-xs text-warm-gray/70 platypi-regular text-center mb-4">Dedicate all mitzvot done on the app for one day - $180</p>
+          <p className="text-xs text-warm-gray/70 platypi-regular text-center mb-4">Dedicate all Mitzvas done on the app for one day - $180</p>
           <div id="sponsor-day-description" className="sr-only">Daily sponsorship and dedication options</div>
           
           <div className="space-y-4">
@@ -125,6 +125,7 @@ export default function TzedakaModals() {
                 value={donorName}
                 onChange={(e) => setDonorName(e.target.value)}
                 className="rounded-xl border-blush/30 focus:border-blush bg-white/80 backdrop-blur-sm"
+                autoFocus={false}
                 required
               />
             </div>
@@ -136,6 +137,7 @@ export default function TzedakaModals() {
                 value={dedicationText}
                 onChange={(e) => setDedicationText(e.target.value)}
                 className="rounded-xl border-blush/30 focus:border-blush bg-white/80 backdrop-blur-sm"
+                autoFocus={false}
                 required
               />
             </div>
@@ -147,6 +149,7 @@ export default function TzedakaModals() {
                 value={sponsorMessage}
                 onChange={(e) => setSponsorMessage(e.target.value)}
                 className="rounded-xl border-blush/30 focus:border-blush bg-white/80 backdrop-blur-sm min-h-[80px]"
+                autoFocus={false}
                 required
               />
             </div>

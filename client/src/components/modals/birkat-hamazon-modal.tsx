@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { X, Plus, Minus } from "lucide-react";
+import { X, Plus, Minus, Expand } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
@@ -10,7 +10,7 @@ import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useLocationStore } from '@/hooks/use-jewish-times';
 import { formatTextContent } from "@/lib/text-formatter";
 import { processTefillaText, getCurrentTefillaConditions, type TefillaConditions } from '@/utils/tefilla-processor';
-import { useEffect, useState as useStateForConditions } from "react";
+import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 
 interface BirkatHamazonPrayer {
   id: number;
@@ -57,13 +57,22 @@ export function BirkatHamazonModal() {
   const [fontSize, setFontSize] = useState(20);
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [selectedPrayer, setSelectedPrayer] = useState<string | null>(null);
-  const [conditions, setConditions] = useStateForConditions<TefillaConditions | null>(null);
-  const [fontsLoaded, setFontsLoaded] = useStateForConditions(false);
+  const [conditions, setConditions] = useState<TefillaConditions | null>(null);
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { trackCompletion } = useAnalytics();
   const { coordinates } = useLocationStore();
+
+  // Fullscreen state
+  const [fullscreenContent, setFullscreenContent] = useState<{
+    isOpen: boolean;
+    title: string;
+    content: React.ReactNode | ((params: { language: 'hebrew' | 'english', fontSize: number }) => React.ReactNode);
+    contentType?: string;
+  }>({ isOpen: false, title: '', content: null });
 
   const isOpen = activeModal === 'after-brochas' || activeModal === 'birkat-hamazon' || activeModal === 'al-hamichiya';
 
@@ -150,8 +159,19 @@ export function BirkatHamazonModal() {
 
   const StandardModalHeader = () => (
     <div className="mb-2 space-y-2">
-      {/* First Row: Language Toggle and Title */}
-      <div className="flex items-center justify-center gap-4">
+      {/* First Row: Fullscreen, Title, and Language Toggle */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => setIsFullscreen(!isFullscreen)}
+          className="w-8 h-8 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+        >
+          <Expand className="w-4 h-4" />
+        </button>
+        
+        <DialogTitle className="text-lg platypi-bold text-black flex-1 text-center">
+          {activeModal === 'al-hamichiya' ? 'Me\'ein Shalosh' : 'Birkat Hamazon'}
+        </DialogTitle>
+        
         <Button
           onClick={() => setLanguage(language === "hebrew" ? "english" : "hebrew")}
           variant="ghost"
@@ -164,10 +184,6 @@ export function BirkatHamazonModal() {
         >
           {language === "hebrew" ? 'עב' : 'EN'}
         </Button>
-        
-        <DialogTitle className="text-lg platypi-bold text-black">
-          {activeModal === 'al-hamichiya' ? 'Me\'ein Shalosh' : 'Birkat Hamazon'}
-        </DialogTitle>
       </div>
       
       {/* Second Row: Font Size Controls */}
@@ -249,7 +265,17 @@ export function BirkatHamazonModal() {
 
           <div className="space-y-3">
             <button
-              onClick={() => openModal('al-hamichiya', 'tefilla')}
+              onClick={() => {
+                // Open Me'ein Shalosh directly in fullscreen
+                setFullscreenContent({
+                  isOpen: true,
+                  title: 'Me\'ein Shalosh',
+                  contentType: 'me-ein-shalosh',
+                  content: ({ language: currentLang, fontSize: currentFontSize }: { language: 'hebrew' | 'english', fontSize: number }) => 
+                    <MeeinShaloshFullscreenContent language={currentLang} fontSize={currentFontSize} />
+                });
+                closeModal(); // Close the After Brochas selection modal
+              }}
               className="w-full bg-white rounded-xl p-4 border border-blush/10 hover:bg-blush/5 transition-colors text-left"
             >
               <h3 className="platypi-medium text-black mb-1">Me'ein Shalosh</h3>
@@ -257,7 +283,17 @@ export function BirkatHamazonModal() {
             </button>
 
             <button
-              onClick={() => openModal('birkat-hamazon', 'tefilla')}
+              onClick={() => {
+                // Open Birkat Hamazon directly in fullscreen
+                setFullscreenContent({
+                  isOpen: true,
+                  title: 'Birkat Hamazon',
+                  contentType: 'birkat-hamazon',
+                  content: ({ language: currentLang, fontSize: currentFontSize }: { language: 'hebrew' | 'english', fontSize: number }) => 
+                    <BirkatHamazonFullscreenContent language={currentLang} fontSize={currentFontSize} />
+                });
+                closeModal(); // Close the After Brochas selection modal
+              }}
               className="w-full bg-white rounded-xl p-4 border border-blush/10 hover:bg-blush/5 transition-colors text-left"
             >
               <h3 className="platypi-medium text-black mb-1">Birkat Hamazon</h3>
@@ -283,11 +319,61 @@ export function BirkatHamazonModal() {
   return (
     <>
       {/* Al Hamichiya Modal */}
-      <Dialog open={activeModal === 'al-hamichiya'} onOpenChange={() => closeModal(true)}>
-        <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
-          <StandardModalHeader />
-          
-          <div className="max-h-[60vh] overflow-y-auto">
+      {isFullscreen ? (
+        <FullscreenModal
+          isOpen={activeModal === 'al-hamichiya'}
+          onClose={() => {
+            setIsFullscreen(false);
+            closeModal(true);
+          }}
+          title="Me'ein Shalosh"
+          showFontControls={true}
+          fontSize={fontSize}
+          onFontSizeChange={(size) => setFontSize(size)}
+          showLanguageControls={true}
+          language={language}
+          onLanguageChange={setLanguage}
+        >
+          <div className="space-y-4">
+            
+            {isAfterBrochasLoading ? (
+              <div className="flex justify-center py-8">
+                <span className="text-sm text-gray-500">Loading prayer...</span>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {afterBrochasPrayers?.filter(p => p.prayerName === "Me'ein Shalosh").map((prayer, index) => (
+                  <div key={index} className="bg-white rounded-2xl p-4 border border-blush/10">
+                    {renderPrayerText(prayer as any)}
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            <KorenThankYou />
+            
+            <div className="heart-explosion-container">
+              <Button 
+                onClick={isModalComplete('al-hamichiya') ? undefined : () => handleComplete('al-hamichiya')}
+                disabled={isModalComplete('al-hamichiya')}
+                className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
+                  isModalComplete('al-hamichiya') 
+                    ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                    : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                }`}
+              >
+                {isModalComplete('al-hamichiya') ? 'Completed Today' : 'Complete'}
+              </Button>
+              <HeartExplosion trigger={showHeartExplosion} />
+            </div>
+          </div>
+        </FullscreenModal>
+      ) : (
+        <Dialog open={activeModal === 'al-hamichiya'} onOpenChange={() => closeModal(true)}>
+          <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
+            <StandardModalHeader />
+            
+            <div className="max-h-[60vh] overflow-y-auto">
             {isAfterBrochasLoading ? (
               <div className="flex justify-center py-8">
                 <span className="text-sm text-gray-500">Loading prayer...</span>
@@ -321,13 +407,26 @@ export function BirkatHamazonModal() {
           </div>
         </DialogContent>
       </Dialog>
+      )}
 
       {/* Birkat Hamazon Modal */}
-      <Dialog open={activeModal === 'birkat-hamazon'} onOpenChange={() => closeModal(true)}>
-        <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
-          <StandardModalHeader />
-          
-          <div className="max-h-[60vh] overflow-y-auto">
+      {isFullscreen ? (
+        <FullscreenModal
+          isOpen={activeModal === 'birkat-hamazon'}
+          onClose={() => {
+            setIsFullscreen(false);
+            closeModal(true);
+          }}
+          title="Birkat Hamazon"
+          showFontControls={true}
+          fontSize={fontSize}
+          onFontSizeChange={(size) => setFontSize(size)}
+          showLanguageControls={true}
+          language={language}
+          onLanguageChange={setLanguage}
+        >
+          <div className="space-y-4">
+            
             {isLoading ? (
               <div className="flex justify-center py-8">
                 <span className="text-sm text-gray-500">Loading prayers...</span>
@@ -341,7 +440,45 @@ export function BirkatHamazonModal() {
                 ))}
               </div>
             )}
+            
+            <KorenThankYou />
+            
+            <div className="heart-explosion-container">
+              <Button 
+                onClick={isModalComplete('birkat-hamazon') ? undefined : () => handleComplete('birkat-hamazon')}
+                disabled={isModalComplete('birkat-hamazon')}
+                className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
+                  isModalComplete('birkat-hamazon') 
+                    ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                    : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                }`}
+              >
+                {isModalComplete('birkat-hamazon') ? 'Completed Today' : 'Complete'}
+              </Button>
+              <HeartExplosion trigger={showHeartExplosion} />
+            </div>
           </div>
+        </FullscreenModal>
+      ) : (
+        <Dialog open={activeModal === 'birkat-hamazon'} onOpenChange={() => closeModal(true)}>
+          <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
+            <StandardModalHeader />
+            
+            <div className="max-h-[60vh] overflow-y-auto">
+              {isLoading ? (
+                <div className="flex justify-center py-8">
+                  <span className="text-sm text-gray-500">Loading prayers...</span>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {prayers?.map((prayer) => (
+                    <div key={prayer.id} className="bg-white rounded-2xl p-4 border border-blush/10">
+                      {renderPrayerText(prayer)}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
           <KorenThankYou />
 
@@ -361,6 +498,238 @@ export function BirkatHamazonModal() {
           </div>
         </DialogContent>
       </Dialog>
+      )}
+    
+    {/* Fullscreen Modal for Direct Access */}
+    {fullscreenContent.isOpen && (
+      <FullscreenModal
+        isOpen={true}
+        onClose={() => setFullscreenContent({ isOpen: false, title: '', content: null })}
+        title={fullscreenContent.title}
+        showFontControls={true}
+        fontSize={fontSize}
+        onFontSizeChange={setFontSize}
+        showLanguageControls={true}
+        language={language}
+        onLanguageChange={setLanguage}
+      >
+        {typeof fullscreenContent.content === 'function' 
+          ? fullscreenContent.content({ language, fontSize })
+          : fullscreenContent.content
+        }
+      </FullscreenModal>
+    )}
     </>
+  );
+}
+
+// Fullscreen content components
+export function MeeinShaloshFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  const { data: afterBrochasPrayers = [], isLoading } = useQuery<{prayerName: string; hebrewText: string; englishTranslation: string}[]>({
+    queryKey: ["/api/after-brochas/prayers"],
+  });
+
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+  const { coordinates } = useLocationStore();
+  const [conditions, setConditions] = useState<TefillaConditions | null>(null);
+
+  // Load conditions for processing
+  useEffect(() => {
+    const loadConditions = async () => {
+      try {
+        const tefillaConditions = await getCurrentTefillaConditions(coordinates?.lat, coordinates?.lng);
+        setConditions(tefillaConditions);
+      } catch (error) {
+        setConditions({
+          isInIsrael: false,
+          isRoshChodesh: false,
+          isFastDay: false,
+          isAseretYemeiTeshuva: false,
+          isSukkot: false,
+          isPesach: false,
+          isRoshChodeshSpecial: false
+        });
+      }
+    };
+    loadConditions();
+  }, [coordinates]);
+
+  const renderPrayerText = (prayer: any) => {
+    const text = language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation;
+    let processedText = text;
+    
+    if (conditions && text) {
+      processedText = processTefillaText(text, conditions);
+    }
+    
+    const formattedText = formatTextContent(processedText);
+    
+    if (language === "hebrew") {
+      return (
+        <div 
+          className="vc-koren-hebrew leading-relaxed"
+          style={{ fontSize: `${fontSize + 1}px` }}
+          dangerouslySetInnerHTML={{ __html: formattedText.replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
+        />
+      );
+    }
+    
+    return (
+      <div 
+        className="koren-siddur-english leading-relaxed text-left"
+        style={{ fontSize: `${fontSize}px` }}
+        dangerouslySetInnerHTML={{ __html: formattedText }}
+      />
+    );
+  };
+
+  const handleComplete = () => {
+    trackModalComplete('al-hamichiya');
+    markModalComplete('al-hamichiya');
+    completeTask('tefilla');
+    // Close fullscreen and navigate home
+    const event = new CustomEvent('closeFullscreen');
+    window.dispatchEvent(event);
+    // Small delay to ensure fullscreen closes, then navigate to home
+    setTimeout(() => {
+      window.location.hash = '#/?section=home&scrollToProgress=true';
+    }, 100);
+  };
+
+  if (isLoading) return <div className="text-center py-8">Loading prayer...</div>;
+
+  return (
+    <div className="space-y-6">
+      {afterBrochasPrayers?.filter(p => p.prayerName === "Me'ein Shalosh").map((prayer, index) => (
+        <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
+          {renderPrayerText(prayer)}
+        </div>
+      ))}
+      
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+        </span>
+      </div>
+
+      <Button
+        onClick={isModalComplete('al-hamichiya') ? undefined : handleComplete}
+        disabled={isModalComplete('al-hamichiya')}
+        className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
+          isModalComplete('al-hamichiya') 
+            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+        }`}
+      >
+        {isModalComplete('al-hamichiya') ? 'Completed Today' : 'Complete'}
+      </Button>
+    </div>
+  );
+}
+
+export function BirkatHamazonFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  const { data: prayers = [], isLoading } = useQuery<BirkatHamazonPrayer[]>({
+    queryKey: ["/api/birkat-hamazon/prayers"],
+  });
+
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+  const { coordinates } = useLocationStore();
+  const [conditions, setConditions] = useState<TefillaConditions | null>(null);
+
+  // Load conditions for processing
+  useEffect(() => {
+    const loadConditions = async () => {
+      try {
+        const tefillaConditions = await getCurrentTefillaConditions(coordinates?.lat, coordinates?.lng);
+        setConditions(tefillaConditions);
+      } catch (error) {
+        setConditions({
+          isInIsrael: false,
+          isRoshChodesh: false,
+          isFastDay: false,
+          isAseretYemeiTeshuva: false,
+          isSukkot: false,
+          isPesach: false,
+          isRoshChodeshSpecial: false
+        });
+      }
+    };
+    loadConditions();
+  }, [coordinates]);
+
+  const renderPrayerText = (prayer: BirkatHamazonPrayer) => {
+    const text = language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation;
+    let processedText = text;
+    
+    if (conditions && text) {
+      processedText = processTefillaText(text, conditions);
+    }
+    
+    const formattedText = formatTextContent(processedText);
+    
+    if (language === "hebrew") {
+      return (
+        <div 
+          className="vc-koren-hebrew leading-relaxed"
+          style={{ fontSize: `${fontSize + 1}px` }}
+          dangerouslySetInnerHTML={{ __html: formattedText.replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
+        />
+      );
+    }
+    
+    return (
+      <div 
+        className="koren-siddur-english leading-relaxed text-left"
+        style={{ fontSize: `${fontSize}px` }}
+        dangerouslySetInnerHTML={{ __html: formattedText }}
+      />
+    );
+  };
+
+  const handleComplete = () => {
+    trackModalComplete('birkat-hamazon');
+    markModalComplete('birkat-hamazon');
+    completeTask('tefilla');
+    // Close fullscreen and navigate home
+    const event = new CustomEvent('closeFullscreen');
+    window.dispatchEvent(event);
+    // Small delay to ensure fullscreen closes, then navigate to home
+    setTimeout(() => {
+      window.location.hash = '#/?section=home&scrollToProgress=true';
+    }, 100);
+  };
+
+  if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
+
+  return (
+    <div className="space-y-6">
+      {prayers?.map((prayer) => (
+        <div key={prayer.id} className="bg-white rounded-2xl p-6 border border-blush/10">
+          {renderPrayerText(prayer)}
+        </div>
+      ))}
+      
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+        </span>
+      </div>
+
+      <Button
+        onClick={isModalComplete('birkat-hamazon') ? undefined : handleComplete}
+        disabled={isModalComplete('birkat-hamazon')}
+        className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
+          isModalComplete('birkat-hamazon') 
+            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+        }`}
+      >
+        {isModalComplete('birkat-hamazon') ? 'Completed Today' : 'Complete'}
+      </Button>
+    </div>
   );
 }

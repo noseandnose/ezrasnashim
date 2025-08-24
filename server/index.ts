@@ -36,9 +36,20 @@ app.use((req, res, next) => {
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
   }
   
-  // API responses get short cache
+  // API responses get appropriate cache based on endpoint
   if (req.url.startsWith('/api/')) {
-    res.setHeader('Cache-Control', 'public, max-age=300'); // 5 minutes
+    // Long cache for content that rarely changes
+    if (req.url.includes('/torah/') || req.url.includes('/tefilla/') || req.url.includes('/pirkei-avot/')) {
+      res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour
+    } 
+    // Short cache for frequently changing data
+    else if (req.url.includes('/tehillim/progress') || req.url.includes('/current-name')) {
+      res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+    }
+    // Default moderate cache for other endpoints
+    else {
+      res.setHeader('Cache-Control', 'public, max-age=300'); // 5 minutes
+    }
   }
   
   next();

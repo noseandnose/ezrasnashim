@@ -90,41 +90,15 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
       const error = (confirmResult as any)?.error;
       const paymentIntent = (confirmResult as any)?.paymentIntent;
       
-      console.log('=== FULL PAYMENT CONFIRMATION RESULT ===');
-      console.log('Raw confirmResult object:', confirmResult);
-      console.log('Error object:', error);
-      console.log('PaymentIntent object:', paymentIntent);
-      console.log('Error exists:', !!error);
-      console.log('PaymentIntent exists:', !!paymentIntent);
-      
-      if (error) {
-        console.log('=== ERROR DETAILS ===');
-        console.log('Error type:', error.type);
-        console.log('Error code:', error.code);
-        console.log('Error message:', error.message);
-        console.log('Decline code:', (error as any).decline_code);
-        console.log('Payment Intent in error:', (error as any).payment_intent);
-        console.log('Full error object keys:', Object.keys(error));
-      }
-      
+
       if (paymentIntent) {
-        console.log('=== PAYMENT INTENT DETAILS ===');
-        console.log('Payment Intent ID:', paymentIntent.id);
-        console.log('Payment Intent status:', paymentIntent.status);
-        console.log('Payment Intent amount:', paymentIntent.amount);
-        console.log('Payment method:', paymentIntent.payment_method);
-        console.log('Client secret exists:', !!paymentIntent.client_secret);
-        console.log('Full PaymentIntent keys:', Object.keys(paymentIntent));
-      }
-      console.log('Raw Stripe response - error exists:', !!error);
-      console.log('Raw Stripe response - paymentIntent exists:', !!paymentIntent);
-      if (paymentIntent) {
-        console.log('PaymentIntent details:', {
+        // Payment details available if needed for debugging
+        const paymentDetails = {
           status: paymentIntent.status,
           amount: paymentIntent.amount,
           created: paymentIntent.created,
           payment_method_id: paymentIntent.payment_method
-        });
+        };
       }
 
       if (error) {
@@ -172,14 +146,13 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         }
       } else if (!error && (!paymentIntent || paymentIntent?.status === 'requires_payment_method')) {
         // This is a normal state when user hasn't entered payment details yet
-        console.log('Payment requires method - user needs to complete form');
+        // Payment requires method - user needs to complete form
         // Don't show error, just let user continue with form
         setIsProcessing(false);
         return;
       } else if (paymentIntent && ['succeeded', 'processing', 'requires_capture', 'requires_confirmation'].includes(paymentIntent.status)) {
         // Handle all successful/processing payment statuses (Apple Pay, Google Pay, card variations)
-        console.log('Payment successful with status:', paymentIntent.status);
-        console.log('Payment method type detected:', paymentIntent.payment_method);
+        // Payment successful
         
         // Call completion handler for sponsor day donations
         if (donationType === 'Sponsor a Day of Ezras Nashim' && sponsorName) {
@@ -189,7 +162,7 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
               sponsorName,
               dedication: dedication || null
             });
-            console.log('Sponsor record created successfully');
+            // Sponsor record created successfully
           } catch (error) {
             console.error('Failed to create sponsor record:', error);
           }
@@ -215,7 +188,7 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         apiRequest("POST", "/api/donations/update-status", {
           paymentIntentId: paymentIntent.id,
           status: 'succeeded'
-        }).catch(err => console.log('Could not update donation status:', err));
+        }).catch(err => console.error('Could not update donation status:', err));
         
         const successMessage = paymentIntent.status === 'processing' 
           ? "Your donation is being processed and will be confirmed shortly."
@@ -245,14 +218,13 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         onSuccess();
       } else if (paymentIntent && paymentIntent.status === 'requires_action') {
         // Handle payments that require additional authentication (3D Secure, etc.)
-        console.log('Payment requires additional action');
+
         toast({
           title: "Additional Authentication Required",
           description: "Please complete the authentication process to finalize your payment.",
         });
       } else if (paymentIntent) {
-        console.warn('Unexpected payment intent status:', paymentIntent.status);
-        console.log('Full payment intent object:', paymentIntent);
+
         
         // Check if this might be a successful payment with an unexpected status
         if (paymentIntent.status === 'canceled') {
@@ -263,11 +235,11 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
           });
         } else {
           // For any other status, be more optimistic about Apple Pay/Google Pay
-          console.log('Unexpected payment status, checking if Apple Pay succeeded:', paymentIntent.status);
+
           
           // If payment method exists and amount matches, likely successful
           if (paymentIntent.payment_method && paymentIntent.amount) {
-            console.log('Payment method and amount exist, treating as successful');
+
             
             // Complete tzedaka task optimistically
             completeTask('tzedaka');
@@ -289,10 +261,10 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         }
       } else {
         // This shouldn't happen but handle it gracefully
-        console.log('Unexpected payment state:', { error, paymentIntent });
+
         if (!error && !paymentIntent) {
           // User may have cancelled or form needs input
-          console.log('Payment form needs completion');
+
           setIsProcessing(false);
           return;
         }
@@ -304,18 +276,6 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
         });
       }
     } catch (paymentError) {
-      console.error('=== PAYMENT PROCESSING ERROR ===');
-      console.error('Error caught in catch block:', paymentError);
-      console.error('Error type:', typeof paymentError);
-      console.error('Error constructor:', (paymentError as any)?.constructor?.name);
-      console.error('Error details:', {
-        name: (paymentError as any)?.name,
-        message: (paymentError as any)?.message,
-        code: (paymentError as any)?.code,
-        type: (paymentError as any)?.type,
-        stack: (paymentError as any)?.stack
-      });
-      
       // Extract error message
       const errorMessage = (paymentError as any)?.message || 
                           (paymentError as any)?.error?.message ||
@@ -407,44 +367,28 @@ const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess
           }
         }}
         onReady={() => {
-          console.log('=== PAYMENT ELEMENT READY ===');
-          console.log('User Agent:', navigator.userAgent);
-          console.log('Protocol:', window.location.protocol);
-          console.log('Hostname:', window.location.hostname);
-          console.log('Full URL:', window.location.href);
+          // Payment element is ready
           
           // Check available payment methods
           if ('ApplePaySession' in window) {
-            console.log('✅ ApplePaySession is available in browser');
             try {
               const canMakePayments = window.ApplePaySession?.canMakePayments();
-              console.log('Device can make Apple Pay payments:', canMakePayments);
               
               // Test domain verification
               fetch('/.well-known/apple-developer-merchantid-domain-association')
                 .then(response => {
-                  console.log('Apple Pay domain verification response:', response.status, response.ok);
                   return response.text();
                 })
                 .then(content => {
-                  console.log('Domain verification content length:', content.length);
-                  console.log('Domain verification content preview:', content.substring(0, 50) + '...');
+                  // Domain verification successful
                 })
                 .catch(error => {
-                  console.error('❌ Apple Pay domain verification failed:', error);
+                  console.error('Apple Pay domain verification failed:', error);
                 });
             } catch (e) {
               console.error('Error checking Apple Pay availability:', e);
             }
-          } else {
-            console.log('❌ ApplePaySession not available in this browser');
           }
-          
-          console.log('=== STRIPE PUBLIC KEY INFO ===');
-          const publicKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
-          console.log('Public key exists:', !!publicKey);
-          console.log('Public key format:', publicKey?.substring(0, 10) + '...');
-          console.log('Is live key:', publicKey?.includes('pk_live'));
         }}
       />
 
@@ -497,6 +441,11 @@ export default function Donate() {
       return;
     }
 
+    // Use ref to ensure payment intent is only created once
+    if (paymentIntentCreatedRef.current || clientSecret) {
+      // Payment intent already created or in progress, skipping
+      return;
+    }
     // // Use ref to ensure payment intent is only created once
     // if (paymentIntentCreatedRef.current || clientSecret) {
     //   console.log('Payment intent already created or in progress, skipping...');
@@ -507,6 +456,7 @@ export default function Donate() {
     // paymentIntentCreatedRef.current = true;
 
     // Create PaymentIntent when component loads
+    apiRequest("POST", "/api/create-payment-intent", {
     // console.log('=== PAYMENT INTENT CREATION (SINGLE INSTANCE) ===');
     // console.log('Amount:', amount);
     // console.log('Donation type:', donationType);

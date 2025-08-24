@@ -223,7 +223,7 @@ export class DatabaseStorage implements IStorage {
     const [progress] = await db.select().from(globalTehillimProgress).limit(1);
     if (!progress) {
       // Assign a random name for the initial perek
-      const initialName = await this.getRandomNameForInitialAssignment();
+      const initialName = await this.getNextNameForAssignment();
       const [newProgress] = await db.insert(globalTehillimProgress).values({
         currentPerek: 1,
         currentNameId: initialName?.id || null,
@@ -267,7 +267,7 @@ export class DatabaseStorage implements IStorage {
       }
       
       // Assign a new random name for the next perek
-      const nextName = await this.getRandomNameForInitialAssignment();
+      const nextName = await this.getNextNameForAssignment();
       
       const [updated] = await db.update(globalTehillimProgress)
         .set({
@@ -289,7 +289,7 @@ export class DatabaseStorage implements IStorage {
     
     if (!progress) {
       // Initialize progress if it doesn't exist
-      const initialName = await this.getRandomNameForInitialAssignment();
+      const initialName = await this.getNextNameForAssignment();
       const [newProgress] = await db.insert(globalTehillimProgress).values({
         currentPerek: 1,
         currentNameId: initialName?.id || null,
@@ -313,7 +313,7 @@ export class DatabaseStorage implements IStorage {
     
     // If no assigned name, assign one now
     if (!assignedName) {
-      const newName = await this.getRandomNameForInitialAssignment();
+      const newName = await this.getNextNameForAssignment();
       if (newName && progress.id) {
         await db.update(globalTehillimProgress)
           .set({ currentNameId: newName.id })
@@ -340,7 +340,7 @@ export class DatabaseStorage implements IStorage {
     }
     
     // If no assigned name, assign one now
-    const newName = await this.getRandomNameForInitialAssignment();
+    const newName = await this.getNextNameForAssignment();
     if (newName && progress.id) {
       // Update the progress with this name
       await db.update(globalTehillimProgress)
@@ -352,14 +352,35 @@ export class DatabaseStorage implements IStorage {
     return undefined;
   }
 
-  async getRandomNameForInitialAssignment(): Promise<TehillimName | undefined> {
+  async getNextNameForAssignment(): Promise<TehillimName | undefined> {
     // Don't cleanup here - avoid redundant cleanup operations
     const now = new Date();
-    const activeNames = await db.select().from(tehillimNames).where(gt(tehillimNames.expiresAt, now));
+    const activeNames = await db.select()
+      .from(tehillimNames)
+      .where(gt(tehillimNames.expiresAt, now))
+      .orderBy(tehillimNames.id); // Order by ID to ensure consistent ordering
+    
     if (activeNames.length === 0) return undefined;
     
-    const randomIndex = Math.floor(Math.random() * activeNames.length);
-    return activeNames[randomIndex];
+    // Get the current progress to find which name was last used
+    const [progress] = await db.select().from(globalTehillimProgress).limit(1);
+    
+    if (!progress || !progress.currentNameId) {
+      // No previous name, return the first one
+      return activeNames[0];
+    }
+    
+    // Find the index of the current name
+    const currentIndex = activeNames.findIndex(name => name.id === progress.currentNameId);
+    
+    if (currentIndex === -1) {
+      // Current name not found (maybe expired), return the first one
+      return activeNames[0];
+    }
+    
+    // Return the next name in the list, cycling back to the beginning if needed
+    const nextIndex = (currentIndex + 1) % activeNames.length;
+    return activeNames[nextIndex];
   }
 
 
@@ -1128,7 +1149,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Efficient session tracking - only record unique sessions once per day
-  async recordActiveSession(sessionId: string): Promise<void> {
+  async recordActiveSession(_sessionId: string): Promise<void> {
     const today = formatDate(new Date());
     
     // Update daily stats to include this unique session
@@ -1268,7 +1289,7 @@ export class DatabaseStorage implements IStorage {
   // Helper method to calculate total acts
   private calculateTotalActs(modalCompletions: Record<string, number>, tehillimCompleted: number): number {
     const torahActs = ['torah', 'chizuk', 'emuna', 'halacha', 'featured-content'];
-    const tefillaActs = ['tefilla', 'morning-brochas', 'mincha', 'maariv', 'nishmas', 'birkat-hamazon', 'tehillim-text', 'special-tehillim'];
+    const tefillaActs = ['tefilla', 'morning-brochas', 'mincha', 'maariv', 'nishmas', 'birkat-hamazon', 'special-tehillim', 'individual-tehillim'];
     const tzedakaActs = ['tzedaka', 'donate'];
     
     let totalActs = 0;

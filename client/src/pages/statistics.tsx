@@ -1,11 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
-import { BarChart3, Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins, DollarSign, Trophy } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins, DollarSign, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
-import { useState } from "react";
-import BottomNavigation from "@/components/bottom-navigation";
+import { useState, useEffect } from "react";
 import type { Section } from "@/pages/home";
+import BottomNavigation from "@/components/bottom-navigation";
 
 interface DailyStats {
   date: string;
@@ -33,23 +32,47 @@ type TimePeriod = 'today' | 'month' | 'alltime';
 export default function Statistics() {
   const [, setLocation] = useLocation();
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('today');
+  const queryClient = useQueryClient();
+  
+  // Force refresh all stats when component mounts
+  useEffect(() => {
+    // Force invalidate and refetch all queries when page loads
+    queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/today"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/month"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/total"] });
+  }, []); // Empty dependency array = runs on every mount
 
   // Fetch today's stats
   const { data: todayStats, isLoading: todayLoading } = useQuery<DailyStats>({
     queryKey: ["/api/analytics/stats/today"],
-    refetchInterval: 30000, // Refresh every 30 seconds
+    staleTime: 0, // Always consider data stale for live updates
+    gcTime: 0, // Don't cache data (TanStack Query v5)
+    refetchInterval: 10000, // Refresh every 10 seconds for faster updates
+    refetchOnMount: 'always', // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gets focus
+    refetchIntervalInBackground: true, // Keep refetching even when tab not focused
   });
 
   // Fetch monthly stats
   const { data: monthlyStats, isLoading: monthlyLoading } = useQuery<PeriodStats>({
     queryKey: ["/api/analytics/stats/month"],
-    refetchInterval: 60000, // Refresh every minute
+    staleTime: 0, // Always consider data stale for live updates
+    gcTime: 0, // Don't cache data (TanStack Query v5)
+    refetchInterval: 15000, // Refresh every 15 seconds
+    refetchOnMount: 'always', // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gets focus
+    refetchIntervalInBackground: true, // Keep refetching even when tab not focused
   });
 
   // Fetch total stats
   const { data: totalStats, isLoading: totalLoading } = useQuery<PeriodStats>({
     queryKey: ["/api/analytics/stats/total"],
-    refetchInterval: 60000, // Refresh every minute
+    staleTime: 0, // Always consider data stale for live updates
+    gcTime: 0, // Don't cache data (TanStack Query v5)
+    refetchInterval: 15000, // Refresh every 15 seconds
+    refetchOnMount: 'always', // Always refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gets focus
+    refetchIntervalInBackground: true, // Keep refetching even when tab not focused
   });
 
   // Get current data based on selected period
@@ -66,7 +89,8 @@ export default function Statistics() {
     }
   };
 
-  const { data: currentData, isLoading: currentLoading } = getCurrentData();
+  const currentDataResult = getCurrentData();
+  const { data: currentData, isLoading: currentLoading } = currentDataResult;
 
 
 
@@ -228,88 +252,88 @@ export default function Statistics() {
         </div>
       </header>
       
-      {/* Time Period Selector - Connected to Top */}
-      <div className="bg-gradient-soft -mt-3 rounded-b-3xl px-4 pt-6 pb-6 border-0 shadow-none flex-shrink-0">
-        <div className="flex bg-white/20 rounded-xl p-1 mb-4">
-          <Button
-            onClick={() => setSelectedPeriod('today')}
-            variant={selectedPeriod === 'today' ? 'default' : 'ghost'}
-            className={`flex-1 rounded-lg text-sm h-10 ${
-              selectedPeriod === 'today' 
-                ? 'bg-white text-black shadow-sm' 
-                : 'text-black/70 hover:text-black hover:bg-white/10'
-            }`}
-          >
-            Today
-          </Button>
-          <Button
-            onClick={() => setSelectedPeriod('month')}
-            variant={selectedPeriod === 'month' ? 'default' : 'ghost'}
-            className={`flex-1 rounded-lg text-sm h-10 ${
-              selectedPeriod === 'month' 
-                ? 'bg-white text-black shadow-sm' 
-                : 'text-black/70 hover:text-black hover:bg-white/10'
-            }`}
-          >
-            This Month
-          </Button>
-          <Button
-            onClick={() => setSelectedPeriod('alltime')}
-            variant={selectedPeriod === 'alltime' ? 'default' : 'ghost'}
-            className={`flex-1 rounded-lg text-sm h-10 ${
-              selectedPeriod === 'alltime' 
-                ? 'bg-white text-black shadow-sm' 
-                : 'text-black/70 hover:text-black hover:bg-white/10'
-            }`}
-          >
-            All Time
-          </Button>
+      <div className="flex-1 overflow-y-auto overflow-x-hidden pb-24">
+        {/* Time Period Selector */}
+        <div className="bg-gradient-soft -mt-3 rounded-b-3xl px-4 pt-6 pb-6 border-0 shadow-none">
+          <div className="flex bg-white/20 rounded-xl p-1 mb-4">
+            <Button
+              onClick={() => setSelectedPeriod('today')}
+              variant={selectedPeriod === 'today' ? 'default' : 'ghost'}
+              className={`flex-1 rounded-lg text-sm h-10 ${
+                selectedPeriod === 'today' 
+                  ? 'bg-white text-black shadow-sm' 
+                  : 'text-black/70 hover:text-black hover:bg-white/10'
+              }`}
+            >
+              Today
+            </Button>
+            <Button
+              onClick={() => setSelectedPeriod('month')}
+              variant={selectedPeriod === 'month' ? 'default' : 'ghost'}
+              className={`flex-1 rounded-lg text-sm h-10 ${
+                selectedPeriod === 'month' 
+                  ? 'bg-white text-black shadow-sm' 
+                  : 'text-black/70 hover:text-black hover:bg-white/10'
+              }`}
+            >
+              This Month
+            </Button>
+            <Button
+              onClick={() => setSelectedPeriod('alltime')}
+              variant={selectedPeriod === 'alltime' ? 'default' : 'ghost'}
+              className={`flex-1 rounded-lg text-sm h-10 ${
+                selectedPeriod === 'alltime' 
+                  ? 'bg-white text-black shadow-sm' 
+                  : 'text-black/70 hover:text-black hover:bg-white/10'
+              }`}
+            >
+              All Time
+            </Button>
+          </div>
+
+          {/* Period-Specific Stats */}
+          <h2 className="text-base platypi-bold text-black mb-3">
+            {selectedPeriod === 'today' ? "Today's Activity" : 
+             selectedPeriod === 'month' ? "This Month's Activity" : 
+             "All Time Activity"}
+          </h2>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <StatCard
+              title="Mitzvas Completed"
+              value={currentLoading ? "..." : (currentData as any)?.totalActs?.toLocaleString() || (currentData as any)?.totalActs || 0}
+              icon={TrendingUp}
+              color="text-blush"
+            />
+            <StatCard
+              title="Active Women"
+              value={currentLoading ? "..." : (currentData as any)?.totalUsers?.toLocaleString() || (currentData as any)?.uniqueUsers || 0}
+              icon={Users}
+              color="text-peach"
+            />
+            <StatCard
+              title="Tehillim Said"
+              value={currentLoading ? "..." : (() => {
+                const modalCompletions = (currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {};
+                const regularTehillim = modalCompletions['tehillim-text'] || 0;
+                const specialTehillim = modalCompletions['special-tehillim'] || 0;
+                const individualTehillim = Object.keys(modalCompletions).filter(key => key.startsWith('individual-tehillim')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
+                const tehillimEvents = (currentData as any)?.totalTehillimCompleted || (currentData as any)?.tehillimCompleted || 0;
+                return (regularTehillim + specialTehillim + individualTehillim + tehillimEvents).toLocaleString();
+              })()}
+              icon={ScrollText}
+              color="text-lavender"
+            />
+            <StatCard
+              title="People Davened For"
+              value={currentLoading ? "..." : (currentData as any)?.totalNamesProcessed?.toLocaleString() || (currentData as any)?.namesProcessed || 0}
+              icon={Heart}
+              color="text-sage"
+            />
+          </div>
         </div>
 
-        {/* Period-Specific Stats */}
-        <h2 className="text-base platypi-bold text-black mb-3">
-          {selectedPeriod === 'today' ? "Today's Activity" : 
-           selectedPeriod === 'month' ? "This Month's Activity" : 
-           "All Time Activity"}
-        </h2>
-        
-        <div className="grid grid-cols-2 gap-3">
-          <StatCard
-            title="Mitzvas Completed"
-            value={currentLoading ? "..." : (currentData as any)?.totalActs?.toLocaleString() || (currentData as any)?.totalActs || 0}
-            icon={TrendingUp}
-            color="text-blush"
-          />
-          <StatCard
-            title="Active Women"
-            value={currentLoading ? "..." : (currentData as any)?.totalUsers?.toLocaleString() || (currentData as any)?.uniqueUsers || 0}
-            icon={Users}
-            color="text-peach"
-          />
-          <StatCard
-            title="Tehillim Said"
-            value={currentLoading ? "..." : (() => {
-              const modalCompletions = (currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {};
-              const regularTehillim = modalCompletions['tehillim-text'] || 0;
-              const specialTehillim = modalCompletions['special-tehillim'] || 0;
-              const individualTehillim = Object.keys(modalCompletions).filter(key => key.startsWith('individual-tehillim')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
-              const tehillimEvents = (currentData as any)?.totalTehillimCompleted || (currentData as any)?.tehillimCompleted || 0;
-              return (regularTehillim + specialTehillim + individualTehillim + tehillimEvents).toLocaleString();
-            })()}
-            icon={ScrollText}
-            color="text-lavender"
-          />
-          <StatCard
-            title="People Davened For"
-            value={currentLoading ? "..." : (currentData as any)?.totalNamesProcessed?.toLocaleString() || (currentData as any)?.namesProcessed || 0}
-            icon={Heart}
-            color="text-sage"
-          />
-        </div>
-      </div>
-
-      <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-24">
-        <div className="space-y-6">
+        <div className="p-4 space-y-6">
           {/* Feature Usage */}
           <div>
             <h2 className="text-base platypi-bold text-black mb-3">Feature Usage</h2>
@@ -347,7 +371,7 @@ export default function Statistics() {
           {/* Financial Stats */}
           <FinancialStatsSection period={selectedPeriod} />
         </div>
-      </main>
+      </div>
 
       <BottomNavigation 
         activeSection={null} 

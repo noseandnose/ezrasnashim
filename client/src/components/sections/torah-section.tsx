@@ -1,7 +1,9 @@
 import { Book, Heart, Play, Shield, BookOpen, Sparkles, Star, Scroll, Triangle } from "lucide-react";
+import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import type { Section } from "@/pages/home";
+import { useLocation } from "wouter";
 
 // Calculate reading time based on word count (average 200 words per minute)
 const calculateReadingTime = (text: string): string => {
@@ -33,6 +35,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
   const { openModal } = useModalStore();
   const { torahCompleted } = useDailyCompletionStore();
   const { isModalComplete } = useModalCompletionStore();
+  const [, setLocation] = useLocation();
   
   // Fetch today's Pirkei Avot for daily inspiration
   const today = new Date().toISOString().split('T')[0];
@@ -77,11 +80,20 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
     gcTime: 30 * 60 * 1000
   });
 
+  // Handle direct fullscreen opening for specific modals (bypassing modal completely)
+  const handleDirectFullscreen = (modalType: string, event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    // Open modal first to trigger state and data loading, then the modal will auto-redirect to fullscreen
+    openModal(modalType, 'torah');
+  };
+
   const torahItems = [
     {
       id: 'chizuk',
       icon: Heart,
-      title: 'Chizuk',
+      title: 'Daily Chizuk',
       subtitle: '5 minute inspiration',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
@@ -92,7 +104,7 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
     {
       id: 'emuna',
       icon: Shield,
-      title: 'Emuna',
+      title: 'Daily Emuna',
       subtitle: 'Faith & Trust',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
@@ -155,17 +167,16 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
             let content = null;
             let hasContent = false;
             let displaySubtitle = subtitle;
+            let readingTime = '';
             
             switch(id) {
               case 'halacha':
                 content = halachaContent;
                 hasContent = !!halachaContent?.content;
                 if (hasContent && !isCompleted && halachaContent) {
-                  const readingTime = calculateReadingTime(halachaContent.content || '');
+                  readingTime = calculateReadingTime(halachaContent.content || '');
                   const camelCaseTitle = toCamelCase(halachaContent.title || '');
-                  displaySubtitle = camelCaseTitle ? 
-                    `${camelCaseTitle} (${readingTime})` : 
-                    `Learn Shabbos (${readingTime})`;
+                  displaySubtitle = camelCaseTitle || 'Learn Shabbos';
                 }
                 break;
               case 'chizuk':
@@ -186,11 +197,9 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
                 content = featuredContent;
                 hasContent = !!featuredContent?.content;
                 if (hasContent && !isCompleted && featuredContent) {
-                  const readingTime = calculateReadingTime(featuredContent.content || '');
+                  readingTime = calculateReadingTime(featuredContent.content || '');
                   const camelCaseTitle = toCamelCase(featuredContent.title || '');
-                  displaySubtitle = camelCaseTitle ? 
-                    `${camelCaseTitle} (${readingTime})` : 
-                    `Special Topics (${readingTime})`;
+                  displaySubtitle = camelCaseTitle || 'Special Topics';
                 }
                 // Always show text indicator for featured content
                 contentType = hasContent ? 'text' : contentType;
@@ -201,7 +210,17 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
               <button
                 key={id}
                 className={`${isCompleted ? 'bg-sage/20' : hasContent ? gradient : 'bg-gray-100'} rounded-3xl p-3 text-center ${hasContent ? 'glow-hover' : ''} transition-gentle shadow-lg border ${hasContent ? border : 'border-gray-200'} relative ${!hasContent ? 'cursor-not-allowed' : ''}`}
-                onClick={() => hasContent && openModal(id, 'torah')}
+                onClick={(event) => {
+                  if (!hasContent) return;
+                  
+                  // For halacha and featured content, open directly in fullscreen
+                  if (id === 'halacha' || id === 'featured') {
+                    handleDirectFullscreen(id, event);
+                  } else {
+                    // For other content types, use regular modal
+                    openModal(id, 'torah');
+                  }
+                }}
                 disabled={!hasContent}
               >
                 {/* Content Type Indicator */}
@@ -216,12 +235,31 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
                 )}
                 
                 <div className={`${isCompleted ? 'bg-sage' : hasContent ? iconBg : 'bg-gray-300'} p-2 rounded-full mx-auto mb-2 w-fit`}>
-                  <Icon className={`${hasContent ? iconColor : 'text-gray-500'}`} size={18} strokeWidth={1.5} />
+                  {id === 'halacha' ? (
+                    <img 
+                      src={customCandleIcon} 
+                      alt="Learn Shabbas" 
+                      className="w-[18px] h-[18px] object-contain"
+                    />
+                  ) : (
+                    <Icon className={`${hasContent ? iconColor : 'text-gray-500'}`} size={18} strokeWidth={1.5} />
+                  )}
                 </div>
                 <h3 className="platypi-bold text-xs text-black mb-1 tracking-wide">{title}</h3>
-                <p className="platypi-regular text-xs text-black/60 leading-relaxed">
-                  {!hasContent ? 'Coming Soon' : isCompleted ? 'Completed' : displaySubtitle}
-                </p>
+                <div className="platypi-regular text-xs text-black/60 leading-relaxed">
+                  {!hasContent ? (
+                    'Coming Soon'
+                  ) : isCompleted ? (
+                    'Completed'
+                  ) : (
+                    <>
+                      <div>{displaySubtitle}</div>
+                      {readingTime && (
+                        <div className="text-xs text-black/50 mt-0.5">({readingTime})</div>
+                      )}
+                    </>
+                  )}
+                </div>
               </button>
             );
           })}

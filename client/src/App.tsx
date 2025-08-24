@@ -6,6 +6,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useGeolocation, useJewishTimes } from "@/hooks/use-jewish-times";
 import { initializeCache } from "@/lib/cache";
 import { useEffect, lazy, Suspense } from "react";
+import ErrorBoundary from "@/components/ui/error-boundary";
+import UpdateNotification from "@/components/UpdateNotification";
+import "@/utils/clear-modal-completions";
+import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));
@@ -32,15 +36,42 @@ function Router() {
   useEffect(() => {
     initializeCache();
     
+    // One-time cleanup of stale modal completion data
+    const cleanupModalCompletions = () => {
+      try {
+        const stored = localStorage.getItem('modalCompletions');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const today = getLocalDateString();
+          const yesterdayStr = getLocalYesterdayString();
+          
+          // Keep only today and yesterday
+          const cleaned: Record<string, string[]> = {};
+          for (const [date, modals] of Object.entries(parsed)) {
+            if (date === today || date === yesterdayStr) {
+              cleaned[date] = modals as string[];
+            }
+          }
+          
+          localStorage.setItem('modalCompletions', JSON.stringify(cleaned));
+        }
+      } catch (e) {
+        // If data is corrupted, clear it
+        localStorage.removeItem('modalCompletions');
+      }
+    };
+    
+    cleanupModalCompletions();
+    
     // Register service worker for PWA functionality
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(registration => {
-            // Service worker registered successfully
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(() => {
+            // ServiceWorker registered successfully
           })
           .catch(error => {
-            // Service worker registration failed
+            console.error('ServiceWorker registration failed:', error);
           });
       });
     }
@@ -63,12 +94,15 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <UpdateNotification />
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

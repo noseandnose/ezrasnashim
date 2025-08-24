@@ -1,5 +1,7 @@
 // Advanced caching utilities for performance optimization
 
+import { getLocalDateString } from './dateUtils';
+
 interface CacheEntry<T> {
   data: T;
   timestamp: number;
@@ -74,7 +76,7 @@ export const getCacheKey = {
 
 // Preload critical data
 export async function preloadCriticalData(): Promise<void> {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateString();
   
   try {
     // Preload today's Pirkei Avot if not cached

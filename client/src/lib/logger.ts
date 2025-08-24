@@ -2,7 +2,7 @@
 export const logger = {
   log: (...args: any[]) => {
     if (import.meta.env.DEV) {
-      console.log(...args);
+      logger.log(...args);
     }
   },
   
@@ -14,19 +14,19 @@ export const logger = {
   
   warn: (...args: any[]) => {
     if (import.meta.env.DEV) {
-      console.warn(...args);
+      logger.warn(...args);
     }
   },
   
   info: (...args: any[]) => {
     if (import.meta.env.DEV) {
-      console.info(...args);
+      logger.info(...args);
     }
   },
   
   debug: (...args: any[]) => {
     if (import.meta.env.DEV) {
-      console.debug(...args);
+      logger.debug(...args);
     }
   }
 };

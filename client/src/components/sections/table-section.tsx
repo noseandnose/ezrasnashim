@@ -1,4 +1,5 @@
 import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar, Moon, MapPin, ShoppingBag, MessageSquare, Zap, Lightbulb as Candle } from "lucide-react";
+import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
@@ -122,25 +123,11 @@ export default function TableSection() {
             <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
               <p className="platypi-regular text-xs text-black/70 platypi-bold">Candle Lighting</p>
               <div className="flex items-center justify-center space-x-1">
-                <svg width="20" height="16" viewBox="0 0 64 64" className="text-blush fill-current">
-                  <g>
-                    {/* Left candle */}
-                    <ellipse cx="20" cy="8" rx="3" ry="6" />
-                    <rect x="18" y="12" width="4" height="3" />
-                    <rect x="16" y="15" width="8" height="4" />
-                    <rect x="18.5" y="19" width="3" height="24" />
-                    <ellipse cx="20" cy="43" rx="8" ry="3" />
-                    <rect x="12" y="43" width="16" height="4" />
-                    
-                    {/* Right candle */}
-                    <ellipse cx="44" cy="8" rx="3" ry="6" />
-                    <rect x="42" y="12" width="4" height="3" />
-                    <rect x="40" y="15" width="8" height="4" />
-                    <rect x="42.5" y="19" width="3" height="24" />
-                    <ellipse cx="44" cy="43" rx="8" ry="3" />
-                    <rect x="36" y="43" width="16" height="4" />
-                  </g>
-                </svg>
+                <img 
+                  src={customCandleIcon} 
+                  alt="Candle lighting" 
+                  className="w-5 h-4 object-contain"
+                />
                 <p className="platypi-bold text-base text-black platypi-medium">
                   {showShabbosError ? "--:--" : 
                    shabbosData?.candleLighting || 
@@ -174,7 +161,18 @@ export default function TableSection() {
                 ? 'bg-gray-100 cursor-not-allowed' 
                 : isModalComplete('recipe') ? 'bg-sage/20 hover:scale-105' : 'bg-white hover:scale-105'
             }`}
-            onClick={() => recipeContent && openModal('recipe', 'table')}
+            onClick={() => {
+              if (recipeContent) {
+                // Open directly in fullscreen without setting activeModal
+                const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
+                  detail: {
+                    modalKey: 'recipe',
+                    content: recipeContent
+                  }
+                });
+                window.dispatchEvent(fullscreenEvent);
+              }
+            }}
             disabled={!recipeContent}
           >
             {/* Banner overlay for when no content */}
@@ -204,7 +202,7 @@ export default function TableSection() {
           {/* Jewish Date Converter Button */}
           <button
             className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
-            onClick={() => openModal('date-calculator', 'table')}
+            onClick={() => openModal('date-calculator-fullscreen', 'table')}
           >
             <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-feminine">
               <Calendar className="text-white" size={18} strokeWidth={1.5} />
@@ -225,7 +223,18 @@ export default function TableSection() {
                 ? 'bg-gray-100 cursor-not-allowed' 
                 : isModalComplete('inspiration') ? 'bg-sage/20 hover:scale-105' : 'bg-white hover:scale-105'
             }`}
-            onClick={() => inspirationContent && openModal('inspiration', 'table')}
+            onClick={() => {
+              if (inspirationContent) {
+                // Open directly in fullscreen without setting activeModal
+                const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
+                  detail: {
+                    modalKey: 'inspiration',
+                    content: inspirationContent
+                  }
+                });
+                window.dispatchEvent(fullscreenEvent);
+              }
+            }}
             disabled={!inspirationContent}
           >
             {/* Banner overlay for when no content */}
@@ -255,7 +264,7 @@ export default function TableSection() {
           {/* Community Feedback Button */}
           <button
             className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
-            onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSeN5R13KeGNC9Fw4llh_ISYWJGgOyhNcFcDhaM3jUGZEOLrNg/viewform', '_blank')}
+            onClick={() => window.open('https://tally.so/r/3xqAEy', '_blank')}
           >
             <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-feminine">
               <MessageSquare className="text-white" size={18} strokeWidth={1.5} />

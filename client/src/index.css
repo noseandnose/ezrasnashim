@@ -4,6 +4,41 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Safari mobile viewport fix */
+@supports (-webkit-touch-callout: none) {
+  /* Safari specific styles */
+  html, body, #root {
+    height: -webkit-fill-available;
+    height: calc(var(--vh, 1vh) * 100);
+  }
+}
+
+html {
+  height: 100dvh;
+  height: 100%;
+}
+
+body {
+  height: 100dvh;
+  height: 100%;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  /* Safari specific fixes */
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  height: 100dvh;  
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+}
+
 /* TEST: VC Koren Light Font for Hebrew Tefilla Content */
 @font-face {
   font-family: 'Koren Siddur';
@@ -551,8 +586,13 @@ html, body, #root {
 }
 
 .mobile-app {
-  min-height: 100vh;
-  overflow: auto;
+  /* Use actual height for Safari compatibility */
+  height: 100%;
+  /* Flexible layout for better Safari handling */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
 }
 
 /* Prayer completion animation */
@@ -601,9 +641,18 @@ html, body, #root {
 }
 
 .content-area {
-  min-height: calc(100vh - 120px);
-  overflow: auto;
-  padding-bottom: 1rem;
+  /* Use flex-grow to fill available space after header */
+  flex: 1 1 auto;
+  height: 0; /* Important for flex child to be scrollable */
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Add safe area padding plus regular padding */
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
+  /* Prevent scroll bounce on iOS */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  /* Ensure content is always accessible on Safari */
+  position: relative;
 }
 
 /* Custom scrollbar for modals */

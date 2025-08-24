@@ -17,6 +17,7 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
   const [playbackSpeed, setPlaybackSpeed] = useState("1");
   const [audioError, setAudioError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout>();
 
@@ -149,15 +150,51 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (audioRef.current) {
+  const handleProgressChange = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    if (audioRef.current && audioRef.current.duration && !isNaN(audioRef.current.duration)) {
       const rect = e.currentTarget.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
+      const touchX = 'touches' in e ? e.touches[0]?.clientX : (e as React.MouseEvent).clientX;
+      const clickX = touchX - rect.left;
       const width = rect.width;
-      const clickPercent = clickX / width;
+      const clickPercent = Math.max(0, Math.min(1, clickX / width)); // Clamp between 0 and 1
       const newTime = clickPercent * audioRef.current.duration;
       audioRef.current.currentTime = newTime;
+      setProgress(clickPercent * 100);
     }
+  };
+
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    handleProgressChange(e);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    handleProgressChange(e);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isDragging) {
+      handleProgressChange(e);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    handleProgressChange(e);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (isDragging) {
+      handleProgressChange(e);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
   };
 
   useEffect(() => {
@@ -222,20 +259,26 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
         </div>
         <div className="audio-progress-bar">
           <div 
-            className="bg-gray-300 rounded-full audio-progress-track w-full"
+            className="bg-gray-300 rounded-full audio-progress-track w-full h-2 cursor-pointer relative"
             onClick={handleProgressClick}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
           >
             <div 
-              className="audio-progress h-full rounded-full transition-all duration-100 relative bg-gradient-feminine" 
+              className={`audio-progress h-full rounded-full ${isDragging ? 'transition-none' : 'transition-all duration-100'} relative bg-gradient-feminine`}
               style={{ width: `${progress}%` }}
             >
-              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg border-2 border-pink-300 opacity-90"></div>
+              <div className={`absolute right-0 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg border-2 border-pink-300 ${isDragging ? 'opacity-100 scale-110' : 'opacity-90'} cursor-pointer transition-all duration-100`}></div>
             </div>
           </div>
         </div>
       </div>
-      {/* Hidden audio element for future real audio implementation */}
-      <audio ref={audioRef} src={audioUrl} style={{ display: 'none' }} />
+
     </div>
   );
 }

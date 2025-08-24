@@ -157,7 +157,8 @@ export async function getCurrentTefillaConditions(
     let hebrewDate = undefined;
 
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const { getLocalDateString } = await import('../lib/dateUtils');
+      const today = getLocalDateString();
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const hebrewResponse = await fetch(
         `${apiUrl}/api/hebrew-date/${today}`

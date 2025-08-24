@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { getLocalDateString } from './dateUtils';
 
 export type ModalType = 
   | 'halacha' 
@@ -30,17 +31,21 @@ export type ModalType =
   | 'location'
   | 'sponsor-details'
   | 'community-impact'
+  | 'date-calculator-fullscreen'
   | null;
 
 export interface ModalState {
   activeModal: string | null;
   selectedPsalm: number | null;
   previousSection: string | null;
+  previousModal: string | null;
   tehillimActiveTab: 'all' | 'special';
-  openModal: (modalId: string, fromSection?: string) => void;
+  tehillimReturnTab: 'all' | 'special' | null; // Store the return tab preference
+  openModal: (modalId: string, fromSection?: string, psalmNumber?: number) => void;
   closeModal: (returnToPrevious?: boolean) => void;
   setSelectedPsalm: (psalmNumber: number) => void;
   setTehillimActiveTab: (tab: 'all' | 'special') => void;
+  setTehillimReturnTab: (tab: 'all' | 'special') => void;
   
   // Convenience methods for specific modals
   isBirkatHamazonModalOpen: boolean;
@@ -52,11 +57,18 @@ export const useModalStore = create<ModalState>((set, get) => ({
   activeModal: null,
   selectedPsalm: null,
   previousSection: null,
+  previousModal: null,
   tehillimActiveTab: 'all',
-  openModal: (modalId: string, fromSection?: string) => set({ 
-    activeModal: modalId, 
-    previousSection: fromSection || get().previousSection 
-  }),
+  tehillimReturnTab: null,
+  openModal: (modalId: string, fromSection?: string, psalmNumber?: number) => {
+    const currentModal = get().activeModal;
+    set({ 
+      activeModal: modalId, 
+      previousSection: fromSection || get().previousSection,
+      previousModal: currentModal,
+      selectedPsalm: psalmNumber || get().selectedPsalm
+    });
+  },
   closeModal: (returnToPrevious?: boolean) => {
     const state = get();
     const wasTefilaModal = state.activeModal === 'tehillim-text';
@@ -83,6 +95,7 @@ export const useModalStore = create<ModalState>((set, get) => ({
   },
   setSelectedPsalm: (psalmNumber: number) => set({ selectedPsalm: psalmNumber }),
   setTehillimActiveTab: (tab: 'all' | 'special') => set({ tehillimActiveTab: tab }),
+  setTehillimReturnTab: (tab: 'all' | 'special') => set({ tehillimReturnTab: tab }),
   
   // Convenience methods for specific modals
   get isBirkatHamazonModalOpen() {
@@ -113,35 +126,103 @@ export interface ModalCompletionState {
   resetModalCompletions: () => void;
 }
 
-export const useModalCompletionStore = create<ModalCompletionState>((set, get) => ({
-  completedModals: {},
-  markModalComplete: (modalId: string) => {
-    const today = new Date().toISOString().split('T')[0];
-    set(state => {
-      const newState = { ...state.completedModals };
-      if (!newState[today]) {
-        newState[today] = new Set();
+export const useModalCompletionStore = create<ModalCompletionState>((set, get) => {
+  // Load initial state from localStorage
+  const loadFromStorage = () => {
+    try {
+      const stored = localStorage.getItem('modalCompletions');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const today = getLocalDateString();
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayYear = yesterday.getFullYear();
+        const yesterdayMonth = String(yesterday.getMonth() + 1).padStart(2, '0');
+        const yesterdayDay = String(yesterday.getDate()).padStart(2, '0');
+        const yesterdayStr = `${yesterdayYear}-${yesterdayMonth}-${yesterdayDay}`;
+        
+        // Convert arrays back to Sets, but only keep today and yesterday
+        const completedModals: Record<string, Set<string>> = {};
+        for (const [date, modals] of Object.entries(parsed)) {
+          // Only load today's and yesterday's data (for midnight transition)
+          if (date === today || date === yesterdayStr) {
+            completedModals[date] = new Set(modals as string[]);
+          }
+        }
+        return completedModals;
       }
-      newState[today].add(modalId);
-      return { completedModals: newState };
-    });
-  },
-  isModalComplete: (modalId: string) => {
-    const today = new Date().toISOString().split('T')[0];
-    const todaysCompletions = get().completedModals[today];
-    return todaysCompletions ? todaysCompletions.has(modalId) : false;
-  },
-  resetModalCompletions: () => {
-    set({ completedModals: {} });
-  }
-}));
+    } catch (e) {
+      console.error('Failed to load modal completions from storage:', e);
+      // Clear corrupted data
+      localStorage.removeItem('modalCompletions');
+    }
+    return {};
+  };
+
+  // Save to localStorage whenever state changes
+  const saveToStorage = (completedModals: Record<string, Set<string>>) => {
+    try {
+      // Convert Sets to arrays for JSON serialization
+      const toStore: Record<string, string[]> = {};
+      for (const [date, modals] of Object.entries(completedModals)) {
+        toStore[date] = Array.from(modals);
+      }
+      localStorage.setItem('modalCompletions', JSON.stringify(toStore));
+    } catch (e) {
+      console.error('Failed to save modal completions to storage:', e);
+    }
+  };
+
+  return {
+    completedModals: loadFromStorage(),
+    markModalComplete: (modalId: string) => {
+      const today = getLocalDateString();
+      set(state => {
+        const newState = { ...state.completedModals };
+        if (!newState[today]) {
+          newState[today] = new Set();
+        } else {
+          // Clone the existing Set to ensure proper state update
+          newState[today] = new Set(newState[today]);
+        }
+        newState[today].add(modalId);
+        
+        // Clean up old dates (keep only today and yesterday for transition period)
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayYear = yesterday.getFullYear();
+        const yesterdayMonth = String(yesterday.getMonth() + 1).padStart(2, '0');
+        const yesterdayDay = String(yesterday.getDate()).padStart(2, '0');
+        const yesterdayStr = `${yesterdayYear}-${yesterdayMonth}-${yesterdayDay}`;
+        
+        for (const date in newState) {
+          if (date !== today && date !== yesterdayStr) {
+            delete newState[date];
+          }
+        }
+        
+        saveToStorage(newState);
+        return { completedModals: newState };
+      });
+    },
+    isModalComplete: (modalId: string) => {
+      const today = getLocalDateString();
+      const todaysCompletions = get().completedModals[today];
+      return todaysCompletions ? todaysCompletions.has(modalId) : false;
+    },
+    resetModalCompletions: () => {
+      localStorage.removeItem('modalCompletions');
+      set({ completedModals: {} });
+    }
+  };
+});
 
 export const useDailyCompletionStore = create<DailyCompletionState>((set, get) => {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateString();
   
   // For testing: reset on every page load/restart
   // For production: comment out the line below and uncomment the localStorage logic
-  const isTestMode = true; // Set to false for production
+  const isTestMode = false; // Set to false for production
   
   if (isTestMode) {
     // Reset on every restart for testing
@@ -270,7 +351,7 @@ export interface DonationCompletionState {
 
 export const useDonationCompletionStore = create<DonationCompletionState>((set, get) => {
   // Load from localStorage on initialization
-  const today = new Date().toDateString();
+  const today = getLocalDateString();
   let initialCompleted = new Set<string>();
   
   if (typeof window !== 'undefined') {
@@ -297,7 +378,7 @@ export const useDonationCompletionStore = create<DonationCompletionState>((set, 
       // Save to localStorage
       if (typeof window !== 'undefined') {
         try {
-          const today = new Date().toDateString();
+          const today = getLocalDateString();
           localStorage.setItem('donationCompletion', JSON.stringify({
             date: today,
             completed: Array.from(newCompleted)
@@ -313,7 +394,7 @@ export const useDonationCompletionStore = create<DonationCompletionState>((set, 
     resetDaily: () => {
       if (typeof window !== 'undefined') {
         try {
-          const today = new Date().toDateString();
+          const today = getLocalDateString();
           const stored = localStorage.getItem('donationCompletion');
           
           if (stored) {
