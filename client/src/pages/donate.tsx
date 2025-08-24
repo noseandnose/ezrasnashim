@@ -416,6 +416,8 @@ export default function Donate() {
   const [donationComplete, setDonationComplete] = useState(false);
   const [userEmailForReceipt, setUserEmailForReceipt] = useState("");
   const { toast } = useToast();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { openModal } = useModalStore();
   
   // Use ref to track if payment intent has been created
   const paymentIntentCreatedRef = useRef(false);
@@ -472,17 +474,29 @@ export default function Donate() {
         // Mark the individual button as complete using the button type
         markTzedakaButtonCompleted(buttonType as TzedakaButtonType);
         
+        // CRITICAL FIX: Also complete the overall daily tzedaka task
+        completeTask('tzedaka');
+        
         toast({
           title: "Donation Complete!",
           description: `Your ${buttonType.replace('_', ' ')} action has been recorded.`,
         });
         
-        console.log(`Successfully recorded ${buttonType} completion`);
+        console.log(`Successfully recorded ${buttonType} completion and daily tzedaka task`);
+        
+        // Check if all tasks are completed and show congratulations
+        setTimeout(() => {
+          if (checkAndShowCongratulations()) {
+            openModal('congratulations', 'tzedaka');
+          }
+        }, 200);
       }
     } catch (error) {
       console.error('Error processing donation success:', error);
       // Still mark button complete locally even if backend fails
       markTzedakaButtonCompleted(buttonType as TzedakaButtonType);
+      // Also complete the overall daily tzedaka task
+      completeTask('tzedaka');
     }
   };
 
