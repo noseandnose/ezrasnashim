@@ -155,17 +155,18 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
             />
           </div>
           
-          {/* Fixed direction line extending through compass - goes under BH icon */}
+          {/* Fixed direction line extending from heart toward BH icon */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <div 
-              className={`w-1.5 origin-center ${
+              className={`w-1.5 origin-bottom ${
                 state.isAligned 
                   ? 'bg-blush animate-pulse' 
                   : 'bg-gray-400'
               }`}
               style={{
-                transformOrigin: 'center center',
-                height: '240px',
+                transformOrigin: 'bottom center',
+                height: '100px',
+                transform: 'translateY(-100%)',
                 animationDuration: state.isAligned ? '1.5s' : undefined
               }}
             />
