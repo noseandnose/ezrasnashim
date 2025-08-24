@@ -102,7 +102,7 @@ export default function TzedakaModals() {
         break;
       case "wedding-campaign":
         amount = getDonationAmount();
-        typeDescription = "Wedding Campaign Support";
+        typeDescription = activeCampaign?.title || "Active Campaign Support";
         buttonType = "active_campaign";
         break;
     }
