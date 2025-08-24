@@ -169,33 +169,35 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
             </div>
           </div>
           
-        </div>
-        
-        {/* Fixed center heart and line - stays in place while compass rotates around it */}
-        <div className="absolute top-1/2 left-1/2 z-10 pointer-events-none" style={{ transform: 'translate(-50%, -50%)' }}>
-          {/* Heart at the exact center of compass */}
-          <div className="relative">
-            <Heart 
-              className={`w-7 h-7 text-blush fill-blush ${
-                state.isAligned ? 'animate-pulse' : ''
-              }`}
-              style={{
-                animationDuration: state.isAligned ? '1s' : undefined
-              }}
-            />
-            
-            {/* Line extending upward from heart center */}
+          {/* Fixed center heart and line - INSIDE compass container, stays fixed while compass rotates */}
+          <div className="absolute top-1/2 left-1/2 z-30 pointer-events-none" style={{ transform: 'translate(-50%, -50%)' }}>
+            {/* Line extending upward from center */}
             <div 
-              className={`w-1.5 absolute left-1/2 transform -translate-x-1/2 ${
+              className={`w-1.5 h-20 ${
                 state.isAligned 
                   ? 'bg-blush animate-pulse' 
                   : 'bg-gray-400'
               }`}
               style={{
-                height: '80px',
-                bottom: '100%',
-                marginBottom: '-3px',
+                position: 'absolute',
+                left: '50%',
+                bottom: '50%',
+                transform: 'translateX(-50%)',
                 animationDuration: state.isAligned ? '1.5s' : undefined
+              }}
+            />
+            
+            {/* Heart at the exact center */}
+            <Heart 
+              className={`w-7 h-7 text-blush fill-blush ${
+                state.isAligned ? 'animate-pulse' : ''
+              }`}
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                animationDuration: state.isAligned ? '1s' : undefined
               }}
             />
           </div>
