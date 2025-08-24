@@ -353,12 +353,15 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
           className={`w-full rounded-3xl p-4 text-center hover:scale-[1.02] transition-all duration-300 shadow-lg border-2 ${
             isTzedakaButtonCompleted('put_a_coin') 
               ? 'bg-sage/20 border-sage/30' 
-              : 'bg-white border-blush/30 shadow-blush/20 animate-pulse'
+              : 'bg-white border-blush/30'
           }`}
           style={{
             boxShadow: isTzedakaButtonCompleted('put_a_coin') 
               ? undefined 
-              : '0 0 20px rgba(244, 63, 94, 0.15), 0 0 40px rgba(244, 63, 94, 0.1)'
+              : '0 0 8px rgba(244, 63, 94, 0.3)',
+            animation: isTzedakaButtonCompleted('put_a_coin') 
+              ? undefined 
+              : 'gentle-glow 3s ease-in-out infinite'
           }}
         >
           <div className="flex items-center justify-center space-x-4">

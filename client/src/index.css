@@ -784,3 +784,13 @@ html, body, #root {
   -o-user-drag: none;
   user-drag: none;
 }
+
+/* Gentle glow animation for tzedaka button */
+@keyframes gentle-glow {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(244, 63, 94, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 8px rgba(244, 63, 94, 0.4);
+  }
+}
