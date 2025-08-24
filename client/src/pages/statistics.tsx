@@ -45,34 +45,22 @@ export default function Statistics() {
   // Fetch today's stats
   const { data: todayStats, isLoading: todayLoading } = useQuery<DailyStats>({
     queryKey: ["/api/analytics/stats/today"],
-    staleTime: 0, // Always consider data stale for live updates
-    gcTime: 0, // Don't cache data (TanStack Query v5)
-    refetchInterval: 10000, // Refresh every 10 seconds for faster updates
-    refetchOnMount: 'always', // Always refetch when component mounts
-    refetchOnWindowFocus: true, // Refetch when window gets focus
-    refetchIntervalInBackground: true, // Keep refetching even when tab not focused
+    staleTime: 5000, // 5 seconds
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   // Fetch monthly stats
   const { data: monthlyStats, isLoading: monthlyLoading } = useQuery<PeriodStats>({
     queryKey: ["/api/analytics/stats/month"],
-    staleTime: 0, // Always consider data stale for live updates
-    gcTime: 0, // Don't cache data (TanStack Query v5)
-    refetchInterval: 15000, // Refresh every 15 seconds
-    refetchOnMount: 'always', // Always refetch when component mounts
-    refetchOnWindowFocus: true, // Refetch when window gets focus
-    refetchIntervalInBackground: true, // Keep refetching even when tab not focused
+    staleTime: 5000, // 5 seconds
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   // Fetch total stats
   const { data: totalStats, isLoading: totalLoading } = useQuery<PeriodStats>({
     queryKey: ["/api/analytics/stats/total"],
-    staleTime: 0, // Always consider data stale for live updates
-    gcTime: 0, // Don't cache data (TanStack Query v5)
-    refetchInterval: 15000, // Refresh every 15 seconds
-    refetchOnMount: 'always', // Always refetch when component mounts
-    refetchOnWindowFocus: true, // Refetch when window gets focus
-    refetchIntervalInBackground: true, // Keep refetching even when tab not focused
+    staleTime: 5000, // 5 seconds
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   // Get current data based on selected period
@@ -221,12 +209,8 @@ export default function Statistics() {
       totalRaised: number;
     }>({
       queryKey: [`/api/analytics/community-impact?period=${period}`],
-      staleTime: 0, // Always consider data stale for live updates
-      gcTime: 0, // Don't cache data (TanStack Query v5)
-      refetchInterval: 10000, // Refresh every 10 seconds for faster updates
-      refetchOnMount: 'always', // Always refetch when component mounts
-      refetchOnWindowFocus: true, // Refetch when window gets focus
-      refetchIntervalInBackground: true, // Keep refetching even when tab not focused
+      staleTime: 5000, // 5 seconds
+      refetchInterval: 30000, // Refresh every 30 seconds
     });
 
     return (
@@ -358,8 +342,10 @@ export default function Statistics() {
                 const globalTehillimText = modalCompletions['tehillim-text'] || 0;
                 const specialTehillim = modalCompletions['special-tehillim'] || 0;
                 const individualTehillim = Object.keys(modalCompletions).filter(key => key.startsWith('individual-tehillim')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
-                const tehillimEvents = (currentData as any)?.totalTehillimCompleted || (currentData as any)?.tehillimCompleted || 0;
-                return (globalTehillimChain + globalTehillimText + specialTehillim + individualTehillim + tehillimEvents).toLocaleString();
+                
+                // Only use modal completions (don't double count with tehillimEvents)
+                const totalTehillim = globalTehillimChain + globalTehillimText + specialTehillim + individualTehillim;
+                return totalTehillim.toLocaleString();
               })()}
               icon={ScrollText}
               color="text-lavender"
