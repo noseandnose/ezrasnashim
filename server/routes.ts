@@ -1888,10 +1888,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       // Verify webhook signature
+      if (!sig) {
+        throw new Error('Missing stripe signature');
+      }
+      if (!process.env.STRIPE_WEBHOOK_SECRET) {
+        throw new Error('Missing stripe webhook secret');
+      }
       event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
     } catch (err) {
-      console.error('Webhook signature verification failed:', err.message);
-      return res.status(400).send(`Webhook Error: ${err.message}`);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      console.error('Webhook signature verification failed:', errorMessage);
+      return res.status(400).send(`Webhook Error: ${errorMessage}`);
     }
 
     try {
@@ -1910,13 +1917,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const buttonType = paymentIntent.metadata?.buttonType || 'put_a_coin';
             await storage.createAct({
               userId: null, // We don't have user auth yet
-              type: 'tzedaka_completion',
-              details: {
-                buttonType: buttonType,
-                amount: paymentIntent.amount,
-                donationId: donation.id,
-                timestamp: new Date().toISOString()
-              }
+              category: 'tzedaka',
+              subtype: buttonType,
+              amount: paymentIntent.amount
             });
             
             console.log(`Created act record for ${buttonType} completion`);
@@ -2009,7 +2012,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (donation && donation.status === 'succeeded') {
         console.log('Found completed donation:', donation.id);
         
-        const buttonType = donation.metadata?.buttonType || donation.type || 'put_a_coin';
+        const metadata = donation.metadata as Record<string, any> || {};
+        const buttonType = metadata.buttonType || donation.type || 'put_a_coin';
         
         res.json({
           completed: true,
@@ -2060,19 +2064,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Extract button type from metadata
-      const buttonType = donation.metadata?.buttonType || donation.type || 'put_a_coin';
+      const metadata = donation.metadata as Record<string, any> || {};
+      const buttonType = metadata.buttonType || donation.type || 'put_a_coin';
       
       // Create an act record if it doesn't exist already
       await storage.createAct({
         userId: null,
-        type: 'tzedaka_completion',
-        details: {
-          buttonType: buttonType,
-          amount: donation.amount,
-          donationId: donation.id,
-          timestamp: new Date().toISOString(),
-          source: 'success_callback'
-        }
+        category: 'tzedaka',
+        subtype: buttonType,
+        amount: donation.amount
       });
       
       console.log('SUCCESS: Donation success processing complete');
@@ -2133,13 +2133,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Create an act record for tracking individual button completion
           await storage.createAct({
             userId: null,
-            type: 'tzedaka_completion',
-            details: {
-              buttonType: paymentIntent.metadata?.buttonType || 'put_a_coin',
-              amount: paymentIntent.amount,
-              donationId: donation.id,
-              timestamp: new Date().toISOString()
-            }
+            category: 'tzedaka',
+            subtype: paymentIntent.metadata?.buttonType || 'put_a_coin',
+            amount: paymentIntent.amount
           });
           
           console.log('Created donation record and act for successful payment:', paymentIntentId);

@@ -1469,7 +1469,7 @@ export class DatabaseStorage implements IStorage {
       totalTehillimCompleted += stats.tehillimCompleted || 0;
       totalNamesProcessed += stats.namesProcessed || 0;
       totalBooksCompleted += stats.booksCompleted || 0;
-      totalTzedakaCompleted += stats.tzedakaCompleted || 0;
+      totalTzedakaCompleted += stats.tzedakaActs || 0;
       totalActs += stats.totalActs || 0;
       
       // Merge modal completions
@@ -1485,7 +1485,7 @@ export class DatabaseStorage implements IStorage {
       totalTehillimCompleted,
       totalNamesProcessed,
       totalBooksCompleted,
-      totalTzedakaCompleted,
+      totalTzedakaActs: totalTzedakaCompleted,
       totalActs,
       totalModalCompletions
     };
