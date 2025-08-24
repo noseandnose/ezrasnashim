@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins, DollarSign, Trophy } from "lucide-react";
+import { Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins, DollarSign, Trophy, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
@@ -91,6 +91,19 @@ export default function Statistics() {
 
   const currentDataResult = getCurrentData();
   const { data: currentData, isLoading: currentLoading } = currentDataResult;
+
+  // Refresh function for manual refresh
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    // Invalidate all analytics queries to force fresh data
+    await queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/today"] });
+    await queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/month"] });
+    await queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/total"] });
+    await queryClient.invalidateQueries({ predicate: (query) => query.queryKey[0]?.toString().includes('/api/analytics/') });
+    // Short delay to show refresh animation
+    setTimeout(() => setIsRefreshing(false), 1000);
+  };
 
 
 
@@ -239,7 +252,7 @@ export default function Statistics() {
   }
 
   return (
-    <div className="mobile-app min-h-screen max-w-md mx-auto bg-white shadow-2xl relative flex flex-col">
+    <div className="mobile-app min-h-screen w-full bg-white relative flex flex-col">
       {/* Header */}
       <header className="bg-gradient-soft p-3 border-0 shadow-none flex-shrink-0">
         <div className="flex items-center justify-between px-2">
@@ -251,7 +264,14 @@ export default function Statistics() {
             <ArrowLeft className="h-5 w-5 text-black/70" />
           </button>
           <h1 className="platypi-semibold text-xl text-black tracking-wide">Analytics Dashboard</h1>
-          <div className="w-8" /> {/* Spacer for centering */}
+          <button
+            onClick={handleRefresh}
+            className="p-2 rounded-full hover:bg-white/50 transition-all duration-200"
+            aria-label="Refresh Analytics"
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`h-5 w-5 text-black/70 transition-transform duration-500 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </button>
         </div>
       </header>
       
