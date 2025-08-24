@@ -137,26 +137,17 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
                     src={state.isAligned ? bhGreenIcon : bhPinkIcon}
                     alt="Jerusalem direction"
                     className={`w-8 h-8 ${state.isAligned ? 'animate-pulse' : ''}`}
+                    style={{
+                      transform: `rotate(${deviceHeadingRotation}deg)`
+                    }}
                   />
                 </div>
               </div>
             </div>
           </div>
           
-          {/* Center heart - fixed pointing up, aligned with line */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <Heart 
-              className={`w-7 h-7 text-blush fill-blush ${
-                state.isAligned ? 'animate-pulse' : ''
-              }`}
-              style={{
-                animationDuration: state.isAligned ? '1s' : undefined
-              }}
-            />
-          </div>
-          
-          {/* Fixed direction line extending from heart toward BH icon */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          {/* Fixed direction line extending from heart toward BH icon - behind heart and BH */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-0">
             <div 
               className={`w-1.5 origin-bottom ${
                 state.isAligned 
@@ -168,6 +159,18 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
                 height: '80px',
                 transform: 'translateY(-50%)',
                 animationDuration: state.isAligned ? '1.5s' : undefined
+              }}
+            />
+          </div>
+          
+          {/* Center heart - fixed pointing up, aligned with line */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+            <Heart 
+              className={`w-7 h-7 text-blush fill-blush ${
+                state.isAligned ? 'animate-pulse' : ''
+              }`}
+              style={{
+                animationDuration: state.isAligned ? '1s' : undefined
               }}
             />
           </div>
