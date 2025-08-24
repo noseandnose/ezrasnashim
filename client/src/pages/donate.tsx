@@ -415,6 +415,7 @@ export default function Donate() {
   //const [clientSecret, setClientSecret] = useState("");
   const [donationComplete, setDonationComplete] = useState(false);
   const [userEmailForReceipt, setUserEmailForReceipt] = useState("");
+  const [showLoadingScreen, setShowLoadingScreen] = useState(true);
   const { toast } = useToast();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { openModal } = useModalStore();
@@ -528,6 +529,7 @@ export default function Donate() {
       });
       
       setDonationComplete(true);
+      setShowLoadingScreen(false);
       
       // Get session ID from URL (passed back from Stripe Checkout)
       const sessionId = urlParams.get('session_id') || urlParams.get('payment_intent') || 'unknown';
@@ -601,6 +603,26 @@ export default function Donate() {
         console.error('Error processing pending donation:', error);
         localStorage.removeItem('pending_donation');
       }
+    }
+
+    // Check if user returned from Stripe without completing payment
+    if (amount <= 0 && !donationType && !buttonType && !pendingDonation) {
+      console.log('CANCELLED: User returned from Stripe without completing payment - redirecting to home');
+      setShowLoadingScreen(false);
+      
+      // Show a message and redirect to home
+      toast({
+        title: "Donation Cancelled",
+        description: "No worries! You can try donating again anytime.",
+        variant: "default",
+      });
+      
+      // Redirect to home after a short delay
+      setTimeout(() => {
+        setLocation('/');
+      }, 1500);
+      
+      return;
     }
 
     if (amount <= 0) {
@@ -752,12 +774,17 @@ export default function Donate() {
   // }
 
   // Show loading spinner while redirecting to Stripe
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-ivory via-lavender/20 to-blush/10 flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin w-12 h-12 border-4 border-blush/20 border-t-blush rounded-full mx-auto mb-4"></div>
-        <p className="text-warm-gray platypi-medium">Processing your donation...</p>
+  if (showLoadingScreen) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-ivory via-lavender/20 to-blush/10 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin w-12 h-12 border-4 border-blush/20 border-t-blush rounded-full mx-auto mb-4"></div>
+          <p className="text-warm-gray platypi-medium">Processing your donation...</p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  // If we get here, user cancelled or something went wrong - redirect to home
+  return null;
 }
