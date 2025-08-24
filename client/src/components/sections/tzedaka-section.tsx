@@ -275,10 +275,10 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
       {/* Main Tzedaka Section - ONLY CAMPAIGN */}
       <div className="bg-gradient-soft rounded-b-3xl px-3 pt-3 pb-2 shadow-lg -mt-1">
         <button 
-          onClick={() => {
-            openModal('wedding-campaign', 'tzedaka');
-          }}
-          className="w-full bg-white/70 rounded-2xl px-3 pt-3 pb-2 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
+          onClick={() => handleTzedakaButtonClick('active_campaign')}
+          className={`w-full rounded-2xl px-3 pt-3 pb-2 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left ${
+            isTzedakaButtonCompleted('active_campaign') ? 'bg-sage/20' : 'bg-white/70'
+          }`}
         >
         {isLoading ? (
           <div className="animate-pulse">
@@ -344,8 +344,8 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
           </p>
         </div>
         
-        {/* 4 Equal-sized Tzedaka Buttons */}
-        <div className="grid grid-cols-2 gap-2">
+        {/* 3 Equal-sized Tzedaka Buttons */}
+        <div className="grid grid-cols-3 gap-2">
           {/* Button 1: Gave Tzedaka Elsewhere (no money) */}
           <button
             onClick={() => handleTzedakaButtonClick('gave_elsewhere')}
@@ -367,25 +367,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             </div>
           </button>
 
-          {/* Button 2: Donate to Active Campaign (money) */}
-          <button
-            onClick={() => handleTzedakaButtonClick('active_campaign')}
-            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              isTzedakaButtonCompleted('active_campaign') ? 'bg-sage/20' : 'bg-white'
-            }`}
-          >
-            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              isTzedakaButtonCompleted('active_campaign') ? 'bg-sage' : 'bg-gradient-feminine'
-            }`}>
-              <Target className="text-white" size={18} strokeWidth={1.5} />
-            </div>
-            <h3 className="platypi-bold text-xs text-black mb-1">Active Campaign</h3>
-            <p className="platypi-regular text-xs text-black/60 leading-relaxed">
-              {isTzedakaButtonCompleted('active_campaign') ? 'Completed' : 'Support wedding'}
-            </p>
-          </button>
-
-          {/* Button 3: Put a Coin in Tzedaka (money) */}
+          {/* Button 2: Put a Coin in Tzedaka (money) */}
           <button
             onClick={() => handleTzedakaButtonClick('put_a_coin')}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
@@ -403,7 +385,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             </p>
           </button>
 
-          {/* Button 4: Sponsor a Day (money + extra fields) */}
+          {/* Button 3: Sponsor a Day (money + extra fields) */}
           <button
             onClick={() => handleTzedakaButtonClick('sponsor_a_day')}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
