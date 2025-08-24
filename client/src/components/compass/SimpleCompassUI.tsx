@@ -116,26 +116,6 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
               <div className="absolute left-2 top-1/2 transform -translate-y-1/2 font-bold text-sm text-black">W</div>
             </div>
             
-            {/* Jerusalem direction arrow */}
-            <div 
-              className="absolute top-1/2 left-1/2 w-full h-full pointer-events-none"
-              style={{ 
-                transform: `translate(-50%, -50%) rotate(${jerusalemArrowRotation}deg)`,
-                transition: state.hasPermission ? 'transform 0.3s ease-out' : 'none',
-                willChange: 'transform'
-              }}
-            >
-              <div className="absolute top-2 left-1/2 transform -translate-x-1/2">
-                <div className="w-12 h-12 rounded-full bg-white shadow-lg border-2 border-white flex items-center justify-center">
-                  <img 
-                    src={state.isAligned ? bhGreenIcon : bhPinkIcon}
-                    alt="Jerusalem direction"
-                    className={`w-8 h-8 ${state.isAligned ? 'animate-pulse' : ''}`}
-                  />
-                </div>
-              </div>
-            </div>
-            
             {/* Device heading line - shows direction user is facing */}
             <div 
               className="absolute top-1/2 left-1/2 w-full h-full pointer-events-none"
@@ -146,10 +126,10 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
               }}
             >
               <div 
-                className={`absolute top-1/2 left-1/2 h-20 w-0.5 bg-gradient-to-t origin-bottom transform -translate-x-1/2 ${
+                className={`absolute top-1/2 left-1/2 h-20 w-0.5 origin-bottom transform -translate-x-1/2 ${
                   state.isAligned 
-                    ? 'from-red-500 to-transparent animate-pulse' 
-                    : 'from-gray-400 to-transparent'
+                    ? 'bg-blush animate-pulse' 
+                    : 'bg-gray-400'
                 }`}
                 style={{
                   transformOrigin: 'bottom center',
@@ -159,13 +139,31 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
               />
             </div>
             
-            {/* Center heart */}
+            {/* BH icon moving around compass based on device heading */}
+            <div 
+              className="absolute top-1/2 left-1/2 w-full h-full pointer-events-none"
+              style={{ 
+                transform: `translate(-50%, -50%) rotate(${deviceHeadingRotation}deg)`,
+                transition: state.hasPermission ? 'transform 0.3s ease-out' : 'none',
+                willChange: 'transform'
+              }}
+            >
+              <div className="absolute top-2 left-1/2 transform -translate-x-1/2">
+                <div className="w-12 h-12 rounded-full bg-white shadow-lg border-2 border-white flex items-center justify-center">
+                  <img 
+                    src={state.isAligned ? bhGreenIcon : bhPinkIcon}
+                    alt="Your direction"
+                    className={`w-8 h-8 ${state.isAligned ? 'animate-pulse' : ''}`}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            {/* Center heart - always pink */}
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
               <Heart 
-                className={`w-8 h-8 ${
-                  state.isAligned 
-                    ? 'text-red-500 animate-pulse fill-current' 
-                    : 'text-blush fill-current'
+                className={`w-8 h-8 text-blush fill-current ${
+                  state.isAligned ? 'animate-pulse' : ''
                 }`}
                 style={{
                   animationDuration: state.isAligned ? '1s' : undefined
@@ -185,7 +183,7 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
           ) : (
             <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200">
               <p className="text-blue-800 font-medium">Turn to align with Jerusalem</p>
-              <p className="text-blue-600 text-sm">Align the line from your heart with the marker</p>
+              <p className="text-blue-600 text-sm">Turn until the BH icon points to Jerusalem bearing: {state.bearing.toFixed(0)}°</p>
             </div>
           )}
           
@@ -233,8 +231,8 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
             <li>2. Tap "Enable Compass" button above</li>
           )}
           <li>{deviceInfo.needsPermission && !state.hasPermission ? '3' : '2'}. Hold device upright and turn your body</li>
-          <li>{deviceInfo.needsPermission && !state.hasPermission ? '4' : '3'}. The marker shows Jerusalem, the line shows your direction</li>
-          <li>{deviceInfo.needsPermission && !state.hasPermission ? '5' : '4'}. Align the line with the marker - both will pulse when aligned</li>
+          <li>{deviceInfo.needsPermission && !state.hasPermission ? '4' : '3'}. The BH icon shows your direction, turn to align with Jerusalem</li>
+          <li>{deviceInfo.needsPermission && !state.hasPermission ? '5' : '4'}. When aligned, the heart and icon will pulse</li>
         </ol>
         
         {/* Device-specific tips */}
