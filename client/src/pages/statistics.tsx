@@ -355,14 +355,6 @@ export default function Statistics() {
                   {(() => {
                     const modalCompletions = (currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {};
                     
-                    // Debug logging for period-specific data 
-                    if (process.env.NODE_ENV === 'development') {
-                      console.log(`=== Feature Usage Debug for ${selectedPeriod} ===`);
-                      console.log('Raw modalCompletions:', modalCompletions);
-                      console.log('Individual tehillim entries:', Object.entries(modalCompletions).filter(([key]) => key.startsWith('individual-tehillim')));
-                      console.log('Current data object:', currentData);
-                    }
-                    
                     // Create a processed entries array with individual tehillim aggregated
                     const processedEntries: Array<[string, number]> = [];
                     let individualTehillimTotal = 0;
@@ -391,13 +383,22 @@ export default function Statistics() {
                     if (globalTehillimTotal > 0) {
                       processedEntries.push(['global-tehillim-chain', globalTehillimTotal]);
                     }
+
+                    // Debug logging for period-specific data 
+                    if (process.env.NODE_ENV === 'development') {
+                      console.log(`=== Feature Usage Debug for ${selectedPeriod} ===`);
+                      console.log('Raw modalCompletions:', modalCompletions);
+                      console.log('Individual tehillim entries:', Object.entries(modalCompletions).filter(([key]) => key.startsWith('individual-tehillim')));
+                      console.log('Current data object:', currentData);
+                      console.log('Processed entries before rendering:', processedEntries);
+                    }
                     
                     return processedEntries
                       .sort(([, a], [, b]) => (b as number) - (a as number))
-                      .map(([modalType, count]) => {
+                      .map(([modalType, count], index) => {
                         const Icon = modalTypeIcons[modalType] || BookOpen;
                         return (
-                          <div key={`${selectedPeriod}-${modalType}`} className="flex justify-between items-center py-1">
+                          <div key={`${selectedPeriod}-${modalType}-${index}`} className="flex justify-between items-center py-1">
                             <div className="flex items-center gap-2">
                               <Icon className="h-4 w-4 text-blush" />
                               <span className="text-xs platypi-medium text-warm-gray">
