@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, CheckCircle, Mail } from "lucide-react";
+import { ArrowLeft, Heart, Mail } from "lucide-react";
 import { useLocation } from "wouter";
 import { useDailyCompletionStore, useModalStore, useDonationCompletionStore, TzedakaButtonType } from "@/lib/types";
 import { playCoinSound } from "@/utils/sounds";
@@ -703,8 +703,8 @@ export default function Donate() {
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div className="w-full max-w-md bg-white rounded-3xl p-8 text-center shadow-2xl animate-in fade-in zoom-in duration-300">
-          <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-            <CheckCircle className="text-white" size={40} />
+          <div className="w-20 h-20 bg-gradient-to-br from-sage to-sage/80 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <Heart className="text-white fill-white" size={40} />
           </div>
           
           <h1 className="text-3xl font-bold mb-4 text-gray-800">Thank You!</h1>
@@ -715,7 +715,7 @@ export default function Donate() {
             ${amount || '0'} - {donationType}
           </p>
           <p className="text-sm text-gray-500 mb-8">
-            May your generosity bring many blessings and help us reach our goal of 1 million mitzvos monthly.
+            Thank you so much for doing Tzedaka through Ezras Nashim, may you merit to do many more holy mitzvas!
             {userEmailForReceipt && (
               <span className="block mt-2">
                 A tax receipt will be sent to: <strong>{userEmailForReceipt}</strong>
