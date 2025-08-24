@@ -751,43 +751,12 @@ export default function Donate() {
   //   );
   // }
 
+  // Show loading spinner while redirecting to Stripe
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blush/10 to-peach/10 p-4">
-      <div className="max-w-md mx-auto pt-8">
-        <div className="flex items-center mb-6">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleBackToApp}
-            className="mr-4"
-          >
-            <ArrowLeft size={20} />
-          </Button>
-          <h1 className="text-xl font-bold">Complete Donation</h1>
-        </div>
-
-        {/* <div className="bg-white rounded-3xl p-6 shadow-lg">
-          <Elements 
-            stripe={stripePromise} 
-            options={{
-              clientSecret: clientSecret,
-              appearance: {
-                theme: 'stripe',
-                variables: {
-                  colorPrimary: 'hsl(328, 85%, 87%)',
-                }
-              }
-            }}
-          >
-            <DonationForm
-              amount={amount}
-              donationType={donationType}
-              sponsorName={sponsorName}
-              dedication={dedication}
-              onSuccess={handleSuccess}
-            />
-          </Elements>
-        </div> */}
+    <div className="min-h-screen bg-gradient-to-br from-ivory via-lavender/20 to-blush/10 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin w-12 h-12 border-4 border-blush/20 border-t-blush rounded-full mx-auto mb-4"></div>
+        <p className="text-warm-gray platypi-medium">Processing your donation...</p>
       </div>
     </div>
   );
