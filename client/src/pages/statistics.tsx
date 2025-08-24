@@ -34,13 +34,13 @@ export default function Statistics() {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('today');
   const queryClient = useQueryClient();
   
-  // Force refresh all stats when component mounts
+  // Force refresh all stats when component mounts and when period changes
   useEffect(() => {
-    // Force invalidate and refetch all queries when page loads
+    // Force invalidate and refetch all queries when page loads or period changes
     queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/today"] });
     queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/month"] });
     queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/total"] });
-  }, []); // Empty dependency array = runs on every mount
+  }, [selectedPeriod]); // Invalidate when period changes
 
   // Fetch today's stats
   const { data: todayStats, isLoading: todayLoading } = useQuery<DailyStats>({
@@ -348,6 +348,11 @@ export default function Statistics() {
                   {(() => {
                     const modalCompletions = (currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {};
                     
+                    // Debug logging for period-specific data 
+                    if (process.env.NODE_ENV === 'development') {
+                      console.log(`Feature Usage for ${selectedPeriod}:`, modalCompletions);
+                    }
+                    
                     // Create a processed entries array with individual tehillim aggregated
                     const processedEntries: Array<[string, number]> = [];
                     let individualTehillimTotal = 0;
@@ -382,7 +387,7 @@ export default function Statistics() {
                       .map(([modalType, count]) => {
                         const Icon = modalTypeIcons[modalType] || BookOpen;
                         return (
-                          <div key={modalType} className="flex justify-between items-center py-1">
+                          <div key={`${selectedPeriod}-${modalType}`} className="flex justify-between items-center py-1">
                             <div className="flex items-center gap-2">
                               <Icon className="h-4 w-4 text-blush" />
                               <span className="text-xs platypi-medium text-warm-gray">
