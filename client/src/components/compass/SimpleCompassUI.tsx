@@ -167,34 +167,41 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
                 </div>
               </div>
             </div>
-            {/* Center heart - fixed pointing up, aligned with line */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-              <Heart 
-                className={`w-7 h-7 text-blush fill-blush ${
-                  state.isAligned ? 'animate-pulse' : ''
-                }`}
-                style={{
-                  animationDuration: state.isAligned ? '1s' : undefined
-                }}
-              />
+            {/* Direction line pointing toward BH icon - rotates with compass */}
+            <div 
+              className="absolute top-1/2 left-1/2 w-full h-full pointer-events-none z-0"
+              style={{ 
+                transform: `translate(-50%, -50%) rotate(${jerusalemArrowRotation}deg)`
+              }}
+            >
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2">
+                <div 
+                  className={`w-1.5 origin-bottom ${
+                    state.isAligned 
+                      ? 'bg-blush animate-pulse' 
+                      : 'bg-gray-400'
+                  }`}
+                  style={{
+                    transformOrigin: 'bottom center',
+                    height: '80px',
+                    transform: 'translateY(-100%)',
+                    animationDuration: state.isAligned ? '1.5s' : undefined
+                  }}
+                />
+              </div>
             </div>
           </div>
           
         </div>
         
-        {/* Fixed direction line extending from heart toward BH icon - behind everything */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-0">
-          <div 
-            className={`w-1.5 origin-bottom ${
-              state.isAligned 
-                ? 'bg-blush animate-pulse' 
-                : 'bg-gray-400'
+        {/* Center heart - stays upright, doesn't rotate */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+          <Heart 
+            className={`w-7 h-7 text-blush fill-blush ${
+              state.isAligned ? 'animate-pulse' : ''
             }`}
             style={{
-              transformOrigin: 'bottom center',
-              height: '80px',
-              transform: 'translateY(-50%)',
-              animationDuration: state.isAligned ? '1.5s' : undefined
+              animationDuration: state.isAligned ? '1s' : undefined
             }}
           />
         </div>
