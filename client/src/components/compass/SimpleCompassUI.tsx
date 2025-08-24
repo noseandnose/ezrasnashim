@@ -173,9 +173,19 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
         
         {/* Fixed center heart and line - stays in place while compass rotates around it */}
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-          {/* Line extending from heart in user's facing direction - always points up */}
+          {/* Heart at the exact center of compass */}
+          <Heart 
+            className={`w-7 h-7 text-blush fill-blush ${
+              state.isAligned ? 'animate-pulse' : ''
+            }`}
+            style={{
+              animationDuration: state.isAligned ? '1s' : undefined
+            }}
+          />
+          
+          {/* Line extending upward from heart center */}
           <div 
-            className={`w-1.5 origin-bottom ${
+            className={`w-1.5 origin-bottom absolute left-1/2 transform -translate-x-1/2 ${
               state.isAligned 
                 ? 'bg-blush animate-pulse' 
                 : 'bg-gray-400'
@@ -183,18 +193,8 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
             style={{
               transformOrigin: 'bottom center',
               height: '80px',
-              transform: 'translateY(-100%)',
+              bottom: '50%',
               animationDuration: state.isAligned ? '1.5s' : undefined
-            }}
-          />
-          
-          {/* Heart at center - always points up along the line */}
-          <Heart 
-            className={`w-7 h-7 text-blush fill-blush absolute top-0 left-1/2 transform -translate-x-1/2 ${
-              state.isAligned ? 'animate-pulse' : ''
-            }`}
-            style={{
-              animationDuration: state.isAligned ? '1s' : undefined
             }}
           />
         </div>
