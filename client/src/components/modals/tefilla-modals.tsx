@@ -3798,11 +3798,16 @@ function JerusalemCompass() {
       }
     }
 
-    // Comprehensive Android geolocation optimization
+    // Device detection for geolocation optimization
+    const userAgent = navigator.userAgent;
+    const isSamsung = /SM-/i.test(userAgent) || /Samsung/i.test(userAgent);
+    const isOldIPhone = /iPhone.*OS [5-9]_/i.test(userAgent);
+    
+    // OPTIMIZED: Device-specific geolocation settings
     const geoOptions = {
-      enableHighAccuracy: isAndroid ? false : true, // Android often fails with high accuracy
-      timeout: isAndroid ? 12000 : 6000, // Much longer timeout for Android
-      maximumAge: isAndroid ? 300000 : 120000 // 5 min cache for Android, 2 min for others
+      enableHighAccuracy: isSamsung ? false : (isAndroid ? false : true), // Samsung and Android prefer lower accuracy
+      timeout: isSamsung ? 15000 : (isAndroid ? 12000 : 8000), // Extra timeout for Samsung devices
+      maximumAge: isOldIPhone ? 600000 : (isAndroid ? 300000 : 120000) // Longer cache for older devices
     };
 
     navigator.geolocation.getCurrentPosition(
@@ -3895,24 +3900,28 @@ function JerusalemCompass() {
     }
   };
 
-  // Comprehensive Android orientation handling for all versions and browsers
+  // Comprehensive orientation handling optimized for all devices
   const initializeOrientation = () => {
     let lastHeading = 0;
     let headingBuffer: number[] = [];
-    const BUFFER_SIZE = 12; // Larger buffer for Android stability
-    const UPDATE_THRESHOLD = 1.5; // Fine-tuned for responsiveness
-    let lastUpdateTime = Date.now();
-    const MIN_UPDATE_INTERVAL = 40; // Optimized for smooth updates
     
     // Enhanced Android detection - covers all versions and browsers
     const userAgent = navigator.userAgent;
     const isAndroid = /Android/i.test(userAgent);
     const androidVersion = isAndroid ? parseFloat(userAgent.match(/Android ([0-9.]+)/)?.[1] || '0') : 0;
-    const isOldAndroid = androidVersion > 0 && androidVersion < 5.0; // Android 4.x and below
+    const isOldAndroid = androidVersion > 0 && androidVersion < 5.0;
     const isModernAndroid = androidVersion >= 5.0;
     const isChrome = /Chrome/i.test(userAgent);
     const isFirefox = /Firefox/i.test(userAgent);
     const isSamsung = /SM-/i.test(userAgent) || /Samsung/i.test(userAgent);
+    const isOldIPhone = /iPhone.*OS [5-9]_/i.test(userAgent); // iOS 5-9
+    const isModernIPhone = /iPhone.*OS 1[0-9]_/i.test(userAgent); // iOS 10+
+    
+    // Device-optimized parameters to fix shaking and responsiveness issues
+    const BUFFER_SIZE = isOldIPhone ? 5 : (isAndroid ? 8 : 6); // Smaller buffer for old iPhones
+    const UPDATE_THRESHOLD = isOldIPhone ? 3.0 : (isSamsung ? 2.5 : 1.8); // Less sensitive for problematic devices
+    let lastUpdateTime = Date.now();
+    const MIN_UPDATE_INTERVAL = isOldIPhone ? 80 : (isAndroid ? 60 : 40); // Slower updates for old devices
     
     const handleOrientation = (event: DeviceOrientationEvent) => {
       let heading = 0;
@@ -3926,14 +3935,13 @@ function JerusalemCompass() {
       // Android and other devices - complex handling for different versions
       else if (event.alpha !== null && event.alpha !== undefined) {
         if (isAndroid) {
-          // Android compass handling - completely rewritten for accuracy
+          // FIXED: Android compass handling with corrected Samsung logic
           if (isOldAndroid) {
             // Android 4.x and older - use direct alpha but invert
             heading = (360 - event.alpha) % 360;
           } else if (isModernAndroid) {
-            if (isChrome) {
-              // Modern Android Chrome - alpha is already magnetic north
-              // But we need to account for device orientation
+            if (isChrome && !isSamsung) {
+              // Modern Android Chrome (non-Samsung) - alpha handling based on absolute flag
               if (event.absolute) {
                 // Absolute orientation available - use alpha directly
                 heading = event.alpha;
@@ -3942,11 +3950,12 @@ function JerusalemCompass() {
                 heading = (360 - event.alpha) % 360;
               }
             } else if (isFirefox) {
-              // Firefox on Android - different handling
+              // Firefox on Android - use alpha directly
               heading = event.alpha || 0;
             } else if (isSamsung) {
-              // Samsung Internet browser - special handling
-              heading = (360 - event.alpha) % 360;
+              // FIXED: Samsung devices - use alpha directly (was incorrectly inverted)
+              // Samsung devices report alpha correctly relative to magnetic north
+              heading = event.alpha;
             } else {
               // Other Android browsers - use inverted alpha
               heading = (360 - event.alpha) % 360;
@@ -3990,19 +3999,27 @@ function JerusalemCompass() {
         return;
       }
       
-      // Calculate circular mean for compass headings (handles 359° to 1° transitions)
-      let sinSum = 0;
-      let cosSum = 0;
-      const weights = headingBuffer.map((_, i) => Math.pow(0.9, headingBuffer.length - 1 - i)); // Exponential decay
-      
-      headingBuffer.forEach((h, i) => {
-        const radians = (h * Math.PI) / 180;
-        const weight = weights[i];
-        sinSum += Math.sin(radians) * weight;
-        cosSum += Math.cos(radians) * weight;
-      });
-      
-      const avgHeading = ((Math.atan2(sinSum, cosSum) * 180) / Math.PI + 360) % 360;
+      // OPTIMIZED: Simplified averaging for better performance on older devices
+      let avgHeading;
+      if (isOldIPhone) {
+        // Simple average for old iPhones to reduce processing load
+        const sum = headingBuffer.reduce((acc, h) => acc + h, 0);
+        avgHeading = sum / headingBuffer.length;
+      } else {
+        // Enhanced circular mean for modern devices
+        let sinSum = 0;
+        let cosSum = 0;
+        const weights = headingBuffer.map((_, i) => Math.pow(0.9, headingBuffer.length - 1 - i));
+        
+        headingBuffer.forEach((h, i) => {
+          const radians = (h * Math.PI) / 180;
+          const weight = weights[i];
+          sinSum += Math.sin(radians) * weight;
+          cosSum += Math.cos(radians) * weight;
+        });
+        
+        avgHeading = ((Math.atan2(sinSum, cosSum) * 180) / Math.PI + 360) % 360;
+      }
       
       // Check time constraint
       const now = Date.now();
@@ -4026,43 +4043,38 @@ function JerusalemCompass() {
 
     orientationEventRef.current = handleOrientation;
     
-    // Enhanced Android event listener setup for maximum compatibility
+    // FIXED: Enhanced event listener setup to prevent conflicts
     const setupEventListeners = () => {
+      // Single event listener strategy to prevent conflicts
+      let eventType = 'deviceorientation';
+      let useAbsolute = false;
+      
       if (isAndroid) {
-        // Android-specific event handling
-        if (isModernAndroid && 'DeviceOrientationEvent' in window) {
-          // Try absolute orientation first for modern Android
-          if ('ondeviceorientationabsolute' in window) {
-            try {
-              window.addEventListener('deviceorientationabsolute', handleOrientation as any, { passive: true });
-              // Also add regular orientation as fallback
-              window.addEventListener('deviceorientation', handleOrientation, { passive: true });
-            } catch (e) {
-              // Fallback to regular deviceorientation
-              window.addEventListener('deviceorientation', handleOrientation, { passive: true });
-            }
-          } else {
-            // No absolute orientation, use regular
-            window.addEventListener('deviceorientation', handleOrientation, { passive: true });
-          }
-        } else if (isOldAndroid) {
-          // Old Android - simple deviceorientation
-          window.addEventListener('deviceorientation', handleOrientation, { passive: true });
-        } else {
-          // Unknown Android version - try both
-          window.addEventListener('deviceorientation', handleOrientation, { passive: true });
-          if ('ondeviceorientationabsolute' in window) {
-            window.addEventListener('deviceorientationabsolute', handleOrientation as any, { passive: true });
-          }
+        // Android-specific event handling - prioritize stability
+        if (isModernAndroid && 'ondeviceorientationabsolute' in window) {
+          // For modern Android, prefer absolute orientation when available
+          eventType = 'deviceorientationabsolute';
+          useAbsolute = true;
         }
-      } else {
-        // Non-Android devices - standard setup
-        window.addEventListener('deviceorientation', handleOrientation, { passive: true });
-        
-        // Also listen for absolute orientation if available
+        // For Samsung and older devices, stick with regular deviceorientation
+      } else if (!isOldIPhone) {
+        // For modern non-Android devices, try absolute if available
         if ('ondeviceorientationabsolute' in window) {
-          window.addEventListener('deviceorientationabsolute', handleOrientation as any, { passive: true });
+          eventType = 'deviceorientationabsolute';
+          useAbsolute = true;
         }
+      }
+      
+      // Add single event listener to prevent conflicts
+      try {
+        if (useAbsolute) {
+          window.addEventListener(eventType, handleOrientation as any, { passive: true });
+        } else {
+          window.addEventListener(eventType, handleOrientation, { passive: true });
+        }
+      } catch (e) {
+        // Fallback to regular deviceorientation
+        window.addEventListener('deviceorientation', handleOrientation, { passive: true });
       }
     };
     
