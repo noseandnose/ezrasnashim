@@ -27,20 +27,26 @@ export default function MessageModal({ isOpen, onClose, date }: MessageModalProp
         
         <div className="py-4 overflow-y-auto flex-1">
           {isLoading ? (
-            <p className="text-center text-warm-gray">Loading message...</p>
+            <div className="bg-white rounded-2xl p-6 border border-blush/10">
+              <p className="text-center text-warm-gray">Loading message...</p>
+            </div>
           ) : message ? (
-            <div className="space-y-4">
-              <p className="text-warm-gray whitespace-pre-wrap platypi-medium leading-relaxed">
-                {message.message}
-              </p>
-              <p className="text-xs text-warm-gray/60 text-right">
-                {format(new Date(date), "MMMM d, yyyy")}
-              </p>
+            <div className="bg-white rounded-2xl p-6 border border-blush/10">
+              <div className="space-y-4">
+                <p className="text-warm-gray whitespace-pre-wrap platypi-medium leading-relaxed">
+                  {message.message}
+                </p>
+                <p className="text-xs text-warm-gray/60 text-right">
+                  {format(new Date(date), "MMMM d, yyyy")}
+                </p>
+              </div>
             </div>
           ) : (
-            <p className="text-center text-warm-gray">
-              No message available for today.
-            </p>
+            <div className="bg-white rounded-2xl p-6 border border-blush/10">
+              <p className="text-center text-warm-gray">
+                No message available for today.
+              </p>
+            </div>
           )}
         </div>
         
