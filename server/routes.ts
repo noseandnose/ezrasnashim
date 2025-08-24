@@ -1887,14 +1887,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     let event;
 
     try {
-      // Verify webhook signature
-      if (!sig) {
-        throw new Error('Missing stripe signature');
+      // In development mode without webhook secret, skip verification
+      if (process.env.NODE_ENV === 'development' && !process.env.STRIPE_WEBHOOK_SECRET) {
+        console.warn('⚠️ WARNING: Running webhook without signature verification in development mode');
+        event = req.body;
+      } else {
+        // Production mode or webhook secret available - verify signature
+        if (!sig) {
+          throw new Error('Missing stripe signature');
+        }
+        if (!process.env.STRIPE_WEBHOOK_SECRET) {
+          throw new Error('Missing stripe webhook secret');
+        }
+        event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
       }
-      if (!process.env.STRIPE_WEBHOOK_SECRET) {
-        throw new Error('Missing stripe webhook secret');
-      }
-      event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       console.error('Webhook signature verification failed:', errorMessage);
