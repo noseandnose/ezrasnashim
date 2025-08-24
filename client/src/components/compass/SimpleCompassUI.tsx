@@ -199,7 +199,6 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
             }}
           />
         </div>
-        </div>
         
         {/* Status and alignment message */}
         <div className="text-center space-y-2">
