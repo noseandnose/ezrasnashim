@@ -8,6 +8,7 @@ import logoImage from "@assets/6LO_1753613081319.png";
 import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
 import MessageModal from "./modals/message-modal";
 import { useQuery } from "@tanstack/react-query";
+import { getLocalDateString } from "@/lib/dateUtils";
 
 
 export default function AppHeader() {
@@ -24,7 +25,7 @@ export default function AppHeader() {
   const [lastClickTime, setLastClickTime] = useState(0);
   const [hasClickedShare, setHasClickedShare] = useState(false);
   
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateString();
   
   // Check if there's a message for today
   const { data: todayMessage } = useQuery({

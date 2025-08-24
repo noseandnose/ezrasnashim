@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { create } from 'zustand';
+import { getLocalDateString } from '@/lib/dateUtils';
 
 interface HebrewDateState {
   hebrewDate: string;
@@ -13,7 +14,7 @@ export const useHebrewDateStore = create<HebrewDateState>((set) => ({
 
 export function useHebrewDate() {
   const { hebrewDate, setHebrewDate } = useHebrewDateStore();
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateString();
 
   return useQuery({
     queryKey: [`/api/hebrew-date`, today],
@@ -54,7 +55,7 @@ export function useHebrewDateWithShkia(shkiaTime?: string) {
   // Parse shkia time and determine if we should use next day
   const getDateToUse = () => {
     const now = new Date();
-    const today = now.toISOString().split('T')[0];
+    const today = getLocalDateString();
     
     if (shkiaTime) {
       try {

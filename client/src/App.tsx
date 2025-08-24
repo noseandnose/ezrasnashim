@@ -9,6 +9,7 @@ import { useEffect, lazy, Suspense } from "react";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import UpdateNotification from "@/components/UpdateNotification";
 import "@/utils/clear-modal-completions";
+import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));
@@ -41,10 +42,8 @@ function Router() {
         const stored = localStorage.getItem('modalCompletions');
         if (stored) {
           const parsed = JSON.parse(stored);
-          const today = new Date().toISOString().split('T')[0];
-          const yesterday = new Date();
-          yesterday.setDate(yesterday.getDate() - 1);
-          const yesterdayStr = yesterday.toISOString().split('T')[0];
+          const today = getLocalDateString();
+          const yesterdayStr = getLocalYesterdayString();
           
           // Keep only today and yesterday
           const cleaned: Record<string, string[]> = {};

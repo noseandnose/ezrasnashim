@@ -1,4 +1,5 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { getLocalDateString } from "@/lib/dateUtils";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
@@ -155,7 +156,7 @@ export default function TableModals() {
   }
 
   const { data: inspirationContent } = useQuery<InspirationContent>({
-    queryKey: [`/api/table/inspiration/${new Date().toISOString().split('T')[0]}`],
+    queryKey: [`/api/table/inspiration/${getLocalDateString()}`],
     enabled: activeModal === 'inspiration'
   });
 

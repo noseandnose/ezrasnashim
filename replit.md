@@ -14,7 +14,17 @@ Text formatting: Database content supports markdown-style formatting - **text** 
 Compass alignment message: When compass is aligned with Jerusalem, displays "Your heart is in the right place" instead of technical alignment message.
 Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20% bigger (w-8 h-8), both BH Green icon and center heart pulse when aligned.
 
-## Recent Changes (August 23, 2025)
+## Recent Changes (August 24, 2025)
+### Critical Timezone Consistency Fix (August 24, 2025)
+- **FIXED MAJOR BUG**: Resolved timezone inconsistency where different user activities reset at different times
+- **Problem**: Main daily tasks used UTC midnight while donations used local midnight, creating user confusion
+- **Solution**: Created centralized date utility (`getLocalDateString()`) ensuring ALL systems use local timezone
+- **Impact**: Torah, Tefilla, Tzedaka completions, modal tracking, donations, and content caching now all reset at same local midnight
+- **Files Updated**: Core completion stores, cache systems, analytics, and content modals standardized to local timezone
+- **User Experience**: Eliminates confusion about when daily progress resets - everything now resets intuitively at local midnight
+- **Foundation**: Prepares codebase for future Jewish day boundaries (Shkia-based transitions) if desired
+
+## Previous Changes (August 23, 2025)
 ### Comprehensive Android Compass System Overhaul (August 23, 2025)
 - **MAJOR REWRITE**: Complete Android compass system rebuilt from ground up to fix all critical issues
 - **Universal Android Support**: Fixed compass for Android 4.x through modern versions across all browsers (Chrome, Firefox, Samsung Internet)
