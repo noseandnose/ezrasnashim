@@ -96,11 +96,22 @@ export default function Statistics() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    // Invalidate all analytics queries to force fresh data
-    await queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/today"] });
-    await queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/month"] });
-    await queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/total"] });
-    await queryClient.invalidateQueries({ predicate: (query) => query.queryKey[0]?.toString().includes('/api/analytics/') });
+    
+    // HARD REFRESH: Clear all cache and force immediate refetch
+    await queryClient.resetQueries({ queryKey: ["/api/analytics/stats/today"] });
+    await queryClient.resetQueries({ queryKey: ["/api/analytics/stats/month"] });
+    await queryClient.resetQueries({ queryKey: ["/api/analytics/stats/total"] });
+    
+    // Also reset all analytics-related queries
+    await queryClient.resetQueries({ 
+      predicate: (query) => query.queryKey[0]?.toString().includes('/api/analytics/') 
+    });
+    
+    // Force refetch to guarantee fresh data
+    await queryClient.refetchQueries({ 
+      predicate: (query) => query.queryKey[0]?.toString().includes('/api/analytics/') 
+    });
+    
     // Short delay to show refresh animation
     setTimeout(() => setIsRefreshing(false), 1000);
   };
@@ -210,7 +221,12 @@ export default function Statistics() {
       totalRaised: number;
     }>({
       queryKey: [`/api/analytics/community-impact?period=${period}`],
-      refetchInterval: 60000, // Refresh every minute
+      staleTime: 0, // Always consider data stale for live updates
+      gcTime: 0, // Don't cache data (TanStack Query v5)
+      refetchInterval: 10000, // Refresh every 10 seconds for faster updates
+      refetchOnMount: 'always', // Always refetch when component mounts
+      refetchOnWindowFocus: true, // Refetch when window gets focus
+      refetchIntervalInBackground: true, // Keep refetching even when tab not focused
     });
 
     return (
