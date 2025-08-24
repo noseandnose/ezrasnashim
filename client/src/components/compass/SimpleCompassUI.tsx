@@ -5,8 +5,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { SimpleCompass, CompassState, calculateCompassRotation, getDeviceInfo } from '@/lib/compass';
-import { MapPin, Compass as CompassIcon } from 'lucide-react';
+import { SimpleCompass, CompassState, getDeviceInfo } from '@/lib/compass';
+import { MapPin, Compass as CompassIcon, Heart } from 'lucide-react';
 
 // Import compass icons
 import bhPinkIcon from '@assets/BH_Pink_1755681221620.png';
@@ -43,10 +43,9 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
     await compass.requestPermission();
   };
   
-  // Calculate the single rotation needed for the arrow
-  const arrowRotation = state.location 
-    ? calculateCompassRotation(state.bearing, state.deviceHeading)
-    : 0;
+  // Calculate rotations for Jerusalem arrow and device heading line
+  const jerusalemArrowRotation = state.location ? state.bearing : 0;
+  const deviceHeadingRotation = state.deviceHeading;
   
   const renderDebugInfo = () => {
     if (!debugMode || !state.debugInfo) return null;
@@ -117,11 +116,11 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
               <div className="absolute left-2 top-1/2 transform -translate-y-1/2 font-bold text-sm text-black">W</div>
             </div>
             
-            {/* Single rotating arrow pointing to Jerusalem */}
+            {/* Jerusalem direction arrow */}
             <div 
               className="absolute top-1/2 left-1/2 w-full h-full pointer-events-none"
               style={{ 
-                transform: `translate(-50%, -50%) rotate(${arrowRotation}deg)`,
+                transform: `translate(-50%, -50%) rotate(${jerusalemArrowRotation}deg)`,
                 transition: state.hasPermission ? 'transform 0.3s ease-out' : 'none',
                 willChange: 'transform'
               }}
@@ -137,8 +136,42 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
               </div>
             </div>
             
-            {/* Center dot */}
-            <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-blush rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
+            {/* Device heading line - shows direction user is facing */}
+            <div 
+              className="absolute top-1/2 left-1/2 w-full h-full pointer-events-none"
+              style={{ 
+                transform: `translate(-50%, -50%) rotate(${deviceHeadingRotation}deg)`,
+                transition: state.hasPermission ? 'transform 0.3s ease-out' : 'none',
+                willChange: 'transform'
+              }}
+            >
+              <div 
+                className={`absolute top-1/2 left-1/2 h-20 w-0.5 bg-gradient-to-t origin-bottom transform -translate-x-1/2 ${
+                  state.isAligned 
+                    ? 'from-red-500 to-transparent animate-pulse' 
+                    : 'from-gray-400 to-transparent'
+                }`}
+                style={{
+                  transformOrigin: 'bottom center',
+                  transform: 'translateX(-50%) translateY(-100%)',
+                  animationDuration: state.isAligned ? '1.5s' : undefined
+                }}
+              />
+            </div>
+            
+            {/* Center heart */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <Heart 
+                className={`w-8 h-8 ${
+                  state.isAligned 
+                    ? 'text-red-500 animate-pulse fill-current' 
+                    : 'text-blush fill-current'
+                }`}
+                style={{
+                  animationDuration: state.isAligned ? '1s' : undefined
+                }}
+              />
+            </div>
           </div>
         </div>
         
@@ -152,7 +185,7 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
           ) : (
             <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200">
               <p className="text-blue-800 font-medium">Turn to align with Jerusalem</p>
-              <p className="text-blue-600 text-sm">Follow the pink marker</p>
+              <p className="text-blue-600 text-sm">Align the line from your heart with the marker</p>
             </div>
           )}
           
@@ -170,7 +203,7 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
       {/* Header */}
       <div className="text-center">
         <h2 className="text-xl font-bold text-black mb-2">The Kotel Compass</h2>
-        <p className="text-sm text-gray-600">Simple. Accurate. Reliable.</p>
+        <p className="text-sm text-gray-600">Beta. Currently in testing</p>
       </div>
       
       {/* iOS Permission Request */}
@@ -200,8 +233,8 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
             <li>2. Tap "Enable Compass" button above</li>
           )}
           <li>{deviceInfo.needsPermission && !state.hasPermission ? '3' : '2'}. Hold device upright and turn your body</li>
-          <li>{deviceInfo.needsPermission && !state.hasPermission ? '4' : '3'}. The arrow points to Jerusalem from your location</li>
-          <li>{deviceInfo.needsPermission && !state.hasPermission ? '5' : '4'}. When aligned, the marker turns green</li>
+          <li>{deviceInfo.needsPermission && !state.hasPermission ? '4' : '3'}. The marker shows Jerusalem, the line shows your direction</li>
+          <li>{deviceInfo.needsPermission && !state.hasPermission ? '5' : '4'}. Align the line with the marker - both will pulse when aligned</li>
         </ol>
         
         {/* Device-specific tips */}
