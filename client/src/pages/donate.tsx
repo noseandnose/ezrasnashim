@@ -1,7 +1,7 @@
 import { useStripe, Elements, PaymentElement, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { useEffect, useState, useRef } from 'react';
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -476,6 +476,15 @@ export default function Donate() {
         
         // CRITICAL FIX: Also complete the overall daily tzedaka task
         completeTask('tzedaka');
+        
+        // CACHE INVALIDATION: Force refresh of all financial data after successful donation
+        const today = new Date().toISOString().split('T')[0];
+        queryClient.invalidateQueries({ queryKey: ['/api/campaigns/active'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/today'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/month'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/total'] });
+        queryClient.invalidateQueries({ queryKey: [`/api/community/impact/${today}`] });
+        console.log('Invalidated financial data queries to show fresh data');
         
         toast({
           title: "Donation Complete!",
