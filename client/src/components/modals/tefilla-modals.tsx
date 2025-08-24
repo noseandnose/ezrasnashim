@@ -1582,8 +1582,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       });
       
       // Track modal completion for daily tracking  
-      trackModalComplete('global-tehillim');
-      markModalComplete('global-tehillim');
+      trackModalComplete('global-tehillim-chain');
+      markModalComplete('global-tehillim-chain');
       completeTask('tefilla');
       
       // Track name prayed for if there was one
@@ -1648,8 +1648,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       });
       
       // Track modal completion for daily tracking  
-      trackModalComplete('global-tehillim');
-      markModalComplete('global-tehillim');
+      trackModalComplete('global-tehillim-chain');
+      markModalComplete('global-tehillim-chain');
       completeTask('tefilla');
       
       // Track name prayed for if there was one

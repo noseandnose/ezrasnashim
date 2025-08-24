@@ -124,7 +124,8 @@ export default function Statistics() {
     maariv: "Maariv",
     nishmas: "Nishmas",
     "birkat-hamazon": "Birkat Hamazon",
-    "global-tehillim": "Global Tehillim Chain",
+    "global-tehillim-chain": "Global Tehillim Chain",
+    "tehillim-text": "Global Tehillim Chain", // Legacy key for existing data
     "special-tehillim": "Special Tehillim",
     "individual-tehillim": "Individual Tehillim", 
     "nishmas-campaign": "Nishmas Campaign",
@@ -162,7 +163,8 @@ export default function Statistics() {
     maariv: Star,
     nishmas: Heart,
     "birkat-hamazon": Clock3,
-    "global-tehillim": ScrollText,
+    "global-tehillim-chain": ScrollText,
+    "tehillim-text": ScrollText, // Legacy key for existing data
     "special-tehillim": Star,
     "individual-tehillim": ScrollText,
     "nishmas-campaign": Heart,
@@ -315,11 +317,12 @@ export default function Statistics() {
               title="Tehillim Said"
               value={currentLoading ? "..." : (() => {
                 const modalCompletions = (currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {};
-                const globalTehillim = modalCompletions['global-tehillim'] || 0;
+                const globalTehillimChain = modalCompletions['global-tehillim-chain'] || 0;
+                const globalTehillimText = modalCompletions['tehillim-text'] || 0;
                 const specialTehillim = modalCompletions['special-tehillim'] || 0;
                 const individualTehillim = Object.keys(modalCompletions).filter(key => key.startsWith('individual-tehillim')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
                 const tehillimEvents = (currentData as any)?.totalTehillimCompleted || (currentData as any)?.tehillimCompleted || 0;
-                return (globalTehillim + specialTehillim + individualTehillim + tehillimEvents).toLocaleString();
+                return (globalTehillimChain + globalTehillimText + specialTehillim + individualTehillim + tehillimEvents).toLocaleString();
               })()}
               icon={ScrollText}
               color="text-lavender"
@@ -350,10 +353,14 @@ export default function Statistics() {
                     let individualTehillimTotal = 0;
                     
                     // Process all modal completion entries
+                    let globalTehillimTotal = 0;
                     Object.entries(modalCompletions).forEach(([modalType, count]) => {
                       if (modalType.startsWith('individual-tehillim-')) {
                         // Aggregate individual tehillim completions
                         individualTehillimTotal += (count as number) || 0;
+                      } else if (modalType === 'global-tehillim-chain' || modalType === 'tehillim-text') {
+                        // Aggregate global tehillim from both keys
+                        globalTehillimTotal += (count as number) || 0;
                       } else if (modalTypeNames[modalType] && !['unknown', 'test', ''].includes(modalType.toLowerCase())) {
                         // Include regular modal types that have names
                         processedEntries.push([modalType, count as number]);
@@ -363,6 +370,11 @@ export default function Statistics() {
                     // Add aggregated individual tehillim if there are any
                     if (individualTehillimTotal > 0) {
                       processedEntries.push(['individual-tehillim', individualTehillimTotal]);
+                    }
+                    
+                    // Add aggregated global tehillim if there are any
+                    if (globalTehillimTotal > 0) {
+                      processedEntries.push(['global-tehillim-chain', globalTehillimTotal]);
                     }
                     
                     return processedEntries
