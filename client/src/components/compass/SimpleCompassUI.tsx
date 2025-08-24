@@ -172,32 +172,33 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
         </div>
         
         {/* Fixed center heart and line - stays in place while compass rotates around it */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none">
-          {/* Line extending upward from heart center */}
-          <div 
-            className={`w-1.5 absolute left-1/2 transform -translate-x-1/2 ${
-              state.isAligned 
-                ? 'bg-blush animate-pulse' 
-                : 'bg-gray-400'
-            }`}
-            style={{
-              height: '80px',
-              bottom: '0',
-              transformOrigin: 'bottom center',
-              animationDuration: state.isAligned ? '1.5s' : undefined
-            }}
-          />
-          
+        <div className="absolute top-1/2 left-1/2 z-10 pointer-events-none" style={{ transform: 'translate(-50%, -50%)' }}>
           {/* Heart at the exact center of compass */}
-          <Heart 
-            className={`w-7 h-7 text-blush fill-blush absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 ${
-              state.isAligned ? 'animate-pulse' : ''
-            }`}
-            style={{
-              top: '0',
-              animationDuration: state.isAligned ? '1s' : undefined
-            }}
-          />
+          <div className="relative">
+            <Heart 
+              className={`w-7 h-7 text-blush fill-blush ${
+                state.isAligned ? 'animate-pulse' : ''
+              }`}
+              style={{
+                animationDuration: state.isAligned ? '1s' : undefined
+              }}
+            />
+            
+            {/* Line extending upward from heart center */}
+            <div 
+              className={`w-1.5 absolute left-1/2 transform -translate-x-1/2 ${
+                state.isAligned 
+                  ? 'bg-blush animate-pulse' 
+                  : 'bg-gray-400'
+              }`}
+              style={{
+                height: '80px',
+                bottom: '100%',
+                marginBottom: '-3px',
+                animationDuration: state.isAligned ? '1.5s' : undefined
+              }}
+            />
+          </div>
         </div>
         
         {/* Status and alignment message */}
