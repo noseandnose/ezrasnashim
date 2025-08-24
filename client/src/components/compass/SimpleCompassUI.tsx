@@ -149,19 +149,20 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
             
             {/* Jerusalem direction marker - rotates with compass */}
             <div 
-              className="absolute top-1/2 left-1/2 w-full h-full pointer-events-none z-20"
+              className="absolute top-1/2 left-1/2 w-full h-full pointer-events-none z-30"
               style={{ 
                 transform: `translate(-50%, -50%) rotate(${jerusalemArrowRotation}deg)`
               }}
             >
               <div className="absolute top-2 left-1/2 transform -translate-x-1/2">
-                <div className="w-12 h-12 rounded-full bg-white shadow-lg border-2 border-white flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full bg-white shadow-lg border-2 border-white flex items-center justify-center z-30">
                   <img 
                     src={state.isAligned ? bhGreenIcon : bhPinkIcon}
                     alt="Jerusalem direction"
-                    className={`w-8 h-8 ${state.isAligned ? 'animate-pulse' : ''}`}
+                    className={`w-8 h-8 ${state.isAligned ? 'animate-bounce' : ''}`}
                     style={{
-                      transform: `rotate(${deviceHeadingRotation - jerusalemArrowRotation}deg)`
+                      transform: `rotate(${deviceHeadingRotation - jerusalemArrowRotation}deg)`,
+                      animationDuration: state.isAligned ? '1s' : undefined
                     }}
                   />
                 </div>
@@ -188,11 +189,11 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
           </div>
           
           {/* Fixed center heart - ON TOP of everything */}
-          <div className="absolute top-1/2 left-1/2 z-30 pointer-events-none" style={{ transform: 'translate(-50%, -50%)' }}>
+          <div className="absolute top-1/2 left-1/2 z-40 pointer-events-none" style={{ transform: 'translate(-50%, -50%)' }}>
             {/* Heart at the exact center */}
             <Heart 
               className={`w-7 h-7 text-blush fill-blush ${
-                state.isAligned ? 'animate-pulse' : ''
+                state.isAligned ? 'animate-bounce' : ''
               }`}
               style={{
                 position: 'absolute',
