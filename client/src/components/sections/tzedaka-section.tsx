@@ -179,8 +179,14 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
   };
 
   const handleTzedakaButtonClick = (buttonType: TzedakaButtonType) => {
+    console.log('Tzedaka button clicked:', buttonType);
+    console.log('Is completed:', isTzedakaButtonCompleted(buttonType));
+    
     // Check if already completed
-    if (isTzedakaButtonCompleted(buttonType)) return;
+    if (isTzedakaButtonCompleted(buttonType)) {
+      console.log('Button already completed, not opening modal');
+      return;
+    }
     
     if (buttonType === 'gave_elsewhere') {
       // No money - just confirm and mark complete
@@ -227,6 +233,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
           modalId = 'sponsor-day';
           break;
       }
+      console.log('Opening modal:', modalId);
       openModal(modalId, 'tzedaka');
     }
   };
