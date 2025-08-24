@@ -1577,12 +1577,13 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       // Track tehillim completion for analytics
       trackEvent("tehillim_complete", { 
         perek: progress?.currentPerek,
-        language: showHebrew ? 'hebrew' : 'english'
+        language: showHebrew ? 'hebrew' : 'english',
+        type: 'global'
       });
       
-      // Track modal completion for daily tracking
-      trackModalComplete('tehillim-text');
-      markModalComplete('tehillim-text');
+      // Track modal completion for daily tracking  
+      trackModalComplete('global-tehillim');
+      markModalComplete('global-tehillim');
       completeTask('tefilla');
       
       // Track name prayed for if there was one
@@ -1642,12 +1643,13 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       // Track tehillim completion for analytics
       trackEvent("tehillim_complete", { 
         perek: progress?.currentPerek,
-        language: showHebrew ? 'hebrew' : 'english'
+        language: showHebrew ? 'hebrew' : 'english',
+        type: 'global'
       });
       
-      // Track modal completion for daily tracking
-      trackModalComplete('tehillim-text');
-      markModalComplete('tehillim-text');
+      // Track modal completion for daily tracking  
+      trackModalComplete('global-tehillim');
+      markModalComplete('global-tehillim');
       completeTask('tefilla');
       
       // Track name prayed for if there was one
@@ -3399,6 +3401,13 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                     {tehillimActiveTab === 'all' && (
                       <Button 
                         onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
+                          // Track tehillim completion for analytics
+                          trackEvent("tehillim_complete", { 
+                            perek: selectedPsalm,
+                            language: language,
+                            type: 'individual'
+                          });
+                          
                           // Track modal completion immediately
                           trackModalComplete(`individual-tehillim-${selectedPsalm}`);
                           markModalComplete(`individual-tehillim-${selectedPsalm}`);
@@ -3484,6 +3493,13 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                       {/* Complete button - returns to Tehillim selector */}
                       <Button 
                         onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
+                          // Track tehillim completion for analytics
+                          trackEvent("tehillim_complete", { 
+                            perek: selectedPsalm,
+                            language: language,
+                            type: 'individual'
+                          });
+                          
                           // Track modal completion immediately
                           trackModalComplete(`individual-tehillim-${selectedPsalm}`);
                           markModalComplete(`individual-tehillim-${selectedPsalm}`);

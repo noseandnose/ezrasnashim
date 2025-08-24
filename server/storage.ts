@@ -1289,7 +1289,7 @@ export class DatabaseStorage implements IStorage {
   // Helper method to calculate total acts
   private calculateTotalActs(modalCompletions: Record<string, number>, tehillimCompleted: number): number {
     const torahActs = ['torah', 'chizuk', 'emuna', 'halacha', 'featured-content'];
-    const tefillaActs = ['tefilla', 'morning-brochas', 'mincha', 'maariv', 'nishmas', 'birkat-hamazon', 'special-tehillim', 'individual-tehillim'];
+    const tefillaActs = ['tefilla', 'morning-brochas', 'mincha', 'maariv', 'nishmas', 'birkat-hamazon', 'special-tehillim', 'global-tehillim'];
     const tzedakaActs = ['tzedaka', 'donate'];
     
     let totalActs = 0;
@@ -1297,6 +1297,10 @@ export class DatabaseStorage implements IStorage {
     // Count modal acts
     for (const [modalType, count] of Object.entries(modalCompletions || {})) {
       if (torahActs.includes(modalType) || tefillaActs.includes(modalType) || tzedakaActs.includes(modalType)) {
+        totalActs += count;
+      }
+      // Also count individual tehillim completions
+      if (modalType.startsWith('individual-tehillim-')) {
         totalActs += count;
       }
     }

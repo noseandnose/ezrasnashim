@@ -124,7 +124,7 @@ export default function Statistics() {
     maariv: "Maariv",
     nishmas: "Nishmas",
     "birkat-hamazon": "Birkat Hamazon",
-    "tehillim-text": "Tehillim",
+    "global-tehillim": "Global Tehillim Chain",
     "special-tehillim": "Special Tehillim",
     "individual-tehillim": "Individual Tehillim", 
     "nishmas-campaign": "Nishmas Campaign",
@@ -162,7 +162,7 @@ export default function Statistics() {
     maariv: Star,
     nishmas: Heart,
     "birkat-hamazon": Clock3,
-    "tehillim-text": ScrollText,
+    "global-tehillim": ScrollText,
     "special-tehillim": Star,
     "individual-tehillim": ScrollText,
     "nishmas-campaign": Heart,
@@ -315,11 +315,11 @@ export default function Statistics() {
               title="Tehillim Said"
               value={currentLoading ? "..." : (() => {
                 const modalCompletions = (currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {};
-                const regularTehillim = modalCompletions['tehillim-text'] || 0;
+                const globalTehillim = modalCompletions['global-tehillim'] || 0;
                 const specialTehillim = modalCompletions['special-tehillim'] || 0;
                 const individualTehillim = Object.keys(modalCompletions).filter(key => key.startsWith('individual-tehillim')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
                 const tehillimEvents = (currentData as any)?.totalTehillimCompleted || (currentData as any)?.tehillimCompleted || 0;
-                return (regularTehillim + specialTehillim + individualTehillim + tehillimEvents).toLocaleString();
+                return (globalTehillim + specialTehillim + individualTehillim + tehillimEvents).toLocaleString();
               })()}
               icon={ScrollText}
               color="text-lavender"
@@ -342,27 +342,46 @@ export default function Statistics() {
                 <div className="text-center text-black/60">Loading...</div>
               ) : (
                 <div className="space-y-2">
-                  {Object.entries((currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {})
-                    .filter(([modalType]) => 
-                      // Remove unknown, test, and other unwanted entries
-                      !['unknown', 'test', ''].includes(modalType.toLowerCase()) &&
-                      modalTypeNames[modalType] // Only show items we have names for
-                    )
-                    .sort(([, a], [, b]) => (b as number) - (a as number))
-                    .map(([modalType, count]) => {
-                      const Icon = modalTypeIcons[modalType] || BookOpen;
-                      return (
-                        <div key={modalType} className="flex justify-between items-center py-1">
-                          <div className="flex items-center gap-2">
-                            <Icon className="h-4 w-4 text-blush" />
-                            <span className="text-xs platypi-medium text-warm-gray">
-                              {modalTypeNames[modalType]}
-                            </span>
+                  {(() => {
+                    const modalCompletions = (currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {};
+                    
+                    // Create a processed entries array with individual tehillim aggregated
+                    const processedEntries: Array<[string, number]> = [];
+                    let individualTehillimTotal = 0;
+                    
+                    // Process all modal completion entries
+                    Object.entries(modalCompletions).forEach(([modalType, count]) => {
+                      if (modalType.startsWith('individual-tehillim-')) {
+                        // Aggregate individual tehillim completions
+                        individualTehillimTotal += (count as number) || 0;
+                      } else if (modalTypeNames[modalType] && !['unknown', 'test', ''].includes(modalType.toLowerCase())) {
+                        // Include regular modal types that have names
+                        processedEntries.push([modalType, count as number]);
+                      }
+                    });
+                    
+                    // Add aggregated individual tehillim if there are any
+                    if (individualTehillimTotal > 0) {
+                      processedEntries.push(['individual-tehillim', individualTehillimTotal]);
+                    }
+                    
+                    return processedEntries
+                      .sort(([, a], [, b]) => (b as number) - (a as number))
+                      .map(([modalType, count]) => {
+                        const Icon = modalTypeIcons[modalType] || BookOpen;
+                        return (
+                          <div key={modalType} className="flex justify-between items-center py-1">
+                            <div className="flex items-center gap-2">
+                              <Icon className="h-4 w-4 text-blush" />
+                              <span className="text-xs platypi-medium text-warm-gray">
+                                {modalTypeNames[modalType]}
+                              </span>
+                            </div>
+                            <span className="text-xs font-bold text-black">{count.toLocaleString()}</span>
                           </div>
-                          <span className="text-xs font-bold text-black">{(count as number).toLocaleString()}</span>
-                        </div>
-                      );
-                    })}
+                        );
+                      });
+                  })()}
                 </div>
               )}
             </div>
