@@ -85,20 +85,20 @@ export default function Statistics() {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     
-    // HARD REFRESH: Clear all cache and force immediate refetch
-    await queryClient.resetQueries({ queryKey: ["/api/analytics/stats/today"] });
-    await queryClient.resetQueries({ queryKey: ["/api/analytics/stats/month"] });
-    await queryClient.resetQueries({ queryKey: ["/api/analytics/stats/total"] });
-    
-    // Also reset all analytics-related queries
-    await queryClient.resetQueries({ 
+    // NUCLEAR REFRESH: Remove all cache entirely and force refetch
+    queryClient.removeQueries({ queryKey: ["/api/analytics/stats/today"] });
+    queryClient.removeQueries({ queryKey: ["/api/analytics/stats/month"] });
+    queryClient.removeQueries({ queryKey: ["/api/analytics/stats/total"] });
+    queryClient.removeQueries({ 
       predicate: (query) => query.queryKey[0]?.toString().includes('/api/analytics/') 
     });
     
-    // Force refetch to guarantee fresh data
-    await queryClient.refetchQueries({ 
-      predicate: (query) => query.queryKey[0]?.toString().includes('/api/analytics/') 
-    });
+    // Force immediate refetch with no cache
+    await Promise.all([
+      queryClient.refetchQueries({ queryKey: ["/api/analytics/stats/today"] }),
+      queryClient.refetchQueries({ queryKey: ["/api/analytics/stats/month"] }),
+      queryClient.refetchQueries({ queryKey: ["/api/analytics/stats/total"] }),
+    ]);
     
     // Short delay to show refresh animation
     setTimeout(() => setIsRefreshing(false), 1000);
@@ -324,7 +324,12 @@ export default function Statistics() {
           <div className="grid grid-cols-2 gap-3">
             <StatCard
               title="Mitzvas Completed"
-              value={currentLoading ? "..." : (currentData as any)?.totalActs?.toLocaleString() || (currentData as any)?.totalActs || 0}
+              value={currentLoading ? "..." : (() => {
+                // Calculate total from modal completions to match Feature Usage exactly
+                const modalCompletions = (currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {};
+                const total = Object.values(modalCompletions).reduce((sum: number, count: any) => sum + (count || 0), 0);
+                return total.toLocaleString();
+              })()}
               icon={TrendingUp}
               color="text-blush"
             />
