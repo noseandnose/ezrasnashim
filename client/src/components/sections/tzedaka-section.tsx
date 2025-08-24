@@ -347,9 +347,49 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
           </p>
         </div>
         
-        {/* 3 Equal-sized Tzedaka Buttons */}
-        <div className="grid grid-cols-3 gap-2">
-          {/* Button 1: Gave Tzedaka Elsewhere (no money) */}
+        {/* Put a Coin - Long Button at Top */}
+        <button
+          onClick={() => handleTzedakaButtonClick('put_a_coin')}
+          className={`w-full rounded-3xl p-4 text-center hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 animate-pulse ${
+            isTzedakaButtonCompleted('put_a_coin') ? 'bg-sage/20' : 'bg-white'
+          }`}
+        >
+          <div className="flex items-center justify-center space-x-4">
+            <div className={`p-3 rounded-full ${
+              isTzedakaButtonCompleted('put_a_coin') ? 'bg-sage' : 'bg-gradient-feminine'
+            }`}>
+              <HandCoins className="text-white" size={24} strokeWidth={1.5} />
+            </div>
+            <div className="text-left">
+              <h3 className="platypi-bold text-lg text-black mb-1">Put a Coin</h3>
+              <p className="platypi-regular text-sm text-black/60">
+                {isTzedakaButtonCompleted('put_a_coin') ? 'Completed' : 'General donation'}
+              </p>
+            </div>
+          </div>
+        </button>
+
+        {/* Two Buttons Underneath */}
+        <div className="grid grid-cols-2 gap-2">
+          {/* Left: Sponsor a Day */}
+          <button
+            onClick={() => handleTzedakaButtonClick('sponsor_a_day')}
+            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
+              isTzedakaButtonCompleted('sponsor_a_day') ? 'bg-sage/20' : 'bg-white'
+            }`}
+          >
+            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
+              isTzedakaButtonCompleted('sponsor_a_day') ? 'bg-sage' : 'bg-gradient-feminine'
+            }`}>
+              <HandCoins className="text-white" size={18} strokeWidth={1.5} />
+            </div>
+            <h3 className="platypi-bold text-xs text-black mb-1">Sponsor a Day</h3>
+            <p className="platypi-regular text-xs text-black/60 leading-relaxed">
+              {isTzedakaButtonCompleted('sponsor_a_day') ? 'Completed' : 'Dedicate mitzvas'}
+            </p>
+          </button>
+
+          {/* Right: Gave Tzedaka Elsewhere */}
           <button
             onClick={() => handleTzedakaButtonClick('gave_elsewhere')}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
@@ -360,50 +400,14 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
               <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
                 isTzedakaButtonCompleted('gave_elsewhere') ? 'bg-sage' : 'bg-gradient-feminine'
               }`}>
-                <Gift className="text-white" size={18} strokeWidth={1.5} />
+                <HandCoins className="text-white" size={18} strokeWidth={1.5} />
               </div>
-              <h3 className="platypi-bold text-xs text-black mb-1">Gave Tzedaka Elsewhere</h3>
+              <h3 className="platypi-bold text-xs text-black mb-1">Gave Elsewhere</h3>
               <p className="platypi-regular text-xs text-black/60 leading-relaxed">
                 {isTzedakaButtonCompleted('gave_elsewhere') ? 'Completed' : 'Mark as complete'}
               </p>
               <HeartExplosion trigger={showExplosion} />
             </div>
-          </button>
-
-          {/* Button 2: Put a Coin in Tzedaka (money) */}
-          <button
-            onClick={() => handleTzedakaButtonClick('put_a_coin')}
-            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              isTzedakaButtonCompleted('put_a_coin') ? 'bg-sage/20' : 'bg-white'
-            }`}
-          >
-            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              isTzedakaButtonCompleted('put_a_coin') ? 'bg-sage' : 'bg-gradient-feminine'
-            }`}>
-              <HandCoins className="text-white" size={18} strokeWidth={1.5} />
-            </div>
-            <h3 className="platypi-bold text-xs text-black mb-1">Put a Coin</h3>
-            <p className="platypi-regular text-xs text-black/60 leading-relaxed">
-              {isTzedakaButtonCompleted('put_a_coin') ? 'Completed' : 'General donation'}
-            </p>
-          </button>
-
-          {/* Button 3: Sponsor a Day (money + extra fields) */}
-          <button
-            onClick={() => handleTzedakaButtonClick('sponsor_a_day')}
-            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              isTzedakaButtonCompleted('sponsor_a_day') ? 'bg-sage/20' : 'bg-white'
-            }`}
-          >
-            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              isTzedakaButtonCompleted('sponsor_a_day') ? 'bg-sage' : 'bg-gradient-feminine'
-            }`}>
-              <Star className="text-white" size={18} strokeWidth={1.5} />
-            </div>
-            <h3 className="platypi-bold text-xs text-black mb-1">Sponsor a Day</h3>
-            <p className="platypi-regular text-xs text-black/60 leading-relaxed">
-              {isTzedakaButtonCompleted('sponsor_a_day') ? 'Completed' : 'Dedicate mitzvas'}
-            </p>
           </button>
         </div>
 
