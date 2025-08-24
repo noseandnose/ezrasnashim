@@ -4157,7 +4157,7 @@ function JerusalemCompass() {
         <div className="flex flex-col items-center justify-center mb-6 relative pr-8">
           <DialogTitle className="text-xl platypi-bold text-black mb-2">The Kotel Compass</DialogTitle>
           <p className="platypi-regular text-sm text-black/70">
-            Face your Heart Home
+            Beta. Currently in testing
           </p>
         </div>
 
