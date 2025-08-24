@@ -35,8 +35,9 @@ export interface TefillaConditions {
  * [[ROSH_CHODESH_SPECIAL]]content[[/ROSH_CHODESH_SPECIAL]] - HIDES content during Rosh Chodesh, Pesach, Sukkot, or Aseret Yemei Teshuva
  * 
  * You can combine conditions:
- * [[OUTSIDE_ISRAEL,ROSH_CHODESH]]content[[/OUTSIDE_ISRAEL,ROSH_CHODESH]] - Shows only for users outside Israel on Rosh Chodesh
- * [[ONLY_ISRAEL,SUKKOT]]content[[/ONLY_ISRAEL,SUKKOT]] - Shows only for users in Israel during Sukkot
+ * [[OUTSIDE_ISRAEL,ROSH_CHODESH]]content[[/OUTSIDE_ISRAEL,ROSH_CHODESH]] - Shows only for users outside Israel AND on Rosh Chodesh (both must be true)
+ * [[ROSH_CHODESH|SUKKOT|PESACH]]content[[/ROSH_CHODESH|SUKKOT|PESACH]] - Shows during any of these holidays (OR logic)
+ * [[ONLY_ISRAEL,SUKKOT]]content[[/ONLY_ISRAEL,SUKKOT]] - Shows only for users in Israel AND during Sukkot (both must be true)
  */
 export function processTefillaText(text: string, conditions: TefillaConditions): string {
   if (!text) return text;
@@ -55,6 +56,7 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     ROSH_CHODESH_SPECIAL: () => !conditions.isRoshChodeshSpecial // Exclusion logic: shows when NOT in special periods
   };
 
+
   // Process all conditional sections with opening and closing tags
   const conditionalPattern = /\[\[([^\]]+)\]\]([\s\S]*?)\[\[\/([^\]]+)\]\]/g;
   
@@ -64,20 +66,27 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
       return match; // Return original if tags don't match
     }
 
-    // Split conditions by comma for multiple conditions (AND logic)
-    const conditions_list = openTag.split(',').map((c: string) => c.trim());
+    // Split conditions by comma for AND logic or pipe for OR logic
+    let conditionsMet = false;
     
-    // Check if all conditions are met
-    const allConditionsMet = conditions_list.every((condition: string) => {
-      const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
-      if (!checker) {
-        return false;
-      }
-      return checker();
-    });
+    if (openTag.includes('|')) {
+      // OR logic: Any condition can be true
+      const conditions_list = openTag.split('|').map((c: string) => c.trim());
+      conditionsMet = conditions_list.some((condition: string) => {
+        const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
+        return checker ? checker() : false;
+      });
+    } else {
+      // AND logic: All conditions must be true (original behavior)
+      const conditions_list = openTag.split(',').map((c: string) => c.trim());
+      conditionsMet = conditions_list.every((condition: string) => {
+        const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
+        return checker ? checker() : false;
+      });
+    }
 
-    // Return content if all conditions are met, otherwise return empty string
-    return allConditionsMet ? content : '';
+    // Return content if conditions are met, otherwise return empty string
+    return conditionsMet ? content : '';
   });
 
   // Also remove any malformed single bracket conditional tags that don't have proper format
