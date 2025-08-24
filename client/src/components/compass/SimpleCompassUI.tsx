@@ -126,7 +126,7 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
             
             {/* Jerusalem direction marker - rotates with compass */}
             <div 
-              className="absolute top-1/2 left-1/2 w-full h-full pointer-events-none"
+              className="absolute top-1/2 left-1/2 w-full h-full pointer-events-none z-20"
               style={{ 
                 transform: `translate(-50%, -50%) rotate(${jerusalemArrowRotation}deg)`
               }}
@@ -138,7 +138,7 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
                     alt="Jerusalem direction"
                     className={`w-8 h-8 ${state.isAligned ? 'animate-pulse' : ''}`}
                     style={{
-                      transform: `rotate(${deviceHeadingRotation}deg)`
+                      transform: `rotate(${deviceHeadingRotation - jerusalemArrowRotation}deg)`
                     }}
                   />
                 </div>
