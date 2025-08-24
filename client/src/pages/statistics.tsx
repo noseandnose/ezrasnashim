@@ -92,12 +92,6 @@ export default function Statistics() {
   const currentDataResult = getCurrentData();
   const { data: currentData, isLoading: currentLoading } = currentDataResult;
 
-  // Debug logging
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`Selected period: ${selectedPeriod}`);
-    console.log(`Current data for ${selectedPeriod}:`, currentData);
-    console.log(`Is loading: ${currentLoading}`);
-  }
 
 
 
@@ -384,14 +378,6 @@ export default function Statistics() {
                       processedEntries.push(['global-tehillim-chain', globalTehillimTotal]);
                     }
 
-                    // Debug logging for period-specific data 
-                    if (process.env.NODE_ENV === 'development') {
-                      console.log(`=== Feature Usage Debug for ${selectedPeriod} ===`);
-                      console.log('Raw modalCompletions:', modalCompletions);
-                      console.log('Individual tehillim entries:', Object.entries(modalCompletions).filter(([key]) => key.startsWith('individual-tehillim')));
-                      console.log('Current data object:', currentData);
-                      console.log('Processed entries before rendering:', processedEntries);
-                    }
                     
                     return processedEntries
                       .sort(([, a], [, b]) => (b as number) - (a as number))
