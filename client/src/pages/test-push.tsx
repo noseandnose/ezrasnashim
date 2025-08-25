@@ -87,10 +87,14 @@ export default function TestPush() {
     try {
       addStatus('Sending test push from server...');
       
-      // Use the correct API URL based on environment
-      const apiUrl = import.meta.env.DEV 
-        ? 'http://localhost:5000/api/push/test'
-        : '/api/push/test';
+      // In Replit, use the same origin with port 5000 for API calls
+      const apiUrl = window.location.hostname.includes('replit') 
+        ? `https://${window.location.hostname.replace('-5173', '-5000')}/api/push/test`
+        : import.meta.env.DEV 
+          ? 'http://localhost:5000/api/push/test'
+          : '/api/push/test';
+      
+      addStatus(`Using API URL: ${apiUrl}`);
       
       const response = await fetch(apiUrl, {
         method: 'POST',
