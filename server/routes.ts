@@ -3038,6 +3038,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Simple test push - minimal payload
+  app.post("/api/push/simple-test", async (req, res) => {
+    try {
+      const subscriptions = await storage.getActiveSubscriptions();
+      
+      if (subscriptions.length === 0) {
+        return res.json({ success: false, message: "No subscriptions" });
+      }
+
+      // Extremely simple payload - just title
+      const payload = JSON.stringify({
+        title: "Test Push"
+      });
+
+      console.log('[Simple Test] Sending minimal payload:', payload);
+      
+      let sent = 0;
+      for (const sub of subscriptions) {
+        try {
+          await webpush.sendNotification({
+            endpoint: sub.endpoint,
+            keys: {
+              p256dh: sub.p256dh,
+              auth: sub.auth
+            }
+          }, payload);
+          sent++;
+          console.log('[Simple Test] Sent successfully');
+        } catch (error: any) {
+          console.error('[Simple Test] Error:', error.statusCode, error.message);
+        }
+      }
+
+      res.json({ success: sent > 0, sent });
+    } catch (error) {
+      console.error("[Simple Test] Error:", error);
+      res.status(500).json({ error: "Failed" });
+    }
+  });
+
   // Test push notification endpoint (for debugging)
   app.post("/api/push/test", async (req, res) => {
     try {

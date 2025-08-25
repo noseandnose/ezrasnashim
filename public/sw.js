@@ -1,11 +1,13 @@
-// Service Worker for Push Notifications
+// Service Worker for Push Notifications - Version 2
+console.log('[SW] Service Worker loading...');
+
 self.addEventListener('install', (event) => {
-  console.log('Service Worker installed');
+  console.log('[SW] Service Worker installed - Version 2');
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker activated');
+  console.log('[SW] Service Worker activated - Version 2');
   event.waitUntil(clients.claim());
 });
 
