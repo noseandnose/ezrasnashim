@@ -10,6 +10,9 @@ export function AutoNotificationPrompt() {
       return;
     }
 
+    // Always register service worker first
+    registerServiceWorker();
+
     // Check current permission status
     if (Notification.permission === 'granted') {
       // If already granted, ensure we're subscribed
@@ -28,6 +31,20 @@ export function AutoNotificationPrompt() {
       requestNotificationPermission();
     }
   }, []);
+
+  const registerServiceWorker = async () => {
+    try {
+      console.log('[SW Registration] Starting...');
+      const registration = await navigator.serviceWorker.register('/sw.js');
+      console.log('[SW Registration] Success:', registration.scope);
+      
+      // Wait for service worker to be ready
+      await navigator.serviceWorker.ready;
+      console.log('[SW Registration] Service worker ready');
+    } catch (error) {
+      console.error('[SW Registration] Failed:', error);
+    }
+  };
 
   const urlBase64ToUint8Array = (base64String: string) => {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -63,9 +80,8 @@ export function AutoNotificationPrompt() {
 
   const subscribeToNotifications = async () => {
     try {
-      // Register service worker
-      const registration = await navigator.serviceWorker.register('/sw.js');
-      await navigator.serviceWorker.ready;
+      // Use already registered service worker
+      const registration = await navigator.serviceWorker.ready;
 
       // Get VAPID public key
       const response = await apiRequest('GET', '/api/push/vapid-public-key');

@@ -99,7 +99,7 @@ export default function PushDebug() {
     
     try {
       // Get VAPID public key
-      const response = await fetch(`${window.location.origin}/api/push/vapid-public-key`);
+      const response = await fetch('/api/push/vapid-public-key');
       const { publicKey } = await response.json();
       log(`Got VAPID key: ${publicKey.substring(0, 20)}...`);
       
@@ -123,7 +123,7 @@ export default function PushDebug() {
       log(`New endpoint: ${newSub.endpoint.substring(0, 60)}...`);
       
       // Send to server
-      const saveResponse = await fetch(`${window.location.origin}/api/push/subscribe`, {
+      const saveResponse = await fetch('/api/push/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -147,10 +147,10 @@ export default function PushDebug() {
     log('=== Sending Test Push ===');
     
     try {
-      // Use the same origin as the current page since frontend and backend are on same port
-      const apiUrl = `${window.location.origin}/api/push/simple-test`;
+      // In development, use relative URL so Vite dev server proxies to Express
+      const apiUrl = '/api/push/simple-test';
       
-      log(`Using API: ${apiUrl}`);
+      log(`Using API: ${window.location.origin}${apiUrl}`);
       
       const response = await fetch(apiUrl, { method: 'POST' });
       const result = await response.json();
