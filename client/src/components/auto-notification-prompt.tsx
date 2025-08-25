@@ -67,44 +67,54 @@ export function AutoNotificationPrompt() {
 
   const subscribeToNotifications = async () => {
     try {
-      console.log('Registering service worker...');
+      console.log('Step 1: Registering service worker...');
       // Register service worker
       const registration = await navigator.serviceWorker.register('/sw.js');
+      console.log('Step 2: Service worker registration object:', registration);
+      
       await navigator.serviceWorker.ready;
-      console.log('Service worker registered');
+      console.log('Step 3: Service worker is ready');
 
       // Get VAPID public key
+      console.log('Step 4: Fetching VAPID public key...');
       const { publicKey } = await apiRequest('GET', '/api/push/vapid-public-key');
+      console.log('Step 5: VAPID public key received:', publicKey);
       
       if (!publicKey) {
-        console.error('Push notifications not configured on server');
+        console.error('Push notifications not configured on server - no public key');
         return;
       }
 
-      console.log('Subscribing to push notifications...');
+      console.log('Step 6: Converting VAPID key...');
+      const applicationServerKey = urlBase64ToUint8Array(publicKey);
+      console.log('Step 7: Application server key ready:', applicationServerKey);
+
+      console.log('Step 8: Subscribing to push notifications...');
       // Subscribe to push notifications
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicKey)
+        applicationServerKey: applicationServerKey
       });
+      console.log('Step 9: Subscription created:', subscription.toJSON());
 
       // Send subscription to server
       const sessionId = localStorage.getItem('sessionId');
-      console.log('Sending subscription to server:', subscription.toJSON());
+      console.log('Step 10: Sending subscription to server with sessionId:', sessionId);
       
       try {
         const response = await apiRequest('POST', '/api/push/subscribe', {
           subscription: subscription.toJSON(),
           sessionId
         });
-        console.log('Server response:', response);
-        console.log('Successfully subscribed to push notifications');
+        console.log('Step 11: Server response:', response);
+        console.log('Successfully subscribed to push notifications!');
       } catch (saveError) {
         console.error('Failed to save subscription to server:', saveError);
         throw saveError;
       }
     } catch (error) {
-      console.error('Error subscribing to push notifications:', error);
+      console.error('Error in subscribeToNotifications at step:', error);
+      console.error('Full error details:', error);
     }
   };
 
