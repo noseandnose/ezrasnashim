@@ -1289,8 +1289,12 @@ export class DatabaseStorage implements IStorage {
       );
     
     // Count unique users (by session ID)
-    const uniqueSessions = new Set(todayEvents.map(e => e.sessionId).filter(Boolean));
-    
+    // const uniqueSessions = new Set(todayEvents.map(e => e.sessionId).filter(Boolean));
+    // Upsert stats with recalculated values
+
+    const existing = await this.getDailyStats(date);
+
+    const uniqueSessions = existing? existing.uniqueUsers : 0;
     // Count event types (no more page_view tracking)
     const pageViews = 0; // No longer tracking page views
     // Count global tehillim separately (they count as 2 mitzvos - saying + praying for someone)
@@ -1313,15 +1317,13 @@ export class DatabaseStorage implements IStorage {
         const modalType = (e.eventData as any)?.modalType || 'unknown';
         modalCompletions[modalType] = (modalCompletions[modalType] || 0) + 1;
       });
-    
-    // Upsert stats with recalculated values
-    const existing = await this.getDailyStats(date);
+  
     
     if (existing) {
       const [updated] = await db
         .update(dailyStats)
         .set({
-          uniqueUsers: uniqueSessions.size,
+          uniqueUsers: uniqueSessions,
           pageViews,
           tehillimCompleted,
           namesProcessed,
@@ -1339,7 +1341,7 @@ export class DatabaseStorage implements IStorage {
         .insert(dailyStats)
         .values({
           date,
-          uniqueUsers: uniqueSessions.size,
+          uniqueUsers: uniqueSessions,
           pageViews,
           tehillimCompleted,
           namesProcessed,
