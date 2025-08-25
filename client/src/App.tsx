@@ -18,6 +18,7 @@ const Donate = lazy(() => import("@/pages/donate"));
 const Statistics = lazy(() => import("@/pages/statistics"));
 const TestPayment = lazy(() => import("@/pages/test-payment"));
 const DebugPayment = lazy(() => import("@/pages/debug-payment"));
+const AdminNotifications = lazy(() => import("@/pages/admin-notifications"));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -84,6 +85,7 @@ function Router() {
         <Route path="/statistics" component={Statistics} />
         <Route path="/test-payment" component={TestPayment} />
         <Route path="/debug-payment" component={DebugPayment} />
+        <Route path="/admin/notifications" component={AdminNotifications} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

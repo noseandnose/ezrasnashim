@@ -64,6 +64,33 @@ export const communityImpact = pgTable("community_impact", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Push notification tables
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  id: serial("id").primaryKey(),
+  endpoint: text("endpoint").notNull().unique(),
+  p256dh: text("p256dh").notNull(), // Auth keys for encryption
+  auth: text("auth").notNull(),
+  sessionId: text("session_id"), // Track which session subscribed
+  subscribed: boolean("subscribed").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const pushNotifications = pgTable("push_notifications", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  icon: text("icon"),
+  badge: text("badge"),
+  url: text("url"), // URL to open when notification is clicked
+  data: jsonb("data"), // Additional data
+  sentAt: timestamp("sent_at").defaultNow(),
+  sentCount: integer("sent_count").default(0), // How many users received it
+  successCount: integer("success_count").default(0), // How many successfully delivered
+  failureCount: integer("failure_count").default(0), // How many failed
+  createdBy: text("created_by"), // Admin who sent it
+});
+
 export const shopItems = pgTable("shop_items", {
   id: serial("id").primaryKey(),
   storeName: text("store_name").notNull(),
@@ -616,3 +643,12 @@ export const messages = pgTable("messages", {
 export const insertMessagesSchema = createInsertSchema(messages);
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessagesSchema>;
+
+// Push notification schemas and types
+export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions).omit({ id: true, createdAt: true, updatedAt: true });
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+export type InsertPushSubscription = z.infer<typeof insertPushSubscriptionSchema>;
+
+export const insertPushNotificationSchema = createInsertSchema(pushNotifications).omit({ id: true, sentAt: true });
+export type PushNotification = typeof pushNotifications.$inferSelect;
+export type InsertPushNotification = z.infer<typeof insertPushNotificationSchema>;

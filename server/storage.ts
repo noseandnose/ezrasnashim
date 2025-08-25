@@ -29,7 +29,10 @@ import {
   type PirkeiAvotProgress, type InsertPirkeiAvotProgress,
   type AnalyticsEvent, type InsertAnalyticsEvent,
   type DailyStats, type InsertDailyStats,
-  type Message, type InsertMessage, messages
+  type Message, type InsertMessage, messages,
+  pushSubscriptions, pushNotifications,
+  type PushSubscription, type InsertPushSubscription,
+  type PushNotification, type InsertPushNotification
 } from "../shared/schema";
 import { db, pool } from "./db";
 import { eq, gt, lt, gte, lte, and, sql, like } from "drizzle-orm";
@@ -172,6 +175,14 @@ export interface IStorage {
   // Message methods
   getMessageByDate(date: string): Promise<Message | undefined>;
   createMessage(message: InsertMessage): Promise<Message>;
+  
+  // Push notification methods
+  subscribeToPush(subscription: InsertPushSubscription): Promise<PushSubscription>;
+  unsubscribeFromPush(endpoint: string): Promise<void>;
+  getActiveSubscriptions(): Promise<PushSubscription[]>;
+  createNotification(notification: InsertPushNotification): Promise<PushNotification>;
+  getNotificationHistory(limit?: number): Promise<PushNotification[]>;
+  updateNotificationStats(id: number, successCount: number, failureCount: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1619,6 +1630,77 @@ export class DatabaseStorage implements IStorage {
       .values(message)
       .returning();
     return newMessage;
+  }
+  
+  // Push notification methods
+  async subscribeToPush(subscription: InsertPushSubscription): Promise<PushSubscription> {
+    // Upsert - if endpoint exists, update it, otherwise insert new
+    const existing = await db
+      .select()
+      .from(pushSubscriptions)
+      .where(eq(pushSubscriptions.endpoint, subscription.endpoint))
+      .limit(1);
+    
+    if (existing.length > 0) {
+      const [updated] = await db
+        .update(pushSubscriptions)
+        .set({
+          p256dh: subscription.p256dh,
+          auth: subscription.auth,
+          subscribed: true,
+          updatedAt: new Date()
+        })
+        .where(eq(pushSubscriptions.endpoint, subscription.endpoint))
+        .returning();
+      return updated;
+    } else {
+      const [newSub] = await db
+        .insert(pushSubscriptions)
+        .values(subscription)
+        .returning();
+      return newSub;
+    }
+  }
+  
+  async unsubscribeFromPush(endpoint: string): Promise<void> {
+    await db
+      .update(pushSubscriptions)
+      .set({ subscribed: false, updatedAt: new Date() })
+      .where(eq(pushSubscriptions.endpoint, endpoint));
+  }
+  
+  async getActiveSubscriptions(): Promise<PushSubscription[]> {
+    return await db
+      .select()
+      .from(pushSubscriptions)
+      .where(eq(pushSubscriptions.subscribed, true));
+  }
+  
+  async createNotification(notification: InsertPushNotification): Promise<PushNotification> {
+    const [newNotification] = await db
+      .insert(pushNotifications)
+      .values(notification)
+      .returning();
+    return newNotification;
+  }
+  
+  async getNotificationHistory(limit: number = 50): Promise<PushNotification[]> {
+    return await db
+      .select()
+      .from(pushNotifications)
+      .orderBy(sql`${pushNotifications.sentAt} DESC`)
+      .limit(limit);
+  }
+  
+  async updateNotificationStats(id: number, successCount: number, failureCount: number): Promise<void> {
+    await db
+      .update(pushNotifications)
+      .set({
+        successCount: successCount,
+        failureCount: failureCount,
+        sentCount: successCount + failureCount
+      })
+      .where(eq(pushNotifications.id, id));
   }
 }
 

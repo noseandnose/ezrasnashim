@@ -6,6 +6,7 @@ import serverAxiosClient from "./axiosClient.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import { find as findTimezone } from "geo-tz";
+import webpush from "web-push";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,6 +17,18 @@ if (!process.env.STRIPE_SECRET_KEY) {
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2025-07-30.basil',
 });
+
+// Configure web-push with VAPID keys
+if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY && process.env.VAPID_EMAIL) {
+  webpush.setVapidDetails(
+    process.env.VAPID_EMAIL,
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  );
+  console.log('Push notifications configured with VAPID keys');
+} else {
+  console.warn('Push notifications not configured - missing VAPID keys');
+}
 import { 
   insertTehillimNameSchema,
   insertDailyHalachaSchema,
@@ -2860,6 +2873,161 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(newMessage);
     } catch (error) {
       res.status(500).json({ message: "Failed to create message" });
+    }
+  });
+
+  // Push notification endpoints
+  app.get("/api/push/vapid-public-key", (req, res) => {
+    res.json({ publicKey: process.env.VAPID_PUBLIC_KEY || null });
+  });
+
+  app.post("/api/push/subscribe", async (req, res) => {
+    try {
+      const { subscription, sessionId } = req.body;
+      
+      if (!subscription || !subscription.endpoint) {
+        return res.status(400).json({ error: "Invalid subscription object" });
+      }
+
+      const savedSubscription = await storage.subscribeToPush({
+        endpoint: subscription.endpoint,
+        p256dh: subscription.keys.p256dh,
+        auth: subscription.keys.auth,
+        sessionId: sessionId || null
+      });
+
+      res.json({ 
+        success: true, 
+        message: "Successfully subscribed to push notifications",
+        subscriptionId: savedSubscription.id 
+      });
+    } catch (error) {
+      console.error("Error subscribing to push:", error);
+      res.status(500).json({ error: "Failed to subscribe to push notifications" });
+    }
+  });
+
+  app.post("/api/push/unsubscribe", async (req, res) => {
+    try {
+      const { endpoint } = req.body;
+      
+      if (!endpoint) {
+        return res.status(400).json({ error: "Endpoint required" });
+      }
+
+      await storage.unsubscribeFromPush(endpoint);
+      res.json({ success: true, message: "Successfully unsubscribed from push notifications" });
+    } catch (error) {
+      console.error("Error unsubscribing from push:", error);
+      res.status(500).json({ error: "Failed to unsubscribe from push notifications" });
+    }
+  });
+
+  // Admin endpoint to send push notifications
+  app.post("/api/push/send", async (req, res) => {
+    try {
+      const { title, body, icon, badge, url, requireInteraction, adminPassword } = req.body;
+      
+      // Simple admin authentication - you might want to improve this
+      if (adminPassword !== process.env.ADMIN_PASSWORD) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      if (!title || !body) {
+        return res.status(400).json({ error: "Title and body are required" });
+      }
+
+      // Get all active subscriptions
+      const subscriptions = await storage.getActiveSubscriptions();
+      
+      if (subscriptions.length === 0) {
+        return res.json({ 
+          success: false, 
+          message: "No active subscriptions found",
+          sentCount: 0 
+        });
+      }
+
+      // Create notification record
+      const notification = await storage.createNotification({
+        title,
+        body,
+        icon: icon || '/icon-192x192.png',
+        badge: badge || '/badge-72x72.png',
+        url: url || '/',
+        data: { timestamp: Date.now() },
+        sentCount: 0,
+        successCount: 0,
+        failureCount: 0,
+        createdBy: 'admin'
+      });
+
+      // Send to all subscriptions
+      const payload = JSON.stringify({
+        title,
+        body,
+        icon: icon || '/icon-192x192.png',
+        badge: badge || '/badge-72x72.png',
+        url: url || '/',
+        requireInteraction: requireInteraction || false,
+        timestamp: Date.now()
+      });
+
+      let successCount = 0;
+      let failureCount = 0;
+
+      const sendPromises = subscriptions.map(async (sub) => {
+        try {
+          await webpush.sendNotification({
+            endpoint: sub.endpoint,
+            keys: {
+              p256dh: sub.p256dh,
+              auth: sub.auth
+            }
+          }, payload);
+          successCount++;
+        } catch (error: any) {
+          failureCount++;
+          // If subscription is invalid, mark it as unsubscribed
+          if (error.statusCode === 410) {
+            await storage.unsubscribeFromPush(sub.endpoint);
+          }
+          console.error(`Failed to send to ${sub.endpoint}:`, error.message);
+        }
+      });
+
+      await Promise.all(sendPromises);
+
+      // Update notification stats
+      await storage.updateNotificationStats(notification.id, successCount, failureCount);
+
+      res.json({ 
+        success: true, 
+        message: `Sent to ${successCount} users`,
+        sentCount: successCount + failureCount,
+        successCount,
+        failureCount
+      });
+    } catch (error) {
+      console.error("Error sending push notification:", error);
+      res.status(500).json({ error: "Failed to send push notification" });
+    }
+  });
+
+  // Get notification history (admin)
+  app.get("/api/push/history", async (req, res) => {
+    try {
+      const { adminPassword } = req.query;
+      
+      if (adminPassword !== process.env.ADMIN_PASSWORD) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const history = await storage.getNotificationHistory(50);
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching notification history:", error);
+      res.status(500).json({ error: "Failed to fetch notification history" });
     }
   });
 
