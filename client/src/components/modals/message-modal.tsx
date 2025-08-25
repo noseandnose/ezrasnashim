@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import type { Message } from "@shared/schema";
+import projectOfImage from "@assets/A project of_1756118917799.png";
 
 interface MessageModalProps {
   isOpen: boolean;
@@ -36,6 +37,9 @@ export default function MessageModal({ isOpen, onClose, date }: MessageModalProp
                 <p className="text-warm-gray whitespace-pre-wrap platypi-medium leading-relaxed">
                   {message.message}
                 </p>
+                <div className="flex justify-center mt-4">
+                  <img src={projectOfImage} alt="Project of JustOneChesed" className="h-8 opacity-80" />
+                </div>
                 <p className="text-xs text-warm-gray/60 text-right">
                   {format(new Date(date), "MMMM d, yyyy")}
                 </p>
