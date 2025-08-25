@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/lib/types";
 import { LazyImage } from "@/components/ui/lazy-image";
 import justOneChesedImage from '@assets/Second print Photo Signs - Chamal  copy_1753336662272.png';
+import projectOfImage from "@assets/A project of_1756118917799.png";
 
 export default function AboutModal() {
   const { activeModal, closeModal } = useModalStore();
@@ -97,6 +98,11 @@ export default function AboutModal() {
               />
             </a>
           </div>
+        </div>
+
+        {/* Project of JustOneChesed Image */}
+        <div className="flex justify-center mb-4">
+          <img src={projectOfImage} alt="Project of JustOneChesed" className="h-8 opacity-80" />
         </div>
 
         {/* Complete Button */}
