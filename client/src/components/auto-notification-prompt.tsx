@@ -1,59 +1,39 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { apiRequest } from '@/lib/queryClient';
 
 export function AutoNotificationPrompt() {
-  const [hasPrompted, setHasPrompted] = useState(false);
 
   useEffect(() => {
-    // Check if we've already prompted in this session
-    const prompted = sessionStorage.getItem('notificationPrompted');
-    if (prompted) {
-      setHasPrompted(true);
-      return;
-    }
-
+    // Check if we've already prompted before
+    const previouslyPrompted = localStorage.getItem('notificationPromptShown');
+    
     // Check if browser supports notifications
     if (!('serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window)) {
       return;
     }
 
     // Check current permission status
-    if (Notification.permission === 'granted' || Notification.permission === 'denied') {
-      sessionStorage.setItem('notificationPrompted', 'true');
-      setHasPrompted(true);
-      
+    if (Notification.permission === 'granted') {
       // If already granted, ensure we're subscribed
-      if (Notification.permission === 'granted') {
-        ensureSubscribed();
-      }
+      ensureSubscribed();
+      return;
+    }
+    
+    if (Notification.permission === 'denied') {
+      // User previously denied, don't prompt again
       return;
     }
 
-    // Set up one-time listener for first user interaction
-    const handleFirstInteraction = async () => {
-      // Remove listeners immediately
-      document.removeEventListener('click', handleFirstInteraction);
-      document.removeEventListener('touchstart', handleFirstInteraction);
+    // If permission is 'default' and we haven't prompted before, request permission immediately
+    if (!previouslyPrompted && Notification.permission === 'default') {
+      // Mark that we've shown the prompt
+      localStorage.setItem('notificationPromptShown', 'true');
       
-      // Mark as prompted
-      sessionStorage.setItem('notificationPrompted', 'true');
-      setHasPrompted(true);
-      
-      // Small delay to ensure interaction is registered
+      // Request permission immediately on page load
       setTimeout(async () => {
         await requestNotificationPermission();
-      }, 100);
-    };
-
-    // Add listeners for first interaction
-    document.addEventListener('click', handleFirstInteraction, { once: true });
-    document.addEventListener('touchstart', handleFirstInteraction, { once: true });
-
-    // Cleanup
-    return () => {
-      document.removeEventListener('click', handleFirstInteraction);
-      document.removeEventListener('touchstart', handleFirstInteraction);
-    };
+      }, 1000); // Small delay to let the page load
+    }
   }, []);
 
   const urlBase64ToUint8Array = (base64String: string) => {

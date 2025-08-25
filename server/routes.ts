@@ -2928,8 +2928,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { title, body, icon, badge, url, requireInteraction, adminPassword } = req.body;
       
-      // Simple admin authentication - you might want to improve this
-      if (adminPassword !== process.env.ADMIN_PASSWORD) {
+      // Simple admin authentication
+      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ezras2025';
+      if (adminPassword !== ADMIN_PASSWORD) {
         return res.status(401).json({ error: "Unauthorized" });
       }
 
@@ -3019,7 +3020,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { adminPassword } = req.query;
       
-      if (adminPassword !== process.env.ADMIN_PASSWORD) {
+      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ezras2025';
+      if (adminPassword !== ADMIN_PASSWORD) {
         return res.status(401).json({ error: "Unauthorized" });
       }
 
