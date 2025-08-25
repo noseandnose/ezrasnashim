@@ -317,7 +317,7 @@ export default function Statistics() {
               color="text-blush"
             />
             <StatCard
-              title="Active Women"
+              title="Women Visited"
               value={currentLoading ? "..." : (currentData as any)?.totalUsers?.toLocaleString() || (currentData as any)?.uniqueUsers || 0}
               icon={Users}
               color="text-peach"
