@@ -18,19 +18,25 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2025-07-30.basil',
 });
 
+// Store VAPID keys at startup
+const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
+const VAPID_EMAIL = process.env.VAPID_EMAIL;
+
 // Configure web-push with VAPID keys
 console.log('Checking VAPID keys...');
-console.log('VAPID_PUBLIC_KEY exists:', !!process.env.VAPID_PUBLIC_KEY);
-console.log('VAPID_PRIVATE_KEY exists:', !!process.env.VAPID_PRIVATE_KEY);
-console.log('VAPID_EMAIL exists:', !!process.env.VAPID_EMAIL);
+console.log('VAPID_PUBLIC_KEY exists:', !!VAPID_PUBLIC_KEY);
+console.log('VAPID_PRIVATE_KEY exists:', !!VAPID_PRIVATE_KEY);
+console.log('VAPID_EMAIL exists:', !!VAPID_EMAIL);
 
-if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY && process.env.VAPID_EMAIL) {
+if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY && VAPID_EMAIL) {
   webpush.setVapidDetails(
-    process.env.VAPID_EMAIL,
-    process.env.VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY
+    VAPID_EMAIL,
+    VAPID_PUBLIC_KEY,
+    VAPID_PRIVATE_KEY
   );
   console.log('Push notifications configured with VAPID keys');
+  console.log('Public key value:', VAPID_PUBLIC_KEY);
 } else {
   console.warn('Push notifications not configured - missing VAPID keys');
   console.warn('Please ensure VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, and VAPID_EMAIL are set');
@@ -2884,12 +2890,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Push notification endpoints
   app.get("/api/push/vapid-public-key", (req, res) => {
-    const publicKey = process.env.VAPID_PUBLIC_KEY;
-    console.log('VAPID public key request - key exists:', !!publicKey);
-    if (!publicKey) {
-      console.log('Environment variables available:', Object.keys(process.env).filter(k => k.includes('VAPID')));
-    }
-    res.json({ publicKey: publicKey || null });
+    console.log('VAPID public key request - key exists:', !!VAPID_PUBLIC_KEY);
+    console.log('Returning public key:', VAPID_PUBLIC_KEY);
+    res.json({ publicKey: VAPID_PUBLIC_KEY || null });
   });
 
   app.post("/api/push/subscribe", async (req, res) => {
