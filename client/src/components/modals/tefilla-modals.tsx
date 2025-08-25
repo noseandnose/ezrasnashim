@@ -3120,7 +3120,7 @@ function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'h
                     isModalComplete(`individual-tehillim-${psalm}`)
                       ? 'bg-sage text-white'
                       : 'bg-gradient-feminine text-white'
-                  }`}
+                  } ${psalm === 27 ? 'tehillim-27-pulse' : ''}`}
                   style={{ touchAction: 'manipulation' }}
                 >
                   {psalm}
