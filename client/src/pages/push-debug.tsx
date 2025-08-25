@@ -150,9 +150,24 @@ export default function PushDebug() {
       // In development, use relative URL so Vite dev server proxies to Express
       const apiUrl = '/api/push/simple-test';
       
-      log(`Using API: ${window.location.origin}${apiUrl}`);
+      log(`Using relative URL: ${apiUrl}`);
+      log(`Full URL would be: ${window.location.origin}${apiUrl}`);
       
-      const response = await fetch(apiUrl, { method: 'POST' });
+      const response = await fetch(apiUrl, { 
+        method: 'POST',
+        cache: 'no-cache'  // Prevent caching issues
+      });
+      
+      log(`Response status: ${response.status}`);
+      log(`Response headers: ${response.headers.get('content-type')}`);
+      
+      if (!response.ok) {
+        log(`❌ HTTP Error: ${response.status} ${response.statusText}`);
+        const text = await response.text();
+        log(`Response body: ${text}`);
+        return;
+      }
+      
       const result = await response.json();
       
       log(`Server result: ${JSON.stringify(result)}`);
