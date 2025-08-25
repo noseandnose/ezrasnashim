@@ -1,0 +1,59 @@
+ebug Log:
+11:42:32: === Service Worker Check ===
+11:42:32: Found 1 service worker(s)
+11:42:32: SW Scope: https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev/
+11:42:32: SW Active: true
+11:42:32: Sent test message to SW
+11:42:36: === Service Worker Check ===
+11:42:36: Found 1 service worker(s)
+11:42:36: SW Scope: https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev/
+11:42:36: SW Active: true
+11:42:36: Sent test message to SW
+11:42:38: === Push Permission Check ===
+11:42:38: Current permission: default
+11:42:38: ⚠️ Permission is default - requesting now...
+11:42:40: Permission after request: granted
+11:42:40: ✅ Permission granted! You can now receive notifications
+11:42:41: === Subscription Check ===
+11:42:41: ❌ No push subscription
+11:42:43: === Sending Test Push ===
+11:42:44: ✅ API call successful
+11:42:44: Server result: {"success":true,"sent":2}
+11:42:44: ✅ Push sent - Check browser console for [SW] logs
+11:42:44: 📱 If no notification appears, check:
+11:42:44: 1. Browser DevTools > Application > Service Workers
+11:42:44: 2. Look for "Push" events in the service worker
+11:42:44: 3. Check OS notification settings
+11:42:44: 4. Try a different browser (Chrome/Edge recommended)
+11:42:49: === Force Permission Request (Safari Fix) ===
+11:42:49: Requesting notification permission...
+11:42:49: Result: granted
+11:42:49: ✅ Success! Now try subscribing to push notifications
+11:42:49: === Service Worker Check ===
+11:42:49: Found 1 service worker(s)
+11:42:49: SW Scope: https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev/
+11:42:49: SW Active: true
+11:42:49: Sent test message to SW
+11:42:49: === Re-subscribing to Push ===
+11:42:49: Got VAPID key: BIclmNy34qd9JXQ-MGlw...
+11:42:49: ✅ Created new subscription
+11:42:49: New endpoint: https://web.push.apple.com/QM2jUJLZ4BLXqLa3zkfDTlA96G-J4tVSZ...
+11:42:50: ❌ Error: Request failed with status code 400
+11:43:06: === Unregistering All Service Workers ===
+11:43:06: Unregistered https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev/: ✅
+11:43:06: Clearing all caches...
+11:43:06: Deleted cache: ezras-nashim-v1
+11:43:06: ✅ All service workers and caches cleared
+11:43:06: ⚠️ Refresh the page to re-register
+11:43:08: === Force Permission Request (Safari Fix) ===
+11:43:08: Requesting notification permission...
+11:43:08: Result: granted
+11:43:08: ✅ Success! Now try subscribing to push notifications
+11:43:08: === Service Worker Check ===
+11:43:08: Found 0 service worker(s)
+11:43:08: === Re-subscribing to Push ===
+11:43:08: Got VAPID key: BIclmNy34qd9JXQ-MGlw...
+11:43:08: Unsubscribed from old subscription
+11:43:08: ✅ Created new subscription
+11:43:08: New endpoint: https://web.push.apple.com/QDtfMzvMVWjPDT1WhOsVRkBrRJACr4Q9I...
+11:43:08: ❌ Error: Request failed with status code 400

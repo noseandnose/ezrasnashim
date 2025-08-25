@@ -158,13 +158,16 @@ export default function PushDebug() {
       log('✅ Created new subscription');
       log(`New endpoint: ${newSub.endpoint.substring(0, 60)}...`);
       
-      // Send to server
+      // Send to server (match the expected format)
       const saveResponse = await apiRequest('POST', '/api/push/subscribe', {
-        endpoint: newSub.endpoint,
-        keys: {
-          p256dh: btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(newSub.getKey('p256dh')!)))),
-          auth: btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(newSub.getKey('auth')!))))
-        }
+        subscription: {
+          endpoint: newSub.endpoint,
+          keys: {
+            p256dh: btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(newSub.getKey('p256dh')!)))),
+            auth: btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(newSub.getKey('auth')!))))
+          }
+        },
+        sessionId: localStorage.getItem('sessionId')
       });
       
       log(`Server response: ${JSON.stringify(saveResponse.data)}`);
