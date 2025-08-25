@@ -8,6 +8,7 @@ import { initializeCache } from "@/lib/cache";
 import { useEffect, lazy, Suspense } from "react";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import UpdateNotification from "@/components/UpdateNotification";
+import { AutoNotificationPrompt } from "@/components/auto-notification-prompt";
 import "@/utils/clear-modal-completions";
 import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
 
@@ -16,8 +17,7 @@ const Home = lazy(() => import("@/pages/home"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const Donate = lazy(() => import("@/pages/donate"));
 const Statistics = lazy(() => import("@/pages/statistics"));
-const TestPayment = lazy(() => import("@/pages/test-payment"));
-const DebugPayment = lazy(() => import("@/pages/debug-payment"));
+const AdminNotifications = lazy(() => import("@/pages/admin-notifications"));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -61,19 +61,6 @@ function Router() {
     };
     
     cleanupModalCompletions();
-    
-    // Register service worker for PWA functionality
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(() => {
-            // ServiceWorker registered successfully
-          })
-          .catch(() => {
-            // ServiceWorker registration failed silently
-          });
-      });
-    }
   }, []);
   
   return (
@@ -82,8 +69,7 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/donate" component={Donate} />
         <Route path="/statistics" component={Statistics} />
-        <Route path="/test-payment" component={TestPayment} />
-        <Route path="/debug-payment" component={DebugPayment} />
+        <Route path="/admin/notifications" component={AdminNotifications} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
@@ -96,6 +82,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <UpdateNotification />
+          <AutoNotificationPrompt />
           <Toaster />
           <Router />
         </TooltipProvider>

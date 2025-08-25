@@ -6,6 +6,7 @@ import serverAxiosClient from "./axiosClient.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import { find as findTimezone } from "geo-tz";
+import webpush from "web-push";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,6 +17,23 @@ if (!process.env.STRIPE_SECRET_KEY) {
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2025-07-30.basil',
 });
+
+// Store VAPID keys at startup
+const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
+const VAPID_EMAIL = process.env.VAPID_EMAIL;
+
+// Configure web-push with VAPID keys
+if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY && VAPID_EMAIL) {
+  webpush.setVapidDetails(
+    VAPID_EMAIL,
+    VAPID_PUBLIC_KEY,
+    VAPID_PRIVATE_KEY
+  );
+  console.log('Push notifications configured with VAPID keys');
+} else {
+  console.warn('Push notifications not configured - missing VAPID keys');
+}
 import { 
   insertTehillimNameSchema,
   insertDailyHalachaSchema,
@@ -1964,7 +1982,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       console.error('Webhook signature verification failed:', {
         error: errorMessage,
-        signatureHeader: sig ? sig : 'none',
+        signatureHeader: sig ? (typeof sig === 'string' ? sig.substring(0, 20) + '...' : 'array') : 'none',
         secretPrefix: process.env.STRIPE_WEBHOOK_SECRET ? process.env.STRIPE_WEBHOOK_SECRET.substring(0, 10) + '...' : 'none'
       });
       return res.status(400).json({ error: `Webhook validation failed: ${errorMessage}` });
@@ -2860,6 +2878,280 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(newMessage);
     } catch (error) {
       res.status(500).json({ message: "Failed to create message" });
+    }
+  });
+
+  // Push notification endpoints
+  app.get("/api/push/vapid-public-key", (req, res) => {
+    res.json({ publicKey: VAPID_PUBLIC_KEY || null });
+  });
+
+  app.post("/api/push/subscribe", async (req, res) => {
+    try {
+      const { subscription, sessionId } = req.body;
+      
+      if (!subscription || !subscription.endpoint) {
+        return res.status(400).json({ error: "Invalid subscription object" });
+      }
+
+      const savedSubscription = await storage.subscribeToPush({
+        endpoint: subscription.endpoint,
+        p256dh: subscription.keys.p256dh,
+        auth: subscription.keys.auth,
+        sessionId: sessionId || null
+      });
+
+      res.json({ 
+        success: true, 
+        message: "Successfully subscribed to push notifications",
+        subscriptionId: savedSubscription.id 
+      });
+    } catch (error) {
+      console.error("Error subscribing to push:", error);
+      res.status(500).json({ error: "Failed to subscribe to push notifications" });
+    }
+  });
+
+  app.post("/api/push/unsubscribe", async (req, res) => {
+    try {
+      const { endpoint } = req.body;
+      
+      if (!endpoint) {
+        return res.status(400).json({ error: "Endpoint required" });
+      }
+
+      await storage.unsubscribeFromPush(endpoint);
+      res.json({ success: true, message: "Successfully unsubscribed from push notifications" });
+    } catch (error) {
+      console.error("Error unsubscribing from push:", error);
+      res.status(500).json({ error: "Failed to unsubscribe from push notifications" });
+    }
+  });
+
+  // Admin endpoint to send push notifications
+  app.post("/api/push/send", async (req, res) => {
+    try {
+      const { title, body, icon, badge, url, requireInteraction, adminPassword } = req.body;
+      
+      // Simple admin authentication
+      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ezras2025';
+      if (adminPassword !== ADMIN_PASSWORD) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      if (!title || !body) {
+        return res.status(400).json({ error: "Title and body are required" });
+      }
+
+      // Get all active subscriptions
+      const subscriptions = await storage.getActiveSubscriptions();
+      
+      if (subscriptions.length === 0) {
+        return res.json({ 
+          success: false, 
+          message: "No active subscriptions found",
+          sentCount: 0 
+        });
+      }
+
+      // Create notification record
+      const notification = await storage.createNotification({
+        title,
+        body,
+        icon: icon || '/icon-192x192.png',
+        badge: badge || '/badge-72x72.png',
+        url: url || '/',
+        data: { timestamp: Date.now() },
+        sentCount: 0,
+        successCount: 0,
+        failureCount: 0,
+        createdBy: 'admin'
+      });
+
+      // Send to all subscriptions
+      const payload = JSON.stringify({
+        title,
+        body,
+        icon: icon || '/icon-192x192.png',
+        badge: badge || '/badge-72x72.png',
+        url: url || '/',
+        requireInteraction: requireInteraction || false,
+        timestamp: Date.now()
+      });
+
+      let successCount = 0;
+      let failureCount = 0;
+
+      const sendPromises = subscriptions.map(async (sub) => {
+        try {
+          await webpush.sendNotification({
+            endpoint: sub.endpoint,
+            keys: {
+              p256dh: sub.p256dh,
+              auth: sub.auth
+            }
+          }, payload);
+          successCount++;
+        } catch (error: any) {
+          failureCount++;
+          // If subscription is invalid, mark it as unsubscribed
+          if (error.statusCode === 410) {
+            await storage.unsubscribeFromPush(sub.endpoint);
+          }
+          console.error(`Failed to send to ${sub.endpoint}:`, error.message);
+        }
+      });
+
+      await Promise.all(sendPromises);
+
+      // Update notification stats
+      await storage.updateNotificationStats(notification.id, successCount, failureCount);
+
+      res.json({ 
+        success: true, 
+        message: `Sent to ${successCount} users`,
+        sentCount: successCount + failureCount,
+        successCount,
+        failureCount
+      });
+    } catch (error) {
+      console.error("Error sending push notification:", error);
+      res.status(500).json({ error: "Failed to send push notification" });
+    }
+  });
+
+  // Get notification history (admin)
+  app.get("/api/push/history", async (req, res) => {
+    try {
+      const { adminPassword } = req.query;
+      
+      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ezras2025';
+      if (adminPassword !== ADMIN_PASSWORD) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const history = await storage.getNotificationHistory(50);
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching notification history:", error);
+      res.status(500).json({ error: "Failed to fetch notification history" });
+    }
+  });
+
+  // Simple test push - minimal payload
+  app.post("/api/push/simple-test", async (req, res) => {
+    try {
+      const subscriptions = await storage.getActiveSubscriptions();
+      
+      if (subscriptions.length === 0) {
+        return res.json({ success: false, message: "No subscriptions" });
+      }
+
+      // Extremely simple payload - just title
+      const payload = JSON.stringify({
+        title: "Test Push"
+      });
+
+      console.log('[Simple Test] Sending minimal payload:', payload);
+      
+      let sent = 0;
+      for (const sub of subscriptions) {
+        try {
+          await webpush.sendNotification({
+            endpoint: sub.endpoint,
+            keys: {
+              p256dh: sub.p256dh,
+              auth: sub.auth
+            }
+          }, payload);
+          sent++;
+          console.log('[Simple Test] Sent successfully');
+        } catch (error: any) {
+          console.error('[Simple Test] Error:', error.statusCode, error.message);
+        }
+      }
+
+      res.json({ success: sent > 0, sent });
+    } catch (error) {
+      console.error("[Simple Test] Error:", error);
+      res.status(500).json({ error: "Failed" });
+    }
+  });
+
+  // Test push notification endpoint (for debugging)
+  app.post("/api/push/test", async (req, res) => {
+    try {
+      const { title, body } = req.body;
+      
+      if (!title || !body) {
+        return res.status(400).json({ error: "Title and body are required" });
+      }
+
+      // Get all active subscriptions
+      const subscriptions = await storage.getActiveSubscriptions();
+      
+      if (subscriptions.length === 0) {
+        return res.json({ 
+          success: false, 
+          message: "No active subscriptions found",
+          sentCount: 0 
+        });
+      }
+
+      // Send test notification
+      const payload = JSON.stringify({
+        title,
+        body,
+        icon: '/icon-192x192.png',
+        badge: '/badge-72x72.png',
+        timestamp: Date.now()
+      });
+
+      console.log('[Test Push] Sending to', subscriptions.length, 'subscription(s)');
+      console.log('[Test Push] Payload:', payload);
+
+      let successCount = 0;
+      let failureCount = 0;
+      const errors: string[] = [];
+
+      const sendPromises = subscriptions.map(async (sub) => {
+        try {
+          console.log('[Test Push] Sending to endpoint:', sub.endpoint.substring(0, 50) + '...');
+          await webpush.sendNotification({
+            endpoint: sub.endpoint,
+            keys: {
+              p256dh: sub.p256dh,
+              auth: sub.auth
+            }
+          }, payload);
+          successCount++;
+          console.log('[Test Push] Success for endpoint:', sub.endpoint.substring(0, 50) + '...');
+        } catch (error: any) {
+          failureCount++;
+          const errorMsg = `Endpoint ${sub.endpoint.substring(0, 50)}...: ${error.message}`;
+          errors.push(errorMsg);
+          console.error('[Test Push] Failed:', errorMsg);
+          
+          // If subscription is invalid, mark it as unsubscribed
+          if (error.statusCode === 410) {
+            await storage.unsubscribeFromPush(sub.endpoint);
+            console.log('[Test Push] Removed invalid subscription');
+          }
+        }
+      });
+
+      await Promise.all(sendPromises);
+
+      res.json({ 
+        success: successCount > 0, 
+        message: `Sent to ${successCount} users, ${failureCount} failed`,
+        successCount,
+        failureCount,
+        errors: errors.length > 0 ? errors : undefined
+      });
+    } catch (error) {
+      console.error("[Test Push] Error:", error);
+      res.status(500).json({ error: "Failed to send test push notification" });
     }
   });
 

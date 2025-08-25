@@ -49,7 +49,16 @@ export function useVersionCheck() {
       
       try {
         console.log('🔍 Checking for app updates...');
-        const response = await fetch('/api/version?t=' + Date.now()); // Cache bust
+        // Use the correct port for API calls in development
+        const apiUrl = import.meta.env.DEV 
+          ? `http://localhost:5000/api/version?t=${Date.now()}`
+          : `/api/version?t=${Date.now()}`;
+        const response = await fetch(apiUrl); // Cache bust
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const latestVersion: VersionInfo = await response.json();
         
         console.log('📊 Version comparison:', {

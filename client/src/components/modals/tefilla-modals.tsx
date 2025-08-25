@@ -2694,7 +2694,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           <VisuallyHidden>
             <DialogDescription>Compass to find direction to Jerusalem for prayer</DialogDescription>
           </VisuallyHidden>
-          <SimpleCompassUI onClose={() => closeModal()} />
+          <div className="px-4 select-none" style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none' }}>
+            <SimpleCompassUI onClose={() => closeModal()} />
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -3118,7 +3120,7 @@ function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'h
                     isModalComplete(`individual-tehillim-${psalm}`)
                       ? 'bg-sage text-white'
                       : 'bg-gradient-feminine text-white'
-                  }`}
+                  } ${psalm === 27 ? 'tehillim-27-pulse' : ''}`}
                   style={{ touchAction: 'manipulation' }}
                 >
                   {psalm}

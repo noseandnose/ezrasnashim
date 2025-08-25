@@ -146,7 +146,7 @@ async function initializeServer() {
       }
     });
   } else {
-    // In development, handle client-side routing
+    // Handle client-side routing
     app.get('*', (req: Request, res: Response) => {
       if (!req.path.startsWith('/api') && !req.path.startsWith('/attached_assets')) {
         // Redirect to the frontend dev server for client-side routing
