@@ -13,20 +13,17 @@ export function AutoNotificationPrompt() {
     // Check current permission status
     if (Notification.permission === 'granted') {
       // If already granted, ensure we're subscribed
-      console.log('Notifications already granted, ensuring subscription');
       ensureSubscribed();
       return;
     }
     
     if (Notification.permission === 'denied') {
       // User previously denied, don't prompt again
-      console.log('Notifications previously denied');
       return;
     }
 
     // If permission is 'default', request permission immediately
     if (Notification.permission === 'default') {
-      console.log('Requesting notification permission...');
       // Request permission immediately without delay
       requestNotificationPermission();
     }
@@ -54,7 +51,6 @@ export function AutoNotificationPrompt() {
       const existingSubscription = await registration.pushManager.getSubscription();
       
       if (existingSubscription) {
-        console.log('Already subscribed to push notifications');
         return; // Already subscribed
       }
 
@@ -67,71 +63,46 @@ export function AutoNotificationPrompt() {
 
   const subscribeToNotifications = async () => {
     try {
-      console.log('Step 1: Registering service worker...');
       // Register service worker
       const registration = await navigator.serviceWorker.register('/sw.js');
-      console.log('Step 2: Service worker registration object:', registration);
-      
       await navigator.serviceWorker.ready;
-      console.log('Step 3: Service worker is ready');
 
       // Get VAPID public key
-      console.log('Step 4: Fetching VAPID public key...');
-      const { publicKey } = await apiRequest('GET', '/api/push/vapid-public-key');
-      console.log('Step 5: VAPID public key received:', publicKey);
+      const response = await apiRequest('GET', '/api/push/vapid-public-key');
+      const { publicKey } = response.data;
       
       if (!publicKey) {
-        console.error('Push notifications not configured on server - no public key');
+        console.error('Push notifications not configured on server');
         return;
       }
 
-      console.log('Step 6: Converting VAPID key...');
-      const applicationServerKey = urlBase64ToUint8Array(publicKey);
-      console.log('Step 7: Application server key ready:', applicationServerKey);
-
-      console.log('Step 8: Subscribing to push notifications...');
       // Subscribe to push notifications
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: applicationServerKey
+        applicationServerKey: urlBase64ToUint8Array(publicKey)
       });
-      console.log('Step 9: Subscription created:', subscription.toJSON());
 
       // Send subscription to server
       const sessionId = localStorage.getItem('sessionId');
-      console.log('Step 10: Sending subscription to server with sessionId:', sessionId);
       
-      try {
-        const response = await apiRequest('POST', '/api/push/subscribe', {
-          subscription: subscription.toJSON(),
-          sessionId
-        });
-        console.log('Step 11: Server response:', response);
-        console.log('Successfully subscribed to push notifications!');
-      } catch (saveError) {
-        console.error('Failed to save subscription to server:', saveError);
-        throw saveError;
-      }
+      await apiRequest('POST', '/api/push/subscribe', {
+        subscription: subscription.toJSON(),
+        sessionId
+      });
+      
+      console.log('Successfully subscribed to push notifications');
     } catch (error) {
-      console.error('Error in subscribeToNotifications at step:', error);
-      console.error('Full error details:', error);
+      console.error('Error subscribing to push notifications:', error);
     }
   };
 
   const requestNotificationPermission = async () => {
     try {
-      console.log('About to request notification permission...');
       const permission = await Notification.requestPermission();
-      console.log('Permission result:', permission);
       
       if (permission === 'granted') {
-        console.log('Permission granted, subscribing...');
         // User granted permission, subscribe to notifications
         await subscribeToNotifications();
-      } else if (permission === 'denied') {
-        console.log('User denied notification permission');
-      } else {
-        console.log('User dismissed notification prompt');
       }
     } catch (error) {
       console.error('Error requesting notification permission:', error);

@@ -24,11 +24,6 @@ const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
 const VAPID_EMAIL = process.env.VAPID_EMAIL;
 
 // Configure web-push with VAPID keys
-console.log('Checking VAPID keys...');
-console.log('VAPID_PUBLIC_KEY exists:', !!VAPID_PUBLIC_KEY);
-console.log('VAPID_PRIVATE_KEY exists:', !!VAPID_PRIVATE_KEY);
-console.log('VAPID_EMAIL exists:', !!VAPID_EMAIL);
-
 if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY && VAPID_EMAIL) {
   webpush.setVapidDetails(
     VAPID_EMAIL,
@@ -36,10 +31,8 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY && VAPID_EMAIL) {
     VAPID_PRIVATE_KEY
   );
   console.log('Push notifications configured with VAPID keys');
-  console.log('Public key value:', VAPID_PUBLIC_KEY);
 } else {
   console.warn('Push notifications not configured - missing VAPID keys');
-  console.warn('Please ensure VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, and VAPID_EMAIL are set');
 }
 import { 
   insertTehillimNameSchema,
@@ -2890,22 +2883,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Push notification endpoints
   app.get("/api/push/vapid-public-key", (req, res) => {
-    console.log('VAPID public key request - key exists:', !!VAPID_PUBLIC_KEY);
-    console.log('Returning public key:', VAPID_PUBLIC_KEY);
     res.json({ publicKey: VAPID_PUBLIC_KEY || null });
   });
 
   app.post("/api/push/subscribe", async (req, res) => {
     try {
-      console.log('Received subscription request:', JSON.stringify(req.body, null, 2));
       const { subscription, sessionId } = req.body;
       
       if (!subscription || !subscription.endpoint) {
-        console.error('Invalid subscription object:', subscription);
         return res.status(400).json({ error: "Invalid subscription object" });
       }
 
-      console.log('Saving subscription to database...');
       const savedSubscription = await storage.subscribeToPush({
         endpoint: subscription.endpoint,
         p256dh: subscription.keys.p256dh,
@@ -2913,7 +2901,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sessionId: sessionId || null
       });
 
-      console.log('Subscription saved successfully:', savedSubscription.id);
       res.json({ 
         success: true, 
         message: "Successfully subscribed to push notifications",

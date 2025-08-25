@@ -1634,44 +1634,31 @@ export class DatabaseStorage implements IStorage {
   
   // Push notification methods
   async subscribeToPush(subscription: InsertPushSubscription): Promise<PushSubscription> {
-    try {
-      console.log('Storage: subscribeToPush called with:', JSON.stringify(subscription, null, 2));
-      
-      // Upsert - if endpoint exists, update it, otherwise insert new
-      const existing = await db
-        .select()
-        .from(pushSubscriptions)
+    // Upsert - if endpoint exists, update it, otherwise insert new
+    const existing = await db
+      .select()
+      .from(pushSubscriptions)
+      .where(eq(pushSubscriptions.endpoint, subscription.endpoint))
+      .limit(1);
+    
+    if (existing.length > 0) {
+      const [updated] = await db
+        .update(pushSubscriptions)
+        .set({
+          p256dh: subscription.p256dh,
+          auth: subscription.auth,
+          subscribed: true,
+          updatedAt: new Date()
+        })
         .where(eq(pushSubscriptions.endpoint, subscription.endpoint))
-        .limit(1);
-      
-      console.log('Storage: Found existing subscriptions:', existing.length);
-      
-      if (existing.length > 0) {
-        console.log('Storage: Updating existing subscription');
-        const [updated] = await db
-          .update(pushSubscriptions)
-          .set({
-            p256dh: subscription.p256dh,
-            auth: subscription.auth,
-            subscribed: true,
-            updatedAt: new Date()
-          })
-          .where(eq(pushSubscriptions.endpoint, subscription.endpoint))
-          .returning();
-        console.log('Storage: Updated subscription:', updated);
-        return updated;
-      } else {
-        console.log('Storage: Creating new subscription');
-        const [newSub] = await db
-          .insert(pushSubscriptions)
-          .values(subscription)
-          .returning();
-        console.log('Storage: Created new subscription:', newSub);
-        return newSub;
-      }
-    } catch (error) {
-      console.error('Storage: Error in subscribeToPush:', error);
-      throw error;
+        .returning();
+      return updated;
+    } else {
+      const [newSub] = await db
+        .insert(pushSubscriptions)
+        .values(subscription)
+        .returning();
+      return newSub;
     }
   }
   
