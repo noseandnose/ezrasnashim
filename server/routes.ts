@@ -19,6 +19,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 });
 
 // Configure web-push with VAPID keys
+console.log('Checking VAPID keys...');
+console.log('VAPID_PUBLIC_KEY exists:', !!process.env.VAPID_PUBLIC_KEY);
+console.log('VAPID_PRIVATE_KEY exists:', !!process.env.VAPID_PRIVATE_KEY);
+console.log('VAPID_EMAIL exists:', !!process.env.VAPID_EMAIL);
+
 if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY && process.env.VAPID_EMAIL) {
   webpush.setVapidDetails(
     process.env.VAPID_EMAIL,
@@ -28,6 +33,7 @@ if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY && process.env
   console.log('Push notifications configured with VAPID keys');
 } else {
   console.warn('Push notifications not configured - missing VAPID keys');
+  console.warn('Please ensure VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, and VAPID_EMAIL are set');
 }
 import { 
   insertTehillimNameSchema,
@@ -2878,7 +2884,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Push notification endpoints
   app.get("/api/push/vapid-public-key", (req, res) => {
-    res.json({ publicKey: process.env.VAPID_PUBLIC_KEY || null });
+    const publicKey = process.env.VAPID_PUBLIC_KEY;
+    console.log('VAPID public key request - key exists:', !!publicKey);
+    if (!publicKey) {
+      console.log('Environment variables available:', Object.keys(process.env).filter(k => k.includes('VAPID')));
+    }
+    res.json({ publicKey: publicKey || null });
   });
 
   app.post("/api/push/subscribe", async (req, res) => {
