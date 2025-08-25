@@ -50,13 +50,16 @@ export default function AdminNotifications() {
 
     setIsSending(true);
     try {
-      const result = await apiRequest('POST', '/api/push/send', {
+      const response = await apiRequest('POST', '/api/push/send', {
         title,
         body,
         url,
         requireInteraction,
         adminPassword
       });
+
+      // Access the actual data from the Axios response
+      const result = response.data;
 
       if (result.success) {
         toast({
@@ -82,12 +85,12 @@ export default function AdminNotifications() {
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to send notification.',
+        description: error?.response?.data?.error || error?.message || 'Failed to send notification.',
         variant: 'destructive'
       });
       
       // If unauthorized, reset authentication
-      if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+      if (error?.response?.status === 401) {
         setIsAuthenticated(false);
         setAdminPassword('');
       }
