@@ -87,7 +87,12 @@ export default function TestPush() {
     try {
       addStatus('Sending test push from server...');
       
-      const response = await fetch('http://localhost:5000/api/push/test', {
+      // Use the correct API URL based on environment
+      const apiUrl = import.meta.env.DEV 
+        ? 'http://localhost:5000/api/push/test'
+        : '/api/push/test';
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
