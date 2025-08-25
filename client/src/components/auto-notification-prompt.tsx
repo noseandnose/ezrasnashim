@@ -90,12 +90,19 @@ export function AutoNotificationPrompt() {
 
       // Send subscription to server
       const sessionId = localStorage.getItem('sessionId');
-      await apiRequest('POST', '/api/push/subscribe', {
-        subscription: subscription.toJSON(),
-        sessionId
-      });
-
-      console.log('Successfully subscribed to push notifications');
+      console.log('Sending subscription to server:', subscription.toJSON());
+      
+      try {
+        const response = await apiRequest('POST', '/api/push/subscribe', {
+          subscription: subscription.toJSON(),
+          sessionId
+        });
+        console.log('Server response:', response);
+        console.log('Successfully subscribed to push notifications');
+      } catch (saveError) {
+        console.error('Failed to save subscription to server:', saveError);
+        throw saveError;
+      }
     } catch (error) {
       console.error('Error subscribing to push notifications:', error);
     }

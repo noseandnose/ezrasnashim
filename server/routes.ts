@@ -2883,12 +2883,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/push/subscribe", async (req, res) => {
     try {
+      console.log('Received subscription request:', JSON.stringify(req.body, null, 2));
       const { subscription, sessionId } = req.body;
       
       if (!subscription || !subscription.endpoint) {
+        console.error('Invalid subscription object:', subscription);
         return res.status(400).json({ error: "Invalid subscription object" });
       }
 
+      console.log('Saving subscription to database...');
       const savedSubscription = await storage.subscribeToPush({
         endpoint: subscription.endpoint,
         p256dh: subscription.keys.p256dh,
@@ -2896,6 +2899,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sessionId: sessionId || null
       });
 
+      console.log('Subscription saved successfully:', savedSubscription.id);
       res.json({ 
         success: true, 
         message: "Successfully subscribed to push notifications",
