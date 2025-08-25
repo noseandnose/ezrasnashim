@@ -4,35 +4,31 @@ import { apiRequest } from '@/lib/queryClient';
 export function AutoNotificationPrompt() {
 
   useEffect(() => {
-    // Check if we've already prompted before
-    const previouslyPrompted = localStorage.getItem('notificationPromptShown');
-    
     // Check if browser supports notifications
     if (!('serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window)) {
+      console.log('Browser does not support push notifications');
       return;
     }
 
     // Check current permission status
     if (Notification.permission === 'granted') {
       // If already granted, ensure we're subscribed
+      console.log('Notifications already granted, ensuring subscription');
       ensureSubscribed();
       return;
     }
     
     if (Notification.permission === 'denied') {
       // User previously denied, don't prompt again
+      console.log('Notifications previously denied');
       return;
     }
 
-    // If permission is 'default' and we haven't prompted before, request permission immediately
-    if (!previouslyPrompted && Notification.permission === 'default') {
-      // Mark that we've shown the prompt
-      localStorage.setItem('notificationPromptShown', 'true');
-      
-      // Request permission immediately on page load
-      setTimeout(async () => {
-        await requestNotificationPermission();
-      }, 1000); // Small delay to let the page load
+    // If permission is 'default', request permission immediately
+    if (Notification.permission === 'default') {
+      console.log('Requesting notification permission...');
+      // Request permission immediately without delay
+      requestNotificationPermission();
     }
   }, []);
 
@@ -58,6 +54,7 @@ export function AutoNotificationPrompt() {
       const existingSubscription = await registration.pushManager.getSubscription();
       
       if (existingSubscription) {
+        console.log('Already subscribed to push notifications');
         return; // Already subscribed
       }
 
@@ -70,9 +67,11 @@ export function AutoNotificationPrompt() {
 
   const subscribeToNotifications = async () => {
     try {
+      console.log('Registering service worker...');
       // Register service worker
       const registration = await navigator.serviceWorker.register('/sw.js');
       await navigator.serviceWorker.ready;
+      console.log('Service worker registered');
 
       // Get VAPID public key
       const { publicKey } = await apiRequest('GET', '/api/push/vapid-public-key');
@@ -82,6 +81,7 @@ export function AutoNotificationPrompt() {
         return;
       }
 
+      console.log('Subscribing to push notifications...');
       // Subscribe to push notifications
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
@@ -103,13 +103,18 @@ export function AutoNotificationPrompt() {
 
   const requestNotificationPermission = async () => {
     try {
+      console.log('About to request notification permission...');
       const permission = await Notification.requestPermission();
+      console.log('Permission result:', permission);
       
       if (permission === 'granted') {
+        console.log('Permission granted, subscribing...');
         // User granted permission, subscribe to notifications
         await subscribeToNotifications();
       } else if (permission === 'denied') {
         console.log('User denied notification permission');
+      } else {
+        console.log('User dismissed notification prompt');
       }
     } catch (error) {
       console.error('Error requesting notification permission:', error);
