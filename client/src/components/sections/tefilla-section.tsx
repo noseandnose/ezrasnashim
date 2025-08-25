@@ -663,7 +663,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       </div>
 
       {/* OTHER SECTIONS BELOW - SEPARATE FROM MAIN */}
-      <div className="p-2 space-y-2">
+      <div className="py-2 space-y-2">
         {/* Top Row: Morning Brochas and Mincha */}
         <div className="grid grid-cols-2 gap-2">
           <button 

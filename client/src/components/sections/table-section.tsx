@@ -151,7 +151,7 @@ export default function TableSection() {
       </div>
 
       {/* Shabbos Content Grid - Separate Section */}
-      <div className="p-2 space-y-1">
+      <div className="py-2 space-y-1">
         {/* Top Row: Daily Recipe and Date Converter */}
         <div className="grid grid-cols-2 gap-2 mb-2">
           {/* Daily Recipe Button */}
@@ -277,7 +277,7 @@ export default function TableSection() {
         </div>
         
         {/* Discount Promotion Bar */}
-        <div className="mt-4 px-2">
+        <div className="mt-4">
           <DiscountBar />
         </div>
         
