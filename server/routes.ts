@@ -1917,24 +1917,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug endpoint to verify webhook secret is loaded
+  app.get("/api/webhooks/stripe/debug", async (req, res) => {
+    res.json({
+      hasWebhookSecret: !!process.env.STRIPE_WEBHOOK_SECRET,
+      secretPrefix: process.env.STRIPE_WEBHOOK_SECRET ? process.env.STRIPE_WEBHOOK_SECRET.substring(0, 10) + '...' : 'NOT_SET',
+      environment: process.env.NODE_ENV || 'development'
+    });
+  });
+
+  // Alternative webhook endpoint with different path (in case proxy is blocking /api/webhooks/stripe)
+  app.post("/api/stripe-webhook", async (req, res) => {
+    // Forward to main webhook handler
+    return app._router.handle(Object.assign(req, { url: '/api/webhooks/stripe' }), res, () => {});
+  });
+
   // Stripe webhook handler for processing successful payments
   app.post("/api/webhooks/stripe", async (req, res) => {
     const sig = req.headers['stripe-signature'];
     let event;
 
     try {
+      // Log webhook attempt for debugging
+      console.log('Webhook received:', {
+        hasSignature: !!sig,
+        hasSecret: !!process.env.STRIPE_WEBHOOK_SECRET,
+        bodyType: typeof req.body,
+        bodyLength: req.body ? req.body.length : 0
+      });
+
       // Verify webhook signature for security
       if (!sig) {
-        throw new Error('Missing stripe signature');
+        console.error('Missing stripe signature header');
+        return res.status(400).json({ error: 'Missing stripe signature' });
       }
       if (!process.env.STRIPE_WEBHOOK_SECRET) {
-        throw new Error('Missing stripe webhook secret - required for production');
+        console.error('Missing stripe webhook secret environment variable');
+        return res.status(400).json({ error: 'Missing webhook secret configuration' });
       }
+      
       event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+      console.log('Webhook signature verified successfully');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      console.error('Webhook signature verification failed:', errorMessage);
-      return res.status(400).send(`Webhook Error: ${errorMessage}`);
+      console.error('Webhook signature verification failed:', {
+        error: errorMessage,
+        signatureHeader: sig ? sig.substring(0, 20) + '...' : 'none',
+        secretPrefix: process.env.STRIPE_WEBHOOK_SECRET ? process.env.STRIPE_WEBHOOK_SECRET.substring(0, 10) + '...' : 'none'
+      });
+      return res.status(400).json({ error: `Webhook validation failed: ${errorMessage}` });
     }
 
     try {
