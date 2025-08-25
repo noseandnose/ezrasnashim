@@ -99,7 +99,7 @@ export default function PushDebug() {
     
     try {
       // Get VAPID public key
-      const response = await fetch('http://localhost:5000/api/push/vapid-public-key');
+      const response = await fetch(`${window.location.origin}/api/push/vapid-public-key`);
       const { publicKey } = await response.json();
       log(`Got VAPID key: ${publicKey.substring(0, 20)}...`);
       
@@ -123,14 +123,14 @@ export default function PushDebug() {
       log(`New endpoint: ${newSub.endpoint.substring(0, 60)}...`);
       
       // Send to server
-      const saveResponse = await fetch('http://localhost:5000/api/push/subscribe', {
+      const saveResponse = await fetch(`${window.location.origin}/api/push/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           endpoint: newSub.endpoint,
           keys: {
-            p256dh: btoa(String.fromCharCode(...new Uint8Array(newSub.getKey('p256dh')!))),
-            auth: btoa(String.fromCharCode(...new Uint8Array(newSub.getKey('auth')!)))
+            p256dh: btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(newSub.getKey('p256dh')!)))),
+            auth: btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(newSub.getKey('auth')!))))
           }
         })
       });
@@ -147,9 +147,8 @@ export default function PushDebug() {
     log('=== Sending Test Push ===');
     
     try {
-      const apiUrl = window.location.hostname.includes('replit')
-        ? `https://${window.location.hostname.replace('-00-', '-5000-')}/api/push/simple-test`
-        : 'http://localhost:5000/api/push/simple-test';
+      // Use the same origin as the current page since frontend and backend are on same port
+      const apiUrl = `${window.location.origin}/api/push/simple-test`;
       
       log(`Using API: ${apiUrl}`);
       
