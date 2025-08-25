@@ -594,7 +594,7 @@ export default function Donate() {
       console.log('Confirming payment with sessionId:', sessionId, 'paymentIntentId:', paymentIntentId, 'buttonType:', buttonType);
       
       // Immediately confirm payment and update UI (don't wait for webhook)
-      handleDonationSuccess(sessionId, buttonType, paymentIntentId);
+      handleDonationSuccess(sessionId, buttonType, paymentIntentId || undefined);
       
       return;
     }
