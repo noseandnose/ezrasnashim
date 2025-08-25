@@ -1282,7 +1282,14 @@ export class DatabaseStorage implements IStorage {
     
     // Count event types (no more page_view tracking)
     const pageViews = 0; // No longer tracking page views
-    const tehillimCompleted = todayEvents.filter(e => e.eventType === 'tehillim_complete').length;
+    // Count global tehillim separately (they count as 2 mitzvos - saying + praying for someone)
+    const globalTehillimCompleted = todayEvents.filter(e => 
+      e.eventType === 'tehillim_complete' && (e.eventData as any)?.type === 'global'
+    ).length;
+    const regularTehillimCompleted = todayEvents.filter(e => 
+      e.eventType === 'tehillim_complete' && (e.eventData as any)?.type !== 'global'
+    ).length;
+    const tehillimCompleted = globalTehillimCompleted + regularTehillimCompleted;
     const namesProcessed = todayEvents.filter(e => e.eventType === 'name_prayed').length;
     const booksCompleted = todayEvents.filter(e => e.eventType === 'tehillim_book_complete').length;
     const tzedakaActs = todayEvents.filter(e => e.eventType === 'tzedaka_completion').length;
@@ -1309,7 +1316,7 @@ export class DatabaseStorage implements IStorage {
           namesProcessed,
           booksCompleted,
           tzedakaActs,
-          totalActs: this.calculateTotalActs(modalCompletions, tehillimCompleted, tzedakaActs),
+          totalActs: this.calculateTotalActs(modalCompletions, regularTehillimCompleted, tzedakaActs, globalTehillimCompleted),
           modalCompletions,
           updatedAt: new Date()
         })
@@ -1327,7 +1334,7 @@ export class DatabaseStorage implements IStorage {
           namesProcessed,
           booksCompleted,
           tzedakaActs,
-          totalActs: this.calculateTotalActs(modalCompletions, tehillimCompleted, tzedakaActs),
+          totalActs: this.calculateTotalActs(modalCompletions, regularTehillimCompleted, tzedakaActs, globalTehillimCompleted),
           modalCompletions
         })
         .returning();
@@ -1356,7 +1363,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Helper method to calculate total acts
-  private calculateTotalActs(modalCompletions: Record<string, number>, tehillimCompleted: number, tzedakaActsCount: number = 0): number {
+  private calculateTotalActs(modalCompletions: Record<string, number>, tehillimCompleted: number, tzedakaActsCount: number = 0, globalTehillimCompleted: number = 0): number {
     const torahActs = ['torah', 'chizuk', 'emuna', 'halacha', 'featured-content'];
     const tefillaActs = ['tefilla', 'morning-brochas', 'mincha', 'maariv', 'nishmas', 'birkat-hamazon', 'special-tehillim', 'global-tehillim-chain', 'tehillim-text'];
     const tzedakaActs = ['tzedaka', 'donate'];
@@ -1374,8 +1381,11 @@ export class DatabaseStorage implements IStorage {
       }
     }
     
-    // Add tehillim completions as acts
+    // Add regular tehillim completions as acts (1 mitzvah each)
     totalActs += tehillimCompleted || 0;
+    
+    // Add global tehillim completions as acts (2 mitzvos each - saying + praying for someone)
+    totalActs += (globalTehillimCompleted || 0) * 2;
     
     // Add tzedaka completions as acts 
     totalActs += tzedakaActsCount || 0;
