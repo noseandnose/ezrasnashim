@@ -210,7 +210,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/zmanim/:lat/:lng", async (req, res) => {
     try {
       const { lat, lng } = req.params;
-      const today = new Date().toISOString().split('T')[0];
+      // Day starts at 02:00 local time for analytics
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
       
       const latitude = parseFloat(lat);
       const longitude = parseFloat(lng);
@@ -858,7 +864,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/hebcal/:location?", async (req, res) => {
     try {
       const location = req.params.location || "5128581"; // Default to NYC
-      const today = new Date().toISOString().split('T')[0];
+      // Day starts at 02:00 local time for analytics
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
       const hebcalUrl = `https://www.hebcal.com/zmanim?cfg=json&geonameid=${location}&date=${today}`;
       
       const response = await serverAxiosClient.get(hebcalUrl);
@@ -1182,7 +1194,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/table/recipe", async (req, res) => {
     try {
       // Get current date
-      const today = new Date().toISOString().split('T')[0];
+      // Day starts at 02:00 local time for analytics
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
       
       const recipe = await storage.getDailyRecipeByDate(today);
       res.json(recipe || null);
@@ -1213,7 +1231,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/table/vort", async (req, res) => {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      // Day starts at 02:00 local time for analytics
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
       const vort = await storage.getParshaVortByDate(today);
       res.json(vort || null);
     } catch (error) {
@@ -1236,7 +1260,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/zmanim/:location?", async (req, res) => {
     try {
       const location = req.params.location || "5128581"; // Default to NYC
-      const today = new Date().toISOString().split('T')[0];
+      // Day starts at 02:00 local time for analytics
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
       const hebcalUrl = `https://www.hebcal.com/zmanim?cfg=json&geonameid=${location}&date=${today}`;
       
       const response = await serverAxiosClient.get(hebcalUrl);
@@ -1564,7 +1594,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Only create sponsor record for "Sponsor a Day" donations
       if (donationType === 'Sponsor a Day of Ezras Nashim' && sponsorName) {
-        const today = new Date().toISOString().split('T')[0];
+        // Day starts at 02:00 local time for analytics
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
         
         // Create sponsor record
         await storage.createSponsor({
@@ -1964,7 +2000,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
 
             // Update today's analytics stats to show immediate impact
-            const today = new Date().toISOString().split('T')[0];
+            // Day starts at 02:00 local time for analytics
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
             try {
               await storage.recalculateDailyStats(today);
               console.log('Recalculated daily stats after donation');
@@ -2064,7 +2106,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
 
             // Recalculate daily stats
-            const today = new Date().toISOString().split('T')[0];
+            // Day starts at 02:00 local time for analytics
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
             try {
               await storage.recalculateDailyStats(today);
               console.log('Recalculated daily stats after checkout donation');
@@ -2280,7 +2328,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Immediately recalculate today's stats to show live updates
-      const today = new Date().toISOString().split('T')[0];
+      // Day starts at 02:00 local time for analytics
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
       await storage.recalculateDailyStats(today);
       
       res.json(event);
@@ -2328,7 +2382,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'Surrogate-Control': 'no-store'
       });
       
-      const today = new Date().toISOString().split('T')[0];
+      // Day starts at 02:00 local time for analytics
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
       const stats = await storage.getDailyStats(today);
       res.json(stats || {
         date: today,
