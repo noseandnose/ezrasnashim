@@ -6,7 +6,6 @@ export function AutoNotificationPrompt() {
   useEffect(() => {
     // Check if browser supports notifications
     if (!('serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window)) {
-      console.log('Browser does not support push notifications');
       return;
     }
 
@@ -34,15 +33,12 @@ export function AutoNotificationPrompt() {
 
   const registerServiceWorker = async () => {
     try {
-      console.log('[SW Registration] Starting...');
-      const registration = await navigator.serviceWorker.register('/sw.js');
-      console.log('[SW Registration] Success:', registration.scope);
+      await navigator.serviceWorker.register('/sw.js');
       
       // Wait for service worker to be ready
       await navigator.serviceWorker.ready;
-      console.log('[SW Registration] Service worker ready');
     } catch (error) {
-      console.error('[SW Registration] Failed:', error);
+      // Service worker registration failed - notifications won't work
     }
   };
 
@@ -74,7 +70,7 @@ export function AutoNotificationPrompt() {
       // Subscribe
       await subscribeToNotifications();
     } catch (error) {
-      console.error('Error ensuring subscription:', error);
+      // Error ensuring subscription
     }
   };
 
@@ -88,7 +84,6 @@ export function AutoNotificationPrompt() {
       const { publicKey } = response.data;
       
       if (!publicKey) {
-        console.error('Push notifications not configured on server');
         return;
       }
 
@@ -106,9 +101,9 @@ export function AutoNotificationPrompt() {
         sessionId
       });
       
-      console.log('Successfully subscribed to push notifications');
+      // Successfully subscribed to push notifications
     } catch (error) {
-      console.error('Error subscribing to push notifications:', error);
+      // Error subscribing to push notifications
     }
   };
 
@@ -121,7 +116,7 @@ export function AutoNotificationPrompt() {
         await subscribeToNotifications();
       }
     } catch (error) {
-      console.error('Error requesting notification permission:', error);
+      // Error requesting notification permission
     }
   };
 

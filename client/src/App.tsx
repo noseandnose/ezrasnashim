@@ -17,11 +17,7 @@ const Home = lazy(() => import("@/pages/home"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const Donate = lazy(() => import("@/pages/donate"));
 const Statistics = lazy(() => import("@/pages/statistics"));
-const TestPayment = lazy(() => import("@/pages/test-payment"));
-const DebugPayment = lazy(() => import("@/pages/debug-payment"));
 const AdminNotifications = lazy(() => import("@/pages/admin-notifications"));
-const TestPush = lazy(() => import("@/pages/test-push"));
-const PushDebug = lazy(() => import("@/pages/push-debug"));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -73,11 +69,7 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/donate" component={Donate} />
         <Route path="/statistics" component={Statistics} />
-        <Route path="/test-payment" component={TestPayment} />
-        <Route path="/debug-payment" component={DebugPayment} />
         <Route path="/admin/notifications" component={AdminNotifications} />
-        <Route path="/test-push" component={TestPush} />
-        <Route path="/push-debug" component={PushDebug} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
