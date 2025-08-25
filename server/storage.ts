@@ -131,6 +131,7 @@ export interface IStorage {
 
   // Acts tracking methods - New for individual button completion tracking
   createAct(act: InsertAct): Promise<Act>;
+  getActByPaymentIntentId(paymentIntentId: string): Promise<Act | null>;
 
   // Pirkei Avot progression methods
   getPirkeiAvotProgress(): Promise<PirkeiAvotProgress>;
@@ -980,6 +981,15 @@ export class DatabaseStorage implements IStorage {
       .values(act)
       .returning();
     return result;
+  }
+
+  async getActByPaymentIntentId(paymentIntentId: string): Promise<Act | null> {
+    const [result] = await db
+      .select()
+      .from(acts)
+      .where(eq(acts.paymentIntentId, paymentIntentId))
+      .limit(1);
+    return result || null;
   }
 
   async getDonationByPaymentIntentId(stripePaymentIntentId: string) {

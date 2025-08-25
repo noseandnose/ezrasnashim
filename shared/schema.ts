@@ -323,6 +323,7 @@ export const acts = pgTable("acts", {
   category: text("category").notNull(), // 'tzedaka', 'torah', 'tefilla'
   subtype: text("subtype"), // 'active_campaign', 'put_a_coin', 'sponsor_a_day', 'gave_elsewhere'
   amount: integer("amount").default(0), // Amount in cents, 0 for "gave elsewhere"
+  paymentIntentId: text("payment_intent_id"), // Stripe payment intent ID for idempotency
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

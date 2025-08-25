@@ -459,20 +459,34 @@ export default function Donate() {
     localStorage.setItem('tzedaka_button_completions', JSON.stringify(completions));
   };
 
-  // Function to call backend success endpoint
-  const handleDonationSuccess = async (sessionId: string, buttonType: string) => {
-    console.log('=== CALLING DONATION SUCCESS ENDPOINT ===');
+  // Function to call backend payment confirmation endpoint (idempotent)
+  const handleDonationSuccess = async (sessionId: string, buttonType: string, paymentIntentId?: string) => {
+    console.log('=== FRONTEND PAYMENT CONFIRMATION ===');
     console.log('Session ID:', sessionId);
+    console.log('Payment Intent ID:', paymentIntentId);
     console.log('Button Type:', buttonType);
     
     try {
-      const response = await apiRequest('POST', '/api/donations/success', {
-        sessionId: sessionId
+      // Call the new idempotent confirmation endpoint
+      const response = await apiRequest('POST', '/api/payments/confirm', {
+        paymentIntentId: paymentIntentId || sessionId, // Use payment intent if available, fallback to session
+        sessionId: sessionId,
+        amount: amount * 100, // Convert to cents
+        currency: 'usd',
+        metadata: {
+          buttonType: buttonType,
+          donationType: donationType,
+          sponsorName: sponsorName,
+          dedication: dedication,
+          message: message,
+          sessionId: sessionId
+        }
       });
       
-      console.log('Success endpoint response:', response);
+      console.log('Payment confirmation response:', response);
       
-      if (response.data && response.data.success) {
+      // Always mark as success locally if we got a response (idempotent backend handles duplicates)
+      if (response && response.data) {
         // Mark the individual button as complete using the button type
         markTzedakaButtonCompleted(buttonType as TzedakaButtonType);
         
@@ -536,12 +550,13 @@ export default function Donate() {
       // Clear redirect flag on successful completion
       localStorage.removeItem('has_been_redirected_to_stripe');
       
-      // Get session ID from URL (passed back from Stripe Checkout)
-      const sessionId = urlParams.get('session_id') || urlParams.get('payment_intent') || 'unknown';
-      console.log('Calling success endpoint with sessionId:', sessionId, 'buttonType:', buttonType);
+      // Get payment details from URL (passed back from Stripe Checkout)
+      const sessionId = urlParams.get('session_id') || 'unknown';
+      const paymentIntentId = urlParams.get('payment_intent');
+      console.log('Confirming payment with sessionId:', sessionId, 'paymentIntentId:', paymentIntentId, 'buttonType:', buttonType);
       
-      // Call backend success endpoint and mark individual button complete
-      handleDonationSuccess(sessionId, buttonType);
+      // Immediately confirm payment and update UI (don't wait for webhook)
+      handleDonationSuccess(sessionId, buttonType, paymentIntentId);
       
       return;
     }

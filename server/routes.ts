@@ -1917,6 +1917,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Frontend-driven payment confirmation (idempotent)
+  app.post("/api/payments/confirm", async (req, res) => {
+    try {
+      const { paymentIntentId, amount, currency, metadata, sessionId } = req.body;
+      
+      if (!paymentIntentId) {
+        return res.status(400).json({ error: 'Payment intent ID required' });
+      }
+
+      // Check if we've already processed this payment (idempotency)
+      const existingDonation = await storage.getDonationByPaymentIntentId(paymentIntentId);
+      
+      if (existingDonation && existingDonation.status === 'succeeded') {
+        // Already processed, return success without double-counting
+        console.log(`Payment ${paymentIntentId} already processed, skipping`);
+        return res.json({ 
+          success: true, 
+          message: 'Payment already processed',
+          donationId: existingDonation.id 
+        });
+      }
+
+      // Update or create donation record
+      if (existingDonation) {
+        // Update existing pending donation to succeeded
+        await storage.updateDonationStatus(paymentIntentId, 'succeeded');
+      } else {
+        // Create new donation record (for payments not created via checkout)
+        await storage.createDonation({
+          userId: null,
+          stripePaymentIntentId: paymentIntentId,
+          stripeSessionId: sessionId || null,
+          amount: amount,
+          type: metadata?.buttonType || 'put_a_coin',
+          donationType: metadata?.donationType || 'General Donation',
+          metadata: metadata || {},
+          status: 'succeeded'
+        });
+      }
+
+      // Track the act (idempotent - check if already exists)
+      const buttonType = metadata?.buttonType || 'put_a_coin';
+      const existingAct = await storage.getActByPaymentIntentId(paymentIntentId);
+      
+      if (!existingAct) {
+        await storage.createAct({
+          userId: null,
+          category: 'tzedaka',
+          subtype: buttonType,
+          amount: amount,
+          paymentIntentId: paymentIntentId // Add this for idempotency
+        });
+      }
+
+      // Track analytics events (idempotent)
+      const today = new Date();
+      const hours = today.getHours();
+      if (hours < 2) {
+        today.setDate(today.getDate() - 1);
+      }
+      const dateStr = today.toISOString().split('T')[0];
+
+      // Track tzedaka completion
+      await storage.trackEvent({
+        eventType: 'tzedaka_completion',
+        eventData: {
+          buttonType: buttonType,
+          amount: amount / 100,
+          paymentIntentId: paymentIntentId,
+          date: dateStr
+        },
+        sessionId: metadata?.sessionId || null
+      });
+
+      // Track as modal_complete for Feature Usage
+      await storage.trackEvent({
+        eventType: 'modal_complete',
+        eventData: {
+          modalType: 'tzedaka',
+          buttonType: buttonType,
+          amount: amount / 100,
+          paymentIntentId: paymentIntentId,
+          date: dateStr
+        },
+        sessionId: metadata?.sessionId || null
+      });
+
+      // Update campaign if active_campaign donation
+      if (buttonType === 'active_campaign') {
+        const activeCampaign = await storage.getActiveCampaign();
+        if (activeCampaign) {
+          const newAmount = activeCampaign.currentAmount + (amount / 100);
+          await storage.updateCampaignProgress(activeCampaign.id, newAmount);
+          console.log(`Campaign updated to ${newAmount}/${activeCampaign.goalAmount}`);
+        }
+      }
+
+      // Recalculate daily stats
+      await storage.recalculateDailyStats(dateStr);
+
+      res.json({ 
+        success: true, 
+        message: 'Payment confirmed and stats updated',
+        donationId: existingDonation?.id || 'new' 
+      });
+
+    } catch (error) {
+      console.error('Error confirming payment:', error);
+      res.status(500).json({ error: 'Failed to confirm payment' });
+    }
+  });
+
   // Debug endpoint to verify webhook secret is loaded
   app.get("/api/webhooks/stripe/debug", async (req, res) => {
     res.json({
@@ -1973,7 +2085,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       switch (event.type) {
         case 'payment_intent.succeeded':
           const paymentIntent = event.data.object;
-          console.log('Payment succeeded:', paymentIntent.id);
+          console.log('Webhook: Payment succeeded:', paymentIntent.id);
+          
+          // BACKUP RECONCILIATION: Check if already processed by frontend
+          const existingAct = await storage.getActByPaymentIntentId(paymentIntent.id);
+          if (existingAct) {
+            console.log(`Webhook: Payment ${paymentIntent.id} already processed by frontend - skipping`);
+            break; // Already handled by frontend confirmation
+          }
+          
+          console.log(`Webhook: Processing payment ${paymentIntent.id} as backup reconciliation`);
           
           // Update donation status to succeeded
           const donation = await storage.getDonationByPaymentIntentId(paymentIntent.id);
@@ -1986,7 +2107,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               userId: null, // We don't have user auth yet
               category: 'tzedaka',
               subtype: buttonType,
-              amount: paymentIntent.amount
+              amount: paymentIntent.amount,
+              paymentIntentId: paymentIntent.id // Store for idempotency
             });
             
             console.log(`Created act record for ${buttonType} completion`);
@@ -2067,11 +2189,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
         case 'checkout.session.completed':
           const session = event.data.object;
-          console.log('Checkout session completed:', session.id);
+          console.log('Webhook: Checkout session completed:', session.id);
           
           // Get the payment intent from the session
           const paymentIntentId = session.payment_intent;
-          console.log('Payment intent from session:', paymentIntentId);
+          console.log('Webhook: Payment intent from session:', paymentIntentId);
+          
+          // BACKUP RECONCILIATION: Check if already processed by frontend
+          if (paymentIntentId) {
+            const existingSessionAct = await storage.getActByPaymentIntentId(paymentIntentId as string);
+            if (existingSessionAct) {
+              console.log(`Webhook: Session ${session.id} already processed by frontend - skipping`);
+              break; // Already handled by frontend confirmation
+            }
+          }
+          
+          console.log(`Webhook: Processing session ${session.id} as backup reconciliation`);
           
           // Find donation by session ID (stored in stripe_payment_intent_id field incorrectly)
           const sessionDonation = await storage.getDonationByPaymentIntentId(session.id);
@@ -2081,7 +2214,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               stripePaymentIntentId: paymentIntentId as string,
               status: 'succeeded'
             });
-            console.log('Updated donation with correct payment intent ID');
+            console.log('Webhook: Updated donation with correct payment intent ID');
             
             // Extract metadata from session
             const buttonType = session.metadata?.buttonType || 'active_campaign';
@@ -2092,7 +2225,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               userId: null,
               category: 'tzedaka',
               subtype: buttonType,
-              amount: amount
+              amount: amount,
+              paymentIntentId: paymentIntentId as string // Store for idempotency
             });
             
             console.log(`Created act record for ${buttonType} completion from checkout session`);
@@ -2265,6 +2399,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Frontend-driven payment confirmation (idempotent)
+  app.post("/api/payments/confirm", async (req, res) => {
+    try {
+      const { paymentIntentId, sessionId, amount, currency, metadata } = req.body;
+      
+      if (!paymentIntentId) {
+        return res.status(400).json({ message: "Payment intent ID required" });
+      }
+      
+      // Check if we've already processed this payment (idempotency check)
+      const existingAct = await storage.getActByPaymentIntentId(paymentIntentId);
+      if (existingAct) {
+        console.log(`Payment ${paymentIntentId} already processed - returning success`);
+        return res.json({ 
+          success: true, 
+          message: "Payment already processed",
+          alreadyProcessed: true 
+        });
+      }
+      
+      // Create donation record if not exists
+      let donation = await storage.getDonationByPaymentIntentId(paymentIntentId);
+      if (!donation && sessionId) {
+        donation = await storage.getDonationBySessionId(sessionId);
+      }
+      
+      if (!donation) {
+        // Create new donation record
+        donation = await storage.createDonation({
+          userId: null,
+          stripePaymentIntentId: paymentIntentId,
+          stripeSessionId: sessionId,
+          amount: amount || 100, // Amount in cents
+          type: metadata?.buttonType || "put_a_coin",
+          donationType: metadata?.donationType || "General Donation",
+          sponsorName: metadata?.sponsorName,
+          dedication: metadata?.dedication,
+          email: metadata?.email,
+          metadata: metadata || {},
+          status: 'succeeded'
+        });
+      } else if (donation.status !== 'succeeded') {
+        // Update existing donation to succeeded
+        await storage.updateDonationStatus(paymentIntentId, 'succeeded');
+      }
+      
+      // Create act record with payment_intent_id for idempotency
+      const buttonType = metadata?.buttonType || donation.type || 'put_a_coin';
+      await storage.createAct({
+        userId: null,
+        category: 'tzedaka',
+        subtype: buttonType,
+        amount: amount || donation.amount,
+        paymentIntentId: paymentIntentId // Store for idempotency
+      });
+      
+      // Update daily stats
+      const today = getStatsDate();
+      const stats = await storage.getDailyStats(today);
+      const updated = {
+        tzedakaActs: (stats?.tzedakaActs || 0) + 1,
+        moneyRaised: (stats?.moneyRaised || 0) + (amount || donation.amount),
+        totalActs: (stats?.totalActs || 0) + 1
+      };
+      
+      // Update specific donation type counter
+      if (buttonType === 'active_campaign') {
+        updated.activeCampaignTotal = (stats?.activeCampaignTotal || 0) + (amount || donation.amount);
+      } else if (buttonType === 'put_a_coin') {
+        updated.putACoinTotal = (stats?.putACoinTotal || 0) + (amount || donation.amount);
+      } else if (buttonType === 'sponsor_a_day') {
+        updated.sponsorADayTotal = (stats?.sponsorADayTotal || 0) + (amount || donation.amount);
+      }
+      
+      await storage.updateDailyStats(today, updated);
+      
+      console.log(`Payment ${paymentIntentId} confirmed and stats updated`);
+      
+      res.json({ 
+        success: true, 
+        message: "Payment confirmed successfully",
+        buttonType: buttonType
+      });
+    } catch (error) {
+      console.error('Error confirming payment:', error);
+      res.status(500).json({ message: "Failed to confirm payment" });
+    }
+  });
+  
   // Manual donation success update (for testing when webhook isn't configured)
   app.post("/api/donations/update-status", async (req, res) => {
     try {
