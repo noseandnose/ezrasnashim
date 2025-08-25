@@ -536,22 +536,34 @@ export default function Donate() {
     // Check if returning from successful payment
     if (isSuccess) {
       console.log('SUCCESS DETECTED - Processing donation completion...');
+
+      // Stripe doesn't send back the session ID with the successful payment, we get it from the pending_donation in localStorage
       console.log('URL Params:', {
         success: urlParams.get('success'),
-        session_id: urlParams.get('session_id'),
-        payment_intent: urlParams.get('payment_intent'),
         buttonType: urlParams.get('buttonType'),
         amount: urlParams.get('amount')
       });
       
+      // Get the session ID from localStorage (if available)
+      const pendingDonationString = localStorage.getItem('pending_donation');
+      let sessionId = null;
+
+      if (pendingDonationString) {
+        try {
+          const pendingDonation = JSON.parse(pendingDonationString);
+          sessionId = pendingDonation.sessionId;
+        } catch (error) {
+          console.error('Failed to parse pending_donation:', error);
+        }
+      }
+
       setDonationComplete(true);
       setShowLoadingScreen(false);
       
       // Clear redirect flag on successful completion
       localStorage.removeItem('has_been_redirected_to_stripe');
       
-      // Get payment details from URL (passed back from Stripe Checkout)
-      const sessionId = urlParams.get('session_id') || 'unknown';
+      // paymentIntentId is not available from the URL since Stripe doesn't send it back with the successful payment - keeping it in because some functions require it
       const paymentIntentId = urlParams.get('payment_intent');
       console.log('Confirming payment with sessionId:', sessionId, 'paymentIntentId:', paymentIntentId, 'buttonType:', buttonType);
       
