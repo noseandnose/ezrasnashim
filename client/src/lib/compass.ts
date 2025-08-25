@@ -1,0 +1,411 @@
+/**
+ * Simplified Compass Module
+ * Uses native device sensors with minimal logic
+ */
+
+// Jerusalem coordinates (Kotel)
+export const JERUSALEM_COORDS = { lat: 31.7767, lng: 35.2345 };
+
+// Compass configuration
+const COMPASS_CONFIG = {
+  MEDIAN_FILTER_SIZE: 5,
+  SMOOTHING_ALPHA: 0.25,
+  UPDATE_THROTTLE_MS: 50,
+  LOCATION_ACCURACY_THRESHOLD: 12, // meters
+  ALIGNMENT_TOLERANCE: 10, // degrees
+};
+
+// Types
+export interface CompassState {
+  deviceHeading: number;
+  bearing: number;
+  isAligned: boolean;
+  location: { lat: number; lng: number } | null;
+  hasPermission: boolean;
+  isSupported: boolean;
+  error: string | null;
+  debugInfo?: DebugInfo;
+}
+
+export interface DebugInfo {
+  rawAlpha: number;
+  rawAbsolute: boolean;
+  eventType: string;
+  deviceType: string;
+  accuracy: number;
+  filterBuffer: number[];
+  computedRotation: number;
+  eventRate: number;
+}
+
+// Device detection utilities
+export function getDeviceInfo() {
+  const ua = navigator.userAgent;
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+  const isAndroid = /Android/i.test(ua);
+  const hasWebkitCompass = 'webkitCompassHeading' in DeviceOrientationEvent.prototype;
+  const hasAbsoluteOrientation = 'ondeviceorientationabsolute' in window;
+  const needsPermission = typeof (DeviceOrientationEvent as any).requestPermission === 'function';
+  
+  return {
+    isIOS,
+    isAndroid,
+    hasWebkitCompass,
+    hasAbsoluteOrientation,
+    needsPermission,
+    deviceType: isIOS ? 'iOS' : isAndroid ? 'Android' : 'Other'
+  };
+}
+
+// Bearing calculation (user location to Jerusalem)
+export function calculateBearing(fromLat: number, fromLng: number, toLat: number, toLng: number): number {
+  const lat1 = (fromLat * Math.PI) / 180;
+  const lat2 = (toLat * Math.PI) / 180;
+  const deltaLng = ((toLng - fromLng) * Math.PI) / 180;
+  
+  const y = Math.sin(deltaLng) * Math.cos(lat2);
+  const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(deltaLng);
+  
+  const bearing = Math.atan2(y, x) * 180 / Math.PI;
+  return normalizeDegrees(bearing);
+}
+
+// Normalize degrees to 0-360 range
+export function normalizeDegrees(degrees: number): number {
+  return ((degrees % 360) + 360) % 360;
+}
+
+// Calculate rotation needed to align bearing with device heading
+export function calculateCompassRotation(bearing: number, deviceHeading: number): number {
+  return normalizeDegrees(bearing - deviceHeading);
+}
+
+// Simple median filter for stability
+export function medianFilter(values: number[]): number {
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0 
+    ? (sorted[mid - 1] + sorted[mid]) / 2 
+    : sorted[mid];
+}
+
+// Exponential smoothing for compass values (handles 359->1 transitions)
+export function smoothCompassValue(current: number, previous: number, alpha: number): number {
+  if (previous === null || previous === undefined) return current;
+  
+  // Handle circular nature of compass headings
+  let diff = current - previous;
+  if (diff > 180) diff -= 360;
+  if (diff < -180) diff += 360;
+  
+  const smoothed = previous + alpha * diff;
+  return normalizeDegrees(smoothed);
+}
+
+// Check if compass is aligned with Jerusalem
+export function isAligned(bearing: number, deviceHeading: number, tolerance: number = COMPASS_CONFIG.ALIGNMENT_TOLERANCE): boolean {
+  let diff = Math.abs(bearing - deviceHeading);
+  if (diff > 180) diff = 360 - diff;
+  return diff <= tolerance;
+}
+
+// Main Compass Class
+export class SimpleCompass {
+  private state: CompassState;
+  private subscribers: Set<(state: CompassState) => void> = new Set();
+  private orientationHandler: ((event: DeviceOrientationEvent) => void) | null = null;
+  private watchId: number | null = null;
+  
+  // Filtering and smoothing
+  private headingBuffer: number[] = [];
+  private lastSmoothedHeading: number | null = null;
+  private lastUpdateTime = 0;
+  private eventCount = 0;
+  
+  // Debug mode
+  private debugMode = false;
+  
+  constructor() {
+    this.state = {
+      deviceHeading: 0,
+      bearing: 0,
+      isAligned: false,
+      location: null,
+      hasPermission: false,
+      isSupported: false,
+      error: null
+    };
+    
+    // Check for debug mode
+    this.debugMode = new URLSearchParams(window.location.search).get('debug') === 'compass';
+    
+    this.initialize();
+  }
+  
+  private initialize() {
+    const deviceInfo = getDeviceInfo();
+    this.state.isSupported = typeof DeviceOrientationEvent !== 'undefined';
+    
+    if (this.debugMode) {
+      console.log('🧭 Compass Debug Mode Enabled');
+      console.log('Device Info:', deviceInfo);
+    }
+    
+    // Request location first
+    this.requestLocation();
+  }
+  
+  private requestLocation() {
+    if (!navigator.geolocation) {
+      this.state.error = 'Geolocation not supported';
+      this.notifySubscribers();
+      return;
+    }
+    
+    // Use cached location if available and fresh (within 15 minutes)
+    const cached = this.getCachedLocation();
+    if (cached) {
+      this.state.location = cached;
+      this.calculateBearing();
+      this.notifySubscribers();
+      return;
+    }
+    
+    const options: PositionOptions = {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 5 * 60 * 1000 // 5 minutes
+    };
+    
+    navigator.geolocation.watchPosition(
+      (position) => {
+        const newLocation = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+        
+        // Only update if location changed significantly
+        if (!this.state.location || this.locationChanged(this.state.location, newLocation, position.coords.accuracy)) {
+          this.state.location = newLocation;
+          this.cacheLocation(newLocation);
+          this.calculateBearing();
+          this.notifySubscribers();
+        }
+      },
+      (error) => {
+        this.state.error = `Location error: ${error.message}`;
+        // Fallback to approximate bearing
+        this.state.bearing = 90; // East (approximate for most locations)
+        this.notifySubscribers();
+      },
+      options
+    );
+  }
+  
+  private locationChanged(oldLoc: {lat: number, lng: number}, newLoc: {lat: number, lng: number}, accuracy: number): boolean {
+    const distance = this.calculateDistance(oldLoc.lat, oldLoc.lng, newLoc.lat, newLoc.lng);
+    return distance > Math.max(COMPASS_CONFIG.LOCATION_ACCURACY_THRESHOLD, accuracy || 50);
+  }
+  
+  private calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+    const R = 6371000; // Earth's radius in meters
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+  
+  private getCachedLocation(): {lat: number, lng: number} | null {
+    try {
+      const cached = localStorage.getItem('compass-location');
+      const timestamp = localStorage.getItem('compass-location-time');
+      
+      if (cached && timestamp) {
+        const age = Date.now() - parseInt(timestamp);
+        if (age < 15 * 60 * 1000) { // 15 minutes
+          return JSON.parse(cached);
+        }
+      }
+    } catch (e) {
+      // Ignore cache errors
+    }
+    return null;
+  }
+  
+  private cacheLocation(location: {lat: number, lng: number}) {
+    try {
+      localStorage.setItem('compass-location', JSON.stringify(location));
+      localStorage.setItem('compass-location-time', Date.now().toString());
+    } catch (e) {
+      // Ignore cache errors
+    }
+  }
+  
+  private calculateBearing() {
+    if (!this.state.location) return;
+    
+    this.state.bearing = calculateBearing(
+      this.state.location.lat,
+      this.state.location.lng,
+      JERUSALEM_COORDS.lat,
+      JERUSALEM_COORDS.lng
+    );
+  }
+  
+  async requestPermission(): Promise<boolean> {
+    const deviceInfo = getDeviceInfo();
+    
+    if (deviceInfo.needsPermission) {
+      try {
+        const response = await (DeviceOrientationEvent as any).requestPermission();
+        this.state.hasPermission = response === 'granted';
+      } catch (error) {
+        this.state.hasPermission = false;
+        this.state.error = 'Permission denied';
+      }
+    } else {
+      this.state.hasPermission = true;
+    }
+    
+    if (this.state.hasPermission) {
+      this.startOrientationTracking();
+    }
+    
+    this.notifySubscribers();
+    return this.state.hasPermission;
+  }
+  
+  private startOrientationTracking() {
+    if (this.orientationHandler) {
+      this.stopOrientationTracking();
+    }
+    
+    const deviceInfo = getDeviceInfo();
+    let eventType: string;
+    
+    // Prioritize native sensors as specified
+    if (deviceInfo.isIOS && deviceInfo.hasWebkitCompass) {
+      eventType = 'deviceorientation'; // webkitCompassHeading is handled in the event
+    } else if (deviceInfo.isAndroid && deviceInfo.hasAbsoluteOrientation) {
+      eventType = 'deviceorientationabsolute';
+    } else {
+      eventType = 'deviceorientation';
+    }
+    
+    this.orientationHandler = (event: DeviceOrientationEvent) => {
+      this.handleOrientationEvent(event, eventType);
+    };
+    
+    // Add event listener with passive flag for performance
+    window.addEventListener(eventType as any, this.orientationHandler, { passive: true });
+    
+    if (this.debugMode) {
+      console.log(`🧭 Started orientation tracking with event: ${eventType}`);
+    }
+  }
+  
+  private handleOrientationEvent(event: DeviceOrientationEvent, eventType: string) {
+    const now = Date.now();
+    this.eventCount++;
+    
+    // Throttle updates
+    if (now - this.lastUpdateTime < COMPASS_CONFIG.UPDATE_THROTTLE_MS) {
+      return;
+    }
+    
+    let heading: number;
+    const deviceInfo = getDeviceInfo();
+    
+    // Use native sensors in priority order
+    if (deviceInfo.isIOS && (event as any).webkitCompassHeading !== undefined) {
+      // iOS native compass heading (most accurate)
+      heading = (event as any).webkitCompassHeading;
+    } else if (event.alpha !== null && event.alpha !== undefined) {
+      // Map alpha to heading correctly
+      if (deviceInfo.isAndroid) {
+        // Android: alpha is typically magnetic north, use directly
+        heading = event.alpha;
+      } else {
+        // Other devices: typically need inversion
+        heading = normalizeDegrees(360 - event.alpha);
+      }
+    } else {
+      // No valid heading available
+      return;
+    }
+    
+    // Apply median filter for stability
+    this.headingBuffer.push(heading);
+    if (this.headingBuffer.length > COMPASS_CONFIG.MEDIAN_FILTER_SIZE) {
+      this.headingBuffer.shift();
+    }
+    
+    if (this.headingBuffer.length >= 3) {
+      const filteredHeading = medianFilter(this.headingBuffer);
+      const smoothedHeading = smoothCompassValue(
+        filteredHeading,
+        this.lastSmoothedHeading || filteredHeading,
+        COMPASS_CONFIG.SMOOTHING_ALPHA
+      );
+      
+      this.state.deviceHeading = Math.round(smoothedHeading);
+      this.lastSmoothedHeading = smoothedHeading;
+      this.lastUpdateTime = now;
+      
+      // Check alignment
+      this.state.isAligned = isAligned(this.state.bearing, this.state.deviceHeading);
+      
+      // Debug info
+      if (this.debugMode) {
+        this.state.debugInfo = {
+          rawAlpha: event.alpha || 0,
+          rawAbsolute: event.absolute || false,
+          eventType,
+          deviceType: deviceInfo.deviceType,
+          accuracy: this.headingBuffer.length,
+          filterBuffer: [...this.headingBuffer],
+          computedRotation: calculateCompassRotation(this.state.bearing, this.state.deviceHeading),
+          eventRate: this.eventCount / ((now - this.lastUpdateTime) / 1000)
+        };
+      }
+      
+      this.notifySubscribers();
+    }
+  }
+  
+  private stopOrientationTracking() {
+    if (this.orientationHandler) {
+      window.removeEventListener('deviceorientation', this.orientationHandler);
+      window.removeEventListener('deviceorientationabsolute', this.orientationHandler as any);
+      this.orientationHandler = null;
+    }
+  }
+  
+  subscribe(callback: (state: CompassState) => void) {
+    this.subscribers.add(callback);
+    // Immediately notify with current state
+    callback(this.state);
+    
+    return () => {
+      this.subscribers.delete(callback);
+    };
+  }
+  
+  private notifySubscribers() {
+    this.subscribers.forEach(callback => callback({ ...this.state }));
+  }
+  
+  dispose() {
+    this.stopOrientationTracking();
+    if (this.watchId !== null) {
+      navigator.geolocation.clearWatch(this.watchId);
+    }
+    this.subscribers.clear();
+  }
+  
+  getState(): CompassState {
+    return { ...this.state };
+  }
+}

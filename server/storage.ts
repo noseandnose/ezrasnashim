@@ -4,7 +4,7 @@ import {
   tehillimNames, tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, birkatHamazonPrayers, afterBrochasPrayers, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
   dailyRecipes, parshaVorts, tableInspirations, communityImpact, campaigns, donations, womensPrayers, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
-  analyticsEvents, dailyStats,
+  analyticsEvents, dailyStats, acts,
 
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
@@ -21,13 +21,18 @@ import {
   type TableInspiration, type InsertTableInspiration,
   type CommunityImpact, type InsertCommunityImpact,
   type Campaign, type InsertCampaign,
+  type Donation, type InsertDonation,
+  type Act, type InsertAct,
   type WomensPrayer, type InsertWomensPrayer,
   type DiscountPromotion, type InsertDiscountPromotion,
   type PirkeiAvot, type InsertPirkeiAvot,
   type PirkeiAvotProgress, type InsertPirkeiAvotProgress,
   type AnalyticsEvent, type InsertAnalyticsEvent,
   type DailyStats, type InsertDailyStats,
-  type Message, type InsertMessage, messages
+  type Message, type InsertMessage, messages,
+  pushSubscriptions, pushNotifications,
+  type PushSubscription, type InsertPushSubscription,
+  type PushNotification, type InsertPushNotification
 } from "../shared/schema";
 import { db, pool } from "./db";
 import { eq, gt, lt, gte, lte, and, sql, like } from "drizzle-orm";
@@ -121,6 +126,16 @@ export interface IStorage {
   createCampaign(campaign: InsertCampaign): Promise<Campaign>;
   updateCampaignProgress(id: number, amount: number): Promise<Campaign>;
 
+  // Donation methods - Enhanced for new schema
+  createDonation(donation: InsertDonation): Promise<Donation>;
+  getDonationByPaymentIntentId(stripePaymentIntentId: string): Promise<Donation | null>;
+  updateDonationStatus(stripePaymentIntentId: string, status: string): Promise<Donation>;
+  updateDonation(id: number, updates: Partial<InsertDonation>): Promise<Donation>;
+
+  // Acts tracking methods - New for individual button completion tracking
+  createAct(act: InsertAct): Promise<Act>;
+  getActByPaymentIntentId(paymentIntentId: string): Promise<Act | null>;
+
   // Pirkei Avot progression methods
   getPirkeiAvotProgress(): Promise<PirkeiAvotProgress>;
   updatePirkeiAvotProgress(orderIndex: number): Promise<PirkeiAvotProgress>;
@@ -160,6 +175,14 @@ export interface IStorage {
   // Message methods
   getMessageByDate(date: string): Promise<Message | undefined>;
   createMessage(message: InsertMessage): Promise<Message>;
+  
+  // Push notification methods
+  subscribeToPush(subscription: InsertPushSubscription): Promise<PushSubscription>;
+  unsubscribeFromPush(endpoint: string): Promise<void>;
+  getActiveSubscriptions(): Promise<PushSubscription[]>;
+  createNotification(notification: InsertPushNotification): Promise<PushNotification>;
+  getNotificationHistory(limit?: number): Promise<PushNotification[]>;
+  updateNotificationStats(id: number, successCount: number, failureCount: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -235,23 +258,48 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateGlobalTehillimProgress(currentPerek: number, language: string, completedBy?: string): Promise<GlobalTehillimProgress> {
-    const [progress] = await db.select().from(globalTehillimProgress).limit(1);
-    if (progress) {
-      // Use the database progress value, not the parameter
-      const currentDbPerek = progress.currentPerek;
+    // CRITICAL FIX: Use atomic database operation to prevent concurrent update issues
+    // When multiple users complete the same perek simultaneously, this ensures 
+    // the progress only advances by 1, not by the number of simultaneous completions
+    
+    return db.transaction(async (tx) => {
+      // Lock the row for update to prevent concurrent modifications
+      const [progress] = await tx.select()
+        .from(globalTehillimProgress)
+        .where(sql`id = (SELECT id FROM global_tehillim_progress LIMIT 1)`)
+        .for('update');
+      
+      if (!progress) {
+        // Initialize progress if it doesn't exist
+        const initialName = await this.getNextNameForAssignment();
+        const [newProgress] = await tx.insert(globalTehillimProgress).values({
+          currentPerek: 1,
+          currentNameId: initialName?.id || null,
+          completedBy: null
+        }).returning();
+        return newProgress;
+      }
+      
+      // ONLY advance if the request matches the current database perek
+      // This prevents multiple simultaneous completions of the same perek from 
+      // causing the chain to jump multiple steps ahead
+      if (currentPerek !== progress.currentPerek) {
+        // Someone else already advanced this perek, return current state without advancing
+        return progress;
+      }
       
       // Get the max ID to know when to reset
-      const [maxRow] = await db
+      const [maxRow] = await tx
         .select({ maxId: sql<number>`MAX(id)` })
         .from(tehillim);
       
       const maxId = maxRow?.maxId || 171; // 171 is the total with Psalm 119 having 22 parts
       
-      // Check if we're completing the entire book (use database value)
-      const isBookComplete = currentDbPerek >= maxId;
+      // Check if we're completing the entire book
+      const isBookComplete = progress.currentPerek >= maxId;
       
-      // Calculate next ID (cycling through all rows) - use database value
-      const nextId = currentDbPerek >= maxId ? 1 : currentDbPerek + 1;
+      // Calculate next ID (cycling through all rows)
+      const nextId = progress.currentPerek >= maxId ? 1 : progress.currentPerek + 1;
       
       // Log book completion event when finishing the last row
       if (isBookComplete) {
@@ -269,18 +317,19 @@ export class DatabaseStorage implements IStorage {
       // Assign a new random name for the next perek
       const nextName = await this.getNextNameForAssignment();
       
-      const [updated] = await db.update(globalTehillimProgress)
+      // Atomically update to the next perek
+      const [updated] = await tx.update(globalTehillimProgress)
         .set({
-          currentPerek: nextId, // Now storing the row ID, not psalm number
+          currentPerek: nextId,
           currentNameId: nextName?.id || null,
           lastUpdated: new Date(),
           completedBy: completedBy || null
         })
         .where(eq(globalTehillimProgress.id, progress.id))
         .returning();
+        
       return updated;
-    }
-    return this.getGlobalTehillimProgress();
+    });
   }
 
   async getProgressWithAssignedName(): Promise<any> {
@@ -927,21 +976,31 @@ export class DatabaseStorage implements IStorage {
     return campaign;
   }
 
-  // Donation methods
-  async createDonation(donation: {
-    stripePaymentIntentId?: string;
-    amount: number;
-    donationType: string;
-    sponsorName?: string;
-    dedication?: string;
-    email?: string;
-    status: string;
-  }) {
+  // Donation methods - Enhanced for new schema
+  async createDonation(donation: InsertDonation): Promise<Donation> {
     const [result] = await db
       .insert(donations)
       .values(donation)
       .returning();
     return result;
+  }
+
+  // Acts tracking methods - New for individual button completion tracking
+  async createAct(act: InsertAct): Promise<Act> {
+    const [result] = await db
+      .insert(acts)
+      .values(act)
+      .returning();
+    return result;
+  }
+
+  async getActByPaymentIntentId(paymentIntentId: string): Promise<Act | null> {
+    const [result] = await db
+      .select()
+      .from(acts)
+      .where(eq(acts.paymentIntentId, paymentIntentId))
+      .limit(1);
+    return result || null;
   }
 
   async getDonationByPaymentIntentId(stripePaymentIntentId: string) {
@@ -953,11 +1012,29 @@ export class DatabaseStorage implements IStorage {
     return result || null;
   }
 
+  async getDonationBySessionId(stripeSessionId: string) {
+    const [result] = await db
+      .select()
+      .from(donations)
+      .where(eq(donations.stripeSessionId, stripeSessionId))
+      .limit(1);
+    return result || null;
+  }
+
   async updateDonationStatus(stripePaymentIntentId: string, status: string) {
     const [result] = await db
       .update(donations)
       .set({ status })
       .where(eq(donations.stripePaymentIntentId, stripePaymentIntentId))
+      .returning();
+    return result;
+  }
+
+  async updateDonation(id: number, updates: Partial<InsertDonation>): Promise<Donation> {
+    const [result] = await db
+      .update(donations)
+      .set(updates)
+      .where(eq(donations.id, id))
       .returning();
     return result;
   }
@@ -1216,9 +1293,17 @@ export class DatabaseStorage implements IStorage {
     
     // Count event types (no more page_view tracking)
     const pageViews = 0; // No longer tracking page views
-    const tehillimCompleted = todayEvents.filter(e => e.eventType === 'tehillim_complete').length;
+    // Count global tehillim separately (they count as 2 mitzvos - saying + praying for someone)
+    const globalTehillimCompleted = todayEvents.filter(e => 
+      e.eventType === 'tehillim_complete' && (e.eventData as any)?.type === 'global'
+    ).length;
+    const regularTehillimCompleted = todayEvents.filter(e => 
+      e.eventType === 'tehillim_complete' && (e.eventData as any)?.type !== 'global'
+    ).length;
+    const tehillimCompleted = globalTehillimCompleted + regularTehillimCompleted;
     const namesProcessed = todayEvents.filter(e => e.eventType === 'name_prayed').length;
     const booksCompleted = todayEvents.filter(e => e.eventType === 'tehillim_book_complete').length;
+    const tzedakaActs = todayEvents.filter(e => e.eventType === 'tzedaka_completion').length;
     
     // Count modal completions by type
     const modalCompletions: Record<string, number> = {};
@@ -1241,7 +1326,8 @@ export class DatabaseStorage implements IStorage {
           tehillimCompleted,
           namesProcessed,
           booksCompleted,
-          totalActs: this.calculateTotalActs(modalCompletions, tehillimCompleted),
+          tzedakaActs,
+          totalActs: this.calculateTotalActs(modalCompletions, regularTehillimCompleted, tzedakaActs, globalTehillimCompleted),
           modalCompletions,
           updatedAt: new Date()
         })
@@ -1258,7 +1344,8 @@ export class DatabaseStorage implements IStorage {
           tehillimCompleted,
           namesProcessed,
           booksCompleted,
-          totalActs: this.calculateTotalActs(modalCompletions, tehillimCompleted),
+          tzedakaActs,
+          totalActs: this.calculateTotalActs(modalCompletions, regularTehillimCompleted, tzedakaActs, globalTehillimCompleted),
           modalCompletions
         })
         .returning();
@@ -1287,9 +1374,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Helper method to calculate total acts
-  private calculateTotalActs(modalCompletions: Record<string, number>, tehillimCompleted: number): number {
+  private calculateTotalActs(modalCompletions: Record<string, number>, tehillimCompleted: number, tzedakaActsCount: number = 0, globalTehillimCompleted: number = 0): number {
     const torahActs = ['torah', 'chizuk', 'emuna', 'halacha', 'featured-content'];
-    const tefillaActs = ['tefilla', 'morning-brochas', 'mincha', 'maariv', 'nishmas', 'birkat-hamazon', 'special-tehillim', 'individual-tehillim'];
+    const tefillaActs = ['tefilla', 'morning-brochas', 'mincha', 'maariv', 'nishmas', 'birkat-hamazon', 'special-tehillim', 'global-tehillim-chain', 'tehillim-text'];
     const tzedakaActs = ['tzedaka', 'donate'];
     
     let totalActs = 0;
@@ -1299,10 +1386,20 @@ export class DatabaseStorage implements IStorage {
       if (torahActs.includes(modalType) || tefillaActs.includes(modalType) || tzedakaActs.includes(modalType)) {
         totalActs += count;
       }
+      // Also count individual tehillim completions
+      if (modalType.startsWith('individual-tehillim-')) {
+        totalActs += count;
+      }
     }
     
-    // Add tehillim completions as acts
+    // Add regular tehillim completions as acts (1 mitzvah each)
     totalActs += tehillimCompleted || 0;
+    
+    // Add global tehillim completions as acts (2 mitzvos each - saying + praying for someone)
+    totalActs += (globalTehillimCompleted || 0) * 2;
+    
+    // Add tzedaka completions as acts 
+    totalActs += tzedakaActsCount || 0;
     
     return totalActs;
   }
@@ -1313,6 +1410,7 @@ export class DatabaseStorage implements IStorage {
     totalTehillimCompleted: number;
     totalNamesProcessed: number;
     totalBooksCompleted: number;
+    totalTzedakaActs: number;
     totalActs: number;
     totalModalCompletions: Record<string, number>;
   }> {
@@ -1337,6 +1435,7 @@ export class DatabaseStorage implements IStorage {
       let totalTehillimCompleted = 0;
       let totalNamesProcessed = 0;
       let totalBooksCompleted = 0;
+      let totalTzedakaActs = 0;
       let totalActs = 0;
       const totalModalCompletions: Record<string, number> = {};
       
@@ -1346,6 +1445,7 @@ export class DatabaseStorage implements IStorage {
         totalTehillimCompleted += stats.tehillimCompleted || 0;
         totalNamesProcessed += stats.namesProcessed || 0;
         totalBooksCompleted += stats.booksCompleted || 0;
+        totalTzedakaActs += stats.tzedakaActs || 0;
         totalActs += stats.totalActs || 0;
         
         // Merge modal completions
@@ -1361,6 +1461,7 @@ export class DatabaseStorage implements IStorage {
         totalTehillimCompleted,
         totalNamesProcessed,
         totalBooksCompleted,
+        totalTzedakaActs,
         totalActs,
         totalModalCompletions
       };
@@ -1373,6 +1474,7 @@ export class DatabaseStorage implements IStorage {
         totalTehillimCompleted: 0,
         totalNamesProcessed: 0,
         totalBooksCompleted: 0,
+        totalTzedakaActs: 0,
         totalActs: 0,
         totalModalCompletions: {}
       };
@@ -1385,6 +1487,7 @@ export class DatabaseStorage implements IStorage {
     totalTehillimCompleted: number;
     totalNamesProcessed: number;
     totalBooksCompleted: number;
+    totalTzedakaActs: number;
     totalActs: number;
     totalModalCompletions: Record<string, number>;
   }> {
@@ -1397,6 +1500,7 @@ export class DatabaseStorage implements IStorage {
     let totalTehillimCompleted = 0;
     let totalNamesProcessed = 0;
     let totalBooksCompleted = 0;
+    let totalTzedakaCompleted = 0;
     let totalActs = 0;
     const totalModalCompletions: Record<string, number> = {};
     
@@ -1406,6 +1510,7 @@ export class DatabaseStorage implements IStorage {
       totalTehillimCompleted += stats.tehillimCompleted || 0;
       totalNamesProcessed += stats.namesProcessed || 0;
       totalBooksCompleted += stats.booksCompleted || 0;
+      totalTzedakaCompleted += stats.tzedakaActs || 0;
       totalActs += stats.totalActs || 0;
       
       // Merge modal completions
@@ -1421,6 +1526,7 @@ export class DatabaseStorage implements IStorage {
       totalTehillimCompleted,
       totalNamesProcessed,
       totalBooksCompleted,
+      totalTzedakaActs: totalTzedakaCompleted,
       totalActs,
       totalModalCompletions
     };
@@ -1485,23 +1591,24 @@ export class DatabaseStorage implements IStorage {
           dateFilter!
         ));
       
-      const totalCampaigns = successfulDonations.length;
+      // FIX: Count all successful donations as "Donations" (renamed from totalCampaigns for clarity)
+      const totalDonations = successfulDonations.length;
       const totalRaised = successfulDonations.reduce((sum, donation) => sum + (donation.amount || 0), 0) / 100;
       
       return {
         totalDaysSponsored,
-        totalCampaigns,
+        totalCampaigns: totalDonations, // Using totalCampaigns field to mean total donations
         totalRaised
       };
     } else {
       // All time - original logic
       const successfulDonations = await donationQuery;
-      const totalCampaigns = successfulDonations.length;
+      const totalDonations = successfulDonations.length;
       const totalRaised = successfulDonations.reduce((sum, donation) => sum + (donation.amount || 0), 0) / 100;
       
       return {
         totalDaysSponsored,
-        totalCampaigns,
+        totalCampaigns: totalDonations, // Using totalCampaigns field to mean total donations
         totalRaised
       };
     }
@@ -1523,6 +1630,77 @@ export class DatabaseStorage implements IStorage {
       .values(message)
       .returning();
     return newMessage;
+  }
+  
+  // Push notification methods
+  async subscribeToPush(subscription: InsertPushSubscription): Promise<PushSubscription> {
+    // Upsert - if endpoint exists, update it, otherwise insert new
+    const existing = await db
+      .select()
+      .from(pushSubscriptions)
+      .where(eq(pushSubscriptions.endpoint, subscription.endpoint))
+      .limit(1);
+    
+    if (existing.length > 0) {
+      const [updated] = await db
+        .update(pushSubscriptions)
+        .set({
+          p256dh: subscription.p256dh,
+          auth: subscription.auth,
+          subscribed: true,
+          updatedAt: new Date()
+        })
+        .where(eq(pushSubscriptions.endpoint, subscription.endpoint))
+        .returning();
+      return updated;
+    } else {
+      const [newSub] = await db
+        .insert(pushSubscriptions)
+        .values(subscription)
+        .returning();
+      return newSub;
+    }
+  }
+  
+  async unsubscribeFromPush(endpoint: string): Promise<void> {
+    await db
+      .update(pushSubscriptions)
+      .set({ subscribed: false, updatedAt: new Date() })
+      .where(eq(pushSubscriptions.endpoint, endpoint));
+  }
+  
+  async getActiveSubscriptions(): Promise<PushSubscription[]> {
+    return await db
+      .select()
+      .from(pushSubscriptions)
+      .where(eq(pushSubscriptions.subscribed, true));
+  }
+  
+  async createNotification(notification: InsertPushNotification): Promise<PushNotification> {
+    const [newNotification] = await db
+      .insert(pushNotifications)
+      .values(notification)
+      .returning();
+    return newNotification;
+  }
+  
+  async getNotificationHistory(limit: number = 50): Promise<PushNotification[]> {
+    return await db
+      .select()
+      .from(pushNotifications)
+      .orderBy(sql`${pushNotifications.sentAt} DESC`)
+      .limit(limit);
+  }
+  
+  async updateNotificationStats(id: number, successCount: number, failureCount: number): Promise<void> {
+    await db
+      .update(pushNotifications)
+      .set({
+        successCount: successCount,
+        failureCount: failureCount,
+        sentCount: successCount + failureCount
+      })
+      .where(eq(pushNotifications.id, id));
   }
 }
 

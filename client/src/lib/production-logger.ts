@@ -5,7 +5,7 @@ const isDevelopment = import.meta.env.MODE === 'development';
 export const logger = {
   log: (...args: any[]) => {
     if (isDevelopment) {
-      logger.log(...args);
+      console.log(...args);
     }
   },
   
@@ -17,13 +17,13 @@ export const logger = {
   
   warn: (...args: any[]) => {
     if (isDevelopment) {
-      logger.warn(...args);
+      console.warn(...args);
     }
   },
   
   info: (...args: any[]) => {
     if (isDevelopment) {
-      logger.info(...args);
+      console.info(...args);
     }
   }
 };
@@ -32,7 +32,7 @@ export const logger = {
 export const serverLogger = {
   log: (...args: any[]) => {
     if (process.env.NODE_ENV === 'development') {
-      logger.log(...args);
+      console.log(...args);
     }
   },
   

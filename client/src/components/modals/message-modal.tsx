@@ -1,4 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import type { Message } from "@shared/schema";
@@ -17,30 +18,45 @@ export default function MessageModal({ isOpen, onClose, date }: MessageModalProp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md mx-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-md mx-auto max-h-[80vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="platypi-bold text-xl text-black">
             {isLoading ? "Loading..." : message?.title || "Daily Message"}
           </DialogTitle>
         </DialogHeader>
         
-        <div className="py-4">
+        <div className="py-4 overflow-y-auto flex-1">
           {isLoading ? (
-            <p className="text-center text-warm-gray">Loading message...</p>
+            <div className="bg-white rounded-2xl p-6 border border-blush/10">
+              <p className="text-center text-warm-gray">Loading message...</p>
+            </div>
           ) : message ? (
-            <div className="space-y-4">
-              <p className="text-warm-gray whitespace-pre-wrap">
-                {message.message}
-              </p>
-              <p className="text-xs text-warm-gray/60 text-right">
-                {format(new Date(date), "MMMM d, yyyy")}
-              </p>
+            <div className="bg-white rounded-2xl p-6 border border-blush/10">
+              <div className="space-y-4">
+                <p className="text-warm-gray whitespace-pre-wrap platypi-medium leading-relaxed">
+                  {message.message}
+                </p>
+                <p className="text-xs text-warm-gray/60 text-right">
+                  {format(new Date(date), "MMMM d, yyyy")}
+                </p>
+              </div>
             </div>
           ) : (
-            <p className="text-center text-warm-gray">
-              No message available for today.
-            </p>
+            <div className="bg-white rounded-2xl p-6 border border-blush/10">
+              <p className="text-center text-warm-gray">
+                No message available for today.
+              </p>
+            </div>
           )}
+        </div>
+        
+        <div className="flex-shrink-0 pt-4">
+          <Button 
+            onClick={onClose}
+            className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
+          >
+            Done
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

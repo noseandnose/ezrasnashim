@@ -6,6 +6,7 @@ import serverAxiosClient from "./axiosClient.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import { find as findTimezone } from "geo-tz";
+import webpush from "web-push";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,6 +17,23 @@ if (!process.env.STRIPE_SECRET_KEY) {
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2025-07-30.basil',
 });
+
+// Store VAPID keys at startup
+const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
+const VAPID_EMAIL = process.env.VAPID_EMAIL;
+
+// Configure web-push with VAPID keys
+if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY && VAPID_EMAIL) {
+  webpush.setVapidDetails(
+    VAPID_EMAIL,
+    VAPID_PUBLIC_KEY,
+    VAPID_PRIVATE_KEY
+  );
+  console.log('Push notifications configured with VAPID keys');
+} else {
+  console.warn('Push notifications not configured - missing VAPID keys');
+}
 import { 
   insertTehillimNameSchema,
   insertDailyHalachaSchema,
@@ -210,7 +228,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/zmanim/:lat/:lng", async (req, res) => {
     try {
       const { lat, lng } = req.params;
-      const today = new Date().toISOString().split('T')[0];
+      // Day starts at 02:00 local time for analytics
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
       
       const latitude = parseFloat(lat);
       const longitude = parseFloat(lng);
@@ -858,7 +882,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/hebcal/:location?", async (req, res) => {
     try {
       const location = req.params.location || "5128581"; // Default to NYC
-      const today = new Date().toISOString().split('T')[0];
+      // Day starts at 02:00 local time for analytics
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
       const hebcalUrl = `https://www.hebcal.com/zmanim?cfg=json&geonameid=${location}&date=${today}`;
       
       const response = await serverAxiosClient.get(hebcalUrl);
@@ -1182,7 +1212,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/table/recipe", async (req, res) => {
     try {
       // Get current date
-      const today = new Date().toISOString().split('T')[0];
+      // Day starts at 02:00 local time for analytics
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
       
       const recipe = await storage.getDailyRecipeByDate(today);
       res.json(recipe || null);
@@ -1213,7 +1249,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/table/vort", async (req, res) => {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      // Day starts at 02:00 local time for analytics
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
       const vort = await storage.getParshaVortByDate(today);
       res.json(vort || null);
     } catch (error) {
@@ -1236,7 +1278,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/zmanim/:location?", async (req, res) => {
     try {
       const location = req.params.location || "5128581"; // Default to NYC
-      const today = new Date().toISOString().split('T')[0];
+      // Day starts at 02:00 local time for analytics
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
       const hebcalUrl = `https://www.hebcal.com/zmanim?cfg=json&geonameid=${location}&date=${today}`;
       
       const response = await serverAxiosClient.get(hebcalUrl);
@@ -1564,7 +1612,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Only create sponsor record for "Sponsor a Day" donations
       if (donationType === 'Sponsor a Day of Ezras Nashim' && sponsorName) {
-        const today = new Date().toISOString().split('T')[0];
+        // Day starts at 02:00 local time for analytics
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
         
         // Create sponsor record
         await storage.createSponsor({
@@ -1638,76 +1692,150 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Stripe payment route for donations
-  app.post("/api/create-payment-intent", async (req, res) => {
+  app.post("/api/create-session-checkout", async (req, res) => {
     try {
-      const { amount, donationType, metadata, email } = req.body;
+      const { amount, donationType, metadata } = req.body;
       
-      console.log('=== PAYMENT INTENT REQUEST ===');
-      console.log('Request body:', { amount, donationType, metadata });
-      console.log('Stripe key exists:', !!process.env.STRIPE_SECRET_KEY);
-      console.log('Stripe key starts with sk_:', process.env.STRIPE_SECRET_KEY?.startsWith('sk_'));
+      // console.log('=== PAYMENT INTENT REQUEST ===');
+      // console.log('Request body:', { amount, donationType, metadata });
+      // console.log('Stripe key exists:', !!process.env.STRIPE_SECRET_KEY);
+      // console.log('Stripe key starts with sk_:', process.env.STRIPE_SECRET_KEY?.startsWith('sk_'));
       
-      if (!amount || amount <= 0) {
-        console.log('Invalid amount provided:', amount);
-        return res.status(400).json({ message: "Invalid amount" });
-      }
+      // if (!amount || amount <= 0) {
+      //   console.log('Invalid amount provided:', amount);
+      //   return res.status(400).json({ message: "Invalid amount" });
+      // }
 
-      if (!process.env.STRIPE_SECRET_KEY) {
-        console.error('STRIPE_SECRET_KEY not found in environment');
-        return res.status(500).json({ message: "Stripe not configured" });
-      }
+      // if (!process.env.STRIPE_SECRET_KEY) {
+      //   console.error('STRIPE_SECRET_KEY not found in environment');
+      //   return res.status(500).json({ message: "Stripe not configured" });
+      // }
 
-      console.log('Creating payment intent with:', { 
-        amount, 
-        donationType, 
-        metadata,
-        stripeConfigured: !!process.env.STRIPE_SECRET_KEY
-      });
+      // console.log('Creating payment intent with:', { 
+      //   amount, 
+      //   donationType, 
+      //   metadata,
+      //   stripeConfigured: !!process.env.STRIPE_SECRET_KEY
+      // });
       
-      const paymentIntentData: any = {
-        amount: Math.round(amount * 100), // Convert to cents
-        currency: "usd",
-        metadata: {
-          source: "ezras-nashim-donation",
-          donationType: donationType || "General Donation",
-          sponsorName: metadata?.sponsorName || "",
-          dedication: metadata?.dedication || "",
-          email: email || metadata?.email || "",
-          timestamp: new Date().toISOString()
+      // const paymentIntentData: any = {
+      //   amount: Math.round(amount * 100), // Convert to cents
+      //   currency: "usd",
+      //   metadata: {
+      //     source: "ezras-nashim-donation",
+      //     donationType: donationType || "General Donation",
+      //     sponsorName: metadata?.sponsorName || "",
+      //     dedication: metadata?.dedication || "",
+      //     email: email || metadata?.email || "",
+      //     timestamp: new Date().toISOString()
+      //   },
+      //   // Enable automatic payment methods including Apple Pay and Google Pay
+      //   automatic_payment_methods: {
+      //     enabled: true,
+      //     allow_redirects: 'never' as const // Keep on same page for better UX
+      //   }
+      // };
+      
+      // // Add receipt_email if provided - this will trigger Stripe to send receipts
+      // const receiptEmail = email || metadata?.email;
+      // if (receiptEmail && receiptEmail.includes('@')) {
+      //   paymentIntentData.receipt_email = receiptEmail;
+      //   console.log('Receipt email will be sent to:', receiptEmail);
+      // }
+      
+      // console.log('Payment intent configuration:', paymentIntentData);
+      
+      // const paymentIntent = await stripe.paymentIntents.create(paymentIntentData);
+      
+      // console.log('Payment intent created successfully:', {
+      //   id: paymentIntent.id,
+      //   status: paymentIntent.status,
+      //   amount: paymentIntent.amount,
+      //   client_secret_exists: !!paymentIntent.client_secret
+      // });
+      
+      // // Track the donation attempt in our database
+      // try {
+      //   await storage.createDonation({
+      //     stripePaymentIntentId: paymentIntent.id,
+      //     amount: paymentIntent.amount, // Already in cents
+      //     donationType: donationType || "General Donation",
+      //     sponsorName: metadata?.sponsorName,
+      //     dedication: metadata?.dedication,
+      //     email: receiptEmail,
+      //     status: 'pending'
+      //   });
+      //   console.log('Donation tracked in database:', paymentIntent.id);
+      // } catch (dbError) {
+      //   console.error('Error saving donation to database:', dbError);
+      //   // Continue even if database save fails
+      // }
+
+      const returnUrl = req.body.returnUrl;
+      const session = await stripe.checkout.sessions.create({
+        currency: 'usd',
+        line_items: [{
+          quantity: 1,
+          price_data: {
+            currency: 'usd',
+            unit_amount_decimal: Math.round(parseFloat(amount) * 100).toString(),
+            product_data: {
+              name: "Ezras Nashim Donation",
+            }
+          }
+        }],
+        ui_mode: 'custom',
+        mode: 'payment',
+        return_url: returnUrl,
+        payment_intent_data: {
+          description: 'Just One Chesed Inc.\nEIN: 47-5615860\nNo tangible benefits were received from this donation.',
+          metadata: {
+            source: "ezras-nashim-donation",
+            donationType:  donationType || "Ezras Nashim Donation",
+            buttonType: metadata?.buttonType || "put_a_coin", // Track which button was clicked
+            sponsorName:  metadata?.sponsorName || "",
+            dedication: metadata?.dedication || "",
+            message: metadata?.message || "",
+            timestamp: new Date().toISOString(),
+          },
         },
-        // Enable automatic payment methods including Apple Pay and Google Pay
-        automatic_payment_methods: {
-          enabled: true,
-          allow_redirects: 'never' as const // Keep on same page for better UX
-        }
-      };
-      
-      // Add receipt_email if provided - this will trigger Stripe to send receipts
-      const receiptEmail = email || metadata?.email;
-      if (receiptEmail && receiptEmail.includes('@')) {
-        paymentIntentData.receipt_email = receiptEmail;
-        console.log('Receipt email will be sent to:', receiptEmail);
-      }
-      
-      console.log('Payment intent configuration:', paymentIntentData);
-      
-      const paymentIntent = await stripe.paymentIntents.create(paymentIntentData);
-      
-      console.log('Payment intent created successfully:', {
-        id: paymentIntent.id,
-        status: paymentIntent.status,
-        amount: paymentIntent.amount,
-        client_secret_exists: !!paymentIntent.client_secret
+        invoice_creation: {
+          enabled: false,
+          invoice_data: {
+            description: 'Just One Chesed Inc.\nEIN: 47-5615860\nNo tangible benefits were received from this donation.',
+          },
+        },
       });
-      
-      // Don't create donation record here - only after successful payment
-      // This prevents incomplete donations from being stored in the database
-      console.log('Payment intent created:', paymentIntent.id);
 
+      // Track the donation attempt in our database with enhanced schema
+      try {
+        await storage.createDonation({
+          userId: null, // We don't have user auth yet
+          stripePaymentIntentId: session.id,
+          stripeSessionId: session.id,
+          amount: Math.round(parseFloat(amount) * 100), // Convert to cents
+          type: metadata?.buttonType || "put_a_coin",
+          donationType: donationType || "General Donation",
+          metadata: {
+            buttonType: metadata?.buttonType || "put_a_coin",
+            sponsorName: metadata?.sponsorName || "",
+            dedication: metadata?.dedication || "",
+            message: metadata?.message || "",
+            source: "ezras-nashim-donation",
+            timestamp: new Date().toISOString()
+          },
+          status: 'pending'
+        });
+        console.log('Donation tracked in database with enhanced schema:', session.id);
+      } catch (dbError) {
+        console.error('Error saving donation to database:', dbError);
+        // Continue even if database save fails
+      }
+
+      console.log('Session created successfully:', session.id)
       res.json({ 
-        clientSecret: paymentIntent.client_secret,
+        sessionId: session.id,
         amount: amount,
-        paymentIntentId: paymentIntent.id
       });
     } catch (error: any) {
       console.error('Stripe payment intent creation failed:', {
@@ -1807,6 +1935,516 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // REMOVED: First duplicate /api/payments/confirm endpoint - using the second one below
+
+  // Debug endpoint to verify webhook secret is loaded
+  app.get("/api/webhooks/stripe/debug", async (req, res) => {
+    res.json({
+      hasWebhookSecret: !!process.env.STRIPE_WEBHOOK_SECRET,
+      secretPrefix: process.env.STRIPE_WEBHOOK_SECRET ? (Array.isArray(process.env.STRIPE_WEBHOOK_SECRET) ? process.env.STRIPE_WEBHOOK_SECRET[0] : process.env.STRIPE_WEBHOOK_SECRET).substring(0, 10) + '...' : 'NOT_SET',
+      environment: process.env.NODE_ENV || 'development'
+    });
+  });
+
+  // Alternative webhook endpoint with different path (in case proxy is blocking /api/webhooks/stripe)
+  app.post("/api/stripe-webhook", async (req, res) => {
+    // Forward to main webhook handler
+    return app._router.handle(Object.assign(req, { url: '/api/webhooks/stripe' }), res, () => {});
+  });
+
+  // Stripe webhook handler for processing successful payments
+  app.post("/api/webhooks/stripe", async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    let event;
+
+    try {
+      // Log webhook attempt for debugging
+      console.log('Webhook received:', {
+        hasSignature: !!sig,
+        hasSecret: !!process.env.STRIPE_WEBHOOK_SECRET,
+        bodyType: typeof req.body,
+        bodyLength: req.body ? req.body.length : 0
+      });
+
+      // Verify webhook signature for security
+      if (!sig) {
+        console.error('Missing stripe signature header');
+        return res.status(400).json({ error: 'Missing stripe signature' });
+      }
+      if (!process.env.STRIPE_WEBHOOK_SECRET) {
+        console.error('Missing stripe webhook secret environment variable');
+        return res.status(400).json({ error: 'Missing webhook secret configuration' });
+      }
+      
+      event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+      console.log('Webhook signature verified successfully');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      console.error('Webhook signature verification failed:', {
+        error: errorMessage,
+        signatureHeader: sig ? (typeof sig === 'string' ? sig.substring(0, 20) + '...' : 'array') : 'none',
+        secretPrefix: process.env.STRIPE_WEBHOOK_SECRET ? process.env.STRIPE_WEBHOOK_SECRET.substring(0, 10) + '...' : 'none'
+      });
+      return res.status(400).json({ error: `Webhook validation failed: ${errorMessage}` });
+    }
+
+    try {
+      // Handle the event
+      switch (event.type) {
+        case 'payment_intent.succeeded':
+          const paymentIntent = event.data.object;
+          console.log('Webhook: Payment succeeded:', paymentIntent.id);
+          
+          // BACKUP RECONCILIATION: Check if already processed by frontend
+          const existingAct = await storage.getActByPaymentIntentId(paymentIntent.id);
+          if (existingAct) {
+            console.log(`Webhook: Payment ${paymentIntent.id} already processed by frontend - skipping`);
+            break; // Already handled by frontend confirmation
+          }
+          
+          console.log(`Webhook: Processing payment ${paymentIntent.id} as backup reconciliation`);
+          
+          // Update donation status to succeeded
+          const donation = await storage.getDonationByPaymentIntentId(paymentIntent.id);
+          if (donation) {
+            await storage.updateDonationStatus(paymentIntent.id, 'succeeded');
+            
+            // Create an act record for tracking individual button completion
+            const buttonType = paymentIntent.metadata?.buttonType || 'put_a_coin';
+            await storage.createAct({
+              userId: null, // We don't have user auth yet
+              category: 'tzedaka',
+              subtype: buttonType,
+              amount: paymentIntent.amount,
+              paymentIntentId: paymentIntent.id // Store for idempotency
+            });
+            
+            console.log(`Created act record for ${buttonType} completion`);
+
+            // Track tzedaka completion in analytics for stats counting
+            await storage.trackEvent({
+              eventType: 'tzedaka_completion',
+              eventData: {
+                buttonType: buttonType,
+                amount: paymentIntent.amount / 100, // Convert from cents to dollars
+                donationId: donation.id
+              },
+              sessionId: null // We don't have session context in webhook
+            });
+
+            // CRITICAL FIX: Also track as modal_complete so it appears in Feature Usage section
+            await storage.trackEvent({
+              eventType: 'modal_complete',
+              eventData: {
+                modalType: 'tzedaka',
+                buttonType: buttonType,
+                amount: paymentIntent.amount / 100,
+                donationId: donation.id
+              },
+              sessionId: null
+            });
+            console.log('Tracked donation as modal_complete for Feature Usage display');
+
+            // Update campaign progress if this is an active_campaign donation
+            if (buttonType === 'active_campaign') {
+              try {
+                // Get current active campaign
+                const activeCampaign = await storage.getActiveCampaign();
+                if (activeCampaign) {
+                  const newAmount = activeCampaign.currentAmount + (paymentIntent.amount / 100); // Convert from cents
+                  await storage.updateCampaignProgress(activeCampaign.id, newAmount);
+                  console.log(`Updated campaign progress: $${newAmount}`);
+                }
+              } catch (campaignError) {
+                console.error('Error updating campaign progress:', campaignError);
+              }
+            }
+
+            // Update today's analytics stats to show immediate impact
+            // Day starts at 02:00 local time for analytics
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
+            try {
+              await storage.recalculateDailyStats(today);
+              console.log('Recalculated daily stats after donation');
+            } catch (statsError) {
+              console.error('Error recalculating daily stats:', statsError);
+            }
+
+            // Store completion in database for frontend to pick up (backup to URL redirect)
+            try {
+              await storage.trackEvent({
+                eventType: 'tzedaka_button_completion',
+                eventData: {
+                  buttonType: buttonType,
+                  paymentIntentId: paymentIntent.id,
+                  amount: paymentIntent.amount / 100,
+                  timestamp: new Date().toISOString(),
+                  source: 'webhook'
+                },
+                sessionId: null
+              });
+              console.log(`Stored ${buttonType} completion event for frontend pickup`);
+            } catch (completionError) {
+              console.error('Error storing completion event:', completionError);
+            }
+          }
+          break;
+          
+        case 'checkout.session.completed':
+          const session = event.data.object;
+          console.log('Webhook: Checkout session completed:', session.id);
+          
+          // Get the payment intent from the session
+          const paymentIntentId = session.payment_intent;
+          console.log('Webhook: Payment intent from session:', paymentIntentId);
+          
+          // BACKUP RECONCILIATION: Check if already processed by frontend
+          if (paymentIntentId) {
+            const existingSessionAct = await storage.getActByPaymentIntentId(paymentIntentId as string);
+            if (existingSessionAct) {
+              console.log(`Webhook: Session ${session.id} already processed by frontend - skipping`);
+              break; // Already handled by frontend confirmation
+            }
+          }
+          
+          console.log(`Webhook: Processing session ${session.id} as backup reconciliation`);
+          
+          // Find donation by session ID (stored in stripe_payment_intent_id field incorrectly)
+          const sessionDonation = await storage.getDonationByPaymentIntentId(session.id);
+          if (sessionDonation) {
+            // Update the donation with correct payment intent ID and status
+            await storage.updateDonation(sessionDonation.id, {
+              stripePaymentIntentId: paymentIntentId as string,
+              status: 'succeeded'
+            });
+            console.log('Webhook: Updated donation with correct payment intent ID');
+            
+            // Extract metadata from session
+            const buttonType = session.metadata?.buttonType || 'active_campaign';
+            const amount = session.amount_total || 100;
+            
+            // Create an act record for tracking
+            await storage.createAct({
+              userId: null,
+              category: 'tzedaka',
+              subtype: buttonType,
+              amount: amount,
+              paymentIntentId: paymentIntentId as string // Store for idempotency
+            });
+            
+            console.log(`Created act record for ${buttonType} completion from checkout session`);
+
+            // Track tzedaka completion in analytics
+            await storage.trackEvent({
+              eventType: 'tzedaka_completion',
+              eventData: {
+                buttonType: buttonType,
+                amount: amount / 100,
+                donationId: sessionDonation.id,
+                sessionId: session.id
+              },
+              sessionId: null
+            });
+
+            // Track as modal_complete for Feature Usage
+            await storage.trackEvent({
+              eventType: 'modal_complete',
+              eventData: {
+                modalType: 'tzedaka',
+                buttonType: buttonType,
+                amount: amount / 100,
+                donationId: sessionDonation.id
+              },
+              sessionId: null
+            });
+            console.log('Tracked checkout donation as modal_complete for Feature Usage');
+
+            // Update campaign progress if this is an active_campaign donation
+            if (buttonType === 'active_campaign') {
+              try {
+                const activeCampaign = await storage.getActiveCampaign();
+                if (activeCampaign) {
+                  const newAmount = activeCampaign.currentAmount + (amount / 100);
+                  await storage.updateCampaignProgress(activeCampaign.id, newAmount);
+                  console.log(`Updated campaign progress from checkout: $${newAmount}`);
+                }
+              } catch (campaignError) {
+                console.error('Error updating campaign progress:', campaignError);
+              }
+            }
+
+            // Recalculate daily stats
+            // Day starts at 02:00 local time for analytics
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
+            try {
+              await storage.recalculateDailyStats(today);
+              console.log('Recalculated daily stats after checkout donation');
+            } catch (statsError) {
+              console.error('Error recalculating daily stats:', statsError);
+            }
+          } else {
+            console.warn('No donation found for checkout session:', session.id);
+          }
+          break;
+
+        case 'payment_intent.payment_failed':
+          const failedPayment = event.data.object;
+          console.log('Payment failed:', failedPayment.id);
+          await storage.updateDonationStatus(failedPayment.id, 'failed');
+          break;
+          
+        default:
+          console.log(`Unhandled event type ${event.type}`);
+      }
+
+      res.json({ received: true });
+    } catch (error) {
+      console.error('Error processing webhook:', error);
+      res.status(500).json({ error: 'Webhook processing failed' });
+    }
+  });
+
+  // Check for recent donation completions (backup endpoint)
+  app.get("/api/donations/check-completion/:sessionId", async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      
+      console.log('Checking completion for session:', sessionId);
+      
+      // Look for completion events in the last 10 minutes
+      const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+      
+      // Check if donation exists and was completed
+      const donation = await storage.getDonationBySessionId(sessionId);
+      
+      if (donation && donation.status === 'succeeded') {
+        console.log('Found completed donation:', donation.id);
+        
+        const metadata = donation.metadata as Record<string, any> || {};
+        const buttonType = metadata.buttonType || donation.type || 'put_a_coin';
+        
+        res.json({
+          completed: true,
+          buttonType: buttonType,
+          amount: donation.amount,
+          timestamp: donation.createdAt
+        });
+      } else {
+        res.json({ completed: false });
+      }
+    } catch (error) {
+      console.error('Error checking donation completion:', error);
+      res.status(500).json({ completed: false, error: 'Failed to check completion' });
+    }
+  });
+
+  // Donation success callback - marks individual button as complete
+  app.post("/api/donations/success", async (req, res) => {
+    console.log('=== DONATIONS SUCCESS ENDPOINT CALLED ===');
+    console.log('Request body:', req.body);
+    
+    try {
+      const { sessionId } = req.body;
+      
+      if (!sessionId) {
+        console.log('ERROR: No session ID provided');
+        return res.status(400).json({ message: "Session ID required" });
+      }
+      
+      console.log('Looking up donation with session ID:', sessionId);
+      
+      // Get donation by session ID
+      const donation = await storage.getDonationBySessionId(sessionId);
+      
+      console.log('Donation found:', donation ? 'YES' : 'NO');
+      if (donation) {
+        console.log('Donation details:', {
+          id: donation.id,
+          amount: donation.amount,
+          type: donation.type,
+          metadata: donation.metadata
+        });
+      }
+      
+      if (!donation) {
+        console.log('ERROR: Donation not found in database');
+        return res.status(404).json({ message: "Donation not found" });
+      }
+      
+      // Extract button type from metadata
+      const metadata = donation.metadata as Record<string, any> || {};
+      const buttonType = metadata.buttonType || donation.type || 'put_a_coin';
+      
+      // Create an act record if it doesn't exist already
+      await storage.createAct({
+        userId: null,
+        category: 'tzedaka',
+        subtype: buttonType,
+        amount: donation.amount
+      });
+      
+      console.log('SUCCESS: Donation success processing complete');
+      console.log('Button type processed:', buttonType);
+      
+      res.json({ 
+        success: true, 
+        buttonType: buttonType,
+        message: `${buttonType} completion recorded successfully` 
+      });
+    } catch (error) {
+      console.error('Error processing donation success:', error);
+      res.status(500).json({ message: "Failed to process donation success" });
+    }
+  });
+
+  // Frontend-driven payment confirmation (idempotent)
+  app.post("/api/payments/confirm", async (req, res) => {
+    try {
+      const { paymentIntentId, sessionId, amount, currency, metadata } = req.body;
+      
+      if (!paymentIntentId) {
+        return res.status(400).json({ message: "Payment intent ID required" });
+      }
+      
+      // Check if we've already processed this payment (idempotency check)
+      const existingAct = await storage.getActByPaymentIntentId(paymentIntentId);
+      if (existingAct) {
+        console.log(`Payment ${paymentIntentId} already processed - returning success`);
+        return res.json({ 
+          success: true, 
+          message: "Payment already processed",
+          alreadyProcessed: true 
+        });
+      }
+      
+      // Create donation record if not exists
+      let donation = await storage.getDonationByPaymentIntentId(paymentIntentId);
+      if (!donation && sessionId) {
+        donation = await storage.getDonationBySessionId(sessionId);
+      }
+      
+      if (!donation) {
+        // Create new donation record
+        donation = await storage.createDonation({
+          userId: null,
+          stripePaymentIntentId: paymentIntentId,
+          stripeSessionId: sessionId,
+          amount: amount || 100, // Amount in cents
+          type: metadata?.buttonType || "put_a_coin",
+          donationType: metadata?.donationType || "General Donation",
+          sponsorName: metadata?.sponsorName,
+          dedication: metadata?.dedication,
+          email: metadata?.email,
+          metadata: metadata || {},
+          status: 'succeeded'
+        });
+      } else if (donation.status !== 'succeeded') {
+        // Update existing donation to succeeded
+        await storage.updateDonationStatus(paymentIntentId, 'succeeded');
+      }
+      
+      // Create act record with payment_intent_id for idempotency
+      const buttonType = metadata?.buttonType || donation.type || 'put_a_coin';
+      await storage.createAct({
+        userId: null,
+        category: 'tzedaka',
+        subtype: buttonType,
+        amount: amount || donation.amount,
+        paymentIntentId: paymentIntentId // Store for idempotency
+      });
+      
+      // Update daily stats
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
+      
+      const stats = await storage.getDailyStats(today);
+      const amountInCents = amount || donation.amount;
+      const amountInDollars = amountInCents / 100; // Convert cents to dollars for financial tracking
+      
+      const updated: any = {
+        tzedakaActs: (stats?.tzedakaActs || 0) + 1,
+        moneyRaised: (stats?.moneyRaised || 0) + amountInDollars, // Fixed: Convert to dollars
+        totalActs: (stats?.totalActs || 0) + 1
+      };
+      
+      // Update specific donation type counter (in dollars)
+      if (buttonType === 'active_campaign') {
+        updated.activeCampaignTotal = (stats?.activeCampaignTotal || 0) + amountInDollars;
+      } else if (buttonType === 'put_a_coin') {
+        updated.putACoinTotal = (stats?.putACoinTotal || 0) + amountInDollars;
+      } else if (buttonType === 'sponsor_a_day') {
+        updated.sponsorADayTotal = (stats?.sponsorADayTotal || 0) + amountInDollars;
+      }
+      
+      await storage.updateDailyStats(today, updated);
+      
+      // Track analytics events for proper statistics
+      await storage.trackEvent({
+        eventType: 'tzedaka_completion',
+        eventData: {
+          buttonType: buttonType,
+          amount: amountInDollars,
+          paymentIntentId: paymentIntentId,
+          date: today
+        },
+        sessionId: metadata?.sessionId || null
+      });
+      
+      // Track as modal_complete for Feature Usage display
+      await storage.trackEvent({
+        eventType: 'modal_complete',
+        eventData: {
+          modalType: 'tzedaka',
+          buttonType: buttonType,
+          amount: amountInDollars,
+          paymentIntentId: paymentIntentId,
+          date: today
+        },
+        sessionId: metadata?.sessionId || null
+      });
+      
+      // Update campaign progress if this is an active_campaign donation
+      if (buttonType === 'active_campaign') {
+        try {
+          const activeCampaign = await storage.getActiveCampaign();
+          if (activeCampaign) {
+            const donationAmount = (amount || donation.amount) / 100; // Convert cents to dollars
+            const newAmount = activeCampaign.currentAmount + donationAmount;
+            await storage.updateCampaignProgress(activeCampaign.id, newAmount);
+            console.log(`Campaign updated to ${newAmount}/${activeCampaign.goalAmount}`);
+          }
+        } catch (campaignError) {
+          console.error('Error updating campaign progress:', campaignError);
+        }
+      }
+      
+      console.log(`Payment ${paymentIntentId} confirmed and stats updated`);
+      
+      res.json({ 
+        success: true, 
+        message: "Payment confirmed successfully",
+        buttonType: buttonType
+      });
+    } catch (error) {
+      console.error('Error confirming payment:', error);
+      res.status(500).json({ message: "Failed to confirm payment" });
+    }
+  });
+  
   // Manual donation success update (for testing when webhook isn't configured)
   app.post("/api/donations/update-status", async (req, res) => {
     try {
@@ -1828,21 +2466,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
           donation = await storage.createDonation({
+            userId: null,
             stripePaymentIntentId: paymentIntentId,
+            stripeSessionId: paymentIntent.metadata?.sessionId,
             amount: paymentIntent.amount, // Amount in cents from Stripe
+            type: paymentIntent.metadata?.buttonType || "put_a_coin",
             donationType: paymentIntent.metadata?.donationType || "General Donation",
             sponsorName: paymentIntent.metadata?.sponsorName,
             dedication: paymentIntent.metadata?.dedication,
             email: paymentIntent.receipt_email || paymentIntent.metadata?.email,
+            metadata: {
+              buttonType: paymentIntent.metadata?.buttonType || "put_a_coin",
+              sponsorName: paymentIntent.metadata?.sponsorName || "",
+              dedication: paymentIntent.metadata?.dedication || "",
+              message: paymentIntent.metadata?.message || "",
+              source: "ezras-nashim-donation",
+              timestamp: new Date().toISOString()
+            },
             status: 'succeeded'
           });
-          console.log('Created donation record for successful payment:', paymentIntentId);
+          
+          // Create an act record for tracking individual button completion
+          await storage.createAct({
+            userId: null,
+            category: 'tzedaka',
+            subtype: paymentIntent.metadata?.buttonType || 'put_a_coin',
+            amount: paymentIntent.amount
+          });
+          
+          console.log('Created donation record and act for successful payment:', paymentIntentId);
         } catch (err) {
           console.error('Error retrieving payment intent from Stripe:', err);
           // Fallback - create with minimal info
           donation = await storage.createDonation({
+            userId: null,
             stripePaymentIntentId: paymentIntentId,
             amount: 100, // Default $1
+            type: "put_a_coin",
             donationType: "General Donation",
             status: status
           });
@@ -1867,7 +2527,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { eventType, eventData, sessionId } = req.body;
       
       // Only allow completion events, reject high-volume events like page_view
-      const allowedEvents = ['modal_complete', 'tehillim_complete', 'name_prayed', 'tehillim_book_complete'];
+      const allowedEvents = ['modal_complete', 'tehillim_complete', 'name_prayed', 'tehillim_book_complete', 'tzedaka_completion'];
       if (!allowedEvents.includes(eventType)) {
         return res.status(400).json({ message: "Event type not tracked" });
       }
@@ -1879,7 +2539,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Immediately recalculate today's stats to show live updates
-      const today = new Date().toISOString().split('T')[0];
+      // Day starts at 02:00 local time for analytics
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
       await storage.recalculateDailyStats(today);
       
       res.json(event);
@@ -1919,7 +2585,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/analytics/stats/today", async (req, res) => {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      // Force no caching for real-time analytics
+      res.set({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store'
+      });
+      
+      // Day starts at 02:00 local time for analytics
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
       const stats = await storage.getDailyStats(today);
       res.json(stats || {
         date: today,
@@ -1937,6 +2617,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/analytics/stats/month", async (req, res) => {
     try {
+      // Force no caching for real-time analytics
+      res.set({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store'
+      });
+      
       const now = new Date();
       const year = parseInt(req.query.year as string) || now.getFullYear();
       const month = parseInt(req.query.month as string) || (now.getMonth() + 1);
@@ -1951,6 +2639,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/analytics/stats/total", async (req, res) => {
     try {
+      // Force no caching for real-time analytics
+      res.set({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store'
+      });
+      
       const totals = await storage.getTotalStats();
       res.json(totals);
     } catch (error) {
@@ -2134,16 +2830,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   })
   
   // Version endpoint for PWA update checking
-  // Use a fixed build timestamp instead of current time to prevent infinite update loops
-  const BUILD_TIMESTAMP = 1756015000000; // Fixed build time: August 24, 2025
+  // Use server start time as the build timestamp to detect actual deployments
+  let SERVER_START_TIME = Date.now();
+  
+  // Update build timestamp when server restarts (deployment detection)
+  const updateBuildTimestamp = () => {
+    SERVER_START_TIME = Date.now();
+    console.log('Updated build timestamp to:', new Date(SERVER_START_TIME).toISOString());
+  };
   
   app.get("/api/version", (req, res) => {
     const version = {
-      timestamp: BUILD_TIMESTAMP,
+      timestamp: SERVER_START_TIME,
       version: process.env.APP_VERSION || '1.0.1',
-      buildDate: new Date(BUILD_TIMESTAMP).toISOString()
+      buildDate: new Date(SERVER_START_TIME).toISOString(),
+      serverUptime: Date.now() - SERVER_START_TIME
     };
     res.json(version);
+  });
+  
+  // Endpoint to manually trigger version update (for testing)
+  app.post("/api/version/update", (req, res) => {
+    updateBuildTimestamp();
+    res.json({ message: "Build timestamp updated", timestamp: SERVER_START_TIME });
   });
 
   // Messages routes
@@ -2169,6 +2878,280 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(newMessage);
     } catch (error) {
       res.status(500).json({ message: "Failed to create message" });
+    }
+  });
+
+  // Push notification endpoints
+  app.get("/api/push/vapid-public-key", (req, res) => {
+    res.json({ publicKey: VAPID_PUBLIC_KEY || null });
+  });
+
+  app.post("/api/push/subscribe", async (req, res) => {
+    try {
+      const { subscription, sessionId } = req.body;
+      
+      if (!subscription || !subscription.endpoint) {
+        return res.status(400).json({ error: "Invalid subscription object" });
+      }
+
+      const savedSubscription = await storage.subscribeToPush({
+        endpoint: subscription.endpoint,
+        p256dh: subscription.keys.p256dh,
+        auth: subscription.keys.auth,
+        sessionId: sessionId || null
+      });
+
+      res.json({ 
+        success: true, 
+        message: "Successfully subscribed to push notifications",
+        subscriptionId: savedSubscription.id 
+      });
+    } catch (error) {
+      console.error("Error subscribing to push:", error);
+      res.status(500).json({ error: "Failed to subscribe to push notifications" });
+    }
+  });
+
+  app.post("/api/push/unsubscribe", async (req, res) => {
+    try {
+      const { endpoint } = req.body;
+      
+      if (!endpoint) {
+        return res.status(400).json({ error: "Endpoint required" });
+      }
+
+      await storage.unsubscribeFromPush(endpoint);
+      res.json({ success: true, message: "Successfully unsubscribed from push notifications" });
+    } catch (error) {
+      console.error("Error unsubscribing from push:", error);
+      res.status(500).json({ error: "Failed to unsubscribe from push notifications" });
+    }
+  });
+
+  // Admin endpoint to send push notifications
+  app.post("/api/push/send", async (req, res) => {
+    try {
+      const { title, body, icon, badge, url, requireInteraction, adminPassword } = req.body;
+      
+      // Simple admin authentication
+      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ezras2025';
+      if (adminPassword !== ADMIN_PASSWORD) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      if (!title || !body) {
+        return res.status(400).json({ error: "Title and body are required" });
+      }
+
+      // Get all active subscriptions
+      const subscriptions = await storage.getActiveSubscriptions();
+      
+      if (subscriptions.length === 0) {
+        return res.json({ 
+          success: false, 
+          message: "No active subscriptions found",
+          sentCount: 0 
+        });
+      }
+
+      // Create notification record
+      const notification = await storage.createNotification({
+        title,
+        body,
+        icon: icon || '/icon-192x192.png',
+        badge: badge || '/badge-72x72.png',
+        url: url || '/',
+        data: { timestamp: Date.now() },
+        sentCount: 0,
+        successCount: 0,
+        failureCount: 0,
+        createdBy: 'admin'
+      });
+
+      // Send to all subscriptions
+      const payload = JSON.stringify({
+        title,
+        body,
+        icon: icon || '/icon-192x192.png',
+        badge: badge || '/badge-72x72.png',
+        url: url || '/',
+        requireInteraction: requireInteraction || false,
+        timestamp: Date.now()
+      });
+
+      let successCount = 0;
+      let failureCount = 0;
+
+      const sendPromises = subscriptions.map(async (sub) => {
+        try {
+          await webpush.sendNotification({
+            endpoint: sub.endpoint,
+            keys: {
+              p256dh: sub.p256dh,
+              auth: sub.auth
+            }
+          }, payload);
+          successCount++;
+        } catch (error: any) {
+          failureCount++;
+          // If subscription is invalid, mark it as unsubscribed
+          if (error.statusCode === 410) {
+            await storage.unsubscribeFromPush(sub.endpoint);
+          }
+          console.error(`Failed to send to ${sub.endpoint}:`, error.message);
+        }
+      });
+
+      await Promise.all(sendPromises);
+
+      // Update notification stats
+      await storage.updateNotificationStats(notification.id, successCount, failureCount);
+
+      res.json({ 
+        success: true, 
+        message: `Sent to ${successCount} users`,
+        sentCount: successCount + failureCount,
+        successCount,
+        failureCount
+      });
+    } catch (error) {
+      console.error("Error sending push notification:", error);
+      res.status(500).json({ error: "Failed to send push notification" });
+    }
+  });
+
+  // Get notification history (admin)
+  app.get("/api/push/history", async (req, res) => {
+    try {
+      const { adminPassword } = req.query;
+      
+      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ezras2025';
+      if (adminPassword !== ADMIN_PASSWORD) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const history = await storage.getNotificationHistory(50);
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching notification history:", error);
+      res.status(500).json({ error: "Failed to fetch notification history" });
+    }
+  });
+
+  // Simple test push - minimal payload
+  app.post("/api/push/simple-test", async (req, res) => {
+    try {
+      const subscriptions = await storage.getActiveSubscriptions();
+      
+      if (subscriptions.length === 0) {
+        return res.json({ success: false, message: "No subscriptions" });
+      }
+
+      // Extremely simple payload - just title
+      const payload = JSON.stringify({
+        title: "Test Push"
+      });
+
+      console.log('[Simple Test] Sending minimal payload:', payload);
+      
+      let sent = 0;
+      for (const sub of subscriptions) {
+        try {
+          await webpush.sendNotification({
+            endpoint: sub.endpoint,
+            keys: {
+              p256dh: sub.p256dh,
+              auth: sub.auth
+            }
+          }, payload);
+          sent++;
+          console.log('[Simple Test] Sent successfully');
+        } catch (error: any) {
+          console.error('[Simple Test] Error:', error.statusCode, error.message);
+        }
+      }
+
+      res.json({ success: sent > 0, sent });
+    } catch (error) {
+      console.error("[Simple Test] Error:", error);
+      res.status(500).json({ error: "Failed" });
+    }
+  });
+
+  // Test push notification endpoint (for debugging)
+  app.post("/api/push/test", async (req, res) => {
+    try {
+      const { title, body } = req.body;
+      
+      if (!title || !body) {
+        return res.status(400).json({ error: "Title and body are required" });
+      }
+
+      // Get all active subscriptions
+      const subscriptions = await storage.getActiveSubscriptions();
+      
+      if (subscriptions.length === 0) {
+        return res.json({ 
+          success: false, 
+          message: "No active subscriptions found",
+          sentCount: 0 
+        });
+      }
+
+      // Send test notification
+      const payload = JSON.stringify({
+        title,
+        body,
+        icon: '/icon-192x192.png',
+        badge: '/badge-72x72.png',
+        timestamp: Date.now()
+      });
+
+      console.log('[Test Push] Sending to', subscriptions.length, 'subscription(s)');
+      console.log('[Test Push] Payload:', payload);
+
+      let successCount = 0;
+      let failureCount = 0;
+      const errors: string[] = [];
+
+      const sendPromises = subscriptions.map(async (sub) => {
+        try {
+          console.log('[Test Push] Sending to endpoint:', sub.endpoint.substring(0, 50) + '...');
+          await webpush.sendNotification({
+            endpoint: sub.endpoint,
+            keys: {
+              p256dh: sub.p256dh,
+              auth: sub.auth
+            }
+          }, payload);
+          successCount++;
+          console.log('[Test Push] Success for endpoint:', sub.endpoint.substring(0, 50) + '...');
+        } catch (error: any) {
+          failureCount++;
+          const errorMsg = `Endpoint ${sub.endpoint.substring(0, 50)}...: ${error.message}`;
+          errors.push(errorMsg);
+          console.error('[Test Push] Failed:', errorMsg);
+          
+          // If subscription is invalid, mark it as unsubscribed
+          if (error.statusCode === 410) {
+            await storage.unsubscribeFromPush(sub.endpoint);
+            console.log('[Test Push] Removed invalid subscription');
+          }
+        }
+      });
+
+      await Promise.all(sendPromises);
+
+      res.json({ 
+        success: successCount > 0, 
+        message: `Sent to ${successCount} users, ${failureCount} failed`,
+        successCount,
+        failureCount,
+        errors: errors.length > 0 ? errors : undefined
+      });
+    } catch (error) {
+      console.error("[Test Push] Error:", error);
+      res.status(500).json({ error: "Failed to send test push notification" });
     }
   });
 

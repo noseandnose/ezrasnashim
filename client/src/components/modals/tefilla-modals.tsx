@@ -20,9 +20,8 @@ import { processTefillaText, getCurrentTefillaConditions, type TefillaConditions
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { Expand } from "lucide-react";
 
-// Import compass icons
-import bhPinkIcon from '@assets/BH_Pink_1755681221620.png';
-import bhGreenIcon from '@assets/BH_Green_1755681221619.png';
+// Import simplified compass component
+import { SimpleCompassUI } from '@/components/compass/SimpleCompassUI';
 
 interface TefillaModalsProps {
   onSectionChange?: (section: 'torah' | 'tefilla' | 'tzedaka' | 'home' | 'table') => void;
@@ -1169,6 +1168,13 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
     }
   }, [prayer]);
 
+  // Update fullscreen title when prayer loads
+  useEffect(() => {
+    if (prayer && prayer.prayerName && (window as any).updateFullscreenTitle) {
+      (window as any).updateFullscreenTitle(prayer.prayerName);
+    }
+  }, [prayer]);
+
   // Use unique key per prayer for proper individual tracking
   const modalKey = `womens-prayer-${prayer?.id || selectedPrayerId}`;
 
@@ -1260,11 +1266,18 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     setFullscreenContent(prev => ({ ...prev, hasTranslation }));
   };
 
-  // Make function available globally for the fullscreen content component
+  // Function to update fullscreen title
+  const updateFullscreenTitle = (title: string) => {
+    setFullscreenContent(prev => ({ ...prev, title }));
+  };
+
+  // Make functions available globally for the fullscreen content component
   useEffect(() => {
     (window as any).updateFullscreenHasTranslation = updateFullscreenHasTranslation;
+    (window as any).updateFullscreenTitle = updateFullscreenTitle;
     return () => {
       delete (window as any).updateFullscreenHasTranslation;
+      delete (window as any).updateFullscreenTitle;
     };
   }, []);
   const queryClient = useQueryClient();
@@ -1496,21 +1509,21 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const { data: progress, refetch: refetchProgress } = useQuery<GlobalTehillimProgress>({
     queryKey: ['/api/tehillim/progress'], 
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress?t=${Date.now()}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress`);
       const data = await response.json();
       return data;
     },
     enabled: activeModal === 'tehillim-text',
-    staleTime: 0, // Always consider stale
-    gcTime: 0 // Don't cache at all
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000 // Keep in cache for 10 minutes
   });
 
   // Fetch current name for the perek
   const { data: currentName, refetch: refetchCurrentName } = useQuery<TehillimName | null>({
     queryKey: ['/api/tehillim/current-name'],
     enabled: activeModal === 'tehillim-text',
-    staleTime: 0, // Always consider stale
-    gcTime: 0 // Don't cache at all
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000 // Keep in cache for 10 minutes
   });
 
   // Get the tehillim info first to get the English number
@@ -1563,12 +1576,13 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       // Track tehillim completion for analytics
       trackEvent("tehillim_complete", { 
         perek: progress?.currentPerek,
-        language: showHebrew ? 'hebrew' : 'english'
+        language: showHebrew ? 'hebrew' : 'english',
+        type: 'global'
       });
       
-      // Track modal completion for daily tracking
-      trackModalComplete('tehillim-text');
-      markModalComplete('tehillim-text');
+      // Track modal completion for daily tracking  
+      trackModalComplete('global-tehillim-chain');
+      markModalComplete('global-tehillim-chain');
       completeTask('tefilla');
       
       // Track name prayed for if there was one
@@ -1628,12 +1642,13 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       // Track tehillim completion for analytics
       trackEvent("tehillim_complete", { 
         perek: progress?.currentPerek,
-        language: showHebrew ? 'hebrew' : 'english'
+        language: showHebrew ? 'hebrew' : 'english',
+        type: 'global'
       });
       
-      // Track modal completion for daily tracking
-      trackModalComplete('tehillim-text');
-      markModalComplete('tehillim-text');
+      // Track modal completion for daily tracking  
+      trackModalComplete('global-tehillim-chain');
+      markModalComplete('global-tehillim-chain');
       completeTask('tefilla');
       
       // Track name prayed for if there was one
@@ -1817,7 +1832,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     <>
       {/* Tehillim Text Modal */}
       <Dialog open={activeModal === 'tehillim-text'} onOpenChange={() => closeModal(true)}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="tehillim-description">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular relative" aria-describedby="tehillim-description">
           <div id="tehillim-description" className="sr-only">Psalms reading and community prayer participation</div>
           
           {/* Fullscreen button */}
@@ -2674,7 +2689,16 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       <BirkatHamazonModal />
       
       {/* Jerusalem Compass Modal */}
-      <JerusalemCompass />
+      <Dialog open={activeModal === 'jerusalem-compass'} onOpenChange={() => closeModal(true)}>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto">
+          <VisuallyHidden>
+            <DialogDescription>Compass to find direction to Jerusalem for prayer</DialogDescription>
+          </VisuallyHidden>
+          <div className="px-4 select-none" style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none' }}>
+            <SimpleCompassUI onClose={() => closeModal()} />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Fullscreen Modal */}
       <FullscreenModal
@@ -3096,7 +3120,7 @@ function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'h
                     isModalComplete(`individual-tehillim-${psalm}`)
                       ? 'bg-sage text-white'
                       : 'bg-gradient-feminine text-white'
-                  }`}
+                  } ${psalm === 27 ? 'tehillim-27-pulse' : ''}`}
                   style={{ touchAction: 'manipulation' }}
                 >
                   {psalm}
@@ -3385,6 +3409,13 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                     {tehillimActiveTab === 'all' && (
                       <Button 
                         onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
+                          // Track tehillim completion for analytics
+                          trackEvent("tehillim_complete", { 
+                            perek: selectedPsalm,
+                            language: language,
+                            type: 'individual'
+                          });
+                          
                           // Track modal completion immediately
                           trackModalComplete(`individual-tehillim-${selectedPsalm}`);
                           markModalComplete(`individual-tehillim-${selectedPsalm}`);
@@ -3470,6 +3501,13 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                       {/* Complete button - returns to Tehillim selector */}
                       <Button 
                         onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
+                          // Track tehillim completion for analytics
+                          trackEvent("tehillim_complete", { 
+                            perek: selectedPsalm,
+                            language: language,
+                            type: 'individual'
+                          });
+                          
                           // Track modal completion immediately
                           trackModalComplete(`individual-tehillim-${selectedPsalm}`);
                           markModalComplete(`individual-tehillim-${selectedPsalm}`);
@@ -3718,662 +3756,4 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
   );
 }
 
-// Jerusalem Compass Component
-function JerusalemCompass() {
-  const { activeModal, closeModal } = useModalStore();
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [direction, setDirection] = useState<number | null>(null);
-  const [deviceOrientation, setDeviceOrientation] = useState<number>(0);
-  const [locationName, setLocationName] = useState<string>("");
-  const [error, setError] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [orientationSupported, setOrientationSupported] = useState(true);
-  const [permissionRequested, setPermissionRequested] = useState(false);
-  const orientationEventRef = useRef<((event: DeviceOrientationEvent) => void) | null>(null);
-  
-  // Android detection for UI elements
-  const isAndroid = /Android/i.test(navigator.userAgent);
-
-  // Jerusalem coordinates for fallback (31.7767, 35.2345 as specified)
-  const JERUSALEM_LAT = 31.7767;
-  const JERUSALEM_LNG = 35.2345;
-
-  // Simple bearing calculation to Jerusalem
-  const calculateBearing = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
-    const lat1Rad = lat1 * Math.PI / 180;
-    const lat2Rad = lat2 * Math.PI / 180;
-    const dLng = (lng2 - lng1) * Math.PI / 180;
-    
-    const y = Math.sin(dLng) * Math.cos(lat2Rad);
-    const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) - Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLng);
-    
-    let bearing = Math.atan2(y, x) * 180 / Math.PI;
-    return (bearing + 360) % 360;
-  };
-
-  // Enhanced location handling for Android stability
-  const getUserLocation = () => {
-    setIsLoading(true);
-    setError("");
-    
-    if (!navigator.geolocation) {
-      setError("Geolocation is not supported by this browser");
-      setIsLoading(false);
-      // Fallback to Jerusalem bearing calculation
-      setDirection(0); // Default north when no location available
-      return;
-    }
-
-    // Enhanced location caching for Android stability
-    const cacheKey = 'ezras-nashim-compass-location-v2'; // New cache version
-    const cacheTimeKey = 'ezras-nashim-compass-location-time-v2';
-    const cachedLocation = localStorage.getItem(cacheKey);
-    const cachedTime = localStorage.getItem(cacheTimeKey);
-    
-    if (cachedLocation && cachedTime) {
-      const locationAge = Date.now() - parseInt(cachedTime);
-      const maxAge = isAndroid ? 900000 : 300000; // 15 min for Android, 5 min for others
-      
-      if (locationAge < maxAge) {
-        try {
-          const parsed = JSON.parse(cachedLocation);
-          // Validate cached location
-          if (parsed.lat && parsed.lng && 
-              Math.abs(parsed.lat) <= 90 && Math.abs(parsed.lng) <= 180) {
-            setLocation(parsed);
-            const bearing = calculateBearing(parsed.lat, parsed.lng, JERUSALEM_LAT, JERUSALEM_LNG);
-            setDirection(bearing);
-            setIsLoading(false);
-            return;
-          }
-        } catch (e) {
-          // Invalid cache, clear it and proceed
-          localStorage.removeItem(cacheKey);
-          localStorage.removeItem(cacheTimeKey);
-        }
-      } else {
-        // Expired cache, clear it
-        localStorage.removeItem(cacheKey);
-        localStorage.removeItem(cacheTimeKey);
-      }
-    }
-
-    // Comprehensive Android geolocation optimization
-    const geoOptions = {
-      enableHighAccuracy: isAndroid ? false : true, // Android often fails with high accuracy
-      timeout: isAndroid ? 12000 : 6000, // Much longer timeout for Android
-      maximumAge: isAndroid ? 300000 : 120000 // 5 min cache for Android, 2 min for others
-    };
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const userLat = position.coords.latitude;
-        const userLng = position.coords.longitude;
-        
-        const locationData = { lat: userLat, lng: userLng };
-        setLocation(locationData);
-        
-        // Enhanced caching for Android reliability
-        localStorage.setItem(cacheKey, JSON.stringify(locationData));
-        localStorage.setItem(cacheTimeKey, Date.now().toString());
-        
-        // Store location name for display consistency
-        try {
-          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLat}&lon=${userLng}&format=json&addressdetails=1`);
-          const data = await response.json();
-          const name = data.display_name?.split(',')[0] || `${userLat.toFixed(2)}, ${userLng.toFixed(2)}`;
-          setLocationName(name);
-          localStorage.setItem('ezras-nashim-compass-location-name', name);
-        } catch (e) {
-          // Location name fetch failed, use coordinates
-          const coordName = `${userLat.toFixed(2)}, ${userLng.toFixed(2)}`;
-          setLocationName(coordName);
-        }
-        
-        // Calculate bearing to Jerusalem
-        const bearing = calculateBearing(userLat, userLng, JERUSALEM_LAT, JERUSALEM_LNG);
-        setDirection(bearing);
-        
-        setIsLoading(false);
-      },
-      (error) => {
-        let errorMessage = "Unable to get your location. Using default Jerusalem direction.";
-        
-        switch(error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = "Location access denied. Showing default Jerusalem direction.";
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = "Location unavailable. Using compass only.";
-            break;
-          case error.TIMEOUT:
-            errorMessage = "Location request timed out. Using compass only.";
-            break;
-        }
-        
-        setError(errorMessage);
-        setIsLoading(false);
-        // Fallback: show compass without specific bearing
-        setDirection(90); // Default east direction to Jerusalem from most places
-      },
-      geoOptions
-    );
-  };
-
-
-
-  // Get cardinal direction
-  const getCardinalDirection = (bearing: number): string => {
-    const directions = [
-      "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
-      "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"
-    ];
-    const index = Math.round(bearing / 22.5) % 16;
-    return directions[index];
-  };
-
-  // Request orientation permission (for iOS 13+)
-  const requestOrientationPermission = async () => {
-    if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
-      try {
-        const response = await (DeviceOrientationEvent as any).requestPermission();
-        if (response === 'granted') {
-          setPermissionRequested(true);
-          initializeOrientation();
-        } else {
-          setOrientationSupported(false);
-          setError("Please enable motion sensors in your device settings");
-        }
-      } catch (error) {
-        setOrientationSupported(false);
-        setError("Unable to access motion sensors");
-      }
-    } else {
-      // Not iOS 13+, proceed directly
-      setPermissionRequested(true);
-      initializeOrientation();
-    }
-  };
-
-  // Comprehensive Android orientation handling for all versions and browsers
-  const initializeOrientation = () => {
-    let lastHeading = 0;
-    let headingBuffer: number[] = [];
-    const BUFFER_SIZE = 12; // Larger buffer for Android stability
-    const UPDATE_THRESHOLD = 1.5; // Fine-tuned for responsiveness
-    let lastUpdateTime = Date.now();
-    const MIN_UPDATE_INTERVAL = 40; // Optimized for smooth updates
-    
-    // Enhanced Android detection - covers all versions and browsers
-    const userAgent = navigator.userAgent;
-    const isAndroid = /Android/i.test(userAgent);
-    const androidVersion = isAndroid ? parseFloat(userAgent.match(/Android ([0-9.]+)/)?.[1] || '0') : 0;
-    const isOldAndroid = androidVersion > 0 && androidVersion < 5.0; // Android 4.x and below
-    const isModernAndroid = androidVersion >= 5.0;
-    const isChrome = /Chrome/i.test(userAgent);
-    const isFirefox = /Firefox/i.test(userAgent);
-    const isSamsung = /SM-/i.test(userAgent) || /Samsung/i.test(userAgent);
-    
-    const handleOrientation = (event: DeviceOrientationEvent) => {
-      let heading = 0;
-      let isValidHeading = false;
-      
-      // iOS devices with webkitCompassHeading (most accurate)
-      if ((event as any).webkitCompassHeading !== undefined && (event as any).webkitCompassHeading !== null) {
-        heading = (event as any).webkitCompassHeading;
-        isValidHeading = true;
-      }
-      // Android and other devices - complex handling for different versions
-      else if (event.alpha !== null && event.alpha !== undefined) {
-        if (isAndroid) {
-          // Android compass handling - completely rewritten for accuracy
-          if (isOldAndroid) {
-            // Android 4.x and older - use direct alpha but invert
-            heading = (360 - event.alpha) % 360;
-          } else if (isModernAndroid) {
-            if (isChrome) {
-              // Modern Android Chrome - alpha is already magnetic north
-              // But we need to account for device orientation
-              if (event.absolute) {
-                // Absolute orientation available - use alpha directly
-                heading = event.alpha;
-              } else {
-                // Relative orientation - invert alpha
-                heading = (360 - event.alpha) % 360;
-              }
-            } else if (isFirefox) {
-              // Firefox on Android - different handling
-              heading = event.alpha || 0;
-            } else if (isSamsung) {
-              // Samsung Internet browser - special handling
-              heading = (360 - event.alpha) % 360;
-            } else {
-              // Other Android browsers - use inverted alpha
-              heading = (360 - event.alpha) % 360;
-            }
-          } else {
-            // Unknown Android version - default handling
-            heading = (360 - event.alpha) % 360;
-          }
-        } else {
-          // Non-Android devices - standard compass calculation
-          heading = (360 - event.alpha) % 360;
-        }
-        
-        // Ensure heading is within 0-360 range
-        heading = ((heading % 360) + 360) % 360;
-        isValidHeading = true;
-      } else {
-        // Try to get heading from other sources
-        if ((event as any).webkitCompassHeading !== undefined) {
-          heading = (event as any).webkitCompassHeading || 0;
-          isValidHeading = true;
-        } else {
-          setOrientationSupported(false);
-          return;
-        }
-      }
-      
-      // Validate heading is reasonable
-      if (!isValidHeading || isNaN(heading) || heading < 0 || heading >= 360) {
-        return;
-      }
-      
-      // Add to buffer for averaging with circular mean calculation
-      headingBuffer.push(heading);
-      if (headingBuffer.length > BUFFER_SIZE) {
-        headingBuffer.shift();
-      }
-      
-      // Wait for buffer to fill before calculating
-      if (headingBuffer.length < 3) { // Start calculating earlier
-        return;
-      }
-      
-      // Calculate circular mean for compass headings (handles 359° to 1° transitions)
-      let sinSum = 0;
-      let cosSum = 0;
-      const weights = headingBuffer.map((_, i) => Math.pow(0.9, headingBuffer.length - 1 - i)); // Exponential decay
-      
-      headingBuffer.forEach((h, i) => {
-        const radians = (h * Math.PI) / 180;
-        const weight = weights[i];
-        sinSum += Math.sin(radians) * weight;
-        cosSum += Math.cos(radians) * weight;
-      });
-      
-      const avgHeading = ((Math.atan2(sinSum, cosSum) * 180) / Math.PI + 360) % 360;
-      
-      // Check time constraint
-      const now = Date.now();
-      if (now - lastUpdateTime < MIN_UPDATE_INTERVAL) {
-        return;
-      }
-      
-      // Calculate circular difference for compass headings
-      let headingDiff = Math.abs(avgHeading - lastHeading);
-      if (headingDiff > 180) {
-        headingDiff = 360 - headingDiff;
-      }
-      
-      // Only update if change is significant
-      if (headingDiff > UPDATE_THRESHOLD) {
-        lastHeading = avgHeading;
-        lastUpdateTime = now;
-        setDeviceOrientation(Math.round(avgHeading));
-      }
-    };
-
-    orientationEventRef.current = handleOrientation;
-    
-    // Enhanced Android event listener setup for maximum compatibility
-    const setupEventListeners = () => {
-      if (isAndroid) {
-        // Android-specific event handling
-        if (isModernAndroid && 'DeviceOrientationEvent' in window) {
-          // Try absolute orientation first for modern Android
-          if ('ondeviceorientationabsolute' in window) {
-            try {
-              window.addEventListener('deviceorientationabsolute', handleOrientation as any, { passive: true });
-              // Also add regular orientation as fallback
-              window.addEventListener('deviceorientation', handleOrientation, { passive: true });
-            } catch (e) {
-              // Fallback to regular deviceorientation
-              window.addEventListener('deviceorientation', handleOrientation, { passive: true });
-            }
-          } else {
-            // No absolute orientation, use regular
-            window.addEventListener('deviceorientation', handleOrientation, { passive: true });
-          }
-        } else if (isOldAndroid) {
-          // Old Android - simple deviceorientation
-          window.addEventListener('deviceorientation', handleOrientation, { passive: true });
-        } else {
-          // Unknown Android version - try both
-          window.addEventListener('deviceorientation', handleOrientation, { passive: true });
-          if ('ondeviceorientationabsolute' in window) {
-            window.addEventListener('deviceorientationabsolute', handleOrientation as any, { passive: true });
-          }
-        }
-      } else {
-        // Non-Android devices - standard setup
-        window.addEventListener('deviceorientation', handleOrientation, { passive: true });
-        
-        // Also listen for absolute orientation if available
-        if ('ondeviceorientationabsolute' in window) {
-          window.addEventListener('deviceorientationabsolute', handleOrientation as any, { passive: true });
-        }
-      }
-    };
-    
-    setupEventListeners();
-  };
-
-  // Handle device orientation
-  useEffect(() => {
-    if (activeModal !== 'jerusalem-compass') return;
-
-    getUserLocation();
-
-    // Check if device orientation is supported
-    if (typeof DeviceOrientationEvent !== 'undefined') {
-      // For iOS 13+, we need user interaction to request permission
-      // This will be handled by a button click
-      if (typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested) {
-        // Don't auto-request, wait for user interaction
-        setOrientationSupported(true);
-      } else {
-        // For non-iOS devices or already permitted
-        requestOrientationPermission();
-      }
-    } else {
-      setOrientationSupported(false);
-    }
-
-    // Enhanced cleanup for Android compatibility
-    return () => {
-      if (orientationEventRef.current) {
-        // Remove all possible event listeners that might have been added
-        try {
-          window.removeEventListener('deviceorientation', orientationEventRef.current);
-          window.removeEventListener('deviceorientationabsolute', orientationEventRef.current as any);
-        } catch (e) {
-          // Ignore cleanup errors
-        }
-      }
-    };
-  }, [activeModal, permissionRequested]);
-
-  if (activeModal !== 'jerusalem-compass') return null;
-
-  return (
-    <Dialog open={true} onOpenChange={() => closeModal(true)}>
-      <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular"
-      >
-        
-        {/* Header */}
-        <div className="flex flex-col items-center justify-center mb-6 relative pr-8">
-          <DialogTitle className="text-xl platypi-bold text-black mb-2">The Kotel Compass</DialogTitle>
-          <p className="platypi-regular text-sm text-black/70">
-            Face your Heart Home
-          </p>
-        </div>
-
-        <div className="space-y-6">
-
-          {/* iOS Permission Request */}
-          {typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested && !isLoading && (
-            <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200 mb-4">
-              <p className="platypi-regular text-sm text-black mb-3">
-                To use the compass on iOS, we need your permission to access motion sensors.
-              </p>
-              <Button
-                onClick={requestOrientationPermission}
-                className="w-full bg-gradient-feminine text-white py-2 rounded-xl platypi-medium"
-              >
-                Enable Compass
-              </Button>
-            </div>
-          )}
-
-          {/* Location Status */}
-          {isLoading ? (
-            <div className="flex flex-col items-center space-y-3 py-8">
-              <div className="animate-spin w-8 h-8 border-3 border-blush/20 border-t-blush rounded-full"></div>
-              <p className="platypi-regular text-sm text-black/60">Getting your location...</p>
-            </div>
-          ) : error ? (
-            <div className="text-center py-8">
-              <div className="bg-red-50 rounded-2xl p-4 mb-4">
-                <MapPin className="w-6 h-6 text-red-500 mx-auto mb-2" />
-                <p className="platypi-regular text-sm text-red-700">{error}</p>
-              </div>
-              <Button 
-                onClick={getUserLocation}
-                className="bg-gradient-feminine text-white px-6 py-2 rounded-xl platypi-medium hover:opacity-90"
-              >
-                Try Again
-              </Button>
-            </div>
-          ) : location && direction !== null ? (
-            <div className="space-y-6">
-              {/* Compass Container with Proper Containment */}
-              <div className="relative w-64 h-64 mx-auto overflow-hidden rounded-full select-none"
-                style={{
-                  touchAction: 'none',
-                  userSelect: 'none',
-                  WebkitUserSelect: 'none',
-                  WebkitTouchCallout: 'none',
-                  MozUserSelect: 'none',
-                  msUserSelect: 'none'
-                } as React.CSSProperties}
-              >
-                {/* Rotating Compass Circle */}
-                <div 
-                  className="w-full h-full rounded-full border-4 border-blush/20 bg-gradient-to-br from-white to-blush/5 shadow-lg relative"
-                  style={{ 
-                    transform: orientationSupported 
-                      ? `rotate(${-deviceOrientation}deg)` 
-                      : 'rotate(0deg)',
-                    transition: 'transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)',
-                    willChange: 'transform'
-                  }}
-                >
-                  
-                  {/* Cardinal directions - rotate with compass */}
-                  <div className="absolute inset-4 rounded-full border border-blush/10">
-                    <div className="absolute top-2 left-1/2 transform -translate-x-1/2 platypi-bold text-sm text-black">N</div>
-                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 platypi-bold text-sm text-black">E</div>
-                    <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 platypi-bold text-sm text-black">S</div>
-                    <div className="absolute left-2 top-1/2 transform -translate-y-1/2 platypi-bold text-sm text-black">W</div>
-                  </div>
-                  
-                  {/* Kotel marker - positioned at calculated bearing, rotates with compass */}
-                  <div 
-                    className="absolute top-1/2 left-1/2 w-full h-full pointer-events-none"
-                    style={{ 
-                      transform: `translate(-50%, -50%) rotate(${direction}deg)`,
-                      transition: 'transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)',
-                      willChange: 'transform',
-                      maxWidth: '100%',
-                      maxHeight: '100%'
-                    }}
-                  >
-                    <div className="absolute top-2 left-1/2 transform -translate-x-1/2">
-                      {(() => {
-                        let angleDiff = Math.abs(direction - deviceOrientation);
-                        if (angleDiff > 180) {
-                          angleDiff = 360 - angleDiff;
-                        }
-                        const isAligned = angleDiff < 10;
-                        
-                        return (
-                          <div className="w-10 h-10 rounded-full bg-white shadow-md border-2 border-white flex items-center justify-center relative">
-                            <img 
-                              src={isAligned ? bhGreenIcon : bhPinkIcon}
-                              alt={isAligned ? "Aligned" : "Not aligned"}
-                              className={`w-8 h-8 ${isAligned ? 'animate-pulse' : ''}`}
-                              style={{
-                                transform: `rotate(${-direction + deviceOrientation}deg)`,
-                                transition: 'transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)',
-                                willChange: 'transform',
-                                animationDuration: isAligned ? '1s' : undefined
-                              }}
-                            />
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Fixed arrow pointing up - changes color when aligned */}
-                {(() => {
-                  let angleDiff = Math.abs(direction - deviceOrientation);
-                  if (angleDiff > 180) {
-                    angleDiff = 360 - angleDiff;
-                  }
-                  const isAligned = angleDiff < 10;
-                  
-                  return (
-                    <div className="absolute top-1/2 left-1/2 w-full h-full pointer-events-none" 
-                      style={{ 
-                        transform: 'translate(-50%, -50%)',
-                        maxWidth: '100%',
-                        maxHeight: '100%'
-                      }}
-                    >
-                      <div className="absolute top-6 left-1/2 transform -translate-x-1/2">
-                        <div className="flex flex-col items-center">
-                          <ArrowUp className={`w-4 h-4 ${isAligned ? 'text-sage' : 'text-blue-500'}`} strokeWidth={3} />
-                          <div className={`w-1 h-16 rounded-full ${isAligned ? 'bg-sage' : 'bg-blue-500'}`}></div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
-                
-                {/* Center heart - changes color when aligned */}
-                {(() => {
-                  let angleDiff = Math.abs(direction - deviceOrientation);
-                  if (angleDiff > 180) {
-                    angleDiff = 360 - angleDiff;
-                  }
-                  const isAligned = angleDiff < 10;
-                  
-                  return (
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
-                      <Heart 
-                        className={`w-8 h-8 ${isAligned ? 'animate-pulse' : ''}`}
-                        style={{
-                          color: '#eacbd2',
-                          fill: '#eacbd2',
-                          animationDuration: isAligned ? '1s' : undefined
-                        }}
-                        strokeWidth={0} 
-                      />
-                    </div>
-                  );
-                })()}
-              </div>
-
-              {/* Alignment Status */}
-              {orientationSupported && (() => {
-                // For alignment, we need to check if the user (facing north when arrow points up)
-                // is actually facing the direction of the Kotel
-                // When the compass rotates by -deviceOrientation, north aligns with the top
-                // So the user is facing the deviceOrientation direction
-                let angleDiff = Math.abs(direction - deviceOrientation);
-                if (angleDiff > 180) {
-                  angleDiff = 360 - angleDiff;
-                }
-                const isAligned = angleDiff < 10;
-                
-                return (
-                  <div className={`rounded-2xl p-3 border text-center ${
-                    isAligned ? 'bg-sage/20 border-sage' : 'bg-blue-50 border-blue-200'
-                  }`}>
-                    <p className={`platypi-medium text-sm ${
-                      isAligned ? 'text-black' : 'text-blue-800'
-                    }`}>
-                      {isAligned
-                        ? '✓ Your heart is in the right place' 
-                        : 'Turn until the Icon is at the top'
-                      }
-                    </p>
-                  </div>
-                );
-              })()}
-
-              {/* Orientation Status */}
-              {!orientationSupported && (
-                <div className="bg-yellow-50 rounded-2xl p-3 border border-yellow-200">
-                  <p className="platypi-regular text-xs text-yellow-800">
-                    Compass not available on this device. The wall icon shows the direction to face for prayer.
-                  </p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <Button 
-                onClick={getUserLocation}
-                className="bg-gradient-feminine text-white px-6 py-3 rounded-xl platypi-medium hover:opacity-90"
-              >
-                <MapPin className="w-4 h-4 mr-2" />
-                Get My Location
-              </Button>
-            </div>
-          )}
-
-          {/* Instructions */}
-          <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200">
-            <h4 className="platypi-bold text-sm text-black mb-2">How to Use:</h4>
-            <ol className="platypi-regular text-xs text-black/70 space-y-1">
-              <li>1. Allow location access when prompted</li>
-              {typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested && (
-                <li>2. Tap "Enable Compass" button above for iOS</li>
-              )}
-              <li>{typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested ? '3' : '2'}. {orientationSupported ? 'Hold device upright and turn your body' : 'Look at the compass to find the Kotel direction'}</li>
-              <li>{typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested ? '4' : '3'}. {orientationSupported ? 'The arrow stays fixed while compass rotates' : 'The pink dot shows the Kotel direction'}</li>
-              <li>{typeof (DeviceOrientationEvent as any).requestPermission === 'function' && !permissionRequested ? '5' : '4'}. {orientationSupported ? 'Align the pink Kotel marker with the arrow' : 'Face the direction of the pink dot to pray'}</li>
-              {isAndroid && orientationSupported && (
-                <li className="text-xs text-black/60 mt-2">📱 Android tip: For best accuracy, hold device flat and move in a figure-8 pattern to calibrate</li>
-              )}
-            </ol>
-            
-            {/* Android-specific tips */}
-            <div className="mt-3 pt-3 border-t border-blue-200">
-              <p className="platypi-medium text-xs text-black mb-1">
-                {/Android/i.test(navigator.userAgent) ? 'Android Tips:' : 'Tips:'}
-              </p>
-              <ul className="platypi-regular text-xs text-black/60 space-y-1">
-                {/Android/i.test(navigator.userAgent) ? (
-                  <>
-                    <li>• Hold phone flat like a traditional compass</li>
-                    <li>• Uses device's magnetic compass sensor</li>
-                    <li>• Avoid areas with magnetic interference</li>
-                    <li>• Calibrate by moving in figure-8 motion if needed</li>
-                  </>
-                ) : (
-                  <>
-                    <li>• Keep device away from metal objects</li>
-                    <li>• Works best outdoors or near windows</li>
-                  </>
-                )}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* Complete Button */}
-        <Button
-          onClick={() => closeModal(true)}
-          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
-        >
-          Close
-        </Button>
-      </DialogContent>
-    </Dialog>
-  );
-}
+// Note: Old complex compass implementation removed in favor of simplified version

@@ -663,7 +663,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       </div>
 
       {/* OTHER SECTIONS BELOW - SEPARATE FROM MAIN */}
-      <div className="p-2 space-y-2">
+      <div className="py-2 space-y-2">
         {/* Top Row: Morning Brochas and Mincha */}
         <div className="grid grid-cols-2 gap-2">
           <button 
@@ -807,7 +807,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
               </div>
               <div className="flex-grow">
                 <h3 className="platypi-bold text-lg text-black">The Kotel Compass</h3>
-                <p className="platypi-regular text-sm text-black/70">Face your Heart Home</p>
+                <p className="platypi-regular text-sm text-black/70">Beta. Currently in testing</p>
               </div>
               <div className="bg-gradient-feminine p-2 rounded-full shadow-lg">
                 <ArrowRight className="text-white" size={16} />

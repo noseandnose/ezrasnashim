@@ -4,10 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart, BookOpen, Baby, Shield, DollarSign } from "lucide-react";
 import { useLocation } from "wouter";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
+import { useQuery } from "@tanstack/react-query";
+import type { Campaign } from "@shared/schema";
 
 export default function TzedakaModals() {
   const { activeModal, closeModal, openModal } = useModalStore();
@@ -20,6 +22,25 @@ export default function TzedakaModals() {
   const [sponsorMessage, setSponsorMessage] = useState("");
   const [torahPortion, setTorahPortion] = useState("");
   const { trackModalComplete } = useTrackModalComplete();
+
+  // Preselect $1 when wedding-campaign modal opens
+  useEffect(() => {
+    if (activeModal === 'wedding-campaign') {
+      setDonationAmount("1");
+    }
+  }, [activeModal]);
+
+  // Fetch active campaign data for the wedding campaign modal
+  const { data: activeCampaign, isLoading: isCampaignLoading } = useQuery<Campaign>({
+    queryKey: ['/api/campaigns/active'],
+    queryFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/campaigns/active`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 60 * 60 * 1000 // 60 minutes
+  });
 
   const getDonationAmount = () => {
     if (donationAmount === "custom") {
@@ -41,39 +62,48 @@ export default function TzedakaModals() {
   const handleDonation = () => {
     let amount = 0;
     let typeDescription = "";
+    let buttonType = ""; // New field for Stripe metadata
 
     switch (activeModal) {
       case "sponsor-day":
         amount = 180;
         typeDescription = "Sponsor a Day of Ezras Nashim";
+        buttonType = "sponsor_a_day";
         break;
       case "torah-dedication":
         amount = getTorahAmount();
         typeDescription = `Torah Dedication - ${torahPortion}`;
+        buttonType = "put_a_coin"; // Torah dedication falls under general donation
         break;
       case "infertility-support":
         amount = getDonationAmount();
         typeDescription = "Women's Infertility Support";
+        buttonType = "put_a_coin"; // General donation category
         break;
       case "abuse-support":
         amount = getDonationAmount();
         typeDescription = "Women's Abuse Support";
+        buttonType = "put_a_coin"; // General donation category
         break;
       case "womens-causes":
         amount = getDonationAmount();
         typeDescription = "Women's Causes Support";
+        buttonType = "put_a_coin"; // General donation category
         break;
       case "support-torah":
         amount = getDonationAmount();
         typeDescription = "Torah Learning Support";
+        buttonType = "put_a_coin"; // General donation category
         break;
       case "donate":
         amount = getDonationAmount();
         typeDescription = "General Donation";
+        buttonType = "put_a_coin";
         break;
       case "wedding-campaign":
         amount = getDonationAmount();
-        typeDescription = "Wedding Campaign Support";
+        typeDescription = activeCampaign?.title || "Active Campaign Support";
+        buttonType = "active_campaign";
         break;
     }
 
@@ -84,6 +114,7 @@ export default function TzedakaModals() {
       const params = new URLSearchParams({
         amount: amount.toString(),
         type: typeDescription,
+        buttonType: buttonType, // Include button type for Stripe metadata
         sponsor: donorName,
         dedication: dedicationText,
         message: sponsorMessage
@@ -506,10 +537,16 @@ export default function TzedakaModals() {
       }}>
         <DialogContent aria-describedby="wedding-campaign-description">
           <div className="flex items-center justify-center mb-3 relative">
-            <DialogTitle className="text-lg platypi-bold text-black">Sponsor a Wedding for a Couple</DialogTitle>
+            <DialogTitle className="text-lg platypi-bold text-black">
+              {isCampaignLoading ? "Loading..." : activeCampaign?.title || "Active Campaign"}
+            </DialogTitle>
           </div>
-          <p className="text-sm platypi-regular text-gray-600 text-center mb-4">Help us raise $50,000 to sponsor an entire wedding for a young couple in need in Eretz Yisrael</p>
-          <div id="wedding-campaign-description" className="sr-only">Wedding sponsorship campaign for couples in need</div>
+          <p className="text-sm platypi-regular text-gray-600 text-center mb-4">
+            {isCampaignLoading ? "Loading campaign details..." : activeCampaign?.description || "Support our active campaign"}
+          </p>
+          <div id="wedding-campaign-description" className="sr-only">
+            {activeCampaign?.description || "Active campaign sponsorship"}
+          </div>
           
           <div className="space-y-4">
             <div>

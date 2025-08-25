@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins, DollarSign, Trophy } from "lucide-react";
+import { Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins, DollarSign, Trophy, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
@@ -34,45 +34,36 @@ export default function Statistics() {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('today');
   const queryClient = useQueryClient();
   
-  // Force refresh all stats when component mounts
+  // Force refresh all stats when component mounts and when period changes
   useEffect(() => {
-    // Force invalidate and refetch all queries when page loads
+    // Force invalidate and refetch all queries when page loads or period changes
     queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/today"] });
     queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/month"] });
     queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/total"] });
-  }, []); // Empty dependency array = runs on every mount
+  }, [selectedPeriod]); // Invalidate when period changes
 
   // Fetch today's stats
   const { data: todayStats, isLoading: todayLoading } = useQuery<DailyStats>({
     queryKey: ["/api/analytics/stats/today"],
-    staleTime: 0, // Always consider data stale for live updates
-    gcTime: 0, // Don't cache data (TanStack Query v5)
-    refetchInterval: 10000, // Refresh every 10 seconds for faster updates
-    refetchOnMount: 'always', // Always refetch when component mounts
-    refetchOnWindowFocus: true, // Refetch when window gets focus
-    refetchIntervalInBackground: true, // Keep refetching even when tab not focused
+    staleTime: 0, // Never cache - always fresh
+    gcTime: 0, // Don't keep in memory
+    refetchInterval: 30000, // Auto-refresh every 30 seconds
   });
 
   // Fetch monthly stats
   const { data: monthlyStats, isLoading: monthlyLoading } = useQuery<PeriodStats>({
     queryKey: ["/api/analytics/stats/month"],
-    staleTime: 0, // Always consider data stale for live updates
-    gcTime: 0, // Don't cache data (TanStack Query v5)
-    refetchInterval: 15000, // Refresh every 15 seconds
-    refetchOnMount: 'always', // Always refetch when component mounts
-    refetchOnWindowFocus: true, // Refetch when window gets focus
-    refetchIntervalInBackground: true, // Keep refetching even when tab not focused
+    staleTime: 0, // Never cache - always fresh
+    gcTime: 0, // Don't keep in memory
+    refetchInterval: 30000, // Auto-refresh every 30 seconds
   });
 
   // Fetch total stats
   const { data: totalStats, isLoading: totalLoading } = useQuery<PeriodStats>({
     queryKey: ["/api/analytics/stats/total"],
-    staleTime: 0, // Always consider data stale for live updates
-    gcTime: 0, // Don't cache data (TanStack Query v5)
-    refetchInterval: 15000, // Refresh every 15 seconds
-    refetchOnMount: 'always', // Always refetch when component mounts
-    refetchOnWindowFocus: true, // Refetch when window gets focus
-    refetchIntervalInBackground: true, // Keep refetching even when tab not focused
+    staleTime: 0, // Never cache - always fresh
+    gcTime: 0, // Don't keep in memory
+    refetchInterval: 30000, // Auto-refresh every 30 seconds
   });
 
   // Get current data based on selected period
@@ -91,6 +82,16 @@ export default function Statistics() {
 
   const currentDataResult = getCurrentData();
   const { data: currentData, isLoading: currentLoading } = currentDataResult;
+
+  // Refresh function for manual refresh
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    
+    // TOTAL CACHE CLEAR: Force page reload to guarantee fresh data
+    window.location.reload();
+  };
+
 
 
 
@@ -124,7 +125,8 @@ export default function Statistics() {
     maariv: "Maariv",
     nishmas: "Nishmas",
     "birkat-hamazon": "Birkat Hamazon",
-    "tehillim-text": "Tehillim",
+    "global-tehillim-chain": "Global Tehillim Chain",
+    "tehillim-text": "Global Tehillim Chain", // Legacy key for existing data
     "special-tehillim": "Special Tehillim",
     "individual-tehillim": "Individual Tehillim", 
     "nishmas-campaign": "Nishmas Campaign",
@@ -162,7 +164,8 @@ export default function Statistics() {
     maariv: Star,
     nishmas: Heart,
     "birkat-hamazon": Clock3,
-    "tehillim-text": ScrollText,
+    "global-tehillim-chain": ScrollText,
+    "tehillim-text": ScrollText, // Legacy key for existing data
     "special-tehillim": Star,
     "individual-tehillim": ScrollText,
     "nishmas-campaign": Heart,
@@ -194,7 +197,8 @@ export default function Statistics() {
       totalRaised: number;
     }>({
       queryKey: [`/api/analytics/community-impact?period=${period}`],
-      refetchInterval: 60000, // Refresh every minute
+      staleTime: 5000, // 5 seconds
+      refetchInterval: 30000, // Refresh every 30 seconds
     });
 
     return (
@@ -236,7 +240,7 @@ export default function Statistics() {
   }
 
   return (
-    <div className="mobile-app min-h-screen max-w-md mx-auto bg-white shadow-2xl relative flex flex-col">
+    <div className="mobile-app min-h-screen w-full bg-white relative flex flex-col">
       {/* Header */}
       <header className="bg-gradient-soft p-3 border-0 shadow-none flex-shrink-0">
         <div className="flex items-center justify-between px-2">
@@ -248,7 +252,14 @@ export default function Statistics() {
             <ArrowLeft className="h-5 w-5 text-black/70" />
           </button>
           <h1 className="platypi-semibold text-xl text-black tracking-wide">Analytics Dashboard</h1>
-          <div className="w-8" /> {/* Spacer for centering */}
+          <button
+            onClick={handleRefresh}
+            className="p-2 rounded-full hover:bg-white/50 transition-all duration-200"
+            aria-label="Refresh Analytics"
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`h-5 w-5 text-black/70 transition-transform duration-500 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </button>
         </div>
       </header>
       
@@ -301,7 +312,7 @@ export default function Statistics() {
           <div className="grid grid-cols-2 gap-3">
             <StatCard
               title="Mitzvas Completed"
-              value={currentLoading ? "..." : (currentData as any)?.totalActs?.toLocaleString() || (currentData as any)?.totalActs || 0}
+              value={currentLoading ? "..." : ((currentData as any)?.totalActs || 0).toLocaleString()}
               icon={TrendingUp}
               color="text-blush"
             />
@@ -315,11 +326,14 @@ export default function Statistics() {
               title="Tehillim Said"
               value={currentLoading ? "..." : (() => {
                 const modalCompletions = (currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {};
-                const regularTehillim = modalCompletions['tehillim-text'] || 0;
+                const globalTehillimChain = modalCompletions['global-tehillim-chain'] || 0;
+                const globalTehillimText = modalCompletions['tehillim-text'] || 0;
                 const specialTehillim = modalCompletions['special-tehillim'] || 0;
                 const individualTehillim = Object.keys(modalCompletions).filter(key => key.startsWith('individual-tehillim')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
-                const tehillimEvents = (currentData as any)?.totalTehillimCompleted || (currentData as any)?.tehillimCompleted || 0;
-                return (regularTehillim + specialTehillim + individualTehillim + tehillimEvents).toLocaleString();
+                
+                // Only use modal completions (don't double count with tehillimEvents)
+                const totalTehillim = globalTehillimChain + globalTehillimText + specialTehillim + individualTehillim;
+                return totalTehillim.toLocaleString();
               })()}
               icon={ScrollText}
               color="text-lavender"
@@ -335,34 +349,77 @@ export default function Statistics() {
 
         <div className="p-4 space-y-6">
           {/* Feature Usage */}
-          <div>
+          <div key={`feature-usage-${selectedPeriod}`}>
             <h2 className="text-base platypi-bold text-black mb-3">Feature Usage</h2>
             <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
               {currentLoading ? (
                 <div className="text-center text-black/60">Loading...</div>
               ) : (
                 <div className="space-y-2">
-                  {Object.entries((currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {})
-                    .filter(([modalType]) => 
-                      // Remove unknown, test, and other unwanted entries
-                      !['unknown', 'test', ''].includes(modalType.toLowerCase()) &&
-                      modalTypeNames[modalType] // Only show items we have names for
-                    )
-                    .sort(([, a], [, b]) => (b as number) - (a as number))
-                    .map(([modalType, count]) => {
-                      const Icon = modalTypeIcons[modalType] || BookOpen;
-                      return (
-                        <div key={modalType} className="flex justify-between items-center py-1">
-                          <div className="flex items-center gap-2">
-                            <Icon className="h-4 w-4 text-blush" />
-                            <span className="text-xs platypi-medium text-warm-gray">
-                              {modalTypeNames[modalType]}
-                            </span>
+                  {(() => {
+                    const modalCompletions = (currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {};
+                    
+                    // Create a processed entries array with individual tehillim aggregated
+                    const processedEntries: Array<[string, number]> = [];
+                    let individualTehillimTotal = 0;
+                    
+                    // Process all modal completion entries
+                    let globalTehillimTotal = 0;
+                    Object.entries(modalCompletions).forEach(([modalType, count]) => {
+                      if (modalType.startsWith('individual-tehillim-')) {
+                        // Aggregate individual tehillim completions
+                        individualTehillimTotal += (count as number) || 0;
+                      } else if (modalType === 'global-tehillim-chain' || modalType === 'tehillim-text') {
+                        // Aggregate global tehillim from both keys
+                        globalTehillimTotal += (count as number) || 0;
+                      } else if (modalType === 'tzedaka' || modalType === 'donate') {
+                        // Skip tzedaka modals - we'll aggregate them separately with tzedakaActs
+                      } else if (modalTypeNames[modalType] && !['unknown', 'test', ''].includes(modalType.toLowerCase())) {
+                        // Include regular modal types that have names
+                        processedEntries.push([modalType, count as number]);
+                      }
+                    });
+                    
+                    // Add aggregated individual tehillim if there are any
+                    if (individualTehillimTotal > 0) {
+                      processedEntries.push(['individual-tehillim', individualTehillimTotal]);
+                    }
+                    
+                    // Add aggregated global tehillim if there are any
+                    if (globalTehillimTotal > 0) {
+                      processedEntries.push(['global-tehillim-chain', globalTehillimTotal]);
+                    }
+
+                    // Add tzedaka acts from the tzedakaActs field (includes "Gave Elsewhere")
+                    const tzedakaActs = selectedPeriod === 'today' 
+                      ? (currentData as any)?.tzedakaActs || 0
+                      : (currentData as any)?.totalTzedakaActs || 0;
+                    
+                    // Also check if there's a tzedaka modal completion to add to it
+                    const tzedakaModalCount = modalCompletions['tzedaka'] || modalCompletions['donate'] || 0;
+                    const totalTzedaka = tzedakaActs + tzedakaModalCount;
+                    
+                    if (totalTzedaka > 0) {
+                      processedEntries.push(['tzedaka', totalTzedaka]);
+                    }
+                    
+                    return processedEntries
+                      .sort(([, a], [, b]) => (b as number) - (a as number))
+                      .map(([modalType, count], index) => {
+                        const Icon = modalTypeIcons[modalType] || BookOpen;
+                        return (
+                          <div key={`${selectedPeriod}-${modalType}-${index}`} className="flex justify-between items-center py-1">
+                            <div className="flex items-center gap-2">
+                              <Icon className="h-4 w-4 text-blush" />
+                              <span className="text-xs platypi-medium text-warm-gray">
+                                {modalTypeNames[modalType]}
+                              </span>
+                            </div>
+                            <span className="text-xs font-bold text-black">{count.toLocaleString()}</span>
                           </div>
-                          <span className="text-xs font-bold text-black">{(count as number).toLocaleString()}</span>
-                        </div>
-                      );
-                    })}
+                        );
+                      });
+                  })()}
                 </div>
               )}
             </div>

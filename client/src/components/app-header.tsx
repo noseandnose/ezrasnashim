@@ -1,6 +1,6 @@
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate } from "@/hooks/use-hebrew-date";
-import { BarChart3, Info, Share2, Share, Mail, X, Heart } from "lucide-react";
+import { BarChart3, Info, Share2, Heart, Mail, Share, X } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
 import { useState, useEffect } from "react";
@@ -12,8 +12,8 @@ import { getLocalDateString } from "@/lib/dateUtils";
 
 
 export default function AppHeader() {
-  const { data: times, isLoading: timesLoading } = useJewishTimes();
-  const { data: hebrewDate, isLoading: dateLoading } = useHebrewDate();
+  useJewishTimes();
+  useHebrewDate();
   const [, setLocation] = useLocation();
   const { openModal } = useModalStore();
   const [showAddToHomeScreen, setShowAddToHomeScreen] = useState(false);
@@ -58,13 +58,6 @@ export default function AppHeader() {
     setHasReadMessage(true);
   };
 
-  const getCurrentTime = () => {
-    return new Date().toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit',
-      hour12: true 
-    });
-  };
 
   const handleShareClick = () => {
     // Mark share button as clicked and save to localStorage

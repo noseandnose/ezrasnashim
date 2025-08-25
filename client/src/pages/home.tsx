@@ -77,7 +77,7 @@ export default function Home() {
   };
 
   return (
-    <div className="mobile-app max-w-md mx-auto bg-white shadow-2xl">
+    <div className="mobile-app bg-white">
       <AppHeader />
       
       <main className="content-area">
