@@ -127,14 +127,18 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
     return (
       <div className="space-y-6">
         {/* Compass Display */}
-        <div className="relative w-64 h-64 mx-auto overflow-hidden">
+        <div className="relative w-64 h-64 mx-auto">
           {/* Rotating compass background */}
           <div 
-            className="w-full h-full rounded-full border-4 border-blush/20 bg-gradient-to-br from-white to-blush/5 shadow-lg relative"
+            className="w-full h-full rounded-full border-4 border-blush/20 bg-gradient-to-br from-white to-blush/5 shadow-lg relative select-none"
             style={{ 
               transform: `rotate(${-deviceHeadingRotation}deg)`,
               transition: state.hasPermission ? 'transform 0.3s ease-out' : 'none',
-              willChange: 'transform'
+              willChange: 'transform',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              MozUserSelect: 'none',
+              msUserSelect: 'none'
             }}
           >
             
