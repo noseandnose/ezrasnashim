@@ -8,6 +8,7 @@ import { initializeCache } from "@/lib/cache";
 import { useEffect, lazy, Suspense } from "react";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import UpdateNotification from "@/components/UpdateNotification";
+import { AutoNotificationPrompt } from "@/components/auto-notification-prompt";
 import "@/utils/clear-modal-completions";
 import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
 
@@ -98,6 +99,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <UpdateNotification />
+          <AutoNotificationPrompt />
           <Toaster />
           <Router />
         </TooltipProvider>

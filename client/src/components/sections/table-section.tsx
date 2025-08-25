@@ -1,7 +1,6 @@
 import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar, Moon, MapPin, ShoppingBag, MessageSquare, Zap, Lightbulb as Candle } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import DiscountBar from "@/components/discount-bar";
-import { PushNotificationManager } from "@/components/push-notification-manager";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
 import { useGeolocation } from "@/hooks/use-jewish-times";
@@ -275,11 +274,6 @@ export default function TableSection() {
               Help Us, Help You
             </p>
           </button>
-        </div>
-        
-        {/* Notification Settings */}
-        <div className="mt-4 flex justify-center">
-          <PushNotificationManager />
         </div>
         
         {/* Discount Promotion Bar */}
