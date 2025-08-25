@@ -412,6 +412,7 @@ export default function Donate() {
   const [showLoadingScreen, setShowLoadingScreen] = useState(true);
   const { toast } = useToast();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const {  addCompletedDonation } = useDonationCompletionStore();
   const { openModal } = useModalStore();
   
   // Use ref to track if payment intent has been created
@@ -465,7 +466,7 @@ export default function Donate() {
     console.log('Session ID:', sessionId);
     console.log('Payment Intent ID:', paymentIntentId);
     console.log('Button Type:', buttonType);
-    
+
     try {
       // Call the new idempotent confirmation endpoint
       const response = await apiRequest('POST', '/api/payments/confirm', {
@@ -487,9 +488,34 @@ export default function Donate() {
       
       // Always mark as success locally if we got a response (idempotent backend handles duplicates)
       if (response && response.data) {
+
+        // Play coin sound on successful donation
+        playCoinSound();
+
         // Mark the individual button as complete using the button type
         markTzedakaButtonCompleted(buttonType as TzedakaButtonType);
         
+        if(buttonType === 'sponsor_a_day') {
+          try {
+            await apiRequest("POST", "/api/donation-complete", {
+              donationType: donationType,
+              sponsorName: sponsorName || 'Anonymous',
+              dedication: dedication || null
+            });
+            // Sponsor record created successfully
+          } catch (error) {
+            console.error('Failed to create sponsor record:', error);
+          }
+        }
+        
+        if (buttonType) {
+          try {
+            addCompletedDonation(buttonType);
+          } catch (error) {
+            console.error('Failed to add completed donation:', error);
+          }
+        }
+
         // CRITICAL FIX: Also complete the overall daily tzedaka task
         completeTask('tzedaka');
         
