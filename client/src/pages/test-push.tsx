@@ -87,12 +87,20 @@ export default function TestPush() {
     try {
       addStatus('Sending test push from server...');
       
-      // In Replit, use the same origin with port 5000 for API calls
-      const apiUrl = window.location.hostname.includes('replit') 
-        ? `https://${window.location.hostname.replace('-5173', '-5000')}/api/push/test`
-        : import.meta.env.DEV 
-          ? 'http://localhost:5000/api/push/test'
-          : '/api/push/test';
+      // Construct the API URL for Replit environment
+      let apiUrl = '/api/push/test';
+      
+      if (window.location.hostname.includes('replit')) {
+        // In Replit, construct the backend URL properly
+        const hostname = window.location.hostname;
+        // Replace the webview port indicator with the backend port
+        const backendHost = hostname.includes('-00-') 
+          ? hostname.replace('-00-', '-5000-')
+          : hostname;
+        apiUrl = `https://${backendHost}/api/push/test`;
+      } else if (import.meta.env.DEV) {
+        apiUrl = 'http://localhost:5000/api/push/test';
+      }
       
       addStatus(`Using API URL: ${apiUrl}`);
       
@@ -102,16 +110,34 @@ export default function TestPush() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          title: 'Test Push',
+          title: 'Test Push Notification',
           body: `Test at ${new Date().toLocaleTimeString()}`
         })
       });
       
-      const data = await response.json();
-      addStatus(`Server response: ${JSON.stringify(data)}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       
-      if (data.success) {
-        addStatus('✅ Push sent from server - check console for service worker logs');
+      const text = await response.text();
+      addStatus(`Raw response: ${text}`);
+      
+      try {
+        const data = JSON.parse(text);
+        addStatus(`Parsed response: ${JSON.stringify(data)}`);
+        
+        if (data.success) {
+          addStatus('✅ Push sent successfully!');
+          addStatus('📱 Check your device for the notification');
+          addStatus('💡 If you don\'t see it, check:');
+          addStatus('  - Browser console for [SW] messages');
+          addStatus('  - OS notification settings');
+          addStatus('  - Do Not Disturb mode is off');
+        } else {
+          addStatus(`⚠️ Server reported: ${data.message}`);
+        }
+      } catch (parseError) {
+        addStatus(`❌ Failed to parse response as JSON`);
       }
     } catch (error: any) {
       addStatus(`❌ Error: ${error.message}`);
