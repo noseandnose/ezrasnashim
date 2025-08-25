@@ -102,13 +102,7 @@ interface DonationFormProps {
 //       }
 
 //       if (error) {
-//         console.error('Payment error details:', {
-//           type: error.type,
-//           code: error.code,
-//           message: error.message,
-//           decline_code: error.decline_code,
-//           payment_intent: error.payment_intent
-//         });
+//         // Payment error details captured but not logged
         
 //         // Enhanced Apple Pay error handling
 //         if (error.type === 'card_error') {

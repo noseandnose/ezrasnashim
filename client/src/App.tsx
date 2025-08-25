@@ -69,8 +69,8 @@ function Router() {
           .then(() => {
             // ServiceWorker registered successfully
           })
-          .catch(error => {
-            console.error('ServiceWorker registration failed:', error);
+          .catch(() => {
+            // ServiceWorker registration failed silently
           });
       });
     }
