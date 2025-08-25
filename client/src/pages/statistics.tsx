@@ -372,6 +372,8 @@ export default function Statistics() {
                       } else if (modalType === 'global-tehillim-chain' || modalType === 'tehillim-text') {
                         // Aggregate global tehillim from both keys
                         globalTehillimTotal += (count as number) || 0;
+                      } else if (modalType === 'tzedaka' || modalType === 'donate') {
+                        // Skip tzedaka modals - we'll aggregate them separately with tzedakaActs
                       } else if (modalTypeNames[modalType] && !['unknown', 'test', ''].includes(modalType.toLowerCase())) {
                         // Include regular modal types that have names
                         processedEntries.push([modalType, count as number]);
@@ -388,6 +390,18 @@ export default function Statistics() {
                       processedEntries.push(['global-tehillim-chain', globalTehillimTotal]);
                     }
 
+                    // Add tzedaka acts from the tzedakaActs field (includes "Gave Elsewhere")
+                    const tzedakaActs = selectedPeriod === 'today' 
+                      ? (currentData as any)?.tzedakaActs || 0
+                      : (currentData as any)?.totalTzedakaActs || 0;
+                    
+                    // Also check if there's a tzedaka modal completion to add to it
+                    const tzedakaModalCount = modalCompletions['tzedaka'] || modalCompletions['donate'] || 0;
+                    const totalTzedaka = tzedakaActs + tzedakaModalCount;
+                    
+                    if (totalTzedaka > 0) {
+                      processedEntries.push(['tzedaka', totalTzedaka]);
+                    }
                     
                     return processedEntries
                       .sort(([, a], [, b]) => (b as number) - (a as number))
