@@ -312,12 +312,7 @@ export default function Statistics() {
           <div className="grid grid-cols-2 gap-3">
             <StatCard
               title="Mitzvas Completed"
-              value={currentLoading ? "..." : (() => {
-                // Calculate total from modal completions to match Feature Usage exactly
-                const modalCompletions = (currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {};
-                const total = Object.values(modalCompletions).reduce((sum: number, count: any) => sum + (count || 0), 0);
-                return total.toLocaleString();
-              })()}
+              value={currentLoading ? "..." : ((currentData as any)?.totalActs || 0).toLocaleString()}
               icon={TrendingUp}
               color="text-blush"
             />
