@@ -2475,6 +2475,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       await storage.updateDailyStats(today, updated);
       
+      // Update campaign progress if this is an active_campaign donation
+      if (buttonType === 'active_campaign') {
+        try {
+          const activeCampaign = await storage.getActiveCampaign();
+          if (activeCampaign) {
+            const donationAmount = (amount || donation.amount) / 100; // Convert cents to dollars
+            const newAmount = activeCampaign.currentAmount + donationAmount;
+            await storage.updateCampaignProgress(activeCampaign.id, newAmount);
+            console.log(`Campaign updated to ${newAmount}/${activeCampaign.goalAmount}`);
+          }
+        } catch (campaignError) {
+          console.error('Error updating campaign progress:', campaignError);
+        }
+      }
+      
       console.log(`Payment ${paymentIntentId} confirmed and stats updated`);
       
       res.json({ 
