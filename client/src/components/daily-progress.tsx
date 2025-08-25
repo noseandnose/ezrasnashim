@@ -9,7 +9,7 @@ interface DailyProgressProps {
   size?: number;
 }
 
-export default function DailyProgress({ size = 36 }: DailyProgressProps) {
+export default function DailyProgress({}: DailyProgressProps) {
   const { torahCompleted, tefillaCompleted, tzedakaCompleted } = useDailyCompletionStore();
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [previousCount, setPreviousCount] = useState(0);
@@ -28,6 +28,7 @@ export default function DailyProgress({ size = 36 }: DailyProgressProps) {
       
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [completedCount, previousCount]);
   
   // Map completion count to the appropriate image using imported static assets
