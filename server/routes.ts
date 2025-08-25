@@ -1917,123 +1917,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Frontend-driven payment confirmation (idempotent)
-  app.post("/api/payments/confirm", async (req, res) => {
-    try {
-      const { paymentIntentId, amount, currency, metadata, sessionId } = req.body;
-      
-      if (!paymentIntentId) {
-        return res.status(400).json({ error: 'Payment intent ID required' });
-      }
-
-      // Check if we've already processed this payment (idempotency)
-      const existingDonation = await storage.getDonationByPaymentIntentId(paymentIntentId);
-      
-      if (existingDonation && existingDonation.status === 'succeeded') {
-        // Already processed, return success without double-counting
-        console.log(`Payment ${paymentIntentId} already processed, skipping`);
-        return res.json({ 
-          success: true, 
-          message: 'Payment already processed',
-          donationId: existingDonation.id 
-        });
-      }
-
-      // Update or create donation record
-      if (existingDonation) {
-        // Update existing pending donation to succeeded
-        await storage.updateDonationStatus(paymentIntentId, 'succeeded');
-      } else {
-        // Create new donation record (for payments not created via checkout)
-        await storage.createDonation({
-          userId: null,
-          stripePaymentIntentId: paymentIntentId,
-          stripeSessionId: sessionId || null,
-          amount: amount,
-          type: metadata?.buttonType || 'put_a_coin',
-          donationType: metadata?.donationType || 'General Donation',
-          metadata: metadata || {},
-          status: 'succeeded'
-        });
-      }
-
-      // Track the act (idempotent - check if already exists)
-      const buttonType = metadata?.buttonType || 'put_a_coin';
-      const existingAct = await storage.getActByPaymentIntentId(paymentIntentId);
-      
-      if (!existingAct) {
-        await storage.createAct({
-          userId: null,
-          category: 'tzedaka',
-          subtype: buttonType,
-          amount: amount,
-          paymentIntentId: paymentIntentId // Add this for idempotency
-        });
-      }
-
-      // Track analytics events (idempotent)
-      const today = new Date();
-      const hours = today.getHours();
-      if (hours < 2) {
-        today.setDate(today.getDate() - 1);
-      }
-      const dateStr = today.toISOString().split('T')[0];
-
-      // Track tzedaka completion
-      await storage.trackEvent({
-        eventType: 'tzedaka_completion',
-        eventData: {
-          buttonType: buttonType,
-          amount: amount / 100,
-          paymentIntentId: paymentIntentId,
-          date: dateStr
-        },
-        sessionId: metadata?.sessionId || null
-      });
-
-      // Track as modal_complete for Feature Usage
-      await storage.trackEvent({
-        eventType: 'modal_complete',
-        eventData: {
-          modalType: 'tzedaka',
-          buttonType: buttonType,
-          amount: amount / 100,
-          paymentIntentId: paymentIntentId,
-          date: dateStr
-        },
-        sessionId: metadata?.sessionId || null
-      });
-
-      // Update campaign if active_campaign donation
-      if (buttonType === 'active_campaign') {
-        const activeCampaign = await storage.getActiveCampaign();
-        if (activeCampaign) {
-          const newAmount = activeCampaign.currentAmount + (amount / 100);
-          await storage.updateCampaignProgress(activeCampaign.id, newAmount);
-          console.log(`Campaign updated to ${newAmount}/${activeCampaign.goalAmount}`);
-        }
-      }
-
-      // Recalculate daily stats
-      await storage.recalculateDailyStats(dateStr);
-
-      res.json({ 
-        success: true, 
-        message: 'Payment confirmed and stats updated',
-        donationId: existingDonation?.id || 'new' 
-      });
-
-    } catch (error) {
-      console.error('Error confirming payment:', error);
-      res.status(500).json({ error: 'Failed to confirm payment' });
-    }
-  });
+  // REMOVED: First duplicate /api/payments/confirm endpoint - using the second one below
 
   // Debug endpoint to verify webhook secret is loaded
   app.get("/api/webhooks/stripe/debug", async (req, res) => {
     res.json({
       hasWebhookSecret: !!process.env.STRIPE_WEBHOOK_SECRET,
-      secretPrefix: process.env.STRIPE_WEBHOOK_SECRET ? process.env.STRIPE_WEBHOOK_SECRET.substring(0, 10) + '...' : 'NOT_SET',
+      secretPrefix: process.env.STRIPE_WEBHOOK_SECRET ? (Array.isArray(process.env.STRIPE_WEBHOOK_SECRET) ? process.env.STRIPE_WEBHOOK_SECRET[0] : process.env.STRIPE_WEBHOOK_SECRET).substring(0, 10) + '...' : 'NOT_SET',
       environment: process.env.NODE_ENV || 'development'
     });
   });
@@ -2456,24 +2346,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Update daily stats
-      const today = getStatsDate();
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
+      
       const stats = await storage.getDailyStats(today);
-      const updated = {
+      const amountInCents = amount || donation.amount;
+      const amountInDollars = amountInCents / 100; // Convert cents to dollars for financial tracking
+      
+      const updated: any = {
         tzedakaActs: (stats?.tzedakaActs || 0) + 1,
-        moneyRaised: (stats?.moneyRaised || 0) + (amount || donation.amount),
+        moneyRaised: (stats?.moneyRaised || 0) + amountInDollars, // Fixed: Convert to dollars
         totalActs: (stats?.totalActs || 0) + 1
       };
       
-      // Update specific donation type counter
+      // Update specific donation type counter (in dollars)
       if (buttonType === 'active_campaign') {
-        updated.activeCampaignTotal = (stats?.activeCampaignTotal || 0) + (amount || donation.amount);
+        updated.activeCampaignTotal = (stats?.activeCampaignTotal || 0) + amountInDollars;
       } else if (buttonType === 'put_a_coin') {
-        updated.putACoinTotal = (stats?.putACoinTotal || 0) + (amount || donation.amount);
+        updated.putACoinTotal = (stats?.putACoinTotal || 0) + amountInDollars;
       } else if (buttonType === 'sponsor_a_day') {
-        updated.sponsorADayTotal = (stats?.sponsorADayTotal || 0) + (amount || donation.amount);
+        updated.sponsorADayTotal = (stats?.sponsorADayTotal || 0) + amountInDollars;
       }
       
       await storage.updateDailyStats(today, updated);
+      
+      // Track analytics events for proper statistics
+      await storage.trackEvent({
+        eventType: 'tzedaka_completion',
+        eventData: {
+          buttonType: buttonType,
+          amount: amountInDollars,
+          paymentIntentId: paymentIntentId,
+          date: today
+        },
+        sessionId: metadata?.sessionId || null
+      });
+      
+      // Track as modal_complete for Feature Usage display
+      await storage.trackEvent({
+        eventType: 'modal_complete',
+        eventData: {
+          modalType: 'tzedaka',
+          buttonType: buttonType,
+          amount: amountInDollars,
+          paymentIntentId: paymentIntentId,
+          date: today
+        },
+        sessionId: metadata?.sessionId || null
+      });
       
       // Update campaign progress if this is an active_campaign donation
       if (buttonType === 'active_campaign') {
