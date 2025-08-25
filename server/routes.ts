@@ -1964,7 +1964,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       console.error('Webhook signature verification failed:', {
         error: errorMessage,
-        signatureHeader: sig ? sig.substring(0, 20) + '...' : 'none',
+        signatureHeader: sig ? sig : 'none',
         secretPrefix: process.env.STRIPE_WEBHOOK_SECRET ? process.env.STRIPE_WEBHOOK_SECRET.substring(0, 10) + '...' : 'none'
       });
       return res.status(400).json({ error: `Webhook validation failed: ${errorMessage}` });
