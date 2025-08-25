@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { apiRequest } from '@/lib/queryClient';
 
 export default function PushDebug() {
   const [logs, setLogs] = useState<string[]>([]);
@@ -99,8 +100,8 @@ export default function PushDebug() {
     
     try {
       // Get VAPID public key
-      const response = await fetch('/api/push/vapid-public-key');
-      const { publicKey } = await response.json();
+      const response = await apiRequest('GET', '/api/push/vapid-public-key');
+      const { publicKey } = response.data;
       log(`Got VAPID key: ${publicKey.substring(0, 20)}...`);
       
       // Get service worker
@@ -123,20 +124,15 @@ export default function PushDebug() {
       log(`New endpoint: ${newSub.endpoint.substring(0, 60)}...`);
       
       // Send to server
-      const saveResponse = await fetch('/api/push/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          endpoint: newSub.endpoint,
-          keys: {
-            p256dh: btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(newSub.getKey('p256dh')!)))),
-            auth: btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(newSub.getKey('auth')!))))
-          }
-        })
+      const saveResponse = await apiRequest('POST', '/api/push/subscribe', {
+        endpoint: newSub.endpoint,
+        keys: {
+          p256dh: btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(newSub.getKey('p256dh')!)))),
+          auth: btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(newSub.getKey('auth')!))))
+        }
       });
       
-      const result = await saveResponse.json();
-      log(`Server response: ${JSON.stringify(result)}`);
+      log(`Server response: ${JSON.stringify(saveResponse.data)}`);
       
     } catch (error: any) {
       log(`❌ Error: ${error.message}`);
@@ -147,32 +143,13 @@ export default function PushDebug() {
     log('=== Sending Test Push ===');
     
     try {
-      // In development, use relative URL so Vite dev server proxies to Express
-      const apiUrl = '/api/push/simple-test';
+      // Use the same axios configuration as the rest of the app
+      const response = await apiRequest('POST', '/api/push/simple-test');
       
-      log(`Using relative URL: ${apiUrl}`);
-      log(`Full URL would be: ${window.location.origin}${apiUrl}`);
+      log(`✅ API call successful`);
+      log(`Server result: ${JSON.stringify(response.data)}`);
       
-      const response = await fetch(apiUrl, { 
-        method: 'POST',
-        cache: 'no-cache'  // Prevent caching issues
-      });
-      
-      log(`Response status: ${response.status}`);
-      log(`Response headers: ${response.headers.get('content-type')}`);
-      
-      if (!response.ok) {
-        log(`❌ HTTP Error: ${response.status} ${response.statusText}`);
-        const text = await response.text();
-        log(`Response body: ${text}`);
-        return;
-      }
-      
-      const result = await response.json();
-      
-      log(`Server result: ${JSON.stringify(result)}`);
-      
-      if (result.success) {
+      if (response.data.success) {
         log('✅ Push sent - Check browser console for [SW] logs');
         log('📱 If no notification appears, check:');
         log('  1. Browser DevTools > Application > Service Workers');
@@ -181,7 +158,10 @@ export default function PushDebug() {
         log('  4. Try a different browser (Chrome/Edge recommended)');
       }
     } catch (error: any) {
-      log(`❌ Error: ${error.message}`);
+      log(`❌ Error: ${error.response?.status || 'Unknown'} - ${error.message}`);
+      if (error.response?.data) {
+        log(`Response: ${JSON.stringify(error.response.data)}`);
+      }
     }
   };
 
