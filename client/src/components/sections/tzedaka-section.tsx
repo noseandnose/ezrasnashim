@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { playCoinSound } from "@/utils/sounds";
+import { useAnalytics } from "@/hooks/use-analytics";
 import type { Campaign } from "@shared/schema";
 import type { Section } from "@/pages/home";
 
@@ -95,6 +96,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
   const { isCompleted: isDonationCompleted, resetDaily, addCompletedDonation } = useDonationCompletionStore();
   const [, setLocation] = useLocation();
   const [showExplosion, setShowExplosion] = useState(false);
+  const { trackEvent } = useAnalytics();
 
   // Individual button completion tracking using localStorage with daily reset
   const getLocalDateString = () => {
@@ -190,6 +192,13 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
       playCoinSound();
       setShowExplosion(true);
       markTzedakaButtonCompleted(buttonType);
+      
+      // Track tzedaka completion for stats
+      trackEvent('tzedaka_completion', {
+        buttonType: 'gave_elsewhere',
+        amount: 0,
+        date: new Date().toISOString().split('T')[0]
+      });
       
       // Navigate back to home section and scroll to progress
       setTimeout(() => {
