@@ -146,9 +146,15 @@ async function initializeServer() {
       }
     });
   } else {
-    // In development, handle client-side routing
+    // In development, serve service worker directly from backend
+    app.get('/sw.js', (req: Request, res: Response) => {
+      const publicPath = path.join(__dirname, '../public');
+      res.sendFile(path.join(publicPath, 'sw.js'));
+    });
+    
+    // Handle client-side routing
     app.get('*', (req: Request, res: Response) => {
-      if (!req.path.startsWith('/api') && !req.path.startsWith('/attached_assets')) {
+      if (!req.path.startsWith('/api') && !req.path.startsWith('/attached_assets') && req.path !== '/sw.js') {
         // Redirect to the frontend dev server for client-side routing
         const frontendUrl = process.env.VITE_DEV_URL || 'http://localhost:5173';
         res.redirect(301, `${frontendUrl}${req.path}`);
