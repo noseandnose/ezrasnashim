@@ -3038,6 +3038,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test push notification endpoint (for debugging)
+  app.post("/api/push/test", async (req, res) => {
+    try {
+      const { title, body } = req.body;
+      
+      if (!title || !body) {
+        return res.status(400).json({ error: "Title and body are required" });
+      }
+
+      // Get all active subscriptions
+      const subscriptions = await storage.getActiveSubscriptions();
+      
+      if (subscriptions.length === 0) {
+        return res.json({ 
+          success: false, 
+          message: "No active subscriptions found",
+          sentCount: 0 
+        });
+      }
+
+      // Send test notification
+      const payload = JSON.stringify({
+        title,
+        body,
+        icon: '/icon-192x192.png',
+        badge: '/badge-72x72.png',
+        timestamp: Date.now()
+      });
+
+      console.log('[Test Push] Sending to', subscriptions.length, 'subscription(s)');
+      console.log('[Test Push] Payload:', payload);
+
+      let successCount = 0;
+      let failureCount = 0;
+      const errors: string[] = [];
+
+      const sendPromises = subscriptions.map(async (sub) => {
+        try {
+          console.log('[Test Push] Sending to endpoint:', sub.endpoint.substring(0, 50) + '...');
+          await webpush.sendNotification({
+            endpoint: sub.endpoint,
+            keys: {
+              p256dh: sub.p256dh,
+              auth: sub.auth
+            }
+          }, payload);
+          successCount++;
+          console.log('[Test Push] Success for endpoint:', sub.endpoint.substring(0, 50) + '...');
+        } catch (error: any) {
+          failureCount++;
+          const errorMsg = `Endpoint ${sub.endpoint.substring(0, 50)}...: ${error.message}`;
+          errors.push(errorMsg);
+          console.error('[Test Push] Failed:', errorMsg);
+          
+          // If subscription is invalid, mark it as unsubscribed
+          if (error.statusCode === 410) {
+            await storage.unsubscribeFromPush(sub.endpoint);
+            console.log('[Test Push] Removed invalid subscription');
+          }
+        }
+      });
+
+      await Promise.all(sendPromises);
+
+      res.json({ 
+        success: successCount > 0, 
+        message: `Sent to ${successCount} users, ${failureCount} failed`,
+        successCount,
+        failureCount,
+        errors: errors.length > 0 ? errors : undefined
+      });
+    } catch (error) {
+      console.error("[Test Push] Error:", error);
+      res.status(500).json({ error: "Failed to send test push notification" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -11,17 +11,20 @@ self.addEventListener('activate', (event) => {
 
 // Handle push notifications
 self.addEventListener('push', (event) => {
-  console.log('Push notification received:', event);
+  console.log('[SW] Push notification received:', event);
+  console.log('[SW] Push data:', event.data ? event.data.text() : 'No data');
   
   if (!event.data) {
-    console.log('No data in push event');
+    console.log('[SW] No data in push event');
     return;
   }
   
   let data;
   try {
     data = event.data.json();
+    console.log('[SW] Parsed push data:', data);
   } catch (e) {
+    console.log('[SW] Failed to parse JSON, using text:', e);
     data = {
       title: 'Ezras Nashim',
       body: event.data.text()
@@ -43,8 +46,12 @@ self.addEventListener('push', (event) => {
     renotify: data.renotify || false
   };
   
+  console.log('[SW] Showing notification with options:', options);
+  
   event.waitUntil(
     self.registration.showNotification(data.title || 'Ezras Nashim', options)
+      .then(() => console.log('[SW] Notification shown successfully'))
+      .catch(err => console.error('[SW] Error showing notification:', err))
   );
 });
 

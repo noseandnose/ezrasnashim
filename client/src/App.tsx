@@ -20,6 +20,7 @@ const Statistics = lazy(() => import("@/pages/statistics"));
 const TestPayment = lazy(() => import("@/pages/test-payment"));
 const DebugPayment = lazy(() => import("@/pages/debug-payment"));
 const AdminNotifications = lazy(() => import("@/pages/admin-notifications"));
+const TestPush = lazy(() => import("@/pages/test-push"));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -63,19 +64,6 @@ function Router() {
     };
     
     cleanupModalCompletions();
-    
-    // Register service worker for PWA functionality
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(() => {
-            // ServiceWorker registered successfully
-          })
-          .catch(() => {
-            // ServiceWorker registration failed silently
-          });
-      });
-    }
   }, []);
   
   return (
@@ -87,6 +75,7 @@ function Router() {
         <Route path="/test-payment" component={TestPayment} />
         <Route path="/debug-payment" component={DebugPayment} />
         <Route path="/admin/notifications" component={AdminNotifications} />
+        <Route path="/test-push" component={TestPush} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
