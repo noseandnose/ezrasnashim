@@ -2690,11 +2690,13 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       
       {/* Jerusalem Compass Modal */}
       <Dialog open={activeModal === 'jerusalem-compass'} onOpenChange={() => closeModal(true)}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto">
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto overflow-x-hidden">
           <VisuallyHidden>
             <DialogDescription>Compass to find direction to Jerusalem for prayer</DialogDescription>
           </VisuallyHidden>
-          <SimpleCompassUI onClose={() => closeModal()} />
+          <div className="overflow-hidden">
+            <SimpleCompassUI onClose={() => closeModal()} />
+          </div>
         </DialogContent>
       </Dialog>
 

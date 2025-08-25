@@ -127,7 +127,7 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
     return (
       <div className="space-y-6">
         {/* Compass Display */}
-        <div className="relative w-64 h-64 mx-auto">
+        <div className="relative w-64 h-64 mx-auto overflow-hidden">
           {/* Rotating compass background */}
           <div 
             className="w-full h-full rounded-full border-4 border-blush/20 bg-gradient-to-br from-white to-blush/5 shadow-lg relative"
