@@ -50,8 +50,43 @@ export default function PushDebug() {
     log(`Current permission: ${Notification.permission}`);
     
     if (Notification.permission === 'default') {
+      log('⚠️ Permission is default - requesting now...');
       const result = await Notification.requestPermission();
       log(`Permission after request: ${result}`);
+      
+      if (result === 'granted') {
+        log('✅ Permission granted! You can now receive notifications');
+      } else if (result === 'denied') {
+        log('❌ Permission denied - notifications blocked');
+      } else {
+        log('⚠️ Permission still default - may need manual browser settings');
+      }
+    }
+  };
+
+  const forceRequestPermission = async () => {
+    log('=== Force Permission Request (Safari Fix) ===');
+    
+    if (!('Notification' in window)) {
+      log('❌ Notifications not supported');
+      return;
+    }
+    
+    try {
+      log('Requesting notification permission...');
+      const permission = await Notification.requestPermission();
+      log(`Result: ${permission}`);
+      
+      if (permission === 'granted') {
+        log('✅ Success! Now try subscribing to push notifications');
+        // Auto-register service worker and subscribe
+        await checkServiceWorker();
+        await resubscribe();
+      } else {
+        log(`❌ Permission ${permission} - check browser settings`);
+      }
+    } catch (error: any) {
+      log(`❌ Error requesting permission: ${error.message}`);
     }
   };
 
@@ -187,6 +222,10 @@ export default function PushDebug() {
             4. Send Test Push
           </Button>
           
+          <Button onClick={forceRequestPermission} className="bg-orange-600 hover:bg-orange-700">
+            🍎 Safari: Force Permission
+          </Button>
+          
           <Button onClick={resubscribe} className="bg-blue-600 hover:bg-blue-700">
             Fix: Re-subscribe
           </Button>
@@ -219,11 +258,13 @@ export default function PushDebug() {
         <div className="mt-6 p-4 bg-blue-50 rounded-lg">
           <h2 className="font-bold mb-2">Troubleshooting Guide:</h2>
           <ol className="list-decimal list-inside space-y-2 text-sm">
+            <li><strong>Safari Users:</strong> Click "🍎 Safari: Force Permission" to manually request notification permission</li>
             <li>Click buttons 1-4 in order to diagnose</li>
             <li>If subscription exists but no notifications arrive, try "Re-subscribe"</li>
             <li>If nothing works, click "Clear All & Reset", then refresh and allow notifications</li>
             <li>Check browser console (F12) for [SW] messages when push is sent</li>
             <li>Ensure browser notifications aren't blocked in OS settings</li>
+            <li><strong>Try Chrome or Edge</strong> - They have better web push support than Safari</li>
           </ol>
         </div>
       </div>
