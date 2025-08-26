@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useLocation } from "wouter";
 import AppHeader from "@/components/app-header";
 import BottomNavigation from "@/components/bottom-navigation";
@@ -7,48 +7,68 @@ import TorahSection from "@/components/sections/torah-section";
 import TefillaSection from "@/components/sections/tefilla-section";
 import TzedakaSection from "@/components/sections/tzedaka-section";
 import TableSection from "@/components/sections/table-section";
-import ShopSection from "@/components/sections/shop-section";
 import ModalContainer from "@/components/modals/modal-container";
 
 export type Section = 'torah' | 'tefilla' | 'tzedaka' | 'home' | 'table';
 
 export default function Home() {
-  const [activeSection, setActiveSection] = useState<Section>('home');
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+  
+  // Determine active section from URL path
+  const getActiveSectionFromPath = (path: string): Section => {
+    switch (path) {
+      case '/torah':
+        return 'torah';
+      case '/tefilla':
+        return 'tefilla';
+      case '/tzedaka':
+        return 'tzedaka';
+      case '/table':
+        return 'table';
+      default:
+        return 'home';
+    }
+  };
 
-  // Check for section parameter in URL and set active section
+  const activeSection = getActiveSectionFromPath(location);
+  
+  // Navigation function to handle section changes
+  const navigateToSection = (section: Section) => {
+    if (section === 'home') {
+      setLocation('/');
+    } else {
+      setLocation(`/${section}`);
+    }
+  };
+
+  // Check for query parameters for special functionality
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const sectionParam = urlParams.get('section') as Section;
     const scrollToProgress = urlParams.get('scrollToProgress') === 'true';
     
-    if (sectionParam && ['torah', 'tefilla', 'tzedaka', 'home', 'table'].includes(sectionParam)) {
-      setActiveSection(sectionParam);
+    // If scrollToProgress is requested and we're on home, scroll to progress section
+    if (activeSection === 'home' && scrollToProgress) {
+      setTimeout(() => {
+        const progressElement = document.getElementById('daily-progress-garden');
+        if (progressElement) {
+          progressElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }
+      }, 100); // Small delay to ensure DOM is ready
       
-      // If scrollToProgress is requested and we're on home, scroll to progress section
-      if (sectionParam === 'home' && scrollToProgress) {
-        setTimeout(() => {
-          const progressElement = document.getElementById('daily-progress-garden');
-          if (progressElement) {
-            progressElement.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'center' 
-            });
-          }
-        }, 100); // Small delay to ensure DOM is ready
-      }
-      
-      // Clean the URL by removing the parameters
-      window.history.replaceState({}, '', '/');
+      // Clean the URL by removing the parameters while keeping the path
+      window.history.replaceState({}, '', location);
     }
-  }, [location]);
+  }, [location, activeSection]);
 
   // Listen for custom navigation events from modal closures
   useEffect(() => {
     const handleNavigateToSection = (event: CustomEvent) => {
       const { section } = event.detail;
       if (['torah', 'tefilla', 'tzedaka', 'home', 'table'].includes(section)) {
-        setActiveSection(section);
+        navigateToSection(section);
       }
     };
 
@@ -57,22 +77,22 @@ export default function Home() {
     return () => {
       window.removeEventListener('navigateToSection', handleNavigateToSection as EventListener);
     };
-  }, []);
+  }, [navigateToSection]);
 
   const renderSection = () => {
     switch (activeSection) {
       case 'home':
-        return <HomeSection onSectionChange={setActiveSection} />;
+        return <HomeSection onSectionChange={navigateToSection} />;
       case 'torah':
-        return <TorahSection onSectionChange={setActiveSection} />;
+        return <TorahSection onSectionChange={navigateToSection} />;
       case 'tefilla':
-        return <TefillaSection onSectionChange={setActiveSection} />;
+        return <TefillaSection onSectionChange={navigateToSection} />;
       case 'tzedaka':
-        return <TzedakaSection onSectionChange={setActiveSection} />;
+        return <TzedakaSection onSectionChange={navigateToSection} />;
       case 'table':
         return <TableSection />;
       default:
-        return <HomeSection onSectionChange={setActiveSection} />;
+        return <HomeSection onSectionChange={navigateToSection} />;
     }
   };
 
@@ -86,10 +106,10 @@ export default function Home() {
 
       <BottomNavigation 
         activeSection={activeSection} 
-        onSectionChange={setActiveSection} 
+        onSectionChange={navigateToSection} 
       />
 
-      <ModalContainer onSectionChange={setActiveSection} />
+      <ModalContainer onSectionChange={navigateToSection} />
     </div>
   );
 }

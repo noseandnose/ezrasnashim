@@ -67,6 +67,10 @@ function Router() {
     <Suspense fallback={<LoadingSpinner />}>
       <Switch>
         <Route path="/" component={Home} />
+        <Route path="/torah" component={Home} />
+        <Route path="/tefilla" component={Home} />
+        <Route path="/tzedaka" component={Home} />
+        <Route path="/table" component={Home} />
         <Route path="/donate" component={Donate} />
         <Route path="/statistics" component={Statistics} />
         <Route path="/admin/notifications" component={AdminNotifications} />
