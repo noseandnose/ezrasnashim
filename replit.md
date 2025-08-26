@@ -20,7 +20,7 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **Styling**: Tailwind CSS with a feminine color palette (rose blush, ivory, sand gold, muted lavender).
 - **UI Components**: Radix UI primitives and shadcn/ui.
 - **State Management**: Zustand for client state, TanStack Query for server state.
-- **Routing**: Wouter for lightweight client-side routing.
+- **Routing**: Wouter for lightweight client-side routing with full URL routing system (August 2025) - supports direct linking to all sections (/, /torah, /tefilla, /tzedaka, /life), browser back/forward navigation, and backward compatibility redirect from /table to /life.
 - **Design**: Mobile-first responsive design, PWA functionality (Add to Home Screen, service worker for offline caching).
 - **Typography**: Playfair Display for headers, Inter for body text, David Libre/Heebo for Hebrew text, Platypi for English text, Koren Siddur for Tefilla content. Font preloading and `font-display: block` for FOUT prevention.
 - **Visuals**: Flower progress indicators, subtle animations, custom logos, consistent gradients for top bar and modals.
