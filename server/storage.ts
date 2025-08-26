@@ -1278,13 +1278,17 @@ export class DatabaseStorage implements IStorage {
 
   async recalculateDailyStats(date: string): Promise<DailyStats> {
     // Count today's events for recalculation (only completion events now)
+
+    const start = new Date(`${date}T00:00:00.000Z`);
+    const end = new Date(new Date(start).setUTCDate(start.getUTCDate() + 1)); // next day
+
     const todayEvents = await db
       .select()
       .from(analyticsEvents)
       .where(
         and(
-          gt(analyticsEvents.createdAt, new Date(date + 'T00:00:00')),
-          lt(analyticsEvents.createdAt, new Date(date + 'T23:59:59'))
+          gte(analyticsEvents.createdAt, start),
+          lt(analyticsEvents.createdAt, end)
         )
       );
     
@@ -1299,15 +1303,15 @@ export class DatabaseStorage implements IStorage {
     const pageViews = 0; // No longer tracking page views
     // Count global tehillim separately (they count as 2 mitzvos - saying + praying for someone)
     const globalTehillimCompleted = todayEvents.filter(e => 
-      e.eventType === 'tehillim_complete' && (e.eventData as any)?.type === 'global'
-    ).length;
+      e.eventType === 'modal_complete' && (e.eventData as any)?.modalType.startsWith('global_')
+    ).length; // not running
     const regularTehillimCompleted = todayEvents.filter(e => 
-      e.eventType === 'tehillim_complete' && (e.eventData as any)?.type !== 'global'
+      e.eventType === 'modal_complete' && (e.eventData as any)?.modalType.startsWith('individual_')
     ).length;
     const tehillimCompleted = globalTehillimCompleted + regularTehillimCompleted;
     const namesProcessed = todayEvents.filter(e => e.eventType === 'name_prayed').length;
     const booksCompleted = todayEvents.filter(e => e.eventType === 'tehillim_book_complete').length;
-    const tzedakaActs = todayEvents.filter(e => e.eventType === 'tzedaka_completion').length;
+    const tzedakaActs = todayEvents.filter(e => e.eventType === 'tzedaka_completion');
     
     // Count modal completions by type
     const modalCompletions: Record<string, number> = {};
@@ -1315,23 +1319,37 @@ export class DatabaseStorage implements IStorage {
       .filter(e => e.eventType === 'modal_complete')
       .forEach(e => {
         const modalType = (e.eventData as any)?.modalType || 'unknown';
-        modalCompletions[modalType] = (modalCompletions[modalType] || 0) + 1;
+        if(modalType != 'unknown'){
+          modalCompletions[modalType] = (modalCompletions[modalType] || 0) + 1;
+        }
       });
-  
-    
+
+    // Add gave elsewhere tzedakah (doesn't have a modal)
+    // Count tzedakah completions by type
+    let gaveElsewhereCompletions: number = 0;
+    tzedakaActs
+    .forEach(e => {
+        const buttonType = (e.eventData as any)?.buttonType || 'unknown';
+        if (buttonType.startsWith('gave_elsewhere')) {
+          gaveElsewhereCompletions += 1;
+        }
+      });
+
     if (existing) {
+
       const [updated] = await db
         .update(dailyStats)
         .set({
+          gaveElsewhereCount: gaveElsewhereCompletions, 
           uniqueUsers: uniqueSessions,
           pageViews,
           tehillimCompleted,
           namesProcessed,
           booksCompleted,
-          tzedakaActs,
-          totalActs: this.calculateTotalActs(modalCompletions, regularTehillimCompleted, tzedakaActs, globalTehillimCompleted),
+          tzedakaActs: tzedakaActs.length,
+          totalActs: this.calculateTotalActs(modalCompletions, gaveElsewhereCompletions, namesProcessed),
           modalCompletions,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         })
         .where(eq(dailyStats.date, date))
         .returning();
@@ -1346,9 +1364,8 @@ export class DatabaseStorage implements IStorage {
           tehillimCompleted,
           namesProcessed,
           booksCompleted,
-          tzedakaActs,
-          totalActs: this.calculateTotalActs(modalCompletions, regularTehillimCompleted, tzedakaActs, globalTehillimCompleted),
-          modalCompletions
+          tzedakaActs: tzedakaActs.length,
+          totalActs: this.calculateTotalActs(modalCompletions, gaveElsewhereCompletions, namesProcessed),
         })
         .returning();
       return newStats;
@@ -1376,9 +1393,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Helper method to calculate total acts
-  private calculateTotalActs(modalCompletions: Record<string, number>, tehillimCompleted: number, tzedakaActsCount: number = 0, globalTehillimCompleted: number = 0): number {
-    const torahActs = ['torah', 'chizuk', 'emuna', 'halacha', 'featured-content'];
-    const tefillaActs = ['tefilla', 'morning-brochas', 'mincha', 'maariv', 'nishmas', 'birkat-hamazon', 'special-tehillim', 'global-tehillim-chain', 'tehillim-text'];
+  private calculateTotalActs(modalCompletions: Record<string, number>, gaveElsewhereCompletions: number = 0, namesProcessed: number = 0): number {
+    const torahActs = ['torah', 'chizuk', 'emuna', 'halacha', 'featured'];
+    const tefillaActs = ['tefilla', 'morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'birkat-hamazon', 'al-hamichiya', 'special-tehillim', 'global-tehillim-chain', 'tehillim-text'];
     const tzedakaActs = ['tzedaka', 'donate'];
     
     let totalActs = 0;
@@ -1388,22 +1405,23 @@ export class DatabaseStorage implements IStorage {
       if (torahActs.includes(modalType) || tefillaActs.includes(modalType) || tzedakaActs.includes(modalType)) {
         totalActs += count;
       }
-      // Also count individual tehillim completions
-      if (modalType.startsWith('individual-tehillim-')) {
+      // Also count individual tehillim and womens prayer completions
+      if (
+        modalType.startsWith('individual-tehillim-') ||
+        modalType.startsWith('womens-prayer-')
+      ) {
         totalActs += count;
       }
     }
     
-    // Add regular tehillim completions as acts (1 mitzvah each)
-    totalActs += tehillimCompleted || 0;
-    
-    // Add global tehillim completions as acts (2 mitzvos each - saying + praying for someone)
-    totalActs += (globalTehillimCompleted || 0) * 2;
-    
-    // Add tzedaka completions as acts 
-    totalActs += tzedakaActsCount || 0;
-    
+    // Add names processed as acts (this is the 2nd modal counting for global tehillim)
+    totalActs += namesProcessed;
+
+    // These don't have a modal, so we count separately
+    totalActs += gaveElsewhereCompletions;
+
     return totalActs;
+
   }
 
   async getMonthlyStats(year: number, month: number): Promise<{
