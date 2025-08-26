@@ -23,7 +23,7 @@ export default function Home() {
         return 'tefilla';
       case '/tzedaka':
         return 'tzedaka';
-      case '/table':
+      case '/life':
         return 'table';
       default:
         return 'home';
@@ -36,6 +36,8 @@ export default function Home() {
   const navigateToSection = (section: Section) => {
     if (section === 'home') {
       setLocation('/');
+    } else if (section === 'table') {
+      setLocation('/life');
     } else {
       setLocation(`/${section}`);
     }
