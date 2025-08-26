@@ -1923,17 +1923,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Serve frontend application on root route
-  app.get("/", (req, res) => {
-    // In Replit environment, we need to serve the frontend differently
-    if (process.env.REPLIT_DOMAINS) {
-      // For Replit, redirect to the frontend port
-      const replitDomain = process.env.REPLIT_DOMAINS;
-      res.redirect(`https://${replitDomain}`);
-    } else {
-      // Local development
-      res.redirect("http://localhost:5173");
-    }
-  });
+  // app.get("/", (req, res) => {
+  //   // In Replit environment, we need to serve the frontend differently
+  //   if (process.env.REPLIT_DOMAINS) {
+  //     // For Replit, redirect to the frontend port
+  //     const replitDomain = process.env.REPLIT_DOMAINS;
+  //     res.redirect(`https://${replitDomain}`);
+  //   } else {
+  //     // Local development
+  //     res.redirect("http://localhost:5173");
+  //   }
+  // });
 
   // REMOVED: First duplicate /api/payments/confirm endpoint - using the second one below
 
@@ -2825,7 +2825,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/healthcheck", (req, res) => {
+  app.get("/", (req, res) => {
     res.json({ status: "OK" });
   })
   
