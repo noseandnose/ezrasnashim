@@ -1298,7 +1298,6 @@ export class DatabaseStorage implements IStorage {
 
     const existing = await this.getDailyStats(date);
 
-    const uniqueSessions = existing? existing.uniqueUsers : 0;
     // Count event types (no more page_view tracking)
     const pageViews = 0; // No longer tracking page views
     // Count global tehillim separately (they count as 2 mitzvos - saying + praying for someone)
@@ -1341,7 +1340,6 @@ export class DatabaseStorage implements IStorage {
         .update(dailyStats)
         .set({
           gaveElsewhereCount: gaveElsewhereCompletions, 
-          uniqueUsers: uniqueSessions,
           pageViews,
           tehillimCompleted,
           namesProcessed,
@@ -1359,7 +1357,6 @@ export class DatabaseStorage implements IStorage {
         .insert(dailyStats)
         .values({
           date,
-          uniqueUsers: uniqueSessions,
           pageViews,
           tehillimCompleted,
           namesProcessed,
