@@ -71,6 +71,13 @@ function Router() {
         <Route path="/tefilla" component={Home} />
         <Route path="/tzedaka" component={Home} />
         <Route path="/life" component={Home} />
+        {/* Redirect old /table route to /life for backward compatibility */}
+        <Route path="/table">
+          {() => {
+            window.location.replace('/life');
+            return null;
+          }}
+        </Route>
         <Route path="/donate" component={Donate} />
         <Route path="/statistics" component={Statistics} />
         <Route path="/admin/notifications" component={AdminNotifications} />
