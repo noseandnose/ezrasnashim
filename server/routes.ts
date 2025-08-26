@@ -1608,10 +1608,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Donation completion handler
   app.post("/api/donation-complete", async (req, res) => {
     try {
-      const { donationType, sponsorName, dedication, message } = req.body;
+      const { buttonType, donationType, sponsorName, dedication, message } = req.body;
       
       // Only create sponsor record for "Sponsor a Day" donations
-      if (donationType === 'Sponsor a Day of Ezras Nashim' && sponsorName) {
+      if (buttonType === 'sponsor_a_day' && sponsorName) {
         // Day starts at 02:00 local time for analytics
       const now = new Date();
       const hours = now.getHours();

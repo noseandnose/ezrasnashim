@@ -498,6 +498,7 @@ export default function Donate() {
         if(buttonType === 'sponsor_a_day') {
           try {
             await apiRequest("POST", "/api/donation-complete", {
+              buttonType,
               donationType: donationType,
               sponsorName: sponsorName || 'Anonymous',
               dedication: dedication || null

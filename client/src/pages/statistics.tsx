@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins, DollarSign, Trophy, RefreshCw } from "lucide-react";
+import { Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins, DollarSign, Trophy, RefreshCw, HandHeart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
@@ -145,7 +145,8 @@ export default function Statistics() {
     inspiration: "Creative Jewish Living",
     "sponsor-day": "Day Sponsorship",
     refuah: "Refuah Names",
-    
+    "womens-prayer": "Women's Prayers",
+
     // Other
     donate: "Donations",
   };
@@ -171,6 +172,7 @@ export default function Statistics() {
     "nishmas-campaign": Heart,
     "al-hamichiya": Clock3,
     "individual-prayer": Heart,
+    "womens-prayer": HandHeart,
     
     // Torah subcategories  
     chizuk: Heart,
@@ -362,7 +364,8 @@ export default function Statistics() {
                     // Create a processed entries array with individual tehillim aggregated
                     const processedEntries: Array<[string, number]> = [];
                     let individualTehillimTotal = 0;
-                    
+                    let womensPrayerTotal = 0;
+
                     // Process all modal completion entries
                     let globalTehillimTotal = 0;
                     Object.entries(modalCompletions).forEach(([modalType, count]) => {
@@ -374,6 +377,9 @@ export default function Statistics() {
                         globalTehillimTotal += (count as number) || 0;
                       } else if (modalType === 'tzedaka' || modalType === 'donate') {
                         // Skip tzedaka modals - we'll aggregate them separately with tzedakaActs
+                      } else if (modalType.startsWith('womens-prayer-')) {
+                        // Aggregate womens prayers
+                        womensPrayerTotal += (count as number) || 0;
                       } else if (modalTypeNames[modalType] && !['unknown', 'test', ''].includes(modalType.toLowerCase())) {
                         // Include regular modal types that have names
                         processedEntries.push([modalType, count as number]);
@@ -390,14 +396,19 @@ export default function Statistics() {
                       processedEntries.push(['global-tehillim-chain', globalTehillimTotal]);
                     }
 
+                    if (womensPrayerTotal > 0) {
+                      processedEntries.push(['womens-prayer', womensPrayerTotal]);
+                    }
+
                     // Add tzedaka acts from the tzedakaActs field (includes "Gave Elsewhere")
                     const tzedakaActs = selectedPeriod === 'today' 
                       ? (currentData as any)?.tzedakaActs || 0
                       : (currentData as any)?.totalTzedakaActs || 0;
                     
                     // Also check if there's a tzedaka modal completion to add to it
-                    const tzedakaModalCount = modalCompletions['tzedaka'] || modalCompletions['donate'] || 0;
-                    const totalTzedaka = tzedakaActs + tzedakaModalCount;
+                    // const tzedakaModalCount = modalCompletions['tzedaka'] || modalCompletions['donate'] || 0;
+                    // Above is double tracking, since tzedaka acts are all counted in tzedakaActs
+                    const totalTzedaka = tzedakaActs;
                     
                     if (totalTzedaka > 0) {
                       processedEntries.push(['tzedaka', totalTzedaka]);
