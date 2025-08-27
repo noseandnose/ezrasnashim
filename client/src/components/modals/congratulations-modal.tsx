@@ -20,7 +20,7 @@ export default function CongratulationsModal() {
     <DialogPrimitive.Root open={activeModal === 'congratulations'} onOpenChange={() => closeModal(true)}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPrimitive.Content className="fixed left-[50%] top-[50%] z-50 w-full max-w-sm translate-x-[-50%] translate-y-[-50%] rounded-3xl p-8 bg-white shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
+        <DialogPrimitive.Content className="fixed left-[50%] top-[50%] z-50 w-full max-w-sm translate-x-[-50%] translate-y-[-50%] rounded-3xl p-8 bg-white shadow-2xl drop-shadow-mazal-tov data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
           {/* Beautiful Stage 3 Flower Image - Fill entire modal */}
           <div className="absolute inset-0 pointer-events-none rounded-3xl overflow-hidden">
             <img 
@@ -32,7 +32,7 @@ export default function CongratulationsModal() {
           
           {/* Content above the flower image */}
           <div className="relative z-10 text-center">
-            <DialogTitle className="text-2xl font-playfair font-bold text-black mb-3 drop-shadow-mazal-tov">
+            <DialogTitle className="text-2xl font-playfair font-bold text-black mb-3">
               Mazal Tov!
             </DialogTitle>
             <DialogDescription className="text-black font-bold mb-6 leading-relaxed font-inter">
