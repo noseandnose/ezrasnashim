@@ -501,7 +501,8 @@ export default function Donate() {
               buttonType,
               donationType: donationType,
               sponsorName: sponsorName || 'Anonymous',
-              dedication: dedication || null
+              dedication: dedication || null,
+              message: message || null
             });
             // Sponsor record created successfully
           } catch (error) {
