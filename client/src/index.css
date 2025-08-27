@@ -256,6 +256,16 @@ body {
     box-shadow: 0 0 0 8px rgba(251, 207, 232, 0.3), 0 0 25px rgba(251, 207, 232, 0.6);
   }
 }
+
+/* Gentle glow animation for daily bars */
+@keyframes gentle-glow {
+  0%, 100% {
+    box-shadow: inherit;
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(244, 63, 94, 0.5), inherit;
+  }
+}
 [dir="rtl"] {
   direction: rtl;
   text-align: right;
