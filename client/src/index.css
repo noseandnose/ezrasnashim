@@ -257,13 +257,23 @@ body {
   }
 }
 
-/* Gentle glow animation for daily bars */
-@keyframes gentle-glow {
+/* Gentle glow animation for daily bars - Pink (incomplete) */
+@keyframes gentle-glow-pink {
   0%, 100% {
-    box-shadow: inherit;
+    box-shadow: 0 0 8px rgba(244, 63, 94, 0.3);
   }
   50% {
-    box-shadow: 0 0 15px rgba(244, 63, 94, 0.5), inherit;
+    box-shadow: 0 0 15px rgba(244, 63, 94, 0.5);
+  }
+}
+
+/* Gentle glow animation for daily bars - Green (completed) */
+@keyframes gentle-glow-green {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
   }
 }
 [dir="rtl"] {

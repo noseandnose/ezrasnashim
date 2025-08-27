@@ -224,10 +224,9 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           onClick={() => navigateToSection('torah')}
           className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
           style={{
-            boxShadow: torahCompleted 
-              ? '0 0 8px rgba(34, 197, 94, 0.4)' // Green glow when completed
-              : '0 0 8px rgba(244, 63, 94, 0.3)', // Pink glow when not completed
-            animation: 'gentle-glow 3s ease-in-out infinite'
+            animation: torahCompleted 
+              ? 'gentle-glow-green 3s ease-in-out infinite' 
+              : 'gentle-glow-pink 3s ease-in-out infinite'
           }}
         >
           <div className={`p-3 rounded-full ${torahCompleted ? 'bg-sage' : 'bg-gradient-feminine'}`}>
@@ -245,10 +244,9 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           onClick={() => navigateToSection('tefilla')}
           className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
           style={{
-            boxShadow: tefillaCompleted 
-              ? '0 0 8px rgba(34, 197, 94, 0.4)' // Green glow when completed
-              : '0 0 8px rgba(244, 63, 94, 0.3)', // Pink glow when not completed
-            animation: 'gentle-glow 3s ease-in-out infinite'
+            animation: tefillaCompleted 
+              ? 'gentle-glow-green 3s ease-in-out infinite' 
+              : 'gentle-glow-pink 3s ease-in-out infinite'
           }}
         >
           <div className={`p-3 rounded-full ${tefillaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-blush to-lavender'}`}>
@@ -266,10 +264,9 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           onClick={() => navigateToSection('tzedaka')}
           className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
           style={{
-            boxShadow: tzedakaCompleted 
-              ? '0 0 8px rgba(34, 197, 94, 0.4)' // Green glow when completed
-              : '0 0 8px rgba(244, 63, 94, 0.3)', // Pink glow when not completed
-            animation: 'gentle-glow 3s ease-in-out infinite'
+            animation: tzedakaCompleted 
+              ? 'gentle-glow-green 3s ease-in-out infinite' 
+              : 'gentle-glow-pink 3s ease-in-out infinite'
           }}
         >
           <div className={`p-3 rounded-full ${tzedakaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-muted-lavender to-rose-blush'}`}>
