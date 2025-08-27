@@ -127,9 +127,13 @@ export function formatTextContent(text: string | null | undefined): string {
   // Clean Hebrew text first to remove problematic characters
   let formatted = cleanHebrewText(text);
   
+  // Remove standalone "- " patterns that appear randomly in text
+  // This removes "- " when it's not part of meaningful punctuation
+  formatted = formatted.replace(/(?<!\w)-\s+/g, '');
+  
   // Format footnote numbers for English text BEFORE any other processing
   // Handle footnotes that appear after punctuation: ". 39 Rashi" becomes ". ^39 Rashi"
-  // Also remove any "- " prefix before the number: ". - 39 Rashi" becomes ". ^39 Rashi"
+  // Also remove any remaining "- " prefix before the number: ". - 39 Rashi" becomes ". ^39 Rashi"
   formatted = formatted.replace(/([."\]\)])(\s+)(-\s+)?(\d{1,2})(\s+)/g, '$1$2<sup style="font-size: 0.65em; font-weight: normal;">$4</sup>$5');
   
   // Convert newlines to HTML breaks FIRST before any other processing
