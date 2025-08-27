@@ -309,35 +309,55 @@ body {
   }
 }
 
-/* Pink heartbeat with realistic lub-dub pattern */
+/* Pink heartbeat with distinct lub-dub pattern */
 @keyframes heartbeat-pink {
-  0%, 40%, 100% {
+  0%, 50%, 100% {
     transform: scale(1);
     box-shadow: 0 2px 4px rgba(244, 63, 94, 0.2);
   }
-  5% {
-    transform: scale(1.1);
-    box-shadow: 0 4px 8px rgba(244, 63, 94, 0.4), 0 2px 12px rgba(244, 63, 94, 0.3);
+  /* First beat - LUB (strong) */
+  8% {
+    transform: scale(1.15);
+    box-shadow: 0 4px 8px rgba(244, 63, 94, 0.5), 0 2px 12px rgba(244, 63, 94, 0.4);
   }
-  15% {
-    transform: scale(1.05);
-    box-shadow: 0 3px 6px rgba(244, 63, 94, 0.3), 0 1px 8px rgba(244, 63, 94, 0.2);
+  12% {
+    transform: scale(1);
+    box-shadow: 0 2px 4px rgba(244, 63, 94, 0.2);
+  }
+  /* Second beat - DUB (weaker) */
+  20% {
+    transform: scale(1.08);
+    box-shadow: 0 3px 6px rgba(244, 63, 94, 0.3), 0 1px 8px rgba(244, 63, 94, 0.25);
+  }
+  24% {
+    transform: scale(1);
+    box-shadow: 0 2px 4px rgba(244, 63, 94, 0.2);
   }
 }
 
-/* Green heartbeat with realistic lub-dub pattern */
+/* Green heartbeat with distinct lub-dub pattern */
 @keyframes heartbeat-green {
-  0%, 40%, 100% {
+  0%, 50%, 100% {
     transform: scale(1);
     box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
   }
-  5% {
-    transform: scale(1.1);
-    box-shadow: 0 4px 8px rgba(34, 197, 94, 0.4), 0 2px 12px rgba(34, 197, 94, 0.3);
+  /* First beat - LUB (strong) */
+  8% {
+    transform: scale(1.15);
+    box-shadow: 0 4px 8px rgba(34, 197, 94, 0.5), 0 2px 12px rgba(34, 197, 94, 0.4);
   }
-  15% {
-    transform: scale(1.05);
-    box-shadow: 0 3px 6px rgba(34, 197, 94, 0.3), 0 1px 8px rgba(34, 197, 94, 0.2);
+  12% {
+    transform: scale(1);
+    box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
+  }
+  /* Second beat - DUB (weaker) */
+  20% {
+    transform: scale(1.08);
+    box-shadow: 0 3px 6px rgba(34, 197, 94, 0.3), 0 1px 8px rgba(34, 197, 94, 0.25);
+  }
+  24% {
+    transform: scale(1);
+    box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
   }
 }
 
