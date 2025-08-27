@@ -225,8 +225,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
           style={{
             animation: torahCompleted 
-              ? 'gentle-glow-green 3s ease-in-out infinite' 
-              : 'gentle-glow-pink 3s ease-in-out infinite'
+              ? 'gentle-glow-green-small 3s ease-in-out infinite' 
+              : 'gentle-glow-pink-small 3s ease-in-out infinite'
           }}
         >
           <div className={`p-3 rounded-full ${torahCompleted ? 'bg-sage' : 'bg-gradient-feminine'}`}>
@@ -245,8 +245,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
           style={{
             animation: tefillaCompleted 
-              ? 'gentle-glow-green 3s ease-in-out infinite' 
-              : 'gentle-glow-pink 3s ease-in-out infinite'
+              ? 'gentle-glow-green-small 3s ease-in-out infinite' 
+              : 'gentle-glow-pink-small 3s ease-in-out infinite'
           }}
         >
           <div className={`p-3 rounded-full ${tefillaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-blush to-lavender'}`}>
@@ -265,8 +265,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
           style={{
             animation: tzedakaCompleted 
-              ? 'gentle-glow-green 3s ease-in-out infinite' 
-              : 'gentle-glow-pink 3s ease-in-out infinite'
+              ? 'gentle-glow-green-small 3s ease-in-out infinite' 
+              : 'gentle-glow-pink-small 3s ease-in-out infinite'
           }}
         >
           <div className={`p-3 rounded-full ${tzedakaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-muted-lavender to-rose-blush'}`}>
