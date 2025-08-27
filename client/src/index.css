@@ -361,14 +361,14 @@ body {
   }
 }
 
-/* CSS classes for synchronized heartbeat - all use same timing */
+/* CSS classes for synchronized heartbeat - 68 BPM timing */
 .heartbeat-pink {
-  animation: heartbeat-pink 1.5s ease-in-out infinite;
+  animation: heartbeat-pink 0.88s ease-in-out infinite;
   animation-delay: 0s !important;
 }
 
 .heartbeat-green {
-  animation: heartbeat-green 1.5s ease-in-out infinite;
+  animation: heartbeat-green 0.88s ease-in-out infinite;
   animation-delay: 0s !important;
 }
 [dir="rtl"] {
