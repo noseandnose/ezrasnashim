@@ -235,8 +235,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             className="rounded-full"
             style={{
               animation: torahCompleted 
-                ? 'heartbeat-green 1.5s ease-in-out infinite' 
-                : 'heartbeat-pink 1.5s ease-in-out infinite'
+                ? 'heartbeat-green 2s ease-in-out infinite' 
+                : 'heartbeat-pink 2s ease-in-out infinite'
             }}
           >
             <HeartProgress completed={torahCompleted} size={20} />
@@ -259,8 +259,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             className="rounded-full"
             style={{
               animation: tefillaCompleted 
-                ? 'heartbeat-green 1.5s ease-in-out infinite' 
-                : 'heartbeat-pink 1.5s ease-in-out infinite'
+                ? 'heartbeat-green 2s ease-in-out infinite' 
+                : 'heartbeat-pink 2s ease-in-out infinite'
             }}
           >
             <HeartProgress completed={tefillaCompleted} size={20} />
@@ -283,8 +283,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             className="rounded-full"
             style={{
               animation: tzedakaCompleted 
-                ? 'heartbeat-green 1.5s ease-in-out infinite' 
-                : 'heartbeat-pink 1.5s ease-in-out infinite'
+                ? 'heartbeat-green 2s ease-in-out infinite' 
+                : 'heartbeat-pink 2s ease-in-out infinite'
             }}
           >
             <HeartProgress completed={tzedakaCompleted} size={20} />
