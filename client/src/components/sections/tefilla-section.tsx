@@ -604,6 +604,9 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             <button
               onClick={() => openModal('tehillim-text', 'tefilla')}
               className="w-full bg-white/90 rounded-2xl p-3 border border-blush/20 hover:bg-white transition-all duration-300 shadow-sm"
+              style={{
+                animation: 'gentle-glow-pink 3s ease-in-out infinite'
+              }}
             >
               {/* Header with perek number */}
               <div className="flex items-center justify-between mb-2">
