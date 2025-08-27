@@ -1,4 +1,4 @@
-import { BookOpen, HandHeart, Home, Heart, Sparkles, ShoppingBag, Coins } from "lucide-react";
+import { BookOpen, HandHeart, Heart, Sparkles, Coins } from "lucide-react";
 import type { Section } from "@/pages/home";
 
 interface BottomNavigationProps {
@@ -17,11 +17,12 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
 
   const getActiveColorClass = (sectionId: Section) => {
     switch (sectionId) {
-      case 'torah': return 'bg-white text-muted-lavender rounded-2xl border-2 border-muted-lavender/30';
-      case 'tefilla': return 'bg-white text-rose-blush rounded-2xl border-2 border-rose-blush/30';
-      case 'tzedaka': return 'bg-white text-sage rounded-2xl border-2 border-sage/30';
-      case 'table': return 'bg-white text-sand-gold rounded-2xl border-2 border-sand-gold/30';
-      default: return 'bg-white text-rose-blush rounded-2xl border-2 border-rose-blush/30';
+      case 'torah': return 'bg-white text-muted-lavender rounded-2xl border-2 border-muted-lavender/30 w-16 h-16';
+      case 'tefilla': return 'bg-white text-rose-blush rounded-2xl border-2 border-rose-blush/30 w-16 h-16';
+      case 'tzedaka': return 'bg-white text-sage rounded-2xl border-2 border-sage/30 w-16 h-16';
+      case 'table': return 'bg-white text-sand-gold rounded-2xl border-2 border-sand-gold/30 w-16 h-16';
+      case 'home': return 'bg-gradient-feminine rounded-2xl shadow-lg w-16 h-16';
+      default: return 'bg-white text-rose-blush rounded-2xl border-2 border-rose-blush/30 w-16 h-16';
     }
   };
 
@@ -34,32 +35,26 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
           <button
             key={id}
             onClick={() => onSectionChange(id)}
-            className={`flex flex-col items-center transition-all duration-300 ${
-              isCenter 
-                ? 'p-3 scale-110' 
-                : 'p-2'
-            } ${
+            className={`flex flex-col items-center justify-center transition-all duration-300 ${
               activeSection === id 
-                ? isCenter 
-                  ? 'bg-gradient-feminine rounded-full shadow-lg'
-                  : getActiveColorClass(id)
-                : 'hover:bg-blush/5 rounded-xl'
+                ? getActiveColorClass(id)
+                : 'hover:bg-blush/5 rounded-xl w-16 h-16'
             }`}
           >
             <Icon 
               className={`mb-1 transition-gentle ${
                 activeSection === id 
-                  ? isCenter 
+                  ? id === 'home'
                     ? 'text-white' 
                     : ''
                   : 'text-warm-gray/70'
               }`}
-              size={isCenter ? 28 : 20}
+              size={20}
               strokeWidth={1.5} 
             />
             <span className={`platypi-medium text-xs transition-colors duration-300 ${
               activeSection === id 
-                ? isCenter 
+                ? id === 'home'
                   ? 'text-white' 
                   : id === 'torah' ? 'text-muted-lavender'
                   : id === 'tefilla' ? 'text-rose-blush'
