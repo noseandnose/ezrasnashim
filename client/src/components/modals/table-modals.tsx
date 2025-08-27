@@ -189,11 +189,11 @@ export default function TableModals() {
             <div className="space-y-4 text-sm text-gray-700">
               {/* Recipe Image */}
               {recipeContent.imageUrl && (
-                <div className="w-full rounded-lg overflow-hidden mb-4">
+                <div className="w-full rounded-lg overflow-hidden mb-4 bg-gray-50 flex items-center justify-center">
                   <LazyImage 
                     src={recipeContent.imageUrl} 
                     alt={recipeContent.title || "Recipe"} 
-                    className="w-full h-80 object-cover"
+                    className="w-full h-80 object-contain"
                     onError={() => {
                       // Image failed to load, could hide the container
                     }}
@@ -407,11 +407,11 @@ export default function TableModals() {
                   switch (currentMedia.type) {
                     case 'image':
                       return (
-                        <div className="relative w-full h-full">
+                        <div className="relative w-full h-full bg-gray-50 flex items-center justify-center">
                           <img 
                             src={currentMedia.url} 
                             alt={`Creative Jewish Living ${currentMediaIndex + 1}`}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain"
                           />
                           <button
                             onClick={() => setFullscreenImage(currentMedia.url || null)}
@@ -502,7 +502,7 @@ export default function TableModals() {
                               <video 
                                 src={videoUrl}
                                 controls
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-contain bg-gray-50"
                                 preload="none"
                                 poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Cpolygon points='40,30 70,50 40,70' fill='%23d1d5db'/%3E%3C/svg%3E"
                                 onError={handleVideoError}
@@ -709,11 +709,11 @@ export default function TableModals() {
                 
                 {/* Recipe Image */}
                 {recipeContent.imageUrl && (
-                  <div className="w-full rounded-lg overflow-hidden mb-4">
+                  <div className="w-full rounded-lg overflow-hidden mb-4 bg-gray-50 flex items-center justify-center">
                     <LazyImage 
                       src={recipeContent.imageUrl} 
                       alt={recipeContent.title || "Recipe"} 
-                      className="w-full h-80 object-cover"
+                      className="w-full h-80 object-contain"
                     />
                   </div>
                 )}
@@ -933,19 +933,19 @@ export default function TableModals() {
                         >
                           {mediaItems[currentMediaIndex]?.type === 'image' ? (
                             <div
-                              className="cursor-pointer"
+                              className="cursor-pointer bg-gray-50 flex items-center justify-center w-full h-80"
                               onClick={() => setFullscreenImage(mediaItems[currentMediaIndex].url!)}
                             >
                               <LazyImage
                                 src={mediaItems[currentMediaIndex].url!}
                                 alt="Inspiration content"
-                                className="w-full h-80 object-cover"
+                                className="w-full h-80 object-contain"
                               />
                             </div>
                           ) : mediaItems[currentMediaIndex]?.type === 'video' ? (
                             <video 
                               controls 
-                              className="w-full h-80 object-cover"
+                              className="w-full h-80 object-contain bg-gray-50"
                               src={mediaItems[currentMediaIndex].url}
                             />
                           ) : null}
