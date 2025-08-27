@@ -127,6 +127,13 @@ export function formatTextContent(text: string | null | undefined): string {
   // Clean Hebrew text first to remove problematic characters
   let formatted = cleanHebrewText(text);
   
+  // Format footnote numbers for English text BEFORE any other processing
+  // Handle footnotes at beginning of lines or after spaces
+  formatted = formatted.replace(/(?:^|\s)- (\d{1,2})\b/gm, (match, num) => {
+    const leadingSpace = match.startsWith(' ') ? ' ' : '';
+    return `${leadingSpace}<sup style="font-size: 0.75em;">${num}</sup>`;
+  });
+  
   // Convert newlines to HTML breaks FIRST before any other processing
   formatted = formatted.replace(/\n/g, '<br />');
   
@@ -239,8 +246,7 @@ export function formatTextContent(text: string | null | undefined): string {
     .replace(/[ \t]+$/gm, '')          // Remove trailing whitespace
     .replace(/^\s+|\s+$/g, '');        // Remove leading/trailing whitespace
 
-  // Format footnote numbers for English text - remove "- " prefix and make numbers small
-  result = result.replace(/- (\d{1,2})\b/g, '<sup style="font-size: 0.75em;">$1</sup>');
+  // Footnote processing already done earlier in the function
 
   // Convert newlines to <br> tags for proper HTML rendering with preserved spacing
   result = result.replace(/\n/g, '<br />');
