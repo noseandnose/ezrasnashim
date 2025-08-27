@@ -231,11 +231,11 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <h3 className="platypi-bold text-sm text-black">Daily Torah</h3>
             <p className="platypi-regular text-xs text-black/60">Halacha, Emuna & Chizuk</p>
           </div>
-          <div 
-            className={`${torahCompleted ? 'heartbeat-green' : 'heartbeat-pink'}`}
-          >
-            <HeartProgress completed={torahCompleted} size={20} />
-          </div>
+          <HeartProgress 
+            completed={torahCompleted} 
+            size={20} 
+            animationClass={torahCompleted ? 'heartbeat-green' : 'heartbeat-pink'}
+          />
         </button>
 
         {/* Daily Tefilla Bar */}
@@ -250,11 +250,11 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <h3 className="platypi-bold text-sm text-black">Daily Tefilla</h3>
             <p className="platypi-regular text-xs text-black/60">Tehillim & Prayers</p>
           </div>
-          <div 
-            className={`${tefillaCompleted ? 'heartbeat-green' : 'heartbeat-pink'}`}
-          >
-            <HeartProgress completed={tefillaCompleted} size={20} />
-          </div>
+          <HeartProgress 
+            completed={tefillaCompleted} 
+            size={20} 
+            animationClass={tefillaCompleted ? 'heartbeat-green' : 'heartbeat-pink'}
+          />
         </button>
 
         {/* Daily Tzedaka Bar */}
@@ -269,11 +269,11 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <h3 className="platypi-bold text-sm text-black">Daily Tzedaka</h3>
             <p className="platypi-regular text-xs text-black/60">Support Causes</p>
           </div>
-          <div 
-            className={`${tzedakaCompleted ? 'heartbeat-green' : 'heartbeat-pink'}`}
-          >
-            <HeartProgress completed={tzedakaCompleted} size={20} />
-          </div>
+          <HeartProgress 
+            completed={tzedakaCompleted} 
+            size={20} 
+            animationClass={tzedakaCompleted ? 'heartbeat-green' : 'heartbeat-pink'}
+          />
         </button>
 
         {/* Daily Progress Tracker - Compact Version */}
