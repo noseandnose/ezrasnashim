@@ -1,0 +1,106 @@
+Ezras Nashim — Privacy Policy
+
+Last updated: August 27, 2025
+
+Ezras Nashim (“we,” “us,” or “our”) is committed to protecting your privacy. This Privacy Policy explains what information we collect, how we use it, and the choices you have. It applies to our website, PWA, and mobile apps (the “App”).
+
+Quick summary: We only collect what’s needed to run the App (e.g., location for halachic times/compass if you allow it, basic analytics to improve features, and donation details via trusted payment processors). We don’t sell your data or use third-party ads.
+
+Who we are & how to contact us
+
+Controller: Ezras Nashim
+Email: team@ezrasnashim.app
+
+Information we collect
+1) Information you provide
+
+Donations: Name, email, amount, currency, and receipt details. We never store full payment card numbers.
+
+Feedback & support: Your email and the content of your message.
+
+Community inputs (optional): If you submit names for the Global Tehillim system or similar features, those names may be visible to other users. Please avoid sensitive personal information.
+
+2) Information we collect automatically
+
+Usage & analytics: Event counts (e.g., features used, completions, streaks), performance & crash diagnostics, device type, and approximate IP-based region.
+
+Location (only with your permission): Used to calculate zmanim and direction (e.g., compass). By default, location is processed on your device. If a server lookup is required, coordinates may be transmitted transiently and not stored.
+
+Notifications: A device token so we can send reminders (e.g., a daily check-in). You can opt out in device settings.
+
+Local storage: We use local storage/cookies to remember preferences and progress.
+
+3) Donations & payments
+
+We use trusted payment processors (e.g., Stripe, FundraiseUp) to process donations. They receive your payment details directly and act as independent controllers for that data. Please refer to their privacy policies for more information.
+
+How we use your information
+
+Provide the App: Show halachic times, compass, Torah/Tefilla/Tzedaka flows, donation functionality, and your progress/stats.
+
+Improve & secure the App: Debugging, analytics, and fraud prevention.
+
+Communicate with you: Send receipts, support replies, and optional reminders/notifications.
+
+Legal & compliance: Tax-compliant donation records and required disclosures.
+
+Legal bases (GDPR/UK GDPR): performance of a contract, our legitimate interests in running and improving the App, your consent (e.g., location/notifications), and legal obligations (e.g., tax).
+
+Sharing your information
+
+We do not sell your personal information. We share only with:
+
+Service providers: Hosting, databases, analytics, crash/error reporting, and notifications (e.g., APNs/FCM).
+
+Payment processors: To complete donations (e.g., Stripe, FundraiseUp).
+
+Legal & safety: If required by law or to protect rights and safety.
+
+If you choose community features (e.g., submitting names for Tehillim), the content you submit may be visible to others.
+
+Data retention
+
+Donation records: Kept as required for tax and accounting (typically up to 7 years).
+
+Analytics & logs: Kept for the shortest practical time (typically 12–24 months) and then aggregated or deleted.
+
+Local device data: Remains on your device until you delete the App or clear storage.
+
+Your choices & rights
+
+Location & notifications: Enable/disable anytime in your device settings.
+
+Access, correction, deletion: You can request a copy or deletion of your data by emailing team@ezrasnashim.app
+. If you don’t have an account, we may verify using your device token or donation email/receipt details.
+
+Do Not Track/Marketing: We don’t run third-party ads or sell data.
+
+GDPR/UK GDPR rights: Access, rectification, erasure, portability, restriction, and objection; you may withdraw consent at any time.
+
+CCPA/CPRA (California): Right to know, delete, correct, and opt-out of “sale”/“sharing” (not applicable—we don’t sell/share). We will not discriminate for exercising rights.
+
+Children’s privacy
+
+The App is designed for adults. We do not knowingly collect personal information from children under 13 (or under the age required by local law). If you believe a child provided personal information, contact us and we will delete it.
+
+Security
+
+We use industry-standard safeguards (e.g., HTTPS, access controls, encryption at rest by our providers). No method is 100% secure, but we continuously work to protect your data.
+
+International transfers
+
+We operate from [Israel] and may use service providers in the EU, UK, and US. Where required, transfers rely on appropriate safeguards (e.g., Standard Contractual Clauses).
+
+Changes to this policy
+
+We may update this Policy from time to time. We will change the “Last updated” date and, where appropriate, notify you in the App.
+
+Contact
+
+Questions or requests? Email team@ezrasnashim.app
+.
+
+App Store/Play Store short summary (optional)
+
+Privacy Summary: We collect limited data to run Ezras Nashim—usage analytics, optional location for halachic times/compass, notification tokens for reminders, and donation details via trusted processors (no card storage). We don’t sell data or show third-party ads. Manage location/notifications in device settings. Contact: team@ezrasnashim.app
+.

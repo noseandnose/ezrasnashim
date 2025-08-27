@@ -1018,7 +1018,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
     refetchInterval: 30000 // Refetch every 30 seconds
   });
 
-  // Define mutation before any conditional returns (hooks rule)
+  // Define mutations before any conditional returns (hooks rule)
   const advanceChainMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/complete`, {
@@ -1070,6 +1070,73 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
     }
   });
 
+  // Smart Complete and Next mutation - completes current and opens next available perek
+  const completeAndNextMutation = useMutation({
+    mutationFn: async () => {
+      // Step 1: Complete the current perek
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/complete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPerek: progress?.currentPerek,
+          language: language,
+          completedBy: 'Anonymous'
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to advance chain');
+      
+      const updatedProgress = await response.json();
+      
+      // Step 2: Fetch the next perek's text immediately
+      const textResponse = await axiosClient.get(`/api/tehillim/text/${updatedProgress.currentPerek}?language=${language}`);
+      
+      return {
+        progress: updatedProgress,
+        nextTehillimText: textResponse.data
+      };
+    },
+    onSuccess: (data) => {
+      // Track tehillim completion for analytics
+      trackEvent("tehillim_complete", { 
+        perek: progress?.currentPerek,
+        language: language
+      });
+      
+      // Track name prayed for if there was one
+      if (currentName) {
+        trackEvent("name_prayed", {
+          nameId: currentName.id,
+          reason: currentName.reason,
+          perek: progress?.currentPerek
+        });
+      }
+      
+      // Invalidate queries to refresh data for the next perek
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/text'] });
+      
+      // Invalidate analytics stats to show updated counts immediately
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/today'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/month'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/total'] });
+      
+      // Trigger event to refresh main tehillim section
+      const event = new CustomEvent('tehillimCompleted');
+      window.dispatchEvent(event);
+    },
+    onError: (error) => {
+      console.error('Failed to complete and advance chain:', error);
+      toast({
+        title: "Error",
+        description: "Failed to advance to next Tehillim",
+        variant: "destructive",
+      });
+    }
+  });
+
   // Early returns after all hooks are defined
   if (isLoading) return <div className="text-center py-8">Loading Tehillim...</div>;
   if (!progress?.currentPerek) return <div className="text-center py-8">No Tehillim available</div>;
@@ -1095,6 +1162,39 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
     setTimeout(() => {
       checkAndShowCongratulations();
     }, 100);
+  };
+
+  const handleCompleteAndNext = async () => {
+    // Track modal completion for feature usage (use unique key to avoid double counting)
+    trackModalComplete('global-tehillim-chain');
+    markModalComplete('tehillim-text');
+    completeTask('tefilla');
+    
+    // Complete current and advance to next perek
+    try {
+      const result = await completeAndNextMutation.mutateAsync();
+      
+      // Show congratulations briefly
+      checkAndShowCongratulations();
+      
+      // Small delay to let congratulations show, then reopen fullscreen with next perek
+      setTimeout(() => {
+        // Trigger fullscreen modal for the next perek
+        const fullscreenEvent = new CustomEvent('openGlobalTehillimFullscreen', {
+          detail: {
+            nextPerek: result.progress.currentPerek,
+            language: language
+          }
+        });
+        window.dispatchEvent(fullscreenEvent);
+      }, 1200);
+      
+    } catch (error) {
+      console.error('Failed to complete and advance:', error);
+      // On error, just close fullscreen
+      const event = new CustomEvent('closeFullscreen');
+      window.dispatchEvent(event);
+    }
   };
 
   return (
@@ -1130,17 +1230,33 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
         </span>
       </div>
 
-      <Button
-        onClick={isCompleted ? undefined : handleComplete}
-        disabled={isCompleted}
-        className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
-          isCompleted 
-            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
-        }`}
-      >
-        {isCompleted ? 'Completed Today' : `Complete Tehillim ${progress?.currentPerek}`}
-      </Button>
+      <div className="flex gap-2 mt-6">
+        {/* Complete button - returns to home */}
+        <Button
+          onClick={isCompleted ? undefined : handleComplete}
+          disabled={isCompleted || advanceChainMutation.isPending || completeAndNextMutation.isPending}
+          className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
+            isCompleted 
+              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+          }`}
+        >
+          {isCompleted ? 'Completed' : advanceChainMutation.isPending ? 'Completing...' : 'Complete'}
+        </Button>
+        
+        {/* Complete and Next button - goes to next tehillim in chain */}
+        <Button
+          onClick={isCompleted ? undefined : handleCompleteAndNext}
+          disabled={isCompleted || advanceChainMutation.isPending || completeAndNextMutation.isPending}
+          className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
+            isCompleted 
+              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+              : 'bg-gradient-to-r from-sage to-sage/90 text-white hover:scale-105 transition-transform'
+          }`}
+        >
+          {isCompleted ? 'Completed' : completeAndNextMutation.isPending ? 'Loading Next...' : 'Complete & Next'}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -1308,11 +1424,31 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       });
     };
 
+    const handleGlobalTehillimFullscreen = (event: CustomEvent) => {
+      const { nextPerek, language: eventLanguage } = event.detail;
+      
+      // Set the language if provided
+      if (eventLanguage) {
+        setLanguage(eventLanguage);
+      }
+      
+      // Open fullscreen for global tehillim with the next perek
+      setFullscreenContent({
+        isOpen: true,
+        title: `Global Tehillim Chain - Tehillim ${nextPerek}`,
+        contentType: 'global-tehillim',
+        content: null,
+        hasTranslation: true
+      });
+    };
+
     window.addEventListener('closeFullscreen', handleCloseFullscreen);
     window.addEventListener('openDirectFullscreen', handleDirectFullscreen as EventListener);
+    window.addEventListener('openGlobalTehillimFullscreen', handleGlobalTehillimFullscreen as EventListener);
     return () => {
       window.removeEventListener('closeFullscreen', handleCloseFullscreen);
       window.removeEventListener('openDirectFullscreen', handleDirectFullscreen as EventListener);
+      window.removeEventListener('openGlobalTehillimFullscreen', handleGlobalTehillimFullscreen as EventListener);
     };
   }, []);
 

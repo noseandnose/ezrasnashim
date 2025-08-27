@@ -127,6 +127,15 @@ export function formatTextContent(text: string | null | undefined): string {
   // Clean Hebrew text first to remove problematic characters
   let formatted = cleanHebrewText(text);
   
+  // Remove hyphenated line breaks that appear in formatted text
+  // This handles cases like "be- gins" -> "begins", "Howev- er" -> "However"
+  formatted = formatted.replace(/([a-zA-Z])-\s+([a-zA-Z])/g, '$1$2');
+  
+  // Format footnote numbers for English text BEFORE any other processing
+  // Handle footnotes that appear after punctuation: ". 39 Rashi" becomes ". ^39 Rashi"
+  // Also remove any remaining "- " prefix before the number: ". - 39 Rashi" becomes ". ^39 Rashi"
+  formatted = formatted.replace(/([."\]\)])(\s+)(-\s+)?(\d{1,2})(\s+)/g, '$1$2<sup style="font-size: 0.65em; font-weight: normal;">$4</sup>$5');
+  
   // Convert newlines to HTML breaks FIRST before any other processing
   formatted = formatted.replace(/\n/g, '<br />');
   
@@ -153,7 +162,7 @@ export function formatTextContent(text: string | null | undefined): string {
 
   // Process {{ }} for grey boxes (English content)
   // This handles {{text}} for regular grey box content
-  formatted = formatted.replace(/\{\{([^}]+?)\}\}/g, (match, content) => {
+  formatted = formatted.replace(/\{\{([^}]+?)\}\}/g, (_match, content) => {
     // This is regular grey box content for English text
     return `<div style="background-color: #f3f4f6; padding: 12px; border-radius: 8px; margin: 8px 0; border-left: 4px solid #d1d5db;">${content}</div>`;
   });
@@ -238,6 +247,8 @@ export function formatTextContent(text: string | null | undefined): string {
     .replace(/\n\s*\n\s*\n/g, '\n\n')  // Reduce multiple line breaks
     .replace(/[ \t]+$/gm, '')          // Remove trailing whitespace
     .replace(/^\s+|\s+$/g, '');        // Remove leading/trailing whitespace
+
+  // Footnote processing already done earlier in the function
 
   // Convert newlines to <br> tags for proper HTML rendering with preserved spacing
   result = result.replace(/\n/g, '<br />');
