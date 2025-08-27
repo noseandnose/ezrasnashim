@@ -18,6 +18,7 @@ export function useVersionCheck() {
     refetchOnWindowFocus: false,
     refetchOnMount: true,
     staleTime: Infinity, // Don't refetch automatically
+    retry: false, // Don't retry failed version checks
   });
   
   // Store initial version
@@ -49,11 +50,10 @@ export function useVersionCheck() {
       
       try {
         console.log('🔍 Checking for app updates...');
-        // Use the correct port for API calls in development
-        const apiUrl = import.meta.env.DEV 
-          ? `http://localhost:5000/api/version?t=${Date.now()}`
-          : `/api/version?t=${Date.now()}`;
-        const response = await fetch(apiUrl); // Cache bust
+        // Use the same API base URL as the rest of the app
+        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const apiUrl = `${baseUrl}/api/version?t=${Date.now()}`;
+        const response = await fetch(apiUrl);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -84,7 +84,10 @@ export function useVersionCheck() {
           console.log('✅ App is up to date.');
         }
       } catch (error) {
-        console.warn('⚠️ Version check failed:', error);
+        // Silently handle version check failures to avoid console noise
+        if (import.meta.env.MODE === 'development') {
+          console.warn('⚠️ Version check failed:', error);
+        }
       }
     };
     

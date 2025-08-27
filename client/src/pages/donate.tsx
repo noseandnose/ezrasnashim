@@ -1,17 +1,15 @@
-import { useStripe, Elements, PaymentElement, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { useEffect, useState, useRef } from 'react';
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ArrowLeft, Heart, Mail } from "lucide-react";
+import { Heart } from "lucide-react";
 import { useLocation } from "wouter";
-import { useDailyCompletionStore, useModalStore, useDonationCompletionStore, TzedakaButtonType } from "@/lib/types";
+import { useDailyCompletionStore, useModalStore, useDonationCompletionStore } from "@/lib/types";
+
+// TzedakaButtonType definition
+type TzedakaButtonType = 'gave_elsewhere' | 'active_campaign' | 'put_a_coin' | 'sponsor_a_day';
 import { playCoinSound } from "@/utils/sounds";
-import { useTrackModalComplete } from "@/hooks/use-analytics";
-import Stripe from 'stripe';
 // Removed Apple Pay button import - now using integrated PaymentElement
 
 // Add Apple Pay types
@@ -29,14 +27,7 @@ if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
 }
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
-interface DonationFormProps {
-  amount: number;
-  donationType: string;
-  sponsorName: string;
-  dedication: string;
-  clientSecret: string;
-  onSuccess: () => void;
-}
+
 
 
 // const DonationForm = ({ amount, donationType, sponsorName, dedication, onSuccess }: DonationFormProps) => {
@@ -501,7 +492,8 @@ export default function Donate() {
               buttonType,
               donationType: donationType,
               sponsorName: sponsorName || 'Anonymous',
-              dedication: dedication || null
+              dedication: dedication || null,
+              message: message || null
             });
             // Sponsor record created successfully
           } catch (error) {
@@ -788,15 +780,7 @@ export default function Donate() {
       });
   }, []); // Empty dependency array - run only once on mount
 
-  const handleSuccess = () => {
-    // Get email from localStorage if it was set in the form
-    const savedEmail = localStorage.getItem('lastDonationEmail');
-    if (savedEmail) {
-      setUserEmailForReceipt(savedEmail);
-      localStorage.removeItem('lastDonationEmail'); // Clean up
-    }
-    setDonationComplete(true);
-  };
+
 
   const handleBackToApp = () => {
     // Navigate to home with scroll to progress to show flower growth

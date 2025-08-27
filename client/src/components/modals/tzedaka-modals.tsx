@@ -1,19 +1,19 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useModalStore, useDailyCompletionStore } from "@/lib/types";
+import { useModalStore } from "@/lib/types";
 import { useState, useEffect } from "react";
-import { Heart, BookOpen, Baby, Shield, DollarSign } from "lucide-react";
+
 import { useLocation } from "wouter";
-import { useTrackModalComplete } from "@/hooks/use-analytics";
+
 import { useQuery } from "@tanstack/react-query";
 import type { Campaign } from "@shared/schema";
 
 export default function TzedakaModals() {
-  const { activeModal, closeModal, openModal } = useModalStore();
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { activeModal, closeModal } = useModalStore();
+
   const [, setLocation] = useLocation();
   const [donationAmount, setDonationAmount] = useState("");
   const [customAmount, setCustomAmount] = useState("");
@@ -21,7 +21,7 @@ export default function TzedakaModals() {
   const [dedicationText, setDedicationText] = useState("");
   const [sponsorMessage, setSponsorMessage] = useState("");
   const [torahPortion, setTorahPortion] = useState("");
-  const { trackModalComplete } = useTrackModalComplete();
+
 
   // Preselect $1 when wedding-campaign modal opens
   useEffect(() => {
@@ -335,11 +335,11 @@ export default function TzedakaModals() {
           closeModal();
         }
       }}>
-        <DialogContent>
+        <DialogContent aria-describedby="abuse-support-description">
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg platypi-bold text-black">Abuse Support</DialogTitle>
           </div>
-          <p className="text-sm text-gray-600 text-center mb-4">Support women escaping abusive situations</p>
+          <p id="abuse-support-description" className="text-sm text-gray-600 text-center mb-4">Support women escaping abusive situations</p>
           
           <div className="space-y-4">
             <div className="bg-purple-50 p-4 rounded-xl text-sm text-gray-700">

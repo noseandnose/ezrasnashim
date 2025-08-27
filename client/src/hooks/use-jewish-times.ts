@@ -146,9 +146,9 @@ export function useJewishTimes() {
       }
     },
     enabled: !!coordinates, // Only fetch when we have coordinates
-    staleTime: 1000 * 60 * 30, // 30 minutes for location changes
+    staleTime: 1000 * 60 * 60, // Increased to 1 hour (zmanim don't change frequently)
     refetchInterval: false,
-    refetchOnWindowFocus: true, // Refetch when window gains focus
-    refetchOnMount: true,
+    refetchOnWindowFocus: false, // Optimized: Avoid excessive refetches
+    refetchOnMount: false, // Optimized: Use cached data when fresh
   });
 }

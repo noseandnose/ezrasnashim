@@ -45,8 +45,9 @@ export function useHebrewDate() {
     staleTime: 1000 * 60 * 60 * 24, // 24 hours
     refetchInterval: false,
     refetchOnWindowFocus: false,
-    refetchOnMount: 'always', // Only fetch once per day
+    refetchOnMount: false, // Optimized: Don't refetch if data is fresh
     initialData: hebrewDate || undefined,
+    enabled: !hebrewDate || hebrewDate === '', // Only fetch if we don't have cached data
   });
 }
 

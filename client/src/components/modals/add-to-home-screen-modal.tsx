@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Share, Smartphone, X, Download, Plus, Home } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Smartphone, Download, Plus, Home } from "lucide-react";
 
 interface AddToHomeScreenModalProps {
   isOpen: boolean;
@@ -149,6 +149,9 @@ export default function AddToHomeScreenModal({ isOpen, onClose }: AddToHomeScree
             <Smartphone className="w-5 h-5 text-blush" />
             <span className="platypi-bold text-xl">Add to Home Screen</span>
           </DialogTitle>
+          <DialogDescription>
+            Access Ezras Nashim instantly from your home screen - no app store needed!
+          </DialogDescription>
         </DialogHeader>
         
         <div className="py-4">

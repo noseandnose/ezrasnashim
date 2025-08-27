@@ -1610,32 +1610,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { buttonType, donationType, sponsorName, dedication, message } = req.body;
       
+      console.log('📋 Donation completion request received:', {
+        donationType,
+        sponsorName,
+        dedication,
+        message,
+        hasName: !!sponsorName,
+        donationTypeMatch: donationType === 'Sponsor a Day of Ezras Nashim'
+      });
+      
       // Only create sponsor record for "Sponsor a Day" donations
       if (buttonType === 'sponsor_a_day' && sponsorName) {
         // Day starts at 02:00 local time for analytics
-      const now = new Date();
-      const hours = now.getHours();
-      if (hours < 2) {
-        now.setDate(now.getDate() - 1);
-      }
-      const today = now.toISOString().split('T')[0];
+        const now = new Date();
+        const hours = now.getHours();
+        if (hours < 2) {
+          now.setDate(now.getDate() - 1);
+        }
+        const today = now.toISOString().split('T')[0];
         
-        // Create sponsor record
-        await storage.createSponsor({
+        const sponsorData = {
           name: sponsorName,
           sponsorshipDate: today,
           inHonorMemoryOf: dedication || null,
           message: message || null,
           isActive: true
+        };
+        
+        console.log('🎯 Creating sponsor record with data:', sponsorData);
+        
+        // Create sponsor record
+        const createdSponsor = await storage.createSponsor(sponsorData);
+        
+        console.log(`✅ Successfully created sponsor record:`, {
+          id: createdSponsor.id,
+          name: createdSponsor.name,
+          date: createdSponsor.sponsorshipDate,
+          dedication: createdSponsor.inHonorMemoryOf,
+          message: createdSponsor.message
         });
         
-        console.log(`Created sponsor record for ${sponsorName} on ${today}`);
-        res.json({ success: true, message: 'Sponsor record created' });
+        res.json({ success: true, message: 'Sponsor record created', sponsor: createdSponsor });
       } else {
+        console.log('⏭️ No sponsor record needed - conditions not met:', {
+          donationType,
+          sponsorName,
+          isCorrectType: donationType === 'Sponsor a Day of Ezras Nashim',
+          hasName: !!sponsorName
+        });
         res.json({ success: true, message: 'No sponsor record needed' });
       }
     } catch (error: any) {
-      console.error('Failed to create sponsor record:', error);
+      console.error('❌ Failed to create sponsor record:', error);
       res.status(500).json({ 
         success: false, 
         message: 'Failed to create sponsor record',
@@ -2825,7 +2851,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/", (req, res) => {
+  app.get("/healthcheck", (req, res) => {
     res.json({ status: "OK" });
   })
   
