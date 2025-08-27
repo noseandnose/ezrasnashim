@@ -223,11 +223,6 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         <button
           onClick={() => navigateToSection('torah')}
           className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
-          style={{
-            animation: torahCompleted 
-              ? 'gentle-glow-green-small 3s ease-in-out infinite' 
-              : 'gentle-glow-pink-small 3s ease-in-out infinite'
-          }}
         >
           <div className={`p-3 rounded-full ${torahCompleted ? 'bg-sage' : 'bg-gradient-feminine'}`}>
             <BookOpen className="text-white" size={20} strokeWidth={1.5} />
@@ -236,18 +231,22 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <h3 className="platypi-bold text-sm text-black">Daily Torah</h3>
             <p className="platypi-regular text-xs text-black/60">Halacha, Emuna & Chizuk</p>
           </div>
-          <HeartProgress completed={torahCompleted} size={20} />
+          <div 
+            className="rounded-full"
+            style={{
+              animation: torahCompleted 
+                ? 'heartbeat-green 1.5s ease-in-out infinite' 
+                : 'heartbeat-pink 1.5s ease-in-out infinite'
+            }}
+          >
+            <HeartProgress completed={torahCompleted} size={20} />
+          </div>
         </button>
 
         {/* Daily Tefilla Bar */}
         <button
           onClick={() => navigateToSection('tefilla')}
           className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
-          style={{
-            animation: tefillaCompleted 
-              ? 'gentle-glow-green-small 3s ease-in-out infinite' 
-              : 'gentle-glow-pink-small 3s ease-in-out infinite'
-          }}
         >
           <div className={`p-3 rounded-full ${tefillaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-blush to-lavender'}`}>
             <HandHeart className="text-white" size={20} strokeWidth={1.5} />
@@ -256,18 +255,22 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <h3 className="platypi-bold text-sm text-black">Daily Tefilla</h3>
             <p className="platypi-regular text-xs text-black/60">Tehillim & Prayers</p>
           </div>
-          <HeartProgress completed={tefillaCompleted} size={20} />
+          <div 
+            className="rounded-full"
+            style={{
+              animation: tefillaCompleted 
+                ? 'heartbeat-green 1.5s ease-in-out infinite' 
+                : 'heartbeat-pink 1.5s ease-in-out infinite'
+            }}
+          >
+            <HeartProgress completed={tefillaCompleted} size={20} />
+          </div>
         </button>
 
         {/* Daily Tzedaka Bar */}
         <button
           onClick={() => navigateToSection('tzedaka')}
           className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
-          style={{
-            animation: tzedakaCompleted 
-              ? 'gentle-glow-green-small 3s ease-in-out infinite' 
-              : 'gentle-glow-pink-small 3s ease-in-out infinite'
-          }}
         >
           <div className={`p-3 rounded-full ${tzedakaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-muted-lavender to-rose-blush'}`}>
             <Coins className="text-white" size={20} strokeWidth={1.5} />
@@ -276,7 +279,16 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <h3 className="platypi-bold text-sm text-black">Daily Tzedaka</h3>
             <p className="platypi-regular text-xs text-black/60">Support Causes</p>
           </div>
-          <HeartProgress completed={tzedakaCompleted} size={20} />
+          <div 
+            className="rounded-full"
+            style={{
+              animation: tzedakaCompleted 
+                ? 'heartbeat-green 1.5s ease-in-out infinite' 
+                : 'heartbeat-pink 1.5s ease-in-out infinite'
+            }}
+          >
+            <HeartProgress completed={tzedakaCompleted} size={20} />
+          </div>
         </button>
 
         {/* Daily Progress Tracker - Compact Version */}
