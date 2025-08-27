@@ -2851,7 +2851,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // staging
   app.get("/healthcheck", (req, res) => {
+    res.json({ status: "OK" });
+  })
+
+  // prod
+  app.get("/", (req, res) => {
     res.json({ status: "OK" });
   })
   
