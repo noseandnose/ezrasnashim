@@ -279,7 +279,11 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         {/* Daily Progress Tracker - Compact Version */}
         <div 
           id="daily-progress-garden"
-          className="rounded-2xl px-4 py-3 shadow-lg border border-blush/10 bg-white mt-4 flex items-center justify-between min-h-[90px]"
+          className={`rounded-2xl px-4 py-3 shadow-lg border border-blush/10 bg-white mt-4 flex items-center justify-between min-h-[90px] ${
+            torahCompleted && tefillaCompleted && tzedakaCompleted 
+              ? 'drop-shadow-garden-green' 
+              : 'drop-shadow-garden-pink'
+          }`}
         >
           {/* Left side: Title and subtitle */}
           <div className="flex flex-col justify-center flex-1">
