@@ -25,8 +25,9 @@ const VAPID_EMAIL = process.env.VAPID_EMAIL;
 
 // Configure web-push with VAPID keys
 if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY && VAPID_EMAIL) {
+  // Use a proper mailto: URL for VAPID subject to ensure proper branding
   webpush.setVapidDetails(
-    VAPID_EMAIL,
+    `mailto:${VAPID_EMAIL}`,
     VAPID_PUBLIC_KEY,
     VAPID_PRIVATE_KEY
   );
