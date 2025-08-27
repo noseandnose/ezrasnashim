@@ -232,12 +232,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <p className="platypi-regular text-xs text-black/60">Halacha, Emuna & Chizuk</p>
           </div>
           <div 
-            className="rounded-full"
-            style={{
-              animation: torahCompleted 
-                ? 'heartbeat-green 2s ease-in-out infinite' 
-                : 'heartbeat-pink 2s ease-in-out infinite'
-            }}
+            className={`rounded-full ${torahCompleted ? 'heartbeat-green' : 'heartbeat-pink'}`}
           >
             <HeartProgress completed={torahCompleted} size={20} />
           </div>
@@ -256,12 +251,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <p className="platypi-regular text-xs text-black/60">Tehillim & Prayers</p>
           </div>
           <div 
-            className="rounded-full"
-            style={{
-              animation: tefillaCompleted 
-                ? 'heartbeat-green 2s ease-in-out infinite' 
-                : 'heartbeat-pink 2s ease-in-out infinite'
-            }}
+            className={`rounded-full ${tefillaCompleted ? 'heartbeat-green' : 'heartbeat-pink'}`}
           >
             <HeartProgress completed={tefillaCompleted} size={20} />
           </div>
@@ -280,12 +270,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <p className="platypi-regular text-xs text-black/60">Support Causes</p>
           </div>
           <div 
-            className="rounded-full"
-            style={{
-              animation: tzedakaCompleted 
-                ? 'heartbeat-green 2s ease-in-out infinite' 
-                : 'heartbeat-pink 2s ease-in-out infinite'
-            }}
+            className={`rounded-full ${tzedakaCompleted ? 'heartbeat-green' : 'heartbeat-pink'}`}
           >
             <HeartProgress completed={tzedakaCompleted} size={20} />
           </div>
