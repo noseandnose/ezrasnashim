@@ -365,11 +365,15 @@ body {
 .heartbeat-pink {
   animation: heartbeat-pink 1.2s ease-in-out infinite;
   animation-delay: 0s !important;
+  background: transparent !important;
+  box-shadow: none;
 }
 
 .heartbeat-green {
   animation: heartbeat-green 1.2s ease-in-out infinite;
   animation-delay: 0s !important;
+  background: transparent !important;
+  box-shadow: none;
 }
 [dir="rtl"] {
   direction: rtl;
@@ -394,9 +398,18 @@ body {
   fill: #E8B4CB !important;
 }
 
-/* Force all text to be pure black */
+/* Force all text to be pure black except heart icons */
 *, *::before, *::after {
   color: #000000 !important;
+}
+
+/* Allow heart icons to have their own colors */
+.heartbeat-pink, .heartbeat-green {
+  color: unset !important;
+}
+
+.heartbeat-pink svg, .heartbeat-green svg {
+  color: unset !important;
 }
 
 /* Force black text in all possible text elements */
