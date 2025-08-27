@@ -129,7 +129,8 @@ export function formatTextContent(text: string | null | undefined): string {
   
   // Format footnote numbers for English text BEFORE any other processing
   // Handle footnotes that appear after punctuation: ". 39 Rashi" becomes ". ^39 Rashi"
-  formatted = formatted.replace(/([."\]\)])(\s+)(\d{1,2})(\s+)/g, '$1$2<sup style="font-size: 0.65em; font-weight: normal;">$3</sup>$4');
+  // Also remove any "- " prefix before the number: ". - 39 Rashi" becomes ". ^39 Rashi"
+  formatted = formatted.replace(/([."\]\)])(\s+)(-\s+)?(\d{1,2})(\s+)/g, '$1$2<sup style="font-size: 0.65em; font-weight: normal;">$4</sup>$5');
   
   // Convert newlines to HTML breaks FIRST before any other processing
   formatted = formatted.replace(/\n/g, '<br />');
@@ -157,7 +158,7 @@ export function formatTextContent(text: string | null | undefined): string {
 
   // Process {{ }} for grey boxes (English content)
   // This handles {{text}} for regular grey box content
-  formatted = formatted.replace(/\{\{([^}]+?)\}\}/g, (match, content) => {
+  formatted = formatted.replace(/\{\{([^}]+?)\}\}/g, (_match, content) => {
     // This is regular grey box content for English text
     return `<div style="background-color: #f3f4f6; padding: 12px; border-radius: 8px; margin: 8px 0; border-left: 4px solid #d1d5db;">${content}</div>`;
   });
