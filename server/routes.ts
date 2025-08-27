@@ -2851,7 +2851,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/", (req, res) => {
+  app.get("/healthcheck", (req, res) => {
     res.json({ status: "OK" });
   })
   
