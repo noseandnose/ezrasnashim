@@ -128,11 +128,8 @@ export function formatTextContent(text: string | null | undefined): string {
   let formatted = cleanHebrewText(text);
   
   // Format footnote numbers for English text BEFORE any other processing
-  // Handle footnotes at beginning of lines or after spaces
-  formatted = formatted.replace(/(?:^|\s)- (\d{1,2})\b/gm, (match, num) => {
-    const leadingSpace = match.startsWith(' ') ? ' ' : '';
-    return `${leadingSpace}<sup style="font-size: 0.75em;">${num}</sup>`;
-  });
+  // Handle footnotes: "- 39" becomes superscript 39
+  formatted = formatted.replace(/- (\d{1,2})(?=\s|$)/g, '<sup style="font-size: 0.65em; font-weight: normal;">$1</sup>');
   
   // Convert newlines to HTML breaks FIRST before any other processing
   formatted = formatted.replace(/\n/g, '<br />');
