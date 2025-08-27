@@ -409,6 +409,11 @@ body {
   filter: drop-shadow(0 4px 12px rgba(34, 197, 94, 0.3)) drop-shadow(0 2px 4px rgba(34, 197, 94, 0.2));
 }
 
+/* Mazal Tov Green Drop Shadow */
+.drop-shadow-mazal-tov {
+  filter: drop-shadow(0 6px 16px rgba(34, 197, 94, 0.4)) drop-shadow(0 3px 8px rgba(34, 197, 94, 0.3));
+}
+
 /* Force black text in all possible text elements */
 p, span, div, a, li, td, th, label, input, textarea, select, option {
   color: #000000 !important;

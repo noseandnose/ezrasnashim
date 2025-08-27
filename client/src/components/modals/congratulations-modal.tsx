@@ -32,7 +32,7 @@ export default function CongratulationsModal() {
           
           {/* Content above the flower image */}
           <div className="relative z-10 text-center">
-            <DialogTitle className="text-2xl font-playfair font-bold text-black mb-3">
+            <DialogTitle className="text-2xl font-playfair font-bold text-black mb-3 drop-shadow-mazal-tov">
               Mazal Tov!
             </DialogTitle>
             <DialogDescription className="text-black font-bold mb-6 leading-relaxed font-inter">
