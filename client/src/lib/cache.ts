@@ -152,7 +152,7 @@ export function initializeCache(): void {
   preloadCriticalData();
   
   // Set up periodic cleanup
-  setInterval(cleanupCache, 10 * 60 * 1000); // Every 10 minutes
+  setInterval(cleanupCache, 30 * 60 * 1000); // Every 30 minutes (optimized)
   
   cacheInitialized = true;
 }
