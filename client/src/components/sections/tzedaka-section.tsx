@@ -365,12 +365,9 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
               : 'bg-white border-blush/30'
           }`}
           style={{
-            boxShadow: isTzedakaButtonCompleted('put_a_coin') 
-              ? undefined 
-              : '0 0 8px rgba(244, 63, 94, 0.3)',
             animation: isTzedakaButtonCompleted('put_a_coin') 
-              ? undefined 
-              : 'gentle-glow 3s ease-in-out infinite'
+              ? 'gentle-glow-green 3s ease-in-out infinite' 
+              : 'gentle-glow-pink 3s ease-in-out infinite'
           }}
         >
           <div className="flex items-center justify-center space-x-4">
