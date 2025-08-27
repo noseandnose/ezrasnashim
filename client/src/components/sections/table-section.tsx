@@ -100,7 +100,10 @@ export default function TableSection() {
         )}
         
         {/* Shabbos Times Section */}
-        <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
+        <div className="bg-white/70 rounded-2xl p-3 border border-blush/10"
+             style={{
+               animation: 'gentle-glow-pink 3s ease-in-out infinite'
+             }}>
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-3">
               <div className="flex items-center justify-center w-10 h-10 bg-gradient-feminine rounded-full">
