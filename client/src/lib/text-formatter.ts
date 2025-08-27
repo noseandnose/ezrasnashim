@@ -239,6 +239,9 @@ export function formatTextContent(text: string | null | undefined): string {
     .replace(/[ \t]+$/gm, '')          // Remove trailing whitespace
     .replace(/^\s+|\s+$/g, '');        // Remove leading/trailing whitespace
 
+  // Format footnote numbers for English text - remove "- " prefix and make numbers small
+  result = result.replace(/- (\d{1,2})\b/g, '<sup style="font-size: 0.75em;">$1</sup>');
+
   // Convert newlines to <br> tags for proper HTML rendering with preserved spacing
   result = result.replace(/\n/g, '<br />');
   
