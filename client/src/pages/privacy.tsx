@@ -1,9 +1,9 @@
 import { useEffect } from "react";
-import { X, Minus, Plus } from "lucide-react";
-import { useState } from "react";
+import { X } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function Privacy() {
-  const [fontSize, setFontSize] = useState(16);
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     // Prevent scrolling on the background
@@ -14,8 +14,8 @@ export default function Privacy() {
     };
   }, []);
 
-  const adjustFontSize = (delta: number) => {
-    setFontSize(prev => Math.max(12, Math.min(24, prev + delta)));
+  const handleClose = () => {
+    setLocation('/');
   };
 
   const privacyContent = `Ezras Nashim — Privacy Policy
@@ -137,43 +137,19 @@ Questions or requests? Email team@ezrasnashim.app.
             </h2>
           </div>
           
-          <div className="flex items-center space-x-3">
-            {/* Font Size Controls */}
-            <div className="flex items-center bg-white/20 rounded-full px-3 py-1 space-x-2">
-              <button
-                onClick={() => adjustFontSize(-2)}
-                className="p-1 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
-                disabled={fontSize <= 12}
-              >
-                <Minus className="w-4 h-4 text-white" />
-              </button>
-              <span className="text-white text-sm font-medium">A</span>
-              <button
-                onClick={() => adjustFontSize(2)}
-                className="p-1 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
-                disabled={fontSize >= 24}
-              >
-                <Plus className="w-4 h-4 text-white" />
-              </button>
-            </div>
-            
-            <button
-              onClick={() => window.history.back()}
-              className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
-            >
-              <X className="w-5 h-5 text-white" />
-            </button>
-          </div>
+          <button
+            onClick={handleClose}
+            className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+          >
+            <X className="w-5 h-5 text-white" />
+          </button>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-auto p-6">
-          <div 
-            className="prose prose-gray max-w-none"
-            style={{ fontSize: `${fontSize}px` }}
-          >
+          <div className="prose prose-gray max-w-none">
             <div 
-              className="whitespace-pre-line leading-relaxed text-gray-800"
+              className="whitespace-pre-line leading-relaxed text-gray-800 text-base"
               dangerouslySetInnerHTML={{ 
                 __html: privacyContent
                   .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
