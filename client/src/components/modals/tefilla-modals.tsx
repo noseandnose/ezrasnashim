@@ -1236,7 +1236,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
           className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
             isCompleted 
               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              : 'bg-gradient-to-r from-sage to-blush text-white hover:scale-105 transition-transform'
           }`}
         >
           {isCompleted ? 'Completed' : completeAndNextMutation.isPending ? 'Loading Next...' : 'Complete & Next'}
@@ -3333,7 +3333,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                         className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
                           isModalComplete(`individual-tehillim-${selectedPsalm}`) 
                             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                            : 'bg-gradient-to-r from-sage to-blush text-white hover:scale-105 transition-transform'
                         }`}
                       >
                         {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete & Next'}
