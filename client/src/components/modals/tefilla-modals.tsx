@@ -925,7 +925,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
             
             <Button
               onClick={handleCompleteAndNext}
-              className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-blush text-white hover:scale-105 transition-transform"
+              className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform"
             >
               Complete & Next ({selectedPsalm && selectedPsalm < 150 ? selectedPsalm + 1 : 1})
             </Button>
@@ -3456,7 +3456,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                           className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
                             isModalComplete(`individual-tehillim-${selectedPsalm}`) 
                               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                              : 'bg-gradient-to-r from-sage to-sage/90 text-white hover:scale-105 transition-transform'
+                              : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform'
                           }`}
                         >
                           {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete & Next'}
@@ -3618,7 +3618,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
             className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
               isModalComplete(`individual-tehillim-${selectedPsalm}`) 
                 ? 'bg-muted-lavender text-white cursor-not-allowed opacity-70' 
-                : 'bg-muted-lavender text-white hover:scale-105 transition-transform'
+                : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform'
             }`}
           >
             {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Next' : 'Complete & Next'}
