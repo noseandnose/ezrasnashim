@@ -12,16 +12,19 @@ import { Expand, BookOpen } from "lucide-react";
 import type { ParshaVort } from "@shared/schema";
 
 export default function ParshaVortModal() {
-  const { modalId, isOpen, closeModal } = useModalStore();
+  const { activeModal, closeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [fullscreenContent, setFullscreenContent] = useState<any>({ isOpen: false });
 
+  const isOpen = activeModal === 'parsha-vort';
+
   // Fetch parsha vort content
   const { data: parshaVort, isLoading } = useQuery<ParshaVort>({
     queryKey: ['/api/table/vort'],
+    enabled: isOpen, // Only fetch when modal is open
     staleTime: 60 * 60 * 1000, // 1 hour
     gcTime: 4 * 60 * 60 * 1000 // 4 hours
   });
@@ -94,8 +97,9 @@ export default function ParshaVortModal() {
           {parshaVort.audioUrl && (
             <div className="bg-white rounded-2xl p-4 border border-blush/10">
               <AudioPlayer 
-                src={parshaVort.audioUrl} 
+                audioUrl={parshaVort.audioUrl} 
                 title={parshaVort.title || 'Weekly Parsha Vort'}
+                duration="0:00"
               />
             </div>
           )}
@@ -117,7 +121,7 @@ export default function ParshaVortModal() {
     });
   };
 
-  if (!isOpen || modalId !== 'parsha-vort') return null;
+  if (!isOpen) return null;
 
   return (
     <>
@@ -182,8 +186,9 @@ export default function ParshaVortModal() {
                 {/* Audio Player */}
                 {parshaVort.audioUrl && (
                   <AudioPlayer 
-                    src={parshaVort.audioUrl} 
+                    audioUrl={parshaVort.audioUrl} 
                     title={parshaVort.title || 'Weekly Parsha Vort'}
+                    duration="0:00"
                   />
                 )}
 
