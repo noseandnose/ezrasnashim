@@ -666,6 +666,10 @@ button, .btn, [role="button"] {
   background: linear-gradient(135deg, hsl(260, 30%, 85%) 0%, hsl(120, 20%, 75%) 100%);
 }
 
+.bg-gradient-sage-to-blush {
+  background: linear-gradient(to right, hsl(120, 20%, 75%) 0%, hsl(350, 45%, 85%) 100%);
+}
+
 /* Gentle Transitions & Animations */
 .transition-gentle {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
