@@ -129,7 +129,7 @@ export default function Statistics() {
     "tehillim-text": "Global Tehillim Chain", // Legacy key for existing data
     "special-tehillim": "Special Tehillim",
     "individual-tehillim": "Individual Tehillim", 
-    "nishmas-campaign": "Nishmas Campaign",
+    "nishmas-campaign": "Nishmas Kol Chai",
     "al-hamichiya": "Al Hamichiya",
     "individual-prayer": "Individual Prayer",
     
