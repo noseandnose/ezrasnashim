@@ -1503,9 +1503,26 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           contentType = 'special-tehillim';
           break;
         case 'tehillim-text':
-          title = 'Global Tehillim Chain';
-          contentType = 'global-tehillim';
-          break;
+          // Fetch current perek dynamically since we don't have global progress in this scope
+          fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress`)
+            .then(res => res.json())
+            .then(data => {
+              setFullscreenContent({
+                isOpen: true,
+                title: `Perek ${data.currentPerek}`,
+                contentType: 'global-tehillim',
+                content: null
+              });
+            })
+            .catch(() => {
+              setFullscreenContent({
+                isOpen: true,
+                title: 'Global Tehillim',
+                contentType: 'global-tehillim',
+                content: null
+              });
+            });
+          return; // Exit early since we handle setFullscreenContent in the async call
       }
       
       // Open fullscreen immediately without closing modal first
