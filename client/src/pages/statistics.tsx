@@ -312,12 +312,19 @@ export default function Statistics() {
           </h2>
           
           <div className="grid grid-cols-2 gap-3">
-            <StatCard
-              title="Mitzvas Completed"
-              value={currentLoading ? "..." : ((currentData as any)?.totalActs || 0).toLocaleString()}
-              icon={TrendingUp}
-              color="text-blush"
-            />
+            {/* Mitzvas Completed - with drop shadow animation */}
+            <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10"
+                 style={{
+                   animation: 'gentle-glow-pink 3s ease-in-out infinite'
+                 }}>
+              <div className="flex items-center justify-between mb-2">
+                <TrendingUp className="h-5 w-5 text-blush" />
+                <span className="text-xs platypi-medium text-warm-gray text-right">Mitzvas Completed</span>
+              </div>
+              <div className="text-2xl platypi-bold text-black text-center">
+                {currentLoading ? "..." : ((currentData as any)?.totalActs || 0).toLocaleString()}
+              </div>
+            </div>
             <StatCard
               title="Women Visited"
               value={currentLoading ? "..." : (currentData as any)?.totalUsers?.toLocaleString() || (currentData as any)?.uniqueUsers || 0}

@@ -25,8 +25,9 @@ const VAPID_EMAIL = process.env.VAPID_EMAIL;
 
 // Configure web-push with VAPID keys
 if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY && VAPID_EMAIL) {
+  // Use a proper mailto: URL for VAPID subject to ensure proper branding
   webpush.setVapidDetails(
-    VAPID_EMAIL,
+    `mailto:${VAPID_EMAIL}`,
     VAPID_PUBLIC_KEY,
     VAPID_PRIVATE_KEY
   );
@@ -2856,10 +2857,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "OK" });
   })
 
-  // prod
-  app.get("/", (req, res) => {
-    res.json({ status: "OK" });
-  })
+  // Development: Inform about frontend port  
+  if (process.env.NODE_ENV === 'development') {
+    app.get("/", (req, res) => {
+      res.send(`
+        <html>
+          <head>
+            <title>Ezras Nashim API Server</title>
+            <style>
+              body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f5f5f5; }
+              .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+              h1 { color: #333; margin-bottom: 20px; }
+              p { color: #666; line-height: 1.6; margin-bottom: 15px; }
+              .frontend-link { display: inline-block; padding: 12px 24px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+              .frontend-link:hover { background: #0056b3; }
+              .api-status { color: #28a745; font-weight: bold; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h1>🌺 Ezras Nashim API Server</h1>
+              <p class="api-status">✅ API Server Running (Port 5000)</p>
+              <p>This is the backend API server. To access the Ezras Nashim application interface, please use:</p>
+              <a href="https://${req.get('host')?.replace(':5000', ':5173')}" class="frontend-link">
+                Access Frontend Application (Port 5173)
+              </a>
+              <p><small>The frontend runs on port 5173 during development.</small></p>
+            </div>
+          </body>
+        </html>
+      `);
+    });
+  } else {
+    // Production: Serve API status  
+    app.get("/", (req, res) => {
+      res.json({ status: "OK" });
+    });
+  }
   
   // Version endpoint for PWA update checking
   // Use server start time as the build timestamp to detect actual deployments

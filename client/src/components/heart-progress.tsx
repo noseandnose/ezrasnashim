@@ -3,14 +3,15 @@ import { Heart } from "lucide-react";
 interface HeartProgressProps {
   completed: boolean;
   size?: number;
+  animationClass?: string;
 }
 
-export default function HeartProgress({ completed, size = 18 }: HeartProgressProps) {
+export default function HeartProgress({ completed, size = 18, animationClass = '' }: HeartProgressProps) {
   if (completed) {
     return (
       <Heart 
         size={size} 
-        className="text-blush fill-blush animate-pulse" 
+        className={`text-sage fill-sage ${animationClass}`}
         strokeWidth={2}
       />
     );
@@ -19,7 +20,7 @@ export default function HeartProgress({ completed, size = 18 }: HeartProgressPro
   return (
     <Heart 
       size={size} 
-      className="text-gray-300" 
+      className={`text-blush fill-blush ${animationClass}`}
       strokeWidth={2}
     />
   );

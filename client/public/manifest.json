@@ -3,6 +3,7 @@
   "short_name": "Ezras Nashim",
   "description": "Daily Jewish spiritual app for women",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "theme_color": "#E8ADB7",
   "background_color": "#FFF8F0",

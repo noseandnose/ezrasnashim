@@ -142,7 +142,10 @@ export default function TorahSection({ onSectionChange }: TorahSectionProps) {
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">
         {/* Daily Inspiration - Pirkei Avot */}
         {pirkeiAvot && (
-          <div className="bg-white/70 rounded-2xl p-3 mb-3 border border-blush/10">
+          <div className="bg-white/70 rounded-2xl p-3 mb-3 border border-blush/10"
+               style={{
+                 animation: 'gentle-glow-pink 3s ease-in-out infinite'
+               }}>
             <div className="flex items-center gap-2 mb-3">
               <div className="bg-gradient-feminine p-1.5 rounded-full">
                 <Scroll className="text-white" size={16} />

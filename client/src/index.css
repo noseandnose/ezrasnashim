@@ -256,6 +256,113 @@ body {
     box-shadow: 0 0 0 8px rgba(251, 207, 232, 0.3), 0 0 25px rgba(251, 207, 232, 0.6);
   }
 }
+
+/* Gentle glow animation for daily bars - Pink (incomplete) */
+@keyframes gentle-glow-pink {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(244, 63, 94, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(244, 63, 94, 0.5);
+  }
+}
+
+/* Gentle glow animation for daily bars - Green (completed) */
+@keyframes gentle-glow-green {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
+  }
+}
+
+/* Smaller glow animations for home page daily buttons */
+@keyframes gentle-glow-pink-small {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(244, 63, 94, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 8px rgba(244, 63, 94, 0.3);
+  }
+}
+
+@keyframes gentle-glow-green-small {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(34, 197, 94, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+  }
+}
+
+/* Realistic heartbeat animation - lub-dub pattern */
+@keyframes realistic-heartbeat {
+  0%, 40%, 100% {
+    transform: scale(1);
+  }
+  5% {
+    transform: scale(1.1);
+  }
+  15% {
+    transform: scale(1.05);
+  }
+}
+
+/* Pink heartbeat with distinct lub-dub pattern - no shadows */
+@keyframes heartbeat-pink {
+  0%, 60%, 100% {
+    transform: scale(1);
+  }
+  /* First beat - LUB (strong) */
+  8% {
+    transform: scale(1.15);
+  }
+  12% {
+    transform: scale(1);
+  }
+  /* Second beat - DUB (weaker) - moved further apart */
+  30% {
+    transform: scale(1.08);
+  }
+  34% {
+    transform: scale(1);
+  }
+}
+
+/* Green heartbeat with distinct lub-dub pattern - no shadows */
+@keyframes heartbeat-green {
+  0%, 60%, 100% {
+    transform: scale(1);
+  }
+  /* First beat - LUB (strong) */
+  8% {
+    transform: scale(1.15);
+  }
+  12% {
+    transform: scale(1);
+  }
+  /* Second beat - DUB (weaker) - moved further apart */
+  30% {
+    transform: scale(1.08);
+  }
+  34% {
+    transform: scale(1);
+  }
+}
+
+/* CSS classes for synchronized heartbeat - 50 BPM timing */
+.heartbeat-pink {
+  animation: heartbeat-pink 1.2s ease-in-out infinite;
+  animation-delay: 0s !important;
+  background: transparent !important;
+}
+
+.heartbeat-green {
+  animation: heartbeat-green 1.2s ease-in-out infinite;
+  animation-delay: 0s !important;
+  background: transparent !important;
+}
 [dir="rtl"] {
   direction: rtl;
   text-align: right;
@@ -279,9 +386,32 @@ body {
   fill: #E8B4CB !important;
 }
 
-/* Force all text to be pure black */
+/* Force all text to be pure black except heart icons */
 *, *::before, *::after {
   color: #000000 !important;
+}
+
+/* Allow heart icons to have their own colors */
+.heartbeat-pink, .heartbeat-green {
+  color: unset !important;
+}
+
+.heartbeat-pink svg, .heartbeat-green svg {
+  color: unset !important;
+}
+
+/* Daily Progress Garden Drop Shadows */
+.drop-shadow-garden-pink {
+  filter: drop-shadow(0 4px 12px rgba(244, 63, 94, 0.3)) drop-shadow(0 2px 4px rgba(244, 63, 94, 0.2));
+}
+
+.drop-shadow-garden-green {
+  filter: drop-shadow(0 4px 12px rgba(34, 197, 94, 0.3)) drop-shadow(0 2px 4px rgba(34, 197, 94, 0.2));
+}
+
+/* Mazal Tov Green Drop Shadow */
+.drop-shadow-mazal-tov {
+  filter: drop-shadow(0 6px 16px rgba(34, 197, 94, 0.4)) drop-shadow(0 3px 8px rgba(34, 197, 94, 0.3));
 }
 
 /* Force black text in all possible text elements */

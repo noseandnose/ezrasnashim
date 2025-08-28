@@ -231,7 +231,11 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <h3 className="platypi-bold text-sm text-black">Daily Torah</h3>
             <p className="platypi-regular text-xs text-black/60">Halacha, Emuna & Chizuk</p>
           </div>
-          <HeartProgress completed={torahCompleted} size={20} />
+          <HeartProgress 
+            completed={torahCompleted} 
+            size={20} 
+            animationClass={torahCompleted ? 'heartbeat-green' : 'heartbeat-pink'}
+          />
         </button>
 
         {/* Daily Tefilla Bar */}
@@ -246,7 +250,11 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <h3 className="platypi-bold text-sm text-black">Daily Tefilla</h3>
             <p className="platypi-regular text-xs text-black/60">Tehillim & Prayers</p>
           </div>
-          <HeartProgress completed={tefillaCompleted} size={20} />
+          <HeartProgress 
+            completed={tefillaCompleted} 
+            size={20} 
+            animationClass={tefillaCompleted ? 'heartbeat-green' : 'heartbeat-pink'}
+          />
         </button>
 
         {/* Daily Tzedaka Bar */}
@@ -261,13 +269,17 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <h3 className="platypi-bold text-sm text-black">Daily Tzedaka</h3>
             <p className="platypi-regular text-xs text-black/60">Support Causes</p>
           </div>
-          <HeartProgress completed={tzedakaCompleted} size={20} />
+          <HeartProgress 
+            completed={tzedakaCompleted} 
+            size={20} 
+            animationClass={tzedakaCompleted ? 'heartbeat-green' : 'heartbeat-pink'}
+          />
         </button>
 
         {/* Daily Progress Tracker - Compact Version */}
         <div 
           id="daily-progress-garden"
-          className="rounded-2xl px-4 py-3 shadow-lg border border-blush/10 bg-white mt-4 flex items-center justify-between min-h-[90px]"
+          className="rounded-2xl pl-4 pr-1 py-3 shadow-lg border border-blush/10 bg-white mt-4 flex items-center justify-between min-h-[90px]"
         >
           {/* Left side: Title and subtitle */}
           <div className="flex flex-col justify-center flex-1">
@@ -278,7 +290,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           </div>
           
           {/* Right side: Progress image */}
-          <div className="flex items-center justify-center -mr-2">
+          <div className="flex items-center justify-center">
             <DailyProgress />
           </div>
         </div>
