@@ -28,6 +28,7 @@ export const parshaVorts = pgTable("parsha_vorts", {
   audioUrl: text("audio_url").notNull(),
   speaker: text("speaker"),
   speakerWebsite: text("speaker_website"),
+  thankYouMessage: text("thank_you_message"), // Dynamic thank you message with support for clickable links
   createdAt: timestamp("created_at").defaultNow(),
 });
 

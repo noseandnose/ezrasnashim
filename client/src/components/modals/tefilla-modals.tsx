@@ -6,7 +6,7 @@ import { HandHeart, Scroll, Heart, Plus, Minus, Stethoscope, HeartHandshake, Bab
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
-import { useLocation } from "wouter";
+
 import { MinchaPrayer, MorningPrayer, NishmasText, GlobalTehillimProgress, TehillimName, WomensPrayer } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
@@ -925,7 +925,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
             
             <Button
               onClick={handleCompleteAndNext}
-              className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-blush text-white hover:scale-105 transition-transform"
+              className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform"
             >
               Complete & Next ({selectedPsalm && selectedPsalm < 150 ? selectedPsalm + 1 : 1})
             </Button>
@@ -1236,7 +1236,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
           className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
             isCompleted 
               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-              : 'bg-gradient-to-r from-sage to-sage/90 text-white hover:scale-105 transition-transform'
+              : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform'
           }`}
         >
           {isCompleted ? 'Completed' : completeAndNextMutation.isPending ? 'Loading Next...' : 'Complete & Next'}
@@ -3333,7 +3333,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                         className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
                           isModalComplete(`individual-tehillim-${selectedPsalm}`) 
                             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                            : 'bg-gradient-to-r from-sage to-sage/90 text-white hover:scale-105 transition-transform'
+                            : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform'
                         }`}
                       >
                         {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete & Next'}
@@ -3456,7 +3456,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                           className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
                             isModalComplete(`individual-tehillim-${selectedPsalm}`) 
                               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                              : 'bg-gradient-to-r from-sage to-sage/90 text-white hover:scale-105 transition-transform'
+                              : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform'
                           }`}
                         >
                           {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete & Next'}
@@ -3618,7 +3618,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
             className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
               isModalComplete(`individual-tehillim-${selectedPsalm}`) 
                 ? 'bg-muted-lavender text-white cursor-not-allowed opacity-70' 
-                : 'bg-muted-lavender text-white hover:scale-105 transition-transform'
+                : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform'
             }`}
           >
             {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Next' : 'Complete & Next'}

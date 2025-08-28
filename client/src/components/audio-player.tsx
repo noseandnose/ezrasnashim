@@ -36,12 +36,10 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
       }
     }
     
-    // Cloudinary files
+    // Cloudinary files - use direct URL if publicly accessible
     if (cleanUrl.includes('res.cloudinary.com')) {
-      const pathMatch = cleanUrl.match(/res\.cloudinary\.com\/(.+)/);
-      if (pathMatch) {
-        return `/api/media-proxy/cloudinary/${pathMatch[1]}`;
-      }
+      // For public Cloudinary URLs, use direct access
+      return cleanUrl;
     }
     
     // Google Drive files

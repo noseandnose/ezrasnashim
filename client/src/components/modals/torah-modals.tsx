@@ -8,6 +8,7 @@ import AudioPlayer from "@/components/audio-player";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { formatTextContent, formatHalachaContent } from "@/lib/text-formatter";
+import { formatThankYouMessage } from "@/lib/link-formatter";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { Expand } from "lucide-react";
 
@@ -227,6 +228,13 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   const { data: pirkeiAvotContent } = useQuery<Record<string, any>>({
     queryKey: ['/api/torah/pirkei-avot', today],
     enabled: activeModal === 'pirkei-avot',
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000
+  });
+
+  const { data: parshaVortContent } = useQuery<{title?: string; content?: string; audioUrl?: string; speaker?: string; speakerWebsite?: string; thankYouMessage?: string}>({
+    queryKey: ['/api/table/vort'],
+    enabled: activeModal === 'parsha-vort',
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000
   });
@@ -639,6 +647,62 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               }`}
             >
               {isModalComplete('chizuk') ? 'Completed Today' : 'Complete'}
+            </Button>
+            <HeartExplosion trigger={showExplosion} />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Parsha Vort Modal */}
+      <Dialog open={activeModal === 'parsha-vort'} onOpenChange={() => closeModal(true)}>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="parsha-vort-description">
+          <div id="parsha-vort-description" className="sr-only">Weekly Torah portion insights and commentary</div>
+          
+          {/* Simple Header for Audio Content */}
+          <div className="flex items-center justify-center mb-1 relative">
+            <DialogTitle className="text-lg platypi-bold text-black">Parsha Shiur</DialogTitle>
+          </div>
+          
+          <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
+            {parshaVortContent && parshaVortContent.audioUrl && (
+              <div className="space-y-4">
+                {/* Title */}
+                {parshaVortContent.title && (
+                  <h3 className="platypi-bold text-lg text-black text-center mb-4">
+                    {parshaVortContent.title}
+                  </h3>
+                )}
+                
+                <AudioPlayer 
+                  title={parshaVortContent.title || 'Parsha Shiur'}
+                  duration="0:00"
+                  audioUrl={parshaVortContent.audioUrl}
+                />
+              </div>
+            )}
+          </div>
+          
+          {/* Thank You Section - Dynamic from database */}
+          {parshaVortContent?.thankYouMessage && (
+            <div className="mt-1 p-4 bg-blue-50 rounded-2xl border border-blue-200">
+              <div 
+                className="text-sm text-black platypi-medium"
+                dangerouslySetInnerHTML={{ __html: formatThankYouMessage(parshaVortContent.thankYouMessage) }}
+              />
+            </div>
+          )}
+
+          <div className="heart-explosion-container">
+            <Button 
+              onClick={isModalComplete('parsha-vort') ? undefined : handleTorahComplete}
+              disabled={isModalComplete('parsha-vort')}
+              className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+                isModalComplete('parsha-vort') 
+                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              }`}
+            >
+              {isModalComplete('parsha-vort') ? 'Completed Today' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -1092,6 +1156,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           fullscreenContent.content
         )}
       </FullscreenModal>
+      
     </>
   );
 }

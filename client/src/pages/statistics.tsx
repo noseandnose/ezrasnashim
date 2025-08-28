@@ -129,7 +129,7 @@ export default function Statistics() {
     "tehillim-text": "Global Tehillim Chain", // Legacy key for existing data
     "special-tehillim": "Special Tehillim",
     "individual-tehillim": "Individual Tehillim", 
-    "nishmas-campaign": "Nishmas Campaign",
+    "nishmas-campaign": "Nishmas Kol Chai",
     "al-hamichiya": "Al Hamichiya",
     "individual-prayer": "Individual Prayer",
     
@@ -139,6 +139,7 @@ export default function Statistics() {
     halacha: "Halacha",
     "featured-content": "Featured Content",
     featured: "Featured",
+    "parsha-vort": "Parsha Shiur",
     
     // Life section
     recipe: "Daily Recipe",
@@ -164,6 +165,9 @@ export default function Statistics() {
     mincha: Clock,
     maariv: Star,
     nishmas: Heart,
+    
+    // Torah subcategories
+    "parsha-vort": BookOpen,
     "birkat-hamazon": Clock3,
     "global-tehillim-chain": ScrollText,
     "tehillim-text": ScrollText, // Legacy key for existing data
