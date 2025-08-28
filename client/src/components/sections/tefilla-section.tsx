@@ -535,7 +535,13 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             </div>
           ) : (
             <button
-              onClick={() => openModal('tehillim-text', 'tefilla')}
+              onClick={() => {
+                // Dispatch custom event to open global tehillim directly in fullscreen
+                const event = new CustomEvent('openGlobalTehillimFullscreen', { 
+                  detail: { nextPerek: progress?.currentPerek || 59 } 
+                });
+                window.dispatchEvent(event);
+              }}
               className="w-full bg-white/90 rounded-2xl p-3 border border-blush/20 hover:bg-white transition-all duration-300 shadow-sm"
               style={{
                 animation: 'gentle-glow-pink 3s ease-in-out infinite'

@@ -1474,7 +1474,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
   // Auto-redirect prayer modals to fullscreen
   useEffect(() => {
-    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'individual-tehillim', 'tehillim-text'];
+    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'individual-tehillim'];
     
     if (activeModal && fullscreenPrayerModals.includes(activeModal)) {
       let title = '';
@@ -1497,29 +1497,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           title = `Tehillim ${selectedPsalm}`;
           contentType = 'individual-tehillim';
           break;
-        case 'tehillim-text':
-          // Fetch current perek dynamically since we don't have global progress in this scope
-          fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress`)
-            .then(res => res.json())
-            .then(data => {
-              setFullscreenContent({
-                isOpen: true,
-                title: `Perek ${data.currentPerek}`,
-                contentType: 'global-tehillim',
-                content: null,
-                hasTranslation: true
-              });
-            })
-            .catch(() => {
-              setFullscreenContent({
-                isOpen: true,
-                title: 'Global Tehillim',
-                contentType: 'global-tehillim',
-                content: null,
-                hasTranslation: true
-              });
-            });
-          return; // Exit early since we handle setFullscreenContent in the async call
       }
       
       // Open fullscreen immediately without closing modal first
