@@ -1474,7 +1474,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
   // Auto-redirect prayer modals to fullscreen
   useEffect(() => {
-    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'individual-tehillim', 'tehillim-text'];
+    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'individual-tehillim'];
     
     if (activeModal && fullscreenPrayerModals.includes(activeModal)) {
       let title = '';
@@ -1497,29 +1497,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           title = `Tehillim ${selectedPsalm}`;
           contentType = 'individual-tehillim';
           break;
-        case 'tehillim-text':
-          // Fetch current perek dynamically since we don't have global progress in this scope
-          fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress`)
-            .then(res => res.json())
-            .then(data => {
-              setFullscreenContent({
-                isOpen: true,
-                title: `Perek ${data.currentPerek}`,
-                contentType: 'global-tehillim',
-                content: null,
-                hasTranslation: true
-              });
-            })
-            .catch(() => {
-              setFullscreenContent({
-                isOpen: true,
-                title: 'Global Tehillim',
-                contentType: 'global-tehillim',
-                content: null,
-                hasTranslation: true
-              });
-            });
-          return; // Exit early since we handle setFullscreenContent in the async call
       }
       
       // Open fullscreen immediately without closing modal first
@@ -2745,6 +2722,13 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         </DialogContent>
       </Dialog>
 
+      {/* Global Tehillim Chain Modal */}
+      <Dialog open={activeModal === 'tehillim-text'} onOpenChange={() => closeModal(true)}>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
+          <GlobalTehillimModal setFullscreenContent={setFullscreenContent} />
+        </DialogContent>
+      </Dialog>
+
       {/* Maariv Modal */}
       <Dialog open={activeModal === 'maariv'} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="maariv-description">
@@ -3476,6 +3460,182 @@ function SpecialTehillimModal() {
 }
 
 // Individual Tehillim Modal Component
+function GlobalTehillimModal({ setFullscreenContent }: { setFullscreenContent?: (content: any) => void }) {
+  const { closeModal } = useModalStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+  const [language, setLanguage] = useState<'hebrew' | 'english'>(() => {
+    const savedLang = localStorage.getItem('tehillim-language');
+    return savedLang === 'english' ? 'english' : 'hebrew';
+  });
+  const [fontSize, setFontSize] = useState(20);
+  const [showHeartExplosion, setShowHeartExplosion] = useState(false);
+  const queryClient = useQueryClient();
+  
+  // Load Tefilla conditions for conditional content processing
+  const tefillaConditions = useTefillaConditions();
+
+  // Fetch current global tehillim progress
+  const { data: progress } = useQuery({
+    queryKey: ['/api/tehillim/progress'],
+    refetchInterval: 5000,
+    staleTime: 0
+  });
+
+  // Fetch current name being prayed for
+  const { data: currentName } = useQuery({
+    queryKey: ['/api/tehillim/current-name', progress?.currentPerek],
+    enabled: !!progress?.currentPerek,
+    refetchInterval: 5000,
+    staleTime: 0
+  });
+
+  // Fetch tehillim text for current perek
+  const { data: tehillimText, isLoading } = useQuery({
+    queryKey: ['/api/tehillim/text/by-id', progress?.currentPerek, language],
+    queryFn: async () => {
+      if (!progress?.currentPerek) return null;
+      const response = await axiosClient.get(`/api/tehillim/text/by-id/${progress.currentPerek}?language=${language}`);
+      return response.data;
+    },
+    enabled: !!progress?.currentPerek,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000
+  });
+
+  const handleComplete = async () => {
+    if (!progress?.currentPerek) return;
+    
+    try {
+      setShowHeartExplosion(true);
+      
+      // Mark tehillim as complete
+      await markModalComplete('global-tehillim');
+      await completeTask('tefilla');
+      await trackModalComplete('global-tehillim');
+      
+      // Complete the global tehillim and advance to next perek
+      await axiosClient.post('/api/tehillim/complete');
+      
+      // Refresh data
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+      
+      // Check for congratulations
+      checkAndShowCongratulations();
+      
+      setTimeout(() => {
+        setShowHeartExplosion(false);
+        closeModal();
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Failed to complete global tehillim:', error);
+      setShowHeartExplosion(false);
+    }
+  };
+
+  const handleFullscreen = () => {
+    if (!setFullscreenContent || !progress?.currentPerek) return;
+    
+    setFullscreenContent({
+      isOpen: true,
+      title: `Perek ${progress.currentPerek}`,
+      contentType: 'global-tehillim',
+      content: null,
+      hasTranslation: true
+    });
+  };
+
+  if (!progress || isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <DialogHeader className="text-center mb-4">
+        <DialogTitle className="text-lg platypi-semibold text-black">
+          Global Tehillim Chain - Perek {progress.currentPerek}
+        </DialogTitle>
+      </DialogHeader>
+
+      {/* Fullscreen button */}
+      <button
+        onClick={handleFullscreen}
+        className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 transition-colors z-10"
+        aria-label="Open fullscreen"
+      >
+        <Expand className="h-4 w-4 text-gray-600" />
+      </button>
+
+      <StandardModalHeader 
+        title={`Perek ${progress.currentPerek}`}
+        showHebrew={language === 'hebrew'}
+        setShowHebrew={(show) => setLanguage(show ? 'hebrew' : 'english')}
+        fontSize={fontSize}
+        setFontSize={setFontSize}
+      />
+
+      {/* Current name being prayed for */}
+      {currentName && (
+        <div className="mb-4 p-3 bg-warm-gray/10 rounded-xl">
+          <div className="text-center">
+            <div className="text-sm platypi-medium text-black/70 mb-1">Davening for:</div>
+            <div className="text-base platypi-semibold text-black">
+              {currentName.hebrewName}
+            </div>
+            {currentName.reasonEnglish && (
+              <div className="text-xs text-black/50 mt-1">({currentName.reasonEnglish})</div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Tehillim text */}
+      <div className="bg-white rounded-2xl p-6 mb-4 shadow-sm border border-warm-gray/10 max-h-[40vh] overflow-y-auto">
+        {tehillimText ? (
+          <div
+            className={`${language === 'hebrew' ? 'vc-koren-hebrew' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
+            style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
+            dangerouslySetInnerHTML={{
+              __html: processTefillaContent(tehillimText?.text || '', tefillaConditions)
+            }}
+          />
+        ) : (
+          <div className="flex items-center justify-center py-4">
+            <div className="animate-spin w-4 h-4 border border-blush border-t-transparent rounded-full"></div>
+          </div>
+        )}
+      </div>
+
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mb-4 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+        </span>
+      </div>
+
+      {/* Complete button */}
+      <div className="heart-explosion-container">
+        <Button 
+          onClick={handleComplete}
+          className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0"
+        >
+          {isModalComplete('global-tehillim') ? 'Complete & Next Perek' : 'Complete & Next Perek'}
+        </Button>
+        <HeartExplosion 
+          trigger={showHeartExplosion}
+          onComplete={() => setShowHeartExplosion(false)} 
+        />
+      </div>
+    </>
+  );
+}
+
 function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenContent?: (content: any) => void }) {
   const { closeModal, openModal, selectedPsalm, previousModal, tehillimActiveTab } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
