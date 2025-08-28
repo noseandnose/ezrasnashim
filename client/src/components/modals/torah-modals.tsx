@@ -10,6 +10,7 @@ import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { formatTextContent, formatHalachaContent } from "@/lib/text-formatter";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { Expand } from "lucide-react";
+import ParshaVortModal from "./parsha-vort-modal";
 
 // Calculate reading time based on word count (average 200 words per minute)
 const calculateReadingTime = (text: string): string => {
@@ -1092,6 +1093,9 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           fullscreenContent.content
         )}
       </FullscreenModal>
+      
+      {/* Parsha Vort Modal */}
+      <ParshaVortModal />
     </>
   );
 }
