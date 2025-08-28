@@ -8,9 +8,9 @@ import AudioPlayer from "@/components/audio-player";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { formatTextContent, formatHalachaContent } from "@/lib/text-formatter";
+import { formatThankYouMessage } from "@/lib/link-formatter";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { Expand } from "lucide-react";
-import ParshaVortModal from "./parsha-vort-modal";
 
 // Calculate reading time based on word count (average 200 words per minute)
 const calculateReadingTime = (text: string): string => {
@@ -687,7 +687,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             <div className="mt-1 p-4 bg-blue-50 rounded-2xl border border-blue-200">
               <div 
                 className="text-sm text-black platypi-medium"
-                dangerouslySetInnerHTML={{ __html: formatTextContent(parshaVortContent.thankYouMessage) }}
+                dangerouslySetInnerHTML={{ __html: formatThankYouMessage(parshaVortContent.thankYouMessage) }}
               />
             </div>
           )}
