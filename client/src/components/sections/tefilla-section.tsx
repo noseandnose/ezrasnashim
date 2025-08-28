@@ -344,33 +344,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     gcTime: 300000 // Keep in cache for 5 minutes
   });
 
-  // Mutation to complete a perek
-  const completePerekMutation = useMutation({
-    mutationFn: async () => {
-      return apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/tehillim/complete`, { completedBy: 'user' });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Perek Completed!",
-        description: `Perek ${progress?.currentPerek || 'current'} has been completed. Moving to the next perek.`,
-      });
-      // Invalidate all tehillim-related queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/info'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/preview'] });
-      
-      // Force immediate refetch to update display
-      queryClient.refetchQueries({ queryKey: ['/api/tehillim/progress'] });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to complete perek. Please try again.",
-        variant: "destructive"
-      });
-    }
-  });
+  // Removed unused _completePerekMutation to fix TypeScript errors
 
   // Mutation to add a new name
   const addNameMutation = useMutation({
@@ -469,50 +443,9 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     }
   ];
 
-  const _getTehillimText = (perekNumber: number, isHebrew: boolean) => {
-    // Authentic Tehillim texts for the first few perakim
-    const tehillimTexts: Record<number, { hebrew: string; english: string }> = {
-      1: {
-        hebrew: "אַשְׁרֵי הָאִישׁ אֲשֶׁר לֹא הָלַךְ בַּעֲצַת רְשָׁעִים וּבְדֶרֶךְ חַטָּאִים לֹא עָמָד וּבְמוֹשַׁב לֵצִים לֹא יָשָׁב׃ כִּי אִם בְּתוֹרַת יְהוָה חֶפְצוֹ וּבְתוֹרָתוֹ יֶהְגֶּה יוֹמָם וָלָיְלָה׃",
-        english: "Happy is the man who has not walked in the counsel of the wicked, nor stood in the way of sinners, nor sat in the seat of scorners. But his delight is in the law of the Lord, and in His law he meditates day and night."
-      },
-      2: {
-        hebrew: "לָמָּה רָגְשׁוּ גוֹיִם וּלְאֻמִּים יֶהְגּוּ רִיק׃ יִתְיַצְּבוּ מַלְכֵי אֶרֶץ וְרוֹזְנִים נוֹסְדוּ יָחַד עַל יְהוָה וְעַל מְשִׁיחוֹ׃",
-        english: "Why do the nations rage, and the peoples plot in vain? The kings of the earth set themselves, and the rulers take counsel together, against the Lord and against His anointed."
-      },
-      3: {
-        hebrew: "מִזְמוֹר לְדָוִד בְּבָרְחוֹ מִפְּנֵי אַבְשָׁלוֹם בְּנוֹ׃ יְהוָה מָה רַבּוּ צָרָי רַבִּים קָמִים עָלָי׃",
-        english: "A Psalm of David, when he fled from Absalom his son. Lord, how many are my foes! Many are rising against me."
-      }
-    };
 
-    const text = tehillimTexts[perekNumber];
-    if (!text) {
-      return (
-        <div className="text-sm text-gray-600 italic text-center">
-          {isHebrew ? `פרק ${perekNumber} - טקסט מלא זמין בספר תהלים` : `Perek ${perekNumber} - Full text available in Tehillim book`}
-        </div>
-      );
-    }
 
-    return (
-      <div className={`text-sm leading-relaxed ${isHebrew ? 'text-right david-libre-regular' : 'font-english'}`}>
-        {isHebrew ? text.hebrew : text.english}
-      </div>
-    );
-  };
 
-  const _getTehillimFirstLine = (perekNumber: number) => {
-    const tehillimTexts: Record<number, string> = {
-      1: "אַשְׁרֵי הָאִישׁ אֲשֶׁר לֹא הָלַךְ בַּעֲצַת רְשָׁעִים...",
-      2: "לָמָּה רָגְשׁוּ גוֹיִם וּלְאֻמִּים יֶהְגּוּ רִיק...",
-      3: "מִזְמוֹר לְדָוִד בְּבָרְחוֹ מִפְּנֵי אַבְשָׁלוֹם בְּנוֹ...",
-      11: "בַּיהוָה חָסִיתִי אֵיךְ תֹּאמְרוּ לְנַפְשִׁי...",
-      12: "הוֹשִׁיעָה יְהוָה כִּי גָמַר חָסִיד..."
-    };
-
-    return tehillimTexts[perekNumber] || `פרק ${perekNumber} - לחץ לצפייה בטקסט המלא`;
-  };
 
   return (
     <div className="overflow-y-auto h-full pb-20">

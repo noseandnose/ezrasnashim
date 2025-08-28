@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { HandHeart, Scroll, Heart, Languages, Type, Plus, Minus, CheckCircle, Calendar, RotateCcw, User, Sparkles, Compass, MapPin, ArrowUp, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Link, Shield, Unlock, Check } from "lucide-react";
+import { HandHeart, Scroll, Heart, Plus, Minus, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Unlock, Check } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
@@ -275,13 +275,13 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
-  const [showEnglish, setShowEnglish] = useState(false);
+  const [_showEnglish, _setShowEnglish] = useState(false);
   
   // Load Tefilla conditions for conditional content processing
   const tefillaConditions = useTefillaConditions();
   
   // Fetch morning prayers from database
-  const { data: morningPrayers, isLoading, error } = useQuery({
+  const { data: morningPrayers, isLoading } = useQuery({
     queryKey: ['morning-prayers'],
     queryFn: async () => {
       // Making API call for morning prayers from database
@@ -417,7 +417,7 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
             </div>
           ) : (
             <div className="space-y-6">
-              {morningPrayers?.map((prayer: MorningPrayer, index: number) => (
+              {morningPrayers?.map((prayer: MorningPrayer, _index: number) => (
                 <div key={prayer.id} className="space-y-3 border-b border-warm-gray/10 pb-4 last:border-b-0">
                   {prayer.hebrewText && language === 'hebrew' && (
                     <div 
@@ -691,7 +691,7 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
     queryKey: [`/api/nishmas/${language}`],
   });
 
-  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { markModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { completeTask } = useDailyCompletionStore();
   
@@ -838,7 +838,7 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
 }
 
 function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
-  const { selectedPsalm, tehillimActiveTab, tehillimReturnTab, setTehillimActiveTab } = useModalStore();
+  const { selectedPsalm, tehillimReturnTab } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
@@ -908,7 +908,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
 
   // Determine button layout based on stored return tab from Zustand store
   const isFromSpecialTab = tehillimReturnTab === 'special';
-  const isFromAllTab = tehillimReturnTab === 'all' || !tehillimReturnTab; // Default to all if not set
+  const _isFromAllTab = tehillimReturnTab === 'all' || !tehillimReturnTab; // Default to all if not set
 
 
   return (
@@ -1371,7 +1371,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const { activeModal, openModal, closeModal, selectedPsalm } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
-  const [, setLocation] = useLocation();
+  const [, ] = useLocation();
   const { trackModalComplete } = useTrackModalComplete();
   const { trackEvent } = useAnalytics();
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
@@ -1382,7 +1382,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     return savedLang !== 'english';
   });
   const [selectedPrayerId, setSelectedPrayerId] = useState<number | null>(null);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [isAnimating, ] = useState(false);
   const [showExplosion, setShowExplosion] = useState(false);
   const [activeExplosionModal, setActiveExplosionModal] = useState<string | null>(null);
   const [fullscreenContent, setFullscreenContent] = useState<{
@@ -1420,7 +1420,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   // Listen for fullscreen close events from fullscreen components
   useEffect(() => {
     const handleCloseFullscreen = () => {
-      setFullscreenContent({ isOpen: false, title: '', content: null, hasTranslation: undefined });
+      setFullscreenContent({ isOpen: false, title: '', content: null });
     };
 
     const handleDirectFullscreen = (event: CustomEvent) => {
@@ -1435,8 +1435,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         isOpen: true,
         title,
         contentType,
-        content: null,
-        hasTranslation: undefined
+        content: null
       });
     };
 
@@ -1511,7 +1510,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 isOpen: true,
                 title: `Perek ${data.currentPerek}`,
                 contentType: 'global-tehillim',
-                content: null
+                content: null,
+                hasTranslation: true
               });
             })
             .catch(() => {
@@ -1519,7 +1519,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 isOpen: true,
                 title: 'Global Tehillim',
                 contentType: 'global-tehillim',
-                content: null
+                content: null,
+                hasTranslation: true
               });
             });
           return; // Exit early since we handle setFullscreenContent in the async call
@@ -1583,8 +1584,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       isOpen: true,
       title: 'Prayer', // Will be updated when prayer data loads
       contentType: 'individual-prayer',
-      content: null,
-      hasTranslation: undefined // Will be determined when prayer data loads
+      content: null
+      // hasTranslation will be determined when prayer data loads
     });
   };
 
@@ -2872,7 +2873,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       {/* Fullscreen Modal */}
       <FullscreenModal
         isOpen={fullscreenContent.isOpen}
-        onClose={() => setFullscreenContent({ isOpen: false, title: '', content: null, hasTranslation: undefined })}
+        onClose={() => setFullscreenContent({ isOpen: false, title: '', content: null })}
         title={fullscreenContent.title}
         showFontControls={fullscreenContent.contentType !== 'special-tehillim'}
         showLanguageControls={
