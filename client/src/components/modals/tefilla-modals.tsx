@@ -175,38 +175,7 @@ const getReasonIcon = (reason: string, reasonEnglish?: string) => {
   return iconMap[code];
 };
 
-const getReasonShort = (reason: string, reasonEnglish?: string) => {
-  // Map Hebrew reasons and English translations to short text
-  const reasonToCode = (r: string, eng?: string): string => {
-    // Handle both Hebrew and English reasons, plus common variations
-    if (r === "רפואה שלמה" || eng === "Complete Healing" || r === "health" || eng === "health" || r === "Health") return "health";
-    if (r === "שידוך" || eng === "Finding a mate" || r === "shidduch" || eng === "shidduch") return "shidduch";
-    if (r === "זרע של קיימא" || eng === "Children" || r === "children" || eng === "children") return "children";
-    if (r === "פרנסה" || eng === "Livelihood" || r === "parnassa" || eng === "parnassa") return "parnassa";
-    if (r === "הצלחה" || eng === "Success" || r === "success" || eng === "success") return "success";
-    if (r === "שלום בית" || eng === "Family" || r === "family" || eng === "family") return "family";
-    if (r === "חכמה" || eng === "Education" || r === "education" || eng === "education") return "education";
-    if (r === "עליית נשמה" || eng === "Peace" || r === "peace" || eng === "peace") return "peace";
-    if (r === "פדיון שבויים" || eng === "Release from Captivity" || r === "hostages" || eng === "hostages") return "hostages";
-    return "general";
-  };
-  
-  const code = reasonToCode(reason, reasonEnglish);
-  const shortMap: Record<string, string> = {
-    'health': 'Health',
-    'shidduch': 'Match',
-    'children': 'Kids',
-    'parnassa': 'Income',
-    'success': 'Success',
-    'family': 'Family',
-    'education': 'Study',
-    'peace': 'Peace',
-    'hostages': 'Release',
-    'general': 'Prayer'
-  };
-  
-  return shortMap[code];
-};
+
 
 // Standardized Modal Header Component for Tefilla Modals
 const StandardModalHeader = ({ 
@@ -908,7 +877,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
 
   // Determine button layout based on stored return tab from Zustand store
   const isFromSpecialTab = tehillimReturnTab === 'special';
-  const _isFromAllTab = tehillimReturnTab === 'all' || !tehillimReturnTab; // Default to all if not set
+
 
 
   return (
@@ -1368,10 +1337,9 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
 }
 
 export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
-  const { activeModal, openModal, closeModal, selectedPsalm } = useModalStore();
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { activeModal, openModal, closeModal, selectedPsalm, setTehillimActiveTab, tehillimReturnTab } = useModalStore();
+  const { completeTask } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
-  const [, ] = useLocation();
   const { trackModalComplete } = useTrackModalComplete();
   const { trackEvent } = useAnalytics();
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
@@ -3336,13 +3304,6 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                     {tehillimActiveTab === 'all' && (
                       <Button 
                         onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
-                          // Track tehillim completion for analytics
-                          trackEvent("tehillim_complete", { 
-                            perek: selectedPsalm,
-                            language: language,
-                            type: 'individual'
-                          });
-                          
                           // Track modal completion immediately
                           trackModalComplete(`individual-tehillim-${selectedPsalm}`);
                           markModalComplete(`individual-tehillim-${selectedPsalm}`);
@@ -3364,7 +3325,6 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                           
                           setTimeout(() => {
                             setShowHeartExplosion(false);
-                            checkAndShowCongratulations();
                             // Stay in fullscreen and navigate to next psalm
                             openModal('individual-tehillim', 'tefilla', nextPsalm);
                           }, 400);
@@ -3428,13 +3388,6 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                       {/* Complete button - returns to Tehillim selector */}
                       <Button 
                         onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
-                          // Track tehillim completion for analytics
-                          trackEvent("tehillim_complete", { 
-                            perek: selectedPsalm,
-                            language: language,
-                            type: 'individual'
-                          });
-                          
                           // Track modal completion immediately
                           trackModalComplete(`individual-tehillim-${selectedPsalm}`);
                           markModalComplete(`individual-tehillim-${selectedPsalm}`);
@@ -3456,7 +3409,6 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                           setTimeout(() => {
                             setShowHeartExplosion(false);
                             setFullscreenContent({ isOpen: false, title: '', content: null });
-                            checkAndShowCongratulations();
                             openModal('special-tehillim', 'tefilla');
                           }, 400);
                         }}
