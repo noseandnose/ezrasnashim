@@ -982,6 +982,9 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
   const tefillaConditions = useTefillaConditions();
   const queryClient = useQueryClient();
 
+  // Lock onto the current perek when fullscreen opens to prevent auto-refresh when others complete
+  const [lockedPerek, setLockedPerek] = useState<number | null>(null);
+
   // Get current global Tehillim progress
   const { data: progress } = useQuery<GlobalTehillimProgress>({
     queryKey: ['/api/tehillim/progress'],
@@ -994,14 +997,24 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
     refetchInterval: 60000 // Refetch every minute
   });
 
-  // Get current psalm text
+  // Lock onto current perek when component mounts to prevent auto-refresh
+  useEffect(() => {
+    if (progress?.currentPerek && !lockedPerek) {
+      setLockedPerek(progress.currentPerek);
+    }
+  }, [progress?.currentPerek, lockedPerek]);
+
+  // Use locked perek instead of live progress to prevent auto-refresh
+  const activePerek = lockedPerek || progress?.currentPerek;
+
+  // Get current psalm text using the locked perek
   const { data: tehillimText, isLoading } = useQuery({
-    queryKey: ['/api/tehillim/text', progress?.currentPerek, language],
+    queryKey: ['/api/tehillim/text', activePerek, language],
     queryFn: async () => {
-      const response = await axiosClient.get(`/api/tehillim/text/${progress?.currentPerek}?language=${language}`);
+      const response = await axiosClient.get(`/api/tehillim/text/${activePerek}?language=${language}`);
       return response.data;
     },
-    enabled: !!progress?.currentPerek,
+    enabled: !!activePerek,
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 30 * 60 * 1000 // 30 minutes
   });
@@ -1027,7 +1040,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          currentPerek: progress?.currentPerek,
+          currentPerek: activePerek,
           language: language,
           completedBy: 'Anonymous'
         }),
@@ -1038,7 +1051,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
     onSuccess: () => {
       // Track tehillim completion for analytics
       trackEvent("tehillim_complete", { 
-        perek: progress?.currentPerek,
+        perek: activePerek,
         language: language
       });
       
@@ -1047,7 +1060,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
         trackEvent("name_prayed", {
           nameId: currentName.id,
           reason: currentName.reason,
-          perek: progress?.currentPerek
+          perek: activePerek
         });
       }
       
@@ -1080,7 +1093,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          currentPerek: progress?.currentPerek,
+          currentPerek: activePerek,
           language: language,
           completedBy: 'Anonymous'
         }),
@@ -1100,7 +1113,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
     onSuccess: (data) => {
       // Track tehillim completion for analytics
       trackEvent("tehillim_complete", { 
-        perek: progress?.currentPerek,
+        perek: activePerek,
         language: language
       });
       
@@ -1109,9 +1122,12 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
         trackEvent("name_prayed", {
           nameId: currentName.id,
           reason: currentName.reason,
-          perek: progress?.currentPerek
+          perek: activePerek
         });
       }
+      
+      // Update locked perek to the next one when completing and advancing
+      setLockedPerek(data.progress.currentPerek);
       
       // Invalidate queries to refresh data for the next perek
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
@@ -1139,10 +1155,10 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
 
   // Early returns after all hooks are defined
   if (isLoading) return <div className="text-center py-8">Loading Tehillim...</div>;
-  if (!progress?.currentPerek) return <div className="text-center py-8">No Tehillim available</div>;
+  if (!activePerek) return <div className="text-center py-8">No Tehillim available</div>;
 
   // Use unique key per Tehillim number for proper individual tracking
-  const completionKey = `tehillim-chain-${progress?.currentPerek}`;
+  const completionKey = `tehillim-chain-${activePerek}`;
   const isCompleted = isModalComplete(completionKey);
 
   const handleComplete = () => {
@@ -1435,7 +1451,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       // Open fullscreen for global tehillim with the next perek
       setFullscreenContent({
         isOpen: true,
-        title: `Global Tehillim Chain - Tehillim ${nextPerek}`,
+        title: `Perek ${nextPerek}`,
         contentType: 'global-tehillim',
         content: null,
         hasTranslation: true
