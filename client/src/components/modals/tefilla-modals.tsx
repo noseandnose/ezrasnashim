@@ -1551,6 +1551,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   useEffect(() => {
     const handleCloseFullscreen = () => {
       setFullscreenContent({ isOpen: false, title: '', content: null });
+      // Close any active modal to reset state properly
+      closeModal();
       // Navigate to home section and show flower growth
       if (onSectionChange) {
         onSectionChange('home');
