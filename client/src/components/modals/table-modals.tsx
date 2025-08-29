@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight, Volume2, Maximize2 } from "lucide-react";
 import AudioPlayer from "@/components/audio-player";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { formatTextContent } from "@/lib/text-formatter";
+import { formatThankYouMessage } from "@/lib/link-formatter";
 import { LazyImage } from "@/components/ui/lazy-image";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 
@@ -133,7 +134,7 @@ export default function TableModals() {
     };
   }, [setFullscreenContent]);
 
-  const { data: recipeContent } = useQuery<{title?: string; description?: string; ingredients?: string[]; instructions?: string[]; cookingTime?: string; servings?: number; imageUrl?: string; prepTime?: string; cookTime?: string; difficulty?: string}>({
+  const { data: recipeContent } = useQuery<{title?: string; description?: string; ingredients?: string[]; instructions?: string[]; cookingTime?: string; servings?: number; imageUrl?: string; prepTime?: string; cookTime?: string; difficulty?: string; thankYouMessage?: string}>({
     queryKey: ['/api/table/recipe'],
     enabled: activeModal === 'recipe'
   });
@@ -317,21 +318,30 @@ export default function TableModals() {
             </div>
           )}
 
-          {/* Kosher.com Attribution */}
-          <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-4 border border-blue-200">
-            <span className="text-sm platypi-medium text-black">
-              Thank you to{' '}
-              <a 
-                href="https://www.kosher.com/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 underline"
-              >
-                Kosher.com
-              </a>
-              {' '}for providing this Recipe
-            </span>
-          </div>
+          {/* Dynamic Thank You Message */}
+          {recipeContent?.thankYouMessage ? (
+            <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-4 border border-blue-200">
+              <div 
+                className="text-sm platypi-medium text-black"
+                dangerouslySetInnerHTML={{ __html: formatThankYouMessage(recipeContent.thankYouMessage) }}
+              />
+            </div>
+          ) : (
+            <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-4 border border-blue-200">
+              <span className="text-sm platypi-medium text-black">
+                Thank you to{' '}
+                <a 
+                  href="https://www.kosher.com/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 underline"
+                >
+                  Kosher.com
+                </a>
+                {' '}for providing this Recipe
+              </span>
+            </div>
+          )}
 
           <Button 
             onClick={() => handleComplete('recipe')}

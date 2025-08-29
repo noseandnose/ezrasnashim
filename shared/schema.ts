@@ -16,6 +16,7 @@ export const dailyRecipes = pgTable("daily_recipes", {
   difficulty: text("difficulty"), // 'easy', 'medium', 'hard'
   imageUrl: text("image_url"),
   tags: text("tags"), // JSON array: kosher, pareve, dairy, meat
+  thankYouMessage: text("thank_you_message"), // Dynamic thank you message with support for clickable links
   createdAt: timestamp("created_at").defaultNow(),
 });
 
