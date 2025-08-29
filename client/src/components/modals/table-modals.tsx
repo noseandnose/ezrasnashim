@@ -854,16 +854,22 @@ export default function TableModals() {
               {/* Thank You Section for Recipe */}
               <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
                 <p className="text-sm text-blue-900 platypi-medium">
-                  Recipe provided with permission by{' '}
-                  <a 
-                    href="https://kosher.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline hover:text-blue-800"
-                  >
-                    Kosher.com
-                  </a>
-                  . Visit Kosher.com for thousands more delicious kosher recipes!
+                  {recipeContent.thankYouMessage ? (
+                    <span dangerouslySetInnerHTML={{ __html: formatThankYouMessage(recipeContent.thankYouMessage) }} />
+                  ) : (
+                    <>
+                      Recipe provided with permission by{' '}
+                      <a 
+                        href="https://kosher.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline hover:text-blue-800"
+                      >
+                        Kosher.com
+                      </a>
+                      . Visit Kosher.com for thousands more delicious kosher recipes!
+                    </>
+                  )}
                 </p>
               </div>
               
