@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { useQuery } from '@tanstack/react-query';
-import { Send, Bell, Clock, Users, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
+import { Send, Bell, Clock, Users, CheckCircle, XCircle, ArrowLeft, ChefHat } from 'lucide-react';
 import { Link } from 'wouter';
 
 export default function AdminNotifications() {
@@ -141,12 +141,20 @@ export default function AdminNotifications() {
             <Bell className="w-8 h-8" />
             Push Notifications Admin
           </h1>
-          <Link href="/">
-            <Button variant="outline">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to App
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link href="/admin/recipes">
+              <Button variant="outline">
+                <ChefHat className="w-4 h-4 mr-2" />
+                Recipes Admin
+              </Button>
+            </Link>
+            <Link href="/">
+              <Button variant="outline">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to App
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
