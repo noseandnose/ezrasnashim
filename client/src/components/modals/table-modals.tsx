@@ -450,7 +450,7 @@ export default function TableModals() {
                         const [videoError, setVideoError] = useState(false);
                         const [isLoading, setIsLoading] = useState(true);
                         
-                        const handleVideoError = (e: any) => {
+                        const handleVideoError = () => {
                           // Video failed to load
                           setVideoError(true);
                           setIsLoading(false);

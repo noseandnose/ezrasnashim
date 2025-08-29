@@ -13,7 +13,7 @@ export function formatThankYouMessage(message: string): string {
   // Convert markdown-style links [text](url) to HTML links
   const markdownLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
   
-  return message.replace(markdownLinkRegex, (match, linkText, url) => {
+  return message.replace(markdownLinkRegex, (_, linkText, url) => {
     // Ensure URL has protocol
     const fullUrl = url.startsWith('http') ? url : `https://${url}`;
     return `<a href="${fullUrl}" target="_blank" rel="noopener noreferrer" class="text-blush font-medium underline hover:text-blush/80 transition-colors">${linkText}</a>`;
