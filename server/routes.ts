@@ -1238,6 +1238,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all recipes for admin interface
+  app.get("/api/table/recipes", async (req, res) => {
+    try {
+      const recipes = await storage.getAllDailyRecipes();
+      res.json(recipes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch recipes" });
+    }
+  });
+
   app.get("/api/table/vort/:week", async (req, res) => {
     try {
       const { week } = req.params;

@@ -66,6 +66,7 @@ export interface IStorage {
   // Daily recipe methods
   getDailyRecipeByDate(date: string): Promise<DailyRecipe | undefined>;
   createDailyRecipe(recipe: InsertDailyRecipe): Promise<DailyRecipe>;
+  getAllDailyRecipes(): Promise<DailyRecipe[]>;
   
   getParshaVortByWeek(week: string): Promise<ParshaVort | undefined>;
   getParshaVortByDate(date: string): Promise<ParshaVort | undefined>;
@@ -898,6 +899,11 @@ export class DatabaseStorage implements IStorage {
   async createDailyRecipe(insertRecipe: InsertDailyRecipe): Promise<DailyRecipe> {
     const [recipe] = await db.insert(dailyRecipes).values(insertRecipe).returning();
     return recipe;
+  }
+
+  async getAllDailyRecipes(): Promise<DailyRecipe[]> {
+    const recipes = await db.select().from(dailyRecipes).orderBy(sql`${dailyRecipes.date} DESC`);
+    return recipes;
   }
 
   async getParshaVortByWeek(week: string): Promise<ParshaVort | undefined> {
