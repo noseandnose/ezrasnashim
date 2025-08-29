@@ -50,6 +50,8 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **Life Page**: Shabbat countdown, Jewish Date converter (with ICS download), Daily Recipe, Creative Jewish Living, Community Feedback.
 - **Time-based Prayer System**: Dynamic prayer buttons based on zmanim.
 - **Text Cleaning**: Enhanced Hebrew text cleaning to preserve vowels/cantillation and ensure proper display of newlines.
+- **Dynamic Thank You Messages**: Custom thank you messages for daily recipes with markdown link support, replacing hardcoded attributions.
+- **Admin Content Management**: Recipe management interface at `/admin/recipes` for creating and managing daily recipes with custom thank you messages.
 
 ### Technical Implementations
 - **API Communication**: TanStack Query for requests, caching, optimistic updates, with centralized configuration.
