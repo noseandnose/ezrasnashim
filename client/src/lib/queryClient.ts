@@ -51,13 +51,9 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
-      staleTime: 5 * 60 * 1000, // 5 minutes default cache
-      gcTime: 15 * 60 * 1000, // 15 minutes in memory
-      refetchInterval: false,
-      refetchOnWindowFocus: false,
-      refetchOnMount: false, // Optimized: Only refetch when stale or invalidated
-      staleTime: 15 * 60 * 1000, // Increased to 15 minutes for better performance
-      gcTime: 60 * 60 * 1000, // 1 hour (was cacheTime)
+      staleTime: 15 * 60 * 1000, // 15 minutes for better performance
+      gcTime: 60 * 60 * 1000, // 1 hour in memory
+      refetchOnMount: false, // Only refetch when stale or invalidated
       retry: (failureCount, error) => {
         // Don't retry on 404s, 401s, or any 4xx client errors
         if (error && typeof error === 'object' && 'response' in error) {

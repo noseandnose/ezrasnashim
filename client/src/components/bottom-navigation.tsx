@@ -49,8 +49,8 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
                     : ''
                   : 'text-warm-gray/70'
               }`}
-              size={20}
-              strokeWidth={activeSection === id ? 2.5 : 1.5}
+              size={activeSection === id ? 22 : 20}
+              strokeWidth={1.5}
               fill={activeSection === id && id !== 'home' ? 'currentColor' : 'none'}
             />
             <span className={`${activeSection === id ? 'platypi-bold' : 'platypi-medium'} text-xs transition-colors duration-300 ${
