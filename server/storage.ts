@@ -315,6 +315,15 @@ export class DatabaseStorage implements IStorage {
         });
       }
       
+      // Get the current name being prayed for before updating
+      let currentNameDetails = null;
+      if (progress.currentNameId) {
+        const [nameDetails] = await tx.select()
+          .from(tehillimNames)
+          .where(eq(tehillimNames.id, progress.currentNameId));
+        currentNameDetails = nameDetails;
+      }
+      
       // Assign a new random name for the next perek
       const nextName = await this.getNextNameForAssignment();
       
@@ -328,9 +337,60 @@ export class DatabaseStorage implements IStorage {
         })
         .where(eq(globalTehillimProgress.id, progress.id))
         .returning();
+      
+      // Track analytics events using the transaction context
+      try {
+        // Track the Tehillim completion - using tx for proper transaction consistency
+        const [tehillimEvent] = await tx
+          .insert(analyticsEvents)
+          .values({
+            eventType: 'tehillim_complete',
+            eventData: {
+              perekNumber: currentPerek,
+              language: language,
+              completedBy: completedBy || 'Anonymous',
+              isGlobal: true
+            },
+            sessionId: 'global-chain'
+          })
+          .returning();
         
+        // Track the name being prayed for (if there was a name)
+        if (currentNameDetails) {
+          const [nameEvent] = await tx
+            .insert(analyticsEvents)
+            .values({
+              eventType: 'name_prayed',
+              eventData: {
+                nameId: currentNameDetails.id,
+                namePrayed: currentNameDetails.hebrewName,
+                perekNumber: currentPerek,
+                language: language,
+                completedBy: completedBy || 'Anonymous'
+              },
+              sessionId: 'global-chain'
+            })
+            .returning();
+        }
+        
+        console.log(`Tracked Tehillim completion: perek ${currentPerek}, name: ${currentNameDetails?.hebrewName || 'None'}`);
+      } catch (analyticsError) {
+        // Log analytics errors but don't fail the transaction
+        console.error('Failed to track Tehillim analytics:', analyticsError);
+      }
+      
       return updated;
     });
+    
+    // Recalculate daily stats after the transaction commits successfully
+    try {
+      const today = formatDate(new Date());
+      await this.recalculateDailyStats(today);
+    } catch (statsError) {
+      console.error('Failed to recalculate daily stats after Tehillim completion:', statsError);
+    }
+    
+    return result;
   }
 
   async getProgressWithAssignedName(): Promise<any> {
@@ -1306,14 +1366,22 @@ export class DatabaseStorage implements IStorage {
 
     // Count event types (no more page_view tracking)
     const pageViews = 0; // No longer tracking page views
-    // Count global tehillim separately (they count as 2 mitzvos - saying + praying for someone)
-    const globalTehillimCompleted = todayEvents.filter(e => 
-      e.eventType === 'modal_complete' && (e.eventData as any)?.modalType.startsWith('global_')
-    ).length; // not running
-    const regularTehillimCompleted = todayEvents.filter(e => 
-      e.eventType === 'modal_complete' && (e.eventData as any)?.modalType.startsWith('individual_')
+    
+    // Count direct tehillim_complete events (global chain completions)
+    const directTehillimCompleted = todayEvents.filter(e => 
+      e.eventType === 'tehillim_complete'
     ).length;
-    const tehillimCompleted = globalTehillimCompleted + regularTehillimCompleted;
+    
+    // Count modal-based tehillim completions (individual and global modal completions)
+    const globalTehillimCompleted = todayEvents.filter(e => 
+      e.eventType === 'modal_complete' && (e.eventData as any)?.modalType?.startsWith('global_')
+    ).length;
+    const regularTehillimCompleted = todayEvents.filter(e => 
+      e.eventType === 'modal_complete' && (e.eventData as any)?.modalType?.startsWith('individual_')
+    ).length;
+    
+    // Total Tehillim completed = direct + modal-based
+    const tehillimCompleted = directTehillimCompleted + globalTehillimCompleted + regularTehillimCompleted;
     const namesProcessed = todayEvents.filter(e => e.eventType === 'name_prayed').length;
     const booksCompleted = todayEvents.filter(e => e.eventType === 'tehillim_book_complete').length;
     const tzedakaActs = todayEvents.filter(e => e.eventType === 'tzedaka_completion');
