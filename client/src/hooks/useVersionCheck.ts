@@ -78,8 +78,8 @@ export function useVersionCheck() {
           console.log('🚀 New version detected! Showing update prompt.');
           setShowUpdatePrompt(true);
           
-          // Update stored version for future comparisons
-          localStorage.setItem('app-version', JSON.stringify(latestVersion));
+          // Store latest version separately for post-refresh update
+          localStorage.setItem('latest-app-version', JSON.stringify(latestVersion));
         } else {
           console.log('✅ App is up to date.');
         }
@@ -107,6 +107,14 @@ export function useVersionCheck() {
   
   const refreshApp = () => {
     console.log('🔄 Performing app refresh with progress preservation...');
+    
+    // Update current version in localStorage before refresh
+    // This prevents the update prompt from showing again after refresh
+    const latestVersionFromStorage = localStorage.getItem('latest-app-version');
+    if (latestVersionFromStorage) {
+      localStorage.setItem('app-version', latestVersionFromStorage);
+      localStorage.removeItem('latest-app-version');
+    }
     
     // Dismiss the update prompt immediately
     setShowUpdatePrompt(false);

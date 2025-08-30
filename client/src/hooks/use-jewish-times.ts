@@ -64,6 +64,24 @@ export function useGeolocation() {
         return;
       }
 
+      // Check cached location first
+      const cachedLocation = localStorage.getItem('user-location');
+      const cacheTimestamp = localStorage.getItem('user-location-time');
+      if (cachedLocation && cacheTimestamp) {
+        const age = Date.now() - parseInt(cacheTimestamp);
+        if (age < 30 * 60 * 1000) { // 30 minutes cache
+          try {
+            const parsed = JSON.parse(cachedLocation);
+            setCoordinates(parsed);
+            return;
+          } catch (e) {
+            // Clear invalid cache
+            localStorage.removeItem('user-location');
+            localStorage.removeItem('user-location-time');
+          }
+        }
+      }
+
       // Check if browser supports permissions API
       if (navigator.permissions) {
         try {
@@ -87,10 +105,15 @@ export function useGeolocation() {
         }
         navigator.geolocation.getCurrentPosition(
           (position) => {
-            setCoordinates({
+            const coords = {
               lat: position.coords.latitude,
               lng: position.coords.longitude,
-            });
+            };
+            setCoordinates(coords);
+            
+            // Cache the location
+            localStorage.setItem('user-location', JSON.stringify(coords));
+            localStorage.setItem('user-location-time', Date.now().toString());
           },
           (error) => {
             if (error.code === error.PERMISSION_DENIED) {
@@ -104,15 +127,17 @@ export function useGeolocation() {
             // Don't set fallback coordinates - require accurate location
           },
           {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0, // Always get fresh location
+            enableHighAccuracy: false, // Use cached location for performance
+            timeout: 8000, // Reduce timeout
+            maximumAge: 5 * 60 * 1000, // Use 5-minute cache
           },
         );
       }
     };
 
-    checkLocationPermission();
+    // Debounce location checking to avoid excessive calls
+    const timeoutId = setTimeout(checkLocationPermission, 100);
+    return () => clearTimeout(timeoutId);
   }, [
     locationRequested,
     coordinates,
@@ -131,6 +156,8 @@ export function useJewishTimes() {
 
   return useQuery({
     queryKey: ["zmanim", coordinates?.lat, coordinates?.lng, today],
+    staleTime: 30 * 60 * 1000, // 30 minutes cache
+    gcTime: 60 * 60 * 1000, // 1 hour in memory
     queryFn: async () => {
       if (!coordinates) {
         return null;
@@ -146,7 +173,6 @@ export function useJewishTimes() {
       }
     },
     enabled: !!coordinates, // Only fetch when we have coordinates
-    staleTime: 1000 * 60 * 60, // Increased to 1 hour (zmanim don't change frequently)
     refetchInterval: false,
     refetchOnWindowFocus: false, // Optimized: Avoid excessive refetches
     refetchOnMount: false, // Optimized: Use cached data when fresh
