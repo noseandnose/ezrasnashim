@@ -3,7 +3,7 @@ import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
-import { useGeolocation } from "@/hooks/use-jewish-times";
+import { useGeolocation, useJewishTimes } from "@/hooks/use-jewish-times";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 
@@ -16,6 +16,9 @@ export default function TableSection() {
   
   // Get shared location state and trigger geolocation if needed
   const { coordinates, permissionDenied } = useGeolocation();
+  
+  // Get Jewish times (includes shkia)
+  const { data: jewishTimes } = useJewishTimes();
   
   // Show location prompt if permission denied and no coordinates
   const showLocationPrompt = permissionDenied && !coordinates;
@@ -65,14 +68,40 @@ export default function TableSection() {
     gcTime: 60 * 60 * 1000
   });
 
-  // Calculate days until Shabbat (Saturday = 6, Sunday = 0)
-  const getDaysUntilShabbat = () => {
-    const today = new Date().getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-    if (today === 6) return 7; // Saturday: 7 days until next Shabbat
-    return 6 - today; // Days remaining until Saturday
+  // Calculate days until Shabbat using Jewish day (sunset to sunset)
+  const getDaysUntilShabbat = (shkiaTime?: string) => {
+    const now = new Date();
+    let currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    
+    // If we have shkia time and it's after shkia, advance to next day
+    if (shkiaTime) {
+      try {
+        const [time, period] = shkiaTime.split(' ');
+        const [hours, minutes] = time.split(':').map(Number);
+        
+        // Convert to 24-hour format
+        let shkiaHours = hours;
+        if (period === 'PM' && hours !== 12) shkiaHours += 12;
+        if (period === 'AM' && hours === 12) shkiaHours = 0;
+        
+        // Create shkia date for today
+        const shkiaDate = new Date(now);
+        shkiaDate.setHours(shkiaHours, minutes, 0, 0);
+        
+        // If current time is after shkia, advance to next Jewish day
+        if (now > shkiaDate) {
+          currentDay = (currentDay + 1) % 7;
+        }
+      } catch (error) {
+        // If parsing fails, fall back to regular day calculation
+      }
+    }
+    
+    if (currentDay === 6) return 7; // Saturday: 7 days until next Shabbat
+    return 6 - currentDay; // Days remaining until Saturday
   };
 
-  const daysUntilShabbat = getDaysUntilShabbat();
+  const daysUntilShabbat = getDaysUntilShabbat(jewishTimes?.shkia);
 
 
 
