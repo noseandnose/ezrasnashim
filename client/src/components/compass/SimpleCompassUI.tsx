@@ -254,7 +254,7 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
       {deviceInfo.needsPermission && !state.hasPermission && state.isSupported && (
         <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200">
           <p className="text-sm text-black mb-3">
-            To show your direction to Jerusalem for prayer, please enable compass access
+            For accurate davening times and direction to Jerusalem, please enable compass access
           </p>
           <Button
             onClick={handleEnableCompass}
@@ -272,7 +272,7 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
       <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200">
         <h4 className="font-bold text-sm text-black mb-2">How to Use:</h4>
         <ol className="text-xs text-black/70 space-y-1">
-          <li>1. Allow location access for accurate prayer direction</li>
+          <li>1. Allow location access for accurate davening times</li>
           {deviceInfo.needsPermission && !state.hasPermission && (
             <li>2. Tap "Enable Compass" button above</li>
           )}

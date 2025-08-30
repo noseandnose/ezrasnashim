@@ -88,7 +88,7 @@ export default function TableSection() {
               <h4 className="platypi-bold text-sm platypi-bold text-yellow-800">Location Required</h4>
             </div>
             <p className="platypi-regular text-xs text-yellow-700 mb-3">
-              Please enable location access for accurate Jewish prayer times, or click below to set your location manually.
+              Please enable location access for accurate davening times, or click below to set your location manually.
             </p>
             <button 
               onClick={() => openModal('location', 'table')}

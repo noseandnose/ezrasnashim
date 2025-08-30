@@ -51,9 +51,9 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
               }`}
               size={activeSection === id ? 22 : 20}
               strokeWidth={1.5}
-              fill={activeSection === id && id !== 'home' ? 'currentColor' : 'none'}
+              fill="none"
             />
-            <span className={`${activeSection === id ? 'platypi-bold' : 'platypi-medium'} text-xs transition-colors duration-300 ${
+            <span className={`platypi-medium text-xs transition-colors duration-300 ${
               activeSection === id 
                 ? id === 'home'
                   ? 'text-white' 
