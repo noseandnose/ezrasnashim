@@ -478,23 +478,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid coordinates" });
       }
 
-      console.log(`[Server API Request] GET https://www.hebcal.com/shabbat/?cfg=json&latitude=${latitude}&longitude=${longitude}`);
+      // First get current zmanim to check if we're past tzait
+      const zmanimResponse = await fetch(`http://localhost:${process.env.PORT || 5000}/api/zmanim/${latitude}/${longitude}`);
+      const zmanimData = await zmanimResponse.json();
       
-      const response = await fetch(
-        `https://www.hebcal.com/shabbat/?cfg=json&latitude=${latitude}&longitude=${longitude}`
-      );
+      // Determine if we need next week's parsha (after tzait hakochavim)
+      let useNextWeek = false;
+      if (zmanimData.tzaitHakochavim) {
+        const now = new Date();
+        const [time, period] = zmanimData.tzaitHakochavim.split(' ');
+        const [hours, minutes] = time.split(':').map(Number);
+        
+        // Convert tzait time to 24-hour format
+        let tzaitHours = hours;
+        if (period === 'PM' && hours !== 12) tzaitHours += 12;
+        if (period === 'AM' && hours === 12) tzaitHours = 0;
+        
+        // Create tzait time in local timezone
+        const tzaitToday = new Date();
+        tzaitToday.setHours(tzaitHours, minutes, 0, 0);
+        
+        // Get current time in local timezone (Asia/Jerusalem)
+        const nowInLocalTZ = new Date().toLocaleString("en-US", {timeZone: zmanimData.tzid || "Asia/Jerusalem"});
+        const localNow = new Date(nowInLocalTZ);
+        
+        // If current time is past tzait, we need next week's parsha
+        useNextWeek = localNow > tzaitToday;
+        
+        console.log(`Debug parsha timing - Local now: ${localNow.toLocaleString()}, Tzait today: ${tzaitToday.toLocaleString()}, Use next week: ${useNextWeek}`);
+      }
+
+      // Build API URL - add week offset if needed  
+      let apiUrl = `https://www.hebcal.com/shabbat/?cfg=json&latitude=${latitude}&longitude=${longitude}`;
+      if (useNextWeek) {
+        // Request next Saturday's data (Sept 6, 2025 for Ki Tetzei)
+        apiUrl += `&gy=2025&gm=9&gd=6`;
+      }
+
+      console.log(`[Server API Request] GET ${apiUrl}`);
       
-      console.log(`[Server API Response] ${response.status} GET https://www.hebcal.com/shabbat/?cfg=json&latitude=${latitude}&longitude=${longitude}`);
+      const response = await fetch(apiUrl);
+      
+      console.log(`[Server API Response] ${response.status} GET ${apiUrl}`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch Shabbos times from Hebcal');
       }
 
       const data = await response.json();
-
-      // Get location name from our zmanim endpoint for consistency
-      const zmanimResponse = await fetch(`http://localhost:${process.env.PORT || 5000}/api/zmanim/${latitude}/${longitude}`);
-      const zmanimData = await zmanimResponse.json();
 
       // Parse the Shabbos data
       const result = {

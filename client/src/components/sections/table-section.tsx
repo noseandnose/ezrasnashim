@@ -1,16 +1,16 @@
-import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar, Moon, MapPin, ShoppingBag, MessageSquare, Zap, Lightbulb as Candle } from "lucide-react";
+import { Utensils, Flame, Star, Calendar, MapPin, MessageSquare } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
 import { useGeolocation, useJewishTimes } from "@/hooks/use-jewish-times";
 import { useQuery } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
+
 
 export default function TableSection() {
   const { openModal } = useModalStore();
   const { isModalComplete } = useModalCompletionStore();
-  const { data: shabbosData, isLoading: shabbosLoading, error: shabbosError } = useShabbosTime();
+  const { data: shabbosData, isLoading: shabbosLoading } = useShabbosTime();
   
 
   
@@ -68,28 +68,28 @@ export default function TableSection() {
     gcTime: 60 * 60 * 1000
   });
 
-  // Calculate days until Shabbat using Jewish day (sunset to sunset)
-  const getDaysUntilShabbat = (shkiaTime?: string) => {
+  // Calculate days until Shabbat using Jewish day (tzait to tzait)
+  const getDaysUntilShabbat = (tzaitTime?: string) => {
     const now = new Date();
     let currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
     
-    // If we have shkia time and it's after shkia, advance to next day
-    if (shkiaTime) {
+    // If we have tzait time and it's after tzait, advance to next day
+    if (tzaitTime) {
       try {
-        const [time, period] = shkiaTime.split(' ');
+        const [time, period] = tzaitTime.split(' ');
         const [hours, minutes] = time.split(':').map(Number);
         
         // Convert to 24-hour format
-        let shkiaHours = hours;
-        if (period === 'PM' && hours !== 12) shkiaHours += 12;
-        if (period === 'AM' && hours === 12) shkiaHours = 0;
+        let tzaitHours = hours;
+        if (period === 'PM' && hours !== 12) tzaitHours += 12;
+        if (period === 'AM' && hours === 12) tzaitHours = 0;
         
-        // Create shkia date for today
-        const shkiaDate = new Date(now);
-        shkiaDate.setHours(shkiaHours, minutes, 0, 0);
+        // Create tzait date for today
+        const tzaitDate = new Date(now);
+        tzaitDate.setHours(tzaitHours, minutes, 0, 0);
         
-        // If current time is after shkia, advance to next Jewish day
-        if (now > shkiaDate) {
+        // If current time is after tzait, advance to next Jewish day
+        if (now > tzaitDate) {
           currentDay = (currentDay + 1) % 7;
         }
       } catch (error) {
@@ -101,7 +101,7 @@ export default function TableSection() {
     return 6 - currentDay; // Days remaining until Saturday
   };
 
-  const daysUntilShabbat = getDaysUntilShabbat(jewishTimes?.shkia);
+  const daysUntilShabbat = getDaysUntilShabbat(jewishTimes?.tzaitHakochavim);
 
 
 
