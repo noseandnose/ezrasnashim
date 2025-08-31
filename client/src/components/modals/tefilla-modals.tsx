@@ -807,7 +807,7 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
 }
 
 function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
-  const { selectedPsalm, tehillimReturnTab } = useModalStore();
+  const { selectedPsalm, tehillimReturnTab, setTehillimActiveTab } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
@@ -1338,7 +1338,7 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
 
 export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const { activeModal, openModal, closeModal, selectedPsalm, setTehillimActiveTab, tehillimReturnTab } = useModalStore();
-  const { completeTask } = useDailyCompletionStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { trackEvent } = useAnalytics();
