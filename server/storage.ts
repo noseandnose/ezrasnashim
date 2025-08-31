@@ -1399,7 +1399,10 @@ export class DatabaseStorage implements IStorage {
     
     // Total Tehillim completed = direct + modal-based
     const tehillimCompleted = directTehillimCompleted + globalTehillimCompleted + regularTehillimCompleted;
-    const namesProcessed = todayEvents.filter(e => e.eventType === 'name_prayed').length;
+    // IMPORTANT: Only count names prayed from global chain (not individual Tehillim)
+    const namesProcessed = todayEvents.filter(e => 
+      e.eventType === 'name_prayed' && e.sessionId === 'global-chain'
+    ).length;
     const booksCompleted = todayEvents.filter(e => e.eventType === 'tehillim_book_complete').length;
     const tzedakaActs = todayEvents.filter(e => e.eventType === 'tzedaka_completion');
     
