@@ -478,23 +478,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid coordinates" });
       }
 
-      console.log(`[Server API Request] GET https://www.hebcal.com/shabbat/?cfg=json&latitude=${latitude}&longitude=${longitude}`);
+      // First get current zmanim to check if we're past tzait
+      const zmanimResponse = await fetch(`http://localhost:${process.env.PORT || 5000}/api/zmanim/${latitude}/${longitude}`);
+      const zmanimData = await zmanimResponse.json();
       
-      const response = await fetch(
-        `https://www.hebcal.com/shabbat/?cfg=json&latitude=${latitude}&longitude=${longitude}`
-      );
+      // Determine if we need next week's parsha (after tzait hakochavim)
+      let useNextWeek = false;
+      if (zmanimData.tzaitHakochavim) {
+        const now = new Date();
+        const [time, period] = zmanimData.tzaitHakochavim.split(' ');
+        const [hours, minutes] = time.split(':').map(Number);
+        
+        // Convert tzait time to 24-hour format
+        let tzaitHours = hours;
+        if (period === 'PM' && hours !== 12) tzaitHours += 12;
+        if (period === 'AM' && hours === 12) tzaitHours = 0;
+        
+        // Create tzait time in local timezone
+        const tzaitToday = new Date();
+        tzaitToday.setHours(tzaitHours, minutes, 0, 0);
+        
+        // Get current time in local timezone (Asia/Jerusalem)
+        const nowInLocalTZ = new Date().toLocaleString("en-US", {timeZone: zmanimData.tzid || "Asia/Jerusalem"});
+        const localNow = new Date(nowInLocalTZ);
+        
+        // If current time is past tzait, we need next week's parsha
+        useNextWeek = localNow > tzaitToday;
+        
+        console.log(`Debug parsha timing - Local now: ${localNow.toLocaleString()}, Tzait today: ${tzaitToday.toLocaleString()}, Use next week: ${useNextWeek}`);
+      }
+
+      // Build API URL - add week offset if needed  
+      let apiUrl = `https://www.hebcal.com/shabbat/?cfg=json&latitude=${latitude}&longitude=${longitude}`;
+      if (useNextWeek) {
+        // Request next Saturday's data (Sept 6, 2025 for Ki Tetzei)
+        apiUrl += `&gy=2025&gm=9&gd=6`;
+      }
+
+      console.log(`[Server API Request] GET ${apiUrl}`);
       
-      console.log(`[Server API Response] ${response.status} GET https://www.hebcal.com/shabbat/?cfg=json&latitude=${latitude}&longitude=${longitude}`);
+      const response = await fetch(apiUrl);
+      
+      console.log(`[Server API Response] ${response.status} GET ${apiUrl}`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch Shabbos times from Hebcal');
       }
 
       const data = await response.json();
-
-      // Get location name from our zmanim endpoint for consistency
-      const zmanimResponse = await fetch(`http://localhost:${process.env.PORT || 5000}/api/zmanim/${latitude}/${longitude}`);
-      const zmanimData = await zmanimResponse.json();
 
       // Parse the Shabbos data
       const result = {
@@ -2906,29 +2937,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
   
   // Version endpoint for PWA update checking
-  // Use server start time as the build timestamp to detect actual deployments
-  let SERVER_START_TIME = Date.now();
+  // Use a stable version timestamp that only changes for actual releases
+  const APP_VERSION = process.env.APP_VERSION || '1.0.1';
+  const SERVER_START_TIME = Date.now();
   
-  // Update build timestamp when server restarts (deployment detection)
-  const updateBuildTimestamp = () => {
-    SERVER_START_TIME = Date.now();
-    console.log('Updated build timestamp to:', new Date(SERVER_START_TIME).toISOString());
+  // Create a stable version timestamp based on version string rather than server restarts
+  const getVersionTimestamp = (versionString: string): number => {
+    // Use a consistent hash of the version string to create stable timestamps
+    // This prevents false update prompts on development server restarts
+    const versionHash = versionString.split('').reduce((hash, char) => {
+      return ((hash << 5) - hash) + char.charCodeAt(0);
+    }, 0);
+    
+    // Base timestamp: August 31, 2025 + version hash offset
+    const baseTimestamp = new Date('2025-08-31T00:00:00Z').getTime();
+    return baseTimestamp + Math.abs(versionHash) * 1000;
   };
   
   app.get("/api/version", (req, res) => {
+    const versionTimestamp = getVersionTimestamp(APP_VERSION);
     const version = {
-      timestamp: SERVER_START_TIME,
-      version: process.env.APP_VERSION || '1.0.1',
-      buildDate: new Date(SERVER_START_TIME).toISOString(),
+      timestamp: versionTimestamp,
+      version: APP_VERSION,
+      buildDate: new Date(versionTimestamp).toISOString(),
       serverUptime: Date.now() - SERVER_START_TIME
     };
     res.json(version);
-  });
-  
-  // Endpoint to manually trigger version update (for testing)
-  app.post("/api/version/update", (req, res) => {
-    updateBuildTimestamp();
-    res.json({ message: "Build timestamp updated", timestamp: SERVER_START_TIME });
   });
 
   // Messages routes

@@ -318,15 +318,19 @@ export class SimpleCompass {
     let heading: number;
     const deviceInfo = getDeviceInfo();
     
-    // Use native sensors in priority order
-    if (deviceInfo.isIOS && (event as any).webkitCompassHeading !== undefined) {
-      // iOS native compass heading (most accurate)
+    // Enhanced iOS support for different iPhone models
+    if (deviceInfo.isIOS && (event as any).webkitCompassHeading !== undefined && (event as any).webkitCompassHeading !== -1) {
+      // iOS native compass heading (most accurate for iPhone 6+ and newer)
       heading = (event as any).webkitCompassHeading;
     } else if (event.alpha !== null && event.alpha !== undefined) {
-      // Map alpha to heading correctly
+      // Fallback to alpha-based heading for older iOS devices or when webkitCompassHeading is unavailable
       if (deviceInfo.isAndroid) {
         // Android: alpha is typically magnetic north, use directly
         heading = event.alpha;
+      } else if (deviceInfo.isIOS) {
+        // iOS: webkitCompassHeading unavailable, use alpha with iOS correction
+        // For iOS, when webkitCompassHeading is not available, alpha needs correction
+        heading = event.absolute ? event.alpha : normalizeDegrees(360 - event.alpha);
       } else {
         // Other devices: typically need inversion
         heading = normalizeDegrees(360 - event.alpha);

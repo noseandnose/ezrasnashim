@@ -102,7 +102,14 @@ export default function AboutModal() {
 
         {/* Project of JustOneChesed Image */}
         <div className="flex justify-center mb-4">
-          <img src={projectOfImage} alt="Project of JustOneChesed" className="h-8 opacity-80" />
+          <a 
+            href="https://justonechesed.org/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="hover:opacity-60 transition-opacity"
+          >
+            <img src={projectOfImage} alt="Project of JustOneChesed" className="h-8 opacity-80 cursor-pointer" />
+          </a>
         </div>
 
         {/* Complete Button */}

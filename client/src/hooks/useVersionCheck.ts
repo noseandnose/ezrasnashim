@@ -27,6 +27,9 @@ export function useVersionCheck() {
       setCurrentVersion(initialVersion);
       // Store in localStorage for persistence across sessions
       localStorage.setItem('app-version', JSON.stringify(initialVersion));
+      
+      // Clear any stale update prompts since we have fresh version info
+      setShowUpdatePrompt(false);
     }
   }, [initialVersion, currentVersion]);
   
@@ -35,10 +38,22 @@ export function useVersionCheck() {
     const storedVersion = localStorage.getItem('app-version');
     if (storedVersion && !currentVersion) {
       try {
-        setCurrentVersion(JSON.parse(storedVersion));
+        const parsedVersion = JSON.parse(storedVersion);
+        // Only use stored version if it's recent (within 24 hours)
+        const oneDay = 24 * 60 * 60 * 1000;
+        const isRecent = Date.now() - parsedVersion.timestamp < oneDay;
+        
+        if (isRecent) {
+          setCurrentVersion(parsedVersion);
+        } else {
+          // Clear old version data
+          localStorage.removeItem('app-version');
+          localStorage.removeItem('latest-app-version');
+        }
       } catch (error) {
         // Clear corrupted version data
         localStorage.removeItem('app-version');
+        localStorage.removeItem('latest-app-version');
       }
     }
   }, [currentVersion]);
@@ -73,13 +88,16 @@ export function useVersionCheck() {
           isNewer: latestVersion.timestamp > currentVersion.timestamp
         });
         
-        // Compare timestamps to detect updates
-        if (latestVersion.timestamp > currentVersion.timestamp) {
+        // Compare timestamps to detect updates with minimum threshold
+        const timeDifference = latestVersion.timestamp - currentVersion.timestamp;
+        const minimumUpdateThreshold = 5 * 60 * 1000; // 5 minutes
+        
+        if (timeDifference > minimumUpdateThreshold) {
           console.log('🚀 New version detected! Showing update prompt.');
           setShowUpdatePrompt(true);
           
-          // Update stored version for future comparisons
-          localStorage.setItem('app-version', JSON.stringify(latestVersion));
+          // Store latest version separately for post-refresh update
+          localStorage.setItem('latest-app-version', JSON.stringify(latestVersion));
         } else {
           console.log('✅ App is up to date.');
         }
@@ -91,11 +109,11 @@ export function useVersionCheck() {
       }
     };
     
-    // Start checking after 2 minutes, then every 1 hour
+    // Start checking after 30 minutes, then every 12 hours
     const startDelay = setTimeout(() => {
       checkForUpdates();
-      intervalRef.current = setInterval(checkForUpdates, 60 * 60 * 1000); // 1 hour
-    }, 2 * 60 * 1000); // 2 minute delay
+      intervalRef.current = setInterval(checkForUpdates, 12 * 60 * 60 * 1000); // 12 hours
+    }, 30 * 60 * 1000); // 30 minute delay
     
     return () => {
       clearTimeout(startDelay);
@@ -107,6 +125,14 @@ export function useVersionCheck() {
   
   const refreshApp = () => {
     console.log('🔄 Performing app refresh with progress preservation...');
+    
+    // Update current version in localStorage before refresh
+    // This prevents the update prompt from showing again after refresh
+    const latestVersionFromStorage = localStorage.getItem('latest-app-version');
+    if (latestVersionFromStorage) {
+      localStorage.setItem('app-version', latestVersionFromStorage);
+      localStorage.removeItem('latest-app-version');
+    }
     
     // Dismiss the update prompt immediately
     setShowUpdatePrompt(false);

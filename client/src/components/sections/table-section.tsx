@@ -1,21 +1,24 @@
-import { Utensils, Lightbulb, Mic, Play, Flame, Clock, Circle, BookOpen, Star, Wine, Sparkles, Heart, Gift, Calendar, Moon, MapPin, ShoppingBag, MessageSquare, Zap, Lightbulb as Candle } from "lucide-react";
+import { Utensils, Flame, Star, Calendar, MapPin, MessageSquare } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
-import { useGeolocation } from "@/hooks/use-jewish-times";
+import { useGeolocation, useJewishTimes } from "@/hooks/use-jewish-times";
 import { useQuery } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
+
 
 export default function TableSection() {
   const { openModal } = useModalStore();
   const { isModalComplete } = useModalCompletionStore();
-  const { data: shabbosData, isLoading: shabbosLoading, error: shabbosError } = useShabbosTime();
+  const { data: shabbosData, isLoading: shabbosLoading } = useShabbosTime();
   
 
   
   // Get shared location state and trigger geolocation if needed
   const { coordinates, permissionDenied } = useGeolocation();
+  
+  // Get Jewish times (includes shkia)
+  const { data: jewishTimes } = useJewishTimes();
   
   // Show location prompt if permission denied and no coordinates
   const showLocationPrompt = permissionDenied && !coordinates;
@@ -65,14 +68,40 @@ export default function TableSection() {
     gcTime: 60 * 60 * 1000
   });
 
-  // Calculate days until Shabbat (Saturday = 6, Sunday = 0)
-  const getDaysUntilShabbat = () => {
-    const today = new Date().getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-    if (today === 6) return 7; // Saturday: 7 days until next Shabbat
-    return 6 - today; // Days remaining until Saturday
+  // Calculate days until Shabbat using Jewish day (tzait to tzait)
+  const getDaysUntilShabbat = (tzaitTime?: string) => {
+    const now = new Date();
+    let currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    
+    // If we have tzait time and it's after tzait, advance to next day
+    if (tzaitTime) {
+      try {
+        const [time, period] = tzaitTime.split(' ');
+        const [hours, minutes] = time.split(':').map(Number);
+        
+        // Convert to 24-hour format
+        let tzaitHours = hours;
+        if (period === 'PM' && hours !== 12) tzaitHours += 12;
+        if (period === 'AM' && hours === 12) tzaitHours = 0;
+        
+        // Create tzait date for today
+        const tzaitDate = new Date(now);
+        tzaitDate.setHours(tzaitHours, minutes, 0, 0);
+        
+        // If current time is after tzait, advance to next Jewish day
+        if (now > tzaitDate) {
+          currentDay = (currentDay + 1) % 7;
+        }
+      } catch (error) {
+        // If parsing fails, fall back to regular day calculation
+      }
+    }
+    
+    if (currentDay === 6) return 7; // Saturday: 7 days until next Shabbat
+    return 6 - currentDay; // Days remaining until Saturday
   };
 
-  const daysUntilShabbat = getDaysUntilShabbat();
+  const daysUntilShabbat = getDaysUntilShabbat(jewishTimes?.tzaitHakochavim);
 
 
 
@@ -88,7 +117,7 @@ export default function TableSection() {
               <h4 className="platypi-bold text-sm platypi-bold text-yellow-800">Location Required</h4>
             </div>
             <p className="platypi-regular text-xs text-yellow-700 mb-3">
-              Please enable location access for accurate Jewish prayer times, or click below to set your location manually.
+              Please enable location access for accurate davening times, or click below to set your location manually.
             </p>
             <button 
               onClick={() => openModal('location', 'table')}

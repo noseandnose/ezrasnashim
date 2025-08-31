@@ -101,6 +101,14 @@ export default function Statistics() {
     setLocation(`/?section=${section}`);
   };
 
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
   const StatCard = ({ title, value, icon: Icon, color }: { title: string; value: number | string; icon: any; color: string }) => (
     <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
       <div className="flex items-center justify-between mb-2">
@@ -257,7 +265,12 @@ export default function Statistics() {
           >
             <ArrowLeft className="h-5 w-5 text-black/70" />
           </button>
-          <h1 className="platypi-semibold text-xl text-black tracking-wide">Analytics Dashboard</h1>
+          <h1 
+            className="platypi-semibold text-xl text-black tracking-wide cursor-pointer hover:text-black/80 transition-colors"
+            onClick={scrollToTop}
+          >
+            Analytics Dashboard
+          </h1>
           <button
             onClick={handleRefresh}
             className="p-2 rounded-full hover:bg-white/50 transition-all duration-200"

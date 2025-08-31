@@ -31,7 +31,7 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
   return (
     <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-gradient-soft backdrop-blur-sm border-t border-rose-blush/15 shadow-2xl rounded-t-3xl transition-gentle z-50">
       <div className="flex items-center justify-around py-2 px-2">
-        {navItems.map(({ id, icon: Icon, label, isCenter }) => (
+        {navItems.map(({ id, icon: Icon, label }) => (
           <button
             key={id}
             onClick={() => onSectionChange(id)}
@@ -49,10 +49,11 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
                     : ''
                   : 'text-warm-gray/70'
               }`}
-              size={20}
-              strokeWidth={1.5} 
+              size={activeSection === id ? 22 : 20}
+              strokeWidth={1.5}
+              fill="none"
             />
-            <span className={`platypi-medium text-xs transition-colors duration-300 ${
+            <span className={`${activeSection === id ? 'platypi-bold' : 'platypi-medium'} text-xs transition-colors duration-300 ${
               activeSection === id 
                 ? id === 'home'
                   ? 'text-white' 

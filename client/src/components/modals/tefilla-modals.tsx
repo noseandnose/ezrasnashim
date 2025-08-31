@@ -807,7 +807,7 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
 }
 
 function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
-  const { selectedPsalm, tehillimReturnTab } = useModalStore();
+  const { selectedPsalm, tehillimReturnTab, setTehillimActiveTab } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
@@ -1139,7 +1139,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
     // Advance the chain (this will trigger the analytics tracking in onSuccess)
     advanceChainMutation.mutate();
     
-    // Close fullscreen and return to home
+    // Close fullscreen and return to previous view (1-150 or special occasions)
     const event = new CustomEvent('closeFullscreen');
     window.dispatchEvent(event);
     
@@ -1216,7 +1216,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
       </div>
 
       <div className="flex gap-2 mt-6">
-        {/* Complete button - returns to home */}
+        {/* Complete button - returns to previous view */}
         <Button
           onClick={isCompleted ? undefined : handleComplete}
           disabled={isCompleted || advanceChainMutation.isPending || completeAndNextMutation.isPending}
@@ -1338,7 +1338,7 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
 
 export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const { activeModal, openModal, closeModal, selectedPsalm, setTehillimActiveTab, tehillimReturnTab } = useModalStore();
-  const { completeTask } = useDailyCompletionStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { trackEvent } = useAnalytics();

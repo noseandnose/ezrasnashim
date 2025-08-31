@@ -24,7 +24,7 @@ export default function MessageModal({ isOpen, onClose, date }: MessageModalProp
             {isLoading ? "Loading..." : message?.title || "Daily Message"}
           </DialogTitle>
           <DialogDescription>
-            Daily inspirational message for spiritual growth
+            Updates on New Features and other Exciting activity
           </DialogDescription>
         </DialogHeader>
         
