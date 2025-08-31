@@ -1414,6 +1414,23 @@ export class DatabaseStorage implements IStorage {
         }
       });
 
+    // IMPORTANT: Fix global chain analytics counting
+    // The problem: older global chain completions only have tehillim_complete events, 
+    // newer ones have both tehillim_complete AND modal_complete events.
+    // Solution: Count all global chain completions (tehillim_complete from global-chain) as the true count
+    const globalChainCompletions = todayEvents.filter(e => 
+      e.eventType === 'tehillim_complete' && 
+      e.sessionId === 'global-chain' &&
+      // Exclude test sessions
+      !e.sessionId?.startsWith('test-') &&
+      !e.sessionId?.startsWith('final-')
+    ).length;
+    
+    // Set the correct count (don't add, replace to avoid double-counting)
+    if (globalChainCompletions > 0) {
+      modalCompletions['global-tehillim-chain'] = globalChainCompletions;
+    }
+
     // Add gave elsewhere tzedakah (doesn't have a modal)
     // Count tzedakah completions by type
     let gaveElsewhereCompletions: number = 0;
