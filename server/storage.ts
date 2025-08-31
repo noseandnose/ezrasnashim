@@ -263,7 +263,7 @@ export class DatabaseStorage implements IStorage {
     // When multiple users complete the same perek simultaneously, this ensures 
     // the progress only advances by 1, not by the number of simultaneous completions
     
-    return db.transaction(async (tx) => {
+    const result = await db.transaction(async (tx) => {
       // Lock the row for update to prevent concurrent modifications
       const [progress] = await tx.select()
         .from(globalTehillimProgress)
@@ -373,7 +373,24 @@ export class DatabaseStorage implements IStorage {
             .returning();
         }
         
-        console.log(`Tracked Tehillim completion: perek ${currentPerek}, name: ${currentNameDetails?.hebrewName || 'None'}`);
+        // IMPORTANT: Global Tehillim chain counts as 2 mitzvos
+        // Track an additional mitzvah for the global chain completion
+        const [secondMitzvahEvent] = await tx
+          .insert(analyticsEvents)
+          .values({
+            eventType: 'modal_complete',
+            eventData: {
+              modalType: 'global-tehillim-chain',
+              perekNumber: currentPerek,
+              language: language,
+              completedBy: completedBy || 'Anonymous',
+              mitzvahType: 'second_global_mitzvah'
+            },
+            sessionId: 'global-chain'
+          })
+          .returning();
+        
+        console.log(`Tracked Tehillim completion: perek ${currentPerek}, name: ${currentNameDetails?.hebrewName || 'None'}, counted as 2 mitzvos`);
       } catch (analyticsError) {
         // Log analytics errors but don't fail the transaction
         console.error('Failed to track Tehillim analytics:', analyticsError);

@@ -1139,7 +1139,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
     // Advance the chain (this will trigger the analytics tracking in onSuccess)
     advanceChainMutation.mutate();
     
-    // Close fullscreen and return to home
+    // Close fullscreen and return to previous view (1-150 or special occasions)
     const event = new CustomEvent('closeFullscreen');
     window.dispatchEvent(event);
     
@@ -1216,7 +1216,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
       </div>
 
       <div className="flex gap-2 mt-6">
-        {/* Complete button - returns to home */}
+        {/* Complete button - returns to previous view */}
         <Button
           onClick={isCompleted ? undefined : handleComplete}
           disabled={isCompleted || advanceChainMutation.isPending || completeAndNextMutation.isPending}
