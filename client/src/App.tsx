@@ -41,13 +41,14 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
   );
 }
 
-// Loading component
+// Loading component using the dove logo
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-screen bg-white">
-    <div className="flex flex-col items-center space-y-4">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blush"></div>
-      <p className="text-sm text-gray-500 font-inter">Loading...</p>
-    </div>
+    <img 
+      src={logoPath} 
+      alt="Loading..." 
+      className="w-16 h-16 object-contain animate-pulse"
+    />
   </div>
 );
 
