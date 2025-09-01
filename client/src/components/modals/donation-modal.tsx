@@ -115,7 +115,7 @@ export default function DonationModal() {
           <DialogTitle className="text-lg platypi-bold text-black">Put a Coin in Tzedaka</DialogTitle>
         </div>
         <p className="text-xs text-warm-gray/70 platypi-regular text-center mb-4">
-          Donations go towards Woman in need and Torah Causes
+          All Donations go towards approved Woman Torah Causes
         </p>
         
         {/* Apple Pay development notice */}
