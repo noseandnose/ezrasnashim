@@ -529,6 +529,12 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                   title={emunaContent.title || 'Emuna'}
                   duration={emunaContent.duration || "0:00"}
                   audioUrl={emunaContent.audioUrl}
+                  onAudioEnded={() => {
+                    // Auto-complete when audio finishes, but only if not already completed
+                    if (!isModalComplete('emuna')) {
+                      handleTorahComplete();
+                    }
+                  }}
                 />
               </div>
             )}
@@ -615,6 +621,12 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                   title={chizukContent.title || 'Chizuk'}
                   duration={chizukContent.duration || "0:00"}
                   audioUrl={chizukContent.audioUrl}
+                  onAudioEnded={() => {
+                    // Auto-complete when audio finishes, but only if not already completed
+                    if (!isModalComplete('chizuk')) {
+                      handleTorahComplete();
+                    }
+                  }}
                 />
               </div>
             )}

@@ -198,14 +198,12 @@ export async function getCurrentTefillaConditions(
           event.toLowerCase().includes('rosh hashana') ||
           event.toLowerCase().includes('tzom gedaliah') ||
           event.toLowerCase().includes('yom kippur')
-        ) || (hebrewDate.hebrew && (
-          hebrewDate.hebrew.includes('תשרי') && 
-          (hebrewDate.hebrew.includes('א׳') || hebrewDate.hebrew.includes('ב׳') || 
-           hebrewDate.hebrew.includes('ג׳') || hebrewDate.hebrew.includes('ד׳') || 
-           hebrewDate.hebrew.includes('ה׳') || hebrewDate.hebrew.includes('ו׳') || 
-           hebrewDate.hebrew.includes('ז׳') || hebrewDate.hebrew.includes('ח׳') || 
-           hebrewDate.hebrew.includes('ט׳') || hebrewDate.hebrew.includes('י׳'))
-        ));
+        ) || (
+          // Check for days 1-10 of Tishrei using structured data
+          hebrewDate.hebrewMonth === 'Tishrei' && 
+          hebrewDate.hebrewDay >= 1 && 
+          hebrewDate.hebrewDay <= 10
+        );
         
         // Check for Sukkot
         isSukkot = events.some((event: string) => 

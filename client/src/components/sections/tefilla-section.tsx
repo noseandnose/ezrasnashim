@@ -43,9 +43,10 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       return { title: "Morning Brochas", subtitle: "Loading times...", modal: "morning-brochas" };
     }
 
+    // Get the current time in the location's timezone where zmanim were calculated
     const now = new Date();
     
-    // Helper function to parse time strings like "6:30 AM" into today's date
+    // Helper function to parse time strings like "6:30 AM" into today's date in the location's timezone
     const parseTimeToday = (timeStr: string) => {
       if (!timeStr) return null;
       
@@ -65,8 +66,15 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       }
       
       // Create a date object for today with the specified time
+      // IMPORTANT: The zmanim times are returned in the location's timezone
+      // We need to ensure we're comparing apples to apples
       const date = new Date();
       date.setHours(hours, minutes, 0, 0);
+      
+      // Debug logging to track potential timezone issues
+      console.log(`Parsed time ${timeStr} as:`, date.toLocaleString(), 
+        `Current time:`, now.toLocaleString());
+      
       return date;
     };
     
@@ -76,6 +84,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     
     // Handle null times gracefully
     if (!neitz || !minchaGedola || !shkia) {
+      console.log('Prayer time calculation failed - missing zmanim data');
       return {
         title: "Morning Brochas",
         subtitle: "Times unavailable",
@@ -83,12 +92,21 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       };
     }
     
-    // Calculate next day's neitz for Maariv end time
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    // Debug logging for prayer time determination
+    console.log('Prayer time calculation:', {
+      now: now.toLocaleString(),
+      neitz: neitz.toLocaleString(),
+      minchaGedola: minchaGedola.toLocaleString(), 
+      shkia: shkia.toLocaleString(),
+      isAfterNeitz: now >= neitz,
+      isBeforeMincha: now < minchaGedola,
+      isAfterMincha: now >= minchaGedola,
+      isBeforeShkia: now < shkia
+    });
 
     if (now >= neitz && now < minchaGedola) {
       // Morning Brochas time
+      console.log('Selected prayer: Morning Brochas');
       return {
         title: "Morning Brochas",
         subtitle: `${times.sunrise} - ${times.minchaGedolah}`,
@@ -96,6 +114,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       };
     } else if (now >= minchaGedola && now < shkia) {
       // Mincha time
+      console.log('Selected prayer: Mincha');
       return {
         title: "Mincha",
         subtitle: `${times.minchaGedolah} - ${times.shkia}`,
@@ -103,6 +122,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       };
     } else {
       // Maariv time (from Shkia until next morning's Neitz)
+      console.log('Selected prayer: Maariv');
       return {
         title: "Maariv",
         subtitle: `${times.shkia} - ${times.sunrise}`,

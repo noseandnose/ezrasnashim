@@ -1,18 +1,9 @@
-import { useState, useEffect } from 'react';
 import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { useGeolocation, useJewishTimes } from "@/hooks/use-jewish-times";
 import { initializeCache } from "@/lib/cache";
-import { lazy, Suspense } from "react";
-import ErrorBoundary from "@/components/ui/error-boundary";
-import UpdateNotification from "@/components/UpdateNotification";
-import { AutoNotificationPrompt } from "@/components/auto-notification-prompt";
-import "@/utils/clear-modal-completions";
+import { useEffect, lazy, Suspense } from "react";
 import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
-import logoPath from '@assets/EN App Icon_1756705023411.png';
+import "@/utils/clear-modal-completions";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));
@@ -23,20 +14,17 @@ const AdminNotifications = lazy(() => import("@/pages/admin-notifications"));
 const AdminRecipes = lazy(() => import("@/pages/admin-recipes"));
 const Privacy = lazy(() => import("@/pages/privacy"));
 
-// Unified loading screen with dove - serves as both splash and loading indicator
-function LoadingScreen() {
-  return (
-    <div className="fixed inset-0 bg-white z-[9999] flex items-center justify-center">
-      <img 
-        src={logoPath} 
-        alt="Loading..." 
-        className="w-24 h-24 object-contain animate-pulse"
-      />
+// Optimized loading component
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center min-h-screen bg-white">
+    <div className="flex flex-col items-center space-y-4">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blush"></div>
+      <p className="text-sm text-gray-500 font-inter">Loading...</p>
     </div>
-  );
-}
+  </div>
+);
 
-function Router() {
+export default function Router() {
   // Initialize geolocation and preload Jewish times on app startup
   useGeolocation();
   useJewishTimes();
@@ -74,7 +62,7 @@ function Router() {
   }, []);
   
   return (
-    <Suspense fallback={<LoadingScreen />}>
+    <Suspense fallback={<LoadingSpinner />}>
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/torah" component={Home} />
@@ -96,20 +84,5 @@ function Router() {
         <Route component={NotFound} />
       </Switch>
     </Suspense>
-  );
-}
-
-export default function App() {
-  return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <UpdateNotification />
-          <AutoNotificationPrompt />
-          <Router />
-          <Toaster />
-        </TooltipProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
   );
 }

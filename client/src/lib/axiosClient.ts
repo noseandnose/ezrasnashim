@@ -61,8 +61,18 @@ axiosClient.interceptors.response.use(
   (error: AxiosError) => {
     const url = error.config?.url;
     const method = error.config?.method?.toUpperCase();
+    const status = error.response?.status;
     
-    console.error(`[API Error] ${error.response?.status || 'Unknown'} ${method} ${url}`);
+    // Don't log 404 errors for messages endpoint as this is expected when no message exists
+    const isMessageEndpoint = url?.includes('/api/messages/');
+    const is404Error = status === 404;
+    
+    if (isMessageEndpoint && is404Error) {
+      // Silently handle expected 404s for missing messages
+      return Promise.reject(error);
+    }
+    
+    console.error(`[API Error] ${status || 'Unknown'} ${method} ${url}`);
     console.error('Error details:', error.toJSON ? error.toJSON() : error);
     
     return Promise.reject(error);
