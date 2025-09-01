@@ -23,31 +23,39 @@ const AdminNotifications = lazy(() => import("@/pages/admin-notifications"));
 const AdminRecipes = lazy(() => import("@/pages/admin-recipes"));
 const Privacy = lazy(() => import("@/pages/privacy"));
 
-// Simple splash screen component
+// Simple splash screen component with fade effect
 function SplashScreen({ onComplete }: { onComplete: () => void }) {
+  const [isVisible, setIsVisible] = useState(true);
+
   useEffect(() => {
-    const timer = setTimeout(onComplete, 800);
+    const timer = setTimeout(() => {
+      setIsVisible(false);
+      // Complete after fade out
+      setTimeout(onComplete, 300);
+    }, 800);
     return () => clearTimeout(timer);
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 bg-white z-[9999] flex items-center justify-center">
+    <div className={`fixed inset-0 bg-white z-[9999] flex items-center justify-center transition-opacity duration-300 ${
+      isVisible ? 'opacity-100' : 'opacity-0'
+    }`}>
       <img 
         src={logoPath} 
         alt="Ezras Nashim" 
-        className="w-24 h-24 object-contain animate-pulse"
+        className="w-24 h-24 object-contain"
       />
     </div>
   );
 }
 
-// Loading component using the dove logo
+// Loading component using the same dove logo size
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-screen bg-white">
     <img 
       src={logoPath} 
       alt="Loading..." 
-      className="w-16 h-16 object-contain animate-pulse"
+      className="w-24 h-24 object-contain animate-pulse"
     />
   </div>
 );
