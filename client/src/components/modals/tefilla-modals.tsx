@@ -148,7 +148,24 @@ const processTefillaContent = (text: string, conditions: TefillaConditions | nul
   };
   
   const effectiveConditions = conditions || defaultConditions;
+  
+  // Debug logging for ASERET_YEMEI_TESHUVA content
+  if (text.includes('ASERET_YEMEI_TESHUVA')) {
+    console.log('Processing text with ASERET_YEMEI_TESHUVA markup');
+    console.log('Conditions:', effectiveConditions);
+    console.log('Original text excerpt:', text.substring(text.indexOf('[[ASERET_YEMEI_TESHUVA]]'), text.indexOf('[[/ASERET_YEMEI_TESHUVA]]') + 25));
+  }
+  
   const processedText = processTefillaText(text, effectiveConditions);
+  
+  // Debug logging for processed result
+  if (text.includes('ASERET_YEMEI_TESHUVA')) {
+    console.log('Processed text still contains ASERET_YEMEI_TESHUVA markup:', processedText.includes('ASERET_YEMEI_TESHUVA'));
+    if (processedText.includes('הַמֶּֽלֶךְְְ הַמִּשְְְׁפָּט')) {
+      console.log('Text still contains the conditional content that should be hidden');
+    }
+  }
+  
   return formatTextContent(processedText);
 };
 
