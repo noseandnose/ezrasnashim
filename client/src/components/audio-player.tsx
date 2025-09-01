@@ -7,9 +7,10 @@ interface AudioPlayerProps {
   title: string;
   duration: string | number;
   audioUrl: string;
+  onAudioEnded?: () => void; // Optional callback for when audio finishes
 }
 
-export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerProps) {
+export default function AudioPlayer({ title, duration, audioUrl, onAudioEnded }: AudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState("0:00");
@@ -82,6 +83,11 @@ export default function AudioPlayer({ title, duration, audioUrl }: AudioPlayerPr
       setIsPlaying(false);
       setProgress(0);
       setCurrentTime("0:00");
+      
+      // Call the completion callback if provided
+      if (onAudioEnded) {
+        onAudioEnded();
+      }
     };
 
     const handleTimeUpdate = () => {
