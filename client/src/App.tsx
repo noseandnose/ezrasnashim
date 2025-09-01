@@ -23,38 +23,18 @@ const AdminNotifications = lazy(() => import("@/pages/admin-notifications"));
 const AdminRecipes = lazy(() => import("@/pages/admin-recipes"));
 const Privacy = lazy(() => import("@/pages/privacy"));
 
-// Simple splash screen component with fade effect
-function SplashScreen({ onComplete }: { onComplete: () => void }) {
-  const [isVisible, setIsVisible] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(false);
-      // Complete after fade out
-      setTimeout(onComplete, 300);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, [onComplete]);
-
+// Unified loading screen with dove - serves as both splash and loading indicator
+function LoadingScreen() {
   return (
-    <div className={`fixed inset-0 bg-white z-[9999] flex items-center justify-center transition-opacity duration-300 ${
-      isVisible ? 'opacity-100' : 'opacity-0'
-    }`}>
+    <div className="fixed inset-0 bg-white z-[9999] flex items-center justify-center">
       <img 
         src={logoPath} 
-        alt="Ezras Nashim" 
-        className="w-24 h-24 object-contain"
+        alt="Loading..." 
+        className="w-24 h-24 object-contain animate-pulse"
       />
     </div>
   );
 }
-
-// Simple loading component without dove to avoid double splash
-const LoadingSpinner = () => (
-  <div className="flex items-center justify-center min-h-screen bg-white">
-    <div className="w-6 h-6 border-2 border-blush border-t-transparent rounded-full animate-spin"></div>
-  </div>
-);
 
 function Router() {
   // Initialize geolocation and preload Jewish times on app startup
@@ -94,7 +74,7 @@ function Router() {
   }, []);
   
   return (
-    <Suspense fallback={<LoadingSpinner />}>
+    <Suspense fallback={<LoadingScreen />}>
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/torah" component={Home} />
@@ -120,16 +100,6 @@ function Router() {
 }
 
 export default function App() {
-  const [showSplash, setShowSplash] = useState(true);
-
-  const handleSplashComplete = () => {
-    setShowSplash(false);
-  };
-
-  if (showSplash) {
-    return <SplashScreen onComplete={handleSplashComplete} />;
-  }
-
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
