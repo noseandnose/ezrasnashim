@@ -26,9 +26,19 @@
     <link rel="icon" type="image/png" href="/icon-192.png">
     <meta name="theme-color" content="#E8ADB7">
     
+    <!-- Critical resource preloading for faster initial load -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev">
+    <link rel="dns-prefetch" href="https://www.hebcal.com">
+    <link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
+    
     <!-- Preload Koren fonts to prevent flash -->
     <link rel="preload" href="/src/fonts/KorenSiddur.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="/src/fonts/ArnoKoren.otf" as="font" type="font/otf" crossorigin>
+    
+    <!-- Preload splash screen logo -->
+    <link rel="preload" href="/attached_assets/EN App Icon_1756705023411.png" as="image" type="image/png">
     
     <!-- Inline critical font CSS to prevent flash -->
     <style>
@@ -62,12 +72,11 @@
       }
     </style>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Platypi:ital,wght@0,300..800;1,300..800&family=Secular+One&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Load only essential font weights to reduce size -->
+    <link href="https://fonts.googleapis.com/css2?family=Platypi:wght@400;600&family=Secular+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;500&display=swap" rel="stylesheet">
   </head>
   <body>
     <div id="root"></div>
