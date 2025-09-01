@@ -40,18 +40,10 @@ const preloadCriticalResources = () => {
 
 export default function AppLoader() {
   const [showSplash, setShowSplash] = useState(true);
-  const [isAppReady, setIsAppReady] = useState(false);
 
   // Preload critical resources immediately
   useEffect(() => {
     preloadCriticalResources();
-    
-    // Mark app as ready after minimum time - reduced for faster startup
-    const readyTimer = setTimeout(() => {
-      setIsAppReady(true);
-    }, 500); // Further reduced for faster perceived loading
-
-    return () => clearTimeout(readyTimer);
   }, []);
 
   const handleSplashComplete = useCallback(() => {
@@ -62,19 +54,21 @@ export default function AppLoader() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          {/* Splash screen shown until app is ready */}
+          {/* Splash screen shown initially */}
           <SplashScreen 
-            isVisible={showSplash && !isAppReady} 
+            isVisible={showSplash} 
             onComplete={handleSplashComplete}
           />
           
-          {/* Main app - rendered in background during splash */}
-          <div className={showSplash ? 'opacity-0 pointer-events-none' : 'opacity-100'}>
-            <UpdateNotification />
-            <AutoNotificationPrompt />
-            <Router />
-            <Toaster />
-          </div>
+          {/* Main app - shown after splash completes */}
+          {!showSplash && (
+            <div className="opacity-100">
+              <UpdateNotification />
+              <AutoNotificationPrompt />
+              <Router />
+              <Toaster />
+            </div>
+          )}
         </TooltipProvider>
       </QueryClientProvider>
     </ErrorBoundary>
