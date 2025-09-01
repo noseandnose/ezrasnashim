@@ -49,14 +49,10 @@ function SplashScreen({ onComplete }: { onComplete: () => void }) {
   );
 }
 
-// Loading component using the same dove logo size
+// Simple loading component without dove to avoid double splash
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-screen bg-white">
-    <img 
-      src={logoPath} 
-      alt="Loading..." 
-      className="w-24 h-24 object-contain animate-pulse"
-    />
+    <div className="w-6 h-6 border-2 border-blush border-t-transparent rounded-full animate-spin"></div>
   </div>
 );
 
