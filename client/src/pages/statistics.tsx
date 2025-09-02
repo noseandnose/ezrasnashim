@@ -35,16 +35,18 @@ export default function Statistics() {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('today');
   const queryClient = useQueryClient();
   
+  // Calculate today's analytics date once
+  const analyticsToday = getLocalDateString(); // Use client's 2 AM boundary calculation
+  
   // Force refresh all stats when component mounts and when period changes
   useEffect(() => {
     // Force invalidate and refetch all queries when page loads or period changes
-    queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/today"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/today", analyticsToday] });
     queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/month"] });
     queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/total"] });
-  }, [selectedPeriod]); // Invalidate when period changes
+  }, [selectedPeriod, analyticsToday, queryClient]); // Invalidate when period changes or date changes
 
   // Fetch today's stats with proper timezone handling
-  const analyticsToday = getLocalDateString(); // Use client's 2 AM boundary calculation
   const { data: todayStats, isLoading: todayLoading } = useQuery<DailyStats>({
     queryKey: ["/api/analytics/stats/today", analyticsToday],
     queryFn: () => fetch(`/api/analytics/stats/today?date=${analyticsToday}`).then(res => res.json()),
