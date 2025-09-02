@@ -21,7 +21,7 @@ interface Campaign {
 
 export default function DonationModal() {
   const { activeModal, closeModal, openModal } = useModalStore();
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+//  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [amount, setAmount] = useState("1");
