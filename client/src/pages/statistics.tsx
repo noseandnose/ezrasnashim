@@ -49,7 +49,13 @@ export default function Statistics() {
   // Fetch today's stats with proper timezone handling
   const { data: todayStats, isLoading: todayLoading } = useQuery<DailyStats>({
     queryKey: ["/api/analytics/stats/today", analyticsToday],
-    queryFn: () => fetch(`/api/analytics/stats/today?date=${analyticsToday}`).then(res => res.json()),
+    queryFn: async () => {
+      console.log(`Fetching today's stats for date: ${analyticsToday}`);
+      const response = await fetch(`/api/analytics/stats/today?date=${analyticsToday}`);
+      const data = await response.json();
+      console.log('Today stats response:', data);
+      return data;
+    },
     staleTime: 0, // Never cache - always fresh
     gcTime: 0, // Don't keep in memory
     refetchInterval: 30000, // Auto-refresh every 30 seconds
