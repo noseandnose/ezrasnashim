@@ -607,6 +607,13 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
   const { trackModalComplete } = useTrackModalComplete();
   const { coordinates } = useLocationStore();
   const [conditions, setConditions] = useState<TefillaConditions | null>(null);
+  
+  // Me'ein Shalosh checkbox states
+  const [selectedOptions, setSelectedOptions] = useState({
+    grain: false,
+    wine: false,
+    fruit: false
+  });
 
   // Load conditions for processing
   useEffect(() => {
@@ -634,7 +641,12 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
     let processedText = text;
     
     if (conditions && text) {
-      processedText = processTefillaText(text, conditions);
+      // Include selected food options in conditions for Me'ein Shalosh
+      const extendedConditions = {
+        ...conditions,
+        selectedFoodTypes: selectedOptions
+      };
+      processedText = processTefillaText(text, extendedConditions);
     }
     
     const formattedText = formatTextContent(processedText);
@@ -674,12 +686,67 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
   if (isLoading) return <div className="text-center py-8">Loading prayer...</div>;
 
   return (
-    <div className="space-y-6">
-      {afterBrochasPrayers?.filter(p => p.prayerName === "Me'ein Shalosh").map((prayer, index) => (
-        <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
-          {renderPrayerText(prayer)}
+    <div className="space-y-4">
+      {/* Me'ein Shalosh Food Selection Checkboxes */}
+      <div className="bg-gradient-to-r from-lavender-50 to-rose-50 rounded-2xl p-4 border border-lavender/20">
+        <div className="grid grid-cols-3 gap-4">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="grain-fullscreen"
+              checked={selectedOptions.grain}
+              onCheckedChange={(checked) => 
+                setSelectedOptions(prev => ({ ...prev, grain: !!checked }))
+              }
+              className="border-blush data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+            />
+            <label 
+              htmlFor="grain-fullscreen" 
+              className="text-sm platypi-medium text-black cursor-pointer"
+            >
+              Grain
+            </label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="wine-fullscreen"
+              checked={selectedOptions.wine}
+              onCheckedChange={(checked) => 
+                setSelectedOptions(prev => ({ ...prev, wine: !!checked }))
+              }
+              className="border-blush data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+            />
+            <label 
+              htmlFor="wine-fullscreen" 
+              className="text-sm platypi-medium text-black cursor-pointer"
+            >
+              Wine
+            </label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="fruit-fullscreen"
+              checked={selectedOptions.fruit}
+              onCheckedChange={(checked) => 
+                setSelectedOptions(prev => ({ ...prev, fruit: !!checked }))
+              }
+              className="border-blush data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+            />
+            <label 
+              htmlFor="fruit-fullscreen" 
+              className="text-sm platypi-medium text-black cursor-pointer"
+            >
+              Fruits
+            </label>
+          </div>
         </div>
-      ))}
+      </div>
+      
+      <div className="space-y-6">
+        {afterBrochasPrayers?.filter(p => p.prayerName === "Me'ein Shalosh").map((prayer, index) => (
+          <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
+            {renderPrayerText(prayer)}
+          </div>
+        ))}
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
