@@ -61,7 +61,7 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
   };
 
 
-  // Process all conditional sections with priority-based logic
+  // Process all conditional sections with localized priority logic
   const conditionalPattern = /\[\[([^\]]+)\]\]([\s\S]*?)\[\[\/([^\]]+)\]\]/g;
   const matches: Array<{
     fullMatch: string;
@@ -70,6 +70,7 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     conditions: string[];
     priority: number;
     startIndex: number;
+    endIndex: number;
   }> = [];
   
   // Collect all matches first
@@ -82,63 +83,90 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
         tag: openTag,
         content,
         conditions: openTag.includes('|') ? openTag.split('|').map(c => c.trim()) : openTag.split(',').map(c => c.trim()),
-        priority: openTag.includes('|') ? openTag.split('|').length : openTag.split(',').length, // More conditions = higher priority
-        startIndex: match.index!
+        priority: openTag.includes('|') ? openTag.split('|').length : openTag.split(',').length,
+        startIndex: match.index!,
+        endIndex: match.index! + fullMatch.length
       });
     }
   }
   
-  // Sort by priority (more conditions = higher priority), then by position
-  matches.sort((a, b) => {
-    if (a.priority !== b.priority) {
-      return b.priority - a.priority; // Higher priority first
-    }
-    return a.startIndex - b.startIndex; // Same priority: maintain original order
-  });
+  // Sort by position first, then by priority within overlapping regions
+  matches.sort((a, b) => a.startIndex - b.startIndex);
   
-  // Track which individual conditions have been used by higher priority matches
-  const usedConditions = new Set<string>();
   const matchesToKeep = new Set<string>();
   
-  // Process from highest to lowest priority
-  for (const matchInfo of matches) {
-    // Check if any of these conditions have already been used
-    const hasOverlap = matchInfo.conditions.some(cond => usedConditions.has(cond));
+  // Process matches in groups - only apply priority logic within overlapping regions
+  for (let i = 0; i < matches.length; i++) {
+    const currentMatch = matches[i];
     
-    if (!hasOverlap) {
-      // Check if all conditions are met
-      let conditionsMet = false;
+    // Find all matches that overlap with this one (within 100 characters)
+    const overlappingMatches = matches.filter(m => 
+      m.startIndex >= currentMatch.startIndex - 100 && 
+      m.startIndex <= currentMatch.endIndex + 100 &&
+      m.conditions.some(cond => currentMatch.conditions.includes(cond))
+    );
+    
+    if (overlappingMatches.length > 1) {
+      // Apply priority logic within this overlapping group
+      const sortedByPriority = overlappingMatches.sort((a, b) => b.priority - a.priority);
+      const usedConditionsInGroup = new Set<string>();
       
-      if (matchInfo.tag.includes('|')) {
-        // OR logic: Any condition can be true
-        conditionsMet = matchInfo.conditions.some((condition: string) => {
-          const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
-          return checker ? checker() : false;
-        });
-      } else {
-        // AND logic: All conditions must be true
-        conditionsMet = matchInfo.conditions.every((condition: string) => {
-          const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
-          return checker ? checker() : false;
-        });
+      for (const matchInfo of sortedByPriority) {
+        if (matchesToKeep.has(matchInfo.fullMatch)) continue; // Already processed
+        
+        const hasOverlap = matchInfo.conditions.some(cond => usedConditionsInGroup.has(cond));
+        
+        if (!hasOverlap) {
+          // Check if conditions are met
+          let conditionsMet = false;
+          
+          if (matchInfo.tag.includes('|')) {
+            conditionsMet = matchInfo.conditions.some((condition: string) => {
+              const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
+              return checker ? checker() : false;
+            });
+          } else {
+            conditionsMet = matchInfo.conditions.every((condition: string) => {
+              const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
+              return checker ? checker() : false;
+            });
+          }
+          
+          if (conditionsMet) {
+            matchInfo.conditions.forEach(cond => usedConditionsInGroup.add(cond));
+            matchesToKeep.add(matchInfo.fullMatch);
+          }
+        }
       }
-      
-      if (conditionsMet) {
-        // Mark these conditions as used and keep this match
-        matchInfo.conditions.forEach(cond => usedConditions.add(cond));
-        matchesToKeep.add(matchInfo.fullMatch);
+    } else {
+      // No overlapping matches - process normally
+      if (!matchesToKeep.has(currentMatch.fullMatch)) {
+        let conditionsMet = false;
+        
+        if (currentMatch.tag.includes('|')) {
+          conditionsMet = currentMatch.conditions.some((condition: string) => {
+            const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
+            return checker ? checker() : false;
+          });
+        } else {
+          conditionsMet = currentMatch.conditions.every((condition: string) => {
+            const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
+            return checker ? checker() : false;
+          });
+        }
+        
+        if (conditionsMet) {
+          matchesToKeep.add(currentMatch.fullMatch);
+        }
       }
     }
   }
   
   // Now process the text, keeping only the matches we want
   processedText = processedText.replace(conditionalPattern, (match, openTag, content, closeTag) => {
-    // Ensure opening and closing tags match
     if (openTag !== closeTag) {
-      return match; // Return original if tags don't match
+      return match;
     }
-    
-    // If this match should be kept, return its content, otherwise remove it
     return matchesToKeep.has(match) ? content : '';
   });
 
