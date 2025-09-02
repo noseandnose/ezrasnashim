@@ -5,6 +5,7 @@ import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import type { Section } from "@/pages/home";
 import BottomNavigation from "@/components/bottom-navigation";
+import { getLocalDateString } from "@/lib/dateUtils";
 
 interface DailyStats {
   date: string;
@@ -42,9 +43,11 @@ export default function Statistics() {
     queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/total"] });
   }, [selectedPeriod]); // Invalidate when period changes
 
-  // Fetch today's stats
+  // Fetch today's stats with proper timezone handling
+  const analyticsToday = getLocalDateString(); // Use client's 2 AM boundary calculation
   const { data: todayStats, isLoading: todayLoading } = useQuery<DailyStats>({
-    queryKey: ["/api/analytics/stats/today"],
+    queryKey: ["/api/analytics/stats/today", analyticsToday],
+    queryFn: () => fetch(`/api/analytics/stats/today?date=${analyticsToday}`).then(res => res.json()),
     staleTime: 0, // Never cache - always fresh
     gcTime: 0, // Don't keep in memory
     refetchInterval: 30000, // Auto-refresh every 30 seconds
