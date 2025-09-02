@@ -41,55 +41,14 @@ export default function Statistics() {
   // Force refresh all stats when component mounts and when period changes
   useEffect(() => {
     // Force invalidate and refetch all queries when page loads or period changes
-    queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/today", analyticsToday] });
+    queryClient.invalidateQueries({ queryKey: [`/api/analytics/stats/today?date=${analyticsToday}`] });
     queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/month"] });
     queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/total"] });
   }, [selectedPeriod, analyticsToday, queryClient]); // Invalidate when period changes or date changes
 
   // Fetch today's stats with proper timezone handling
   const { data: todayStats, isLoading: todayLoading } = useQuery<DailyStats>({
-    queryKey: ["/api/analytics/stats/today", analyticsToday],
-    queryFn: async () => {
-      console.log(`Fetching today's stats for date: ${analyticsToday}`);
-      try {
-        const fullUrl = `/api/analytics/stats/today?date=${analyticsToday}`;
-        console.log('Full request URL:', fullUrl);
-        
-        const response = await fetch(fullUrl, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
-        console.log('Response content-type:', response.headers.get('content-type'));
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const responseText = await response.text();
-        console.log('Raw response text:', responseText.substring(0, 200));
-        
-        let data;
-        try {
-          data = JSON.parse(responseText);
-        } catch (parseError) {
-          console.error('JSON parse error:', parseError);
-          console.error('Response was not valid JSON:', responseText.substring(0, 500));
-          throw new Error('Server returned invalid JSON');
-        }
-        
-        console.log('Today stats response:', data);
-        return data;
-      } catch (error) {
-        console.error('Error fetching today stats:', error);
-        throw error;
-      }
-    },
+    queryKey: [`/api/analytics/stats/today?date=${analyticsToday}`],
     staleTime: 0, // Never cache - always fresh
     gcTime: 0, // Don't keep in memory
     refetchInterval: 30000, // Auto-refresh every 30 seconds
