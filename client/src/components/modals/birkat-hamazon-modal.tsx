@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { X, Plus, Minus, Expand } from "lucide-react";
+import { Expand } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
-import { useAnalytics, useTrackModalComplete } from "@/hooks/use-analytics";
+import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useLocationStore } from '@/hooks/use-jewish-times';
 import { formatTextContent } from "@/lib/text-formatter";
@@ -53,11 +53,11 @@ const KorenThankYou = () => {
 };
 
 export function BirkatHamazonModal() {
-  const { activeModal, closeModal, openModal } = useModalStore();
+  const { activeModal, closeModal } = useModalStore();
   const [language, setLanguage] = useState<"hebrew" | "english">("hebrew");
   const [fontSize, setFontSize] = useState(20);
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
-  const [selectedPrayer, setSelectedPrayer] = useState<string | null>(null);
+
   const [conditions, setConditions] = useState<TefillaConditions | null>(null);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -69,10 +69,10 @@ export function BirkatHamazonModal() {
     fruit: false
   });
   
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { completeTask } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
-  const { trackCompletion } = useAnalytics();
+
   const { coordinates } = useLocationStore();
 
   // Fullscreen state
@@ -602,7 +602,7 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
     queryKey: ["/api/after-brochas/prayers"],
   });
 
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { completeTask } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { coordinates } = useLocationStore();
@@ -775,7 +775,7 @@ export function BirkatHamazonFullscreenContent({ language, fontSize }: { languag
     queryKey: ["/api/birkat-hamazon/prayers"],
   });
 
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { completeTask } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { coordinates } = useLocationStore();
