@@ -105,13 +105,29 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     // Find overlapping matches (within 300 characters and sharing conditions)
     const overlappingMatches = matches.filter(m => 
       Math.abs(m.startIndex - currentMatch.startIndex) <= 300 &&
-      m.conditions.some(cond => currentMatch.conditions.includes(cond)) &&
-      !processedMatches.has(m.fullMatch)
+      m.conditions.some(cond => currentMatch.conditions.includes(cond))
     );
     
-    if (overlappingMatches.length > 1) {
+    // Filter to only unprocessed matches for priority processing
+    const unprocessedOverlaps = overlappingMatches.filter(m => !processedMatches.has(m.fullMatch));
+    
+    // Check if this match conflicts with any already processed higher-priority matches
+    const conflictsWithProcessed = overlappingMatches.some(m => 
+      processedMatches.has(m.fullMatch) && 
+      matchesToKeep.has(m.fullMatch) &&
+      m.priority > currentMatch.priority &&
+      m.conditions.some(cond => currentMatch.conditions.includes(cond))
+    );
+    
+    if (conflictsWithProcessed) {
+      // This match is suppressed by a higher-priority match that was already processed
+      processedMatches.add(currentMatch.fullMatch);
+      continue;
+    }
+    
+    if (unprocessedOverlaps.length > 1) {
       // Apply priority logic within this overlapping group
-      const sortedByPriority = overlappingMatches.sort((a, b) => b.priority - a.priority);
+      const sortedByPriority = unprocessedOverlaps.sort((a, b) => b.priority - a.priority);
       const usedConditionsInGroup = new Set<string>();
       
       for (const matchInfo of sortedByPriority) {
