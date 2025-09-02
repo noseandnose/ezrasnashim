@@ -102,9 +102,9 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     const currentMatch = matches[i];
     if (processedMatches.has(currentMatch.fullMatch)) continue;
     
-    // Find overlapping matches (within 200 characters and sharing conditions)
+    // Find overlapping matches (within 300 characters and sharing conditions)
     const overlappingMatches = matches.filter(m => 
-      Math.abs(m.startIndex - currentMatch.startIndex) <= 200 &&
+      Math.abs(m.startIndex - currentMatch.startIndex) <= 300 &&
       m.conditions.some(cond => currentMatch.conditions.includes(cond)) &&
       !processedMatches.has(m.fullMatch)
     );
