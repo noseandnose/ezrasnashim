@@ -53,7 +53,11 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     ASERET_YEMEI_TESHUVA: () => conditions.isAseretYemeiTeshuva,
     SUKKOT: () => conditions.isSukkot,
     PESACH: () => conditions.isPesach,
-    ROSH_CHODESH_SPECIAL: () => !conditions.isRoshChodeshSpecial // Exclusion logic: shows when NOT in special periods
+    ROSH_CHODESH_SPECIAL: () => !conditions.isRoshChodeshSpecial, // Exclusion logic: shows when NOT in special periods
+    // Me'ein Shalosh food selection conditions
+    grain: () => (conditions as any)?.selectedFoodTypes?.grain || false,
+    wine: () => (conditions as any)?.selectedFoodTypes?.wine || false,
+    fruit: () => (conditions as any)?.selectedFoodTypes?.fruit || false
   };
 
 
@@ -91,12 +95,12 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
 
   // Remove any leftover orphaned conditional tags (only if they don't have proper pairs)
   // Check if there are any remaining orphaned conditional tags after processing
-  const remainingTags = processedText.match(/\[\[(?:\/?)(?:ROSH_CHODESH|PESACH|SUKKOT|FAST_DAY|ASERET_YEMEI_TESHUVA|OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH_SPECIAL)\]\]/g);
+  const remainingTags = processedText.match(/\[\[(?:\/?)(?:ROSH_CHODESH|PESACH|SUKKOT|FAST_DAY|ASERET_YEMEI_TESHUVA|OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH_SPECIAL|grain|wine|fruit)\]\]/g);
   if (remainingTags && remainingTags.length > 0) {
     // Only remove if there are no more valid conditional blocks
     const hasValidBlocks = /\[\[([^\]]+)\]\]([\s\S]*?)\[\[\/([^\]]+)\]\]/.test(processedText);
     if (!hasValidBlocks) {
-      processedText = processedText.replace(/\[\[(?:\/?)(?:ROSH_CHODESH|PESACH|SUKKOT|FAST_DAY|ASERET_YEMEI_TESHUVA|OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH_SPECIAL)\]\]/g, (match) => {
+      processedText = processedText.replace(/\[\[(?:\/?)(?:ROSH_CHODESH|PESACH|SUKKOT|FAST_DAY|ASERET_YEMEI_TESHUVA|OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH_SPECIAL|grain|wine|fruit)\]\]/g, (match) => {
         if (import.meta.env.DEV) {
           console.log(`Removing truly orphaned conditional tag: ${match}`);
         }
