@@ -688,7 +688,7 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
   return (
     <div className="space-y-4">
       {/* Me'ein Shalosh Food Selection Checkboxes */}
-      <div className="bg-gradient-to-r from-lavender-50 to-rose-50 rounded-2xl p-4 border border-lavender/20">
+      <div className="bg-gradient-to-r from-lavender-50 to-rose-50 rounded-2xl p-4 border border-lavender/20" style={{ animation: 'gentle-glow-pink-thin 3s ease-in-out infinite' }}>
         <div className="grid grid-cols-3 gap-4">
           <div className="flex items-center space-x-2">
             <Checkbox
