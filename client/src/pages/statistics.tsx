@@ -51,10 +51,21 @@ export default function Statistics() {
     queryKey: ["/api/analytics/stats/today", analyticsToday],
     queryFn: async () => {
       console.log(`Fetching today's stats for date: ${analyticsToday}`);
-      const response = await fetch(`/api/analytics/stats/today?date=${analyticsToday}`);
-      const data = await response.json();
-      console.log('Today stats response:', data);
-      return data;
+      try {
+        const response = await fetch(`/api/analytics/stats/today?date=${analyticsToday}`);
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('Today stats response:', data);
+        return data;
+      } catch (error) {
+        console.error('Error fetching today stats:', error);
+        throw error;
+      }
     },
     staleTime: 0, // Never cache - always fresh
     gcTime: 0, // Don't keep in memory
