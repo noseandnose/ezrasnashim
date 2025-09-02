@@ -134,10 +134,21 @@ const useTefillaConditions = () => {
 
 // Enhanced text processing function for Tefilla content
 const processTefillaContent = (text: string, conditions: TefillaConditions | null): string => {
+  if (!text) return text;
   
-  if (!conditions || !text) return formatTextContent(text);
+  // If conditions are not loaded yet, use default conditions (all false) to ensure conditional markup is still processed
+  const defaultConditions: TefillaConditions = {
+    isInIsrael: false,
+    isRoshChodesh: false,
+    isFastDay: false,
+    isAseretYemeiTeshuva: false,
+    isSukkot: false,
+    isPesach: false,
+    isRoshChodeshSpecial: false
+  };
   
-  const processedText = processTefillaText(text, conditions);
+  const effectiveConditions = conditions || defaultConditions;
+  const processedText = processTefillaText(text, effectiveConditions);
   return formatTextContent(processedText);
 };
 

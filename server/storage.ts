@@ -1361,9 +1361,17 @@ export class DatabaseStorage implements IStorage {
 
   async recalculateDailyStats(date: string): Promise<DailyStats> {
     // Count today's events for recalculation (only completion events now)
-
+    // Analytics day starts at 2 AM local time to align with client-side logic
+    
+    // The client sends us a date string that represents an analytics day (already adjusted for 2 AM boundary)
+    // We need to count events from 2 AM local time on this date to 2 AM local time on the next date
+    // Since events are stored in UTC, we need to query a 24-hour window
+    // 
+    // The date parameter comes from client's getLocalDateString() which already considers the 2 AM boundary
+    // So we just need a 24-hour window starting from the beginning of this analytics day
     const start = new Date(`${date}T00:00:00.000Z`);
-    const end = new Date(new Date(start).setUTCDate(start.getUTCDate() + 1)); // next day
+    const end = new Date(`${date}T00:00:00.000Z`);
+    end.setUTCDate(end.getUTCDate() + 1); // 24 hours later
 
     const todayEvents = await db
       .select()

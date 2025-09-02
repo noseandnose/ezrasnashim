@@ -2606,15 +2606,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sessionId
       });
       
-      // Immediately recalculate today's stats to show live updates
-      // Day starts at 02:00 local time for analytics
-      const now = new Date();
-      const hours = now.getHours();
-      if (hours < 2) {
-        now.setDate(now.getDate() - 1);
-      }
-      const today = now.toISOString().split('T')[0];
-      await storage.recalculateDailyStats(today);
+      // Note: Daily stats recalculation is now handled by client-side requests
+      // to ensure proper timezone handling. The client determines the correct
+      // analytics date based on their local 2 AM boundary.
       
       res.json(event);
     } catch (error) {
@@ -2661,14 +2655,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'Surrogate-Control': 'no-store'
       });
       
-      // Day starts at 02:00 local time for analytics
-      const now = new Date();
-      const hours = now.getHours();
-      if (hours < 2) {
-        now.setDate(now.getDate() - 1);
+      // Accept client-provided date parameter for proper timezone handling
+      // If no date provided, calculate using server time (fallback for backward compatibility)
+      let today: string;
+      if (req.query.date && typeof req.query.date === 'string') {
+        // Client provides the correct analytics date accounting for their local 2 AM boundary
+        today = req.query.date;
+      } else {
+        // Fallback: use server time calculation (may be incorrect for users in different timezones)
+        const now = new Date();
+        const hours = now.getHours();
+        if (hours < 2) {
+          now.setDate(now.getDate() - 1);
+        }
+        today = now.toISOString().split('T')[0];
       }
-      const today = now.toISOString().split('T')[0];
-      const stats = await storage.getDailyStats(today);
+      
+      // Recalculate stats to ensure they're current
+      const stats = await storage.recalculateDailyStats(today);
+      
       res.json(stats || {
         date: today,
         uniqueUsers: 0,
