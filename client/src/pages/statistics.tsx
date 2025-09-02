@@ -52,14 +52,37 @@ export default function Statistics() {
     queryFn: async () => {
       console.log(`Fetching today's stats for date: ${analyticsToday}`);
       try {
-        const response = await fetch(`/api/analytics/stats/today?date=${analyticsToday}`);
+        const fullUrl = `/api/analytics/stats/today?date=${analyticsToday}`;
+        console.log('Full request URL:', fullUrl);
+        
+        const response = await fetch(fullUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        });
+        
         console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        console.log('Response content-type:', response.headers.get('content-type'));
         
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
-        const data = await response.json();
+        const responseText = await response.text();
+        console.log('Raw response text:', responseText.substring(0, 200));
+        
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error('JSON parse error:', parseError);
+          console.error('Response was not valid JSON:', responseText.substring(0, 500));
+          throw new Error('Server returned invalid JSON');
+        }
+        
         console.log('Today stats response:', data);
         return data;
       } catch (error) {
