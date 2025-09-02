@@ -747,6 +747,7 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
             {renderPrayerText(prayer)}
           </div>
         ))}
+      </div>
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
