@@ -17,7 +17,7 @@ interface SimpleCompassUIProps {
 }
 
 export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
-  const [compass] = useState(() => new SimpleCompass());
+  const [compass, setCompass] = useState(() => new SimpleCompass());
   const [state, setState] = useState<CompassState>({
     deviceHeading: 0,
     bearing: 0,
@@ -65,6 +65,29 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
   const handleEnableCompass = async () => {
     await compass.requestPermission();
   };
+
+  const handleRetry = async () => {
+    // Clean up old compass
+    compass.dispose();
+    
+    // Clear current error state
+    setState({
+      deviceHeading: 0,
+      bearing: 0,
+      isAligned: false,
+      location: null,
+      hasPermission: false,
+      isSupported: false,
+      error: null
+    });
+    
+    // Create new compass instance to fully restart
+    const newCompass = new SimpleCompass();
+    setCompass(newCompass);
+    
+    // Request permission on new instance
+    await newCompass.requestPermission();
+  };
   
   // Calculate rotations for Jerusalem arrow and device heading line
   const jerusalemArrowRotation = state.location ? state.bearing : 0;
@@ -108,7 +131,7 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
             <MapPin className="w-6 h-6 text-red-500 mx-auto mb-2" />
             <p className="text-red-700 text-sm">{state.error}</p>
           </div>
-          <Button onClick={() => window.location.reload()} variant="outline">
+          <Button onClick={handleRetry} variant="outline">
             Try Again
           </Button>
         </div>
