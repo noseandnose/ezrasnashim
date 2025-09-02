@@ -61,36 +61,85 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
   };
 
 
-  // Process all conditional sections with opening and closing tags
+  // Process all conditional sections with priority-based logic
   const conditionalPattern = /\[\[([^\]]+)\]\]([\s\S]*?)\[\[\/([^\]]+)\]\]/g;
+  const matches: Array<{
+    fullMatch: string;
+    tag: string;
+    content: string;
+    conditions: string[];
+    priority: number;
+    startIndex: number;
+  }> = [];
   
+  // Collect all matches first
+  let match;
+  while ((match = conditionalPattern.exec(processedText)) !== null) {
+    const [fullMatch, openTag, content, closeTag] = match;
+    if (openTag === closeTag) {
+      matches.push({
+        fullMatch,
+        tag: openTag,
+        content,
+        conditions: openTag.includes('|') ? openTag.split('|').map(c => c.trim()) : openTag.split(',').map(c => c.trim()),
+        priority: openTag.includes('|') ? openTag.split('|').length : openTag.split(',').length, // More conditions = higher priority
+        startIndex: match.index!
+      });
+    }
+  }
+  
+  // Sort by priority (more conditions = higher priority), then by position
+  matches.sort((a, b) => {
+    if (a.priority !== b.priority) {
+      return b.priority - a.priority; // Higher priority first
+    }
+    return a.startIndex - b.startIndex; // Same priority: maintain original order
+  });
+  
+  // Track which individual conditions have been used by higher priority matches
+  const usedConditions = new Set<string>();
+  const matchesToKeep = new Set<string>();
+  
+  // Process from highest to lowest priority
+  for (const matchInfo of matches) {
+    // Check if any of these conditions have already been used
+    const hasOverlap = matchInfo.conditions.some(cond => usedConditions.has(cond));
+    
+    if (!hasOverlap) {
+      // Check if all conditions are met
+      let conditionsMet = false;
+      
+      if (matchInfo.tag.includes('|')) {
+        // OR logic: Any condition can be true
+        conditionsMet = matchInfo.conditions.some((condition: string) => {
+          const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
+          return checker ? checker() : false;
+        });
+      } else {
+        // AND logic: All conditions must be true
+        conditionsMet = matchInfo.conditions.every((condition: string) => {
+          const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
+          return checker ? checker() : false;
+        });
+      }
+      
+      if (conditionsMet) {
+        // Mark these conditions as used and keep this match
+        matchInfo.conditions.forEach(cond => usedConditions.add(cond));
+        matchesToKeep.add(matchInfo.fullMatch);
+      }
+    }
+  }
+  
+  // Now process the text, keeping only the matches we want
   processedText = processedText.replace(conditionalPattern, (match, openTag, content, closeTag) => {
     // Ensure opening and closing tags match
     if (openTag !== closeTag) {
       return match; // Return original if tags don't match
     }
-
-    // Split conditions by comma for AND logic or pipe for OR logic
-    let conditionsMet = false;
     
-    if (openTag.includes('|')) {
-      // OR logic: Any condition can be true
-      const conditions_list = openTag.split('|').map((c: string) => c.trim());
-      conditionsMet = conditions_list.some((condition: string) => {
-        const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
-        return checker ? checker() : false;
-      });
-    } else {
-      // AND logic: All conditions must be true (original behavior)
-      const conditions_list = openTag.split(',').map((c: string) => c.trim());
-      conditionsMet = conditions_list.every((condition: string) => {
-        const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
-        return checker ? checker() : false;
-      });
-    }
-
-    // Return content if conditions are met, otherwise return empty string
-    return conditionsMet ? content : '';
+    // If this match should be kept, return its content, otherwise remove it
+    return matchesToKeep.has(match) ? content : '';
   });
 
   // Remove any leftover orphaned conditional tags (only if they don't have proper pairs)
