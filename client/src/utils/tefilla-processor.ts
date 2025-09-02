@@ -17,7 +17,7 @@ export interface TefillaConditions {
   location?: {
     country: string;
     city: string;
-  };
+  } | undefined;
 }
 
 /**
@@ -96,7 +96,9 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     const hasKnownCondition = knownConditions.some(condition => content.includes(condition));
     
     if (hasKnownCondition) {
-      console.log(`Removing malformed conditional tag: ${match}`);
+      if (import.meta.env.DEV) {
+        console.log(`Removing malformed conditional tag: ${match}`);
+      }
       return ''; // Remove malformed conditional tags
     }
     

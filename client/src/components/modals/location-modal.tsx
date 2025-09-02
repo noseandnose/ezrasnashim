@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MapPin, Loader2, X } from "lucide-react";
+import { MapPin, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useLocationStore } from "@/hooks/use-jewish-times";
 
@@ -12,7 +12,7 @@ interface LocationModalProps {
 }
 
 export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
-  const { setCoordinates, setPermissionDenied, useIPLocation } = useLocationStore();
+  const { setCoordinates } = useLocationStore();
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [predictions, setPredictions] = useState<any[]>([]);
