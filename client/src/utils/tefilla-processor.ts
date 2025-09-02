@@ -89,15 +89,21 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     return conditionsMet ? content : '';
   });
 
-  // Clean up any remaining malformed conditional tags (single tags without pairs)
-  // This only targets orphaned opening or closing tags, not proper conditional blocks
-  processedText = processedText.replace(/\[\[(?:\/?)(?:ROSH_CHODESH|PESACH|SUKKOT|FAST_DAY|ASERET_YEMEI_TESHUVA|OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH_SPECIAL)\]\]/g, (match) => {
-    // Only remove if it's an orphaned tag (no matching pair)
-    if (import.meta.env.DEV) {
-      console.log(`Removing orphaned conditional tag: ${match}`);
+  // Remove any leftover orphaned conditional tags (only if they don't have proper pairs)
+  // Check if there are any remaining orphaned conditional tags after processing
+  const remainingTags = processedText.match(/\[\[(?:\/?)(?:ROSH_CHODESH|PESACH|SUKKOT|FAST_DAY|ASERET_YEMEI_TESHUVA|OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH_SPECIAL)\]\]/g);
+  if (remainingTags && remainingTags.length > 0) {
+    // Only remove if there are no more valid conditional blocks
+    const hasValidBlocks = /\[\[([^\]]+)\]\]([\s\S]*?)\[\[\/([^\]]+)\]\]/.test(processedText);
+    if (!hasValidBlocks) {
+      processedText = processedText.replace(/\[\[(?:\/?)(?:ROSH_CHODESH|PESACH|SUKKOT|FAST_DAY|ASERET_YEMEI_TESHUVA|OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH_SPECIAL)\]\]/g, (match) => {
+        if (import.meta.env.DEV) {
+          console.log(`Removing truly orphaned conditional tag: ${match}`);
+        }
+        return '';
+      });
     }
-    return '';
-  });
+  }
 
   // Clean up excessive whitespace and empty lines left by hidden content
   processedText = processedText
