@@ -89,33 +89,14 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     return conditionsMet ? content : '';
   });
 
-  // Only remove malformed single bracket conditional tags that don't have proper opening/closing pairs
-  // First, find all valid conditional block patterns to avoid removing their tags
-  const validConditionalBlocks = [...processedText.matchAll(/\[\[([^\]]+)\]\]([\s\S]*?)\[\[\/([^\]]+)\]\]/g)];
-  const validTags = new Set();
-  validConditionalBlocks.forEach(match => {
-    validTags.add(`[[${match[1]}]]`);
-    validTags.add(`[[/${match[3]}]]`);
-  });
-  
-  processedText = processedText.replace(/\[\[([^\]]*(?:ROSH_CHODESH|PESACH|SUKKOT|FAST_DAY|ASERET_YEMEI_TESHUVA|OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH_SPECIAL)[^\]]*)\]\]/g, (match, content) => {
-    // Skip if this tag is part of a valid conditional block
-    if (validTags.has(match)) {
-      return match;
+  // Clean up any remaining malformed conditional tags (single tags without pairs)
+  // This only targets orphaned opening or closing tags, not proper conditional blocks
+  processedText = processedText.replace(/\[\[(?:\/?)(?:ROSH_CHODESH|PESACH|SUKKOT|FAST_DAY|ASERET_YEMEI_TESHUVA|OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH_SPECIAL)\]\]/g, (match) => {
+    // Only remove if it's an orphaned tag (no matching pair)
+    if (import.meta.env.DEV) {
+      console.log(`Removing orphaned conditional tag: ${match}`);
     }
-    
-    // If it looks like a malformed condition tag without proper opening/closing, remove it
-    const knownConditions = ['ROSH_CHODESH', 'PESACH', 'SUKKOT', 'FAST_DAY', 'ASERET_YEMEI_TESHUVA', 'OUTSIDE_ISRAEL', 'ONLY_ISRAEL', 'ROSH_CHODESH_SPECIAL'];
-    const hasKnownCondition = knownConditions.some(condition => content.includes(condition));
-    
-    if (hasKnownCondition) {
-      if (import.meta.env.DEV) {
-        console.log(`Removing truly malformed conditional tag: ${match}`);
-      }
-      return ''; // Remove malformed conditional tags
-    }
-    
-    return match; // Keep non-conditional content in brackets
+    return '';
   });
 
   // Clean up excessive whitespace and empty lines left by hidden content

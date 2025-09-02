@@ -66,6 +66,7 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **UX Fix**: Resolved dark overlay issue with global tehillim modal - removed auto-redirect behavior for special-tehillim modal (August 28, 2025).
 - **Compass Fix**: Fixed "Try Again" button in Kotel compass to properly restart without redirecting users back to tefilla page (September 2, 2025).
 - **Production Audit**: Comprehensive audit completed - application confirmed ready for launch with all core features functional (September 2, 2025).
+- **Conditional Text Fix**: Fixed ASERET_YEMEI_TESHUVA conditional text processing to properly hide seasonal content when not in that period (September 2, 2025).
 - **Deployment**: Static frontend (S3), backend (ECS), PostgreSQL (Supabase).
 
 ## External Dependencies
