@@ -5,6 +5,7 @@ import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import type { Section } from "@/pages/home";
 import BottomNavigation from "@/components/bottom-navigation";
+import { getLocalDateString } from "@/lib/dateUtils";
 
 interface DailyStats {
   date: string;
@@ -34,17 +35,20 @@ export default function Statistics() {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('today');
   const queryClient = useQueryClient();
   
+  // Calculate today's analytics date once
+  const analyticsToday = getLocalDateString(); // Use client's 2 AM boundary calculation
+  
   // Force refresh all stats when component mounts and when period changes
   useEffect(() => {
     // Force invalidate and refetch all queries when page loads or period changes
-    queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/today"] });
+    queryClient.invalidateQueries({ queryKey: [`/api/analytics/stats/today?date=${analyticsToday}`] });
     queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/month"] });
     queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/total"] });
-  }, [selectedPeriod]); // Invalidate when period changes
+  }, [selectedPeriod, analyticsToday, queryClient]); // Invalidate when period changes or date changes
 
-  // Fetch today's stats
+  // Fetch today's stats with proper timezone handling
   const { data: todayStats, isLoading: todayLoading } = useQuery<DailyStats>({
-    queryKey: ["/api/analytics/stats/today"],
+    queryKey: [`/api/analytics/stats/today?date=${analyticsToday}`],
     staleTime: 0, // Never cache - always fresh
     gcTime: 0, // Don't keep in memory
     refetchInterval: 30000, // Auto-refresh every 30 seconds
