@@ -95,15 +95,18 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
   
   const matchesToKeep = new Set<string>();
   
+  const processedMatches = new Set<string>();
+  
   // Process matches in groups - only apply priority logic within overlapping regions
   for (let i = 0; i < matches.length; i++) {
     const currentMatch = matches[i];
+    if (processedMatches.has(currentMatch.fullMatch)) continue;
     
-    // Find all matches that overlap with this one (within 100 characters)
+    // Find overlapping matches (within 200 characters and sharing conditions)
     const overlappingMatches = matches.filter(m => 
-      m.startIndex >= currentMatch.startIndex - 100 && 
-      m.startIndex <= currentMatch.endIndex + 100 &&
-      m.conditions.some(cond => currentMatch.conditions.includes(cond))
+      Math.abs(m.startIndex - currentMatch.startIndex) <= 200 &&
+      m.conditions.some(cond => currentMatch.conditions.includes(cond)) &&
+      !processedMatches.has(m.fullMatch)
     );
     
     if (overlappingMatches.length > 1) {
@@ -112,8 +115,6 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
       const usedConditionsInGroup = new Set<string>();
       
       for (const matchInfo of sortedByPriority) {
-        if (matchesToKeep.has(matchInfo.fullMatch)) continue; // Already processed
-        
         const hasOverlap = matchInfo.conditions.some(cond => usedConditionsInGroup.has(cond));
         
         if (!hasOverlap) {
@@ -135,30 +136,32 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
           if (conditionsMet) {
             matchInfo.conditions.forEach(cond => usedConditionsInGroup.add(cond));
             matchesToKeep.add(matchInfo.fullMatch);
+            processedMatches.add(matchInfo.fullMatch);
           }
+        } else {
+          processedMatches.add(matchInfo.fullMatch);
         }
       }
     } else {
       // No overlapping matches - process normally
-      if (!matchesToKeep.has(currentMatch.fullMatch)) {
-        let conditionsMet = false;
-        
-        if (currentMatch.tag.includes('|')) {
-          conditionsMet = currentMatch.conditions.some((condition: string) => {
-            const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
-            return checker ? checker() : false;
-          });
-        } else {
-          conditionsMet = currentMatch.conditions.every((condition: string) => {
-            const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
-            return checker ? checker() : false;
-          });
-        }
-        
-        if (conditionsMet) {
-          matchesToKeep.add(currentMatch.fullMatch);
-        }
+      let conditionsMet = false;
+      
+      if (currentMatch.tag.includes('|')) {
+        conditionsMet = currentMatch.conditions.some((condition: string) => {
+          const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
+          return checker ? checker() : false;
+        });
+      } else {
+        conditionsMet = currentMatch.conditions.every((condition: string) => {
+          const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
+          return checker ? checker() : false;
+        });
       }
+      
+      if (conditionsMet) {
+        matchesToKeep.add(currentMatch.fullMatch);
+      }
+      processedMatches.add(currentMatch.fullMatch);
     }
   }
   
