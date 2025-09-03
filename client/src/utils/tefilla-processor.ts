@@ -93,91 +93,76 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
   // Sort by position first, then by priority within overlapping regions
   matches.sort((a, b) => a.startIndex - b.startIndex);
   
+  // Group matches into overlapping clusters and process each cluster by priority
+  const processedMatches = new Set<string>();
   const matchesToKeep = new Set<string>();
   
-  const processedMatches = new Set<string>();
+  // Build clusters of overlapping matches
+  const clusters: Array<typeof matches> = [];
+  const matchesToCluster = [...matches];
   
-  // Process matches in groups - only apply priority logic within overlapping regions
-  for (let i = 0; i < matches.length; i++) {
-    const currentMatch = matches[i];
-    if (processedMatches.has(currentMatch.fullMatch)) continue;
+  while (matchesToCluster.length > 0) {
+    const seed = matchesToCluster.shift()!;
+    const cluster = [seed];
     
-    // Find overlapping matches (within 300 characters and sharing conditions)
-    const overlappingMatches = matches.filter(m => 
-      Math.abs(m.startIndex - currentMatch.startIndex) <= 300 &&
-      m.conditions.some(cond => currentMatch.conditions.includes(cond))
-    );
-    
-    // Filter to only unprocessed matches for priority processing
-    const unprocessedOverlaps = overlappingMatches.filter(m => !processedMatches.has(m.fullMatch));
-    
-    // Check if this match conflicts with any already processed higher-priority matches
-    const conflictsWithProcessed = overlappingMatches.some(m => 
-      processedMatches.has(m.fullMatch) && 
-      matchesToKeep.has(m.fullMatch) &&
-      m.priority > currentMatch.priority &&
-      m.conditions.some(cond => currentMatch.conditions.includes(cond))
-    );
-    
-    if (conflictsWithProcessed) {
-      // This match is suppressed by a higher-priority match that was already processed
-      processedMatches.add(currentMatch.fullMatch);
-      continue;
-    }
-    
-    if (unprocessedOverlaps.length > 1) {
-      // Apply priority logic within this overlapping group
-      const sortedByPriority = unprocessedOverlaps.sort((a, b) => b.priority - a.priority);
-      const usedConditionsInGroup = new Set<string>();
-      
-      for (const matchInfo of sortedByPriority) {
-        const hasOverlap = matchInfo.conditions.some(cond => usedConditionsInGroup.has(cond));
+    // Find all matches that overlap with any match in the current cluster
+    let foundNewOverlaps = true;
+    while (foundNewOverlaps) {
+      foundNewOverlaps = false;
+      for (let i = matchesToCluster.length - 1; i >= 0; i--) {
+        const candidate = matchesToCluster[i];
         
-        if (!hasOverlap) {
-          // Check if conditions are met
-          let conditionsMet = false;
-          
-          if (matchInfo.tag.includes('|')) {
-            conditionsMet = matchInfo.conditions.some((condition: string) => {
-              const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
-              return checker ? checker() : false;
-            });
-          } else {
-            conditionsMet = matchInfo.conditions.every((condition: string) => {
-              const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
-              return checker ? checker() : false;
-            });
-          }
-          
-          if (conditionsMet) {
-            matchInfo.conditions.forEach(cond => usedConditionsInGroup.add(cond));
-            matchesToKeep.add(matchInfo.fullMatch);
-            processedMatches.add(matchInfo.fullMatch);
-          }
-        } else {
-          processedMatches.add(matchInfo.fullMatch);
+        // Check if this candidate overlaps with any match in the current cluster
+        const overlapsWithCluster = cluster.some(clusterMatch =>
+          Math.abs(candidate.startIndex - clusterMatch.startIndex) <= 300 &&
+          candidate.conditions.some(cond => clusterMatch.conditions.includes(cond))
+        );
+        
+        if (overlapsWithCluster) {
+          cluster.push(candidate);
+          matchesToCluster.splice(i, 1);
+          foundNewOverlaps = true;
         }
       }
-    } else {
-      // No overlapping matches - process normally
-      let conditionsMet = false;
+    }
+    
+    clusters.push(cluster);
+  }
+  
+  // Process each cluster independently with proper priority handling
+  for (const cluster of clusters) {
+    // Sort cluster by priority (highest first)
+    const sortedCluster = cluster.sort((a, b) => b.priority - a.priority);
+    const usedConditionsInCluster = new Set<string>();
+    
+    for (const matchInfo of sortedCluster) {
+      // Check if this match's conditions conflict with already-selected matches in this cluster
+      const hasConflict = matchInfo.conditions.some(cond => usedConditionsInCluster.has(cond));
       
-      if (currentMatch.tag.includes('|')) {
-        conditionsMet = currentMatch.conditions.some((condition: string) => {
-          const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
-          return checker ? checker() : false;
-        });
-      } else {
-        conditionsMet = currentMatch.conditions.every((condition: string) => {
-          const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
-          return checker ? checker() : false;
-        });
+      if (!hasConflict) {
+        // Check if conditions are met
+        let conditionsMet = false;
+        
+        if (matchInfo.tag.includes('|')) {
+          conditionsMet = matchInfo.conditions.some((condition: string) => {
+            const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
+            return checker ? checker() : false;
+          });
+        } else {
+          conditionsMet = matchInfo.conditions.every((condition: string) => {
+            const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
+            return checker ? checker() : false;
+          });
+        }
+        
+        if (conditionsMet) {
+          // Mark all conditions as used to prevent lower-priority matches with same conditions
+          matchInfo.conditions.forEach(cond => usedConditionsInCluster.add(cond));
+          matchesToKeep.add(matchInfo.fullMatch);
+        }
       }
       
-      if (conditionsMet) {
-        matchesToKeep.add(currentMatch.fullMatch);
-      }
-      processedMatches.add(currentMatch.fullMatch);
+      processedMatches.add(matchInfo.fullMatch);
     }
   }
   
