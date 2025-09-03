@@ -13,7 +13,7 @@ import { CommunityImpactModal } from "./community-impact-modal";
 import { useModalStore } from "@/lib/types";
 
 interface ModalContainerProps {
-  onSectionChange?: (section: any) => void;
+  onSectionChange?: ((section: any) => void) | undefined;
 }
 
 export default function ModalContainer({ onSectionChange }: ModalContainerProps) {

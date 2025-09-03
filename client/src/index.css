@@ -267,6 +267,16 @@ body {
   }
 }
 
+/* Thinner version for checkbox sections */
+@keyframes gentle-glow-pink-thin {
+  0%, 100% {
+    box-shadow: 0 0 6px rgba(244, 63, 94, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(244, 63, 94, 0.4);
+  }
+}
+
 /* Gentle glow animation for daily bars - Green (completed) */
 @keyframes gentle-glow-green {
   0%, 100% {

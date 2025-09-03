@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { X, Plus, Minus, Expand } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Expand } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
-import { useAnalytics, useTrackModalComplete } from "@/hooks/use-analytics";
+import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useLocationStore } from '@/hooks/use-jewish-times';
 import { formatTextContent } from "@/lib/text-formatter";
@@ -52,18 +53,26 @@ const KorenThankYou = () => {
 };
 
 export function BirkatHamazonModal() {
-  const { activeModal, closeModal, openModal } = useModalStore();
+  const { activeModal, closeModal } = useModalStore();
   const [language, setLanguage] = useState<"hebrew" | "english">("hebrew");
   const [fontSize, setFontSize] = useState(20);
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
-  const [selectedPrayer, setSelectedPrayer] = useState<string | null>(null);
+
   const [conditions, setConditions] = useState<TefillaConditions | null>(null);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  
+  // Me'ein Shalosh checkbox states
+  const [selectedOptions, setSelectedOptions] = useState({
+    grain: false,
+    wine: false,
+    fruit: false
+  });
+  
+  const { completeTask } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
-  const { trackCompletion } = useAnalytics();
+
   const { coordinates } = useLocationStore();
 
   // Fullscreen state
@@ -210,14 +219,20 @@ export function BirkatHamazonModal() {
     </div>
   );
 
-  const renderPrayerText = (prayer: BirkatHamazonPrayer | any) => {
+  const renderPrayerText = (prayer: BirkatHamazonPrayer | any, includeSelectedOptions = false) => {
     const text = language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation;
     
     
     // Apply conditional processing first if conditions are available
     let processedText = text;
     if (conditions && text) {
-      processedText = processTefillaText(text, conditions);
+      // For Me'ein Shalosh, include selected food options in conditions
+      const extendedConditions = includeSelectedOptions ? {
+        ...conditions,
+        selectedFoodTypes: selectedOptions
+      } : conditions;
+      
+      processedText = processTefillaText(text, extendedConditions);
     }
     
     // Apply text formatting to handle ** and ---
@@ -340,6 +355,60 @@ export function BirkatHamazonModal() {
         >
           <div className="space-y-4">
             
+            {/* Me'ein Shalosh Food Selection Checkboxes */}
+            <div className="bg-gradient-to-r from-lavender-50 to-rose-50 rounded-2xl p-4 border border-lavender/20">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="grain"
+                    checked={selectedOptions.grain}
+                    onCheckedChange={(checked) => 
+                      setSelectedOptions(prev => ({ ...prev, grain: !!checked }))
+                    }
+                    className="border-blush data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+                  />
+                  <label 
+                    htmlFor="grain" 
+                    className="text-sm platypi-medium text-black cursor-pointer"
+                  >
+                    Grain
+                  </label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="wine"
+                    checked={selectedOptions.wine}
+                    onCheckedChange={(checked) => 
+                      setSelectedOptions(prev => ({ ...prev, wine: !!checked }))
+                    }
+                    className="border-blush data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+                  />
+                  <label 
+                    htmlFor="wine" 
+                    className="text-sm platypi-medium text-black cursor-pointer"
+                  >
+                    Wine
+                  </label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="fruit"
+                    checked={selectedOptions.fruit}
+                    onCheckedChange={(checked) => 
+                      setSelectedOptions(prev => ({ ...prev, fruit: !!checked }))
+                    }
+                    className="border-blush data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+                  />
+                  <label 
+                    htmlFor="fruit" 
+                    className="text-sm platypi-medium text-black cursor-pointer"
+                  >
+                    Fruits
+                  </label>
+                </div>
+              </div>
+            </div>
+            
             {isAfterBrochasLoading ? (
               <div className="flex justify-center py-8">
                 <span className="text-sm text-gray-500">Loading prayer...</span>
@@ -348,7 +417,7 @@ export function BirkatHamazonModal() {
               <div className="space-y-6">
                 {afterBrochasPrayers?.filter(p => p.prayerName === "Me'ein Shalosh").map((prayer, index) => (
                   <div key={index} className="bg-white rounded-2xl p-4 border border-blush/10">
-                    {renderPrayerText(prayer as any)}
+                    {renderPrayerText(prayer as any, true)}
                   </div>
                 ))}
               </div>
@@ -533,11 +602,18 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
     queryKey: ["/api/after-brochas/prayers"],
   });
 
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { completeTask } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { coordinates } = useLocationStore();
   const [conditions, setConditions] = useState<TefillaConditions | null>(null);
+  
+  // Me'ein Shalosh checkbox states
+  const [selectedOptions, setSelectedOptions] = useState({
+    grain: false,
+    wine: false,
+    fruit: false
+  });
 
   // Load conditions for processing
   useEffect(() => {
@@ -565,7 +641,12 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
     let processedText = text;
     
     if (conditions && text) {
-      processedText = processTefillaText(text, conditions);
+      // Include selected food options in conditions for Me'ein Shalosh
+      const extendedConditions = {
+        ...conditions,
+        selectedFoodTypes: selectedOptions
+      };
+      processedText = processTefillaText(text, extendedConditions);
     }
     
     const formattedText = formatTextContent(processedText);
@@ -605,12 +686,68 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
   if (isLoading) return <div className="text-center py-8">Loading prayer...</div>;
 
   return (
-    <div className="space-y-6">
-      {afterBrochasPrayers?.filter(p => p.prayerName === "Me'ein Shalosh").map((prayer, index) => (
-        <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
-          {renderPrayerText(prayer)}
+    <div className="space-y-4">
+      {/* Me'ein Shalosh Food Selection Checkboxes */}
+      <div className="bg-gradient-to-r from-lavender-50 to-rose-50 rounded-2xl p-4 border border-lavender/20" style={{ animation: 'gentle-glow-pink-thin 3s ease-in-out infinite' }}>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="grain-fullscreen"
+              checked={selectedOptions.grain}
+              onCheckedChange={(checked) => 
+                setSelectedOptions(prev => ({ ...prev, grain: !!checked }))
+              }
+              className="border-blush data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+            />
+            <label 
+              htmlFor="grain-fullscreen" 
+              className="text-sm platypi-medium text-black cursor-pointer"
+            >
+              Grain
+            </label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="wine-fullscreen"
+              checked={selectedOptions.wine}
+              onCheckedChange={(checked) => 
+                setSelectedOptions(prev => ({ ...prev, wine: !!checked }))
+              }
+              className="border-blush data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+            />
+            <label 
+              htmlFor="wine-fullscreen" 
+              className="text-sm platypi-medium text-black cursor-pointer"
+            >
+              Wine
+            </label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="fruit-fullscreen"
+              checked={selectedOptions.fruit}
+              onCheckedChange={(checked) => 
+                setSelectedOptions(prev => ({ ...prev, fruit: !!checked }))
+              }
+              className="border-blush data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+            />
+            <label 
+              htmlFor="fruit-fullscreen" 
+              className="text-sm platypi-medium text-black cursor-pointer"
+            >
+              Fruits
+            </label>
+          </div>
         </div>
-      ))}
+      </div>
+      
+      <div className="space-y-6">
+        {afterBrochasPrayers?.filter(p => p.prayerName === "Me'ein Shalosh").map((prayer, index) => (
+          <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
+            {renderPrayerText(prayer)}
+          </div>
+        ))}
+      </div>
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
@@ -638,7 +775,7 @@ export function BirkatHamazonFullscreenContent({ language, fontSize }: { languag
     queryKey: ["/api/birkat-hamazon/prayers"],
   });
 
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { completeTask } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { coordinates } = useLocationStore();

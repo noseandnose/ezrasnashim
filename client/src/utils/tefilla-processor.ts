@@ -17,7 +17,7 @@ export interface TefillaConditions {
   location?: {
     country: string;
     city: string;
-  };
+  } | undefined;
 }
 
 /**
@@ -53,55 +53,142 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     ASERET_YEMEI_TESHUVA: () => conditions.isAseretYemeiTeshuva,
     SUKKOT: () => conditions.isSukkot,
     PESACH: () => conditions.isPesach,
-    ROSH_CHODESH_SPECIAL: () => !conditions.isRoshChodeshSpecial // Exclusion logic: shows when NOT in special periods
+    ROSH_CHODESH_SPECIAL: () => !conditions.isRoshChodeshSpecial, // Exclusion logic: shows when NOT in special periods
+    // Me'ein Shalosh food selection conditions
+    grain: () => (conditions as any)?.selectedFoodTypes?.grain || false,
+    wine: () => (conditions as any)?.selectedFoodTypes?.wine || false,
+    fruit: () => (conditions as any)?.selectedFoodTypes?.fruit || false
   };
 
 
-  // Process all conditional sections with opening and closing tags
+  // Process all conditional sections with localized priority logic
   const conditionalPattern = /\[\[([^\]]+)\]\]([\s\S]*?)\[\[\/([^\]]+)\]\]/g;
+  const matches: Array<{
+    fullMatch: string;
+    tag: string;
+    content: string;
+    conditions: string[];
+    priority: number;
+    startIndex: number;
+    endIndex: number;
+  }> = [];
   
+  // Collect all matches first
+  let match;
+  while ((match = conditionalPattern.exec(processedText)) !== null) {
+    const [fullMatch, openTag, content, closeTag] = match;
+    if (openTag === closeTag) {
+      matches.push({
+        fullMatch,
+        tag: openTag,
+        content,
+        conditions: openTag.includes('|') ? openTag.split('|').map(c => c.trim()) : openTag.split(',').map(c => c.trim()),
+        priority: openTag.includes('|') ? openTag.split('|').length : openTag.split(',').length,
+        startIndex: match.index!,
+        endIndex: match.index! + fullMatch.length
+      });
+    }
+  }
+  
+  // Sort by position first, then by priority within overlapping regions
+  matches.sort((a, b) => a.startIndex - b.startIndex);
+  
+  // Group matches into overlapping clusters and process each cluster by priority
+  const processedMatches = new Set<string>();
+  const matchesToKeep = new Set<string>();
+  
+  // Build clusters of overlapping matches
+  const clusters: Array<typeof matches> = [];
+  const matchesToCluster = [...matches];
+  
+  while (matchesToCluster.length > 0) {
+    const seed = matchesToCluster.shift()!;
+    const cluster = [seed];
+    
+    // Find all matches that overlap with any match in the current cluster
+    let foundNewOverlaps = true;
+    while (foundNewOverlaps) {
+      foundNewOverlaps = false;
+      for (let i = matchesToCluster.length - 1; i >= 0; i--) {
+        const candidate = matchesToCluster[i];
+        
+        // Check if this candidate overlaps with any match in the current cluster
+        const overlapsWithCluster = cluster.some(clusterMatch =>
+          Math.abs(candidate.startIndex - clusterMatch.startIndex) <= 300 &&
+          candidate.conditions.some(cond => clusterMatch.conditions.includes(cond))
+        );
+        
+        if (overlapsWithCluster) {
+          cluster.push(candidate);
+          matchesToCluster.splice(i, 1);
+          foundNewOverlaps = true;
+        }
+      }
+    }
+    
+    clusters.push(cluster);
+  }
+  
+  // Process each cluster independently with proper priority handling
+  for (const cluster of clusters) {
+    // Sort cluster by priority (highest first)
+    const sortedCluster = cluster.sort((a, b) => b.priority - a.priority);
+    const usedConditionsInCluster = new Set<string>();
+    
+    for (const matchInfo of sortedCluster) {
+      // Check if this match's conditions conflict with already-selected matches in this cluster
+      const hasConflict = matchInfo.conditions.some(cond => usedConditionsInCluster.has(cond));
+      
+      if (!hasConflict) {
+        // Check if conditions are met
+        let conditionsMet = false;
+        
+        if (matchInfo.tag.includes('|')) {
+          conditionsMet = matchInfo.conditions.some((condition: string) => {
+            const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
+            return checker ? checker() : false;
+          });
+        } else {
+          conditionsMet = matchInfo.conditions.every((condition: string) => {
+            const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
+            return checker ? checker() : false;
+          });
+        }
+        
+        if (conditionsMet) {
+          // Mark all conditions as used to prevent lower-priority matches with same conditions
+          matchInfo.conditions.forEach(cond => usedConditionsInCluster.add(cond));
+          matchesToKeep.add(matchInfo.fullMatch);
+        }
+      }
+      
+      processedMatches.add(matchInfo.fullMatch);
+    }
+  }
+  
+  // Now process the text, keeping only the matches we want
   processedText = processedText.replace(conditionalPattern, (match, openTag, content, closeTag) => {
-    // Ensure opening and closing tags match
     if (openTag !== closeTag) {
-      return match; // Return original if tags don't match
+      return match;
     }
-
-    // Split conditions by comma for AND logic or pipe for OR logic
-    let conditionsMet = false;
-    
-    if (openTag.includes('|')) {
-      // OR logic: Any condition can be true
-      const conditions_list = openTag.split('|').map((c: string) => c.trim());
-      conditionsMet = conditions_list.some((condition: string) => {
-        const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
-        return checker ? checker() : false;
-      });
-    } else {
-      // AND logic: All conditions must be true (original behavior)
-      const conditions_list = openTag.split(',').map((c: string) => c.trim());
-      conditionsMet = conditions_list.every((condition: string) => {
-        const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
-        return checker ? checker() : false;
-      });
-    }
-
-    // Return content if conditions are met, otherwise return empty string
-    return conditionsMet ? content : '';
+    return matchesToKeep.has(match) ? content : '';
   });
 
-  // Also remove any malformed single bracket conditional tags that don't have proper format
-  processedText = processedText.replace(/\[\[([^\]]*(?:ROSH_CHODESH|PESACH|SUKKOT|FAST_DAY|ASERET_YEMEI_TESHUVA|OUTSIDE_ISRAEL|ROSH_CHODESH_SPECIAL)[^\]]*)\]\]/g, (match, content) => {
-    // If it looks like a malformed condition tag without proper opening/closing, remove it
-    const knownConditions = ['ROSH_CHODESH', 'PESACH', 'SUKKOT', 'FAST_DAY', 'ASERET_YEMEI_TESHUVA', 'OUTSIDE_ISRAEL', 'ROSH_CHODESH_SPECIAL'];
-    const hasKnownCondition = knownConditions.some(condition => content.includes(condition));
-    
-    if (hasKnownCondition) {
-      console.log(`Removing malformed conditional tag: ${match}`);
-      return ''; // Remove malformed conditional tags
+  // Remove any leftover orphaned conditional tags (only if they don't have proper pairs)
+  // Check if there are any remaining orphaned conditional tags after processing
+  const remainingTags = processedText.match(/\[\[(?:\/?)(?:ROSH_CHODESH|PESACH|SUKKOT|FAST_DAY|ASERET_YEMEI_TESHUVA|OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH_SPECIAL|grain|wine|fruit)\]\]/g);
+  if (remainingTags && remainingTags.length > 0) {
+    // Only remove if there are no more valid conditional blocks
+    const hasValidBlocks = /\[\[([^\]]+)\]\]([\s\S]*?)\[\[\/([^\]]+)\]\]/.test(processedText);
+    if (!hasValidBlocks) {
+      processedText = processedText.replace(/\[\[(?:\/?)(?:ROSH_CHODESH|PESACH|SUKKOT|FAST_DAY|ASERET_YEMEI_TESHUVA|OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH_SPECIAL|grain|wine|fruit)\]\]/g, (match) => {
+        if (import.meta.env.DEV) {
+          console.log(`Removing truly orphaned conditional tag: ${match}`);
+        }
+        return '';
+      });
     }
-    
-    return match; // Keep non-conditional content in brackets
-  });
+  }
 
   // Clean up excessive whitespace and empty lines left by hidden content
   processedText = processedText
