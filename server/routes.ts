@@ -3109,11 +3109,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
           successCount++;
         } catch (error: any) {
           failureCount++;
-          // If subscription is invalid, mark it as unsubscribed
-          if (error.statusCode === 410) {
+          
+          // Enhanced error handling based on status code
+          const statusCode = error.statusCode || error.status;
+          console.error(`Push notification failed for ${sub.endpoint.substring(0, 50)}...`, {
+            statusCode,
+            message: error.message,
+            headers: error.headers
+          });
+          
+          // Handle different error types appropriately
+          if (statusCode === 410) {
+            // Subscription expired/invalid - remove it
             await storage.unsubscribeFromPush(sub.endpoint);
+            console.log(`Removed expired subscription: ${sub.endpoint.substring(0, 50)}...`);
+          } else if (statusCode === 413) {
+            // Payload too large - this is a code issue, not subscription issue
+            console.error('Push payload too large - review notification content');
+          } else if (statusCode === 429) {
+            // Rate limited - temporary issue, subscription is still valid
+            console.warn(`Rate limited for ${sub.endpoint.substring(0, 50)}... - subscription remains active`);
+          } else if (statusCode >= 400 && statusCode < 500) {
+            // Client error - likely invalid subscription
+            console.warn(`Client error ${statusCode} for subscription - may need review`);
+          } else if (statusCode >= 500) {
+            // Server error - temporary issue, keep subscription
+            console.warn(`Server error ${statusCode} - temporary issue, retaining subscription`);
           }
-          console.error(`Failed to send to ${sub.endpoint}:`, error.message);
         }
       });
 

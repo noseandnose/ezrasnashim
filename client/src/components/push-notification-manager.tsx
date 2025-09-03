@@ -63,7 +63,8 @@ export function PushNotificationManager() {
       await navigator.serviceWorker.ready;
 
       // Get VAPID public key from server
-      const { publicKey } = await apiRequest('GET', '/api/push/vapid-public-key');
+      const response = await apiRequest('GET', '/api/push/vapid-public-key');
+      const publicKey = response.data.publicKey;
       
       if (!publicKey) {
         throw new Error('Push notifications not configured on server');
@@ -75,8 +76,14 @@ export function PushNotificationManager() {
         applicationServerKey: urlBase64ToUint8Array(publicKey)
       });
 
+      // Get or create session ID for tracking
+      let sessionId = localStorage.getItem('sessionId');
+      if (!sessionId) {
+        sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem('sessionId', sessionId);
+      }
+
       // Send subscription to server
-      const sessionId = localStorage.getItem('sessionId');
       await apiRequest('POST', '/api/push/subscribe', {
         subscription: newSubscription.toJSON(),
         sessionId
