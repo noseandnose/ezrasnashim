@@ -156,6 +156,7 @@ export interface IStorage {
 
   // Discount promotion methods
   getActiveDiscountPromotion(): Promise<DiscountPromotion | undefined>;
+  getActiveDiscountPromotions(userLocation?: string): Promise<DiscountPromotion[]>;
   createDiscountPromotion(promotion: InsertDiscountPromotion): Promise<DiscountPromotion>;
 
   // Analytics methods
@@ -1265,6 +1266,49 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Database error in getActiveDiscountPromotion:', error);
       return undefined;
+    }
+  }
+
+  async getActiveDiscountPromotions(userLocation?: string): Promise<DiscountPromotion[]> {
+    try {
+      const targetLocation = userLocation === "israel" ? "israel" : "worldwide";
+      const now = new Date();
+      
+      // Get location-specific promotions
+      let locationPromotions = await db.select()
+        .from(discountPromotions)
+        .where(
+          and(
+            eq(discountPromotions.isActive, true),
+            lte(discountPromotions.startDate, now),
+            gte(discountPromotions.endDate, now),
+            eq(discountPromotions.targetLocation, targetLocation)
+          )
+        )
+        .orderBy(discountPromotions.id);
+      
+      // If user is in Israel, also get worldwide promotions
+      if (targetLocation === "israel") {
+        const worldwidePromotions = await db.select()
+          .from(discountPromotions)
+          .where(
+            and(
+              eq(discountPromotions.isActive, true),
+              lte(discountPromotions.startDate, now),
+              gte(discountPromotions.endDate, now),
+              eq(discountPromotions.targetLocation, "worldwide")
+            )
+          )
+          .orderBy(discountPromotions.id);
+        
+        // Combine location-specific first, then worldwide
+        return [...locationPromotions, ...worldwidePromotions];
+      }
+      
+      return locationPromotions;
+    } catch (error) {
+      console.error('Database error in getActiveDiscountPromotions:', error);
+      return [];
     }
   }
 
