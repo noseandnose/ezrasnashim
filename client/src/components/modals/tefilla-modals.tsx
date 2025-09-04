@@ -644,6 +644,13 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
 
+  // Me'ein Shalosh food selection state
+  const [selectedOptions, setSelectedOptions] = useState({
+    grain: false,
+    wine: false,
+    fruit: false
+  });
+
   // Fetch the specific brocha by ID
   const { data: brocha, isLoading } = useQuery<any>({
     queryKey: ['/api/brochas', selectedBrochaId],
@@ -651,6 +658,8 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
   });
 
   if (isLoading || !brocha) return <div className="text-center py-8">Loading brocha...</div>;
+
+  const isMeeinShalosh = brocha.title === "Me'ein Shalosh";
 
   const handleComplete = () => {
     trackModalComplete('brochas');
@@ -661,8 +670,78 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
     window.dispatchEvent(event);
   };
 
+  // Process text with food selections for Me'ein Shalosh
+  const getProcessedText = (text: string) => {
+    if (!text || !tefillaConditions) return text;
+    
+    if (isMeeinShalosh) {
+      // Include selected food options in conditions for Me'ein Shalosh
+      const extendedConditions = {
+        ...tefillaConditions,
+        selectedFoodTypes: selectedOptions
+      };
+      return processTefillaContent(text, extendedConditions);
+    }
+    
+    return processTefillaContent(text, tefillaConditions);
+  };
+
   return (
     <div className="space-y-6">
+      {/* Me'ein Shalosh food selection checkboxes */}
+      {isMeeinShalosh && (
+        <div className="bg-blush/10 rounded-2xl p-4 border border-blush/20">
+          <h4 className="platypi-medium text-black text-center mb-3">What did you eat?</h4>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="grain"
+                checked={selectedOptions.grain}
+                onChange={(e) => setSelectedOptions(prev => ({ ...prev, grain: e.target.checked }))}
+                className="w-4 h-4 rounded border-blush/30 text-blush focus:ring-blush/20"
+              />
+              <label 
+                htmlFor="grain" 
+                className="text-sm platypi-medium text-black cursor-pointer"
+              >
+                Grains
+              </label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="wine"
+                checked={selectedOptions.wine}
+                onChange={(e) => setSelectedOptions(prev => ({ ...prev, wine: e.target.checked }))}
+                className="w-4 h-4 rounded border-blush/30 text-blush focus:ring-blush/20"
+              />
+              <label 
+                htmlFor="wine" 
+                className="text-sm platypi-medium text-black cursor-pointer"
+              >
+                Wine
+              </label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="fruit"
+                checked={selectedOptions.fruit}
+                onChange={(e) => setSelectedOptions(prev => ({ ...prev, fruit: e.target.checked }))}
+                className="w-4 h-4 rounded border-blush/30 text-blush focus:ring-blush/20"
+              />
+              <label 
+                htmlFor="fruit" 
+                className="text-sm platypi-medium text-black cursor-pointer"
+              >
+                Fruits
+              </label>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-2xl p-6 border border-blush/10">
         <h3 className="platypi-bold text-lg text-black text-center mb-4">
           {brocha.title}
@@ -677,14 +756,14 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
           <div 
             className="vc-koren-hebrew text-right leading-relaxed text-black"
             style={{ fontSize: `${fontSize + 1}px` }}
-            dangerouslySetInnerHTML={{ __html: processTefillaContent(brocha.hebrewText, tefillaConditions) }}
+            dangerouslySetInnerHTML={{ __html: getProcessedText(brocha.hebrewText) }}
           />
         )}
         {language === 'english' && brocha.englishText && (
           <div 
             className="koren-siddur-english text-left leading-relaxed text-black/70"
             style={{ fontSize: `${fontSize}px` }}
-            dangerouslySetInnerHTML={{ __html: processTefillaContent(brocha.englishText || "English translation not available", tefillaConditions) }}
+            dangerouslySetInnerHTML={{ __html: getProcessedText(brocha.englishText || "English translation not available") }}
           />
         )}
       </div>
