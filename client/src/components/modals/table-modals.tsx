@@ -52,6 +52,19 @@ export default function TableModals() {
     });
   };
 
+  // Helper function for mobile-friendly double-tap detection
+  const handleImageTap = (imageUrl: string, allImages: string[] = []) => {
+    const currentTime = new Date().getTime();
+    const tapLength = currentTime - lastTap;
+    
+    if (tapLength < 300 && tapLength > 0) {
+      // Double tap detected
+      handleImageDoubleClick(imageUrl, allImages);
+    }
+    
+    setLastTap(currentTime);
+  };
+
   const formatTimeDisplay = (timeString: string) => {
     if (!timeString) return timeString;
     
@@ -209,7 +222,7 @@ export default function TableModals() {
                     src={recipeContent.imageUrl} 
                     alt={recipeContent.title || "Recipe"} 
                     className="w-full h-80 object-contain cursor-pointer"
-                    onDoubleClick={() => handleImageDoubleClick(recipeContent.imageUrl!)}
+                    onClick={() => handleImageTap(recipeContent.imageUrl!)}
                     onError={() => {
                       // Image failed to load, could hide the container
                     }}
@@ -438,7 +451,7 @@ export default function TableModals() {
                             src={currentMedia.url} 
                             alt={`Creative Jewish Living ${currentMediaIndex + 1}`}
                             className="w-full h-full object-contain cursor-pointer"
-                            onDoubleClick={() => handleImageDoubleClick(currentMedia.url!, allImageUrls)}
+                            onClick={() => handleImageTap(currentMedia.url!, allImageUrls)}
                           />
                           <button
                             onClick={() => handleImageDoubleClick(currentMedia.url!, allImageUrls)}
@@ -741,7 +754,7 @@ export default function TableModals() {
                       src={recipeContent.imageUrl} 
                       alt={recipeContent.title || "Recipe"} 
                       className="w-full h-80 object-contain cursor-pointer"
-                      onDoubleClick={() => handleImageDoubleClick(recipeContent.imageUrl!)}
+                      onClick={() => handleImageTap(recipeContent.imageUrl!)}
                     />
                   </div>
                 )}
@@ -973,9 +986,9 @@ export default function TableModals() {
                                 src={mediaItems[currentMediaIndex].url!}
                                 alt="Inspiration content"
                                 className="w-full h-80 object-contain"
-                                onDoubleClick={() => {
+                                onClick={() => {
                                   const allImageUrls = mediaItems.filter(item => item.type === 'image' && item.url).map(item => item.url!);
-                                  handleImageDoubleClick(mediaItems[currentMediaIndex].url!, allImageUrls);
+                                  handleImageTap(mediaItems[currentMediaIndex].url!, allImageUrls);
                                 }}
                               />
                             </div>
