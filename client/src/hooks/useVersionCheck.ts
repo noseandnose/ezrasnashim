@@ -90,7 +90,8 @@ export function useVersionCheck() {
         
         // Compare timestamps to detect updates with minimum threshold
         const timeDifference = latestVersion.timestamp - currentVersion.timestamp;
-        const minimumUpdateThreshold = 5 * 60 * 1000; // 5 minutes
+        // Shorter threshold in development for easier testing
+        const minimumUpdateThreshold = import.meta.env.MODE === 'development' ? 1 * 60 * 1000 : 5 * 60 * 1000; // 1 minute in dev, 5 minutes in prod
         
         if (timeDifference > minimumUpdateThreshold) {
           console.log('🚀 New version detected! Showing update prompt.');
@@ -110,10 +111,14 @@ export function useVersionCheck() {
     };
     
     // Start checking after 30 minutes, then every 12 hours
+    // In development, check more frequently for testing
+    const initialDelay = import.meta.env.MODE === 'development' ? 2 * 60 * 1000 : 30 * 60 * 1000; // 2 minutes in dev, 30 minutes in prod
+    const checkInterval = import.meta.env.MODE === 'development' ? 5 * 60 * 1000 : 12 * 60 * 60 * 1000; // 5 minutes in dev, 12 hours in prod
+    
     const startDelay = setTimeout(() => {
       checkForUpdates();
-      intervalRef.current = setInterval(checkForUpdates, 12 * 60 * 60 * 1000); // 12 hours
-    }, 30 * 60 * 1000); // 30 minute delay
+      intervalRef.current = setInterval(checkForUpdates, checkInterval);
+    }, initialDelay);
     
     return () => {
       clearTimeout(startDelay);
@@ -210,11 +215,20 @@ export function useVersionCheck() {
   const dismissUpdate = () => {
     setShowUpdatePrompt(false);
   };
+
+  // Add manual test function for development
+  const testUpdateNotification = () => {
+    if (import.meta.env.MODE === 'development') {
+      console.log('🧪 Testing update notification...');
+      setShowUpdatePrompt(true);
+    }
+  };
   
   return {
     showUpdatePrompt,
     refreshApp,
     dismissUpdate,
-    currentVersion
+    currentVersion,
+    testUpdateNotification: import.meta.env.MODE === 'development' ? testUpdateNotification : undefined
   };
 }
