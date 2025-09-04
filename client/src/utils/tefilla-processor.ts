@@ -202,6 +202,15 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
   return processedText;
 }
 
+// Cache for Tefilla conditions to avoid redundant API calls
+let conditionsCache: {
+  key: string;
+  data: TefillaConditions;
+  timestamp: number;
+} | null = null;
+
+const CONDITIONS_CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
+
 /**
  * Get current conditions based on location and Hebrew calendar data
  */
@@ -210,6 +219,17 @@ export async function getCurrentTefillaConditions(
   longitude?: number
 ): Promise<TefillaConditions> {
   try {
+    // Create cache key from coordinates and date
+    const { getLocalDateString } = await import('../lib/dateUtils');
+    const today = getLocalDateString();
+    const cacheKey = `${today}-${latitude}-${longitude}`;
+    
+    // Check if we have valid cached data
+    if (conditionsCache && 
+        conditionsCache.key === cacheKey && 
+        Date.now() - conditionsCache.timestamp < CONDITIONS_CACHE_DURATION) {
+      return conditionsCache.data;
+    }
     // Get location information
     let isInIsrael = false;
     let location = undefined;
@@ -338,6 +358,14 @@ export async function getCurrentTefillaConditions(
     };
     
     console.log('Final Tefilla conditions:', finalConditions);
+    
+    // Cache the result
+    conditionsCache = {
+      key: cacheKey,
+      data: finalConditions,
+      timestamp: Date.now()
+    };
+    
     return finalConditions;
   } catch (error) {
     console.error('Error getting Tefilla conditions:', error);
