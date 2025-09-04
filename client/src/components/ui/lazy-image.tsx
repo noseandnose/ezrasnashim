@@ -8,6 +8,7 @@ interface LazyImageProps {
   fallback?: string;
   onLoad?: () => void;
   onError?: () => void;
+  onClick?: () => void;
 }
 
 export function LazyImage({ 
@@ -17,7 +18,8 @@ export function LazyImage({
   style = {}, 
   fallback,
   onLoad,
-  onError 
+  onError,
+  onClick 
 }: LazyImageProps) {
   const [imageSrc, setImageSrc] = useState<string | undefined>(undefined);
   const [imageError, setImageError] = useState(false);
@@ -83,6 +85,7 @@ export function LazyImage({
         backgroundColor: !imageSrc ? '#f5f5f5' : undefined
       }}
       loading="lazy"
+      onClick={onClick}
     />
   );
 }
