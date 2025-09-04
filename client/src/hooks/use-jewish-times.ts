@@ -14,9 +14,11 @@ interface LocationState {
   setPermissionDenied: (denied: boolean) => void;
   resetLocation: () => void;
   useIPLocation: () => Promise<any>;
+  initializeFromCache: () => boolean;
+  refreshLocationIfStale: () => void;
 }
 
-export const useLocationStore = create<LocationState>((set) => ({
+export const useLocationStore = create<LocationState>((set, get) => ({
   location: "",
   coordinates: null,
   locationRequested: false,
@@ -31,12 +33,18 @@ export const useLocationStore = create<LocationState>((set) => ({
   useIPLocation: async () => {
     try {
       const response = await axiosClient.get('/api/location/ip');
+      const data = response.data;
       set({ 
-        coordinates: response.data.coordinates,
-        location: response.data.location,
+        coordinates: data.coordinates,
+        location: data.location,
         permissionDenied: false 
       });
-      return response.data;
+      
+      // Cache IP-based location with shorter expiry
+      localStorage.setItem('user-location-fallback', JSON.stringify(data.coordinates));
+      localStorage.setItem('user-location-fallback-time', Date.now().toString());
+      
+      return data;
     } catch (error) {
       if (import.meta.env.MODE === 'development') {
         // Failed to get IP-based location
@@ -44,7 +52,79 @@ export const useLocationStore = create<LocationState>((set) => ({
       throw error;
     }
   },
+  
+  // Initialize location from cache synchronously for instant startup
+  initializeFromCache: () => {
+    const cachedLocation = localStorage.getItem('user-location');
+    const cacheTimestamp = localStorage.getItem('user-location-time');
+    
+    if (cachedLocation && cacheTimestamp) {
+      const age = Date.now() - parseInt(cacheTimestamp);
+      if (age < 24 * 60 * 60 * 1000) { // 24 hour cache
+        try {
+          const parsed = JSON.parse(cachedLocation);
+          set({ coordinates: parsed, location: '', permissionDenied: false });
+          return true;
+        } catch (e) {
+          // Clear invalid cache
+          localStorage.removeItem('user-location');
+          localStorage.removeItem('user-location-time');
+        }
+      }
+    }
+    
+    // Try fallback cache (IP location)
+    const fallbackLocation = localStorage.getItem('user-location-fallback');
+    const fallbackTimestamp = localStorage.getItem('user-location-fallback-time');
+    
+    if (fallbackLocation && fallbackTimestamp) {
+      const age = Date.now() - parseInt(fallbackTimestamp);
+      if (age < 7 * 24 * 60 * 60 * 1000) { // 7 day cache for IP location
+        try {
+          const parsed = JSON.parse(fallbackLocation);
+          set({ coordinates: parsed, location: '', permissionDenied: false });
+          return true;
+        } catch (e) {
+          localStorage.removeItem('user-location-fallback');
+          localStorage.removeItem('user-location-fallback-time');
+        }
+      }
+    }
+    
+    return false;
+  },
+  
+  // Refresh location if the cache is getting stale (for travel scenarios)
+  refreshLocationIfStale: () => {
+    const cacheTimestamp = localStorage.getItem('user-location-time');
+    if (cacheTimestamp) {
+      const age = Date.now() - parseInt(cacheTimestamp);
+      // If cache is older than 4 hours, force a refresh
+      if (age > 4 * 60 * 60 * 1000) {
+        console.log('Location cache is stale, refreshing for accuracy...');
+        localStorage.removeItem('user-location');
+        localStorage.removeItem('user-location-time');
+        set({ coordinates: null, locationRequested: false });
+      }
+    }
+  },
 }));
+
+// Calculate distance between two coordinates in kilometers
+function calculateDistance(
+  lat1: number, lng1: number,
+  lat2: number, lng2: number
+): number {
+  const R = 6371; // Radius of Earth in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng/2) * Math.sin(dLng/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
 
 // Hook to get user's location
 export function useGeolocation() {
@@ -59,27 +139,25 @@ export function useGeolocation() {
 
   useEffect(() => {
     const checkLocationPermission = async () => {
-      // If coordinates are already set (manually), don't override with browser permission check
+      // If coordinates are already set, periodically check for location changes
       if (coordinates) {
+        // Check for location changes every 30 minutes
+        const lastCheck = localStorage.getItem('location-change-check');
+        const now = Date.now();
+        
+        if (!lastCheck || now - parseInt(lastCheck) > 2 * 60 * 60 * 1000) {
+          localStorage.setItem('location-change-check', now.toString());
+          // Check if location cache is stale and refresh if needed
+          const { refreshLocationIfStale } = useLocationStore.getState();
+          refreshLocationIfStale();
+        }
         return;
       }
-
-      // Check cached location first
-      const cachedLocation = localStorage.getItem('user-location');
-      const cacheTimestamp = localStorage.getItem('user-location-time');
-      if (cachedLocation && cacheTimestamp) {
-        const age = Date.now() - parseInt(cacheTimestamp);
-        if (age < 30 * 60 * 1000) { // 30 minutes cache
-          try {
-            const parsed = JSON.parse(cachedLocation);
-            setCoordinates(parsed);
-            return;
-          } catch (e) {
-            // Clear invalid cache
-            localStorage.removeItem('user-location');
-            localStorage.removeItem('user-location-time');
-          }
-        }
+      
+      // Try to initialize from cache first (synchronous)
+      const store = useLocationStore.getState();
+      if (store.initializeFromCache()) {
+        return; // Successfully loaded from cache
       }
 
       // Check if browser supports permissions API
@@ -129,14 +207,14 @@ export function useGeolocation() {
           {
             enableHighAccuracy: false, // Use cached location for performance
             timeout: 8000, // Reduce timeout
-            maximumAge: 5 * 60 * 1000, // Use 5-minute cache
+            maximumAge: 60 * 60 * 1000, // Use 1-hour cache from device GPS
           },
         );
       }
     };
 
-    // Debounce location checking to avoid excessive calls
-    const timeoutId = setTimeout(checkLocationPermission, 100);
+    // Immediate execution for faster startup, debounced only on re-renders
+    const timeoutId = setTimeout(checkLocationPermission, coordinates ? 1000 : 0);
     return () => clearTimeout(timeoutId);
   }, [
     locationRequested,
@@ -156,8 +234,8 @@ export function useJewishTimes() {
 
   return useQuery({
     queryKey: ["zmanim", coordinates?.lat, coordinates?.lng, today],
-    staleTime: 30 * 60 * 1000, // 30 minutes cache
-    gcTime: 60 * 60 * 1000, // 1 hour in memory
+    staleTime: 60 * 60 * 1000, // 1 hour cache
+    gcTime: 24 * 60 * 60 * 1000, // 24 hours in memory
     queryFn: async () => {
       if (!coordinates) {
         return null;

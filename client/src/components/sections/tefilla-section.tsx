@@ -1,4 +1,4 @@
-import { HandHeart, Plus, User, AlertCircle, Heart, Star, Compass, ArrowRight, Baby, HeartHandshake, GraduationCap, Users, Stethoscope, DollarSign, Smile, TrendingUp, Sunrise, Sun, Moon, Utensils, Stars, Globe, Unlock } from "lucide-react";
+import { HandHeart, Plus, User, AlertCircle, Heart, Star, Compass, ArrowRight, Baby, HeartHandshake, GraduationCap, Users, Stethoscope, DollarSign, Smile, TrendingUp, Sunrise, Sun, Moon, Stars, Globe, Unlock } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -21,6 +21,19 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const { tefillaCompleted: _tefillaCompleted } = useDailyCompletionStore();
   const { isModalComplete, completedModals } = useModalCompletionStore();
   const { data: times, isLoading } = useJewishTimes();
+
+  // Prefetch brochas data to speed up loading when user clicks
+  useQuery({
+    queryKey: ['/api/brochas/daily'],
+    staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (garbage collection time)
+  });
+
+  useQuery({
+    queryKey: ['/api/brochas/special'],
+    staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (garbage collection time)
+  });
 
   // Helper function to check if any individual Tehillim has been completed
   const hasAnyTehillimCompleted = () => {
@@ -655,7 +668,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
           </button>
 
           <button 
-            onClick={() => openModal('after-brochas', 'tefilla')}
+            onClick={() => openModal('brochas', 'tefilla')}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
               (isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'bg-sage/20' : 'bg-white'
             }`}
@@ -663,11 +676,11 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
               (isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
-              <Utensils className="text-white" size={18} />
+              <Star className="text-white" size={18} />
             </div>
-            <h3 className="platypi-bold text-sm text-black mb-1">After Brochas</h3>
+            <h3 className="platypi-bold text-sm text-black mb-1">Brochas</h3>
             <p className="platypi-regular text-xs text-black/60">
-              {(isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'Completed' : 'Prayers of Thanks'}
+              {(isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'Completed' : 'Daily and Special'}
             </p>
           </button>
         </div>

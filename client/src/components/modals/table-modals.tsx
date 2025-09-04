@@ -11,13 +11,15 @@ import { formatTextContent } from "@/lib/text-formatter";
 import { formatThankYouMessage } from "@/lib/link-formatter";
 import { LazyImage } from "@/components/ui/lazy-image";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
+import { FullscreenImageModal } from "@/components/modals/fullscreen-image-modal";
 
 export default function TableModals() {
   const { activeModal, closeModal } = useModalStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
-  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  const [fullscreenImages, setFullscreenImages] = useState<{isOpen: boolean; images: string[]; initialIndex: number}>({isOpen: false, images: [], initialIndex: 0});
+  const [lastTap, setLastTap] = useState<number>(0);
   const [fullscreenContent, setFullscreenContent] = useState<{
     isOpen: boolean;
     title: string;
@@ -38,6 +40,30 @@ export default function TableModals() {
   
 
   // Function to format time display (convert minutes > 59 to hours and minutes)
+  // Helper function for double-tap detection
+  const handleImageDoubleClick = (imageUrl: string, allImages: string[] = []) => {
+    const images = allImages.length > 0 ? allImages : [imageUrl];
+    const initialIndex = images.indexOf(imageUrl);
+    setFullscreenImages({
+      isOpen: true,
+      images,
+      initialIndex: initialIndex >= 0 ? initialIndex : 0
+    });
+  };
+
+  // Helper function for mobile-friendly double-tap detection
+  const handleImageTap = (imageUrl: string, allImages: string[] = []) => {
+    const currentTime = new Date().getTime();
+    const tapLength = currentTime - lastTap;
+    
+    if (tapLength < 300 && tapLength > 0) {
+      // Double tap detected
+      handleImageDoubleClick(imageUrl, allImages);
+    }
+    
+    setLastTap(currentTime);
+  };
+
   const formatTimeDisplay = (timeString: string) => {
     if (!timeString) return timeString;
     
@@ -136,7 +162,7 @@ export default function TableModals() {
 
   const { data: recipeContent } = useQuery<{title?: string; description?: string; ingredients?: string[]; instructions?: string[]; cookingTime?: string; servings?: number; imageUrl?: string; prepTime?: string; cookTime?: string; difficulty?: string; thankYouMessage?: string}>({
     queryKey: ['/api/table/recipe'],
-    enabled: activeModal === 'recipe'
+    enabled: activeModal === 'recipe' || fullscreenContent.contentType === 'recipe'
   });
 
   interface InspirationContent {
@@ -158,7 +184,7 @@ export default function TableModals() {
 
   const { data: inspirationContent } = useQuery<InspirationContent>({
     queryKey: [`/api/table/inspiration/${getLocalDateString()}`],
-    enabled: activeModal === 'inspiration'
+    enabled: activeModal === 'inspiration' || fullscreenContent.contentType === 'inspiration'
   });
 
   interface ParshaContent {
@@ -194,7 +220,8 @@ export default function TableModals() {
                   <LazyImage 
                     src={recipeContent.imageUrl} 
                     alt={recipeContent.title || "Recipe"} 
-                    className="w-full h-80 object-contain"
+                    className="w-full h-80 object-contain cursor-pointer"
+                    onClick={() => handleImageTap(recipeContent.imageUrl!)}
                     onError={() => {
                       // Image failed to load, could hide the container
                     }}
@@ -416,15 +443,17 @@ export default function TableModals() {
                   
                   switch (currentMedia.type) {
                     case 'image':
+                      const allImageUrls = mediaItems.filter(item => item.type === 'image' && item.url).map(item => item.url!);
                       return (
                         <div className="relative w-full h-full bg-gray-50 flex items-center justify-center">
                           <img 
                             src={currentMedia.url} 
                             alt={`Creative Jewish Living ${currentMediaIndex + 1}`}
-                            className="w-full h-full object-contain"
+                            className="w-full h-full object-contain cursor-pointer"
+                            onClick={() => handleImageTap(currentMedia.url!, allImageUrls)}
                           />
                           <button
-                            onClick={() => setFullscreenImage(currentMedia.url || null)}
+                            onClick={() => handleImageDoubleClick(currentMedia.url!, allImageUrls)}
                             className="absolute top-2 right-2 bg-black/50 text-white p-1.5 rounded-full hover:bg-black/70 transition-colors"
                             title="View fullscreen"
                           >
@@ -640,29 +669,6 @@ export default function TableModals() {
         </DialogContent>
       </Dialog>
 
-      {/* Fullscreen Image Modal */}
-      {fullscreenImage && (
-        <div 
-          className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-4"
-          onClick={() => setFullscreenImage(null)}
-        >
-          <div className="relative max-w-full max-h-full">
-            <img 
-              src={fullscreenImage} 
-              alt="Fullscreen view"
-              className="max-w-full max-h-full object-contain"
-            />
-            <button
-              onClick={() => setFullscreenImage(null)}
-              className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Parsha Shiur Modal */}
       <Dialog open={activeModal === 'parsha'} onOpenChange={() => closeModal(true)}>
@@ -694,8 +700,6 @@ export default function TableModals() {
         isOpen={fullscreenContent.isOpen}
         onClose={() => {
           setFullscreenContent({ isOpen: false, title: '', content: null });
-          // Also close any open fullscreen image
-          setFullscreenImage(null);
           // Close the underlying modal as well
           closeModal();
           // Navigate back to the Life page (table section)
@@ -723,7 +727,8 @@ export default function TableModals() {
                     <LazyImage 
                       src={recipeContent.imageUrl} 
                       alt={recipeContent.title || "Recipe"} 
-                      className="w-full h-80 object-contain"
+                      className="w-full h-80 object-contain cursor-pointer"
+                      onClick={() => handleImageTap(recipeContent.imageUrl!)}
                     />
                   </div>
                 )}
@@ -878,17 +883,15 @@ export default function TableModals() {
                   onClick={isModalComplete('recipe') ? undefined : () => {
                     handleComplete('recipe');
                     setFullscreenContent({ isOpen: false, title: '', content: null });
-                    // Also close any open fullscreen image
-                    setFullscreenImage(null);
                   }}
                   disabled={isModalComplete('recipe')}
                   className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                     isModalComplete('recipe') 
                       ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                   }`}
                 >
-                  {isModalComplete('recipe') ? 'Completed Today' : 'Done'}
+                  {isModalComplete('recipe') ? 'Completed Today' : 'Complete'}
                 </Button>
               </div>
             </div>
@@ -950,12 +953,15 @@ export default function TableModals() {
                           {mediaItems[currentMediaIndex]?.type === 'image' ? (
                             <div
                               className="cursor-pointer bg-gray-50 flex items-center justify-center w-full h-80"
-                              onClick={() => setFullscreenImage(mediaItems[currentMediaIndex].url!)}
                             >
                               <LazyImage
                                 src={mediaItems[currentMediaIndex].url!}
                                 alt="Inspiration content"
                                 className="w-full h-80 object-contain"
+                                onClick={() => {
+                                  const allImageUrls = mediaItems.filter(item => item.type === 'image' && item.url).map(item => item.url!);
+                                  handleImageTap(mediaItems[currentMediaIndex].url!, allImageUrls);
+                                }}
                               />
                             </div>
                           ) : mediaItems[currentMediaIndex]?.type === 'video' ? (
@@ -1039,8 +1045,6 @@ export default function TableModals() {
                   onClick={isModalComplete('inspiration') ? undefined : () => {
                     handleComplete('inspiration');
                     setFullscreenContent({ isOpen: false, title: '', content: null });
-                    // Also close any open fullscreen image
-                    setFullscreenImage(null);
                   }}
                   disabled={isModalComplete('inspiration')}
                   className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
@@ -1058,6 +1062,14 @@ export default function TableModals() {
           fullscreenContent.content
         )}
       </FullscreenModal>
+
+      {/* Fullscreen Image Modal */}
+      <FullscreenImageModal
+        isOpen={fullscreenImages.isOpen}
+        onClose={() => setFullscreenImages({ isOpen: false, images: [], initialIndex: 0 })}
+        images={fullscreenImages.images}
+        initialIndex={fullscreenImages.initialIndex}
+      />
     </>
   );
 }

@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { HandHeart, Scroll, Heart, Plus, Minus, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Unlock, Check } from "lucide-react";
+import { HandHeart, Scroll, Heart, Plus, Minus, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Unlock, Check, Utensils, Wine, Car, Wheat, Moon, User } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
@@ -81,16 +81,16 @@ const NishmasThankYou = () => {
   return (
     <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
       <span className="text-sm platypi-medium text-black">
-        Thank you to{' '}
+        All tefilla texts courtesy of{' '}
         <a 
-          href="https://www.nishmas.net/"
+          href="https://korenpub.co.il/"
           target="_blank"
           rel="noopener noreferrer"
           className="underline hover:text-blue-700"
         >
-          Nishmas.net
+          Koren Publishers Jerusalem
         </a>
-        {' '}for providing this Tefilla
+        {' '}and Rabbi Sacks Legacy
       </span>
     </div>
   );
@@ -315,7 +315,16 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
                     
                     <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
                       <span className="text-sm platypi-medium text-black">
-                        All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+                        All tefilla texts courtesy of{' '}
+          <a 
+            href="https://korenpub.co.il/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-700"
+          >
+            Koren Publishers Jerusalem
+          </a>
+          {' '}and Rabbi Sacks Legacy
                       </span>
                     </div>
                     
@@ -332,7 +341,7 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
                         className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                           isModalComplete('morning-brochas') 
                             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                         }`}
                       >
                         {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete'}
@@ -441,7 +450,7 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
           className={`w-full py-3 rounded-xl platypi-medium border-0 ${
             isModalComplete('morning-brochas') 
               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
           }`}
         >
           {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete Morning Brochas'}
@@ -472,6 +481,10 @@ function renderPrayerContent(contentType: string | undefined, language: 'hebrew'
       return <NishmasFullscreenContent language={language} fontSize={fontSize} />;
     case 'individual-tehillim':
       return <TehillimFullscreenContent language={language} fontSize={fontSize} />;
+    case 'brochas':
+      return <BrochasFullscreenContent language={language} fontSize={fontSize} />;
+    case 'individual-brocha':
+      return <IndividualBrochaFullscreenContent language={language} fontSize={fontSize} />;
     case 'global-tehillim':
       return <GlobalTehillimFullscreenContent language={language} fontSize={fontSize} />;
     case 'special-tehillim':
@@ -528,7 +541,16 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+          All tefilla texts courtesy of{' '}
+          <a 
+            href="https://korenpub.co.il/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-700"
+          >
+            Koren Publishers Jerusalem
+          </a>
+          {' '}and Rabbi Sacks Legacy
         </span>
       </div>
 
@@ -538,7 +560,7 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           isModalComplete('maariv') 
             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
         {isModalComplete('maariv') ? 'Completed Today' : 'Complete Maariv'}
@@ -587,7 +609,16 @@ function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+          All tefilla texts courtesy of{' '}
+          <a 
+            href="https://korenpub.co.il/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-700"
+          >
+            Koren Publishers Jerusalem
+          </a>
+          {' '}and Rabbi Sacks Legacy
         </span>
       </div>
 
@@ -597,11 +628,309 @@ function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           isModalComplete('mincha') 
             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
         {isModalComplete('mincha') ? 'Completed Today' : 'Complete Mincha'}
       </Button>
+    </div>
+  );
+}
+
+function IndividualBrochaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  const selectedBrochaId = (window as any).selectedBrochaId;
+  const tefillaConditions = useTefillaConditions();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+
+  // Me'ein Shalosh food selection state
+  const [selectedOptions, setSelectedOptions] = useState({
+    grain: false,
+    wine: false,
+    fruit: false
+  });
+
+  // Fetch the specific brocha by ID
+  const { data: brocha, isLoading } = useQuery<any>({
+    queryKey: ['/api/brochas', selectedBrochaId],
+    enabled: !!selectedBrochaId,
+  });
+
+  if (isLoading || !brocha) return <div className="text-center py-8">Loading brocha...</div>;
+
+  const isMeeinShalosh = brocha.title === "Me'ein Shalosh";
+
+  const handleComplete = () => {
+    // Track with specific brocha ID for backend analytics
+    trackModalComplete(`brocha-${brocha.id}`);
+    // Don't mark as complete since brochas are repeatable
+    completeTask('tefilla');
+    // Close fullscreen
+    const event = new CustomEvent('closeFullscreen');
+    window.dispatchEvent(event);
+  };
+
+  // Process text with food selections for Me'ein Shalosh
+  const getProcessedText = (text: string) => {
+    if (!text || !tefillaConditions) return text;
+    
+    if (isMeeinShalosh) {
+      // Include selected food options in conditions for Me'ein Shalosh
+      const extendedConditions = {
+        ...tefillaConditions,
+        selectedFoodTypes: selectedOptions
+      };
+      return processTefillaContent(text, extendedConditions);
+    }
+    
+    return processTefillaContent(text, tefillaConditions);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Me'ein Shalosh food selection checkboxes */}
+      {isMeeinShalosh && (
+        <div className="bg-blush/10 rounded-2xl p-4 border border-blush/20">
+          <div className="flex justify-center">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="grain"
+                  checked={selectedOptions.grain}
+                  onChange={(e) => setSelectedOptions(prev => ({ ...prev, grain: e.target.checked }))}
+                  className="w-4 h-4 rounded border-blush/30 focus:ring-2 focus:ring-blush/20"
+                  style={{ 
+                    accentColor: selectedOptions.grain ? 'hsl(350, 45%, 85%)' : undefined
+                  }}
+                />
+                <label 
+                  htmlFor="grain" 
+                  className="text-sm platypi-medium text-black cursor-pointer"
+                >
+                  Grains
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="wine"
+                  checked={selectedOptions.wine}
+                  onChange={(e) => setSelectedOptions(prev => ({ ...prev, wine: e.target.checked }))}
+                  className="w-4 h-4 rounded border-blush/30 focus:ring-2 focus:ring-blush/20"
+                  style={{ 
+                    accentColor: selectedOptions.wine ? 'hsl(350, 45%, 85%)' : undefined
+                  }}
+                />
+                <label 
+                  htmlFor="wine" 
+                  className="text-sm platypi-medium text-black cursor-pointer"
+                >
+                  Wine
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="fruit"
+                  checked={selectedOptions.fruit}
+                  onChange={(e) => setSelectedOptions(prev => ({ ...prev, fruit: e.target.checked }))}
+                  className="w-4 h-4 rounded border-blush/30 focus:ring-2 focus:ring-blush/20"
+                  style={{ 
+                    accentColor: selectedOptions.fruit ? 'hsl(350, 45%, 85%)' : undefined
+                  }}
+                />
+                <label 
+                  htmlFor="fruit" 
+                  className="text-sm platypi-medium text-black cursor-pointer"
+                >
+                  Fruits
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="bg-white rounded-2xl p-6 border border-blush/10">
+        
+        {language === 'hebrew' && brocha.hebrewText && (
+          <div 
+            className="vc-koren-hebrew text-right leading-relaxed text-black"
+            style={{ fontSize: `${fontSize + 1}px` }}
+            dangerouslySetInnerHTML={{ __html: getProcessedText(brocha.hebrewText) }}
+          />
+        )}
+        {language === 'english' && brocha.englishText && (
+          <div 
+            className="koren-siddur-english text-left leading-relaxed text-black/70"
+            style={{ fontSize: `${fontSize}px` }}
+            dangerouslySetInnerHTML={{ __html: getProcessedText(brocha.englishText || "English translation not available") }}
+          />
+        )}
+      </div>
+      
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of{' '}
+          <a 
+            href="https://korenpub.co.il/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-700"
+          >
+            Koren Publishers Jerusalem
+          </a>
+          {' '}and Rabbi Sacks Legacy
+        </span>
+      </div>
+
+      <Button
+        onClick={handleComplete}
+        className="w-full py-3 rounded-xl platypi-medium border-0 mt-6 bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse"
+      >
+        Complete Brocha
+      </Button>
+    </div>
+  );
+}
+
+function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  const [activeTab, setActiveTab] = useState<'daily' | 'special'>('daily');
+  
+  const { data: dailyBrochas = [], isLoading: dailyLoading } = useQuery({
+    queryKey: ['/api/brochas/daily'],
+    staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (garbage collection time)
+  });
+
+  const { data: specialBrochas = [], isLoading: specialLoading } = useQuery({
+    queryKey: ['/api/brochas/special'],
+    staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (garbage collection time)
+  });
+
+  // Icon mapping function for brochas
+  const getBrochaIcon = (title: string) => {
+    switch (title) {
+      case "Me'ein Shalosh":
+        return Wine; // Wine icon for Me'ein Shalosh
+      case "Birkat Hamazon":
+        return Utensils; // Fork and knife for Birkat Hamazon
+      case "Kriyat Shmah Al Hamita":
+        return Moon; // Moon for bedtime prayer
+      case "Asher Yatzar":
+        return User; // Simple user/lady icon
+      case "Hafrashas Challah":
+        return Wheat; // Wheat for challah
+      case "Tefillas Haderech":
+        return Car; // Car for travel prayer
+      default:
+        return Star; // Default star icon for any future brochas
+    }
+  };
+
+  // Type the arrays properly and handle loading states
+  const dailyArray = Array.isArray(dailyBrochas) ? dailyBrochas : [];
+  const specialArray = Array.isArray(specialBrochas) ? specialBrochas : [];
+  
+  // Show content immediately if we have cached data, even while loading
+  const hasData = dailyArray.length > 0 || specialArray.length > 0;
+  
+  if (!hasData && (dailyLoading || specialLoading)) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-rose-blush/30 border-t-rose-blush rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 platypi-regular">Loading brochas...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const currentBrochas = activeTab === 'daily' ? dailyArray : specialArray;
+  const hasDaily = dailyArray.length > 0;
+  const hasSpecial = specialArray.length > 0;
+
+  return (
+    <div className="space-y-6">
+      {/* Tab Navigation */}
+      <div className="flex bg-warm-gray/10 rounded-xl p-1 mb-4">
+        <button
+          onClick={() => setActiveTab('daily')}
+          className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
+            activeTab === 'daily'
+              ? 'bg-white text-black'
+              : 'text-black/60 hover:text-black'
+          }`}
+          style={activeTab === 'daily' ? { boxShadow: '0 4px 6px -1px hsla(350, 45%, 85%, 0.5), 0 2px 4px -1px hsla(350, 45%, 85%, 0.3)' } : {}}
+        >
+          Daily ({hasDaily ? dailyBrochas.length : 0})
+        </button>
+        <button
+          onClick={() => setActiveTab('special')}
+          className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
+            activeTab === 'special'
+              ? 'bg-white text-black'
+              : 'text-black/60 hover:text-black'
+          }`}
+          style={activeTab === 'special' ? { boxShadow: '0 4px 6px -1px hsla(350, 45%, 85%, 0.5), 0 2px 4px -1px hsla(350, 45%, 85%, 0.3)' } : {}}
+        >
+          Special ({hasSpecial ? specialBrochas.length : 0})
+        </button>
+      </div>
+
+      {/* Prayer Buttons */}
+      <div className="space-y-4">
+        {currentBrochas.length > 0 ? (
+          currentBrochas.map((brocha: any) => {
+            const IconComponent = getBrochaIcon(brocha.title);
+            return (
+              <button
+                key={brocha.id}
+                onClick={() => {
+                  // Store the selected brocha ID globally and open individual brocha fullscreen
+                  (window as any).selectedBrochaId = brocha.id;
+                  const openEvent = new CustomEvent('openDirectFullscreen', {
+                    detail: {
+                      title: brocha.title,
+                      contentType: 'individual-brocha',
+                      hasTranslation: true
+                    }
+                  });
+                  window.dispatchEvent(openEvent);
+                }}
+                className="w-full bg-white rounded-2xl p-4 border border-blush/10 hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-4"
+              >
+                {/* Icon with gradient circle */}
+                <div className="p-3 rounded-full bg-gradient-feminine flex-shrink-0">
+                  <IconComponent className="text-white" size={20} strokeWidth={1.5} />
+                </div>
+                
+                {/* Text content */}
+                <div className="flex-grow text-center">
+                  <h3 className="platypi-bold text-lg text-black mb-1">
+                    {brocha.title}
+                  </h3>
+                  {brocha.description && (
+                    <p className="platypi-regular text-sm text-black/70">
+                      {brocha.description}
+                    </p>
+                  )}
+                </div>
+              </button>
+            );
+          })
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-600 platypi-regular">
+              No {activeTab} brochas available
+            </p>
+          </div>
+        )}
+      </div>
+      
     </div>
   );
 }
@@ -646,7 +975,16 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+          All tefilla texts courtesy of{' '}
+          <a 
+            href="https://korenpub.co.il/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-700"
+          >
+            Koren Publishers Jerusalem
+          </a>
+          {' '}and Rabbi Sacks Legacy
         </span>
       </div>
 
@@ -656,7 +994,7 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           isModalComplete('morning-brochas') 
             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
         {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete Morning Brochas'}
@@ -789,16 +1127,16 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
-          Thank you to{' '}
+          All tefilla texts courtesy of{' '}
           <a 
-            href="https://www.nishmas.net/"
+            href="https://korenpub.co.il/"
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:text-blue-700"
           >
-            Nishmas.net
+            Koren Publishers Jerusalem
           </a>
-          {' '}for providing this Tefilla
+          {' '}and Rabbi Sacks Legacy
         </span>
       </div>
 
@@ -808,7 +1146,7 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           todayCompleted 
             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
         {todayCompleted ? 'Completed Today' : 'Complete Nishmas'}
@@ -905,7 +1243,16 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+          All tefilla texts courtesy of{' '}
+          <a 
+            href="https://korenpub.co.il/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-700"
+          >
+            Koren Publishers Jerusalem
+          </a>
+          {' '}and Rabbi Sacks Legacy
         </span>
       </div>
 
@@ -918,7 +1265,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
           className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
             isCompleted 
               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
           }`}
         >
           {isCompleted ? 'Completed Today' : `Complete Tehillim ${selectedPsalm}`}
@@ -929,14 +1276,14 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
           <div className="flex gap-2">
             <Button
               onClick={handleComplete}
-              className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
+              className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse"
             >
               Complete
             </Button>
             
             <Button
               onClick={handleCompleteAndNext}
-              className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform"
+              className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse"
             >
               Complete & Next ({selectedPsalm && selectedPsalm < 150 ? selectedPsalm + 1 : 1})
             </Button>
@@ -1222,7 +1569,16 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+          All tefilla texts courtesy of{' '}
+          <a 
+            href="https://korenpub.co.il/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-700"
+          >
+            Koren Publishers Jerusalem
+          </a>
+          {' '}and Rabbi Sacks Legacy
         </span>
       </div>
 
@@ -1234,7 +1590,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
           className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
             isCompleted 
               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
           }`}
         >
           {isCompleted ? 'Completed' : advanceChainMutation.isPending ? 'Completing...' : 'Complete'}
@@ -1247,7 +1603,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
           className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
             isCompleted 
               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-              : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform'
+              : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse'
           }`}
         >
           {isCompleted ? 'Completed' : completeAndNextMutation.isPending ? 'Loading Next...' : 'Complete & Next'}
@@ -1338,7 +1694,7 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
         className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
           isModalComplete(modalKey) 
             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
         {isModalComplete(modalKey) ? 'Completed Today' : 'Complete'}
@@ -1453,7 +1809,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
   // Auto-redirect prayer modals to fullscreen
   useEffect(() => {
-    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'individual-tehillim', 'tehillim-text', 'special-tehillim'];
+    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'individual-tehillim', 'tehillim-text', 'special-tehillim', 'brochas'];
     
     if (activeModal && fullscreenPrayerModals.includes(activeModal)) {
       let title = '';
@@ -1483,6 +1839,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         case 'special-tehillim':
           title = 'Sefer Tehillim';
           contentType = 'special-tehillim';
+          break;
+        case 'brochas':
+          title = 'Brochas';
+          contentType = 'brochas';
           break;
       }
       
@@ -1514,21 +1874,36 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   // Listen for custom close fullscreen events
   useEffect(() => {
     const handleCloseFullscreen = () => {
+      const wasIndividualBrocha = fullscreenContent.contentType === 'individual-brocha';
+      
       setFullscreenContent({ isOpen: false, title: '', content: null });
       // Close any active modal to reset state properly
       closeModal();
-      // Navigate to home section and show flower growth
-      if (onSectionChange) {
-        onSectionChange('home');
+      
+      if (wasIndividualBrocha) {
+        // Go back to Brochas selector instead of home
         setTimeout(() => {
-          const progressElement = document.getElementById('daily-progress-garden');
-          if (progressElement) {
-            progressElement.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'center' 
-            });
-          }
-        }, 300);
+          setFullscreenContent({
+            isOpen: true,
+            title: 'Brochas',
+            contentType: 'brochas',
+            content: null
+          });
+        }, 100);
+      } else {
+        // Navigate to home section and show flower growth for other types
+        if (onSectionChange) {
+          onSectionChange('home');
+          setTimeout(() => {
+            const progressElement = document.getElementById('daily-progress-garden');
+            if (progressElement) {
+              progressElement.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+              });
+            }
+          }, 300);
+        }
       }
     };
 
@@ -1969,7 +2344,16 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                     
                     <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
                       <span className="text-sm platypi-medium text-black">
-                        All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+                        All tefilla texts courtesy of{' '}
+          <a 
+            href="https://korenpub.co.il/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-700"
+          >
+            Koren Publishers Jerusalem
+          </a>
+          {' '}and Rabbi Sacks Legacy
                       </span>
                     </div>
                     
@@ -1986,7 +2370,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                         className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                           isModalComplete('mincha') 
                             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                         }`}
                       >
                         {isModalComplete('mincha') ? 'Completed Today' : 'Complete'}
@@ -2050,7 +2434,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('mincha') 
                   ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
               {isModalComplete('mincha') ? 'Completed Today' : 'Complete Mincha'}
@@ -2169,7 +2553,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('blessings') 
                   ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
               {isModalComplete('blessings') ? 'Completed Today' : 'Complete Blessings'}
@@ -2200,7 +2584,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('tefillos') 
                   ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
               {isModalComplete('tefillos') ? 'Completed Today' : 'Complete Tefillos'}
@@ -2245,7 +2629,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('personal-prayers') 
                   ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
               {isModalComplete('personal-prayers') ? 'Completed Today' : 'Complete Personal Prayers'}
@@ -2286,7 +2670,16 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                       
                       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
                         <span className="text-sm platypi-medium text-black">
-                          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+                          All tefilla texts courtesy of{' '}
+          <a 
+            href="https://korenpub.co.il/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-700"
+          >
+            Koren Publishers Jerusalem
+          </a>
+          {' '}and Rabbi Sacks Legacy
                         </span>
                       </div>
                       
@@ -2303,7 +2696,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                           className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                             isModalComplete('nishmas-campaign') 
                               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                           }`}
                         >
                           {isModalComplete('nishmas-campaign') ? 'Completed Today' : 'Complete'}
@@ -2572,7 +2965,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('maariv') 
                   ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
               {isModalComplete('maariv') ? 'Completed Today' : 'Complete Maariv'}
@@ -2611,9 +3004,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         isOpen={fullscreenContent.isOpen}
         onClose={() => setFullscreenContent({ isOpen: false, title: '', content: null })}
         title={fullscreenContent.title}
-        showFontControls={fullscreenContent.contentType !== 'special-tehillim'}
+        showFontControls={fullscreenContent.contentType !== 'special-tehillim' && fullscreenContent.contentType !== 'brochas'}
         showLanguageControls={
           fullscreenContent.contentType !== 'special-tehillim' && 
+          fullscreenContent.contentType !== 'brochas' &&
           (fullscreenContent.contentType !== 'individual-prayer' || fullscreenContent.hasTranslation !== false)
         }
         fontSize={fontSize}
@@ -2910,7 +3304,7 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
           className={`w-full py-3 rounded-xl platypi-medium border-0 ${
             isModalComplete(modalKey) 
               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
           }`}
         >
           {isModalComplete(modalKey) ? 'Completed Today' : 'Complete'}
@@ -3063,7 +3457,16 @@ function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'h
 
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+          All tefilla texts courtesy of{' '}
+          <a 
+            href="https://korenpub.co.il/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-700"
+          >
+            Koren Publishers Jerusalem
+          </a>
+          {' '}and Rabbi Sacks Legacy
         </span>
       </div>
 
@@ -3267,7 +3670,16 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                 
                 <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
                   <span className="text-sm platypi-medium text-black">
-                    All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+                    All tefilla texts courtesy of{' '}
+          <a 
+            href="https://korenpub.co.il/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-700"
+          >
+            Koren Publishers Jerusalem
+          </a>
+          {' '}and Rabbi Sacks Legacy
                   </span>
                 </div>
                 
@@ -3305,7 +3717,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                       className={`${tehillimActiveTab === 'all' ? 'flex-1' : 'w-full'} py-3 rounded-xl platypi-medium border-0 ${
                         isModalComplete(`individual-tehillim-${selectedPsalm}`) 
                           ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                          : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                          : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                       }`}
                     >
                       {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete'}
@@ -3344,7 +3756,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                         className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
                           isModalComplete(`individual-tehillim-${selectedPsalm}`) 
                             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                            : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform'
+                            : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse'
                         }`}
                       >
                         {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete & Next'}
@@ -3390,7 +3802,16 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                   
                   <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
                     <span className="text-sm platypi-medium text-black">
-                      All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+                      All tefilla texts courtesy of{' '}
+          <a 
+            href="https://korenpub.co.il/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-700"
+          >
+            Koren Publishers Jerusalem
+          </a>
+          {' '}and Rabbi Sacks Legacy
                     </span>
                   </div>
                   
@@ -3427,7 +3848,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                         className={`${tehillimActiveTab === 'all' ? 'flex-1' : 'w-full'} py-3 rounded-xl platypi-medium border-0 ${
                           isModalComplete(`individual-tehillim-${selectedPsalm}`) 
                             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                         }`}
                       >
                         {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete'}
@@ -3467,7 +3888,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                           className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
                             isModalComplete(`individual-tehillim-${selectedPsalm}`) 
                               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                              : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform'
+                              : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse'
                           }`}
                         >
                           {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete & Next'}
@@ -3586,7 +4007,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
           className={`${tehillimActiveTab === 'all' ? 'flex-1' : 'w-full'} py-3 rounded-xl platypi-medium border-0 ${
             isModalComplete(`individual-tehillim-${selectedPsalm}`) 
               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
           }`}
         >
           {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete'}
@@ -3629,7 +4050,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
             className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
               isModalComplete(`individual-tehillim-${selectedPsalm}`) 
                 ? 'bg-muted-lavender text-white cursor-not-allowed opacity-70' 
-                : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform'
+                : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse'
             }`}
           >
             {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Next' : 'Complete & Next'}

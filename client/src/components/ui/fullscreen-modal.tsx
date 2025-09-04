@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Minimize2, Maximize2 } from 'lucide-react';
-import { Button } from './button';
+import { X } from 'lucide-react';
 import logoImage from "@assets/1LO_1755590090315.png";
 
 interface FullscreenModalProps {
@@ -31,7 +30,6 @@ export function FullscreenModal({
   language = 'hebrew',
   onLanguageChange
 }: FullscreenModalProps) {
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -51,6 +49,16 @@ export function FullscreenModal({
     const handleCloseFullscreen = () => {
       onClose();
     };
+
+    // Try to handle native browser back gesture by listening for popstate
+    const handlePopState = (e: PopStateEvent) => {
+      console.log('Popstate detected in fullscreen modal');
+      e.preventDefault();
+      onClose();
+    };
+
+    // Add popstate listener to catch browser back gestures
+    window.addEventListener('popstate', handlePopState, true);
     
     // Save current scroll position and body styles
     const scrollY = window.scrollY;
@@ -59,15 +67,20 @@ export function FullscreenModal({
       position: document.body.style.position,
       top: document.body.style.top,
       width: document.body.style.width,
-      touchAction: document.body.style.touchAction
+      touchAction: document.body.style.touchAction,
+      overscrollBehavior: document.body.style.overscrollBehavior,
+      webkitOverscrollBehavior: (document.body.style as any).webkitOverscrollBehavior
     };
     
-    // Prevent body from scrolling on both desktop and mobile
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
+    // Try minimal body style changes to avoid interfering with gestures
     document.body.style.overflow = 'hidden';
-    document.body.style.touchAction = 'none';
+    // Don't fix the body position - this might be interfering with gesture detection
+    // document.body.style.position = 'fixed';
+    // document.body.style.top = `-${scrollY}px`;
+    document.body.style.touchAction = 'auto';
+    document.body.style.overscrollBehavior = 'auto';
+    // @ts-ignore - WebKit specific property
+    document.body.style.webkitOverscrollBehavior = 'auto';
     
     // Also prevent scrolling on the document element for iOS
     const originalHtmlOverflow = document.documentElement.style.overflow;
@@ -85,28 +98,24 @@ export function FullscreenModal({
       document.body.style.top = originalBodyStyle.top;
       document.body.style.width = originalBodyStyle.width;
       document.body.style.touchAction = originalBodyStyle.touchAction;
+      document.body.style.overscrollBehavior = originalBodyStyle.overscrollBehavior;
+      // @ts-ignore - WebKit specific property
+      document.body.style.webkitOverscrollBehavior = originalBodyStyle.webkitOverscrollBehavior;
       
       // Restore html overflow
       document.documentElement.style.overflow = originalHtmlOverflow;
       
-      // Restore scroll position
-      window.scrollTo(0, scrollY);
+      // Only restore scroll position if we actually saved it
+      if (typeof scrollY === 'number') {
+        window.scrollTo(0, scrollY);
+      }
       
       document.removeEventListener('keydown', handleEscape, true);
       window.removeEventListener('closeFullscreen', handleCloseFullscreen);
+      window.removeEventListener('popstate', handlePopState, true);
     };
   }, [isOpen, onClose]);
 
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-    };
-  }, []);
 
   if (!isOpen) return null;
 
@@ -128,16 +137,15 @@ export function FullscreenModal({
         backgroundColor: 'white',
         isolation: 'isolate',
         pointerEvents: 'auto',
-        touchAction: 'none' // Prevent any touch actions on the container
+        // Remove all touch restrictions to allow native browser gestures
+        touchAction: 'auto',
+        overscrollBehavior: 'auto',
+        WebkitOverscrollBehavior: 'auto'
       }}
       onClick={(e) => {
-        e.stopPropagation();
-        e.nativeEvent.stopImmediatePropagation();
-      }}
-      onTouchStart={(e) => {
-        // Prevent default touch behavior except in scrollable area
-        if (!scrollContainerRef.current?.contains(e.target as Node)) {
-          e.preventDefault();
+        // Only stop propagation for clicks directly on the modal background
+        if (e.target === e.currentTarget) {
+          e.stopPropagation();
         }
       }}
     >
@@ -263,10 +271,6 @@ export function FullscreenModal({
           // Add extra padding bottom for iOS safe area
           paddingBottom: 'env(safe-area-inset-bottom, 20px)'
         }}
-        onTouchMove={(e) => {
-          // Allow touch scrolling within this container
-          e.stopPropagation();
-        }}
       >
         <div className={`max-w-4xl mx-auto ${className}`} style={{ paddingBottom: '100px' }}>
           {typeof children === 'function' 
@@ -278,23 +282,3 @@ export function FullscreenModal({
   );
 }
 
-interface FullscreenButtonProps {
-  onToggle: () => void;
-  isFullscreen?: boolean;
-}
-
-export function FullscreenButton({ onToggle, isFullscreen = false }: FullscreenButtonProps) {
-  return (
-    <button
-      onClick={onToggle}
-      className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-      aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-    >
-      {isFullscreen ? (
-        <Minimize2 className="h-4 w-4 text-gray-600" />
-      ) : (
-        <Maximize2 className="h-4 w-4 text-gray-600" />
-      )}
-    </button>
-  );
-}

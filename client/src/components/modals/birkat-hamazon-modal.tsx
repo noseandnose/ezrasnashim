@@ -432,7 +432,7 @@ export function BirkatHamazonModal() {
                 className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                   isModalComplete('al-hamichiya') 
                     ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                    : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                    : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                 }`}
               >
                 {isModalComplete('al-hamichiya') ? 'Completed Today' : 'Complete'}
@@ -471,7 +471,7 @@ export function BirkatHamazonModal() {
               className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                 isModalComplete('al-hamichiya') 
                   ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
               {isModalComplete('al-hamichiya') ? 'Completed Today' : 'Complete'}
@@ -523,7 +523,7 @@ export function BirkatHamazonModal() {
                 className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                   isModalComplete('birkat-hamazon') 
                     ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                    : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                    : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                 }`}
               >
                 {isModalComplete('birkat-hamazon') ? 'Completed Today' : 'Complete'}
@@ -562,7 +562,7 @@ export function BirkatHamazonModal() {
               className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                 isModalComplete('birkat-hamazon') 
                   ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
               {isModalComplete('birkat-hamazon') ? 'Completed Today' : 'Complete'}
@@ -689,7 +689,8 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
     <div className="space-y-4">
       {/* Me'ein Shalosh Food Selection Checkboxes */}
       <div className="bg-gradient-to-r from-lavender-50 to-rose-50 rounded-2xl p-4 border border-lavender/20" style={{ animation: 'gentle-glow-pink-thin 3s ease-in-out infinite' }}>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="flex justify-center">
+          <div className="flex gap-8">
           <div className="flex items-center space-x-2">
             <Checkbox
               id="grain-fullscreen"
@@ -738,6 +739,7 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
               Fruits
             </label>
           </div>
+          </div>
         </div>
       </div>
       
@@ -751,7 +753,16 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+          All tefilla texts courtesy of{' '}
+          <a 
+            href="https://korenpub.co.il/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-700"
+          >
+            Koren Publishers Jerusalem
+          </a>
+          {' '}and Rabbi Sacks Legacy
         </span>
       </div>
 
@@ -761,7 +772,7 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           isModalComplete('al-hamichiya') 
             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
         {isModalComplete('al-hamichiya') ? 'Completed Today' : 'Complete'}
@@ -856,7 +867,16 @@ export function BirkatHamazonFullscreenContent({ language, fontSize }: { languag
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+          All tefilla texts courtesy of{' '}
+          <a 
+            href="https://korenpub.co.il/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-700"
+          >
+            Koren Publishers Jerusalem
+          </a>
+          {' '}and Rabbi Sacks Legacy
         </span>
       </div>
 
@@ -866,7 +886,7 @@ export function BirkatHamazonFullscreenContent({ language, fontSize }: { languag
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           isModalComplete('birkat-hamazon') 
             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
         {isModalComplete('birkat-hamazon') ? 'Completed Today' : 'Complete'}

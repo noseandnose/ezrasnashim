@@ -8,6 +8,7 @@ interface LazyImageProps {
   fallback?: string;
   onLoad?: () => void;
   onError?: () => void;
+  onClick?: () => void;
 }
 
 export function LazyImage({ 
@@ -17,10 +18,10 @@ export function LazyImage({
   style = {}, 
   fallback,
   onLoad,
-  onError 
+  onError,
+  onClick 
 }: LazyImageProps) {
   const [imageSrc, setImageSrc] = useState<string | undefined>(undefined);
-  const [imageError, setImageError] = useState(false);
   const [isIntersecting, setIsIntersecting] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
@@ -58,12 +59,10 @@ export function LazyImage({
       
       img.onload = () => {
         setImageSrc(src);
-        setImageError(false);
         onLoad?.();
       };
       
       img.onerror = () => {
-        setImageError(true);
         if (fallback) {
           setImageSrc(fallback);
         }
@@ -83,6 +82,7 @@ export function LazyImage({
         backgroundColor: !imageSrc ? '#f5f5f5' : undefined
       }}
       loading="lazy"
+      onClick={onClick}
     />
   );
 }
