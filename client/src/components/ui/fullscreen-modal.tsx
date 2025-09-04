@@ -123,8 +123,9 @@ export function FullscreenModal({
         e.nativeEvent.stopImmediatePropagation();
       }}
       onTouchStart={(e) => {
-        // Prevent default touch behavior except in scrollable area
-        if (!scrollContainerRef.current?.contains(e.target as Node)) {
+        // Only prevent touch defaults for very specific cases to avoid interfering with navigation gestures
+        // We only want to prevent when it's a direct click on the modal background itself
+        if (e.target === e.currentTarget) {
           e.preventDefault();
         }
       }}
@@ -266,23 +267,3 @@ export function FullscreenModal({
   );
 }
 
-interface FullscreenButtonProps {
-  onToggle: () => void;
-  isFullscreen?: boolean;
-}
-
-export function FullscreenButton({ onToggle, isFullscreen = false }: FullscreenButtonProps) {
-  return (
-    <button
-      onClick={onToggle}
-      className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-      aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-    >
-      {isFullscreen ? (
-        <Minimize2 className="h-4 w-4 text-gray-600" />
-      ) : (
-        <Maximize2 className="h-4 w-4 text-gray-600" />
-      )}
-    </button>
-  );
-}
