@@ -822,23 +822,23 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
   return (
     <div className="space-y-6">
       {/* Tabs */}
-      <div className="flex justify-center bg-gray-50 p-1 rounded-xl max-w-sm mx-auto">
+      <div className="flex justify-center gap-4 max-w-sm mx-auto">
         <button
           onClick={() => setActiveTab('daily')}
-          className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
+          className={`py-3 px-6 rounded-xl text-sm platypi-medium transition-all ${
             activeTab === 'daily'
-              ? 'bg-white text-black shadow-lg shadow-blush/20'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'bg-white text-black shadow-lg shadow-blush/30'
+              : 'bg-white text-gray-600 hover:text-gray-900 shadow-sm'
           }`}
         >
           Daily ({hasDaily ? dailyBrochas.length : 0})
         </button>
         <button
           onClick={() => setActiveTab('special')}
-          className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
+          className={`py-3 px-6 rounded-xl text-sm platypi-medium transition-all ${
             activeTab === 'special'
-              ? 'bg-white text-black shadow-lg shadow-blush/20'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'bg-white text-black shadow-lg shadow-blush/30'
+              : 'bg-white text-gray-600 hover:text-gray-900 shadow-sm'
           }`}
         >
           Special ({hasSpecial ? specialBrochas.length : 0})
