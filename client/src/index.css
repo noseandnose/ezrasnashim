@@ -311,21 +311,12 @@ body {
   animation: gentle-glow-pink 2s ease-in-out infinite;
 }
 
-/* Dual-color rotating border for Complete and Next buttons */
+/* Dual-color border for Complete and Next buttons */
 .complete-next-button-pulse {
   position: relative;
-  background: conic-gradient(from 0deg, #fb7185, #22c55e, #fb7185, #22c55e) border-box;
-  border: 2px solid transparent;
-  animation: rotate-border 3s linear infinite;
-}
-
-.complete-next-button-pulse::before {
-  content: '';
-  position: absolute;
-  inset: 2px;
-  background: inherit;
-  border-radius: inherit;
-  z-index: -1;
+  border: 2px solid;
+  border-image: linear-gradient(90deg, #fb7185 50%, #22c55e 50%);
+  border-image-slice: 1;
 }
 
 @keyframes rotate-border {
