@@ -841,22 +841,14 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
             <button
               key={brocha.id}
               onClick={() => {
-                // Store the selected brocha ID globally and open individual prayer fullscreen
+                // Store the selected brocha ID globally and directly set fullscreen content
                 (window as any).selectedBrochaId = brocha.id;
-                // Close current fullscreen
-                const closeEvent = new CustomEvent('closeFullscreen');
-                window.dispatchEvent(closeEvent);
-                // Open individual prayer fullscreen after a short delay
-                setTimeout(() => {
-                  const openEvent = new CustomEvent('openDirectFullscreen', {
-                    detail: {
-                      title: brocha.title,
-                      contentType: 'individual-brocha',
-                      hasTranslation: true
-                    }
-                  });
-                  window.dispatchEvent(openEvent);
-                }, 100);
+                setFullscreenContent({
+                  isOpen: true,
+                  title: brocha.title,
+                  contentType: 'individual-brocha',
+                  hasTranslation: true
+                });
               }}
               className="w-full bg-white rounded-2xl p-6 border border-blush/10 hover:scale-105 transition-all duration-300 shadow-lg text-left"
             >
