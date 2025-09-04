@@ -841,14 +841,16 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
             <button
               key={brocha.id}
               onClick={() => {
-                // Store the selected brocha ID globally and directly set fullscreen content
+                // Store the selected brocha ID globally and open individual brocha fullscreen
                 (window as any).selectedBrochaId = brocha.id;
-                setFullscreenContent({
-                  isOpen: true,
-                  title: brocha.title,
-                  contentType: 'individual-brocha',
-                  hasTranslation: true
+                const openEvent = new CustomEvent('openDirectFullscreen', {
+                  detail: {
+                    title: brocha.title,
+                    contentType: 'individual-brocha',
+                    hasTranslation: true
+                  }
                 });
+                window.dispatchEvent(openEvent);
               }}
               className="w-full bg-white rounded-2xl p-6 border border-blush/10 hover:scale-105 transition-all duration-300 shadow-lg text-left"
             >
