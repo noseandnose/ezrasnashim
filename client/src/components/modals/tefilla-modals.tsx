@@ -844,9 +844,10 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
           onClick={() => setActiveTab('daily')}
           className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
             activeTab === 'daily'
-              ? 'bg-white text-black shadow-rose-blush/30 shadow-md'
+              ? 'bg-white text-black'
               : 'text-black/60 hover:text-black'
           }`}
+          style={activeTab === 'daily' ? { boxShadow: '0 4px 6px -1px hsla(350, 45%, 85%, 0.5), 0 2px 4px -1px hsla(350, 45%, 85%, 0.3)' } : {}}
         >
           Daily ({hasDaily ? dailyBrochas.length : 0})
         </button>
@@ -854,9 +855,10 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
           onClick={() => setActiveTab('special')}
           className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
             activeTab === 'special'
-              ? 'bg-white text-black shadow-rose-blush/30 shadow-md'
+              ? 'bg-white text-black'
               : 'text-black/60 hover:text-black'
           }`}
+          style={activeTab === 'special' ? { boxShadow: '0 4px 6px -1px hsla(350, 45%, 85%, 0.5), 0 2px 4px -1px hsla(350, 45%, 85%, 0.3)' } : {}}
         >
           Special ({hasSpecial ? specialBrochas.length : 0})
         </button>
