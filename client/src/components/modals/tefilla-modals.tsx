@@ -483,6 +483,8 @@ function renderPrayerContent(contentType: string | undefined, language: 'hebrew'
       return <TehillimFullscreenContent language={language} fontSize={fontSize} />;
     case 'brochas':
       return <BrochasFullscreenContent language={language} fontSize={fontSize} />;
+    case 'individual-brocha':
+      return <IndividualBrochaFullscreenContent language={language} fontSize={fontSize} />;
     case 'global-tehillim':
       return <GlobalTehillimFullscreenContent language={language} fontSize={fontSize} />;
     case 'special-tehillim':
@@ -635,6 +637,88 @@ function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
   );
 }
 
+function IndividualBrochaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  const selectedBrochaId = (window as any).selectedBrochaId;
+  const tefillaConditions = useTefillaConditions();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+
+  // Fetch the specific brocha by ID
+  const { data: brocha, isLoading } = useQuery<any>({
+    queryKey: ['/api/brochas', selectedBrochaId],
+    enabled: !!selectedBrochaId,
+  });
+
+  if (isLoading || !brocha) return <div className="text-center py-8">Loading brocha...</div>;
+
+  const handleComplete = () => {
+    trackModalComplete('brochas');
+    markModalComplete('brochas');
+    completeTask('tefilla');
+    // Close fullscreen
+    const event = new CustomEvent('closeFullscreen');
+    window.dispatchEvent(event);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-2xl p-6 border border-blush/10">
+        <h3 className="platypi-bold text-lg text-black text-center mb-4">
+          {brocha.title}
+        </h3>
+        {brocha.description && (
+          <p className="platypi-regular text-sm text-black/70 text-center mb-6">
+            {brocha.description}
+          </p>
+        )}
+        
+        {language === 'hebrew' && brocha.hebrewText && (
+          <div 
+            className="vc-koren-hebrew text-right leading-relaxed text-black"
+            style={{ fontSize: `${fontSize + 1}px` }}
+            dangerouslySetInnerHTML={{ __html: processTefillaContent(brocha.hebrewText, tefillaConditions) }}
+          />
+        )}
+        {language === 'english' && brocha.englishText && (
+          <div 
+            className="koren-siddur-english text-left leading-relaxed text-black/70"
+            style={{ fontSize: `${fontSize}px` }}
+            dangerouslySetInnerHTML={{ __html: processTefillaContent(brocha.englishText || "English translation not available", tefillaConditions) }}
+          />
+        )}
+      </div>
+      
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of{' '}
+          <a 
+            href="https://korenpub.co.il/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-700"
+          >
+            Koren Publishers Jerusalem
+          </a>
+          {' '}and Rabbi Sacks Legacy
+        </span>
+      </div>
+
+      <Button
+        onClick={isModalComplete('brochas') ? undefined : handleComplete}
+        disabled={isModalComplete('brochas')}
+        className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
+          isModalComplete('brochas') 
+            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
+        }`}
+      >
+        {isModalComplete('brochas') ? 'Completed Today' : 'Complete Brocha'}
+      </Button>
+    </div>
+  );
+}
+
 function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
   const [activeTab, setActiveTab] = useState<'daily' | 'special'>('daily');
   
@@ -680,35 +764,41 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
         </button>
       </div>
 
-      {/* Content */}
+      {/* Prayer Buttons */}
       <div className="space-y-4">
         {currentBrochas.length > 0 ? (
           currentBrochas.map((brocha: any) => (
-            <div key={brocha.id} className="bg-white rounded-2xl p-6 border border-blush/10">
+            <button
+              key={brocha.id}
+              onClick={() => {
+                // Store the selected brocha ID globally and open individual prayer fullscreen
+                (window as any).selectedBrochaId = brocha.id;
+                // Close current fullscreen
+                const closeEvent = new CustomEvent('closeFullscreen');
+                window.dispatchEvent(closeEvent);
+                // Open individual prayer fullscreen after a short delay
+                setTimeout(() => {
+                  const openEvent = new CustomEvent('openDirectFullscreen', {
+                    detail: {
+                      title: brocha.title,
+                      contentType: 'individual-brocha',
+                      hasTranslation: true
+                    }
+                  });
+                  window.dispatchEvent(openEvent);
+                }, 100);
+              }}
+              className="w-full bg-white rounded-2xl p-6 border border-blush/10 hover:scale-105 transition-all duration-300 shadow-lg text-left"
+            >
               <h3 className="platypi-bold text-lg text-black text-center mb-2">
                 {brocha.title}
               </h3>
               {brocha.description && (
-                <p className="platypi-regular text-sm text-black/70 text-center mb-4">
+                <p className="platypi-regular text-sm text-black/70 text-center">
                   {brocha.description}
                 </p>
               )}
-              
-              {language === 'hebrew' && brocha.hebrewText && (
-                <div 
-                  className="vc-koren-hebrew text-right leading-relaxed text-black"
-                  style={{ fontSize: `${fontSize + 1}px` }}
-                  dangerouslySetInnerHTML={{ __html: processTefillaContent(brocha.hebrewText, tefillaConditions) }}
-                />
-              )}
-              {language === 'english' && brocha.englishText && (
-                <div 
-                  className="koren-siddur-english text-left leading-relaxed text-black/70"
-                  style={{ fontSize: `${fontSize}px` }}
-                  dangerouslySetInnerHTML={{ __html: processTefillaContent(brocha.englishText || "English translation not available", tefillaConditions) }}
-                />
-              )}
-            </div>
+            </button>
           ))
         ) : (
           <div className="text-center py-8">

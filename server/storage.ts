@@ -110,6 +110,7 @@ export interface IStorage {
   // Brochas methods
   getBrochas(): Promise<Brocha[]>;
   getBrochasByType(isSpecial: boolean): Promise<Brocha[]>;
+  getBrochaById(id: number): Promise<Brocha | undefined>;
   createBrocha(brocha: InsertBrocha): Promise<Brocha>;
   
   // Birkat Hamazon methods
@@ -840,6 +841,11 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(brochas)
       .where(eq(brochas.specialOccasions, isSpecial))
       .orderBy(brochas.orderIndex);
+  }
+
+  async getBrochaById(id: number): Promise<Brocha | undefined> {
+    const [brocha] = await db.select().from(brochas).where(eq(brochas.id, id));
+    return brocha;
   }
 
   async createBrocha(insertBrocha: InsertBrocha): Promise<Brocha> {

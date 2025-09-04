@@ -1044,6 +1044,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get individual brocha by ID
+  app.get("/api/brochas/:id", async (req, res) => {
+    try {
+      const brochaId = parseInt(req.params.id);
+      if (isNaN(brochaId)) {
+        return res.status(400).json({ message: "Invalid brocha ID" });
+      }
+      const brocha = await storage.getBrochaById(brochaId);
+      if (!brocha) {
+        return res.status(404).json({ message: "Brocha not found" });
+      }
+      res.json(brocha);
+    } catch (error) {
+      console.error("Error fetching brocha:", error);
+      res.status(500).json({ message: "Failed to fetch brocha" });
+    }
+  });
+
   app.post("/api/brochas", async (req, res) => {
     try {
       const brocha = await storage.createBrocha(req.body);
