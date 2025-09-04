@@ -809,6 +809,28 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
 
   const tefillaConditions = useTefillaConditions();
 
+  // Custom Ladies Bathroom Icon Component
+  const LadiesIcon = ({ className, size }: { className?: string, size?: number }) => (
+    <svg 
+      width={size || 20} 
+      height={size || 20} 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="1.5" 
+      className={className}
+    >
+      {/* Head */}
+      <circle cx="12" cy="5" r="2"/>
+      {/* Body/Dress */}
+      <path d="M10 10h4l-1 6h-2l-1-6z"/>
+      {/* Arms */}
+      <path d="M8 12l2-1M16 12l-2-1"/>
+      {/* Legs */}
+      <path d="M10 16v4M14 16v4"/>
+    </svg>
+  );
+
   // Icon mapping function for brochas
   const getBrochaIcon = (title: string) => {
     switch (title) {
@@ -819,7 +841,7 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
       case "Kriyat Shmah Al Hamita":
         return Moon; // Moon for bedtime prayer
       case "Asher Yatzar":
-        return UserCheck; // Person with check mark icon - more appropriate for this blessing
+        return LadiesIcon; // Custom ladies bathroom icon
       case "Hafrashas Challah":
         return Wheat; // Wheat for challah
       case "Tefillas Haderech":
