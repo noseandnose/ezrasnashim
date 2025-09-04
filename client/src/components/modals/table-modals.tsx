@@ -163,7 +163,7 @@ export default function TableModals() {
 
   const { data: recipeContent } = useQuery<{title?: string; description?: string; ingredients?: string[]; instructions?: string[]; cookingTime?: string; servings?: number; imageUrl?: string; prepTime?: string; cookTime?: string; difficulty?: string; thankYouMessage?: string}>({
     queryKey: ['/api/table/recipe'],
-    enabled: activeModal === 'recipe'
+    enabled: activeModal === 'recipe' || fullscreenContent.contentType === 'recipe'
   });
 
   interface InspirationContent {
@@ -185,7 +185,7 @@ export default function TableModals() {
 
   const { data: inspirationContent } = useQuery<InspirationContent>({
     queryKey: [`/api/table/inspiration/${getLocalDateString()}`],
-    enabled: activeModal === 'inspiration'
+    enabled: activeModal === 'inspiration' || fullscreenContent.contentType === 'inspiration'
   });
 
   interface ParshaContent {
