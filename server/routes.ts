@@ -1699,11 +1699,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      const promotion = await storage.getActiveDiscountPromotion(userLocation);
-      res.json(promotion || null);
+      const promotions = await storage.getActiveDiscountPromotions(userLocation);
+      res.json(promotions);
     } catch (error) {
-      console.error('Error fetching discount promotion:', error);
-      res.status(500).json({ message: "Failed to fetch active discount promotion" });
+      console.error('Error fetching discount promotions:', error);
+      res.status(500).json({ message: "Failed to fetch active discount promotions" });
     }
   });
 
