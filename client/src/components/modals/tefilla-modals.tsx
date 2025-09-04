@@ -819,17 +819,9 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
       className={className}
     >
       {/* Head */}
-      <circle cx="12" cy="4.5" r="2.5"/>
-      {/* Upper body */}
-      <path d="M9 8.5h6v3.5h-6z"/>
-      {/* Dress/Skirt - triangular shape */}
-      <path d="M8 12h8l-2 6H10l-2-6z"/>
-      {/* Arms */}
-      <rect x="6.5" y="9.5" width="1.5" height="3" rx="0.75"/>
-      <rect x="16" y="9.5" width="1.5" height="3" rx="0.75"/>
-      {/* Legs */}
-      <rect x="10" y="18" width="1.5" height="4" rx="0.75"/>
-      <rect x="12.5" y="18" width="1.5" height="4" rx="0.75"/>
+      <circle cx="12" cy="6" r="3"/>
+      {/* Triangular dress with rounded corners */}
+      <path d="M8 12 L16 12 L14 20 L10 20 Z" rx="2" ry="2"/>
     </svg>
   );
 
