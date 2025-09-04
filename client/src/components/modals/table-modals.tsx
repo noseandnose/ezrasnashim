@@ -11,6 +11,7 @@ import { formatTextContent } from "@/lib/text-formatter";
 import { formatThankYouMessage } from "@/lib/link-formatter";
 import { LazyImage } from "@/components/ui/lazy-image";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
+import { FullscreenImageModal } from "@/components/modals/fullscreen-image-modal";
 
 export default function TableModals() {
   const { activeModal, closeModal } = useModalStore();
@@ -18,6 +19,8 @@ export default function TableModals() {
   const { trackModalComplete } = useTrackModalComplete();
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  const [fullscreenImages, setFullscreenImages] = useState<{isOpen: boolean; images: string[]; initialIndex: number}>({isOpen: false, images: [], initialIndex: 0});
+  const [lastTap, setLastTap] = useState<number>(0);
   const [fullscreenContent, setFullscreenContent] = useState<{
     isOpen: boolean;
     title: string;
@@ -38,6 +41,17 @@ export default function TableModals() {
   
 
   // Function to format time display (convert minutes > 59 to hours and minutes)
+  // Helper function for double-tap detection
+  const handleImageDoubleClick = (imageUrl: string, allImages: string[] = []) => {
+    const images = allImages.length > 0 ? allImages : [imageUrl];
+    const initialIndex = images.indexOf(imageUrl);
+    setFullscreenImages({
+      isOpen: true,
+      images,
+      initialIndex: initialIndex >= 0 ? initialIndex : 0
+    });
+  };
+
   const formatTimeDisplay = (timeString: string) => {
     if (!timeString) return timeString;
     
@@ -194,7 +208,8 @@ export default function TableModals() {
                   <LazyImage 
                     src={recipeContent.imageUrl} 
                     alt={recipeContent.title || "Recipe"} 
-                    className="w-full h-80 object-contain"
+                    className="w-full h-80 object-contain cursor-pointer"
+                    onDoubleClick={() => handleImageDoubleClick(recipeContent.imageUrl!)}
                     onError={() => {
                       // Image failed to load, could hide the container
                     }}
@@ -416,15 +431,17 @@ export default function TableModals() {
                   
                   switch (currentMedia.type) {
                     case 'image':
+                      const allImageUrls = mediaItems.filter(item => item.type === 'image' && item.url).map(item => item.url!);
                       return (
                         <div className="relative w-full h-full bg-gray-50 flex items-center justify-center">
                           <img 
                             src={currentMedia.url} 
                             alt={`Creative Jewish Living ${currentMediaIndex + 1}`}
-                            className="w-full h-full object-contain"
+                            className="w-full h-full object-contain cursor-pointer"
+                            onDoubleClick={() => handleImageDoubleClick(currentMedia.url!, allImageUrls)}
                           />
                           <button
-                            onClick={() => setFullscreenImage(currentMedia.url || null)}
+                            onClick={() => handleImageDoubleClick(currentMedia.url!, allImageUrls)}
                             className="absolute top-2 right-2 bg-black/50 text-white p-1.5 rounded-full hover:bg-black/70 transition-colors"
                             title="View fullscreen"
                           >
@@ -723,7 +740,8 @@ export default function TableModals() {
                     <LazyImage 
                       src={recipeContent.imageUrl} 
                       alt={recipeContent.title || "Recipe"} 
-                      className="w-full h-80 object-contain"
+                      className="w-full h-80 object-contain cursor-pointer"
+                      onDoubleClick={() => handleImageDoubleClick(recipeContent.imageUrl!)}
                     />
                   </div>
                 )}
@@ -950,12 +968,15 @@ export default function TableModals() {
                           {mediaItems[currentMediaIndex]?.type === 'image' ? (
                             <div
                               className="cursor-pointer bg-gray-50 flex items-center justify-center w-full h-80"
-                              onClick={() => setFullscreenImage(mediaItems[currentMediaIndex].url!)}
                             >
                               <LazyImage
                                 src={mediaItems[currentMediaIndex].url!}
                                 alt="Inspiration content"
                                 className="w-full h-80 object-contain"
+                                onDoubleClick={() => {
+                                  const allImageUrls = mediaItems.filter(item => item.type === 'image' && item.url).map(item => item.url!);
+                                  handleImageDoubleClick(mediaItems[currentMediaIndex].url!, allImageUrls);
+                                }}
                               />
                             </div>
                           ) : mediaItems[currentMediaIndex]?.type === 'video' ? (
@@ -1058,6 +1079,14 @@ export default function TableModals() {
           fullscreenContent.content
         )}
       </FullscreenModal>
+
+      {/* Fullscreen Image Modal */}
+      <FullscreenImageModal
+        isOpen={fullscreenImages.isOpen}
+        onClose={() => setFullscreenImages({ isOpen: false, images: [], initialIndex: 0 })}
+        images={fullscreenImages.images}
+        initialIndex={fullscreenImages.initialIndex}
+      />
     </>
   );
 }
