@@ -1,7 +1,7 @@
 import serverAxiosClient from "./axiosClient";
 import { 
   shopItems, 
-  tehillimNames, tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, birkatHamazonPrayers, afterBrochasPrayers, sponsors, nishmasText,
+  tehillimNames, tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, birkatHamazonPrayers, afterBrochasPrayers, brochas, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
   dailyRecipes, parshaVorts, tableInspirations, communityImpact, campaigns, donations, womensPrayers, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats, acts,
@@ -11,6 +11,7 @@ import {
   type MaarivPrayer, type InsertMaarivPrayer, type MorningPrayer, type InsertMorningPrayer,
   type BirkatHamazonPrayer, type InsertBirkatHamazonPrayer,
   type AfterBrochasPrayer, type InsertAfterBrochasPrayer,
+  type Brocha, type InsertBrocha,
   type Sponsor, type InsertSponsor, type NishmasText, type InsertNishmasText,
   type DailyHalacha, type InsertDailyHalacha,
   type DailyEmuna, type InsertDailyEmuna,
@@ -105,6 +106,11 @@ export interface IStorage {
   // After Brochas methods
   getAfterBrochasPrayers(): Promise<AfterBrochasPrayer[]>;
   createAfterBrochasPrayer(prayer: InsertAfterBrochasPrayer): Promise<AfterBrochasPrayer>;
+  
+  // Brochas methods
+  getBrochas(): Promise<Brocha[]>;
+  getBrochasByType(isSpecial: boolean): Promise<Brocha[]>;
+  createBrocha(brocha: InsertBrocha): Promise<Brocha>;
   
   // Birkat Hamazon methods
   getBirkatHamazonPrayers(): Promise<BirkatHamazonPrayer[]>;
@@ -823,6 +829,22 @@ export class DatabaseStorage implements IStorage {
   async createAfterBrochasPrayer(insertPrayer: InsertAfterBrochasPrayer): Promise<AfterBrochasPrayer> {
     const [prayer] = await db.insert(afterBrochasPrayers).values(insertPrayer).returning();
     return prayer;
+  }
+
+  // Brochas methods
+  async getBrochas(): Promise<Brocha[]> {
+    return await db.select().from(brochas).orderBy(brochas.orderIndex);
+  }
+
+  async getBrochasByType(isSpecial: boolean): Promise<Brocha[]> {
+    return await db.select().from(brochas)
+      .where(eq(brochas.specialOccasions, isSpecial))
+      .orderBy(brochas.orderIndex);
+  }
+
+  async createBrocha(insertBrocha: InsertBrocha): Promise<Brocha> {
+    const [brocha] = await db.insert(brochas).values(insertBrocha).returning();
+    return brocha;
   }
 
   // Birkat Hamazon methods

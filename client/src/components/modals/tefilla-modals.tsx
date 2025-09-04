@@ -481,6 +481,8 @@ function renderPrayerContent(contentType: string | undefined, language: 'hebrew'
       return <NishmasFullscreenContent language={language} fontSize={fontSize} />;
     case 'individual-tehillim':
       return <TehillimFullscreenContent language={language} fontSize={fontSize} />;
+    case 'brochas':
+      return <BrochasFullscreenContent language={language} fontSize={fontSize} />;
     case 'global-tehillim':
       return <GlobalTehillimFullscreenContent language={language} fontSize={fontSize} />;
     case 'special-tehillim':
@@ -629,6 +631,108 @@ function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
       >
         {isModalComplete('mincha') ? 'Completed Today' : 'Complete Mincha'}
       </Button>
+    </div>
+  );
+}
+
+function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  const [activeTab, setActiveTab] = useState<'daily' | 'special'>('daily');
+  
+  const { data: dailyBrochas = [], isLoading: dailyLoading } = useQuery<any[]>({
+    queryKey: ['/api/brochas/daily'],
+  });
+
+  const { data: specialBrochas = [], isLoading: specialLoading } = useQuery<any[]>({
+    queryKey: ['/api/brochas/special'],
+  });
+
+  const tefillaConditions = useTefillaConditions();
+
+  if (dailyLoading || specialLoading) return <div className="text-center py-8">Loading brochas...</div>;
+
+  const currentBrochas = activeTab === 'daily' ? dailyBrochas : specialBrochas;
+  const hasDaily = dailyBrochas.length > 0;
+  const hasSpecial = specialBrochas.length > 0;
+
+  return (
+    <div className="space-y-6">
+      {/* Tabs */}
+      <div className="flex justify-center bg-gray-100 p-1 rounded-xl max-w-sm mx-auto">
+        <button
+          onClick={() => setActiveTab('daily')}
+          className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
+            activeTab === 'daily'
+              ? 'bg-white text-black shadow-sm'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Daily ({hasDaily ? dailyBrochas.length : 0})
+        </button>
+        <button
+          onClick={() => setActiveTab('special')}
+          className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
+            activeTab === 'special'
+              ? 'bg-white text-black shadow-sm'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Special ({hasSpecial ? specialBrochas.length : 0})
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="space-y-4">
+        {currentBrochas.length > 0 ? (
+          currentBrochas.map((brocha: any) => (
+            <div key={brocha.id} className="bg-white rounded-2xl p-6 border border-blush/10">
+              <h3 className="platypi-bold text-lg text-black text-center mb-2">
+                {brocha.title}
+              </h3>
+              {brocha.description && (
+                <p className="platypi-regular text-sm text-black/70 text-center mb-4">
+                  {brocha.description}
+                </p>
+              )}
+              
+              {language === 'hebrew' && brocha.hebrewText && (
+                <div 
+                  className="vc-koren-hebrew text-right leading-relaxed text-black"
+                  style={{ fontSize: `${fontSize + 1}px` }}
+                  dangerouslySetInnerHTML={{ __html: processTefillaContent(brocha.hebrewText, tefillaConditions) }}
+                />
+              )}
+              {language === 'english' && brocha.englishText && (
+                <div 
+                  className="koren-siddur-english text-left leading-relaxed text-black/70"
+                  style={{ fontSize: `${fontSize}px` }}
+                  dangerouslySetInnerHTML={{ __html: processTefillaContent(brocha.englishText || "English translation not available", tefillaConditions) }}
+                />
+              )}
+            </div>
+          ))
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-600 platypi-regular">
+              No {activeTab} brochas available
+            </p>
+          </div>
+        )}
+      </div>
+      
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of{' '}
+          <a 
+            href="https://korenpub.co.il/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-700"
+          >
+            Koren Publishers Jerusalem
+          </a>
+          {' '}and Rabbi Sacks Legacy
+        </span>
+      </div>
     </div>
   );
 }
@@ -1507,7 +1611,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
   // Auto-redirect prayer modals to fullscreen
   useEffect(() => {
-    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'individual-tehillim', 'tehillim-text', 'special-tehillim'];
+    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'individual-tehillim', 'tehillim-text', 'special-tehillim', 'brochas'];
     
     if (activeModal && fullscreenPrayerModals.includes(activeModal)) {
       let title = '';
@@ -1537,6 +1641,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         case 'special-tehillim':
           title = 'Sefer Tehillim';
           contentType = 'special-tehillim';
+          break;
+        case 'brochas':
+          title = 'Brochas';
+          contentType = 'brochas';
           break;
       }
       

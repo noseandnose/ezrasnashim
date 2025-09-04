@@ -1013,6 +1013,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Brochas routes
+  app.get("/api/brochas", async (req, res) => {
+    try {
+      const brochas = await storage.getBrochas();
+      res.json(brochas);
+    } catch (error) {
+      console.error("Error fetching brochas:", error);
+      res.status(500).json({ message: "Failed to fetch brochas" });
+    }
+  });
+
+  app.get("/api/brochas/daily", async (req, res) => {
+    try {
+      const brochas = await storage.getBrochasByType(false); // false = daily (not special)
+      res.json(brochas);
+    } catch (error) {
+      console.error("Error fetching daily brochas:", error);
+      res.status(500).json({ message: "Failed to fetch daily brochas" });
+    }
+  });
+
+  app.get("/api/brochas/special", async (req, res) => {
+    try {
+      const brochas = await storage.getBrochasByType(true); // true = special occasions
+      res.json(brochas);
+    } catch (error) {
+      console.error("Error fetching special brochas:", error);
+      res.status(500).json({ message: "Failed to fetch special brochas" });
+    }
+  });
+
+  app.post("/api/brochas", async (req, res) => {
+    try {
+      const brocha = await storage.createBrocha(req.body);
+      res.json(brocha);
+    } catch (error) {
+      console.error("Error creating brocha:", error);
+      res.status(500).json({ message: "Failed to create brocha" });
+    }
+  });
+
   // Birkat Hamazon routes
   app.get("/api/birkat-hamazon/prayers", async (req, res) => {
     try {

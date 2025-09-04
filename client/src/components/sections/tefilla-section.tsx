@@ -655,7 +655,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
           </button>
 
           <button 
-            onClick={() => openModal('after-brochas', 'tefilla')}
+            onClick={() => openModal('brochas', 'tefilla')}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
               (isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'bg-sage/20' : 'bg-white'
             }`}
@@ -665,9 +665,9 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             }`}>
               <Utensils className="text-white" size={18} />
             </div>
-            <h3 className="platypi-bold text-sm text-black mb-1">After Brochas</h3>
+            <h3 className="platypi-bold text-sm text-black mb-1">Brochas</h3>
             <p className="platypi-regular text-xs text-black/60">
-              {(isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'Completed' : 'Prayers of Thanks'}
+              {(isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'Completed' : 'Daily and Special'}
             </p>
           </button>
         </div>
