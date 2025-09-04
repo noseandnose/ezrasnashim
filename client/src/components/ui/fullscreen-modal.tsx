@@ -67,7 +67,7 @@ export function FullscreenModal({
     document.body.style.top = `-${scrollY}px`;
     document.body.style.width = '100%';
     document.body.style.overflow = 'hidden';
-    document.body.style.touchAction = 'none';
+    document.body.style.touchAction = 'manipulation'; // Allow gestures but prevent double-tap zoom
     document.body.style.overscrollBehavior = 'none';
     // @ts-ignore - WebKit specific property
     document.body.style.webkitOverscrollBehavior = 'none';
@@ -124,20 +124,19 @@ export function FullscreenModal({
         backgroundColor: 'white',
         isolation: 'isolate',
         pointerEvents: 'auto',
-        touchAction: 'pan-y', // Allow vertical panning for scrolling but prevent horizontal pull-to-refresh
+        touchAction: 'manipulation', // Allow all touch gestures but optimize for speed
         overscrollBehavior: 'none', // Prevent overscroll behaviors like pull-to-refresh
         WebkitOverscrollBehavior: 'none' // Safari support
       }}
       onClick={(e) => {
-        e.stopPropagation();
-        e.nativeEvent.stopImmediatePropagation();
+        // Only stop propagation for clicks directly on the modal background
+        if (e.target === e.currentTarget) {
+          e.stopPropagation();
+        }
       }}
       onTouchStart={(e) => {
-        // Only prevent touch defaults for very specific cases to avoid interfering with navigation gestures
-        // We only want to prevent when it's a direct click on the modal background itself
-        if (e.target === e.currentTarget) {
-          e.preventDefault();
-        }
+        // Allow all touch events to pass through to enable native navigation gestures
+        // Only prevent default if we're specifically trying to stop something
       }}
     >
       {/* Header */}
@@ -263,8 +262,8 @@ export function FullscreenModal({
           paddingBottom: 'env(safe-area-inset-bottom, 20px)'
         }}
         onTouchMove={(e) => {
-          // Allow touch scrolling within this container
-          e.stopPropagation();
+          // Only handle touch move if we're actually scrolling, not swiping for navigation
+          // Don't stop propagation to allow browser navigation gestures to work
         }}
       >
         <div className={`max-w-4xl mx-auto ${className}`} style={{ paddingBottom: '100px' }}>
