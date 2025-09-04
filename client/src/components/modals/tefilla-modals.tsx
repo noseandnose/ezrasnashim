@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { HandHeart, Scroll, Heart, Plus, Minus, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Unlock, Check } from "lucide-react";
+import { HandHeart, Scroll, Heart, Plus, Minus, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Unlock, Check, Utensils, Wine, Car, Wheat, Moon } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
@@ -809,6 +809,26 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
 
   const tefillaConditions = useTefillaConditions();
 
+  // Icon mapping function for brochas
+  const getBrochaIcon = (title: string) => {
+    switch (title) {
+      case "Me'ein Shalosh":
+        return Wine; // Wine icon for Me'ein Shalosh
+      case "Birkat Hamazon":
+        return Utensils; // Fork and knife for Birkat Hamazon
+      case "Kriyat Shmah Al Hamita":
+        return Moon; // Moon for bedtime prayer
+      case "Asher Yatzar":
+        return Users; // Using Users as closest to bathroom sign
+      case "Hafrashas Challah":
+        return Wheat; // Wheat for challah
+      case "Tefillas Haderech":
+        return Car; // Car for travel prayer
+      default:
+        return Star; // Default star icon for any future brochas
+    }
+  };
+
   if (dailyLoading || specialLoading) return <div className="text-center py-8">Loading brochas...</div>;
 
   const currentBrochas = activeTab === 'daily' ? dailyBrochas : specialBrochas;
@@ -844,33 +864,44 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
       {/* Prayer Buttons */}
       <div className="space-y-4">
         {currentBrochas.length > 0 ? (
-          currentBrochas.map((brocha: any) => (
-            <button
-              key={brocha.id}
-              onClick={() => {
-                // Store the selected brocha ID globally and open individual brocha fullscreen
-                (window as any).selectedBrochaId = brocha.id;
-                const openEvent = new CustomEvent('openDirectFullscreen', {
-                  detail: {
-                    title: brocha.title,
-                    contentType: 'individual-brocha',
-                    hasTranslation: true
-                  }
-                });
-                window.dispatchEvent(openEvent);
-              }}
-              className="w-full bg-white rounded-2xl p-6 border border-blush/10 hover:scale-105 transition-all duration-300 shadow-lg text-left"
-            >
-              <h3 className="platypi-bold text-lg text-black text-center mb-2">
-                {brocha.title}
-              </h3>
-              {brocha.description && (
-                <p className="platypi-regular text-sm text-black/70 text-center">
-                  {brocha.description}
-                </p>
-              )}
-            </button>
-          ))
+          currentBrochas.map((brocha: any) => {
+            const IconComponent = getBrochaIcon(brocha.title);
+            return (
+              <button
+                key={brocha.id}
+                onClick={() => {
+                  // Store the selected brocha ID globally and open individual brocha fullscreen
+                  (window as any).selectedBrochaId = brocha.id;
+                  const openEvent = new CustomEvent('openDirectFullscreen', {
+                    detail: {
+                      title: brocha.title,
+                      contentType: 'individual-brocha',
+                      hasTranslation: true
+                    }
+                  });
+                  window.dispatchEvent(openEvent);
+                }}
+                className="w-full bg-white rounded-2xl p-4 border border-blush/10 hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-4"
+              >
+                {/* Icon with gradient circle */}
+                <div className="p-3 rounded-full bg-gradient-feminine flex-shrink-0">
+                  <IconComponent className="text-white" size={20} strokeWidth={1.5} />
+                </div>
+                
+                {/* Text content */}
+                <div className="flex-grow text-center">
+                  <h3 className="platypi-bold text-lg text-black mb-1">
+                    {brocha.title}
+                  </h3>
+                  {brocha.description && (
+                    <p className="platypi-regular text-sm text-black/70">
+                      {brocha.description}
+                    </p>
+                  )}
+                </div>
+              </button>
+            );
+          })
         ) : (
           <div className="text-center py-8">
             <p className="text-gray-600 platypi-regular">
