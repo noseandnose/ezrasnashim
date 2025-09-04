@@ -22,7 +22,6 @@ export function LazyImage({
   onClick 
 }: LazyImageProps) {
   const [imageSrc, setImageSrc] = useState<string | undefined>(undefined);
-  const [imageError, setImageError] = useState(false);
   const [isIntersecting, setIsIntersecting] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
@@ -60,12 +59,10 @@ export function LazyImage({
       
       img.onload = () => {
         setImageSrc(src);
-        setImageError(false);
         onLoad?.();
       };
       
       img.onerror = () => {
-        setImageError(true);
         if (fallback) {
           setImageSrc(fallback);
         }

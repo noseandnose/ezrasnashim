@@ -18,7 +18,6 @@ export default function TableModals() {
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
-  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [fullscreenImages, setFullscreenImages] = useState<{isOpen: boolean; images: string[]; initialIndex: number}>({isOpen: false, images: [], initialIndex: 0});
   const [lastTap, setLastTap] = useState<number>(0);
   const [fullscreenContent, setFullscreenContent] = useState<{
@@ -670,29 +669,6 @@ export default function TableModals() {
         </DialogContent>
       </Dialog>
 
-      {/* Fullscreen Image Modal */}
-      {fullscreenImage && (
-        <div 
-          className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-4"
-          onClick={() => setFullscreenImage(null)}
-        >
-          <div className="relative max-w-full max-h-full">
-            <img 
-              src={fullscreenImage} 
-              alt="Fullscreen view"
-              className="max-w-full max-h-full object-contain"
-            />
-            <button
-              onClick={() => setFullscreenImage(null)}
-              className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Parsha Shiur Modal */}
       <Dialog open={activeModal === 'parsha'} onOpenChange={() => closeModal(true)}>
@@ -724,8 +700,6 @@ export default function TableModals() {
         isOpen={fullscreenContent.isOpen}
         onClose={() => {
           setFullscreenContent({ isOpen: false, title: '', content: null });
-          // Also close any open fullscreen image
-          setFullscreenImage(null);
           // Close the underlying modal as well
           closeModal();
           // Navigate back to the Life page (table section)
@@ -909,8 +883,6 @@ export default function TableModals() {
                   onClick={isModalComplete('recipe') ? undefined : () => {
                     handleComplete('recipe');
                     setFullscreenContent({ isOpen: false, title: '', content: null });
-                    // Also close any open fullscreen image
-                    setFullscreenImage(null);
                   }}
                   disabled={isModalComplete('recipe')}
                   className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
@@ -1073,8 +1045,6 @@ export default function TableModals() {
                   onClick={isModalComplete('inspiration') ? undefined : () => {
                     handleComplete('inspiration');
                     setFullscreenContent({ isOpen: false, title: '', content: null });
-                    // Also close any open fullscreen image
-                    setFullscreenImage(null);
                   }}
                   disabled={isModalComplete('inspiration')}
                   className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
