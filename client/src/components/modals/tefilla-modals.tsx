@@ -809,8 +809,8 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
 
   const tefillaConditions = useTefillaConditions();
 
-  // Custom Toilet Icon Component
-  const ToiletIcon = ({ className, size }: { className?: string, size?: number }) => (
+  // Custom Female Figure Icon Component
+  const FemaleIcon = ({ className, size }: { className?: string, size?: number }) => (
     <svg 
       width={size || 20} 
       height={size || 20} 
@@ -818,14 +818,10 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
       fill="currentColor" 
       className={className}
     >
-      {/* Toilet bowl */}
-      <ellipse cx="12" cy="16" rx="6" ry="4"/>
-      {/* Toilet seat */}
-      <ellipse cx="12" cy="14" rx="5" ry="3" fill="none" stroke="currentColor" strokeWidth="1.5"/>
-      {/* Tank */}
-      <rect x="8" y="4" width="8" height="8" rx="1"/>
-      {/* Flush handle */}
-      <rect x="7" y="7" width="1" height="2" rx="0.5"/>
+      {/* Head */}
+      <circle cx="12" cy="5" r="2.5"/>
+      {/* Triangular dress/body */}
+      <path d="M9.5 9.5h5L16 20H8l1.5-10.5z"/>
     </svg>
   );
 
@@ -839,7 +835,7 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
       case "Kriyat Shmah Al Hamita":
         return Moon; // Moon for bedtime prayer
       case "Asher Yatzar":
-        return ToiletIcon; // Custom toilet icon
+        return FemaleIcon; // Custom female figure icon
       case "Hafrashas Challah":
         return Wheat; // Wheat for challah
       case "Tefillas Haderech":
