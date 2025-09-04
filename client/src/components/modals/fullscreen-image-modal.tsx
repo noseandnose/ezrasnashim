@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface FullscreenImageModalProps {
@@ -101,9 +100,8 @@ export function FullscreenImageModal({ isOpen, onClose, images, initialIndex }: 
   if (!isOpen || images.length === 0) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="fixed inset-0 z-[100] bg-black/95 p-0 max-w-none h-screen w-screen border-0">
-        {/* Close Button */}
+    <div className="fixed inset-0 bg-black/95 p-0 h-screen w-screen border-0" style={{ zIndex: 2147483647 }}>
+      {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 z-[101] bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors"
@@ -163,7 +161,6 @@ export function FullscreenImageModal({ isOpen, onClose, images, initialIndex }: 
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[101] bg-black/50 text-white px-4 py-2 rounded-full text-sm opacity-50">
           Double-tap to close • Swipe to navigate
         </div>
-      </DialogContent>
-    </Dialog>
+    </div>
   );
 }
