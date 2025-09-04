@@ -15,9 +15,10 @@ interface LocationState {
   resetLocation: () => void;
   useIPLocation: () => Promise<any>;
   initializeFromCache: () => boolean;
+  refreshLocationIfStale: () => void;
 }
 
-export const useLocationStore = create<LocationState>((set) => ({
+export const useLocationStore = create<LocationState>((set, get) => ({
   location: "",
   coordinates: null,
   locationRequested: false,
@@ -92,7 +93,38 @@ export const useLocationStore = create<LocationState>((set) => ({
     
     return false;
   },
+  
+  // Refresh location if the cache is getting stale (for travel scenarios)
+  refreshLocationIfStale: () => {
+    const cacheTimestamp = localStorage.getItem('user-location-time');
+    if (cacheTimestamp) {
+      const age = Date.now() - parseInt(cacheTimestamp);
+      // If cache is older than 4 hours, force a refresh
+      if (age > 4 * 60 * 60 * 1000) {
+        console.log('Location cache is stale, refreshing for accuracy...');
+        localStorage.removeItem('user-location');
+        localStorage.removeItem('user-location-time');
+        set({ coordinates: null, locationRequested: false });
+      }
+    }
+  },
 }));
+
+// Calculate distance between two coordinates in kilometers
+function calculateDistance(
+  lat1: number, lng1: number,
+  lat2: number, lng2: number
+): number {
+  const R = 6371; // Radius of Earth in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng/2) * Math.sin(dLng/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
 
 // Hook to get user's location
 export function useGeolocation() {
@@ -107,8 +139,18 @@ export function useGeolocation() {
 
   useEffect(() => {
     const checkLocationPermission = async () => {
-      // If coordinates are already set, don't override
+      // If coordinates are already set, periodically check for location changes
       if (coordinates) {
+        // Check for location changes every 30 minutes
+        const lastCheck = localStorage.getItem('location-change-check');
+        const now = Date.now();
+        
+        if (!lastCheck || now - parseInt(lastCheck) > 2 * 60 * 60 * 1000) {
+          localStorage.setItem('location-change-check', now.toString());
+          // Check if location cache is stale and refresh if needed
+          const { refreshLocationIfStale } = useLocationStore.getState();
+          refreshLocationIfStale();
+        }
         return;
       }
       
