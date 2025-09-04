@@ -91,12 +91,14 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       return date;
     };
     
-    const neitz = parseTimeToday(times.sunrise);
+    const alos = parseTimeToday(times.alosHashachar);
+    const sofZmanTfilla = parseTimeToday(times.sofZmanTfilla);
     const minchaGedola = parseTimeToday(times.minchaGedolah);
     const shkia = parseTimeToday(times.shkia);
+    // Note: We still use sunrise for next day calculation in the future if needed
     
     // Handle null times gracefully
-    if (!neitz || !minchaGedola || !shkia) {
+    if (!alos || !sofZmanTfilla || !minchaGedola || !shkia) {
       console.log('Prayer time calculation failed - missing zmanim data');
       return {
         title: "Morning Brochas",
@@ -108,38 +110,50 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     // Debug logging for prayer time determination
     console.log('Prayer time calculation:', {
       now: now.toLocaleString(),
-      neitz: neitz.toLocaleString(),
+      alos: alos.toLocaleString(),
+      sofZmanTfilla: sofZmanTfilla.toLocaleString(),
       minchaGedola: minchaGedola.toLocaleString(), 
       shkia: shkia.toLocaleString(),
-      isAfterNeitz: now >= neitz,
+      isAfterAlos: now >= alos,
+      isBeforeSofZmanTfilla: now < sofZmanTfilla,
+      isAfterSofZmanTfilla: now >= sofZmanTfilla,
       isBeforeMincha: now < minchaGedola,
       isAfterMincha: now >= minchaGedola,
       isBeforeShkia: now < shkia
     });
 
-    if (now >= neitz && now < minchaGedola) {
-      // Morning Brochas time
+    if (now >= alos && now < sofZmanTfilla) {
+      // Morning Brochas time - from Alos Hashachar until Sof Zman Tefilla
       console.log('Selected prayer: Morning Brochas');
       return {
         title: "Morning Brochas",
-        subtitle: `${times.sunrise} - ${times.minchaGedolah}`,
+        subtitle: `${times.alosHashachar} - ${times.sofZmanTfilla}`,
         modal: "morning-brochas"
       };
     } else if (now >= minchaGedola && now < shkia) {
-      // Mincha time
+      // Mincha time - from Mincha Gedolah until Shkia
       console.log('Selected prayer: Mincha');
       return {
         title: "Mincha",
         subtitle: `${times.minchaGedolah} - ${times.shkia}`,
         modal: "mincha"
       };
-    } else {
-      // Maariv time (from Shkia until next morning's Neitz)
+    } else if (now >= shkia || now < alos) {
+      // Maariv time - from Shkia until next Alos Hashachar
       console.log('Selected prayer: Maariv');
       return {
         title: "Maariv",
-        subtitle: `${times.shkia} - ${times.sunrise}`,
+        subtitle: `${times.shkia} - ${times.alosHashachar}`,
         modal: "maariv"
+      };
+    } else {
+      // Between Sof Zman Tefilla and Mincha Gedolah - show when Mincha will be available
+      console.log('Between prayer times - showing upcoming Mincha');
+      return {
+        title: "Mincha",
+        subtitle: `from ${times.minchaGedolah} until ${times.shkia}`,
+        modal: "mincha",
+        disabled: true
       };
     }
   };
@@ -643,26 +657,39 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
         <div className="grid grid-cols-2 gap-2">
           <button 
             onClick={() => {
-              // Prayer button clicked
-              openModal(currentPrayer.modal, 'tefilla');
+              // Only open modal if not disabled
+              if (!currentPrayer.disabled) {
+                openModal(currentPrayer.modal, 'tefilla');
+              }
             }}
-            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              isModalComplete(currentPrayer.modal) ? 'bg-sage/20' : 'bg-white'
+            disabled={currentPrayer.disabled}
+            className={`rounded-3xl p-3 text-center transition-all duration-300 shadow-lg border border-blush/10 ${
+              currentPrayer.disabled 
+                ? 'bg-gray-100 opacity-60 cursor-not-allowed' 
+                : isModalComplete(currentPrayer.modal) 
+                  ? 'bg-sage/20 hover:scale-105' 
+                  : 'bg-white hover:scale-105'
             }`}
           >
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              isModalComplete(currentPrayer.modal) ? 'bg-sage' : 'bg-gradient-feminine'
+              currentPrayer.disabled 
+                ? 'bg-gray-300' 
+                : isModalComplete(currentPrayer.modal) 
+                  ? 'bg-sage' 
+                  : 'bg-gradient-feminine'
             }`}>
               {currentPrayer.modal === 'morning-brochas' ? (
-                <Sunrise className="text-white" size={18} />
+                <Sunrise className={currentPrayer.disabled ? "text-gray-500" : "text-white"} size={18} />
               ) : currentPrayer.modal === 'mincha' ? (
-                <Sun className="text-white" size={18} />
+                <Sun className={currentPrayer.disabled ? "text-gray-500" : "text-white"} size={18} />
               ) : (
-                <Moon className="text-white" size={18} />
+                <Moon className={currentPrayer.disabled ? "text-gray-500" : "text-white"} size={18} />
               )}
             </div>
-            <h3 className="platypi-bold text-sm text-black mb-1">{currentPrayer.title}</h3>
-            <p className="platypi-regular text-xs text-black/60">
+            <h3 className={`platypi-bold text-sm mb-1 ${currentPrayer.disabled ? 'text-gray-500' : 'text-black'}`}>
+              {currentPrayer.title}
+            </h3>
+            <p className={`platypi-regular text-xs ${currentPrayer.disabled ? 'text-gray-400' : 'text-black/60'}`}>
               {isModalComplete(currentPrayer.modal) ? 'Completed' : currentPrayer.subtitle}
             </p>
           </button>
