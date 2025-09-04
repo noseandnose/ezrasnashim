@@ -663,7 +663,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
               (isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
-              <Utensils className="text-white" size={18} />
+              <Star className="text-white" size={18} />
             </div>
             <h3 className="platypi-bold text-sm text-black mb-1">Brochas</h3>
             <p className="platypi-regular text-xs text-black/60">
