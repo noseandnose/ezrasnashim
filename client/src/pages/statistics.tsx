@@ -133,6 +133,7 @@ export default function Statistics() {
     
     // Prayer subcategories
     "morning-brochas": "Morning Brochas",
+    "brochas": "Brochas",
     mincha: "Mincha",
     maariv: "Maariv",
     nishmas: "Nishmas",
@@ -174,6 +175,7 @@ export default function Statistics() {
     
     // Prayer subcategories
     "morning-brochas": Sun,
+    "brochas": Heart,
     mincha: Clock,
     maariv: Star,
     nishmas: Heart,
@@ -396,6 +398,7 @@ export default function Statistics() {
 
                     // Process all modal completion entries
                     let globalTehillimTotal = 0;
+                    let brochasTotal = 0;
                     Object.entries(modalCompletions).forEach(([modalType, count]) => {
                       if (modalType.startsWith('individual-tehillim-')) {
                         // Aggregate individual tehillim completions
@@ -408,6 +411,9 @@ export default function Statistics() {
                       } else if (modalType.startsWith('womens-prayer-')) {
                         // Aggregate womens prayers
                         womensPrayerTotal += (count as number) || 0;
+                      } else if (modalType.startsWith('brocha-')) {
+                        // Aggregate individual brocha completions
+                        brochasTotal += (count as number) || 0;
                       } else if (modalTypeNames[modalType] && !['unknown', 'test', ''].includes(modalType.toLowerCase())) {
                         // Include regular modal types that have names
                         processedEntries.push([modalType, count as number]);
@@ -426,6 +432,11 @@ export default function Statistics() {
 
                     if (womensPrayerTotal > 0) {
                       processedEntries.push(['womens-prayer', womensPrayerTotal]);
+                    }
+                    
+                    // Add aggregated brochas if there are any
+                    if (brochasTotal > 0) {
+                      processedEntries.push(['brochas', brochasTotal]);
                     }
 
                     // Add tzedaka acts from the tzedakaActs field (includes "Gave Elsewhere")

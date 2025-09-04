@@ -662,8 +662,9 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
   const isMeeinShalosh = brocha.title === "Me'ein Shalosh";
 
   const handleComplete = () => {
-    trackModalComplete('brochas');
-    markModalComplete('brochas');
+    // Track with specific brocha ID for backend analytics
+    trackModalComplete(`brocha-${brocha.id}`);
+    markModalComplete('brochas'); // Keep generic for frontend completion state
     completeTask('tefilla');
     // Close fullscreen
     const event = new CustomEvent('closeFullscreen');
