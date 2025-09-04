@@ -815,19 +815,21 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
       width={size || 20} 
       height={size || 20} 
       viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="1.5" 
+      fill="currentColor" 
       className={className}
     >
       {/* Head */}
-      <circle cx="12" cy="5" r="2"/>
-      {/* Body/Dress */}
-      <path d="M10 10h4l-1 6h-2l-1-6z"/>
+      <circle cx="12" cy="4.5" r="2.5"/>
+      {/* Upper body */}
+      <path d="M9 8.5h6v3.5h-6z"/>
+      {/* Dress/Skirt - triangular shape */}
+      <path d="M8 12h8l-2 6H10l-2-6z"/>
       {/* Arms */}
-      <path d="M8 12l2-1M16 12l-2-1"/>
+      <rect x="6.5" y="9.5" width="1.5" height="3" rx="0.75"/>
+      <rect x="16" y="9.5" width="1.5" height="3" rx="0.75"/>
       {/* Legs */}
-      <path d="M10 16v4M14 16v4"/>
+      <rect x="10" y="18" width="1.5" height="4" rx="0.75"/>
+      <rect x="12.5" y="18" width="1.5" height="4" rx="0.75"/>
     </svg>
   );
 
