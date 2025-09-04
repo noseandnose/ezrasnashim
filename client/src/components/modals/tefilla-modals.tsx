@@ -801,10 +801,14 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
   
   const { data: dailyBrochas = [], isLoading: dailyLoading } = useQuery<any[]>({
     queryKey: ['/api/brochas/daily'],
+    staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
+    cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   const { data: specialBrochas = [], isLoading: specialLoading } = useQuery<any[]>({
     queryKey: ['/api/brochas/special'],
+    staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
+    cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   const tefillaConditions = useTefillaConditions();
@@ -830,7 +834,19 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
     }
   };
 
-  if (dailyLoading || specialLoading) return <div className="text-center py-8">Loading brochas...</div>;
+  // Show content immediately if we have cached data, even while loading
+  const hasData = dailyBrochas.length > 0 || specialBrochas.length > 0;
+  
+  if (!hasData && (dailyLoading || specialLoading)) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-rose-blush/30 border-t-rose-blush rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 platypi-regular">Loading brochas...</p>
+        </div>
+      </div>
+    );
+  }
 
   const currentBrochas = activeTab === 'daily' ? dailyBrochas : specialBrochas;
   const hasDaily = dailyBrochas.length > 0;

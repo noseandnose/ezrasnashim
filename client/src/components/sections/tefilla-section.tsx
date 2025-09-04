@@ -22,6 +22,19 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const { isModalComplete, completedModals } = useModalCompletionStore();
   const { data: times, isLoading } = useJewishTimes();
 
+  // Prefetch brochas data to speed up loading when user clicks
+  useQuery<any[]>({
+    queryKey: ['/api/brochas/daily'],
+    staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
+    cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+  });
+
+  useQuery<any[]>({
+    queryKey: ['/api/brochas/special'],
+    staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
+    cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+  });
+
   // Helper function to check if any individual Tehillim has been completed
   const hasAnyTehillimCompleted = () => {
     const today = new Date().toISOString().split('T')[0];
