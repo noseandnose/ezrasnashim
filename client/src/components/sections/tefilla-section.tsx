@@ -92,13 +92,13 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     };
     
     const alos = parseTimeToday(times.alosHashachar);
-    const sofZmanTfilla = parseTimeToday(times.sofZmanTfilla);
+    const chatzos = parseTimeToday(times.chatzos);
     const minchaGedola = parseTimeToday(times.minchaGedolah);
     const shkia = parseTimeToday(times.shkia);
     // Note: We still use sunrise for next day calculation in the future if needed
     
     // Handle null times gracefully
-    if (!alos || !sofZmanTfilla || !minchaGedola || !shkia) {
+    if (!alos || !chatzos || !minchaGedola || !shkia) {
       console.log('Prayer time calculation failed - missing zmanim data');
       return {
         title: "Morning Brochas",
@@ -111,23 +111,23 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     console.log('Prayer time calculation:', {
       now: now.toLocaleString(),
       alos: alos.toLocaleString(),
-      sofZmanTfilla: sofZmanTfilla.toLocaleString(),
+      chatzos: chatzos.toLocaleString(),
       minchaGedola: minchaGedola.toLocaleString(), 
       shkia: shkia.toLocaleString(),
       isAfterAlos: now >= alos,
-      isBeforeSofZmanTfilla: now < sofZmanTfilla,
-      isAfterSofZmanTfilla: now >= sofZmanTfilla,
+      isBeforeChatzos: now < chatzos,
+      isAfterChatzos: now >= chatzos,
       isBeforeMincha: now < minchaGedola,
       isAfterMincha: now >= minchaGedola,
       isBeforeShkia: now < shkia
     });
 
-    if (now >= alos && now < sofZmanTfilla) {
-      // Morning Brochas time - from Alos Hashachar until Sof Zman Tefilla
+    if (now >= alos && now < chatzos) {
+      // Morning Brochas time - from Alos Hashachar until Chatzos
       console.log('Selected prayer: Morning Brochas');
       return {
         title: "Morning Brochas",
-        subtitle: `${times.alosHashachar} - ${times.sofZmanTfilla}`,
+        subtitle: `${times.alosHashachar} - ${times.chatzos}`,
         modal: "morning-brochas"
       };
     } else if (now >= minchaGedola && now < shkia) {
@@ -147,7 +147,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
         modal: "maariv"
       };
     } else {
-      // Between Sof Zman Tefilla and Mincha Gedolah - show when Mincha will be available
+      // Between Chatzos and Mincha Gedolah - show when Mincha will be available
       console.log('Between prayer times - showing upcoming Mincha');
       return {
         title: "Mincha",
