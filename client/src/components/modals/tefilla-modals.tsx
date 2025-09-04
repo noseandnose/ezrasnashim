@@ -81,16 +81,16 @@ const NishmasThankYou = () => {
   return (
     <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
       <span className="text-sm platypi-medium text-black">
-        Thank you to{' '}
+        All tefilla texts courtesy of{' '}
         <a 
-          href="https://www.nishmas.net/"
+          href="https://korenpub.co.il/"
           target="_blank"
           rel="noopener noreferrer"
           className="underline hover:text-blue-700"
         >
-          Nishmas.net
+          Koren Publishers Jerusalem
         </a>
-        {' '}for providing this Tefilla
+        {' '}and Rabbi Sacks Legacy
       </span>
     </div>
   );
@@ -929,14 +929,14 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
           <div className="flex gap-2">
             <Button
               onClick={handleComplete}
-              className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
+              className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse"
             >
               Complete
             </Button>
             
             <Button
               onClick={handleCompleteAndNext}
-              className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform"
+              className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse"
             >
               Complete & Next ({selectedPsalm && selectedPsalm < 150 ? selectedPsalm + 1 : 1})
             </Button>
