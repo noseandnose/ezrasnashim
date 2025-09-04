@@ -67,10 +67,11 @@ export function FullscreenModal({
     document.body.style.top = `-${scrollY}px`;
     document.body.style.width = '100%';
     document.body.style.overflow = 'hidden';
-    document.body.style.touchAction = 'manipulation'; // Allow gestures but prevent double-tap zoom
-    document.body.style.overscrollBehavior = 'none';
+    // Temporarily allow all touch actions to test if this fixes navigation
+    document.body.style.touchAction = 'auto';
+    document.body.style.overscrollBehavior = 'auto';
     // @ts-ignore - WebKit specific property
-    document.body.style.webkitOverscrollBehavior = 'none';
+    document.body.style.webkitOverscrollBehavior = 'auto';
     
     // Also prevent scrolling on the document element for iOS
     const originalHtmlOverflow = document.documentElement.style.overflow;
@@ -124,19 +125,16 @@ export function FullscreenModal({
         backgroundColor: 'white',
         isolation: 'isolate',
         pointerEvents: 'auto',
-        touchAction: 'manipulation', // Allow all touch gestures but optimize for speed
-        overscrollBehavior: 'none', // Prevent overscroll behaviors like pull-to-refresh
-        WebkitOverscrollBehavior: 'none' // Safari support
+        // Remove all touch restrictions to allow native browser gestures
+        touchAction: 'auto',
+        overscrollBehavior: 'auto',
+        WebkitOverscrollBehavior: 'auto'
       }}
       onClick={(e) => {
         // Only stop propagation for clicks directly on the modal background
         if (e.target === e.currentTarget) {
           e.stopPropagation();
         }
-      }}
-      onTouchStart={(e) => {
-        // Allow all touch events to pass through to enable native navigation gestures
-        // Only prevent default if we're specifically trying to stop something
       }}
     >
       {/* Header */}
@@ -260,10 +258,6 @@ export function FullscreenModal({
           overscrollBehaviorY: 'contain',
           // Add extra padding bottom for iOS safe area
           paddingBottom: 'env(safe-area-inset-bottom, 20px)'
-        }}
-        onTouchMove={(e) => {
-          // Only handle touch move if we're actually scrolling, not swiping for navigation
-          // Don't stop propagation to allow browser navigation gestures to work
         }}
       >
         <div className={`max-w-4xl mx-auto ${className}`} style={{ paddingBottom: '100px' }}>
