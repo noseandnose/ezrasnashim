@@ -49,6 +49,16 @@ export function FullscreenModal({
     const handleCloseFullscreen = () => {
       onClose();
     };
+
+    // Try to handle native browser back gesture by listening for popstate
+    const handlePopState = (e: PopStateEvent) => {
+      console.log('Popstate detected in fullscreen modal');
+      e.preventDefault();
+      onClose();
+    };
+
+    // Add popstate listener to catch browser back gestures
+    window.addEventListener('popstate', handlePopState, true);
     
     // Save current scroll position and body styles
     const scrollY = window.scrollY;
@@ -62,12 +72,11 @@ export function FullscreenModal({
       webkitOverscrollBehavior: (document.body.style as any).webkitOverscrollBehavior
     };
     
-    // Prevent body from scrolling on both desktop and mobile
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
+    // Try minimal body style changes to avoid interfering with gestures
     document.body.style.overflow = 'hidden';
-    // Temporarily allow all touch actions to test if this fixes navigation
+    // Don't fix the body position - this might be interfering with gesture detection
+    // document.body.style.position = 'fixed';
+    // document.body.style.top = `-${scrollY}px`;
     document.body.style.touchAction = 'auto';
     document.body.style.overscrollBehavior = 'auto';
     // @ts-ignore - WebKit specific property
@@ -96,11 +105,14 @@ export function FullscreenModal({
       // Restore html overflow
       document.documentElement.style.overflow = originalHtmlOverflow;
       
-      // Restore scroll position
-      window.scrollTo(0, scrollY);
+      // Only restore scroll position if we actually saved it
+      if (typeof scrollY === 'number') {
+        window.scrollTo(0, scrollY);
+      }
       
       document.removeEventListener('keydown', handleEscape, true);
       window.removeEventListener('closeFullscreen', handleCloseFullscreen);
+      window.removeEventListener('popstate', handlePopState, true);
     };
   }, [isOpen, onClose]);
 
