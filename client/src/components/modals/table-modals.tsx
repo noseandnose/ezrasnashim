@@ -885,10 +885,10 @@ export default function TableModals() {
                   className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                     isModalComplete('recipe') 
                       ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                   }`}
                 >
-                  {isModalComplete('recipe') ? 'Completed Today' : 'Done'}
+                  {isModalComplete('recipe') ? 'Completed Today' : 'Complete'}
                 </Button>
               </div>
             </div>
@@ -1046,7 +1046,7 @@ export default function TableModals() {
                   className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                     isModalComplete('inspiration') 
                       ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                   }`}
                 >
                   {isModalComplete('inspiration') ? 'Completed Today' : 'Done'}

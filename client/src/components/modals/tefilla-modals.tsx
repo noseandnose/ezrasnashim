@@ -332,7 +332,7 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
                         className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                           isModalComplete('morning-brochas') 
                             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                         }`}
                       >
                         {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete'}
@@ -441,7 +441,7 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
           className={`w-full py-3 rounded-xl platypi-medium border-0 ${
             isModalComplete('morning-brochas') 
               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
           }`}
         >
           {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete Morning Brochas'}
@@ -538,7 +538,7 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           isModalComplete('maariv') 
             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
         {isModalComplete('maariv') ? 'Completed Today' : 'Complete Maariv'}
@@ -597,7 +597,7 @@ function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           isModalComplete('mincha') 
             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
         {isModalComplete('mincha') ? 'Completed Today' : 'Complete Mincha'}
@@ -656,7 +656,7 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           isModalComplete('morning-brochas') 
             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
         {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete Morning Brochas'}
@@ -808,7 +808,7 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           todayCompleted 
             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
         {todayCompleted ? 'Completed Today' : 'Complete Nishmas'}
@@ -918,7 +918,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
           className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
             isCompleted 
               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
           }`}
         >
           {isCompleted ? 'Completed Today' : `Complete Tehillim ${selectedPsalm}`}
@@ -1234,7 +1234,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
           className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
             isCompleted 
               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
           }`}
         >
           {isCompleted ? 'Completed' : advanceChainMutation.isPending ? 'Completing...' : 'Complete'}
@@ -1247,7 +1247,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
           className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
             isCompleted 
               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-              : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform'
+              : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse'
           }`}
         >
           {isCompleted ? 'Completed' : completeAndNextMutation.isPending ? 'Loading Next...' : 'Complete & Next'}
@@ -1338,7 +1338,7 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
         className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
           isModalComplete(modalKey) 
             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
         {isModalComplete(modalKey) ? 'Completed Today' : 'Complete'}
@@ -1986,7 +1986,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                         className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                           isModalComplete('mincha') 
                             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                         }`}
                       >
                         {isModalComplete('mincha') ? 'Completed Today' : 'Complete'}
@@ -2050,7 +2050,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('mincha') 
                   ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
               {isModalComplete('mincha') ? 'Completed Today' : 'Complete Mincha'}
@@ -2169,7 +2169,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('blessings') 
                   ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
               {isModalComplete('blessings') ? 'Completed Today' : 'Complete Blessings'}
@@ -2200,7 +2200,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('tefillos') 
                   ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
               {isModalComplete('tefillos') ? 'Completed Today' : 'Complete Tefillos'}
@@ -2245,7 +2245,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('personal-prayers') 
                   ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
               {isModalComplete('personal-prayers') ? 'Completed Today' : 'Complete Personal Prayers'}
@@ -2303,7 +2303,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                           className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                             isModalComplete('nishmas-campaign') 
                               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                           }`}
                         >
                           {isModalComplete('nishmas-campaign') ? 'Completed Today' : 'Complete'}
@@ -2572,7 +2572,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('maariv') 
                   ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
               {isModalComplete('maariv') ? 'Completed Today' : 'Complete Maariv'}
@@ -2910,7 +2910,7 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
           className={`w-full py-3 rounded-xl platypi-medium border-0 ${
             isModalComplete(modalKey) 
               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
           }`}
         >
           {isModalComplete(modalKey) ? 'Completed Today' : 'Complete'}
@@ -3305,7 +3305,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                       className={`${tehillimActiveTab === 'all' ? 'flex-1' : 'w-full'} py-3 rounded-xl platypi-medium border-0 ${
                         isModalComplete(`individual-tehillim-${selectedPsalm}`) 
                           ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                          : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                          : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                       }`}
                     >
                       {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete'}
@@ -3344,7 +3344,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                         className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
                           isModalComplete(`individual-tehillim-${selectedPsalm}`) 
                             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                            : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform'
+                            : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse'
                         }`}
                       >
                         {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete & Next'}
@@ -3427,7 +3427,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                         className={`${tehillimActiveTab === 'all' ? 'flex-1' : 'w-full'} py-3 rounded-xl platypi-medium border-0 ${
                           isModalComplete(`individual-tehillim-${selectedPsalm}`) 
                             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                         }`}
                       >
                         {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete'}
@@ -3467,7 +3467,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                           className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
                             isModalComplete(`individual-tehillim-${selectedPsalm}`) 
                               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                              : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform'
+                              : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse'
                           }`}
                         >
                           {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete & Next'}
@@ -3586,7 +3586,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
           className={`${tehillimActiveTab === 'all' ? 'flex-1' : 'w-full'} py-3 rounded-xl platypi-medium border-0 ${
             isModalComplete(`individual-tehillim-${selectedPsalm}`) 
               ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
           }`}
         >
           {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete'}
@@ -3629,7 +3629,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
             className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
               isModalComplete(`individual-tehillim-${selectedPsalm}`) 
                 ? 'bg-muted-lavender text-white cursor-not-allowed opacity-70' 
-                : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform'
+                : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse'
             }`}
           >
             {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Next' : 'Complete & Next'}

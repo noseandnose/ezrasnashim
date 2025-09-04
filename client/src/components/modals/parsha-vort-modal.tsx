@@ -111,7 +111,7 @@ export default function ParshaVortModal() {
             className={`w-full py-3 rounded-xl platypi-medium border-0 ${
               isCompleted 
                 ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
             }`}
           >
             {isCompleted ? 'Completed Today' : 'Complete Parsha Vort'}
@@ -199,7 +199,7 @@ export default function ParshaVortModal() {
                   className={`w-full py-3 rounded-xl platypi-medium border-0 ${
                     isCompleted 
                       ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                   }`}
                 >
                   {isCompleted ? 'Completed Today' : 'Complete Parsha Vort'}

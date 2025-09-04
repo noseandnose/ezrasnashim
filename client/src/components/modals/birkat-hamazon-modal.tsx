@@ -432,7 +432,7 @@ export function BirkatHamazonModal() {
                 className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                   isModalComplete('al-hamichiya') 
                     ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                    : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                    : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                 }`}
               >
                 {isModalComplete('al-hamichiya') ? 'Completed Today' : 'Complete'}
@@ -471,7 +471,7 @@ export function BirkatHamazonModal() {
               className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                 isModalComplete('al-hamichiya') 
                   ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
               {isModalComplete('al-hamichiya') ? 'Completed Today' : 'Complete'}
@@ -523,7 +523,7 @@ export function BirkatHamazonModal() {
                 className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                   isModalComplete('birkat-hamazon') 
                     ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                    : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                    : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                 }`}
               >
                 {isModalComplete('birkat-hamazon') ? 'Completed Today' : 'Complete'}
@@ -562,7 +562,7 @@ export function BirkatHamazonModal() {
               className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                 isModalComplete('birkat-hamazon') 
                   ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                  : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
               {isModalComplete('birkat-hamazon') ? 'Completed Today' : 'Complete'}
@@ -763,7 +763,7 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           isModalComplete('al-hamichiya') 
             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
         {isModalComplete('al-hamichiya') ? 'Completed Today' : 'Complete'}
@@ -868,7 +868,7 @@ export function BirkatHamazonFullscreenContent({ language, fontSize }: { languag
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           isModalComplete('birkat-hamazon') 
             ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
         {isModalComplete('birkat-hamazon') ? 'Completed Today' : 'Complete'}
