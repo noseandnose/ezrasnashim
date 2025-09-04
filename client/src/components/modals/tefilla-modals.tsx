@@ -691,7 +691,6 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
       {/* Me'ein Shalosh food selection checkboxes */}
       {isMeeinShalosh && (
         <div className="bg-blush/10 rounded-2xl p-4 border border-blush/20">
-          <h4 className="platypi-medium text-black text-center mb-3">What did you eat?</h4>
           <div className="grid grid-cols-3 gap-4">
             <div className="flex items-center space-x-2">
               <input
@@ -699,7 +698,7 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
                 id="grain"
                 checked={selectedOptions.grain}
                 onChange={(e) => setSelectedOptions(prev => ({ ...prev, grain: e.target.checked }))}
-                className="w-4 h-4 rounded border-blush/30 text-blush focus:ring-blush/20"
+                className="w-4 h-4 rounded border-blush/30 focus:ring-2 focus:ring-blush/20 checked:bg-blush checked:border-blush"
               />
               <label 
                 htmlFor="grain" 
@@ -714,7 +713,7 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
                 id="wine"
                 checked={selectedOptions.wine}
                 onChange={(e) => setSelectedOptions(prev => ({ ...prev, wine: e.target.checked }))}
-                className="w-4 h-4 rounded border-blush/30 text-blush focus:ring-blush/20"
+                className="w-4 h-4 rounded border-blush/30 focus:ring-2 focus:ring-blush/20 checked:bg-blush checked:border-blush"
               />
               <label 
                 htmlFor="wine" 
@@ -729,7 +728,7 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
                 id="fruit"
                 checked={selectedOptions.fruit}
                 onChange={(e) => setSelectedOptions(prev => ({ ...prev, fruit: e.target.checked }))}
-                className="w-4 h-4 rounded border-blush/30 text-blush focus:ring-blush/20"
+                className="w-4 h-4 rounded border-blush/30 focus:ring-2 focus:ring-blush/20 checked:bg-blush checked:border-blush"
               />
               <label 
                 htmlFor="fruit" 
@@ -743,14 +742,6 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
       )}
 
       <div className="bg-white rounded-2xl p-6 border border-blush/10">
-        <h3 className="platypi-bold text-lg text-black text-center mb-4">
-          {brocha.title}
-        </h3>
-        {brocha.description && (
-          <p className="platypi-regular text-sm text-black/70 text-center mb-6">
-            {brocha.description}
-          </p>
-        )}
         
         {language === 'hebrew' && brocha.hebrewText && (
           <div 
@@ -820,12 +811,12 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
   return (
     <div className="space-y-6">
       {/* Tabs */}
-      <div className="flex justify-center bg-gray-100 p-1 rounded-xl max-w-sm mx-auto">
+      <div className="flex justify-center bg-gray-50 p-1 rounded-xl max-w-sm mx-auto">
         <button
           onClick={() => setActiveTab('daily')}
           className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
             activeTab === 'daily'
-              ? 'bg-white text-black shadow-sm'
+              ? 'bg-white text-black shadow-lg shadow-blush/20'
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
@@ -835,7 +826,7 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
           onClick={() => setActiveTab('special')}
           className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
             activeTab === 'special'
-              ? 'bg-white text-black shadow-sm'
+              ? 'bg-white text-black shadow-lg shadow-blush/20'
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
@@ -888,20 +879,6 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
         )}
       </div>
       
-      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-        <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of{' '}
-          <a 
-            href="https://korenpub.co.il/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-blue-700"
-          >
-            Koren Publishers Jerusalem
-          </a>
-          {' '}and Rabbi Sacks Legacy
-        </span>
-      </div>
     </div>
   );
 }
@@ -1845,21 +1822,36 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   // Listen for custom close fullscreen events
   useEffect(() => {
     const handleCloseFullscreen = () => {
+      const wasIndividualBrocha = fullscreenContent.contentType === 'individual-brocha';
+      
       setFullscreenContent({ isOpen: false, title: '', content: null });
       // Close any active modal to reset state properly
       closeModal();
-      // Navigate to home section and show flower growth
-      if (onSectionChange) {
-        onSectionChange('home');
+      
+      if (wasIndividualBrocha) {
+        // Go back to Brochas selector instead of home
         setTimeout(() => {
-          const progressElement = document.getElementById('daily-progress-garden');
-          if (progressElement) {
-            progressElement.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'center' 
-            });
-          }
-        }, 300);
+          setFullscreenContent({
+            isOpen: true,
+            title: 'Brochas',
+            contentType: 'brochas',
+            content: null
+          });
+        }, 100);
+      } else {
+        // Navigate to home section and show flower growth for other types
+        if (onSectionChange) {
+          onSectionChange('home');
+          setTimeout(() => {
+            const progressElement = document.getElementById('daily-progress-garden');
+            if (progressElement) {
+              progressElement.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+              });
+            }
+          }, 300);
+        }
       }
     };
 
