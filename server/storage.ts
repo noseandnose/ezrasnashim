@@ -1274,8 +1274,8 @@ export class DatabaseStorage implements IStorage {
       const targetLocation = userLocation === "israel" ? "israel" : "worldwide";
       const now = new Date();
       
-      // Get location-specific promotions
-      let locationPromotions = await db.select()
+      // Get only promotions that match the exact user location
+      const promotions = await db.select()
         .from(discountPromotions)
         .where(
           and(
@@ -1287,25 +1287,7 @@ export class DatabaseStorage implements IStorage {
         )
         .orderBy(discountPromotions.id);
       
-      // If user is in Israel, also get worldwide promotions
-      if (targetLocation === "israel") {
-        const worldwidePromotions = await db.select()
-          .from(discountPromotions)
-          .where(
-            and(
-              eq(discountPromotions.isActive, true),
-              lte(discountPromotions.startDate, now),
-              gte(discountPromotions.endDate, now),
-              eq(discountPromotions.targetLocation, "worldwide")
-            )
-          )
-          .orderBy(discountPromotions.id);
-        
-        // Combine location-specific first, then worldwide
-        return [...locationPromotions, ...worldwidePromotions];
-      }
-      
-      return locationPromotions;
+      return promotions;
     } catch (error) {
       console.error('Database error in getActiveDiscountPromotions:', error);
       return [];
