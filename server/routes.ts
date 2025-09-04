@@ -433,6 +433,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         minchaKetanah: formatTime(data.times?.minchaKetana),
         candleLighting: formatTime(data.times?.candleLighting),
         havdalah: formatTime(data.times?.havdalah),
+        alosHashachar: formatTime(data.times?.alotHaShachar),
+        sofZmanTfilla: formatTime(data.times?.sofZmanTfilla),
+        chatzos: formatTime(data.times?.chatzot),
         hebrewDate: data.date || '',
         location: locationName,
         coordinates: {
