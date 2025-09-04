@@ -664,7 +664,7 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
   const handleComplete = () => {
     // Track with specific brocha ID for backend analytics
     trackModalComplete(`brocha-${brocha.id}`);
-    markModalComplete('brochas'); // Keep generic for frontend completion state
+    // Don't mark as complete since brochas are repeatable
     completeTask('tefilla');
     // Close fullscreen
     const event = new CustomEvent('closeFullscreen');
@@ -787,15 +787,10 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
       </div>
 
       <Button
-        onClick={isModalComplete('brochas') ? undefined : handleComplete}
-        disabled={isModalComplete('brochas')}
-        className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
-          isModalComplete('brochas') 
-            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
-        }`}
+        onClick={handleComplete}
+        className="w-full py-3 rounded-xl platypi-medium border-0 mt-6 bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse"
       >
-        {isModalComplete('brochas') ? 'Completed Today' : 'Complete Brocha'}
+        Complete Brocha
       </Button>
     </div>
   );
