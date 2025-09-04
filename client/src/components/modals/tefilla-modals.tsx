@@ -691,51 +691,65 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
       {/* Me'ein Shalosh food selection checkboxes */}
       {isMeeinShalosh && (
         <div className="bg-blush/10 rounded-2xl p-4 border border-blush/20">
-          <div className="grid grid-cols-3 gap-4">
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="grain"
-                checked={selectedOptions.grain}
-                onChange={(e) => setSelectedOptions(prev => ({ ...prev, grain: e.target.checked }))}
-                className="w-4 h-4 rounded border-blush/30 focus:ring-2 focus:ring-blush/20 checked:bg-blush checked:border-blush"
-              />
-              <label 
-                htmlFor="grain" 
-                className="text-sm platypi-medium text-black cursor-pointer"
-              >
-                Grains
-              </label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="wine"
-                checked={selectedOptions.wine}
-                onChange={(e) => setSelectedOptions(prev => ({ ...prev, wine: e.target.checked }))}
-                className="w-4 h-4 rounded border-blush/30 focus:ring-2 focus:ring-blush/20 checked:bg-blush checked:border-blush"
-              />
-              <label 
-                htmlFor="wine" 
-                className="text-sm platypi-medium text-black cursor-pointer"
-              >
-                Wine
-              </label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="fruit"
-                checked={selectedOptions.fruit}
-                onChange={(e) => setSelectedOptions(prev => ({ ...prev, fruit: e.target.checked }))}
-                className="w-4 h-4 rounded border-blush/30 focus:ring-2 focus:ring-blush/20 checked:bg-blush checked:border-blush"
-              />
-              <label 
-                htmlFor="fruit" 
-                className="text-sm platypi-medium text-black cursor-pointer"
-              >
-                Fruits
-              </label>
+          <div className="flex justify-center">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="grain"
+                  checked={selectedOptions.grain}
+                  onChange={(e) => setSelectedOptions(prev => ({ ...prev, grain: e.target.checked }))}
+                  className="w-4 h-4 rounded border-blush/30 focus:ring-2 focus:ring-blush/20 accent-blush"
+                  style={{ 
+                    accentColor: selectedOptions.grain ? '#E91E63' : undefined,
+                    background: selectedOptions.grain ? 'linear-gradient(135deg, #E91E63 0%, #9C27B0 100%)' : undefined
+                  }}
+                />
+                <label 
+                  htmlFor="grain" 
+                  className="text-sm platypi-medium text-black cursor-pointer"
+                >
+                  Grains
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="wine"
+                  checked={selectedOptions.wine}
+                  onChange={(e) => setSelectedOptions(prev => ({ ...prev, wine: e.target.checked }))}
+                  className="w-4 h-4 rounded border-blush/30 focus:ring-2 focus:ring-blush/20 accent-blush"
+                  style={{ 
+                    accentColor: selectedOptions.wine ? '#E91E63' : undefined,
+                    background: selectedOptions.wine ? 'linear-gradient(135deg, #E91E63 0%, #9C27B0 100%)' : undefined
+                  }}
+                />
+                <label 
+                  htmlFor="wine" 
+                  className="text-sm platypi-medium text-black cursor-pointer"
+                >
+                  Wine
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="fruit"
+                  checked={selectedOptions.fruit}
+                  onChange={(e) => setSelectedOptions(prev => ({ ...prev, fruit: e.target.checked }))}
+                  className="w-4 h-4 rounded border-blush/30 focus:ring-2 focus:ring-blush/20 accent-blush"
+                  style={{ 
+                    accentColor: selectedOptions.fruit ? '#E91E63' : undefined,
+                    background: selectedOptions.fruit ? 'linear-gradient(135deg, #E91E63 0%, #9C27B0 100%)' : undefined
+                  }}
+                />
+                <label 
+                  htmlFor="fruit" 
+                  className="text-sm platypi-medium text-black cursor-pointer"
+                >
+                  Fruits
+                </label>
+              </div>
             </div>
           </div>
         </div>
