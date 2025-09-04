@@ -42,15 +42,18 @@ export default function DiscountBar({ className = "" }: DiscountBarProps) {
       );
       const data = response.data;
 
+      console.log('DiscountBar: Fetched promotions:', data);
       return data || [];
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0, // Force fresh data for testing
     gcTime: 30 * 60 * 1000, // 30 minutes
   });
 
   if (isLoading) {
     return null;
   }
+
+  console.log('DiscountBar: Render - promotions:', promotions, 'length:', promotions?.length);
 
   if (!promotions || promotions.length === 0) {
     return null;
