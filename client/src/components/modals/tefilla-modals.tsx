@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { HandHeart, Scroll, Heart, Plus, Minus, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Unlock, Check, Utensils, Wine, Car, Wheat, Moon, User, UserCheck } from "lucide-react";
+import { HandHeart, Scroll, Heart, Plus, Minus, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Unlock, Check, Utensils, Wine, Car, Wheat, Moon, User } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
@@ -799,20 +799,17 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
 function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
   const [activeTab, setActiveTab] = useState<'daily' | 'special'>('daily');
   
-  const { data: dailyBrochas = [], isLoading: dailyLoading } = useQuery<any[]>({
+  const { data: dailyBrochas = [], isLoading: dailyLoading } = useQuery({
     queryKey: ['/api/brochas/daily'],
     staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
-    cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (garbage collection time)
   });
 
-  const { data: specialBrochas = [], isLoading: specialLoading } = useQuery<any[]>({
+  const { data: specialBrochas = [], isLoading: specialLoading } = useQuery({
     queryKey: ['/api/brochas/special'],
     staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
-    cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (garbage collection time)
   });
-
-  const tefillaConditions = useTefillaConditions();
-
 
   // Icon mapping function for brochas
   const getBrochaIcon = (title: string) => {
@@ -834,8 +831,12 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
     }
   };
 
+  // Type the arrays properly and handle loading states
+  const dailyArray = Array.isArray(dailyBrochas) ? dailyBrochas : [];
+  const specialArray = Array.isArray(specialBrochas) ? specialBrochas : [];
+  
   // Show content immediately if we have cached data, even while loading
-  const hasData = dailyBrochas.length > 0 || specialBrochas.length > 0;
+  const hasData = dailyArray.length > 0 || specialArray.length > 0;
   
   if (!hasData && (dailyLoading || specialLoading)) {
     return (
@@ -848,9 +849,9 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
     );
   }
 
-  const currentBrochas = activeTab === 'daily' ? dailyBrochas : specialBrochas;
-  const hasDaily = dailyBrochas.length > 0;
-  const hasSpecial = specialBrochas.length > 0;
+  const currentBrochas = activeTab === 'daily' ? dailyArray : specialArray;
+  const hasDaily = dailyArray.length > 0;
+  const hasSpecial = specialArray.length > 0;
 
   return (
     <div className="space-y-6">

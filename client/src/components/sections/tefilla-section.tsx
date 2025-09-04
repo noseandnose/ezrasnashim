@@ -1,4 +1,4 @@
-import { HandHeart, Plus, User, AlertCircle, Heart, Star, Compass, ArrowRight, Baby, HeartHandshake, GraduationCap, Users, Stethoscope, DollarSign, Smile, TrendingUp, Sunrise, Sun, Moon, Utensils, Stars, Globe, Unlock } from "lucide-react";
+import { HandHeart, Plus, User, AlertCircle, Heart, Star, Compass, ArrowRight, Baby, HeartHandshake, GraduationCap, Users, Stethoscope, DollarSign, Smile, TrendingUp, Sunrise, Sun, Moon, Stars, Globe, Unlock } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -23,16 +23,16 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const { data: times, isLoading } = useJewishTimes();
 
   // Prefetch brochas data to speed up loading when user clicks
-  useQuery<any[]>({
+  useQuery({
     queryKey: ['/api/brochas/daily'],
     staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
-    cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (garbage collection time)
   });
 
-  useQuery<any[]>({
+  useQuery({
     queryKey: ['/api/brochas/special'],
     staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
-    cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (garbage collection time)
   });
 
   // Helper function to check if any individual Tehillim has been completed

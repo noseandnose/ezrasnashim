@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Minimize2, Maximize2 } from 'lucide-react';
-import { Button } from './button';
+import { X } from 'lucide-react';
 import logoImage from "@assets/1LO_1755590090315.png";
 
 interface FullscreenModalProps {
@@ -31,7 +30,6 @@ export function FullscreenModal({
   language = 'hebrew',
   onLanguageChange
 }: FullscreenModalProps) {
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -97,16 +95,6 @@ export function FullscreenModal({
     };
   }, [isOpen, onClose]);
 
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-    };
-  }, []);
 
   if (!isOpen) return null;
 
