@@ -248,7 +248,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           </div>
           <div className="flex-grow">
             <h3 className="platypi-bold text-sm text-black">Daily Tefilla</h3>
-            <p className="platypi-regular text-xs text-black/60">Tehillim & Prayers</p>
+            <p className="platypi-regular text-xs text-black/60">Tehillim, Prayers and Brochas</p>
           </div>
           <HeartProgress 
             completed={tefillaCompleted} 
