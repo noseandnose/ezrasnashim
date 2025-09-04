@@ -53,6 +53,7 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **Dynamic Thank You Messages**: Custom thank you messages for daily recipes with markdown link support, replacing hardcoded attributions.
 - **Admin Content Management**: Recipe management interface at `/admin/recipes` for creating and managing daily recipes with custom thank you messages.
 - **Audio Auto-Completion**: Daily Chizuk and Daily Emuna audio content automatically triggers completion when users finish listening, enhancing user engagement.
+- **Mobile App Support**: Enhanced detection and user guidance for mobile app wrappers (FlutterFlow, etc.) with intelligent permission prompts for location, compass, and notifications. Provides step-by-step instructions for enabling native app permissions on iOS/Android.
 
 ### Technical Implementations
 - **API Communication**: TanStack Query for requests, caching, optimistic updates, with centralized configuration.

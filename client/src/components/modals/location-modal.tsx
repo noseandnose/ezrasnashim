@@ -2,9 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MapPin, Loader2 } from "lucide-react";
+import { MapPin, Loader2, Settings } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useLocationStore } from "@/hooks/use-jewish-times";
+import { MobilePermissionsGuide } from "@/components/mobile-permissions-guide";
+import { isMobileApp } from "@/utils/mobile-app-detection";
 
 interface LocationModalProps {
   isOpen: boolean;
@@ -17,6 +19,7 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [predictions, setPredictions] = useState<any[]>([]);
   const [showPredictions, setShowPredictions] = useState(false);
+  const [showPermissionGuide, setShowPermissionGuide] = useState(false);
   const autocompleteService = useRef<any>(null);
   const placesService = useRef<any>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -182,7 +185,26 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
             </div>
           )}
 
-
+          {/* Mobile App Permission Helper */}
+          {isMobileApp() && (
+            <div className="bg-gradient-to-r from-lavender-50 to-rose-50 rounded-2xl p-4 border border-lavender/20">
+              <div className="flex items-center gap-3 mb-2">
+                <Settings className="w-5 h-5 text-blush" />
+                <p className="platypi-medium text-black">Mobile App User?</p>
+              </div>
+              <p className="text-sm text-gray-700 mb-3 platypi-regular">
+                If location isn't working, you may need to enable app permissions.
+              </p>
+              <Button
+                onClick={() => setShowPermissionGuide(true)}
+                variant="outline"
+                size="sm"
+                className="w-full rounded-xl border-blush/30 text-blush hover:bg-blush/5"
+              >
+                Show Permission Guide
+              </Button>
+            </div>
+          )}
 
           <div className="flex space-x-3">
             <Button 
@@ -195,6 +217,12 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
           </div>
         </div>
       </DialogContent>
+      
+      <MobilePermissionsGuide
+        isOpen={showPermissionGuide}
+        onClose={() => setShowPermissionGuide(false)}
+        permissionType="location"
+      />
     </Dialog>
   );
 }
