@@ -699,10 +699,9 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
                   id="grain"
                   checked={selectedOptions.grain}
                   onChange={(e) => setSelectedOptions(prev => ({ ...prev, grain: e.target.checked }))}
-                  className="w-4 h-4 rounded border-blush/30 focus:ring-2 focus:ring-blush/20 accent-blush"
+                  className="w-4 h-4 rounded border-blush/30 focus:ring-2 focus:ring-blush/20"
                   style={{ 
-                    accentColor: selectedOptions.grain ? '#E91E63' : undefined,
-                    background: selectedOptions.grain ? 'linear-gradient(135deg, #E91E63 0%, #9C27B0 100%)' : undefined
+                    accentColor: selectedOptions.grain ? 'hsl(350, 45%, 85%)' : undefined
                   }}
                 />
                 <label 
@@ -718,10 +717,9 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
                   id="wine"
                   checked={selectedOptions.wine}
                   onChange={(e) => setSelectedOptions(prev => ({ ...prev, wine: e.target.checked }))}
-                  className="w-4 h-4 rounded border-blush/30 focus:ring-2 focus:ring-blush/20 accent-blush"
+                  className="w-4 h-4 rounded border-blush/30 focus:ring-2 focus:ring-blush/20"
                   style={{ 
-                    accentColor: selectedOptions.wine ? '#E91E63' : undefined,
-                    background: selectedOptions.wine ? 'linear-gradient(135deg, #E91E63 0%, #9C27B0 100%)' : undefined
+                    accentColor: selectedOptions.wine ? 'hsl(350, 45%, 85%)' : undefined
                   }}
                 />
                 <label 
@@ -737,10 +735,9 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
                   id="fruit"
                   checked={selectedOptions.fruit}
                   onChange={(e) => setSelectedOptions(prev => ({ ...prev, fruit: e.target.checked }))}
-                  className="w-4 h-4 rounded border-blush/30 focus:ring-2 focus:ring-blush/20 accent-blush"
+                  className="w-4 h-4 rounded border-blush/30 focus:ring-2 focus:ring-blush/20"
                   style={{ 
-                    accentColor: selectedOptions.fruit ? '#E91E63' : undefined,
-                    background: selectedOptions.fruit ? 'linear-gradient(135deg, #E91E63 0%, #9C27B0 100%)' : undefined
+                    accentColor: selectedOptions.fruit ? 'hsl(350, 45%, 85%)' : undefined
                   }}
                 />
                 <label 
