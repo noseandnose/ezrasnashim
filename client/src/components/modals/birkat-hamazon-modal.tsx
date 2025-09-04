@@ -753,7 +753,16 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+          All tefilla texts courtesy of{' '}
+          <a 
+            href="https://korenpub.co.il/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-700"
+          >
+            Koren Publishers Jerusalem
+          </a>
+          {' '}and Rabbi Sacks Legacy
         </span>
       </div>
 
@@ -858,7 +867,16 @@ export function BirkatHamazonFullscreenContent({ language, fontSize }: { languag
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy
+          All tefilla texts courtesy of{' '}
+          <a 
+            href="https://korenpub.co.il/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-700"
+          >
+            Koren Publishers Jerusalem
+          </a>
+          {' '}and Rabbi Sacks Legacy
         </span>
       </div>
 
