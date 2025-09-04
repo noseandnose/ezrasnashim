@@ -57,7 +57,9 @@ export function FullscreenModal({
       position: document.body.style.position,
       top: document.body.style.top,
       width: document.body.style.width,
-      touchAction: document.body.style.touchAction
+      touchAction: document.body.style.touchAction,
+      overscrollBehavior: document.body.style.overscrollBehavior,
+      webkitOverscrollBehavior: (document.body.style as any).webkitOverscrollBehavior
     };
     
     // Prevent body from scrolling on both desktop and mobile
@@ -66,6 +68,9 @@ export function FullscreenModal({
     document.body.style.width = '100%';
     document.body.style.overflow = 'hidden';
     document.body.style.touchAction = 'none';
+    document.body.style.overscrollBehavior = 'none';
+    // @ts-ignore - WebKit specific property
+    document.body.style.webkitOverscrollBehavior = 'none';
     
     // Also prevent scrolling on the document element for iOS
     const originalHtmlOverflow = document.documentElement.style.overflow;
@@ -83,6 +88,9 @@ export function FullscreenModal({
       document.body.style.top = originalBodyStyle.top;
       document.body.style.width = originalBodyStyle.width;
       document.body.style.touchAction = originalBodyStyle.touchAction;
+      document.body.style.overscrollBehavior = originalBodyStyle.overscrollBehavior;
+      // @ts-ignore - WebKit specific property
+      document.body.style.webkitOverscrollBehavior = originalBodyStyle.webkitOverscrollBehavior;
       
       // Restore html overflow
       document.documentElement.style.overflow = originalHtmlOverflow;
@@ -116,7 +124,9 @@ export function FullscreenModal({
         backgroundColor: 'white',
         isolation: 'isolate',
         pointerEvents: 'auto',
-        touchAction: 'none' // Prevent any touch actions on the container
+        touchAction: 'pan-y', // Allow vertical panning for scrolling but prevent horizontal pull-to-refresh
+        overscrollBehavior: 'none', // Prevent overscroll behaviors like pull-to-refresh
+        WebkitOverscrollBehavior: 'none' // Safari support
       }}
       onClick={(e) => {
         e.stopPropagation();
