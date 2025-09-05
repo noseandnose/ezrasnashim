@@ -29,6 +29,12 @@ export default function ParshaVortModal() {
   });
 
   const parshaVort = parshaVorts?.[0]; // Get first vort from array
+  
+  // Debug - let's see what we actually have
+  if (isOpen && parshaVorts) {
+    console.log('Modal Debug - parshaVorts:', parshaVorts);
+    console.log('Modal Debug - parshaVort:', parshaVort);
+  }
 
 
   const isCompleted = isModalComplete('parsha-vort');
@@ -150,54 +156,47 @@ export default function ParshaVortModal() {
               </DialogTitle>
             </DialogHeader>
 
-            {parshaVorts && parshaVorts.length > 0 ? (
-              <div className="space-y-4">
-                {/* Speaker Info */}
-                <div className="text-center">
-                  <span className="text-sm platypi-medium text-black/70">
-                    By {parshaVort?.speaker || 'Unknown Speaker'}
-                  </span>
-                </div>
-
-                {/* Audio Player */}
-                {parshaVort?.audioUrl && (
-                  <AudioPlayer 
-                    audioUrl={parshaVort.audioUrl} 
-                    title={parshaVort.title || 'Weekly Parsha Vort'}
-                    duration="0:00"
-                  />
-                )}
-
-                {/* Thank You Message */}
-                {parshaVort?.thankYouMessage && (
-                  <div className="bg-white/60 rounded-xl p-3 text-center">
-                    <div 
-                      className="text-xs platypi-regular text-black/80 line-clamp-2"
-                      dangerouslySetInnerHTML={{
-                        __html: formatThankYouMessageFull(parshaVort.thankYouMessage)
-                      }}
-                    />
-                  </div>
-                )}
-
-                {/* Complete Button */}
-                <Button
-                  onClick={isCompleted ? undefined : handleComplete}
-                  disabled={isCompleted}
-                  className={`w-full py-3 rounded-xl platypi-medium border-0 ${
-                    isCompleted 
-                      ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
-                  }`}
-                >
-                  {isCompleted ? 'Completed Today' : 'Complete Parsha Vort'}
-                </Button>
+            <div className="space-y-4">
+              {/* Debug Info */}
+              <div className="bg-gray-100 p-2 text-xs">
+                isLoading: {String(isLoading)}<br/>
+                hasData: {String(!!parshaVorts)}<br/>
+                arrayLength: {parshaVorts?.length || 0}<br/>
+                vortExists: {String(!!parshaVort)}<br/>
+                title: {parshaVort?.title || 'none'}<br/>
+                speaker: {parshaVort?.speaker || 'none'}<br/>
+                audioUrl: {parshaVort?.audioUrl ? 'exists' : 'none'}
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-sm text-black/60">Loading parsha vort...</p>
+
+              {/* Always show speaker - test if this renders */}
+              <div className="text-center bg-blue-100 p-2">
+                <span className="text-sm platypi-medium text-black/70">
+                  TEST: By {parshaVort?.speaker || 'Rabbi Efrem Goldberg'}
+                </span>
               </div>
-            )}
+
+              {/* Always show a simple audio placeholder */}
+              <div className="bg-green-100 p-4 text-center">
+                <p>TEST AUDIO PLAYER AREA</p>
+                <p>URL: {parshaVort?.audioUrl || 'No URL'}</p>
+              </div>
+
+              {/* Always show thank you */}
+              <div className="bg-yellow-100 p-2">
+                <p className="text-xs">
+                  TEST: {parshaVort?.thankYouMessage || 'No thank you message'}
+                </p>
+              </div>
+
+              {/* Complete Button - always show */}
+              <Button
+                onClick={isCompleted ? undefined : handleComplete}
+                disabled={isCompleted}
+                className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white"
+              >
+                {isCompleted ? 'Completed Today' : 'TEST Complete Parsha Vort'}
+              </Button>
+            </div>
 
             {/* Heart Explosion Animation */}
             <HeartExplosion 
