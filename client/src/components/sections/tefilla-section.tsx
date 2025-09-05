@@ -95,10 +95,11 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     const chatzos = parseTimeToday(times.chatzos);
     const minchaGedola = parseTimeToday(times.minchaGedolah);
     const shkia = parseTimeToday(times.shkia);
+    const tzaitHakochavim = parseTimeToday(times.tzaitHakochavim);
     // Note: We still use sunrise for next day calculation in the future if needed
     
     // Handle null times gracefully
-    if (!alos || !chatzos || !minchaGedola || !shkia) {
+    if (!alos || !chatzos || !minchaGedola || !shkia || !tzaitHakochavim) {
       console.log('Prayer time calculation failed - missing zmanim data');
       return {
         title: "Morning Brochas",
@@ -114,12 +115,16 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       chatzos: chatzos.toLocaleString(),
       minchaGedola: minchaGedola.toLocaleString(), 
       shkia: shkia.toLocaleString(),
+      tzaitHakochavim: tzaitHakochavim.toLocaleString(),
       isAfterAlos: now >= alos,
       isBeforeChatzos: now < chatzos,
       isAfterChatzos: now >= chatzos,
       isBeforeMincha: now < minchaGedola,
       isAfterMincha: now >= minchaGedola,
-      isBeforeShkia: now < shkia
+      isBeforeShkia: now < shkia,
+      isAfterShkia: now >= shkia,
+      isBeforeTzait: now < tzaitHakochavim,
+      isAfterTzait: now >= tzaitHakochavim
     });
 
     if (now >= alos && now < chatzos) {
@@ -138,12 +143,21 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
         subtitle: `${times.minchaGedolah} - ${times.shkia}`,
         modal: "mincha"
       };
-    } else if (now >= shkia || now < alos) {
-      // Maariv time - from Shkia until next Alos Hashachar
+    } else if (now >= shkia && now < tzaitHakochavim) {
+      // Gap between Shkia and Tzait Hakochavim - show when Maariv will be available
+      console.log('Between Shkia and Tzait - showing upcoming Maariv');
+      return {
+        title: "Maariv",
+        subtitle: `from ${times.tzaitHakochavim} until ${times.alosHashachar}`,
+        modal: "maariv",
+        disabled: true
+      };
+    } else if (now >= tzaitHakochavim || now < alos) {
+      // Maariv time - from Tzait Hakochavim until next Alos Hashachar
       console.log('Selected prayer: Maariv');
       return {
         title: "Maariv",
-        subtitle: `${times.shkia} - ${times.alosHashachar}`,
+        subtitle: `${times.tzaitHakochavim} - ${times.alosHashachar}`,
         modal: "maariv"
       };
     } else {
