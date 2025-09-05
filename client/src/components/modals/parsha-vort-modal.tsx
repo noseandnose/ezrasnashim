@@ -150,46 +150,54 @@ export default function ParshaVortModal() {
               </DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-4">
-              {/* Speaker Info */}
-              <div className="text-center">
-                <span className="text-sm platypi-medium text-black/70">
-                  By {parshaVort?.speaker || 'Speaker'}
-                </span>
-              </div>
-
-              {/* Audio Player */}
-              <AudioPlayer 
-                audioUrl={parshaVort?.audioUrl || ''} 
-                title={parshaVort?.title || 'Weekly Parsha Vort'}
-                duration="0:00"
-              />
-
-              {/* Thank You Message */}
-              {parshaVort?.thankYouMessage && (
-                <div className="bg-white/60 rounded-xl p-3 text-center">
-                  <div 
-                    className="text-xs platypi-regular text-black/80 line-clamp-2"
-                    dangerouslySetInnerHTML={{
-                      __html: formatThankYouMessageFull(parshaVort.thankYouMessage)
-                    }}
-                  />
+            {parshaVorts && parshaVorts.length > 0 ? (
+              <div className="space-y-4">
+                {/* Speaker Info */}
+                <div className="text-center">
+                  <span className="text-sm platypi-medium text-black/70">
+                    By {parshaVort?.speaker || 'Unknown Speaker'}
+                  </span>
                 </div>
-              )}
 
-              {/* Complete Button */}
-              <Button
-                onClick={isCompleted ? undefined : handleComplete}
-                disabled={isCompleted}
-                className={`w-full py-3 rounded-xl platypi-medium border-0 ${
-                  isCompleted 
-                    ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                    : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
-                }`}
-              >
-                {isCompleted ? 'Completed Today' : 'Complete Parsha Vort'}
-              </Button>
-            </div>
+                {/* Audio Player */}
+                {parshaVort?.audioUrl && (
+                  <AudioPlayer 
+                    audioUrl={parshaVort.audioUrl} 
+                    title={parshaVort.title || 'Weekly Parsha Vort'}
+                    duration="0:00"
+                  />
+                )}
+
+                {/* Thank You Message */}
+                {parshaVort?.thankYouMessage && (
+                  <div className="bg-white/60 rounded-xl p-3 text-center">
+                    <div 
+                      className="text-xs platypi-regular text-black/80 line-clamp-2"
+                      dangerouslySetInnerHTML={{
+                        __html: formatThankYouMessageFull(parshaVort.thankYouMessage)
+                      }}
+                    />
+                  </div>
+                )}
+
+                {/* Complete Button */}
+                <Button
+                  onClick={isCompleted ? undefined : handleComplete}
+                  disabled={isCompleted}
+                  className={`w-full py-3 rounded-xl platypi-medium border-0 ${
+                    isCompleted 
+                      ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
+                  }`}
+                >
+                  {isCompleted ? 'Completed Today' : 'Complete Parsha Vort'}
+                </Button>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-sm text-black/60">Loading parsha vort...</p>
+              </div>
+            )}
 
             {/* Heart Explosion Animation */}
             <HeartExplosion 
