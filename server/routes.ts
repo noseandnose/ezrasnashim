@@ -1360,11 +1360,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         now.setDate(now.getDate() - 1);
       }
       const today = now.toISOString().split('T')[0];
-      const vort = await storage.getParshaVortByDate(today);
-      res.json(vort || null);
+      const vorts = await storage.getParshaVortsByDate(today);
+      res.json(vorts);
     } catch (error) {
-      console.error('Error fetching Parsha vort:', error);
-      res.status(500).json({ message: "Failed to fetch Parsha vort" });
+      console.error('Error fetching Parsha vorts:', error);
+      res.status(500).json({ message: "Failed to fetch Parsha vorts" });
     }
   });
 
@@ -1374,6 +1374,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const vort = await storage.createParshaVort(validatedData);
       res.json(vort);
     } catch (error) {
+      console.error('Error creating Parsha vort:', error);
       res.status(500).json({ message: "Failed to create Parsha vort" });
     }
   });

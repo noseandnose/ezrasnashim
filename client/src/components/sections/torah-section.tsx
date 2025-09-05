@@ -1,9 +1,8 @@
 import { Book, Heart, Shield, BookOpen, Star, Scroll, Triangle } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
-import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
+import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import type { Section } from "@/pages/home";
-import { useLocation } from "wouter";
 
 // Calculate reading time based on word count (average 200 words per minute)
 const calculateReadingTime = (text: string): string => {
@@ -43,8 +42,8 @@ export default function TorahSection({}: TorahSectionProps) {
     gcTime: 60 * 60 * 1000 // 1 hour
   });
 
-  // Fetch weekly Parsha vort using current date
-  const { data: parshaContent } = useQuery<{
+  // Fetch weekly Parsha vorts using current date
+  const { data: parshaVorts } = useQuery<Array<{
     parsha?: string; 
     hebrew_parsha?: string; 
     title?: string; 
@@ -53,10 +52,11 @@ export default function TorahSection({}: TorahSectionProps) {
     audioUrl?: string;
     speakerWebsite?: string;
     thankYouMessage?: string;
-  }>({
+  }>>({
     queryKey: ['/api/table/vort'],
     staleTime: 60 * 60 * 1000, // 1 hour
-    gcTime: 4 * 60 * 60 * 1000 // 4 hours
+    gcTime: 4 * 60 * 60 * 1000, // 4 hours
+    select: (data) => data || [] // Ensure we always have an array
   });
 
   // Fetch today's Halacha content for reading time calculation
@@ -174,7 +174,6 @@ export default function TorahSection({}: TorahSectionProps) {
             const isCompleted = isModalComplete(id);
             
             // Get content for each button
-            let content = null;
             let hasContent = false;
             let displaySubtitle = subtitle;
             let readingTime = '';
@@ -275,43 +274,68 @@ export default function TorahSection({}: TorahSectionProps) {
           })}
         </div>
 
-        {/* Parsha Vort Bar - Conditional Coming Soon */}
-        <div className="w-full bg-white rounded-2xl p-3 shadow-lg border border-blush/10 mb-3 relative">
-          {/* Coming Soon Overlay - only show when no content */}
-          {(!parshaContent?.title && !parshaContent?.content) && (
+        {/* Parsha Vort Bars - Multiple or Coming Soon */}
+        {parshaVorts && parshaVorts.length > 0 ? (
+          // Display multiple parsha vorts when available
+          <div className="space-y-3 mb-3">
+            {parshaVorts.map((vort, index) => (
+              <div key={index} className="w-full bg-white rounded-2xl p-3 shadow-lg border border-blush/10 relative">
+                <div 
+                  className="flex items-center gap-3 cursor-pointer hover:scale-[1.02] transition-transform"
+                  onClick={() => {
+                    if (vort.title || vort.audioUrl) {
+                      // Store current vort for modal
+                      (window as any).currentParshaVort = vort;
+                      openModal('parsha-vort', 'torah');
+                    }
+                  }}
+                >
+                  <div className="bg-gradient-feminine p-2 rounded-full">
+                    <BookOpen className="text-white" size={16} strokeWidth={1.5} />
+                  </div>
+                  <div className="text-left flex-grow">
+                    <h3 className="platypi-bold text-sm text-black">
+                      {vort.hebrew_parsha || vort.parsha || 'Parsha Shiur'}
+                    </h3>
+                    <p className="platypi-regular text-xs text-black/60">
+                      {vort.title || 'Weekly Torah insight'}
+                      {vort.speaker && ` • ${vort.speaker}`}
+                    </p>
+                  </div>
+                  <div className="bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
+                    <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          // Show single "Coming Soon" bar when no vorts available
+          <div className="w-full bg-white rounded-2xl p-3 shadow-lg border border-blush/10 mb-3 relative">
             <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center z-10">
               <div className="bg-white/90 rounded-xl px-4 py-2 shadow-lg">
                 <p className="platypi-bold text-sm text-black">Coming Soon</p>
               </div>
             </div>
-          )}
-          
-          {/* Content */}
-          <div 
-            className={`flex items-center gap-3 cursor-pointer hover:scale-[1.02] transition-transform ${(!parshaContent?.title && !parshaContent?.content) ? 'opacity-60' : ''}`}
-            onClick={() => {
-              if (parshaContent?.title || parshaContent?.audioUrl) {
-                openModal('parsha-vort', 'torah');
-              }
-            }}
-          >
-            <div className="bg-gradient-feminine p-2 rounded-full">
-              <BookOpen className="text-white" size={16} strokeWidth={1.5} />
-            </div>
-            <div className="text-left flex-grow">
-              <h3 className="platypi-bold text-sm text-black">
-                {parshaContent?.hebrew_parsha || parshaContent?.parsha || 'Parsha Shiur'}
-              </h3>
-              <p className="platypi-regular text-xs text-black/60">
-                {parshaContent?.title || 'Weekly Torah insight'}
-                {parshaContent?.speaker && ` • ${parshaContent.speaker}`}
-              </p>
-            </div>
-            <div className="bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-              <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+            
+            <div className="flex items-center gap-3 opacity-60">
+              <div className="bg-gradient-feminine p-2 rounded-full">
+                <BookOpen className="text-white" size={16} strokeWidth={1.5} />
+              </div>
+              <div className="text-left flex-grow">
+                <h3 className="platypi-bold text-sm text-black">
+                  Parsha Shiur
+                </h3>
+                <p className="platypi-regular text-xs text-black/60">
+                  Weekly Torah insight
+                </p>
+              </div>
+              <div className="bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
+                <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Bottom padding */}
         <div className="h-16"></div>

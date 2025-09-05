@@ -71,6 +71,7 @@ export interface IStorage {
   
   getParshaVortByWeek(week: string): Promise<ParshaVort | undefined>;
   getParshaVortByDate(date: string): Promise<ParshaVort | undefined>;
+  getParshaVortsByDate(date: string): Promise<ParshaVort[]>;
   createParshaVort(vort: InsertParshaVort): Promise<ParshaVort>;
 
   // Table inspiration methods
@@ -1028,6 +1029,18 @@ export class DatabaseStorage implements IStorage {
       ))
       .limit(1);
     return vort;
+  }
+
+  async getParshaVortsByDate(date: string): Promise<ParshaVort[]> {
+    const vorts = await db
+      .select()
+      .from(parshaVorts)
+      .where(and(
+        lte(parshaVorts.fromDate, date),
+        gte(parshaVorts.untilDate, date)
+      ))
+      .orderBy(parshaVorts.id);
+    return vorts;
   }
 
   async createParshaVort(insertVort: InsertParshaVort): Promise<ParshaVort> {

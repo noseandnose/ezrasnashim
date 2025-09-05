@@ -1,7 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import AudioPlayer from "@/components/audio-player";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
@@ -9,7 +8,6 @@ import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { formatThankYouMessageFull } from "@/lib/link-formatter";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { Expand, BookOpen } from "lucide-react";
-import type { ParshaVort } from "@shared/schema";
 
 export default function ParshaVortModal() {
   const { activeModal, closeModal } = useModalStore();
@@ -21,13 +19,9 @@ export default function ParshaVortModal() {
 
   const isOpen = activeModal === 'parsha-vort';
 
-  // Fetch parsha vort content
-  const { data: parshaVort, isLoading } = useQuery<ParshaVort>({
-    queryKey: ['/api/table/vort'],
-    enabled: isOpen, // Only fetch when modal is open
-    staleTime: 60 * 60 * 1000, // 1 hour
-    gcTime: 4 * 60 * 60 * 1000 // 4 hours
-  });
+  // Get the currently selected parsha vort from window
+  const parshaVort = isOpen ? (window as any).currentParshaVort : null;
+  const isLoading = false;
 
   const isCompleted = isModalComplete('parsha-vort');
 
