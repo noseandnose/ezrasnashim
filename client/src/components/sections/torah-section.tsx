@@ -180,7 +180,6 @@ export default function TorahSection({}: TorahSectionProps) {
             
             switch(id) {
               case 'halacha':
-                content = halachaContent;
                 hasContent = !!halachaContent?.content;
                 if (hasContent && !isCompleted && halachaContent) {
                   readingTime = calculateReadingTime(halachaContent.content || '');
@@ -189,21 +188,18 @@ export default function TorahSection({}: TorahSectionProps) {
                 }
                 break;
               case 'chizuk':
-                content = chizukContent;
                 hasContent = !!chizukContent?.audioUrl;
                 if (hasContent && !isCompleted && chizukContent) {
                   displaySubtitle = toCamelCase(chizukContent.title || '') || subtitle;
                 }
                 break;
               case 'emuna':
-                content = emunaContent;
                 hasContent = !!emunaContent?.audioUrl;
                 if (hasContent && !isCompleted && emunaContent) {
                   displaySubtitle = toCamelCase(emunaContent.title || '') || subtitle;
                 }
                 break;
               case 'featured':
-                content = featuredContent;
                 hasContent = !!featuredContent?.content;
                 if (hasContent && !isCompleted && featuredContent) {
                   readingTime = calculateReadingTime(featuredContent.content || '');
