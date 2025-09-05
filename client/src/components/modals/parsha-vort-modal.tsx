@@ -148,77 +148,65 @@ export default function ParshaVortModal() {
               </DialogTitle>
             </DialogHeader>
 
-            {/* Debug info */}
-            <div className="text-xs text-gray-500 mb-2 p-2 bg-gray-100 rounded">
-              Debug: isLoading={isLoading ? 'true' : 'false'}, 
-              parshaVort={parshaVort ? 'exists' : 'null'},
-              title={parshaVort?.title || 'no title'}
-            </div>
+            <div className="space-y-4">
+              {/* Speaker Info - Always show if exists */}
+              {parshaVort?.speaker && (
+                <div className="text-center">
+                  <span className="text-sm platypi-medium text-black/70">
+                    By {parshaVort.speaker}
+                  </span>
+                </div>
+              )}
 
-            {isLoading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blush mx-auto"></div>
-                <p className="text-sm text-black/60 mt-2">Loading parsha vort...</p>
-              </div>
-            ) : parshaVort ? (
-              <div className="space-y-4">
-                {/* Content Preview - only show if content exists */}
-                {parshaVort.content && (
-                  <div className="bg-white/80 rounded-2xl p-4">
-                    <div className="koren-siddur-english text-sm leading-relaxed text-black line-clamp-4">
-                      {parshaVort.content}
-                    </div>
+              {/* Content Preview - only show if content exists */}
+              {parshaVort?.content && (
+                <div className="bg-white/80 rounded-2xl p-4">
+                  <div className="koren-siddur-english text-sm leading-relaxed text-black line-clamp-4">
+                    {parshaVort.content}
                   </div>
-                )}
+                </div>
+              )}
 
-                {/* Speaker Info */}
-                {parshaVort.speaker && (
-                  <div className="text-center">
-                    <span className="text-xs platypi-medium text-black/70">
-                      By {parshaVort.speaker}
-                    </span>
-                  </div>
-                )}
+              {/* Audio Player - Always show if exists */}
+              {parshaVort?.audioUrl && (
+                <AudioPlayer 
+                  audioUrl={parshaVort.audioUrl} 
+                  title={parshaVort.title || 'Weekly Parsha Vort'}
+                  duration="0:00"
+                />
+              )}
 
-                {/* Thank You Message Preview */}
-                {parshaVort.thankYouMessage && (
-                  <div className="bg-white/60 rounded-xl p-3 text-center">
-                    <div 
-                      className="text-xs platypi-regular text-black/80 line-clamp-2"
-                      dangerouslySetInnerHTML={{
-                        __html: formatThankYouMessageFull(parshaVort.thankYouMessage)
-                      }}
-                    />
-                  </div>
-                )}
-
-                {/* Audio Player */}
-                {parshaVort.audioUrl && (
-                  <AudioPlayer 
-                    audioUrl={parshaVort.audioUrl} 
-                    title={parshaVort.title || 'Weekly Parsha Vort'}
-                    duration="0:00"
+              {/* Thank You Message - Always show if exists */}
+              {parshaVort?.thankYouMessage && (
+                <div className="bg-white/60 rounded-xl p-3 text-center">
+                  <div 
+                    className="text-xs platypi-regular text-black/80 line-clamp-2"
+                    dangerouslySetInnerHTML={{
+                      __html: formatThankYouMessageFull(parshaVort.thankYouMessage)
+                    }}
                   />
-                )}
+                </div>
+              )}
 
-                {/* Complete Button */}
-                <Button
-                  onClick={isCompleted ? undefined : handleComplete}
-                  disabled={isCompleted}
-                  className={`w-full py-3 rounded-xl platypi-medium border-0 ${
-                    isCompleted 
-                      ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
-                  }`}
-                >
-                  {isCompleted ? 'Completed Today' : 'Complete Parsha Vort'}
-                </Button>
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-sm text-black/60">No parsha vort available for this week</p>
-              </div>
-            )}
+              {/* Complete Button - Always show */}
+              <Button
+                onClick={isCompleted ? undefined : handleComplete}
+                disabled={isCompleted}
+                className={`w-full py-3 rounded-xl platypi-medium border-0 ${
+                  isCompleted 
+                    ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                    : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
+                }`}
+              >
+                {isCompleted ? 'Completed Today' : 'Complete Parsha Vort'}
+              </Button>
+
+              {!parshaVort && (
+                <div className="text-center py-8">
+                  <p className="text-sm text-black/60">Loading parsha vort...</p>
+                </div>
+              )}
+            </div>
 
             {/* Heart Explosion Animation */}
             <HeartExplosion 
