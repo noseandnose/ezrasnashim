@@ -148,6 +148,13 @@ export default function ParshaVortModal() {
               </DialogTitle>
             </DialogHeader>
 
+            {/* Debug info */}
+            <div className="text-xs text-gray-500 mb-2 p-2 bg-gray-100 rounded">
+              Debug: isLoading={isLoading ? 'true' : 'false'}, 
+              parshaVort={parshaVort ? 'exists' : 'null'},
+              title={parshaVort?.title || 'no title'}
+            </div>
+
             {isLoading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blush mx-auto"></div>
