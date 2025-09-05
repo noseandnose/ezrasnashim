@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import AudioPlayer from "@/components/audio-player";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
@@ -19,14 +20,18 @@ export default function ParshaVortModal() {
 
   const isOpen = activeModal === 'parsha-vort';
 
-  // Get the currently selected parsha vort from window
-  const parshaVort = isOpen ? (window as any).currentParshaVort : null;
-  const isLoading = !parshaVort;
+  // Get the currently selected parsha vort from window, fallback to API
+  const { data: apiVorts } = useQuery<any[]>({
+    queryKey: ['/api/table/vort'],
+    enabled: isOpen && !(window as any).currentParshaVort, // Only fetch if no vort selected
+    staleTime: 60 * 60 * 1000, // 1 hour
+    gcTime: 4 * 60 * 60 * 1000 // 4 hours
+  });
   
-  // Debug logging
-  if (isOpen) {
-    console.log('Modal opened, parshaVort:', parshaVort);
-  }
+  const parshaVort = isOpen ? 
+    (window as any).currentParshaVort || (apiVorts && apiVorts[0]) : 
+    null;
+  const isLoading = isOpen && !parshaVort;
 
   const isCompleted = isModalComplete('parsha-vort');
 
@@ -152,10 +157,6 @@ export default function ParshaVortModal() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blush mx-auto"></div>
                 <p className="text-sm text-black/60 mt-2">Loading parsha vort...</p>
               </div>
-            ) : !parshaVort ? (
-              <div className="text-center py-8">
-                <p className="text-sm text-black/60">No parsha vort selected. Please try again.</p>
-              </div>
             ) : (
               <div className="space-y-4">
                 {/* Content Preview */}
@@ -208,7 +209,9 @@ export default function ParshaVortModal() {
                   {isCompleted ? 'Completed Today' : 'Complete Parsha Vort'}
                 </Button>
               </div>
-            ) : (
+            )}
+
+            {!parshaVort && !isLoading && (
               <div className="text-center py-8">
                 <p className="text-sm text-black/60">No parsha vort available for this week</p>
               </div>
