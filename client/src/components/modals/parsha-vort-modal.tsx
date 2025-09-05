@@ -20,14 +20,15 @@ export default function ParshaVortModal() {
 
   const isOpen = activeModal === 'parsha-vort';
 
-  // Fetch parsha vort content - back to original working approach  
-  const { data: parshaVort, isLoading } = useQuery<any>({
+  // Fetch parsha vort content - exactly as it was working before
+  const { data: parshaVorts, isLoading } = useQuery<any[]>({
     queryKey: ['/api/table/vort'],
     enabled: isOpen, // Only fetch when modal is open
     staleTime: 60 * 60 * 1000, // 1 hour
     gcTime: 4 * 60 * 60 * 1000, // 4 hours
-    select: (data) => data && data[0] // Get first vort from array
   });
+
+  const parshaVort = parshaVorts?.[0]; // Get first vort from array
 
   const isCompleted = isModalComplete('parsha-vort');
 
