@@ -54,8 +54,8 @@ export default function TorahSection({}: TorahSectionProps) {
     thankYouMessage?: string;
   }>>({
     queryKey: ['/api/table/vort'],
-    staleTime: 60 * 60 * 1000, // 1 hour
-    gcTime: 4 * 60 * 60 * 1000, // 4 hours
+    staleTime: 10 * 60 * 1000, // Reduced to 10 minutes for testing
+    gcTime: 30 * 60 * 1000, // Reduced cache time
     select: (data) => data || [] // Ensure we always have an array
   });
 
@@ -281,6 +281,7 @@ export default function TorahSection({}: TorahSectionProps) {
                   onClick={() => {
                     if (vort.title || vort.audioUrl) {
                       // Store current vort for modal
+                      console.log('Setting current vort:', vort);
                       (window as any).currentParshaVort = vort;
                       openModal('parsha-vort', 'torah');
                     }

@@ -21,7 +21,12 @@ export default function ParshaVortModal() {
 
   // Get the currently selected parsha vort from window
   const parshaVort = isOpen ? (window as any).currentParshaVort : null;
-  const isLoading = false;
+  const isLoading = !parshaVort;
+  
+  // Debug logging
+  if (isOpen) {
+    console.log('Modal opened, parshaVort:', parshaVort);
+  }
 
   const isCompleted = isModalComplete('parsha-vort');
 
@@ -147,7 +152,11 @@ export default function ParshaVortModal() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blush mx-auto"></div>
                 <p className="text-sm text-black/60 mt-2">Loading parsha vort...</p>
               </div>
-            ) : parshaVort ? (
+            ) : !parshaVort ? (
+              <div className="text-center py-8">
+                <p className="text-sm text-black/60">No parsha vort selected. Please try again.</p>
+              </div>
+            ) : (
               <div className="space-y-4">
                 {/* Content Preview */}
                 <div className="bg-white/80 rounded-2xl p-4">
