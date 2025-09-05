@@ -21,15 +21,16 @@ export default function ParshaVortModal() {
   const isOpen = activeModal === 'parsha-vort';
 
   // Get the currently selected parsha vort from window, fallback to API
+  const hasSelectedVort = typeof window !== 'undefined' && (window as any).currentParshaVort;
   const { data: apiVorts } = useQuery<any[]>({
     queryKey: ['/api/table/vort'],
-    enabled: isOpen && !(window as any).currentParshaVort, // Only fetch if no vort selected
+    enabled: isOpen && !hasSelectedVort, // Only fetch if no vort selected
     staleTime: 60 * 60 * 1000, // 1 hour
     gcTime: 4 * 60 * 60 * 1000 // 4 hours
   });
   
   const parshaVort = isOpen ? 
-    (window as any).currentParshaVort || (apiVorts && apiVorts[0]) : 
+    (hasSelectedVort ? (window as any).currentParshaVort : (apiVorts && apiVorts[0])) : 
     null;
   const isLoading = isOpen && !parshaVort;
 
@@ -159,12 +160,14 @@ export default function ParshaVortModal() {
               </div>
             ) : (
               <div className="space-y-4">
-                {/* Content Preview */}
-                <div className="bg-white/80 rounded-2xl p-4">
-                  <div className="koren-siddur-english text-sm leading-relaxed text-black line-clamp-4">
-                    {parshaVort.content}
+                {/* Content Preview - only show if content exists */}
+                {parshaVort.content && (
+                  <div className="bg-white/80 rounded-2xl p-4">
+                    <div className="koren-siddur-english text-sm leading-relaxed text-black line-clamp-4">
+                      {parshaVort.content}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Speaker Info */}
                 {parshaVort.speaker && (

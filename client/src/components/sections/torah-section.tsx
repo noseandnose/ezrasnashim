@@ -281,8 +281,9 @@ export default function TorahSection({}: TorahSectionProps) {
                   onClick={() => {
                     if (vort.title || vort.audioUrl) {
                       // Store current vort for modal
-                      console.log('Setting current vort:', vort);
-                      (window as any).currentParshaVort = vort;
+                      if (typeof window !== 'undefined') {
+                        (window as any).currentParshaVort = vort;
+                      }
                       openModal('parsha-vort', 'torah');
                     }
                   }}
