@@ -155,7 +155,7 @@ export default function ParshaVortModal() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blush mx-auto"></div>
                 <p className="text-sm text-black/60 mt-2">Loading parsha vort...</p>
               </div>
-            ) : (
+            ) : parshaVort ? (
               <div className="space-y-4">
                 {/* Content Preview - only show if content exists */}
                 {parshaVort.content && (
@@ -209,9 +209,7 @@ export default function ParshaVortModal() {
                   {isCompleted ? 'Completed Today' : 'Complete Parsha Vort'}
                 </Button>
               </div>
-            )}
-
-            {!parshaVort && !isLoading && (
+            ) : (
               <div className="text-center py-8">
                 <p className="text-sm text-black/60">No parsha vort available for this week</p>
               </div>
