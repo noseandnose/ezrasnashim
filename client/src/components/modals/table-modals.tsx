@@ -198,7 +198,7 @@ export default function TableModals() {
 
   const { data: parshaContent } = useQuery<ParshaContent>({
     queryKey: ['/api/table/vort'],
-    enabled: activeModal === 'parsha'
+    enabled: activeModal === 'parsha' || activeModal === 'parsha-vort'
   });
 
   return (
@@ -671,7 +671,7 @@ export default function TableModals() {
 
 
       {/* Parsha Shiur Modal */}
-      <Dialog open={activeModal === 'parsha'} onOpenChange={() => closeModal(true)}>
+      <Dialog open={activeModal === 'parsha' || activeModal === 'parsha-vort'} onOpenChange={() => closeModal(true)}>
         <DialogContent>
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg platypi-bold text-black">Parsha Shiur</DialogTitle>
@@ -687,7 +687,7 @@ export default function TableModals() {
           />
 
           <Button 
-            onClick={() => handleComplete('parsha')}
+            onClick={() => handleComplete(activeModal === 'parsha-vort' ? 'parsha-vort' : 'parsha')}
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
           >
             Completed Parsha
