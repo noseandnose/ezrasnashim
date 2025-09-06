@@ -198,7 +198,8 @@ export default function TableModals() {
 
   const { data: parshaContent } = useQuery<ParshaContent>({
     queryKey: ['/api/table/vort'],
-    enabled: activeModal === 'parsha' || activeModal === 'parsha-vort'
+    enabled: activeModal === 'parsha' || activeModal === 'parsha-vort',
+    select: (data) => data && data[0] // Extract first vort from array
   });
 
   return (
@@ -679,6 +680,13 @@ export default function TableModals() {
           <p className="text-sm text-gray-600 mb-4 text-center">
             {parshaContent?.title || "This Week's Torah Portion"}
           </p>
+          
+          {/* Speaker Info */}
+          {parshaContent?.speaker && (
+            <p className="text-xs text-gray-500 mb-3 text-center">
+              By {parshaContent.speaker}
+            </p>
+          )}
           
           <AudioPlayer 
             title={parshaContent?.title || "Parsha Shiur"}
