@@ -199,7 +199,18 @@ export default function TableModals() {
   const { data: parshaContent } = useQuery<ParshaContent>({
     queryKey: ['/api/table/vort'],
     enabled: activeModal === 'parsha' || activeModal === 'parsha-vort',
-    select: (data) => data && data[0] // Extract first vort from array
+    select: (data) => {
+      if (!data || !Array.isArray(data)) return null;
+      
+      // Filter to only show currently active vorts based on date range
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+      const activeVorts = data.filter((vort: any) => {
+        if (!vort.fromDate || !vort.untilDate) return false;
+        return today >= vort.fromDate && today <= vort.untilDate;
+      });
+      
+      return activeVorts[0] || null; // Return first active vort
+    }
   });
 
   return (
