@@ -42,8 +42,9 @@ export default function TorahSection({}: TorahSectionProps) {
     gcTime: 60 * 60 * 1000 // 1 hour
   });
 
-  // Fetch weekly Parsha vort using current date - simplified
-  const { data: parshaContent } = useQuery<{
+  // Fetch all weekly Parsha vorts to support multiple shiurim
+  const { data: parshaVorts } = useQuery<Array<{
+    id: number;
     parsha?: string; 
     hebrew_parsha?: string; 
     title?: string; 
@@ -52,11 +53,13 @@ export default function TorahSection({}: TorahSectionProps) {
     audioUrl?: string;
     speakerWebsite?: string;
     thankYouMessage?: string;
-  }>({
+    fromDate?: string;
+    untilDate?: string;
+  }>>({
     queryKey: ['/api/table/vort'],
     staleTime: 60 * 60 * 1000, // 1 hour
-    gcTime: 4 * 60 * 60 * 1000, // 4 hours
-    select: (data) => data && data[0] // Get first vort from array
+    gcTime: 4 * 60 * 60 * 1000 // 4 hours
+    // No select - keep all vorts for multiple shiurim support
   });
 
   // Fetch today's Halacha content for reading time calculation
@@ -270,43 +273,62 @@ export default function TorahSection({}: TorahSectionProps) {
           })}
         </div>
 
-        {/* Parsha Vort Bar - Back to single display */}
-        <div className="w-full bg-white rounded-2xl p-3 shadow-lg border border-blush/10 mb-3 relative">
-          {/* Coming Soon Overlay - only show when no content */}
-          {(!parshaContent?.title && !parshaContent?.content) && (
+        {/* Parsha Vort Bars - Support multiple shiurim */}
+        {parshaVorts && parshaVorts.length > 0 ? (
+          // Render multiple bars for each available shiur
+          parshaVorts.map((parsha, index) => (
+            <div key={parsha.id || index} className="w-full bg-white rounded-2xl p-3 shadow-lg border border-blush/10 mb-3 relative">
+              <div 
+                className="flex items-center gap-3 cursor-pointer hover:scale-[1.02] transition-transform"
+                onClick={() => {
+                  if (parsha?.title || parsha?.audioUrl) {
+                    openModal('parsha-vort', 'torah');
+                  }
+                }}
+              >
+                <div className="bg-gradient-feminine p-2 rounded-full">
+                  <BookOpen className="text-white" size={16} strokeWidth={1.5} />
+                </div>
+                <div className="text-left flex-grow">
+                  <h3 className="platypi-bold text-sm text-black">
+                    {parsha?.hebrew_parsha || parsha?.parsha || 'Parsha Shiur'}
+                  </h3>
+                  <p className="platypi-regular text-xs text-black/60">
+                    {parsha?.title || 'Weekly Torah insight'}
+                    {parsha?.speaker && ` • ${parsha.speaker}`}
+                  </p>
+                </div>
+                <div className="bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
+                  <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          // Show single "Coming Soon" bar when no shiurim available
+          <div className="w-full bg-white rounded-2xl p-3 shadow-lg border border-blush/10 mb-3 relative">
+            {/* Coming Soon Overlay */}
             <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center z-10">
               <div className="bg-white/90 rounded-xl px-4 py-2 shadow-lg">
                 <p className="platypi-bold text-sm text-black">Coming Soon</p>
               </div>
             </div>
-          )}
-          
-          {/* Content */}
-          <div 
-            className={`flex items-center gap-3 cursor-pointer hover:scale-[1.02] transition-transform ${(!parshaContent?.title && !parshaContent?.content) ? 'opacity-60' : ''}`}
-            onClick={() => {
-              if (parshaContent?.title || parshaContent?.audioUrl) {
-                openModal('parsha-vort', 'torah');
-              }
-            }}
-          >
-            <div className="bg-gradient-feminine p-2 rounded-full">
-              <BookOpen className="text-white" size={16} strokeWidth={1.5} />
-            </div>
-            <div className="text-left flex-grow">
-              <h3 className="platypi-bold text-sm text-black">
-                {parshaContent?.hebrew_parsha || parshaContent?.parsha || 'Parsha Shiur'}
-              </h3>
-              <p className="platypi-regular text-xs text-black/60">
-                {parshaContent?.title || 'Weekly Torah insight'}
-                {parshaContent?.speaker && ` • ${parshaContent.speaker}`}
-              </p>
-            </div>
-            <div className="bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-              <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+            
+            {/* Content (unclickable) */}
+            <div className="flex items-center gap-3 opacity-60 cursor-not-allowed">
+              <div className="bg-gray-300 p-2 rounded-full">
+                <BookOpen className="text-gray-500" size={16} strokeWidth={1.5} />
+              </div>
+              <div className="text-left flex-grow">
+                <h3 className="platypi-bold text-sm text-black">Parsha Shiur</h3>
+                <p className="platypi-regular text-xs text-black/60">Weekly Torah insight</p>
+              </div>
+              <div className="bg-gray-200 text-gray-500 text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
+                <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Bottom padding */}
         <div className="h-16"></div>

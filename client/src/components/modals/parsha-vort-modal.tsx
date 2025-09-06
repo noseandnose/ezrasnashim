@@ -20,25 +20,14 @@ export default function ParshaVortModal() {
 
   const isOpen = activeModal === 'parsha-vort';
 
-  // Fetch parsha vort content - match Torah section approach
+  // This modal was the wrong file - actual modal is in table-modals.tsx
+  // Keeping minimal structure for future use
   const { data: parshaVort, isLoading } = useQuery<any>({
     queryKey: ['/api/table/vort'],
-    enabled: isOpen, // Only fetch when modal is open
-    staleTime: 60 * 60 * 1000, // 1 hour
-    gcTime: 4 * 60 * 60 * 1000, // 4 hours
-    select: (data) => data && data[0] // Get first vort from array, same as Torah section
-  });
-
-  // Debug logging - temporary
-  console.log('PARSHA MODAL DEBUG:', {
-    isOpen,
-    isLoading,
-    parshaVort,
-    hasTitle: !!parshaVort?.title,
-    hasAudioUrl: !!parshaVort?.audioUrl,
-    hasSpeaker: !!parshaVort?.speaker,
-    hasContent: !!parshaVort?.content,
-    hasThankYou: !!parshaVort?.thankYouMessage
+    enabled: isOpen,
+    staleTime: 60 * 60 * 1000,
+    gcTime: 4 * 60 * 60 * 1000,
+    select: (data) => data && data[0]
   });
   
 
@@ -162,49 +151,66 @@ export default function ParshaVortModal() {
               </DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-4">
-              {/* Always show basic info first */}
-              <div className="bg-red-100 border border-red-300 p-3 rounded-lg">
-                <p className="text-sm font-bold">DEBUG INFO:</p>
-                <p>isLoading: {String(isLoading)}</p>
-                <p>parshaVort exists: {String(!!parshaVort)}</p>
-                <p>title: {parshaVort?.title || 'None'}</p>
-                <p>speaker: {parshaVort?.speaker || 'None'}</p>
-                <p>audioUrl: {parshaVort?.audioUrl ? 'YES' : 'NO'}</p>
+            {isLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blush mx-auto"></div>
+                <p className="text-sm text-black/60 mt-2">Loading parsha vort...</p>
               </div>
-
-              {/* Simple test content */}
-              <div className="bg-blue-100 p-4 rounded-lg">
-                <h3 className="font-bold">TEST CONTENT</h3>
-                <p>This should always show up</p>
-              </div>
-
-              {/* Basic speaker info if exists */}
-              {parshaVort?.speaker && (
-                <div className="text-center bg-green-100 p-2 rounded">
+            ) : parshaVort ? (
+              <div className="space-y-4">
+                {/* Speaker Info */}
+                <div className="text-center">
                   <span className="text-sm platypi-medium text-black/70">
                     By {parshaVort.speaker}
                   </span>
                 </div>
-              )}
 
-              {/* Simple audio placeholder - NO AudioPlayer component yet */}
-              {parshaVort?.audioUrl && (
-                <div className="bg-yellow-100 p-3 rounded">
-                  <p className="text-sm">Audio URL exists: {parshaVort.audioUrl.slice(0, 50)}...</p>
-                  <p className="text-xs text-gray-600">AudioPlayer component would go here</p>
-                </div>
-              )}
+                {/* Content Preview */}
+                {parshaVort.content && (
+                  <div className="bg-white/80 rounded-2xl p-4">
+                    <div className="koren-siddur-english text-sm leading-relaxed text-black line-clamp-4">
+                      {parshaVort.content}
+                    </div>
+                  </div>
+                )}
 
-              {/* Complete Button - simplified */}
-              <Button
-                onClick={isCompleted ? undefined : handleComplete}
-                disabled={isCompleted}
-                className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white"
-              >
-                {isCompleted ? 'Completed Today' : 'Complete Parsha Vort'}
-              </Button>
-            </div>
+                {/* Audio Player */}
+                <AudioPlayer 
+                  audioUrl={parshaVort.audioUrl} 
+                  title={parshaVort.title}
+                  duration="0:00"
+                />
+
+                {/* Thank You Message */}
+                {parshaVort.thankYouMessage && (
+                  <div className="bg-white/60 rounded-xl p-3 text-center">
+                    <div 
+                      className="text-xs platypi-regular text-black/80 line-clamp-2"
+                      dangerouslySetInnerHTML={{
+                        __html: formatThankYouMessageFull(parshaVort.thankYouMessage)
+                      }}
+                    />
+                  </div>
+                )}
+
+                {/* Complete Button */}
+                <Button
+                  onClick={isCompleted ? undefined : handleComplete}
+                  disabled={isCompleted}
+                  className={`w-full py-3 rounded-xl platypi-medium border-0 ${
+                    isCompleted 
+                      ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
+                  }`}
+                >
+                  {isCompleted ? 'Completed Today' : 'Complete Parsha Vort'}
+                </Button>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-sm text-black/60">No parsha vort available for this week</p>
+              </div>
+            )}
 
             {/* Heart Explosion Animation */}
             <HeartExplosion 
