@@ -6,7 +6,7 @@ import { useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
 import HeartProgress from "@/components/heart-progress";
 import DailyProgress from "@/components/daily-progress";
 import type { Section } from "@/pages/home";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo } from "react";
 
 interface Sponsor {
   name: string;

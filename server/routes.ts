@@ -2829,13 +2829,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // IP-based location detection (works with VPN)
   app.get("/api/location/ip", async (req, res) => {
     try {
-      // Get client IP address
-      const clientIP = req.headers['x-forwarded-for'] || 
+      // Get client IP address - handle multiple IPs by taking the first one
+      let clientIP = req.headers['x-forwarded-for'] || 
                       req.headers['x-real-ip'] || 
                       req.connection.remoteAddress || 
                       req.socket.remoteAddress ||
                       (req.connection as any)?.socket?.remoteAddress ||
                       '127.0.0.1';
+      
+      // If x-forwarded-for contains multiple IPs, take the first one
+      if (typeof clientIP === 'string' && clientIP.includes(',')) {
+        clientIP = clientIP.split(',')[0].trim();
+      }
+      
+      // Remove IPv6 prefix if present
+      if (typeof clientIP === 'string' && clientIP.startsWith('::ffff:')) {
+        clientIP = clientIP.replace('::ffff:', '');
+      }
       
       console.log('IP-based location detection for IP:', clientIP);
       
