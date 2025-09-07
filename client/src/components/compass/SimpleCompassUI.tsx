@@ -273,11 +273,11 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
         <p className="text-sm text-gray-600">Beta. Currently in testing</p>
       </div>
       
-      {/* iOS Permission Request */}
-      {deviceInfo.needsPermission && !state.hasPermission && state.isSupported && (
+      {/* Permission Request */}
+      {!state.hasPermission && state.isSupported && (
         <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200">
           <p className="text-sm text-black mb-3">
-            For accurate davening times and direction to Jerusalem, please enable compass access
+            For accurate direction to Jerusalem, please enable compass access
           </p>
           <Button
             onClick={handleEnableCompass}
@@ -295,32 +295,23 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
       <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200">
         <h4 className="font-bold text-sm text-black mb-2">How to Use:</h4>
         <ol className="text-xs text-black/70 space-y-1">
-          <li>1. Allow location access for accurate davening times</li>
-          {deviceInfo.needsPermission && !state.hasPermission && (
-            <li>2. Tap "Enable Compass" button above</li>
+          <li>1. Allow location access for accurate direction</li>
+          {!state.hasPermission && (
+            <li>2. Enable compass access when prompted</li>
           )}
-          <li>{deviceInfo.needsPermission && !state.hasPermission ? '3' : '2'}. Hold device upright and turn your body</li>
-          <li>{deviceInfo.needsPermission && !state.hasPermission ? '4' : '3'}. Turn your body until the center line points to the BH icon</li>
-          <li>{deviceInfo.needsPermission && !state.hasPermission ? '5' : '4'}. When aligned, the heart and line will pulse</li>
+          <li>{!state.hasPermission ? '3' : '2'}. Hold device upright and turn your body</li>
+          <li>{!state.hasPermission ? '4' : '3'}. Turn your body until the center line points to the BH icon</li>
+          <li>{!state.hasPermission ? '5' : '4'}. When aligned, the heart and line will pulse</li>
         </ol>
         
-        {/* Device-specific tips */}
+        {/* General tips */}
         <div className="mt-3 pt-3 border-t border-blue-200">
           <p className="font-medium text-xs text-black mb-1">Tips:</p>
           <ul className="text-xs text-black/60 space-y-1">
-            {deviceInfo.isAndroid ? (
-              <>
-                <li>• Hold phone flat like a traditional compass</li>
-                <li>• Calibrate by moving in figure-8 motion if needed</li>
-                <li>• Avoid magnetic interference (speakers, metal)</li>
-              </>
-            ) : (
-              <>
-                <li>• Keep device away from metal objects</li>
-                <li>• Works best outdoors or near windows</li>
-                <li>• Accuracy improves with device calibration</li>
-              </>
-            )}
+            <li>• Keep device away from metal objects</li>
+            <li>• Works best outdoors or near windows</li>
+            <li>• Calibrate by moving in figure-8 motion if needed</li>
+            <li>• Avoid magnetic interference (speakers, metal)</li>
           </ul>
         </div>
       </div>
