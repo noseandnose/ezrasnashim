@@ -901,7 +901,7 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
                   });
                   window.dispatchEvent(openEvent);
                 }}
-                className="w-full bg-white rounded-2xl p-4 border border-blush/10 hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-4"
+                className="w-full bg-white rounded-2xl p-4 border border-blush/10 hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-4 complete-button-pulse"
               >
                 {/* Icon with gradient circle */}
                 <div className="p-3 rounded-full bg-gradient-feminine flex-shrink-0">
