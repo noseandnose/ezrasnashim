@@ -148,10 +148,16 @@ export function formatTextContent(text: string | null | undefined): string {
     // Check if this is conditional content (contains known keywords)
     const conditionalKeywords = [
       'OUTSIDE_ISRAEL', 'ONLY_ISRAEL', 'ROSH_CHODESH', 'FAST_DAY', 
-      'ASERET_YEMEI_TESHUVA', 'SUKKOT', 'PESACH', 'ROSH_CHODESH_SPECIAL'
+      'ASERET_YEMEI_TESHUVA', 'SUKKOT', 'PESACH', 'ROSH_CHODESH_SPECIAL',
+      // Food selection conditions
+      'grain', 'wine', 'fruit'
     ];
     
-    if (conditionalKeywords.some(keyword => content.includes(keyword))) {
+    // Check if content contains any conditional keyword or combination logic (comma, pipe)
+    const isConditional = conditionalKeywords.some(keyword => content.includes(keyword)) ||
+                         content.includes(',') || content.includes('|');
+    
+    if (isConditional) {
       // This is conditional content, leave it for tefilla processor
       return match;
     }
