@@ -206,16 +206,15 @@ export function useGeolocation() {
           },
           {
             enableHighAccuracy: false, // Use cached location for performance
-            timeout: 8000, // Reduce timeout
-            maximumAge: 60 * 60 * 1000, // Use 1-hour cache from device GPS
+            timeout: 5000, // Faster timeout for quicker fallback
+            maximumAge: 30 * 60 * 1000, // Use 30-minute cache from device GPS
           },
         );
       }
     };
 
-    // Immediate execution for faster startup, debounced only on re-renders
-    const timeoutId = setTimeout(checkLocationPermission, coordinates ? 1000 : 0);
-    return () => clearTimeout(timeoutId);
+    // Execute immediately for fastest location detection
+    checkLocationPermission();
   }, [
     locationRequested,
     coordinates,

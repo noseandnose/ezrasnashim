@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon } from "lucide-react";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
-import { useDeferredJewishTimes, useDeferredGeolocation } from "@/hooks/use-deferred-location";
+import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
 import { useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
 import HeartProgress from "@/components/heart-progress";
 import DailyProgress from "@/components/daily-progress";
@@ -22,17 +22,10 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   const { openModal } = useModalStore();
   const { torahCompleted, tefillaCompleted, tzedakaCompleted } = useDailyCompletionStore();
   
-  // Lazy load location and times - only when needed
-  const [timesLoaded, setTimesLoaded] = useState(false);
-  const jewishTimesQuery = useDeferredJewishTimes(timesLoaded);
-  const { coordinates, permissionDenied } = useDeferredGeolocation(timesLoaded);
+  // Load location immediately on startup for accurate times
+  const jewishTimesQuery = useJewishTimes();
+  const { coordinates, permissionDenied } = useGeolocation();
   const { data: hebrewDate } = useHebrewDateWithShkia(jewishTimesQuery.data?.shkia);
-  
-  // Load times after initial render
-  useEffect(() => {
-    const timer = setTimeout(() => setTimesLoaded(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
 
   // Get time-appropriate greeting
   const getGreeting = () => {
