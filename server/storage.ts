@@ -1426,6 +1426,34 @@ export class DatabaseStorage implements IStorage {
     return stats;
   }
 
+  // Get all unique dates that have analytics events
+  async getAllAnalyticsDates(): Promise<string[]> {
+    const events = await db
+      .selectDistinct({ date: sql<string>`DATE(${analyticsEvents.createdAt})` })
+      .from(analyticsEvents)
+      .orderBy(sql`DATE(${analyticsEvents.createdAt}) DESC`);
+    
+    return events.map(e => e.date).filter(Boolean);
+  }
+
+  // Recalculate all historical analytics
+  async recalculateAllHistoricalStats(): Promise<{ updated: number; dates: string[] }> {
+    const dates = await this.getAllAnalyticsDates();
+    let updated = 0;
+    
+    for (const date of dates) {
+      try {
+        await this.recalculateDailyStats(date);
+        updated++;
+        console.log(`Recalculated stats for ${date}`);
+      } catch (error) {
+        console.error(`Failed to recalculate stats for ${date}:`, error);
+      }
+    }
+    
+    return { updated, dates };
+  }
+
   async recalculateDailyStats(date: string): Promise<DailyStats> {
     // Count today's events for recalculation (only completion events now)
     // Analytics day starts at 2 AM local time to align with client-side logic
@@ -1588,10 +1616,11 @@ export class DatabaseStorage implements IStorage {
       if (torahActs.includes(modalType) || tefillaActs.includes(modalType) || tzedakaActs.includes(modalType)) {
         totalActs += count;
       }
-      // Also count individual tehillim and womens prayer completions
+      // Also count individual tehillim, womens prayers, and individual brochas
       if (
         modalType.startsWith('individual-tehillim-') ||
-        modalType.startsWith('womens-prayer-')
+        modalType.startsWith('womens-prayer-') ||
+        modalType.startsWith('brocha-')  // Count individual brochas like Asher Yatzar
       ) {
         totalActs += count;
       }

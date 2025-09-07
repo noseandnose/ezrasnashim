@@ -2791,6 +2791,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Recalculate all historical analytics to fix brocha counting
+  app.post("/api/analytics/recalculate-all", async (req, res) => {
+    try {
+      console.log('Starting recalculation of all historical analytics...');
+      const result = await storage.recalculateAllHistoricalStats();
+      console.log(`Completed: Updated ${result.updated} dates`);
+      
+      res.json({ 
+        success: true, 
+        message: `Successfully recalculated analytics for ${result.updated} dates`,
+        datesUpdated: result.updated,
+        dates: result.dates
+      });
+    } catch (error) {
+      console.error('Error recalculating all analytics:', error);
+      res.status(500).json({ message: "Failed to recalculate all analytics" });
+    }
+  });
+
   app.get("/api/analytics/stats/daily", async (req, res) => {
     try {
       // Get stats for the last 30 days
