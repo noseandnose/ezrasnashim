@@ -22,6 +22,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const { tefillaCompleted: _tefillaCompleted } = useDailyCompletionStore();
   const { isModalComplete, completedModals } = useModalCompletionStore();
   const { data: times, isLoading } = useJewishTimes();
+  const [showInfoModal, setShowInfoModal] = useState<'morning-brochas' | 'maariv' | null>(null);
 
   // Prefetch brochas data to speed up loading when user clicks
   useQuery({
