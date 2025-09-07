@@ -1,14 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Clock, Heart, BookOpen, HandHeart, Coins, MapPin, ArrowRight, Sparkles, Star, Sunrise, Sun, Moon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon } from "lucide-react";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
-import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
-import { useHebrewDate, useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
+import { useDeferredJewishTimes, useDeferredGeolocation } from "@/hooks/use-deferred-location";
+import { useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
 import HeartProgress from "@/components/heart-progress";
 import DailyProgress from "@/components/daily-progress";
 import type { Section } from "@/pages/home";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 interface Sponsor {
   name: string;
@@ -26,8 +24,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   
   // Lazy load location and times - only when needed
   const [timesLoaded, setTimesLoaded] = useState(false);
-  const jewishTimesQuery = useJewishTimes(timesLoaded);
-  const { coordinates, permissionDenied } = useGeolocation(timesLoaded);
+  const jewishTimesQuery = useDeferredJewishTimes(timesLoaded);
+  const { coordinates, permissionDenied } = useDeferredGeolocation(timesLoaded);
   const { data: hebrewDate } = useHebrewDateWithShkia(jewishTimesQuery.data?.shkia);
   
   // Load times after initial render
@@ -46,7 +44,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
 
   // Fetch today's sponsor
   const today = new Date().toISOString().split('T')[0];
-  const { data: sponsor, isLoading: sponsorLoading, error: sponsorError } = useQuery<Sponsor>({
+  const { data: sponsor, isLoading: sponsorLoading } = useQuery<Sponsor>({
     queryKey: ['daily-sponsor', today],
     queryFn: async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sponsors/daily/${today}`);
