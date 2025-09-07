@@ -1588,10 +1588,11 @@ export class DatabaseStorage implements IStorage {
       if (torahActs.includes(modalType) || tefillaActs.includes(modalType) || tzedakaActs.includes(modalType)) {
         totalActs += count;
       }
-      // Also count individual tehillim and womens prayer completions
+      // Also count individual tehillim, womens prayers, and individual brochas
       if (
         modalType.startsWith('individual-tehillim-') ||
-        modalType.startsWith('womens-prayer-')
+        modalType.startsWith('womens-prayer-') ||
+        modalType.startsWith('brocha-')  // Count individual brochas like Asher Yatzar
       ) {
         totalActs += count;
       }
