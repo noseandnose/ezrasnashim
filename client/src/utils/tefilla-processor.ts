@@ -305,12 +305,8 @@ export async function getCurrentTefillaConditions(
         );
         
         // Check for Aseret Yemei Teshuva (between Rosh Hashana and Yom Kippur)
-        isAseretYemeiTeshuva = events.some((event: string) => 
-          event.toLowerCase().includes('rosh hashana') ||
-          event.toLowerCase().includes('tzom gedaliah') ||
-          event.toLowerCase().includes('yom kippur')
-        ) || (
-          // Check for days 1-10 of Tishrei using structured data
+        // Days 1-10 of Tishrei
+        isAseretYemeiTeshuva = (
           hebrewDate.hebrewMonth === 'Tishrei' && 
           hebrewDate.hebrewDay >= 1 && 
           hebrewDate.hebrewDay <= 10
