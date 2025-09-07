@@ -82,19 +82,21 @@ export default function Home() {
   }, [navigateToSection]);
 
   const renderSection = () => {
+    // Only render the active section to prevent unnecessary API calls
+    // Each section will load its own data when rendered
     switch (activeSection) {
       case 'home':
-        return <HomeSection onSectionChange={navigateToSection} />;
+        return <HomeSection key="home" onSectionChange={navigateToSection} />;
       case 'torah':
-        return <TorahSection onSectionChange={navigateToSection} />;
+        return <TorahSection key="torah" onSectionChange={navigateToSection} />;
       case 'tefilla':
-        return <TefillaSection onSectionChange={navigateToSection} />;
+        return <TefillaSection key="tefilla" onSectionChange={navigateToSection} />;
       case 'tzedaka':
-        return <TzedakaSection onSectionChange={navigateToSection} />;
+        return <TzedakaSection key="tzedaka" onSectionChange={navigateToSection} />;
       case 'table':
-        return <TableSection />;
+        return <TableSection key="table" />;
       default:
-        return <HomeSection onSectionChange={navigateToSection} />;
+        return <HomeSection key="home-default" onSectionChange={navigateToSection} />;
     }
   };
 
