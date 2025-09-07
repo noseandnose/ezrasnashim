@@ -1,15 +1,14 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import AudioPlayer from "@/components/audio-player";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { formatThankYouMessageFull } from "@/lib/link-formatter";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { Expand, BookOpen } from "lucide-react";
-import type { ParshaVort } from "@shared/schema";
 
 export default function ParshaVortModal() {
   const { activeModal, closeModal } = useModalStore();
@@ -21,13 +20,17 @@ export default function ParshaVortModal() {
 
   const isOpen = activeModal === 'parsha-vort';
 
-  // Fetch parsha vort content
-  const { data: parshaVort, isLoading } = useQuery<ParshaVort>({
+  // This modal was the wrong file - actual modal is in table-modals.tsx
+  // Keeping minimal structure for future use
+  const { data: parshaVort, isLoading } = useQuery<any>({
     queryKey: ['/api/table/vort'],
-    enabled: isOpen, // Only fetch when modal is open
-    staleTime: 60 * 60 * 1000, // 1 hour
-    gcTime: 4 * 60 * 60 * 1000 // 4 hours
+    enabled: isOpen,
+    staleTime: 60 * 60 * 1000,
+    gcTime: 4 * 60 * 60 * 1000,
+    select: (data) => data && data[0]
   });
+  
+
 
   const isCompleted = isModalComplete('parsha-vort');
 
@@ -155,23 +158,30 @@ export default function ParshaVortModal() {
               </div>
             ) : parshaVort ? (
               <div className="space-y-4">
-                {/* Content Preview */}
-                <div className="bg-white/80 rounded-2xl p-4">
-                  <div className="koren-siddur-english text-sm leading-relaxed text-black line-clamp-4">
-                    {parshaVort.content}
-                  </div>
+                {/* Speaker Info */}
+                <div className="text-center">
+                  <span className="text-sm platypi-medium text-black/70">
+                    By {parshaVort.speaker}
+                  </span>
                 </div>
 
-                {/* Speaker Info */}
-                {parshaVort.speaker && (
-                  <div className="text-center">
-                    <span className="text-xs platypi-medium text-black/70">
-                      By {parshaVort.speaker}
-                    </span>
+                {/* Content Preview */}
+                {parshaVort.content && (
+                  <div className="bg-white/80 rounded-2xl p-4">
+                    <div className="koren-siddur-english text-sm leading-relaxed text-black line-clamp-4">
+                      {parshaVort.content}
+                    </div>
                   </div>
                 )}
 
-                {/* Thank You Message Preview */}
+                {/* Audio Player */}
+                <AudioPlayer 
+                  audioUrl={parshaVort.audioUrl} 
+                  title={parshaVort.title}
+                  duration="0:00"
+                />
+
+                {/* Thank You Message */}
                 {parshaVort.thankYouMessage && (
                   <div className="bg-white/60 rounded-xl p-3 text-center">
                     <div 
@@ -181,15 +191,6 @@ export default function ParshaVortModal() {
                       }}
                     />
                   </div>
-                )}
-
-                {/* Audio Player */}
-                {parshaVort.audioUrl && (
-                  <AudioPlayer 
-                    audioUrl={parshaVort.audioUrl} 
-                    title={parshaVort.title || 'Weekly Parsha Vort'}
-                    duration="0:00"
-                  />
                 )}
 
                 {/* Complete Button */}

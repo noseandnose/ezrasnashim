@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import logoImage from "@assets/1LO_1755590090315.png";
+import { FloatingSettings } from './floating-settings';
 
 interface FullscreenModalProps {
   isOpen: boolean;
@@ -52,7 +53,6 @@ export function FullscreenModal({
 
     // Try to handle native browser back gesture by listening for popstate
     const handlePopState = (e: PopStateEvent) => {
-      console.log('Popstate detected in fullscreen modal');
       e.preventDefault();
       onClose();
     };
@@ -140,6 +140,8 @@ export function FullscreenModal({
         // Remove all touch restrictions to allow native browser gestures
         touchAction: 'auto',
         overscrollBehavior: 'auto',
+        // WebKit-specific property for Safari
+        // @ts-ignore
         WebkitOverscrollBehavior: 'auto'
       }}
       onClick={(e) => {
@@ -167,77 +169,19 @@ export function FullscreenModal({
         }}
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <img 
               src={logoImage} 
               alt="Ezras Nashim" 
               className="h-5 w-auto"
             />
-            
-            {/* Language Selector */}
-            {showLanguageControls && onLanguageChange && (
-              <div className="flex bg-gray-100 rounded-lg p-1">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onLanguageChange('hebrew');
-                  }}
-                  className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-                    language === 'hebrew' 
-                      ? 'bg-white text-black shadow-sm' 
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  עב
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onLanguageChange('english');
-                  }}
-                  className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-                    language === 'english' 
-                      ? 'bg-white text-black shadow-sm' 
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  EN
-                </button>
-              </div>
-            )}
           </div>
 
-          <h1 className="text-lg font-semibold text-gray-900 truncate text-center flex-1 mx-4">
+          <h1 className="text-lg font-semibold text-gray-900 text-center flex-1 mx-4">
             {title}
           </h1>
           
-          <div className="flex items-center gap-2">
-            {/* Font Size Controls */}
-            {showFontControls && onFontSizeChange && (
-              <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onFontSizeChange(Math.max(12, (fontSize || 16) - 2));
-                  }}
-                  className="w-6 h-6 flex items-center justify-center rounded text-xs font-bold text-gray-600 hover:text-gray-900 hover:bg-white transition-colors"
-                  aria-label="Decrease font size"
-                >
-                  A-
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onFontSizeChange(Math.min(28, (fontSize || 16) + 2));
-                  }}
-                  className="w-6 h-6 flex items-center justify-center rounded text-xs font-bold text-gray-600 hover:text-gray-900 hover:bg-white transition-colors"
-                  aria-label="Increase font size"
-                >
-                  A+
-                </button>
-              </div>
-            )}
-            
+          <div className="flex items-center">
             <button
               onClick={(e) => {
                 e.preventDefault();
@@ -277,6 +221,18 @@ export function FullscreenModal({
             ? (children as (params: { language: 'hebrew' | 'english', fontSize: number }) => React.ReactNode)({ language: language || 'hebrew', fontSize: fontSize || 16 }) 
             : children}
         </div>
+        
+        {/* Floating Settings Button */}
+        {(showFontControls || showLanguageControls) && (
+          <FloatingSettings
+            showFontControls={showFontControls}
+            fontSize={fontSize}
+            onFontSizeChange={onFontSizeChange}
+            showLanguageControls={showLanguageControls}
+            language={language}
+            onLanguageChange={onLanguageChange}
+          />
+        )}
       </div>
     </div>
   );

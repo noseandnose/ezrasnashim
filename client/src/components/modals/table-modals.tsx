@@ -198,7 +198,19 @@ export default function TableModals() {
 
   const { data: parshaContent } = useQuery<ParshaContent>({
     queryKey: ['/api/table/vort'],
-    enabled: activeModal === 'parsha'
+    enabled: activeModal === 'parsha' || activeModal === 'parsha-vort',
+    select: (data) => {
+      if (!data || !Array.isArray(data)) return null;
+      
+      // Filter to only show currently active vorts based on date range
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+      const activeVorts = data.filter((vort: any) => {
+        if (!vort.fromDate || !vort.untilDate) return false;
+        return today >= vort.fromDate && today <= vort.untilDate;
+      });
+      
+      return activeVorts[0] || null; // Return first active vort
+    }
   });
 
   return (
@@ -671,7 +683,7 @@ export default function TableModals() {
 
 
       {/* Parsha Shiur Modal */}
-      <Dialog open={activeModal === 'parsha'} onOpenChange={() => closeModal(true)}>
+      <Dialog open={activeModal === 'parsha' || activeModal === 'parsha-vort'} onOpenChange={() => closeModal(true)}>
         <DialogContent>
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg platypi-bold text-black">Parsha Shiur</DialogTitle>
@@ -680,6 +692,13 @@ export default function TableModals() {
             {parshaContent?.title || "This Week's Torah Portion"}
           </p>
           
+          {/* Speaker Info */}
+          {parshaContent?.speaker && (
+            <p className="text-xs text-gray-500 mb-3 text-center">
+              By {parshaContent.speaker}
+            </p>
+          )}
+          
           <AudioPlayer 
             title={parshaContent?.title || "Parsha Shiur"}
             duration={parshaContent?.duration || "0:00"}
@@ -687,7 +706,7 @@ export default function TableModals() {
           />
 
           <Button 
-            onClick={() => handleComplete('parsha')}
+            onClick={() => handleComplete(activeModal === 'parsha-vort' ? 'parsha-vort' : 'parsha')}
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
           >
             Completed Parsha
@@ -888,10 +907,10 @@ export default function TableModals() {
                   className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                     isModalComplete('recipe') 
                       ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
+                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
                   }`}
                 >
-                  {isModalComplete('recipe') ? 'Completed Today' : 'Complete'}
+                  {isModalComplete('recipe') ? 'Completed Today' : 'Done'}
                 </Button>
               </div>
             </div>

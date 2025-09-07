@@ -15,6 +15,7 @@ import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
 import logoPath from '@assets/EN App Icon_1756705023411.png';
 import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
+import { initializePerformance, whenIdle } from "./lib/startup-performance";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));
@@ -42,12 +43,16 @@ function Router() {
   // Track page views when routes change
   useAnalytics();
   
-  // Initialize geolocation and preload Jewish times on app startup
+  // Initialize location immediately for accurate prayer times
   useGeolocation();
   useJewishTimes();
   
-  // Initialize cache system and register service worker
+  // Initialize critical systems
   useEffect(() => {
+    // Initialize performance optimizations
+    initializePerformance();
+    
+    // Initialize cache system
     initializeCache();
     
     // One-time cleanup of stale modal completion data
@@ -75,7 +80,10 @@ function Router() {
       }
     };
     
-    cleanupModalCompletions();
+    // Low priority: Clean up modal completions when idle
+    whenIdle(() => {
+      cleanupModalCompletions();
+    }, 3000);
   }, []);
   
   return (

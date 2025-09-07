@@ -1,14 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Clock, Heart, BookOpen, HandHeart, Coins, MapPin, ArrowRight, Sparkles, Star, Sunrise, Sun, Moon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Info } from "lucide-react";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
-import { useHebrewDate, useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
+import { useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
 import HeartProgress from "@/components/heart-progress";
 import DailyProgress from "@/components/daily-progress";
 import type { Section } from "@/pages/home";
 import { useMemo } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Sponsor {
   name: string;
@@ -23,6 +27,8 @@ interface HomeSectionProps {
 export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   const { openModal } = useModalStore();
   const { torahCompleted, tefillaCompleted, tzedakaCompleted } = useDailyCompletionStore();
+  
+  // Load location immediately on startup for accurate times
   const jewishTimesQuery = useJewishTimes();
   const { coordinates, permissionDenied } = useGeolocation();
   const { data: hebrewDate } = useHebrewDateWithShkia(jewishTimesQuery.data?.shkia);
@@ -37,20 +43,20 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
 
   // Fetch today's sponsor
   const today = new Date().toISOString().split('T')[0];
-  const { data: sponsor, isLoading: sponsorLoading, error: sponsorError } = useQuery<Sponsor>({
-    queryKey: ['daily-sponsor', today, 'v2'], // Added version to bust cache
+  const { data: sponsor, isLoading: sponsorLoading } = useQuery<Sponsor>({
+    queryKey: ['daily-sponsor', today],
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sponsors/daily/${today}?t=${Date.now()}`); // Cache busting
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sponsors/daily/${today}`);
       if (!response.ok) {
         return null;
       }
       const data = await response.json();
       return data;
     },
-    staleTime: 0, // No caching - always fresh
-    gcTime: 1000, // Short cache time
-    refetchOnMount: true,
-    refetchOnWindowFocus: true // Refresh when window gets focus
+    staleTime: 60 * 60 * 1000, // Cache for 1 hour
+    gcTime: 2 * 60 * 60 * 1000, // Keep in cache for 2 hours
+    refetchOnMount: false,
+    refetchOnWindowFocus: false // Don't refetch on focus
   });
 
 
@@ -192,18 +198,46 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         {/* Times Section - Time-based Prayer and Shkia */}
         <div className="grid grid-cols-2 gap-2">
           {/* Time-based Prayer - Dynamic based on current time */}
-          <button 
-            onClick={() => openModal(currentPrayer.modal, 'tefilla')}
-            className="bg-white/80 rounded-xl p-3 text-center border border-blush/20 hover:scale-105 transition-all duration-300 hover:bg-white/95"
-          >
-            <div className="flex items-center justify-center mb-1">
-              <div className="bg-gradient-feminine p-1.5 rounded-full mr-1">
-                <PrayerIcon className="text-white" size={12} />
+          <div className="relative">
+            <button 
+              onClick={() => openModal(currentPrayer.modal, 'tefilla')}
+              className="w-full bg-white/80 rounded-xl p-3 text-center border border-blush/20 hover:scale-105 transition-all duration-300 hover:bg-white/95"
+            >
+              <div className="flex items-center justify-center mb-1">
+                <div className="bg-gradient-feminine p-1.5 rounded-full mr-1">
+                  <PrayerIcon className="text-white" size={12} />
+                </div>
               </div>
-            </div>
-            <p className="platypi-bold text-sm text-black mb-0.5">{currentPrayer.title}</p>
-            <p className="platypi-bold text-xs text-black leading-tight">{currentPrayer.subtitle}</p>
-          </button>
+              <p className="platypi-bold text-sm text-black mb-0.5">{currentPrayer.title}</p>
+              <p className="platypi-bold text-xs text-black leading-tight">{currentPrayer.subtitle}</p>
+            </button>
+            {/* Info icon for Morning Brochas and Maariv */}
+            {(currentPrayer.modal === 'morning-brochas' || currentPrayer.modal === 'maariv') && jewishTimesQuery.data && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button 
+                      className="absolute top-1 right-1 p-1 hover:bg-blush/10 rounded-full transition-colors" 
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Info className="text-blush/60" size={12} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs p-3 bg-white border border-blush/20 shadow-lg">
+                    {currentPrayer.modal === 'morning-brochas' ? (
+                      <p className="text-xs text-black">
+                        Birchos Kriyas Shema should not be recited after {jewishTimesQuery.data.sofZmanTfillah || jewishTimesQuery.data.chatzos}.
+                      </p>
+                    ) : currentPrayer.modal === 'maariv' ? (
+                      <p className="text-xs text-black">
+                        In a case of pressing need, Maariv can be recited from {jewishTimesQuery.data.plagHamincha} if, and only if, Mincha was recited that day before {jewishTimesQuery.data.plagHamincha}. In a case of pressing need, Maariv may be davened until {jewishTimesQuery.data.alosHashachar} (instead of Chatzos Haleiyla {jewishTimesQuery.data.chatzos}) of the next day.
+                      </p>
+                    ) : null}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
 
           {/* Shkia - Display Only */}
           <div className="bg-white/80 rounded-xl p-3 text-center border border-blush/20">

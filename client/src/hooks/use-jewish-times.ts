@@ -60,9 +60,11 @@ export const useLocationStore = create<LocationState>((set, get) => ({
     
     if (cachedLocation && cacheTimestamp) {
       const age = Date.now() - parseInt(cacheTimestamp);
-      if (age < 24 * 60 * 60 * 1000) { // 24 hour cache
+      // Use shorter cache time for more accurate location
+      if (age < 4 * 60 * 60 * 1000) { // 4 hour cache instead of 24
         try {
           const parsed = JSON.parse(cachedLocation);
+          console.log('Using cached location:', parsed);
           set({ coordinates: parsed, location: '', permissionDenied: false });
           return true;
         } catch (e) {
@@ -70,6 +72,11 @@ export const useLocationStore = create<LocationState>((set, get) => ({
           localStorage.removeItem('user-location');
           localStorage.removeItem('user-location-time');
         }
+      } else {
+        // Cache is stale, clear it
+        console.log('Location cache is stale, clearing');
+        localStorage.removeItem('user-location');
+        localStorage.removeItem('user-location-time');
       }
     }
     
@@ -79,9 +86,10 @@ export const useLocationStore = create<LocationState>((set, get) => ({
     
     if (fallbackLocation && fallbackTimestamp) {
       const age = Date.now() - parseInt(fallbackTimestamp);
-      if (age < 7 * 24 * 60 * 60 * 1000) { // 7 day cache for IP location
+      if (age < 24 * 60 * 60 * 1000) { // 24 hour cache for IP location
         try {
           const parsed = JSON.parse(fallbackLocation);
+          console.log('Using IP fallback location:', parsed);
           set({ coordinates: parsed, location: '', permissionDenied: false });
           return true;
         } catch (e) {
@@ -160,19 +168,7 @@ export function useGeolocation() {
         return; // Successfully loaded from cache
       }
 
-      // Check if browser supports permissions API
-      if (navigator.permissions) {
-        try {
-          const permission = await navigator.permissions.query({ name: 'geolocation' });
-          if (permission.state === 'denied') {
-            setPermissionDenied(true);
-            setLocationRequested(true);
-            return;
-          }
-        } catch (err) {
-          // Could not check permission
-        }
-      }
+      // Skip permission check for faster startup - just try to get location
 
       if (!locationRequested && !coordinates && !permissionDenied) {
         setLocationRequested(true);
@@ -181,41 +177,42 @@ export function useGeolocation() {
           setPermissionDenied(true);
           return;
         }
+        // Get location with optimized settings
         navigator.geolocation.getCurrentPosition(
           (position) => {
             const coords = {
               lat: position.coords.latitude,
               lng: position.coords.longitude,
             };
+            console.log('Got accurate location:', coords);
             setCoordinates(coords);
             
             // Cache the location
             localStorage.setItem('user-location', JSON.stringify(coords));
             localStorage.setItem('user-location-time', Date.now().toString());
           },
-          (error) => {
-            if (error.code === error.PERMISSION_DENIED) {
-              // User denied location permission
-            } else if (error.code === error.POSITION_UNAVAILABLE) {
-              // Location unavailable
-            } else if (error.code === error.TIMEOUT) {
-              // Location request timeout
-            }
+          async (error) => {
+            console.log('Location error, trying IP fallback:', error.message);
             setPermissionDenied(true);
-            // Don't set fallback coordinates - require accurate location
+            // Try IP-based location as fallback
+            try {
+              const store = useLocationStore.getState();
+              await store.useIPLocation();
+            } catch (ipError) {
+              console.error('IP location also failed:', ipError);
+            }
           },
           {
             enableHighAccuracy: false, // Use cached location for performance
-            timeout: 8000, // Reduce timeout
-            maximumAge: 60 * 60 * 1000, // Use 1-hour cache from device GPS
+            timeout: 3000, // Even faster timeout to get to IP fallback quicker
+            maximumAge: 10 * 60 * 1000, // Use fresher cache (10 minutes)
           },
         );
       }
     };
 
-    // Immediate execution for faster startup, debounced only on re-renders
-    const timeoutId = setTimeout(checkLocationPermission, coordinates ? 1000 : 0);
-    return () => clearTimeout(timeoutId);
+    // Execute immediately for fastest location detection
+    checkLocationPermission();
   }, [
     locationRequested,
     coordinates,

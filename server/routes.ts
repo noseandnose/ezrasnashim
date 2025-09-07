@@ -1360,11 +1360,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         now.setDate(now.getDate() - 1);
       }
       const today = now.toISOString().split('T')[0];
-      const vort = await storage.getParshaVortByDate(today);
-      res.json(vort || null);
+      const vorts = await storage.getParshaVortsByDate(today);
+      res.json(vorts);
     } catch (error) {
-      console.error('Error fetching Parsha vort:', error);
-      res.status(500).json({ message: "Failed to fetch Parsha vort" });
+      console.error('Error fetching Parsha vorts:', error);
+      res.status(500).json({ message: "Failed to fetch Parsha vorts" });
     }
   });
 
@@ -1374,6 +1374,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const vort = await storage.createParshaVort(validatedData);
       res.json(vort);
     } catch (error) {
+      console.error('Error creating Parsha vort:', error);
       res.status(500).json({ message: "Failed to create Parsha vort" });
     }
   });
@@ -2828,13 +2829,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // IP-based location detection (works with VPN)
   app.get("/api/location/ip", async (req, res) => {
     try {
-      // Get client IP address
-      const clientIP = req.headers['x-forwarded-for'] || 
+      // Get client IP address - handle multiple IPs by taking the first one
+      let clientIP = req.headers['x-forwarded-for'] || 
                       req.headers['x-real-ip'] || 
                       req.connection.remoteAddress || 
                       req.socket.remoteAddress ||
                       (req.connection as any)?.socket?.remoteAddress ||
                       '127.0.0.1';
+      
+      // If x-forwarded-for contains multiple IPs, take the first one
+      if (typeof clientIP === 'string' && clientIP.includes(',')) {
+        clientIP = clientIP.split(',')[0].trim();
+      }
+      
+      // Remove IPv6 prefix if present
+      if (typeof clientIP === 'string' && clientIP.startsWith('::ffff:')) {
+        clientIP = clientIP.replace('::ffff:', '');
+      }
       
       console.log('IP-based location detection for IP:', clientIP);
       

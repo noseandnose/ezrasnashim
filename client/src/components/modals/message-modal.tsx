@@ -1,12 +1,9 @@
-import { useState } from "react";
+// Remove unused useState import
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Settings, Bell } from "lucide-react";
 import type { Message } from "@shared/schema";
-import { MobilePermissionsGuide } from "@/components/mobile-permissions-guide";
-import { isMobileApp } from "@/utils/mobile-app-detection";
 
 interface MessageModalProps {
   isOpen: boolean;
@@ -15,7 +12,6 @@ interface MessageModalProps {
 }
 
 export default function MessageModal({ isOpen, onClose, date }: MessageModalProps) {
-  const [showPermissionGuide, setShowPermissionGuide] = useState(false);
   
   const { data: message, isLoading } = useQuery<Message>({
     queryKey: [`/api/messages/${date}`],
@@ -59,26 +55,6 @@ export default function MessageModal({ isOpen, onClose, date }: MessageModalProp
           )}
         </div>
         
-        {/* Mobile App Notification Permission Helper */}
-        {isMobileApp() && (
-          <div className="bg-gradient-to-r from-lavender-50 to-rose-50 rounded-2xl p-4 border border-lavender/20 mb-4">
-            <div className="flex items-center gap-3 mb-2">
-              <Bell className="w-5 h-5 text-blush" />
-              <p className="platypi-medium text-black">Get Notifications?</p>
-            </div>
-            <p className="text-sm text-gray-700 mb-3 platypi-regular">
-              Enable notifications to receive updates about new messages and features.
-            </p>
-            <Button
-              onClick={() => setShowPermissionGuide(true)}
-              variant="outline"
-              size="sm"
-              className="w-full rounded-xl border-blush/30 text-blush hover:bg-blush/5"
-            >
-              Show Notification Guide
-            </Button>
-          </div>
-        )}
         
         <div className="flex-shrink-0 pt-4">
           <Button 
@@ -90,11 +66,6 @@ export default function MessageModal({ isOpen, onClose, date }: MessageModalProp
         </div>
       </DialogContent>
       
-      <MobilePermissionsGuide
-        isOpen={showPermissionGuide}
-        onClose={() => setShowPermissionGuide(false)}
-        permissionType="notifications"
-      />
     </Dialog>
   );
 }

@@ -63,6 +63,7 @@ export const tehillimCache = new MemoryCache<{ text: string; perek: number; lang
 export const pirkeiAvotCache = new MemoryCache<{ text: string; chapter: number; source: string }>(10);
 export const torahContentCache = new MemoryCache<unknown>(20);
 export const zmanimCache = new MemoryCache<Record<string, unknown>>(5);
+export const apiCache = new MemoryCache<unknown>(50); // General API cache
 
 // Cache key generators
 export const getCacheKey = {
@@ -74,39 +75,25 @@ export const getCacheKey = {
   campaigns: () => 'campaigns_active'
 };
 
-// Preload critical data
+// Preload critical data - now deferred to avoid blocking startup
 export async function preloadCriticalData(): Promise<void> {
-  const today = getLocalDateString();
-  
-  try {
-    // Preload today's Pirkei Avot if not cached
-    const pirkeiAvotKey = getCacheKey.pirkeiAvot(today);
-    if (!pirkeiAvotCache.has(pirkeiAvotKey)) {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/torah/pirkei-avot/${today}`);
-      if (response.ok) {
-        const data = await response.json();
-        pirkeiAvotCache.set(pirkeiAvotKey, data, 24 * 60 * 60 * 1000); // 24 hours
+  // Defer preloading to prevent blocking initial render
+  setTimeout(async () => {
+    const today = getLocalDateString();
+    
+    try {
+      // Only preload the most critical data
+      // Sponsors are frequently accessed on home page
+      const sponsorKey = getCacheKey.sponsors(today);
+      const sponsorResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/sponsors/daily/${today}`);
+      if (sponsorResponse.ok) {
+        const sponsorData = await sponsorResponse.json();
+        apiCache.set(sponsorKey, sponsorData, 60 * 60 * 1000); // 1 hour cache
       }
+    } catch (error) {
+      // Silently fail - this is just optimization
     }
-
-    // Preload current Tehillim if not cached
-    const progressResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tehillim/progress`);
-    if (progressResponse.ok) {
-      const progress = await progressResponse.json();
-      const tehillimKey = getCacheKey.tehillim(progress.currentPerek, 'hebrew');
-      if (!tehillimCache.has(tehillimKey)) {
-        const textResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tehillim/text/${progress.currentPerek}`);
-        if (textResponse.ok) {
-          const textData = await textResponse.json();
-          tehillimCache.set(tehillimKey, textData, 60 * 60 * 1000); // 1 hour
-        }
-      }
-    }
-  } catch (error) {
-    if (import.meta.env.MODE === 'development') {
-      console.log('Preload failed:', error);
-    }
-  }
+  }, 3000); // Wait 3 seconds after app loads
 }
 
 // Cleanup expired cache entries
