@@ -15,6 +15,7 @@ import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
 import logoPath from '@assets/EN App Icon_1756705023411.png';
 import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
+import { initializePerformance, whenIdle, LoadPriority, deferredLoad } from "./lib/startup-performance";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));
@@ -42,13 +43,16 @@ function Router() {
   // Track page views when routes change
   useAnalytics();
   
-  // Initialize geolocation and preload Jewish times on app startup
-  useGeolocation();
-  useJewishTimes();
-  
-  // Initialize cache system and register service worker
+  // Defer non-critical initialization
   useEffect(() => {
-    initializeCache();
+    // Critical: Initialize performance optimizations
+    initializePerformance();
+    
+    // High priority: Initialize cache after initial render
+    deferredLoad('cache-init', async () => {
+      initializeCache();
+      return true;
+    }, LoadPriority.HIGH);
     
     // One-time cleanup of stale modal completion data
     const cleanupModalCompletions = () => {
@@ -75,7 +79,10 @@ function Router() {
       }
     };
     
-    cleanupModalCompletions();
+    // Low priority: Clean up modal completions when idle
+    whenIdle(() => {
+      cleanupModalCompletions();
+    }, 3000);
   }, []);
   
   return (

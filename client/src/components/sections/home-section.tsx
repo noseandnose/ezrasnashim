@@ -23,9 +23,18 @@ interface HomeSectionProps {
 export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   const { openModal } = useModalStore();
   const { torahCompleted, tefillaCompleted, tzedakaCompleted } = useDailyCompletionStore();
-  const jewishTimesQuery = useJewishTimes();
-  const { coordinates, permissionDenied } = useGeolocation();
+  
+  // Lazy load location and times - only when needed
+  const [timesLoaded, setTimesLoaded] = useState(false);
+  const jewishTimesQuery = useJewishTimes(timesLoaded);
+  const { coordinates, permissionDenied } = useGeolocation(timesLoaded);
   const { data: hebrewDate } = useHebrewDateWithShkia(jewishTimesQuery.data?.shkia);
+  
+  // Load times after initial render
+  useEffect(() => {
+    const timer = setTimeout(() => setTimesLoaded(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Get time-appropriate greeting
   const getGreeting = () => {
@@ -38,19 +47,19 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   // Fetch today's sponsor
   const today = new Date().toISOString().split('T')[0];
   const { data: sponsor, isLoading: sponsorLoading, error: sponsorError } = useQuery<Sponsor>({
-    queryKey: ['daily-sponsor', today, 'v2'], // Added version to bust cache
+    queryKey: ['daily-sponsor', today],
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sponsors/daily/${today}?t=${Date.now()}`); // Cache busting
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sponsors/daily/${today}`);
       if (!response.ok) {
         return null;
       }
       const data = await response.json();
       return data;
     },
-    staleTime: 0, // No caching - always fresh
-    gcTime: 1000, // Short cache time
-    refetchOnMount: true,
-    refetchOnWindowFocus: true // Refresh when window gets focus
+    staleTime: 60 * 60 * 1000, // Cache for 1 hour
+    gcTime: 2 * 60 * 60 * 1000, // Keep in cache for 2 hours
+    refetchOnMount: false,
+    refetchOnWindowFocus: false // Don't refetch on focus
   });
 
 
