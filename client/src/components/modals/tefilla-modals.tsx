@@ -148,7 +148,11 @@ const processTefillaContent = (text: string, conditions: TefillaConditions | nul
   };
   
   const effectiveConditions = conditions || defaultConditions;
+  
+  // Process conditional text FIRST (removes/shows conditional sections)
   const processedText = processTefillaText(text, effectiveConditions);
+  
+  // Then format the resulting text (bold, italics, etc)
   return formatTextContent(processedText);
 };
 
