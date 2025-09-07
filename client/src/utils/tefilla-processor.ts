@@ -43,6 +43,10 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
   if (!text) return text;
 
   let processedText = text;
+  
+  // Extract selectedFoodTypes if present
+  const extendedConditions = conditions as any;
+  const selectedFoodTypes = extendedConditions?.selectedFoodTypes || {};
 
   // Define condition checkers for all special conditions
   const conditionCheckers = {
@@ -55,9 +59,9 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     PESACH: () => conditions.isPesach,
     ROSH_CHODESH_SPECIAL: () => !conditions.isRoshChodeshSpecial, // Exclusion logic: shows when NOT in special periods
     // Me'ein Shalosh food selection conditions
-    grain: () => (conditions as any)?.selectedFoodTypes?.grain || false,
-    wine: () => (conditions as any)?.selectedFoodTypes?.wine || false,
-    fruit: () => (conditions as any)?.selectedFoodTypes?.fruit || false
+    grain: () => selectedFoodTypes.grain === true,
+    wine: () => selectedFoodTypes.wine === true,
+    fruit: () => selectedFoodTypes.fruit === true
   };
 
 
