@@ -53,17 +53,17 @@ export function FloatingSettings({
               {/* Language Selector */}
               {showLanguageControls && onLanguageChange && (
                 <div>
-                  <p className="text-sm font-medium text-gray-700 mb-2">Language</p>
-                  <div className="flex bg-gray-100 rounded-lg p-1">
+                  <p className="text-sm font-medium text-gray-700 mb-2 text-center">Language</p>
+                  <div className="flex bg-gradient-feminine rounded-2xl p-1">
                     <button
                       onClick={() => {
                         onLanguageChange('hebrew');
                         setIsDrawerOpen(false);
                       }}
-                      className={`px-3 py-2 rounded text-sm font-medium transition-colors flex-1 ${
+                      className={`px-3 py-2 rounded-xl text-sm font-medium transition-colors flex-1 ${
                         language === 'hebrew' 
                           ? 'bg-white text-black shadow-sm' 
-                          : 'text-gray-600 hover:text-gray-900'
+                          : 'text-white hover:text-gray-100'
                       }`}
                     >
                       עברית
@@ -73,10 +73,10 @@ export function FloatingSettings({
                         onLanguageChange('english');
                         setIsDrawerOpen(false);
                       }}
-                      className={`px-3 py-2 rounded text-sm font-medium transition-colors flex-1 ${
+                      className={`px-3 py-2 rounded-xl text-sm font-medium transition-colors flex-1 ${
                         language === 'english' 
                           ? 'bg-white text-black shadow-sm' 
-                          : 'text-gray-600 hover:text-gray-900'
+                          : 'text-white hover:text-gray-100'
                       }`}
                     >
                       English
@@ -88,21 +88,21 @@ export function FloatingSettings({
               {/* Font Size Controls */}
               {showFontControls && onFontSizeChange && (
                 <div>
-                  <p className="text-sm font-medium text-gray-700 mb-2">Font Size</p>
-                  <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-2">
+                  <p className="text-sm font-medium text-gray-700 mb-2 text-center">Font Size</p>
+                  <div className="flex items-center justify-center gap-2 bg-gradient-feminine rounded-2xl p-2">
                     <button
                       onClick={() => onFontSizeChange(Math.max(12, (fontSize || 16) - 2))}
-                      className="w-8 h-8 flex items-center justify-center rounded bg-white text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors shadow-sm"
+                      className="w-8 h-8 flex items-center justify-center rounded-xl bg-white text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors shadow-sm"
                       aria-label="Decrease font size"
                     >
                       A-
                     </button>
-                    <span className="text-sm text-gray-600 font-medium px-2">
+                    <span className="text-sm text-white font-medium px-2">
                       {fontSize || 16}px
                     </span>
                     <button
                       onClick={() => onFontSizeChange(Math.min(28, (fontSize || 16) + 2))}
-                      className="w-8 h-8 flex items-center justify-center rounded bg-white text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors shadow-sm"
+                      className="w-8 h-8 flex items-center justify-center rounded-xl bg-white text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors shadow-sm"
                       aria-label="Increase font size"
                     >
                       A+
