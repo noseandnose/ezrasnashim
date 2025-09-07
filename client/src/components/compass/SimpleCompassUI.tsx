@@ -60,7 +60,7 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
     };
   }, [state.isAligned, vibrationInterval]);
   
-  const deviceInfo = getDeviceInfo();
+  // Removed device-specific detection
   
   const handleEnableCompass = async () => {
     await compass.requestPermission();
