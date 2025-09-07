@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import logoImage from "@assets/1LO_1755590090315.png";
 import { FloatingSettings } from './floating-settings';
@@ -140,6 +140,8 @@ export function FullscreenModal({
         // Remove all touch restrictions to allow native browser gestures
         touchAction: 'auto',
         overscrollBehavior: 'auto',
+        // WebKit-specific property for Safari
+        // @ts-ignore
         WebkitOverscrollBehavior: 'auto'
       }}
       onClick={(e) => {
@@ -221,14 +223,16 @@ export function FullscreenModal({
         </div>
         
         {/* Floating Settings Button */}
-        <FloatingSettings
-          showFontControls={showFontControls}
-          fontSize={fontSize}
-          onFontSizeChange={onFontSizeChange}
-          showLanguageControls={showLanguageControls}
-          language={language}
-          onLanguageChange={onLanguageChange}
-        />
+        {(showFontControls || showLanguageControls) && (
+          <FloatingSettings
+            showFontControls={showFontControls}
+            fontSize={fontSize}
+            onFontSizeChange={onFontSizeChange}
+            showLanguageControls={showLanguageControls}
+            language={language}
+            onLanguageChange={onLanguageChange}
+          />
+        )}
       </div>
     </div>
   );
