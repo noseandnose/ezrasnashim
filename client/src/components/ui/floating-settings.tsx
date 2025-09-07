@@ -5,11 +5,11 @@ interface FloatingSettingsProps {
   // Font Controls
   showFontControls?: boolean;
   fontSize?: number;
-  onFontSizeChange?: (size: number) => void;
+  onFontSizeChange?: ((size: number) => void) | undefined;
   // Language Controls
   showLanguageControls?: boolean;
   language?: 'hebrew' | 'english';
-  onLanguageChange?: (lang: 'hebrew' | 'english') => void;
+  onLanguageChange?: ((lang: 'hebrew' | 'english') => void) | undefined;
 }
 
 export function FloatingSettings({
