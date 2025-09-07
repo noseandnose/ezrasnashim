@@ -647,14 +647,6 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
         selectedFoodTypes: selectedOptions
       };
       
-      // Debug logging
-      console.log('Me\'ein Shalosh Processing:', {
-        selectedOptions,
-        hasConditions: !!conditions,
-        textLength: text?.length,
-        hasConditionalMarkers: text?.includes('[[grain]]') || text?.includes('[[wine]]') || text?.includes('[[fruit]]')
-      });
-      
       processedText = processTefillaText(text, extendedConditions);
     }
     
