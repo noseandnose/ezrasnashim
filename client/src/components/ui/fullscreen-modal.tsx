@@ -53,7 +53,6 @@ export function FullscreenModal({
 
     // Try to handle native browser back gesture by listening for popstate
     const handlePopState = (e: PopStateEvent) => {
-      console.log('Popstate detected in fullscreen modal');
       e.preventDefault();
       onClose();
     };

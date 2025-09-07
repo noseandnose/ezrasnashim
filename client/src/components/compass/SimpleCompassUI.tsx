@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { SimpleCompass, CompassState, getDeviceInfo } from '@/lib/compass';
+import { SimpleCompass, CompassState } from '@/lib/compass';
 import { MapPin, Compass as CompassIcon, Heart } from 'lucide-react';
 
 // Import compass icons
