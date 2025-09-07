@@ -12,11 +12,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
@@ -716,28 +715,27 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             </button>
             {/* Info icon for Morning Brochas and Maariv */}
             {(currentPrayer.modal === 'morning-brochas' || currentPrayer.modal === 'maariv') && !currentPrayer.disabled && times && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div 
-                      className="absolute top-2 right-2 p-1 hover:bg-blush/10 rounded-full transition-colors cursor-help" 
-                    >
-                      <Info className="text-blush/60" size={14} />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs p-3 bg-white border border-blush/20 shadow-lg">
-                    {currentPrayer.modal === 'morning-brochas' ? (
-                      <p className="text-xs text-black">
-                        Birchos Kriyas Shema should not be recited after {times.sofZmanTfillah || times.chatzos}.
-                      </p>
-                    ) : currentPrayer.modal === 'maariv' ? (
-                      <p className="text-xs text-black">
-                        In a case of pressing need, Maariv can be recited from {times.plagHamincha} if, and only if, Mincha was recited that day before {times.plagHamincha}. In a case of pressing need, Maariv may be davened until {times.alosHashachar} (instead of Chatzos Haleiyla {times.chatzos}) of the next day.
-                      </p>
-                    ) : null}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button 
+                    className="absolute top-2 right-2 p-1.5 hover:bg-blush/10 active:bg-blush/20 rounded-full transition-colors" 
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Info className="text-blush/60" size={14} />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72 p-3 bg-white border border-blush/20 shadow-lg" side="bottom" align="end">
+                  {currentPrayer.modal === 'morning-brochas' ? (
+                    <p className="text-xs text-black">
+                      Birchos Kriyas Shema should not be recited after {times.sofZmanTfillah || times.chatzos}.
+                    </p>
+                  ) : currentPrayer.modal === 'maariv' ? (
+                    <p className="text-xs text-black">
+                      In a case of pressing need, Maariv can be recited from {times.plagHamincha} if, and only if, Mincha was recited that day before {times.plagHamincha}. In a case of pressing need, Maariv may be davened until {times.alosHashachar} (instead of Chatzos Haleiyla {times.chatzos}) of the next day.
+                    </p>
+                  ) : null}
+                </PopoverContent>
+              </Popover>
             )}
           </div>
 
