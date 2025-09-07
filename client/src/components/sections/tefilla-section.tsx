@@ -1,4 +1,4 @@
-import { HandHeart, Plus, User, AlertCircle, Heart, Star, Compass, ArrowRight, Baby, HeartHandshake, GraduationCap, Users, Stethoscope, DollarSign, Smile, TrendingUp, Sunrise, Sun, Moon, Stars, Globe, Unlock } from "lucide-react";
+import { HandHeart, Plus, User, AlertCircle, Heart, Star, Compass, ArrowRight, Baby, HeartHandshake, GraduationCap, Users, Stethoscope, DollarSign, Smile, TrendingUp, Sunrise, Sun, Moon, Stars, Globe, Unlock, Info } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -11,6 +11,12 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
@@ -669,44 +675,72 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       <div className="py-2 space-y-2">
         {/* Top Row: Morning Brochas and Mincha */}
         <div className="grid grid-cols-2 gap-2">
-          <button 
-            onClick={() => {
-              // Only open modal if not disabled
-              if (!currentPrayer.disabled) {
-                openModal(currentPrayer.modal, 'tefilla');
-              }
-            }}
-            disabled={currentPrayer.disabled}
-            className={`rounded-3xl p-3 text-center transition-all duration-300 shadow-lg border border-blush/10 ${
-              currentPrayer.disabled 
-                ? 'bg-gray-100 opacity-60 cursor-not-allowed' 
-                : isModalComplete(currentPrayer.modal) 
-                  ? 'bg-sage/20 hover:scale-105' 
-                  : 'bg-white hover:scale-105'
-            }`}
-          >
-            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              currentPrayer.disabled 
-                ? 'bg-gray-300' 
-                : isModalComplete(currentPrayer.modal) 
-                  ? 'bg-sage' 
-                  : 'bg-gradient-feminine'
-            }`}>
-              {currentPrayer.modal === 'morning-brochas' ? (
-                <Sunrise className={currentPrayer.disabled ? "text-gray-500" : "text-white"} size={18} />
-              ) : currentPrayer.modal === 'mincha' ? (
-                <Sun className={currentPrayer.disabled ? "text-gray-500" : "text-white"} size={18} />
-              ) : (
-                <Moon className={currentPrayer.disabled ? "text-gray-500" : "text-white"} size={18} />
-              )}
-            </div>
-            <h3 className={`platypi-bold text-sm mb-1 ${currentPrayer.disabled ? 'text-gray-500' : 'text-black'}`}>
-              {currentPrayer.title}
-            </h3>
-            <p className={`platypi-regular text-xs ${currentPrayer.disabled ? 'text-gray-400' : 'text-black/60'}`}>
-              {isModalComplete(currentPrayer.modal) ? 'Completed' : currentPrayer.subtitle}
-            </p>
-          </button>
+          <div className="relative">
+            <button 
+              onClick={() => {
+                // Only open modal if not disabled
+                if (!currentPrayer.disabled) {
+                  openModal(currentPrayer.modal, 'tefilla');
+                }
+              }}
+              disabled={currentPrayer.disabled}
+              className={`w-full rounded-3xl p-3 text-center transition-all duration-300 shadow-lg border border-blush/10 ${
+                currentPrayer.disabled 
+                  ? 'bg-gray-100 opacity-60 cursor-not-allowed' 
+                  : isModalComplete(currentPrayer.modal) 
+                    ? 'bg-sage/20 hover:scale-105' 
+                    : 'bg-white hover:scale-105'
+              }`}
+            >
+              <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
+                currentPrayer.disabled 
+                  ? 'bg-gray-300' 
+                  : isModalComplete(currentPrayer.modal) 
+                    ? 'bg-sage' 
+                    : 'bg-gradient-feminine'
+              }`}>
+                {currentPrayer.modal === 'morning-brochas' ? (
+                  <Sunrise className={currentPrayer.disabled ? "text-gray-500" : "text-white"} size={18} />
+                ) : currentPrayer.modal === 'mincha' ? (
+                  <Sun className={currentPrayer.disabled ? "text-gray-500" : "text-white"} size={18} />
+                ) : (
+                  <Moon className={currentPrayer.disabled ? "text-gray-500" : "text-white"} size={18} />
+                )}
+              </div>
+              <h3 className={`platypi-bold text-sm mb-1 ${currentPrayer.disabled ? 'text-gray-500' : 'text-black'}`}>
+                {currentPrayer.title}
+              </h3>
+              <p className={`platypi-regular text-xs ${currentPrayer.disabled ? 'text-gray-400' : 'text-black/60'}`}>
+                {isModalComplete(currentPrayer.modal) ? 'Completed' : currentPrayer.subtitle}
+              </p>
+            </button>
+            {/* Info icon for Morning Brochas and Maariv */}
+            {(currentPrayer.modal === 'morning-brochas' || currentPrayer.modal === 'maariv') && !currentPrayer.disabled && times && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button 
+                      className="absolute top-2 right-2 p-1 hover:bg-blush/10 rounded-full transition-colors" 
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Info className="text-blush/60" size={14} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs p-3 bg-white border border-blush/20 shadow-lg">
+                    {currentPrayer.modal === 'morning-brochas' ? (
+                      <p className="text-xs text-black">
+                        Birchos Kriyas Shema should not be recited after {times.sofZmanTfillah || times.chatzos}.
+                      </p>
+                    ) : currentPrayer.modal === 'maariv' ? (
+                      <p className="text-xs text-black">
+                        In a case of pressing need, Maariv can be recited from {times.plagHamincha} if, and only if, Mincha was recited that day before {times.plagHamincha}. In a case of pressing need, Maariv may be davened until {times.alosHashachar} (instead of Chatzos Haleiyla {times.chatzos}) of the next day.
+                      </p>
+                    ) : null}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
 
           <button 
             onClick={() => openModal('brochas', 'tefilla')}
