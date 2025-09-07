@@ -149,6 +149,15 @@ const processTefillaContent = (text: string, conditions: TefillaConditions | nul
   
   const effectiveConditions = conditions || defaultConditions;
   
+  // Debug log for ASERET_YEMEI_TESHUVA issues
+  if (text.includes('ASERET_YEMEI_TESHUVA')) {
+    console.log('Processing text with ASERET_YEMEI_TESHUVA:', {
+      conditionsLoaded: !!conditions,
+      isAseretYemeiTeshuva: effectiveConditions.isAseretYemeiTeshuva,
+      textSnippet: text.substring(text.indexOf('ASERET_YEMEI_TESHUVA') - 20, text.indexOf('ASERET_YEMEI_TESHUVA') + 50)
+    });
+  }
+  
   // Process conditional text FIRST (removes/shows conditional sections)
   const processedText = processTefillaText(text, effectiveConditions);
   
