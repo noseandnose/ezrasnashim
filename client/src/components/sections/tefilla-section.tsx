@@ -719,12 +719,11 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button 
-                      className="absolute top-2 right-2 p-1 hover:bg-blush/10 rounded-full transition-colors" 
-                      onClick={(e) => e.stopPropagation()}
+                    <div 
+                      className="absolute top-2 right-2 p-1 hover:bg-blush/10 rounded-full transition-colors cursor-help" 
                     >
                       <Info className="text-blush/60" size={14} />
-                    </button>
+                    </div>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs p-3 bg-white border border-blush/20 shadow-lg">
                     {currentPrayer.modal === 'morning-brochas' ? (
