@@ -530,6 +530,8 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
+  const { data: jewishTimes } = useJewishTimes();
+  const [showInfoPopover, setShowInfoPopover] = useState(false);
 
   if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
 
@@ -544,6 +546,38 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
 
   return (
     <div className="space-y-6">
+      {/* Info Icon for Maariv Timing */}
+      <div className="flex justify-end">
+        <Popover open={showInfoPopover} onOpenChange={setShowInfoPopover}>
+          <PopoverTrigger asChild>
+            <button
+              className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+              aria-label="Maariv timing information"
+              type="button"
+            >
+              <Info className="h-5 w-5 text-blush/60" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80" align="end">
+            {jewishTimes ? (
+              <div className="space-y-2">
+                <p className="font-semibold text-black">Maariv Prayer Times</p>
+                <div className="space-y-1 text-xs text-black/80">
+                  <p><strong>Begins:</strong> {jewishTimes.shkia} (Sunset)</p>
+                  <p><strong>Ideal time:</strong> {jewishTimes.tzaitHakochavim} (Stars visible)</p>
+                  <p><strong>Until:</strong> {jewishTimes.alosHashachar} (Next dawn)</p>
+                </div>
+                <p className="text-xs text-black/70 mt-2">
+                  Maariv may be prayed from sunset onwards, ideally after the stars become visible.
+                </p>
+              </div>
+            ) : (
+              <p className="text-xs text-black">Loading timing information...</p>
+            )}
+          </PopoverContent>
+        </Popover>
+      </div>
+      
       {prayers.map((prayer, index) => (
         <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
           <div
@@ -2031,10 +2065,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     enabled: activeModal === 'maariv'
   });
 
-  // Get Jewish times for info content
-  const { coordinates } = useLocationStore();
+  // Get Jewish times for info content  
   const { data: jewishTimes } = useJewishTimes();
-  const [showMaarivInfoPopover, setShowMaarivInfoPopover] = useState(false);
 
   // Intercept Maariv modal opening and redirect directly to fullscreen
   useEffect(() => {
@@ -2046,30 +2078,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         isOpen: true,
         title: 'Maariv Prayer',
         contentType: 'maariv',
-        showFontControls: true,
-        showLanguageControls: true,
-        showInfoIcon: true,
-        onInfoClick: (open) => setShowMaarivInfoPopover(open),
-        showInfoPopover: showMaarivInfoPopover,
-        infoContent: jewishTimes ? (
-          <div className="space-y-2">
-            <p className="font-semibold text-black">Maariv Prayer Times</p>
-            <div className="space-y-1 text-xs text-black/80">
-              <p><strong>Begins:</strong> {jewishTimes.shkia} (Sunset)</p>
-              <p><strong>Ideal time:</strong> {jewishTimes.tzaitHakochavim} (Stars visible)</p>
-              <p><strong>Until:</strong> {jewishTimes.alosHashachar} (Next dawn)</p>
-            </div>
-            <p className="text-xs text-black/70 mt-2">
-              Maariv may be prayed from sunset onwards, ideally after the stars become visible.
-            </p>
-          </div>
-        ) : (
-          <p className="text-xs text-black">Loading timing information...</p>
-        ),
         content: <MaarivFullscreenContent language={language} fontSize={fontSize} />
       });
     }
-  }, [activeModal, maarivPrayers, isMaarivLoading, closeModal, setFullscreenContent, language, fontSize, jewishTimes, showMaarivInfoPopover]);
+  }, [activeModal, maarivPrayers, isMaarivLoading, closeModal, setFullscreenContent, language, fontSize]);
 
   // Fetch Nishmas text from database
   const { data: nishmasText, isLoading: nishmasLoading } = useQuery<NishmasText>({
