@@ -2041,53 +2041,13 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         isOpen: true,
         title: 'Maariv Prayer',
         contentType: 'maariv',
-        content: (
-          <div className="space-y-6">
-            {maarivPrayers.map((prayer) => (
-              <div key={prayer.id} className="border-b border-warm-gray/10 pb-4 last:border-b-0">
-                {prayer.hebrewText && language === 'hebrew' && (
-                  <div 
-                    className="vc-koren-hebrew leading-relaxed"
-                    style={{ fontSize: `${fontSize + 1}px` }}
-                    dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.hebrewText, tefillaConditions).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">') }}
-                  />
-                )}
-                {language === 'english' && (
-                  <div 
-                    className="koren-siddur-english text-left leading-relaxed text-black/70"
-                    style={{ fontSize: `${fontSize}px` }}
-                    dangerouslySetInnerHTML={{ __html: processTefillaContent(prayer.englishTranslation || "English translation not available", tefillaConditions) }}
-                  />
-                )}
-              </div>
-            ))}
-            
-            <KorenThankYou />
-            
-            <div className="heart-explosion-container">
-              <Button 
-                onClick={isModalComplete('maariv') ? undefined : () => {
-                  trackModalComplete('maariv');
-                  markModalComplete('maariv');
-                  completeTask('tefilla');
-                  setFullscreenContent({ isOpen: false, title: '', content: null });
-                  checkAndShowCongratulations();
-                }}
-                disabled={isModalComplete('maariv')}
-                className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
-                  isModalComplete('maariv') 
-                    ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                    : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
-                }`}
-              >
-                {isModalComplete('maariv') ? 'Completed Today' : 'Complete Maariv'}
-              </Button>
-            </div>
-          </div>
-        )
+        showFontControls: true,
+        showLanguageControls: true,
+        showInfoIcon: true,
+        content: <MaarivFullscreenContent language={language} fontSize={fontSize} />
       });
     }
-  }, [activeModal, maarivPrayers, isMaarivLoading, language, fontSize, closeModal, setFullscreenContent, isModalComplete, trackModalComplete, markModalComplete, completeTask, checkAndShowCongratulations, tefillaConditions]);
+  }, [activeModal, maarivPrayers, isMaarivLoading, closeModal, setFullscreenContent, language, fontSize]);
 
   // Fetch Nishmas text from database
   const { data: nishmasText, isLoading: nishmasLoading } = useQuery<NishmasText>({
@@ -4220,5 +4180,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
     </>
   );
 }
+
+export { BrochasFullscreenContent, IndividualBrochaFullscreenContent, TehillimFullscreenContent, MaarivFullscreenContent };
 
 // Note: Old complex compass implementation removed in favor of simplified version
