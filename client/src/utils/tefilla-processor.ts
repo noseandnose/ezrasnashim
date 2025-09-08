@@ -286,8 +286,6 @@ export async function getCurrentTefillaConditions(
         `${apiUrl}/api/hebrew-date/${today}`
       );
       
-      console.log(`Fetching Hebrew date from: ${apiUrl}/api/hebrew-date/${today}`);
-      
       if (hebrewResponse.ok) {
         hebrewDate = await hebrewResponse.json();
         isRoshChodesh = hebrewDate.isRoshChodesh || false;
@@ -332,16 +330,6 @@ export async function getCurrentTefillaConditions(
         // Check if we're in any special period (for exclusion logic)
         isRoshChodeshSpecial = isRoshChodesh || isPesach || isSukkot || isAseretYemeiTeshuva;
         
-        console.log('Hebrew calendar conditions loaded:', {
-          isRoshChodesh,
-          isFastDay,
-          isAseretYemeiTeshuva,
-          isSukkot,
-          isPesach,
-          isRoshChodeshSpecial,
-          events,
-          hebrewDate: hebrewDate.hebrew
-        });
       }
     } catch (error) {
       console.warn('Could not fetch Hebrew date data:', error);
@@ -358,8 +346,6 @@ export async function getCurrentTefillaConditions(
       hebrewDate,
       location
     };
-    
-    console.log('Final Tefilla conditions:', finalConditions);
     
     // Cache the result
     conditionsCache = {
@@ -385,19 +371,3 @@ export async function getCurrentTefillaConditions(
   }
 }
 
-/**
- * Debug function to test conditions
- */
-export function debugTefillaConditions(conditions: TefillaConditions): void {
-  console.log('Tefilla Conditions Debug:', {
-    isInIsrael: conditions.isInIsrael,
-    isRoshChodesh: conditions.isRoshChodesh,
-    isFastDay: conditions.isFastDay,
-    isAseretYemeiTeshuva: conditions.isAseretYemeiTeshuva,
-    isSukkot: conditions.isSukkot,
-    isPesach: conditions.isPesach,
-    isRoshChodeshSpecial: conditions.isRoshChodeshSpecial,
-    location: conditions.location,
-    hebrewDate: conditions.hebrewDate
-  });
-}

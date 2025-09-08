@@ -84,9 +84,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       const date = new Date();
       date.setHours(hours, minutes, 0, 0);
       
-      // Debug logging to track potential timezone issues
-      console.log(`Parsed time ${timeStr} as:`, date.toLocaleString(), 
-        `Current time:`, now.toLocaleString());
       
       return date;
     };
@@ -100,7 +97,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     
     // Handle null times gracefully
     if (!alos || !chatzos || !minchaGedola || !shkia || !tzaitHakochavim) {
-      console.log('Prayer time calculation failed - missing zmanim data');
       return {
         title: "Morning Brochas",
         subtitle: "Times unavailable",
@@ -108,28 +104,8 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       };
     }
     
-    // Debug logging for prayer time determination
-    console.log('Prayer time calculation:', {
-      now: now.toLocaleString(),
-      alos: alos.toLocaleString(),
-      chatzos: chatzos.toLocaleString(),
-      minchaGedola: minchaGedola.toLocaleString(), 
-      shkia: shkia.toLocaleString(),
-      tzaitHakochavim: tzaitHakochavim.toLocaleString(),
-      isAfterAlos: now >= alos,
-      isBeforeChatzos: now < chatzos,
-      isAfterChatzos: now >= chatzos,
-      isBeforeMincha: now < minchaGedola,
-      isAfterMincha: now >= minchaGedola,
-      isBeforeShkia: now < shkia,
-      isAfterShkia: now >= shkia,
-      isBeforeTzait: now < tzaitHakochavim,
-      isAfterTzait: now >= tzaitHakochavim
-    });
-
     if (now >= alos && now < chatzos) {
       // Morning Brochas time - from Alos Hashachar until Chatzos
-      console.log('Selected prayer: Morning Brochas');
       return {
         title: "Morning Brochas",
         subtitle: `${times.alosHashachar} - ${times.chatzos}`,
@@ -137,7 +113,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       };
     } else if (now >= minchaGedola && now < shkia) {
       // Mincha time - from Mincha Gedolah until Shkia
-      console.log('Selected prayer: Mincha');
       return {
         title: "Mincha",
         subtitle: `${times.minchaGedolah} - ${times.shkia}`,
@@ -145,7 +120,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       };
     } else if (now >= shkia && now < tzaitHakochavim) {
       // Gap between Shkia and Tzait Hakochavim - show when Maariv will be available
-      console.log('Between Shkia and Tzait - showing upcoming Maariv');
       return {
         title: "Maariv",
         subtitle: `from ${times.tzaitHakochavim} until ${times.alosHashachar}`,
@@ -154,7 +128,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       };
     } else if (now >= tzaitHakochavim || now < alos) {
       // Maariv time - from Tzait Hakochavim until next Alos Hashachar
-      console.log('Selected prayer: Maariv');
       return {
         title: "Maariv",
         subtitle: `${times.tzaitHakochavim} - ${times.alosHashachar}`,
@@ -162,7 +135,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       };
     } else {
       // Between Chatzos and Mincha Gedolah - show when Mincha will be available
-      console.log('Between prayer times - showing upcoming Mincha');
       return {
         title: "Mincha",
         subtitle: `from ${times.minchaGedolah} until ${times.shkia}`,
