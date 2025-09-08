@@ -1768,7 +1768,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   // Load Tefilla conditions for conditional content processing
   const tefillaConditions = useTefillaConditions();
   
-  // Get Jewish times for info tooltips
+  // Get Jewish times for info tooltips  
+  const { coordinates } = useLocationStore();
   const jewishTimesQuery = useJewishTimes(coordinates?.lat, coordinates?.lng);
 
   // Listen for fullscreen close events from fullscreen components
