@@ -151,20 +151,39 @@ const processTefillaContent = (text: string, conditions: TefillaConditions | nul
   
   const effectiveConditions = conditions || defaultConditions;
   
-  // Debug log for ASERET_YEMEI_TESHUVA issues
-  if (text.includes('ASERET_YEMEI_TESHUVA')) {
-    console.log('Processing text with ASERET_YEMEI_TESHUVA:', {
+  // Debug conditional text processing
+  if (text.includes('[[')) {
+    console.log('Processing text with conditional markers:', {
+      originalLength: text.length,
       conditionsLoaded: !!conditions,
-      isAseretYemeiTeshuva: effectiveConditions.isAseretYemeiTeshuva,
-      textSnippet: text.substring(text.indexOf('ASERET_YEMEI_TESHUVA') - 20, text.indexOf('ASERET_YEMEI_TESHUVA') + 50)
+      conditions: effectiveConditions,
+      textPreview: text.substring(0, 200) + '...'
     });
   }
   
   // Process conditional text FIRST (removes/shows conditional sections)
   const processedText = processTefillaText(text, effectiveConditions);
   
+  // Debug what came out of processTefillaText
+  if (text.includes('[[') && processedText !== text) {
+    console.log('Conditional text was processed:', {
+      originalLength: text.length,
+      processedLength: processedText.length,
+      hasConditionalAfterProcessing: processedText.includes('[[')
+    });
+  }
+  
   // Then format the resulting text (bold, italics, etc)
-  return formatTextContent(processedText);
+  const finalText = formatTextContent(processedText);
+  
+  // Debug final result
+  if (text.includes('[[') && finalText.includes('[[')) {
+    console.log('WARNING: Conditional brackets still present in final text!', {
+      finalTextPreview: finalText.substring(0, 200) + '...'
+    });
+  }
+  
+  return finalText;
 };
 
 // Helper functions for prayer reason icons and short text
@@ -3035,10 +3054,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         language={language}
         onLanguageChange={setLanguage}
         showInfoIcon={fullscreenContent.contentType === 'morning-brochas' || fullscreenContent.contentType === 'maariv'}
-        onInfoClick={(open) => {
-          console.log('onInfoClick called with:', open);
-          setShowInfoPopover(open);
-        }}
+        onInfoClick={(open) => setShowInfoPopover(open)}
         showInfoPopover={showInfoPopover}
         infoContent={
           fullscreenContent.contentType === 'morning-brochas' ? (
