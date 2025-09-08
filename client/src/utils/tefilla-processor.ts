@@ -178,22 +178,26 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     return matchesToKeep.has(match) ? content : '';
   });
 
-  // Handle standalone conditional markers (like [[ROSH_CHODESH]]) that don't have content/closing tags
-  const standalonePattern = /\[\[([^\]]+)\]\]/g;
-  processedText = processedText.replace(standalonePattern, (match, tag) => {
+  // Handle ALL remaining conditional markers and orphaned tags
+  const allBracketsPattern = /\[\[([^\]]*)\]\]/g;
+  processedText = processedText.replace(allBracketsPattern, (match, content) => {
     const conditionalKeywords = [
       'OUTSIDE_ISRAEL', 'ONLY_ISRAEL', 'ROSH_CHODESH', 'FAST_DAY', 
       'ASERET_YEMEI_TESHUVA', 'SUKKOT', 'PESACH', 'ROSH_CHODESH_SPECIAL',
       'grain', 'wine', 'fruit'
     ];
     
-    // Check if this is a standalone conditional marker
-    if (conditionalKeywords.some(keyword => tag.trim() === keyword)) {
-      if (import.meta.env.DEV) {
-        console.log(`Removing standalone conditional marker: ${match}`);
+    // Remove closing tags like [[/ASERET_YEMEI_TESHUVA]]
+    if (content.startsWith('/')) {
+      const keyword = content.substring(1).trim();
+      if (conditionalKeywords.includes(keyword)) {
+        return ''; // Remove orphaned closing tags
       }
-      // Always remove standalone conditional markers since they don't have content
-      return '';
+    }
+    
+    // Remove standalone conditional markers
+    if (conditionalKeywords.includes(content.trim())) {
+      return ''; // Remove standalone markers
     }
     
     // For non-conditional content like instructions, leave it for formatTextContent to handle as grey boxes
