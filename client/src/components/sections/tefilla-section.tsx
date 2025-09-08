@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { X } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
 import type { TehillimName, GlobalTehillimProgress } from "@shared/schema";
@@ -22,7 +21,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const { tefillaCompleted: _tefillaCompleted } = useDailyCompletionStore();
   const { isModalComplete, completedModals } = useModalCompletionStore();
   const { data: times, isLoading } = useJewishTimes();
-  const [showInfoModal, setShowInfoModal] = useState<'morning-brochas' | 'maariv' | null>(null);
 
   // Prefetch brochas data to speed up loading when user clicks
   useQuery({
@@ -710,18 +708,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                 {isModalComplete(currentPrayer.modal) ? 'Completed' : currentPrayer.subtitle}
               </p>
             </button>
-            {/* Info icon for Morning Brochas and Maariv */}
-            {(currentPrayer.modal === 'morning-brochas' || currentPrayer.modal === 'maariv') && !currentPrayer.disabled && times && (
-              <button
-                className="absolute top-2 right-2 z-10 p-1.5 bg-white/80 hover:bg-blush/10 active:bg-blush/20 rounded-full transition-colors shadow-sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowInfoModal(currentPrayer.modal as 'morning-brochas' | 'maariv');
-                }}
-              >
-                <Info className="text-blush/60" size={14} />
-              </button>
-            )}
           </div>
 
           <button 
@@ -852,37 +838,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
         <div className="h-16"></div>
       </div>
       
-      {/* Info Modal */}
-      {showInfoModal && times && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30"
-          onClick={() => setShowInfoModal(null)}
-        >
-          <div 
-            className="bg-white rounded-2xl p-4 max-w-sm shadow-lg border border-blush/20"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="platypi-bold text-base text-black">
-                {showInfoModal === 'morning-brochas' ? 'Morning Brochas Info' : 'Maariv Info'}
-              </h3>
-              <button 
-                onClick={() => setShowInfoModal(null)}
-                className="p-1 hover:bg-gray-100 rounded-full"
-              >
-                <X className="text-gray-500" size={16} />
-              </button>
-            </div>
-            <p className="text-sm text-black/80 platypi-regular">
-              {showInfoModal === 'morning-brochas' ? (
-                <>Birchos Kriyas Shema should not be recited after {times.sofZmanTfillah || times.chatzos}.</>
-              ) : (
-                <>In a case of pressing need, Maariv can be recited from {times.plagHamincha} if, and only if, Mincha was recited that day before {times.plagHamincha}. In a case of pressing need, Maariv may be davened until {times.alosHashachar} (instead of Chatzos Haleiyla {times.chatzos}) of the next day.</>
-              )}
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
