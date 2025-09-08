@@ -184,7 +184,7 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
   // This handles cases where the main processor missed some blocks
   if (!conditions.isAseretYemeiTeshuva) {
     // Remove any remaining ASERET_YEMEI_TESHUVA blocks that weren't processed
-    processedText = processedText.replace(/\[\[ASERET_YEMEI_TESHUVA\]\](.*?)\[\[\/ASERET_YEMEI_TESHUVA\]\]/gs, '');
+    processedText = processedText.replace(/\[\[ASERET_YEMEI_TESHUVA\]\]([\s\S]*?)\[\[\/ASERET_YEMEI_TESHUVA\]\]/g, '');
     // Also remove any loose ASERET_YEMEI_TESHUVA content
     processedText = processedText.replace(/הַמֶּֽלֶךְְְ הַמִּשְְְׁפָּט/g, '');
   }
@@ -192,7 +192,7 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
   // Clean up any orphaned conditional tags that weren't properly matched
   const orphanedTagPattern = /\[\[(?:\/?)(?:OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH|FAST_DAY|ASERET_YEMEI_TESHUVA|SUKKOT|PESACH|ROSH_CHODESH_SPECIAL|grain|wine|fruit)(?:,[^\\]]*)?(?:\|[^\\]]*)?\]\]/g;
   
-  processedText = processedText.replace(orphanedTagPattern, (match) => {
+  processedText = processedText.replace(orphanedTagPattern, () => {
     return ''; // Remove orphaned conditional tags only
   });
 

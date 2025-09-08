@@ -1,4 +1,4 @@
-import { HandHeart, Plus, User, AlertCircle, Heart, Star, Compass, ArrowRight, Baby, HeartHandshake, GraduationCap, Users, Stethoscope, DollarSign, Smile, TrendingUp, Sunrise, Sun, Moon, Stars, Globe, Unlock, Info } from "lucide-react";
+import { HandHeart, Plus, User, AlertCircle, Heart, Star, Compass, ArrowRight, Baby, HeartHandshake, GraduationCap, Users, Stethoscope, DollarSign, Smile, TrendingUp, Sunrise, Sun, Moon, Stars, Globe, Unlock } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
