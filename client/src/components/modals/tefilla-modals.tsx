@@ -366,8 +366,8 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
         
         {/* Standardized Header with centered controls */}
         <div className="mb-2 space-y-2">
-          {/* First Row: Language Toggle and Title */}
-          <div className="flex items-center justify-center gap-4">
+          {/* First Row: Language Toggle, Title, and Info Icon */}
+          <div className="flex items-center justify-center gap-2">
             <Button
               onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
               variant="ghost"
@@ -382,6 +382,20 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
             </Button>
             
             <DialogTitle className="text-lg platypi-bold text-black">Morning Brochas</DialogTitle>
+            
+            {/* Info Icon with Popover */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="ml-1 p-1 rounded-full hover:bg-gray-100 transition-colors">
+                  <Info className="h-4 w-4 text-gray-500" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 p-3">
+                <p className="text-xs text-black">
+                  Birchos Kriyas Shema should not be recited after Sof Zman Tfillah.
+                </p>
+              </PopoverContent>
+            </Popover>
           </div>
           
           {/* Second Row: Font Size Controls */}
@@ -2930,13 +2944,62 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             <Expand className="h-4 w-4 text-gray-600" />
           </button>
           
-          <StandardModalHeader 
-            title="Maariv Prayer"
-            showHebrew={language === 'hebrew'}
-            setShowHebrew={(show) => setLanguage(show ? 'hebrew' : 'english')}
-            fontSize={fontSize}
-            setFontSize={setFontSize}
-          />
+          <div className="mb-2 space-y-2">
+            {/* First Row: Language Toggle, Title, and Info Icon */}
+            <div className="flex items-center justify-center gap-2">
+              <Button
+                onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
+                variant="ghost"
+                size="sm"
+                className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
+                  language === 'hebrew'
+                    ? 'bg-blush text-white' 
+                    : 'text-black/60 hover:text-black hover:bg-white/50'
+                }`}
+              >
+                {language === 'hebrew' ? 'EN' : 'עב'}
+              </Button>
+              
+              <DialogTitle className="text-lg platypi-bold text-black">Maariv Prayer</DialogTitle>
+              
+              {/* Info Icon with Popover */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="ml-1 p-1 rounded-full hover:bg-gray-100 transition-colors">
+                    <Info className="h-4 w-4 text-gray-500" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72 p-3">
+                  {jewishTimesQuery.data ? (
+                    <p className="text-xs text-black">
+                      In a case of pressing need, Maariv can be recited from {jewishTimesQuery.data.plagHamincha} if, and only if, Mincha was recited that day before {jewishTimesQuery.data.plagHamincha}. In a case of pressing need, Maariv may be davened until {jewishTimesQuery.data.alosHashachar} (instead of Chatzos Haleiyla {jewishTimesQuery.data.chatzos}) of the next day.
+                    </p>
+                  ) : (
+                    <p className="text-xs text-black">Loading timing information...</p>
+                  )}
+                </PopoverContent>
+              </Popover>
+            </div>
+            
+            {/* Second Row: Font Size Controls */}
+            <div className="flex items-center justify-center">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                >
+                  <span className="text-xs platypi-medium">-</span>
+                </button>
+                <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
+                <button
+                  onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                >
+                  <span className="text-xs platypi-medium">+</span>
+                </button>
+              </div>
+            </div>
+          </div>
 
           <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
             {isMaarivLoading ? (
