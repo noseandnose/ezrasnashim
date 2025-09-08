@@ -183,9 +183,6 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
   const orphanedTagPattern = /\[\[(?:\/?)(?:OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH|FAST_DAY|ASERET_YEMEI_TESHUVA|SUKKOT|PESACH|ROSH_CHODESH_SPECIAL|grain|wine|fruit)(?:,[^\\]]*)?(?:\|[^\\]]*)?\]\]/g;
   
   processedText = processedText.replace(orphanedTagPattern, (match) => {
-    if (import.meta.env.DEV) {
-      console.log(`Removing orphaned conditional tag: ${match}`);
-    }
     return ''; // Remove orphaned conditional tags only
   });
 

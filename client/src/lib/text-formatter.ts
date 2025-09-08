@@ -153,17 +153,10 @@ export function formatTextContent(text: string | null | undefined): string {
       'grain', 'wine', 'fruit'
     ];
     
-    // Check if content contains any conditional keyword or combination logic (comma, pipe)
-    const isConditional = conditionalKeywords.some(keyword => content.includes(keyword)) ||
-                         content.includes(',') || content.includes('|');
-    
-    if (import.meta.env.DEV) {
-      console.log(`Processing [[text]] pattern:`, {
-        content: content.substring(0, 50) + '...',
-        isConditional,
-        match
-      });
-    }
+    // Check if this is conditional content - must contain actual conditional keywords
+    // Only consider comma/pipe as conditional if combined with keywords
+    const hasConditionalKeyword = conditionalKeywords.some(keyword => content.includes(keyword));
+    const isConditional = hasConditionalKeyword;
     
     if (isConditional) {
       // This is conditional content, leave it for tefilla processor
@@ -171,11 +164,7 @@ export function formatTextContent(text: string | null | undefined): string {
     }
     
     // This is regular grey box content
-    const greyBox = `<div style="background-color: #f3f4f6; padding: 12px; border-radius: 8px; margin: 8px 0; border-left: 4px solid #d1d5db;">${content}</div>`;
-    if (import.meta.env.DEV) {
-      console.log(`Converting to grey box:`, content.substring(0, 30) + '...');
-    }
-    return greyBox;
+    return `<div style="background-color: #f3f4f6; padding: 12px; border-radius: 8px; margin: 8px 0; border-left: 4px solid #d1d5db;">${content}</div>`;
   });
 
   // Process {{ }} for grey boxes (English content)
