@@ -178,30 +178,15 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     return matchesToKeep.has(match) ? content : '';
   });
 
-  // Handle ALL remaining conditional markers and orphaned tags
-  const allBracketsPattern = /\[\[([^\]]*)\]\]/g;
-  processedText = processedText.replace(allBracketsPattern, (match, content) => {
-    const conditionalKeywords = [
-      'OUTSIDE_ISRAEL', 'ONLY_ISRAEL', 'ROSH_CHODESH', 'FAST_DAY', 
-      'ASERET_YEMEI_TESHUVA', 'SUKKOT', 'PESACH', 'ROSH_CHODESH_SPECIAL',
-      'grain', 'wine', 'fruit'
-    ];
-    
-    // Remove closing tags like [[/ASERET_YEMEI_TESHUVA]]
-    if (content.startsWith('/')) {
-      const keyword = content.substring(1).trim();
-      if (conditionalKeywords.includes(keyword)) {
-        return ''; // Remove orphaned closing tags
-      }
+  // Clean up any orphaned conditional tags that weren't properly matched
+  // This handles cases where opening/closing tags are unmatched
+  const orphanedTagPattern = /\[\[(?:\/?)(?:OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH|FAST_DAY|ASERET_YEMEI_TESHUVA|SUKKOT|PESACH|ROSH_CHODESH_SPECIAL|grain|wine|fruit)(?:,[^\\]]*)?(?:\|[^\\]]*)?\]\]/g;
+  
+  processedText = processedText.replace(orphanedTagPattern, (match) => {
+    if (import.meta.env.DEV) {
+      console.log(`Removing orphaned conditional tag: ${match}`);
     }
-    
-    // Remove standalone conditional markers
-    if (conditionalKeywords.includes(content.trim())) {
-      return ''; // Remove standalone markers
-    }
-    
-    // For non-conditional content like instructions, leave it for formatTextContent to handle as grey boxes
-    return match;
+    return ''; // Remove orphaned conditional tags only
   });
 
   // Clean up excessive whitespace and empty lines left by hidden content
