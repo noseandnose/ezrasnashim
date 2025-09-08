@@ -3068,7 +3068,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         language={language}
         onLanguageChange={setLanguage}
         showInfoIcon={true}
-        onInfoClick={setShowMaarivInfoPopover}
+        onInfoClick={(open) => setShowMaarivInfoPopover(open)}
         showInfoPopover={showMaarivInfoPopover}
         infoContent={jewishTimes ? (
           <div className="space-y-2">
