@@ -180,10 +180,12 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     return matchesToKeep.has(match) ? content : '';
   });
 
-  // Additional cleanup: Handle any remaining ASERET_YEMEI_TESHUVA content that wasn't properly processed
-  // This is a backup to ensure no conditional content leaks through
+  // Additional cleanup: Remove any remaining unprocessed conditional blocks
+  // This handles cases where the main processor missed some blocks
   if (!conditions.isAseretYemeiTeshuva) {
-    // During non-ASERET_YEMEI_TESHUVA periods, remove any remaining text that contains the specific text
+    // Remove any remaining ASERET_YEMEI_TESHUVA blocks that weren't processed
+    processedText = processedText.replace(/\[\[ASERET_YEMEI_TESHUVA\]\](.*?)\[\[\/ASERET_YEMEI_TESHUVA\]\]/gs, '');
+    // Also remove any loose ASERET_YEMEI_TESHUVA content
     processedText = processedText.replace(/הַמֶּֽלֶךְְְ הַמִּשְְְׁפָּט/g, '');
   }
   
