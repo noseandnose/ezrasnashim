@@ -194,7 +194,7 @@ export function FullscreenModal({
           
           <div className="flex items-center gap-2">
             {showInfoIcon && (
-              <Popover open={showInfoPopover} onOpenChange={onInfoClick}>
+              <Popover open={showInfoPopover} onOpenChange={onInfoClick || (() => {})}>
                 <PopoverTrigger asChild>
                   <button
                     className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"

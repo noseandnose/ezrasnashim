@@ -3038,14 +3038,22 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         onInfoClick={(open) => setShowInfoPopover(open)}
         showInfoPopover={showInfoPopover}
         infoContent={
-          fullscreenContent.contentType === 'morning-brochas' && jewishTimesQuery.data ? (
-            <p className="text-xs text-black">
-              Birchos Kriyas Shema should not be recited after {jewishTimesQuery.data.sofZmanTfillah || jewishTimesQuery.data.chatzos}.
-            </p>
-          ) : fullscreenContent.contentType === 'maariv' && jewishTimesQuery.data ? (
-            <p className="text-xs text-black">
-              In a case of pressing need, Maariv can be recited from {jewishTimesQuery.data.plagHamincha} if, and only if, Mincha was recited that day before {jewishTimesQuery.data.plagHamincha}. In a case of pressing need, Maariv may be davened until {jewishTimesQuery.data.alosHashachar} (instead of Chatzos Haleiyla {jewishTimesQuery.data.chatzos}) of the next day.
-            </p>
+          fullscreenContent.contentType === 'morning-brochas' ? (
+            jewishTimesQuery.data ? (
+              <p className="text-xs text-black">
+                Birchos Kriyas Shema should not be recited after {jewishTimesQuery.data.sofZmanTfillah || jewishTimesQuery.data.chatzos}.
+              </p>
+            ) : (
+              <p className="text-xs text-black">Loading timing information...</p>
+            )
+          ) : fullscreenContent.contentType === 'maariv' ? (
+            jewishTimesQuery.data ? (
+              <p className="text-xs text-black">
+                In a case of pressing need, Maariv can be recited from {jewishTimesQuery.data.plagHamincha} if, and only if, Mincha was recited that day before {jewishTimesQuery.data.plagHamincha}. In a case of pressing need, Maariv may be davened until {jewishTimesQuery.data.alosHashachar} (instead of Chatzos Haleiyla {jewishTimesQuery.data.chatzos}) of the next day.
+              </p>
+            ) : (
+              <p className="text-xs text-black">Loading timing information...</p>
+            )
           ) : null
         }
       >
