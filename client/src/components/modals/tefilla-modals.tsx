@@ -540,17 +540,6 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
 
   return (
     <div className="space-y-6">
-      {/* Info Icon and Modal */}
-      <div className="flex justify-end mb-2">
-        <button
-          onClick={() => setShowInfoModal(true)}
-          className="p-2 hover:bg-blush/10 active:bg-blush/20 rounded-full transition-colors"
-          aria-label="Prayer timing information"
-        >
-          <Info className="text-blush/60" size={20} />
-        </button>
-      </div>
-      
       {prayers.map((prayer, index) => (
         <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
           <div
@@ -1013,17 +1002,6 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
 
   return (
     <div className="space-y-6">
-      {/* Info Icon and Modal */}
-      <div className="flex justify-end mb-2">
-        <button
-          onClick={() => setShowInfoModal(true)}
-          className="p-2 hover:bg-blush/10 active:bg-blush/20 rounded-full transition-colors"
-          aria-label="Prayer timing information"
-        >
-          <Info className="text-blush/60" size={20} />
-        </button>
-      </div>
-      
       {prayers.map((prayer, index) => (
         <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
           <div
@@ -3106,6 +3084,16 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         onFontSizeChange={setFontSize}
         language={language}
         onLanguageChange={setLanguage}
+        showInfoIcon={fullscreenContent.contentType === 'morning-brochas' || fullscreenContent.contentType === 'maariv'}
+        onInfoClick={() => {
+          if (fullscreenContent.contentType === 'morning-brochas') {
+            // Show Morning Brochas info
+            alert('Birchos Kriyas Shema should not be recited after Sof Zman Tfillah.');
+          } else if (fullscreenContent.contentType === 'maariv') {
+            // Show Maariv info
+            alert('Maariv should be recited after sunset and ideally after nightfall.');
+          }
+        }}
       >
         {fullscreenContent.content || renderPrayerContent(fullscreenContent.contentType, language, fontSize)}
       </FullscreenModal>
