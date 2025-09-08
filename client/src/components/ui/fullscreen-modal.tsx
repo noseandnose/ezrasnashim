@@ -19,7 +19,7 @@ interface FullscreenModalProps {
   onLanguageChange?: (lang: 'hebrew' | 'english') => void;
   // Info icon  
   showInfoIcon?: boolean;
-  onInfoClick?: () => void;
+  onInfoClick?: (open?: boolean) => void;
   // Info popover content
   infoContent?: React.ReactNode;
   showInfoPopover?: boolean;
@@ -193,15 +193,10 @@ export function FullscreenModal({
           </h1>
           
           <div className="flex items-center gap-2">
-            {showInfoIcon && infoContent && (
-              <Popover open={showInfoPopover}>
+            {showInfoIcon && (
+              <Popover open={showInfoPopover} onOpenChange={onInfoClick}>
                 <PopoverTrigger asChild>
                   <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onInfoClick?.();
-                    }}
                     className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
                     aria-label="Prayer timing information"
                     type="button"
@@ -210,7 +205,7 @@ export function FullscreenModal({
                   </button>
                 </PopoverTrigger>
                 <PopoverContent className="max-w-xs p-3 bg-white border border-blush/20 shadow-lg">
-                  {infoContent}
+                  {infoContent || <p className="text-xs text-black">Loading timing information...</p>}
                 </PopoverContent>
               </Popover>
             )}

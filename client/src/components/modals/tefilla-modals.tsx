@@ -3035,7 +3035,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         language={language}
         onLanguageChange={setLanguage}
         showInfoIcon={fullscreenContent.contentType === 'morning-brochas' || fullscreenContent.contentType === 'maariv'}
-        onInfoClick={() => setShowInfoPopover(!showInfoPopover)}
+        onInfoClick={(open?: boolean) => setShowInfoPopover(open !== undefined ? open : !showInfoPopover)}
         showInfoPopover={showInfoPopover}
         infoContent={
           fullscreenContent.contentType === 'morning-brochas' && jewishTimesQuery.data ? (
