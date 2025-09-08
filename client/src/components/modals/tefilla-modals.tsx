@@ -151,39 +151,11 @@ const processTefillaContent = (text: string, conditions: TefillaConditions | nul
   
   const effectiveConditions = conditions || defaultConditions;
   
-  // Debug conditional text processing
-  if (text.includes('[[')) {
-    console.log('Processing text with conditional markers:', {
-      originalLength: text.length,
-      conditionsLoaded: !!conditions,
-      conditions: effectiveConditions,
-      textPreview: text.substring(0, 200) + '...'
-    });
-  }
-  
   // Process conditional text FIRST (removes/shows conditional sections)
   const processedText = processTefillaText(text, effectiveConditions);
   
-  // Debug what came out of processTefillaText
-  if (text.includes('[[') && processedText !== text) {
-    console.log('Conditional text was processed:', {
-      originalLength: text.length,
-      processedLength: processedText.length,
-      hasConditionalAfterProcessing: processedText.includes('[[')
-    });
-  }
-  
   // Then format the resulting text (bold, italics, etc)
-  const finalText = formatTextContent(processedText);
-  
-  // Debug final result
-  if (text.includes('[[') && finalText.includes('[[')) {
-    console.log('WARNING: Conditional brackets still present in final text!', {
-      finalTextPreview: finalText.substring(0, 200) + '...'
-    });
-  }
-  
-  return finalText;
+  return formatTextContent(processedText);
 };
 
 // Helper functions for prayer reason icons and short text

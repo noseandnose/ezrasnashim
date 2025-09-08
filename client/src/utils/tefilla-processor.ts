@@ -178,21 +178,27 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     return matchesToKeep.has(match) ? content : '';
   });
 
-  // Remove any leftover orphaned conditional tags (only if they don't have proper pairs)
-  // Check if there are any remaining orphaned conditional tags after processing
-  const remainingTags = processedText.match(/\[\[(?:\/?)(?:ROSH_CHODESH|PESACH|SUKKOT|FAST_DAY|ASERET_YEMEI_TESHUVA|OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH_SPECIAL|grain|wine|fruit)\]\]/g);
-  if (remainingTags && remainingTags.length > 0) {
-    // Only remove if there are no more valid conditional blocks
-    const hasValidBlocks = /\[\[([^\]]+)\]\]([\s\S]*?)\[\[\/([^\]]+)\]\]/.test(processedText);
-    if (!hasValidBlocks) {
-      processedText = processedText.replace(/\[\[(?:\/?)(?:ROSH_CHODESH|PESACH|SUKKOT|FAST_DAY|ASERET_YEMEI_TESHUVA|OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH_SPECIAL|grain|wine|fruit)\]\]/g, (match) => {
-        if (import.meta.env.DEV) {
-          console.log(`Removing truly orphaned conditional tag: ${match}`);
-        }
-        return '';
-      });
+  // Handle standalone conditional markers (like [[ROSH_CHODESH]]) that don't have content/closing tags
+  const standalonePattern = /\[\[([^\]]+)\]\]/g;
+  processedText = processedText.replace(standalonePattern, (match, tag) => {
+    const conditionalKeywords = [
+      'OUTSIDE_ISRAEL', 'ONLY_ISRAEL', 'ROSH_CHODESH', 'FAST_DAY', 
+      'ASERET_YEMEI_TESHUVA', 'SUKKOT', 'PESACH', 'ROSH_CHODESH_SPECIAL',
+      'grain', 'wine', 'fruit'
+    ];
+    
+    // Check if this is a standalone conditional marker
+    if (conditionalKeywords.some(keyword => tag.trim() === keyword)) {
+      if (import.meta.env.DEV) {
+        console.log(`Removing standalone conditional marker: ${match}`);
+      }
+      // Always remove standalone conditional markers since they don't have content
+      return '';
     }
-  }
+    
+    // For non-conditional content like instructions, leave it for formatTextContent to handle as grey boxes
+    return match;
+  });
 
   // Clean up excessive whitespace and empty lines left by hidden content
   processedText = processedText
