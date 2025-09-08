@@ -2044,6 +2044,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     });
   }, [activeModal, showMaarivInfoPopover, jewishTimes]);
 
+  // Debug modal state changes
+  useEffect(() => {
+    if (activeModal === 'maariv') {
+      console.log('Maariv modal opened');
+    } else if (activeModal === null) {
+      console.log('Modal closed');
+    }
+  }, [activeModal]);
+
   // Don't intercept Maariv - let it render as a direct fullscreen modal
   // This will be handled in the JSX return instead
 
