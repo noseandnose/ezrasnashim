@@ -19,7 +19,7 @@ interface FullscreenModalProps {
   onLanguageChange?: (lang: 'hebrew' | 'english') => void;
   // Info icon  
   showInfoIcon?: boolean;
-  onInfoClick?: (open?: boolean) => void;
+  onInfoClick?: () => void;
   // Info popover content
   infoContent?: React.ReactNode;
   showInfoPopover?: boolean;
@@ -193,21 +193,25 @@ export function FullscreenModal({
           </h1>
           
           <div className="flex items-center gap-2">
-            {showInfoIcon && (
-              <Popover open={showInfoPopover} onOpenChange={onInfoClick}>
-                <PopoverTrigger asChild>
-                  <button
-                    className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
-                    aria-label="Prayer timing information"
-                    type="button"
-                  >
-                    <Info className="h-5 w-5 text-blush/60" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="max-w-xs p-3 bg-white border border-blush/20 shadow-lg">
-                  {infoContent || <p className="text-xs text-black">Loading timing information...</p>}
-                </PopoverContent>
-              </Popover>
+            {(() => {
+              console.log('showInfoIcon render check:', showInfoIcon);
+              return showInfoIcon;
+            })() && (
+              <button
+                onClick={(e) => {
+                  console.log('Info icon clicked!');
+                  alert('Info icon clicked!');
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onInfoClick?.();
+                }}
+                className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors border-2 border-red-500"
+                aria-label="Prayer timing information"
+                type="button"
+                style={{ backgroundColor: 'red', opacity: 0.5 }}
+              >
+                <Info className="h-5 w-5 text-white" />
+              </button>
             )}
             <button
               onClick={(e) => {
