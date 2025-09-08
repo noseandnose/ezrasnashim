@@ -2031,6 +2031,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     enabled: activeModal === 'maariv'
   });
 
+  // Get Jewish times for info content
+  const { coordinates } = useLocationStore();
+  const { data: jewishTimes } = useJewishTimes();
+  const [showMaarivInfoPopover, setShowMaarivInfoPopover] = useState(false);
+
   // Intercept Maariv modal opening and redirect directly to fullscreen
   useEffect(() => {
     if (activeModal === 'maariv' && maarivPrayers.length > 0 && !isMaarivLoading) {
@@ -2044,10 +2049,27 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         showFontControls: true,
         showLanguageControls: true,
         showInfoIcon: true,
+        onInfoClick: (open) => setShowMaarivInfoPopover(open),
+        showInfoPopover: showMaarivInfoPopover,
+        infoContent: jewishTimes ? (
+          <div className="space-y-2">
+            <p className="font-semibold text-black">Maariv Prayer Times</p>
+            <div className="space-y-1 text-xs text-black/80">
+              <p><strong>Begins:</strong> {jewishTimes.shkia} (Sunset)</p>
+              <p><strong>Ideal time:</strong> {jewishTimes.tzaitHakochavim} (Stars visible)</p>
+              <p><strong>Until:</strong> {jewishTimes.alosHashachar} (Next dawn)</p>
+            </div>
+            <p className="text-xs text-black/70 mt-2">
+              Maariv may be prayed from sunset onwards, ideally after the stars become visible.
+            </p>
+          </div>
+        ) : (
+          <p className="text-xs text-black">Loading timing information...</p>
+        ),
         content: <MaarivFullscreenContent language={language} fontSize={fontSize} />
       });
     }
-  }, [activeModal, maarivPrayers, isMaarivLoading, closeModal, setFullscreenContent, language, fontSize]);
+  }, [activeModal, maarivPrayers, isMaarivLoading, closeModal, setFullscreenContent, language, fontSize, jewishTimes, showMaarivInfoPopover]);
 
   // Fetch Nishmas text from database
   const { data: nishmasText, isLoading: nishmasLoading } = useQuery<NishmasText>({
