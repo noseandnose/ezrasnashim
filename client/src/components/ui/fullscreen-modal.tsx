@@ -200,10 +200,6 @@ export function FullscreenModal({
                     className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
                     aria-label="Prayer timing information"
                     type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
                   >
                     <Info className="h-5 w-5 text-blush/60" />
                   </button>
