@@ -524,6 +524,8 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const { data: times } = useJewishTimes();
 
   if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
 
@@ -538,6 +540,17 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
 
   return (
     <div className="space-y-6">
+      {/* Info Icon and Modal */}
+      <div className="flex justify-end mb-2">
+        <button
+          onClick={() => setShowInfoModal(true)}
+          className="p-2 hover:bg-blush/10 active:bg-blush/20 rounded-full transition-colors"
+          aria-label="Prayer timing information"
+        >
+          <Info className="text-blush/60" size={20} />
+        </button>
+      </div>
+      
       {prayers.map((prayer, index) => (
         <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
           <div
@@ -579,6 +592,32 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
       >
         {isModalComplete('maariv') ? 'Completed Today' : 'Complete Maariv'}
       </Button>
+      
+      {/* Info Modal */}
+      {showInfoModal && times && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30"
+          onClick={() => setShowInfoModal(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl p-4 max-w-sm shadow-lg border border-blush/20"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-start mb-3">
+              <h3 className="platypi-bold text-base text-black">Maariv Info</h3>
+              <button 
+                onClick={() => setShowInfoModal(false)}
+                className="p-1 hover:bg-gray-100 rounded-full"
+              >
+                <X className="text-gray-500" size={16} />
+              </button>
+            </div>
+            <p className="text-sm text-black/80 platypi-regular">
+              Maariv should be recited after {times.shkia} (sunset) and ideally after {times.tzeis || 'nightfall'}.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
