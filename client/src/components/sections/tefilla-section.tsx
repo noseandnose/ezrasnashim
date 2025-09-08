@@ -243,7 +243,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     return shortMap[code];
   };
   const queryClient = useQueryClient();
-  const [showInfoModal, setShowInfoModal] = useState<'morning-brochas' | 'maariv' | null>(null);
   
   // Local state management
   const [hebrewName, setHebrewName] = useState("");
