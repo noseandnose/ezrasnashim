@@ -2034,6 +2034,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   // Get Jewish times for info content  
   const { data: jewishTimes } = useJewishTimes();
   const [showMaarivInfoPopover, setShowMaarivInfoPopover] = useState(false);
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('Maariv Info Debug:', { 
+      activeModal, 
+      showMaarivInfoPopover, 
+      jewishTimes: jewishTimes ? 'loaded' : 'not loaded' 
+    });
+  }, [activeModal, showMaarivInfoPopover, jewishTimes]);
 
   // Don't intercept Maariv - let it render as a direct fullscreen modal
   // This will be handled in the JSX return instead
@@ -3068,22 +3077,23 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         language={language}
         onLanguageChange={setLanguage}
         showInfoIcon={true}
-        onInfoClick={(open) => setShowMaarivInfoPopover(open)}
+        onInfoClick={(open) => {
+          console.log('Maariv info clicked:', open);
+          setShowMaarivInfoPopover(open);
+        }}
         showInfoPopover={showMaarivInfoPopover}
-        infoContent={jewishTimes ? (
+        infoContent={(
           <div className="space-y-2">
             <p className="font-semibold text-black">Maariv Prayer Times</p>
             <div className="space-y-1 text-xs text-black/80">
-              <p><strong>Begins:</strong> {jewishTimes.shkia} (Sunset)</p>
-              <p><strong>Ideal time:</strong> {jewishTimes.tzaitHakochavim} (Stars visible)</p>
-              <p><strong>Until:</strong> {jewishTimes.alosHashachar} (Next dawn)</p>
+              <p><strong>Begins:</strong> {jewishTimes?.shkia || 'Loading...'} (Sunset)</p>
+              <p><strong>Ideal time:</strong> {jewishTimes?.tzaitHakochavim || 'Loading...'} (Stars visible)</p>
+              <p><strong>Until:</strong> {jewishTimes?.alosHashachar || 'Loading...'} (Next dawn)</p>
             </div>
             <p className="text-xs text-black/70 mt-2">
               Maariv may be prayed from sunset onwards, ideally after the stars become visible.
             </p>
           </div>
-        ) : (
-          <p className="text-xs text-black">Loading timing information...</p>
         )}
       >
         <MaarivFullscreenContent language={language} fontSize={fontSize} />
