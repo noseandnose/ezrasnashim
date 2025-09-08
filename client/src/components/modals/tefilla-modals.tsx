@@ -3034,15 +3034,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         onFontSizeChange={setFontSize}
         language={language}
         onLanguageChange={setLanguage}
-        showInfoIcon={(() => {
-          const shouldShow = fullscreenContent.contentType === 'morning-brochas' || fullscreenContent.contentType === 'maariv';
-          console.log('showInfoIcon check:', fullscreenContent.contentType, shouldShow);
-          return shouldShow;
-        })()}
-        onInfoClick={() => {
-          console.log('onInfoClick called, current showInfoPopover:', showInfoPopover);
-          setShowInfoPopover(!showInfoPopover);
-        }}
+        showInfoIcon={fullscreenContent.contentType === 'morning-brochas' || fullscreenContent.contentType === 'maariv'}
+        onInfoClick={(open) => setShowInfoPopover(open)}
         showInfoPopover={showInfoPopover}
         infoContent={
           fullscreenContent.contentType === 'morning-brochas' && jewishTimesQuery.data ? (
