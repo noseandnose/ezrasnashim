@@ -175,6 +175,19 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     if (openTag !== closeTag) {
       return match;
     }
+    
+    // Debug ASERET_YEMEI_TESHUVA specifically
+    if (openTag.includes('ASERET_YEMEI_TESHUVA') && import.meta.env.DEV) {
+      console.log('ASERET_YEMEI_TESHUVA Pattern Match:', {
+        openTag,
+        content: content.substring(0, 50) + '...',
+        closeTag,
+        isInMatchesToKeep: matchesToKeep.has(match),
+        matchesToKeepSize: matchesToKeep.size,
+        result: matchesToKeep.has(match) ? 'SHOWING content' : 'HIDING content'
+      });
+    }
+    
     return matchesToKeep.has(match) ? content : '';
   });
 
