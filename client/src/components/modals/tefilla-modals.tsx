@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { HandHeart, Scroll, Heart, Plus, Minus, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Unlock, Check, Utensils, Wine, Car, Wheat, Moon, User, Info, X } from "lucide-react";
 
@@ -1733,6 +1734,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const [selectedPrayerId, setSelectedPrayerId] = useState<number | null>(null);
   const [isAnimating, ] = useState(false);
   const [showExplosion, setShowExplosion] = useState(false);
+  const [showInfoPopover, setShowInfoPopover] = useState(false);
   const [activeExplosionModal, setActiveExplosionModal] = useState<string | null>(null);
   const [fullscreenContent, setFullscreenContent] = useState<{
     isOpen: boolean;
@@ -1765,6 +1767,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   
   // Load Tefilla conditions for conditional content processing
   const tefillaConditions = useTefillaConditions();
+  
+  // Get Jewish times for info tooltips
+  const jewishTimesQuery = useJewishTimes(coordinates?.lat, coordinates?.lng);
 
   // Listen for fullscreen close events from fullscreen components
   useEffect(() => {
