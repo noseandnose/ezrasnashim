@@ -211,32 +211,6 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               <p className="platypi-bold text-sm text-black mb-0.5">{currentPrayer.title}</p>
               <p className="platypi-bold text-xs text-black leading-tight">{currentPrayer.subtitle}</p>
             </button>
-            {/* Info icon for Morning Brochas and Maariv */}
-            {(currentPrayer.modal === 'morning-brochas' || currentPrayer.modal === 'maariv') && jewishTimesQuery.data && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button 
-                      className="absolute top-1 right-1 p-1 hover:bg-blush/10 rounded-full transition-colors" 
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Info className="text-blush/60" size={12} />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs p-3 bg-white border border-blush/20 shadow-lg">
-                    {currentPrayer.modal === 'morning-brochas' ? (
-                      <p className="text-xs text-black">
-                        Birchos Kriyas Shema should not be recited after {jewishTimesQuery.data.sofZmanTfillah || jewishTimesQuery.data.chatzos}.
-                      </p>
-                    ) : currentPrayer.modal === 'maariv' ? (
-                      <p className="text-xs text-black">
-                        In a case of pressing need, Maariv can be recited from {jewishTimesQuery.data.plagHamincha} if, and only if, Mincha was recited that day before {jewishTimesQuery.data.plagHamincha}. In a case of pressing need, Maariv may be davened until {jewishTimesQuery.data.alosHashachar} (instead of Chatzos Haleiyla {jewishTimesQuery.data.chatzos}) of the next day.
-                      </p>
-                    ) : null}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
           </div>
 
           {/* Shkia - Display Only */}
