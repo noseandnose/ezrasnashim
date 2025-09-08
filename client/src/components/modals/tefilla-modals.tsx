@@ -3034,15 +3034,19 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         language={language}
         onLanguageChange={setLanguage}
         showInfoIcon={fullscreenContent.contentType === 'morning-brochas' || fullscreenContent.contentType === 'maariv'}
-        onInfoClick={() => {
-          if (fullscreenContent.contentType === 'morning-brochas') {
-            // Show Morning Brochas info
-            alert('Birchos Kriyas Shema should not be recited after Sof Zman Tfillah.');
-          } else if (fullscreenContent.contentType === 'maariv') {
-            // Show Maariv info
-            alert('Maariv should be recited after sunset and ideally after nightfall.');
-          }
-        }}
+        onInfoClick={() => setShowInfoPopover(!showInfoPopover)}
+        showInfoPopover={showInfoPopover}
+        infoContent={
+          fullscreenContent.contentType === 'morning-brochas' && jewishTimesQuery.data ? (
+            <p className="text-xs text-black">
+              Birchos Kriyas Shema should not be recited after {jewishTimesQuery.data.sofZmanTfillah || jewishTimesQuery.data.chatzos}.
+            </p>
+          ) : fullscreenContent.contentType === 'maariv' && jewishTimesQuery.data ? (
+            <p className="text-xs text-black">
+              In a case of pressing need, Maariv can be recited from {jewishTimesQuery.data.plagHamincha} if, and only if, Mincha was recited that day before {jewishTimesQuery.data.plagHamincha}. In a case of pressing need, Maariv may be davened until {jewishTimesQuery.data.alosHashachar} (instead of Chatzos Haleiyla {jewishTimesQuery.data.chatzos}) of the next day.
+            </p>
+          ) : null
+        }
       >
         {fullscreenContent.content || renderPrayerContent(fullscreenContent.contentType, language, fontSize)}
       </FullscreenModal>

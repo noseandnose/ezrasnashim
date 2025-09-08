@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { X, Info } from 'lucide-react';
 import logoImage from "@assets/1LO_1755590090315.png";
 import { FloatingSettings } from './floating-settings';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface FullscreenModalProps {
   isOpen: boolean;
@@ -16,9 +17,12 @@ interface FullscreenModalProps {
   showLanguageControls?: boolean;
   language?: 'hebrew' | 'english';
   onLanguageChange?: (lang: 'hebrew' | 'english') => void;
-  // Info icon
+  // Info icon  
   showInfoIcon?: boolean;
   onInfoClick?: () => void;
+  // Info popover content
+  infoContent?: React.ReactNode;
+  showInfoPopover?: boolean;
 }
 
 export function FullscreenModal({ 
@@ -34,7 +38,9 @@ export function FullscreenModal({
   language = 'hebrew',
   onLanguageChange,
   showInfoIcon = false,
-  onInfoClick
+  onInfoClick,
+  infoContent,
+  showInfoPopover = false
 }: FullscreenModalProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -187,19 +193,26 @@ export function FullscreenModal({
           </h1>
           
           <div className="flex items-center gap-2">
-            {showInfoIcon && onInfoClick && (
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onInfoClick();
-                }}
-                className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
-                aria-label="Prayer timing information"
-                type="button"
-              >
-                <Info className="h-5 w-5 text-blush/60" />
-              </button>
+            {showInfoIcon && infoContent && (
+              <Popover open={showInfoPopover}>
+                <PopoverTrigger asChild>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onInfoClick?.();
+                    }}
+                    className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+                    aria-label="Prayer timing information"
+                    type="button"
+                  >
+                    <Info className="h-5 w-5 text-blush/60" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="max-w-xs p-3 bg-white border border-blush/20 shadow-lg">
+                  {infoContent}
+                </PopoverContent>
+              </Popover>
             )}
             <button
               onClick={(e) => {
