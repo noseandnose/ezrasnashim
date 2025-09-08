@@ -170,8 +170,8 @@ export function FullscreenModal({
           minHeight: '56px'
         }}
         onClick={(e) => {
-          // Only scroll to top if not clicking the close button
-          if (!(e.target as Element).closest('button[aria-label="Close fullscreen"]')) {
+          // Only scroll to top if not clicking any button (close or info)
+          if (!(e.target as Element).closest('button')) {
             scrollContainerRef.current?.scrollTo({
               top: 0,
               behavior: 'smooth'
