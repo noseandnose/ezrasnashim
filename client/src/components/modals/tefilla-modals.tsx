@@ -151,26 +151,8 @@ const processTefillaContent = (text: string, conditions: TefillaConditions | nul
   
   const effectiveConditions = conditions || defaultConditions;
   
-  // Debug the ASERET_YEMEI_TESHUVA condition specifically
-  if (text.includes('ASERET_YEMEI_TESHUVA') && import.meta.env.DEV) {
-    console.log('ASERET_YEMEI_TESHUVA Debug:', {
-      isAseretYemeiTeshuva: effectiveConditions.isAseretYemeiTeshuva,
-      textSnippet: text.substring(text.indexOf('ASERET_YEMEI_TESHUVA') - 30, text.indexOf('ASERET_YEMEI_TESHUVA') + 100)
-    });
-  }
-  
   // Process conditional text FIRST (removes/shows conditional sections)
   const processedText = processTefillaText(text, effectiveConditions);
-  
-  // Debug the result of processing
-  if (text.includes('ASERET_YEMEI_TESHUVA') && import.meta.env.DEV) {
-    console.log('After processTefillaText:', {
-      originalLength: text.length,
-      processedLength: processedText.length,
-      stillHasTags: processedText.includes('ASERET_YEMEI_TESHUVA'),
-      contentPreview: processedText.substring(processedText.indexOf('המשפט') - 20, processedText.indexOf('המשפט') + 20)
-    });
-  }
   
   // Then format the resulting text (bold, italics, etc)
   return formatTextContent(processedText);

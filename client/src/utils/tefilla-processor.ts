@@ -176,23 +176,18 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
       return match;
     }
     
-    // Debug ASERET_YEMEI_TESHUVA specifically
-    if (openTag.includes('ASERET_YEMEI_TESHUVA') && import.meta.env.DEV) {
-      console.log('ASERET_YEMEI_TESHUVA Pattern Match:', {
-        openTag,
-        content: content.substring(0, 50) + '...',
-        closeTag,
-        isInMatchesToKeep: matchesToKeep.has(match),
-        matchesToKeepSize: matchesToKeep.size,
-        result: matchesToKeep.has(match) ? 'SHOWING content' : 'HIDING content'
-      });
-    }
     
     return matchesToKeep.has(match) ? content : '';
   });
 
+  // Additional cleanup: Handle any remaining ASERET_YEMEI_TESHUVA content that wasn't properly processed
+  // This is a backup to ensure no conditional content leaks through
+  if (!conditions.isAseretYemeiTeshuva) {
+    // During non-ASERET_YEMEI_TESHUVA periods, remove any remaining text that contains the specific text
+    processedText = processedText.replace(/הַמֶּֽלֶךְְְ הַמִּשְְְׁפָּט/g, '');
+  }
+  
   // Clean up any orphaned conditional tags that weren't properly matched
-  // This handles cases where opening/closing tags are unmatched
   const orphanedTagPattern = /\[\[(?:\/?)(?:OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH|FAST_DAY|ASERET_YEMEI_TESHUVA|SUKKOT|PESACH|ROSH_CHODESH_SPECIAL|grain|wine|fruit)(?:,[^\\]]*)?(?:\|[^\\]]*)?\]\]/g;
   
   processedText = processedText.replace(orphanedTagPattern, (match) => {
