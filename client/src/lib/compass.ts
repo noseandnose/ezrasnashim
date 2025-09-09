@@ -143,12 +143,10 @@ export class SimpleCompass {
   }
   
   private initialize() {
-    const deviceInfo = getDeviceInfo();
     this.state.isSupported = typeof DeviceOrientationEvent !== 'undefined';
     
     if (this.debugMode) {
-      console.log('🧭 Compass Debug Mode Enabled');
-      console.log('Device Info:', deviceInfo);
+      // Debug mode enabled
     }
     
     // Request location first
@@ -302,7 +300,7 @@ export class SimpleCompass {
     window.addEventListener(eventType as any, this.orientationHandler, { passive: true });
     
     if (this.debugMode) {
-      console.log(`🧭 Started orientation tracking with event: ${eventType}`);
+      // Started orientation tracking
     }
   }
   

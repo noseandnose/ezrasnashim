@@ -18,7 +18,7 @@ interface LocationState {
   refreshLocationIfStale: () => void;
 }
 
-export const useLocationStore = create<LocationState>((set, get) => ({
+export const useLocationStore = create<LocationState>((set) => ({
   location: "",
   coordinates: null,
   locationRequested: false,
@@ -64,7 +64,7 @@ export const useLocationStore = create<LocationState>((set, get) => ({
       if (age < 4 * 60 * 60 * 1000) { // 4 hour cache instead of 24
         try {
           const parsed = JSON.parse(cachedLocation);
-          console.log('Using cached location:', parsed);
+          // Using cached location
           set({ coordinates: parsed, location: '', permissionDenied: false });
           return true;
         } catch (e) {
@@ -74,7 +74,7 @@ export const useLocationStore = create<LocationState>((set, get) => ({
         }
       } else {
         // Cache is stale, clear it
-        console.log('Location cache is stale, clearing');
+        // Cache is stale, clearing
         localStorage.removeItem('user-location');
         localStorage.removeItem('user-location-time');
       }
@@ -89,7 +89,7 @@ export const useLocationStore = create<LocationState>((set, get) => ({
       if (age < 24 * 60 * 60 * 1000) { // 24 hour cache for IP location
         try {
           const parsed = JSON.parse(fallbackLocation);
-          console.log('Using IP fallback location:', parsed);
+          // Using IP fallback location
           set({ coordinates: parsed, location: '', permissionDenied: false });
           return true;
         } catch (e) {
@@ -109,7 +109,7 @@ export const useLocationStore = create<LocationState>((set, get) => ({
       const age = Date.now() - parseInt(cacheTimestamp);
       // If cache is older than 4 hours, force a refresh
       if (age > 4 * 60 * 60 * 1000) {
-        console.log('Location cache is stale, refreshing for accuracy...');
+        // Location cache is stale, refreshing
         localStorage.removeItem('user-location');
         localStorage.removeItem('user-location-time');
         set({ coordinates: null, locationRequested: false });
@@ -118,21 +118,6 @@ export const useLocationStore = create<LocationState>((set, get) => ({
   },
 }));
 
-// Calculate distance between two coordinates in kilometers
-function calculateDistance(
-  lat1: number, lng1: number,
-  lat2: number, lng2: number
-): number {
-  const R = 6371; // Radius of Earth in km
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLng/2) * Math.sin(dLng/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c;
-}
 
 // Hook to get user's location
 export function useGeolocation() {
@@ -184,22 +169,22 @@ export function useGeolocation() {
               lat: position.coords.latitude,
               lng: position.coords.longitude,
             };
-            console.log('Got accurate location:', coords);
+            // Got accurate location
             setCoordinates(coords);
             
             // Cache the location
             localStorage.setItem('user-location', JSON.stringify(coords));
             localStorage.setItem('user-location-time', Date.now().toString());
           },
-          async (error) => {
-            console.log('Location error, trying IP fallback:', error.message);
+          async () => {
+            // Location error, trying IP fallback
             setPermissionDenied(true);
             // Try IP-based location as fallback
             try {
               const store = useLocationStore.getState();
               await store.useIPLocation();
             } catch (ipError) {
-              console.error('IP location also failed:', ipError);
+              // IP location also failed
             }
           },
           {

@@ -133,8 +133,8 @@ export interface TefillaConditions {
   // New seasonal and location-based conditions
   isMH: boolean;    // 22 Tishrei - 14 Nissan
   isMT: boolean;    // 15 Nissan - 21 Tishrei
-  isTTI: boolean;   // 15 Nissan - 7 Cheshvan (Israel only)
-  isTBI: boolean;   // 8 Cheshvan - 14 Nissan (Israel only)
+  isTBI: boolean;   // 15 Nissan - 6 Cheshvan (Israel only)
+  isTTI: boolean;   // 7 Cheshvan - 14 Nissan (Israel only)
   isTTC: boolean;   // Dec 5 - 15 Nissan (outside Israel)
   isTBC: boolean;   // 15 Nissan - Dec 4 (outside Israel)
   hebrewDate?: {
@@ -173,8 +173,8 @@ export interface TefillaConditions {
  * Seasonal and location-based conditions:
  * [[MH]]content[[/MH]] - Shows from 22 Tishrei until 14 Nissan
  * [[MT]]content[[/MT]] - Shows from 15 Nissan until 21 Tishrei  
- * [[TTI]]content[[/TTI]] - Shows from 15 Nissan until 7 Cheshvan (Israel only)
- * [[TBI]]content[[/TBI]] - Shows from 8 Cheshvan until 14 Nissan (Israel only)
+ * [[TBI]]content[[/TBI]] - Shows from 15 Nissan until 6 Cheshvan (Israel only)
+ * [[TTI]]content[[/TTI]] - Shows from 7 Cheshvan until 14 Nissan (Israel only)
  * [[TTC]]content[[/TTC]] - Shows from December 5th until 15 Nissan (outside Israel only)
  * [[TBC]]content[[/TBC]] - Shows from 15 Nissan until December 4th (outside Israel only)
  * 
@@ -212,8 +212,8 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     // New seasonal and location-based conditions
     MH: () => conditions.isMH,
     MT: () => conditions.isMT,
-    TTI: () => conditions.isTTI,
     TBI: () => conditions.isTBI,
+    TTI: () => conditions.isTTI,
     TTC: () => conditions.isTTC,
     TBC: () => conditions.isTBC,
     // Me'ein Shalosh food selection conditions
@@ -512,11 +512,11 @@ export async function getCurrentTefillaConditions(
     // MT: 15 Nissan - 21 Tishrei  
     const isMT = isInHebrewDateRange(hebrewDate, 'Nissan', 15, 'Tishrei', 21);
     
-    // TTI: 15 Nissan - 7 Cheshvan (Israel only)
-    const isTTI = isInIsrael && isInHebrewDateRange(hebrewDate, 'Nissan', 15, 'Cheshvan', 7);
+    // TBI: 15 Nissan - 6 Cheshvan (Israel only)
+    const isTBI = isInIsrael && isInHebrewDateRange(hebrewDate, 'Nissan', 15, 'Cheshvan', 6);
     
-    // TBI: 8 Cheshvan - 14 Nissan (Israel only)
-    const isTBI = isInIsrael && isInHebrewDateRange(hebrewDate, 'Cheshvan', 8, 'Nissan', 14);
+    // TTI: 7 Cheshvan - 14 Nissan (Israel only)
+    const isTTI = isInIsrael && isInHebrewDateRange(hebrewDate, 'Cheshvan', 7, 'Nissan', 14);
     
     // TTC: Dec 5 - 15 Nissan (outside Israel)
     // This uses mixed English and Hebrew dates
@@ -556,8 +556,8 @@ export async function getCurrentTefillaConditions(
       // New seasonal conditions
       isMH,
       isMT,
-      isTTI,
       isTBI,
+      isTTI,
       isTTC,
       isTBC,
       hebrewDate,
