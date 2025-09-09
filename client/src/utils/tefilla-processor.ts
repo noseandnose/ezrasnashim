@@ -1,5 +1,120 @@
 // Tefilla text processor for conditional content based on location, time, and Jewish calendar
 
+// Hebrew date helper functions
+function parseHebrewDate(hebrewDate: any): { month: string; day: number } | null {
+  if (!hebrewDate) return null;
+  
+  try {
+    // The hebrewDate object from API has hebrewMonth and hebrewDay properties
+    const month = hebrewDate.hebrewMonth || '';
+    const day = hebrewDate.hebrewDay || 0;
+    
+    return { month, day };
+  } catch {
+    return null;
+  }
+}
+
+// Check if current Hebrew date falls within a range that may span years
+function isInHebrewDateRange(
+  hebrewDate: any,
+  startMonth: string,
+  startDay: number,
+  endMonth: string,
+  endDay: number
+): boolean {
+  const current = parseHebrewDate(hebrewDate);
+  if (!current) return false;
+  
+  const { month: currentMonth, day: currentDay } = current;
+  
+  // Define month order in Hebrew calendar
+  const monthOrder = [
+    'Tishrei', 'Cheshvan', 'Kislev', 'Tevet', 'Shevat', 'Adar',
+    'Nissan', 'Iyar', 'Sivan', 'Tammuz', 'Av', 'Elul'
+  ];
+  
+  // Handle Adar I/II - treat both as "Adar"
+  const normalizeMonth = (month: string) => {
+    if (month.includes('Adar')) return 'Adar';
+    return month;
+  };
+  
+  const currentMonthIndex = monthOrder.indexOf(normalizeMonth(currentMonth));
+  const startMonthIndex = monthOrder.indexOf(startMonth);
+  const endMonthIndex = monthOrder.indexOf(endMonth);
+  
+  if (currentMonthIndex === -1 || startMonthIndex === -1 || endMonthIndex === -1) {
+    return false;
+  }
+  
+  // Check if range spans across Hebrew year (e.g., Tishrei to Nissan)
+  if (startMonthIndex > endMonthIndex) {
+    // Range spans Hebrew year boundary
+    if (currentMonthIndex >= startMonthIndex) {
+      // We're in the first part (from start month to end of year)
+      return currentMonthIndex > startMonthIndex || 
+             (currentMonthIndex === startMonthIndex && currentDay >= startDay);
+    } else if (currentMonthIndex <= endMonthIndex) {
+      // We're in the second part (from start of year to end month)
+      return currentMonthIndex < endMonthIndex || 
+             (currentMonthIndex === endMonthIndex && currentDay <= endDay);
+    }
+    return false;
+  } else {
+    // Range within same Hebrew year
+    if (currentMonthIndex < startMonthIndex || currentMonthIndex > endMonthIndex) {
+      return false;
+    }
+    if (currentMonthIndex === startMonthIndex && currentDay < startDay) {
+      return false;
+    }
+    if (currentMonthIndex === endMonthIndex && currentDay > endDay) {
+      return false;
+    }
+    return true;
+  }
+}
+
+// Check if current English date is between two specific dates
+function isInEnglishDateRange(
+  currentDate: Date,
+  startMonth: number,  // 1-12
+  startDay: number,
+  endMonth: number,    // 1-12
+  endDay: number
+): boolean {
+  const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-11
+  const currentDay = currentDate.getDate();
+  
+  // Check if range spans across calendar year (e.g., December to March)
+  if (startMonth > endMonth) {
+    // Range spans year boundary
+    if (currentMonth >= startMonth) {
+      // We're in the first part (from start month to end of year)
+      return currentMonth > startMonth || 
+             (currentMonth === startMonth && currentDay >= startDay);
+    } else if (currentMonth <= endMonth) {
+      // We're in the second part (from start of year to end month)
+      return currentMonth < endMonth || 
+             (currentMonth === endMonth && currentDay <= endDay);
+    }
+    return false;
+  } else {
+    // Range within same calendar year
+    if (currentMonth < startMonth || currentMonth > endMonth) {
+      return false;
+    }
+    if (currentMonth === startMonth && currentDay < startDay) {
+      return false;
+    }
+    if (currentMonth === endMonth && currentDay > endDay) {
+      return false;
+    }
+    return true;
+  }
+}
+
 export interface TefillaConditions {
   isInIsrael: boolean;
   isRoshChodesh: boolean;
@@ -15,6 +130,13 @@ export interface TefillaConditions {
   isThursday: boolean;
   isFriday: boolean;
   isSaturday: boolean;
+  // New seasonal and location-based conditions
+  isMH: boolean;    // 22 Tishrei - 14 Nissan
+  isMT: boolean;    // 15 Nissan - 21 Tishrei
+  isTTI: boolean;   // 15 Nissan - 7 Cheshvan (Israel only)
+  isTBI: boolean;   // 8 Cheshvan - 14 Nissan (Israel only)
+  isTTC: boolean;   // Dec 5 - 15 Nissan (outside Israel)
+  isTBC: boolean;   // 15 Nissan - Dec 4 (outside Israel)
   hebrewDate?: {
     hebrew: string;
     date: string;
@@ -48,6 +170,14 @@ export interface TefillaConditions {
  * [[FRIDAY]]content[[/FRIDAY]] - Only shows on Fridays
  * [[SATURDAY]]content[[/SATURDAY]] - Only shows on Saturdays
  * 
+ * Seasonal and location-based conditions:
+ * [[MH]]content[[/MH]] - Shows from 22 Tishrei until 14 Nissan
+ * [[MT]]content[[/MT]] - Shows from 15 Nissan until 21 Tishrei  
+ * [[TTI]]content[[/TTI]] - Shows from 15 Nissan until 7 Cheshvan (Israel only)
+ * [[TBI]]content[[/TBI]] - Shows from 8 Cheshvan until 14 Nissan (Israel only)
+ * [[TTC]]content[[/TTC]] - Shows from December 5th until 15 Nissan (outside Israel only)
+ * [[TBC]]content[[/TBC]] - Shows from 15 Nissan until December 4th (outside Israel only)
+ * 
  * You can combine conditions:
  * [[OUTSIDE_ISRAEL,ROSH_CHODESH]]content[[/OUTSIDE_ISRAEL,ROSH_CHODESH]] - Shows only for users outside Israel AND on Rosh Chodesh (both must be true)
  * [[ROSH_CHODESH|SUKKOT|PESACH]]content[[/ROSH_CHODESH|SUKKOT|PESACH]] - Shows during any of these holidays (OR logic)
@@ -79,6 +209,13 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     THURSDAY: () => conditions.isThursday,
     FRIDAY: () => conditions.isFriday,
     SATURDAY: () => conditions.isSaturday,
+    // New seasonal and location-based conditions
+    MH: () => conditions.isMH,
+    MT: () => conditions.isMT,
+    TTI: () => conditions.isTTI,
+    TBI: () => conditions.isTBI,
+    TTC: () => conditions.isTTC,
+    TBC: () => conditions.isTBC,
     // Me'ein Shalosh food selection conditions
     grain: () => selectedFoodTypes.grain === true,
     wine: () => selectedFoodTypes.wine === true,
@@ -366,6 +503,41 @@ export async function getCurrentTefillaConditions(
       console.warn('Could not fetch Hebrew date data:', error);
     }
 
+    // Calculate new seasonal conditions
+    const currentDate = new Date();
+    
+    // MH: 22 Tishrei - 14 Nissan
+    const isMH = isInHebrewDateRange(hebrewDate, 'Tishrei', 22, 'Nissan', 14);
+    
+    // MT: 15 Nissan - 21 Tishrei  
+    const isMT = isInHebrewDateRange(hebrewDate, 'Nissan', 15, 'Tishrei', 21);
+    
+    // TTI: 15 Nissan - 7 Cheshvan (Israel only)
+    const isTTI = isInIsrael && isInHebrewDateRange(hebrewDate, 'Nissan', 15, 'Cheshvan', 7);
+    
+    // TBI: 8 Cheshvan - 14 Nissan (Israel only)
+    const isTBI = isInIsrael && isInHebrewDateRange(hebrewDate, 'Cheshvan', 8, 'Nissan', 14);
+    
+    // TTC: Dec 5 - 15 Nissan (outside Israel)
+    // This uses mixed English and Hebrew dates
+    let isTTC = false;
+    if (!isInIsrael && hebrewDate) {
+      const isAfterDec5 = isInEnglishDateRange(currentDate, 12, 5, 12, 31); // Dec 5 to end of year
+      const isBeforeNissan15 = isInHebrewDateRange(hebrewDate, 'Tishrei', 1, 'Nissan', 14); // Start of Hebrew year to 14 Nissan
+      const isExactlyTo15Nissan = parseHebrewDate(hebrewDate)?.month === 'Nissan' && 
+                                  parseHebrewDate(hebrewDate)?.day === 15;
+      isTTC = isAfterDec5 || isBeforeNissan15 || isExactlyTo15Nissan;
+    }
+    
+    // TBC: 15 Nissan - Dec 4 (outside Israel)
+    // This uses mixed Hebrew and English dates
+    let isTBC = false;
+    if (!isInIsrael && hebrewDate) {
+      const isAfterNissan15 = isInHebrewDateRange(hebrewDate, 'Nissan', 15, 'Elul', 29); // 15 Nissan to end of Hebrew year
+      const isBeforeDec4 = isInEnglishDateRange(currentDate, 1, 1, 12, 4); // Start of year to Dec 4
+      isTBC = isAfterNissan15 || isBeforeDec4;
+    }
+
     const finalConditions = {
       isInIsrael,
       isRoshChodesh,
@@ -381,6 +553,13 @@ export async function getCurrentTefillaConditions(
       isThursday,
       isFriday,
       isSaturday,
+      // New seasonal conditions
+      isMH,
+      isMT,
+      isTTI,
+      isTBI,
+      isTTC,
+      isTBC,
       hebrewDate,
       location
     };
@@ -421,7 +600,14 @@ export async function getCurrentTefillaConditions(
       isWednesday,
       isThursday,
       isFriday,
-      isSaturday
+      isSaturday,
+      // Default values for new seasonal conditions
+      isMH: false,
+      isMT: false,
+      isTTI: false,
+      isTBI: false,
+      isTTC: false,
+      isTBC: false
     };
   }
 }
