@@ -674,11 +674,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 }
               }
               if (process.env.NODE_ENV === 'development') {
-                console.log('Found English text:', englishText.substring(0, 50) + '...');
+                // Found English text
               }
             } catch (englishError) {
               if (process.env.NODE_ENV === 'development') {
-                console.log('No English version available for:', url);
+                // No English version available
               }
             }
             
@@ -689,7 +689,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             };
           } catch (error) {
             if (process.env.NODE_ENV === 'development') {
-              console.error('Error fetching morning blessing from Sefaria:', error);
+              // Error fetching morning blessing from Sefaria
             }
             return { hebrew: '', english: '', ref: '' };
           }
@@ -704,7 +704,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(validBlessings);
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Error fetching morning brochas from Sefaria:', error);
+        // Error fetching morning brochas from Sefaria
       }
       res.status(500).json({ message: "Failed to fetch morning brochas from Sefaria API" });
     }
