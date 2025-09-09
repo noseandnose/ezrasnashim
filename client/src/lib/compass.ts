@@ -143,7 +143,6 @@ export class SimpleCompass {
   }
   
   private initialize() {
-    const deviceInfo = getDeviceInfo();
     this.state.isSupported = typeof DeviceOrientationEvent !== 'undefined';
     
     if (this.debugMode) {

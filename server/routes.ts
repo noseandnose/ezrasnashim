@@ -31,9 +31,9 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY && VAPID_EMAIL) {
     VAPID_PUBLIC_KEY,
     VAPID_PRIVATE_KEY
   );
-  console.log('Push notifications configured with VAPID keys');
+  // Push notifications configured with VAPID keys
 } else {
-  console.warn('Push notifications not configured - missing VAPID keys');
+  // Push notifications not configured - missing VAPID keys
 }
 import { 
   insertTehillimNameSchema,
@@ -55,7 +55,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.cleanupExpiredNames();
       // Cleaned up expired Tehillim names
     } catch (error) {
-      console.error('Error cleaning up expired names:', error);
+      // Error cleaning up expired names
     }
   }, 60 * 60 * 1000); // Run every hour
 
@@ -69,7 +69,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const years = parseInt(req.query.years as string) || 1;
       const afterNightfall = req.query.afterNightfall === 'true';
       
-      console.log('Calendar download request:', { title, hebrewDate, gregorianDate, years, afterNightfall });
+      // Calendar download request
       
       // Generate calendar content
       const events: string[] = [];
