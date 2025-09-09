@@ -3150,10 +3150,19 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         onFontSizeChange={setFontSize}
         language={language}
         onLanguageChange={setLanguage}
-        showInfoIcon={fullscreenContent.contentType === 'morning-brochas'}
-        showInfoPopover={fullscreenContent.contentType === 'morning-brochas' ? showMorningBrochasInfo : false}
-        onInfoClick={fullscreenContent.contentType === 'morning-brochas' ? setShowMorningBrochasInfo : undefined}
-        infoContent={fullscreenContent.contentType === 'morning-brochas' ? getMorningBrochasTooltip() : undefined}
+        showInfoIcon={fullscreenContent.contentType === 'morning-brochas' || fullscreenContent.title === 'Maariv Prayer'}
+        showInfoPopover={
+          fullscreenContent.contentType === 'morning-brochas' ? showMorningBrochasInfo :
+          fullscreenContent.title === 'Maariv Prayer' ? showMaarivInfo : false
+        }
+        onInfoClick={
+          fullscreenContent.contentType === 'morning-brochas' ? setShowMorningBrochasInfo :
+          fullscreenContent.title === 'Maariv Prayer' ? setShowMaarivInfo : undefined
+        }
+        infoContent={
+          fullscreenContent.contentType === 'morning-brochas' ? getMorningBrochasTooltip() :
+          fullscreenContent.title === 'Maariv Prayer' ? <p className="text-xs text-black">Test: Maariv info content from generic modal</p> : undefined
+        }
       >
         {fullscreenContent.content || renderPrayerContent(fullscreenContent.contentType, language, fontSize)}
       </FullscreenModal>
