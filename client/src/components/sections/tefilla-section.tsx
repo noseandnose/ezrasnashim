@@ -104,6 +104,14 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       };
     }
     
+    // FOR TESTING: Always show Shacharis as available
+    return {
+      title: "Shacharis",
+      subtitle: `${times.alosHashachar} - ${times.chatzos}`,
+      modal: "morning-brochas"
+    };
+    
+    /*
     if (now >= alos && now < chatzos) {
       // Morning Brochas time - from Alos Hashachar until Chatzos
       return {
@@ -142,6 +150,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
         disabled: true
       };
     }
+    */
   };
 
   const currentPrayer = getCurrentPrayer();

@@ -111,6 +111,15 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       };
     }
 
+    // FOR TESTING: Always show Shacharis as available
+    return {
+      title: "Shacharis",
+      subtitle: `${times.alosHashachar} - ${times.chatzos}`,
+      modal: "morning-brochas" as const,
+      icon: Sunrise
+    };
+    
+    /*
     if (now >= alos && now < chatzos) {
       // Morning Brochas time - from Alos Hashachar until Chatzos
       return {
@@ -154,6 +163,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         disabled: true
       };
     }
+    */
   };
 
   const currentPrayer = useMemo(() => getCurrentPrayer(), [jewishTimesQuery.data, jewishTimesQuery.isLoading]);

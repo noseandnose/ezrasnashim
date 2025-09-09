@@ -981,6 +981,9 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
   const { trackModalComplete } = useTrackModalComplete();
   const jewishTimesQuery = useJewishTimes();
 
+  // State for managing which section is expanded
+  const [expandedSection, setExpandedSection] = useState<number>(0); // Start with first section expanded
+
   if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
 
   const handleComplete = () => {
@@ -992,22 +995,80 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
     window.dispatchEvent(event);
   };
 
+  // Group prayers by orderIndex
+  const groupedPrayers = prayers.reduce((groups, prayer) => {
+    const orderIndex = prayer.orderIndex || 0;
+    if (!groups[orderIndex]) {
+      groups[orderIndex] = [];
+    }
+    groups[orderIndex].push(prayer);
+    return groups;
+  }, {} as Record<number, any[]>);
+
+  // Get sorted order indices
+  const sortedOrderIndices = Object.keys(groupedPrayers)
+    .map(Number)
+    .sort((a, b) => a - b);
+
   return (
-    <div className="space-y-6">
-      {prayers.map((prayer, index) => (
-        <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
-          <div
-            className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
-            style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
-            dangerouslySetInnerHTML={{
-              __html: processTefillaContent(
-                language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation, 
-                tefillaConditions
-              )
-            }}
-          />
-        </div>
-      ))}
+    <div className="space-y-4">
+      {sortedOrderIndices.map((orderIndex, sectionIndex) => {
+        const sectionPrayers = groupedPrayers[orderIndex];
+        const isExpanded = expandedSection === sectionIndex;
+        const sectionTitle = sectionPrayers[0]?.prayerType || `Section ${orderIndex}`;
+
+        return (
+          <div key={orderIndex} className="bg-white rounded-2xl border border-blush/10 overflow-hidden">
+            {/* Section Header - Clickable */}
+            <button
+              onClick={() => setExpandedSection(isExpanded ? -1 : sectionIndex)}
+              className="w-full px-6 py-4 text-left hover:bg-blush/5 transition-colors flex items-center justify-between"
+            >
+              <h3 className="platypi-bold text-lg text-black">
+                {sectionTitle}
+              </h3>
+              <div className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </button>
+
+            {/* Section Content - Collapsible */}
+            {isExpanded && (
+              <div className="px-6 pb-6 space-y-4">
+                {sectionPrayers.map((prayer, prayerIndex) => (
+                  <div key={prayerIndex}>
+                    <div
+                      className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
+                      style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
+                      dangerouslySetInnerHTML={{
+                        __html: processTefillaContent(
+                          language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation, 
+                          tefillaConditions
+                        )
+                      }}
+                    />
+                  </div>
+                ))}
+                
+                {/* Done Button for this section */}
+                <Button
+                  onClick={isModalComplete('morning-brochas') ? undefined : handleComplete}
+                  disabled={isModalComplete('morning-brochas')}
+                  className={`w-full py-3 rounded-xl platypi-medium border-0 mt-4 ${
+                    isModalComplete('morning-brochas') 
+                      ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
+                  }`}
+                >
+                  {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete Shacharis'}
+                </Button>
+              </div>
+            )}
+          </div>
+        );
+      })}
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
@@ -1023,18 +1084,6 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
           {' '}and Rabbi Sacks Legacy
         </span>
       </div>
-
-      <Button
-        onClick={isModalComplete('morning-brochas') ? undefined : handleComplete}
-        disabled={isModalComplete('morning-brochas')}
-        className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
-          isModalComplete('morning-brochas') 
-            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
-        }`}
-      >
-        {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete Shacharis'}
-      </Button>
     </div>
   );
 }
