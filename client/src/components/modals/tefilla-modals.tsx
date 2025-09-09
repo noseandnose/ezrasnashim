@@ -530,6 +530,7 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
+  const jewishTimesQuery = useJewishTimes();
 
   if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
 
@@ -964,6 +965,7 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
+  const jewishTimesQuery = useJewishTimes();
 
   if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
 
@@ -1740,6 +1742,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const [isAnimating, ] = useState(false);
   const [showExplosion, setShowExplosion] = useState(false);
   const [activeExplosionModal, setActiveExplosionModal] = useState<string | null>(null);
+  const [showMorningBrochasInfo, setShowMorningBrochasInfo] = useState(false);
+  const [showMaarivInfo, setShowMaarivInfo] = useState(false);
   const [fullscreenContent, setFullscreenContent] = useState<{
     isOpen: boolean;
     title: string;
@@ -1775,6 +1779,28 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   // Get Jewish times for info tooltips  
   const { coordinates } = useLocationStore();
   const jewishTimesQuery = useJewishTimes(coordinates?.lat, coordinates?.lng);
+
+  // Helper function to create Morning Brochas tooltip content
+  const getMorningBrochasTooltip = () => {
+    if (!jewishTimesQuery.data) return "Loading timing information...";
+    const times = jewishTimesQuery.data;
+    return (
+      <p className="text-xs text-black">
+        It is better to Daven between Netz {times.sunrise} and Sof Zman Tefilla {times.sofZmanTfilla}. Birchas Kriyas Shema should not be recited after Sof Zman Tefilla.
+      </p>
+    );
+  };
+
+  // Helper function to create Maariv tooltip content
+  const getMaarivTooltip = () => {
+    if (!jewishTimesQuery.data) return "Loading timing information...";
+    const times = jewishTimesQuery.data;
+    return (
+      <p className="text-xs text-black">
+        It is better to daven between Tzeitz {times.tzaitHakochavim} and Chatsos Halyla {times.chatzos}.
+      </p>
+    );
+  };
 
   // Listen for fullscreen close events from fullscreen components
   useEffect(() => {
@@ -3063,6 +3089,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         showLanguageControls={true}
         language={language}
         onLanguageChange={setLanguage}
+        showInfoIcon={true}
+        showInfoPopover={showMaarivInfo}
+        onInfoClick={setShowMaarivInfo}
+        infoContent={getMaarivTooltip()}
       >
         <MaarivFullscreenContent language={language} fontSize={fontSize} />
       </FullscreenModal>
@@ -3106,6 +3136,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         onFontSizeChange={setFontSize}
         language={language}
         onLanguageChange={setLanguage}
+        showInfoIcon={fullscreenContent.contentType === 'morning-brochas'}
+        showInfoPopover={fullscreenContent.contentType === 'morning-brochas' ? showMorningBrochasInfo : false}
+        onInfoClick={fullscreenContent.contentType === 'morning-brochas' ? setShowMorningBrochasInfo : undefined}
+        infoContent={fullscreenContent.contentType === 'morning-brochas' ? getMorningBrochasTooltip() : undefined}
       >
         {fullscreenContent.content || renderPrayerContent(fullscreenContent.contentType, language, fontSize)}
       </FullscreenModal>
