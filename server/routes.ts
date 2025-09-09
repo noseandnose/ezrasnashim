@@ -154,11 +154,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 ].join('\r\n'));
               }
             } catch (error) {
-              console.error(`Failed to convert Hebrew date for year ${targetYear}:`, error);
+              // Failed to convert Hebrew date
             }
           }
         } catch (error) {
-          console.error('Hebrew date conversion error:', error);
+          // Hebrew date conversion error
           // Fallback to simple date logic if API fails
           const startYear = inputDate.getFullYear() < currentYear ? currentYear : inputDate.getFullYear();
           
@@ -218,7 +218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.send(icsContent);
       
     } catch (error) {
-      console.error('Calendar download error:', error);
+      // Calendar download error
       res.status(500).json({ message: "Failed to generate calendar" });
     }
   });
@@ -245,7 +245,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Log coordinates for debugging
       if (process.env.NODE_ENV === 'development') {
-        console.log(`Zmanim request for coordinates: lat=${latitude}, lng=${longitude}`);
+        // Zmanim request for coordinates
       }
       
       try {
@@ -255,15 +255,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (timezones && timezones.length > 0) {
           tzid = timezones[0]; // Use the first (most accurate) timezone
           if (process.env.NODE_ENV === 'development') {
-            console.log(`geo-tz detected timezone: ${tzid} for coordinates lat=${latitude}, lng=${longitude}`);
+            // geo-tz detected timezone
             if (timezones.length > 1) {
-              console.log(`Alternative timezones available: ${timezones.slice(1).join(', ')}`);
+              // Alternative timezones available
             }
           }
         } else {
           // Fallback to basic detection for edge cases
           if (process.env.NODE_ENV === 'development') {
-            console.log(`geo-tz returned no timezones, using fallback detection`);
+            // geo-tz returned no timezones, using fallback detection
           }
           
           // Basic fallback detection for ocean areas
@@ -287,14 +287,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.error('geo-tz timezone detection error:', error);
+          // geo-tz timezone detection error
         }
         // Keep default fallback timezone
       }
       
       // Log final timezone selection
       if (process.env.NODE_ENV === 'development') {
-        console.log(`Final selected timezone: ${tzid} for coordinates lat=${latitude}, lng=${longitude}`);
+        // Final selected timezone
       }
       
       // Call Hebcal with exact coordinates
@@ -334,7 +334,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return localTime;
         } catch (error) {
           if (process.env.NODE_ENV === 'development') {
-            console.error('Time formatting error:', error, 'for time:', timeStr);
+            // Time formatting error
           }
           return timeStr;
         }
@@ -397,7 +397,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (geocodeError) {
         // If reverse geocoding fails, use intelligent coordinate-based fallback
         if (process.env.NODE_ENV === 'development') {
-          console.warn('Reverse geocoding failed:', geocodeError);
+          // Reverse geocoding failed
         }
         
         // Provide intelligent location names based on known coordinates (expanded ranges)
@@ -454,19 +454,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // - Custom candle lighting time preferences
       };
       
-      // Debug logging
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`Formatted times for ${locationName}:`, {
-          sunrise: formattedTimes.sunrise,
-          minchaGedolah: formattedTimes.minchaGedolah,
-          shkia: formattedTimes.shkia,
-          tzid: tzid
-        });
-      }
+      // Debug logging removed for production
 
       res.json(formattedTimes);
     } catch (error) {
-      console.error('Error fetching Hebcal zmanim:', error);
+      // Error fetching Hebcal zmanim
       res.status(500).json({ message: "Failed to fetch zmanim from Hebcal API" });
     }
   });
@@ -509,7 +501,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // If current time is past tzait, we need next week's parsha
         useNextWeek = localNow > tzaitToday;
         
-        console.log(`Debug parsha timing - Local now: ${localNow.toLocaleString()}, Tzait today: ${tzaitToday.toLocaleString()}, Use next week: ${useNextWeek}`);
+        // Debug parsha timing
       }
 
       // Build API URL - add week offset if needed  
@@ -519,11 +511,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         apiUrl += `&gy=2025&gm=9&gd=6`;
       }
 
-      console.log(`[Server API Request] GET ${apiUrl}`);
+      // Server API Request
       
       const response = await fetch(apiUrl);
       
-      console.log(`[Server API Response] ${response.status} GET ${apiUrl}`);
+      // Server API Response
 
       if (!response.ok) {
         throw new Error('Failed to fetch Shabbos times from Hebcal');
@@ -540,17 +532,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       data.items.forEach((item: any) => {
-        console.log('Processing item:', item.title);
+        // Processing item
         if (item.title.includes("Candle lighting:")) {
           // Extract time with possible pm/am suffix (e.g., "Candle lighting: 8:00pm" or "Candle lighting: 19:23")
           const timeMatch = item.title.match(/Candle lighting: (\d{1,2}:\d{2})(pm|am|p\.m\.|a\.m\.)?/i);
-          console.log('Candle lighting timeMatch:', timeMatch);
+          // Candle lighting timeMatch
           if (timeMatch) {
             const [hours, minutes] = timeMatch[1].split(':');
             const hour12 = parseInt(hours);
             const suffix = timeMatch[2]?.toLowerCase();
             
-            console.log('Candle lighting - hour12:', hour12, 'minutes:', minutes, 'suffix:', suffix);
+            // Candle lighting time parsing
             
             if (suffix) {
               // Already has am/pm, just format it properly
@@ -562,31 +554,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const period = hour12 >= 12 ? 'PM' : 'AM';
               result.candleLighting = `${displayHour}:${minutes} ${period}`;
             }
-            console.log('Final candleLighting:', result.candleLighting);
+            // Final candleLighting
           }
         } else if (item.title.includes("Havdalah:")) {
-          console.log('Full title for havdalah:', item.title);
+          // Full title for havdalah
           // Check if it has pm/am at the end of the full title  
           const timeWithSuffixMatch = item.title.match(/Havdalah: (\d{1,2}:\d{2})\s*(pm|am)/i);
           if (timeWithSuffixMatch) {
             const [, time, suffix] = timeWithSuffixMatch;
             const [hours, minutes] = time.split(':');
             const hour12 = parseInt(hours);
-            console.log('Havdalah with suffix - hour12:', hour12, 'minutes:', minutes, 'suffix:', suffix);
+            // Havdalah with suffix
             const displayHour = hour12 === 0 ? 12 : hour12;
             result.havdalah = `${displayHour}:${minutes} ${suffix.toUpperCase()}`;
-            console.log('Final havdalah:', result.havdalah);
+            // Final havdalah
           } else {
             // Try 24-hour format
             const timeMatch = item.title.match(/Havdalah: (\d{1,2}:\d{2})/);
             if (timeMatch) {
               const [hours, minutes] = timeMatch[1].split(':');
               const hour24 = parseInt(hours);
-              console.log('Havdalah 24hr - hour24:', hour24, 'minutes:', minutes);
+              // Havdalah 24hr
               const displayHour = hour24 > 12 ? hour24 - 12 : (hour24 === 0 ? 12 : hour24);
               const period = hour24 >= 12 ? 'PM' : 'AM';
               result.havdalah = `${displayHour}:${minutes} ${period}`;
-              console.log('Final havdalah:', result.havdalah);
+              // Final havdalah
             }
           }
         } else if (item.title.startsWith("Parashat ") || item.title.startsWith("Parashah ")) {
@@ -596,7 +588,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(result);
     } catch (error) {
-      console.error('Error fetching Shabbos times:', error);
+      // Error fetching Shabbos times
       res.status(500).json({ message: "Failed to fetch Shabbos times from Hebcal API" });
     }
   });
