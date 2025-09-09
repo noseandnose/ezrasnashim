@@ -1021,9 +1021,10 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
     if (expandedSection >= 0 && sectionRefs.current[expandedSection]) {
       const sectionElement = sectionRefs.current[expandedSection];
       
-      // Find the Done button within the expanded section to scroll to it
-      const doneButton = sectionElement!.querySelector('button[class*="complete-button-pulse"], button[class*="bg-gradient-feminine"], .complete-shacharis-btn') || 
-                         sectionElement!.querySelector('button:last-of-type');
+      // Find the Done button within the expanded section content (not the header)
+      const sectionContent = sectionElement!.querySelector('div[class*="px-6 pb-6"]'); // The content area with padding
+      const doneButton = sectionContent?.querySelector('button') || 
+                         sectionElement!.querySelector('button[class*="bg-gradient-feminine"], button[class*="bg-sage"]');
       
       if (doneButton) {
         // Scroll the Done button into view, which puts us at the bottom of the section
