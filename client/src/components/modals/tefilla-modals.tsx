@@ -123,7 +123,8 @@ const useTefillaConditions = () => {
           isAseretYemeiTeshuva: false,
           isSukkot: false,
           isPesach: false,
-          isRoshChodeshSpecial: false
+          isRoshChodeshSpecial: false,
+          isMondayThursday: false
         });
       }
     };
@@ -146,7 +147,8 @@ const processTefillaContent = (text: string, conditions: TefillaConditions | nul
     isAseretYemeiTeshuva: false,
     isSukkot: false,
     isPesach: false,
-    isRoshChodeshSpecial: false
+    isRoshChodeshSpecial: false,
+    isMondayThursday: false
   };
   
   const effectiveConditions = conditions || defaultConditions;

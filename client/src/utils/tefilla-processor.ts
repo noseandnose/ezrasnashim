@@ -8,6 +8,7 @@ export interface TefillaConditions {
   isSukkot: boolean;
   isPesach: boolean;
   isRoshChodeshSpecial: boolean;
+  isMondayThursday: boolean;
   hebrewDate?: {
     hebrew: string;
     date: string;
@@ -33,6 +34,7 @@ export interface TefillaConditions {
  * [[SUKKOT]]content[[/SUKKOT]] - Only shows during Sukkot
  * [[PESACH]]content[[/PESACH]] - Only shows during Pesach
  * [[ROSH_CHODESH_SPECIAL]]content[[/ROSH_CHODESH_SPECIAL]] - HIDES content during Rosh Chodesh, Pesach, or Sukkot
+ * [[MONTHUR]]content[[/MONTHUR]] - Only shows on Mondays and Thursdays
  * 
  * You can combine conditions:
  * [[OUTSIDE_ISRAEL,ROSH_CHODESH]]content[[/OUTSIDE_ISRAEL,ROSH_CHODESH]] - Shows only for users outside Israel AND on Rosh Chodesh (both must be true)
@@ -58,6 +60,7 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     SUKKOT: () => conditions.isSukkot,
     PESACH: () => conditions.isPesach,
     ROSH_CHODESH_SPECIAL: () => !conditions.isRoshChodeshSpecial, // Exclusion logic: shows when NOT in special periods
+    MONTHUR: () => conditions.isMondayThursday,
     // Me'ein Shalosh food selection conditions
     grain: () => selectedFoodTypes.grain === true,
     wine: () => selectedFoodTypes.wine === true,
@@ -276,6 +279,10 @@ export async function getCurrentTefillaConditions(
     let isSukkot = false;
     let isPesach = false;
     let isRoshChodeshSpecial = false;
+    
+    // Check if today is Monday (1) or Thursday (4)
+    const dayOfWeek = new Date().getDay();
+    const isMondayThursday = dayOfWeek === 1 || dayOfWeek === 4;
     let hebrewDate = undefined;
 
     try {
@@ -343,6 +350,7 @@ export async function getCurrentTefillaConditions(
       isSukkot,
       isPesach,
       isRoshChodeshSpecial,
+      isMondayThursday,
       hebrewDate,
       location
     };
@@ -359,6 +367,10 @@ export async function getCurrentTefillaConditions(
     console.error('Error getting Tefilla conditions:', error);
     
     // Return safe defaults
+    // Check if today is Monday (1) or Thursday (4) for fallback too
+    const dayOfWeek = new Date().getDay();
+    const isMondayThursday = dayOfWeek === 1 || dayOfWeek === 4;
+    
     return {
       isInIsrael: false,
       isRoshChodesh: false,
@@ -366,7 +378,8 @@ export async function getCurrentTefillaConditions(
       isAseretYemeiTeshuva: false,
       isSukkot: false,
       isPesach: false,
-      isRoshChodeshSpecial: false
+      isRoshChodeshSpecial: false,
+      isMondayThursday
     };
   }
 }

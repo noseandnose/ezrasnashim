@@ -125,7 +125,8 @@ export function BirkatHamazonModal() {
           isAseretYemeiTeshuva: false,
           isSukkot: false,
           isPesach: false,
-          isRoshChodeshSpecial: false
+          isRoshChodeshSpecial: false,
+          isMondayThursday: false
         });
       }
     };
@@ -629,7 +630,8 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
           isAseretYemeiTeshuva: false,
           isSukkot: false,
           isPesach: false,
-          isRoshChodeshSpecial: false
+          isRoshChodeshSpecial: false,
+          isMondayThursday: false
         });
       }
     };
@@ -809,7 +811,8 @@ export function BirkatHamazonFullscreenContent({ language, fontSize }: { languag
           isAseretYemeiTeshuva: false,
           isSukkot: false,
           isPesach: false,
-          isRoshChodeshSpecial: false
+          isRoshChodeshSpecial: false,
+          isMondayThursday: false
         });
       }
     };
