@@ -126,7 +126,13 @@ export function BirkatHamazonModal() {
           isSukkot: false,
           isPesach: false,
           isRoshChodeshSpecial: false,
-          isMondayThursday: false
+          isSunday: false,
+          isMonday: false,
+          isTuesday: false,
+          isWednesday: false,
+          isThursday: false,
+          isFriday: false,
+          isSaturday: false
         });
       }
     };
@@ -631,7 +637,13 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
           isSukkot: false,
           isPesach: false,
           isRoshChodeshSpecial: false,
-          isMondayThursday: false
+          isSunday: false,
+          isMonday: false,
+          isTuesday: false,
+          isWednesday: false,
+          isThursday: false,
+          isFriday: false,
+          isSaturday: false
         });
       }
     };
@@ -812,7 +824,13 @@ export function BirkatHamazonFullscreenContent({ language, fontSize }: { languag
           isSukkot: false,
           isPesach: false,
           isRoshChodeshSpecial: false,
-          isMondayThursday: false
+          isSunday: false,
+          isMonday: false,
+          isTuesday: false,
+          isWednesday: false,
+          isThursday: false,
+          isFriday: false,
+          isSaturday: false
         });
       }
     };

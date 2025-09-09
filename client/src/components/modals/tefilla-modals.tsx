@@ -124,7 +124,13 @@ const useTefillaConditions = () => {
           isSukkot: false,
           isPesach: false,
           isRoshChodeshSpecial: false,
-          isMondayThursday: false
+          isSunday: false,
+          isMonday: false,
+          isTuesday: false,
+          isWednesday: false,
+          isThursday: false,
+          isFriday: false,
+          isSaturday: false
         });
       }
     };
@@ -148,7 +154,13 @@ const processTefillaContent = (text: string, conditions: TefillaConditions | nul
     isSukkot: false,
     isPesach: false,
     isRoshChodeshSpecial: false,
-    isMondayThursday: false
+    isSunday: false,
+    isMonday: false,
+    isTuesday: false,
+    isWednesday: false,
+    isThursday: false,
+    isFriday: false,
+    isSaturday: false
   };
   
   const effectiveConditions = conditions || defaultConditions;

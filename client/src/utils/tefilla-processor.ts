@@ -8,7 +8,13 @@ export interface TefillaConditions {
   isSukkot: boolean;
   isPesach: boolean;
   isRoshChodeshSpecial: boolean;
-  isMondayThursday: boolean;
+  isSunday: boolean;
+  isMonday: boolean;
+  isTuesday: boolean;
+  isWednesday: boolean;
+  isThursday: boolean;
+  isFriday: boolean;
+  isSaturday: boolean;
   hebrewDate?: {
     hebrew: string;
     date: string;
@@ -34,7 +40,13 @@ export interface TefillaConditions {
  * [[SUKKOT]]content[[/SUKKOT]] - Only shows during Sukkot
  * [[PESACH]]content[[/PESACH]] - Only shows during Pesach
  * [[ROSH_CHODESH_SPECIAL]]content[[/ROSH_CHODESH_SPECIAL]] - HIDES content during Rosh Chodesh, Pesach, or Sukkot
- * [[MONTHUR]]content[[/MONTHUR]] - Only shows on Mondays and Thursdays
+ * [[SUNDAY]]content[[/SUNDAY]] - Only shows on Sundays
+ * [[MONDAY]]content[[/MONDAY]] - Only shows on Mondays
+ * [[TUESDAY]]content[[/TUESDAY]] - Only shows on Tuesdays
+ * [[WEDNESDAY]]content[[/WEDNESDAY]] - Only shows on Wednesdays
+ * [[THURSDAY]]content[[/THURSDAY]] - Only shows on Thursdays
+ * [[FRIDAY]]content[[/FRIDAY]] - Only shows on Fridays
+ * [[SATURDAY]]content[[/SATURDAY]] - Only shows on Saturdays
  * 
  * You can combine conditions:
  * [[OUTSIDE_ISRAEL,ROSH_CHODESH]]content[[/OUTSIDE_ISRAEL,ROSH_CHODESH]] - Shows only for users outside Israel AND on Rosh Chodesh (both must be true)
@@ -60,7 +72,13 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     SUKKOT: () => conditions.isSukkot,
     PESACH: () => conditions.isPesach,
     ROSH_CHODESH_SPECIAL: () => !conditions.isRoshChodeshSpecial, // Exclusion logic: shows when NOT in special periods
-    MONTHUR: () => conditions.isMondayThursday,
+    SUNDAY: () => conditions.isSunday,
+    MONDAY: () => conditions.isMonday,
+    TUESDAY: () => conditions.isTuesday,
+    WEDNESDAY: () => conditions.isWednesday,
+    THURSDAY: () => conditions.isThursday,
+    FRIDAY: () => conditions.isFriday,
+    SATURDAY: () => conditions.isSaturday,
     // Me'ein Shalosh food selection conditions
     grain: () => selectedFoodTypes.grain === true,
     wine: () => selectedFoodTypes.wine === true,
@@ -280,9 +298,15 @@ export async function getCurrentTefillaConditions(
     let isPesach = false;
     let isRoshChodeshSpecial = false;
     
-    // Check if today is Monday (1) or Thursday (4)
+    // Check individual days of the week
     const dayOfWeek = new Date().getDay();
-    const isMondayThursday = dayOfWeek === 1 || dayOfWeek === 4;
+    const isSunday = dayOfWeek === 0;
+    const isMonday = dayOfWeek === 1;
+    const isTuesday = dayOfWeek === 2;
+    const isWednesday = dayOfWeek === 3;
+    const isThursday = dayOfWeek === 4;
+    const isFriday = dayOfWeek === 5;
+    const isSaturday = dayOfWeek === 6;
     let hebrewDate = undefined;
 
     try {
@@ -350,7 +374,13 @@ export async function getCurrentTefillaConditions(
       isSukkot,
       isPesach,
       isRoshChodeshSpecial,
-      isMondayThursday,
+      isSunday,
+      isMonday,
+      isTuesday,
+      isWednesday,
+      isThursday,
+      isFriday,
+      isSaturday,
       hebrewDate,
       location
     };
@@ -367,9 +397,15 @@ export async function getCurrentTefillaConditions(
     console.error('Error getting Tefilla conditions:', error);
     
     // Return safe defaults
-    // Check if today is Monday (1) or Thursday (4) for fallback too
+    // Check individual days of the week for fallback too
     const dayOfWeek = new Date().getDay();
-    const isMondayThursday = dayOfWeek === 1 || dayOfWeek === 4;
+    const isSunday = dayOfWeek === 0;
+    const isMonday = dayOfWeek === 1;
+    const isTuesday = dayOfWeek === 2;
+    const isWednesday = dayOfWeek === 3;
+    const isThursday = dayOfWeek === 4;
+    const isFriday = dayOfWeek === 5;
+    const isSaturday = dayOfWeek === 6;
     
     return {
       isInIsrael: false,
@@ -379,7 +415,13 @@ export async function getCurrentTefillaConditions(
       isSukkot: false,
       isPesach: false,
       isRoshChodeshSpecial: false,
-      isMondayThursday
+      isSunday,
+      isMonday,
+      isTuesday,
+      isWednesday,
+      isThursday,
+      isFriday,
+      isSaturday
     };
   }
 }
