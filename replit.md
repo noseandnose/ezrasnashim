@@ -24,7 +24,7 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **Design**: Mobile-first responsive design, PWA functionality (Add to Home Screen, service worker for offline caching).
 - **Typography**: Playfair Display for headers, Inter for body text, David Libre/Heebo for Hebrew text, Platypi for English text, Koren Siddur for Tefilla content. Font preloading and `font-display: block` for FOUT prevention.
 - **Visuals**: Flower progress indicators, subtle animations, custom logos, consistent gradients for top bar and modals.
-- **Modals**: Fullscreen overlay system for major content, with consistent headers, font controls, language toggles, and attribution. Direct fullscreen access for key prayers and Tehillim sections.
+- **Modals**: Fullscreen overlay system for major content, with consistent headers, font controls, language toggles, and attribution. Direct fullscreen access for all Tefilla prayers (Morning Brochas/Shacharis, Maariv) and Tehillim sections - no intermediate modals.
 
 ### Backend
 - **Runtime**: Node.js 20 with Express.js.
