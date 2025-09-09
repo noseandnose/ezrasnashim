@@ -3106,7 +3106,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         showInfoIcon={true}
         showInfoPopover={showMaarivInfo}
         onInfoClick={setShowMaarivInfo}
-        infoContent={<p className="text-xs text-black">Test: Maariv info content</p>}
+        infoContent={getMaarivTooltip()}
       >
         <MaarivFullscreenContent language={language} fontSize={fontSize} />
       </FullscreenModal>
@@ -3161,7 +3161,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         }
         infoContent={
           fullscreenContent.contentType === 'morning-brochas' ? getMorningBrochasTooltip() :
-          fullscreenContent.title === 'Maariv Prayer' ? <p className="text-xs text-black">Test: Maariv info content from generic modal</p> : undefined
+          fullscreenContent.title === 'Maariv Prayer' ? getMaarivTooltip() : undefined
         }
       >
         {fullscreenContent.content || renderPrayerContent(fullscreenContent.contentType, language, fontSize)}
