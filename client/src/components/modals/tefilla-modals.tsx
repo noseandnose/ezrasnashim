@@ -3106,7 +3106,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         showInfoIcon={true}
         showInfoPopover={showMaarivInfo}
         onInfoClick={setShowMaarivInfo}
-        infoContent={getMaarivTooltip()}
+        infoContent={<p className="text-xs text-black">Test: Maariv info content</p>}
       >
         <MaarivFullscreenContent language={language} fontSize={fontSize} />
       </FullscreenModal>
