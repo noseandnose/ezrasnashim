@@ -150,6 +150,10 @@ export function formatTextContent(text: string | null | undefined): string {
     const conditionalKeywords = [
       'OUTSIDE_ISRAEL', 'ONLY_ISRAEL', 'ROSH_CHODESH', 'FAST_DAY', 
       'ASERET_YEMEI_TESHUVA', 'SUKKOT', 'PESACH', 'ROSH_CHODESH_SPECIAL',
+      // Seasonal and location conditions
+      'MH', 'MT', 'TTI', 'TBI', 'TTC', 'TBC',
+      // Day conditions
+      'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY',
       // Food selection conditions
       'grain', 'wine', 'fruit'
     ];
@@ -157,7 +161,9 @@ export function formatTextContent(text: string | null | undefined): string {
     // Check if this is conditional content - must contain actual conditional keywords
     // Only consider comma/pipe as conditional if combined with keywords
     const hasConditionalKeyword = conditionalKeywords.some(keyword => content.includes(keyword));
-    const isConditional = hasConditionalKeyword;
+    // Also check for day-specific conditions with pipes
+    const hasDayCondition = /\b(MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY)\b/.test(content);
+    const isConditional = hasConditionalKeyword || hasDayCondition;
     
     if (isConditional) {
       // This is conditional content, leave it for tefilla processor
