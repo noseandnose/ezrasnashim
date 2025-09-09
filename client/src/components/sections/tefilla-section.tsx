@@ -53,7 +53,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   // Time-based prayer logic
   const getCurrentPrayer = () => {
     if (!times || isLoading) {
-      return { title: "Morning Brochas", subtitle: "Loading times...", modal: "morning-brochas" };
+      return { title: "Shacharis", subtitle: "Loading times...", modal: "morning-brochas" };
     }
 
     // Get the current time in the location's timezone where zmanim were calculated
@@ -98,16 +98,16 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     // Handle null times gracefully
     if (!alos || !chatzos || !minchaGedola || !shkia || !plagHamincha) {
       return {
-        title: "Morning Brochas",
+        title: "Shacharis",
         subtitle: "Times unavailable",
         modal: "morning-brochas"
       };
     }
     
     if (now >= alos && now < chatzos) {
-      // Morning Brochas time - from Alos Hashachar until Chatzos
+      // Shacharis time - from Alos Hashachar until Chatzos
       return {
-        title: "Morning Brochas",
+        title: "Shacharis",
         subtitle: `${times.alosHashachar} - ${times.chatzos}`,
         modal: "morning-brochas"
       };

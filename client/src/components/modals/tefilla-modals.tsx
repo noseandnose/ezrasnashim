@@ -487,7 +487,7 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
               : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
           }`}
         >
-          {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete Morning Brochas'}
+          {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete Shacharis'}
         </Button>
         
         {/* Heart Explosion Animation */}
@@ -981,6 +981,12 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
   const { trackModalComplete } = useTrackModalComplete();
   const jewishTimesQuery = useJewishTimes();
 
+  // State for managing which section is expanded
+  const [expandedSection, setExpandedSection] = useState<number>(0); // Start with first section expanded
+  
+  // Refs for each section to enable scrolling
+  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
+
   if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
 
   const handleComplete = () => {
@@ -992,22 +998,128 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
     window.dispatchEvent(event);
   };
 
+  // Handle section expansion with scroll-to-top
+  const handleSectionToggle = (sectionIndex: number) => {
+    const isCurrentlyExpanded = expandedSection === sectionIndex;
+    const newExpandedSection = isCurrentlyExpanded ? -1 : sectionIndex;
+    
+    setExpandedSection(newExpandedSection);
+    
+    // Scroll to top of the section when opening
+    if (!isCurrentlyExpanded && sectionRefs.current[sectionIndex]) {
+      setTimeout(() => {
+        sectionRefs.current[sectionIndex]?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }, 100); // Small delay to allow the section to expand
+    }
+  };
+
+  // Scroll to bottom of currently expanded section
+  const scrollToBottomOfSection = () => {
+    if (expandedSection >= 0 && sectionRefs.current[expandedSection]) {
+      const sectionElement = sectionRefs.current[expandedSection];
+      
+      // Find the Done button within the expanded section content (not the header)
+      const sectionContent = sectionElement!.querySelector('div[class*="px-6 pb-6"]'); // The content area with padding
+      const doneButton = sectionContent?.querySelector('button') || 
+                         sectionElement!.querySelector('button[class*="bg-gradient-feminine"], button[class*="bg-sage"]');
+      
+      if (doneButton) {
+        // Scroll the Done button into view, which puts us at the bottom of the section
+        doneButton.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' // Center the button in the view
+        });
+      } else {
+        // Fallback: scroll to bottom of the section element
+        sectionElement!.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'end' // Scroll to the bottom of the section
+        });
+      }
+    }
+  };
+
+  // Group prayers by orderIndex
+  const groupedPrayers = prayers.reduce((groups, prayer) => {
+    const orderIndex = prayer.orderIndex || 0;
+    if (!groups[orderIndex]) {
+      groups[orderIndex] = [];
+    }
+    groups[orderIndex].push(prayer);
+    return groups;
+  }, {} as Record<number, any[]>);
+
+  // Get sorted order indices
+  const sortedOrderIndices = Object.keys(groupedPrayers)
+    .map(Number)
+    .sort((a, b) => a - b);
+
   return (
-    <div className="space-y-6">
-      {prayers.map((prayer, index) => (
-        <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
-          <div
-            className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
-            style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
-            dangerouslySetInnerHTML={{
-              __html: processTefillaContent(
-                language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation, 
-                tefillaConditions
-              )
-            }}
-          />
-        </div>
-      ))}
+    <div className="space-y-4">
+      {sortedOrderIndices.map((orderIndex, sectionIndex) => {
+        const sectionPrayers = groupedPrayers[orderIndex];
+        const isExpanded = expandedSection === sectionIndex;
+        const sectionTitle = sectionPrayers[0]?.prayerType || `Section ${orderIndex}`;
+
+        return (
+          <div 
+            key={orderIndex} 
+            ref={(el) => { sectionRefs.current[sectionIndex] = el; }}
+            className="bg-white rounded-2xl border border-blush/10 overflow-hidden"
+          >
+            {/* Section Header - Clickable */}
+            <button
+              onClick={() => handleSectionToggle(sectionIndex)}
+              className="w-full px-6 py-4 text-left hover:bg-blush/5 transition-colors flex items-center justify-between"
+            >
+              <h3 className="platypi-bold text-lg text-black">
+                {sectionTitle}
+              </h3>
+              <div className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </button>
+
+            {/* Section Content - Collapsible */}
+            {isExpanded && (
+              <div className="px-6 pb-6 space-y-4">
+                {sectionPrayers.map((prayer, prayerIndex) => (
+                  <div key={prayerIndex}>
+                    <div
+                      className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
+                      style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
+                      dangerouslySetInnerHTML={{
+                        __html: processTefillaContent(
+                          language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation, 
+                          tefillaConditions
+                        )
+                      }}
+                    />
+                  </div>
+                ))}
+                
+                {/* Done Button for this section */}
+                <Button
+                  onClick={isModalComplete('morning-brochas') ? undefined : handleComplete}
+                  disabled={isModalComplete('morning-brochas')}
+                  className={`w-full py-3 rounded-xl platypi-medium border-0 mt-4 ${
+                    isModalComplete('morning-brochas') 
+                      ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
+                  }`}
+                >
+                  {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete Shacharis'}
+                </Button>
+              </div>
+            )}
+          </div>
+        );
+      })}
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
@@ -1024,17 +1136,18 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
         </span>
       </div>
 
-      <Button
-        onClick={isModalComplete('morning-brochas') ? undefined : handleComplete}
-        disabled={isModalComplete('morning-brochas')}
-        className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
-          isModalComplete('morning-brochas') 
-            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
-        }`}
-      >
-        {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete Morning Brochas'}
-      </Button>
+      {/* Floating Dropdown Arrow - Only show when a section is expanded */}
+      {expandedSection >= 0 && (
+        <button
+          onClick={scrollToBottomOfSection}
+          className="fixed bottom-6 right-6 bg-gradient-feminine text-white rounded-full p-3 shadow-lg hover:scale-110 transition-all duration-200 z-50"
+          aria-label="Jump to bottom of section"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7-7-7" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }
