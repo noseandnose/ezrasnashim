@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Info } from "lucide-react";
+import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon } from "lucide-react";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
 import { useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
@@ -7,12 +7,6 @@ import HeartProgress from "@/components/heart-progress";
 import DailyProgress from "@/components/daily-progress";
 import type { Section } from "@/pages/home";
 import { useMemo } from "react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface Sponsor {
   name: string;
@@ -133,6 +127,15 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         modal: "mincha" as const,
         icon: Sun
       };
+    } else if (now >= shkia && now < plagHamincha) {
+      // Gap between Shkia and Plag Hamincha - show when Maariv will be available
+      return {
+        title: "Maariv",
+        subtitle: `from ${times.plagHamincha} until ${times.alosHashachar}`,
+        modal: "maariv" as const,
+        icon: Moon,
+        disabled: true
+      };
     } else if (now >= plagHamincha || now < alos) {
       // Maariv time - from Plag Hamincha until next Alos Hashachar
       return {
@@ -211,16 +214,29 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           {/* Time-based Prayer - Dynamic based on current time */}
           <div className="relative">
             <button 
-              onClick={() => openModal(currentPrayer.modal, 'tefilla')}
-              className="w-full bg-white/80 rounded-xl p-3 text-center border border-blush/20 hover:scale-105 transition-all duration-300 hover:bg-white/95"
+              onClick={() => !currentPrayer.disabled && openModal(currentPrayer.modal, 'tefilla')}
+              disabled={currentPrayer.disabled}
+              className={`w-full rounded-xl p-3 text-center border transition-all duration-300 ${
+                currentPrayer.disabled 
+                  ? 'bg-gray-100 border-gray-200 opacity-60 cursor-not-allowed' 
+                  : 'bg-white/80 border-blush/20 hover:scale-105 hover:bg-white/95'
+              }`}
             >
               <div className="flex items-center justify-center mb-1">
-                <div className="bg-gradient-feminine p-1.5 rounded-full mr-1">
-                  <PrayerIcon className="text-white" size={12} />
+                <div className={`p-1.5 rounded-full mr-1 ${
+                  currentPrayer.disabled 
+                    ? 'bg-gray-300' 
+                    : 'bg-gradient-feminine'
+                }`}>
+                  <PrayerIcon className={currentPrayer.disabled ? "text-gray-500" : "text-white"} size={12} />
                 </div>
               </div>
-              <p className="platypi-bold text-sm text-black mb-0.5">{currentPrayer.title}</p>
-              <p className="platypi-bold text-xs text-black leading-tight">{currentPrayer.subtitle}</p>
+              <p className={`platypi-bold text-sm mb-0.5 ${currentPrayer.disabled ? 'text-gray-500' : 'text-black'}`}>
+                {currentPrayer.title}
+              </p>
+              <p className={`platypi-bold text-xs leading-tight ${currentPrayer.disabled ? 'text-gray-400' : 'text-black'}`}>
+                {currentPrayer.subtitle}
+              </p>
             </button>
           </div>
 

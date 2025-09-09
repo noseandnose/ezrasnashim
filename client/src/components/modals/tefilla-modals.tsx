@@ -123,7 +123,14 @@ const useTefillaConditions = () => {
           isAseretYemeiTeshuva: false,
           isSukkot: false,
           isPesach: false,
-          isRoshChodeshSpecial: false
+          isRoshChodeshSpecial: false,
+          isSunday: false,
+          isMonday: false,
+          isTuesday: false,
+          isWednesday: false,
+          isThursday: false,
+          isFriday: false,
+          isSaturday: false
         });
       }
     };
@@ -146,7 +153,14 @@ const processTefillaContent = (text: string, conditions: TefillaConditions | nul
     isAseretYemeiTeshuva: false,
     isSukkot: false,
     isPesach: false,
-    isRoshChodeshSpecial: false
+    isRoshChodeshSpecial: false,
+    isSunday: false,
+    isMonday: false,
+    isTuesday: false,
+    isWednesday: false,
+    isThursday: false,
+    isFriday: false,
+    isSaturday: false
   };
   
   const effectiveConditions = conditions || defaultConditions;
@@ -3136,10 +3150,19 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         onFontSizeChange={setFontSize}
         language={language}
         onLanguageChange={setLanguage}
-        showInfoIcon={fullscreenContent.contentType === 'morning-brochas'}
-        showInfoPopover={fullscreenContent.contentType === 'morning-brochas' ? showMorningBrochasInfo : false}
-        onInfoClick={fullscreenContent.contentType === 'morning-brochas' ? setShowMorningBrochasInfo : undefined}
-        infoContent={fullscreenContent.contentType === 'morning-brochas' ? getMorningBrochasTooltip() : undefined}
+        showInfoIcon={fullscreenContent.contentType === 'morning-brochas' || fullscreenContent.title === 'Maariv Prayer'}
+        showInfoPopover={
+          fullscreenContent.contentType === 'morning-brochas' ? showMorningBrochasInfo :
+          fullscreenContent.title === 'Maariv Prayer' ? showMaarivInfo : false
+        }
+        onInfoClick={
+          fullscreenContent.contentType === 'morning-brochas' ? setShowMorningBrochasInfo :
+          fullscreenContent.title === 'Maariv Prayer' ? setShowMaarivInfo : undefined
+        }
+        infoContent={
+          fullscreenContent.contentType === 'morning-brochas' ? getMorningBrochasTooltip() :
+          fullscreenContent.title === 'Maariv Prayer' ? getMaarivTooltip() : undefined
+        }
       >
         {fullscreenContent.content || renderPrayerContent(fullscreenContent.contentType, language, fontSize)}
       </FullscreenModal>

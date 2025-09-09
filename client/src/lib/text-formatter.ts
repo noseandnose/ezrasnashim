@@ -111,6 +111,7 @@ function cleanHebrewText(text: string): string {
 /**
  * Formats text content to handle special markers:
  * - ** for bold text
+ * - ## for title text (bigger and bold)
  * - --- for line breaks
  * - ~~ for greyed out text
  * - ++ for larger text
@@ -182,13 +183,28 @@ export function formatTextContent(text: string | null | undefined): string {
   let result = '';
   let lastIndex = 0;
   let isInBold = false;
+  let isInTitle = false;
   let isInGrey = false;
   let isInLarger = false;
   let isInSmaller = false;
   
   for (let i = 0; i < formatted.length - 1; i++) {
+    // Check for ## (title) markers - bigger and bold
+    if (formatted[i] === '#' && formatted[i + 1] === '#') {
+      result += formatted.substring(lastIndex, i);
+      
+      if (!isInTitle) {
+        result += '<span style="font-size: 1.5em; font-weight: bold; display: block; margin: 0.5em 0;">';
+      } else {
+        result += '</span>';
+      }
+      
+      isInTitle = !isInTitle;
+      i++; // Skip the second #
+      lastIndex = i + 1;
+    }
     // Check for ** (bold) markers
-    if (formatted[i] === '*' && formatted[i + 1] === '*') {
+    else if (formatted[i] === '*' && formatted[i + 1] === '*') {
       result += formatted.substring(lastIndex, i);
       
       if (!isInBold) {
