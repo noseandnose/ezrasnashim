@@ -1739,7 +1739,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const [selectedPrayerId, setSelectedPrayerId] = useState<number | null>(null);
   const [isAnimating, ] = useState(false);
   const [showExplosion, setShowExplosion] = useState(false);
-  const [showInfoPopover, setShowInfoPopover] = useState(false);
   const [activeExplosionModal, setActiveExplosionModal] = useState<string | null>(null);
   const [fullscreenContent, setFullscreenContent] = useState<{
     isOpen: boolean;
@@ -2031,27 +2030,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     enabled: activeModal === 'maariv'
   });
 
-  // Get Jewish times for info content  
-  const { data: jewishTimes } = useJewishTimes();
-  const [showMaarivInfoPopover, setShowMaarivInfoPopover] = useState(false);
-  
-  // Debug logging
-  useEffect(() => {
-    console.log('Maariv Info Debug:', { 
-      activeModal, 
-      showMaarivInfoPopover, 
-      jewishTimes: jewishTimes ? 'loaded' : 'not loaded' 
-    });
-  }, [activeModal, showMaarivInfoPopover, jewishTimes]);
-
-  // Debug modal state changes
-  useEffect(() => {
-    if (activeModal === 'maariv') {
-      console.log('Maariv modal opened');
-    } else if (activeModal === null) {
-      console.log('Modal closed');
-    }
-  }, [activeModal]);
 
   // Don't intercept Maariv - let it render as a direct fullscreen modal
   // This will be handled in the JSX return instead
@@ -3074,7 +3052,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Maariv FullscreenModal with Info Icon in Header */}
+      {/* Maariv FullscreenModal */}
       <FullscreenModal
         isOpen={activeModal === 'maariv'}
         onClose={() => closeModal(true)}
@@ -3085,25 +3063,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         showLanguageControls={true}
         language={language}
         onLanguageChange={setLanguage}
-        showInfoIcon={true}
-        onInfoClick={(open) => {
-          console.log('Maariv info clicked:', open);
-          setShowMaarivInfoPopover(open);
-        }}
-        showInfoPopover={showMaarivInfoPopover}
-        infoContent={(
-          <div className="space-y-2">
-            <p className="font-semibold text-black">Maariv Prayer Times</p>
-            <div className="space-y-1 text-xs text-black/80">
-              <p><strong>Begins:</strong> {jewishTimes?.shkia || 'Loading...'} (Sunset)</p>
-              <p><strong>Ideal time:</strong> {jewishTimes?.tzaitHakochavim || 'Loading...'} (Stars visible)</p>
-              <p><strong>Until:</strong> {jewishTimes?.alosHashachar || 'Loading...'} (Next dawn)</p>
-            </div>
-            <p className="text-xs text-black/70 mt-2">
-              Maariv may be prayed from sunset onwards, ideally after the stars become visible.
-            </p>
-          </div>
-        )}
       >
         <MaarivFullscreenContent language={language} fontSize={fontSize} />
       </FullscreenModal>
@@ -3147,28 +3106,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         onFontSizeChange={setFontSize}
         language={language}
         onLanguageChange={setLanguage}
-        showInfoIcon={fullscreenContent.contentType === 'morning-brochas' || fullscreenContent.contentType === 'maariv'}
-        onInfoClick={(open) => setShowInfoPopover(open)}
-        showInfoPopover={showInfoPopover}
-        infoContent={
-          fullscreenContent.contentType === 'morning-brochas' ? (
-            jewishTimesQuery.data ? (
-              <p className="text-xs text-black">
-                Birchos Kriyas Shema should not be recited after {jewishTimesQuery.data.sofZmanTfillah || jewishTimesQuery.data.chatzos}.
-              </p>
-            ) : (
-              <p className="text-xs text-black">Loading timing information...</p>
-            )
-          ) : fullscreenContent.contentType === 'maariv' ? (
-            jewishTimesQuery.data ? (
-              <p className="text-xs text-black">
-                In a case of pressing need, Maariv can be recited from {jewishTimesQuery.data.plagHamincha} if, and only if, Mincha was recited that day before {jewishTimesQuery.data.plagHamincha}. In a case of pressing need, Maariv may be davened until {jewishTimesQuery.data.alosHashachar} (instead of Chatzos Haleiyla {jewishTimesQuery.data.chatzos}) of the next day.
-              </p>
-            ) : (
-              <p className="text-xs text-black">Loading timing information...</p>
-            )
-          ) : null
-        }
       >
         {fullscreenContent.content || renderPrayerContent(fullscreenContent.contentType, language, fontSize)}
       </FullscreenModal>
