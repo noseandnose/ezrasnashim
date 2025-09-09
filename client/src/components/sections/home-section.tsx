@@ -64,7 +64,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   // Time-based prayer logic (identical to Tefilla section)
   const getCurrentPrayer = () => {
     if (!jewishTimesQuery.data || jewishTimesQuery.isLoading) {
-      return { title: "Morning Brochas", subtitle: "Loading times...", modal: "morning-brochas", icon: Sunrise };
+      return { title: "Shacharis", subtitle: "Loading times...", modal: "morning-brochas", icon: Sunrise };
     }
 
     const now = new Date();
@@ -104,7 +104,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     // Handle null times gracefully
     if (!alos || !chatzos || !minchaGedola || !shkia || !plagHamincha) {
       return {
-        title: "Morning Brochas",
+        title: "Shacharis",
         subtitle: "Times unavailable",
         modal: "morning-brochas" as const,
         icon: Sunrise
@@ -114,7 +114,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     if (now >= alos && now < chatzos) {
       // Morning Brochas time - from Alos Hashachar until Chatzos
       return {
-        title: "Morning Brochas",
+        title: "Shacharis",
         subtitle: `${times.alosHashachar} - ${times.chatzos}`,
         modal: "morning-brochas" as const,
         icon: Sunrise

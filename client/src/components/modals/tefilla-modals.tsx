@@ -487,7 +487,7 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
               : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
           }`}
         >
-          {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete Morning Brochas'}
+          {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete Shacharis'}
         </Button>
         
         {/* Heart Explosion Animation */}
@@ -1033,7 +1033,7 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
             : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
-        {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete Morning Brochas'}
+        {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete Shacharis'}
       </Button>
     </div>
   );
