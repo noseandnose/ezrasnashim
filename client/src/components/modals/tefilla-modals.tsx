@@ -1020,11 +1020,24 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
   const scrollToBottomOfSection = () => {
     if (expandedSection >= 0 && sectionRefs.current[expandedSection]) {
       const sectionElement = sectionRefs.current[expandedSection];
-      const sectionBottom = sectionElement!.offsetTop + sectionElement!.offsetHeight;
-      window.scrollTo({ 
-        top: sectionBottom - window.innerHeight + 100, // Offset to show a bit of the next section
-        behavior: 'smooth' 
-      });
+      
+      // Find the Done button within the expanded section to scroll to it
+      const doneButton = sectionElement!.querySelector('button[class*="complete-button-pulse"], button[class*="bg-gradient-feminine"], .complete-shacharis-btn') || 
+                         sectionElement!.querySelector('button:last-of-type');
+      
+      if (doneButton) {
+        // Scroll the Done button into view, which puts us at the bottom of the section
+        doneButton.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' // Center the button in the view
+        });
+      } else {
+        // Fallback: scroll to bottom of the section element
+        sectionElement!.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'end' // Scroll to the bottom of the section
+        });
+      }
     }
   };
 
