@@ -148,10 +148,17 @@ export function formatTextContent(text: string | null | undefined): string {
     // Check if this is conditional content (contains known keywords)
     const conditionalKeywords = [
       'OUTSIDE_ISRAEL', 'ONLY_ISRAEL', 'ROSH_CHODESH', 'FAST_DAY', 
-      'ASERET_YEMEI_TESHUVA', 'SUKKOT', 'PESACH', 'ROSH_CHODESH_SPECIAL'
+      'ASERET_YEMEI_TESHUVA', 'SUKKOT', 'PESACH', 'ROSH_CHODESH_SPECIAL',
+      // Food selection conditions
+      'grain', 'wine', 'fruit'
     ];
     
-    if (conditionalKeywords.some(keyword => content.includes(keyword))) {
+    // Check if this is conditional content - must contain actual conditional keywords
+    // Only consider comma/pipe as conditional if combined with keywords
+    const hasConditionalKeyword = conditionalKeywords.some(keyword => content.includes(keyword));
+    const isConditional = hasConditionalKeyword;
+    
+    if (isConditional) {
       // This is conditional content, leave it for tefilla processor
       return match;
     }
@@ -185,9 +192,9 @@ export function formatTextContent(text: string | null | undefined): string {
       result += formatted.substring(lastIndex, i);
       
       if (!isInBold) {
-        result += '<span style="font-weight: bold;">';
+        result += '<strong>';
       } else {
-        result += '</span>';
+        result += '</strong>';
       }
       
       isInBold = !isInBold;

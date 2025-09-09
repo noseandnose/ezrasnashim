@@ -1,8 +1,9 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { HandHeart, Scroll, Heart, Plus, Minus, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Unlock, Check, Utensils, Wine, Car, Wheat, Moon, User } from "lucide-react";
+import { HandHeart, Scroll, Heart, Plus, Minus, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Unlock, Check, Utensils, Wine, Car, Wheat, Moon, User, Info, X } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
@@ -17,6 +18,7 @@ import { BirkatHamazonModal, MeeinShaloshFullscreenContent, BirkatHamazonFullscr
 import { useLocationStore } from '@/hooks/use-jewish-times';
 import { formatTextContent } from "@/lib/text-formatter";
 import { processTefillaText, getCurrentTefillaConditions, type TefillaConditions } from "@/utils/tefilla-processor";
+import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { Expand } from "lucide-react";
 
@@ -148,7 +150,11 @@ const processTefillaContent = (text: string, conditions: TefillaConditions | nul
   };
   
   const effectiveConditions = conditions || defaultConditions;
+  
+  // Process conditional text FIRST (removes/shows conditional sections)
   const processedText = processTefillaText(text, effectiveConditions);
+  
+  // Then format the resulting text (bold, italics, etc)
   return formatTextContent(processedText);
 };
 
@@ -360,8 +366,8 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
         
         {/* Standardized Header with centered controls */}
         <div className="mb-2 space-y-2">
-          {/* First Row: Language Toggle and Title */}
-          <div className="flex items-center justify-center gap-4">
+          {/* First Row: Language Toggle, Title, and Info Icon */}
+          <div className="flex items-center justify-center gap-2">
             <Button
               onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
               variant="ghost"
@@ -376,6 +382,20 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
             </Button>
             
             <DialogTitle className="text-lg platypi-bold text-black">Morning Brochas</DialogTitle>
+            
+            {/* Info Icon with Popover */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="ml-1 p-1 rounded-full hover:bg-gray-100 transition-colors">
+                  <Info className="h-4 w-4 text-gray-500" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 p-3">
+                <p className="text-xs text-black">
+                  Birchos Kriyas Shema should not be recited after Sof Zman Tfillah.
+                </p>
+              </PopoverContent>
+            </Popover>
           </div>
           
           {/* Second Row: Font Size Controls */}
@@ -510,6 +530,7 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
+  const jewishTimesQuery = useJewishTimes();
 
   if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
 
@@ -944,6 +965,7 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
+  const jewishTimesQuery = useJewishTimes();
 
   if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
 
@@ -1720,6 +1742,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const [isAnimating, ] = useState(false);
   const [showExplosion, setShowExplosion] = useState(false);
   const [activeExplosionModal, setActiveExplosionModal] = useState<string | null>(null);
+  const [showMorningBrochasInfo, setShowMorningBrochasInfo] = useState(false);
+  const [showMaarivInfo, setShowMaarivInfo] = useState(false);
   const [fullscreenContent, setFullscreenContent] = useState<{
     isOpen: boolean;
     title: string;
@@ -1751,6 +1775,32 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   
   // Load Tefilla conditions for conditional content processing
   const tefillaConditions = useTefillaConditions();
+  
+  // Get Jewish times for info tooltips  
+  const { coordinates } = useLocationStore();
+  const jewishTimesQuery = useJewishTimes(coordinates?.lat, coordinates?.lng);
+
+  // Helper function to create Morning Brochas tooltip content
+  const getMorningBrochasTooltip = () => {
+    if (!jewishTimesQuery.data) return "Loading timing information...";
+    const times = jewishTimesQuery.data;
+    return (
+      <p className="text-xs text-black">
+        It is better to Daven between Netz {times.sunrise} and Sof Zman Tefilla {times.sofZmanTfilla}. Birchas Kriyas Shema should not be recited after Sof Zman Tefilla.
+      </p>
+    );
+  };
+
+  // Helper function to create Maariv tooltip content
+  const getMaarivTooltip = () => {
+    if (!jewishTimesQuery.data) return "Loading timing information...";
+    const times = jewishTimesQuery.data;
+    return (
+      <p className="text-xs text-black">
+        It is better to daven between Tzeitz {times.tzaitHakochavim} and Chatsos Halyla {times.chatzos}.
+      </p>
+    );
+  };
 
   // Listen for fullscreen close events from fullscreen components
   useEffect(() => {
@@ -2005,6 +2055,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     queryKey: ['/api/maariv/prayers'],
     enabled: activeModal === 'maariv'
   });
+
+
+  // Don't intercept Maariv - let it render as a direct fullscreen modal
+  // This will be handled in the JSX return instead
 
   // Fetch Nishmas text from database
   const { data: nishmasText, isLoading: nishmasLoading } = useQuery<NishmasText>({
@@ -2878,8 +2932,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
 
 
-      {/* Maariv Modal */}
-      <Dialog open={activeModal === 'maariv'} onOpenChange={() => closeModal(true)}>
+      {/* Maariv Modal - Redirect directly to fullscreen */}
+      <Dialog open={false} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="maariv-description">
           <div id="maariv-description" className="sr-only">Evening prayer service and instructions</div>
           
@@ -2919,13 +2973,62 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             <Expand className="h-4 w-4 text-gray-600" />
           </button>
           
-          <StandardModalHeader 
-            title="Maariv Prayer"
-            showHebrew={language === 'hebrew'}
-            setShowHebrew={(show) => setLanguage(show ? 'hebrew' : 'english')}
-            fontSize={fontSize}
-            setFontSize={setFontSize}
-          />
+          <div className="mb-2 space-y-2">
+            {/* First Row: Language Toggle, Title, and Info Icon */}
+            <div className="flex items-center justify-center gap-2">
+              <Button
+                onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
+                variant="ghost"
+                size="sm"
+                className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
+                  language === 'hebrew'
+                    ? 'bg-blush text-white' 
+                    : 'text-black/60 hover:text-black hover:bg-white/50'
+                }`}
+              >
+                {language === 'hebrew' ? 'EN' : 'עב'}
+              </Button>
+              
+              <DialogTitle className="text-lg platypi-bold text-black">Maariv Prayer</DialogTitle>
+              
+              {/* Info Icon with Popover */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="ml-1 p-1 rounded-full hover:bg-gray-100 transition-colors">
+                    <Info className="h-4 w-4 text-gray-500" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72 p-3">
+                  {jewishTimesQuery.data ? (
+                    <p className="text-xs text-black">
+                      In a case of pressing need, Maariv can be recited from {jewishTimesQuery.data.plagHamincha} if, and only if, Mincha was recited that day before {jewishTimesQuery.data.plagHamincha}. In a case of pressing need, Maariv may be davened until {jewishTimesQuery.data.alosHashachar} (instead of Chatzos Haleiyla {jewishTimesQuery.data.chatzos}) of the next day.
+                    </p>
+                  ) : (
+                    <p className="text-xs text-black">Loading timing information...</p>
+                  )}
+                </PopoverContent>
+              </Popover>
+            </div>
+            
+            {/* Second Row: Font Size Controls */}
+            <div className="flex items-center justify-center">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                >
+                  <span className="text-xs platypi-medium">-</span>
+                </button>
+                <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
+                <button
+                  onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+                  className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
+                >
+                  <span className="text-xs platypi-medium">+</span>
+                </button>
+              </div>
+            </div>
+          </div>
 
           <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[50vh] overflow-y-auto">
             {isMaarivLoading ? (
@@ -2975,6 +3078,25 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         </DialogContent>
       </Dialog>
 
+      {/* Maariv FullscreenModal */}
+      <FullscreenModal
+        isOpen={activeModal === 'maariv'}
+        onClose={() => closeModal(true)}
+        title="Maariv Prayer"
+        showFontControls={true}
+        fontSize={fontSize}
+        onFontSizeChange={setFontSize}
+        showLanguageControls={true}
+        language={language}
+        onLanguageChange={setLanguage}
+        showInfoIcon={true}
+        showInfoPopover={showMaarivInfo}
+        onInfoClick={setShowMaarivInfo}
+        infoContent={getMaarivTooltip()}
+      >
+        <MaarivFullscreenContent language={language} fontSize={fontSize} />
+      </FullscreenModal>
+
       {/* Morning Brochas Modal */}
       <MorningBrochasModal 
         setFullscreenContent={setFullscreenContent} 
@@ -3014,6 +3136,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         onFontSizeChange={setFontSize}
         language={language}
         onLanguageChange={setLanguage}
+        showInfoIcon={fullscreenContent.contentType === 'morning-brochas'}
+        showInfoPopover={fullscreenContent.contentType === 'morning-brochas' ? showMorningBrochasInfo : false}
+        onInfoClick={fullscreenContent.contentType === 'morning-brochas' ? setShowMorningBrochasInfo : undefined}
+        infoContent={fullscreenContent.contentType === 'morning-brochas' ? getMorningBrochasTooltip() : undefined}
       >
         {fullscreenContent.content || renderPrayerContent(fullscreenContent.contentType, language, fontSize)}
       </FullscreenModal>
@@ -4066,5 +4192,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
     </>
   );
 }
+
+export { BrochasFullscreenContent, IndividualBrochaFullscreenContent, TehillimFullscreenContent, MaarivFullscreenContent };
 
 // Note: Old complex compass implementation removed in favor of simplified version

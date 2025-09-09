@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
+import { X, Info } from 'lucide-react';
 import logoImage from "@assets/1LO_1755590090315.png";
 import { FloatingSettings } from './floating-settings';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface FullscreenModalProps {
   isOpen: boolean;
@@ -16,6 +17,12 @@ interface FullscreenModalProps {
   showLanguageControls?: boolean;
   language?: 'hebrew' | 'english';
   onLanguageChange?: (lang: 'hebrew' | 'english') => void;
+  // Info icon  
+  showInfoIcon?: boolean;
+  onInfoClick?: (open: boolean) => void;
+  // Info popover content
+  infoContent?: React.ReactNode;
+  showInfoPopover?: boolean;
 }
 
 export function FullscreenModal({ 
@@ -29,7 +36,11 @@ export function FullscreenModal({
   onFontSizeChange,
   showLanguageControls = false,
   language = 'hebrew',
-  onLanguageChange
+  onLanguageChange,
+  showInfoIcon = false,
+  onInfoClick,
+  infoContent,
+  showInfoPopover = false
 }: FullscreenModalProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -159,8 +170,8 @@ export function FullscreenModal({
           minHeight: '56px'
         }}
         onClick={(e) => {
-          // Only scroll to top if not clicking the close button
-          if (!(e.target as Element).closest('button[aria-label="Close fullscreen"]')) {
+          // Only scroll to top if not clicking any button (close or info)
+          if (!(e.target as Element).closest('button')) {
             scrollContainerRef.current?.scrollTo({
               top: 0,
               behavior: 'smooth'
@@ -181,7 +192,29 @@ export function FullscreenModal({
             {title}
           </h1>
           
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
+            {showInfoIcon && (
+              <Popover open={showInfoPopover} onOpenChange={(open) => onInfoClick?.(open)}>
+                <PopoverTrigger asChild>
+                  <button
+                    className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+                    aria-label="Prayer timing information"
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('Info button clicked directly');
+                      onInfoClick?.(!showInfoPopover);
+                    }}
+                  >
+                    <Info className="h-5 w-5 text-blush/60" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="max-w-xs p-3 bg-white border border-blush/20 shadow-lg z-[9999]">
+                  {infoContent || <p className="text-xs text-black">Loading timing information...</p>}
+                </PopoverContent>
+              </Popover>
+            )}
             <button
               onClick={(e) => {
                 e.preventDefault();

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text Formatting Test</title>
+    <script type="module">
+        // Copy of the formatTextContent function for testing
+        function cleanHebrewText(text) {
+            let cleaned = text
+                .replace(/׃/g, '.')
+                .replace(/[\u0591-\u05AE]/g, '')
+                .replace(/[\u05BD\u05BF\u05C0\u05C3\u05C4\u05C5\u05C6]/g, '')
+                .replace(/[\u2000-\u206F]/g, (char) => {
+                    const code = char.charCodeAt(0);
+                    if (code === 0x2000 || code === 0x2002 || code === 0x2003 || code === 0x2009) return ' ';
+                    if (code === 0x2013 || code === 0x2014) return '-';
+                    return '';
+                })
+                .replace(/[\u2100-\u21FF]/g, '')
+                .replace(/[\u2200-\u23FF]/g, '')
+                .replace(/[\u2400-\u24FF]/g, '')
+                .replace(/[\u2500-\u25FF]/g, '')
+                .replace(/[\u2600-\u27BF]/g, '')
+                .replace(/[\u2800-\u28FF]/g, '')
+                .replace(/[\uE000-\uF8FF]/g, '')
+                .replace(/[\uFE00-\uFE0F]/g, '')
+                .replace(/[\uFFF0-\uFFFF]/g, '')
+                .replace(/[\uFFFD\uFFFC]/g, '')
+                .replace(/[\u00A0]/g, ' ')
+                .replace(/[\u0000-\u0009\u000B-\u001F\u007F-\u009F]/g, '');
+            
+            let result = '';
+            for (let i = 0; i < cleaned.length; i++) {
+                const char = cleaned[i];
+                const code = char.charCodeAt(0);
+                
+                if (code <= 127) {
+                    result += char;
+                    continue;
+                }
+                
+                if (code >= 0x0590 && code <= 0x05FF) {
+                    if ((code >= 0x05D0 && code <= 0x05EA) ||
+                        (code >= 0x05B0 && code <= 0x05BC) ||
+                        (code >= 0x05C1 && code <= 0x05C2) ||
+                        code === 0x05BE ||
+                        code === 0x05C7) {
+                        
+                        if (code === 0x05BA || code === 0x05C4 || code === 0x05C5) {
+                            continue;
+                        }
+                        
+                        result += char;
+                    }
+                    continue;
+                }
+                
+                if (code >= 0xFB1D && code <= 0xFB4F) {
+                    result += char;
+                    continue;
+                }
+                
+                if (code === 0x007C) {
+                    result += ' ';
+                    continue;
+                }
+                
+                if (code >= 0x0100 && code <= 0x017F) {
+                    result += char;
+                    continue;
+                }
+                
+                if (code >= 0x00C0 && code <= 0x00FF) {
+                    result += char;
+                    continue;
+                }
+                
+                if ((code >= 0x00A0 && code <= 0x00BF)) {
+                    if (char === ' ' || code === 0x00A0) {
+                        result += ' ';
+                    } else {
+                        result += char;
+                    }
+                    continue;
+                }
+            }
+            
+            return result
+                .replace(/[ \t]{2,}/g, ' ')
+                .replace(/\n{3,}/g, '\n\n')
+                .trim();
+        }
+
+        function formatTextContent(text) {
+            if (!text) return '';
+            
+            let formatted = cleanHebrewText(text);
+            
+            formatted = formatted.replace(/([a-zA-Z])-\s+([a-zA-Z])/g, '$1$2');
+            formatted = formatted.replace(/([."\]\)])(\s+)(-\s+)?(\d{1,2})(\s+)/g, '$1$2<sup style="font-size: 0.65em; font-weight: normal;">$4</sup>$5');
+            formatted = formatted.replace(/\n/g, '<br />');
+            formatted = formatted.replace(/---/g, '<br /><br />');
+            
+            formatted = formatted.replace(/\[\[([^\]]+?)\]\]/g, (match, content) => {
+                const conditionalKeywords = [
+                    'OUTSIDE_ISRAEL', 'ONLY_ISRAEL', 'ROSH_CHODESH', 'FAST_DAY', 
+                    'ASERET_YEMEI_TESHUVA', 'SUKKOT', 'PESACH', 'ROSH_CHODESH_SPECIAL'
+                ];
+                
+                if (conditionalKeywords.some(keyword => content.includes(keyword))) {
+                    return match;
+                }
+                
+                return `<div style="background-color: #f3f4f6; padding: 12px; border-radius: 8px; margin: 8px 0; border-left: 4px solid #d1d5db;">${content}</div>`;
+            });
+
+            formatted = formatted.replace(/\{\{([^}]+?)\}\}/g, (_match, content) => {
+                return `<div style="background-color: #f3f4f6; padding: 12px; border-radius: 8px; margin: 8px 0; border-left: 4px solid #d1d5db;">${content}</div>`;
+            });
+            
+            formatted = formatted.replace(/\{\{grey\}\}([\s\S]*?)\{\{\/grey\}\}/g, 
+                '<div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg border-l-4 border-gray-300 dark:border-gray-600 my-2 text-gray-700 dark:text-gray-300">$1</div>');
+
+            let result = '';
+            let lastIndex = 0;
+            let isInBold = false;
+            let isInGrey = false;
+            let isInLarger = false;
+            let isInSmaller = false;
+            
+            for (let i = 0; i < formatted.length - 1; i++) {
+                if (formatted[i] === '*' && formatted[i + 1] === '*') {
+                    result += formatted.substring(lastIndex, i);
+                    
+                    if (!isInBold) {
+                        result += '<span style="font-weight: bold;">';
+                    } else {
+                        result += '</span>';
+                    }
+                    
+                    isInBold = !isInBold;
+                    i++;
+                    lastIndex = i + 1;
+                }
+                else if (formatted[i] === '~' && formatted[i + 1] === '~') {
+                    result += formatted.substring(lastIndex, i);
+                    
+                    if (!isInGrey) {
+                        result += '<span style="color: #9CA3AF; opacity: 0.8;">';
+                    } else {
+                        result += '</span>';
+                    }
+                    
+                    isInGrey = !isInGrey;
+                    i++;
+                    lastIndex = i + 1;
+                }
+                else if (formatted[i] === '+' && formatted[i + 1] === '+') {
+                    result += formatted.substring(lastIndex, i);
+                    
+                    if (!isInLarger) {
+                        result += '<span style="font-size: 1.2em;">';
+                    } else {
+                        result += '</span>';
+                    }
+                    
+                    isInLarger = !isInLarger;
+                    i++;
+                    lastIndex = i + 1;
+                }
+                else if (formatted[i] === '-' && formatted[i + 1] === '-' && 
+                         (i + 2 >= formatted.length || formatted[i + 2] !== '-')) {
+                    result += formatted.substring(lastIndex, i);
+                    
+                    if (!isInSmaller) {
+                        result += '<span style="font-size: 0.85em;">';
+                    } else {
+                        result += '</span>';
+                    }
+                    
+                    isInSmaller = !isInSmaller;
+                    i++;
+                    lastIndex = i + 1;
+                }
+            }
+            
+            result += formatted.substring(lastIndex);
+            
+            result = result
+                .replace(/\n\s*\n\s*\n/g, '\n\n')
+                .replace(/[ \t]+$/gm, '')
+                .replace(/^\s+|\s+$/g, '');
+
+            result = result.replace(/\n/g, '<br />');
+            result = result.replace(/(<br\s*\/?>){4,}/gi, '<br /><br /><br />');
+            result = result.replace(/^(<br\s*\/?>)+/gi, '').replace(/(<br\s*\/?>)+$/gi, '');
+            result = result.replace(/  +/g, (match) => {
+                return match.split('').map(() => '&nbsp;').join('');
+            });
+            
+            return result;
+        }
+
+        // Test cases
+        const testCases = [
+            {
+                name: "Bold text",
+                input: "This is **bold text** in a sentence.",
+                expected: "Bold text should be wrapped in bold tags"
+            },
+            {
+                name: "Line breaks",
+                input: "Line 1---Line 2",
+                expected: "Should have double line break between lines"
+            },
+            {
+                name: "Grey text",
+                input: "This is ~~grey text~~ in a sentence.",
+                expected: "Grey text should have grey color"
+            },
+            {
+                name: "Larger text",
+                input: "This is ++larger text++ in a sentence.",
+                expected: "Larger text should be 1.2em"
+            },
+            {
+                name: "Smaller text",
+                input: "This is --smaller text-- in a sentence.",
+                expected: "Smaller text should be 0.85em"
+            },
+            {
+                name: "Grey box",
+                input: "This is [[text in a grey box]] content.",
+                expected: "Should have grey box with padding"
+            },
+            {
+                name: "Multiple formats",
+                input: "**Bold** and ~~grey~~ and ++large++ text.",
+                expected: "Should have all formats applied"
+            },
+            {
+                name: "Featured content example",
+                input: "Lashon hara is negative speech.\n\n**Source**\nSpeaking lashon hara is prohibited.",
+                expected: "Source should be bold"
+            }
+        ];
+
+        // Run tests
+        window.addEventListener('DOMContentLoaded', () => {
+            const resultsDiv = document.getElementById('results');
+            
+            testCases.forEach(test => {
+                const result = formatTextContent(test.input);
+                const testDiv = document.createElement('div');
+                testDiv.className = 'test-case';
+                testDiv.innerHTML = `
+                    <h3>${test.name}</h3>
+                    <div class="input"><strong>Input:</strong> <pre>${test.input}</pre></div>
+                    <div class="expected"><strong>Expected:</strong> ${test.expected}</div>
+                    <div class="output"><strong>Raw HTML:</strong> <pre>${result.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre></div>
+                    <div class="rendered"><strong>Rendered:</strong> <div>${result}</div></div>
+                `;
+                resultsDiv.appendChild(testDiv);
+            });
+        });
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-case {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #f9f9f9;
+        }
+        .test-case h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .test-case > div {
+            margin: 10px 0;
+        }
+        .input, .expected, .output {
+            background: #fff;
+            padding: 10px;
+            border-left: 3px solid #007bff;
+        }
+        .rendered {
+            background: #fff;
+            padding: 10px;
+            border-left: 3px solid #28a745;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Text Formatting Test</h1>
+    <div id="results"></div>
+</body>
+</html>

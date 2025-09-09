@@ -646,6 +646,7 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
         ...conditions,
         selectedFoodTypes: selectedOptions
       };
+      
       processedText = processTefillaText(text, extendedConditions);
     }
     
@@ -746,7 +747,9 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
       <div className="space-y-6">
         {afterBrochasPrayers?.filter(p => p.prayerName === "Me'ein Shalosh").map((prayer, index) => (
           <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
-            {renderPrayerText(prayer)}
+            {conditions ? renderPrayerText(prayer) : (
+              <div className="text-center text-gray-500">Loading prayer conditions...</div>
+            )}
           </div>
         ))}
       </div>

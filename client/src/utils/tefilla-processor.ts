@@ -43,6 +43,10 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
   if (!text) return text;
 
   let processedText = text;
+  
+  // Extract selectedFoodTypes if present
+  const extendedConditions = conditions as any;
+  const selectedFoodTypes = extendedConditions?.selectedFoodTypes || {};
 
   // Define condition checkers for all special conditions
   const conditionCheckers = {
@@ -55,9 +59,9 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     PESACH: () => conditions.isPesach,
     ROSH_CHODESH_SPECIAL: () => !conditions.isRoshChodeshSpecial, // Exclusion logic: shows when NOT in special periods
     // Me'ein Shalosh food selection conditions
-    grain: () => (conditions as any)?.selectedFoodTypes?.grain || false,
-    wine: () => (conditions as any)?.selectedFoodTypes?.wine || false,
-    fruit: () => (conditions as any)?.selectedFoodTypes?.fruit || false
+    grain: () => selectedFoodTypes.grain === true,
+    wine: () => selectedFoodTypes.wine === true,
+    fruit: () => selectedFoodTypes.fruit === true
   };
 
 
@@ -171,24 +175,26 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     if (openTag !== closeTag) {
       return match;
     }
+    
+    
     return matchesToKeep.has(match) ? content : '';
   });
 
-  // Remove any leftover orphaned conditional tags (only if they don't have proper pairs)
-  // Check if there are any remaining orphaned conditional tags after processing
-  const remainingTags = processedText.match(/\[\[(?:\/?)(?:ROSH_CHODESH|PESACH|SUKKOT|FAST_DAY|ASERET_YEMEI_TESHUVA|OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH_SPECIAL|grain|wine|fruit)\]\]/g);
-  if (remainingTags && remainingTags.length > 0) {
-    // Only remove if there are no more valid conditional blocks
-    const hasValidBlocks = /\[\[([^\]]+)\]\]([\s\S]*?)\[\[\/([^\]]+)\]\]/.test(processedText);
-    if (!hasValidBlocks) {
-      processedText = processedText.replace(/\[\[(?:\/?)(?:ROSH_CHODESH|PESACH|SUKKOT|FAST_DAY|ASERET_YEMEI_TESHUVA|OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH_SPECIAL|grain|wine|fruit)\]\]/g, (match) => {
-        if (import.meta.env.DEV) {
-          console.log(`Removing truly orphaned conditional tag: ${match}`);
-        }
-        return '';
-      });
-    }
+  // Additional cleanup: Remove any remaining unprocessed conditional blocks
+  // This handles cases where the main processor missed some blocks
+  if (!conditions.isAseretYemeiTeshuva) {
+    // Remove any remaining ASERET_YEMEI_TESHUVA blocks that weren't processed
+    processedText = processedText.replace(/\[\[ASERET_YEMEI_TESHUVA\]\]([\s\S]*?)\[\[\/ASERET_YEMEI_TESHUVA\]\]/g, '');
+    // Also remove any loose ASERET_YEMEI_TESHUVA content
+    processedText = processedText.replace(/הַמֶּֽלֶךְְְ הַמִּשְְְׁפָּט/g, '');
   }
+  
+  // Clean up any orphaned conditional tags that weren't properly matched
+  const orphanedTagPattern = /\[\[(?:\/?)(?:OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH|FAST_DAY|ASERET_YEMEI_TESHUVA|SUKKOT|PESACH|ROSH_CHODESH_SPECIAL|grain|wine|fruit)(?:,[^\\]]*)?(?:\|[^\\]]*)?\]\]/g;
+  
+  processedText = processedText.replace(orphanedTagPattern, () => {
+    return ''; // Remove orphaned conditional tags only
+  });
 
   // Clean up excessive whitespace and empty lines left by hidden content
   processedText = processedText
@@ -280,8 +286,6 @@ export async function getCurrentTefillaConditions(
         `${apiUrl}/api/hebrew-date/${today}`
       );
       
-      console.log(`Fetching Hebrew date from: ${apiUrl}/api/hebrew-date/${today}`);
-      
       if (hebrewResponse.ok) {
         hebrewDate = await hebrewResponse.json();
         isRoshChodesh = hebrewDate.isRoshChodesh || false;
@@ -301,12 +305,8 @@ export async function getCurrentTefillaConditions(
         );
         
         // Check for Aseret Yemei Teshuva (between Rosh Hashana and Yom Kippur)
-        isAseretYemeiTeshuva = events.some((event: string) => 
-          event.toLowerCase().includes('rosh hashana') ||
-          event.toLowerCase().includes('tzom gedaliah') ||
-          event.toLowerCase().includes('yom kippur')
-        ) || (
-          // Check for days 1-10 of Tishrei using structured data
+        // Days 1-10 of Tishrei
+        isAseretYemeiTeshuva = (
           hebrewDate.hebrewMonth === 'Tishrei' && 
           hebrewDate.hebrewDay >= 1 && 
           hebrewDate.hebrewDay <= 10
@@ -330,16 +330,6 @@ export async function getCurrentTefillaConditions(
         // Check if we're in any special period (for exclusion logic)
         isRoshChodeshSpecial = isRoshChodesh || isPesach || isSukkot || isAseretYemeiTeshuva;
         
-        console.log('Hebrew calendar conditions loaded:', {
-          isRoshChodesh,
-          isFastDay,
-          isAseretYemeiTeshuva,
-          isSukkot,
-          isPesach,
-          isRoshChodeshSpecial,
-          events,
-          hebrewDate: hebrewDate.hebrew
-        });
       }
     } catch (error) {
       console.warn('Could not fetch Hebrew date data:', error);
@@ -356,8 +346,6 @@ export async function getCurrentTefillaConditions(
       hebrewDate,
       location
     };
-    
-    console.log('Final Tefilla conditions:', finalConditions);
     
     // Cache the result
     conditionsCache = {
@@ -383,19 +371,3 @@ export async function getCurrentTefillaConditions(
   }
 }
 
-/**
- * Debug function to test conditions
- */
-export function debugTefillaConditions(conditions: TefillaConditions): void {
-  console.log('Tefilla Conditions Debug:', {
-    isInIsrael: conditions.isInIsrael,
-    isRoshChodesh: conditions.isRoshChodesh,
-    isFastDay: conditions.isFastDay,
-    isAseretYemeiTeshuva: conditions.isAseretYemeiTeshuva,
-    isSukkot: conditions.isSukkot,
-    isPesach: conditions.isPesach,
-    isRoshChodeshSpecial: conditions.isRoshChodeshSpecial,
-    location: conditions.location,
-    hebrewDate: conditions.hebrewDate
-  });
-}

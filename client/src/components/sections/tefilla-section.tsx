@@ -1,4 +1,4 @@
-import { HandHeart, Plus, User, AlertCircle, Heart, Star, Compass, ArrowRight, Baby, HeartHandshake, GraduationCap, Users, Stethoscope, DollarSign, Smile, TrendingUp, Sunrise, Sun, Moon, Stars, Globe, Unlock, Info } from "lucide-react";
+import { HandHeart, Plus, User, AlertCircle, Heart, Star, Compass, ArrowRight, Baby, HeartHandshake, GraduationCap, Users, Stethoscope, DollarSign, Smile, TrendingUp, Sunrise, Sun, Moon, Stars, Globe, Unlock } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -11,12 +11,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
@@ -90,9 +84,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       const date = new Date();
       date.setHours(hours, minutes, 0, 0);
       
-      // Debug logging to track potential timezone issues
-      console.log(`Parsed time ${timeStr} as:`, date.toLocaleString(), 
-        `Current time:`, now.toLocaleString());
       
       return date;
     };
@@ -101,12 +92,11 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     const chatzos = parseTimeToday(times.chatzos);
     const minchaGedola = parseTimeToday(times.minchaGedolah);
     const shkia = parseTimeToday(times.shkia);
-    const tzaitHakochavim = parseTimeToday(times.tzaitHakochavim);
+    const plagHamincha = parseTimeToday(times.plagHamincha);
     // Note: We still use sunrise for next day calculation in the future if needed
     
     // Handle null times gracefully
-    if (!alos || !chatzos || !minchaGedola || !shkia || !tzaitHakochavim) {
-      console.log('Prayer time calculation failed - missing zmanim data');
+    if (!alos || !chatzos || !minchaGedola || !shkia || !plagHamincha) {
       return {
         title: "Morning Brochas",
         subtitle: "Times unavailable",
@@ -114,28 +104,8 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       };
     }
     
-    // Debug logging for prayer time determination
-    console.log('Prayer time calculation:', {
-      now: now.toLocaleString(),
-      alos: alos.toLocaleString(),
-      chatzos: chatzos.toLocaleString(),
-      minchaGedola: minchaGedola.toLocaleString(), 
-      shkia: shkia.toLocaleString(),
-      tzaitHakochavim: tzaitHakochavim.toLocaleString(),
-      isAfterAlos: now >= alos,
-      isBeforeChatzos: now < chatzos,
-      isAfterChatzos: now >= chatzos,
-      isBeforeMincha: now < minchaGedola,
-      isAfterMincha: now >= minchaGedola,
-      isBeforeShkia: now < shkia,
-      isAfterShkia: now >= shkia,
-      isBeforeTzait: now < tzaitHakochavim,
-      isAfterTzait: now >= tzaitHakochavim
-    });
-
     if (now >= alos && now < chatzos) {
       // Morning Brochas time - from Alos Hashachar until Chatzos
-      console.log('Selected prayer: Morning Brochas');
       return {
         title: "Morning Brochas",
         subtitle: `${times.alosHashachar} - ${times.chatzos}`,
@@ -143,32 +113,28 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       };
     } else if (now >= minchaGedola && now < shkia) {
       // Mincha time - from Mincha Gedolah until Shkia
-      console.log('Selected prayer: Mincha');
       return {
         title: "Mincha",
         subtitle: `${times.minchaGedolah} - ${times.shkia}`,
         modal: "mincha"
       };
-    } else if (now >= shkia && now < tzaitHakochavim) {
-      // Gap between Shkia and Tzait Hakochavim - show when Maariv will be available
-      console.log('Between Shkia and Tzait - showing upcoming Maariv');
+    } else if (now >= shkia && now < plagHamincha) {
+      // Gap between Shkia and Plag Hamincha - show when Maariv will be available
       return {
         title: "Maariv",
-        subtitle: `from ${times.tzaitHakochavim} until ${times.alosHashachar}`,
+        subtitle: `from ${times.plagHamincha} until ${times.alosHashachar}`,
         modal: "maariv",
         disabled: true
       };
-    } else if (now >= tzaitHakochavim || now < alos) {
-      // Maariv time - from Tzait Hakochavim until next Alos Hashachar
-      console.log('Selected prayer: Maariv');
+    } else if (now >= plagHamincha || now < alos) {
+      // Maariv time - from Plag Hamincha until next Alos Hashachar
       return {
         title: "Maariv",
-        subtitle: `${times.tzaitHakochavim} - ${times.alosHashachar}`,
+        subtitle: `${times.plagHamincha} - ${times.alosHashachar}`,
         modal: "maariv"
       };
     } else {
       // Between Chatzos and Mincha Gedolah - show when Mincha will be available
-      console.log('Between prayer times - showing upcoming Mincha');
       return {
         title: "Mincha",
         subtitle: `from ${times.minchaGedolah} until ${times.shkia}`,
@@ -714,32 +680,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                 {isModalComplete(currentPrayer.modal) ? 'Completed' : currentPrayer.subtitle}
               </p>
             </button>
-            {/* Info icon for Morning Brochas and Maariv */}
-            {(currentPrayer.modal === 'morning-brochas' || currentPrayer.modal === 'maariv') && !currentPrayer.disabled && times && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button 
-                      className="absolute top-2 right-2 p-1 hover:bg-blush/10 rounded-full transition-colors" 
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Info className="text-blush/60" size={14} />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs p-3 bg-white border border-blush/20 shadow-lg">
-                    {currentPrayer.modal === 'morning-brochas' ? (
-                      <p className="text-xs text-black">
-                        Birchos Kriyas Shema should not be recited after {times.sofZmanTfillah || times.chatzos}.
-                      </p>
-                    ) : currentPrayer.modal === 'maariv' ? (
-                      <p className="text-xs text-black">
-                        In a case of pressing need, Maariv can be recited from {times.plagHamincha} if, and only if, Mincha was recited that day before {times.plagHamincha}. In a case of pressing need, Maariv may be davened until {times.alosHashachar} (instead of Chatzos Haleiyla {times.chatzos}) of the next day.
-                      </p>
-                    ) : null}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
           </div>
 
           <button 
@@ -869,6 +809,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
         {/* Bottom padding */}
         <div className="h-16"></div>
       </div>
+      
     </div>
   );
 }
