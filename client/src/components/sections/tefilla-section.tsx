@@ -118,19 +118,19 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
         subtitle: `${times.minchaGedolah} - ${times.shkia}`,
         modal: "mincha"
       };
-    } else if (now >= shkia && now < tzaitHakochavim) {
-      // Gap between Shkia and Tzait Hakochavim - show when Maariv will be available
+    } else if (now >= shkia && now < parseTimeToday(times.plagHamincha)) {
+      // Gap between Shkia and Plag Hamincha - show when Maariv will be available
       return {
         title: "Maariv",
-        subtitle: `from ${times.tzaitHakochavim} until ${times.alosHashachar}`,
+        subtitle: `from ${times.plagHamincha} until ${times.alosHashachar}`,
         modal: "maariv",
         disabled: true
       };
-    } else if (now >= tzaitHakochavim || now < alos) {
-      // Maariv time - from Tzait Hakochavim until next Alos Hashachar
+    } else if (now >= parseTimeToday(times.plagHamincha) || now < alos) {
+      // Maariv time - from Plag Hamincha until next Alos Hashachar
       return {
         title: "Maariv",
-        subtitle: `${times.tzaitHakochavim} - ${times.alosHashachar}`,
+        subtitle: `${times.plagHamincha} - ${times.alosHashachar}`,
         modal: "maariv"
       };
     } else {

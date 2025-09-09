@@ -426,10 +426,14 @@ export interface JewishTimes {
   tzaitHakochavim: string;
   minchaGedolah: string;
   minchaKetanah: string;
+  alosHashachar: string;
+  chatzos: string;
+  plagHamincha: string;
   candleLighting?: string;
   havdalah?: string;
   hebrewDate: string;
   location: string;
+  coordinates: { lat: number; lng: number };
 }
 
 export interface HebcalResponse {

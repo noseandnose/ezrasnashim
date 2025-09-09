@@ -67,7 +67,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     }
   };
 
-  // Time-based prayer logic (same as Tefilla section)
+  // Time-based prayer logic (identical to Tefilla section)
   const getCurrentPrayer = () => {
     if (!jewishTimesQuery.data || jewishTimesQuery.isLoading) {
       return { title: "Morning Brochas", subtitle: "Loading times...", modal: "morning-brochas", icon: Sunrise };
@@ -101,12 +101,14 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       return date;
     };
     
-    const neitz = parseTimeToday(times.sunrise);
+    const alos = parseTimeToday(times.alosHashachar);
+    const chatzos = parseTimeToday(times.chatzos);
     const minchaGedola = parseTimeToday(times.minchaGedolah);
     const shkia = parseTimeToday(times.shkia);
+    const plagHamincha = parseTimeToday(times.plagHamincha);
     
     // Handle null times gracefully
-    if (!neitz || !minchaGedola || !shkia) {
+    if (!alos || !chatzos || !minchaGedola || !shkia || !plagHamincha) {
       return {
         title: "Morning Brochas",
         subtitle: "Times unavailable",
@@ -115,29 +117,38 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       };
     }
 
-    if (now >= neitz && now < minchaGedola) {
-      // Morning Brochas time - sunrise icon
+    if (now >= alos && now < chatzos) {
+      // Morning Brochas time - from Alos Hashachar until Chatzos
       return {
         title: "Morning Brochas",
-        subtitle: `${times.sunrise} - ${times.minchaGedolah}`,
+        subtitle: `${times.alosHashachar} - ${times.chatzos}`,
         modal: "morning-brochas" as const,
         icon: Sunrise
       };
     } else if (now >= minchaGedola && now < shkia) {
-      // Mincha time - midday sun icon
+      // Mincha time - from Mincha Gedolah until Shkia
       return {
         title: "Mincha",
         subtitle: `${times.minchaGedolah} - ${times.shkia}`,
         modal: "mincha" as const,
         icon: Sun
       };
-    } else {
-      // Maariv time - night moon icon
+    } else if (now >= plagHamincha || now < alos) {
+      // Maariv time - from Plag Hamincha until next Alos Hashachar
       return {
         title: "Maariv",
-        subtitle: `${times.shkia} - ${times.sunrise}`,
+        subtitle: `${times.plagHamincha} - ${times.alosHashachar}`,
         modal: "maariv" as const,
         icon: Moon
+      };
+    } else {
+      // Between Chatzos and Mincha Gedolah - show when Mincha will be available
+      return {
+        title: "Mincha",
+        subtitle: `from ${times.minchaGedolah} until ${times.shkia}`,
+        modal: "mincha" as const,
+        icon: Sun,
+        disabled: true
       };
     }
   };
