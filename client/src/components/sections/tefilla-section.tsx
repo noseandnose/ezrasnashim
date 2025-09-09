@@ -92,11 +92,11 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     const chatzos = parseTimeToday(times.chatzos);
     const minchaGedola = parseTimeToday(times.minchaGedolah);
     const shkia = parseTimeToday(times.shkia);
-    const tzaitHakochavim = parseTimeToday(times.tzaitHakochavim);
+    const plagHamincha = parseTimeToday(times.plagHamincha);
     // Note: We still use sunrise for next day calculation in the future if needed
     
     // Handle null times gracefully
-    if (!alos || !chatzos || !minchaGedola || !shkia || !tzaitHakochavim) {
+    if (!alos || !chatzos || !minchaGedola || !shkia || !plagHamincha) {
       return {
         title: "Morning Brochas",
         subtitle: "Times unavailable",
@@ -118,7 +118,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
         subtitle: `${times.minchaGedolah} - ${times.shkia}`,
         modal: "mincha"
       };
-    } else if (now >= shkia && now < parseTimeToday(times.plagHamincha)) {
+    } else if (now >= shkia && now < plagHamincha) {
       // Gap between Shkia and Plag Hamincha - show when Maariv will be available
       return {
         title: "Maariv",
@@ -126,7 +126,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
         modal: "maariv",
         disabled: true
       };
-    } else if (now >= parseTimeToday(times.plagHamincha) || now < alos) {
+    } else if (now >= plagHamincha || now < alos) {
       // Maariv time - from Plag Hamincha until next Alos Hashachar
       return {
         title: "Maariv",
