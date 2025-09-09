@@ -983,6 +983,9 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
 
   // State for managing which section is expanded
   const [expandedSection, setExpandedSection] = useState<number>(0); // Start with first section expanded
+  
+  // Refs for each section to enable scrolling
+  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
 
@@ -993,6 +996,36 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
     // Close fullscreen
     const event = new CustomEvent('closeFullscreen');
     window.dispatchEvent(event);
+  };
+
+  // Handle section expansion with scroll-to-top
+  const handleSectionToggle = (sectionIndex: number) => {
+    const isCurrentlyExpanded = expandedSection === sectionIndex;
+    const newExpandedSection = isCurrentlyExpanded ? -1 : sectionIndex;
+    
+    setExpandedSection(newExpandedSection);
+    
+    // Scroll to top of the section when opening
+    if (!isCurrentlyExpanded && sectionRefs.current[sectionIndex]) {
+      setTimeout(() => {
+        sectionRefs.current[sectionIndex]?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }, 100); // Small delay to allow the section to expand
+    }
+  };
+
+  // Scroll to bottom of currently expanded section
+  const scrollToBottomOfSection = () => {
+    if (expandedSection >= 0 && sectionRefs.current[expandedSection]) {
+      const sectionElement = sectionRefs.current[expandedSection];
+      const sectionBottom = sectionElement!.offsetTop + sectionElement!.offsetHeight;
+      window.scrollTo({ 
+        top: sectionBottom - window.innerHeight + 100, // Offset to show a bit of the next section
+        behavior: 'smooth' 
+      });
+    }
   };
 
   // Group prayers by orderIndex
@@ -1018,10 +1051,14 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
         const sectionTitle = sectionPrayers[0]?.prayerType || `Section ${orderIndex}`;
 
         return (
-          <div key={orderIndex} className="bg-white rounded-2xl border border-blush/10 overflow-hidden">
+          <div 
+            key={orderIndex} 
+            ref={(el) => { sectionRefs.current[sectionIndex] = el; }}
+            className="bg-white rounded-2xl border border-blush/10 overflow-hidden"
+          >
             {/* Section Header - Clickable */}
             <button
-              onClick={() => setExpandedSection(isExpanded ? -1 : sectionIndex)}
+              onClick={() => handleSectionToggle(sectionIndex)}
               className="w-full px-6 py-4 text-left hover:bg-blush/5 transition-colors flex items-center justify-between"
             >
               <h3 className="platypi-bold text-lg text-black">
@@ -1084,6 +1121,19 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
           {' '}and Rabbi Sacks Legacy
         </span>
       </div>
+
+      {/* Floating Dropdown Arrow - Only show when a section is expanded */}
+      {expandedSection >= 0 && (
+        <button
+          onClick={scrollToBottomOfSection}
+          className="fixed bottom-6 right-6 bg-gradient-feminine text-white rounded-full p-3 shadow-lg hover:scale-110 transition-all duration-200 z-50"
+          aria-label="Jump to bottom of section"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7-7-7" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }
