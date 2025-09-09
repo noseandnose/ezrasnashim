@@ -32,7 +32,7 @@ export interface TefillaConditions {
  * [[ASERET_YEMEI_TESHUVA]]content[[/ASERET_YEMEI_TESHUVA]] - Only shows during days between Rosh Hashana and Yom Kippur
  * [[SUKKOT]]content[[/SUKKOT]] - Only shows during Sukkot
  * [[PESACH]]content[[/PESACH]] - Only shows during Pesach
- * [[ROSH_CHODESH_SPECIAL]]content[[/ROSH_CHODESH_SPECIAL]] - HIDES content during Rosh Chodesh, Pesach, Sukkot, or Aseret Yemei Teshuva
+ * [[ROSH_CHODESH_SPECIAL]]content[[/ROSH_CHODESH_SPECIAL]] - HIDES content during Rosh Chodesh, Pesach, or Sukkot
  * 
  * You can combine conditions:
  * [[OUTSIDE_ISRAEL,ROSH_CHODESH]]content[[/OUTSIDE_ISRAEL,ROSH_CHODESH]] - Shows only for users outside Israel AND on Rosh Chodesh (both must be true)
@@ -328,7 +328,7 @@ export async function getCurrentTefillaConditions(
         );
         
         // Check if we're in any special period (for exclusion logic)
-        isRoshChodeshSpecial = isRoshChodesh || isPesach || isSukkot || isAseretYemeiTeshuva;
+        isRoshChodeshSpecial = isRoshChodesh || isPesach || isSukkot;
         
       }
     } catch (error) {
