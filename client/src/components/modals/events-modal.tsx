@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { FullscreenModal } from '@/components/ui/fullscreen-modal';
-import { axiosClient } from '@/lib/queryClient';
-import { useLocationStore } from '@/stores/location-store';
+import axiosClient from '@/lib/axiosClient';
+import { useLocationStore } from '@/hooks/use-jewish-times';
 
 interface JewishEvent {
   title: string;
@@ -87,7 +87,6 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
       onClose={onClose}
       title="Events"
       showFontControls={false}
-      showLanguageToggle={false}
     >
       <div className="space-y-3 pb-6">
         {eventsQuery.isLoading && (
