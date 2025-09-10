@@ -72,10 +72,14 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
   };
 
   const getCategoryDisplay = (category: string, subcat: string) => {
-    if (subcat) {
-      return `${category} (${subcat})`;
+    if (category === 'holiday') {
+      return 'Holiday';
     }
-    return category;
+    if (category === 'roshchodesh') return 'Rosh Chodesh';
+    if (category === 'fastday') return 'Fast Day';
+    if (category === 'special' || subcat === 'special') return 'Special Shabbat';
+    if (category === 'modern') return 'Modern Holiday';
+    return category || 'Event';
   };
 
   const getTimeDisplay = (title: string) => {
@@ -120,34 +124,41 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
                 <div
                   id={`event-${index}`}
                   key={`${event.date}-${event.title}`}
-                  className={`relative overflow-hidden rounded-2xl border-2 transition-all duration-300 ${
+                  className={`relative overflow-hidden rounded-xl border transition-all duration-300 ${
                     isUpcoming 
-                      ? 'bg-gradient-to-r from-rose-50 to-pink-50 border-rose-300 shadow-md scale-105' 
+                      ? 'bg-gradient-to-r from-blush/20 to-muted-lavender/20 border-blush shadow-md scale-102' 
                       : isPast 
                         ? 'bg-gradient-to-r from-gray-50 to-slate-50 border-gray-200 opacity-75' 
-                        : 'bg-gradient-to-r from-white to-rose-25 border-blush/30 hover:shadow-md hover:scale-102'
+                        : 'bg-gradient-to-r from-white to-blush/10 border-blush/30 hover:shadow-sm hover:scale-101'
                   }`}
                 >
                   {/* Decorative top border */}
-                  <div className={`h-1 w-full ${
+                  <div className={`h-0.5 w-full ${
                     isUpcoming 
-                      ? 'bg-gradient-to-r from-rose-400 to-pink-400' 
+                      ? 'bg-gradient-to-r from-blush to-muted-lavender' 
                       : isPast 
                         ? 'bg-gradient-to-r from-gray-300 to-slate-300' 
                         : 'bg-gradient-to-r from-blush to-muted-lavender'
                   }`} />
                   
-                  <div className="p-4">
-                    <div className="flex flex-col space-y-2">
+                  <div className="p-3">
+                    <div className="flex flex-col space-y-1.5">
                       {/* Title with badge */}
                       <div className="flex items-center justify-between">
-                        <h3 className={`platypi-bold text-lg ${
+                        <h3 className={`platypi-bold text-base ${
                           isPast ? 'text-gray-600' : 'text-black'
                         }`}>
                           {event.title}
+                          {shouldShowTime(event.category) && getTimeDisplay(event.title) && (
+                            <span className={`ml-2 text-sm platypi-medium ${
+                              isPast ? 'text-gray-500' : 'text-black/70'
+                            }`}>
+                              {getTimeDisplay(event.title)}
+                            </span>
+                          )}
                         </h3>
                         {isUpcoming && (
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs platypi-semibold bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-sm">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs platypi-semibold bg-gradient-to-r from-blush to-muted-lavender text-black shadow-sm">
                             ✨ Next
                           </span>
                         )}
@@ -169,35 +180,18 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
                         {formatDate(event.date)}
                       </div>
 
-                      {/* Category badge and time */}
-                      <div className="flex items-center justify-between">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs platypi-medium ${
+                      {/* Category badge only */}
+                      <div className="flex items-center">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs platypi-medium ${
                           isPast 
                             ? 'bg-gray-100 text-gray-500' 
                             : isUpcoming
-                              ? 'bg-rose-100 text-rose-700'
+                              ? 'bg-blush/20 text-blush'
                               : 'bg-blush/10 text-blush'
                         }`}>
                           {getCategoryDisplay(event.category, event.subcat)}
                         </span>
-                        
-                        {shouldShowTime(event.category) && (
-                          <div className={`text-sm platypi-semibold ${
-                            isPast ? 'text-gray-500' : 'text-black'
-                          }`}>
-                            {getTimeDisplay(event.title)}
-                          </div>
-                        )}
                       </div>
-
-                      {/* Memo/Description for holidays */}
-                      {event.memo && event.category === 'holiday' && (
-                        <div className={`text-xs platypi-regular italic leading-relaxed ${
-                          isPast ? 'text-gray-400' : 'text-gray-600'
-                        }`}>
-                          {event.memo}
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>

@@ -2948,11 +2948,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (eventsResponse.data && eventsResponse.data.items) {
         // Filter and process events
         const filteredEvents = eventsResponse.data.items.filter((item: any) => {
+          const title = (item.title || '').toLowerCase();
+          const memo = (item.memo || '').toLowerCase();
+          
+          // Skip fast end/begin events
+          if (title.includes('fast ends') || title.includes('fast begins')) {
+            return false;
+          }
+          
           // Skip standalone candle lighting and havdalah unless they're for holidays/fasts
           if (item.category === 'candles' || item.category === 'havdalah') {
             // Only include if it's for a holiday or fast
-            const memo = (item.memo || '').toLowerCase();
-            const title = (item.title || '').toLowerCase();
             return memo.includes('holiday') || memo.includes('fast') || 
                    title.includes('erev') || title.includes('yom kippur') || 
                    title.includes('rosh hashana') || title.includes('pesach') ||
