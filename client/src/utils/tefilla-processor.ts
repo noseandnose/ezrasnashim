@@ -336,6 +336,16 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
           });
         }
         
+        // Debug seasonal conditions BEFORE they're processed
+        if (matchInfo.tag === 'TTI' || matchInfo.tag === 'TBI') {
+          console.log(`Evaluating ${matchInfo.tag}:`, {
+            conditionsMet,
+            isTBI: conditions.isTBI,
+            isTTI: conditions.isTTI,
+            isInIsrael: conditions.isInIsrael
+          });
+        }
+        
         if (conditionsMet) {
           // Mark all conditions as used to prevent lower-priority matches with same conditions
           matchInfo.conditions.forEach(cond => usedConditionsInCluster.add(cond));
@@ -355,13 +365,6 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
       return match;
     }
     
-    // Debug seasonal conditions
-    if (openTag === 'TTI' || openTag === 'TBI' || openTag === 'TTC' || openTag === 'TBC') {
-      console.log(`Processing ${openTag} tag:`, {
-        shouldKeep: matchesToKeep.has(match),
-        matchLength: match.length
-      });
-    }
     
     return matchesToKeep.has(match) ? content : '';
   });
