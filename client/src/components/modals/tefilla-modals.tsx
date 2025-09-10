@@ -111,6 +111,15 @@ const useTefillaConditions = () => {
           coordinates?.lng
         );
         
+        // Debug TTI/TBI conditions
+        console.log('Loaded Tefilla conditions:', {
+          isTTI: tefillaConditions.isTTI,
+          isTBI: tefillaConditions.isTBI,
+          isTTC: tefillaConditions.isTTC,
+          isTBC: tefillaConditions.isTBC,
+          isInIsrael: tefillaConditions.isInIsrael,
+          allConditions: tefillaConditions
+        });
         
         setConditions(tefillaConditions);
       } catch (error) {
@@ -130,7 +139,14 @@ const useTefillaConditions = () => {
           isWednesday: false,
           isThursday: false,
           isFriday: false,
-          isSaturday: false
+          isSaturday: false,
+          // New seasonal conditions
+          isMH: false,
+          isMT: false,
+          isTBI: false,
+          isTTI: false,
+          isTTC: false,
+          isTBC: false
         });
       }
     };
@@ -160,10 +176,28 @@ const processTefillaContent = (text: string, conditions: TefillaConditions | nul
     isWednesday: false,
     isThursday: false,
     isFriday: false,
-    isSaturday: false
+    isSaturday: false,
+    // New seasonal conditions
+    isMH: false,
+    isMT: false,
+    isTBI: false,
+    isTTI: false,
+    isTTC: false,
+    isTBC: false
   };
   
   const effectiveConditions = conditions || defaultConditions;
+  
+  // Debug text processing for TTI issues
+  if (text && text.includes('[[TTI]]')) {
+    console.log('Processing text with TTI:', {
+      hasConditions: !!effectiveConditions,
+      isTTI: effectiveConditions.isTTI,
+      isTBI: effectiveConditions.isTBI,
+      isTTC: effectiveConditions.isTTC,
+      isTBC: effectiveConditions.isTBC
+    });
+  }
   
   // Process conditional text FIRST (removes/shows conditional sections)
   const processedText = processTefillaText(text, effectiveConditions);
@@ -1994,7 +2028,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       
       switch (activeModal) {
         case 'morning-brochas':
-          title = 'Morning Brochas';
+          title = 'Shacharis';
           break;
         case 'mincha':
           title = 'Mincha Prayer';
@@ -2031,10 +2065,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         content: null // Content will be rendered based on contentType
       });
       
-      // Close the regular modal after fullscreen opens
-      setTimeout(() => {
-        closeModal();
-      }, 10);
+      // Close the regular modal immediately with fullscreen opens
+      closeModal();
     }
   }, [activeModal, closeModal, selectedPsalm]);
 

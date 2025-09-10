@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon } from "lucide-react";
+import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Star } from "lucide-react";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
 import { useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
@@ -240,15 +240,24 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             </button>
           </div>
 
-          {/* Shkia - Display Only */}
-          <div className="bg-white/80 rounded-xl p-3 text-center border border-blush/20">
-            <div className="flex items-center justify-center mb-1">
-              <div className="bg-gradient-feminine p-1.5 rounded-full">
-                <Clock className="text-white" size={12} />
+          {/* Shkia - Clickable to open Events */}
+          <div className="relative">
+            <button 
+              onClick={() => openModal('events', 'home')}
+              className="w-full bg-white/80 rounded-xl p-3 text-center border border-blush/20 hover:scale-105 hover:bg-white/95 transition-all duration-300"
+            >
+              <div className="flex items-center justify-center mb-1">
+                <div className="bg-gradient-feminine p-1.5 rounded-full relative">
+                  <Clock className="text-white" size={12} />
+                  {/* Small star inside circle */}
+                  <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-gradient-to-r from-blush to-muted-lavender rounded-full flex items-center justify-center">
+                    <Star className="text-white" size={6} fill="currentColor" />
+                  </div>
+                </div>
               </div>
-            </div>
-            <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
-            <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
+              <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
+              <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
+            </button>
           </div>
         </div>
       </div>

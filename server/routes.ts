@@ -2919,6 +2919,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Jewish events API endpoint for Events page
+  app.get("/api/events/:lat/:lng", async (req, res) => {
+    try {
+      const { lat, lng } = req.params;
+      const latitude = parseFloat(lat);
+      const longitude = parseFloat(lng);
+      
+      if (isNaN(latitude) || isNaN(longitude)) {
+        return res.status(400).json({ message: "Invalid coordinates" });
+      }
+
+      // Get current date and calculate date range (6 months past, 12 months future)
+      const now = new Date();
+      const pastDate = new Date(now);
+      pastDate.setMonth(pastDate.getMonth() - 6);
+      const futureDate = new Date(now);
+      futureDate.setMonth(futureDate.getMonth() + 12);
+
+      const startDate = pastDate.toISOString().split('T')[0];
+      const endDate = futureDate.toISOString().split('T')[0];
+
+      // Fetch events from Hebcal with specified categories
+      const eventsUrl = `https://www.hebcal.com/hebcal?v=1&cfg=json&start=${startDate}&end=${endDate}&mf=on&ss=on&nx=on&maj=on&min=on&c=on&geo=pos&latitude=${latitude}&longitude=${longitude}`;
+      
+      const eventsResponse = await serverAxiosClient.get(eventsUrl);
+
+      if (eventsResponse.data && eventsResponse.data.items) {
+        // Filter and process events
+        const filteredEvents = eventsResponse.data.items.filter((item: any) => {
+          const title = (item.title || '').toLowerCase();
+          const memo = (item.memo || '').toLowerCase();
+          
+          // Skip fast end/begin events
+          if (title.includes('fast ends') || title.includes('fast begins')) {
+            return false;
+          }
+          
+          // Skip standalone candle lighting and havdalah unless they're for holidays/fasts
+          if (item.category === 'candles' || item.category === 'havdalah') {
+            // Only include if it's for a holiday or fast
+            return memo.includes('holiday') || memo.includes('fast') || 
+                   title.includes('erev') || title.includes('yom kippur') || 
+                   title.includes('rosh hashana') || title.includes('pesach') ||
+                   title.includes('sukkot') || title.includes('shavuot') ||
+                   memo.includes('chanukah') || memo.includes('purim');
+          }
+          return true;
+        });
+
+        // Process and sort events
+        const events = filteredEvents.map((item: any) => ({
+          title: item.title || '',
+          hebrew: item.hebrew || '',
+          date: item.date,
+          hdate: item.hdate || '',
+          category: item.category || '',
+          subcat: item.subcat || '',
+          memo: item.memo || '',
+          yomtov: item.yomtov || false,
+          link: item.link || ''
+        })).sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+        res.json({
+          events,
+          location: eventsResponse.data.location || null
+        });
+      } else {
+        res.json({ events: [], location: null });
+      }
+    } catch (error) {
+      console.error('Error fetching Jewish events:', error);
+      res.status(500).json({ message: "Failed to fetch Jewish events" });
+    }
+  });
+
   // Hebrew date API endpoint for Tefilla conditional processing
   app.get("/api/hebrew-date/:date", async (req, res) => {
     try {
