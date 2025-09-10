@@ -240,8 +240,11 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             </button>
           </div>
 
-          {/* Shkia - Display Only */}
-          <div className="bg-white/80 rounded-xl p-3 text-center border border-blush/20">
+          {/* Shkia - Clickable to open Events */}
+          <button 
+            onClick={() => openModal('events', 'home')}
+            className="bg-white/80 rounded-xl p-3 text-center border border-blush/20 hover:scale-105 hover:bg-white/95 transition-all duration-300"
+          >
             <div className="flex items-center justify-center mb-1">
               <div className="bg-gradient-feminine p-1.5 rounded-full">
                 <Clock className="text-white" size={12} />
@@ -249,7 +252,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             </div>
             <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
             <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
-          </div>
+          </button>
         </div>
       </div>
       {/* Main Action Buttons */}
