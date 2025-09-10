@@ -336,20 +336,17 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
           });
         }
         
-        // Debug seasonal conditions BEFORE they're processed
-        if (matchInfo.tag === 'TTI' || matchInfo.tag === 'TBI') {
-          console.log(`Evaluating ${matchInfo.tag}:`, {
-            conditionsMet,
-            isTBI: conditions.isTBI,
-            isTTI: conditions.isTTI,
-            isInIsrael: conditions.isInIsrael,
-            hebrewDate: conditions.hebrewDate
-          });
-          
-          // Force TTI to false when TBI is true for debugging
-          if (matchInfo.tag === 'TTI' && conditions.isTBI) {
-            console.log('FORCING TTI to false because TBI is true');
-            conditionsMet = false;
+        // For seasonal conditions, ensure strict mutual exclusivity
+        if (['TTI', 'TBI', 'TTC', 'TBC'].includes(matchInfo.tag)) {
+          // Override the normal evaluation for seasonal conditions to ensure mutual exclusivity
+          if (matchInfo.tag === 'TTI') {
+            conditionsMet = conditions.isTTI && conditions.isInIsrael;
+          } else if (matchInfo.tag === 'TBI') {
+            conditionsMet = conditions.isTBI && conditions.isInIsrael;
+          } else if (matchInfo.tag === 'TTC') {
+            conditionsMet = conditions.isTTC && !conditions.isInIsrael;
+          } else if (matchInfo.tag === 'TBC') {
+            conditionsMet = conditions.isTBC && !conditions.isInIsrael;
           }
         }
         
