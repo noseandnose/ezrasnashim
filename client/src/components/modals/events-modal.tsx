@@ -49,16 +49,21 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
       
       const upcomingIndex = nextEventIndex >= 0 ? nextEventIndex : 0;
       setUpcomingEventIndex(upcomingIndex);
-      
-      // Scroll to the upcoming event after a brief delay
+    }
+  }, [eventsQuery.data]);
+
+  // Scroll to upcoming event whenever modal opens
+  useEffect(() => {
+    if (isOpen && upcomingEventIndex !== null && eventsQuery.data?.events) {
+      // Reset scroll position first, then scroll to upcoming event
       setTimeout(() => {
-        const upcomingElement = document.getElementById(`event-${upcomingIndex}`);
+        const upcomingElement = document.getElementById(`event-${upcomingEventIndex}`);
         if (upcomingElement) {
           upcomingElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      }, 300);
+      }, 100);
     }
-  }, [eventsQuery.data]);
+  }, [isOpen, upcomingEventIndex, eventsQuery.data]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
