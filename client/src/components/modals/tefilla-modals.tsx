@@ -130,7 +130,14 @@ const useTefillaConditions = () => {
           isWednesday: false,
           isThursday: false,
           isFriday: false,
-          isSaturday: false
+          isSaturday: false,
+          // New seasonal conditions
+          isMH: false,
+          isMT: false,
+          isTBI: false,
+          isTTI: false,
+          isTTC: false,
+          isTBC: false
         });
       }
     };
@@ -160,7 +167,14 @@ const processTefillaContent = (text: string, conditions: TefillaConditions | nul
     isWednesday: false,
     isThursday: false,
     isFriday: false,
-    isSaturday: false
+    isSaturday: false,
+    // New seasonal conditions
+    isMH: false,
+    isMT: false,
+    isTBI: false,
+    isTTI: false,
+    isTTC: false,
+    isTBC: false
   };
   
   const effectiveConditions = conditions || defaultConditions;
