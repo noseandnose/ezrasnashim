@@ -71,16 +71,6 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
     return date.toLocaleDateString('en-US', options);
   };
 
-  const getCategoryDisplay = (category: string, subcat: string) => {
-    if (category === 'holiday') {
-      return 'Holiday';
-    }
-    if (category === 'roshchodesh') return 'Rosh Chodesh';
-    if (category === 'fastday') return 'Fast Day';
-    if (category === 'special' || subcat === 'special') return 'Special Shabbat';
-    if (category === 'modern') return 'Modern Holiday';
-    return category || 'Event';
-  };
 
   const getTimeDisplay = (title: string) => {
     // Extract time from titles like "Candle lighting: 7:25pm" or "Havdalah: 8:17pm"
@@ -90,6 +80,48 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
 
   const shouldShowTime = (category: string) => {
     return category === 'candles' || category === 'havdalah';
+  };
+
+  const getEventEmoji = (title: string, category: string) => {
+    const titleLower = title.toLowerCase();
+    
+    // High holidays and major events
+    if (titleLower.includes('rosh hashana')) return '🍎';
+    if (titleLower.includes('yom kippur')) return '🕯️';
+    if (titleLower.includes('sukkot')) return '🌿';
+    if (titleLower.includes('simchat torah')) return '📜';
+    if (titleLower.includes('shemini atzeret')) return '🌧️';
+    if (titleLower.includes('pesach') || titleLower.includes('passover')) return '🍷';
+    if (titleLower.includes('shavuot')) return '🌾';
+    if (titleLower.includes('chanukah') || titleLower.includes('hanukkah')) return '🕎';
+    if (titleLower.includes('purim')) return '🎭';
+    if (titleLower.includes('tu bishvat')) return '🌳';
+    if (titleLower.includes('lag baomer')) return '🔥';
+    if (titleLower.includes('tu bav')) return '💖';
+    
+    // Fast days
+    if (category === 'fastday' || titleLower.includes('fast')) return '⚡';
+    
+    // Rosh Chodesh
+    if (category === 'roshchodesh' || titleLower.includes('rosh chodesh')) return '🌙';
+    
+    // Special Shabbatot
+    if (titleLower.includes('shabbat')) return '✨';
+    
+    // Candles and Havdalah
+    if (category === 'candles' || titleLower.includes('candle')) return '🕯️';
+    if (category === 'havdalah') return '🌟';
+    
+    // Modern holidays
+    if (titleLower.includes('yom hashoah')) return '🕯️';
+    if (titleLower.includes('yom hazikaron')) return '🇮🇱';
+    if (titleLower.includes('yom haatzmaut')) return '🎉';
+    if (titleLower.includes('yom yerushalayim')) return '🏛️';
+    
+    // Default for any holiday
+    if (category === 'holiday') return '🎊';
+    
+    return '📅'; // Default for other events
   };
 
   if (!isOpen) return null;
@@ -148,6 +180,7 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
                         <h3 className={`platypi-bold text-base ${
                           isPast ? 'text-gray-600' : 'text-black'
                         }`}>
+                          <span className="mr-2">{getEventEmoji(event.title, event.category)}</span>
                           {event.title}
                           {shouldShowTime(event.category) && getTimeDisplay(event.title) && (
                             <span className={`ml-2 text-sm platypi-medium ${
