@@ -348,11 +348,20 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
   }
   
   // Now process the text, keeping only the matches we want
-  processedText = processedText.replace(conditionalPattern, (match, openTag, content, closeTag) => {
+  // Create a new regex to avoid lastIndex issues from the exec() loop
+  const replacementPattern = /\[\[([^\]]+)\]\]([\s\S]*?)\[\[\/([^\]]+)\]\]/g;
+  processedText = processedText.replace(replacementPattern, (match, openTag, content, closeTag) => {
     if (openTag !== closeTag) {
       return match;
     }
     
+    // Debug seasonal conditions
+    if (openTag === 'TTI' || openTag === 'TBI' || openTag === 'TTC' || openTag === 'TBC') {
+      console.log(`Processing ${openTag} tag:`, {
+        shouldKeep: matchesToKeep.has(match),
+        matchLength: match.length
+      });
+    }
     
     return matchesToKeep.has(match) ? content : '';
   });
@@ -367,7 +376,7 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
   }
   
   // Clean up any orphaned conditional tags that weren't properly matched
-  const orphanedTagPattern = /\[\[(?:\/?)(?:OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH|FAST_DAY|ASERET_YEMEI_TESHUVA|SUKKOT|PESACH|ROSH_CHODESH_SPECIAL|grain|wine|fruit)(?:,[^\\]]*)?(?:\|[^\\]]*)?\]\]/g;
+  const orphanedTagPattern = /\[\[(?:\/?)(?:OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH|FAST_DAY|ASERET_YEMEI_TESHUVA|SUKKOT|PESACH|ROSH_CHODESH_SPECIAL|MH|MT|TBI|TTI|TTC|TBC|grain|wine|fruit)(?:,[^\\]]*)?(?:\|[^\\]]*)?\]\]/g;
   
   processedText = processedText.replace(orphanedTagPattern, () => {
     return ''; // Remove orphaned conditional tags only
