@@ -342,8 +342,15 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
             conditionsMet,
             isTBI: conditions.isTBI,
             isTTI: conditions.isTTI,
-            isInIsrael: conditions.isInIsrael
+            isInIsrael: conditions.isInIsrael,
+            hebrewDate: conditions.hebrewDate
           });
+          
+          // Force TTI to false when TBI is true for debugging
+          if (matchInfo.tag === 'TTI' && conditions.isTBI) {
+            console.log('FORCING TTI to false because TBI is true');
+            conditionsMet = false;
+          }
         }
         
         if (conditionsMet) {
@@ -560,7 +567,11 @@ export async function getCurrentTefillaConditions(
         
         // TTI: Only true if NOT in TBI period (they're complementary)
         // TTI covers 7 Cheshvan through 14 Nissan (the winter period)
-        isTTI = !isTBI;
+        if (isTBI) {
+          isTTI = false; // Ensure mutual exclusivity - if TBI is true, TTI must be false
+        } else {
+          isTTI = isInHebrewDateRange(hebrewDate, 'Cheshvan', 7, 'Nissan', 14);
+        }
       }
     }
     

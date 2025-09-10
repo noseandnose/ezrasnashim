@@ -2065,10 +2065,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         content: null // Content will be rendered based on contentType
       });
       
-      // Close the regular modal after fullscreen opens
-      setTimeout(() => {
-        closeModal();
-      }, 10);
+      // Close the regular modal immediately with fullscreen opens
+      closeModal();
     }
   }, [activeModal, closeModal, selectedPsalm]);
 
