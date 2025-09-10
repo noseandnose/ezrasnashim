@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon } from "lucide-react";
+import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Star } from "lucide-react";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
 import { useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
@@ -241,18 +241,24 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           </div>
 
           {/* Shkia - Clickable to open Events */}
-          <button 
-            onClick={() => openModal('events', 'home')}
-            className="bg-white/80 rounded-xl p-3 text-center border border-blush/20 hover:scale-105 hover:bg-white/95 transition-all duration-300"
-          >
-            <div className="flex items-center justify-center mb-1">
-              <div className="bg-gradient-feminine p-1.5 rounded-full">
-                <Clock className="text-white" size={12} />
+          <div className="relative">
+            <button 
+              onClick={() => openModal('events', 'home')}
+              className="w-full bg-white/80 rounded-xl p-3 text-center border border-blush/20 hover:scale-105 hover:bg-white/95 transition-all duration-300"
+            >
+              <div className="flex items-center justify-center mb-1">
+                <div className="bg-gradient-feminine p-1.5 rounded-full">
+                  <Clock className="text-white" size={12} />
+                </div>
               </div>
+              <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
+              <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
+            </button>
+            {/* Enticing star in top right corner */}
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-blush to-muted-lavender rounded-full flex items-center justify-center animate-pulse">
+              <Star className="text-white" size={8} fill="currentColor" />
             </div>
-            <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
-            <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
-          </button>
+          </div>
         </div>
       </div>
       {/* Main Action Buttons */}
