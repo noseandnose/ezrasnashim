@@ -9,10 +9,6 @@ function parseHebrewDate(hebrewDate: any): { month: string; day: number } | null
     const month = hebrewDate.hebrewMonth || '';
     const day = parseInt(hebrewDate.hebrewDay) || 0;
     
-    // Debug logging for verification
-    if (typeof window !== 'undefined' && window.location.search.includes('debug')) {
-      console.log('Parsing Hebrew date:', { month, day, raw: hebrewDate });
-    }
     
     return { month, day };
   } catch {
@@ -245,7 +241,7 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
   // SPECIAL PREPROCESSING: Handle seasonal conditions first to ensure mutual exclusivity
   // Replace the specific 4-condition seasonal pattern with only the appropriate one
   const seasonalPattern = /\[\[TTI\]\]([^\[]*?)\[\[\/TTI\]\]\[\[TBI\]\]([^\[]*?)\[\[\/TBI\]\]\[\[TTC\]\]([^\[]*?)\[\[\/TTC\]\]\[\[TBC\]\]([^\[]*?)\[\[\/TBC\]\]/g;
-  processedText = processedText.replace(seasonalPattern, (match, ttiContent, tbiContent, ttcContent, tbcContent) => {
+  processedText = processedText.replace(seasonalPattern, (_, ttiContent, tbiContent, ttcContent, tbcContent) => {
     if (conditions.isInIsrael) {
       // Israel: TBI (summer) vs TTI (winter) 
       return conditions.isTBI ? tbiContent : (conditions.isTTI ? ttiContent : '');
@@ -572,17 +568,6 @@ export async function getCurrentTefillaConditions(
       }
     }
     
-    // Debug logging for troubleshooting
-    if (typeof window !== 'undefined' && window.location.search.includes('debug')) {
-      const parsed = parseHebrewDate(hebrewDate);
-      console.log('Date conditions:', { 
-        hebrewMonth: parsed?.month,
-        hebrewDay: parsed?.day,
-        isInIsrael,
-        isTBI,
-        isTTI
-      });
-    }
     
     // TTC: Dec 5 - 15 Nissan (outside Israel)
     // This uses mixed English and Hebrew dates
