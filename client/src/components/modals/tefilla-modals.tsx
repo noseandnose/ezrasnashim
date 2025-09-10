@@ -111,6 +111,12 @@ const useTefillaConditions = () => {
           coordinates?.lng
         );
         
+        // Debug TTI/TBI conditions
+        console.log('Loaded Tefilla conditions:', {
+          isTTI: tefillaConditions.isTTI,
+          isTBI: tefillaConditions.isTBI,
+          isInIsrael: tefillaConditions.isInIsrael
+        });
         
         setConditions(tefillaConditions);
       } catch (error) {
