@@ -242,13 +242,16 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
   // Replace the specific 4-condition seasonal pattern with only the appropriate one
   const seasonalPattern = /\[\[TTI\]\]([^\[]*?)\[\[\/TTI\]\]\[\[TBI\]\]([^\[]*?)\[\[\/TBI\]\]\[\[TTC\]\]([^\[]*?)\[\[\/TTC\]\]\[\[TBC\]\]([^\[]*?)\[\[\/TBC\]\]/g;
   processedText = processedText.replace(seasonalPattern, (_, ttiContent, tbiContent, ttcContent, tbcContent) => {
+    let selectedContent = '';
     if (conditions.isInIsrael) {
       // Israel: TBI (summer) vs TTI (winter) 
-      return conditions.isTBI ? tbiContent : (conditions.isTTI ? ttiContent : '');
+      selectedContent = conditions.isTBI ? tbiContent : (conditions.isTTI ? ttiContent : '');
     } else {
       // Outside Israel: TBC (summer) vs TTC (winter)
-      return conditions.isTBC ? tbcContent : (conditions.isTTC ? ttcContent : '');
+      selectedContent = conditions.isTBC ? tbcContent : (conditions.isTTC ? ttcContent : '');
     }
+    // Preserve formatting markers in selected content
+    return selectedContent;
   });
 
   // Process all conditional sections with localized priority logic
@@ -365,8 +368,9 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
       return match;
     }
     
-    
-    return matchesToKeep.has(match) ? content : '';
+    // When we keep content, preserve any formatting markers like ** that might be inside
+    const contentToReturn = matchesToKeep.has(match) ? content : '';
+    return contentToReturn;
   });
 
   // Additional cleanup: Remove any remaining unprocessed conditional blocks
