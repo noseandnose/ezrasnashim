@@ -133,7 +133,7 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
                   }`}
                 >
                   {/* Decorative top border */}
-                  <div className={`h-0.5 w-full ${
+                  <div className={`h-1 w-full ${
                     isUpcoming 
                       ? 'bg-gradient-to-r from-blush to-muted-lavender' 
                       : isPast 
@@ -164,33 +164,16 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
                         )}
                       </div>
 
-                      {/* Hebrew Date */}
-                      {event.hdate && (
-                        <div className={`platypi-medium text-sm ${
-                          isPast ? 'text-gray-500' : 'text-gray-700'
-                        } font-hebrew`}>
-                          {event.hdate}
-                        </div>
-                      )}
-
-                      {/* English Date */}
+                      {/* Combined Date Line */}
                       <div className={`platypi-medium text-sm ${
-                        isPast ? 'text-gray-500' : 'text-gray-800'
+                        isPast ? 'text-gray-500' : 'text-gray-700'
                       }`}>
                         {formatDate(event.date)}
-                      </div>
-
-                      {/* Category badge only */}
-                      <div className="flex items-center">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs platypi-medium ${
-                          isPast 
-                            ? 'bg-gray-100 text-gray-500' 
-                            : isUpcoming
-                              ? 'bg-blush/20 text-blush'
-                              : 'bg-blush/10 text-blush'
-                        }`}>
-                          {getCategoryDisplay(event.category, event.subcat)}
-                        </span>
+                        {event.hdate && (
+                          <span className="font-hebrew ml-2">
+                            • {event.hdate}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
