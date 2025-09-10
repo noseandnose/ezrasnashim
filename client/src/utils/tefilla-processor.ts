@@ -242,6 +242,19 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
   };
 
 
+  // SPECIAL PREPROCESSING: Handle seasonal conditions first to ensure mutual exclusivity
+  // Replace the specific 4-condition seasonal pattern with only the appropriate one
+  const seasonalPattern = /\[\[TTI\]\]([^\[]*?)\[\[\/TTI\]\]\[\[TBI\]\]([^\[]*?)\[\[\/TBI\]\]\[\[TTC\]\]([^\[]*?)\[\[\/TTC\]\]\[\[TBC\]\]([^\[]*?)\[\[\/TBC\]\]/g;
+  processedText = processedText.replace(seasonalPattern, (match, ttiContent, tbiContent, ttcContent, tbcContent) => {
+    if (conditions.isInIsrael) {
+      // Israel: TBI (summer) vs TTI (winter) 
+      return conditions.isTBI ? tbiContent : (conditions.isTTI ? ttiContent : '');
+    } else {
+      // Outside Israel: TBC (summer) vs TTC (winter)
+      return conditions.isTBC ? tbcContent : (conditions.isTTC ? ttcContent : '');
+    }
+  });
+
   // Process all conditional sections with localized priority logic
   const conditionalPattern = /\[\[([^\]]+)\]\]([\s\S]*?)\[\[\/([^\]]+)\]\]/g;
   const matches: Array<{
@@ -336,19 +349,6 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
           });
         }
         
-        // For seasonal conditions, ensure strict mutual exclusivity
-        if (['TTI', 'TBI', 'TTC', 'TBC'].includes(matchInfo.tag)) {
-          // Override the normal evaluation for seasonal conditions to ensure mutual exclusivity
-          if (matchInfo.tag === 'TTI') {
-            conditionsMet = conditions.isTTI && conditions.isInIsrael;
-          } else if (matchInfo.tag === 'TBI') {
-            conditionsMet = conditions.isTBI && conditions.isInIsrael;
-          } else if (matchInfo.tag === 'TTC') {
-            conditionsMet = conditions.isTTC && !conditions.isInIsrael;
-          } else if (matchInfo.tag === 'TBC') {
-            conditionsMet = conditions.isTBC && !conditions.isInIsrael;
-          }
-        }
         
         if (conditionsMet) {
           // Mark all conditions as used to prevent lower-priority matches with same conditions

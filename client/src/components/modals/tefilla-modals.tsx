@@ -2028,7 +2028,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       
       switch (activeModal) {
         case 'morning-brochas':
-          title = 'Morning Brochas';
+          title = 'Shacharis';
           break;
         case 'mincha':
           title = 'Mincha Prayer';
