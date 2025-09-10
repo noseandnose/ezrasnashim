@@ -7,7 +7,12 @@ function parseHebrewDate(hebrewDate: any): { month: string; day: number } | null
   try {
     // The hebrewDate object from API has hebrewMonth and hebrewDay properties
     const month = hebrewDate.hebrewMonth || '';
-    const day = hebrewDate.hebrewDay || 0;
+    const day = parseInt(hebrewDate.hebrewDay) || 0;
+    
+    // Debug logging for verification
+    if (typeof window !== 'undefined' && window.location.search.includes('debug')) {
+      console.log('Parsing Hebrew date:', { month, day, raw: hebrewDate });
+    }
     
     return { month, day };
   } catch {
@@ -28,7 +33,7 @@ function isInHebrewDateRange(
   
   const { month: currentMonth, day: currentDay } = current;
   
-  // Define month order in Hebrew calendar
+  // Define month order in Hebrew calendar (Tishrei is first month, index 0)
   const monthOrder = [
     'Tishrei', 'Cheshvan', 'Kislev', 'Tevet', 'Shevat', 'Adar',
     'Nissan', 'Iyar', 'Sivan', 'Tammuz', 'Av', 'Elul'
@@ -48,17 +53,31 @@ function isInHebrewDateRange(
     return false;
   }
   
-  // Check if range spans across Hebrew year (e.g., Tishrei to Nissan)
+  // Check if range spans across Hebrew year (e.g., Cheshvan to Nissan)
+  // Note: Tishrei is month 0, Elul is month 11 in our array
+  // IMPORTANT: A range like "Cheshvan to Nissan" (indices 1 to 6) does NOT span the year
+  // A range like "Nissan to Cheshvan" (indices 6 to 1) DOES span the year
   if (startMonthIndex > endMonthIndex) {
     // Range spans Hebrew year boundary
+    // For a range like Cheshvan (1) to Nissan (6), we're IN the range if:
+    // - We're >= Cheshvan (months 1-11) OR
+    // - We're <= Nissan (months 0-6)
+    // But for Elul (11), we need to check if we're actually after the start
+    
     if (currentMonthIndex >= startMonthIndex) {
-      // We're in the first part (from start month to end of year)
-      return currentMonthIndex > startMonthIndex || 
-             (currentMonthIndex === startMonthIndex && currentDay >= startDay);
+      // We're potentially in the first part (from start month through Elul)
+      if (currentMonthIndex > startMonthIndex) {
+        return true; // Definitely after start month
+      }
+      // Same month as start, check day
+      return currentDay >= startDay;
     } else if (currentMonthIndex <= endMonthIndex) {
-      // We're in the second part (from start of year to end month)
-      return currentMonthIndex < endMonthIndex || 
-             (currentMonthIndex === endMonthIndex && currentDay <= endDay);
+      // We're potentially in the second part (from Tishrei through end month)  
+      if (currentMonthIndex < endMonthIndex) {
+        return true; // Definitely before end month
+      }
+      // Same month as end, check day
+      return currentDay <= endDay;
     }
     return false;
   } else {
@@ -512,11 +531,38 @@ export async function getCurrentTefillaConditions(
     // MT: 15 Nissan - 21 Tishrei  
     const isMT = isInHebrewDateRange(hebrewDate, 'Nissan', 15, 'Tishrei', 21);
     
-    // TBI: 15 Nissan - 6 Cheshvan (Israel only)
-    const isTBI = isInIsrael && isInHebrewDateRange(hebrewDate, 'Nissan', 15, 'Cheshvan', 6);
+    // For Israel, we have two complementary seasonal periods:
+    // TBI: 15 Nissan through 6 Cheshvan (spring/summer/early fall - approx April to October)
+    // TTI: 7 Cheshvan through 14 Nissan (late fall/winter/early spring - approx November to March)
     
-    // TTI: 7 Cheshvan - 14 Nissan (Israel only)
-    const isTTI = isInIsrael && isInHebrewDateRange(hebrewDate, 'Cheshvan', 7, 'Nissan', 14);
+    // These should be mutually exclusive - only one should be true at a time
+    let isTBI = false;
+    let isTTI = false;
+    
+    if (isInIsrael && hebrewDate) {
+      const parsed = parseHebrewDate(hebrewDate);
+      if (parsed) {
+        // TBI: Check if we're between 15 Nissan and 6 Cheshvan
+        // This period starts at Nissan 15 and goes through summer into early fall
+        isTBI = isInHebrewDateRange(hebrewDate, 'Nissan', 15, 'Cheshvan', 6);
+        
+        // TTI: Only true if NOT in TBI period (they're complementary)
+        // TTI covers 7 Cheshvan through 14 Nissan (the winter period)
+        isTTI = !isTBI;
+      }
+    }
+    
+    // Debug logging for troubleshooting
+    if (typeof window !== 'undefined' && window.location.search.includes('debug')) {
+      const parsed = parseHebrewDate(hebrewDate);
+      console.log('Date conditions:', { 
+        hebrewMonth: parsed?.month,
+        hebrewDay: parsed?.day,
+        isInIsrael,
+        isTBI,
+        isTTI
+      });
+    }
     
     // TTC: Dec 5 - 15 Nissan (outside Israel)
     // This uses mixed English and Hebrew dates
