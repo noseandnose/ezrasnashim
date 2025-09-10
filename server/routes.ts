@@ -2946,8 +2946,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const eventsResponse = await serverAxiosClient.get(eventsUrl);
 
       if (eventsResponse.data && eventsResponse.data.items) {
+        // Filter and process events
+        const filteredEvents = eventsResponse.data.items.filter((item: any) => {
+          // Skip standalone candle lighting and havdalah unless they're for holidays/fasts
+          if (item.category === 'candles' || item.category === 'havdalah') {
+            // Only include if it's for a holiday or fast
+            const memo = (item.memo || '').toLowerCase();
+            const title = (item.title || '').toLowerCase();
+            return memo.includes('holiday') || memo.includes('fast') || 
+                   title.includes('erev') || title.includes('yom kippur') || 
+                   title.includes('rosh hashana') || title.includes('pesach') ||
+                   title.includes('sukkot') || title.includes('shavuot') ||
+                   memo.includes('chanukah') || memo.includes('purim');
+          }
+          return true;
+        });
+
         // Process and sort events
-        const events = eventsResponse.data.items.map((item: any) => ({
+        const events = filteredEvents.map((item: any) => ({
           title: item.title || '',
           hebrew: item.hebrew || '',
           date: item.date,
