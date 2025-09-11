@@ -9,6 +9,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
+import { Calendar } from "lucide-react";
 
 export default function TimesModals() {
   const { activeModal, closeModal } = useModalStore();
