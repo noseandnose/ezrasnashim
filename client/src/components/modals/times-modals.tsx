@@ -16,6 +16,8 @@ export default function TimesModals() {
   const [eventTitle, setEventTitle] = useState("");
   const [englishDate, setEnglishDate] = useState(new Date().toISOString().split('T')[0]);
   const [convertedHebrewDate, setConvertedHebrewDate] = useState("");
+  const [dateObject, setDateObject] = useState<Date | null>(null);
+  const [showEnglishFormat, setShowEnglishFormat] = useState(false);
   const [afterNightfall, setAfterNightfall] = useState(false);
   const [yearDuration, setYearDuration] = useState(10);
   const { toast } = useToast();
@@ -142,6 +144,8 @@ export default function TimesModals() {
       
       if (data.hebrew) {
         setConvertedHebrewDate(data.hebrew);
+        setDateObject(dateObj); // Store the date object for English formatting
+        setShowEnglishFormat(false); // Reset to Hebrew format when new date is converted
       } else {
         throw new Error('No Hebrew date returned from API');
       }
@@ -152,13 +156,40 @@ export default function TimesModals() {
         variant: "destructive"
       });
       setConvertedHebrewDate('');
+      setDateObject(null);
+      setShowEnglishFormat(false);
     }
+  };
+
+  // Format date in English with weekday and Hebrew month
+  const formatEnglishDate = (dateObj: Date, hebrewDate: string): string => {
+    const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const weekday = weekdays[dateObj.getDay()];
+    
+    // Extract Hebrew day and month from the Hebrew date string
+    // Hebrew date format is usually like "י״ח באלול ה׳תשפ״ה"
+    // We'll parse it to get the components
+    const hebrewParts = hebrewDate.split(' ');
+    if (hebrewParts.length >= 3) {
+      const hebrewDay = hebrewParts[0];
+      const hebrewMonth = hebrewParts[1].replace('ב', ''); // Remove the ב prefix
+      const hebrewYear = hebrewParts[2];
+      
+      return `${weekday} ${hebrewDay} ${hebrewMonth} ${hebrewYear}`;
+    }
+    
+    // Fallback if parsing fails
+    return `${weekday} ${hebrewDate}`;
   };
 
   const handleDateChange = (date: string) => {
     setEnglishDate(date);
     if (date) {
       convertToHebrewDate(date, afterNightfall);
+    } else {
+      setConvertedHebrewDate('');
+      setDateObject(null);
+      setShowEnglishFormat(false);
     }
   };
 
@@ -248,17 +279,25 @@ export default function TimesModals() {
 
             {/* Hebrew Date Result */}
             {convertedHebrewDate && (
-              <div className="bg-gradient-to-r from-blush/5 to-lavender/5 backdrop-blur-sm rounded-lg p-3 shadow-soft border border-blush/20 animate-in slide-in-from-bottom duration-300">
+              <div 
+                className="bg-gradient-to-r from-blush/5 to-lavender/5 backdrop-blur-sm rounded-lg p-3 shadow-soft border border-blush/20 animate-in slide-in-from-bottom duration-300 cursor-pointer hover:border-blush/30 hover:shadow-md transition-all"
+                onClick={() => setShowEnglishFormat(!showEnglishFormat)}
+                data-testid="hebrew-date-display"
+              >
                 <div className="flex items-center justify-between">
                   <div>
                     <Label className="text-xs platypi-semibold text-black flex items-center">
                       <span className="w-1.5 h-1.5 bg-blush rounded-full mr-2"></span>
-                      Hebrew Date
+                      {showEnglishFormat ? 'English Format' : 'Hebrew Date'}
                     </Label>
+                    <p className="text-xs text-gray-500 mt-0.5">Tap to {showEnglishFormat ? 'show Hebrew' : 'show English'}</p>
                   </div>
                   <div className="text-right">
                     <div className="text-sm platypi-semibold text-blush">
-                      {convertedHebrewDate}
+                      {showEnglishFormat && dateObject 
+                        ? formatEnglishDate(dateObject, convertedHebrewDate)
+                        : convertedHebrewDate
+                      }
                     </div>
                   </div>
                 </div>
