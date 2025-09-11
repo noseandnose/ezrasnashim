@@ -237,14 +237,14 @@ export function formatTextContent(text: string | null | undefined): string {
       i++; // Skip the second ~
       lastIndex = i + 1;
     }
-    // Check for ++ (larger text) markers
+    // Check for ++ (bold text) markers - changed from larger text to bold
     else if (formatted[i] === '+' && formatted[i + 1] === '+') {
       result += formatted.substring(lastIndex, i);
       
       if (!isInLarger) {
-        result += '<span style="font-size: 1.2em;">';
+        result += '<strong>';
       } else {
-        result += '</span>';
+        result += '</strong>';
       }
       
       isInLarger = !isInLarger;
