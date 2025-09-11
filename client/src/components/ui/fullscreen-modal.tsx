@@ -7,7 +7,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 interface FullscreenModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
+  title?: string;
+  hideHeader?: boolean;
   children: React.ReactNode | ((params: { language: 'hebrew' | 'english', fontSize: number }) => React.ReactNode);
   className?: string;
   // Font and Language Controls
@@ -29,6 +30,7 @@ export function FullscreenModal({
   isOpen, 
   onClose, 
   title, 
+  hideHeader = false,
   children, 
   className = '',
   showFontControls = false,
@@ -142,7 +144,7 @@ export function FullscreenModal({
         right: 0,
         bottom: 0,
         width: '100vw',
-        height: '100vh',
+        height: '100dvh',
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: 'white',
@@ -163,74 +165,91 @@ export function FullscreenModal({
       }}
     >
       {/* Header */}
-      <div 
-        className="bg-white border-b border-gray-200 px-4 py-3 cursor-pointer"
-        style={{
-          flexShrink: 0,
-          minHeight: '56px'
-        }}
-        onClick={(e) => {
-          // Only scroll to top if not clicking any button (close or info)
-          if (!(e.target as Element).closest('button')) {
-            scrollContainerRef.current?.scrollTo({
-              top: 0,
-              behavior: 'smooth'
-            });
-          }
-        }}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img 
-              src={logoImage} 
-              alt="Ezras Nashim" 
-              className="h-5 w-auto"
-            />
-          </div>
+      {!hideHeader ? (
+        <div 
+          className="bg-white border-b border-gray-200 px-4 py-3 cursor-pointer"
+          style={{
+            flexShrink: 0,
+            minHeight: '56px'
+          }}
+          onClick={(e) => {
+            // Only scroll to top if not clicking any button (close or info)
+            if (!(e.target as Element).closest('button')) {
+              scrollContainerRef.current?.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+              });
+            }
+          }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img 
+                src={logoImage} 
+                alt="Ezras Nashim" 
+                className="h-5 w-auto"
+              />
+            </div>
 
-          <h1 className="text-lg font-semibold text-gray-900 text-center flex-1 mx-4">
-            {title}
-          </h1>
-          
-          <div className="flex items-center gap-2">
-            {showInfoIcon && (
-              <Popover open={showInfoPopover} onOpenChange={(open) => onInfoClick?.(open)}>
-                <PopoverTrigger asChild>
-                  <button
-                    className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
-                    aria-label="Prayer timing information"
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      console.log('Info button clicked directly');
-                      onInfoClick?.(!showInfoPopover);
-                    }}
-                  >
-                    <Info className="h-5 w-5 text-blush/60" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="max-w-xs p-3 bg-white border border-blush/20 shadow-lg z-[9999]">
-                  {infoContent || <p className="text-xs text-black">Loading timing information...</p>}
-                </PopoverContent>
-              </Popover>
-            )}
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                e.nativeEvent.stopImmediatePropagation();
-                onClose();
-              }}
-              className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
-              aria-label="Close fullscreen"
-              type="button"
-            >
-              <X className="h-5 w-5 text-gray-600" />
-            </button>
+            <h1 className="text-lg font-semibold text-gray-900 text-center flex-1 mx-4">
+              {title}
+            </h1>
+            
+            <div className="flex items-center gap-2">
+              {showInfoIcon && (
+                <Popover open={showInfoPopover} onOpenChange={(open) => onInfoClick?.(open)}>
+                  <PopoverTrigger asChild>
+                    <button
+                      className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+                      aria-label="Prayer timing information"
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Info button clicked directly');
+                        onInfoClick?.(!showInfoPopover);
+                      }}
+                    >
+                      <Info className="h-5 w-5 text-blush/60" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="max-w-xs p-3 bg-white border border-blush/20 shadow-lg z-[9999]">
+                    {infoContent || <p className="text-xs text-black">Loading timing information...</p>}
+                  </PopoverContent>
+                </Popover>
+              )}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  e.nativeEvent.stopImmediatePropagation();
+                  onClose();
+                }}
+                className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+                aria-label="Close fullscreen"
+                type="button"
+              >
+                <X className="h-5 w-5 text-gray-600" />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        /* Compact close button for headerless modals */
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            e.nativeEvent.stopImmediatePropagation();
+            onClose();
+          }}
+          className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm hover:bg-white/90 transition-colors shadow-sm z-10"
+          aria-label="Close"
+          type="button"
+        >
+          <X className="h-4 w-4 text-gray-600" />
+        </button>
+      )}
 
       {/* Scrollable Content */}
       <div 
@@ -249,7 +268,7 @@ export function FullscreenModal({
           paddingBottom: 'env(safe-area-inset-bottom, 20px)'
         }}
       >
-        <div className={`max-w-4xl mx-auto ${className}`} style={{ paddingBottom: '100px' }}>
+        <div className={`max-w-4xl mx-auto ${className}`} style={{ paddingBottom: (showFontControls || showLanguageControls) ? '100px' : '0px' }}>
           {typeof children === 'function' 
             ? (children as (params: { language: 'hebrew' | 'english', fontSize: number }) => React.ReactNode)({ language: language || 'hebrew', fontSize: fontSize || 16 }) 
             : children}

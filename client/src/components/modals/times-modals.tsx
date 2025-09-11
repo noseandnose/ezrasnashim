@@ -197,21 +197,15 @@ export default function TimesModals() {
       <FullscreenModal
         isOpen={activeModal === 'date-calculator-fullscreen'}
         onClose={() => closeModal()}
-        title="Hebrew Date Converter"
+        hideHeader={true}
         className="bg-gradient-to-br from-cream via-ivory to-sand"
       >
-        <div className="max-w-lg mx-auto p-4">
-          {/* Header Section */}
-          <div className="text-center mb-6">
-            <h2 className="text-lg platypi-semibold text-black mb-2">Convert English to Hebrew Dates</h2>
-            <p className="text-sm text-gray-600 platypi-medium">Create calendar events that recur yearly on the Hebrew calendar</p>
-          </div>
-          
+        <div className="max-w-lg mx-auto p-3">
           {/* Form Sections */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             {/* Event Title */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-soft border border-blush/10">
-              <Label className="text-sm platypi-semibold text-black mb-2 flex items-center">
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 shadow-soft border border-blush/10">
+              <Label className="text-xs platypi-semibold text-black mb-1 flex items-center">
                 Event Title
                 <span className="text-blush ml-1">*</span>
               </Label>
@@ -220,15 +214,15 @@ export default function TimesModals() {
                 placeholder="Anniversary, Yahrzeit, Birthday..." 
                 value={eventTitle}
                 onChange={(e) => setEventTitle(e.target.value)}
-                className="w-full p-3 border-0 bg-gray-50/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blush/30 text-sm placeholder:text-gray-400 transition-all"
+                className="w-full p-2 border-0 bg-gray-50/50 rounded-md focus:outline-none focus:ring-2 focus:ring-blush/30 text-sm placeholder:text-gray-400 transition-all"
                 data-testid="input-event-title"
               />
             </div>
             
             {/* Date Selection & Nightfall */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-soft border border-blush/10">
-              <div className="flex items-start justify-between mb-2">
-                <Label className="text-sm platypi-semibold text-black flex items-center">
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 shadow-soft border border-blush/10">
+              <div className="flex items-start justify-between mb-1">
+                <Label className="text-xs platypi-semibold text-black flex items-center">
                   Select Date
                   <span className="text-blush ml-1">*</span>
                 </Label>
@@ -237,7 +231,7 @@ export default function TimesModals() {
                     id="nightfall-fullscreen"
                     checked={afterNightfall}
                     onCheckedChange={handleNightfallChange}
-                    className="w-4 h-4 border-2 border-blush/30 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+                    className="w-3 h-3 border-2 border-blush/30 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
                     data-testid="checkbox-nightfall"
                   />
                   <Label htmlFor="nightfall-fullscreen" className="text-xs text-gray-600">After nightfall?</Label>
@@ -247,27 +241,23 @@ export default function TimesModals() {
                 type="date"
                 value={englishDate || ''}
                 onChange={(e) => handleDateChange(e.target.value)}
-                className="w-full p-3 border-0 bg-gray-50/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blush/30 text-sm transition-all appearance-none"
-                style={{
-                  WebkitAppearance: 'none',
-                  MozAppearance: 'textfield'
-                }}
+                className="w-full p-2 border-0 bg-gray-50/50 rounded-md focus:outline-none focus:ring-2 focus:ring-blush/30 text-sm transition-all"
                 data-testid="input-date"
               />
             </div>
 
             {/* Hebrew Date Result */}
             {convertedHebrewDate && (
-              <div className="bg-gradient-to-r from-blush/5 to-lavender/5 backdrop-blur-sm rounded-xl p-4 shadow-soft border border-blush/20 animate-in slide-in-from-bottom duration-300">
+              <div className="bg-gradient-to-r from-blush/5 to-lavender/5 backdrop-blur-sm rounded-lg p-3 shadow-soft border border-blush/20 animate-in slide-in-from-bottom duration-300">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-sm platypi-semibold text-black flex items-center">
-                      <span className="w-2 h-2 bg-blush rounded-full mr-2"></span>
+                    <Label className="text-xs platypi-semibold text-black flex items-center">
+                      <span className="w-1.5 h-1.5 bg-blush rounded-full mr-2"></span>
                       Hebrew Date
                     </Label>
                   </div>
                   <div className="text-right">
-                    <div className="text-base platypi-semibold text-blush">
+                    <div className="text-sm platypi-semibold text-blush">
                       {convertedHebrewDate}
                     </div>
                   </div>
@@ -277,74 +267,74 @@ export default function TimesModals() {
 
             
             {/* Duration Selection */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-soft border border-blush/10">
-              <Label className="text-sm platypi-semibold text-black mb-3 block">Calendar Duration</Label>
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 shadow-soft border border-blush/10">
+              <Label className="text-xs platypi-semibold text-black mb-2 block">Calendar Duration</Label>
               <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => setYearDuration(1)}
-                  className={`py-3 px-2 rounded-lg text-xs platypi-semibold transition-all duration-200 ${
+                  className={`py-2 px-2 rounded-md text-xs platypi-semibold transition-all duration-200 ${
                     yearDuration === 1
                       ? 'bg-gradient-feminine text-white shadow-lg transform scale-105'
                       : 'bg-gray-50/70 border-2 border-blush/20 text-gray-700 hover:border-blush/40 hover:bg-white'
                   }`}
                   data-testid="button-1-year"
                 >
-                  <div className="text-base mb-1">1</div>
+                  <div className="text-sm mb-0.5">1</div>
                   <div className="text-xs opacity-90">Year</div>
                 </button>
                 <button
                   type="button"
                   onClick={() => setYearDuration(10)}
-                  className={`py-3 px-2 rounded-lg text-xs platypi-semibold transition-all duration-200 ${
+                  className={`py-2 px-2 rounded-md text-xs platypi-semibold transition-all duration-200 ${
                     yearDuration === 10
                       ? 'bg-gradient-feminine text-white shadow-lg transform scale-105'
                       : 'bg-gray-50/70 border-2 border-blush/20 text-gray-700 hover:border-blush/40 hover:bg-white'
                   }`}
                   data-testid="button-10-years"
                 >
-                  <div className="text-base mb-1">10</div>
+                  <div className="text-sm mb-0.5">10</div>
                   <div className="text-xs opacity-90">Years</div>
                 </button>
                 <button
                   type="button"
                   onClick={() => setYearDuration(120)}
-                  className={`py-3 px-2 rounded-lg text-xs platypi-semibold transition-all duration-200 ${
+                  className={`py-2 px-2 rounded-md text-xs platypi-semibold transition-all duration-200 ${
                     yearDuration === 120
                       ? 'bg-gradient-feminine text-white shadow-lg transform scale-105'
                       : 'bg-gray-50/70 border-2 border-blush/20 text-gray-700 hover:border-blush/40 hover:bg-white'
                   }`}
                   data-testid="button-120-years"
                 >
-                  <div className="text-base mb-1">120</div>
+                  <div className="text-sm mb-0.5">120</div>
                   <div className="text-xs opacity-90">Years</div>
                 </button>
               </div>
             </div>
             
             {/* Download Button */}
-            <div className="pt-2">
+            <div className="pt-1">
               <Button 
                 onClick={handleDownloadCalendar}
                 disabled={downloadCalendarMutation.isPending || !eventTitle || !englishDate}
-                className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-semibold text-sm border-0 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none"
+                className="w-full bg-gradient-feminine text-white py-2.5 rounded-lg platypi-semibold text-sm border-0 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none"
                 data-testid="button-download-calendar"
               >
                 {downloadCalendarMutation.isPending ? (
                   <div className="flex items-center justify-center">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
                     Generating Calendar...
                   </div>
                 ) : (
                   <div className="flex items-center justify-center">
-                    <Calendar className="w-4 h-4 mr-2" />
+                    <Calendar className="w-3 h-3 mr-2" />
                     Download Calendar
                   </div>
                 )}
               </Button>
               
               {/* Attribution */}
-              <div className="mt-2 text-center">
+              <div className="mt-1 text-center">
                 <span className="text-xs text-gray-500 platypi-medium">
                   Powered by{" "}
                   <a 
