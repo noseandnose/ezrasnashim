@@ -7,7 +7,7 @@ import { useModalStore } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import WheelDatePicker from "@/components/ui/wheel-date-picker";
 import { Calendar } from "lucide-react";
@@ -30,6 +30,10 @@ export default function TimesModals() {
   const [yearDuration, setYearDuration] = useState(10);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Debounced conversion refs
+  const conversionTimeoutRef = useRef<NodeJS.Timeout>();
+  const lastConversionKeyRef = useRef<string>('');
 
   // Check if mobile device
   useEffect(() => {
@@ -43,12 +47,31 @@ export default function TimesModals() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Convert today's date on component mount
+  // Debounced conversion effect - handles API calls after user stops scrolling
   useEffect(() => {
-    if (englishDate && !convertedHebrewDate) {
-      convertToHebrewDate(englishDate, false);
+    if (!englishDate) return;
+    
+    const conversionKey = `${englishDate}|${afterNightfall}`;
+    if (conversionKey === lastConversionKeyRef.current) return;
+    
+    // Clear existing timeout
+    if (conversionTimeoutRef.current) {
+      clearTimeout(conversionTimeoutRef.current);
     }
-  }, [englishDate]);
+    
+    // Set new timeout for conversion
+    conversionTimeoutRef.current = setTimeout(() => {
+      convertToHebrewDate(englishDate, afterNightfall);
+      lastConversionKeyRef.current = conversionKey;
+    }, 500); // 500ms delay to prevent API spam
+    
+    return () => {
+      if (conversionTimeoutRef.current) {
+        clearTimeout(conversionTimeoutRef.current);
+      }
+    };
+  }, [englishDate, afterNightfall]);
+
 
   const handleMobileDownload = async () => {
     if (!eventTitle || !englishDate) {
@@ -175,7 +198,7 @@ export default function TimesModals() {
           });
         }
         
-        setShowEnglishFormat(false); // Reset to Hebrew format when new date is converted
+        // Keep existing toggle state - don't reset to Hebrew
       } else {
         throw new Error('No Hebrew date returned from API');
       }
@@ -188,7 +211,7 @@ export default function TimesModals() {
       setConvertedHebrewDate('');
       setHebrewDateParts(null);
       setDateObject(null);
-      setShowEnglishFormat(false);
+      // Keep existing toggle state on clear
     }
   };
 
@@ -208,22 +231,18 @@ export default function TimesModals() {
 
   const handleDateChange = (date: string) => {
     setEnglishDate(date);
-    if (date) {
-      convertToHebrewDate(date, afterNightfall);
-    } else {
+    // API conversion will be handled by debounced effect
+    if (!date) {
       setConvertedHebrewDate('');
       setHebrewDateParts(null);
       setDateObject(null);
-      setShowEnglishFormat(false);
     }
   };
 
   const handleNightfallChange = (checked: boolean | string) => {
     const isChecked = checked === true;
     setAfterNightfall(isChecked);
-    if (englishDate) {
-      convertToHebrewDate(englishDate, isChecked);
-    }
+    // API conversion will be handled by debounced effect
   };
 
   const toggleNightfall = () => {
@@ -287,7 +306,7 @@ export default function TimesModals() {
                     id="nightfall-fullscreen"
                     checked={afterNightfall}
                     onCheckedChange={handleNightfallChange}
-                    className="w-3 h-3 border-2 border-blush/30 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+                    className="h-4 w-4 rounded-full border-2 border-blush/30 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
                     data-testid="checkbox-nightfall"
                   />
                   <Label htmlFor="nightfall-fullscreen" className="text-xs text-gray-600">After nightfall?</Label>

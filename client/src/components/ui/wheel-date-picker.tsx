@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface WheelDatePickerProps {
   value: string; // ISO format YYYY-MM-DD
@@ -14,14 +14,6 @@ const getDaysInMonth = (year: number, month: number): number => {
   return new Date(year, month, 0).getDate();
 };
 
-// Simple debounce function to prevent API spam during scrolling
-const debounce = (func: Function, wait: number) => {
-  let timeout: NodeJS.Timeout;
-  return (...args: any[]) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-};
 
 const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
   const currentYear = new Date().getFullYear();
@@ -45,19 +37,11 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
     }
   }, [value]);
 
-  // Debounced update to parent to prevent API spam during scrolling
-  const debouncedOnChange = useCallback(
-    debounce((dateString: string) => {
-      onChange(dateString);
-    }, 300),
-    [onChange]
-  );
-
-  // Update parent when selection changes (debounced)
+  // Update parent when selection changes (parent handles debouncing)
   useEffect(() => {
     const dateString = `${selectedYear}-${selectedMonth.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`;
-    debouncedOnChange(dateString);
-  }, [selectedMonth, selectedDay, selectedYear, debouncedOnChange]);
+    onChange(dateString);
+  }, [selectedMonth, selectedDay, selectedYear, onChange]);
 
   // Validate and adjust day when month or year changes
   useEffect(() => {
