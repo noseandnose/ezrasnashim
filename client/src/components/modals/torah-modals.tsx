@@ -665,8 +665,8 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Parsha Vort Modal */}
-      <Dialog open={activeModal === 'parsha-vort'} onOpenChange={() => closeModal(true)}>
+      {/* Parsha Vort Modal - DISABLED: Now handled in table-modals.tsx to prevent modal layering */}
+      <Dialog open={false} onOpenChange={() => closeModal(true)}>
         <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="parsha-vort-description">
           <div id="parsha-vort-description" className="sr-only">Weekly Torah portion insights and commentary</div>
           
