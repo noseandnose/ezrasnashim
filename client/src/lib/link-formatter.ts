@@ -1,6 +1,7 @@
 /**
  * Utility functions for formatting thank you messages with clickable links
  */
+import { sanitizeHTML } from './text-formatter';
 
 /**
  * Convert markdown-style links to HTML links
@@ -13,11 +14,13 @@ export function formatThankYouMessage(message: string): string {
   // Convert markdown-style links [text](url) to HTML links
   const markdownLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
   
-  return message.replace(markdownLinkRegex, (_, linkText, url) => {
+  const result = message.replace(markdownLinkRegex, (_, linkText, url) => {
     // Ensure URL has protocol
     const fullUrl = url.startsWith('http') ? url : `https://${url}`;
     return `<a href="${fullUrl}" target="_blank" rel="noopener noreferrer" class="text-blush font-medium underline hover:text-blush/80 transition-colors">${linkText}</a>`;
   });
+  
+  return sanitizeHTML(result);
 }
 
 /**
@@ -59,5 +62,6 @@ export function formatThankYouMessageFull(message: string): string {
     }
   }
   
-  return result;
+  // Sanitize the final HTML output to prevent XSS
+  return sanitizeHTML(result);
 }

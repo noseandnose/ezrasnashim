@@ -1,3 +1,19 @@
+import DOMPurify from 'dompurify';
+
+/**
+ * Safely sanitizes HTML content to prevent XSS attacks
+ */
+export function sanitizeHTML(htmlContent: string): string {
+  return DOMPurify.sanitize(htmlContent, {
+    ALLOWED_TAGS: ['strong', 'b', 'em', 'i', 'br', 'div', 'span', 'sup', 'h2', 'h3'],
+    ALLOWED_ATTR: ['style', 'class'],
+    ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+    RETURN_DOM_FRAGMENT: false,
+    RETURN_DOM: false,
+    SANITIZE_DOM: true
+  });
+}
+
 /**
  * Aggressively cleans Hebrew text to eliminate all display issues while preserving legitimate Hebrew content
  */
@@ -293,7 +309,7 @@ export function formatTextContent(text: string | null | undefined): string {
     return match.split('').map(() => '&nbsp;').join('');
   });
   
-  return result;
+  return sanitizeHTML(result);
 }
 
 // Removed problematic English text wrapping function
@@ -322,5 +338,5 @@ export function formatHalachaContent(text: string | null | undefined): string {
     return match;
   });
   
-  return formatted;
+  return sanitizeHTML(formatted);
 }
