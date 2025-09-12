@@ -373,7 +373,7 @@ export default function TableModals() {
             <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-4 border border-blue-200">
               <div 
                 className="text-sm platypi-medium text-black"
-                dangerouslySetInnerHTML={{ __html: formatThankYouMessage(recipeContent.thankYouMessage) }}
+                dangerouslySetInnerHTML={{ __html: formatThankYouMessageFull(recipeContent.thankYouMessage) }}
               />
             </div>
           ) : (
@@ -751,7 +751,7 @@ export default function TableModals() {
           {/* Thank You Message with Links */}
           {parshaContent?.thankYouMessage && (
             <div 
-              className="text-sm text-gray-600 mt-4 text-center leading-relaxed"
+              className="bg-blue-50 rounded-2xl px-2 py-3 mt-4 border border-blue-200 text-sm text-gray-600 text-center leading-relaxed"
               dangerouslySetInnerHTML={{
                 __html: formatThankYouMessageFull(parshaContent.thankYouMessage)
               }}
@@ -932,7 +932,7 @@ export default function TableModals() {
               <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
                 <p className="text-sm text-blue-900 platypi-medium">
                   {recipeContent.thankYouMessage ? (
-                    <span dangerouslySetInnerHTML={{ __html: formatThankYouMessage(recipeContent.thankYouMessage) }} />
+                    <span dangerouslySetInnerHTML={{ __html: formatThankYouMessageFull(recipeContent.thankYouMessage) }} />
                   ) : (
                     <>
                       Recipe provided with permission by{' '}
