@@ -1131,7 +1131,7 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
                         __html: processTefillaContent(
                           language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation, 
                           tefillaConditions
-                        )
+                        ).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">')
                       }}
                     />
                   </div>

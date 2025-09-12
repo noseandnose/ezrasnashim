@@ -7,25 +7,71 @@ import { useModalStore } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
+import WheelDatePicker from "@/components/ui/wheel-date-picker";
+import { Calendar } from "lucide-react";
 
 export default function TimesModals() {
   const { activeModal, closeModal } = useModalStore();
   const [eventTitle, setEventTitle] = useState("");
-  const [englishDate, setEnglishDate] = useState(new Date().toISOString().split('T')[0]);
+  // Use local timezone date to avoid timezone issues
+  const getLocalDate = () => {
+    const now = new Date();
+    return `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
+  };
+  const [englishDate, setEnglishDate] = useState(getLocalDate());
   const [convertedHebrewDate, setConvertedHebrewDate] = useState("");
+  const [hebrewDateParts, setHebrewDateParts] = useState<{hd: number, hm: string, hy: number} | null>(null);
+  const [dateObject, setDateObject] = useState<Date | null>(null);
+  const [showEnglishFormat, setShowEnglishFormat] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [afterNightfall, setAfterNightfall] = useState(false);
   const [yearDuration, setYearDuration] = useState(10);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Debounced conversion refs
+  const conversionTimeoutRef = useRef<NodeJS.Timeout>();
+  const lastConversionKeyRef = useRef<string>('');
 
-  // Convert today's date on component mount
+  // Check if mobile device
   useEffect(() => {
-    if (englishDate && !convertedHebrewDate) {
-      convertToHebrewDate(englishDate, false);
+    const checkMobile = () => {
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+        (window.innerWidth <= 768);
+      setIsMobile(isMobileDevice);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Debounced conversion effect - handles API calls after user stops scrolling
+  useEffect(() => {
+    if (!englishDate) return;
+    
+    const conversionKey = `${englishDate}|${afterNightfall}`;
+    if (conversionKey === lastConversionKeyRef.current) return;
+    
+    // Clear existing timeout
+    if (conversionTimeoutRef.current) {
+      clearTimeout(conversionTimeoutRef.current);
     }
-  }, [englishDate]);
+    
+    // Set new timeout for conversion
+    conversionTimeoutRef.current = setTimeout(() => {
+      convertToHebrewDate(englishDate, afterNightfall);
+      lastConversionKeyRef.current = conversionKey;
+    }, 500); // 500ms delay to prevent API spam
+    
+    return () => {
+      if (conversionTimeoutRef.current) {
+        clearTimeout(conversionTimeoutRef.current);
+      }
+    };
+  }, [englishDate, afterNightfall]);
+
 
   const handleMobileDownload = async () => {
     if (!eventTitle || !englishDate) {
@@ -141,6 +187,18 @@ export default function TimesModals() {
       
       if (data.hebrew) {
         setConvertedHebrewDate(data.hebrew);
+        setDateObject(dateObj); // Store the date object for English formatting
+        
+        // Store Hebrew date parts for proper English conversion from Hebcal response
+        if (data.hd && data.hm && data.hy) {
+          setHebrewDateParts({
+            hd: data.hd,
+            hm: data.hm,
+            hy: data.hy
+          });
+        }
+        
+        // Keep existing toggle state - don't reset to Hebrew
       } else {
         throw new Error('No Hebrew date returned from API');
       }
@@ -151,22 +209,40 @@ export default function TimesModals() {
         variant: "destructive"
       });
       setConvertedHebrewDate('');
+      setHebrewDateParts(null);
+      setDateObject(null);
+      // Keep existing toggle state on clear
     }
+  };
+
+  // Format date in English with weekday and Hebrew components
+  const formatEnglishDate = (dateObj: Date): string => {
+    const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const weekday = weekdays[dateObj.getDay()];
+    
+    // Use Hebcal API fields for proper English formatting
+    if (hebrewDateParts) {
+      return `${weekday} ${hebrewDateParts.hd} ${hebrewDateParts.hm} ${hebrewDateParts.hy}`;
+    }
+    
+    // Fallback if no Hebrew date parts
+    return `${weekday} (conversion pending)`;
   };
 
   const handleDateChange = (date: string) => {
     setEnglishDate(date);
-    if (date) {
-      convertToHebrewDate(date, afterNightfall);
+    // API conversion will be handled by debounced effect
+    if (!date) {
+      setConvertedHebrewDate('');
+      setHebrewDateParts(null);
+      setDateObject(null);
     }
   };
 
   const handleNightfallChange = (checked: boolean | string) => {
     const isChecked = checked === true;
     setAfterNightfall(isChecked);
-    if (englishDate) {
-      convertToHebrewDate(englishDate, isChecked);
-    }
+    // API conversion will be handled by debounced effect
   };
 
   const toggleNightfall = () => {
@@ -196,287 +272,166 @@ export default function TimesModals() {
       <FullscreenModal
         isOpen={activeModal === 'date-calculator-fullscreen'}
         onClose={() => closeModal()}
-        title="Hebrew Date Converter"
+        hideHeader={true}
         className="bg-gradient-to-br from-cream via-ivory to-sand"
       >
-        <div className="max-w-xl mx-auto p-4 space-y-4">
-          <div className="text-center mb-4">
-            <p className="text-sm text-gray-700 platypi-medium">Convert English dates to Hebrew dates and add recurring events to your calendar</p>
-          </div>
-          
-          <div className="space-y-4">
-            <div>
-              <Label className="block text-sm platypi-semibold text-black mb-2">Event Title</Label>
+        <div className="max-w-lg mx-auto p-3">
+          {/* Form Sections */}
+          <div className="space-y-3">
+            {/* Event Title */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 shadow-soft border border-blush/10">
+              <Label className="text-xs platypi-semibold text-black mb-1 flex items-center">
+                Event Title
+                <span className="text-blush ml-1">*</span>
+              </Label>
               <Input 
                 type="text" 
-                placeholder="Anniversary, Yahrzeit, etc." 
+                placeholder="Anniversary, Yahrzeit, Birthday..." 
                 value={eventTitle}
                 onChange={(e) => setEventTitle(e.target.value)}
-                className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blush bg-white text-sm placeholder:text-gray-400"
+                className="w-full p-2 border-0 bg-gray-50/50 rounded-md focus:outline-none focus:ring-2 focus:ring-blush/30 text-sm placeholder:text-gray-400 transition-all"
+                data-testid="input-event-title"
               />
             </div>
             
-            <div>
-              <Label className="block text-sm platypi-semibold text-black mb-2">English Date</Label>
-              {typeof navigator !== 'undefined' && /iPhone|iPad|iPod/.test(navigator.userAgent) ? (
-                // iOS Custom Date Picker using select elements (wheel picker style)
-                <div className="flex space-x-3">
-                  <select 
-                    value={(() => {
-                      if (!englishDate) return new Date().getMonth() + 1;
-                      const date = new Date(englishDate + 'T12:00:00');
-                      return date.getMonth() + 1;
-                    })()}
-                    onChange={(e) => {
-                      const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
-                      const selectedMonth = parseInt(e.target.value) - 1;
-                      const currentDay = currentDate.getDate();
-                      const currentYear = currentDate.getFullYear();
-                      
-                      const daysInNewMonth = new Date(currentYear, selectedMonth + 1, 0).getDate();
-                      const validDay = Math.min(currentDay, daysInNewMonth);
-                      
-                      const newDate = new Date(currentYear, selectedMonth, validDay, 12, 0, 0);
-                      handleDateChange(newDate.toISOString().split('T')[0]);
-                    }}
-                    className="flex-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blush bg-white text-gray-700 text-sm"
-                  >
-                    {Array.from({length: 12}, (_, i) => (
-                      <option key={i+1} value={i+1}>
-                        {new Date(2000, i, 1).toLocaleDateString('en-US', { month: 'long' })}
-                      </option>
-                    ))}
-                  </select>
-                  <select 
-                    value={(() => {
-                      if (!englishDate) return new Date().getDate();
-                      const date = new Date(englishDate + 'T12:00:00');
-                      return date.getDate();
-                    })()}
-                    onChange={(e) => {
-                      const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
-                      const selectedDay = parseInt(e.target.value);
-                      const currentMonth = currentDate.getMonth();
-                      const currentYear = currentDate.getFullYear();
-                      
-                      const newDate = new Date(currentYear, currentMonth, selectedDay, 12, 0, 0);
-                      
-                      if (newDate.getDate() === selectedDay) {
-                        handleDateChange(newDate.toISOString().split('T')[0]);
-                      }
-                    }}
-                    className="flex-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blush bg-white text-gray-700 text-sm"
-                  >
-                    {(() => {
-                      const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
-                      const year = currentDate.getFullYear();
-                      const month = currentDate.getMonth();
-                      const daysInMonth = new Date(year, month + 1, 0).getDate();
-                      
-                      return Array.from({length: daysInMonth}, (_, i) => (
-                        <option key={i+1} value={i+1}>{i+1}</option>
-                      ));
-                    })()}
-                  </select>
-                  <select 
-                    value={(() => {
-                      if (!englishDate) return new Date().getFullYear();
-                      const date = new Date(englishDate + 'T12:00:00');
-                      return date.getFullYear();
-                    })()}
-                    onChange={(e) => {
-                      const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
-                      const selectedYear = parseInt(e.target.value);
-                      const currentMonth = currentDate.getMonth();
-                      const currentDay = currentDate.getDate();
-                      
-                      const daysInMonth = new Date(selectedYear, currentMonth + 1, 0).getDate();
-                      const validDay = Math.min(currentDay, daysInMonth);
-                      
-                      const newDate = new Date(selectedYear, currentMonth, validDay, 12, 0, 0);
-                      handleDateChange(newDate.toISOString().split('T')[0]);
-                    }}
-                    className="flex-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blush bg-white text-gray-700 text-sm"
-                  >
-                    {Array.from({length: 200}, (_, i) => {
-                      const year = new Date().getFullYear() + 10 - i;
-                      return <option key={year} value={year}>{year}</option>;
-                    })}
-                  </select>
+            {/* Date Selection & Nightfall */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 shadow-soft border border-blush/10">
+              <div className="flex items-start justify-between mb-1">
+                <Label className="text-xs platypi-semibold text-black flex items-center">
+                  Select Date
+                  <span className="text-blush ml-1">*</span>
+                </Label>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="nightfall-fullscreen"
+                    checked={afterNightfall}
+                    onCheckedChange={handleNightfallChange}
+                    className="h-4 w-4 rounded-full border-2 border-blush/30 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+                    data-testid="checkbox-nightfall"
+                  />
+                  <Label htmlFor="nightfall-fullscreen" className="text-xs text-gray-600">After nightfall?</Label>
                 </div>
+              </div>
+              {isMobile ? (
+                <WheelDatePicker
+                  value={englishDate || ''}
+                  onChange={handleDateChange}
+                />
               ) : (
-                // Non-iOS: Use separate dropdowns for better year selection
-                <div className="flex space-x-3">
-                  <select 
-                    value={(() => {
-                      if (!englishDate) return new Date().getMonth() + 1;
-                      const date = new Date(englishDate + 'T12:00:00');
-                      return date.getMonth() + 1;
-                    })()}
-                    onChange={(e) => {
-                      const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
-                      const selectedMonth = parseInt(e.target.value) - 1;
-                      const currentDay = currentDate.getDate();
-                      const currentYear = currentDate.getFullYear();
-                      
-                      const daysInNewMonth = new Date(currentYear, selectedMonth + 1, 0).getDate();
-                      const validDay = Math.min(currentDay, daysInNewMonth);
-                      
-                      const newDate = new Date(currentYear, selectedMonth, validDay, 12, 0, 0);
-                      handleDateChange(newDate.toISOString().split('T')[0]);
-                    }}
-                    className="flex-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blush bg-white text-gray-700 text-sm"
-                  >
-                    {Array.from({length: 12}, (_, i) => (
-                      <option key={i+1} value={i+1}>
-                        {new Date(2000, i, 1).toLocaleDateString('en-US', { month: 'long' })}
-                      </option>
-                    ))}
-                  </select>
-                  <select 
-                    value={(() => {
-                      if (!englishDate) return new Date().getDate();
-                      const date = new Date(englishDate + 'T12:00:00');
-                      return date.getDate();
-                    })()}
-                    onChange={(e) => {
-                      const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
-                      const selectedDay = parseInt(e.target.value);
-                      const currentMonth = currentDate.getMonth();
-                      const currentYear = currentDate.getFullYear();
-                      
-                      const newDate = new Date(currentYear, currentMonth, selectedDay, 12, 0, 0);
-                      
-                      if (newDate.getDate() === selectedDay) {
-                        handleDateChange(newDate.toISOString().split('T')[0]);
-                      }
-                    }}
-                    className="flex-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blush bg-white text-gray-700 text-sm"
-                  >
-                    {(() => {
-                      const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
-                      const year = currentDate.getFullYear();
-                      const month = currentDate.getMonth();
-                      const daysInMonth = new Date(year, month + 1, 0).getDate();
-                      
-                      return Array.from({length: daysInMonth}, (_, i) => (
-                        <option key={i+1} value={i+1}>{i+1}</option>
-                      ));
-                    })()}
-                  </select>
-                  <select 
-                    value={(() => {
-                      if (!englishDate) return new Date().getFullYear();
-                      const date = new Date(englishDate + 'T12:00:00');
-                      return date.getFullYear();
-                    })()}
-                    onChange={(e) => {
-                      const currentDate = englishDate ? new Date(englishDate + 'T12:00:00') : new Date();
-                      const selectedYear = parseInt(e.target.value);
-                      const currentMonth = currentDate.getMonth();
-                      const currentDay = currentDate.getDate();
-                      
-                      const daysInMonth = new Date(selectedYear, currentMonth + 1, 0).getDate();
-                      const validDay = Math.min(currentDay, daysInMonth);
-                      
-                      const newDate = new Date(selectedYear, currentMonth, validDay, 12, 0, 0);
-                      handleDateChange(newDate.toISOString().split('T')[0]);
-                    }}
-                    className="flex-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blush bg-white text-gray-700 text-sm"
-                  >
-                    {Array.from({length: 200}, (_, i) => {
-                      const year = new Date().getFullYear() + 10 - i;
-                      return <option key={year} value={year}>{year}</option>;
-                    })}
-                  </select>
-                </div>
+                <input 
+                  type="date"
+                  value={englishDate || ''}
+                  onChange={(e) => handleDateChange(e.target.value)}
+                  className="w-full p-2 border-0 bg-gray-50/50 rounded-md focus:outline-none focus:ring-2 focus:ring-blush/30 text-sm transition-all"
+                  data-testid="input-date"
+                />
               )}
             </div>
 
+            {/* Hebrew Date Result */}
             {convertedHebrewDate && (
-              <div className="p-3 bg-gradient-feminine/10 border border-blush/20 rounded-lg">
+              <div 
+                className="bg-gradient-to-r from-blush/5 to-lavender/5 backdrop-blur-sm rounded-lg p-3 shadow-soft border border-blush/20 animate-in slide-in-from-bottom duration-300 cursor-pointer hover:border-blush/30 hover:shadow-md transition-all"
+                onClick={() => setShowEnglishFormat(!showEnglishFormat)}
+                data-testid="hebrew-date-display"
+              >
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm platypi-semibold text-black">Hebrew Date</Label>
-                  <div className="text-sm text-black platypi-medium">
-                    {convertedHebrewDate}
+                  <div>
+                    <Label className="text-xs platypi-semibold text-black flex items-center">
+                      <span className="w-1.5 h-1.5 bg-blush rounded-full mr-2"></span>
+                      {showEnglishFormat ? 'English Format' : 'Hebrew Date'}
+                    </Label>
+                    <p className="text-xs text-gray-500 mt-0.5">Tap to {showEnglishFormat ? 'show Hebrew' : 'show English'}</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm platypi-semibold text-blush">
+                      {showEnglishFormat && dateObject 
+                        ? formatEnglishDate(dateObject)
+                        : convertedHebrewDate
+                      }
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
-            <div>
-              <div className="flex items-center justify-between p-3 bg-blue-50/50 rounded-lg border border-blue-200/50">
-                <div>
-                  <Label className="text-sm platypi-semibold text-black">After nightfall?</Label>
-                  <p className="text-xs text-gray-600 mt-1">Select if the event occurs after sunset</p>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Checkbox
-                    id="nightfall-fullscreen"
-                    checked={afterNightfall}
-                    onCheckedChange={handleNightfallChange}
-                    className="w-5 h-5"
-                  />
-                </div>
-              </div>
-            </div>
             
-            <div>
-              <Label className="block text-sm platypi-semibold text-black mb-2">Add to my calendar for the next:</Label>
+            {/* Duration Selection */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 shadow-soft border border-blush/10">
+              <Label className="text-xs platypi-semibold text-black mb-2 block">Calendar Duration</Label>
               <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => setYearDuration(1)}
-                  className={`py-2 px-3 rounded-lg text-sm platypi-medium transition-all ${
+                  className={`py-2 px-2 rounded-md text-xs platypi-semibold transition-all duration-200 ${
                     yearDuration === 1
-                      ? 'bg-gradient-feminine text-white shadow-soft'
-                      : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
+                      ? 'bg-gradient-feminine text-white shadow-lg transform scale-105'
+                      : 'bg-gray-50/70 border-2 border-blush/20 text-gray-700 hover:border-blush/40 hover:bg-white'
                   }`}
+                  data-testid="button-1-year"
                 >
-                  1 Year
+                  <div className="text-sm mb-0.5">1</div>
+                  <div className="text-xs opacity-90">Year</div>
                 </button>
                 <button
                   type="button"
                   onClick={() => setYearDuration(10)}
-                  className={`py-2 px-3 rounded-lg text-sm platypi-medium transition-all ${
+                  className={`py-2 px-2 rounded-md text-xs platypi-semibold transition-all duration-200 ${
                     yearDuration === 10
-                      ? 'bg-gradient-feminine text-white shadow-soft'
-                      : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
+                      ? 'bg-gradient-feminine text-white shadow-lg transform scale-105'
+                      : 'bg-gray-50/70 border-2 border-blush/20 text-gray-700 hover:border-blush/40 hover:bg-white'
                   }`}
+                  data-testid="button-10-years"
                 >
-                  10 Years
+                  <div className="text-sm mb-0.5">10</div>
+                  <div className="text-xs opacity-90">Years</div>
                 </button>
                 <button
                   type="button"
                   onClick={() => setYearDuration(120)}
-                  className={`py-2 px-3 rounded-lg text-sm platypi-medium transition-all ${
+                  className={`py-2 px-2 rounded-md text-xs platypi-semibold transition-all duration-200 ${
                     yearDuration === 120
-                      ? 'bg-gradient-feminine text-white shadow-soft'
-                      : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
+                      ? 'bg-gradient-feminine text-white shadow-lg transform scale-105'
+                      : 'bg-gray-50/70 border-2 border-blush/20 text-gray-700 hover:border-blush/40 hover:bg-white'
                   }`}
+                  data-testid="button-120-years"
                 >
-                  120 Years
+                  <div className="text-sm mb-0.5">120</div>
+                  <div className="text-xs opacity-90">Years</div>
                 </button>
               </div>
             </div>
             
-            <div className="space-y-3">
+            {/* Download Button */}
+            <div className="pt-1">
               <Button 
                 onClick={handleDownloadCalendar}
                 disabled={downloadCalendarMutation.isPending || !eventTitle || !englishDate}
-                className="w-full bg-gradient-feminine text-white py-3 rounded-lg platypi-medium border-0 hover:shadow-lg transition-all duration-300 text-sm"
+                className="w-full bg-gradient-feminine text-white py-2.5 rounded-lg platypi-semibold text-sm border-0 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none"
+                data-testid="button-download-calendar"
               >
-                {downloadCalendarMutation.isPending ? "Generating..." : "Download Calendar"}
+                {downloadCalendarMutation.isPending ? (
+                  <div className="flex items-center justify-center">
+                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Generating Calendar...
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center">
+                    <Calendar className="w-3 h-3 mr-2" />
+                    Download Calendar
+                  </div>
+                )}
               </Button>
               
-              <div className="bg-blue-50 rounded-lg px-3 py-2 border border-blue-200">
-                <span className="text-sm platypi-medium text-black">
-                  Date converter powered by{" "}
+              {/* Attribution */}
+              <div className="mt-1 text-center">
+                <span className="text-xs text-gray-500 platypi-medium">
+                  Powered by{" "}
                   <a 
                     href="https://www.hebcal.com/" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 underline"
+                    className="text-blush hover:text-blush/80 underline transition-colors"
                   >
                     Hebcal
                   </a>

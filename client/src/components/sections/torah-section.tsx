@@ -290,7 +290,7 @@ export default function TorahSection({}: TorahSectionProps) {
                   className="flex items-center gap-3 cursor-pointer hover:scale-[1.02] transition-transform"
                   onClick={() => {
                     if (parsha?.title || parsha?.audioUrl) {
-                      openModal('parsha-vort', 'torah');
+                      openModal('parsha-vort', 'torah', undefined, parsha.id);
                     }
                   }}
                 >

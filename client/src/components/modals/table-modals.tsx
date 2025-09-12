@@ -8,7 +8,7 @@ import { ChevronLeft, ChevronRight, Volume2, Maximize2 } from "lucide-react";
 import AudioPlayer from "@/components/audio-player";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { formatTextContent } from "@/lib/text-formatter";
-import { formatThankYouMessage } from "@/lib/link-formatter";
+import { formatThankYouMessageFull } from "@/lib/link-formatter";
 import { LazyImage } from "@/components/ui/lazy-image";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { FullscreenImageModal } from "@/components/modals/fullscreen-image-modal";
@@ -194,8 +194,12 @@ export default function TableModals() {
     content: string;
     duration?: string;
     audioUrl?: string;
+    speaker?: string;
+    thankYouMessage?: string;
   }
 
+  const { selectedParshaVortId } = useModalStore();
+  
   const { data: parshaContent } = useQuery<ParshaContent>({
     queryKey: ['/api/table/vort'],
     enabled: activeModal === 'parsha' || activeModal === 'parsha-vort',
@@ -209,7 +213,14 @@ export default function TableModals() {
         return today >= vort.fromDate && today <= vort.untilDate;
       });
       
-      return activeVorts[0] || null; // Return first active vort
+      // If a specific parsha vort ID is selected and modal is parsha-vort, find that one
+      if (selectedParshaVortId && (activeModal === 'parsha-vort')) {
+        const selectedVort = activeVorts.find((vort: any) => vort.id === selectedParshaVortId);
+        if (selectedVort) return selectedVort;
+      }
+      
+      // Fallback to first active vort if no specific selection
+      return activeVorts[0] || null;
     }
   });
 
@@ -362,7 +373,7 @@ export default function TableModals() {
             <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-4 border border-blue-200">
               <div 
                 className="text-sm platypi-medium text-black"
-                dangerouslySetInnerHTML={{ __html: formatThankYouMessage(recipeContent.thankYouMessage) }}
+                dangerouslySetInnerHTML={{ __html: formatThankYouMessageFull(recipeContent.thankYouMessage) }}
               />
             </div>
           ) : (
@@ -682,8 +693,8 @@ export default function TableModals() {
       </Dialog>
 
 
-      {/* Parsha Shiur Modal */}
-      <Dialog open={activeModal === 'parsha' || activeModal === 'parsha-vort'} onOpenChange={() => closeModal(true)}>
+      {/* Parsha Shiur Modal - Regular (Only when NOT parsha-vort) */}
+      <Dialog open={activeModal === 'parsha' && !fullscreenContent.isOpen} onOpenChange={() => closeModal(true)}>
         <DialogContent>
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg platypi-bold text-black">Parsha Shiur</DialogTitle>
@@ -706,7 +717,49 @@ export default function TableModals() {
           />
 
           <Button 
-            onClick={() => handleComplete(activeModal === 'parsha-vort' ? 'parsha-vort' : 'parsha')}
+            onClick={() => handleComplete('parsha')}
+            className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
+          >
+            Completed Parsha
+          </Button>
+        </DialogContent>
+      </Dialog>
+
+      {/* Parsha Vort Modal - Specific Selection (Higher priority) */}
+      <Dialog open={activeModal === 'parsha-vort' && !fullscreenContent.isOpen} onOpenChange={() => closeModal(true)}>
+        <DialogContent>
+          <div className="flex items-center justify-center mb-3 relative">
+            <DialogTitle className="text-lg platypi-bold text-black">Parsha Shiur</DialogTitle>
+          </div>
+          <p className="text-sm text-gray-600 mb-4 text-center">
+            {parshaContent?.title || "This Week's Torah Portion"}
+          </p>
+          
+          {/* Speaker Info */}
+          {parshaContent?.speaker && (
+            <p className="text-xs text-gray-500 mb-3 text-center">
+              By {parshaContent.speaker}
+            </p>
+          )}
+          
+          <AudioPlayer 
+            title={parshaContent?.title || "Parsha Shiur"}
+            duration={parshaContent?.duration || "0:00"}
+            audioUrl={parshaContent?.audioUrl || ""}
+          />
+
+          {/* Thank You Message with Links */}
+          {parshaContent?.thankYouMessage && (
+            <div 
+              className="bg-blue-50 rounded-2xl px-2 py-3 mt-4 border border-blue-200 text-sm text-gray-600 text-center leading-relaxed"
+              dangerouslySetInnerHTML={{
+                __html: formatThankYouMessageFull(parshaContent.thankYouMessage)
+              }}
+            />
+          )}
+
+          <Button 
+            onClick={() => handleComplete('parsha-vort')}
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
           >
             Completed Parsha
@@ -879,7 +932,7 @@ export default function TableModals() {
               <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
                 <p className="text-sm text-blue-900 platypi-medium">
                   {recipeContent.thankYouMessage ? (
-                    <span dangerouslySetInnerHTML={{ __html: formatThankYouMessage(recipeContent.thankYouMessage) }} />
+                    <span dangerouslySetInnerHTML={{ __html: formatThankYouMessageFull(recipeContent.thankYouMessage) }} />
                   ) : (
                     <>
                       Recipe provided with permission by{' '}
