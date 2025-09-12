@@ -4,11 +4,53 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import compression from "compression";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+// Enhanced security headers with Helmet
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://www.hebcal.com", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+      imgSrc: ["'self'", "data:", "https:", "blob:"],
+      connectSrc: ["'self'", "https://www.hebcal.com", "https://nominatim.openstreetmap.org", "https://www.google-analytics.com", "https://api.stripe.com", "https://*.replit.dev", "https://*.replit.app"],
+      mediaSrc: ["'self'", "https:", "blob:"],
+      objectSrc: ["'none'"],
+      frameSrc: ["'self'", "https://js.stripe.com"],
+      upgradeInsecureRequests: [],
+    },
+  },
+  crossOriginEmbedderPolicy: false, // Allow iframe embedding for mobile apps
+}));
+
+// Rate limiting for API routes
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs for API routes
+  message: { message: "Too many API requests, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes  
+  max: 5, // Limit auth attempts
+  message: { message: "Too many authentication attempts, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply rate limiting
+app.use('/api/', apiLimiter);
+app.use('/api/auth/', authLimiter);
 
 // Enable compression for all responses
 app.use(compression({
@@ -61,7 +103,6 @@ app.use(
       // Allow requests with no origin (like mobile apps or curl)
       if (!origin) return callback(null, true);
 
-      // Allow Vite dev server and any origin
       const allowedOrigins = [
         'http://localhost:5173',
         'http://127.0.0.1:5173',
@@ -70,7 +111,8 @@ app.use(
         /\.replit\.dev$/,
         /\.replit\.app$/,
         'https://api.ezrasnashim.app',
-        'https://staging.ezrasnashim.app'
+        'https://staging.ezrasnashim.app',
+        'https://ezrasnashim.app'
       ];
       
       const isAllowed = allowedOrigins.some(allowed => {
@@ -84,8 +126,12 @@ app.use(
         return callback(null, true);
       }
       
-      // Allow any origin as fallback for development
-      return callback(null, true);
+      // In production, be strict; in development, allow any origin
+      if (process.env.NODE_ENV === 'production') {
+        return callback(new Error('Not allowed by CORS'), false);
+      } else {
+        return callback(null, true);
+      }
     },
     credentials: true,
   }),

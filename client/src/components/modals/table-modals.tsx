@@ -194,6 +194,7 @@ export default function TableModals() {
     content: string;
     duration?: string;
     audioUrl?: string;
+    speaker?: string;
   }
 
   const { selectedParshaVortId } = useModalStore();
