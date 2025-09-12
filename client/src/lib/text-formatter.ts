@@ -5,8 +5,8 @@ import DOMPurify from 'dompurify';
  */
 export function sanitizeHTML(htmlContent: string): string {
   return DOMPurify.sanitize(htmlContent, {
-    ALLOWED_TAGS: ['strong', 'b', 'em', 'i', 'br', 'div', 'span', 'sup', 'h2', 'h3'],
-    ALLOWED_ATTR: ['style', 'class'],
+    ALLOWED_TAGS: ['strong', 'b', 'em', 'i', 'br', 'div', 'span', 'sup', 'h2', 'h3', 'a'],
+    ALLOWED_ATTR: ['style', 'class', 'href', 'target', 'rel'],
     ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
     RETURN_DOM_FRAGMENT: false,
     RETURN_DOM: false,

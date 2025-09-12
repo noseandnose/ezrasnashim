@@ -13,15 +13,21 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // Enhanced security headers with Helmet
+const isProduction = process.env.NODE_ENV === 'production';
+
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://www.hebcal.com", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
+      scriptSrc: isProduction 
+        ? ["'self'", "https://www.hebcal.com", "https://www.googletagmanager.com", "https://www.google-analytics.com", "https://js.stripe.com"]
+        : ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://www.hebcal.com", "https://www.googletagmanager.com", "https://www.google-analytics.com"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
       imgSrc: ["'self'", "data:", "https:", "blob:"],
-      connectSrc: ["'self'", "https://www.hebcal.com", "https://nominatim.openstreetmap.org", "https://www.google-analytics.com", "https://api.stripe.com", "https://*.replit.dev", "https://*.replit.app"],
+      connectSrc: isProduction
+        ? ["'self'", "https://www.hebcal.com", "https://nominatim.openstreetmap.org", "https://www.google-analytics.com", "https://api.stripe.com", "https://ezrasnashim.app", "https://api.ezrasnashim.app"]
+        : ["'self'", "https://www.hebcal.com", "https://nominatim.openstreetmap.org", "https://www.google-analytics.com", "https://api.stripe.com", "https://*.replit.dev", "https://*.replit.app"],
       mediaSrc: ["'self'", "https:", "blob:"],
       objectSrc: ["'none'"],
       frameSrc: ["'self'", "https://js.stripe.com"],
@@ -29,6 +35,7 @@ app.use(helmet({
     },
   },
   crossOriginEmbedderPolicy: false, // Allow iframe embedding for mobile apps
+  frameguard: false, // Explicitly disable to allow iframe embedding
 }));
 
 // Rate limiting for API routes
@@ -202,12 +209,26 @@ async function initializeServer() {
     });
   }
 
-  app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
     const status = (err as any)?.status || (err as any)?.statusCode || 500;
     const message = (err as any)?.message || "Internal Server Error";
 
-    res.status(status).json({ message });
-    throw err;
+    // Log error for debugging (include request info for tracing)
+    console.error('Express Error Handler:', {
+      error: err,
+      status,
+      message,
+      url: req.url,
+      method: req.method,
+      timestamp: new Date().toISOString()
+    });
+
+    // Send error response (only if not already sent)
+    if (!res.headersSent) {
+      res.status(status).json({ message });
+    }
+    
+    // DO NOT rethrow - this prevents server crashes
   });
 
   return server;
