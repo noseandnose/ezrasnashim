@@ -694,7 +694,7 @@ export default function TableModals() {
 
 
       {/* Parsha Shiur Modal - Regular */}
-      <Dialog open={activeModal === 'parsha' && !fullscreenContent.isOpen} onOpenChange={() => closeModal(true)}>
+      <Dialog open={activeModal === 'parsha' && !fullscreenContent.isOpen && activeModal !== 'parsha-vort'} onOpenChange={() => closeModal(true)}>
         <DialogContent>
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg platypi-bold text-black">Parsha Shiur</DialogTitle>
@@ -726,7 +726,7 @@ export default function TableModals() {
       </Dialog>
 
       {/* Parsha Vort Modal - Specific Selection */}
-      <Dialog open={activeModal === 'parsha-vort' && !fullscreenContent.isOpen} onOpenChange={() => closeModal(true)}>
+      <Dialog open={activeModal === 'parsha-vort' && !fullscreenContent.isOpen && activeModal !== 'parsha'} onOpenChange={() => closeModal(true)}>
         <DialogContent>
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg platypi-bold text-black">Parsha Shiur</DialogTitle>
