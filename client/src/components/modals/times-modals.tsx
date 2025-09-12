@@ -9,19 +9,39 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
+import WheelDatePicker from "@/components/ui/wheel-date-picker";
 import { Calendar } from "lucide-react";
 
 export default function TimesModals() {
   const { activeModal, closeModal } = useModalStore();
   const [eventTitle, setEventTitle] = useState("");
-  const [englishDate, setEnglishDate] = useState(new Date().toISOString().split('T')[0]);
+  // Use local timezone date to avoid timezone issues
+  const getLocalDate = () => {
+    const now = new Date();
+    return `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
+  };
+  const [englishDate, setEnglishDate] = useState(getLocalDate());
   const [convertedHebrewDate, setConvertedHebrewDate] = useState("");
+  const [hebrewDateParts, setHebrewDateParts] = useState<{hd: number, hm: string, hy: number} | null>(null);
   const [dateObject, setDateObject] = useState<Date | null>(null);
   const [showEnglishFormat, setShowEnglishFormat] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [afterNightfall, setAfterNightfall] = useState(false);
   const [yearDuration, setYearDuration] = useState(10);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Check if mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+        (window.innerWidth <= 768);
+      setIsMobile(isMobileDevice);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Convert today's date on component mount
   useEffect(() => {
@@ -145,6 +165,16 @@ export default function TimesModals() {
       if (data.hebrew) {
         setConvertedHebrewDate(data.hebrew);
         setDateObject(dateObj); // Store the date object for English formatting
+        
+        // Store Hebrew date parts for proper English conversion from Hebcal response
+        if (data.hd && data.hm && data.hy) {
+          setHebrewDateParts({
+            hd: data.hd,
+            hm: data.hm,
+            hy: data.hy
+          });
+        }
+        
         setShowEnglishFormat(false); // Reset to Hebrew format when new date is converted
       } else {
         throw new Error('No Hebrew date returned from API');
@@ -156,30 +186,24 @@ export default function TimesModals() {
         variant: "destructive"
       });
       setConvertedHebrewDate('');
+      setHebrewDateParts(null);
       setDateObject(null);
       setShowEnglishFormat(false);
     }
   };
 
-  // Format date in English with weekday and Hebrew month
-  const formatEnglishDate = (dateObj: Date, hebrewDate: string): string => {
+  // Format date in English with weekday and Hebrew components
+  const formatEnglishDate = (dateObj: Date): string => {
     const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const weekday = weekdays[dateObj.getDay()];
     
-    // Extract Hebrew day and month from the Hebrew date string
-    // Hebrew date format is usually like "י״ח באלול ה׳תשפ״ה"
-    // We'll parse it to get the components
-    const hebrewParts = hebrewDate.split(' ');
-    if (hebrewParts.length >= 3) {
-      const hebrewDay = hebrewParts[0];
-      const hebrewMonth = hebrewParts[1].replace('ב', ''); // Remove the ב prefix
-      const hebrewYear = hebrewParts[2];
-      
-      return `${weekday} ${hebrewDay} ${hebrewMonth} ${hebrewYear}`;
+    // Use Hebcal API fields for proper English formatting
+    if (hebrewDateParts) {
+      return `${weekday} ${hebrewDateParts.hd} ${hebrewDateParts.hm} ${hebrewDateParts.hy}`;
     }
     
-    // Fallback if parsing fails
-    return `${weekday} ${hebrewDate}`;
+    // Fallback if no Hebrew date parts
+    return `${weekday} (conversion pending)`;
   };
 
   const handleDateChange = (date: string) => {
@@ -188,6 +212,7 @@ export default function TimesModals() {
       convertToHebrewDate(date, afterNightfall);
     } else {
       setConvertedHebrewDate('');
+      setHebrewDateParts(null);
       setDateObject(null);
       setShowEnglishFormat(false);
     }
@@ -268,13 +293,20 @@ export default function TimesModals() {
                   <Label htmlFor="nightfall-fullscreen" className="text-xs text-gray-600">After nightfall?</Label>
                 </div>
               </div>
-              <input 
-                type="date"
-                value={englishDate || ''}
-                onChange={(e) => handleDateChange(e.target.value)}
-                className="w-full p-2 border-0 bg-gray-50/50 rounded-md focus:outline-none focus:ring-2 focus:ring-blush/30 text-sm transition-all"
-                data-testid="input-date"
-              />
+              {isMobile ? (
+                <WheelDatePicker
+                  value={englishDate || ''}
+                  onChange={handleDateChange}
+                />
+              ) : (
+                <input 
+                  type="date"
+                  value={englishDate || ''}
+                  onChange={(e) => handleDateChange(e.target.value)}
+                  className="w-full p-2 border-0 bg-gray-50/50 rounded-md focus:outline-none focus:ring-2 focus:ring-blush/30 text-sm transition-all"
+                  data-testid="input-date"
+                />
+              )}
             </div>
 
             {/* Hebrew Date Result */}
@@ -295,7 +327,7 @@ export default function TimesModals() {
                   <div className="text-right">
                     <div className="text-sm platypi-semibold text-blush">
                       {showEnglishFormat && dateObject 
-                        ? formatEnglishDate(dateObject, convertedHebrewDate)
+                        ? formatEnglishDate(dateObject)
                         : convertedHebrewDate
                       }
                     </div>
