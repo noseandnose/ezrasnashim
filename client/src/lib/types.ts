@@ -37,13 +37,15 @@ export type ModalType =
 export interface ModalState {
   activeModal: string | null;
   selectedPsalm: number | null;
+  selectedParshaVortId: number | null;
   previousSection: string | null;
   previousModal: string | null;
   tehillimActiveTab: 'all' | 'special';
   tehillimReturnTab: 'all' | 'special' | null; // Store the return tab preference
-  openModal: (modalId: string, fromSection?: string, psalmNumber?: number) => void;
+  openModal: (modalId: string, fromSection?: string, psalmNumber?: number, parshaVortId?: number) => void;
   closeModal: (returnToPrevious?: boolean) => void;
   setSelectedPsalm: (psalmNumber: number) => void;
+  setSelectedParshaVortId: (parshaVortId: number) => void;
   setTehillimActiveTab: (tab: 'all' | 'special') => void;
   setTehillimReturnTab: (tab: 'all' | 'special') => void;
   
@@ -56,17 +58,20 @@ export interface ModalState {
 export const useModalStore = create<ModalState>((set, get) => ({
   activeModal: null,
   selectedPsalm: null,
+  selectedParshaVortId: null,
   previousSection: null,
   previousModal: null,
   tehillimActiveTab: 'all',
   tehillimReturnTab: null,
-  openModal: (modalId: string, fromSection?: string, psalmNumber?: number) => {
+  openModal: (modalId: string, fromSection?: string, psalmNumber?: number, parshaVortId?: number) => {
     const currentModal = get().activeModal;
     set({ 
       activeModal: modalId, 
       previousSection: fromSection || get().previousSection,
       previousModal: currentModal,
-      selectedPsalm: psalmNumber || get().selectedPsalm
+      selectedPsalm: psalmNumber || get().selectedPsalm,
+      // Only set parshaVortId if explicitly provided, otherwise clear it to prevent sticky state
+      selectedParshaVortId: parshaVortId !== undefined ? parshaVortId : null
     });
   },
   closeModal: (returnToPrevious?: boolean) => {
@@ -94,6 +99,7 @@ export const useModalStore = create<ModalState>((set, get) => ({
     }
   },
   setSelectedPsalm: (psalmNumber: number) => set({ selectedPsalm: psalmNumber }),
+  setSelectedParshaVortId: (parshaVortId: number) => set({ selectedParshaVortId: parshaVortId }),
   setTehillimActiveTab: (tab: 'all' | 'special') => set({ tehillimActiveTab: tab }),
   setTehillimReturnTab: (tab: 'all' | 'special') => set({ tehillimReturnTab: tab }),
   

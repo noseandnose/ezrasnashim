@@ -196,6 +196,8 @@ export default function TableModals() {
     audioUrl?: string;
   }
 
+  const { selectedParshaVortId } = useModalStore();
+  
   const { data: parshaContent } = useQuery<ParshaContent>({
     queryKey: ['/api/table/vort'],
     enabled: activeModal === 'parsha' || activeModal === 'parsha-vort',
@@ -209,7 +211,14 @@ export default function TableModals() {
         return today >= vort.fromDate && today <= vort.untilDate;
       });
       
-      return activeVorts[0] || null; // Return first active vort
+      // If a specific parsha vort ID is selected and modal is parsha-vort, find that one
+      if (selectedParshaVortId && (activeModal === 'parsha-vort')) {
+        const selectedVort = activeVorts.find((vort: any) => vort.id === selectedParshaVortId);
+        if (selectedVort) return selectedVort;
+      }
+      
+      // Fallback to first active vort if no specific selection
+      return activeVorts[0] || null;
     }
   });
 
