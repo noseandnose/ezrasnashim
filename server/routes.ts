@@ -8,6 +8,88 @@ import { fileURLToPath } from "url";
 import { find as findTimezone } from "geo-tz";
 import webpush from "web-push";
 
+// Server-side cache with TTL and request coalescing to prevent API rate limiting
+interface CacheEntry {
+  data: any;
+  expires: number;
+  pendingPromise?: Promise<any>;
+}
+
+const apiCache = new Map<string, CacheEntry>();
+
+// Cache TTL configurations (in milliseconds)
+const CACHE_TTLS = {
+  hebcalZmanim: 15 * 60 * 1000,      // 15 minutes - times change throughout day
+  hebcalConverter: 24 * 60 * 60 * 1000, // 24 hours - date conversions are static
+  hebcalEvents: 60 * 60 * 1000,      // 1 hour - events don't change frequently  
+  nominatim: 24 * 60 * 60 * 1000,    // 24 hours - reverse geocoding is static
+  sefaria: 7 * 24 * 60 * 60 * 1000,  // 7 days - text content rarely changes
+  ipGeo: 60 * 60 * 1000,             // 1 hour - IP geolocation
+  default: 5 * 60 * 1000             // 5 minutes - default for other APIs
+};
+
+// Get cache key from URL and determine TTL
+function getCacheConfig(url: string): { key: string; ttl: number } {
+  const key = url;
+  let ttl = CACHE_TTLS.default;
+
+  if (url.includes('hebcal.com/zmanim')) ttl = CACHE_TTLS.hebcalZmanim;
+  else if (url.includes('hebcal.com/converter')) ttl = CACHE_TTLS.hebcalConverter;
+  else if (url.includes('hebcal.com/')) ttl = CACHE_TTLS.hebcalEvents;
+  else if (url.includes('nominatim.openstreetmap.org')) ttl = CACHE_TTLS.nominatim;
+  else if (url.includes('sefaria.org')) ttl = CACHE_TTLS.sefaria;
+  else if (url.includes('ip-api.com')) ttl = CACHE_TTLS.ipGeo;
+
+  return { key, ttl };
+}
+
+// Cached HTTP GET with request coalescing
+async function cachedGet(url: string, config: any = {}): Promise<any> {
+  const { key, ttl } = getCacheConfig(url);
+  const now = Date.now();
+
+  // Check if we have valid cached data
+  const cached = apiCache.get(key);
+  if (cached && cached.expires > now) {
+    return cached.data;
+  }
+
+  // Check if there's already a pending request for this key (request coalescing)
+  if (cached && cached.pendingPromise) {
+    return cached.pendingPromise;
+  }
+
+  // Make the request and cache it
+  const promise = serverAxiosClient.get(url, config).then(response => {
+    // Cache the response data
+    apiCache.set(key, {
+      data: response,
+      expires: now + ttl
+    });
+    return response;
+  }).catch(error => {
+    // Remove the pending promise on error to allow retry
+    const entry = apiCache.get(key);
+    if (entry) {
+      delete entry.pendingPromise;
+    }
+    throw error;
+  });
+
+  // Store the pending promise for coalescing
+  if (cached) {
+    cached.pendingPromise = promise;
+  } else {
+    apiCache.set(key, {
+      data: null,
+      expires: 0,
+      pendingPromise: promise
+    });
+  }
+
+  return promise;
+}
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -297,9 +379,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Final selected timezone
       }
       
-      // Call Hebcal with exact coordinates
+      // Call Hebcal with exact coordinates (with caching)
       const hebcalUrl = `https://www.hebcal.com/zmanim?cfg=json&latitude=${latitude}&longitude=${longitude}&tzid=${tzid}&date=${today}`;
-      const response = await serverAxiosClient.get(hebcalUrl);
+      const response = await cachedGet(hebcalUrl);
       const data = response.data;
       
       // Format times to 12-hour format with AM/PM - properly handling timezone
@@ -344,9 +426,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let locationName = 'Current Location';
       
       try {
-        // Use OpenStreetMap Nominatim API for free reverse geocoding
+        // Use OpenStreetMap Nominatim API for free reverse geocoding (with caching)
         const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`;
-        const geocodeResponse = await serverAxiosClient.get(nominatimUrl, {
+        const geocodeResponse = await cachedGet(nominatimUrl, {
           headers: {
             'User-Agent': 'EzrasNashim/1.0 (jewish-prayer-app)'
           }
@@ -478,11 +560,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const currentYear = new Date().getFullYear();
       const nextYear = currentYear + 1;
       
-      // Fetch events for current and next year to ensure we have upcoming events
+      // Fetch events for current and next year to ensure we have upcoming events (with caching)
       const eventsPromises = [currentYear, nextYear].map(async (year) => {
         const hebcalUrl = `https://www.hebcal.com/hebcal?v=1&cfg=json&year=${year}&latitude=${latitude}&longitude=${longitude}&mf=on&ss=on&mod=on&nx=on&o=on&s=on`;
         console.log(`[Server API Request] GET ${hebcalUrl}`);
-        const response = await serverAxiosClient.get(hebcalUrl);
+        const response = await cachedGet(hebcalUrl);
         console.log(`[Server API Response] ${response.status} GET ${hebcalUrl}`);
         return response.data;
       });
@@ -521,7 +603,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let locationName = 'Current Location';
       try {
         const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`;
-        const geocodeResponse = await serverAxiosClient.get(nominatimUrl, {
+        const geocodeResponse = await cachedGet(nominatimUrl, {
           headers: {
             'User-Agent': 'EzrasNashim/1.0 (jewish-prayer-app)'
           }

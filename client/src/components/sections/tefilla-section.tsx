@@ -233,11 +233,10 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       // Progress data updated
       return data;
     },
-    refetchInterval: 5000, // Refresh every 5 seconds for even better responsiveness
-    staleTime: 0, // Always consider data stale to force refetch
-    gcTime: 10000, // Shorter cache time
-    refetchOnWindowFocus: true, // Refetch when window regains focus
-    refetchOnMount: 'always' // Always refetch when component mounts
+    staleTime: 10 * 60 * 1000, // Keep data fresh for 10 minutes
+    gcTime: 30 * 60 * 1000,    // Keep in cache for 30 minutes
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnMount: false        // Use cached data on mount
   });
   
   // Fetch current name for the perek - MUST be defined before useEffect hooks that use it
@@ -255,66 +254,26 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       }
     },
     queryKey: ['/api/tehillim/current-name', progress?.currentPerek], // Include perek in key to force refetch
-    refetchInterval: 5000, // Refresh every 5 seconds
-    staleTime: 0, // Always consider stale to force refetch
-    gcTime: 10000, // Shorter cache time
+    staleTime: 10 * 60 * 1000,      // Keep data fresh for 10 minutes
+    gcTime: 30 * 60 * 1000,         // Keep in cache for 30 minutes
+    refetchOnWindowFocus: false,    // Don't refetch on window focus
     enabled: !!progress?.currentPerek // Only fetch when we have progress
   });
   
-  // Refetch progress when returning to this section or when modal opens/closes
-  useEffect(() => {
-    // Small delay to ensure any server updates have completed
-    const timer = setTimeout(() => {
-      refetchProgress();
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/info'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []); // Run once on mount
+  // Only refetch tehillim data when explicitly needed (removed aggressive polling)
+  // Removed automatic refetching on mount and modal state changes to prevent request storms
   
-  // Also refetch when the section becomes visible again after modal closes
-  useEffect(() => {
-    // Check if no modal is open (returned to section)
-    const checkModalState = () => {
-      const modalStore = useModalStore.getState();
-      if (!modalStore.activeModal) {
-        // Modal was closed, refetch all data
-        setTimeout(() => {
-          refetchProgress();
-          queryClient.invalidateQueries({ queryKey: ['/api/tehillim/info'] });
-          queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
-        }, 200);
-      }
-    };
-    
-    // Subscribe to modal state changes
-    const unsubscribe = useModalStore.subscribe((state, prevState) => {
-      if (prevState.activeModal && !state.activeModal) {
-        checkModalState();
-      }
-    });
-    
-    return unsubscribe;
-  }, [refetchProgress, queryClient]);
-  
-  // Listen for tehillim completion event
+  // Listen for tehillim completion event - only invalidate when actually needed
   useEffect(() => {
     const handleTehillimCompleted = () => {
-      // Add a delay to ensure backend has updated
-      setTimeout(() => {
-        // Refetch all tehillim-related data with forced refresh
-        queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/tehillim/info'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/tehillim/preview'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
-        refetchProgress();
-        refetchCurrentName();
-      }, 500); // Half second delay to ensure backend has updated
+      // Only invalidate specific queries after completion (no aggressive refetching)
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
     };
     
     window.addEventListener('tehillimCompleted', handleTehillimCompleted);
     return () => window.removeEventListener('tehillimCompleted', handleTehillimCompleted);
-  }, [refetchProgress, refetchCurrentName, queryClient]);
+  }, [queryClient]);
 
   // Get the actual Tehillim info to display English number and part
   const { data: tehillimInfo } = useQuery<{
@@ -331,7 +290,9 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       return response.json();
     },
     enabled: !!progress?.currentPerek,
-    staleTime: 60000
+    staleTime: 10 * 60 * 1000,  // Keep fresh for 10 minutes 
+    gcTime: 30 * 60 * 1000,     // Cache for 30 minutes
+    refetchOnWindowFocus: false
   });
 
 
