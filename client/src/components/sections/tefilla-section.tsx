@@ -233,10 +233,9 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       // Progress data updated
       return data;
     },
-    staleTime: 10 * 60 * 1000, // Keep data fresh for 10 minutes
-    gcTime: 30 * 60 * 1000,    // Keep in cache for 30 minutes
-    refetchOnWindowFocus: false, // Don't refetch on window focus
-    refetchOnMount: false        // Use cached data on mount
+    staleTime: 0,               // NO caching - keep real-time for global chain
+    refetchOnWindowFocus: true, // Refetch when users return to app
+    refetchInterval: 30000      // Check every 30 seconds for chain updates
   });
   
   // Fetch current name for the perek - MUST be defined before useEffect hooks that use it
@@ -254,9 +253,8 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       }
     },
     queryKey: ['/api/tehillim/current-name', progress?.currentPerek], // Include perek in key to force refetch
-    staleTime: 10 * 60 * 1000,      // Keep data fresh for 10 minutes
-    gcTime: 30 * 60 * 1000,         // Keep in cache for 30 minutes
-    refetchOnWindowFocus: false,    // Don't refetch on window focus
+    staleTime: 0,                   // NO caching - keep real-time for global chain
+    refetchOnWindowFocus: true,     // Refetch when users return to app  
     enabled: !!progress?.currentPerek // Only fetch when we have progress
   });
   
