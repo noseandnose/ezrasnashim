@@ -463,6 +463,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Hebcal Events API proxy route
+  app.get("/api/events/:lat/:lng", async (req, res) => {
+    try {
+      const { lat, lng } = req.params;
+      const latitude = parseFloat(lat);
+      const longitude = parseFloat(lng);
+      
+      if (isNaN(latitude) || isNaN(longitude)) {
+        return res.status(400).json({ message: "Invalid coordinates" });
+      }
+
+      // Get current year and determine date range for events
+      const currentYear = new Date().getFullYear();
+      const nextYear = currentYear + 1;
+      
+      // Fetch events for current and next year to ensure we have upcoming events
+      const eventsPromises = [currentYear, nextYear].map(async (year) => {
+        const hebcalUrl = `https://www.hebcal.com/hebcal?v=1&cfg=json&year=${year}&latitude=${latitude}&longitude=${longitude}&mf=on&ss=on&mod=on&nx=on&o=on&s=on`;
+        console.log(`[Server API Request] GET ${hebcalUrl}`);
+        const response = await serverAxiosClient.get(hebcalUrl);
+        console.log(`[Server API Response] ${response.status} GET ${hebcalUrl}`);
+        return response.data;
+      });
+
+      const [currentYearData, nextYearData] = await Promise.all(eventsPromises);
+      
+      // Combine events from both years
+      const allEvents = [
+        ...(currentYearData.items || []),
+        ...(nextYearData.items || [])
+      ];
+
+      // Filter and format events
+      const formattedEvents = allEvents
+        .filter((event: any) => {
+          // Only include significant events (holidays, fast days, Rosh Chodesh, special Shabbatot)
+          return event.category && [
+            'holiday', 'fastday', 'roshchodesh', 'candles', 'havdalah', 
+            'modern', 'shabbat', 'parashat'
+          ].includes(event.category);
+        })
+        .map((event: any) => ({
+          title: event.title || '',
+          hebrew: event.hebrew || '',
+          date: event.date || '',
+          hdate: event.hdate || '',
+          category: event.category || '',
+          subcat: event.subcat || '',
+          memo: event.memo || '',
+          yomtov: event.yomtov || false,
+          link: event.link || ''
+        }))
+        .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+      // Get location name for display
+      let locationName = 'Current Location';
+      try {
+        const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`;
+        const geocodeResponse = await serverAxiosClient.get(nominatimUrl, {
+          headers: {
+            'User-Agent': 'EzrasNashim/1.0 (jewish-prayer-app)'
+          }
+        });
+        
+        if (geocodeResponse.data && geocodeResponse.data.address) {
+          const address = geocodeResponse.data.address;
+          const city = address.city || address.town || address.village || address.municipality || address.suburb;
+          const country = address.country;
+          
+          if (city && country) {
+            locationName = `${city}, ${country}`;
+          } else if (city) {
+            locationName = city;
+          }
+        }
+      } catch (geocodeError) {
+        // Geocoding failed, use default location name
+      }
+
+      res.json({
+        events: formattedEvents,
+        location: locationName
+      });
+
+    } catch (error) {
+      console.error('Error fetching Hebcal events:', error);
+      res.status(500).json({ message: "Failed to fetch events from Hebcal API" });
+    }
+  });
+
   // Hebcal Shabbos times proxy route
   app.get("/api/shabbos/:lat/:lng", async (req, res) => {
     try {
