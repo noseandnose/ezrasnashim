@@ -58,7 +58,6 @@ const apiLimiter = rateLimit({
   message: { message: "Too many API requests, please try again later." },
   standardHeaders: true,
   legacyHeaders: false,
-  trustProxy: true,
 });
 
 const authLimiter = rateLimit({
@@ -67,7 +66,6 @@ const authLimiter = rateLimit({
   message: { message: "Too many authentication attempts, please try again later." },
   standardHeaders: true,
   legacyHeaders: false,
-  trustProxy: true,
 });
 
 // Apply rate limiting
