@@ -30,7 +30,39 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
     queryFn: async () => {
       if (!coordinates) return { events: [], location: null };
       const response = await axiosClient.get(`/api/events/${coordinates.lat}/${coordinates.lng}`);
-      return response.data;
+      
+      // Filter events to only show Major Holidays, Minor Holidays, and Rosh Chodesh
+      const filteredEvents = response.data.events.filter((event: JewishEvent) => {
+        // Include Rosh Chodesh
+        if (event.category === 'roshchodesh' || event.title.toLowerCase().includes('rosh chodesh')) {
+          return true;
+        }
+        
+        // Include Major Holidays (yomtov = true indicates major holidays)
+        if (event.yomtov === true) {
+          return true;
+        }
+        
+        // Include specific holiday categories
+        if (event.category === 'holiday' || event.category === 'major' || event.category === 'minor') {
+          return true;
+        }
+        
+        // Include specific minor holidays by name
+        const titleLower = event.title.toLowerCase();
+        const minorHolidays = [
+          'chanukah', 'hanukkah', 'purim', 'tu bishvat', 'lag baomer', 'tu bav',
+          'yom hashoah', 'yom hazikaron', 'yom haatzmaut', 'yom yerushalayim'
+        ];
+        
+        if (minorHolidays.some(holiday => titleLower.includes(holiday))) {
+          return true;
+        }
+        
+        return false;
+      });
+      
+      return { ...response.data, events: filteredEvents };
     },
     enabled: !!coordinates && isOpen,
   });
