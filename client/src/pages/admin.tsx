@@ -108,9 +108,18 @@ export default function Admin() {
     queryKey: ['/api/table/recipes'],
     queryFn: async () => {
       if (!isAuthenticated || activeTab !== 'recipes') return [];
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/recipes`);
-      if (!response.ok) throw new Error('Failed to fetch recipes');
-      return response.json();
+      try {
+        const response = await axiosClient.get('/api/table/recipes', {
+          headers: getAuthHeaders()
+        });
+        return response.data;
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          setIsAuthenticated(false);
+          throw new Error('Authentication expired');
+        }
+        throw error;
+      }
     },
     enabled: isAuthenticated && activeTab === 'recipes',
   });
@@ -120,9 +129,18 @@ export default function Admin() {
     queryKey: ['/api/table/inspirations'],
     queryFn: async () => {
       if (!isAuthenticated || activeTab !== 'inspirations') return [];
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/inspirations`);
-      if (!response.ok) throw new Error('Failed to fetch inspirations');
-      return response.json();
+      try {
+        const response = await axiosClient.get('/api/table/inspirations', {
+          headers: getAuthHeaders()
+        });
+        return response.data;
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          setIsAuthenticated(false);
+          throw new Error('Authentication expired');
+        }
+        throw error;
+      }
     },
     enabled: isAuthenticated && activeTab === 'inspirations',
   });
@@ -132,9 +150,18 @@ export default function Admin() {
     queryKey: ['/api/push/history'],
     queryFn: async () => {
       if (!isAuthenticated || activeTab !== 'notifications') return [];
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/push/history?adminPassword=${encodeURIComponent(adminPassword)}`);
-      if (!response.ok) throw new Error('Failed to fetch notification history');
-      return response.json();
+      try {
+        const response = await axiosClient.get('/api/push/history', {
+          headers: getAuthHeaders()
+        });
+        return response.data;
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          setIsAuthenticated(false);
+          throw new Error('Authentication expired');
+        }
+        throw error;
+      }
     },
     enabled: isAuthenticated && activeTab === 'notifications',
   });
@@ -329,13 +356,11 @@ export default function Admin() {
         thankYouMessage: recipeFormData.thankYouMessage || null
       };
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/recipe`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(recipeData)
+      const response = await axiosClient.post('/api/table/recipe', recipeData, {
+        headers: getAuthHeaders()
       });
 
-      if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
         toast({
           title: 'Recipe Created',
           description: 'Recipe has been successfully created!',
@@ -345,8 +370,6 @@ export default function Admin() {
           servings: '', prepTime: '', cookTime: '', difficulty: 'easy', imageUrl: '', tags: '', thankYouMessage: ''
         });
         await refetchRecipes();
-      } else {
-        throw new Error('Failed to create recipe');
       }
     } catch (error: any) {
       toast({
@@ -383,20 +406,16 @@ export default function Admin() {
 
       let response;
       if (editingInspiration) {
-        response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/inspiration/${editingInspiration.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(inspirationData)
+        response = await axiosClient.put(`/api/table/inspiration/${editingInspiration.id}`, inspirationData, {
+          headers: getAuthHeaders()
         });
       } else {
-        response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/inspiration`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(inspirationData)
+        response = await axiosClient.post('/api/table/inspiration', inspirationData, {
+          headers: getAuthHeaders()
         });
       }
 
-      if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
         toast({
           title: 'Success',
           description: editingInspiration ? 'Inspiration updated successfully!' : 'Inspiration created successfully!',
@@ -409,8 +428,6 @@ export default function Admin() {
         });
         setEditingInspiration(null);
         await refetchInspirations();
-      } else {
-        throw new Error('Failed to save inspiration');
       }
     } catch (error: any) {
       toast({
@@ -429,18 +446,16 @@ export default function Admin() {
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/inspiration/${inspiration.id}`, {
-        method: 'DELETE'
+      const response = await axiosClient.delete(`/api/table/inspiration/${inspiration.id}`, {
+        headers: getAuthHeaders()
       });
       
-      if (response.ok) {
+      if (response.status === 200 || response.status === 204) {
         toast({
           title: 'Inspiration Deleted',
           description: 'The inspiration has been successfully deleted.',
         });
         await refetchInspirations();
-      } else {
-        throw new Error('Failed to delete inspiration');
       }
     } catch (error: any) {
       toast({
@@ -464,25 +479,17 @@ export default function Admin() {
 
     setIsSendingNotification(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/push/send`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...notificationData,
-          adminPassword
-        })
+      const response = await axiosClient.post('/api/push/send', notificationData, {
+        headers: getAuthHeaders()
       });
 
-      if (response.ok) {
-        const result = await response.json();
+      if (response.status === 200 || response.status === 201) {
         toast({
           title: 'Notification Sent',
-          description: `Notification sent to ${result.successCount || 'all'} users.`,
+          description: `Notification sent to ${response.data.successCount || 'all'} users.`,
         });
         setNotificationData({ title: '', body: '', url: '/', requireInteraction: false });
         await refetchNotificationHistory();
-      } else {
-        throw new Error('Failed to send notification');
       }
     } catch (error: any) {
       toast({

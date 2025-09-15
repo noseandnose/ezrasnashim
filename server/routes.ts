@@ -1136,7 +1136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/table/inspiration", async (req, res) => {
+  app.post("/api/table/inspiration", requireAdminAuth, async (req, res) => {
     try {
       const validatedData = insertTableInspirationSchema.parse(req.body);
       const inspiration = await storage.createTableInspiration(validatedData);
@@ -1147,7 +1147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all table inspirations
-  app.get("/api/table/inspirations", async (req, res) => {
+  app.get("/api/table/inspirations", requireAdminAuth, async (req, res) => {
     try {
       const inspirations = await storage.getAllTableInspirations();
       res.json(inspirations);
@@ -1157,7 +1157,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update table inspiration
-  app.put("/api/table/inspiration/:id", async (req, res) => {
+  app.put("/api/table/inspiration/:id", requireAdminAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const validatedData = insertTableInspirationSchema.parse(req.body);
@@ -1172,7 +1172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete table inspiration
-  app.delete("/api/table/inspiration/:id", async (req, res) => {
+  app.delete("/api/table/inspiration/:id", requireAdminAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const success = await storage.deleteTableInspiration(id);
@@ -1600,7 +1600,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/table/recipe", async (req, res) => {
+  app.post("/api/table/recipe", requireAdminAuth, async (req, res) => {
     try {
       const validatedData = insertDailyRecipeSchema.parse(req.body);
       const recipe = await storage.createDailyRecipe(validatedData);
@@ -1611,7 +1611,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all recipes for admin interface
-  app.get("/api/table/recipes", async (req, res) => {
+  app.get("/api/table/recipes", requireAdminAuth, async (req, res) => {
     try {
       const recipes = await storage.getAllDailyRecipes();
       res.json(recipes);
@@ -3547,16 +3547,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin endpoint to send push notifications
-  app.post("/api/push/send", async (req, res) => {
+  app.post("/api/push/send", requireAdminAuth, async (req, res) => {
     try {
-      const { title, body, icon, badge, url, requireInteraction, adminPassword } = req.body;
+      const { title, body, icon, badge, url, requireInteraction } = req.body;
       
-      // Simple admin authentication
-      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ezras2025';
-      if (adminPassword !== ADMIN_PASSWORD) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-
       if (!title || !body) {
         return res.status(400).json({ error: "Title and body are required" });
       }
@@ -3661,15 +3655,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get notification history (admin)
-  app.get("/api/push/history", async (req, res) => {
+  app.get("/api/push/history", requireAdminAuth, async (req, res) => {
     try {
-      const { adminPassword } = req.query;
-      
-      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ezras2025';
-      if (adminPassword !== ADMIN_PASSWORD) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-
       const history = await storage.getNotificationHistory(50);
       res.json(history);
     } catch (error) {
