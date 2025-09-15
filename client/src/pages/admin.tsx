@@ -915,6 +915,242 @@ export default function Admin() {
           </div>
         )}
 
+        {/* Table Inspirations Tab */}
+        {activeTab === 'inspirations' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Create Inspiration Form */}
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center">
+                <Plus className="w-5 h-5 mr-2 text-rose-600" />
+                {editingInspiration ? 'Edit' : 'Create New'} Table Inspiration
+              </h2>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="inspiration-from-date">From Date *</Label>
+                    <Input
+                      id="inspiration-from-date"
+                      type="date"
+                      value={inspirationFormData.fromDate}
+                      onChange={(e) => setInspirationFormData(prev => ({ ...prev, fromDate: e.target.value }))}
+                      data-testid="input-inspiration-from-date"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="inspiration-until-date">Until Date *</Label>
+                    <Input
+                      id="inspiration-until-date"
+                      type="date"
+                      value={inspirationFormData.untilDate}
+                      onChange={(e) => setInspirationFormData(prev => ({ ...prev, untilDate: e.target.value }))}
+                      data-testid="input-inspiration-until-date"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="inspiration-title">Title *</Label>
+                  <Input
+                    id="inspiration-title"
+                    value={inspirationFormData.title}
+                    onChange={(e) => setInspirationFormData(prev => ({ ...prev, title: e.target.value }))}
+                    data-testid="input-inspiration-title"
+                    placeholder="Inspiration title"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="inspiration-content">Content *</Label>
+                  <Textarea
+                    id="inspiration-content"
+                    value={inspirationFormData.content}
+                    onChange={(e) => setInspirationFormData(prev => ({ ...prev, content: e.target.value }))}
+                    data-testid="textarea-inspiration-content"
+                    placeholder="Main inspiration content"
+                    rows={4}
+                    className="mt-1"
+                  />
+                </div>
+
+                {/* Media Uploads */}
+                <div className="space-y-4">
+                  <h3 className="font-medium text-gray-900 border-b pb-2">Media Files (Images/Audio/Video)</h3>
+                  
+                  {[1, 2, 3, 4, 5].map(index => {
+                    const mediaUrlField = `mediaUrl${index}` as keyof typeof inspirationFormData;
+                    const mediaTypeField = `mediaType${index}` as keyof typeof inspirationFormData;
+                    
+                    return (
+                      <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                        <Label className="text-sm font-medium text-gray-700 mb-2">Media {index}</Label>
+                        
+                        <div className="grid grid-cols-3 gap-2 mb-3">
+                          <select
+                            value={inspirationFormData[mediaTypeField]}
+                            onChange={(e) => setInspirationFormData(prev => ({ 
+                              ...prev, 
+                              [mediaTypeField]: e.target.value 
+                            }))}
+                            className="px-3 py-1.5 text-sm border border-gray-300 rounded-md"
+                          >
+                            <option value="image">Image</option>
+                            <option value="audio">Audio</option>
+                            <option value="video">Video</option>
+                          </select>
+                          
+                          <Input
+                            placeholder="Or enter URL"
+                            value={inspirationFormData[mediaUrlField]}
+                            onChange={(e) => setInspirationFormData(prev => ({ 
+                              ...prev, 
+                              [mediaUrlField]: e.target.value 
+                            }))}
+                            className="col-span-2 text-sm"
+                          />
+                        </div>
+                        
+                        <ObjectUploader
+                          endpoint={() => handleImageUpload('inspiration', mediaUrlField)}
+                          onUploadSuccess={(result) => handleImageUploadComplete(result, 'inspiration', mediaUrlField)}
+                          accept={inspirationFormData[mediaTypeField] === 'image' ? 'image/*' : 
+                                 inspirationFormData[mediaTypeField] === 'audio' ? 'audio/*' : 
+                                 'video/*'}
+                          multiple={false}
+                          text={`Upload ${inspirationFormData[mediaTypeField]}`}
+                        />
+                        
+                        {inspirationFormData[mediaUrlField] && (
+                          <div className="mt-2 text-xs text-gray-600 break-all">
+                            Current: {inspirationFormData[mediaUrlField]}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleInspirationSubmit}
+                    disabled={isSavingInspiration}
+                    className="flex-1 bg-rose-600 hover:bg-rose-700"
+                    data-testid="button-save-inspiration"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    {isSavingInspiration ? 'Saving...' : (editingInspiration ? 'Update' : 'Create')} Inspiration
+                  </Button>
+                  
+                  {editingInspiration && (
+                    <Button 
+                      onClick={() => {
+                        setEditingInspiration(null);
+                        setInspirationFormData({
+                          fromDate: '', untilDate: '', title: '', content: '',
+                          mediaUrl1: '', mediaType1: 'image', mediaUrl2: '', mediaType2: 'image',
+                          mediaUrl3: '', mediaType3: 'image', mediaUrl4: '', mediaType4: 'image',
+                          mediaUrl5: '', mediaType5: 'image'
+                        });
+                      }}
+                      variant="outline"
+                      data-testid="button-cancel-inspiration"
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </Card>
+
+            {/* Recent Inspirations */}
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center">
+                <Calendar className="w-5 h-5 mr-2 text-rose-600" />
+                Recent Table Inspirations
+              </h2>
+              
+              {inspirations && inspirations.length > 0 ? (
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  {inspirations.map((inspiration: any) => (
+                    <div key={inspiration.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <h3 className="font-semibold text-gray-900">{inspiration.title}</h3>
+                          <p className="text-sm text-gray-600">
+                            {format(new Date(inspiration.fromDate), 'MMM d')} - {format(new Date(inspiration.untilDate), 'MMM d, yyyy')}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setEditingInspiration(inspiration);
+                              setInspirationFormData({
+                                fromDate: inspiration.fromDate,
+                                untilDate: inspiration.untilDate,
+                                title: inspiration.title,
+                                content: inspiration.content,
+                                mediaUrl1: inspiration.mediaUrl1 || '',
+                                mediaType1: inspiration.mediaType1 || 'image',
+                                mediaUrl2: inspiration.mediaUrl2 || '',
+                                mediaType2: inspiration.mediaType2 || 'image',
+                                mediaUrl3: inspiration.mediaUrl3 || '',
+                                mediaType3: inspiration.mediaType3 || 'image',
+                                mediaUrl4: inspiration.mediaUrl4 || '',
+                                mediaType4: inspiration.mediaType4 || 'image',
+                                mediaUrl5: inspiration.mediaUrl5 || '',
+                                mediaType5: inspiration.mediaType5 || 'image'
+                              });
+                            }}
+                            data-testid={`button-edit-inspiration-${inspiration.id}`}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDeleteInspiration(inspiration)}
+                            data-testid={`button-delete-inspiration-${inspiration.id}`}
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      <p className="text-sm text-gray-700 mb-2">{inspiration.content}</p>
+                      
+                      {/* Show media files if any */}
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {[1, 2, 3, 4, 5].map(index => {
+                          const mediaUrl = inspiration[`mediaUrl${index}`];
+                          const mediaType = inspiration[`mediaType${index}`];
+                          if (mediaUrl) {
+                            return (
+                              <span key={index} className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-200 text-gray-700">
+                                <Image className="w-3 h-3 mr-1" />
+                                {mediaType} {index}
+                              </span>
+                            );
+                          }
+                          return null;
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  No table inspirations found
+                </div>
+              )}
+            </Card>
+          </div>
+        )}
+
         {/* Notifications Tab */}
         {activeTab === 'notifications' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
