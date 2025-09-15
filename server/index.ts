@@ -12,6 +12,16 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Redirect .repl.co to .replit.dev to match Vite's allowedHosts configuration
+app.use((req, res, next) => {
+  const host = req.headers.host ?? "";
+  if (host.endsWith('.repl.co')) {
+    const target = 'https://' + host.replace('.repl.co', '.replit.dev') + req.url;
+    return res.redirect(307, target);
+  }
+  next();
+});
+
 // Enhanced security headers with Helmet
 const isProduction = process.env.NODE_ENV === 'production';
 
