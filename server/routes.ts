@@ -3327,6 +3327,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/messages", async (req, res) => {
+    try {
+      const { upcoming } = req.query;
+      const messages = upcoming === 'true' 
+        ? await storage.getUpcomingMessages()
+        : await storage.getAllMessages();
+      res.json(messages);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch messages" });
+    }
+  });
+
+  app.put("/api/messages/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const messageData = req.body;
+      const updatedMessage = await storage.updateMessage(parseInt(id), messageData);
+      res.json(updatedMessage);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update message" });
+    }
+  });
+
+  app.delete("/api/messages/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteMessage(parseInt(id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete message" });
+    }
+  });
+
   // Push notification endpoints
   app.get("/api/push/vapid-public-key", (req, res) => {
     res.json({ publicKey: VAPID_PUBLIC_KEY || null });

@@ -185,6 +185,10 @@ export interface IStorage {
   // Message methods
   getMessageByDate(date: string): Promise<Message | undefined>;
   createMessage(message: InsertMessage): Promise<Message>;
+  getAllMessages(): Promise<Message[]>;
+  getUpcomingMessages(): Promise<Message[]>;
+  updateMessage(id: number, message: Partial<InsertMessage>): Promise<Message>;
+  deleteMessage(id: number): Promise<void>;
   
   // Push notification methods
   subscribeToPush(subscription: InsertPushSubscription): Promise<PushSubscription>;
@@ -1862,6 +1866,37 @@ export class DatabaseStorage implements IStorage {
       .values(message)
       .returning();
     return newMessage;
+  }
+
+  async getAllMessages(): Promise<Message[]> {
+    return await db
+      .select()
+      .from(messages)
+      .orderBy(messages.date);
+  }
+
+  async getUpcomingMessages(): Promise<Message[]> {
+    const today = new Date().toISOString().split('T')[0];
+    return await db
+      .select()
+      .from(messages)
+      .where(gte(messages.date, today))
+      .orderBy(messages.date);
+  }
+
+  async updateMessage(id: number, messageData: Partial<InsertMessage>): Promise<Message> {
+    const [updatedMessage] = await db
+      .update(messages)
+      .set({ ...messageData, updatedAt: new Date() })
+      .where(eq(messages.id, id))
+      .returning();
+    return updatedMessage;
+  }
+
+  async deleteMessage(id: number): Promise<void> {
+    await db
+      .delete(messages)
+      .where(eq(messages.id, id));
   }
   
   // Push notification methods
