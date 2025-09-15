@@ -562,7 +562,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Fetch events for current and next year to ensure we have upcoming events (with caching)
       const eventsPromises = [currentYear, nextYear].map(async (year) => {
-        const hebcalUrl = `https://www.hebcal.com/hebcal?v=1&cfg=json&year=${year}&latitude=${latitude}&longitude=${longitude}&mf=on&ss=on&mod=on&nx=on&o=on&s=on`;
+        const hebcalUrl = `https://www.hebcal.com/hebcal?v=1&cfg=json&year=${year}&latitude=${latitude}&longitude=${longitude}&maj=on&min=on&nx=on`;
         console.log(`[Server API Request] GET ${hebcalUrl}`);
         const response = await cachedGet(hebcalUrl);
         console.log(`[Server API Response] ${response.status} GET ${hebcalUrl}`);
@@ -580,10 +580,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Filter and format events
       const formattedEvents = allEvents
         .filter((event: any) => {
-          // Only include significant events (holidays, fast days, Rosh Chodesh, special Shabbatot)
+          // Only include Major Holidays, Minor Holidays, and Rosh Chodesh
           return event.category && [
-            'holiday', 'fastday', 'roshchodesh', 'candles', 'havdalah', 
-            'modern', 'shabbat', 'parashat'
+            'holiday', 'roshchodesh'
           ].includes(event.category);
         })
         .map((event: any) => ({
@@ -3113,7 +3112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const endDate = futureDate.toISOString().split('T')[0];
 
       // Fetch events from Hebcal with specified categories
-      const eventsUrl = `https://www.hebcal.com/hebcal?v=1&cfg=json&start=${startDate}&end=${endDate}&mf=on&ss=on&nx=on&maj=on&min=on&c=on&geo=pos&latitude=${latitude}&longitude=${longitude}`;
+      const eventsUrl = `https://www.hebcal.com/hebcal?v=1&cfg=json&start=${startDate}&end=${endDate}&maj=on&min=on&nx=on&geo=pos&latitude=${latitude}&longitude=${longitude}`;
       
       const eventsResponse = await serverAxiosClient.get(eventsUrl);
 
@@ -3187,7 +3186,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get events and holidays for this date
       const eventsResponse = await serverAxiosClient.get(
-        `https://www.hebcal.com/hebcal?v=1&cfg=json&year=${year}&month=${month}&mf=on&ss=on&mod=on&nx=on&o=on&s=on`
+        `https://www.hebcal.com/hebcal?v=1&cfg=json&year=${year}&month=${month}&maj=on&min=on&nx=on`
       );
 
       let isRoshChodesh = false;

@@ -12,6 +12,19 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Trust proxy for accurate IP addresses in Replit environment
+app.set('trust proxy', true);
+
+// Redirect .repl.co to .replit.dev to match Vite's allowedHosts configuration
+app.use((req, res, next) => {
+  const host = req.headers.host ?? "";
+  if (host.endsWith('.repl.co')) {
+    const target = 'https://' + host.replace('.repl.co', '.replit.dev') + req.url;
+    return res.redirect(307, target);
+  }
+  next();
+});
+
 // Enhanced security headers with Helmet
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -27,7 +40,7 @@ app.use(helmet({
       imgSrc: ["'self'", "data:", "https:", "blob:"],
       connectSrc: isProduction
         ? ["'self'", "https://www.hebcal.com", "https://nominatim.openstreetmap.org", "https://www.google-analytics.com", "https://api.stripe.com", "https://ezrasnashim.app", "https://api.ezrasnashim.app"]
-        : ["'self'", "https://www.hebcal.com", "https://nominatim.openstreetmap.org", "https://www.google-analytics.com", "https://api.stripe.com", "https://*.replit.dev", "https://*.replit.app"],
+        : ["'self'", "https://www.hebcal.com", "https://nominatim.openstreetmap.org", "https://www.google-analytics.com", "https://api.stripe.com", "https://*.replit.dev", "https://*.replit.app", "https://*.repl.co"],
       mediaSrc: ["'self'", "https:", "blob:"],
       objectSrc: ["'none'"],
       frameSrc: ["'self'", "https://js.stripe.com"],
@@ -117,6 +130,7 @@ app.use(
         'http://127.0.0.1:5000',
         /\.replit\.dev$/,
         /\.replit\.app$/,
+        /\.repl\.co$/,
         'https://api.ezrasnashim.app',
         'https://staging.ezrasnashim.app',
         'https://ezrasnashim.app'

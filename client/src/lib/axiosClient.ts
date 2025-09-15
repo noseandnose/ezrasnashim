@@ -9,10 +9,11 @@ function getBaseURL() {
   }
   
   // Fallback for Replit environment if VITE_API_URL is not set
-  if (window.location.hostname.includes('replit.dev')) {
-    // In Replit, the backend runs on port 5000 with the same domain
-    const hostname = window.location.hostname;
-    return `https://${hostname}:5000`;
+  if (window.location.hostname.includes('replit.dev') || 
+      window.location.hostname.includes('replit.app') || 
+      window.location.hostname.includes('repl.co')) {
+    // In Replit, the backend and frontend run on the same port/domain
+    return `${window.location.protocol}//${window.location.host}`;
   }
   
   // Default for local development
