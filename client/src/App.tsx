@@ -22,9 +22,7 @@ const Home = lazy(() => import("@/pages/home"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const Donate = lazy(() => import("@/pages/donate"));
 const Statistics = lazy(() => import("@/pages/statistics"));
-const AdminNotifications = lazy(() => import("@/pages/admin-notifications"));
-const AdminRecipes = lazy(() => import("@/pages/admin-recipes"));
-const AdminMessages = lazy(() => import("@/pages/admin-messages"));
+const Admin = lazy(() => import("@/pages/admin"));
 const Privacy = lazy(() => import("@/pages/privacy"));
 
 // Unified loading screen with dove - serves as both splash and loading indicator
@@ -104,9 +102,10 @@ function Router() {
         </Route>
         <Route path="/donate" component={Donate} />
         <Route path="/statistics" component={Statistics} />
-        <Route path="/admin/notifications" component={AdminNotifications} />
-        <Route path="/admin/recipes" component={AdminRecipes} />
-        <Route path="/admin/messages" component={AdminMessages} />
+        <Route path="/admin" component={Admin} />
+        <Route path="/admin/notifications" component={Admin} />
+        <Route path="/admin/recipes" component={Admin} />
+        <Route path="/admin/messages" component={Admin} />
         <Route path="/privacy" component={Privacy} />
         <Route component={NotFound} />
       </Switch>
