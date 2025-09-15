@@ -8,11 +8,13 @@ import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
 import axiosClient from '@/lib/axiosClient';
 import { useQuery } from '@tanstack/react-query';
-import { MessageSquare, Plus, Save, Edit, Trash2, Bell, ChefHat, Send, Clock, Users, CheckCircle, XCircle } from 'lucide-react';
+import { MessageSquare, Plus, Save, Edit, Trash2, Bell, ChefHat, Send, Clock, Users, CheckCircle, XCircle, Image, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Message } from '@shared/schema';
+import { ObjectUploader } from '@/components/ObjectUploader';
+import type { UploadResult } from '@uppy/core';
 
-type AdminTab = 'messages' | 'recipes' | 'notifications';
+type AdminTab = 'messages' | 'recipes' | 'inspirations' | 'notifications';
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState<AdminTab>('messages');
@@ -45,6 +47,26 @@ export default function Admin() {
     thankYouMessage: ''
   });
   const [isSavingRecipe, setIsSavingRecipe] = useState(false);
+
+  // Table inspirations state
+  const [inspirationFormData, setInspirationFormData] = useState({
+    fromDate: '',
+    untilDate: '',
+    title: '',
+    content: '',
+    mediaUrl1: '',
+    mediaType1: 'image',
+    mediaUrl2: '',
+    mediaType2: 'image',
+    mediaUrl3: '',
+    mediaType3: 'image',
+    mediaUrl4: '',
+    mediaType4: 'image',
+    mediaUrl5: '',
+    mediaType5: 'image'
+  });
+  const [editingInspiration, setEditingInspiration] = useState(null);
+  const [isSavingInspiration, setIsSavingInspiration] = useState(false);
 
   // Notifications state
   const [notificationData, setNotificationData] = useState({
@@ -91,6 +113,18 @@ export default function Admin() {
       return response.json();
     },
     enabled: isAuthenticated && activeTab === 'recipes',
+  });
+
+  // Table inspirations API calls
+  const { data: inspirations, refetch: refetchInspirations } = useQuery({
+    queryKey: ['/api/table/inspirations'],
+    queryFn: async () => {
+      if (!isAuthenticated || activeTab !== 'inspirations') return [];
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/inspirations`);
+      if (!response.ok) throw new Error('Failed to fetch inspirations');
+      return response.json();
+    },
+    enabled: isAuthenticated && activeTab === 'inspirations',
   });
 
   // Notifications API calls
@@ -220,6 +254,62 @@ export default function Admin() {
     }
   };
 
+  // Image upload functions
+  const handleImageUpload = async (type: 'recipe' | 'inspiration', field?: string) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/objects/upload`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const { uploadURL } = await response.json();
+      return { method: 'PUT' as const, url: uploadURL };
+    } catch (error) {
+      toast({
+        title: 'Upload Error',
+        description: 'Failed to get upload URL',
+        variant: 'destructive'
+      });
+      throw error;
+    }
+  };
+
+  const handleImageUploadComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>, type: 'recipe' | 'inspiration', field?: string) => {
+    try {
+      if (result.successful && result.successful.length > 0) {
+        const uploadURL = result.successful[0].uploadURL;
+        
+        // Set ACL policy for the uploaded image
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/images/upload-complete`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageURL: uploadURL })
+        });
+        
+        if (response.ok) {
+          const { objectPath } = await response.json();
+          const fullImageUrl = `${window.location.origin}${objectPath}`;
+          
+          if (type === 'recipe') {
+            setRecipeFormData(prev => ({ ...prev, imageUrl: fullImageUrl }));
+          } else if (type === 'inspiration' && field) {
+            setInspirationFormData(prev => ({ ...prev, [field]: fullImageUrl }));
+          }
+          
+          toast({
+            title: 'Image Uploaded',
+            description: 'Image uploaded successfully!'
+          });
+        }
+      }
+    } catch (error) {
+      toast({
+        title: 'Upload Error',
+        description: 'Failed to complete image upload',
+        variant: 'destructive'
+      });
+    }
+  };
+
   // Recipe functions
   const handleRecipeSubmit = async () => {
     if (!recipeFormData.title || !recipeFormData.date || !recipeFormData.ingredients || !recipeFormData.instructions) {
@@ -266,6 +356,98 @@ export default function Admin() {
       });
     } finally {
       setIsSavingRecipe(false);
+    }
+  };
+
+  // Table inspirations functions
+  const handleInspirationSubmit = async () => {
+    if (!inspirationFormData.title || !inspirationFormData.fromDate || !inspirationFormData.untilDate || !inspirationFormData.content) {
+      toast({
+        title: 'Missing Required Fields',
+        description: 'Please fill in title, from date, until date, and content.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsSavingInspiration(true);
+    try {
+      const inspirationData = {
+        ...inspirationFormData,
+        mediaUrl1: inspirationFormData.mediaUrl1 || null,
+        mediaUrl2: inspirationFormData.mediaUrl2 || null,
+        mediaUrl3: inspirationFormData.mediaUrl3 || null,
+        mediaUrl4: inspirationFormData.mediaUrl4 || null,
+        mediaUrl5: inspirationFormData.mediaUrl5 || null
+      };
+
+      let response;
+      if (editingInspiration) {
+        response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/inspiration/${editingInspiration.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(inspirationData)
+        });
+      } else {
+        response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/inspiration`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(inspirationData)
+        });
+      }
+
+      if (response.ok) {
+        toast({
+          title: 'Success',
+          description: editingInspiration ? 'Inspiration updated successfully!' : 'Inspiration created successfully!',
+        });
+        setInspirationFormData({
+          fromDate: '', untilDate: '', title: '', content: '',
+          mediaUrl1: '', mediaType1: 'image', mediaUrl2: '', mediaType2: 'image',
+          mediaUrl3: '', mediaType3: 'image', mediaUrl4: '', mediaType4: 'image',
+          mediaUrl5: '', mediaType5: 'image'
+        });
+        setEditingInspiration(null);
+        await refetchInspirations();
+      } else {
+        throw new Error('Failed to save inspiration');
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save inspiration. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSavingInspiration(false);
+    }
+  };
+
+  const handleDeleteInspiration = async (inspiration: any) => {
+    if (!confirm(`Are you sure you want to delete the inspiration "${inspiration.title}"?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/inspiration/${inspiration.id}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        toast({
+          title: 'Inspiration Deleted',
+          description: 'The inspiration has been successfully deleted.',
+        });
+        await refetchInspirations();
+      } else {
+        throw new Error('Failed to delete inspiration');
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Delete Failed',
+        description: 'Failed to delete inspiration',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -390,6 +572,18 @@ export default function Admin() {
             >
               <ChefHat className="w-4 h-4 mr-2" />
               Recipes
+            </button>
+            <button
+              onClick={() => setActiveTab('inspirations')}
+              className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'inspirations'
+                  ? 'bg-rose-600 text-white shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              }`}
+              data-testid="tab-inspirations"
+            >
+              <Calendar className="w-4 h-4 mr-2" />
+              Inspirations
             </button>
             <button
               onClick={() => setActiveTab('notifications')}

@@ -77,6 +77,9 @@ export interface IStorage {
   // Table inspiration methods
   getTableInspirationByDate(date: string): Promise<TableInspiration | undefined>;
   createTableInspiration(inspiration: InsertTableInspiration): Promise<TableInspiration>;
+  getAllTableInspirations(): Promise<TableInspiration[]>;
+  updateTableInspiration(id: number, inspiration: InsertTableInspiration): Promise<TableInspiration | undefined>;
+  deleteTableInspiration(id: number): Promise<boolean>;
 
   // Community impact methods
   getCommunityImpactByDate(date: string): Promise<CommunityImpact | undefined>;
@@ -1340,6 +1343,29 @@ export class DatabaseStorage implements IStorage {
       .values(insertInspiration)
       .returning();
     return inspiration;
+  }
+
+  async getAllTableInspirations(): Promise<TableInspiration[]> {
+    return await db
+      .select()
+      .from(tableInspirations)
+      .orderBy(tableInspirations.fromDate);
+  }
+
+  async updateTableInspiration(id: number, insertInspiration: InsertTableInspiration): Promise<TableInspiration | undefined> {
+    const [inspiration] = await db
+      .update(tableInspirations)
+      .set(insertInspiration)
+      .where(eq(tableInspirations.id, id))
+      .returning();
+    return inspiration;
+  }
+
+  async deleteTableInspiration(id: number): Promise<boolean> {
+    const result = await db
+      .delete(tableInspirations)
+      .where(eq(tableInspirations.id, id));
+    return result.changes > 0;
   }
 
   async getCommunityImpactByDate(date: string): Promise<CommunityImpact | undefined> {

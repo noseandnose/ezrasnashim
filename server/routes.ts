@@ -7,6 +7,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { find as findTimezone } from "geo-tz";
 import webpush from "web-push";
+import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 
 // Server-side cache with TTL and request coalescing to prevent API rate limiting
 interface CacheEntry {
@@ -1142,6 +1143,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(inspiration);
     } catch (error) {
       res.status(500).json({ message: "Failed to create table inspiration" });
+    }
+  });
+
+  // Get all table inspirations
+  app.get("/api/table/inspirations", async (req, res) => {
+    try {
+      const inspirations = await storage.getAllTableInspirations();
+      res.json(inspirations);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch table inspirations" });
+    }
+  });
+
+  // Update table inspiration
+  app.put("/api/table/inspiration/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertTableInspirationSchema.parse(req.body);
+      const inspiration = await storage.updateTableInspiration(id, validatedData);
+      if (!inspiration) {
+        return res.status(404).json({ message: "Table inspiration not found" });
+      }
+      res.json(inspiration);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update table inspiration" });
+    }
+  });
+
+  // Delete table inspiration
+  app.delete("/api/table/inspiration/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteTableInspiration(id);
+      if (!success) {
+        return res.status(404).json({ message: "Table inspiration not found" });
+      }
+      res.json({ message: "Table inspiration deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete table inspiration" });
+    }
+  });
+
+  // Object storage endpoints for file uploads
+  app.post("/api/objects/upload", async (req, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error('Error getting upload URL:', error);
+      res.status(500).json({ error: "Failed to get upload URL" });
+    }
+  });
+
+  // Serve uploaded objects
+  app.get("/objects/:objectPath(*)", async (req, res) => {
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const objectFile = await objectStorageService.getObjectEntityFile(req.path);
+      objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      console.error("Error serving object:", error);
+      if (error instanceof ObjectNotFoundError) {
+        return res.sendStatus(404);
+      }
+      return res.sendStatus(500);
+    }
+  });
+
+  // Handle image upload completion and set ACL policy
+  app.post("/api/images/upload-complete", async (req, res) => {
+    if (!req.body.imageURL) {
+      return res.status(400).json({ error: "imageURL is required" });
+    }
+
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
+        req.body.imageURL,
+        {
+          owner: "admin",
+          visibility: "public"
+        }
+      );
+
+      res.status(200).json({ objectPath });
+    } catch (error) {
+      console.error("Error setting image ACL:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 
