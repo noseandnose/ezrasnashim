@@ -12,6 +12,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Trust proxy for accurate IP addresses in Replit environment
+app.set('trust proxy', true);
+
 // Redirect .repl.co to .replit.dev to match Vite's allowedHosts configuration
 app.use((req, res, next) => {
   const host = req.headers.host ?? "";
