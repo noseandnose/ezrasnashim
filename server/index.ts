@@ -104,10 +104,43 @@ app.use((req, res, next) => {
   next();
 });
 
-// TEMPORARY DEBUG: Allow all origins to isolate CORS issue
 app.use(
   cors({
-    origin: true, // Allow all origins for debugging
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+
+      const allowedOrigins = [
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        'http://localhost:5000', // Add backend origin
+        'http://127.0.0.1:5000',
+        /\.replit\.dev$/,
+        /\.replit\.app$/,
+        /\.repl\.co$/,
+        'https://api.ezrasnashim.app',
+        'https://staging.ezrasnashim.app',
+        'https://ezrasnashim.app'
+      ];
+      
+      const isAllowed = allowedOrigins.some(allowed => {
+        if (typeof allowed === 'string') {
+          return origin === allowed;
+        }
+        return allowed.test(origin);
+      });
+      
+      if (isAllowed || !origin) {
+        return callback(null, true);
+      }
+      
+      // In production, be strict; in development, allow any origin
+      if (process.env.NODE_ENV === 'production') {
+        return callback(new Error('Not allowed by CORS'), false);
+      } else {
+        return callback(null, true);
+      }
+    },
     credentials: true,
   }),
 );

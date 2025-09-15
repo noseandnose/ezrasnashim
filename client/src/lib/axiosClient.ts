@@ -3,14 +3,8 @@ import axios, { AxiosResponse, AxiosError } from 'axios';
 
 // Determine the correct base URL for API calls
 function getBaseURL() {
-  console.log('[DEBUG] Current hostname:', window.location.hostname);
-  console.log('[DEBUG] Current protocol:', window.location.protocol);
-  console.log('[DEBUG] Current host:', window.location.host);
-  console.log('[DEBUG] VITE_API_URL:', import.meta.env.VITE_API_URL);
-  
   // Always use VITE_API_URL if it's set
   if (import.meta.env.VITE_API_URL) {
-    console.log('[DEBUG] Using VITE_API_URL:', import.meta.env.VITE_API_URL);
     return import.meta.env.VITE_API_URL;
   }
   
@@ -19,13 +13,10 @@ function getBaseURL() {
       window.location.hostname.includes('replit.app') || 
       window.location.hostname.includes('repl.co')) {
     // In Replit, the backend and frontend run on the same port/domain
-    const baseURL = `${window.location.protocol}//${window.location.host}`;
-    console.log('[DEBUG] Using Replit URL:', baseURL);
-    return baseURL;
+    return `${window.location.protocol}//${window.location.host}`;
   }
   
   // Default for local development
-  console.log('[DEBUG] Using localhost URL');
   return 'http://localhost:5000';
 }
 
