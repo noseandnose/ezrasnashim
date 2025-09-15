@@ -10,7 +10,7 @@ import axiosClient from '@/lib/axiosClient';
 import { useQuery } from '@tanstack/react-query';
 import { MessageSquare, Plus, Save, Edit, Trash2, Bell, ChefHat, Send, Clock, Users, CheckCircle, XCircle, Image, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
-import type { Message } from '@shared/schema';
+import type { Message, TableInspiration } from '@shared/schema';
 import { ObjectUploader } from '@/components/ObjectUploader';
 import type { UploadResult } from '@uppy/core';
 
@@ -65,7 +65,7 @@ export default function Admin() {
     mediaUrl5: '',
     mediaType5: 'image'
   });
-  const [editingInspiration, setEditingInspiration] = useState(null);
+  const [editingInspiration, setEditingInspiration] = useState<TableInspiration | null>(null);
   const [isSavingInspiration, setIsSavingInspiration] = useState(false);
 
   // Notifications state
@@ -284,18 +284,26 @@ export default function Admin() {
   // Image upload functions
   const handleImageUpload = async (type: 'recipe' | 'inspiration', field?: string) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/objects/upload`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+      const response = await axiosClient.post('/api/objects/upload', {}, {
+        headers: getAuthHeaders()
       });
-      const { uploadURL } = await response.json();
+      const { uploadURL } = response.data;
       return { method: 'PUT' as const, url: uploadURL };
-    } catch (error) {
-      toast({
-        title: 'Upload Error',
-        description: 'Failed to get upload URL',
-        variant: 'destructive'
-      });
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        setIsAuthenticated(false);
+        toast({
+          title: 'Authentication Failed',
+          description: 'Please login again to upload images.',
+          variant: 'destructive'
+        });
+      } else {
+        toast({
+          title: 'Upload Error',
+          description: 'Failed to get upload URL',
+          variant: 'destructive'
+        });
+      }
       throw error;
     }
   };
@@ -306,14 +314,14 @@ export default function Admin() {
         const uploadURL = result.successful[0].uploadURL;
         
         // Set ACL policy for the uploaded image
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/images/upload-complete`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageURL: uploadURL })
+        const response = await axiosClient.post('/api/images/upload-complete', {
+          imageURL: uploadURL
+        }, {
+          headers: getAuthHeaders()
         });
         
-        if (response.ok) {
-          const { objectPath } = await response.json();
+        if (response.status === 200) {
+          const { objectPath } = response.data;
           const fullImageUrl = `${window.location.origin}${objectPath}`;
           
           if (type === 'recipe') {
@@ -328,12 +336,21 @@ export default function Admin() {
           });
         }
       }
-    } catch (error) {
-      toast({
-        title: 'Upload Error',
-        description: 'Failed to complete image upload',
-        variant: 'destructive'
-      });
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        setIsAuthenticated(false);
+        toast({
+          title: 'Authentication Failed',
+          description: 'Please login again to upload images.',
+          variant: 'destructive'
+        });
+      } else {
+        toast({
+          title: 'Upload Error',
+          description: 'Failed to complete image upload',
+          variant: 'destructive'
+        });
+      }
     }
   };
 
@@ -881,6 +898,36 @@ export default function Admin() {
                   />
                 </div>
 
+                {/* Recipe Image Upload */}
+                <div className="border rounded-lg p-4 bg-gray-50">
+                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Recipe Image</Label>
+                  
+                  <div className="space-y-3">
+                    <Input
+                      placeholder="Image URL (or upload below)"
+                      value={recipeFormData.imageUrl}
+                      onChange={(e) => setRecipeFormData(prev => ({ ...prev, imageUrl: e.target.value }))}
+                      data-testid="input-recipe-image-url"
+                      className="text-sm"
+                    />
+                    
+                    <ObjectUploader
+                      onGetUploadParameters={() => handleImageUpload('recipe')}
+                      onComplete={(result) => handleImageUploadComplete(result, 'recipe')}
+                      maxNumberOfFiles={1}
+                      buttonClassName="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      Upload Recipe Image
+                    </ObjectUploader>
+                    
+                    {recipeFormData.imageUrl && (
+                      <div className="mt-2 text-xs text-gray-600 break-all">
+                        Current image: {recipeFormData.imageUrl}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <Button 
                   onClick={handleRecipeSubmit} 
                   disabled={isSavingRecipe}
@@ -1021,14 +1068,13 @@ export default function Admin() {
                         </div>
                         
                         <ObjectUploader
-                          endpoint={() => handleImageUpload('inspiration', mediaUrlField)}
-                          onUploadSuccess={(result) => handleImageUploadComplete(result, 'inspiration', mediaUrlField)}
-                          accept={inspirationFormData[mediaTypeField] === 'image' ? 'image/*' : 
-                                 inspirationFormData[mediaTypeField] === 'audio' ? 'audio/*' : 
-                                 'video/*'}
-                          multiple={false}
-                          text={`Upload ${inspirationFormData[mediaTypeField]}`}
-                        />
+                          onGetUploadParameters={() => handleImageUpload('inspiration', mediaUrlField)}
+                          onComplete={(result) => handleImageUploadComplete(result, 'inspiration', mediaUrlField)}
+                          buttonClassName="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm"
+                        >
+                          <Image className="w-4 h-4 mr-2" />
+                          Upload {inspirationFormData[mediaTypeField]}
+                        </ObjectUploader>
                         
                         {inspirationFormData[mediaUrlField] && (
                           <div className="mt-2 text-xs text-gray-600 break-all">

@@ -1186,7 +1186,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Object storage endpoints for file uploads
-  app.post("/api/objects/upload", async (req, res) => {
+  app.post("/api/objects/upload", requireAdminAuth, async (req, res) => {
     try {
       const objectStorageService = new ObjectStorageService();
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
@@ -1213,7 +1213,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Handle image upload completion and set ACL policy
-  app.post("/api/images/upload-complete", async (req, res) => {
+  app.post("/api/images/upload-complete", requireAdminAuth, async (req, res) => {
     if (!req.body.imageURL) {
       return res.status(400).json({ error: "imageURL is required" });
     }
