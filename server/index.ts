@@ -27,7 +27,7 @@ app.use(helmet({
       imgSrc: ["'self'", "data:", "https:", "blob:"],
       connectSrc: isProduction
         ? ["'self'", "https://www.hebcal.com", "https://nominatim.openstreetmap.org", "https://www.google-analytics.com", "https://api.stripe.com", "https://ezrasnashim.app", "https://api.ezrasnashim.app"]
-        : ["'self'", "https://www.hebcal.com", "https://nominatim.openstreetmap.org", "https://www.google-analytics.com", "https://api.stripe.com", "https://*.replit.dev", "https://*.replit.app"],
+        : ["'self'", "https://www.hebcal.com", "https://nominatim.openstreetmap.org", "https://www.google-analytics.com", "https://api.stripe.com", "https://*.replit.dev", "https://*.replit.app", "https://*.repl.co"],
       mediaSrc: ["'self'", "https:", "blob:"],
       objectSrc: ["'none'"],
       frameSrc: ["'self'", "https://js.stripe.com"],
@@ -117,6 +117,7 @@ app.use(
         'http://127.0.0.1:5000',
         /\.replit\.dev$/,
         /\.replit\.app$/,
+        /\.repl\.co$/,
         'https://api.ezrasnashim.app',
         'https://staging.ezrasnashim.app',
         'https://ezrasnashim.app'
