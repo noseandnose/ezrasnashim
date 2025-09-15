@@ -126,9 +126,34 @@ import {
   insertDailyRecipeSchema,
   insertParshaVortSchema,
   insertTableInspirationSchema,
-  insertNishmasTextSchema
+  insertNishmasTextSchema,
+  insertMessagesSchema
 } from "../shared/schema.js";
 import { z } from "zod";
+
+// Admin authentication middleware
+function requireAdminAuth(req: any, res: any, next: any) {
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  
+  if (!adminPassword) {
+    return res.status(500).json({ 
+      message: "Admin authentication not configured" 
+    });
+  }
+  
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.startsWith('Bearer ') 
+    ? authHeader.slice(7) 
+    : null;
+  
+  if (!token || token !== adminPassword) {
+    return res.status(401).json({ 
+      message: "Unauthorized: Invalid admin credentials" 
+    });
+  }
+  
+  next();
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Schedule periodic cleanup of expired names (every hour)
@@ -3301,7 +3326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(version);
   });
 
-  // Messages routes
+  // Messages routes - Public endpoint for fetching messages by date (no auth required)
   app.get("/api/messages/:date", async (req, res) => {
     try {
       const { date } = req.params;
@@ -3317,17 +3342,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/messages", async (req, res) => {
+  // Admin-only endpoints - require authentication
+  app.post("/api/messages", requireAdminAuth, async (req, res) => {
     try {
-      const messageData = req.body;
-      const newMessage = await storage.createMessage(messageData);
+      // Validate request body with Zod schema
+      const validatedData = insertMessagesSchema.parse(req.body);
+      const newMessage = await storage.createMessage(validatedData);
       res.json(newMessage);
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ 
+          message: "Invalid message data", 
+          errors: error.errors 
+        });
+      }
+      console.error("Error creating message:", error);
       res.status(500).json({ message: "Failed to create message" });
     }
   });
 
-  app.get("/api/messages", async (req, res) => {
+  app.get("/api/messages", requireAdminAuth, async (req, res) => {
     try {
       const { upcoming } = req.query;
       const messages = upcoming === 'true' 
@@ -3335,27 +3369,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         : await storage.getAllMessages();
       res.json(messages);
     } catch (error) {
+      console.error("Error fetching messages:", error);
       res.status(500).json({ message: "Failed to fetch messages" });
     }
   });
 
-  app.put("/api/messages/:id", async (req, res) => {
+  app.put("/api/messages/:id", requireAdminAuth, async (req, res) => {
     try {
       const { id } = req.params;
-      const messageData = req.body;
-      const updatedMessage = await storage.updateMessage(parseInt(id), messageData);
+      // Validate request body with Zod schema (omit id and timestamps for updates)
+      const updateSchema = insertMessagesSchema.omit({ 
+        id: true, 
+        createdAt: true, 
+        updatedAt: true 
+      });
+      const validatedData = updateSchema.parse(req.body);
+      const updatedMessage = await storage.updateMessage(parseInt(id), validatedData);
       res.json(updatedMessage);
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ 
+          message: "Invalid message data", 
+          errors: error.errors 
+        });
+      }
+      console.error("Error updating message:", error);
       res.status(500).json({ message: "Failed to update message" });
     }
   });
 
-  app.delete("/api/messages/:id", async (req, res) => {
+  app.delete("/api/messages/:id", requireAdminAuth, async (req, res) => {
     try {
       const { id } = req.params;
       await storage.deleteMessage(parseInt(id));
       res.json({ success: true });
     } catch (error) {
+      console.error("Error deleting message:", error);
       res.status(500).json({ message: "Failed to delete message" });
     }
   });

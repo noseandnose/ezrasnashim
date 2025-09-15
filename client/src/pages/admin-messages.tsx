@@ -5,7 +5,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { apiRequest, queryClient } from '@/lib/queryClient';
+import { queryClient } from '@/lib/queryClient';
+import axiosClient from '@/lib/axiosClient';
 import { useQuery } from '@tanstack/react-query';
 import { MessageSquare, Plus, ArrowLeft, Save, Edit, Trash2, Bell, ChefHat } from 'lucide-react';
 import { Link } from 'wouter';
@@ -24,21 +25,66 @@ export default function AdminMessages() {
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
+  // Set up authorization headers for authenticated requests
+  const getAuthHeaders = () => ({
+    'Authorization': `Bearer ${adminPassword}`
+  });
+
   // Fetch upcoming messages if authenticated
   const { data: messages, refetch: refetchMessages } = useQuery({
     queryKey: ['/api/messages', { upcoming: true }],
     queryFn: async () => {
       if (!isAuthenticated) return [];
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/messages?upcoming=true`);
-      if (!response.ok) throw new Error('Failed to fetch messages');
-      return response.json();
+      try {
+        const response = await axiosClient.get('/api/messages?upcoming=true', {
+          headers: getAuthHeaders()
+        });
+        return response.data;
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          setIsAuthenticated(false);
+          throw new Error('Authentication expired');
+        }
+        throw error;
+      }
     },
     enabled: isAuthenticated,
   });
 
-  const handleLogin = () => {
-    if (adminPassword) {
+  const handleLogin = async () => {
+    if (!adminPassword) {
+      toast({
+        title: 'Password Required',
+        description: 'Please enter the admin password.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    try {
+      // Test authentication by trying to fetch messages
+      await axiosClient.get('/api/messages?upcoming=true', {
+        headers: { 'Authorization': `Bearer ${adminPassword}` }
+      });
       setIsAuthenticated(true);
+      toast({
+        title: 'Login Successful',
+        description: 'You are now authenticated as admin.',
+      });
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        toast({
+          title: 'Authentication Failed',
+          description: 'Invalid admin password.',
+          variant: 'destructive'
+        });
+      } else {
+        toast({
+          title: 'Login Error',
+          description: 'Unable to authenticate. Please try again.',
+          variant: 'destructive'
+        });
+      }
     }
   };
 
@@ -85,14 +131,18 @@ export default function AdminMessages() {
       let response;
       if (editingMessage) {
         // Update existing message
-        response = await apiRequest('PUT', `/api/messages/${editingMessage.id}`, messageData);
+        response = await axiosClient.put(`/api/messages/${editingMessage.id}`, messageData, {
+          headers: getAuthHeaders()
+        });
         toast({
           title: 'Message Updated!',
           description: `Message for ${format(new Date(formData.date), "MMMM d, yyyy")} has been updated successfully.`,
         });
       } else {
         // Create new message
-        response = await apiRequest('POST', '/api/messages', messageData);
+        response = await axiosClient.post('/api/messages', messageData, {
+          headers: getAuthHeaders()
+        });
         toast({
           title: 'Message Created!',
           description: `Message for ${format(new Date(formData.date), "MMMM d, yyyy")} has been saved successfully.`,
@@ -113,11 +163,20 @@ export default function AdminMessages() {
         queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
       }
     } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error?.response?.data?.message || error?.message || 'Failed to save message.',
-        variant: 'destructive'
-      });
+      if (error.response?.status === 401) {
+        setIsAuthenticated(false);
+        toast({
+          title: 'Authentication Error',
+          description: 'Your session has expired. Please log in again.',
+          variant: 'destructive'
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: error?.response?.data?.message || error?.message || 'Failed to save message.',
+          variant: 'destructive'
+        });
+      }
     } finally {
       setIsSaving(false);
     }
@@ -129,7 +188,9 @@ export default function AdminMessages() {
     }
 
     try {
-      await apiRequest('DELETE', `/api/messages/${message.id}`);
+      await axiosClient.delete(`/api/messages/${message.id}`, {
+        headers: getAuthHeaders()
+      });
       toast({
         title: 'Message Deleted',
         description: `Message for ${format(new Date(message.date), "MMMM d, yyyy")} has been deleted.`,
@@ -139,11 +200,20 @@ export default function AdminMessages() {
       refetchMessages();
       queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
     } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error?.response?.data?.message || error?.message || 'Failed to delete message.',
-        variant: 'destructive'
-      });
+      if (error.response?.status === 401) {
+        setIsAuthenticated(false);
+        toast({
+          title: 'Authentication Error',
+          description: 'Your session has expired. Please log in again.',
+          variant: 'destructive'
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: error?.response?.data?.message || error?.message || 'Failed to delete message.',
+          variant: 'destructive'
+        });
+      }
     }
   };
 
