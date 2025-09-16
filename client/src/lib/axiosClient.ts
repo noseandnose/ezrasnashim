@@ -12,8 +12,9 @@ function getBaseURL() {
   if (window.location.hostname.includes('replit.dev') || 
       window.location.hostname.includes('replit.app') || 
       window.location.hostname.includes('repl.co')) {
-    // In Replit, the backend and frontend run on the same port/domain
-    return `${window.location.protocol}//${window.location.host}`;
+    // In Replit, use relative URLs to avoid CORS issues
+    // This makes all API calls relative to the current origin
+    return '';
   }
   
   // Default for local development
