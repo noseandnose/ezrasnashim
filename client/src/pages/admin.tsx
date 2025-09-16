@@ -943,22 +943,69 @@ export default function Admin() {
             {/* Existing Recipes */}
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-4">Recent Recipes</h2>
-              <div className="space-y-3 max-h-96 overflow-y-auto">
+              <div className="space-y-3 max-h-[600px] overflow-y-auto">
                 {recipes && recipes.length > 0 ? (
-                  recipes.slice(0, 10).map((recipe: any) => (
-                    <div 
-                      key={recipe.id} 
-                      className="p-3 bg-gray-50 rounded-lg"
-                      data-testid={`recipe-item-${recipe.id}`}
-                    >
-                      <div className="font-medium text-sm text-gray-900">
-                        {format(new Date(recipe.date), 'MMM dd, yyyy')} - {recipe.title}
+                  recipes.slice(0, 15).map((recipe: any) => {
+                    const recipeDate = new Date(recipe.date);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const isFuture = recipeDate >= today;
+                    
+                    return (
+                      <div 
+                        key={recipe.id} 
+                        className="p-3 bg-gray-50 rounded-lg"
+                        data-testid={`recipe-item-${recipe.id}`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium text-sm text-gray-900">
+                              {format(new Date(recipe.date), 'MMM dd, yyyy')} - {recipe.title}
+                            </div>
+                            <div className="text-sm text-gray-600 mt-1">
+                              {recipe.description || 'No description'}
+                            </div>
+                          </div>
+                          
+                          {/* Only show edit/delete for future recipes */}
+                          {isFuture && (
+                            <div className="flex gap-2 ml-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  // Handle edit recipe - you can implement this later
+                                  toast({
+                                    title: "Edit Recipe",
+                                    description: "Recipe editing feature coming soon"
+                                  });
+                                }}
+                                data-testid={`button-edit-recipe-${recipe.id}`}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  // Handle delete recipe - you can implement this later
+                                  if (confirm('Are you sure you want to delete this recipe?')) {
+                                    toast({
+                                      title: "Delete Recipe",
+                                      description: "Recipe deletion feature coming soon"
+                                    });
+                                  }
+                                }}
+                                data-testid={`button-delete-recipe-${recipe.id}`}
+                              >
+                                <Trash2 className="w-4 h-4 text-red-500" />
+                              </Button>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div className="text-sm text-gray-600 mt-1">
-                        {recipe.description || 'No description'}
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     No recipes found
@@ -1126,74 +1173,85 @@ export default function Admin() {
               </h2>
               
               {inspirations && inspirations.length > 0 ? (
-                <div className="space-y-4 max-h-96 overflow-y-auto">
-                  {inspirations.map((inspiration: any) => (
-                    <div key={inspiration.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{inspiration.title}</h3>
-                          <p className="text-sm text-gray-600">
-                            {format(new Date(inspiration.fromDate), 'MMM d')} - {format(new Date(inspiration.untilDate), 'MMM d, yyyy')}
-                          </p>
+                <div className="space-y-4 max-h-[600px] overflow-y-auto">
+                  {inspirations.map((inspiration: any) => {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const untilDate = new Date(inspiration.untilDate);
+                    const isFuture = untilDate >= today;
+                    
+                    return (
+                      <div key={inspiration.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-900">{inspiration.title}</h3>
+                            <p className="text-sm text-gray-600">
+                              {format(new Date(inspiration.fromDate), 'MMM d')} - {format(new Date(inspiration.untilDate), 'MMM d, yyyy')}
+                            </p>
+                          </div>
+                          
+                          {/* Only show edit/delete for future inspirations */}
+                          {isFuture && (
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingInspiration(inspiration);
+                                  setInspirationFormData({
+                                    fromDate: inspiration.fromDate,
+                                    untilDate: inspiration.untilDate,
+                                    title: inspiration.title,
+                                    content: inspiration.content,
+                                    mediaUrl1: inspiration.mediaUrl1 || '',
+                                    mediaType1: inspiration.mediaType1 || 'image',
+                                    mediaUrl2: inspiration.mediaUrl2 || '',
+                                    mediaType2: inspiration.mediaType2 || 'image',
+                                    mediaUrl3: inspiration.mediaUrl3 || '',
+                                    mediaType3: inspiration.mediaType3 || 'image',
+                                    mediaUrl4: inspiration.mediaUrl4 || '',
+                                    mediaType4: inspiration.mediaType4 || 'image',
+                                    mediaUrl5: inspiration.mediaUrl5 || '',
+                                    mediaType5: inspiration.mediaType5 || 'image'
+                                  });
+                                }}
+                                data-testid={`button-edit-inspiration-${inspiration.id}`}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDeleteInspiration(inspiration)}
+                                data-testid={`button-delete-inspiration-${inspiration.id}`}
+                              >
+                                <Trash2 className="w-4 h-4 text-red-500" />
+                              </Button>
+                            </div>
+                          )}
                         </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setEditingInspiration(inspiration);
-                              setInspirationFormData({
-                                fromDate: inspiration.fromDate,
-                                untilDate: inspiration.untilDate,
-                                title: inspiration.title,
-                                content: inspiration.content,
-                                mediaUrl1: inspiration.mediaUrl1 || '',
-                                mediaType1: inspiration.mediaType1 || 'image',
-                                mediaUrl2: inspiration.mediaUrl2 || '',
-                                mediaType2: inspiration.mediaType2 || 'image',
-                                mediaUrl3: inspiration.mediaUrl3 || '',
-                                mediaType3: inspiration.mediaType3 || 'image',
-                                mediaUrl4: inspiration.mediaUrl4 || '',
-                                mediaType4: inspiration.mediaType4 || 'image',
-                                mediaUrl5: inspiration.mediaUrl5 || '',
-                                mediaType5: inspiration.mediaType5 || 'image'
-                              });
-                            }}
-                            data-testid={`button-edit-inspiration-${inspiration.id}`}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDeleteInspiration(inspiration)}
-                            data-testid={`button-delete-inspiration-${inspiration.id}`}
-                          >
-                            <Trash2 className="w-4 h-4 text-red-500" />
-                          </Button>
+                        
+                        <p className="text-sm text-gray-700 mb-2 leading-relaxed">{inspiration.content}</p>
+                        
+                        {/* Show media files if any */}
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {[1, 2, 3, 4, 5].map(index => {
+                            const mediaUrl = inspiration[`mediaUrl${index}`];
+                            const mediaType = inspiration[`mediaType${index}`];
+                            if (mediaUrl) {
+                              return (
+                                <span key={index} className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-200 text-gray-700">
+                                  <Image className="w-3 h-3 mr-1" />
+                                  {mediaType} {index}
+                                </span>
+                              );
+                            }
+                            return null;
+                          })}
                         </div>
                       </div>
-                      
-                      <p className="text-sm text-gray-700 mb-2">{inspiration.content}</p>
-                      
-                      {/* Show media files if any */}
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {[1, 2, 3, 4, 5].map(index => {
-                          const mediaUrl = inspiration[`mediaUrl${index}`];
-                          const mediaType = inspiration[`mediaType${index}`];
-                          if (mediaUrl) {
-                            return (
-                              <span key={index} className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-200 text-gray-700">
-                                <Image className="w-3 h-3 mr-1" />
-                                {mediaType} {index}
-                              </span>
-                            );
-                          }
-                          return null;
-                        })}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
