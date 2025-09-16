@@ -161,7 +161,7 @@ export default function TorahSection({}: TorahSectionProps) {
                 <Scroll className="text-white" size={16} />
               </div>
               <h3 className="platypi-bold text-sm text-black">Pirkei Avot</h3>
-              <span className="text-xs text-black/60 platypi-regular">{pirkeiAvot.source.replace('.', ':')}</span>
+              <span className="text-xs text-black/60 platypi-regular">{pirkeiAvot.source?.replace('.', ':') || ''}</span>
             </div>
             <p className="koren-siddur-english text-base text-black font-bold leading-relaxed text-justify">
               {pirkeiAvot.text}
