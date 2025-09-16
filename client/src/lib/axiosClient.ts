@@ -3,30 +3,12 @@ import axios, { AxiosResponse, AxiosError } from 'axios';
 
 // Determine the correct base URL for API calls
 function getBaseURL() {
-  // Check for Replit environment FIRST - use relative URLs to avoid CORS
-  if (window.location.hostname.includes('replit.dev') || 
-      window.location.hostname.includes('replit.app') || 
-      window.location.hostname.includes('repl.co')) {
-    // In Replit, always use relative URLs to avoid CORS issues
-    // This ensures all API calls are same-origin
-    return '';
-  }
-  
-  // Use VITE_API_URL if it's set (for non-Replit environments)
+  // Use VITE_API_URL if it's set
   if (import.meta.env.VITE_API_URL) {
-    // If VITE_API_URL points to the same hostname, use relative URLs
-    try {
-      const apiUrl = new URL(import.meta.env.VITE_API_URL);
-      if (apiUrl.hostname === window.location.hostname) {
-        return ''; // Use relative URLs if same hostname
-      }
-    } catch (e) {
-      // If parsing fails, use the value as-is
-    }
     return import.meta.env.VITE_API_URL;
   }
   
-  // Default for local development
+  // Default for local development - backend runs on port 5000
   return 'http://localhost:5000';
 }
 
