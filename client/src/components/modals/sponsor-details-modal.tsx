@@ -20,9 +20,14 @@ export default function SponsorDetailsModal() {
   const { data: sponsor } = useQuery<Sponsor>({
     queryKey: ['daily-sponsor', today, 'v2'], // Added version to match home section
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sponsors/daily/${today}?t=${Date.now()}`);
-      if (!response.ok) return null;
-      return response.json();
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sponsors/daily/${today}?t=${Date.now()}`);
+        if (!response.ok) return null;
+        return response.json();
+      } catch (error) {
+        console.error('Failed to fetch sponsor:', error);
+        return null;
+      }
     },
     staleTime: 0, // No caching
     gcTime: 1000, // Short cache time
