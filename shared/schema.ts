@@ -529,6 +529,20 @@ export const insertParshaVortSchema = createInsertSchema(parshaVorts).omit({
 export const insertTableInspirationSchema = createInsertSchema(tableInspirations).omit({
   id: true,
   createdAt: true,
+}).refine(data => {
+  // Data integrity: Only allow mediaType when corresponding mediaUrl exists
+  const mediaFields = [1, 2, 3, 4, 5];
+  for (const num of mediaFields) {
+    const urlKey = `mediaUrl${num}` as keyof typeof data;
+    const typeKey = `mediaType${num}` as keyof typeof data;
+    
+    if (!data[urlKey] && data[typeKey]) {
+      return false; // mediaType set without mediaUrl
+    }
+  }
+  return true;
+}, {
+  message: "mediaType can only be set when corresponding mediaUrl exists"
 });
 
 export const insertCommunityImpactSchema = createInsertSchema(communityImpact).omit({

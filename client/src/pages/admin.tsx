@@ -427,13 +427,19 @@ export default function Admin() {
 
     setIsSavingInspiration(true);
     try {
+      // Only include mediaType when mediaUrl exists for data integrity
       const inspirationData = {
         ...inspirationFormData,
         mediaUrl1: inspirationFormData.mediaUrl1 || null,
+        mediaType1: inspirationFormData.mediaUrl1 ? inspirationFormData.mediaType1 : null,
         mediaUrl2: inspirationFormData.mediaUrl2 || null,
+        mediaType2: inspirationFormData.mediaUrl2 ? inspirationFormData.mediaType2 : null,
         mediaUrl3: inspirationFormData.mediaUrl3 || null,
+        mediaType3: inspirationFormData.mediaUrl3 ? inspirationFormData.mediaType3 : null,
         mediaUrl4: inspirationFormData.mediaUrl4 || null,
-        mediaUrl5: inspirationFormData.mediaUrl5 || null
+        mediaType4: inspirationFormData.mediaUrl4 ? inspirationFormData.mediaType4 : null,
+        mediaUrl5: inspirationFormData.mediaUrl5 || null,
+        mediaType5: inspirationFormData.mediaUrl5 ? inspirationFormData.mediaType5 : null
       };
 
       let response;
