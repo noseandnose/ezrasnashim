@@ -25,6 +25,11 @@ export const getQueryFn: <T>(options: {
     try {
       let url = queryKey[0] as string;
       
+      // Skip custom query keys that aren't API endpoints
+      if (!url.startsWith('/api/') && !url.startsWith('http')) {
+        throw new Error(`Query key "${url}" is not a valid API endpoint. Custom queries should define their own queryFn.`);
+      }
+      
       // If there are additional parameters in the queryKey, append them to the URL
       if (queryKey.length > 1) {
         const params = queryKey.slice(1);
