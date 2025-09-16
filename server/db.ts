@@ -13,8 +13,8 @@ const isStaging = process.env.NODE_ENV == 'staging';
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
   ssl: isStaging ? false : { rejectUnauthorized: false },
-  max: 25, // Increased pool size to handle more concurrent users
-  min: 5, // Keep more connections warm
+  max: 100, // Large pool size for high concurrent load (can handle hundreds of users)
+  min: 10, // Keep sufficient connections warm for quick response
   idleTimeoutMillis: 30000, // Increased idle timeout to reduce reconnections
   connectionTimeoutMillis: 10000, // Increased connection timeout for reliability
   keepAlive: true, // Keep connections alive
