@@ -51,7 +51,8 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **Time-based Prayer System**: Dynamic prayer buttons based on zmanim.
 - **Text Cleaning**: Enhanced Hebrew text cleaning to preserve vowels/cantillation and ensure proper display of newlines.
 - **Dynamic Thank You Messages**: Custom thank you messages for daily recipes with markdown link support, replacing hardcoded attributions.
-- **Admin Content Management**: Recipe management interface at `/admin/recipes` for creating and managing daily recipes with custom thank you messages.
+- **Unified Admin Interface**: Complete admin dashboard at `/admin` with secure authentication featuring four main tabs: Messages (daily inspiration messages), Recipes (daily recipe management with image upload), Table Inspirations (table setting content with multiple image support), and Notifications (push notification history). All content management includes full CRUD operations with proper validation and security controls.
+- **Secure Image Upload System**: Object storage integration with authenticated image upload functionality for both recipes and table inspirations, supporting both URL input and direct file upload with proper access control.
 - **Audio Auto-Completion**: Daily Chizuk and Daily Emuna audio content automatically triggers completion when users finish listening, enhancing user engagement.
 - **Mobile App Support**: Enhanced detection and user guidance for mobile app wrappers (FlutterFlow, etc.) with intelligent permission prompts for location, compass, and notifications. Provides step-by-step instructions for enabling native app permissions on iOS/Android.
 

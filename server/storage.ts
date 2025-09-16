@@ -77,6 +77,9 @@ export interface IStorage {
   // Table inspiration methods
   getTableInspirationByDate(date: string): Promise<TableInspiration | undefined>;
   createTableInspiration(inspiration: InsertTableInspiration): Promise<TableInspiration>;
+  getAllTableInspirations(): Promise<TableInspiration[]>;
+  updateTableInspiration(id: number, inspiration: InsertTableInspiration): Promise<TableInspiration | undefined>;
+  deleteTableInspiration(id: number): Promise<boolean>;
 
   // Community impact methods
   getCommunityImpactByDate(date: string): Promise<CommunityImpact | undefined>;
@@ -91,6 +94,11 @@ export interface IStorage {
   getRandomNameForPerek(): Promise<TehillimName | undefined>;
   getProgressWithAssignedName(): Promise<any>;
   getSefariaTehillim(perek: number, language: string): Promise<{text: string; perek: number; language: string}>;
+  getSupabaseTehillim(englishNumber: number, language: string): Promise<{text: string; perek: number; language: string}>;
+  getSupabaseTehillimById(id: number): Promise<{id: number; englishNumber: number; partNumber: number; hebrewNumber: string; hebrewText: string; englishText: string;} | null>;
+  getSupabaseTehillimByEnglishAndPart(englishNumber: number, partNumber: number): Promise<{id: number; englishNumber: number; partNumber: number; hebrewNumber: string; hebrewText: string; englishText: string;} | null>;
+  getTehillimById(id: number, language: string): Promise<{text: string; perek: number; language: string}>;
+  getSupabaseTehillimPreview(id: number, language: string): Promise<{preview: string; englishNumber: number; partNumber: number; language: string;} | null>;
 
   // Mincha methods
   getMinchaPrayers(): Promise<MinchaPrayer[]>;
@@ -185,6 +193,10 @@ export interface IStorage {
   // Message methods
   getMessageByDate(date: string): Promise<Message | undefined>;
   createMessage(message: InsertMessage): Promise<Message>;
+  getAllMessages(): Promise<Message[]>;
+  getUpcomingMessages(): Promise<Message[]>;
+  updateMessage(id: number, message: Partial<InsertMessage>): Promise<Message>;
+  deleteMessage(id: number): Promise<void>;
   
   // Push notification methods
   subscribeToPush(subscription: InsertPushSubscription): Promise<PushSubscription>;
@@ -573,6 +585,33 @@ export class DatabaseStorage implements IStorage {
       return row || null;
     } catch (error) {
       console.error('Error fetching Tehillim by ID:', error);
+      return null;
+    }
+  }
+
+  // Get specific Tehillim part by English number and part number
+  async getSupabaseTehillimByEnglishAndPart(englishNumber: number, partNumber: number): Promise<{
+    id: number;
+    englishNumber: number;
+    partNumber: number;
+    hebrewNumber: string;
+    hebrewText: string;
+    englishText: string;
+  } | null> {
+    try {
+      const [row] = await db
+        .select()
+        .from(tehillim)
+        .where(
+          and(
+            eq(tehillim.englishNumber, englishNumber),
+            eq(tehillim.partNumber, partNumber)
+          )
+        );
+
+      return row || null;
+    } catch (error) {
+      console.error('Error fetching Tehillim by English number and part from Supabase:', error);
       return null;
     }
   }
@@ -1004,7 +1043,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createDailyRecipe(insertRecipe: InsertDailyRecipe): Promise<DailyRecipe> {
-    const [recipe] = await db.insert(dailyRecipes).values(insertRecipe).returning();
+    // Find the maximum ID currently in the table
+    const [maxIdResult] = await db
+      .select({ maxId: sql<number>`COALESCE(MAX(${dailyRecipes.id}), 0)` })
+      .from(dailyRecipes);
+    
+    const nextId = (maxIdResult?.maxId || 0) + 1;
+    
+    // Insert with explicit ID to avoid sequence issues
+    const [recipe] = await db
+      .insert(dailyRecipes)
+      .values({ ...insertRecipe, id: nextId })
+      .returning();
     return recipe;
   }
 
@@ -1331,11 +1381,43 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createTableInspiration(insertInspiration: InsertTableInspiration): Promise<TableInspiration> {
+    // Find the maximum ID currently in the table
+    const [maxIdResult] = await db
+      .select({ maxId: sql<number>`COALESCE(MAX(${tableInspirations.id}), 0)` })
+      .from(tableInspirations);
+    
+    const nextId = (maxIdResult?.maxId || 0) + 1;
+    
+    // Insert with explicit ID to avoid sequence issues
     const [inspiration] = await db
       .insert(tableInspirations)
-      .values(insertInspiration)
+      .values({ ...insertInspiration, id: nextId })
       .returning();
     return inspiration;
+  }
+
+  async getAllTableInspirations(): Promise<TableInspiration[]> {
+    return await db
+      .select()
+      .from(tableInspirations)
+      .orderBy(tableInspirations.fromDate);
+  }
+
+  async updateTableInspiration(id: number, insertInspiration: InsertTableInspiration): Promise<TableInspiration | undefined> {
+    const [inspiration] = await db
+      .update(tableInspirations)
+      .set(insertInspiration)
+      .where(eq(tableInspirations.id, id))
+      .returning();
+    return inspiration;
+  }
+
+  async deleteTableInspiration(id: number): Promise<boolean> {
+    const deletedRows = await db
+      .delete(tableInspirations)
+      .where(eq(tableInspirations.id, id))
+      .returning({ id: tableInspirations.id });
+    return deletedRows.length > 0;
   }
 
   async getCommunityImpactByDate(date: string): Promise<CommunityImpact | undefined> {
@@ -1857,11 +1939,50 @@ export class DatabaseStorage implements IStorage {
   }
   
   async createMessage(message: InsertMessage): Promise<Message> {
+    // Find the maximum ID currently in the table
+    const [maxIdResult] = await db
+      .select({ maxId: sql<number>`COALESCE(MAX(${messages.id}), 0)` })
+      .from(messages);
+    
+    const nextId = (maxIdResult?.maxId || 0) + 1;
+    
+    // Insert with explicit ID to avoid sequence issues
     const [newMessage] = await db
       .insert(messages)
-      .values(message)
+      .values({ ...message, id: nextId })
       .returning();
     return newMessage;
+  }
+
+  async getAllMessages(): Promise<Message[]> {
+    return await db
+      .select()
+      .from(messages)
+      .orderBy(messages.date);
+  }
+
+  async getUpcomingMessages(): Promise<Message[]> {
+    const today = new Date().toISOString().split('T')[0];
+    return await db
+      .select()
+      .from(messages)
+      .where(gte(messages.date, today))
+      .orderBy(messages.date);
+  }
+
+  async updateMessage(id: number, messageData: Partial<InsertMessage>): Promise<Message> {
+    const [updatedMessage] = await db
+      .update(messages)
+      .set({ ...messageData, updatedAt: new Date() })
+      .where(eq(messages.id, id))
+      .returning();
+    return updatedMessage;
+  }
+
+  async deleteMessage(id: number): Promise<void> {
+    await db
+      .delete(messages)
+      .where(eq(messages.id, id));
   }
   
   // Push notification methods
@@ -1909,9 +2030,17 @@ export class DatabaseStorage implements IStorage {
   }
   
   async createNotification(notification: InsertPushNotification): Promise<PushNotification> {
+    // Find the maximum ID currently in the table
+    const [maxIdResult] = await db
+      .select({ maxId: sql<number>`COALESCE(MAX(${pushNotifications.id}), 0)` })
+      .from(pushNotifications);
+    
+    const nextId = (maxIdResult?.maxId || 0) + 1;
+    
+    // Insert with explicit ID to avoid sequence issues
     const [newNotification] = await db
       .insert(pushNotifications)
-      .values(notification)
+      .values({ ...notification, id: nextId })
       .returning();
     return newNotification;
   }

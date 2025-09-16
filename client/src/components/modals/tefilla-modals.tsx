@@ -1345,11 +1345,37 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
   const { trackModalComplete } = useTrackModalComplete();
   const tefillaConditions = useTefillaConditions();
 
-  const { data: tehillimText, isLoading } = useQuery({
-    queryKey: ['/api/tehillim/text', selectedPsalm, language],
+  // First get tehillim info to check if this is a specific part (by ID) or full psalm (by English number)
+  const { data: tehillimInfo } = useQuery<{
+    id: number;
+    englishNumber: number;
+    partNumber: number;
+    hebrewNumber: string;
+  }>({
+    queryKey: ['/api/tehillim/info', selectedPsalm],
     queryFn: async () => {
-      const response = await axiosClient.get(`/api/tehillim/text/${selectedPsalm}?language=${language}`);
-      return response.data;
+      if (!selectedPsalm) return null;
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/info/${selectedPsalm}`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    enabled: !!selectedPsalm,
+    staleTime: 0
+  });
+
+  // Use by-id endpoint if we have tehillim info (meaning selectedPsalm is an ID), otherwise use English number endpoint
+  const { data: tehillimText, isLoading } = useQuery({
+    queryKey: tehillimInfo ? ['/api/tehillim/text/by-id', selectedPsalm, language] : ['/api/tehillim/text', selectedPsalm, language],
+    queryFn: async () => {
+      if (tehillimInfo) {
+        // This is a specific part - use by-id endpoint
+        const response = await axiosClient.get(`/api/tehillim/text/by-id/${selectedPsalm}?language=${language}`);
+        return response.data;
+      } else {
+        // This is a full psalm - use English number endpoint
+        const response = await axiosClient.get(`/api/tehillim/text/${selectedPsalm}?language=${language}`);
+        return response.data;
+      }
     },
     enabled: !!selectedPsalm,
     staleTime: 10 * 60 * 1000, // 10 minutes
@@ -1389,7 +1415,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     }, 50);
   };
 
-  const handleCompleteAndNext = () => {
+  const handleCompleteAndNext = async () => {
     if (!selectedPsalm) return;
     
     trackModalComplete(completionKey);
@@ -1397,8 +1423,42 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     completeTask('tefilla');
     checkAndShowCongratulations();
     
-    // Move to next psalm (only for 1-150 sequence)
-    const nextPsalm = selectedPsalm < 150 ? selectedPsalm + 1 : 1;
+    // Determine next psalm based on whether this is a specific part (by ID) or full psalm (by English number)
+    let nextPsalm: number;
+    
+    if (tehillimInfo) {
+      // This is a specific part by ID - handle 119 parts specially
+      if (tehillimInfo.englishNumber === 119) {
+        // For psalm 119, move to next part or to psalm 120 if this is the last part
+        // Psalm 119 has 22 parts (parts 1-22)
+        if (tehillimInfo.partNumber < 22) {
+          // Move to next part of 119 - get the next part ID from the server
+          try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/next-part/${selectedPsalm}`);
+            if (response.ok) {
+              const nextPartData = await response.json();
+              nextPsalm = nextPartData.id;
+            } else {
+              // Fallback to next English number if API fails
+              nextPsalm = 120;
+            }
+          } catch (error) {
+            console.error('Failed to get next Tehillim part:', error);
+            // Fallback to next English number
+            nextPsalm = 120;
+          }
+        } else {
+          // Last part of 119, move to psalm 120
+          nextPsalm = 120;
+        }
+      } else {
+        // For other specific parts, move to next psalm
+        nextPsalm = Math.min(tehillimInfo.englishNumber + 1, 150);
+      }
+    } else {
+      // This is a full psalm by English number - use simple increment
+      nextPsalm = selectedPsalm < 150 ? selectedPsalm + 1 : 1;
+    }
     
     // Update the selected psalm in the store
     const { setSelectedPsalm } = useModalStore.getState();
@@ -1517,11 +1577,11 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
   // Use locked perek instead of live progress to prevent auto-refresh
   const activePerek = lockedPerek || progress?.currentPerek;
 
-  // Get current psalm text using the locked perek
+  // Get current psalm text using the locked perek (using by-id endpoint for proper part handling)
   const { data: tehillimText, isLoading } = useQuery({
-    queryKey: ['/api/tehillim/text', activePerek, language],
+    queryKey: ['/api/tehillim/text/by-id', activePerek, language],
     queryFn: async () => {
-      const response = await axiosClient.get(`/api/tehillim/text/${activePerek}?language=${language}`);
+      const response = await axiosClient.get(`/api/tehillim/text/by-id/${activePerek}?language=${language}`);
       return response.data;
     },
     enabled: !!activePerek,
@@ -1994,13 +2054,37 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       }
       
       // Open fullscreen for global tehillim with the next perek
-      setFullscreenContent({
-        isOpen: true,
-        title: `Perek ${nextPerek}`,
-        contentType: 'global-tehillim',
-        content: null,
-        hasTranslation: true
-      });
+      // Get the proper title using tehillim info
+      fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/info/${nextPerek}`)
+        .then(response => response.ok ? response.json() : null)
+        .then(tehillimInfo => {
+          let title = `Perek ${nextPerek}`;
+          if (tehillimInfo) {
+            if (tehillimInfo.partNumber > 1) {
+              title = `Tehillim ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber}`;
+            } else {
+              title = `Tehillim ${tehillimInfo.englishNumber}`;
+            }
+          }
+          
+          setFullscreenContent({
+            isOpen: true,
+            title: title,
+            contentType: 'global-tehillim',
+            content: null,
+            hasTranslation: true
+          });
+        })
+        .catch(() => {
+          // Fallback to basic title if API fails
+          setFullscreenContent({
+            isOpen: true,
+            title: `Perek ${nextPerek}`,
+            contentType: 'global-tehillim',
+            content: null,
+            hasTranslation: true
+          });
+        });
     };
 
     window.addEventListener('closeFullscreen', handleCloseFullscreen);
@@ -2040,7 +2124,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           title = 'Nishmas Kol Chai';
           break;
         case 'individual-tehillim':
-          title = `Tehillim ${selectedPsalm}`;
+          title = `Tehillim ${selectedPsalm}`; // Will be updated by useEffect
           contentType = 'individual-tehillim';
           break;
         case 'tehillim-text':
@@ -2073,10 +2157,31 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   // Update fullscreen title when selectedPsalm changes for individual Tehillim
   useEffect(() => {
     if (fullscreenContent.isOpen && fullscreenContent.contentType === 'individual-tehillim' && selectedPsalm) {
-      setFullscreenContent(current => ({
-        ...current,
-        title: `Tehillim ${selectedPsalm}`
-      }));
+      // Get current tehillim info to construct proper title
+      fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/info/${selectedPsalm}`)
+        .then(response => response.ok ? response.json() : null)
+        .then(tehillimInfo => {
+          let title = `Tehillim ${selectedPsalm}`;
+          if (tehillimInfo) {
+            if (tehillimInfo.partNumber > 1) {
+              title = `Tehillim ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber}`;
+            } else {
+              title = `Tehillim ${tehillimInfo.englishNumber}`;
+            }
+          }
+          
+          setFullscreenContent(current => ({
+            ...current,
+            title: title
+          }));
+        })
+        .catch(() => {
+          // Fallback to selectedPsalm if API fails
+          setFullscreenContent(current => ({
+            ...current,
+            title: `Tehillim ${selectedPsalm}`
+          }));
+        });
     }
   }, [selectedPsalm, fullscreenContent.isOpen, fullscreenContent.contentType]);
 
@@ -3930,11 +4035,37 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
   // Load Tefilla conditions for conditional content processing
   const tefillaConditions = useTefillaConditions();
 
-  const { data: tehillimText, isLoading } = useQuery({
-    queryKey: ['/api/tehillim/text', selectedPsalm, language],
+  // First get tehillim info to check if this is a specific part (by ID) or full psalm (by English number)
+  const { data: tehillimInfo } = useQuery<{
+    id: number;
+    englishNumber: number;
+    partNumber: number;
+    hebrewNumber: string;
+  }>({
+    queryKey: ['/api/tehillim/info', selectedPsalm],
     queryFn: async () => {
-      const response = await axiosClient.get(`/api/tehillim/text/${selectedPsalm}?language=${language}`);
-      return response.data;
+      if (!selectedPsalm) return null;
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/info/${selectedPsalm}`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    enabled: !!selectedPsalm,
+    staleTime: 0
+  });
+
+  // Use by-id endpoint if we have tehillim info (meaning selectedPsalm is an ID), otherwise use English number endpoint
+  const { data: tehillimText, isLoading } = useQuery({
+    queryKey: tehillimInfo ? ['/api/tehillim/text/by-id', selectedPsalm, language] : ['/api/tehillim/text', selectedPsalm, language],
+    queryFn: async () => {
+      if (tehillimInfo) {
+        // This is a specific part - use by-id endpoint
+        const response = await axiosClient.get(`/api/tehillim/text/by-id/${selectedPsalm}?language=${language}`);
+        return response.data;
+      } else {
+        // This is a full psalm - use English number endpoint
+        const response = await axiosClient.get(`/api/tehillim/text/${selectedPsalm}?language=${language}`);
+        return response.data;
+      }
     },
     enabled: !!selectedPsalm,
     staleTime: 10 * 60 * 1000, // 10 minutes
@@ -3947,9 +4078,19 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
       // Check if fullscreen is already open and update content
       setFullscreenContent((current: any) => {
         if (current.isOpen && current.title?.includes('Tehillim')) {
+          // Construct proper title using tehillimInfo if available
+          let title = `Tehillim ${selectedPsalm}`;
+          if (tehillimInfo) {
+            if (tehillimInfo.partNumber > 1) {
+              title = `Tehillim ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber}`;
+            } else {
+              title = `Tehillim ${tehillimInfo.englishNumber}`;
+            }
+          }
+          
           return {
             isOpen: true,
-            title: `Tehillim ${selectedPsalm}`,
+            title: title,
             content: (
               <div className="space-y-4">
                 <div className="bg-white rounded-2xl p-6 border border-blush/10">
@@ -4071,7 +4212,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
         return current;
       });
     }
-  }, [selectedPsalm, tehillimText, language, fontSize, tehillimActiveTab, setFullscreenContent]);
+  }, [selectedPsalm, tehillimText, language, fontSize, tehillimActiveTab, setFullscreenContent, tehillimInfo]);
 
   return (
     <>
@@ -4079,9 +4220,19 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
       {setFullscreenContent && tehillimText && (
         <button
           onClick={() => {
+            // Construct proper title using tehillimInfo if available
+            let title = `Tehillim ${selectedPsalm}`;
+            if (tehillimInfo) {
+              if (tehillimInfo.partNumber > 1) {
+                title = `Tehillim ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber}`;
+              } else {
+                title = `Tehillim ${tehillimInfo.englishNumber}`;
+              }
+            }
+            
             setFullscreenContent({
               isOpen: true,
-              title: `Tehillim ${selectedPsalm}`,
+              title: title,
               content: (
                 <div className="space-y-4">
                   <div className="bg-white rounded-2xl p-6 border border-blush/10">

@@ -509,6 +509,43 @@ button, .btn, [role="button"] {
   color: #000000 !important;
 }
 
+/* Additional CSS variables for admin interface */
+:root {
+  --rose-blush-hover: hsl(350, 45%, 70%);
+  --rose-icon-bg: hsl(350, 45%, 95%);
+  --rose-icon-text: hsl(350, 45%, 65%);
+  --rose-bg-light: hsl(350, 45%, 96%);
+}
+
+/* Admin Interface Utility Classes */
+.admin-btn-primary {
+  background-color: var(--rose-blush) !important;
+  color: white !important;
+  transition: background-color 0.2s ease;
+}
+
+.admin-btn-primary:hover {
+  background-color: var(--rose-blush-hover) !important;
+}
+
+.admin-tab-active {
+  background-color: var(--rose-blush) !important;
+  color: white !important;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+
+.admin-bg-gradient {
+  background: linear-gradient(135deg, var(--ivory) 0%, var(--rose-bg-light) 50%, var(--muted-lavender) 100%);
+}
+
+.admin-icon-bg {
+  background-color: var(--rose-icon-bg);
+}
+
+.admin-icon-text {
+  color: var(--rose-icon-text);
+}
+
 /* Fade in animation for Hebrew text to prevent font flash */
 @keyframes fadeInText {
   from {

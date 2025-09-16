@@ -1,8 +1,8 @@
 // Service Worker for Ezras Nashim PWA
-// Version 1.1.0 - Auto-Update Ready
+// Version 1.2.0 - Auto-Update Ready - Cache Cleared
 
-const CACHE_NAME = 'ezras-nashim-v1.1';
-const DYNAMIC_CACHE = 'ezras-nashim-dynamic-v1.1';
+const CACHE_NAME = 'ezras-nashim-v1.2';
+const DYNAMIC_CACHE = 'ezras-nashim-dynamic-v1.2';
 
 // Core files to cache for offline functionality
 const STATIC_ASSETS = [

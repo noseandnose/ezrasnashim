@@ -7,6 +7,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { find as findTimezone } from "geo-tz";
 import webpush from "web-push";
+import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 
 // Server-side cache with TTL and request coalescing to prevent API rate limiting
 interface CacheEntry {
@@ -126,9 +127,34 @@ import {
   insertDailyRecipeSchema,
   insertParshaVortSchema,
   insertTableInspirationSchema,
-  insertNishmasTextSchema
+  insertNishmasTextSchema,
+  insertMessagesSchema
 } from "../shared/schema.js";
 import { z } from "zod";
+
+// Admin authentication middleware
+function requireAdminAuth(req: any, res: any, next: any) {
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  
+  if (!adminPassword) {
+    return res.status(500).json({ 
+      message: "Admin authentication not configured" 
+    });
+  }
+  
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.startsWith('Bearer ') 
+    ? authHeader.slice(7) 
+    : null;
+  
+  if (!token || token !== adminPassword) {
+    return res.status(401).json({ 
+      message: "Unauthorized: Invalid admin credentials" 
+    });
+  }
+  
+  next();
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Schedule periodic cleanup of expired names (every hour)
@@ -1110,13 +1136,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/table/inspiration", async (req, res) => {
+  app.post("/api/table/inspiration", requireAdminAuth, async (req, res) => {
     try {
       const validatedData = insertTableInspirationSchema.parse(req.body);
       const inspiration = await storage.createTableInspiration(validatedData);
       res.json(inspiration);
     } catch (error) {
       res.status(500).json({ message: "Failed to create table inspiration" });
+    }
+  });
+
+  // Get all table inspirations
+  app.get("/api/table/inspirations", requireAdminAuth, async (req, res) => {
+    try {
+      const inspirations = await storage.getAllTableInspirations();
+      res.json(inspirations);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch table inspirations" });
+    }
+  });
+
+  // Update table inspiration
+  app.put("/api/table/inspiration/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertTableInspirationSchema.parse(req.body);
+      const inspiration = await storage.updateTableInspiration(id, validatedData);
+      if (!inspiration) {
+        return res.status(404).json({ message: "Table inspiration not found" });
+      }
+      res.json(inspiration);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update table inspiration" });
+    }
+  });
+
+  // Delete table inspiration
+  app.delete("/api/table/inspiration/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteTableInspiration(id);
+      if (!success) {
+        return res.status(404).json({ message: "Table inspiration not found" });
+      }
+      res.json({ message: "Table inspiration deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete table inspiration" });
+    }
+  });
+
+  // Object storage endpoints for file uploads
+  app.post("/api/objects/upload", requireAdminAuth, async (req, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error('Error getting upload URL:', error);
+      res.status(500).json({ error: "Failed to get upload URL" });
+    }
+  });
+
+  // Serve uploaded objects
+  app.get("/objects/:objectPath(*)", async (req, res) => {
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const objectFile = await objectStorageService.getObjectEntityFile(req.path);
+      objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      console.error("Error serving object:", error);
+      if (error instanceof ObjectNotFoundError) {
+        return res.sendStatus(404);
+      }
+      return res.sendStatus(500);
+    }
+  });
+
+  // Handle image upload completion and set ACL policy
+  app.post("/api/images/upload-complete", requireAdminAuth, async (req, res) => {
+    if (!req.body.imageURL) {
+      return res.status(400).json({ error: "imageURL is required" });
+    }
+
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
+        req.body.imageURL,
+        {
+          owner: "admin",
+          visibility: "public"
+        }
+      );
+
+      res.status(200).json({ objectPath });
+    } catch (error) {
+      console.error("Error setting image ACL:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 
@@ -1485,18 +1600,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/table/recipe", async (req, res) => {
+  app.post("/api/table/recipe", requireAdminAuth, async (req, res) => {
     try {
+      console.log("Recipe creation request body:", req.body);
       const validatedData = insertDailyRecipeSchema.parse(req.body);
+      console.log("Recipe validated data:", validatedData);
       const recipe = await storage.createDailyRecipe(validatedData);
       res.json(recipe);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create daily recipe" });
+      console.error("Failed to create daily recipe:", error);
+      if (error instanceof Error) {
+        res.status(500).json({ message: "Failed to create daily recipe", error: error.message });
+      } else {
+        res.status(500).json({ message: "Failed to create daily recipe", error: String(error) });
+      }
     }
   });
 
   // Get all recipes for admin interface
-  app.get("/api/table/recipes", async (req, res) => {
+  app.get("/api/table/recipes", requireAdminAuth, async (req, res) => {
     try {
       const recipes = await storage.getAllDailyRecipes();
       res.json(recipes);
@@ -1742,6 +1864,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching Tehillim text by ID:', error);
       res.status(500).json({ error: "Failed to fetch Tehillim text" });
+    }
+  });
+
+  // Get next Tehillim part ID for navigation (handles Psalm 119 parts properly)
+  app.get("/api/tehillim/next-part/:id", async (req, res) => {
+    try {
+      const currentId = parseInt(req.params.id);
+      
+      if (isNaN(currentId) || currentId < 1) {
+        return res.status(400).json({ error: "Invalid ID" });
+      }
+      
+      // Get current tehillim info to determine what's next
+      const currentTehillim = await storage.getSupabaseTehillimById(currentId);
+      
+      if (!currentTehillim) {
+        return res.status(404).json({ error: "Tehillim not found" });
+      }
+      
+      // If this is Psalm 119, find the next part
+      if (currentTehillim.englishNumber === 119) {
+        const nextPartNumber = currentTehillim.partNumber + 1;
+        
+        // Find the next part of 119
+        const nextPart = await storage.getSupabaseTehillimByEnglishAndPart(119, nextPartNumber);
+        if (nextPart) {
+          return res.json({ 
+            id: nextPart.id,
+            englishNumber: 119,
+            partNumber: nextPartNumber,
+            hebrewNumber: nextPart.hebrewNumber
+          });
+        }
+        
+        // If there's no next part, we're at the last part - move to psalm 120
+        const psalm120 = await storage.getSupabaseTehillimByEnglishAndPart(120, 1);
+        if (psalm120) {
+          return res.json({
+            id: psalm120.id,
+            englishNumber: 120,
+            partNumber: 1,
+            hebrewNumber: psalm120.hebrewNumber
+          });
+        }
+      }
+      
+      // For other psalms, move to the next English number
+      const nextEnglishNumber = currentTehillim.englishNumber + 1;
+      
+      // Handle wrap around from 150 to 1
+      if (nextEnglishNumber > 150) {
+        const psalm1 = await storage.getSupabaseTehillimByEnglishAndPart(1, 1);
+        if (psalm1) {
+          return res.json({
+            id: psalm1.id,
+            englishNumber: 1,
+            partNumber: 1,
+            hebrewNumber: psalm1.hebrewNumber
+          });
+        }
+      }
+      
+      // Handle transition from 118 to 119 (should go to 119 part 1)
+      if (nextEnglishNumber === 119) {
+        const psalm119Part1 = await storage.getSupabaseTehillimByEnglishAndPart(119, 1);
+        if (psalm119Part1) {
+          return res.json({
+            id: psalm119Part1.id,
+            englishNumber: 119,
+            partNumber: 1,
+            hebrewNumber: psalm119Part1.hebrewNumber
+          });
+        }
+      }
+      
+      // For other psalms or if 119 part 1 not found, use regular logic
+      const nextPsalm = await storage.getSupabaseTehillimByEnglishAndPart(nextEnglishNumber, 1);
+      if (nextPsalm) {
+        return res.json({
+          id: nextPsalm.id,
+          englishNumber: nextEnglishNumber,
+          partNumber: 1,
+          hebrewNumber: nextPsalm.hebrewNumber
+        });
+      }
+      
+      // Fallback
+      return res.status(404).json({ error: "Could not determine next Tehillim" });
+      
+    } catch (error) {
+      console.error("Error getting next Tehillim part:", error);
+      res.status(500).json({ message: "Failed to get next Tehillim part" });
     }
   });
 
@@ -3301,7 +3515,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(version);
   });
 
-  // Messages routes
+  // Messages routes - Public endpoint for fetching messages by date (no auth required)
   app.get("/api/messages/:date", async (req, res) => {
     try {
       const { date } = req.params;
@@ -3317,13 +3531,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/messages", async (req, res) => {
+  // Admin-only endpoints - require authentication
+  app.post("/api/messages", requireAdminAuth, async (req, res) => {
     try {
-      const messageData = req.body;
-      const newMessage = await storage.createMessage(messageData);
+      // Validate request body with Zod schema
+      const validatedData = insertMessagesSchema.parse(req.body);
+      const newMessage = await storage.createMessage(validatedData);
       res.json(newMessage);
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ 
+          message: "Invalid message data", 
+          errors: error.errors 
+        });
+      }
+      console.error("Error creating message:", error);
       res.status(500).json({ message: "Failed to create message" });
+    }
+  });
+
+  app.get("/api/messages", requireAdminAuth, async (req, res) => {
+    try {
+      const { upcoming } = req.query;
+      const messages = upcoming === 'true' 
+        ? await storage.getUpcomingMessages()
+        : await storage.getAllMessages();
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      res.status(500).json({ message: "Failed to fetch messages" });
+    }
+  });
+
+  app.put("/api/messages/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      // Validate request body with Zod schema (omit id and timestamps for updates)
+      const updateSchema = insertMessagesSchema.omit({ 
+        id: true, 
+        createdAt: true, 
+        updatedAt: true 
+      });
+      const validatedData = updateSchema.parse(req.body);
+      const updatedMessage = await storage.updateMessage(parseInt(id), validatedData);
+      res.json(updatedMessage);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ 
+          message: "Invalid message data", 
+          errors: error.errors 
+        });
+      }
+      console.error("Error updating message:", error);
+      res.status(500).json({ message: "Failed to update message" });
+    }
+  });
+
+  app.delete("/api/messages/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteMessage(parseInt(id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting message:", error);
+      res.status(500).json({ message: "Failed to delete message" });
     }
   });
 
@@ -3375,16 +3646,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin endpoint to send push notifications
-  app.post("/api/push/send", async (req, res) => {
+  app.post("/api/push/send", requireAdminAuth, async (req, res) => {
     try {
-      const { title, body, icon, badge, url, requireInteraction, adminPassword } = req.body;
+      const { title, body, icon, badge, url, requireInteraction } = req.body;
       
-      // Simple admin authentication
-      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ezras2025';
-      if (adminPassword !== ADMIN_PASSWORD) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-
       if (!title || !body) {
         return res.status(400).json({ error: "Title and body are required" });
       }
@@ -3489,15 +3754,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get notification history (admin)
-  app.get("/api/push/history", async (req, res) => {
+  app.get("/api/push/history", requireAdminAuth, async (req, res) => {
     try {
-      const { adminPassword } = req.query;
-      
-      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ezras2025';
-      if (adminPassword !== ADMIN_PASSWORD) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-
       const history = await storage.getNotificationHistory(50);
       res.json(history);
     } catch (error) {
