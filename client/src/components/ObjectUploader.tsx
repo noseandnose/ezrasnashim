@@ -78,35 +78,15 @@ export function ObjectUploader({
 
   return (
     <div>
-      <Button 
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          setShowModal(true);
-        }} 
-        className={buttonClassName}
-        tabIndex={-1} // Prevent button from being focused via tab
-        onMouseDown={(e) => {
-          // Prevent focus stealing on mousedown
-          e.preventDefault();
-          // Manually trigger click on mouseup
-          const handleMouseUp = () => {
-            e.currentTarget.click();
-            document.removeEventListener('mouseup', handleMouseUp);
-          };
-          document.addEventListener('mouseup', handleMouseUp);
-        }}
-        onFocus={(e) => {
-          // Immediately blur if focus was not from a click
-          const activeElement = document.activeElement;
-          if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
-            e.currentTarget.blur();
-            (activeElement as HTMLElement).focus();
-          }
-        }}
+      <div 
+        role="button"
+        onClick={() => setShowModal(true)} 
+        className={`${buttonClassName} cursor-pointer inline-flex items-center justify-center`}
+        tabIndex={-1}
+        style={{ userSelect: 'none' }}
       >
         {children}
-      </Button>
+      </div>
 
       <DashboardModal
         uppy={uppy}

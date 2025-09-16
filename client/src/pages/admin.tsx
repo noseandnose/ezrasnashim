@@ -1156,16 +1156,14 @@ export default function Admin() {
                           />
                         </div>
                         
-                        <div onMouseDown={(e) => e.preventDefault()}>
-                          <ObjectUploader
-                            onGetUploadParameters={() => handleMediaUpload('inspiration', mediaUrlField)}
-                            onComplete={(result) => handleMediaUploadComplete(result, 'inspiration', mediaUrlField)}
-                            buttonClassName="w-full admin-btn-primary px-3 py-2 rounded-md text-sm"
-                          >
-                            <Image className="w-4 h-4 mr-2" />
-                            Upload {inspirationFormData[mediaTypeField]}
-                          </ObjectUploader>
-                        </div>
+                        <ObjectUploader
+                          onGetUploadParameters={() => handleMediaUpload('inspiration', mediaUrlField)}
+                          onComplete={(result) => handleMediaUploadComplete(result, 'inspiration', mediaUrlField)}
+                          buttonClassName="w-full admin-btn-primary px-3 py-2 rounded-md text-sm"
+                        >
+                          <Image className="w-4 h-4 mr-2" />
+                          Upload {inspirationFormData[mediaTypeField]}
+                        </ObjectUploader>
                         
                         {inspirationFormData[mediaUrlField] && (
                           <div className="mt-2 text-xs text-gray-600 break-all">
