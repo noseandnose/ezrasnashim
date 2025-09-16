@@ -1345,11 +1345,37 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
   const { trackModalComplete } = useTrackModalComplete();
   const tefillaConditions = useTefillaConditions();
 
-  const { data: tehillimText, isLoading } = useQuery({
-    queryKey: ['/api/tehillim/text', selectedPsalm, language],
+  // First get tehillim info to check if this is a specific part (by ID) or full psalm (by English number)
+  const { data: tehillimInfo } = useQuery<{
+    id: number;
+    englishNumber: number;
+    partNumber: number;
+    hebrewNumber: string;
+  }>({
+    queryKey: ['/api/tehillim/info', selectedPsalm],
     queryFn: async () => {
-      const response = await axiosClient.get(`/api/tehillim/text/${selectedPsalm}?language=${language}`);
-      return response.data;
+      if (!selectedPsalm) return null;
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/info/${selectedPsalm}`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    enabled: !!selectedPsalm,
+    staleTime: 0
+  });
+
+  // Use by-id endpoint if we have tehillim info (meaning selectedPsalm is an ID), otherwise use English number endpoint
+  const { data: tehillimText, isLoading } = useQuery({
+    queryKey: tehillimInfo ? ['/api/tehillim/text/by-id', selectedPsalm, language] : ['/api/tehillim/text', selectedPsalm, language],
+    queryFn: async () => {
+      if (tehillimInfo) {
+        // This is a specific part - use by-id endpoint
+        const response = await axiosClient.get(`/api/tehillim/text/by-id/${selectedPsalm}?language=${language}`);
+        return response.data;
+      } else {
+        // This is a full psalm - use English number endpoint
+        const response = await axiosClient.get(`/api/tehillim/text/${selectedPsalm}?language=${language}`);
+        return response.data;
+      }
     },
     enabled: !!selectedPsalm,
     staleTime: 10 * 60 * 1000, // 10 minutes
@@ -3930,11 +3956,37 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
   // Load Tefilla conditions for conditional content processing
   const tefillaConditions = useTefillaConditions();
 
-  const { data: tehillimText, isLoading } = useQuery({
-    queryKey: ['/api/tehillim/text', selectedPsalm, language],
+  // First get tehillim info to check if this is a specific part (by ID) or full psalm (by English number)
+  const { data: tehillimInfo } = useQuery<{
+    id: number;
+    englishNumber: number;
+    partNumber: number;
+    hebrewNumber: string;
+  }>({
+    queryKey: ['/api/tehillim/info', selectedPsalm],
     queryFn: async () => {
-      const response = await axiosClient.get(`/api/tehillim/text/${selectedPsalm}?language=${language}`);
-      return response.data;
+      if (!selectedPsalm) return null;
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/info/${selectedPsalm}`);
+      if (!response.ok) return null;
+      return response.json();
+    },
+    enabled: !!selectedPsalm,
+    staleTime: 0
+  });
+
+  // Use by-id endpoint if we have tehillim info (meaning selectedPsalm is an ID), otherwise use English number endpoint
+  const { data: tehillimText, isLoading } = useQuery({
+    queryKey: tehillimInfo ? ['/api/tehillim/text/by-id', selectedPsalm, language] : ['/api/tehillim/text', selectedPsalm, language],
+    queryFn: async () => {
+      if (tehillimInfo) {
+        // This is a specific part - use by-id endpoint
+        const response = await axiosClient.get(`/api/tehillim/text/by-id/${selectedPsalm}?language=${language}`);
+        return response.data;
+      } else {
+        // This is a full psalm - use English number endpoint
+        const response = await axiosClient.get(`/api/tehillim/text/${selectedPsalm}?language=${language}`);
+        return response.data;
+      }
     },
     enabled: !!selectedPsalm,
     staleTime: 10 * 60 * 1000, // 10 minutes
