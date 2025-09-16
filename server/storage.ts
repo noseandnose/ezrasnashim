@@ -1362,10 +1362,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteTableInspiration(id: number): Promise<boolean> {
-    const result = await db
+    const deletedRows = await db
       .delete(tableInspirations)
-      .where(eq(tableInspirations.id, id));
-    return result.changes > 0;
+      .where(eq(tableInspirations.id, id))
+      .returning({ id: tableInspirations.id });
+    return deletedRows.length > 0;
   }
 
   async getCommunityImpactByDate(date: string): Promise<CommunityImpact | undefined> {
