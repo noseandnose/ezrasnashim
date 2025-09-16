@@ -88,12 +88,16 @@ export function ObjectUploader({
         {children}
       </div>
 
-      <DashboardModal
-        uppy={uppy}
-        open={showModal}
-        onRequestClose={() => setShowModal(false)}
-        proudlyDisplayPoweredByUppy={false}
-      />
+      {showModal && (
+        <DashboardModal
+          uppy={uppy}
+          open={showModal}
+          onRequestClose={() => setShowModal(false)}
+          proudlyDisplayPoweredByUppy={false}
+          autoOpenFileEditor={false}
+          disablePageScrollWhenModalOpen={false}
+        />
+      )}
     </div>
   );
 }
