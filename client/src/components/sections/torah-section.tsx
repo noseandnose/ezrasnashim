@@ -277,10 +277,10 @@ export default function TorahSection({}: TorahSectionProps) {
         {(() => {
           // Filter vorts to only show currently active ones based on date range
           const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-          const activeVorts = parshaVorts?.filter(parsha => {
+          const activeVorts = (Array.isArray(parshaVorts) ? parshaVorts.filter(parsha => {
             if (!parsha.fromDate || !parsha.untilDate) return false;
             return today >= parsha.fromDate && today <= parsha.untilDate;
-          }) || [];
+          }) : []) || [];
 
           return activeVorts.length > 0 ? (
             // Render multiple bars for each available shiur
