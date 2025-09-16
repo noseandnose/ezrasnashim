@@ -1043,7 +1043,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createDailyRecipe(insertRecipe: InsertDailyRecipe): Promise<DailyRecipe> {
-    const [recipe] = await db.insert(dailyRecipes).values(insertRecipe).returning();
+    // Find the maximum ID currently in the table
+    const [maxIdResult] = await db
+      .select({ maxId: sql<number>`COALESCE(MAX(${dailyRecipes.id}), 0)` })
+      .from(dailyRecipes);
+    
+    const nextId = (maxIdResult?.maxId || 0) + 1;
+    
+    // Insert with explicit ID to avoid sequence issues
+    const [recipe] = await db
+      .insert(dailyRecipes)
+      .values({ ...insertRecipe, id: nextId })
+      .returning();
     return recipe;
   }
 
