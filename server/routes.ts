@@ -1248,23 +1248,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Handle image upload completion and set ACL policy
-  app.post("/api/images/upload-complete", requireAdminAuth, async (req, res) => {
-    if (!req.body.imageURL) {
-      return res.status(400).json({ error: "imageURL is required" });
+  // Handle object upload completion and set ACL policy (for all media types)
+  app.post("/api/objects/upload-complete", requireAdminAuth, async (req, res) => {
+    const objectURL = req.body.objectURL || req.body.imageURL; // Support both parameter names
+    if (!objectURL) {
+      return res.status(400).json({ error: "objectURL is required" });
     }
 
     try {
       // Check if running in Replit environment
       const isReplitEnv = process.env.REPL_ID || process.env.REPLIT_DEPLOYMENT;
       if (!isReplitEnv) {
-        // In non-Replit environment, just return the image URL as-is
-        return res.status(200).json({ objectPath: req.body.imageURL });
+        // In non-Replit environment, just return the object URL as-is
+        return res.status(200).json({ objectPath: objectURL });
       }
 
       const objectStorageService = new ObjectStorageService();
       const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
-        req.body.imageURL,
+        objectURL,
         {
           owner: "admin",
           visibility: "public"
@@ -1273,17 +1274,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(200).json({ objectPath });
     } catch (error: any) {
-      console.error("Error setting image ACL:", error);
+      console.error("Error setting object ACL:", error);
       
       // If it's an environment issue, return the URL as-is
       if (error.message?.includes('Failed to sign object URL') || 
           error.message?.includes('PRIVATE_OBJECT_DIR')) {
-        return res.status(200).json({ objectPath: req.body.imageURL });
+        return res.status(200).json({ objectPath: objectURL });
       }
       
       res.status(500).json({ 
         error: "Internal server error",
-        message: error.message || "Failed to process image upload"
+        message: error.message || "Failed to process object upload"
+      });
+    }
+  });
+
+  // Legacy alias for backward compatibility
+  app.post("/api/images/upload-complete", requireAdminAuth, async (req, res) => {
+    const objectURL = req.body.imageURL;
+    if (!objectURL) {
+      return res.status(400).json({ error: "imageURL is required" });
+    }
+
+    try {
+      // Check if running in Replit environment
+      const isReplitEnv = process.env.REPL_ID || process.env.REPLIT_DEPLOYMENT;
+      if (!isReplitEnv) {
+        // In non-Replit environment, just return the image URL as-is
+        return res.status(200).json({ objectPath: objectURL });
+      }
+
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
+        objectURL,
+        {
+          owner: "admin",
+          visibility: "public"
+        }
+      );
+
+      res.status(200).json({ objectPath });
+    } catch (error: any) {
+      console.error("Error setting object ACL:", error);
+      
+      // If it's an environment issue, return the URL as-is
+      if (error.message?.includes('Failed to sign object URL') || 
+          error.message?.includes('PRIVATE_OBJECT_DIR')) {
+        return res.status(200).json({ objectPath: objectURL });
+      }
+      
+      res.status(500).json({ 
+        error: "Internal server error",
+        message: error.message || "Failed to process object upload"
       });
     }
   });
