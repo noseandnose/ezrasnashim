@@ -272,9 +272,18 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
         const allCompleted = state.torahCompleted && state.tefillaCompleted && state.tzedakaCompleted;
         
         if (allCompleted && !state.congratulationsShown) {
-          // Mark congratulations as shown
-          set({ ...state, congratulationsShown: true });
-          return true;
+          // Mark congratulations as shown immediately to prevent race conditions
+          const newState = { ...state, congratulationsShown: true };
+          set(newState);
+          
+          // Double-check after state update to ensure consistency
+          const updatedState = get();
+          if (updatedState.congratulationsShown && 
+              updatedState.torahCompleted && 
+              updatedState.tefillaCompleted && 
+              updatedState.tzedakaCompleted) {
+            return true;
+          }
         }
         return false;
       }
@@ -336,11 +345,19 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
       const allCompleted = state.torahCompleted && state.tefillaCompleted && state.tzedakaCompleted;
       
       if (allCompleted && !state.congratulationsShown) {
-        // Mark congratulations as shown
+        // Mark congratulations as shown immediately to prevent race conditions
         const newState = { ...state, congratulationsShown: true };
         set(newState);
         localStorage.setItem('dailyCompletion', JSON.stringify(newState));
-        return true;
+        
+        // Double-check after state update to ensure consistency
+        const updatedState = get();
+        if (updatedState.congratulationsShown && 
+            updatedState.torahCompleted && 
+            updatedState.tefillaCompleted && 
+            updatedState.tzedakaCompleted) {
+          return true;
+        }
       }
       return false;
     }
