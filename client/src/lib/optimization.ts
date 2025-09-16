@@ -71,8 +71,14 @@ export async function preloadCriticalResources(): Promise<void> {
   fontLink.as = 'style';
   document.head.appendChild(fontLink);
   
-  // Preload critical API endpoints with proper VITE_API_URL
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  // Preload critical API endpoints
+  // Check for Replit environment - use relative URLs to avoid CORS
+  const isReplit = window.location.hostname.includes('replit.dev') || 
+                    window.location.hostname.includes('replit.app') || 
+                    window.location.hostname.includes('repl.co');
+  
+  // Use relative URLs on Replit to avoid CORS issues
+  const baseUrl = isReplit ? '' : (import.meta.env.VITE_API_URL || 'http://localhost:5000');
   const { getLocalDateString } = await import('./dateUtils');
   const today = getLocalDateString();
   
