@@ -13,7 +13,11 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // Trust proxy for accurate IP addresses in Replit environment
-app.set('trust proxy', true);
+// Use hop count instead of 'true' to prevent IP spoofing and rate limit bypass
+const trustProxyHops = process.env.TRUST_PROXY_HOPS 
+  ? parseInt(process.env.TRUST_PROXY_HOPS, 10) 
+  : (process.env.NODE_ENV === 'production' ? 2 : 1);
+app.set('trust proxy', trustProxyHops);
 
 // Redirect .repl.co to .replit.dev to match Vite's allowedHosts configuration
 app.use((req, res, next) => {
