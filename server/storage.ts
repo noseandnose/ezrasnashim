@@ -1381,9 +1381,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createTableInspiration(insertInspiration: InsertTableInspiration): Promise<TableInspiration> {
+    // Find the maximum ID currently in the table
+    const [maxIdResult] = await db
+      .select({ maxId: sql<number>`COALESCE(MAX(${tableInspirations.id}), 0)` })
+      .from(tableInspirations);
+    
+    const nextId = (maxIdResult?.maxId || 0) + 1;
+    
+    // Insert with explicit ID to avoid sequence issues
     const [inspiration] = await db
       .insert(tableInspirations)
-      .values(insertInspiration)
+      .values({ ...insertInspiration, id: nextId })
       .returning();
     return inspiration;
   }
@@ -2022,9 +2030,17 @@ export class DatabaseStorage implements IStorage {
   }
   
   async createNotification(notification: InsertPushNotification): Promise<PushNotification> {
+    // Find the maximum ID currently in the table
+    const [maxIdResult] = await db
+      .select({ maxId: sql<number>`COALESCE(MAX(${pushNotifications.id}), 0)` })
+      .from(pushNotifications);
+    
+    const nextId = (maxIdResult?.maxId || 0) + 1;
+    
+    // Insert with explicit ID to avoid sequence issues
     const [newNotification] = await db
       .insert(pushNotifications)
-      .values(notification)
+      .values({ ...notification, id: nextId })
       .returning();
     return newNotification;
   }
