@@ -2100,7 +2100,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           title = 'Nishmas Kol Chai';
           break;
         case 'individual-tehillim':
-          title = `Tehillim ${selectedPsalm}`;
+          title = `Tehillim ${selectedPsalm}`; // Will be updated by useEffect
           contentType = 'individual-tehillim';
           break;
         case 'tehillim-text':
@@ -2133,10 +2133,31 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   // Update fullscreen title when selectedPsalm changes for individual Tehillim
   useEffect(() => {
     if (fullscreenContent.isOpen && fullscreenContent.contentType === 'individual-tehillim' && selectedPsalm) {
-      setFullscreenContent(current => ({
-        ...current,
-        title: `Tehillim ${selectedPsalm}`
-      }));
+      // Get current tehillim info to construct proper title
+      fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/info/${selectedPsalm}`)
+        .then(response => response.ok ? response.json() : null)
+        .then(tehillimInfo => {
+          let title = `Tehillim ${selectedPsalm}`;
+          if (tehillimInfo) {
+            if (tehillimInfo.partNumber > 1) {
+              title = `Tehillim ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber}`;
+            } else {
+              title = `Tehillim ${tehillimInfo.englishNumber}`;
+            }
+          }
+          
+          setFullscreenContent(current => ({
+            ...current,
+            title: title
+          }));
+        })
+        .catch(() => {
+          // Fallback to selectedPsalm if API fails
+          setFullscreenContent(current => ({
+            ...current,
+            title: `Tehillim ${selectedPsalm}`
+          }));
+        });
     }
   }, [selectedPsalm, fullscreenContent.isOpen, fullscreenContent.contentType]);
 
@@ -4033,9 +4054,19 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
       // Check if fullscreen is already open and update content
       setFullscreenContent((current: any) => {
         if (current.isOpen && current.title?.includes('Tehillim')) {
+          // Construct proper title using tehillimInfo if available
+          let title = `Tehillim ${selectedPsalm}`;
+          if (tehillimInfo) {
+            if (tehillimInfo.partNumber > 1) {
+              title = `Tehillim ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber}`;
+            } else {
+              title = `Tehillim ${tehillimInfo.englishNumber}`;
+            }
+          }
+          
           return {
             isOpen: true,
-            title: `Tehillim ${selectedPsalm}`,
+            title: title,
             content: (
               <div className="space-y-4">
                 <div className="bg-white rounded-2xl p-6 border border-blush/10">
@@ -4157,7 +4188,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
         return current;
       });
     }
-  }, [selectedPsalm, tehillimText, language, fontSize, tehillimActiveTab, setFullscreenContent]);
+  }, [selectedPsalm, tehillimText, language, fontSize, tehillimActiveTab, setFullscreenContent, tehillimInfo]);
 
   return (
     <>
@@ -4165,9 +4196,19 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
       {setFullscreenContent && tehillimText && (
         <button
           onClick={() => {
+            // Construct proper title using tehillimInfo if available
+            let title = `Tehillim ${selectedPsalm}`;
+            if (tehillimInfo) {
+              if (tehillimInfo.partNumber > 1) {
+                title = `Tehillim ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber}`;
+              } else {
+                title = `Tehillim ${tehillimInfo.englishNumber}`;
+              }
+            }
+            
             setFullscreenContent({
               isOpen: true,
-              title: `Tehillim ${selectedPsalm}`,
+              title: title,
               content: (
                 <div className="space-y-4">
                   <div className="bg-white rounded-2xl p-6 border border-blush/10">
