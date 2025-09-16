@@ -1543,11 +1543,11 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
   // Use locked perek instead of live progress to prevent auto-refresh
   const activePerek = lockedPerek || progress?.currentPerek;
 
-  // Get current psalm text using the locked perek
+  // Get current psalm text using the locked perek (using by-id endpoint for proper part handling)
   const { data: tehillimText, isLoading } = useQuery({
-    queryKey: ['/api/tehillim/text', activePerek, language],
+    queryKey: ['/api/tehillim/text/by-id', activePerek, language],
     queryFn: async () => {
-      const response = await axiosClient.get(`/api/tehillim/text/${activePerek}?language=${language}`);
+      const response = await axiosClient.get(`/api/tehillim/text/by-id/${activePerek}?language=${language}`);
       return response.data;
     },
     enabled: !!activePerek,
