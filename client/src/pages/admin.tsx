@@ -241,7 +241,7 @@ export default function Admin() {
 
         setMessageFormData({ date: '', title: '', message: '' });
         setEditingMessage(null);
-        queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/messages', { upcoming: true }] });
         await refetchMessages();
       }
     } catch (error: any) {
@@ -270,7 +270,7 @@ export default function Admin() {
         description: 'The message has been successfully deleted.',
       });
 
-      queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/messages', { upcoming: true }] });
       await refetchMessages();
     } catch (error: any) {
       toast({
@@ -386,6 +386,7 @@ export default function Admin() {
           date: '', title: '', description: '', ingredients: '', instructions: '',
           servings: '', prepTime: '', cookTime: '', difficulty: 'easy', imageUrl: '', tags: '', thankYouMessage: ''
         });
+        queryClient.invalidateQueries({ queryKey: ['/api/table/recipes'] });
         await refetchRecipes();
       }
     } catch (error: any) {
@@ -444,6 +445,7 @@ export default function Admin() {
           mediaUrl5: '', mediaType5: 'image'
         });
         setEditingInspiration(null);
+        queryClient.invalidateQueries({ queryKey: ['/api/table/inspirations'] });
         await refetchInspirations();
       }
     } catch (error: any) {
@@ -472,6 +474,7 @@ export default function Admin() {
           title: 'Inspiration Deleted',
           description: 'The inspiration has been successfully deleted.',
         });
+        queryClient.invalidateQueries({ queryKey: ['/api/table/inspirations'] });
         await refetchInspirations();
       }
     } catch (error: any) {
@@ -506,6 +509,7 @@ export default function Admin() {
           description: `Notification sent to ${response.data.successCount || 'all'} users.`,
         });
         setNotificationData({ title: '', body: '', url: '/', requireInteraction: false });
+        queryClient.invalidateQueries({ queryKey: ['/api/push/history'] });
         await refetchNotificationHistory();
       }
     } catch (error: any) {
