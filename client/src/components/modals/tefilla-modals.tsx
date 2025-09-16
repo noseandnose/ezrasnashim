@@ -2054,13 +2054,37 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       }
       
       // Open fullscreen for global tehillim with the next perek
-      setFullscreenContent({
-        isOpen: true,
-        title: `Perek ${nextPerek}`,
-        contentType: 'global-tehillim',
-        content: null,
-        hasTranslation: true
-      });
+      // Get the proper title using tehillim info
+      fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/info/${nextPerek}`)
+        .then(response => response.ok ? response.json() : null)
+        .then(tehillimInfo => {
+          let title = `Perek ${nextPerek}`;
+          if (tehillimInfo) {
+            if (tehillimInfo.partNumber > 1) {
+              title = `Tehillim ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber}`;
+            } else {
+              title = `Tehillim ${tehillimInfo.englishNumber}`;
+            }
+          }
+          
+          setFullscreenContent({
+            isOpen: true,
+            title: title,
+            contentType: 'global-tehillim',
+            content: null,
+            hasTranslation: true
+          });
+        })
+        .catch(() => {
+          // Fallback to basic title if API fails
+          setFullscreenContent({
+            isOpen: true,
+            title: `Perek ${nextPerek}`,
+            contentType: 'global-tehillim',
+            content: null,
+            hasTranslation: true
+          });
+        });
     };
 
     window.addEventListener('closeFullscreen', handleCloseFullscreen);
