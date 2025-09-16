@@ -84,7 +84,7 @@ export default function Admin() {
 
   // Messages API calls
   const { data: messages, refetch: refetchMessages } = useQuery({
-    queryKey: ['/api/messages', { upcoming: true }],
+    queryKey: ['admin-messages-upcoming'],
     queryFn: async () => {
       if (!isAuthenticated || activeTab !== 'messages') return [];
       try {
@@ -105,7 +105,7 @@ export default function Admin() {
 
   // Recipes API calls
   const { data: recipes, refetch: refetchRecipes } = useQuery({
-    queryKey: ['/api/table/recipes'],
+    queryKey: ['admin-table-recipes'],
     queryFn: async () => {
       if (!isAuthenticated || activeTab !== 'recipes') return [];
       try {
@@ -126,7 +126,7 @@ export default function Admin() {
 
   // Table inspirations API calls
   const { data: inspirations, refetch: refetchInspirations } = useQuery({
-    queryKey: ['/api/table/inspirations'],
+    queryKey: ['admin-table-inspirations'],
     queryFn: async () => {
       if (!isAuthenticated || activeTab !== 'inspirations') return [];
       try {
@@ -147,7 +147,7 @@ export default function Admin() {
 
   // Notifications API calls
   const { data: notificationHistory, refetch: refetchNotificationHistory } = useQuery({
-    queryKey: ['/api/push/history'],
+    queryKey: ['admin-push-history'],
     queryFn: async () => {
       if (!isAuthenticated || activeTab !== 'notifications') return [];
       try {
@@ -241,7 +241,7 @@ export default function Admin() {
 
         setMessageFormData({ date: '', title: '', message: '' });
         setEditingMessage(null);
-        queryClient.invalidateQueries({ queryKey: ['/api/messages', { upcoming: true }] });
+        queryClient.invalidateQueries({ queryKey: ['admin-messages-upcoming'] });
         await refetchMessages();
       }
     } catch (error: any) {
@@ -386,7 +386,7 @@ export default function Admin() {
           date: '', title: '', description: '', ingredients: '', instructions: '',
           servings: '', prepTime: '', cookTime: '', difficulty: 'easy', imageUrl: '', tags: '', thankYouMessage: ''
         });
-        queryClient.invalidateQueries({ queryKey: ['/api/table/recipes'] });
+        queryClient.invalidateQueries({ queryKey: ['admin-table-recipes'] });
         await refetchRecipes();
       }
     } catch (error: any) {
@@ -445,7 +445,7 @@ export default function Admin() {
           mediaUrl5: '', mediaType5: 'image'
         });
         setEditingInspiration(null);
-        queryClient.invalidateQueries({ queryKey: ['/api/table/inspirations'] });
+        queryClient.invalidateQueries({ queryKey: ['admin-table-inspirations'] });
         await refetchInspirations();
       }
     } catch (error: any) {
@@ -474,7 +474,7 @@ export default function Admin() {
           title: 'Inspiration Deleted',
           description: 'The inspiration has been successfully deleted.',
         });
-        queryClient.invalidateQueries({ queryKey: ['/api/table/inspirations'] });
+        queryClient.invalidateQueries({ queryKey: ['admin-table-inspirations'] });
         await refetchInspirations();
       }
     } catch (error: any) {
@@ -509,7 +509,7 @@ export default function Admin() {
           description: `Notification sent to ${response.data.successCount || 'all'} users.`,
         });
         setNotificationData({ title: '', body: '', url: '/', requireInteraction: false });
-        queryClient.invalidateQueries({ queryKey: ['/api/push/history'] });
+        queryClient.invalidateQueries({ queryKey: ['admin-push-history'] });
         await refetchNotificationHistory();
       }
     } catch (error: any) {
