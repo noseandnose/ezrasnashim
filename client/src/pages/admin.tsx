@@ -521,12 +521,12 @@ export default function Admin() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-orange-50 flex items-center justify-center p-4">
+      <div className="min-h-screen admin-bg-gradient flex items-center justify-center p-4">
         <Card className="w-full max-w-md p-8 shadow-lg">
           <div className="text-center mb-6">
             <div className="flex justify-center mb-4">
-              <div className="p-3 bg-rose-100 rounded-full">
-                <MessageSquare className="w-8 h-8 text-rose-600" />
+              <div className="p-3 admin-icon-bg rounded-full">
+                <MessageSquare className="w-8 h-8 admin-icon-text" />
               </div>
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Admin Panel</h1>
@@ -550,7 +550,7 @@ export default function Admin() {
             
             <Button 
               onClick={handleLogin} 
-              className="w-full bg-rose-600 hover:bg-rose-700"
+              className="w-full admin-btn-primary"
               data-testid="button-admin-login"
             >
               Login
@@ -562,7 +562,7 @@ export default function Admin() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-orange-50">
+    <div className="min-h-screen admin-bg-gradient">
       <div className="container mx-auto p-4 max-w-7xl">
         {/* Header */}
         <div className="mb-8 text-center">
@@ -577,7 +577,7 @@ export default function Admin() {
               onClick={() => setActiveTab('messages')}
               className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeTab === 'messages'
-                  ? 'bg-rose-600 text-white shadow-sm'
+                  ? 'admin-tab-active'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
               }`}
               data-testid="tab-messages"
@@ -589,7 +589,7 @@ export default function Admin() {
               onClick={() => setActiveTab('recipes')}
               className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeTab === 'recipes'
-                  ? 'bg-rose-600 text-white shadow-sm'
+                  ? 'admin-tab-active'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
               }`}
               data-testid="tab-recipes"
@@ -601,7 +601,7 @@ export default function Admin() {
               onClick={() => setActiveTab('inspirations')}
               className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeTab === 'inspirations'
-                  ? 'bg-rose-600 text-white shadow-sm'
+                  ? 'admin-tab-active'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
               }`}
               data-testid="tab-inspirations"
@@ -613,7 +613,7 @@ export default function Admin() {
               onClick={() => setActiveTab('notifications')}
               className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeTab === 'notifications'
-                  ? 'bg-rose-600 text-white shadow-sm'
+                  ? 'admin-tab-active'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
               }`}
               data-testid="tab-notifications"
@@ -675,7 +675,7 @@ export default function Admin() {
                 <Button 
                   onClick={handleMessageSubmit} 
                   disabled={isSavingMessage}
-                  className="w-full bg-rose-600 hover:bg-rose-700"
+                  className="w-full admin-btn-primary"
                   data-testid="button-save-message"
                 >
                   <Save className="w-4 h-4 mr-2" />
@@ -915,7 +915,7 @@ export default function Admin() {
                       onGetUploadParameters={() => handleImageUpload('recipe')}
                       onComplete={(result) => handleImageUploadComplete(result, 'recipe')}
                       maxNumberOfFiles={1}
-                      buttonClassName="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                      buttonClassName="w-full admin-btn-primary"
                     >
                       Upload Recipe Image
                     </ObjectUploader>
@@ -931,7 +931,7 @@ export default function Admin() {
                 <Button 
                   onClick={handleRecipeSubmit} 
                   disabled={isSavingRecipe}
-                  className="w-full bg-rose-600 hover:bg-rose-700"
+                  className="w-full admin-btn-primary"
                   data-testid="button-save-recipe"
                 >
                   <Save className="w-4 h-4 mr-2" />
@@ -943,7 +943,7 @@ export default function Admin() {
             {/* Existing Recipes */}
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-4">Recent Recipes</h2>
-              <div className="space-y-3 max-h-[600px] overflow-y-auto">
+              <div className="space-y-3 max-h-[700px] overflow-y-auto">
                 {recipes && recipes.length > 0 ? (
                   recipes.slice(0, 15).map((recipe: any) => {
                     const recipeDate = new Date(recipe.date);
@@ -1117,7 +1117,7 @@ export default function Admin() {
                         <ObjectUploader
                           onGetUploadParameters={() => handleImageUpload('inspiration', mediaUrlField)}
                           onComplete={(result) => handleImageUploadComplete(result, 'inspiration', mediaUrlField)}
-                          buttonClassName="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm"
+                          buttonClassName="w-full admin-btn-primary px-3 py-2 rounded-md text-sm"
                         >
                           <Image className="w-4 h-4 mr-2" />
                           Upload {inspirationFormData[mediaTypeField]}
@@ -1137,7 +1137,7 @@ export default function Admin() {
                   <Button 
                     onClick={handleInspirationSubmit}
                     disabled={isSavingInspiration}
-                    className="flex-1 bg-rose-600 hover:bg-rose-700"
+                    className="flex-1 admin-btn-primary"
                     data-testid="button-save-inspiration"
                   >
                     <Save className="w-4 h-4 mr-2" />
@@ -1173,7 +1173,7 @@ export default function Admin() {
               </h2>
               
               {inspirations && inspirations.length > 0 ? (
-                <div className="space-y-4 max-h-[600px] overflow-y-auto">
+                <div className="space-y-4 max-h-[700px] overflow-y-auto">
                   {inspirations.map((inspiration: any) => {
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
@@ -1325,7 +1325,7 @@ export default function Admin() {
                 <Button 
                   onClick={handleSendNotification} 
                   disabled={isSendingNotification}
-                  className="w-full bg-rose-600 hover:bg-rose-700"
+                  className="w-full admin-btn-primary"
                   data-testid="button-send-notification"
                 >
                   <Send className="w-4 h-4 mr-2" />
