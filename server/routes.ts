@@ -1602,11 +1602,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/table/recipe", requireAdminAuth, async (req, res) => {
     try {
+      console.log("Recipe creation request body:", req.body);
       const validatedData = insertDailyRecipeSchema.parse(req.body);
+      console.log("Recipe validated data:", validatedData);
       const recipe = await storage.createDailyRecipe(validatedData);
       res.json(recipe);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create daily recipe" });
+      console.error("Failed to create daily recipe:", error);
+      if (error instanceof Error) {
+        res.status(500).json({ message: "Failed to create daily recipe", error: error.message });
+      } else {
+        res.status(500).json({ message: "Failed to create daily recipe", error: String(error) });
+      }
     }
   });
 
@@ -1857,6 +1864,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching Tehillim text by ID:', error);
       res.status(500).json({ error: "Failed to fetch Tehillim text" });
+    }
+  });
+
+  // Get next Tehillim part ID for navigation (handles Psalm 119 parts properly)
+  app.get("/api/tehillim/next-part/:id", async (req, res) => {
+    try {
+      const currentId = parseInt(req.params.id);
+      
+      if (isNaN(currentId) || currentId < 1) {
+        return res.status(400).json({ error: "Invalid ID" });
+      }
+      
+      // Get current tehillim info to determine what's next
+      const currentTehillim = await storage.getSupabaseTehillimById(currentId);
+      
+      if (!currentTehillim) {
+        return res.status(404).json({ error: "Tehillim not found" });
+      }
+      
+      // If this is Psalm 119, find the next part
+      if (currentTehillim.englishNumber === 119) {
+        const nextPartNumber = currentTehillim.partNumber + 1;
+        
+        // Psalm 119 has 22 parts
+        if (nextPartNumber <= 22) {
+          // Find the next part of 119
+          const nextPart = await storage.getSupabaseTehillimByEnglishAndPart(119, nextPartNumber);
+          if (nextPart) {
+            return res.json({ 
+              id: nextPart.id,
+              englishNumber: 119,
+              partNumber: nextPartNumber,
+              hebrewNumber: nextPart.hebrewNumber
+            });
+          }
+        }
+        
+        // If we're at the last part or can't find next part, move to psalm 120
+        return res.json({
+          id: 120,
+          englishNumber: 120,
+          partNumber: 1,
+          hebrewNumber: "קכ"
+        });
+      }
+      
+      // For other psalms, just move to the next English number
+      const nextEnglishNumber = Math.min(currentTehillim.englishNumber + 1, 150);
+      return res.json({
+        id: nextEnglishNumber,
+        englishNumber: nextEnglishNumber,
+        partNumber: 1,
+        hebrewNumber: `${nextEnglishNumber}` // Simplified - should be proper Hebrew
+      });
+      
+    } catch (error) {
+      console.error("Error getting next Tehillim part:", error);
+      res.status(500).json({ message: "Failed to get next Tehillim part" });
     }
   });
 

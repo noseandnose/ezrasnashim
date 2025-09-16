@@ -1415,7 +1415,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     }, 50);
   };
 
-  const handleCompleteAndNext = () => {
+  const handleCompleteAndNext = async () => {
     if (!selectedPsalm) return;
     
     trackModalComplete(completionKey);
@@ -1423,8 +1423,42 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     completeTask('tefilla');
     checkAndShowCongratulations();
     
-    // Move to next psalm (only for 1-150 sequence)
-    const nextPsalm = selectedPsalm < 150 ? selectedPsalm + 1 : 1;
+    // Determine next psalm based on whether this is a specific part (by ID) or full psalm (by English number)
+    let nextPsalm: number;
+    
+    if (tehillimInfo) {
+      // This is a specific part by ID - handle 119 parts specially
+      if (tehillimInfo.englishNumber === 119) {
+        // For psalm 119, move to next part or to psalm 120 if this is the last part
+        // Psalm 119 has 22 parts (parts 1-22)
+        if (tehillimInfo.partNumber < 22) {
+          // Move to next part of 119 - get the next part ID from the server
+          try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/next-part/${selectedPsalm}`);
+            if (response.ok) {
+              const nextPartData = await response.json();
+              nextPsalm = nextPartData.id;
+            } else {
+              // Fallback to next English number if API fails
+              nextPsalm = 120;
+            }
+          } catch (error) {
+            console.error('Failed to get next Tehillim part:', error);
+            // Fallback to next English number
+            nextPsalm = 120;
+          }
+        } else {
+          // Last part of 119, move to psalm 120
+          nextPsalm = 120;
+        }
+      } else {
+        // For other specific parts, move to next psalm
+        nextPsalm = Math.min(tehillimInfo.englishNumber + 1, 150);
+      }
+    } else {
+      // This is a full psalm by English number - use simple increment
+      nextPsalm = selectedPsalm < 150 ? selectedPsalm + 1 : 1;
+    }
     
     // Update the selected psalm in the store
     const { setSelectedPsalm } = useModalStore.getState();
