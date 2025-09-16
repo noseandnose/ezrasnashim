@@ -70,9 +70,10 @@ export const queryClient = new QueryClient({
           const status = (error as any).response?.status;
           if (status >= 400 && status < 500) return false;
         }
-        return failureCount < 1; // Reduced to 1 retry for faster failure
+        // Increase retries to 3 for better reliability with database connections
+        return failureCount < 3;
       },
-      retryDelay: (attemptIndex) => Math.min(500 * 2 ** attemptIndex, 5000), // Faster retries
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000), // Exponential backoff: 1s, 2s, 4s...
       networkMode: 'online',
     },
     mutations: {

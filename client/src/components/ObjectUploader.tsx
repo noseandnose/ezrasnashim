@@ -82,6 +82,7 @@ export function ObjectUploader({
         type="button"
         onClick={() => setShowModal(true)} 
         className={buttonClassName}
+        tabIndex={-1} // Prevent button from being focused via tab
       >
         {children}
       </Button>

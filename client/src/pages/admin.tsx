@@ -1082,6 +1082,12 @@ export default function Admin() {
                     id="inspiration-title"
                     value={inspirationFormData.title}
                     onChange={(e) => setInspirationFormData(prev => ({ ...prev, title: e.target.value }))}
+                    onKeyDown={(e) => {
+                      // Prevent space key from triggering button focus
+                      if (e.key === ' ') {
+                        e.stopPropagation();
+                      }
+                    }}
                     data-testid="input-inspiration-title"
                     placeholder="Inspiration title"
                     className="mt-1"
@@ -1094,6 +1100,12 @@ export default function Admin() {
                     id="inspiration-content"
                     value={inspirationFormData.content}
                     onChange={(e) => setInspirationFormData(prev => ({ ...prev, content: e.target.value }))}
+                    onKeyDown={(e) => {
+                      // Prevent space key from triggering button focus
+                      if (e.key === ' ') {
+                        e.stopPropagation();
+                      }
+                    }}
                     data-testid="textarea-inspiration-content"
                     placeholder="Main inspiration content"
                     rows={4}
@@ -1134,6 +1146,12 @@ export default function Admin() {
                               ...prev, 
                               [mediaUrlField]: e.target.value 
                             }))}
+                            onKeyDown={(e) => {
+                              // Prevent space key from triggering button focus
+                              if (e.key === ' ') {
+                                e.stopPropagation();
+                              }
+                            }}
                             className="col-span-2 text-sm"
                           />
                         </div>
