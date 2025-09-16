@@ -297,10 +297,17 @@ export default function Admin() {
           description: 'Please login again to upload images.',
           variant: 'destructive'
         });
+      } else if (error.response?.status === 503) {
+        // Object storage not available in production
+        toast({
+          title: 'Upload Not Available',
+          description: error.response?.data?.message || 'Image upload is only available in the Replit development environment. Please use direct image URLs instead.',
+          variant: 'destructive'
+        });
       } else {
         toast({
           title: 'Upload Error',
-          description: 'Failed to get upload URL',
+          description: error.response?.data?.message || 'Failed to get upload URL',
           variant: 'destructive'
         });
       }

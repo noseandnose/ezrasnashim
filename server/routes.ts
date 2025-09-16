@@ -1188,12 +1188,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Object storage endpoints for file uploads
   app.post("/api/objects/upload", requireAdminAuth, async (req, res) => {
     try {
+      // Check if running in Replit environment
+      const isReplitEnv = process.env.REPL_ID || process.env.REPLIT_DEPLOYMENT;
+      if (!isReplitEnv) {
+        return res.status(503).json({ 
+          error: "Object storage is only available in Replit environment",
+          message: "Please use direct image URLs instead of uploading files"
+        });
+      }
+
+      // Check if object storage environment variables are set
+      if (!process.env.PRIVATE_OBJECT_DIR) {
+        return res.status(503).json({ 
+          error: "Object storage not configured",
+          message: "Object storage needs to be set up in the Replit environment"
+        });
+      }
+
       const objectStorageService = new ObjectStorageService();
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
       res.json({ uploadURL });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error getting upload URL:', error);
-      res.status(500).json({ error: "Failed to get upload URL" });
+      
+      // Provide more specific error messages
+      if (error.message?.includes('PRIVATE_OBJECT_DIR')) {
+        return res.status(503).json({ 
+          error: "Object storage not configured",
+          message: "Please set up object storage in Replit"
+        });
+      }
+      
+      if (error.message?.includes('Failed to sign object URL')) {
+        return res.status(503).json({ 
+          error: "Object storage service unavailable",
+          message: "The object storage service is not available in this environment"
+        });
+      }
+      
+      res.status(500).json({ 
+        error: "Failed to get upload URL",
+        message: error.message || "An unexpected error occurred"
+      });
     }
   });
 
@@ -1219,6 +1255,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
+      // Check if running in Replit environment
+      const isReplitEnv = process.env.REPL_ID || process.env.REPLIT_DEPLOYMENT;
+      if (!isReplitEnv) {
+        // In non-Replit environment, just return the image URL as-is
+        return res.status(200).json({ objectPath: req.body.imageURL });
+      }
+
       const objectStorageService = new ObjectStorageService();
       const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
         req.body.imageURL,
@@ -1229,9 +1272,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
       res.status(200).json({ objectPath });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error setting image ACL:", error);
-      res.status(500).json({ error: "Internal server error" });
+      
+      // If it's an environment issue, return the URL as-is
+      if (error.message?.includes('Failed to sign object URL') || 
+          error.message?.includes('PRIVATE_OBJECT_DIR')) {
+        return res.status(200).json({ objectPath: req.body.imageURL });
+      }
+      
+      res.status(500).json({ 
+        error: "Internal server error",
+        message: error.message || "Failed to process image upload"
+      });
     }
   });
 
