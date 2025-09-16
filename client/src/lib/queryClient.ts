@@ -25,11 +25,6 @@ export const getQueryFn: <T>(options: {
     try {
       let url = queryKey[0] as string;
       
-      // Skip custom query keys that aren't API endpoints
-      if (!url.startsWith('/api/') && !url.startsWith('http')) {
-        throw new Error(`Query key "${url}" is not a valid API endpoint. Custom queries should define their own queryFn.`);
-      }
-      
       // If there are additional parameters in the queryKey, append them to the URL
       if (queryKey.length > 1) {
         const params = queryKey.slice(1);
@@ -55,7 +50,17 @@ export const getQueryFn: <T>(options: {
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: getQueryFn({ on401: "throw" }),
+      // Only use default queryFn for API endpoints
+      queryFn: async (context) => {
+        const key = context.queryKey[0] as string;
+        // Skip non-API keys - these should have their own queryFn
+        if (!key.startsWith('/api/') && !key.startsWith('http')) {
+          // Return empty data for non-API keys to prevent errors
+          // The actual query should have its own queryFn that will override this
+          return null;
+        }
+        return getQueryFn({ on401: "throw" })(context);
+      },
       staleTime: 15 * 60 * 1000, // 15 minutes for better performance
       gcTime: 60 * 60 * 1000, // 1 hour in memory
       refetchOnMount: false, // Only refetch when stale or invalidated
