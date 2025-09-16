@@ -1887,37 +1887,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (currentTehillim.englishNumber === 119) {
         const nextPartNumber = currentTehillim.partNumber + 1;
         
-        // Psalm 119 has 22 parts
-        if (nextPartNumber <= 22) {
-          // Find the next part of 119
-          const nextPart = await storage.getSupabaseTehillimByEnglishAndPart(119, nextPartNumber);
-          if (nextPart) {
-            return res.json({ 
-              id: nextPart.id,
-              englishNumber: 119,
-              partNumber: nextPartNumber,
-              hebrewNumber: nextPart.hebrewNumber
-            });
-          }
+        // Find the next part of 119
+        const nextPart = await storage.getSupabaseTehillimByEnglishAndPart(119, nextPartNumber);
+        if (nextPart) {
+          return res.json({ 
+            id: nextPart.id,
+            englishNumber: 119,
+            partNumber: nextPartNumber,
+            hebrewNumber: nextPart.hebrewNumber
+          });
         }
         
-        // If we're at the last part or can't find next part, move to psalm 120
+        // If there's no next part, we're at the last part - move to psalm 120
+        const psalm120 = await storage.getSupabaseTehillimByEnglishAndPart(120, 1);
+        if (psalm120) {
+          return res.json({
+            id: psalm120.id,
+            englishNumber: 120,
+            partNumber: 1,
+            hebrewNumber: psalm120.hebrewNumber
+          });
+        }
+      }
+      
+      // For other psalms, move to the next English number
+      const nextEnglishNumber = currentTehillim.englishNumber + 1;
+      
+      // Handle wrap around from 150 to 1
+      if (nextEnglishNumber > 150) {
+        const psalm1 = await storage.getSupabaseTehillimByEnglishAndPart(1, 1);
+        if (psalm1) {
+          return res.json({
+            id: psalm1.id,
+            englishNumber: 1,
+            partNumber: 1,
+            hebrewNumber: psalm1.hebrewNumber
+          });
+        }
+      }
+      
+      // Handle transition from 118 to 119 (should go to 119 part 1)
+      if (nextEnglishNumber === 119) {
+        const psalm119Part1 = await storage.getSupabaseTehillimByEnglishAndPart(119, 1);
+        if (psalm119Part1) {
+          return res.json({
+            id: psalm119Part1.id,
+            englishNumber: 119,
+            partNumber: 1,
+            hebrewNumber: psalm119Part1.hebrewNumber
+          });
+        }
+      }
+      
+      // For other psalms or if 119 part 1 not found, use regular logic
+      const nextPsalm = await storage.getSupabaseTehillimByEnglishAndPart(nextEnglishNumber, 1);
+      if (nextPsalm) {
         return res.json({
-          id: 120,
-          englishNumber: 120,
+          id: nextPsalm.id,
+          englishNumber: nextEnglishNumber,
           partNumber: 1,
-          hebrewNumber: "קכ"
+          hebrewNumber: nextPsalm.hebrewNumber
         });
       }
       
-      // For other psalms, just move to the next English number
-      const nextEnglishNumber = Math.min(currentTehillim.englishNumber + 1, 150);
-      return res.json({
-        id: nextEnglishNumber,
-        englishNumber: nextEnglishNumber,
-        partNumber: 1,
-        hebrewNumber: `${nextEnglishNumber}` // Simplified - should be proper Hebrew
-      });
+      // Fallback
+      return res.status(404).json({ error: "Could not determine next Tehillim" });
       
     } catch (error) {
       console.error("Error getting next Tehillim part:", error);

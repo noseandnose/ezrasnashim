@@ -94,6 +94,11 @@ export interface IStorage {
   getRandomNameForPerek(): Promise<TehillimName | undefined>;
   getProgressWithAssignedName(): Promise<any>;
   getSefariaTehillim(perek: number, language: string): Promise<{text: string; perek: number; language: string}>;
+  getSupabaseTehillim(englishNumber: number, language: string): Promise<{text: string; perek: number; language: string}>;
+  getSupabaseTehillimById(id: number): Promise<{id: number; englishNumber: number; partNumber: number; hebrewNumber: string; hebrewText: string; englishText: string;} | null>;
+  getSupabaseTehillimByEnglishAndPart(englishNumber: number, partNumber: number): Promise<{id: number; englishNumber: number; partNumber: number; hebrewNumber: string; hebrewText: string; englishText: string;} | null>;
+  getTehillimById(id: number, language: string): Promise<{text: string; perek: number; language: string}>;
+  getSupabaseTehillimPreview(id: number, language: string): Promise<{preview: string; englishNumber: number; partNumber: number; language: string;} | null>;
 
   // Mincha methods
   getMinchaPrayers(): Promise<MinchaPrayer[]>;
@@ -580,6 +585,33 @@ export class DatabaseStorage implements IStorage {
       return row || null;
     } catch (error) {
       console.error('Error fetching Tehillim by ID:', error);
+      return null;
+    }
+  }
+
+  // Get specific Tehillim part by English number and part number
+  async getSupabaseTehillimByEnglishAndPart(englishNumber: number, partNumber: number): Promise<{
+    id: number;
+    englishNumber: number;
+    partNumber: number;
+    hebrewNumber: string;
+    hebrewText: string;
+    englishText: string;
+  } | null> {
+    try {
+      const [row] = await db
+        .select()
+        .from(tehillim)
+        .where(
+          and(
+            eq(tehillim.englishNumber, englishNumber),
+            eq(tehillim.partNumber, partNumber)
+          )
+        );
+
+      return row || null;
+    } catch (error) {
+      console.error('Error fetching Tehillim by English number and part from Supabase:', error);
       return null;
     }
   }
