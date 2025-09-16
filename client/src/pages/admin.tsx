@@ -218,8 +218,8 @@ export default function Admin() {
     try {
       const messageData = {
         date: messageFormData.date,
-        title: messageFormData.title || null,
-        content: messageFormData.message
+        title: messageFormData.title || '',
+        message: messageFormData.message
       };
 
       let response;
