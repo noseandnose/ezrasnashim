@@ -1931,9 +1931,17 @@ export class DatabaseStorage implements IStorage {
   }
   
   async createMessage(message: InsertMessage): Promise<Message> {
+    // Find the maximum ID currently in the table
+    const [maxIdResult] = await db
+      .select({ maxId: sql<number>`COALESCE(MAX(${messages.id}), 0)` })
+      .from(messages);
+    
+    const nextId = (maxIdResult?.maxId || 0) + 1;
+    
+    // Insert with explicit ID to avoid sequence issues
     const [newMessage] = await db
       .insert(messages)
-      .values(message)
+      .values({ ...message, id: nextId })
       .returning();
     return newMessage;
   }
