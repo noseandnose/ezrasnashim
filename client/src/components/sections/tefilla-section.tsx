@@ -23,6 +23,8 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const { data: times, isLoading } = useJewishTimes();
 
   // Prefetch brochas data to speed up loading when user clicks
+  const queryClient = useQueryClient();
+  
   useQuery({
     queryKey: ['/api/brochas/daily'],
     staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
@@ -34,6 +36,37 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (garbage collection time)
   });
+  
+  // Prefetch Mincha and Maariv prayers to prevent empty modals
+  useEffect(() => {
+    // Prefetch Mincha prayer - uses default queryFn from queryClient
+    queryClient.prefetchQuery({
+      queryKey: ['/api/mincha/prayer'],
+      staleTime: 10 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+    });
+    
+    // Prefetch Maariv prayer - uses default queryFn from queryClient
+    queryClient.prefetchQuery({
+      queryKey: ['/api/maariv/prayer'],
+      staleTime: 10 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+    });
+    
+    // Prefetch Nishmas prayer - uses default queryFn from queryClient
+    queryClient.prefetchQuery({
+      queryKey: ['/api/nishmas/prayer'],
+      staleTime: 10 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+    });
+    
+    // Prefetch morning prayers - uses default queryFn from queryClient
+    queryClient.prefetchQuery({
+      queryKey: ['/api/morning/prayers'],
+      staleTime: 10 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+    });
+  }, [queryClient]);
 
   // Helper function to check if any individual Tehillim has been completed
   const hasAnyTehillimCompleted = () => {

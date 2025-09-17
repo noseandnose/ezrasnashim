@@ -13,14 +13,15 @@ const isStaging = process.env.NODE_ENV == 'staging';
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
   ssl: isStaging ? false : { rejectUnauthorized: false },
-  max: 20, // Reduced pool size for Supabase free tier (prevents connection exhaustion)
-  min: 2, // Lower minimum to conserve connections
-  idleTimeoutMillis: 30000, // Increased idle timeout to reduce reconnections
-  connectionTimeoutMillis: 10000, // Increased connection timeout for reliability
+  max: 15, // Conservative pool size for Supabase free tier
+  min: 0, // Allow pool to shrink to zero when not in use
+  idleTimeoutMillis: 10000, // Close idle connections after 10 seconds
+  connectionTimeoutMillis: 10000, // Connection timeout for reliability
   keepAlive: true, // Keep connections alive
   keepAliveInitialDelayMillis: 10000, // Start keep-alive after 10 seconds
   query_timeout: 30000, // Add query timeout to prevent hanging queries
-  statement_timeout: 30000 // Prevent long-running statements
+  statement_timeout: 30000, // Prevent long-running statements
+  allowExitOnIdle: true // Allow process to exit when idle
 });
 
 export const db = drizzle(pool, { schema });
