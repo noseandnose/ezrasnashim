@@ -9,12 +9,12 @@ if (!process.env.DATABASE_URL) {
 }
 
 const isStaging = process.env.NODE_ENV == 'staging';
-// Optimized Supabase connection configuration for faster queries
+// Optimized Supabase connection configuration for production stability
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
   ssl: isStaging ? false : { rejectUnauthorized: false },
-  max: 100, // Large pool size for high concurrent load (can handle hundreds of users)
-  min: 10, // Keep sufficient connections warm for quick response
+  max: 20, // Reduced pool size for Supabase free tier (prevents connection exhaustion)
+  min: 2, // Lower minimum to conserve connections
   idleTimeoutMillis: 30000, // Increased idle timeout to reduce reconnections
   connectionTimeoutMillis: 10000, // Increased connection timeout for reliability
   keepAlive: true, // Keep connections alive
