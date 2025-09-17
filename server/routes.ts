@@ -1355,6 +1355,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/mincha/prayer", async (req, res) => {
+    try {
+      const prayers = await storage.getMinchaPrayers();
+      res.json(prayers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch Mincha prayers" });
+    }
+  });
+
   // Morning prayer routes
   app.get("/api/morning/prayers", async (req, res) => {
     try {
@@ -1367,6 +1376,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Maariv routes
   app.get("/api/maariv/prayers", async (req, res) => {
+    try {
+      const prayers = await storage.getMaarivPrayers();
+      res.json(prayers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch Maariv prayers" });
+    }
+  });
+
+  app.get("/api/maariv/prayer", async (req, res) => {
     try {
       const prayers = await storage.getMaarivPrayers();
       res.json(prayers);
