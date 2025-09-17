@@ -56,7 +56,16 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **Audio Auto-Completion**: Daily Chizuk and Daily Emuna audio content automatically triggers completion when users finish listening, enhancing user engagement.
 - **Mobile App Support**: Enhanced detection and user guidance for mobile app wrappers (FlutterFlow, etc.) with intelligent permission prompts for location, compass, and notifications. Provides step-by-step instructions for enabling native app permissions on iOS/Android.
 
-### Technical Implementations
+### Recent Bug Fixes (September 17, 2025)
+- **Error Handling**: Added robust fallback UI for Torah/Tefilla content sections to prevent blank screens when API calls fail
+- **Font Loading**: Fixed Hebrew font loading issues (VC-Koren-Light, Koren Siddur) with proper preloading and font-display:swap
+- **Database Stability**: Optimized connection pool from 100 to 15 connections with min 0 to prevent Supabase free tier exhaustion
+- **User Experience**: Added user-friendly error messages for failed API calls with specific HTTP status handling
+- **Data Prefetching**: Implemented prefetching for prayer modals (Mincha, Maariv, Nishmas, Morning Prayers) to prevent empty content
+- **Error Recovery**: Added error states with "Temporarily unavailable" messages instead of blank screens
+- **Progressive Enhancement**: Content sections now show loading states and gracefully degrade on errors
+
+## Technical Implementations
 - **API Communication**: TanStack Query for requests, caching, optimistic updates, with centralized configuration.
 - **State Persistence**: Daily completion resets automatically; location cached per session.
 - **Audio/Video Playback**: HTML5 audio/video with progress sliders and media proxy.

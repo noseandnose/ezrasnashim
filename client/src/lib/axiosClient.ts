@@ -3,20 +3,12 @@ import axios, { AxiosResponse, AxiosError } from 'axios';
 
 // Determine the correct base URL for API calls
 function getBaseURL() {
-  // Always use VITE_API_URL if it's set
+  // Use VITE_API_URL if it's set
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
   }
   
-  // Fallback for Replit environment if VITE_API_URL is not set
-  if (window.location.hostname.includes('replit.dev') || 
-      window.location.hostname.includes('replit.app') || 
-      window.location.hostname.includes('repl.co')) {
-    // In Replit, the backend and frontend run on the same port/domain
-    return `${window.location.protocol}//${window.location.host}`;
-  }
-  
-  // Default for local development
+  // Default for local development - backend runs on port 5000
   return 'http://localhost:5000';
 }
 

@@ -84,7 +84,7 @@ export default function Admin() {
 
   // Messages API calls
   const { data: messages, refetch: refetchMessages } = useQuery({
-    queryKey: ['/api/messages', { upcoming: true }],
+    queryKey: ['admin-messages-upcoming'],
     queryFn: async () => {
       if (!isAuthenticated || activeTab !== 'messages') return [];
       try {
@@ -105,7 +105,7 @@ export default function Admin() {
 
   // Recipes API calls
   const { data: recipes, refetch: refetchRecipes } = useQuery({
-    queryKey: ['/api/table/recipes'],
+    queryKey: ['admin-table-recipes'],
     queryFn: async () => {
       if (!isAuthenticated || activeTab !== 'recipes') return [];
       try {
@@ -126,7 +126,7 @@ export default function Admin() {
 
   // Table inspirations API calls
   const { data: inspirations, refetch: refetchInspirations } = useQuery({
-    queryKey: ['/api/table/inspirations'],
+    queryKey: ['admin-table-inspirations'],
     queryFn: async () => {
       if (!isAuthenticated || activeTab !== 'inspirations') return [];
       try {
@@ -147,7 +147,7 @@ export default function Admin() {
 
   // Notifications API calls
   const { data: notificationHistory, refetch: refetchNotificationHistory } = useQuery({
-    queryKey: ['/api/push/history'],
+    queryKey: ['admin-push-history'],
     queryFn: async () => {
       if (!isAuthenticated || activeTab !== 'notifications') return [];
       try {
@@ -241,7 +241,7 @@ export default function Admin() {
 
         setMessageFormData({ date: '', title: '', message: '' });
         setEditingMessage(null);
-        queryClient.invalidateQueries({ queryKey: ['/api/messages', { upcoming: true }] });
+        queryClient.invalidateQueries({ queryKey: ['admin-messages-upcoming'] });
         await refetchMessages();
       }
     } catch (error: any) {
@@ -281,8 +281,8 @@ export default function Admin() {
     }
   };
 
-  // Image upload functions
-  const handleImageUpload = async (type: 'recipe' | 'inspiration', field?: string) => {
+  // Media upload functions (handles images, videos, and audio)
+  const handleMediaUpload = async (type: 'recipe' | 'inspiration', field?: string) => {
     try {
       const response = await axiosClient.post('/api/objects/upload', {}, {
         headers: getAuthHeaders()
@@ -294,13 +294,20 @@ export default function Admin() {
         setIsAuthenticated(false);
         toast({
           title: 'Authentication Failed',
-          description: 'Please login again to upload images.',
+          description: 'Please login again to upload media.',
+          variant: 'destructive'
+        });
+      } else if (error.response?.status === 503) {
+        // Object storage not available in production
+        toast({
+          title: 'Upload Not Available',
+          description: error.response?.data?.message || 'Media upload is only available in the Replit development environment. Please use direct URLs instead.',
           variant: 'destructive'
         });
       } else {
         toast({
           title: 'Upload Error',
-          description: 'Failed to get upload URL',
+          description: error.response?.data?.message || 'Failed to get upload URL',
           variant: 'destructive'
         });
       }
@@ -308,31 +315,38 @@ export default function Admin() {
     }
   };
 
-  const handleImageUploadComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>, type: 'recipe' | 'inspiration', field?: string) => {
+  const handleMediaUploadComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>, type: 'recipe' | 'inspiration', field?: string) => {
     try {
       if (result.successful && result.successful.length > 0) {
-        const uploadURL = result.successful[0].uploadURL;
+        const uploadedFile = result.successful[0];
+        const uploadURL = uploadedFile.uploadURL;
         
-        // Set ACL policy for the uploaded image
-        const response = await axiosClient.post('/api/images/upload-complete', {
-          imageURL: uploadURL
+        // Set ACL policy for the uploaded media (works for all types)
+        const response = await axiosClient.post('/api/objects/upload-complete', {
+          objectURL: uploadURL
         }, {
           headers: getAuthHeaders()
         });
         
         if (response.status === 200) {
           const { objectPath } = response.data;
-          const fullImageUrl = `${window.location.origin}${objectPath}`;
+          const fullMediaUrl = `${window.location.origin}${objectPath}`;
           
           if (type === 'recipe') {
-            setRecipeFormData(prev => ({ ...prev, imageUrl: fullImageUrl }));
+            setRecipeFormData(prev => ({ ...prev, imageUrl: fullMediaUrl }));
           } else if (type === 'inspiration' && field) {
-            setInspirationFormData(prev => ({ ...prev, [field]: fullImageUrl }));
+            setInspirationFormData(prev => ({ ...prev, [field]: fullMediaUrl }));
           }
           
+          // Get media type from file info for better toast message
+          const fileType = uploadedFile.type || 'media';
+          const mediaType = fileType.startsWith('image/') ? 'Image' : 
+                           fileType.startsWith('video/') ? 'Video' :
+                           fileType.startsWith('audio/') ? 'Audio' : 'Media';
+          
           toast({
-            title: 'Image Uploaded',
-            description: 'Image uploaded successfully!'
+            title: `${mediaType} Uploaded`,
+            description: `${mediaType} uploaded successfully!`
           });
         }
       }
@@ -341,13 +355,13 @@ export default function Admin() {
         setIsAuthenticated(false);
         toast({
           title: 'Authentication Failed',
-          description: 'Please login again to upload images.',
+          description: 'Please login again to upload media.',
           variant: 'destructive'
         });
       } else {
         toast({
           title: 'Upload Error',
-          description: 'Failed to complete image upload',
+          description: 'Failed to complete media upload',
           variant: 'destructive'
         });
       }
@@ -386,7 +400,7 @@ export default function Admin() {
           date: '', title: '', description: '', ingredients: '', instructions: '',
           servings: '', prepTime: '', cookTime: '', difficulty: 'easy', imageUrl: '', tags: '', thankYouMessage: ''
         });
-        queryClient.invalidateQueries({ queryKey: ['/api/table/recipes'] });
+        queryClient.invalidateQueries({ queryKey: ['admin-table-recipes'] });
         await refetchRecipes();
       }
     } catch (error: any) {
@@ -413,13 +427,19 @@ export default function Admin() {
 
     setIsSavingInspiration(true);
     try {
+      // Only include mediaType when mediaUrl exists for data integrity
       const inspirationData = {
         ...inspirationFormData,
         mediaUrl1: inspirationFormData.mediaUrl1 || null,
+        mediaType1: inspirationFormData.mediaUrl1 ? inspirationFormData.mediaType1 : null,
         mediaUrl2: inspirationFormData.mediaUrl2 || null,
+        mediaType2: inspirationFormData.mediaUrl2 ? inspirationFormData.mediaType2 : null,
         mediaUrl3: inspirationFormData.mediaUrl3 || null,
+        mediaType3: inspirationFormData.mediaUrl3 ? inspirationFormData.mediaType3 : null,
         mediaUrl4: inspirationFormData.mediaUrl4 || null,
-        mediaUrl5: inspirationFormData.mediaUrl5 || null
+        mediaType4: inspirationFormData.mediaUrl4 ? inspirationFormData.mediaType4 : null,
+        mediaUrl5: inspirationFormData.mediaUrl5 || null,
+        mediaType5: inspirationFormData.mediaUrl5 ? inspirationFormData.mediaType5 : null
       };
 
       let response;
@@ -445,7 +465,7 @@ export default function Admin() {
           mediaUrl5: '', mediaType5: 'image'
         });
         setEditingInspiration(null);
-        queryClient.invalidateQueries({ queryKey: ['/api/table/inspirations'] });
+        queryClient.invalidateQueries({ queryKey: ['admin-table-inspirations'] });
         await refetchInspirations();
       }
     } catch (error: any) {
@@ -474,7 +494,7 @@ export default function Admin() {
           title: 'Inspiration Deleted',
           description: 'The inspiration has been successfully deleted.',
         });
-        queryClient.invalidateQueries({ queryKey: ['/api/table/inspirations'] });
+        queryClient.invalidateQueries({ queryKey: ['admin-table-inspirations'] });
         await refetchInspirations();
       }
     } catch (error: any) {
@@ -509,7 +529,7 @@ export default function Admin() {
           description: `Notification sent to ${response.data.successCount || 'all'} users.`,
         });
         setNotificationData({ title: '', body: '', url: '/', requireInteraction: false });
-        queryClient.invalidateQueries({ queryKey: ['/api/push/history'] });
+        queryClient.invalidateQueries({ queryKey: ['admin-push-history'] });
         await refetchNotificationHistory();
       }
     } catch (error: any) {
@@ -916,8 +936,8 @@ export default function Admin() {
                     />
                     
                     <ObjectUploader
-                      onGetUploadParameters={() => handleImageUpload('recipe')}
-                      onComplete={(result) => handleImageUploadComplete(result, 'recipe')}
+                      onGetUploadParameters={() => handleMediaUpload('recipe')}
+                      onComplete={(result) => handleMediaUploadComplete(result, 'recipe')}
                       maxNumberOfFiles={1}
                       buttonClassName="w-full admin-btn-primary"
                     >
@@ -1062,6 +1082,12 @@ export default function Admin() {
                     id="inspiration-title"
                     value={inspirationFormData.title}
                     onChange={(e) => setInspirationFormData(prev => ({ ...prev, title: e.target.value }))}
+                    onKeyDown={(e) => {
+                      // Prevent space key from triggering button focus
+                      if (e.key === ' ') {
+                        e.stopPropagation();
+                      }
+                    }}
                     data-testid="input-inspiration-title"
                     placeholder="Inspiration title"
                     className="mt-1"
@@ -1074,6 +1100,12 @@ export default function Admin() {
                     id="inspiration-content"
                     value={inspirationFormData.content}
                     onChange={(e) => setInspirationFormData(prev => ({ ...prev, content: e.target.value }))}
+                    onKeyDown={(e) => {
+                      // Prevent space key from triggering button focus
+                      if (e.key === ' ') {
+                        e.stopPropagation();
+                      }
+                    }}
                     data-testid="textarea-inspiration-content"
                     placeholder="Main inspiration content"
                     rows={4}
@@ -1114,13 +1146,19 @@ export default function Admin() {
                               ...prev, 
                               [mediaUrlField]: e.target.value 
                             }))}
+                            onKeyDown={(e) => {
+                              // Prevent space key from triggering button focus
+                              if (e.key === ' ') {
+                                e.stopPropagation();
+                              }
+                            }}
                             className="col-span-2 text-sm"
                           />
                         </div>
                         
                         <ObjectUploader
-                          onGetUploadParameters={() => handleImageUpload('inspiration', mediaUrlField)}
-                          onComplete={(result) => handleImageUploadComplete(result, 'inspiration', mediaUrlField)}
+                          onGetUploadParameters={() => handleMediaUpload('inspiration', mediaUrlField)}
+                          onComplete={(result) => handleMediaUploadComplete(result, 'inspiration', mediaUrlField)}
                           buttonClassName="w-full admin-btn-primary px-3 py-2 rounded-md text-sm"
                         >
                           <Image className="w-4 h-4 mr-2" />

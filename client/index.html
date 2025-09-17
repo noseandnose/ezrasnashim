@@ -34,6 +34,7 @@
     <link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
     
     <!-- Preload Koren fonts to prevent flash -->
+    <link rel="preload" href="/fonts/VC-Koren-Light.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="/src/fonts/KorenSiddur.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="/src/fonts/ArnoKoren.otf" as="font" type="font/otf" crossorigin>
     
@@ -42,12 +43,13 @@
     
     <!-- Inline critical font CSS to prevent flash -->
     <style>
+      /* Critical font definitions - using swap for better performance */
       @font-face {
         font-family: 'Koren Siddur';
-        src: url('/src/fonts/KorenSiddur.otf') format('opentype');
+        src: url('/fonts/VC-Koren-Light.otf') format('opentype');
         font-weight: normal;
         font-style: normal;
-        font-display: block;
+        font-display: swap; /* Show fallback immediately, then swap */
         unicode-range: U+0590-05FF, U+FB1D-FB4F;
       }
       @font-face {
@@ -55,20 +57,8 @@
         src: url('/src/fonts/ArnoKoren.otf') format('opentype');
         font-weight: normal;
         font-style: normal;
-        font-display: block;
+        font-display: swap; /* Show fallback immediately, then swap */
         unicode-range: U+0020-007F, U+00A0-00FF;
-      }
-      /* Apply fonts immediately */
-      .vc-koren-hebrew {
-        font-family: 'Koren Siddur', 'Arno Koren', serif !important;
-        font-weight: normal !important;
-        direction: rtl !important;
-        unicode-bidi: plaintext !important;
-      }
-      .koren-siddur-english {
-        font-family: 'Arno Koren', 'Playfair Display', Georgia, serif !important;
-        font-weight: normal !important;
-        direction: ltr !important;
       }
     </style>
     

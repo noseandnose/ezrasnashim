@@ -23,6 +23,8 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const { data: times, isLoading } = useJewishTimes();
 
   // Prefetch brochas data to speed up loading when user clicks
+  const queryClient = useQueryClient();
+  
   useQuery({
     queryKey: ['/api/brochas/daily'],
     staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
@@ -34,6 +36,37 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (garbage collection time)
   });
+  
+  // Prefetch Mincha and Maariv prayers to prevent empty modals
+  useEffect(() => {
+    // Prefetch Mincha prayer - uses default queryFn from queryClient
+    queryClient.prefetchQuery({
+      queryKey: ['/api/mincha/prayer'],
+      staleTime: 10 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+    });
+    
+    // Prefetch Maariv prayer - uses default queryFn from queryClient
+    queryClient.prefetchQuery({
+      queryKey: ['/api/maariv/prayer'],
+      staleTime: 10 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+    });
+    
+    // Prefetch Nishmas prayer - uses default queryFn from queryClient
+    queryClient.prefetchQuery({
+      queryKey: ['/api/nishmas/prayer'],
+      staleTime: 10 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+    });
+    
+    // Prefetch morning prayers - uses default queryFn from queryClient
+    queryClient.prefetchQuery({
+      queryKey: ['/api/morning/prayers'],
+      staleTime: 10 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+    });
+  }, [queryClient]);
 
   // Helper function to check if any individual Tehillim has been completed
   const hasAnyTehillimCompleted = () => {
@@ -212,7 +245,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     
     return shortMap[code];
   };
-  const queryClient = useQueryClient();
   
   // Local state management
   const [hebrewName, setHebrewName] = useState("");
@@ -222,7 +254,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const [_showHebrew, _setShowHebrew] = useState(true);
 
   // Fetch global Tehillim progress
-  const { data: progress, refetch: refetchProgress } = useQuery<GlobalTehillimProgress>({
+  const { data: progress, refetch: refetchProgress, isError: progressError } = useQuery<GlobalTehillimProgress>({
     queryKey: ['/api/tehillim/progress'], 
     queryFn: async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress`);
@@ -235,7 +267,9 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     },
     staleTime: 0,               // NO caching - keep real-time for global chain
     refetchOnWindowFocus: true, // Refetch when users return to app
-    refetchInterval: 30000      // Check every 30 seconds for chain updates
+    refetchInterval: 30000,     // Check every 30 seconds for chain updates
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
   
   // Fetch current name for the perek - MUST be defined before useEffect hooks that use it
@@ -558,13 +592,20 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                 <div className="w-full bg-blush/20 rounded-full h-1.5">
                   <div 
                     className="bg-gradient-feminine h-1.5 rounded-full transition-all duration-500 ease-out"
-                    style={{ width: `${((progress?.currentPerek || 0) / 150) * 100}%` }}
+                    style={{ width: `${progressError ? 0 : ((progress?.currentPerek || 0) / 150) * 100}%` }}
                   ></div>
                 </div>
               </div>
 
               {/* Name assignment with reason icon */}
-              {currentName ? (
+              {progressError ? (
+                <div className="mb-2 p-2 bg-red-50 rounded-xl border border-red-200">
+                  <div className="flex items-center justify-center space-x-2">
+                    <AlertCircle size={14} className="text-red-500" />
+                    <span className="platypi-regular text-xs text-red-600">Unable to connect to Tehillim chain</span>
+                  </div>
+                </div>
+              ) : currentName ? (
                 <div className="mb-2 p-2 bg-white/60 rounded-xl border border-blush/10">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-1">
