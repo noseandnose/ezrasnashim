@@ -222,7 +222,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const [_showHebrew, _setShowHebrew] = useState(true);
 
   // Fetch global Tehillim progress
-  const { data: progress, refetch: refetchProgress } = useQuery<GlobalTehillimProgress>({
+  const { data: progress, refetch: refetchProgress, isError: progressError } = useQuery<GlobalTehillimProgress>({
     queryKey: ['/api/tehillim/progress'], 
     queryFn: async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress`);
@@ -235,7 +235,9 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     },
     staleTime: 0,               // NO caching - keep real-time for global chain
     refetchOnWindowFocus: true, // Refetch when users return to app
-    refetchInterval: 30000      // Check every 30 seconds for chain updates
+    refetchInterval: 30000,     // Check every 30 seconds for chain updates
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
   
   // Fetch current name for the perek - MUST be defined before useEffect hooks that use it
@@ -558,13 +560,20 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                 <div className="w-full bg-blush/20 rounded-full h-1.5">
                   <div 
                     className="bg-gradient-feminine h-1.5 rounded-full transition-all duration-500 ease-out"
-                    style={{ width: `${((progress?.currentPerek || 0) / 150) * 100}%` }}
+                    style={{ width: `${progressError ? 0 : ((progress?.currentPerek || 0) / 150) * 100}%` }}
                   ></div>
                 </div>
               </div>
 
               {/* Name assignment with reason icon */}
-              {currentName ? (
+              {progressError ? (
+                <div className="mb-2 p-2 bg-red-50 rounded-xl border border-red-200">
+                  <div className="flex items-center justify-center space-x-2">
+                    <AlertCircle size={14} className="text-red-500" />
+                    <span className="platypi-regular text-xs text-red-600">Unable to connect to Tehillim chain</span>
+                  </div>
+                </div>
+              ) : currentName ? (
                 <div className="mb-2 p-2 bg-white/60 rounded-xl border border-blush/10">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-1">
