@@ -245,7 +245,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     
     return shortMap[code];
   };
-  const queryClient = useQueryClient();
   
   // Local state management
   const [hebrewName, setHebrewName] = useState("");
