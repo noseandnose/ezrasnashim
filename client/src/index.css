@@ -39,13 +39,13 @@ body {
   padding: 0;
 }
 
-/* TEST: VC Koren Light Font for Hebrew Tefilla Content */
+/* VC Koren Light Font for Hebrew Tefilla Content */
 @font-face {
   font-family: 'Koren Siddur';
   src: url('/fonts/VC-Koren-Light.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
-  font-display: block; /* Prevent font flash - wait for font to load */
+  font-display: swap; /* Better performance - show fallback immediately, then swap */
   unicode-range: U+0590-05FF, U+FB1D-FB4F; /* Hebrew characters only */
 }
 
@@ -55,7 +55,7 @@ body {
   src: url('./fonts/ArnoKoren.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
-  font-display: block; /* Prevent font flash - wait for font to load */
+  font-display: swap; /* Better performance - show fallback immediately, then swap */
   unicode-range: U+0020-007F, U+00A0-00FF; /* Latin characters only */
 }
 

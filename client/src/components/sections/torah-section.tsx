@@ -36,10 +36,12 @@ export default function TorahSection({}: TorahSectionProps) {
   
   // Fetch today's Pirkei Avot for daily inspiration
   const today = new Date().toISOString().split('T')[0];
-  const { data: pirkeiAvot } = useQuery<{text: string; chapter: number; source: string}>({
+  const { data: pirkeiAvot, isError: pirkeiError } = useQuery<{text: string; chapter: number; source: string}>({
     queryKey: ['/api/torah/pirkei-avot', today],
     staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 60 * 60 * 1000 // 1 hour
+    gcTime: 60 * 60 * 1000, // 1 hour
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
 
   // Fetch all weekly Parsha vorts to support multiple shiurim
@@ -63,31 +65,39 @@ export default function TorahSection({}: TorahSectionProps) {
   });
 
   // Fetch today's Halacha content for reading time calculation
-  const { data: halachaContent } = useQuery<{title?: string; content?: string; footnotes?: string}>({
+  const { data: halachaContent, isError: halachaError, isLoading: halachaLoading } = useQuery<{title?: string; content?: string; footnotes?: string}>({
     queryKey: ['/api/torah/halacha', today],
     staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 30 * 60 * 1000 // 30 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
 
   // Fetch today's Chizuk content
-  const { data: chizukContent } = useQuery<{title?: string; audioUrl?: string; speaker?: string}>({
+  const { data: chizukContent, isError: chizukError, isLoading: chizukLoading } = useQuery<{title?: string; audioUrl?: string; speaker?: string}>({
     queryKey: ['/api/torah/chizuk', today],
     staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000
+    gcTime: 30 * 60 * 1000,
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
 
   // Fetch today's Emuna content
-  const { data: emunaContent } = useQuery<{title?: string; audioUrl?: string; speaker?: string}>({
+  const { data: emunaContent, isError: emunaError, isLoading: emunaLoading } = useQuery<{title?: string; audioUrl?: string; speaker?: string}>({
     queryKey: ['/api/torah/emuna', today],
     staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000
+    gcTime: 30 * 60 * 1000,
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
 
   // Fetch today's Featured content
-  const { data: featuredContent } = useQuery<{title?: string; content?: string; provider?: string; footnotes?: string}>({
+  const { data: featuredContent, isError: featuredError, isLoading: featuredLoading } = useQuery<{title?: string; content?: string; provider?: string; footnotes?: string}>({
     queryKey: ['/api/torah/featured', today],
     staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000
+    gcTime: 30 * 60 * 1000,
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
 
   // Handle direct fullscreen opening for specific modals (bypassing modal completely)
@@ -151,7 +161,7 @@ export default function TorahSection({}: TorahSectionProps) {
       {/* Main Torah Section - Connected to top bar */}
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">
         {/* Daily Inspiration - Pirkei Avot */}
-        {pirkeiAvot && (
+        {(pirkeiAvot || pirkeiError) && (
           <div className="bg-white/70 rounded-2xl p-3 mb-3 border border-blush/10"
                style={{
                  animation: 'gentle-glow-pink 3s ease-in-out infinite'
@@ -161,10 +171,16 @@ export default function TorahSection({}: TorahSectionProps) {
                 <Scroll className="text-white" size={16} />
               </div>
               <h3 className="platypi-bold text-sm text-black">Pirkei Avot</h3>
-              <span className="text-xs text-black/60 platypi-regular">{pirkeiAvot.source?.replace('.', ':') || ''}</span>
+              {pirkeiAvot && (
+                <span className="text-xs text-black/60 platypi-regular">{pirkeiAvot.source?.replace('.', ':') || ''}</span>
+              )}
             </div>
             <p className="koren-siddur-english text-base text-black font-bold leading-relaxed text-justify">
-              {pirkeiAvot.text}
+              {pirkeiError ? (
+                <span className="text-sm text-black/60 platypi-regular">Daily inspiration temporarily unavailable. Please check back later.</span>
+              ) : (
+                pirkeiAvot?.text || 'Loading...'
+              )}
             </p>
           </div>
         )}
@@ -181,33 +197,60 @@ export default function TorahSection({}: TorahSectionProps) {
             let displaySubtitle = subtitle;
             let readingTime = '';
             
+            let isError = false;
+            let isLoading = false;
+            
             switch(id) {
               case 'halacha':
-                hasContent = !!halachaContent?.content;
+                isError = halachaError;
+                isLoading = halachaLoading;
+                hasContent = !!halachaContent?.content && !isError;
                 if (hasContent && !isCompleted && halachaContent) {
                   readingTime = calculateReadingTime(halachaContent.content || '');
                   const camelCaseTitle = toCamelCase(halachaContent.title || '');
                   displaySubtitle = camelCaseTitle || 'Learn Shabbos';
+                } else if (isError) {
+                  displaySubtitle = 'Temporarily unavailable';
+                } else if (isLoading) {
+                  displaySubtitle = 'Loading...';
                 }
                 break;
               case 'chizuk':
-                hasContent = !!chizukContent?.audioUrl;
+                isError = chizukError;
+                isLoading = chizukLoading;
+                hasContent = !!chizukContent?.audioUrl && !isError;
                 if (hasContent && !isCompleted && chizukContent) {
                   displaySubtitle = toCamelCase(chizukContent.title || '') || subtitle;
+                } else if (isError) {
+                  displaySubtitle = 'Temporarily unavailable';
+                } else if (isLoading) {
+                  displaySubtitle = 'Loading...';
                 }
                 break;
               case 'emuna':
-                hasContent = !!emunaContent?.audioUrl;
+                isError = emunaError;
+                isLoading = emunaLoading;
+                hasContent = !!emunaContent?.audioUrl && !isError;
                 if (hasContent && !isCompleted && emunaContent) {
                   displaySubtitle = toCamelCase(emunaContent.title || '') || subtitle;
+                } else if (isError) {
+                  displaySubtitle = 'Temporarily unavailable';
+                } else if (isLoading) {
+                  displaySubtitle = 'Loading...';
                 }
                 break;
               case 'featured':
-                hasContent = !!featuredContent?.content;
+                isError = featuredError;
+                isLoading = featuredLoading;
+                hasContent = !!featuredContent?.content && !isError;
                 if (hasContent && !isCompleted && featuredContent) {
                   readingTime = calculateReadingTime(featuredContent.content || '');
                   const camelCaseTitle = toCamelCase(featuredContent.title || '');
                   displaySubtitle = camelCaseTitle || 'Special Topics';
+                } else if (isError) {
+                  displaySubtitle = 'Temporarily unavailable';
+                } else if (isLoading) {
+                  displaySubtitle = 'Loading...';
                 }
                 // Always show text indicator for featured content
                 contentType = hasContent ? 'text' : contentType;
@@ -255,10 +298,10 @@ export default function TorahSection({}: TorahSectionProps) {
                 </div>
                 <h3 className="platypi-bold text-xs text-black mb-1 tracking-wide">{title}</h3>
                 <div className="platypi-regular text-xs text-black/60 leading-relaxed">
-                  {!hasContent ? (
-                    'Coming Soon'
-                  ) : isCompleted ? (
+                  {isCompleted ? (
                     'Completed'
+                  ) : !hasContent && !isLoading && !isError ? (
+                    'Coming Soon'
                   ) : (
                     <>
                       <div>{displaySubtitle}</div>
