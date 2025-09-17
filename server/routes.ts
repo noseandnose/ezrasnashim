@@ -604,14 +604,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...(nextYearData.items || [])
       ];
 
-      // Debug: Log all events to see what we're getting from Hebcal
-      console.log('All events from Hebcal:', allEvents.slice(0, 10).map(e => ({
-        title: e.title,
-        category: e.category,
-        subcat: e.subcat,
-        date: e.date
-      })));
-
       // Filter and format events
       const formattedEvents = allEvents
         .filter((event: any) => {
@@ -620,17 +612,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const isHoliday = event.category === 'holiday';
           const isRoshChodesh = event.category === 'roshchodesh';
           const isFastDay = event.subcat === 'fast';
-          
-          // Debug: Log all fast days found
-          if (event.subcat === 'fast') {
-            console.log('Fast day found:', {
-              title: event.title,
-              category: event.category,
-              subcat: event.subcat,
-              date: event.date,
-              willInclude: isFastDay
-            });
-          }
           
           return isHoliday || isRoshChodesh || isFastDay;
         })
