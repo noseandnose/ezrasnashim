@@ -87,12 +87,12 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
     return category === 'candles' || category === 'havdalah';
   };
 
-  const getEventEmoji = (title: string, category: string) => {
+  const getEventEmoji = (title: string, category: string, subcat?: string) => {
     const titleLower = title.toLowerCase();
     
     // High holidays and major events
     if (titleLower.includes('rosh hashana')) return '🍎';
-    if (titleLower.includes('yom kippur')) return '🕯️';
+    if (titleLower.includes('yom kippur')) return '⚡';  // Fast day emoji for Yom Kippur
     if (titleLower.includes('sukkot')) return '🌿';
     if (titleLower.includes('simchat torah')) return '📜';
     if (titleLower.includes('shemini atzeret')) return '🌧️';
@@ -104,8 +104,10 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
     if (titleLower.includes('lag baomer')) return '🔥';
     if (titleLower.includes('tu bav')) return '💖';
     
-    // Fast days
-    if (category === 'fastday' || titleLower.includes('fast')) return '⚡';
+    // Fast days - check subcat or title
+    if (subcat === 'fast' || titleLower.includes('fast of') || titleLower.includes("ta'anit") || 
+        titleLower.includes('tzom') || titleLower.includes('asara b\'tevet') || 
+        titleLower.includes('tisha b\'av') || titleLower.includes('gedaliah')) return '⚡';
     
     // Rosh Chodesh
     if (category === 'roshchodesh' || titleLower.includes('rosh chodesh')) return '🌙';
@@ -185,7 +187,7 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
                         <h3 className={`platypi-bold text-base ${
                           isPast ? 'text-gray-600' : 'text-black'
                         }`}>
-                          <span className="mr-2">{getEventEmoji(event.title, event.category)}</span>
+                          <span className="mr-2">{getEventEmoji(event.title, event.category, event.subcat)}</span>
                           {event.title}
                           {shouldShowTime(event.category) && getTimeDisplay(event.title) && (
                             <span className={`ml-2 text-sm platypi-medium ${
