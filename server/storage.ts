@@ -242,9 +242,7 @@ export class DatabaseStorage implements IStorage {
 
   // Tehillim methods
   async getActiveNames(): Promise<TehillimName[]> {
-    // Cleanup expired names only when fetching all names
-    // This happens less frequently than progress checks
-    await this.cleanupExpiredNames();
+    // Note: Cleanup is handled by scheduled interval in routes.ts, not per-request
     const now = new Date();
     return await db.select().from(tehillimNames).where(gt(tehillimNames.expiresAt, now));
   }
