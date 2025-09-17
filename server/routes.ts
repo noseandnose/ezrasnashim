@@ -608,10 +608,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const formattedEvents = allEvents
         .filter((event: any) => {
           // Include Major Holidays, Minor Holidays, Rosh Chodesh, and Fast Days
-          // Fast days have subcat 'fast' with category 'holiday'
+          // Fast days have subcat 'fast' with category 'holiday' (exclude zmanim timing events)
           const isHoliday = event.category === 'holiday';
           const isRoshChodesh = event.category === 'roshchodesh';
-          const isFastDay = event.subcat === 'fast';
+          const isFastDay = event.category === 'holiday' && event.subcat === 'fast';
           
           return isHoliday || isRoshChodesh || isFastDay;
         })
