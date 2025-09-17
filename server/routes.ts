@@ -587,8 +587,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const nextYear = currentYear + 1;
       
       // Fetch events for current and next year to ensure we have upcoming events (with caching)
+      // Include fast days (F=on) in addition to holidays and Rosh Chodesh
       const eventsPromises = [currentYear, nextYear].map(async (year) => {
-        const hebcalUrl = `https://www.hebcal.com/hebcal?v=1&cfg=json&year=${year}&latitude=${latitude}&longitude=${longitude}&maj=on&min=on&nx=on`;
+        const hebcalUrl = `https://www.hebcal.com/hebcal?v=1&cfg=json&year=${year}&latitude=${latitude}&longitude=${longitude}&maj=on&min=on&nx=on&F=on`;
         console.log(`[Server API Request] GET ${hebcalUrl}`);
         const response = await cachedGet(hebcalUrl);
         console.log(`[Server API Response] ${response.status} GET ${hebcalUrl}`);
@@ -606,10 +607,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Filter and format events
       const formattedEvents = allEvents
         .filter((event: any) => {
-          // Only include Major Holidays, Minor Holidays, and Rosh Chodesh
-          return event.category && [
-            'holiday', 'roshchodesh'
-          ].includes(event.category);
+          // Include Major Holidays, Minor Holidays, Rosh Chodesh, and Fast Days
+          // Fast days have subcat of 'fast' or 'major' (for Yom Kippur)
+          const isHoliday = event.category === 'holiday';
+          const isRoshChodesh = event.category === 'roshchodesh';
+          const isFastDay = event.subcat === 'fast' || 
+                           (event.subcat === 'major' && event.title && event.title.includes('Yom Kippur'));
+          
+          return isHoliday || isRoshChodesh || isFastDay;
         })
         .map((event: any) => ({
           title: event.title || '',
