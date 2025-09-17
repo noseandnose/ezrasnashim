@@ -107,7 +107,7 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
     // Fast days - check subcat or title
     if (subcat === 'fast' || titleLower.includes('fast of') || titleLower.includes("ta'anit") || 
         titleLower.includes('tzom') || titleLower.includes('asara b\'tevet') || 
-        titleLower.includes('tisha b\'av') || titleLower.includes('gedaliah')) return '⚡';
+        titleLower.includes('tisha b\'av') || titleLower.includes('gedaliah')) return '🚫🍽️';
     
     // Rosh Chodesh
     if (category === 'roshchodesh' || titleLower.includes('rosh chodesh')) return '🌙';
