@@ -732,32 +732,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
         parsha: null as string | null
       };
 
+      // Find the upcoming Friday's candle lighting (closest Friday candle lighting)
+      const now = new Date();
+      let closestFridayCandleLighting = null;
+      let closestDistance = Infinity;
+      
       data.items.forEach((item: any) => {
-        // Processing item
-        if (item.title.includes("Candle lighting:")) {
-          // Extract time with possible pm/am suffix (e.g., "Candle lighting: 8:00pm" or "Candle lighting: 19:23")
-          const timeMatch = item.title.match(/Candle lighting: (\d{1,2}:\d{2})(pm|am|p\.m\.|a\.m\.)?/i);
-          // Candle lighting timeMatch
-          if (timeMatch) {
-            const [hours, minutes] = timeMatch[1].split(':');
-            const hour12 = parseInt(hours);
-            const suffix = timeMatch[2]?.toLowerCase();
+        // Processing item - look for Friday candle lighting times only
+        if (item.title.includes("Candle lighting:") && item.date) {
+          const itemDate = new Date(item.date);
+          const dayOfWeek = itemDate.getDay(); // 0=Sunday, 5=Friday
+          
+          // Only consider Friday candle lighting times (not Yom Tov candle lighting)
+          if (dayOfWeek === 5) { // Friday
+            const timeDifference = itemDate.getTime() - now.getTime();
             
-            // Candle lighting time parsing
-            
-            if (suffix) {
-              // Already has am/pm, just format it properly
-              const displayHour = hour12 === 0 ? 12 : hour12;
-              result.candleLighting = `${displayHour}:${minutes} ${suffix.toUpperCase().replace(/\./g, '')}`;
-            } else {
-              // 24-hour format, convert to 12-hour
-              const displayHour = hour12 > 12 ? hour12 - 12 : (hour12 === 0 ? 12 : hour12);
-              const period = hour12 >= 12 ? 'PM' : 'AM';
-              result.candleLighting = `${displayHour}:${minutes} ${period}`;
+            // Find the closest upcoming Friday (or current Friday if we haven't passed candle lighting yet)
+            if (timeDifference >= -24 * 60 * 60 * 1000 && timeDifference < closestDistance) { // Allow current Friday up to 24 hours ago
+              closestDistance = timeDifference;
+              closestFridayCandleLighting = item;
             }
-            // Final candleLighting
           }
-        } else if (item.title.includes("Havdalah:")) {
+        }
+      });
+      
+      // Process the closest Friday candle lighting
+      if (closestFridayCandleLighting) {
+        const item = closestFridayCandleLighting;
+        const timeMatch = item.title.match(/Candle lighting: (\d{1,2}:\d{2})(pm|am|p\.m\.|a\.m\.)?/i);
+        // Candle lighting timeMatch
+        if (timeMatch) {
+          const [hours, minutes] = timeMatch[1].split(':');
+          const hour12 = parseInt(hours);
+          const suffix = timeMatch[2]?.toLowerCase();
+          
+          // Candle lighting time parsing
+          
+          if (suffix) {
+            // Already has am/pm, just format it properly
+            const displayHour = hour12 === 0 ? 12 : hour12;
+            result.candleLighting = `${displayHour}:${minutes} ${suffix.toUpperCase().replace(/\./g, '')}`;
+          } else {
+            // 24-hour format, convert to 12-hour
+            const displayHour = hour12 > 12 ? hour12 - 12 : (hour12 === 0 ? 12 : hour12);
+            const period = hour12 >= 12 ? 'PM' : 'AM';
+            result.candleLighting = `${displayHour}:${minutes} ${period}`;
+          }
+          // Final candleLighting
+        }
+      }
+      
+      // Process other items for havdalah and parsha
+      data.items.forEach((item: any) => {
+        // Skip candle lighting since we already processed it above
+        if (item.title.includes("Havdalah:")) {
           // Full title for havdalah
           // Check if it has pm/am at the end of the full title  
           const timeWithSuffixMatch = item.title.match(/Havdalah: (\d{1,2}:\d{2})\s*(pm|am)/i);
