@@ -27,7 +27,7 @@ export function useShabbosTime() {
   const { coordinates } = useLocationStore();
 
   return useQuery({
-    queryKey: ['shabbos-times', coordinates?.lat, coordinates?.lng],
+    queryKey: ['shabbos-times-v2', coordinates?.lat, coordinates?.lng], // Changed key to force cache refresh
     queryFn: async () => {
       if (!coordinates) {
         // Return null instead of throwing error - matches useJewishTimes behavior
