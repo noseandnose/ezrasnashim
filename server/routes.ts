@@ -587,8 +587,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const nextYear = currentYear + 1;
       
       // Fetch events for current and next year to ensure we have upcoming events (with caching)
+      // Include minor fasts (mf=on) in addition to holidays and Rosh Chodesh
       const eventsPromises = [currentYear, nextYear].map(async (year) => {
-        const hebcalUrl = `https://www.hebcal.com/hebcal?v=1&cfg=json&year=${year}&latitude=${latitude}&longitude=${longitude}&maj=on&min=on&nx=on`;
+        const hebcalUrl = `https://www.hebcal.com/hebcal?v=1&cfg=json&year=${year}&latitude=${latitude}&longitude=${longitude}&maj=on&min=on&nx=on&mf=on`;
         console.log(`[Server API Request] GET ${hebcalUrl}`);
         const response = await cachedGet(hebcalUrl);
         console.log(`[Server API Response] ${response.status} GET ${hebcalUrl}`);
@@ -606,10 +607,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Filter and format events
       const formattedEvents = allEvents
         .filter((event: any) => {
-          // Only include Major Holidays, Minor Holidays, and Rosh Chodesh
-          return event.category && [
-            'holiday', 'roshchodesh'
-          ].includes(event.category);
+          // Include Major Holidays, Minor Holidays, Rosh Chodesh, and Fast Days
+          // Fast days have subcat 'fast' with category 'holiday' (exclude zmanim timing events)
+          const isHoliday = event.category === 'holiday';
+          const isRoshChodesh = event.category === 'roshchodesh';
+          const isFastDay = event.category === 'holiday' && event.subcat === 'fast';
+          
+          return isHoliday || isRoshChodesh || isFastDay;
         })
         .map((event: any) => ({
           title: event.title || '',
@@ -1351,6 +1355,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/mincha/prayer", async (req, res) => {
+    try {
+      const prayers = await storage.getMinchaPrayers();
+      res.json(prayers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch Mincha prayers" });
+    }
+  });
+
   // Morning prayer routes
   app.get("/api/morning/prayers", async (req, res) => {
     try {
@@ -1363,6 +1376,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Maariv routes
   app.get("/api/maariv/prayers", async (req, res) => {
+    try {
+      const prayers = await storage.getMaarivPrayers();
+      res.json(prayers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch Maariv prayers" });
+    }
+  });
+
+  app.get("/api/maariv/prayer", async (req, res) => {
     try {
       const prayers = await storage.getMaarivPrayers();
       res.json(prayers);

@@ -242,9 +242,7 @@ export class DatabaseStorage implements IStorage {
 
   // Tehillim methods
   async getActiveNames(): Promise<TehillimName[]> {
-    // Cleanup expired names only when fetching all names
-    // This happens less frequently than progress checks
-    await this.cleanupExpiredNames();
+    // Note: Cleanup is handled by scheduled interval in routes.ts, not per-request
     const now = new Date();
     return await db.select().from(tehillimNames).where(gt(tehillimNames.expiresAt, now));
   }
@@ -835,7 +833,19 @@ export class DatabaseStorage implements IStorage {
 
   // Mincha methods
   async getMinchaPrayers(): Promise<MinchaPrayer[]> {
-    return await db.select().from(minchaPrayers).orderBy(minchaPrayers.orderIndex);
+    try {
+      // Add timeout protection to prevent hangs
+      const queryPromise = db.select().from(minchaPrayers).orderBy(minchaPrayers.orderIndex);
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Query timeout')), 3000)
+      );
+      
+      return await Promise.race([queryPromise, timeoutPromise]);
+    } catch (error) {
+      console.error('Error fetching mincha prayers:', error);
+      // Return empty array on timeout/error to prevent app crashes
+      return [];
+    }
   }
 
   async createMinchaPrayer(insertPrayer: InsertMinchaPrayer): Promise<MinchaPrayer> {
@@ -845,7 +855,19 @@ export class DatabaseStorage implements IStorage {
 
   // Morning prayer methods
   async getMorningPrayers(): Promise<MorningPrayer[]> {
-    return await db.select().from(morningPrayers).orderBy(morningPrayers.orderIndex);
+    try {
+      // Add timeout protection to prevent hangs
+      const queryPromise = db.select().from(morningPrayers).orderBy(morningPrayers.orderIndex);
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Query timeout')), 3000)
+      );
+      
+      return await Promise.race([queryPromise, timeoutPromise]);
+    } catch (error) {
+      console.error('Error fetching morning prayers:', error);
+      // Return empty array on timeout/error to prevent app crashes
+      return [];
+    }
   }
 
   async createMorningPrayer(insertPrayer: InsertMorningPrayer): Promise<MorningPrayer> {
@@ -855,7 +877,19 @@ export class DatabaseStorage implements IStorage {
 
   // Maariv methods
   async getMaarivPrayers(): Promise<MaarivPrayer[]> {
-    return await db.select().from(maarivPrayers).orderBy(maarivPrayers.orderIndex);
+    try {
+      // Add timeout protection to prevent hangs
+      const queryPromise = db.select().from(maarivPrayers).orderBy(maarivPrayers.orderIndex);
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Query timeout')), 3000)
+      );
+      
+      return await Promise.race([queryPromise, timeoutPromise]);
+    } catch (error) {
+      console.error('Error fetching maariv prayers:', error);
+      // Return empty array on timeout/error to prevent app crashes
+      return [];
+    }
   }
 
   async createMaarivPrayer(insertPrayer: InsertMaarivPrayer): Promise<MaarivPrayer> {

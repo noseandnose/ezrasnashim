@@ -55,26 +55,56 @@ app.use(helmet({
   frameguard: false, // Explicitly disable to allow iframe embedding
 }));
 
-// Rate limiting for API routes
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs for API routes
-  message: { message: "Too many API requests, please try again later." },
+// Rate limiting configuration
+// Production app needs to handle many concurrent users
+// Each page load makes ~30-40 API calls for content
+const generalApiLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute window
+  max: 2000, // Allow 2000 requests per minute (supports ~50+ concurrent users)
+  message: { message: "Too many API requests, please try again in a minute." },
   standardHeaders: true,
   legacyHeaders: false,
+  skipSuccessfulRequests: false,
+  // Trust proxy to get real IP for per-IP limiting
+  keyGenerator: (req) => {
+    // Use real IP if available, fallback to connection IP
+    return req.ip || req.connection.remoteAddress || 'unknown';
+  },
+  // Skip rate limiting for health checks and read-only content
+  skip: (req) => {
+    return req.path === '/api/version' || 
+           req.path === '/api/health' ||
+           req.path.startsWith('/api/sponsors') ||
+           req.path.includes('/hebrew-date') || // Date conversions are cached
+           req.method === 'OPTIONS'; // Don't rate limit preflight requests
+  }
 });
 
+// Stricter limit for auth endpoints (per IP)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes  
-  max: 5, // Limit auth attempts
+  max: 10, // Allow 10 auth attempts per 15 minutes per IP
   message: { message: "Too many authentication attempts, please try again later." },
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => req.ip || req.connection.remoteAddress || 'unknown',
 });
 
-// Apply rate limiting
-app.use('/api/', apiLimiter);
+// Moderate limit for expensive write operations (per IP)
+const expensiveLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 30, // 30 requests per minute per IP for expensive operations
+  message: { message: "Too many requests to this resource, please slow down." },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.ip || req.connection.remoteAddress || 'unknown',
+});
+
+// Apply rate limiting with different tiers
 app.use('/api/auth/', authLimiter);
+app.use('/api/tehillim/complete', expensiveLimiter);
+app.use('/api/analytics/track', expensiveLimiter);
+app.use('/api/', generalApiLimiter);
 
 // Enable compression for all responses
 app.use(compression({
@@ -104,17 +134,33 @@ app.use((req, res, next) => {
   
   // API responses get appropriate cache based on endpoint
   if (req.url.startsWith('/api/')) {
-    // Long cache for content that rarely changes
-    if (req.url.includes('/torah/') || req.url.includes('/tefilla/') || req.url.includes('/pirkei-avot/')) {
-      res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour
-    } 
-    // Short cache for frequently changing data
-    else if (req.url.includes('/tehillim/progress') || req.url.includes('/current-name')) {
+    // Long cache for content that rarely changes (reduces API calls significantly)
+    if (req.url.includes('/torah/') || 
+        req.url.includes('/tefilla/') || 
+        req.url.includes('/pirkei-avot/') ||
+        req.url.includes('/brochas/') ||
+        req.url.includes('/morning/prayers') ||
+        req.url.includes('/mincha/prayer') ||
+        req.url.includes('/maariv/prayer') ||
+        req.url.includes('/nishmas/') ||
+        req.url.includes('/birkat-hamazon/')) {
+      res.setHeader('Cache-Control', 'public, max-age=7200, stale-while-revalidate=3600'); // 2 hours + 1 hour stale
+    }
+    // Medium cache for semi-static content
+    else if (req.url.includes('/hebrew-date/') || 
+             req.url.includes('/sponsors/') ||
+             req.url.includes('/messages/')) {
+      res.setHeader('Cache-Control', 'public, max-age=1800, stale-while-revalidate=900'); // 30 min + 15 min stale
+    }
+    // No cache for real-time data
+    else if (req.url.includes('/tehillim/progress') || 
+             req.url.includes('/current-name') ||
+             req.url.includes('/analytics/')) {
       res.setHeader('Cache-Control', 'no-cache, must-revalidate');
     }
     // Default moderate cache for other endpoints
     else {
-      res.setHeader('Cache-Control', 'public, max-age=300'); // 5 minutes
+      res.setHeader('Cache-Control', 'public, max-age=600, stale-while-revalidate=300'); // 10 min + 5 min stale
     }
   }
   
@@ -136,8 +182,10 @@ app.use(
         /\.replit\.app$/,
         /\.repl\.co$/,
         'https://api.ezrasnashim.app',
+        'https://api.staging.ezrasnashim.app',
         'https://staging.ezrasnashim.app',
-        'https://ezrasnashim.app'
+        'https://ezrasnashim.app',
+        'https://www.ezrasnashim.app'
       ];
       
       const isAllowed = allowedOrigins.some(allowed => {
@@ -151,8 +199,10 @@ app.use(
         return callback(null, true);
       }
       
-      // In production, be strict; in development, allow any origin
-      if (process.env.NODE_ENV === 'production') {
+      // In production/staging, be strict; in development, allow any origin
+      const isProduction = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging';
+      if (isProduction) {
+        console.error(`CORS rejection: Origin ${origin} not in allowed list`);
         return callback(new Error('Not allowed by CORS'), false);
       } else {
         return callback(null, true);
