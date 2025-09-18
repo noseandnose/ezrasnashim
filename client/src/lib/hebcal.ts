@@ -29,11 +29,12 @@ function adjustTime(timeStr: string, adjustmentMinutes: number): string {
     if (isNaN(date.getTime())) return timeStr;
     
     date.setMinutes(date.getMinutes() + adjustmentMinutes);
+    // Use local timezone instead of hardcoded New York time
     return date.toLocaleTimeString('en-US', { 
       hour: 'numeric', 
       minute: '2-digit',
-      hour12: true,
-      timeZone: 'America/New_York'
+      hour12: true
+      // Removed timeZone: 'America/New_York' to use user's local timezone
     });
   } catch {
     return timeStr;
@@ -51,11 +52,12 @@ export function parseJewishTimes(hebcalData: HebcalResponse) {
     const time = item.time;
     if (!time) return;
     
+    // Use local timezone instead of hardcoded New York time
     const timeStr = new Date(time).toLocaleTimeString('en-US', { 
       hour: 'numeric', 
       minute: '2-digit',
-      hour12: true,
-      timeZone: 'America/New_York'
+      hour12: true
+      // Removed timeZone: 'America/New_York' to use user's local timezone
     });
     
     switch (item.title.toLowerCase()) {
