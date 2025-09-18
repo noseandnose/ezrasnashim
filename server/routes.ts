@@ -734,7 +734,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Find the upcoming Friday's candle lighting (closest Friday candle lighting)
       const now = new Date();
-      let closestFridayCandleLighting = null;
+      let closestFridayCandleLighting: any = null;
       let closestDistance = Infinity;
       
       data.items.forEach((item: any) => {
