@@ -56,38 +56,48 @@ app.use(helmet({
 }));
 
 // Rate limiting configuration
-// Note: A single page load makes ~30-40 API calls for content
+// Production app needs to handle many concurrent users
+// Each page load makes ~30-40 API calls for content
 const generalApiLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute window
-  max: 200, // Allow 200 requests per minute (supports ~5 concurrent users)
+  max: 2000, // Allow 2000 requests per minute (supports ~50+ concurrent users)
   message: { message: "Too many API requests, please try again in a minute." },
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: false,
-  // Skip rate limiting for health checks and static content
+  // Trust proxy to get real IP for per-IP limiting
+  keyGenerator: (req) => {
+    // Use real IP if available, fallback to connection IP
+    return req.ip || req.connection.remoteAddress || 'unknown';
+  },
+  // Skip rate limiting for health checks and read-only content
   skip: (req) => {
     return req.path === '/api/version' || 
            req.path === '/api/health' ||
-           req.path.startsWith('/api/sponsors');
+           req.path.startsWith('/api/sponsors') ||
+           req.path.includes('/hebrew-date') || // Date conversions are cached
+           req.method === 'OPTIONS'; // Don't rate limit preflight requests
   }
 });
 
-// Stricter limit for auth endpoints
+// Stricter limit for auth endpoints (per IP)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes  
-  max: 10, // Allow 10 auth attempts per 15 minutes
+  max: 10, // Allow 10 auth attempts per 15 minutes per IP
   message: { message: "Too many authentication attempts, please try again later." },
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => req.ip || req.connection.remoteAddress || 'unknown',
 });
 
-// Very strict limit for expensive operations
+// Moderate limit for expensive write operations (per IP)
 const expensiveLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 20, // Only 20 requests per minute for expensive operations
+  max: 30, // 30 requests per minute per IP for expensive operations
   message: { message: "Too many requests to this resource, please slow down." },
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => req.ip || req.connection.remoteAddress || 'unknown',
 });
 
 // Apply rate limiting with different tiers
@@ -124,17 +134,33 @@ app.use((req, res, next) => {
   
   // API responses get appropriate cache based on endpoint
   if (req.url.startsWith('/api/')) {
-    // Long cache for content that rarely changes
-    if (req.url.includes('/torah/') || req.url.includes('/tefilla/') || req.url.includes('/pirkei-avot/')) {
-      res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour
-    } 
-    // Short cache for frequently changing data
-    else if (req.url.includes('/tehillim/progress') || req.url.includes('/current-name')) {
+    // Long cache for content that rarely changes (reduces API calls significantly)
+    if (req.url.includes('/torah/') || 
+        req.url.includes('/tefilla/') || 
+        req.url.includes('/pirkei-avot/') ||
+        req.url.includes('/brochas/') ||
+        req.url.includes('/morning/prayers') ||
+        req.url.includes('/mincha/prayer') ||
+        req.url.includes('/maariv/prayer') ||
+        req.url.includes('/nishmas/') ||
+        req.url.includes('/birkat-hamazon/')) {
+      res.setHeader('Cache-Control', 'public, max-age=7200, stale-while-revalidate=3600'); // 2 hours + 1 hour stale
+    }
+    // Medium cache for semi-static content
+    else if (req.url.includes('/hebrew-date/') || 
+             req.url.includes('/sponsors/') ||
+             req.url.includes('/messages/')) {
+      res.setHeader('Cache-Control', 'public, max-age=1800, stale-while-revalidate=900'); // 30 min + 15 min stale
+    }
+    // No cache for real-time data
+    else if (req.url.includes('/tehillim/progress') || 
+             req.url.includes('/current-name') ||
+             req.url.includes('/analytics/')) {
       res.setHeader('Cache-Control', 'no-cache, must-revalidate');
     }
     // Default moderate cache for other endpoints
     else {
-      res.setHeader('Cache-Control', 'public, max-age=300'); // 5 minutes
+      res.setHeader('Cache-Control', 'public, max-age=600, stale-while-revalidate=300'); // 10 min + 5 min stale
     }
   }
   
