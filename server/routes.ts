@@ -3633,7 +3633,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Version endpoint for PWA update checking
   // Use a stable version timestamp that only changes for actual releases
-  const APP_VERSION = process.env.APP_VERSION || '1.0.1';
+  const APP_VERSION = process.env.APP_VERSION || '1.0.2';
   const SERVER_START_TIME = Date.now();
   
   // Create a stable version timestamp based on version string rather than server restarts
