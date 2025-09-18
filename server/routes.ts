@@ -1,8 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";
-import { storage } from "./storage.js";
-import serverAxiosClient from "./axiosClient.js";
+import { storage } from "./storage";
+import serverAxiosClient from "./axiosClient";
 import path from "path";
 import { fileURLToPath } from "url";
 import { find as findTimezone } from "geo-tz";
@@ -129,7 +129,7 @@ import {
   insertTableInspirationSchema,
   insertNishmasTextSchema,
   insertMessagesSchema
-} from "../shared/schema.js";
+} from "../shared/schema";
 import { z } from "zod";
 
 // Admin authentication middleware
