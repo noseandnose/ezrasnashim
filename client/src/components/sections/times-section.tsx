@@ -79,16 +79,16 @@ export default function TimesSection() {
           )}
         </div>
 
-        {/* Jewish Events & Calendar */}
+        {/* Hebrew Date Calculator */}
         <div 
           className="content-card rounded-2xl p-4 cursor-pointer"
-          onClick={() => openModal('events', 'times')}
+          onClick={() => openModal('date-calculator-fullscreen', 'times')}
         >
           <div className="flex items-center space-x-3">
             <Calendar className="text-xl text-blush" size={24} />
             <div className="flex-1">
-              <h3 className="platypi-semibold text-sm">Jewish Events & Calendar</h3>
-              <p className="text-xs text-gray-600">View upcoming holidays & events</p>
+              <h3 className="platypi-semibold text-sm">Hebrew Date Converter</h3>
+              <p className="text-xs text-gray-600">Convert Hebrew and Gregorian dates</p>
             </div>
             <Plus className="text-gray-400" size={16} />
           </div>
