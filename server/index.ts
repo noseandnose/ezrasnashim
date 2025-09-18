@@ -136,8 +136,10 @@ app.use(
         /\.replit\.app$/,
         /\.repl\.co$/,
         'https://api.ezrasnashim.app',
+        'https://api.staging.ezrasnashim.app',
         'https://staging.ezrasnashim.app',
-        'https://ezrasnashim.app'
+        'https://ezrasnashim.app',
+        'https://www.ezrasnashim.app'
       ];
       
       const isAllowed = allowedOrigins.some(allowed => {
@@ -151,8 +153,10 @@ app.use(
         return callback(null, true);
       }
       
-      // In production, be strict; in development, allow any origin
-      if (process.env.NODE_ENV === 'production') {
+      // In production/staging, be strict; in development, allow any origin
+      const isProduction = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging';
+      if (isProduction) {
+        console.error(`CORS rejection: Origin ${origin} not in allowed list`);
         return callback(new Error('Not allowed by CORS'), false);
       } else {
         return callback(null, true);
