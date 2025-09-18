@@ -64,10 +64,10 @@ async function cachedGet(url: string, config: any = {}): Promise<any> {
   const promise = serverAxiosClient.get(url, config).then(response => {
     // Cache the response data
     apiCache.set(key, {
-      data: response,
+      data: response.data,
       expires: now + ttl
     });
-    return response;
+    return response.data;
   }).catch(error => {
     // Remove the pending promise on error to allow retry
     const entry = apiCache.get(key);
@@ -98,7 +98,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2025-07-30.basil',
+  apiVersion: '2024-04-10',
 });
 
 // Store VAPID keys at startup
@@ -407,8 +407,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Call Hebcal with exact coordinates (with caching)
       const hebcalUrl = `https://www.hebcal.com/zmanim?cfg=json&latitude=${latitude}&longitude=${longitude}&tzid=${tzid}&date=${today}`;
-      const response = await cachedGet(hebcalUrl);
-      const data = response.data;
+      const data = await cachedGet(hebcalUrl);
       
       // Format times to 12-hour format with AM/PM - properly handling timezone
       const formatTime = (timeStr: string) => {
@@ -460,8 +459,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         });
         
-        if (geocodeResponse.data && geocodeResponse.data.address) {
-          const address = geocodeResponse.data.address;
+        if (geocodeResponse && geocodeResponse.address) {
+          const address = geocodeResponse.address;
           
           // Extract city and country from Nominatim response
           const city = address.city || address.town || address.village || address.municipality || address.suburb;
@@ -492,9 +491,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             locationName = `${city}, ${country}`;
           } else if (city) {
             locationName = city;
-          } else if (geocodeResponse.data.display_name) {
+          } else if (geocodeResponse.display_name) {
             // Use display name but clean it up
-            const parts = geocodeResponse.data.display_name.split(',');
+            const parts = geocodeResponse.display_name.split(',');
             if (parts.length >= 2) {
               locationName = `${parts[0].trim()}, ${parts[parts.length - 1].trim()}`;
             } else {
@@ -638,8 +637,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         });
         
-        if (geocodeResponse.data && geocodeResponse.data.address) {
-          const address = geocodeResponse.data.address;
+        if (geocodeResponse && geocodeResponse.address) {
+          const address = geocodeResponse.address;
           const city = address.city || address.town || address.village || address.municipality || address.suburb;
           const country = address.country;
           
