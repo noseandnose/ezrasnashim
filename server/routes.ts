@@ -3631,26 +3631,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }
   
-  // Version endpoint for PWA update checking
-  // Use a stable version timestamp that only changes for actual releases
-  const APP_VERSION = process.env.APP_VERSION || '1.0.2';
+  // Version endpoint for PWA update checking - AUTOMATIC VERSIONING
+  // Automatically generate version based on deployment time
   const SERVER_START_TIME = Date.now();
+  const DEPLOYMENT_DATE = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  const DEPLOYMENT_TIME = Math.floor(SERVER_START_TIME / 1000); // Unix timestamp in seconds
   
-  // Create a stable version timestamp based on version string rather than server restarts
-  const getVersionTimestamp = (versionString: string): number => {
-    // Use a consistent hash of the version string to create stable timestamps
-    // This prevents false update prompts on development server restarts
-    const versionHash = versionString.split('').reduce((hash, char) => {
-      return ((hash << 5) - hash) + char.charCodeAt(0);
-    }, 0);
+  // Generate automatic version: date + time-based
+  const generateAutoVersion = (): string => {
+    const date = new Date();
+    const year = date.getFullYear().toString().slice(-2); // Last 2 digits of year
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hour = String(date.getHours()).padStart(2, '0');
+    const minute = String(date.getMinutes()).padStart(2, '0');
     
-    // Base timestamp: August 31, 2025 + version hash offset
-    const baseTimestamp = new Date('2025-08-31T00:00:00Z').getTime();
-    return baseTimestamp + Math.abs(versionHash) * 1000;
+    return `${year}.${month}.${day}.${hour}${minute}`;
+  };
+  
+  const APP_VERSION = process.env.APP_VERSION || generateAutoVersion();
+  
+  // Use deployment timestamp as version timestamp for automatic updates
+  const getVersionTimestamp = (): number => {
+    // In production, use server start time as deployment timestamp
+    // This ensures each deployment gets a unique timestamp
+    return SERVER_START_TIME;
   };
   
   app.get("/api/version", (req, res) => {
-    const versionTimestamp = getVersionTimestamp(APP_VERSION);
+    const versionTimestamp = getVersionTimestamp();
     const version = {
       timestamp: versionTimestamp,
       version: APP_VERSION,
