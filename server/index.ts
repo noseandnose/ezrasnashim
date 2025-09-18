@@ -55,26 +55,46 @@ app.use(helmet({
   frameguard: false, // Explicitly disable to allow iframe embedding
 }));
 
-// Rate limiting for API routes
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs for API routes
-  message: { message: "Too many API requests, please try again later." },
+// Rate limiting configuration
+// Note: A single page load makes ~30-40 API calls for content
+const generalApiLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute window
+  max: 200, // Allow 200 requests per minute (supports ~5 concurrent users)
+  message: { message: "Too many API requests, please try again in a minute." },
   standardHeaders: true,
   legacyHeaders: false,
+  skipSuccessfulRequests: false,
+  // Skip rate limiting for health checks and static content
+  skip: (req) => {
+    return req.path === '/api/version' || 
+           req.path === '/api/health' ||
+           req.path.startsWith('/api/sponsors');
+  }
 });
 
+// Stricter limit for auth endpoints
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes  
-  max: 5, // Limit auth attempts
+  max: 10, // Allow 10 auth attempts per 15 minutes
   message: { message: "Too many authentication attempts, please try again later." },
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// Apply rate limiting
-app.use('/api/', apiLimiter);
+// Very strict limit for expensive operations
+const expensiveLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 20, // Only 20 requests per minute for expensive operations
+  message: { message: "Too many requests to this resource, please slow down." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply rate limiting with different tiers
 app.use('/api/auth/', authLimiter);
+app.use('/api/tehillim/complete', expensiveLimiter);
+app.use('/api/analytics/track', expensiveLimiter);
+app.use('/api/', generalApiLimiter);
 
 // Enable compression for all responses
 app.use(compression({
