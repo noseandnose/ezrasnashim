@@ -1345,7 +1345,12 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
   const { trackModalComplete } = useTrackModalComplete();
   const tefillaConditions = useTefillaConditions();
 
+  // Check if we're coming from the selector page (psalm number 1-150) or from global chain (ID > 150)
+  // Psalms from selector are always 1-150, while global chain IDs for psalm 119 parts are > 150
+  const isFromSelector = selectedPsalm && selectedPsalm <= 150;
+
   // First get tehillim info to check if this is a specific part (by ID) or full psalm (by English number)
+  // Skip this check if coming from selector - always treat as full psalm
   const { data: tehillimInfo } = useQuery<{
     id: number;
     englishNumber: number;
@@ -1355,24 +1360,27 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     queryKey: ['/api/tehillim/info', selectedPsalm],
     queryFn: async () => {
       if (!selectedPsalm) return null;
+      // If from selector, don't fetch info - we want the full psalm
+      if (isFromSelector) return null;
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/info/${selectedPsalm}`);
       if (!response.ok) return null;
       return response.json();
     },
-    enabled: !!selectedPsalm,
+    enabled: !!selectedPsalm && !isFromSelector, // Don't fetch info if from selector
     staleTime: 0
   });
 
-  // Use by-id endpoint if we have tehillim info (meaning selectedPsalm is an ID), otherwise use English number endpoint
+  // Use by-id endpoint if we have tehillim info (meaning selectedPsalm is an ID from global chain)
+  // Otherwise use English number endpoint (for selector page or when no info available)
   const { data: tehillimText, isLoading } = useQuery({
     queryKey: tehillimInfo ? ['/api/tehillim/text/by-id', selectedPsalm, language] : ['/api/tehillim/text', selectedPsalm, language],
     queryFn: async () => {
-      if (tehillimInfo) {
-        // This is a specific part - use by-id endpoint
+      if (tehillimInfo && !isFromSelector) {
+        // This is a specific part from global chain - use by-id endpoint
         const response = await axiosClient.get(`/api/tehillim/text/by-id/${selectedPsalm}?language=${language}`);
         return response.data;
       } else {
-        // This is a full psalm - use English number endpoint
+        // This is a full psalm from selector - use English number endpoint
         const response = await axiosClient.get(`/api/tehillim/text/${selectedPsalm}?language=${language}`);
         return response.data;
       }
@@ -2157,31 +2165,42 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   // Update fullscreen title when selectedPsalm changes for individual Tehillim
   useEffect(() => {
     if (fullscreenContent.isOpen && fullscreenContent.contentType === 'individual-tehillim' && selectedPsalm) {
-      // Get current tehillim info to construct proper title
-      fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/info/${selectedPsalm}`)
-        .then(response => response.ok ? response.json() : null)
-        .then(tehillimInfo => {
-          let title = `Tehillim ${selectedPsalm}`;
-          if (tehillimInfo) {
-            if (tehillimInfo.partNumber > 1) {
-              title = `Tehillim ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber}`;
-            } else {
-              title = `Tehillim ${tehillimInfo.englishNumber}`;
+      // Check if we're coming from the selector page (psalm number 1-150) or from global chain (ID > 150)
+      const isFromSelector = selectedPsalm && selectedPsalm <= 150;
+      
+      if (isFromSelector) {
+        // For selector pages, just use the psalm number directly
+        setFullscreenContent(current => ({
+          ...current,
+          title: `Tehillim ${selectedPsalm}`
+        }));
+      } else {
+        // For global chain, fetch tehillim info to construct proper title with parts
+        fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/info/${selectedPsalm}`)
+          .then(response => response.ok ? response.json() : null)
+          .then(tehillimInfo => {
+            let title = `Tehillim ${selectedPsalm}`;
+            if (tehillimInfo) {
+              if (tehillimInfo.partNumber > 1) {
+                title = `Tehillim ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber}`;
+              } else {
+                title = `Tehillim ${tehillimInfo.englishNumber}`;
+              }
             }
-          }
-          
-          setFullscreenContent(current => ({
-            ...current,
-            title: title
-          }));
-        })
-        .catch(() => {
-          // Fallback to selectedPsalm if API fails
-          setFullscreenContent(current => ({
-            ...current,
-            title: `Tehillim ${selectedPsalm}`
-          }));
-        });
+            
+            setFullscreenContent(current => ({
+              ...current,
+              title: title
+            }));
+          })
+          .catch(() => {
+            // Fallback to selectedPsalm if API fails
+            setFullscreenContent(current => ({
+              ...current,
+              title: `Tehillim ${selectedPsalm}`
+            }));
+          });
+      }
     }
   }, [selectedPsalm, fullscreenContent.isOpen, fullscreenContent.contentType]);
 
@@ -4035,7 +4054,12 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
   // Load Tefilla conditions for conditional content processing
   const tefillaConditions = useTefillaConditions();
 
+  // Check if we're coming from the selector page (psalm number 1-150) or from global chain (ID > 150)
+  // Psalms from selector are always 1-150, while global chain IDs for psalm 119 parts are > 150
+  const isFromSelector = selectedPsalm && selectedPsalm <= 150;
+
   // First get tehillim info to check if this is a specific part (by ID) or full psalm (by English number)
+  // Skip this check if coming from selector - always treat as full psalm
   const { data: tehillimInfo } = useQuery<{
     id: number;
     englishNumber: number;
@@ -4045,24 +4069,27 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
     queryKey: ['/api/tehillim/info', selectedPsalm],
     queryFn: async () => {
       if (!selectedPsalm) return null;
+      // If from selector, don't fetch info - we want the full psalm
+      if (isFromSelector) return null;
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/info/${selectedPsalm}`);
       if (!response.ok) return null;
       return response.json();
     },
-    enabled: !!selectedPsalm,
+    enabled: !!selectedPsalm && !isFromSelector, // Don't fetch info if from selector
     staleTime: 0
   });
 
-  // Use by-id endpoint if we have tehillim info (meaning selectedPsalm is an ID), otherwise use English number endpoint
+  // Use by-id endpoint if we have tehillim info (meaning selectedPsalm is an ID from global chain)
+  // Otherwise use English number endpoint (for selector page or when no info available)
   const { data: tehillimText, isLoading } = useQuery({
     queryKey: tehillimInfo ? ['/api/tehillim/text/by-id', selectedPsalm, language] : ['/api/tehillim/text', selectedPsalm, language],
     queryFn: async () => {
-      if (tehillimInfo) {
-        // This is a specific part - use by-id endpoint
+      if (tehillimInfo && !isFromSelector) {
+        // This is a specific part from global chain - use by-id endpoint
         const response = await axiosClient.get(`/api/tehillim/text/by-id/${selectedPsalm}?language=${language}`);
         return response.data;
       } else {
-        // This is a full psalm - use English number endpoint
+        // This is a full psalm from selector - use English number endpoint
         const response = await axiosClient.get(`/api/tehillim/text/${selectedPsalm}?language=${language}`);
         return response.data;
       }
@@ -4078,15 +4105,17 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
       // Check if fullscreen is already open and update content
       setFullscreenContent((current: any) => {
         if (current.isOpen && current.title?.includes('Tehillim')) {
-          // Construct proper title using tehillimInfo if available
+          // Construct proper title
           let title = `Tehillim ${selectedPsalm}`;
-          if (tehillimInfo) {
+          if (!isFromSelector && tehillimInfo) {
+            // Only use tehillimInfo for global chain (parts)
             if (tehillimInfo.partNumber > 1) {
               title = `Tehillim ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber}`;
             } else {
               title = `Tehillim ${tehillimInfo.englishNumber}`;
             }
           }
+          // For selector pages, just use the psalm number directly
           
           return {
             isOpen: true,
@@ -4220,15 +4249,17 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
       {setFullscreenContent && tehillimText && (
         <button
           onClick={() => {
-            // Construct proper title using tehillimInfo if available
+            // Construct proper title
             let title = `Tehillim ${selectedPsalm}`;
-            if (tehillimInfo) {
+            if (!isFromSelector && tehillimInfo) {
+              // Only use tehillimInfo for global chain (parts)
               if (tehillimInfo.partNumber > 1) {
                 title = `Tehillim ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber}`;
               } else {
                 title = `Tehillim ${tehillimInfo.englishNumber}`;
               }
             }
+            // For selector pages, just use the psalm number directly
             
             setFullscreenContent({
               isOpen: true,
