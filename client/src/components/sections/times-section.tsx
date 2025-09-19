@@ -88,7 +88,7 @@ export default function TimesSection() {
             <Calendar className="text-xl text-blush" size={24} />
             <div className="flex-1">
               <h3 className="platypi-semibold text-sm">Hebrew Date Converter</h3>
-              <p className="text-xs text-gray-600">Add events to calendar</p>
+              <p className="text-xs text-gray-600">Convert Hebrew and Gregorian dates</p>
             </div>
             <Plus className="text-gray-400" size={16} />
           </div>

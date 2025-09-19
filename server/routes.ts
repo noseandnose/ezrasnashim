@@ -590,9 +590,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const eventsPromises = [currentYear, nextYear].map(async (year) => {
         const hebcalUrl = `https://www.hebcal.com/hebcal?v=1&cfg=json&year=${year}&latitude=${latitude}&longitude=${longitude}&maj=on&min=on&nx=on&mf=on`;
         console.log(`[Server API Request] GET ${hebcalUrl}`);
-        const response = await cachedGet(hebcalUrl);
-        console.log(`[Server API Response] ${response.status} GET ${hebcalUrl}`);
-        return response.data;
+        const data = await cachedGet(hebcalUrl);
+        console.log(`[Server API Response] 200 GET ${hebcalUrl}`);
+        return data;
       });
 
       const [currentYearData, nextYearData] = await Promise.all(eventsPromises);
