@@ -28,19 +28,12 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
   const eventsQuery = useQuery({
     queryKey: ['/api/events', coordinates?.lat, coordinates?.lng],
     queryFn: async () => {
-      if (!coordinates) {
-        console.log('[EventsModal] No coordinates available');
-        return { events: [], location: null };
-      }
-      console.log('[EventsModal] Making API call with coordinates:', coordinates);
+      if (!coordinates) return { events: [], location: null };
       const response = await axiosClient.get(`/api/events/${coordinates.lat}/${coordinates.lng}`);
       return response.data;
     },
     enabled: !!coordinates && isOpen,
   });
-
-  // Debug logging
-  console.log('[EventsModal] Render - isOpen:', isOpen, 'coordinates:', coordinates, 'enabled:', !!coordinates && isOpen);
 
   // Find the next upcoming event when data loads and scroll to it
   useEffect(() => {
