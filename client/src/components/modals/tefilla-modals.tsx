@@ -1345,7 +1345,12 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
   const { trackModalComplete } = useTrackModalComplete();
   const tefillaConditions = useTefillaConditions();
 
+  // Check if we're coming from the selector page (psalm number 1-150) or from global chain (ID > 150)
+  // Psalms from selector are always 1-150, while global chain IDs for psalm 119 parts are > 150
+  const isFromSelector = selectedPsalm && selectedPsalm <= 150;
+
   // First get tehillim info to check if this is a specific part (by ID) or full psalm (by English number)
+  // Skip this check if coming from selector - always treat as full psalm
   const { data: tehillimInfo } = useQuery<{
     id: number;
     englishNumber: number;
@@ -1355,24 +1360,27 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     queryKey: ['/api/tehillim/info', selectedPsalm],
     queryFn: async () => {
       if (!selectedPsalm) return null;
+      // If from selector, don't fetch info - we want the full psalm
+      if (isFromSelector) return null;
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/info/${selectedPsalm}`);
       if (!response.ok) return null;
       return response.json();
     },
-    enabled: !!selectedPsalm,
+    enabled: !!selectedPsalm && !isFromSelector, // Don't fetch info if from selector
     staleTime: 0
   });
 
-  // Use by-id endpoint if we have tehillim info (meaning selectedPsalm is an ID), otherwise use English number endpoint
+  // Use by-id endpoint if we have tehillim info (meaning selectedPsalm is an ID from global chain)
+  // Otherwise use English number endpoint (for selector page or when no info available)
   const { data: tehillimText, isLoading } = useQuery({
     queryKey: tehillimInfo ? ['/api/tehillim/text/by-id', selectedPsalm, language] : ['/api/tehillim/text', selectedPsalm, language],
     queryFn: async () => {
-      if (tehillimInfo) {
-        // This is a specific part - use by-id endpoint
+      if (tehillimInfo && !isFromSelector) {
+        // This is a specific part from global chain - use by-id endpoint
         const response = await axiosClient.get(`/api/tehillim/text/by-id/${selectedPsalm}?language=${language}`);
         return response.data;
       } else {
-        // This is a full psalm - use English number endpoint
+        // This is a full psalm from selector - use English number endpoint
         const response = await axiosClient.get(`/api/tehillim/text/${selectedPsalm}?language=${language}`);
         return response.data;
       }
@@ -4035,7 +4043,12 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
   // Load Tefilla conditions for conditional content processing
   const tefillaConditions = useTefillaConditions();
 
+  // Check if we're coming from the selector page (psalm number 1-150) or from global chain (ID > 150)
+  // Psalms from selector are always 1-150, while global chain IDs for psalm 119 parts are > 150
+  const isFromSelector = selectedPsalm && selectedPsalm <= 150;
+
   // First get tehillim info to check if this is a specific part (by ID) or full psalm (by English number)
+  // Skip this check if coming from selector - always treat as full psalm
   const { data: tehillimInfo } = useQuery<{
     id: number;
     englishNumber: number;
@@ -4045,24 +4058,27 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
     queryKey: ['/api/tehillim/info', selectedPsalm],
     queryFn: async () => {
       if (!selectedPsalm) return null;
+      // If from selector, don't fetch info - we want the full psalm
+      if (isFromSelector) return null;
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/info/${selectedPsalm}`);
       if (!response.ok) return null;
       return response.json();
     },
-    enabled: !!selectedPsalm,
+    enabled: !!selectedPsalm && !isFromSelector, // Don't fetch info if from selector
     staleTime: 0
   });
 
-  // Use by-id endpoint if we have tehillim info (meaning selectedPsalm is an ID), otherwise use English number endpoint
+  // Use by-id endpoint if we have tehillim info (meaning selectedPsalm is an ID from global chain)
+  // Otherwise use English number endpoint (for selector page or when no info available)
   const { data: tehillimText, isLoading } = useQuery({
     queryKey: tehillimInfo ? ['/api/tehillim/text/by-id', selectedPsalm, language] : ['/api/tehillim/text', selectedPsalm, language],
     queryFn: async () => {
-      if (tehillimInfo) {
-        // This is a specific part - use by-id endpoint
+      if (tehillimInfo && !isFromSelector) {
+        // This is a specific part from global chain - use by-id endpoint
         const response = await axiosClient.get(`/api/tehillim/text/by-id/${selectedPsalm}?language=${language}`);
         return response.data;
       } else {
-        // This is a full psalm - use English number endpoint
+        // This is a full psalm from selector - use English number endpoint
         const response = await axiosClient.get(`/api/tehillim/text/${selectedPsalm}?language=${language}`);
         return response.data;
       }
