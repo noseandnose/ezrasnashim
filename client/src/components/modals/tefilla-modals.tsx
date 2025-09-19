@@ -2165,31 +2165,42 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   // Update fullscreen title when selectedPsalm changes for individual Tehillim
   useEffect(() => {
     if (fullscreenContent.isOpen && fullscreenContent.contentType === 'individual-tehillim' && selectedPsalm) {
-      // Get current tehillim info to construct proper title
-      fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/info/${selectedPsalm}`)
-        .then(response => response.ok ? response.json() : null)
-        .then(tehillimInfo => {
-          let title = `Tehillim ${selectedPsalm}`;
-          if (tehillimInfo) {
-            if (tehillimInfo.partNumber > 1) {
-              title = `Tehillim ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber}`;
-            } else {
-              title = `Tehillim ${tehillimInfo.englishNumber}`;
+      // Check if we're coming from the selector page (psalm number 1-150) or from global chain (ID > 150)
+      const isFromSelector = selectedPsalm && selectedPsalm <= 150;
+      
+      if (isFromSelector) {
+        // For selector pages, just use the psalm number directly
+        setFullscreenContent(current => ({
+          ...current,
+          title: `Tehillim ${selectedPsalm}`
+        }));
+      } else {
+        // For global chain, fetch tehillim info to construct proper title with parts
+        fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/info/${selectedPsalm}`)
+          .then(response => response.ok ? response.json() : null)
+          .then(tehillimInfo => {
+            let title = `Tehillim ${selectedPsalm}`;
+            if (tehillimInfo) {
+              if (tehillimInfo.partNumber > 1) {
+                title = `Tehillim ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber}`;
+              } else {
+                title = `Tehillim ${tehillimInfo.englishNumber}`;
+              }
             }
-          }
-          
-          setFullscreenContent(current => ({
-            ...current,
-            title: title
-          }));
-        })
-        .catch(() => {
-          // Fallback to selectedPsalm if API fails
-          setFullscreenContent(current => ({
-            ...current,
-            title: `Tehillim ${selectedPsalm}`
-          }));
-        });
+            
+            setFullscreenContent(current => ({
+              ...current,
+              title: title
+            }));
+          })
+          .catch(() => {
+            // Fallback to selectedPsalm if API fails
+            setFullscreenContent(current => ({
+              ...current,
+              title: `Tehillim ${selectedPsalm}`
+            }));
+          });
+      }
     }
   }, [selectedPsalm, fullscreenContent.isOpen, fullscreenContent.contentType]);
 
@@ -4094,15 +4105,17 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
       // Check if fullscreen is already open and update content
       setFullscreenContent((current: any) => {
         if (current.isOpen && current.title?.includes('Tehillim')) {
-          // Construct proper title using tehillimInfo if available
+          // Construct proper title
           let title = `Tehillim ${selectedPsalm}`;
-          if (tehillimInfo) {
+          if (!isFromSelector && tehillimInfo) {
+            // Only use tehillimInfo for global chain (parts)
             if (tehillimInfo.partNumber > 1) {
               title = `Tehillim ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber}`;
             } else {
               title = `Tehillim ${tehillimInfo.englishNumber}`;
             }
           }
+          // For selector pages, just use the psalm number directly
           
           return {
             isOpen: true,
@@ -4236,15 +4249,17 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
       {setFullscreenContent && tehillimText && (
         <button
           onClick={() => {
-            // Construct proper title using tehillimInfo if available
+            // Construct proper title
             let title = `Tehillim ${selectedPsalm}`;
-            if (tehillimInfo) {
+            if (!isFromSelector && tehillimInfo) {
+              // Only use tehillimInfo for global chain (parts)
               if (tehillimInfo.partNumber > 1) {
                 title = `Tehillim ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber}`;
               } else {
                 title = `Tehillim ${tehillimInfo.englishNumber}`;
               }
             }
+            // For selector pages, just use the psalm number directly
             
             setFullscreenContent({
               isOpen: true,
