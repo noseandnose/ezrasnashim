@@ -1681,7 +1681,8 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
       const updatedProgress = await response.json();
       
       // Step 2: Fetch the next perek's text immediately
-      const textResponse = await axiosClient.get(`/api/tehillim/text/${updatedProgress.currentPerek}?language=${language}`);
+      // Use the by-id endpoint for global chain (which uses IDs that can exceed 150)
+      const textResponse = await axiosClient.get(`/api/tehillim/text/by-id/${updatedProgress.currentPerek}?language=${language}`);
       
       return {
         progress: updatedProgress,
