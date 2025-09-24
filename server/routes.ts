@@ -1890,8 +1890,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { currentPerek, language, completedBy } = req.body;
       
-      if (!currentPerek || currentPerek < 1 || currentPerek > 150) {
-        return res.status(400).json({ error: "Invalid perek number" });
+      // Accept IDs up to 171 (Psalm 119 has 22 parts, making the max ID 171)
+      if (!currentPerek || currentPerek < 1 || currentPerek > 171) {
+        return res.status(400).json({ error: "Invalid perek ID" });
       }
       
       if (!language || !['english', 'hebrew'].includes(language)) {
