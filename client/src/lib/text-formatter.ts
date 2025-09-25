@@ -208,17 +208,18 @@ export function formatTextContent(text: string | null | undefined): string {
   formatted = formatted.replace(/##([^#]*?)##/g, '<span style="font-size: 1.5em; font-weight: bold; display: block; margin: 0.5em 0;">$1</span>');
   
   // Process ** (bold) markers - handle nested content robustly
-  formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // Use [\s\S] instead of . to properly match all characters including Hebrew with nikud
+  formatted = formatted.replace(/\*\*([\s\S]*?)\*\*/g, '<strong>$1</strong>');
   
   // Process ~~ (grey) markers
-  formatted = formatted.replace(/~~(.*?)~~/g, '<span style="color: #9CA3AF; opacity: 0.8;">$1</span>');
+  formatted = formatted.replace(/~~([\s\S]*?)~~/g, '<span style="color: #9CA3AF; opacity: 0.8;">$1</span>');
   
   // Process ++ (bold text) markers 
-  formatted = formatted.replace(/\+\+(.*?)\+\+/g, '<strong>$1</strong>');
+  formatted = formatted.replace(/\+\+([\s\S]*?)\+\+/g, '<strong>$1</strong>');
   
   // Process -- (smaller text) markers - but avoid conflicts with line breaks
   // Use negative lookahead to avoid matching --- (line breaks)
-  formatted = formatted.replace(/--(?!-)(.+?)--(?!-)/g, '<span style="font-size: 0.85em;">$1</span>');
+  formatted = formatted.replace(/--(?!-)([\s\S]+?)--(?!-)/g, '<span style="font-size: 0.85em;">$1</span>');
   
   let result = formatted;
   
