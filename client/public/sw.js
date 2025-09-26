@@ -13,27 +13,30 @@ const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const APP_SHELL_RESOURCES = [
   '/',
   '/index.html',
-  '/src/main.tsx',
-  '/src/index.css',
-  '/src/App.tsx',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png'
 ];
 
-// Prayer and Torah content patterns
+// Prayer and Torah content patterns (excluding dynamic Tehillim)
 const PRAYER_PATTERNS = [
   /\/api\/morning\/prayers/,
   /\/api\/mincha\/prayer/,
   /\/api\/maariv\/prayer/,
   /\/api\/nishmas\/prayer/,
-  /\/api\/brochas\//,
-  /\/api\/tehillim\//
+  /\/api\/brochas\//
 ];
 
 const TORAH_PATTERNS = [
   /\/api\/torah\//,
   /\/api\/pirkei-avot\//
+];
+
+// Tehillim patterns - Network First for live chain progression
+const TEHILLIM_PATTERNS = [
+  /\/api\/tehillim\//,
+  /\/api\/global-tehillim\//,
+  /\/api\/tehillim-completion\//
 ];
 
 // Critical API patterns for offline functionality
@@ -169,6 +172,31 @@ self.addEventListener('fetch', (event) => {
               headers: { 'Content-Type': 'application/json' }
             });
           });
+        });
+      })
+    );
+    return;
+  }
+  
+  // Handle Tehillim content - Network First with NO caching for live chain progression
+  if (TEHILLIM_PATTERNS.some(pattern => pattern.test(url.pathname))) {
+    event.respondWith(
+      fetch(event.request).then(response => {
+        console.log('[SW] Serving fresh Tehillim data (no cache):', url.pathname);
+        return response;
+      }).catch(() => {
+        // No cache fallback - offline users get clear error for live content
+        console.log('[SW] Tehillim requires network connection:', url.pathname);
+        return new Response(JSON.stringify({
+          error: 'Tehillim chain requires internet connection for live updates',
+          offline: true,
+          requiresNetwork: true
+        }), {
+          status: 503,
+          headers: { 
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate'
+          }
         });
       })
     );

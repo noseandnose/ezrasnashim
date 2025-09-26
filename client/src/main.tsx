@@ -63,10 +63,87 @@ function setupSafariViewportFix() {
   }
 }
 
+// Service Worker Registration for Offline Capabilities
+async function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    try {
+      const registration = await navigator.serviceWorker.register('/sw.js', {
+        scope: '/'
+      });
+      
+      console.log('[SW] Service Worker registered successfully:', registration.scope);
+      
+      // Listen for updates
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        if (newWorker) {
+          console.log('[SW] New Service Worker installing...');
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('[SW] New content available! Please refresh.');
+            }
+          });
+        }
+      });
+      
+      // Check for updates every 30 seconds when page is visible
+      setInterval(() => {
+        if (!document.hidden) {
+          registration.update();
+        }
+      }, 30000);
+      
+    } catch (error) {
+      console.error('[SW] Service Worker registration failed:', error);
+    }
+  } else {
+    console.log('[SW] Service Worker not supported in this browser');
+  }
+}
+
+// App Shell DNS Prefetching and Critical Resource Hints
+function preloadAppShell() {
+  // DNS prefetch for external APIs
+  const dnsPrefetchDomains = [
+    'assets.ezrasnashim.app',
+    'www.hebcal.com',
+    'nominatim.openstreetmap.org'
+  ];
+  
+  dnsPrefetchDomains.forEach(domain => {
+    const link = document.createElement('link');
+    link.rel = 'dns-prefetch';
+    link.href = `https://${domain}`;
+    document.head.appendChild(link);
+  });
+  
+  // Preload critical CSS and fonts
+  const criticalAssets = [
+    { href: '/fonts/VC-Koren-Light.otf', as: 'font', type: 'font/otf' },
+    { href: '/fonts/KorenSiddur.otf', as: 'font', type: 'font/otf' }
+  ];
+  
+  criticalAssets.forEach(asset => {
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.href = asset.href;
+    link.as = asset.as;
+    link.type = asset.type;
+    link.crossOrigin = 'anonymous';
+    document.head.appendChild(link);
+  });
+}
+
 // Initialize performance optimizations
 initializeOptimizations();
 
 // Setup Safari viewport fix
 setupSafariViewportFix();
+
+// Register service worker for offline capabilities
+registerServiceWorker();
+
+// Preload app shell components
+preloadAppShell();
 
 createRoot(document.getElementById("root")!).render(<App />);
