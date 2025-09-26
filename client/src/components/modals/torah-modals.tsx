@@ -443,7 +443,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
       {/* Emuna Modal */}
       <Dialog open={activeModal === 'emuna'} onOpenChange={() => closeModal(true)}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-4 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="emuna-description">
+        <DialogContent aria-describedby="emuna-description">
           <div id="emuna-description" className="sr-only">Daily faith strengthening and spiritual trust content</div>
           
           {/* Fullscreen button */}
@@ -599,7 +599,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
       {/* Chizuk Modal */}
       <Dialog open={activeModal === 'chizuk'} onOpenChange={() => closeModal(true)}>
-        <DialogContent className="w-full max-w-sm rounded-3xl p-4 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="chizuk-description">
+        <DialogContent aria-describedby="chizuk-description">
           <div id="chizuk-description" className="sr-only">5-minute daily inspiration and spiritual strengthening content</div>
           
           {/* Simple Header for Audio Content */}
