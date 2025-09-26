@@ -148,7 +148,6 @@ export function FullscreenModal({
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: 'white',
-        isolation: 'isolate',
         pointerEvents: 'auto',
         // Remove all touch restrictions to allow native browser gestures
         touchAction: 'auto',
