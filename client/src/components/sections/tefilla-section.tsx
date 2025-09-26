@@ -592,7 +592,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                 <div className="w-full bg-blush/20 rounded-full h-1.5">
                   <div 
                     className="bg-gradient-feminine h-1.5 rounded-full transition-all duration-500 ease-out"
-                    style={{ width: `${progressError ? 0 : ((progress?.currentPerek || 0) / 150) * 100}%` }}
+                    style={{ width: `${progressError ? 0 : ((progress?.currentPerek || 0) / 171) * 100}%` }}
                   ></div>
                 </div>
               </div>
