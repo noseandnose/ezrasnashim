@@ -2037,8 +2037,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const perek = parseInt(req.params.perek);
       const language = req.query.language as string || 'english';
       
-      if (isNaN(perek) || perek < 1 || perek > 150) {
-        return res.status(400).json({ error: "Perek must be between 1 and 150" });
+      if (isNaN(perek) || perek < 1 || perek > 171) {
+        return res.status(400).json({ error: "Perek must be between 1 and 171" });
       }
       
       if (!['english', 'hebrew'].includes(language)) {
@@ -2175,8 +2175,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const perek = parseInt(req.params.perek);
       const language = req.query.language as string || 'hebrew';
       
-      if (isNaN(perek) || perek < 1 || perek > 150) {
-        return res.status(400).json({ error: 'Perek must be between 1 and 150' });
+      if (isNaN(perek) || perek < 1 || perek > 171) {
+        return res.status(400).json({ error: 'Perek must be between 1 and 171' });
       }
       
       const tehillimText = await storage.getSefariaTehillim(perek, language);
