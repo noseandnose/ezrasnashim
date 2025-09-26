@@ -26,6 +26,10 @@ export default function SponsorshipBar({ className = "" }: SponsorshipBarProps) 
       if (!response.ok) return null;
       return response.json();
     },
+    staleTime: 60 * 60 * 1000, // Cache for 1 hour
+    gcTime: 2 * 60 * 60 * 1000, // Keep in cache for 2 hours
+    refetchOnMount: false,
+    refetchOnWindowFocus: false // Don't refetch on focus
   });
 
   if (isLoading || !sponsor) {

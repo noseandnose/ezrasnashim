@@ -1521,7 +1521,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/sponsors/:contentType/:date", async (req, res) => {
     try {
       const { contentType, date } = req.params;
+      const cacheKey = `sponsor_${contentType}_${date}`;
+      const now = Date.now();
+      
+      // Check cache first (4 hour TTL for sponsor data)
+      const cached = apiCache.get(cacheKey);
+      if (cached && cached.expires > now) {
+        return res.json(cached.data);
+      }
+      
       const sponsor = await storage.getSponsorByContentTypeAndDate(contentType, date);
+      
+      // Cache the result for 4 hours
+      apiCache.set(cacheKey, {
+        data: sponsor || null,
+        expires: now + (4 * 60 * 60 * 1000)
+      });
+      
       res.json(sponsor || null);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch sponsor" });
@@ -1531,7 +1547,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/sponsors/daily/:date", async (req, res) => {
     try {
       const { date } = req.params;
+      const cacheKey = `daily_sponsor_${date}`;
+      const now = Date.now();
+      
+      // Check cache first (4 hour TTL for daily sponsor data)
+      const cached = apiCache.get(cacheKey);
+      if (cached && cached.expires > now) {
+        return res.json(cached.data);
+      }
+      
       const sponsor = await storage.getDailySponsor(date);
+      
+      // Cache the result for 4 hours
+      apiCache.set(cacheKey, {
+        data: sponsor || null,
+        expires: now + (4 * 60 * 60 * 1000)
+      });
+      
       res.json(sponsor || null);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch daily sponsor" });
@@ -1540,7 +1572,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/sponsors", async (req, res) => {
     try {
+      const cacheKey = 'active_sponsors';
+      const now = Date.now();
+      
+      // Check cache first (30 minute TTL for active sponsors list)
+      const cached = apiCache.get(cacheKey);
+      if (cached && cached.expires > now) {
+        return res.json(cached.data);
+      }
+      
       const sponsors = await storage.getActiveSponsors();
+      
+      // Cache the result for 30 minutes
+      apiCache.set(cacheKey, {
+        data: sponsors,
+        expires: now + (30 * 60 * 1000)
+      });
+      
       res.json(sponsors);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch sponsors" });
@@ -1550,6 +1598,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/sponsors", async (req, res) => {
     try {
       const sponsor = await storage.createSponsor(req.body);
+      
+      // Clear sponsor-related cache entries to prevent stale data
+      const sponsorshipDate = sponsor.sponsorshipDate;
+      
+      // Clear daily sponsor cache for the sponsor's date
+      apiCache.delete(`daily_sponsor_${sponsorshipDate}`);
+      
+      // Clear active sponsors list cache
+      apiCache.delete('active_sponsors');
+      
+      // Clear any content-specific sponsor caches for this date
+      // We don't know all possible content types, so clear the common ones
+      const contentTypes = ['daily', 'tehillim', 'torah', 'tefilla'];
+      contentTypes.forEach(contentType => {
+        apiCache.delete(`sponsor_${contentType}_${sponsorshipDate}`);
+      });
+      
       res.json(sponsor);
     } catch (error) {
       res.status(500).json({ message: "Failed to create sponsor" });
