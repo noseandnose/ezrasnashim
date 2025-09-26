@@ -131,8 +131,11 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       caches.match(event.request).then(response => {
         return response || fetch(event.request).then(fetchResponse => {
-          const cache = caches.open(STATIC_CACHE);
-          cache.then(c => c.put(event.request, fetchResponse.clone()));
+          // Clone immediately before any other operations
+          const responseClone = fetchResponse.clone();
+          caches.open(STATIC_CACHE).then(cache => {
+            cache.put(event.request, responseClone);
+          });
           return fetchResponse;
         });
       }).catch(() => {
@@ -159,6 +162,7 @@ self.addEventListener('fetch', (event) => {
           return fetch(event.request).then(fetchResponse => {
             if (fetchResponse.ok) {
               console.log('[SW] Caching prayer content:', url.pathname);
+              // Clone immediately before caching
               cache.put(event.request, fetchResponse.clone());
             }
             return fetchResponse;
@@ -276,9 +280,11 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(event.request).then(response => {
         if (response.ok) {
+          // Clone immediately before caching
+          const responseClone = response.clone();
           // Cache successful API responses with shorter TTL
           caches.open(API_CACHE).then(cache => {
-            cache.put(event.request, response.clone());
+            cache.put(event.request, responseClone);
             // Auto-expire API cache entries after 1 hour
             setTimeout(() => {
               cache.delete(event.request);
