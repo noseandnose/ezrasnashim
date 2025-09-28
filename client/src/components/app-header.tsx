@@ -92,7 +92,7 @@ export default function AppHeader() {
   return (
     <>
       <header className="bg-gradient-soft p-3 border-0 shadow-none">
-        <div className="flex items-center justify-between px-2">
+        <div className="flex items-center justify-around px-2">
         <div className="flex items-center gap-1">
           <button
             onClick={() => openModal('about', 'about')}
