@@ -46,6 +46,77 @@ app.get('/api/version', (req: Request, res: Response) => {
   });
 });
 
+// Zmanim endpoint
+app.get('/api/zmanim/:lat/:lng', (req: Request, res: Response) => {
+  res.json({
+    sunrise: '06:30',
+    sunset: '18:45',
+    candleLighting: '18:30',
+    havdalah: '19:30',
+    location: `${req.params.lat},${req.params.lng}`
+  });
+});
+
+// Messages endpoint
+app.get('/api/messages/:date', (req: Request, res: Response) => {
+  res.json({
+    id: 1,
+    title: 'Daily Message',
+    content: 'Sample daily message for ' + req.params.date,
+    date: req.params.date
+  });
+});
+
+// Campaigns endpoint
+app.get('/api/campaigns/active', (req: Request, res: Response) => {
+  res.json({
+    id: 1,
+    title: 'Sample Campaign',
+    description: 'Sample campaign description',
+    goalAmount: 10000,
+    currentAmount: 2500
+  });
+});
+
+// Brochas endpoints
+app.get('/api/brochas/daily', (req: Request, res: Response) => {
+  res.json([
+    {
+      id: 1,
+      title: 'Morning Brochas',
+      content: 'Sample daily brochas content'
+    }
+  ]);
+});
+
+app.get('/api/brochas/special', (req: Request, res: Response) => {
+  res.json([
+    {
+      id: 1,
+      title: 'Special Brochas',
+      content: 'Sample special brochas content'
+    }
+  ]);
+});
+
+// Prayer endpoints
+app.get('/api/nishmas/prayer', (req: Request, res: Response) => {
+  res.json({
+    title: 'Nishmas Prayer',
+    content: 'Sample Nishmas prayer content'
+  });
+});
+
+app.get('/api/morning/prayers', (req: Request, res: Response) => {
+  res.json([
+    {
+      id: 1,
+      title: 'Morning Prayers',
+      content: 'Sample morning prayers content'
+    }
+  ]);
+});
+
 app.get('/api/sponsors/daily/:date', (req: Request, res: Response) => {
   res.json(null); // No sponsor for today
 });
