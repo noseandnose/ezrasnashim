@@ -32,7 +32,7 @@ export default function TimesSection() {
               <h3 className="platypi-semibold text-sm">Today's Times</h3>
             </div>
             <button 
-              className="text-xs text-blush cursor-pointer hover:text-blush/80 hover:bg-blush/10 px-3 py-2 rounded-lg transition-colors border border-blush/30 platypi-medium"
+              className="text-xs text-blush cursor-pointer hover:text-blush/80 hover:bg-blush/10 px-2 py-1 rounded-lg transition-colors border border-blush/30 platypi-medium"
               onClick={() => {
 
                 openModal('location', 'times');
