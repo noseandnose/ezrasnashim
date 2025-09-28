@@ -254,7 +254,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const [_showHebrew, _setShowHebrew] = useState(true);
 
   // Fetch global Tehillim progress
-  const { data: progress, refetch: refetchProgress, isError: progressError } = useQuery<GlobalTehillimProgress>({
+  const { data: progress, isError: progressError } = useQuery<GlobalTehillimProgress>({
     queryKey: ['/api/tehillim/progress'], 
     queryFn: async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress`);
@@ -273,7 +273,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   });
   
   // Fetch current name for the perek - MUST be defined before useEffect hooks that use it
-  const { data: currentName, refetch: refetchCurrentName } = useQuery<TehillimName | null>({
+  const { data: currentName } = useQuery<TehillimName | null>({
     queryFn: async () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/current-name`);

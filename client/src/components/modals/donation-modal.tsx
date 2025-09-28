@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useModalStore } from "@/lib/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { useTrackModalComplete } from "@/hooks/use-analytics";
 
 interface Campaign {
   id: number;
@@ -25,10 +24,8 @@ export default function DonationModal() {
   const [amount, setAmount] = useState("1");
   const [isCustom, setIsCustom] = useState(false);
   const [customAmount, setCustomAmount] = useState("");
-  const { trackModalComplete } = useTrackModalComplete();
-
   // Fetch active campaign data
-  const { data: campaign } = useQuery<Campaign>({
+  useQuery<Campaign>({
     queryKey: ['/api/campaigns/active'],
     queryFn: async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/campaigns/active`);
@@ -40,13 +37,13 @@ export default function DonationModal() {
   });
 
   const createPaymentMutation = useMutation({
-    mutationFn: async (donationAmount: number) => {
+    mutationFn: async () => {
       // const response = await apiRequest('POST', '/api/create-payment-intent', {
       //   amount: donationAmount
       // });
       // return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       // Don't track completion or mark task complete here - only after successful payment
       closeModal();
       
@@ -61,7 +58,7 @@ export default function DonationModal() {
         setLocation(`/donate?${params.toString()}`);
       // }
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "Payment Error",
         description: "Unable to process donation. Please try again.",
@@ -80,7 +77,7 @@ export default function DonationModal() {
       });
       return;
     }
-    createPaymentMutation.mutate(donationAmount);
+    createPaymentMutation.mutate();
   };
 
   const handleAmountSelect = (selectedAmount: string) => {

@@ -6,7 +6,6 @@ import { DashboardModal } from "@uppy/react";
 // The uploader will be functional but with basic styling
 import AwsS3 from "@uppy/aws-s3";
 import type { UploadResult } from "@uppy/core";
-import { Button } from "@/components/ui/button";
 
 interface ObjectUploaderProps {
   maxNumberOfFiles?: number;
@@ -94,7 +93,6 @@ export function ObjectUploader({
           open={showModal}
           onRequestClose={() => setShowModal(false)}
           proudlyDisplayPoweredByUppy={false}
-          autoOpenFileEditor={false}
           disablePageScrollWhenModalOpen={false}
         />
       )}

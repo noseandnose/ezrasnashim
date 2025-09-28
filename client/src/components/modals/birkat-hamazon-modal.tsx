@@ -69,7 +69,7 @@ export function BirkatHamazonModal() {
     fruit: false
   });
   
-  const { completeTask } = useDailyCompletionStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
 
@@ -132,7 +132,13 @@ export function BirkatHamazonModal() {
           isWednesday: false,
           isThursday: false,
           isFriday: false,
-          isSaturday: false
+          isSaturday: false,
+          isMH: false,
+          isMT: false,
+          isTBI: false,
+          isTTI: false,
+          isTTC: false,
+          isTBC: false
         });
       }
     };
@@ -609,7 +615,7 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
     queryKey: ["/api/after-brochas/prayers"],
   });
 
-  const { completeTask } = useDailyCompletionStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { coordinates } = useLocationStore();
@@ -643,7 +649,13 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
           isWednesday: false,
           isThursday: false,
           isFriday: false,
-          isSaturday: false
+          isSaturday: false,
+          isMH: false,
+          isMT: false,
+          isTBI: false,
+          isTTI: false,
+          isTTC: false,
+          isTBC: false
         });
       }
     };
@@ -803,7 +815,7 @@ export function BirkatHamazonFullscreenContent({ language, fontSize }: { languag
     queryKey: ["/api/birkat-hamazon/prayers"],
   });
 
-  const { completeTask } = useDailyCompletionStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { coordinates } = useLocationStore();
@@ -830,7 +842,13 @@ export function BirkatHamazonFullscreenContent({ language, fontSize }: { languag
           isWednesday: false,
           isThursday: false,
           isFriday: false,
-          isSaturday: false
+          isSaturday: false,
+          isMH: false,
+          isMT: false,
+          isTBI: false,
+          isTTI: false,
+          isTTC: false,
+          isTBC: false
         });
       }
     };
