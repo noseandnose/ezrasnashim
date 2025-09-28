@@ -98,7 +98,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-04-10' as any,
+  apiVersion: '2025-03-31.basil' as any,
 });
 
 // Store VAPID keys at startup
