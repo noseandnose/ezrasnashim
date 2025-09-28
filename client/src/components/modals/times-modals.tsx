@@ -1,11 +1,9 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useModalStore } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect, useRef } from "react";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
@@ -29,7 +27,7 @@ export default function TimesModals() {
   const [afterNightfall, setAfterNightfall] = useState(false);
   const [yearDuration, setYearDuration] = useState(10);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
+  useQueryClient();
   
   // Debounced conversion refs
   const conversionTimeoutRef = useRef<NodeJS.Timeout>();
@@ -245,13 +243,6 @@ export default function TimesModals() {
     // API conversion will be handled by debounced effect
   };
 
-  const toggleNightfall = () => {
-    const newValue = !afterNightfall;
-    setAfterNightfall(newValue);
-    if (englishDate) {
-      convertToHebrewDate(englishDate, newValue);
-    }
-  };
 
   const handleDownloadCalendar = () => {
     if (!eventTitle || !englishDate || !convertedHebrewDate) {

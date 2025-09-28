@@ -1,9 +1,8 @@
-import { Heart, BookOpen, Shield, Plus, HandHeart, Gift, Star, Sparkles, Target, Users, DollarSign, TrendingUp, HandCoins } from "lucide-react";
+import { BookOpen, Target, Users, HandCoins } from "lucide-react";
 import { useModalStore, useDailyCompletionStore, useDonationCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { playCoinSound } from "@/utils/sounds";
 import { useAnalytics } from "@/hooks/use-analytics";
@@ -92,9 +91,9 @@ type TzedakaButtonType = 'gave_elsewhere' | 'active_campaign' | 'put_a_coin' | '
 
 export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps) {
   const { openModal, activeModal } = useModalStore();
-  const { tzedakaCompleted, completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { isCompleted: isDonationCompleted, resetDaily, addCompletedDonation } = useDonationCompletionStore();
-  const [, setLocation] = useLocation();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { resetDaily } = useDonationCompletionStore();
+  const [, ] = useLocation();
   const [showExplosion, setShowExplosion] = useState(false);
   const { trackEvent } = useAnalytics();
 
@@ -139,46 +138,6 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
     resetDaily(); // Reset donation completion tracking if new day
   }, [activeModal, resetDaily]);
 
-  const handleTzedakaComplete = () => {
-    if (tzedakaCompleted) return; // Prevent double execution
-    
-    // Play coin clink sound effect
-    playCoinSound();
-    
-    setShowExplosion(true);
-    // Mark gave-elsewhere as completed immediately (different from donation buttons)
-    
-    // Wait for animation to complete before proceeding
-    setTimeout(() => {
-      setShowExplosion(false); // Reset explosion state
-      completeTask('tzedaka');
-      
-      // Navigate back to home section to show progress
-      if (onSectionChange) {
-        onSectionChange('home');
-        // Also scroll to progress section
-        setTimeout(() => {
-          const progressElement = document.getElementById('daily-progress-garden');
-          if (progressElement) {
-            progressElement.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'center' 
-            });
-          }
-        }, 300);
-      } else {
-        // Fallback: redirect to home with scroll parameter
-        window.location.hash = '#/?section=home&scrollToProgress=true';
-      }
-      
-      // Check if all tasks are completed and show congratulations
-      setTimeout(() => {
-        if (checkAndShowCongratulations()) {
-          openModal('congratulations', 'tzedaka');
-        }
-      }, 200);
-    }, 500);
-  };
 
   const handleTzedakaButtonClick = (buttonType: TzedakaButtonType) => {
     // Only prevent "gave_elsewhere" from being clicked again (it's a one-time acknowledgment)
@@ -194,7 +153,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
       markTzedakaButtonCompleted(buttonType);
       
       // Track tzedaka completion for stats
-      trackEvent('tzedaka_completion', {
+      trackEvent('modal_complete', {
         buttonType: 'gave_elsewhere',
         amount: 0,
         date: new Date().toISOString().split('T')[0]
@@ -243,10 +202,6 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
     }
   };
 
-  const handleButtonClick = (buttonId: string) => {
-    // Legacy function for backward compatibility
-    openModal(buttonId, 'tzedaka');
-  };
 
   // Fetch active campaign data
   const { data: campaign, isLoading } = useQuery<Campaign>({
@@ -263,24 +218,6 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
   // Only calculate progress when campaign data is loaded
   const progressPercentage = campaign ? Math.round((campaign.currentAmount / campaign.goalAmount) * 100) : 0;
 
-  const tzedakaOptions = [
-    {
-      id: "causes",
-      icon: Shield,
-      title: "Causes",
-      description: "Support our partner causes including fertility support, women's abuse prevention, and kollels",
-      color: "text-peach",
-      bgColor: "bg-peach/10",
-    },
-    {
-      id: "sponsor-day",
-      icon: Heart,
-      title: "Sponsor a Day",
-      description: "Dedicate all Mitzvas done on the app - choose 1 day, 1 week, or 1 month",
-      color: "text-sage",
-      bgColor: "bg-sage/10",
-    },
-  ];
 
   return (
     <div className="overflow-y-auto h-full pb-20">
