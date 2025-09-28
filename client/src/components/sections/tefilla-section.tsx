@@ -282,7 +282,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
         }
         return response.json();
       } catch (error) {
-        // Failed to fetch current name
         return null; // Return null as fallback
       }
     },
@@ -340,7 +339,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
         return response.json();
       } catch (error) {
         // Silent error handling - don't show runtime error modal
-        // Failed to fetch tehillim names
         return []; // Return empty array as fallback
       }
     },

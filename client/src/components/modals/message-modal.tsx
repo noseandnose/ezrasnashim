@@ -42,7 +42,11 @@ export default function MessageModal({ isOpen, onClose, date }: MessageModalProp
                   {message.message}
                 </p>
                 <p className="text-xs text-warm-gray/60 text-right">
-                  {format(new Date(date), "MMMM d, yyyy")}
+                  {new Date(date).toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}
                 </p>
               </div>
             </div>

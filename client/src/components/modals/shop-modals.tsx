@@ -17,7 +17,7 @@ export default function ShopModals() {
 
   const { data: shopItem, isLoading } = useQuery<ShopItem>({
     queryKey: [`/api/shop/${shopItemId}`],
-    enabled: !!shopItemId,
+    enabled: !!shopItemId
   });
 
   const handleCopyCoupon = () => {

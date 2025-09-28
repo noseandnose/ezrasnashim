@@ -17,11 +17,6 @@ export function CommunityImpactModal() {
     imageUrl: string;
   }>({
     queryKey: [`/api/community/impact/${today}`],
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/community/impact/${today}`);
-      if (!response.ok) return null;
-      return response.json();
-    },
     enabled: isOpen,
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 60 * 60 * 1000 // 60 minutes

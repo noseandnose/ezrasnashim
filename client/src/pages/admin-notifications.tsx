@@ -23,12 +23,6 @@ export default function AdminNotifications() {
   // Fetch notification history if authenticated
   const { data: history, refetch: refetchHistory } = useQuery({
     queryKey: ['/api/push/history', adminPassword],
-    queryFn: async () => {
-      if (!isAuthenticated) return [];
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/push/history?adminPassword=${encodeURIComponent(adminPassword)}`);
-      if (!response.ok) throw new Error('Failed to fetch history');
-      return response.json();
-    },
     enabled: isAuthenticated,
   });
 

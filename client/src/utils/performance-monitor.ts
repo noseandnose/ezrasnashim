@@ -27,7 +27,9 @@ export class PerformanceMonitor {
     this.metrics.delete(label);
     
     if (duration > 100) {
-      logger.warn(`Slow operation detected: ${label} took ${duration.toFixed(2)}ms`);
+      if (import.meta.env.DEV) {
+        console.warn(`Slow operation detected: ${label} took ${duration.toFixed(2)}ms`);
+      }
     }
     
     return duration;

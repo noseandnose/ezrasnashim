@@ -33,11 +33,6 @@ export default function TzedakaModals() {
   // Fetch active campaign data for the wedding campaign modal
   const { data: activeCampaign, isLoading: isCampaignLoading } = useQuery<Campaign>({
     queryKey: ['/api/campaigns/active'],
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/campaigns/active`);
-      if (!response.ok) return null;
-      return response.json();
-    },
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 60 * 60 * 1000 // 60 minutes
   });

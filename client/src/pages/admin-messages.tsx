@@ -364,7 +364,11 @@ export default function AdminMessages() {
                       <div className="flex-1">
                         <h3 className="font-medium">{message.title}</h3>
                         <p className="text-sm text-gray-600">
-                          {format(new Date(message.date), "MMMM d, yyyy")}
+                          {new Date(message.date).toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                          })}
                         </p>
                         <p className="text-sm text-gray-700 mt-1 line-clamp-2">
                           {message.message}

@@ -49,25 +49,22 @@ export default function Statistics() {
   // Fetch today's stats with proper timezone handling
   const { data: todayStats, isLoading: todayLoading } = useQuery<DailyStats>({
     queryKey: [`/api/analytics/stats/today?date=${analyticsToday}`],
-    staleTime: 0, // Never cache - always fresh
-    gcTime: 0, // Don't keep in memory
-    refetchInterval: 30000, // Auto-refresh every 30 seconds
+    staleTime: 30000, // 30 seconds
+    refetchInterval: 60000, // Auto-refresh every minute
   });
 
   // Fetch monthly stats
   const { data: monthlyStats, isLoading: monthlyLoading } = useQuery<PeriodStats>({
     queryKey: ["/api/analytics/stats/month"],
-    staleTime: 0, // Never cache - always fresh
-    gcTime: 0, // Don't keep in memory
-    refetchInterval: 30000, // Auto-refresh every 30 seconds
+    staleTime: 60000, // 1 minute
+    refetchInterval: 300000, // Auto-refresh every 5 minutes
   });
 
   // Fetch total stats
   const { data: totalStats, isLoading: totalLoading } = useQuery<PeriodStats>({
     queryKey: ["/api/analytics/stats/total"],
-    staleTime: 0, // Never cache - always fresh
-    gcTime: 0, // Don't keep in memory
-    refetchInterval: 30000, // Auto-refresh every 30 seconds
+    staleTime: 300000, // 5 minutes
+    refetchInterval: 600000, // Auto-refresh every 10 minutes
   });
 
   // Get current data based on selected period

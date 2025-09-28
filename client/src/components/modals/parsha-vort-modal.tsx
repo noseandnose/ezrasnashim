@@ -27,7 +27,7 @@ export default function ParshaVortModal() {
     enabled: isOpen,
     staleTime: 60 * 60 * 1000,
     gcTime: 4 * 60 * 60 * 1000,
-    select: (data) => data && data[0]
+    select: (data) => Array.isArray(data) ? data[0] : data
   });
   
 

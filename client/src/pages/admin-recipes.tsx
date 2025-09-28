@@ -33,12 +33,6 @@ export default function AdminRecipes() {
   // Fetch existing recipes if authenticated
   const { data: recipes, refetch: refetchRecipes } = useQuery({
     queryKey: ['/api/table/recipes'],
-    queryFn: async () => {
-      if (!isAuthenticated) return [];
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/recipes`);
-      if (!response.ok) throw new Error('Failed to fetch recipes');
-      return response.json();
-    },
     enabled: isAuthenticated,
   });
 

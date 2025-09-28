@@ -27,11 +27,6 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
 
   const eventsQuery = useQuery({
     queryKey: ['/api/events', coordinates?.lat, coordinates?.lng],
-    queryFn: async () => {
-      if (!coordinates) return { events: [], location: null };
-      const response = await axiosClient.get(`/api/events/${coordinates.lat}/${coordinates.lng}`);
-      return response.data;
-    },
     enabled: !!coordinates && isOpen,
   });
 
