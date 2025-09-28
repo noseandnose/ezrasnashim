@@ -64,6 +64,48 @@ app.get('/api/campaigns/active', (req: Request, res: Response) => {
   });
 });
 
+// Torah endpoints
+app.get('/api/torah/pirkei-avot/:date', (req: Request, res: Response) => {
+  res.json({
+    title: 'Pirkei Avot',
+    content: 'Sample Pirkei Avot content for ' + req.params.date,
+    date: req.params.date
+  });
+});
+
+app.get('/api/torah/featured/:date', (req: Request, res: Response) => {
+  res.json({
+    title: 'Featured Torah',
+    content: 'Sample featured Torah content for ' + req.params.date,
+    date: req.params.date
+  });
+});
+
+app.get('/api/torah/halacha/:date', (req: Request, res: Response) => {
+  res.json({
+    title: 'Halacha',
+    content: 'Sample halacha content for ' + req.params.date,
+    date: req.params.date
+  });
+});
+
+// Table endpoints
+app.get('/api/table/vort', (req: Request, res: Response) => {
+  res.json({
+    title: 'Table Vort',
+    content: 'Sample table vort content'
+  });
+});
+
+// Sponsor endpoints
+app.get('/api/sponsors/:id', (req: Request, res: Response) => {
+  res.json({
+    id: req.params.id,
+    name: 'Sample Sponsor',
+    description: 'Sample sponsor description'
+  });
+});
+
 // Serve static files from client/dist if it exists
 const clientDistPath = path.join(__dirname, '..', 'client', 'dist');
 const publicPath = path.join(__dirname, '..', 'dist', 'public');
