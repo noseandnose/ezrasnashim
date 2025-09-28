@@ -293,13 +293,21 @@ export default function TimesModals() {
                   <span className="text-blush ml-1">*</span>
                 </Label>
                 <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="nightfall-fullscreen"
-                    checked={afterNightfall}
-                    onCheckedChange={handleNightfallChange}
-                    className="h-4 w-4 rounded-full border-2 border-blush/30 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
-                    data-testid="checkbox-nightfall"
-                  />
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      id="nightfall-fullscreen"
+                      checked={afterNightfall}
+                      onChange={(e) => handleNightfallChange(e.target.checked)}
+                      className="h-3.5 w-3.5 rounded-full border-2 border-blush/30 checked:bg-blush checked:border-blush focus:ring-2 focus:ring-blush/30 focus:ring-offset-0"
+                      style={{ 
+                        height: '14px', 
+                        width: '14px',
+                        accentColor: '#f4a3a3'
+                      }}
+                      data-testid="checkbox-nightfall"
+                    />
+                  </div>
                   <Label htmlFor="nightfall-fullscreen" className="text-xs text-gray-600">After nightfall?</Label>
                 </div>
               </div>
