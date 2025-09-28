@@ -5,7 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import compression from "compression";
 import helmet from "helmet";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -65,11 +65,7 @@ const generalApiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: false,
-  // Trust proxy to get real IP for per-IP limiting
-  keyGenerator: (req) => {
-    // Use real IP if available, fallback to connection IP
-    return req.ip || req.connection.remoteAddress || 'unknown';
-  },
+  keyGenerator: ipKeyGenerator,
   // Skip rate limiting for health checks and read-only content
   skip: (req) => {
     return req.path === '/api/version' || 
@@ -87,7 +83,7 @@ const authLimiter = rateLimit({
   message: { message: "Too many authentication attempts, please try again later." },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.ip || req.connection.remoteAddress || 'unknown',
+  keyGenerator: ipKeyGenerator,
 });
 
 // Moderate limit for expensive write operations (per IP)
@@ -97,7 +93,7 @@ const expensiveLimiter = rateLimit({
   message: { message: "Too many requests to this resource, please slow down." },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.ip || req.connection.remoteAddress || 'unknown',
+  keyGenerator: ipKeyGenerator,
 });
 
 // Apply rate limiting with different tiers
