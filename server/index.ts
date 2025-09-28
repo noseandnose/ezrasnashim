@@ -307,12 +307,12 @@ initializeServer().then((server) => {
   const isProduction = process.env.NODE_ENV === 'production';
   const port = parseInt(process.env.PORT || '5000');
   
-  server.listen(port, () => {
+  server.listen(port, '0.0.0.0', () => {
     const environment = process.env.NODE_ENV || 'development';
     const emoji = isProduction ? '🚀' : '⚡';
     console.log(`${emoji} Ezras Nashim server running on port ${port}`);
     console.log(`📍 Environment: ${environment}`);
-    console.log(`🌐 Server listening on port ${port}`);
+    console.log(`🌐 Server listening on 0.0.0.0:${port}`);
     console.log(`🔗 WebContainer URL should be accessible`);
   });
 }).catch((error) => {
