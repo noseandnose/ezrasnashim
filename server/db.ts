@@ -2,16 +2,16 @@ import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "../shared/schema";
 
-// Use a default database URL for development if not set
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/ezras_nashim';
+// Use a working database URL for WebContainer environment
+const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres@localhost:5432/postgres';
 
 console.log('Database connection attempt:', DATABASE_URL.replace(/:[^:@]*@/, ':***@'));
 
 const isStaging = process.env.NODE_ENV == 'staging';
-// Optimized Supabase connection configuration for production stability
+// Optimized connection configuration for WebContainer environment
 export const pool = new Pool({ 
   connectionString: DATABASE_URL,
-  ssl: isStaging ? false : { rejectUnauthorized: false },
+  ssl: false, // Disable SSL for local development
   max: 15, // Conservative pool size for Supabase free tier
   min: 0, // Allow pool to shrink to zero when not in use
   idleTimeoutMillis: 10000, // Close idle connections after 10 seconds
