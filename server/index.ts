@@ -305,17 +305,20 @@ async function initializeServer() {
 // Start server for both production and development
 initializeServer().then((server) => {
   const isProduction = process.env.NODE_ENV === 'production';
-  const defaultPort = '5000';
-  const port = parseInt(process.env.PORT ?? defaultPort);
+  const port = parseInt(process.env.PORT || '5000');
   
-  server.listen(port, '0.0.0.0', () => {
+  server.listen(port, () => {
     const environment = process.env.NODE_ENV || 'development';
     const emoji = isProduction ? '🚀' : '⚡';
     console.log(`${emoji} Ezras Nashim server running on port ${port}`);
     console.log(`📍 Environment: ${environment}`);
-    console.log(`🌐 Server accessible at: http://localhost:${port}`);
+    console.log(`🌐 Server listening on port ${port}`);
+    console.log(`🔗 WebContainer URL should be accessible`);
   });
-}).catch(console.error);
+}).catch((error) => {
+  console.error('❌ Failed to start server:', error);
+  process.exit(1);
+});
 
 // Export the configured app for external use
 export { app };
