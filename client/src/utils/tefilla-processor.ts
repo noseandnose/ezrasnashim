@@ -350,7 +350,6 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
         
         
         if (conditionsMet) {
-          // Mark all conditions as used to prevent lower-priority matches with same conditions
           matchInfo.conditions.forEach(cond => usedConditionsInCluster.add(cond));
           matchesToKeep.add(matchInfo.fullMatch);
         }

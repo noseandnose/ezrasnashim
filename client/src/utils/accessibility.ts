@@ -54,6 +54,8 @@ export class AccessibilityManager {
     
     setTimeout(() => {
       document.body.removeChild(announcement);
-    }, 1000);
+    }).catch(() => {
+      // Cache cleanup failed
+    });
   }
 }

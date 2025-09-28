@@ -361,7 +361,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
         }
         return response.json();
       } catch (error) {
-        // Failed to fetch tehillim preview
         return { preview: '', perek: progress?.currentPerek || 0, language: 'hebrew' }; // Return empty preview as fallback
       }
     },

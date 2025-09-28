@@ -40,7 +40,6 @@ export function useShabbosTime() {
         const response = await axiosClient.get(url);
         return response.data;
       } catch (error) {
-
         throw error;
       }
     },

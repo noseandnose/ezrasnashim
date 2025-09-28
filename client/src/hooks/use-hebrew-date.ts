@@ -36,9 +36,6 @@ export function useHebrewDate() {
         
         return hebrewDateStr;
       } catch (error: unknown) {
-        if (import.meta.env.MODE === 'development') {
-          // Error fetching Hebrew date
-        }
         return hebrewDate; // Return stored value if fetch fails
       }
     },

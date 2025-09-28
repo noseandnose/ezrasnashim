@@ -626,11 +626,9 @@ export default function Donate() {
         
         // If donation is less than 5 minutes old, check for completion
         if (donationAge < 5 * 60 * 1000) {
-          console.log('BACKUP: Checking for completed donation:', donation);
           
           // Check backend for completion status
           if (amount <= 0) { // We're on the donate page without parameters - likely returned from Stripe
-            console.log('BACKUP: Checking backend for donation completion');
             
             // Check if donation was completed
             apiRequest('GET', `/api/donations/check-completion/${donation.sessionId}`)

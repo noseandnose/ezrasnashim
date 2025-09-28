@@ -300,15 +300,15 @@ export default function TorahSection({}: TorahSectionProps) {
                 <div className="platypi-regular text-xs text-black/60 leading-relaxed">
                   {isCompleted ? (
                     'Completed'
-                  ) : !hasContent && !isLoading && !isError ? (
-                    'Coming Soon'
                   ) : (
-                    <>
-                      <div>{displaySubtitle}</div>
-                      {readingTime && (
+                    <div>
+                      {!hasContent && !isLoading && !isError ? 'Coming Soon' : 
+                       isError ? 'Temporarily unavailable' :
+                       isLoading ? 'Loading...' : displaySubtitle}
+                      {readingTime && hasContent && !isCompleted && (
                         <div className="text-xs text-black/50 mt-0.5">({readingTime})</div>
                       )}
-                    </>
+                    </div>
                   )}
                 </div>
               </button>

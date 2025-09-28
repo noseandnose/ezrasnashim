@@ -73,7 +73,7 @@ export const playCoinClinkSound = async () => {
     
     source.start();
   } catch (error) {
-    // Could not play coin clink sound
+    // Audio playback failed
   }
 };
 
@@ -83,10 +83,10 @@ export const playCoinClinkSoundFromFile = () => {
     const audio = new Audio('/sounds/coin-jingle.mp3');
     audio.volume = 0.3;
     audio.play().catch(error => {
-      // Could not play coin jingle sound file
+      // Audio file playback failed
     });
   } catch (error) {
-    // Could not create audio element
+    // Audio element creation failed
   }
 };
 

@@ -123,7 +123,7 @@ export async function preloadCritical(): Promise<void> {
   Promise.all(
     criticalEndpoints.map(endpoint =>
       cachedFetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${endpoint}`)
-        .catch(() => {}) // Ignore errors during preload
+        .catch(() => {}) // Ignore preload errors
     )
   );
 }

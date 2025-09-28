@@ -231,7 +231,6 @@ export default function TimesModals() {
 
   const handleDateChange = (date: string) => {
     setEnglishDate(date);
-    // API conversion will be handled by debounced effect
     if (!date) {
       setConvertedHebrewDate('');
       setHebrewDateParts(null);

@@ -40,9 +40,7 @@ export default function DiscountBar({ className = "" }: DiscountBarProps) {
       const response = await axiosClient.get(
         `/api/discount-promotions/active?${params.toString()}`
       );
-      const data = response.data;
-
-      return data || [];
+      return response.data || [];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes

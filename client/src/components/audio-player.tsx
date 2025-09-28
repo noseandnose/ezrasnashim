@@ -217,7 +217,6 @@ export default function AudioPlayer({ title, duration, audioUrl, onAudioEnded }:
         ref={audioRef} 
         src={directAudioUrl} 
         preload="metadata"
-        onError={() => { /* Audio failed to load */ }}
       />
       {audioError && (
         <div className="text-xs text-gray-600 mb-2 text-center">

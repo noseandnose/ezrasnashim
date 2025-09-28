@@ -91,7 +91,7 @@ export async function preloadCriticalData(): Promise<void> {
         apiCache.set(sponsorKey, sponsorData, 60 * 60 * 1000); // 1 hour cache
       }
     } catch (error) {
-      // Silently fail - this is just optimization
+      // Preload failed, continuing without cache
     }
   }, 3000); // Wait 3 seconds after app loads
 }

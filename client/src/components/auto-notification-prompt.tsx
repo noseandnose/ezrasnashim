@@ -116,7 +116,7 @@ export function AutoNotificationPrompt() {
         await subscribeToNotifications();
       }
     } catch (error) {
-      // Error requesting notification permission
+      // Permission request failed
     }
   };
 

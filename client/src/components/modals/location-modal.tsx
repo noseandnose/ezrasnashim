@@ -62,7 +62,7 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
         (predictions: any[] | null) => {
           if (predictions) {
             setPredictions(predictions.slice(0, 5)); // Limit to 5 suggestions
-          } else {
+              // Apple Pay check failed
             setPredictions([]);
           }
         }

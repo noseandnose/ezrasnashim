@@ -176,7 +176,7 @@ export const useModalCompletionStore = create<ModalCompletionState>((set, get) =
       }
       localStorage.setItem('modalCompletions', JSON.stringify(toStore));
     } catch (e) {
-      console.error('Failed to save modal completions to storage:', e);
+      // Storage save failed
     }
   };
 

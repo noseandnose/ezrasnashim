@@ -219,7 +219,6 @@ export function useVersionCheck() {
   // Add manual test function for development
   const testUpdateNotification = () => {
     if (import.meta.env.MODE === 'development') {
-      console.log('🧪 Testing update notification...');
       setShowUpdatePrompt(true);
     }
   };

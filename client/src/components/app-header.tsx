@@ -30,7 +30,7 @@ export default function AppHeader() {
   // Check if there's a message for today
   const { data: todayMessage } = useQuery({
     queryKey: [`/api/messages/${today}`],
-    retry: false,
+    retry: false
   });
   
   // Check if user has read today's message

@@ -2,10 +2,8 @@
 export function clearModalCompletions() {
   try {
     localStorage.removeItem('modalCompletions');
-    console.log('Modal completions cleared successfully');
     return true;
   } catch (error) {
-    console.error('Failed to clear modal completions:', error);
     return false;
   }
 }
@@ -16,6 +14,5 @@ if (typeof window !== 'undefined') {
   if (!clearFlag) {
     clearModalCompletions();
     localStorage.setItem('modalCompletions_cleared_aug21', 'true');
-    console.log('One-time modal completions clear performed');
   }
 }

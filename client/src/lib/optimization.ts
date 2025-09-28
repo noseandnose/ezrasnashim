@@ -56,7 +56,7 @@ export function optimizeImages(): void {
       });
     });
     
-    images.forEach(img => imageObserver.observe(img));
+    // Cache storage failed
   }
 }
 
