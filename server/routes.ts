@@ -674,42 +674,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid coordinates" });
       }
 
-      // First get current zmanim to check if we're past tzait
-      const zmanimResponse = await fetch(`http://localhost:${process.env.PORT || 5000}/api/zmanim/${latitude}/${longitude}`);
-      const zmanimData = await zmanimResponse.json();
-      
-      // Determine if we need next week's parsha (after tzait hakochavim)
-      let useNextWeek = false;
-      if (zmanimData.tzaitHakochavim) {
-        const now = new Date();
-        const [time, period] = zmanimData.tzaitHakochavim.split(' ');
-        const [hours, minutes] = time.split(':').map(Number);
-        
-        // Convert tzait time to 24-hour format
-        let tzaitHours = hours;
-        if (period === 'PM' && hours !== 12) tzaitHours += 12;
-        if (period === 'AM' && hours === 12) tzaitHours = 0;
-        
-        // Create tzait time in local timezone
-        const tzaitToday = new Date();
-        tzaitToday.setHours(tzaitHours, minutes, 0, 0);
-        
-        // Get current time in local timezone (Asia/Jerusalem)
-        const nowInLocalTZ = new Date().toLocaleString("en-US", {timeZone: zmanimData.tzid || "Asia/Jerusalem"});
-        const localNow = new Date(nowInLocalTZ);
-        
-        // If current time is past tzait, we need next week's parsha
-        useNextWeek = localNow > tzaitToday;
-        
-        // Debug parsha timing
-      }
-
-      // Build API URL - add week offset if needed  
-      let apiUrl = `https://www.hebcal.com/shabbat/?cfg=json&latitude=${latitude}&longitude=${longitude}`;
-      if (useNextWeek) {
-        // Request next Saturday's data (Sept 6, 2025 for Ki Tetzei)
-        apiUrl += `&gy=2025&gm=9&gd=6`;
-      }
+      // Build API URL - get current week's Shabbat data
+      const apiUrl = `https://www.hebcal.com/shabbat/?cfg=json&latitude=${latitude}&longitude=${longitude}`;
 
       // Server API Request
       
@@ -725,7 +691,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Parse the Shabbos data
       const result = {
-        location: zmanimData.location || 'Unknown Location',
+        location: data.location?.title || 'Unknown Location',
         candleLighting: null as string | null,
         havdalah: null as string | null,
         parsha: null as string | null
@@ -737,17 +703,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let closestDistance = Infinity;
       
       data.items.forEach((item: any) => {
-        // Processing item - look for Friday candle lighting times only
-        if (item.title.includes("Candle lighting:") && item.date) {
+        // Look for Shabbat candle lighting times (not Yom Tov)
+        if (item.title.includes("Candle lighting:") && item.date && !item.memo?.includes("Yom Kippur")) {
           const itemDate = new Date(item.date);
-          const dayOfWeek = itemDate.getDay(); // 0=Sunday, 5=Friday
+          const dayOfWeek = itemDate.getDay(); // 0=Sunday, 5=Friday, 6=Saturday
           
-          // Only consider Friday candle lighting times (not Yom Tov candle lighting)
-          if (dayOfWeek === 5) { // Friday
+          // Look for Friday or Saturday candle lighting (Shabbat starts Friday night)
+          // The API sometimes shows Friday candle lighting on Saturday date
+          if (dayOfWeek === 5 || dayOfWeek === 6) { // Friday or Saturday
             const timeDifference = itemDate.getTime() - now.getTime();
             
-            // Find the closest upcoming Friday (or current Friday if we haven't passed candle lighting yet)
-            if (timeDifference >= -24 * 60 * 60 * 1000 && timeDifference < closestDistance) { // Allow current Friday up to 24 hours ago
+            // Find the closest upcoming Shabbat candle lighting
+            if (timeDifference >= -24 * 60 * 60 * 1000 && timeDifference < closestDistance) { // Allow current day up to 24 hours ago
               closestDistance = timeDifference;
               closestFridayCandleLighting = item;
             }
@@ -759,13 +726,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (closestFridayCandleLighting) {
         const item = closestFridayCandleLighting;
         const timeMatch = item.title.match(/Candle lighting: (\d{1,2}:\d{2})(pm|am|p\.m\.|a\.m\.)?/i);
-        // Candle lighting timeMatch
         if (timeMatch) {
           const [hours, minutes] = timeMatch[1].split(':');
           const hour12 = parseInt(hours);
           const suffix = timeMatch[2]?.toLowerCase();
-          
-          // Candle lighting time parsing
           
           if (suffix) {
             // Already has am/pm, just format it properly
@@ -777,36 +741,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const period = hour12 >= 12 ? 'PM' : 'AM';
             result.candleLighting = `${displayHour}:${minutes} ${period}`;
           }
-          // Final candleLighting
         }
       }
       
       // Process other items for havdalah and parsha
       data.items.forEach((item: any) => {
-        // Skip candle lighting since we already processed it above
         if (item.title.includes("Havdalah:")) {
-          // Full title for havdalah
-          // Check if it has pm/am at the end of the full title  
+          // Check if it has pm/am at the end of the title  
           const timeWithSuffixMatch = item.title.match(/Havdalah: (\d{1,2}:\d{2})\s*(pm|am)/i);
           if (timeWithSuffixMatch) {
             const [, time, suffix] = timeWithSuffixMatch;
             const [hours, minutes] = time.split(':');
             const hour12 = parseInt(hours);
-            // Havdalah with suffix
             const displayHour = hour12 === 0 ? 12 : hour12;
             result.havdalah = `${displayHour}:${minutes} ${suffix.toUpperCase()}`;
-            // Final havdalah
           } else {
             // Try 24-hour format
             const timeMatch = item.title.match(/Havdalah: (\d{1,2}:\d{2})/);
             if (timeMatch) {
               const [hours, minutes] = timeMatch[1].split(':');
               const hour24 = parseInt(hours);
-              // Havdalah 24hr
               const displayHour = hour24 > 12 ? hour24 - 12 : (hour24 === 0 ? 12 : hour24);
               const period = hour24 >= 12 ? 'PM' : 'AM';
               result.havdalah = `${displayHour}:${minutes} ${period}`;
-              // Final havdalah
             }
           }
         } else if (item.title.startsWith("Parashat ") || item.title.startsWith("Parashah ")) {
