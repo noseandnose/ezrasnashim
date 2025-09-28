@@ -305,7 +305,7 @@ async function initializeServer() {
 // Start server for both production and development
 initializeServer().then((server) => {
   const isProduction = process.env.NODE_ENV === 'production';
-  const defaultPort = isProduction ? '80' : '5000';
+  const defaultPort = '5000';
   const port = parseInt(process.env.PORT ?? defaultPort);
   
   server.listen(port, '0.0.0.0', () => {
@@ -313,6 +313,7 @@ initializeServer().then((server) => {
     const emoji = isProduction ? '🚀' : '⚡';
     console.log(`${emoji} Ezras Nashim server running on port ${port}`);
     console.log(`📍 Environment: ${environment}`);
+    console.log(`🌐 Server accessible at: http://localhost:${port}`);
   });
 }).catch(console.error);
 
