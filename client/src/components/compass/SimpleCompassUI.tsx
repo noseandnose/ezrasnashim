@@ -304,14 +304,45 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
           <li>{!state.hasPermission ? '5' : '4'}. When aligned, the heart and line will pulse</li>
         </ol>
         
+        {/* Device-specific tips */}
+        <div className="mt-3 pt-3 border-t border-blue-200">
+          <p className="font-medium text-xs text-black mb-1">Device-Specific Tips:</p>
+          <ul className="text-xs text-black/60 space-y-1">
+            {state.debugInfo?.deviceType === 'iOS' && (
+              <>
+                <li>• iPhone 15/16: Uses native compass - most accurate</li>
+                <li>• iPhone 12-14: Good compass support with webkitCompassHeading</li>
+                <li>• iPhone 6-11: May need figure-8 calibration if inaccurate</li>
+                <li>• Keep away from MagSafe accessories during use</li>
+              </>
+            )}
+            {state.debugInfo?.deviceType === 'Android' && (
+              <>
+                <li>• Uses deviceorientationabsolute for best accuracy</li>
+                <li>• Calibrate by moving phone in figure-8 motion</li>
+                <li>• Avoid magnetic cases or metal objects</li>
+                <li>• Some Android devices may need manual calibration</li>
+              </>
+            )}
+            {!state.debugInfo?.deviceType && (
+              <>
+                <li>• Keep device away from metal objects</li>
+                <li>• Works best outdoors or near windows</li>
+                <li>• Calibrate by moving in figure-8 motion if needed</li>
+                <li>• Avoid magnetic interference (speakers, metal)</li>
+              </>
+            )}
+          </ul>
+        </div>
+        
         {/* General tips */}
         <div className="mt-3 pt-3 border-t border-blue-200">
-          <p className="font-medium text-xs text-black mb-1">Tips:</p>
+          <p className="font-medium text-xs text-black mb-1">General Tips:</p>
           <ul className="text-xs text-black/60 space-y-1">
-            <li>• Keep device away from metal objects</li>
             <li>• Works best outdoors or near windows</li>
-            <li>• Calibrate by moving in figure-8 motion if needed</li>
             <li>• Avoid magnetic interference (speakers, metal)</li>
+            <li>• If inaccurate, try figure-8 calibration motion</li>
+            <li>• Restart compass if readings seem wrong</li>
           </ul>
         </div>
       </div>

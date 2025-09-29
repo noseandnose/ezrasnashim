@@ -110,7 +110,7 @@ export default function DonationModal() {
           <div className="flex items-center justify-center mb-3 relative">
           <DialogTitle className="text-lg platypi-bold text-black">Put a Coin in Tzedaka</DialogTitle>
         </div>
-        <p className="text-xs text-warm-gray/70 platypi-regular text-center mb-4">
+        <p className="text-sm platypi-regular text-gray-600 text-center mb-4">
           All Donations go towards approved Woman Torah Causes
         </p>
         
@@ -133,7 +133,7 @@ export default function DonationModal() {
         <div className="space-y-3 text-sm text-gray-700">
           {/* Amount Selection Buttons */}
           <div>
-            <p className="text-sm platypi-medium text-warm-gray mb-2">Select Amount</p>
+            <p className="text-sm platypi-medium block mb-2">Select Amount</p>
             <div className="grid grid-cols-5 gap-1">
               {quickAmounts.map((quickAmount) => (
                 <button
@@ -154,7 +154,7 @@ export default function DonationModal() {
           {/* Custom Amount Input - Only show when Custom is selected */}
           {isCustom && (
             <div>
-              <label className="text-sm platypi-medium text-warm-gray mb-2 block">Enter Custom Amount</label>
+              <label className="text-sm platypi-medium block mb-2">Enter Custom Amount</label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 platypi-semibold">$</span>
                 <Input

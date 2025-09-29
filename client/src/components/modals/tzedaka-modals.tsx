@@ -629,6 +629,43 @@ export default function TzedakaModals() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Gave Tzedaka Elsewhere Modal - Matching Campaign Modal Style */}
+      <Dialog open={activeModal === 'gave-elsewhere'} onOpenChange={(open) => {
+        if (!open) {
+          closeModal();
+        }
+      }}>
+        <DialogContent aria-describedby="gave-elsewhere-description">
+          <div className="flex items-center justify-center mb-3 relative">
+            <DialogTitle className="text-lg platypi-bold text-black">Gave Tzedaka Elsewhere</DialogTitle>
+          </div>
+          <p className="text-sm platypi-regular text-gray-600 text-center mb-4">
+            Thank you for giving tzedaka! Mark this as complete to track your mitzvah.
+          </p>
+          <div id="gave-elsewhere-description" className="sr-only">
+            Confirmation that user gave tzedaka elsewhere
+          </div>
+          
+          <div className="space-y-4">
+            <div className="bg-green-50 rounded-xl p-4 border border-green-200">
+              <p className="text-sm text-green-800 platypi-medium mb-2">✓ Tzedaka Completed</p>
+              <p className="text-xs text-green-600 platypi-regular">
+                You've fulfilled the mitzvah of tzedaka today. May your generosity be blessed.
+              </p>
+            </div>
+
+            <div>
+              <Button 
+                onClick={() => closeModal()}
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
+              >
+                Mark Complete
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
