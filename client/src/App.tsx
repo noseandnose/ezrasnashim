@@ -17,6 +17,8 @@ import logoPath from '@assets/EN App Icon_1756705023411.png';
 import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
 import { initializePerformance, whenIdle } from "./lib/startup-performance";
+import { preloadCriticalResources, registerServiceWorker } from "./utils/bundle-optimization";
+import { SkeletonCard } from "./components/ui/skeleton-loading";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));
@@ -26,15 +28,19 @@ const Statistics = lazy(() => import("@/pages/statistics"));
 const Admin = lazy(() => import("@/pages/admin"));
 const Privacy = lazy(() => import("@/pages/privacy"));
 
-// Unified loading screen with dove - serves as both splash and loading indicator
+// Enhanced loading screen with skeleton loading
 function LoadingScreen() {
   return (
-    <div className="fixed inset-0 bg-white z-[9999] flex items-center justify-center">
+    <div className="fixed inset-0 bg-white z-[9999] flex flex-col items-center justify-center p-4">
       <img 
         src={logoPath} 
         alt="Loading..." 
-        className="w-24 h-24 object-contain animate-pulse"
+        className="w-24 h-24 object-contain animate-pulse mb-4"
       />
+      <div className="w-full max-w-sm space-y-3">
+        <SkeletonCard />
+        <SkeletonCard />
+      </div>
     </div>
   );
 }
@@ -54,6 +60,12 @@ function Router() {
     
     // Initialize cache system
     initializeCache();
+    
+    // Preload critical resources
+    preloadCriticalResources();
+    
+    // Register service worker for offline functionality
+    registerServiceWorker();
     
     // One-time cleanup of stale modal completion data
     const cleanupModalCompletions = () => {

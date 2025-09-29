@@ -8,9 +8,12 @@
     "dev:frontend": "vite dev --mode replit",
     "dev": "npm-run-all --parallel dev:backend dev:frontend",
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "build:mobile": "vite build --mode mobile",
     "start": "NODE_ENV=production node server/index.js",
     "check": "tsc",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "analyze": "vite-bundle-analyzer dist/public",
+    "lighthouse": "lighthouse http://localhost:5173 --output=html --output-path=./lighthouse-report.html"
   },
   "dependencies": {
     "@babel/traverse": "^7.25.9",

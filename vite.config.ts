@@ -32,6 +32,29 @@ export default defineConfig(async ({ mode }) => {
         build: {
             outDir: path.resolve(import.meta.dirname, "dist/public"),
             emptyOutDir: true,
+            // Mobile performance optimizations
+            rollupOptions: {
+                output: {
+                    manualChunks: {
+                        vendor: ['react', 'react-dom'],
+                        router: ['wouter'],
+                        ui: ['@radix-ui/react-dialog', '@radix-ui/react-tooltip'],
+                        utils: ['date-fns', 'lodash']
+                    }
+                }
+            },
+            // Enable compression
+            minify: 'terser',
+            terserOptions: {
+                compress: {
+                    drop_console: true,
+                    drop_debugger: true
+                }
+            },
+            // Optimize for mobile
+            target: 'es2015',
+            cssCodeSplit: true,
+            sourcemap: false
         },
         server: {
             fs: {
