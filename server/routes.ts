@@ -691,8 +691,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const data = await response.json();
 
-      // Log all items to debug parsha issue
-      console.log('Hebcal API items:', JSON.stringify(data.items, null, 2));
+      // Log all data to debug parsha issue
+      console.log('Hebcal API full response:', JSON.stringify(data, null, 2));
 
       // Parse the Shabbos data
       const result = {
@@ -701,6 +701,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         havdalah: null as string | null,
         parsha: null as string | null
       };
+
+      // Check if parsha is in the main title (e.g., "Shabbat Bereshit")
+      if (data.title && data.title.includes('Shabbat ')) {
+        const parshaMatch = data.title.match(/Shabbat\s+(.+)/);
+        if (parshaMatch) {
+          result.parsha = parshaMatch[1];
+        }
+      }
 
       // Find the upcoming Friday's candle lighting (closest Friday candle lighting)
       const now = new Date();
