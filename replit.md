@@ -56,6 +56,10 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **Audio Auto-Completion**: Daily Chizuk and Daily Emuna audio content automatically triggers completion when users finish listening, enhancing user engagement.
 - **Mobile App Support**: Enhanced detection and user guidance for mobile app wrappers (FlutterFlow, etc.) with intelligent permission prompts for location, compass, and notifications. Provides step-by-step instructions for enabling native app permissions on iOS/Android.
 
+### Recent Maintenance (October 5, 2025)
+- **Console Log Cleanup**: Fixed critical infinite recursion bug in logger.ts. Wrapped all development debug logs with environment checks (import.meta.env.DEV for client, process.env.NODE_ENV for server) to reduce production noise while preserving all error logging. Cleaned up verbose API request/response logs, calendar generation debug logs, and recipe creation logs.
+- **Code Quality**: Zero TypeScript errors maintained. All changes conservative to preserve functionality.
+
 ### Recent Bug Fixes (September 17, 2025)
 - **Error Handling**: Added robust fallback UI for Torah/Tefilla content sections to prevent blank screens when API calls fail
 - **Font Loading**: Fixed Hebrew font loading issues (VC-Koren-Light, Koren Siddur) with proper preloading and font-display:swap

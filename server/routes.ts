@@ -589,9 +589,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Include minor fasts (mf=on) in addition to holidays and Rosh Chodesh
       const eventsPromises = [currentYear, nextYear].map(async (year) => {
         const hebcalUrl = `https://www.hebcal.com/hebcal?v=1&cfg=json&year=${year}&latitude=${latitude}&longitude=${longitude}&maj=on&min=on&nx=on&mf=on`;
-        console.log(`[Server API Request] GET ${hebcalUrl}`);
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`[Server API Request] GET ${hebcalUrl}`);
+        }
         const data = await cachedGet(hebcalUrl);
-        console.log(`[Server API Response] 200 GET ${hebcalUrl}`);
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`[Server API Response] 200 GET ${hebcalUrl}`);
+        }
         return data;
       });
 
@@ -901,7 +905,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Handle preflight OPTIONS request for calendar download
   app.options("/api/calendar-events/download", (req, res) => {
-    console.log('OPTIONS preflight request for calendar download');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('OPTIONS preflight request for calendar download');
+    }
     res.header('Access-Control-Allow-Origin', req.get('origin') || '*');
     res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization');
@@ -912,12 +918,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Generate and download ICS calendar file
   app.post("/api/calendar-events/download", async (req, res) => {
     try {
-      console.log('Calendar download request received:', { 
-        method: req.method,
-        headers: req.headers,
-        body: req.body,
-        origin: req.get('origin')
-      });
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Calendar download request received:', { 
+          method: req.method,
+          headers: req.headers,
+          body: req.body,
+          origin: req.get('origin')
+        });
+      }
       
       const { title, hebrewDate, gregorianDate, years = 10 } = req.body;
       
@@ -1768,9 +1776,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/table/recipe", requireAdminAuth, async (req, res) => {
     try {
-      console.log("Recipe creation request body:", req.body);
+      if (process.env.NODE_ENV === 'development') {
+        console.log("Recipe creation request body:", req.body);
+      }
       const validatedData = insertDailyRecipeSchema.parse(req.body);
-      console.log("Recipe validated data:", validatedData);
+      if (process.env.NODE_ENV === 'development') {
+        console.log("Recipe validated data:", validatedData);
+      }
       const recipe = await storage.createDailyRecipe(validatedData);
       res.json(recipe);
     } catch (error) {

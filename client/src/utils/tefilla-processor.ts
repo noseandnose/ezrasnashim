@@ -458,7 +458,9 @@ export async function getCurrentTefillaConditions(
           };
         }
       } catch (error) {
-        console.warn('Could not fetch location data:', error);
+        if (import.meta.env.DEV) {
+          console.warn('Could not fetch location data:', error);
+        }
       }
     }
 
@@ -535,7 +537,9 @@ export async function getCurrentTefillaConditions(
         
       }
     } catch (error) {
-      console.warn('Could not fetch Hebrew date data:', error);
+      if (import.meta.env.DEV) {
+        console.warn('Could not fetch Hebrew date data:', error);
+      }
     }
 
     // Calculate new seasonal conditions
