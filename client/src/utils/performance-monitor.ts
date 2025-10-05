@@ -1,5 +1,5 @@
 // Performance monitoring and optimization utilities
-import { logger } from '@/lib/console-cleaner';
+import { logger } from '@/lib/logger';
 
 export class PerformanceMonitor {
   private static instance: PerformanceMonitor;
