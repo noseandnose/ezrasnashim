@@ -18,11 +18,11 @@ interface FullscreenModalProps {
   showLanguageControls?: boolean;
   language?: 'hebrew' | 'english';
   onLanguageChange?: (lang: 'hebrew' | 'english') => void;
-  // Info icon  
+  // Info icon
   showInfoIcon?: boolean;
-  onInfoClick?: (open: boolean) => void;
+  onInfoClick?: ((open: boolean) => void) | undefined;
   // Info popover content
-  infoContent?: React.ReactNode;
+  infoContent?: React.ReactNode | undefined;
   showInfoPopover?: boolean;
 }
 

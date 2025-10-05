@@ -615,12 +615,12 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
     queryKey: ["/api/after-brochas/prayers"],
   });
 
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { completeTask } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { coordinates } = useLocationStore();
   const [conditions, setConditions] = useState<TefillaConditions | null>(null);
-  
+
   // Me'ein Shalosh checkbox states
   const [selectedOptions, setSelectedOptions] = useState({
     grain: false,
@@ -815,7 +815,7 @@ export function BirkatHamazonFullscreenContent({ language, fontSize }: { languag
     queryKey: ["/api/birkat-hamazon/prayers"],
   });
 
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { completeTask } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { coordinates } = useLocationStore();
