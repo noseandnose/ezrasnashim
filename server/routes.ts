@@ -132,29 +132,8 @@ import {
 } from "../shared/schema";
 import { z } from "zod";
 
-// Admin authentication middleware
-function requireAdminAuth(req: any, res: any, next: any) {
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  
-  if (!adminPassword) {
-    return res.status(500).json({ 
-      message: "Admin authentication not configured" 
-    });
-  }
-  
-  const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.startsWith('Bearer ') 
-    ? authHeader.slice(7) 
-    : null;
-  
-  if (!token || token !== adminPassword) {
-    return res.status(401).json({ 
-      message: "Unauthorized: Invalid admin credentials" 
-    });
-  }
-  
-  next();
-}
+// Admin authentication middleware - imported from routes/middleware
+import { requireAdminAuth } from "./routes/middleware";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Schedule periodic cleanup of expired names (every hour)
