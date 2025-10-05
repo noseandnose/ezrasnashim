@@ -67,11 +67,26 @@ function setupSafariViewportFix() {
 async function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     try {
+      // Clear all old caches on startup to prevent stale content issues
+      const cacheNames = await caches.keys();
+      const oldCaches = cacheNames.filter(name => !name.includes('v4.0'));
+      if (oldCaches.length > 0) {
+        console.log('[SW] Clearing old caches:', oldCaches);
+        await Promise.all(oldCaches.map(name => caches.delete(name)));
+      }
+      
       const registration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/'
+        scope: '/',
+        updateViaCache: 'none' // Always fetch fresh service worker
       });
       
       console.log('[SW] Service Worker registered successfully:', registration.scope);
+      
+      // Force immediate update if there's a waiting worker
+      if (registration.waiting) {
+        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        window.location.reload();
+      }
       
       // Listen for updates
       registration.addEventListener('updatefound', () => {
@@ -80,7 +95,8 @@ async function registerServiceWorker() {
           console.log('[SW] New Service Worker installing...');
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              console.log('[SW] New content available! Please refresh.');
+              console.log('[SW] New content available! Reloading...');
+              window.location.reload();
             }
           });
         }
