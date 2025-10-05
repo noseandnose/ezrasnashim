@@ -141,9 +141,7 @@ export default function TableSection() {
                 </span>
               </div>
               <h3 className="platypi-bold text-lg text-black">
-                Days Until Shabbas {showShabbosError ? "" : 
-                 shabbosData?.parsha?.replace("Parashat ", "") || 
-                 (isShabbosDataLoading ? "" : "")}
+                Days Until Shabbas {shabbosData?.parsha ? shabbosData.parsha.replace("Parashat ", "") : ""}
               </h3>
             </div>
           </div>
