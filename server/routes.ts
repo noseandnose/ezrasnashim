@@ -823,25 +823,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Upcoming Shabbos Date: ${upcomingShabbosDate ? upcomingShabbosDate.toISOString() : 'Not found'}`);
 
       // Return debug info temporarily
+      const debugInfo = {
+        currentTime: now.toISOString(),
+        upcomingShabbosDate: upcomingShabbosDate ? upcomingShabbosDate.toISOString() : null,
+        apiUrl,
+        totalItems: data.items.length,
+        relevantItems: data.items
+          .filter((item: any) =>
+            item.title.includes('Candle lighting') ||
+            item.title.includes('Havdalah') ||
+            item.title.includes('Parashat')
+          )
+          .map((item: any) => ({
+            title: item.title,
+            date: item.date,
+            category: item.category
+          }))
+      };
+
       res.json({
         ...result,
-        debug: {
-          currentTime: now.toISOString(),
-          upcomingShabbosDate: upcomingShabbosDate?.toISOString() || null,
-          apiUrl,
-          totalItems: data.items.length,
-          relevantItems: data.items
-            .filter((item: any) =>
-              item.title.includes('Candle lighting') ||
-              item.title.includes('Havdalah') ||
-              item.title.includes('Parashat')
-            )
-            .map((item: any) => ({
-              title: item.title,
-              date: item.date,
-              category: item.category
-            }))
-        }
+        debug: debugInfo
       });
     } catch (error) {
       // Error fetching Shabbos times
