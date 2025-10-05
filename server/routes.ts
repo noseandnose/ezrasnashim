@@ -692,8 +692,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const data = await response.json();
 
-      // Log all data to debug parsha issue
-      console.log('Hebcal API full response:', JSON.stringify(data, null, 2));
+      // Log incoming request
+      console.log(`\n=== Shabbos API Request ===`);
+      console.log(`Coordinates: ${latitude}, ${longitude}`);
+      console.log(`Current time: ${now.toISOString()}`);
+      console.log(`API URL: ${apiUrl}`);
 
       // Parse the Shabbos data
       const result = {
@@ -761,10 +764,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         havdalahDate.setDate(havdalahDate.getDate() + 1);
 
         data.items.forEach((item: any) => {
+          if (!item.date) return;
           const itemDate = new Date(item.date);
 
           // Find havdalah for this Shabbos (within 2 days of candle lighting)
-          if (item.title.includes("Havdalah:") && !result.havdalah) {
+          if (item.title.includes("Havdalah:") && !result.havdalah && upcomingShabbosDate) {
             const dayDiff = Math.abs((itemDate.getTime() - upcomingShabbosDate.getTime()) / (1000 * 60 * 60 * 24));
 
             if (dayDiff <= 2) {
@@ -789,7 +793,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
 
           // Find parsha for this Shabbos (within 2 days of candle lighting)
-          if (!result.parsha) {
+          if (!result.parsha && upcomingShabbosDate) {
             const dayDiff = Math.abs((itemDate.getTime() - upcomingShabbosDate.getTime()) / (1000 * 60 * 60 * 24));
 
             if (dayDiff <= 2) {
@@ -802,6 +806,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         });
       }
+
+      console.log(`\n=== Shabbos Result ===`);
+      console.log(`Location: ${result.location}`);
+      console.log(`Candle Lighting: ${result.candleLighting}`);
+      console.log(`Havdalah: ${result.havdalah}`);
+      console.log(`Parsha: ${result.parsha}`);
+      console.log(`Upcoming Shabbos Date: ${upcomingShabbosDate?.toISOString()}`);
 
       res.json(result);
     } catch (error) {
