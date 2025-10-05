@@ -92,8 +92,8 @@ export default function AppHeader() {
   return (
     <>
       <header className="bg-gradient-soft p-4 border-0 shadow-none">
-        <div className="grid grid-cols-3 items-center gap-4 max-w-screen-xl mx-auto">
-          <div className="flex items-center gap-2 justify-start">
+        <div className="flex items-center justify-between max-w-screen-xl mx-auto">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={() => openModal('about', 'about')}
               className="p-2 rounded-full hover:bg-white/50 transition-colors"
@@ -113,7 +113,7 @@ export default function AppHeader() {
             </button>
           </div>
 
-          <div className="flex justify-center">
+          <div className="absolute left-1/2 transform -translate-x-1/2">
             <img
               src={logoImage}
               alt="Ezras Nashim"
@@ -123,7 +123,7 @@ export default function AppHeader() {
             />
           </div>
 
-          <div className="flex items-center gap-2 justify-end">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={handleShareClick}
               className={`p-2 rounded-full hover:bg-white/50 transition-colors ${
