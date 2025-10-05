@@ -67,13 +67,22 @@ function setupSafariViewportFix() {
 async function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     try {
-      // Clear all old caches on startup to prevent stale content issues
-      const cacheNames = await caches.keys();
-      const oldCaches = cacheNames.filter(name => !name.includes('v4.1'));
-      if (oldCaches.length > 0) {
-        console.log('[SW] Clearing old caches:', oldCaches);
-        await Promise.all(oldCaches.map(name => caches.delete(name)));
+      // AGGRESSIVE CLEANUP: Unregister all old service workers first
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const reg of registrations) {
+        await reg.unregister();
+        console.log('[SW] Unregistered old service worker');
       }
+      
+      // Clear ALL caches to force fresh content
+      const cacheNames = await caches.keys();
+      if (cacheNames.length > 0) {
+        console.log('[SW] Clearing ALL caches:', cacheNames);
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+      }
+      
+      // Small delay to ensure cleanup completes
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       const registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/',
