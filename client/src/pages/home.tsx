@@ -8,6 +8,7 @@ import TefillaSection from "@/components/sections/tefilla-section";
 import TzedakaSection from "@/components/sections/tzedaka-section";
 import TableSection from "@/components/sections/table-section";
 import ModalContainer from "@/components/modals/modal-container";
+import ErrorBoundary from "@/components/ui/error-boundary";
 
 export type Section = 'torah' | 'tefilla' | 'tzedaka' | 'home' | 'table';
 
@@ -84,19 +85,44 @@ export default function Home() {
   const renderSection = () => {
     // Only render the active section to prevent unnecessary API calls
     // Each section will load its own data when rendered
+    // Each section is wrapped in an ErrorBoundary for isolated error handling
     switch (activeSection) {
       case 'home':
-        return <HomeSection key="home" onSectionChange={navigateToSection} />;
+        return (
+          <ErrorBoundary>
+            <HomeSection key="home" onSectionChange={navigateToSection} />
+          </ErrorBoundary>
+        );
       case 'torah':
-        return <TorahSection key="torah" onSectionChange={navigateToSection} />;
+        return (
+          <ErrorBoundary>
+            <TorahSection key="torah" onSectionChange={navigateToSection} />
+          </ErrorBoundary>
+        );
       case 'tefilla':
-        return <TefillaSection key="tefilla" onSectionChange={navigateToSection} />;
+        return (
+          <ErrorBoundary>
+            <TefillaSection key="tefilla" onSectionChange={navigateToSection} />
+          </ErrorBoundary>
+        );
       case 'tzedaka':
-        return <TzedakaSection key="tzedaka" onSectionChange={navigateToSection} />;
+        return (
+          <ErrorBoundary>
+            <TzedakaSection key="tzedaka" onSectionChange={navigateToSection} />
+          </ErrorBoundary>
+        );
       case 'table':
-        return <TableSection key="table" />;
+        return (
+          <ErrorBoundary>
+            <TableSection key="table" />
+          </ErrorBoundary>
+        );
       default:
-        return <HomeSection key="home-default" onSectionChange={navigateToSection} />;
+        return (
+          <ErrorBoundary>
+            <HomeSection key="home-default" onSectionChange={navigateToSection} />
+          </ErrorBoundary>
+        );
     }
   };
 

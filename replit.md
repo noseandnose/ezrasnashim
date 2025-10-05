@@ -58,6 +58,8 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 
 ### Recent Maintenance (October 5, 2025)
 - **Console Log Cleanup**: Fixed critical infinite recursion bug in logger.ts. Wrapped all development debug logs with environment checks (import.meta.env.DEV for client, process.env.NODE_ENV for server) to reduce production noise while preserving all error logging. Cleaned up verbose API request/response logs, calendar generation debug logs, and recipe creation logs.
+- **TODO Cleanup**: Removed inline TODO comments from server/routes.ts (notification/reminder and minhag customization feature suggestions). These items are documented as future enhancements in audit reports.
+- **Error Boundaries**: Added granular error boundaries around all main sections (HomeSection, TorahSection, TefillaSection, TzedakaSection, TableSection) for isolated error handling. If one section fails, users can still navigate to and use other sections.
 - **Code Quality**: Zero TypeScript errors maintained. All changes conservative to preserve functionality.
 
 ### Recent Bug Fixes (September 17, 2025)
