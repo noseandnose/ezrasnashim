@@ -93,54 +93,58 @@ export default function AppHeader() {
     <>
       <header className="bg-gradient-soft p-3 border-0 shadow-none">
         <div className="flex items-center justify-between px-2">
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => openModal('about', 'about')}
-            className="p-2 rounded-full hover:bg-white/50 transition-colors"
-            aria-label="About Ezras Nashim"
-          >
-            <Info className="h-5 w-5 text-blush" />
-          </button>
-          <button
-            onClick={handleOpenMessage}
-            className="p-2 rounded-full hover:bg-white/50 transition-colors relative"
-            aria-label="Daily Message"
-          >
-            <Mail className="h-5 w-5 text-black/70" />
-            {!!todayMessage && !hasReadMessage && (
-              <span className="absolute top-1 right-1 w-2 h-2 bg-blush rounded-full" />
-            )}
-          </button>
-        </div>
-        <img 
-          src={logoImage} 
-          alt="Ezras Nashim" 
-          className="h-7 w-auto cursor-pointer select-none"
-          onClick={handleLogoClick}
-          draggable={false}
-        />
-        <div className="flex items-center space-x-1">
-          <button
-            onClick={handleShareClick}
-            className={`p-2 rounded-full hover:bg-white/50 transition-colors ${
-              !hasClickedShare ? 'animate-pulse border-2 border-blush' : ''
-            }`}
-            aria-label="Add to Home Screen"
-          >
-            {isIOS ? (
-              <Share className="h-5 w-5 text-black/70" />
-            ) : (
-              <Share2 className="h-5 w-5 text-black/70" />
-            )}
-          </button>
-          <button
-            onClick={() => setLocation("/statistics")}
-            className="p-2 rounded-full hover:bg-white/50 transition-colors"
-            aria-label="View Statistics"
-          >
-            <BarChart3 className="h-5 w-5 text-black/70" />
-          </button>
-        </div>
+          <div className="flex items-center gap-1 flex-1">
+            <button
+              onClick={() => openModal('about', 'about')}
+              className="p-2 rounded-full hover:bg-white/50 transition-colors"
+              aria-label="About Ezras Nashim"
+            >
+              <Info className="h-5 w-5 text-blush" />
+            </button>
+            <button
+              onClick={handleOpenMessage}
+              className="p-2 rounded-full hover:bg-white/50 transition-colors relative"
+              aria-label="Daily Message"
+            >
+              <Mail className="h-5 w-5 text-black/70" />
+              {!!todayMessage && !hasReadMessage && (
+                <span className="absolute top-1 right-1 w-2 h-2 bg-blush rounded-full" />
+              )}
+            </button>
+          </div>
+
+          <div className="flex-shrink-0">
+            <img
+              src={logoImage}
+              alt="Ezras Nashim"
+              className="h-7 w-auto cursor-pointer select-none"
+              onClick={handleLogoClick}
+              draggable={false}
+            />
+          </div>
+
+          <div className="flex items-center gap-1 flex-1 justify-end">
+            <button
+              onClick={handleShareClick}
+              className={`p-2 rounded-full hover:bg-white/50 transition-colors ${
+                !hasClickedShare ? 'animate-pulse border-2 border-blush' : ''
+              }`}
+              aria-label="Add to Home Screen"
+            >
+              {isIOS ? (
+                <Share className="h-5 w-5 text-black/70" />
+              ) : (
+                <Share2 className="h-5 w-5 text-black/70" />
+              )}
+            </button>
+            <button
+              onClick={() => setLocation("/statistics")}
+              className="p-2 rounded-full hover:bg-white/50 transition-colors"
+              aria-label="View Statistics"
+            >
+              <BarChart3 className="h-5 w-5 text-black/70" />
+            </button>
+          </div>
         </div>
       </header>
       
