@@ -1,0 +1,20 @@
+GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev/fonts/VC-Koren-Light.otf net::ERR_ABORTED 502 (Bad Gateway)Understand this error
+(index):72  GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev/fonts/KorenSiddur.otf net::ERR_ABORTED 502 (Bad Gateway)Understand this error
+(index):73  GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev/fonts/ArnoKoren.otf net::ERR_ABORTED 502 (Bad Gateway)Understand this error
+(index):1 Failed to load module script: Expected a JavaScript-or-Wasm module script but the server responded with a MIME type of "text/html". Strict MIME type checking is enforced for module scripts per HTML spec.Understand this error
+(index):1 Failed to load module script: Expected a JavaScript-or-Wasm module script but the server responded with a MIME type of "text/html". Strict MIME type checking is enforced for module scripts per HTML spec.Understand this error
+sw.js:2 [SW] Enhanced Service Worker loading...
+sw.js:51 [SW] Enhanced Service Worker installed - Version 4
+sw.js:56 [SW] Caching app shell resources
+sw.js:59 [SW] App shell cached successfully
+(index):1 The resource https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev/attached_assets/EN%20App%20Icon_1756705023411.png was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.Understand this warning
+(index):1 The resource https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev/fonts/KorenSiddur.otf was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.Understand this warning
+sw.js:71 [SW] Enhanced Service Worker activated - Version 4
+sw.js:80 [SW] Deleting old cache: app-shell-v3.0
+sw.js:80 [SW] Deleting old cache: static-v3.0
+sw.js:80 [SW] Deleting old cache: api-v3.0
+sw.js:80 [SW] Deleting old cache: torah-v3.0
+sw.js:80 [SW] Deleting old cache: prayers-v3.0
+sw.js:80 [SW] Deleting old cache: app-shell-v3.1
+sw.js:80 [SW] Deleting old cache: static-v3.1
+sw.js:90 [SW] Cache cleanup completed and clients claimed
