@@ -676,8 +676,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid coordinates" });
       }
 
-      // Build API URL - get current week's Shabbat data
-      const apiUrl = `https://www.hebcal.com/shabbat/?cfg=json&latitude=${latitude}&longitude=${longitude}`;
+      // Build API URL - get current week's Shabbat data with proper parameters
+      // m=50 means include multiple weeks, a=on means include parashat
+      const apiUrl = `https://www.hebcal.com/shabbat/?cfg=json&latitude=${latitude}&longitude=${longitude}&M=on&m=50&a=on`;
 
       // Server API Request
       
