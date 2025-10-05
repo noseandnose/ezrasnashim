@@ -1,8 +1,8 @@
-// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 4
+// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 4.1
 console.log('[SW] Enhanced Service Worker loading...');
 
 // Cache configuration
-const CACHE_VERSION = 'v4.0';
+const CACHE_VERSION = 'v4.1';
 const APP_SHELL_CACHE = `app-shell-${CACHE_VERSION}`;
 const PRAYERS_CACHE = `prayers-${CACHE_VERSION}`;
 const TORAH_CACHE = `torah-${CACHE_VERSION}`;
@@ -121,12 +121,20 @@ self.addEventListener('fetch', (event) => {
   )) {
     event.respondWith(
       caches.match(event.request).then(response => {
-        return response || fetch(event.request).then(fetchResponse => {
-          // Clone immediately before any other operations
-          const responseClone = fetchResponse.clone();
-          caches.open(STATIC_CACHE).then(cache => {
-            cache.put(event.request, responseClone);
-          });
+        // Validate cached response - only use if it's a successful response
+        if (response && response.ok && response.status === 200) {
+          return response;
+        }
+        
+        // If cached response is invalid or doesn't exist, fetch fresh
+        return fetch(event.request).then(fetchResponse => {
+          // Only cache successful responses
+          if (fetchResponse.ok && fetchResponse.status === 200) {
+            const responseClone = fetchResponse.clone();
+            caches.open(STATIC_CACHE).then(cache => {
+              cache.put(event.request, responseClone);
+            });
+          }
           return fetchResponse;
         });
       }).catch(() => {

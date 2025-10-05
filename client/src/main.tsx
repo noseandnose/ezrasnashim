@@ -69,7 +69,7 @@ async function registerServiceWorker() {
     try {
       // Clear all old caches on startup to prevent stale content issues
       const cacheNames = await caches.keys();
-      const oldCaches = cacheNames.filter(name => !name.includes('v4.0'));
+      const oldCaches = cacheNames.filter(name => !name.includes('v4.1'));
       if (oldCaches.length > 0) {
         console.log('[SW] Clearing old caches:', oldCaches);
         await Promise.all(oldCaches.map(name => caches.delete(name)));
