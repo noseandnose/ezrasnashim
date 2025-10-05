@@ -820,12 +820,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Candle Lighting: ${result.candleLighting || 'Not found'}`);
       console.log(`Havdalah: ${result.havdalah || 'Not found'}`);
       console.log(`Parsha: ${result.parsha || 'Not found'}`);
-      console.log(`Upcoming Shabbos Date: ${upcomingShabbosDate ? upcomingShabbosDate.toISOString() : 'Not found'}`);
+      const shabbosDateStr = upcomingShabbosDate ? (upcomingShabbosDate as Date).toISOString() : 'Not found';
+      console.log(`Upcoming Shabbos Date: ${shabbosDateStr}`);
 
       // Return debug info temporarily
       const debugInfo = {
         currentTime: now.toISOString(),
-        upcomingShabbosDate: upcomingShabbosDate ? upcomingShabbosDate.toISOString() : null,
+        upcomingShabbosDate: upcomingShabbosDate ? (upcomingShabbosDate as Date).toISOString() : null,
         apiUrl,
         totalItems: data.items.length,
         relevantItems: data.items
