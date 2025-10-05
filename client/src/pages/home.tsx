@@ -1,24 +1,14 @@
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect } from "react";
 import { useLocation } from "wouter";
 import AppHeader from "@/components/app-header";
 import BottomNavigation from "@/components/bottom-navigation";
 import ModalContainer from "@/components/modals/modal-container";
 import ErrorBoundary from "@/components/ui/error-boundary";
-import { Loader2 } from "lucide-react";
-
-// Lazy load section components for better performance
-const HomeSection = lazy(() => import("@/components/sections/home-section"));
-const TorahSection = lazy(() => import("@/components/sections/torah-section"));
-const TefillaSection = lazy(() => import("@/components/sections/tefilla-section"));
-const TzedakaSection = lazy(() => import("@/components/sections/tzedaka-section"));
-const TableSection = lazy(() => import("@/components/sections/table-section"));
-
-// Loading fallback for sections
-const SectionLoader = () => (
-  <div className="flex items-center justify-center min-h-[50vh]">
-    <Loader2 className="animate-spin text-blush" size={48} />
-  </div>
-);
+import HomeSection from "@/components/sections/home-section";
+import TorahSection from "@/components/sections/torah-section";
+import TefillaSection from "@/components/sections/tefilla-section";
+import TzedakaSection from "@/components/sections/tzedaka-section";
+import TableSection from "@/components/sections/table-section";
 
 export type Section = 'torah' | 'tefilla' | 'tzedaka' | 'home' | 'table';
 
@@ -95,55 +85,42 @@ export default function Home() {
   const renderSection = () => {
     // Only render the active section to prevent unnecessary API calls
     // Each section will load its own data when rendered
-    // Suspense wraps ErrorBoundary to properly handle lazy loading promises
     switch (activeSection) {
       case 'home':
         return (
-          <Suspense fallback={<SectionLoader />}>
-            <ErrorBoundary>
-              <HomeSection key="home" onSectionChange={navigateToSection} />
-            </ErrorBoundary>
-          </Suspense>
+          <ErrorBoundary>
+            <HomeSection key="home" onSectionChange={navigateToSection} />
+          </ErrorBoundary>
         );
       case 'torah':
         return (
-          <Suspense fallback={<SectionLoader />}>
-            <ErrorBoundary>
-              <TorahSection key="torah" onSectionChange={navigateToSection} />
-            </ErrorBoundary>
-          </Suspense>
+          <ErrorBoundary>
+            <TorahSection key="torah" onSectionChange={navigateToSection} />
+          </ErrorBoundary>
         );
       case 'tefilla':
         return (
-          <Suspense fallback={<SectionLoader />}>
-            <ErrorBoundary>
-              <TefillaSection key="tefilla" onSectionChange={navigateToSection} />
-            </ErrorBoundary>
-          </Suspense>
+          <ErrorBoundary>
+            <TefillaSection key="tefilla" onSectionChange={navigateToSection} />
+          </ErrorBoundary>
         );
       case 'tzedaka':
         return (
-          <Suspense fallback={<SectionLoader />}>
-            <ErrorBoundary>
-              <TzedakaSection key="tzedaka" onSectionChange={navigateToSection} />
-            </ErrorBoundary>
-          </Suspense>
+          <ErrorBoundary>
+            <TzedakaSection key="tzedaka" onSectionChange={navigateToSection} />
+          </ErrorBoundary>
         );
       case 'table':
         return (
-          <Suspense fallback={<SectionLoader />}>
-            <ErrorBoundary>
-              <TableSection key="table" />
-            </ErrorBoundary>
-          </Suspense>
+          <ErrorBoundary>
+            <TableSection key="table" />
+          </ErrorBoundary>
         );
       default:
         return (
-          <Suspense fallback={<SectionLoader />}>
-            <ErrorBoundary>
-              <HomeSection key="home-default" onSectionChange={navigateToSection} />
-            </ErrorBoundary>
-          </Suspense>
+          <ErrorBoundary>
+            <HomeSection key="home-default" onSectionChange={navigateToSection} />
+          </ErrorBoundary>
         );
     }
   };
