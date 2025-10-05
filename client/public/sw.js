@@ -1,8 +1,8 @@
-// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 3
+// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 4
 console.log('[SW] Enhanced Service Worker loading...');
 
 // Cache configuration
-const CACHE_VERSION = 'v3.0';
+const CACHE_VERSION = 'v4.0';
 const APP_SHELL_CACHE = `app-shell-${CACHE_VERSION}`;
 const PRAYERS_CACHE = `prayers-${CACHE_VERSION}`;
 const TORAH_CACHE = `torah-${CACHE_VERSION}`;
@@ -48,44 +48,35 @@ const CRITICAL_API_PATTERNS = [
 ];
 
 self.addEventListener('install', (event) => {
-  console.log('[SW] Enhanced Service Worker installed - Version 3');
+  console.log('[SW] Enhanced Service Worker installed - Version 4');
   
   event.waitUntil(
-    Promise.all([
-      // Cache app shell resources
-      caches.open(APP_SHELL_CACHE).then(cache => {
-        console.log('[SW] Caching app shell resources');
-        return cache.addAll(APP_SHELL_RESOURCES.map(url => new Request(url, { cache: 'reload' })));
-      }),
-      
-      // Cache critical static resources
-      caches.open(STATIC_CACHE).then(cache => {
-        console.log('[SW] Caching static resources');
-        return cache.addAll([
-          '/fonts/VC-Koren-Light.otf',
-          '/fonts/KorenSiddur.otf',
-          '/fonts/ArnoKoren.otf'
-        ]);
-      })
-    ]).then(() => {
-      console.log('[SW] App shell and static resources cached successfully');
-      self.skipWaiting();
+    // Only cache app shell resources during install - fonts will be cached on first use
+    caches.open(APP_SHELL_CACHE).then(cache => {
+      console.log('[SW] Caching app shell resources');
+      return cache.addAll(APP_SHELL_RESOURCES.map(url => new Request(url, { cache: 'reload' })));
+    }).then(() => {
+      console.log('[SW] App shell cached successfully');
+      // Skip waiting to activate immediately
+      return self.skipWaiting();
     }).catch(err => {
       console.error('[SW] Failed to cache app shell:', err);
+      // Still skip waiting even if caching fails
+      return self.skipWaiting();
     })
   );
 });
 
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Enhanced Service Worker activated - Version 3');
+  console.log('[SW] Enhanced Service Worker activated - Version 4');
   
   event.waitUntil(
     Promise.all([
-      // Clean up old caches
+      // Clean up all old caches (v1, v2, v3)
       caches.keys().then(cacheNames => {
         return Promise.all(
           cacheNames.map(cacheName => {
-            if (cacheName.includes('v2') || (cacheName.includes('v1') && !cacheName.includes(CACHE_VERSION))) {
+            if (!cacheName.includes(CACHE_VERSION)) {
               console.log('[SW] Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
@@ -93,7 +84,7 @@ self.addEventListener('activate', (event) => {
         );
       }),
       
-      // Claim all clients
+      // Claim all clients immediately
       clients.claim()
     ]).then(() => {
       console.log('[SW] Cache cleanup completed and clients claimed');
