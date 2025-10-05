@@ -691,6 +691,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const data = await response.json();
 
+      // Log all items to debug parsha issue
+      console.log('Hebcal API items:', JSON.stringify(data.items, null, 2));
+
       // Parse the Shabbos data
       const result = {
         location: data.location?.title || 'Unknown Location',
@@ -749,7 +752,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Process other items for havdalah and parsha
       data.items.forEach((item: any) => {
         if (item.title.includes("Havdalah:")) {
-          // Check if it has pm/am at the end of the title  
+          // Check if it has pm/am at the end of the title
           const timeWithSuffixMatch = item.title.match(/Havdalah: (\d{1,2}:\d{2})\s*(pm|am)/i);
           if (timeWithSuffixMatch) {
             const [, time, suffix] = timeWithSuffixMatch;
@@ -768,7 +771,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
               result.havdalah = `${displayHour}:${minutes} ${period}`;
             }
           }
+        }
+
+        // Look for parsha in multiple ways
+        if (item.category === 'parashat' || item.category === 'parashah') {
+          result.parsha = item.title;
         } else if (item.title.startsWith("Parashat ") || item.title.startsWith("Parashah ")) {
+          result.parsha = item.title;
+        } else if (item.hebrew && (item.title.includes("Torah") || item.category === 'torah')) {
+          // Sometimes the parsha is just the Hebrew name
           result.parsha = item.title;
         }
       });
