@@ -92,7 +92,7 @@ export default function AppHeader() {
   return (
     <>
       <header className="bg-gradient-soft p-4 border-0 shadow-none">
-        <div className="flex items-center justify-between max-w-screen-xl mx-auto">
+        <div className="relative flex items-center justify-between max-w-screen-xl mx-auto">
           <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={() => openModal('about', 'about')}
@@ -113,7 +113,7 @@ export default function AppHeader() {
             </button>
           </div>
 
-          <div className="absolute left-1/2 transform -translate-x-1/2">
+          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <img
               src={logoImage}
               alt="Ezras Nashim"
