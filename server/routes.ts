@@ -692,11 +692,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const data = await response.json();
 
+      // Get current time first
+      const now = new Date();
+
       // Log incoming request
       console.log(`\n=== Shabbos API Request ===`);
       console.log(`Coordinates: ${latitude}, ${longitude}`);
       console.log(`Current time: ${now.toISOString()}`);
       console.log(`API URL: ${apiUrl}`);
+      console.log(`\nAll items from API:`);
+      data.items.forEach((item: any) => {
+        if (item.title.includes('Candle lighting') || item.title.includes('Havdalah') || item.title.includes('Parashat')) {
+          console.log(`  - ${item.title} | Date: ${item.date} | Category: ${item.category}`);
+        }
+      });
 
       // Parse the Shabbos data
       const result = {
@@ -715,7 +724,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Find the upcoming (next) Shabbos - must be in the future
-      const now = new Date();
       let upcomingShabbosDate: Date | null = null;
       let candleLightingItem: any = null;
 
@@ -809,10 +817,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`\n=== Shabbos Result ===`);
       console.log(`Location: ${result.location}`);
-      console.log(`Candle Lighting: ${result.candleLighting}`);
-      console.log(`Havdalah: ${result.havdalah}`);
-      console.log(`Parsha: ${result.parsha}`);
-      console.log(`Upcoming Shabbos Date: ${upcomingShabbosDate?.toISOString()}`);
+      console.log(`Candle Lighting: ${result.candleLighting || 'Not found'}`);
+      console.log(`Havdalah: ${result.havdalah || 'Not found'}`);
+      console.log(`Parsha: ${result.parsha || 'Not found'}`);
+      console.log(`Upcoming Shabbos Date: ${upcomingShabbosDate ? upcomingShabbosDate.toISOString() : 'Not found'}`);
 
       res.json(result);
     } catch (error) {
