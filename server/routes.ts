@@ -822,7 +822,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Parsha: ${result.parsha || 'Not found'}`);
       console.log(`Upcoming Shabbos Date: ${upcomingShabbosDate ? upcomingShabbosDate.toISOString() : 'Not found'}`);
 
-      res.json(result);
+      // Return debug info temporarily
+      res.json({
+        ...result,
+        debug: {
+          currentTime: now.toISOString(),
+          upcomingShabbosDate: upcomingShabbosDate?.toISOString() || null,
+          apiUrl,
+          totalItems: data.items.length,
+          relevantItems: data.items
+            .filter((item: any) =>
+              item.title.includes('Candle lighting') ||
+              item.title.includes('Havdalah') ||
+              item.title.includes('Parashat')
+            )
+            .map((item: any) => ({
+              title: item.title,
+              date: item.date,
+              category: item.category
+            }))
+        }
+      });
     } catch (error) {
       // Error fetching Shabbos times
       return res.status(500).json({ message: "Failed to fetch Shabbos times from Hebcal API" });
