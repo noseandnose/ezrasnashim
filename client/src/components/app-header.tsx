@@ -1,6 +1,6 @@
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate } from "@/hooks/use-hebrew-date";
-import { BarChart3, Info, Share2, Heart, Mail, Share, X } from "lucide-react";
+import { ChartBar as BarChart3, Info, Share2, Heart, Mail, Share, X } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
 import { useState, useEffect } from "react";
