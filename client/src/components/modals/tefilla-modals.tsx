@@ -3,7 +3,7 @@ import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { HandHeart, Scroll, Heart, Plus, Minus, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Unlock, Check, Utensils, Wine, Car, Wheat, Moon, User, Info, X } from "lucide-react";
+import { HandHeart, Scroll, Heart, Plus, Minus, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Unlock, Check, Utensils, Wine, Car, Wheat, Moon, User, Info } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
@@ -570,7 +570,7 @@ function renderPrayerContent(contentType: string | undefined, language: 'hebrew'
 
 // Fullscreen content components for prayers
 function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
-  const { data: prayers = [], isLoading } = useQuery<any[]>({
+  const { data: prayers = [], isLoading } = useQuery<MorningPrayer[]>({
     queryKey: ['/api/maariv/prayers'],
   });
 
@@ -578,7 +578,6 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
-  const jewishTimesQuery = useJewishTimes();
 
   if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
 
@@ -586,6 +585,7 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
     trackModalComplete('maariv');
     markModalComplete('maariv');
     completeTask('tefilla');
+    checkAndShowCongratulations();
     // Close fullscreen
     const event = new CustomEvent('closeFullscreen');
     window.dispatchEvent(event);
@@ -654,6 +654,7 @@ function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
     trackModalComplete('mincha');
     markModalComplete('mincha');
     completeTask('tefilla');
+    checkAndShowCongratulations();
     // Close fullscreen
     const event = new CustomEvent('closeFullscreen');
     window.dispatchEvent(event);
@@ -709,7 +710,7 @@ function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
 function IndividualBrochaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
   const selectedBrochaId = (window as any).selectedBrochaId;
   const tefillaConditions = useTefillaConditions();
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { completeTask } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
 
@@ -868,13 +869,13 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
 function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
   const [activeTab, setActiveTab] = useState<'daily' | 'special'>('daily');
   
-  const { data: dailyBrochas = [], isLoading: dailyLoading } = useQuery({
+  const { data: dailyBrochas = [], isLoading: dailyLoading } = useQuery<any[]>({
     queryKey: ['/api/brochas/daily'],
     staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (garbage collection time)
   });
 
-  const { data: specialBrochas = [], isLoading: specialLoading } = useQuery({
+  const { data: specialBrochas = [], isLoading: specialLoading } = useQuery<any[]>({
     queryKey: ['/api/brochas/special'],
     staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (garbage collection time)
@@ -1005,15 +1006,14 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
 }
 
 function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
-  const { data: prayers = [], isLoading } = useQuery<any[]>({
+  const { data: prayers = [], isLoading } = useQuery<MorningPrayer[]>({
     queryKey: ['/api/morning/prayers'],
   });
 
   const tefillaConditions = useTefillaConditions();
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { completeTask } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
-  const jewishTimesQuery = useJewishTimes();
 
   // State for managing which section is expanded
   const [expandedSection, setExpandedSection] = useState<number>(0); // Start with first section expanded
@@ -1122,7 +1122,7 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
             {/* Section Content - Collapsible */}
             {isExpanded && (
               <div className="px-6 pb-6 space-y-4">
-                {sectionPrayers.map((prayer, prayerIndex) => (
+                {sectionPrayers.map((prayer: any, prayerIndex: number) => (
                   <div key={prayerIndex}>
                     <div
                       className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
@@ -1866,7 +1866,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
 }
 
 function IndividualPrayerFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { completeTask } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const tefillaConditions = useTefillaConditions();
@@ -1956,7 +1956,7 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
 }
 
 export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
-  const { activeModal, openModal, closeModal, selectedPsalm, setTehillimActiveTab, tehillimReturnTab } = useModalStore();
+  const { activeModal, openModal, closeModal, selectedPsalm } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
@@ -2390,7 +2390,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   });
 
   // Fetch Tehillim text from Supabase using ID (for proper part handling)
-  const { data: tehillimText, refetch: refetchTehillimText } = useQuery<{text: string; perek: number; language: string}>({
+  const { refetch: refetchTehillimText } = useQuery<{text: string; perek: number; language: string}>({
     queryKey: ['/api/tehillim/text/by-id', progress?.currentPerek, showHebrew ? 'hebrew' : 'english'],
     queryFn: async () => {
       if (!progress?.currentPerek) return null;
@@ -3395,7 +3395,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       
       {/* Jerusalem Compass Modal */}
       <Dialog open={activeModal === 'jerusalem-compass'} onOpenChange={() => closeModal(true)}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto">
+        <DialogContent>
           <VisuallyHidden>
             <DialogDescription>Compass to find direction to Jerusalem for prayer</DialogDescription>
           </VisuallyHidden>

@@ -254,7 +254,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const [_showHebrew, _setShowHebrew] = useState(true);
 
   // Fetch global Tehillim progress
-  const { data: progress, refetch: refetchProgress, isError: progressError } = useQuery<GlobalTehillimProgress>({
+  const { data: progress, isError: progressError } = useQuery<GlobalTehillimProgress>({
     queryKey: ['/api/tehillim/progress'], 
     queryFn: async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress`);
@@ -273,7 +273,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   });
   
   // Fetch current name for the perek - MUST be defined before useEffect hooks that use it
-  const { data: currentName, refetch: refetchCurrentName } = useQuery<TehillimName | null>({
+  const { data: currentName } = useQuery<TehillimName | null>({
     queryFn: async () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/current-name`);
@@ -289,7 +289,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     queryKey: ['/api/tehillim/current-name', progress?.currentPerek], // Include perek in key to force refetch
     staleTime: 0,                   // NO caching - keep real-time for global chain
     refetchOnWindowFocus: true,     // Refetch when users return to app  
-    enabled: !!progress?.currentPerek // Only fetch when we have progress
+    enabled: !!progress?.currentPerek && progress.currentPerek >= 1 && progress.currentPerek <= 171 // Only fetch when we have valid progress (includes Perek 119 parts)
   });
   
   // Only refetch tehillim data when explicitly needed (removed aggressive polling)
@@ -321,7 +321,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       if (!response.ok) return null;
       return response.json();
     },
-    enabled: !!progress?.currentPerek,
+    enabled: !!progress?.currentPerek && progress.currentPerek >= 1 && progress.currentPerek <= 171, // Includes Perek 119 parts
     staleTime: 10 * 60 * 1000,  // Keep fresh for 10 minutes 
     gcTime: 30 * 60 * 1000,     // Cache for 30 minutes
     refetchOnWindowFocus: false
@@ -365,7 +365,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
         return { preview: '', perek: progress?.currentPerek || 0, language: 'hebrew' }; // Return empty preview as fallback
       }
     },
-    enabled: !!progress?.currentPerek,
+    enabled: !!progress?.currentPerek && progress.currentPerek >= 1 && progress.currentPerek <= 171, // Includes Perek 119 parts
     staleTime: 60000, // Cache for 1 minute - preview text doesn't change
     gcTime: 300000 // Keep in cache for 5 minutes
   });
@@ -592,7 +592,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                 <div className="w-full bg-blush/20 rounded-full h-1.5">
                   <div 
                     className="bg-gradient-feminine h-1.5 rounded-full transition-all duration-500 ease-out"
-                    style={{ width: `${progressError ? 0 : ((progress?.currentPerek || 0) / 150) * 100}%` }}
+                    style={{ width: `${progressError ? 0 : ((progress?.currentPerek || 0) / 171) * 100}%` }}
                   ></div>
                 </div>
               </div>

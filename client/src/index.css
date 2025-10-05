@@ -28,6 +28,13 @@ body {
   position: relative;
   margin: 0;
   padding: 0;
+  
+  /* Enhanced mobile touch/gesture optimizations */
+  touch-action: manipulation; /* Prevent delay on double-tap zoom */
+  -webkit-tap-highlight-color: transparent; /* Remove tap highlights */
+  -webkit-touch-callout: none; /* Disable callout on long press */
+  -webkit-user-select: none; /* Prevent text selection on touch */
+  user-select: none;
 }
 
 #root {
@@ -1015,5 +1022,189 @@ html, body, #root {
   }
   50% {
     box-shadow: 0 0 8px rgba(244, 63, 94, 0.4);
+  }
+}
+
+/* ====== MOBILE PERFORMANCE OPTIMIZATIONS ====== */
+
+/* Scroll Performance Optimizations */
+* {
+  /* Optimize scrolling performance across all elements */
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Enhanced Mobile Touch Interactions */
+button, 
+.button,
+[role="button"],
+a,
+.touch-target {
+  /* Faster touch response and better mobile UX */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: pointer;
+  
+  /* Minimum touch target size for accessibility */
+  min-height: 44px;
+  min-width: 44px;
+  
+  /* Smooth transitions for touch feedback */
+  transition: transform 0.1s ease, opacity 0.1s ease, background-color 0.1s ease;
+  will-change: transform, opacity;
+}
+
+/* Active touch states for better feedback */
+button:active,
+.button:active,
+[role="button"]:active,
+a:active,
+.touch-target:active {
+  transform: scale(0.98);
+  opacity: 0.8;
+}
+
+/* Scrollable Container Optimizations */
+.scroll-container,
+.modal-content,
+.fullscreen-modal,
+.overflow-y-auto,
+.overflow-auto {
+  /* Optimize scroll performance for mobile */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  
+  /* Performance optimizations */
+  contain: layout style paint;
+  will-change: scroll-position;
+  
+  /* Momentum scrolling for iOS */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* Performance optimizations for scrollable elements */
+.scroll-optimized {
+  /* Hardware acceleration for smooth scrolling */
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  
+  /* Contain paint for better performance */
+  contain: layout style paint;
+  
+  /* Optimize for scrolling */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Modal and Fullscreen Optimizations */
+.modal-overlay,
+.fullscreen-modal {
+  /* Prevent background scrolling */
+  position: fixed;
+  overflow: hidden;
+  
+  /* Optimize modal rendering */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  
+  /* Smooth animations */
+  will-change: opacity, transform;
+}
+
+/* Text Selection Optimizations */
+.selectable-text,
+.prayer-text,
+.torah-content {
+  /* Allow text selection for reading content */
+  -webkit-user-select: text;
+  user-select: text;
+  
+  /* Better text rendering on mobile */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Input and Form Optimizations */
+input,
+textarea,
+select {
+  /* Better mobile input handling */
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: manipulation;
+  
+  /* Prevent zoom on focus for iOS */
+  font-size: 16px;
+  
+  /* Better input rendering */
+  -webkit-font-smoothing: antialiased;
+  border-radius: 8px;
+}
+
+/* Animation Performance */
+@media (prefers-reduced-motion: no-preference) {
+  .animate-in,
+  .transition-all,
+  .transition-transform {
+    /* Hardware acceleration for animations */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    will-change: transform, opacity;
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+  /* Optimize viewport for mobile devices */
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  /* Better mobile scrolling */
+  body {
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+  
+  /* Optimize font rendering on mobile */
+  body, 
+  .mobile-optimized {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeSpeed; /* Prioritize speed over quality on mobile */
+  }
+  
+  /* Touch-friendly spacing */
+  .mobile-spacing {
+    padding: 16px;
+    margin: 8px 0;
+  }
+  
+  /* Larger touch targets for mobile */
+  button,
+  .button,
+  a {
+    min-height: 48px;
+    padding: 12px 16px;
   }
 }

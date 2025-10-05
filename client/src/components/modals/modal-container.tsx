@@ -22,8 +22,8 @@ export default function ModalContainer({ onSectionChange }: ModalContainerProps)
   
   return (
     <>
-      <TorahModals onSectionChange={onSectionChange} />
-      <TefillaModals onSectionChange={onSectionChange} />
+      <TorahModals onSectionChange={onSectionChange || (() => {})} />
+      <TefillaModals onSectionChange={onSectionChange || (() => {})} />
       <TimesModals />
       <TableModals />
       <TzedakaModals />

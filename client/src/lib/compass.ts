@@ -47,13 +47,30 @@ export function getDeviceInfo() {
   const hasAbsoluteOrientation = 'ondeviceorientationabsolute' in window;
   const needsPermission = typeof (DeviceOrientationEvent as any).requestPermission === 'function';
   
+  // Enhanced iPhone model detection
+  let iphoneModel = 'Unknown';
+  if (isIOS) {
+    if (/iPhone OS 17_0|iPhone OS 18_0|iPhone OS 19_0/.test(ua)) {
+      iphoneModel = 'iPhone 15/16+ (iOS 17+)';
+    } else if (/iPhone OS 16_0|iPhone OS 15_0/.test(ua)) {
+      iphoneModel = 'iPhone 12/13/14 (iOS 15-16)';
+    } else if (/iPhone OS 14_0|iPhone OS 13_0/.test(ua)) {
+      iphoneModel = 'iPhone 11/XS/XR (iOS 13-14)';
+    } else if (/iPhone OS 12_0|iPhone OS 11_0/.test(ua)) {
+      iphoneModel = 'iPhone 6/7/8/X (iOS 11-12)';
+    } else {
+      iphoneModel = 'iPhone 5s/6 (iOS 10-)';
+    }
+  }
+  
   return {
     isIOS,
     isAndroid,
     hasWebkitCompass,
     hasAbsoluteOrientation,
     needsPermission,
-    deviceType: isIOS ? 'iOS' : isAndroid ? 'Android' : 'Other'
+    deviceType: isIOS ? 'iOS' : isAndroid ? 'Android' : 'Other',
+    iphoneModel: isIOS ? iphoneModel : null
   };
 }
 
@@ -334,7 +351,23 @@ export class SimpleCompass {
         heading = normalizeDegrees(360 - event.alpha);
       }
     } else {
-      // No valid heading available
+      // No valid heading available - this might indicate a problem
+      if (this.debugMode) {
+        console.warn('No valid compass heading available', {
+          webkitCompassHeading: (event as any).webkitCompassHeading,
+          alpha: event.alpha,
+          absolute: event.absolute,
+          deviceInfo
+        });
+      }
+      return;
+    }
+    
+    // Validate heading range
+    if (heading < 0 || heading > 360 || isNaN(heading)) {
+      if (this.debugMode) {
+        console.warn('Invalid heading value:', heading);
+      }
       return;
     }
     

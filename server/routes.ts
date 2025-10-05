@@ -98,7 +98,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-04-10' as any,
+  apiVersion: '2025-03-31.basil' as any,
 });
 
 // Store VAPID keys at startup
@@ -132,8 +132,29 @@ import {
 } from "../shared/schema";
 import { z } from "zod";
 
-// Admin authentication middleware - imported from routes/middleware
-import { requireAdminAuth } from "./routes/middleware";
+// Admin authentication middleware
+function requireAdminAuth(req: any, res: any, next: any) {
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  
+  if (!adminPassword) {
+    return res.status(500).json({ 
+      message: "Admin authentication not configured" 
+    });
+  }
+  
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.startsWith('Bearer ') 
+    ? authHeader.slice(7) 
+    : null;
+  
+  if (!token || token !== adminPassword) {
+    return res.status(401).json({ 
+      message: "Unauthorized: Invalid admin credentials" 
+    });
+  }
+  
+  next();
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Schedule periodic cleanup of expired names (every hour)
@@ -306,7 +327,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
     } catch (error) {
       // Calendar download error
-      res.status(500).json({ message: "Failed to generate calendar" });
+      return res.status(500).json({ message: "Failed to generate calendar" });
     }
   });
 
@@ -545,7 +566,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(formattedTimes);
     } catch (error) {
       // Error fetching Hebcal zmanim
-      res.status(500).json({ message: "Failed to fetch zmanim from Hebcal API" });
+      return res.status(500).json({ message: "Failed to fetch zmanim from Hebcal API" });
     }
   });
 
@@ -638,7 +659,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error) {
       console.error('Error fetching Hebcal events:', error);
-      res.status(500).json({ message: "Failed to fetch events from Hebcal API" });
+      return res.status(500).json({ message: "Failed to fetch events from Hebcal API" });
     }
   });
 
@@ -653,42 +674,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid coordinates" });
       }
 
-      // First get current zmanim to check if we're past tzait
-      const zmanimResponse = await fetch(`http://localhost:${process.env.PORT || 5000}/api/zmanim/${latitude}/${longitude}`);
-      const zmanimData = await zmanimResponse.json();
-      
-      // Determine if we need next week's parsha (after tzait hakochavim)
-      let useNextWeek = false;
-      if (zmanimData.tzaitHakochavim) {
-        const now = new Date();
-        const [time, period] = zmanimData.tzaitHakochavim.split(' ');
-        const [hours, minutes] = time.split(':').map(Number);
-        
-        // Convert tzait time to 24-hour format
-        let tzaitHours = hours;
-        if (period === 'PM' && hours !== 12) tzaitHours += 12;
-        if (period === 'AM' && hours === 12) tzaitHours = 0;
-        
-        // Create tzait time in local timezone
-        const tzaitToday = new Date();
-        tzaitToday.setHours(tzaitHours, minutes, 0, 0);
-        
-        // Get current time in local timezone (Asia/Jerusalem)
-        const nowInLocalTZ = new Date().toLocaleString("en-US", {timeZone: zmanimData.tzid || "Asia/Jerusalem"});
-        const localNow = new Date(nowInLocalTZ);
-        
-        // If current time is past tzait, we need next week's parsha
-        useNextWeek = localNow > tzaitToday;
-        
-        // Debug parsha timing
-      }
-
-      // Build API URL - add week offset if needed  
-      let apiUrl = `https://www.hebcal.com/shabbat/?cfg=json&latitude=${latitude}&longitude=${longitude}`;
-      if (useNextWeek) {
-        // Request next Saturday's data (Sept 6, 2025 for Ki Tetzei)
-        apiUrl += `&gy=2025&gm=9&gd=6`;
-      }
+      // Build API URL - get current week's Shabbat data
+      const apiUrl = `https://www.hebcal.com/shabbat/?cfg=json&latitude=${latitude}&longitude=${longitude}`;
 
       // Server API Request
       
@@ -704,7 +691,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Parse the Shabbos data
       const result = {
-        location: zmanimData.location || 'Unknown Location',
+        location: data.location?.title || 'Unknown Location',
         candleLighting: null as string | null,
         havdalah: null as string | null,
         parsha: null as string | null
@@ -716,17 +703,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let closestDistance = Infinity;
       
       data.items.forEach((item: any) => {
-        // Processing item - look for Friday candle lighting times only
-        if (item.title.includes("Candle lighting:") && item.date) {
+        // Look for Shabbat candle lighting times (not Yom Tov)
+        if (item.title.includes("Candle lighting:") && item.date && !item.memo?.includes("Yom Kippur")) {
           const itemDate = new Date(item.date);
-          const dayOfWeek = itemDate.getDay(); // 0=Sunday, 5=Friday
+          const dayOfWeek = itemDate.getDay(); // 0=Sunday, 5=Friday, 6=Saturday
           
-          // Only consider Friday candle lighting times (not Yom Tov candle lighting)
-          if (dayOfWeek === 5) { // Friday
+          // Look for Friday or Saturday candle lighting (Shabbat starts Friday night)
+          // The API sometimes shows Friday candle lighting on Saturday date
+          if (dayOfWeek === 5 || dayOfWeek === 6) { // Friday or Saturday
             const timeDifference = itemDate.getTime() - now.getTime();
             
-            // Find the closest upcoming Friday (or current Friday if we haven't passed candle lighting yet)
-            if (timeDifference >= -24 * 60 * 60 * 1000 && timeDifference < closestDistance) { // Allow current Friday up to 24 hours ago
+            // Find the closest upcoming Shabbat candle lighting
+            if (timeDifference >= -24 * 60 * 60 * 1000 && timeDifference < closestDistance) { // Allow current day up to 24 hours ago
               closestDistance = timeDifference;
               closestFridayCandleLighting = item;
             }
@@ -738,13 +726,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (closestFridayCandleLighting) {
         const item = closestFridayCandleLighting;
         const timeMatch = item.title.match(/Candle lighting: (\d{1,2}:\d{2})(pm|am|p\.m\.|a\.m\.)?/i);
-        // Candle lighting timeMatch
         if (timeMatch) {
           const [hours, minutes] = timeMatch[1].split(':');
           const hour12 = parseInt(hours);
           const suffix = timeMatch[2]?.toLowerCase();
-          
-          // Candle lighting time parsing
           
           if (suffix) {
             // Already has am/pm, just format it properly
@@ -756,36 +741,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const period = hour12 >= 12 ? 'PM' : 'AM';
             result.candleLighting = `${displayHour}:${minutes} ${period}`;
           }
-          // Final candleLighting
         }
       }
       
       // Process other items for havdalah and parsha
       data.items.forEach((item: any) => {
-        // Skip candle lighting since we already processed it above
         if (item.title.includes("Havdalah:")) {
-          // Full title for havdalah
-          // Check if it has pm/am at the end of the full title  
+          // Check if it has pm/am at the end of the title  
           const timeWithSuffixMatch = item.title.match(/Havdalah: (\d{1,2}:\d{2})\s*(pm|am)/i);
           if (timeWithSuffixMatch) {
             const [, time, suffix] = timeWithSuffixMatch;
             const [hours, minutes] = time.split(':');
             const hour12 = parseInt(hours);
-            // Havdalah with suffix
             const displayHour = hour12 === 0 ? 12 : hour12;
             result.havdalah = `${displayHour}:${minutes} ${suffix.toUpperCase()}`;
-            // Final havdalah
           } else {
             // Try 24-hour format
             const timeMatch = item.title.match(/Havdalah: (\d{1,2}:\d{2})/);
             if (timeMatch) {
               const [hours, minutes] = timeMatch[1].split(':');
               const hour24 = parseInt(hours);
-              // Havdalah 24hr
               const displayHour = hour24 > 12 ? hour24 - 12 : (hour24 === 0 ? 12 : hour24);
               const period = hour24 >= 12 ? 'PM' : 'AM';
               result.havdalah = `${displayHour}:${minutes} ${period}`;
-              // Final havdalah
             }
           }
         } else if (item.title.startsWith("Parashat ") || item.title.startsWith("Parashah ")) {
@@ -796,7 +774,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(result);
     } catch (error) {
       // Error fetching Shabbos times
-      res.status(500).json({ message: "Failed to fetch Shabbos times from Hebcal API" });
+      return res.status(500).json({ message: "Failed to fetch Shabbos times from Hebcal API" });
     }
   });
 
@@ -1079,7 +1057,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error generating calendar file:', error);
       console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-      res.status(500).json({ 
+      return res.status(500).json({ 
         message: "Failed to generate calendar file",
         error: error instanceof Error ? error.message : 'Unknown error'
       });
@@ -1093,7 +1071,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const items = await storage.getAllShopItems();
       res.json(items);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch shop items" });
+      return res.status(500).json({ message: "Failed to fetch shop items" });
     }
   });
 
@@ -1109,7 +1087,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(item);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch shop item" });
+      return res.status(500).json({ message: "Failed to fetch shop item" });
     }
   });
 
@@ -1131,7 +1109,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(data);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch from Hebcal API" });
+      return res.status(500).json({ message: "Failed to fetch from Hebcal API" });
     }
   });
 
@@ -1142,7 +1120,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const inspiration = await storage.getTableInspirationByDate(date);
       res.json(inspiration || null);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch table inspiration" });
+      return res.status(500).json({ message: "Failed to fetch table inspiration" });
     }
   });
 
@@ -1152,7 +1130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const inspiration = await storage.createTableInspiration(validatedData);
       res.json(inspiration);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create table inspiration" });
+      return res.status(500).json({ message: "Failed to create table inspiration" });
     }
   });
 
@@ -1162,7 +1140,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const inspirations = await storage.getAllTableInspirations();
       res.json(inspirations);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch table inspirations" });
+      return res.status(500).json({ message: "Failed to fetch table inspirations" });
     }
   });
 
@@ -1177,7 +1155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(inspiration);
     } catch (error) {
-      res.status(500).json({ message: "Failed to update table inspiration" });
+      return res.status(500).json({ message: "Failed to update table inspiration" });
     }
   });
 
@@ -1191,7 +1169,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json({ message: "Table inspiration deleted successfully" });
     } catch (error) {
-      res.status(500).json({ message: "Failed to delete table inspiration" });
+      return res.status(500).json({ message: "Failed to delete table inspiration" });
     }
   });
 
@@ -1347,7 +1325,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const impact = await storage.getCommunityImpactByDate(date);
       res.json(impact || null);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch community impact" });
+      return res.status(500).json({ message: "Failed to fetch community impact" });
     }
   });
 
@@ -1357,7 +1335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const prayers = await storage.getMinchaPrayers();
       res.json(prayers);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch Mincha prayers" });
+      return res.status(500).json({ message: "Failed to fetch Mincha prayers" });
     }
   });
 
@@ -1366,7 +1344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const prayers = await storage.getMinchaPrayers();
       res.json(prayers);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch Mincha prayers" });
+      return res.status(500).json({ message: "Failed to fetch Mincha prayers" });
     }
   });
 
@@ -1376,7 +1354,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const prayers = await storage.getMorningPrayers();
       res.json(prayers);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch Morning prayers" });
+      return res.status(500).json({ message: "Failed to fetch Morning prayers" });
     }
   });
 
@@ -1386,7 +1364,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const prayers = await storage.getMaarivPrayers();
       res.json(prayers);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch Maariv prayers" });
+      return res.status(500).json({ message: "Failed to fetch Maariv prayers" });
     }
   });
 
@@ -1395,7 +1373,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const prayers = await storage.getMaarivPrayers();
       res.json(prayers);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch Maariv prayers" });
+      return res.status(500).json({ message: "Failed to fetch Maariv prayers" });
     }
   });
 
@@ -1405,7 +1383,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const prayers = await storage.getAfterBrochasPrayers();
       res.json(prayers);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch After Brochas prayers" });
+      return res.status(500).json({ message: "Failed to fetch After Brochas prayers" });
     }
   });
 
@@ -1414,7 +1392,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const prayer = await storage.createAfterBrochasPrayer(req.body);
       res.json(prayer);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create After Brochas prayer" });
+      return res.status(500).json({ message: "Failed to create After Brochas prayer" });
     }
   });
 
@@ -1425,7 +1403,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(brochas);
     } catch (error) {
       console.error("Error fetching brochas:", error);
-      res.status(500).json({ message: "Failed to fetch brochas" });
+      return res.status(500).json({ message: "Failed to fetch brochas" });
     }
   });
 
@@ -1435,7 +1413,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(brochas);
     } catch (error) {
       console.error("Error fetching daily brochas:", error);
-      res.status(500).json({ message: "Failed to fetch daily brochas" });
+      return res.status(500).json({ message: "Failed to fetch daily brochas" });
     }
   });
 
@@ -1445,7 +1423,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(brochas);
     } catch (error) {
       console.error("Error fetching special brochas:", error);
-      res.status(500).json({ message: "Failed to fetch special brochas" });
+      return res.status(500).json({ message: "Failed to fetch special brochas" });
     }
   });
 
@@ -1463,7 +1441,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(brocha);
     } catch (error) {
       console.error("Error fetching brocha:", error);
-      res.status(500).json({ message: "Failed to fetch brocha" });
+      return res.status(500).json({ message: "Failed to fetch brocha" });
     }
   });
 
@@ -1473,7 +1451,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(brocha);
     } catch (error) {
       console.error("Error creating brocha:", error);
-      res.status(500).json({ message: "Failed to create brocha" });
+      return res.status(500).json({ message: "Failed to create brocha" });
     }
   });
 
@@ -1483,7 +1461,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const prayers = await storage.getBirkatHamazonPrayers();
       res.json(prayers);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch Birkat Hamazon prayers" });
+      return res.status(500).json({ message: "Failed to fetch Birkat Hamazon prayers" });
     }
   });
 
@@ -1492,7 +1470,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const prayer = await storage.createBirkatHamazonPrayer(req.body);
       res.json(prayer);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create Birkat Hamazon prayer" });
+      return res.status(500).json({ message: "Failed to create Birkat Hamazon prayer" });
     }
   });
 
@@ -1500,38 +1478,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/sponsors/:contentType/:date", async (req, res) => {
     try {
       const { contentType, date } = req.params;
+      const cacheKey = `sponsor_${contentType}_${date}`;
+      const now = Date.now();
+      
+      // Check cache first (4 hour TTL for sponsor data)
+      const cached = apiCache.get(cacheKey);
+      if (cached && cached.expires > now) {
+        return res.json(cached.data);
+      }
+      
       const sponsor = await storage.getSponsorByContentTypeAndDate(contentType, date);
+      
+      // Cache the result for 4 hours
+      apiCache.set(cacheKey, {
+        data: sponsor || null,
+        expires: now + (4 * 60 * 60 * 1000)
+      });
+      
       res.json(sponsor || null);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch sponsor" });
+      return res.status(500).json({ message: "Failed to fetch sponsor" });
     }
   });
 
   app.get("/api/sponsors/daily/:date", async (req, res) => {
     try {
       const { date } = req.params;
+      const cacheKey = `daily_sponsor_${date}`;
+      const now = Date.now();
+      
+      // Check cache first (4 hour TTL for daily sponsor data)
+      const cached = apiCache.get(cacheKey);
+      if (cached && cached.expires > now) {
+        return res.json(cached.data);
+      }
+      
       const sponsor = await storage.getDailySponsor(date);
+      
+      // Cache the result for 4 hours
+      apiCache.set(cacheKey, {
+        data: sponsor || null,
+        expires: now + (4 * 60 * 60 * 1000)
+      });
+      
       res.json(sponsor || null);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch daily sponsor" });
+      return res.status(500).json({ message: "Failed to fetch daily sponsor" });
     }
   });
 
   app.get("/api/sponsors", async (req, res) => {
     try {
+      const cacheKey = 'active_sponsors';
+      const now = Date.now();
+      
+      // Check cache first (30 minute TTL for active sponsors list)
+      const cached = apiCache.get(cacheKey);
+      if (cached && cached.expires > now) {
+        return res.json(cached.data);
+      }
+      
       const sponsors = await storage.getActiveSponsors();
+      
+      // Cache the result for 30 minutes
+      apiCache.set(cacheKey, {
+        data: sponsors,
+        expires: now + (30 * 60 * 1000)
+      });
+      
       res.json(sponsors);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch sponsors" });
+      return res.status(500).json({ message: "Failed to fetch sponsors" });
     }
   });
 
   app.post("/api/sponsors", async (req, res) => {
     try {
       const sponsor = await storage.createSponsor(req.body);
+      
+      // Clear sponsor-related cache entries to prevent stale data
+      const sponsorshipDate = sponsor.sponsorshipDate;
+      
+      // Clear daily sponsor cache for the sponsor's date
+      apiCache.delete(`daily_sponsor_${sponsorshipDate}`);
+      
+      // Clear active sponsors list cache
+      apiCache.delete('active_sponsors');
+      
+      // Clear any content-specific sponsor caches for this date
+      // We don't know all possible content types, so clear the common ones
+      const contentTypes = ['daily', 'tehillim', 'torah', 'tefilla'];
+      contentTypes.forEach(contentType => {
+        apiCache.delete(`sponsor_${contentType}_${sponsorshipDate}`);
+      });
+      
       res.json(sponsor);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create sponsor" });
+      return res.status(500).json({ message: "Failed to create sponsor" });
     }
   });
 
@@ -1541,7 +1584,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const campaign = await storage.getActiveCampaign();
       res.json(campaign || null);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch active campaign" });
+      return res.status(500).json({ message: "Failed to fetch active campaign" });
     }
   });
 
@@ -1550,7 +1593,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const campaigns = await storage.getAllCampaigns();
       res.json(campaigns);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch campaigns" });
+      return res.status(500).json({ message: "Failed to fetch campaigns" });
     }
   });
 
@@ -1559,7 +1602,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const campaign = await storage.createCampaign(req.body);
       res.json(campaign);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create campaign" });
+      return res.status(500).json({ message: "Failed to create campaign" });
     }
   });
 
@@ -1570,7 +1613,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const halacha = await storage.getDailyHalachaByDate(date);
       res.json(halacha || null);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch daily halacha" });
+      return res.status(500).json({ message: "Failed to fetch daily halacha" });
     }
   });
 
@@ -1580,7 +1623,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const halacha = await storage.createDailyHalacha(validatedData);
       res.json(halacha);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create daily halacha" });
+      return res.status(500).json({ message: "Failed to create daily halacha" });
     }
   });
 
@@ -1590,7 +1633,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const emuna = await storage.getDailyEmunaByDate(date);
       res.json(emuna || null);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch daily emuna" });
+      return res.status(500).json({ message: "Failed to fetch daily emuna" });
     }
   });
 
@@ -1600,7 +1643,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const emuna = await storage.createDailyEmuna(validatedData);
       res.json(emuna);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create daily emuna" });
+      return res.status(500).json({ message: "Failed to create daily emuna" });
     }
   });
 
@@ -1610,7 +1653,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const chizuk = await storage.getDailyChizukByDate(date);
       res.json(chizuk || null);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch daily chizuk" });
+      return res.status(500).json({ message: "Failed to fetch daily chizuk" });
     }
   });
 
@@ -1620,7 +1663,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const chizuk = await storage.createDailyChizuk(validatedData);
       res.json(chizuk);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create daily chizuk" });
+      return res.status(500).json({ message: "Failed to create daily chizuk" });
     }
   });
 
@@ -1630,7 +1673,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const featured = await storage.getFeaturedContentByDate(date);
       res.json(featured || null);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch featured content" });
+      return res.status(500).json({ message: "Failed to fetch featured content" });
     }
   });
 
@@ -1640,7 +1683,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const featured = await storage.createFeaturedContent(validatedData);
       res.json(featured);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create featured content" });
+      return res.status(500).json({ message: "Failed to create featured content" });
     }
   });
 
@@ -1662,7 +1705,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error('Error fetching Pirkei Avot:', error);
-      res.status(500).json({ message: "Failed to fetch Pirkei Avot content" });
+      return res.status(500).json({ message: "Failed to fetch Pirkei Avot content" });
     }
   });
 
@@ -1671,7 +1714,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const progress = await storage.advancePirkeiAvotProgress();
       res.json(progress);
     } catch (error) {
-      res.status(500).json({ message: "Failed to advance Pirkei Avot progress" });
+      return res.status(500).json({ message: "Failed to advance Pirkei Avot progress" });
     }
   });
 
@@ -1681,7 +1724,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allPirkeiAvot = await storage.getAllPirkeiAvot();
       res.json(allPirkeiAvot);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch all Pirkei Avot content" });
+      return res.status(500).json({ message: "Failed to fetch all Pirkei Avot content" });
     }
   });
 
@@ -1690,7 +1733,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newPirkeiAvot = await storage.createPirkeiAvot(req.body);
       res.json(newPirkeiAvot);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create Pirkei Avot content" });
+      return res.status(500).json({ message: "Failed to create Pirkei Avot content" });
     }
   });
 
@@ -1701,7 +1744,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const recipe = await storage.getDailyRecipeByDate(date);
       res.json(recipe || null);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch daily recipe" });
+      return res.status(500).json({ message: "Failed to fetch daily recipe" });
     }
   });
 
@@ -1719,7 +1762,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const recipe = await storage.getDailyRecipeByDate(today);
       res.json(recipe || null);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch daily recipe" });
+      return res.status(500).json({ message: "Failed to fetch daily recipe" });
     }
   });
 
@@ -1733,7 +1776,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Failed to create daily recipe:", error);
       if (error instanceof Error) {
-        res.status(500).json({ message: "Failed to create daily recipe", error: error.message });
+        return res.status(500).json({ message: "Failed to create daily recipe", error: error.message });
       } else {
         res.status(500).json({ message: "Failed to create daily recipe", error: String(error) });
       }
@@ -1746,7 +1789,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const recipes = await storage.getAllDailyRecipes();
       res.json(recipes);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch recipes" });
+      return res.status(500).json({ message: "Failed to fetch recipes" });
     }
   });
 
@@ -1756,7 +1799,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const vort = await storage.getParshaVortByWeek(week);
       res.json(vort || null);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch Parsha vort" });
+      return res.status(500).json({ message: "Failed to fetch Parsha vort" });
     }
   });
 
@@ -1773,7 +1816,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(vorts);
     } catch (error) {
       console.error('Error fetching Parsha vorts:', error);
-      res.status(500).json({ message: "Failed to fetch Parsha vorts" });
+      return res.status(500).json({ message: "Failed to fetch Parsha vorts" });
     }
   });
 
@@ -1784,7 +1827,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(vort);
     } catch (error) {
       console.error('Error creating Parsha vort:', error);
-      res.status(500).json({ message: "Failed to create Parsha vort" });
+      return res.status(500).json({ message: "Failed to create Parsha vort" });
     }
   });
 
@@ -1848,7 +1891,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(times);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch zmanim data" });
+      return res.status(500).json({ message: "Failed to fetch zmanim data" });
     }
   });
 
@@ -1861,7 +1904,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(progressWithName);
     } catch (error) {
       console.error('Error fetching Tehillim progress:', error);
-      res.status(500).json({ error: "Failed to fetch Tehillim progress" });
+      return res.status(500).json({ error: "Failed to fetch Tehillim progress" });
     }
   });
 
@@ -1882,7 +1925,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedProgress);
     } catch (error) {
       console.error('Error completing Tehillim:', error);
-      res.status(500).json({ error: "Failed to complete Tehillim" });
+      return res.status(500).json({ error: "Failed to complete Tehillim" });
     }
   });
 
@@ -1900,7 +1943,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json(null);
       }
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch current name" });
+      return res.status(500).json({ message: "Failed to fetch current name" });
     }
   });
 
@@ -1909,7 +1952,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const names = await storage.getActiveNames();
       res.json(names);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch Tehillim names" });
+      return res.status(500).json({ message: "Failed to fetch Tehillim names" });
     }
   });
 
@@ -1920,7 +1963,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(progress);
     } catch (error) {
       console.error("Error fetching global tehillim progress:", error);
-      res.status(500).json({ message: "Failed to fetch global tehillim progress" });
+      return res.status(500).json({ message: "Failed to fetch global tehillim progress" });
     }
   });
 
@@ -1941,7 +1984,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(tehillimInfo);
     } catch (error) {
       console.error('Error fetching Tehillim info:', error);
-      res.status(500).json({ error: "Failed to fetch Tehillim info" });
+      return res.status(500).json({ error: "Failed to fetch Tehillim info" });
     }
   });
 
@@ -1951,8 +1994,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const perek = parseInt(req.params.perek);
       const language = req.query.language as string || 'english';
       
-      if (isNaN(perek) || perek < 1 || perek > 150) {
-        return res.status(400).json({ error: "Perek must be between 1 and 150" });
+      if (isNaN(perek) || perek < 1 || perek > 171) {
+        return res.status(400).json({ error: "Perek must be between 1 and 171" });
       }
       
       if (!['english', 'hebrew'].includes(language)) {
@@ -1964,7 +2007,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(tehillimData);
     } catch (error) {
       console.error('Error fetching Tehillim text:', error);
-      res.status(500).json({ error: "Failed to fetch Tehillim text" });
+      return res.status(500).json({ error: "Failed to fetch Tehillim text" });
     }
   });
 
@@ -1987,7 +2030,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(tehillimData);
     } catch (error) {
       console.error('Error fetching Tehillim text by ID:', error);
-      res.status(500).json({ error: "Failed to fetch Tehillim text" });
+      return res.status(500).json({ error: "Failed to fetch Tehillim text" });
     }
   });
 
@@ -2079,7 +2122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
     } catch (error) {
       console.error("Error getting next Tehillim part:", error);
-      res.status(500).json({ message: "Failed to get next Tehillim part" });
+      return res.status(500).json({ message: "Failed to get next Tehillim part" });
     }
   });
 
@@ -2089,8 +2132,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const perek = parseInt(req.params.perek);
       const language = req.query.language as string || 'hebrew';
       
-      if (isNaN(perek) || perek < 1 || perek > 150) {
-        return res.status(400).json({ error: 'Perek must be between 1 and 150' });
+      if (isNaN(perek) || perek < 1 || perek > 171) {
+        return res.status(400).json({ error: 'Perek must be between 1 and 171' });
       }
       
       const tehillimText = await storage.getSefariaTehillim(perek, language);
@@ -2104,7 +2147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error('Error fetching Tehillim preview:', error);
-      res.status(500).json({ error: 'Failed to fetch Tehillim preview' });
+      return res.status(500).json({ error: 'Failed to fetch Tehillim preview' });
     }
   });
 
@@ -2129,7 +2172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const text = await storage.getNishmasTextByLanguage(language);
       res.json(text || null);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch Nishmas text" });
+      return res.status(500).json({ message: "Failed to fetch Nishmas text" });
     }
   });
 
@@ -2139,7 +2182,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const text = await storage.createNishmasText(validatedData);
       res.json(text);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create Nishmas text" });
+      return res.status(500).json({ message: "Failed to create Nishmas text" });
     }
   });
 
@@ -2150,7 +2193,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const text = await storage.updateNishmasText(language, validatedData);
       res.json(text);
     } catch (error) {
-      res.status(500).json({ message: "Failed to update Nishmas text" });
+      return res.status(500).json({ message: "Failed to update Nishmas text" });
     }
   });
 
@@ -2160,7 +2203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const progress = await storage.getPirkeiAvotProgress();
       res.json(progress);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch Pirkei Avot progress" });
+      return res.status(500).json({ message: "Failed to fetch Pirkei Avot progress" });
     }
   });
 
@@ -2171,7 +2214,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const prayers = await storage.getWomensPrayersByCategory(category);
       res.json(prayers);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch women's prayers" });
+      return res.status(500).json({ message: "Failed to fetch women's prayers" });
     }
   });
 
@@ -2181,7 +2224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const prayer = await storage.getWomensPrayerById(parseInt(id));
       res.json(prayer || null);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch prayer" });
+      return res.status(500).json({ message: "Failed to fetch prayer" });
     }
   });
 
@@ -2206,7 +2249,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(promotions);
     } catch (error) {
       console.error('Error fetching discount promotions:', error);
-      res.status(500).json({ message: "Failed to fetch active discount promotions" });
+      return res.status(500).json({ message: "Failed to fetch active discount promotions" });
     }
   });
 
@@ -2269,7 +2312,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error: any) {
       console.error('❌ Failed to create sponsor record:', error);
-      res.status(500).json({ 
+      return res.status(500).json({ 
         success: false, 
         message: 'Failed to create sponsor record',
         error: error.message 
@@ -2544,7 +2587,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error('Media proxy error:', error);
-      res.status(500).json({ error: "Failed to fetch media" });
+      return res.status(500).json({ error: "Failed to fetch media" });
     }
   });
 
@@ -2843,7 +2886,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ received: true });
     } catch (error) {
       console.error('Error processing webhook:', error);
-      res.status(500).json({ error: 'Webhook processing failed' });
+      return res.status(500).json({ error: 'Webhook processing failed' });
     }
   });
 
@@ -2877,7 +2920,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error('Error checking donation completion:', error);
-      res.status(500).json({ completed: false, error: 'Failed to check completion' });
+      return res.status(500).json({ completed: false, error: 'Failed to check completion' });
     }
   });
 
@@ -2936,7 +2979,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error('Error processing donation success:', error);
-      res.status(500).json({ message: "Failed to process donation success" });
+      return res.status(500).json({ message: "Failed to process donation success" });
     }
   });
 
@@ -3074,7 +3117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error('Error confirming payment:', error);
-      res.status(500).json({ message: "Failed to confirm payment" });
+      return res.status(500).json({ message: "Failed to confirm payment" });
     }
   });
   
@@ -3149,7 +3192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Donation status updated", donation });
     } catch (error) {
       console.error('Error updating donation status:', error);
-      res.status(500).json({ message: "Failed to update donation status" });
+      return res.status(500).json({ message: "Failed to update donation status" });
     }
   });
 
@@ -3178,7 +3221,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(event);
     } catch (error) {
       console.error('Error tracking analytics event:', error);
-      res.status(500).json({ message: "Failed to track event" });
+      return res.status(500).json({ message: "Failed to track event" });
     }
   });
 
@@ -3195,7 +3238,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       console.error('Error recording session:', error);
-      res.status(500).json({ message: "Failed to record session" });
+      return res.status(500).json({ message: "Failed to record session" });
     }
   });
 
@@ -3206,7 +3249,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, message: "Old analytics data cleaned up" });
     } catch (error) {
       console.error('Error cleaning up analytics:', error);
-      res.status(500).json({ message: "Failed to cleanup analytics" });
+      return res.status(500).json({ message: "Failed to cleanup analytics" });
     }
   });
 
@@ -3249,7 +3292,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error('Error fetching today stats:', error);
-      res.status(500).json({ message: "Failed to fetch today's stats" });
+      return res.status(500).json({ message: "Failed to fetch today's stats" });
     }
   });
 
@@ -3271,7 +3314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(monthlyStats);
     } catch (error) {
       console.error('Error fetching monthly stats:', error);
-      res.status(500).json({ message: "Failed to fetch monthly stats" });
+      return res.status(500).json({ message: "Failed to fetch monthly stats" });
     }
   });
 
@@ -3289,7 +3332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(totals);
     } catch (error) {
       console.error('Error fetching total stats:', error);
-      res.status(500).json({ message: "Failed to fetch total stats" });
+      return res.status(500).json({ message: "Failed to fetch total stats" });
     }
   });
 
@@ -3308,7 +3351,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error('Error recalculating all analytics:', error);
-      res.status(500).json({ message: "Failed to recalculate all analytics" });
+      return res.status(500).json({ message: "Failed to recalculate all analytics" });
     }
   });
 
@@ -3332,7 +3375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(dailyStats);
     } catch (error) {
       console.error('Error fetching daily stats:', error);
-      res.status(500).json({ message: "Failed to fetch daily stats" });
+      return res.status(500).json({ message: "Failed to fetch daily stats" });
     }
   });
 
@@ -3343,7 +3386,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(impact);
     } catch (error) {
       console.error('Error fetching community impact:', error);
-      res.status(500).json({ message: "Failed to fetch community impact" });
+      return res.status(500).json({ message: "Failed to fetch community impact" });
     }
   });
 
@@ -3392,7 +3435,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error('IP-based location detection error:', error);
-      res.status(500).json({ error: 'Failed to detect location from IP' });
+      return res.status(500).json({ error: 'Failed to detect location from IP' });
     }
   });
 
@@ -3424,7 +3467,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error('Error fetching location:', error);
-      res.status(500).json({ message: "Failed to fetch location data" });
+      return res.status(500).json({ message: "Failed to fetch location data" });
     }
   });
 
@@ -3499,7 +3542,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error('Error fetching Jewish events:', error);
-      res.status(500).json({ message: "Failed to fetch Jewish events" });
+      return res.status(500).json({ message: "Failed to fetch Jewish events" });
     }
   });
 
@@ -3563,7 +3606,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error('Error fetching Hebrew date:', error);
-      res.status(500).json({ message: "Failed to fetch Hebrew date data" });
+      return res.status(500).json({ message: "Failed to fetch Hebrew date data" });
     }
   });
 
@@ -3660,7 +3703,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(message);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch message" });
+      return res.status(500).json({ message: "Failed to fetch message" });
     }
   });
   
@@ -3692,7 +3735,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(messages);
     } catch (error) {
       console.error("Error fetching messages:", error);
-      res.status(500).json({ message: "Failed to fetch messages" });
+      return res.status(500).json({ message: "Failed to fetch messages" });
     }
   });
 
@@ -3727,7 +3770,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting message:", error);
-      res.status(500).json({ message: "Failed to delete message" });
+      return res.status(500).json({ message: "Failed to delete message" });
     }
   });
 
@@ -3758,7 +3801,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error subscribing to push:", error);
-      res.status(500).json({ error: "Failed to subscribe to push notifications" });
+      return res.status(500).json({ error: "Failed to subscribe to push notifications" });
     }
   });
 
@@ -3774,7 +3817,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true, message: "Successfully unsubscribed from push notifications" });
     } catch (error) {
       console.error("Error unsubscribing from push:", error);
-      res.status(500).json({ error: "Failed to unsubscribe from push notifications" });
+      return res.status(500).json({ error: "Failed to unsubscribe from push notifications" });
     }
   });
 
@@ -3882,7 +3925,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error sending push notification:", error);
-      res.status(500).json({ error: "Failed to send push notification" });
+      return res.status(500).json({ error: "Failed to send push notification" });
     }
   });
 
@@ -3893,7 +3936,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(history);
     } catch (error) {
       console.error("Error fetching notification history:", error);
-      res.status(500).json({ error: "Failed to fetch notification history" });
+      return res.status(500).json({ error: "Failed to fetch notification history" });
     }
   });
 
@@ -3933,7 +3976,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: sent > 0, sent });
     } catch (error) {
       console.error("[Simple Test] Error:", error);
-      res.status(500).json({ error: "Failed" });
+      return res.status(500).json({ error: "Failed" });
     }
   });
 
@@ -4010,7 +4053,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("[Test Push] Error:", error);
-      res.status(500).json({ error: "Failed to send test push notification" });
+      return res.status(500).json({ error: "Failed to send test push notification" });
     }
   });
 

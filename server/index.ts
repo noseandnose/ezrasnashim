@@ -6,7 +6,6 @@ import { fileURLToPath } from "url";
 import compression from "compression";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-import { env } from "./env";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,9 +14,9 @@ const app = express();
 
 // Trust proxy for accurate IP addresses in Replit environment
 // Use hop count instead of 'true' to prevent IP spoofing and rate limit bypass
-const trustProxyHops = env.TRUST_PROXY_HOPS
-  ? parseInt(env.TRUST_PROXY_HOPS, 10)
-  : (env.NODE_ENV === 'production' ? 2 : 1);
+const trustProxyHops = process.env.TRUST_PROXY_HOPS 
+  ? parseInt(process.env.TRUST_PROXY_HOPS, 10) 
+  : (process.env.NODE_ENV === 'production' ? 2 : 1);
 app.set('trust proxy', trustProxyHops);
 
 // Redirect .repl.co to .replit.dev to match Vite's allowedHosts configuration
@@ -31,7 +30,7 @@ app.use((req, res, next) => {
 });
 
 // Enhanced security headers with Helmet
-const isProduction = env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === 'production';
 
 app.use(helmet({
   contentSecurityPolicy: {
@@ -66,11 +65,6 @@ const generalApiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: false,
-  // Trust proxy to get real IP for per-IP limiting
-  keyGenerator: (req) => {
-    // Use real IP if available, fallback to connection IP
-    return req.ip || req.connection.remoteAddress || 'unknown';
-  },
   // Skip rate limiting for health checks and read-only content
   skip: (req) => {
     return req.path === '/api/version' || 
@@ -88,7 +82,6 @@ const authLimiter = rateLimit({
   message: { message: "Too many authentication attempts, please try again later." },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.ip || req.connection.remoteAddress || 'unknown',
 });
 
 // Moderate limit for expensive write operations (per IP)
@@ -98,7 +91,6 @@ const expensiveLimiter = rateLimit({
   message: { message: "Too many requests to this resource, please slow down." },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.ip || req.connection.remoteAddress || 'unknown',
 });
 
 // Apply rate limiting with different tiers
@@ -201,8 +193,8 @@ app.use(
       }
       
       // In production/staging, be strict; in development, allow any origin
-      const isProductionEnv = env.NODE_ENV === 'production' || env.NODE_ENV === 'staging';
-      if (isProductionEnv) {
+      const isProduction = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging';
+      if (isProduction) {
         console.error(`CORS rejection: Origin ${origin} not in allowed list`);
         return callback(new Error('Not allowed by CORS'), false);
       } else {
@@ -261,7 +253,7 @@ async function initializeServer() {
   const server = await registerRoutes(app);
 
   // Serve static files in production
-  if (env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === 'production') {
     const publicPath = path.join(__dirname, 'public');
     app.use(express.static(publicPath));
     
@@ -309,14 +301,15 @@ async function initializeServer() {
 
 // Start server for both production and development
 initializeServer().then((server) => {
-  const isProductionMode = env.NODE_ENV === 'production';
-  const defaultPort = isProductionMode ? '80' : '5000';
-  const port = parseInt(env.PORT ?? defaultPort);
-
+  const isProduction = process.env.NODE_ENV === 'production';
+  const defaultPort = isProduction ? '80' : '5000';
+  const port = parseInt(process.env.PORT ?? defaultPort);
+  
   server.listen(port, '0.0.0.0', () => {
-    const emoji = isProductionMode ? '🚀' : '⚡';
+    const environment = process.env.NODE_ENV || 'development';
+    const emoji = isProduction ? '🚀' : '⚡';
     console.log(`${emoji} Ezras Nashim server running on port ${port}`);
-    console.log(`📍 Environment: ${env.NODE_ENV}`);
+    console.log(`📍 Environment: ${environment}`);
   });
 }).catch(console.error);
 

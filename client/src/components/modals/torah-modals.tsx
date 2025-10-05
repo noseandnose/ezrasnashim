@@ -2,7 +2,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
-import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import AudioPlayer from "@/components/audio-player";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
@@ -12,99 +11,18 @@ import { formatThankYouMessage } from "@/lib/link-formatter";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { Expand } from "lucide-react";
 
-// Calculate reading time based on word count (average 200 words per minute)
-const calculateReadingTime = (text: string): string => {
-  if (!text) return "0 min";
-  
-  const wordCount = text.trim().split(/\s+/).length;
-  const readingTimeMinutes = Math.ceil(wordCount / 200);
-  
-  if (readingTimeMinutes === 1) {
-    return "1 min";
-  } else {
-    return `${readingTimeMinutes} min`;
-  }
-};
 
 interface TorahModalsProps {
   onSectionChange?: (section: any) => void;
 }
 
-// Standardized Modal Header Component
-const StandardModalHeader = ({ 
-  title, 
-  showHebrew, 
-  setShowHebrew, 
-  fontSize, 
-  setFontSize,
-  onFullscreen
-}: {
-  title: string;
-  showHebrew: boolean;
-  setShowHebrew: (show: boolean) => void;
-  fontSize: number;
-  setFontSize: (size: number) => void;
-  onFullscreen?: () => void;
-}) => (
-  <div className="mb-2 space-y-2">
-    {/* Fullscreen button in top left */}
-    {onFullscreen && (
-      <button
-        onClick={onFullscreen}
-        className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 transition-colors z-10"
-        aria-label="Open fullscreen"
-      >
-        <Expand className="h-4 w-4 text-gray-600" />
-      </button>
-    )}
-    
-    {/* First Row: Language Toggle and Title */}
-    <div className="flex items-center justify-center gap-4">
-      <Button
-        onClick={() => setShowHebrew(!showHebrew)}
-        variant="ghost"
-        size="sm"
-        className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
-          showHebrew 
-            ? 'bg-blush text-white' 
-            : 'text-black/60 hover:text-black hover:bg-white/50'
-        }`}
-      >
-        {showHebrew ? 'עב' : 'EN'}
-      </Button>
-      
-      <DialogTitle className="text-lg platypi-bold text-black">{title}</DialogTitle>
-    </div>
-    
-    {/* Second Row: Font Size Controls */}
-    <div className="flex items-center justify-center">
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => setFontSize(Math.max(12, fontSize - 2))}
-          className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
-        >
-          <span className="text-xs platypi-medium">-</span>
-        </button>
-        <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
-        <button
-          onClick={() => setFontSize(Math.min(32, fontSize + 2))}
-          className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
-        >
-          <span className="text-xs platypi-medium">+</span>
-        </button>
-      </div>
-    </div>
-  </div>
-);
 
 export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   const { activeModal, closeModal, openModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
-  const [, setLocation] = useLocation();
   const [showExplosion, setShowExplosion] = useState(false);
   const [fontSize, setFontSize] = useState(16);
-  const [showHebrew, setShowHebrew] = useState(true);
   const [showFootnotes, setShowFootnotes] = useState(false);
   const [fullscreenContent, setFullscreenContent] = useState<{
     isOpen: boolean;
@@ -443,7 +361,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
       {/* Emuna Modal */}
       <Dialog open={activeModal === 'emuna'} onOpenChange={() => closeModal(true)}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="emuna-description">
+        <DialogContent aria-describedby="emuna-description">
           <div id="emuna-description" className="sr-only">Daily faith strengthening and spiritual trust content</div>
           
           {/* Fullscreen button */}
@@ -599,7 +517,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
       {/* Chizuk Modal */}
       <Dialog open={activeModal === 'chizuk'} onOpenChange={() => closeModal(true)}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="chizuk-description">
+        <DialogContent aria-describedby="chizuk-description">
           <div id="chizuk-description" className="sr-only">5-minute daily inspiration and spiritual strengthening content</div>
           
           {/* Simple Header for Audio Content */}

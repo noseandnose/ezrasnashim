@@ -232,7 +232,7 @@ export class ObjectStorageService {
     requestedPermission?: ObjectPermission;
   }): Promise<boolean> {
     return canAccessObject({
-      userId,
+      ...(userId && { userId }),
       objectFile,
       requestedPermission: requestedPermission ?? ObjectPermission.READ,
     });

@@ -23,6 +23,7 @@ export function HeartExplosion({ trigger, onComplete }: HeartExplosionProps) {
     } else {
       // Reset explosion state when trigger becomes false
       setShowExplosion(false);
+      return undefined;
     }
   }, [trigger, onComplete]);
 

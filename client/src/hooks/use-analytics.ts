@@ -18,7 +18,7 @@ interface TrackEventParams {
 }
 
 export const useAnalytics = () => {
-  const [location] = useLocation();
+  useLocation();
 
   const trackEventMutation = useMutation({
     mutationFn: async ({ eventType, eventData }: TrackEventParams) => {
@@ -52,7 +52,7 @@ export const useAnalytics = () => {
   }, []);
 
   const trackEvent = (eventType: TrackEventParams["eventType"], eventData?: Record<string, any>) => {
-    trackEventMutation.mutate({ eventType, eventData });
+    trackEventMutation.mutate({ eventType, eventData: eventData || {} });
   };
 
   const trackCompletion = (modalName: string) => {

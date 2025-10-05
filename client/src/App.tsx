@@ -10,6 +10,7 @@ import { lazy, Suspense } from "react";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import UpdateNotification from "@/components/UpdateNotification";
 import { AutoNotificationPrompt } from "@/components/auto-notification-prompt";
+import { OfflineIndicator } from "@/components/offline-indicator";
 import "@/utils/clear-modal-completions";
 import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
 import logoPath from '@assets/EN App Icon_1756705023411.png';
@@ -130,6 +131,7 @@ export default function App() {
         <TooltipProvider>
           <UpdateNotification />
           <AutoNotificationPrompt />
+          <OfflineIndicator />
           <Router />
           <Toaster />
         </TooltipProvider>

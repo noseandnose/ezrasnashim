@@ -201,91 +201,27 @@ export function formatTextContent(text: string | null | undefined): string {
   formatted = formatted.replace(/\{\{grey\}\}([\s\S]*?)\{\{\/grey\}\}/g, 
     '<div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg border-l-4 border-gray-300 dark:border-gray-600 my-2 text-gray-700 dark:text-gray-300">$1</div>');
 
-  // Process the text character by character to handle formatting markers
-  let result = '';
-  let lastIndex = 0;
-  let isInBold = false;
-  let isInTitle = false;
-  let isInGrey = false;
-  let isInLarger = false;
-  let isInSmaller = false;
+  // Use regex-based processing for more robust formatting handling
+  // This approach better handles nested formatting from conditional content
   
-  for (let i = 0; i < formatted.length - 1; i++) {
-    // Check for ## (title) markers - bigger and bold
-    if (formatted[i] === '#' && formatted[i + 1] === '#') {
-      result += formatted.substring(lastIndex, i);
-      
-      if (!isInTitle) {
-        result += '<span style="font-size: 1.5em; font-weight: bold; display: block; margin: 0.5em 0;">';
-      } else {
-        result += '</span>';
-      }
-      
-      isInTitle = !isInTitle;
-      i++; // Skip the second #
-      lastIndex = i + 1;
-    }
-    // Check for ** (bold) markers
-    else if (formatted[i] === '*' && formatted[i + 1] === '*') {
-      result += formatted.substring(lastIndex, i);
-      
-      if (!isInBold) {
-        result += '<strong>';
-      } else {
-        result += '</strong>';
-      }
-      
-      isInBold = !isInBold;
-      i++; // Skip the second *
-      lastIndex = i + 1;
-    }
-    // Check for ~~ (grey) markers
-    else if (formatted[i] === '~' && formatted[i + 1] === '~') {
-      result += formatted.substring(lastIndex, i);
-      
-      if (!isInGrey) {
-        result += '<span style="color: #9CA3AF; opacity: 0.8;">';
-      } else {
-        result += '</span>';
-      }
-      
-      isInGrey = !isInGrey;
-      i++; // Skip the second ~
-      lastIndex = i + 1;
-    }
-    // Check for ++ (bold text) markers - changed from larger text to bold
-    else if (formatted[i] === '+' && formatted[i + 1] === '+') {
-      result += formatted.substring(lastIndex, i);
-      
-      if (!isInLarger) {
-        result += '<strong>';
-      } else {
-        result += '</strong>';
-      }
-      
-      isInLarger = !isInLarger;
-      i++; // Skip the second +
-      lastIndex = i + 1;
-    }
-    // Check for -- (smaller text) markers - but avoid conflicts with line breaks
-    else if (formatted[i] === '-' && formatted[i + 1] === '-' && 
-             (i + 2 >= formatted.length || formatted[i + 2] !== '-')) {
-      result += formatted.substring(lastIndex, i);
-      
-      if (!isInSmaller) {
-        result += '<span style="font-size: 0.85em;">';
-      } else {
-        result += '</span>';
-      }
-      
-      isInSmaller = !isInSmaller;
-      i++; // Skip the second -
-      lastIndex = i + 1;
-    }
-  }
+  // Process ## (title) markers - bigger and bold
+  formatted = formatted.replace(/##([^#]*?)##/g, '<span style="font-size: 1.5em; font-weight: bold; display: block; margin: 0.5em 0;">$1</span>');
   
-  // Add any remaining text
-  result += formatted.substring(lastIndex);
+  // Process ** (bold) markers - handle nested content robustly
+  // Use [\s\S] instead of . to properly match all characters including Hebrew with nikud
+  formatted = formatted.replace(/\*\*([\s\S]*?)\*\*/g, '<strong>$1</strong>');
+  
+  // Process ~~ (grey) markers
+  formatted = formatted.replace(/~~([\s\S]*?)~~/g, '<span style="color: #9CA3AF; opacity: 0.8;">$1</span>');
+  
+  // Process ++ (bold text) markers 
+  formatted = formatted.replace(/\+\+([\s\S]*?)\+\+/g, '<strong>$1</strong>');
+  
+  // Process -- (smaller text) markers - but avoid conflicts with line breaks
+  // Use negative lookahead to avoid matching --- (line breaks)
+  formatted = formatted.replace(/--(?!-)([\s\S]+?)--(?!-)/g, '<span style="font-size: 0.85em;">$1</span>');
+  
+  let result = formatted;
   
   // Clean up excessive whitespace and empty lines BEFORE converting to HTML
   result = result

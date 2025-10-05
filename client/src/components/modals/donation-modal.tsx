@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useModalStore } from "@/lib/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { useTrackModalComplete } from "@/hooks/use-analytics";
 
 interface Campaign {
   id: number;
@@ -25,10 +24,8 @@ export default function DonationModal() {
   const [amount, setAmount] = useState("1");
   const [isCustom, setIsCustom] = useState(false);
   const [customAmount, setCustomAmount] = useState("");
-  const { trackModalComplete } = useTrackModalComplete();
-
   // Fetch active campaign data
-  const { data: campaign } = useQuery<Campaign>({
+  useQuery<Campaign>({
     queryKey: ['/api/campaigns/active'],
     queryFn: async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/campaigns/active`);
@@ -40,13 +37,13 @@ export default function DonationModal() {
   });
 
   const createPaymentMutation = useMutation({
-    mutationFn: async (donationAmount: number) => {
+    mutationFn: async () => {
       // const response = await apiRequest('POST', '/api/create-payment-intent', {
       //   amount: donationAmount
       // });
       // return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       // Don't track completion or mark task complete here - only after successful payment
       closeModal();
       
@@ -61,7 +58,7 @@ export default function DonationModal() {
         setLocation(`/donate?${params.toString()}`);
       // }
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "Payment Error",
         description: "Unable to process donation. Please try again.",
@@ -80,7 +77,7 @@ export default function DonationModal() {
       });
       return;
     }
-    createPaymentMutation.mutate(donationAmount);
+    createPaymentMutation.mutate();
   };
 
   const handleAmountSelect = (selectedAmount: string) => {
@@ -108,11 +105,12 @@ export default function DonationModal() {
         closeModal();
       }
     }}>
-      <DialogContent className="w-full max-w-sm max-h-[80vh] overflow-y-auto gradient-soft-glow rounded-3xl p-6 platypi-regular border border-blush/20">
-        <div className="flex items-center justify-center mb-3 relative">
+      <DialogContent>
+        <div className="max-h-[80vh] overflow-y-auto rounded-3xl p-6 gradient-soft-glow platypi-regular border border-blush/20">
+          <div className="flex items-center justify-center mb-3 relative">
           <DialogTitle className="text-lg platypi-bold text-black">Put a Coin in Tzedaka</DialogTitle>
         </div>
-        <p className="text-xs text-warm-gray/70 platypi-regular text-center mb-4">
+        <p className="text-sm platypi-regular text-gray-600 text-center mb-4">
           All Donations go towards approved Woman Torah Causes
         </p>
         
@@ -135,7 +133,7 @@ export default function DonationModal() {
         <div className="space-y-3 text-sm text-gray-700">
           {/* Amount Selection Buttons */}
           <div>
-            <p className="text-sm platypi-medium text-warm-gray mb-2">Select Amount</p>
+            <p className="text-sm platypi-medium block mb-2">Select Amount</p>
             <div className="grid grid-cols-5 gap-1">
               {quickAmounts.map((quickAmount) => (
                 <button
@@ -156,7 +154,7 @@ export default function DonationModal() {
           {/* Custom Amount Input - Only show when Custom is selected */}
           {isCustom && (
             <div>
-              <label className="text-sm platypi-medium text-warm-gray mb-2 block">Enter Custom Amount</label>
+              <label className="text-sm platypi-medium block mb-2">Enter Custom Amount</label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 platypi-semibold">$</span>
                 <Input
@@ -182,6 +180,7 @@ export default function DonationModal() {
               {createPaymentMutation.isPending ? 'Processing...' : `Donate $${isCustom ? customAmount : amount}`}
             </Button>
           </div>
+        </div>
         </div>
       </DialogContent>
     </Dialog>

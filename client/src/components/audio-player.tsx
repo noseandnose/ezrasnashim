@@ -10,7 +10,7 @@ interface AudioPlayerProps {
   onAudioEnded?: () => void; // Optional callback for when audio finishes
 }
 
-export default function AudioPlayer({ title, duration, audioUrl, onAudioEnded }: AudioPlayerProps) {
+export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState("0:00");
@@ -143,10 +143,6 @@ export default function AudioPlayer({ title, duration, audioUrl, onAudioEnded }:
     }
   }, [playbackSpeed]);
 
-  const parseDuration = (duration: string): number => {
-    const parts = duration.split(':');
-    return parseInt(parts[0]) * 60 + parseInt(parts[1]);
-  };
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);

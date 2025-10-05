@@ -148,7 +148,6 @@ export function FullscreenModal({
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: 'white',
-        isolation: 'isolate',
         pointerEvents: 'auto',
         // Remove all touch restrictions to allow native browser gestures
         touchAction: 'auto',
@@ -273,19 +272,19 @@ export function FullscreenModal({
             ? (children as (params: { language: 'hebrew' | 'english', fontSize: number }) => React.ReactNode)({ language: language || 'hebrew', fontSize: fontSize || 16 }) 
             : children}
         </div>
-        
-        {/* Floating Settings Button */}
-        {(showFontControls || showLanguageControls) && (
-          <FloatingSettings
-            showFontControls={showFontControls}
-            fontSize={fontSize}
-            onFontSizeChange={onFontSizeChange}
-            showLanguageControls={showLanguageControls}
-            language={language}
-            onLanguageChange={onLanguageChange}
-          />
-        )}
       </div>
+
+      {/* Floating Settings Button - Outside scrollable content */}
+      {(showFontControls || showLanguageControls) && (
+        <FloatingSettings
+          showFontControls={showFontControls}
+          fontSize={fontSize}
+          onFontSizeChange={onFontSizeChange}
+          showLanguageControls={showLanguageControls}
+          language={language}
+          onLanguageChange={onLanguageChange}
+        />
+      )}
     </div>
   );
 }
