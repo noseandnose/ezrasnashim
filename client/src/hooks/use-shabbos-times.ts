@@ -37,16 +37,19 @@ export function useShabbosTime() {
       try {
         // Use axios like other hooks for consistency
         const url = `/api/shabbos/${coordinates.lat}/${coordinates.lng}`;
+        console.log('Fetching Shabbos times from:', url);
         const response = await axiosClient.get(url);
+        console.log('Shabbos API Response:', response.data);
         return response.data;
       } catch (error) {
-
+        console.error('Error fetching Shabbos times:', error);
         throw error;
       }
     },
     enabled: !!coordinates, // Only fetch when coordinates are available
-    staleTime: 1000 * 60 * 60 * 6, // 6 hours
+    staleTime: 0, // Always fetch fresh data for debugging
     refetchInterval: 1000 * 60 * 60 * 6, // Refetch every 6 hours
+    cacheTime: 0 // Don't cache for debugging
   });
 }
 
