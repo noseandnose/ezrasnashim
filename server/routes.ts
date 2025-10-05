@@ -700,11 +700,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Coordinates: ${latitude}, ${longitude}`);
       console.log(`Current time: ${now.toISOString()}`);
       console.log(`API URL: ${apiUrl}`);
-      console.log(`\nAll items from API:`);
-      data.items.forEach((item: any) => {
-        if (item.title.includes('Candle lighting') || item.title.includes('Havdalah') || item.title.includes('Parashat')) {
-          console.log(`  - ${item.title} | Date: ${item.date} | Category: ${item.category}`);
-        }
+      console.log(`\nAll items from API (EVERY SINGLE ONE):`);
+      data.items.forEach((item: any, index: number) => {
+        console.log(`  [${index}] ${item.title} | Date: ${item.date} | Category: ${item.category}`);
       });
 
       // Parse the Shabbos data
