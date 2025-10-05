@@ -3786,8 +3786,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { subscription, sessionId } = req.body;
       
-      if (!subscription || !subscription.endpoint) {
-        return res.status(400).json({ error: "Invalid subscription object" });
+      // Validate subscription structure
+      if (!subscription || !subscription.endpoint || !subscription.keys || !subscription.keys.p256dh || !subscription.keys.auth) {
+        return res.status(400).json({ error: "Invalid subscription object - missing required fields" });
       }
 
       const savedSubscription = await storage.subscribeToPush({
@@ -3874,6 +3875,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const sendPromises = subscriptions.map(async (sub) => {
         try {
+          // Validate subscription before sending
+          if (!sub.endpoint || !sub.p256dh || !sub.auth) {
+            if (process.env.NODE_ENV !== 'production') {
+              console.warn(`Invalid subscription structure for ${sub.endpoint?.substring(0, 50) || 'unknown'}...`);
+            }
+            await storage.unsubscribeFromPush(sub.endpoint);
+            failureCount++;
+            return;
+          }
+          
           await webpush.sendNotification({
             endpoint: sub.endpoint,
             keys: {
@@ -3894,19 +3905,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
           
           // Handle different error types appropriately
-          if (statusCode === 410) {
-            // Subscription expired/invalid - remove it
+          if (statusCode === 410 || statusCode === 404 || statusCode === 400) {
+            // Subscription expired/invalid/not found - remove it (terminal errors)
             await storage.unsubscribeFromPush(sub.endpoint);
-            console.log(`Removed expired subscription: ${sub.endpoint.substring(0, 50)}...`);
+            console.log(`Removed invalid/expired subscription (${statusCode}): ${sub.endpoint.substring(0, 50)}...`);
           } else if (statusCode === 413) {
             // Payload too large - this is a code issue, not subscription issue
             console.error('Push payload too large - review notification content');
           } else if (statusCode === 429) {
             // Rate limited - temporary issue, subscription is still valid
             console.warn(`Rate limited for ${sub.endpoint.substring(0, 50)}... - subscription remains active`);
+          } else if (statusCode === 401 || statusCode === 403) {
+            // Auth error - likely VAPID misconfiguration, keep subscription
+            console.error(`Auth error ${statusCode} - check VAPID configuration. Subscription retained.`);
           } else if (statusCode >= 400 && statusCode < 500) {
-            // Client error - likely invalid subscription
-            console.warn(`Client error ${statusCode} for subscription - may need review`);
+            // Other unexpected client error - log for investigation but keep subscription
+            console.warn(`Unexpected client error ${statusCode} for ${sub.endpoint.substring(0, 50)}... - subscription retained for investigation`);
           } else if (statusCode >= 500) {
             // Server error - temporary issue, keep subscription
             console.warn(`Server error ${statusCode} - temporary issue, retaining subscription`);
@@ -3962,6 +3976,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let sent = 0;
       for (const sub of subscriptions) {
         try {
+          // Validate subscription before sending
+          if (!sub.endpoint || !sub.p256dh || !sub.auth) {
+            await storage.unsubscribeFromPush(sub.endpoint);
+            continue;
+          }
+          
           await webpush.sendNotification({
             endpoint: sub.endpoint,
             keys: {
@@ -3973,6 +3993,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log('[Simple Test] Sent successfully');
         } catch (error: any) {
           console.error('[Simple Test] Error:', error.statusCode, error.message);
+          // Remove invalid subscriptions
+          if (error.statusCode === 410 || error.statusCode === 404 || error.statusCode === 400) {
+            await storage.unsubscribeFromPush(sub.endpoint);
+          }
         }
       }
 
@@ -4021,6 +4045,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const sendPromises = subscriptions.map(async (sub) => {
         try {
+          // Validate subscription before sending
+          if (!sub.endpoint || !sub.p256dh || !sub.auth) {
+            await storage.unsubscribeFromPush(sub.endpoint);
+            failureCount++;
+            errors.push(`Invalid subscription structure`);
+            return;
+          }
+          
           console.log('[Test Push] Sending to endpoint:', sub.endpoint.substring(0, 50) + '...');
           await webpush.sendNotification({
             endpoint: sub.endpoint,
@@ -4037,10 +4069,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           errors.push(errorMsg);
           console.error('[Test Push] Failed:', errorMsg);
           
-          // If subscription is invalid, mark it as unsubscribed
-          if (error.statusCode === 410) {
+          // If subscription is invalid/expired (terminal errors), mark it as unsubscribed
+          const statusCode = error.statusCode || error.status;
+          if (statusCode === 410 || statusCode === 404 || statusCode === 400) {
             await storage.unsubscribeFromPush(sub.endpoint);
-            console.log('[Test Push] Removed invalid subscription');
+            console.log('[Test Push] Removed invalid subscription (', statusCode, ')');
+          } else if (statusCode === 401 || statusCode === 403) {
+            console.error('[Test Push] Auth error - check VAPID configuration');
           }
         }
       });
