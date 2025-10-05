@@ -1,4 +1,6 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { persistQueryClient } from "@tanstack/react-query-persist-client";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import axiosClient from "./axiosClient";
 import { AxiosResponse } from "axios";
 
@@ -126,3 +128,70 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+// Helper function to check if localStorage is available
+function isStorageAvailable(): boolean {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return false;
+    }
+    // Test if we can actually use localStorage (privacy mode blocks it)
+    const testKey = '__ezras_nashim_test__';
+    window.localStorage.setItem(testKey, '1');
+    window.localStorage.removeItem(testKey);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Set up cache persistence to localStorage for faster subsequent visits
+if (isStorageAvailable()) {
+  try {
+    const localStoragePersister = createSyncStoragePersister({
+      storage: window.localStorage,
+      key: 'ezras-nashim-cache',
+    });
+
+    persistQueryClient({
+      queryClient,
+      persister: localStoragePersister,
+      maxAge: 1000 * 60 * 60 * 24, // 24 hours - cache persists for a day
+      dehydrateOptions: {
+        shouldDehydrateQuery: (query) => {
+          // Only persist queries that have been successful
+          if (query.state.status !== 'success') {
+            return false;
+          }
+          
+          // Inspect entire queryKey array for sensitive data
+          const queryKeyString = JSON.stringify(query.queryKey).toLowerCase();
+          
+          // Exclude sensitive/user-specific endpoints (use block-list approach)
+          const sensitivePatterns = [
+            '/progress',
+            '/user',
+            '/admin',
+            '/statistics',
+            '/session',
+            '/auth',
+            '/notification',
+            '/subscription',
+          ];
+          
+          // Check if any sensitive pattern is in the query key
+          const isSensitive = sensitivePatterns.some(pattern => 
+            queryKeyString.includes(pattern)
+          );
+          
+          return !isSensitive;
+        },
+      },
+    });
+  } catch (error) {
+    // Silently fail if persistence setup fails - app will work without it
+    if (import.meta.env.DEV) {
+      console.warn('Failed to set up query cache persistence:', error);
+    }
+  }
+}
