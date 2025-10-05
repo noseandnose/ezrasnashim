@@ -711,34 +711,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Find the upcoming Friday's candle lighting (closest Friday candle lighting)
+      // Find the upcoming (next) Shabbos - must be in the future
       const now = new Date();
-      let closestFridayCandleLighting: any = null;
-      let closestDistance = Infinity;
-      
+      let upcomingShabbosDate: Date | null = null;
+      let candleLightingItem: any = null;
+
+      // First pass: find the next candle lighting that's in the future
       data.items.forEach((item: any) => {
-        // Look for Shabbat candle lighting times (not Yom Tov)
-        if (item.title.includes("Candle lighting:") && item.date && !item.memo?.includes("Yom Kippur")) {
+        if (item.title.includes("Candle lighting:") && item.date) {
           const itemDate = new Date(item.date);
-          const dayOfWeek = itemDate.getDay(); // 0=Sunday, 5=Friday, 6=Saturday
-          
-          // Look for Friday or Saturday candle lighting (Shabbat starts Friday night)
-          // The API sometimes shows Friday candle lighting on Saturday date
-          if (dayOfWeek === 5 || dayOfWeek === 6) { // Friday or Saturday
-            const timeDifference = itemDate.getTime() - now.getTime();
-            
-            // Find the closest upcoming Shabbat candle lighting
-            if (timeDifference >= -24 * 60 * 60 * 1000 && timeDifference < closestDistance) { // Allow current day up to 24 hours ago
-              closestDistance = timeDifference;
-              closestFridayCandleLighting = item;
+          const timeDifference = itemDate.getTime() - now.getTime();
+
+          // Only consider future dates (more than 1 hour from now to avoid timezone issues)
+          if (timeDifference > -1 * 60 * 60 * 1000) {
+            if (!upcomingShabbosDate || itemDate < upcomingShabbosDate) {
+              upcomingShabbosDate = itemDate;
+              candleLightingItem = item;
             }
           }
         }
       });
       
-      // Process the closest Friday candle lighting
-      if (closestFridayCandleLighting) {
-        const item = closestFridayCandleLighting;
+      // Process the upcoming candle lighting time
+      if (candleLightingItem) {
+        const item = candleLightingItem;
         const timeMatch = item.title.match(/Candle lighting: (\d{1,2}:\d{2})(pm|am|p\.m\.|a\.m\.)?/i);
         if (timeMatch) {
           const [hours, minutes] = timeMatch[1].split(':');
@@ -758,40 +754,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Process other items for havdalah and parsha
-      data.items.forEach((item: any) => {
-        if (item.title.includes("Havdalah:")) {
-          // Check if it has pm/am at the end of the title
-          const timeWithSuffixMatch = item.title.match(/Havdalah: (\d{1,2}:\d{2})\s*(pm|am)/i);
-          if (timeWithSuffixMatch) {
-            const [, time, suffix] = timeWithSuffixMatch;
-            const [hours, minutes] = time.split(':');
-            const hour12 = parseInt(hours);
-            const displayHour = hour12 === 0 ? 12 : hour12;
-            result.havdalah = `${displayHour}:${minutes} ${suffix.toUpperCase()}`;
-          } else {
-            // Try 24-hour format
-            const timeMatch = item.title.match(/Havdalah: (\d{1,2}:\d{2})/);
-            if (timeMatch) {
-              const [hours, minutes] = timeMatch[1].split(':');
-              const hour24 = parseInt(hours);
-              const displayHour = hour24 > 12 ? hour24 - 12 : (hour24 === 0 ? 12 : hour24);
-              const period = hour24 >= 12 ? 'PM' : 'AM';
-              result.havdalah = `${displayHour}:${minutes} ${period}`;
+      // Second pass: find havdalah and parsha for the same upcoming Shabbos
+      if (upcomingShabbosDate) {
+        // Havdalah is typically the day after candle lighting (Saturday evening)
+        const havdalahDate = new Date(upcomingShabbosDate);
+        havdalahDate.setDate(havdalahDate.getDate() + 1);
+
+        data.items.forEach((item: any) => {
+          const itemDate = new Date(item.date);
+
+          // Find havdalah for this Shabbos (within 2 days of candle lighting)
+          if (item.title.includes("Havdalah:") && !result.havdalah) {
+            const dayDiff = Math.abs((itemDate.getTime() - upcomingShabbosDate.getTime()) / (1000 * 60 * 60 * 24));
+
+            if (dayDiff <= 2) {
+              const timeWithSuffixMatch = item.title.match(/Havdalah: (\d{1,2}:\d{2})\s*(pm|am)/i);
+              if (timeWithSuffixMatch) {
+                const [, time, suffix] = timeWithSuffixMatch;
+                const [hours, minutes] = time.split(':');
+                const hour12 = parseInt(hours);
+                const displayHour = hour12 === 0 ? 12 : hour12;
+                result.havdalah = `${displayHour}:${minutes} ${suffix.toUpperCase()}`;
+              } else {
+                const timeMatch = item.title.match(/Havdalah: (\d{1,2}:\d{2})/);
+                if (timeMatch) {
+                  const [hours, minutes] = timeMatch[1].split(':');
+                  const hour24 = parseInt(hours);
+                  const displayHour = hour24 > 12 ? hour24 - 12 : (hour24 === 0 ? 12 : hour24);
+                  const period = hour24 >= 12 ? 'PM' : 'AM';
+                  result.havdalah = `${displayHour}:${minutes} ${period}`;
+                }
+              }
             }
           }
-        }
 
-        // Look for parsha in multiple ways
-        if (item.category === 'parashat' || item.category === 'parashah') {
-          result.parsha = item.title;
-        } else if (item.title.startsWith("Parashat ") || item.title.startsWith("Parashah ")) {
-          result.parsha = item.title;
-        } else if (item.hebrew && (item.title.includes("Torah") || item.category === 'torah')) {
-          // Sometimes the parsha is just the Hebrew name
-          result.parsha = item.title;
-        }
-      });
+          // Find parsha for this Shabbos (within 2 days of candle lighting)
+          if (!result.parsha) {
+            const dayDiff = Math.abs((itemDate.getTime() - upcomingShabbosDate.getTime()) / (1000 * 60 * 60 * 24));
+
+            if (dayDiff <= 2) {
+              if (item.category === 'parashat' || item.category === 'parashah') {
+                result.parsha = item.title;
+              } else if (item.title.startsWith("Parashat ") || item.title.startsWith("Parashah ")) {
+                result.parsha = item.title;
+              }
+            }
+          }
+        });
+      }
 
       res.json(result);
     } catch (error) {
