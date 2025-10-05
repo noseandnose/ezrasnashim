@@ -5,10 +5,15 @@ interface VersionInfo {
   timestamp: number;
   version: string;
   buildDate: string;
+  buildNumber?: number;
+  releaseNotes?: string;
+  isCritical?: boolean;
+  changesSummary?: string;
 }
 
 export function useVersionCheck() {
   const [currentVersion, setCurrentVersion] = useState<VersionInfo | null>(null);
+  const [updateInfo, setUpdateInfo] = useState<VersionInfo | null>(null);
   const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -95,8 +100,9 @@ export function useVersionCheck() {
         
         if (timeDifference > minimumUpdateThreshold) {
           console.log('🚀 New version detected! Showing update prompt.');
+          setUpdateInfo(latestVersion);
           setShowUpdatePrompt(true);
-          
+
           // Store latest version separately for post-refresh update
           localStorage.setItem('latest-app-version', JSON.stringify(latestVersion));
         } else {
@@ -229,6 +235,7 @@ export function useVersionCheck() {
     refreshApp,
     dismissUpdate,
     currentVersion,
+    updateInfo,
     testUpdateNotification: import.meta.env.MODE === 'development' ? testUpdateNotification : undefined
   };
 }

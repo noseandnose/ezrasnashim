@@ -684,3 +684,30 @@ export type InsertPushSubscription = z.infer<typeof insertPushSubscriptionSchema
 export const insertPushNotificationSchema = createInsertSchema(pushNotifications).omit({ id: true, sentAt: true });
 export type PushNotification = typeof pushNotifications.$inferSelect;
 export type InsertPushNotification = z.infer<typeof insertPushNotificationSchema>;
+
+// App version history table for tracking deployments and updates
+export const appVersions = pgTable("app_versions", {
+  id: serial("id").primaryKey(),
+  version: varchar("version", { length: 50 }).notNull(),
+  buildNumber: integer("build_number").notNull(),
+  timestamp: timestamp("timestamp").notNull(),
+  deployedAt: timestamp("deployed_at").defaultNow().notNull(),
+  releaseNotes: text("release_notes"),
+  environment: varchar("environment", { length: 20 }).notNull().default('production'), // 'production', 'staging', 'development'
+  isActive: boolean("is_active").default(true).notNull(),
+  deployedBy: text("deployed_by"),
+  gitCommit: varchar("git_commit", { length: 40 }),
+  changesSummary: text("changes_summary"),
+  isCritical: boolean("is_critical").default(false), // Force update flag
+  minClientVersion: varchar("min_client_version", { length: 50 }), // Minimum compatible client version
+}, (table) => {
+  return {
+    versionIdx: index("version_idx").on(table.version),
+    timestampIdx: index("timestamp_idx").on(table.timestamp),
+    activeIdx: index("active_idx").on(table.isActive),
+  };
+});
+
+export const insertAppVersionSchema = createInsertSchema(appVersions).omit({ id: true, deployedAt: true });
+export type AppVersion = typeof appVersions.$inferSelect;
+export type InsertAppVersion = z.infer<typeof insertAppVersionSchema>;

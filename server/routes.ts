@@ -8,6 +8,9 @@ import { fileURLToPath } from "url";
 import { find as findTimezone } from "geo-tz";
 import webpush from "web-push";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
+import { db } from "./db";
+import * as schema from "../shared/schema";
+import { eq, desc } from "drizzle-orm";
 
 // Server-side cache with TTL and request coalescing to prevent API rate limiting
 interface CacheEntry {
@@ -3679,15 +3682,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return SERVER_START_TIME;
   };
   
-  app.get("/api/version", (req, res) => {
-    const versionTimestamp = getVersionTimestamp();
-    const version = {
-      timestamp: versionTimestamp,
-      version: APP_VERSION,
-      buildDate: new Date(versionTimestamp).toISOString(),
-      serverUptime: Date.now() - SERVER_START_TIME
-    };
-    res.json(version);
+  app.get("/api/version", async (req, res) => {
+    try {
+      const versionTimestamp = getVersionTimestamp();
+
+      // Try to get version info from database
+      const latestVersion = await db.select()
+        .from(schema.appVersions)
+        .where(eq(schema.appVersions.isActive, true))
+        .orderBy(desc(schema.appVersions.timestamp))
+        .limit(1);
+
+      if (latestVersion.length > 0) {
+        const dbVersion = latestVersion[0];
+        return res.json({
+          timestamp: dbVersion.timestamp.getTime(),
+          version: dbVersion.version,
+          buildNumber: dbVersion.buildNumber,
+          buildDate: dbVersion.deployedAt.toISOString(),
+          releaseNotes: dbVersion.releaseNotes,
+          isCritical: dbVersion.isCritical,
+          changesSummary: dbVersion.changesSummary,
+          serverUptime: Date.now() - SERVER_START_TIME
+        });
+      }
+
+      // Fallback to automatic version if no DB version exists
+      const version = {
+        timestamp: versionTimestamp,
+        version: APP_VERSION,
+        buildDate: new Date(versionTimestamp).toISOString(),
+        serverUptime: Date.now() - SERVER_START_TIME
+      };
+      res.json(version);
+    } catch (error) {
+      console.error('Error fetching version:', error);
+      // Fallback to basic version info
+      const versionTimestamp = getVersionTimestamp();
+      const version = {
+        timestamp: versionTimestamp,
+        version: APP_VERSION,
+        buildDate: new Date(versionTimestamp).toISOString(),
+        serverUptime: Date.now() - SERVER_START_TIME
+      };
+      res.json(version);
+    }
   });
 
   // Messages routes - Public endpoint for fetching messages by date (no auth required)
