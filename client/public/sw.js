@@ -1,7 +1,7 @@
-// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 4.4
+// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 4.5
 
 // Cache configuration
-const CACHE_VERSION = 'v4.4';
+const CACHE_VERSION = 'v4.5';
 const APP_SHELL_CACHE = `app-shell-${CACHE_VERSION}`;
 const PRAYERS_CACHE = `prayers-${CACHE_VERSION}`;
 const TORAH_CACHE = `torah-${CACHE_VERSION}`;
@@ -61,8 +61,8 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     Promise.all([
-      // EMERGENCY CLEANUP for v4.4: Delete ALL caches to fix MIME type corruption from v4.0-4.3
-      // NOTE: Future versions should use targeted cleanup: only delete caches not matching CACHE_VERSION
+      // EMERGENCY CLEANUP for v4.4-4.5: Delete ALL caches to fix MIME type corruption from v4.0-4.3
+      // NOTE: Future versions (v5.0+) should use targeted cleanup: only delete caches not matching CACHE_VERSION
       // This aggressive approach is temporary to ensure all users recover from corrupted caches
       caches.keys().then(cacheNames => 
         Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)))
@@ -147,20 +147,17 @@ self.addEventListener('fetch', (event) => {
       caches.open(PRAYERS_CACHE).then(cache => {
         return cache.match(event.request).then(response => {
           if (response) {
-            console.log('[SW] Serving prayer content from cache:', url.pathname);
             return response;
           }
           
           // Fetch and cache prayer content
           return fetch(event.request).then(fetchResponse => {
             if (fetchResponse.ok) {
-              console.log('[SW] Caching prayer content:', url.pathname);
               // Clone immediately before caching
               cache.put(event.request, fetchResponse.clone());
             }
             return fetchResponse;
           }).catch(() => {
-            console.log('[SW] Prayer content not available offline:', url.pathname);
             return new Response(JSON.stringify({
               error: 'Content not available offline',
               offline: true
@@ -179,11 +176,9 @@ self.addEventListener('fetch', (event) => {
   if (TEHILLIM_PATTERNS.some(pattern => pattern.test(url.pathname))) {
     event.respondWith(
       fetch(event.request).then(response => {
-        console.log('[SW] Serving fresh Tehillim data (no cache):', url.pathname);
         return response;
       }).catch(() => {
         // No cache fallback - offline users get clear error for live content
-        console.log('[SW] Tehillim requires network connection:', url.pathname);
         return new Response(JSON.stringify({
           error: 'Tehillim chain requires internet connection for live updates',
           offline: true,
@@ -206,19 +201,16 @@ self.addEventListener('fetch', (event) => {
       caches.open(TORAH_CACHE).then(cache => {
         return cache.match(event.request).then(response => {
           if (response) {
-            console.log('[SW] Serving Torah content from cache:', url.pathname);
             return response;
           }
           
           // Fetch and cache Torah content
           return fetch(event.request).then(fetchResponse => {
             if (fetchResponse.ok) {
-              console.log('[SW] Caching Torah content:', url.pathname);
               cache.put(event.request, fetchResponse.clone());
             }
             return fetchResponse;
           }).catch(() => {
-            console.log('[SW] Torah content not available offline:', url.pathname);
             return new Response(JSON.stringify({
               error: 'Content not available offline',
               offline: true
@@ -247,7 +239,6 @@ self.addEventListener('fetch', (event) => {
           
           // Return cached version immediately, update in background
           if (response) {
-            console.log('[SW] Serving critical API from cache:', url.pathname);
             fetchPromise.catch(() => {}); // Update in background
             return response;
           }
@@ -289,7 +280,6 @@ self.addEventListener('fetch', (event) => {
         // Try to serve from cache as fallback
         return caches.match(event.request).then(response => {
           if (response) {
-            console.log('[SW] Serving API fallback from cache:', url.pathname);
             return response;
           }
           
@@ -309,20 +299,15 @@ self.addEventListener('fetch', (event) => {
 
 // Handle push notifications
 self.addEventListener('push', (event) => {
-  console.log('[SW] Push notification received:', event);
-  console.log('[SW] Push data:', event.data ? event.data.text() : 'No data');
   
   if (!event.data) {
-    console.log('[SW] No data in push event');
     return;
   }
   
   let data;
   try {
     data = event.data.json();
-    console.log('[SW] Parsed push data:', data);
   } catch (e) {
-    console.log('[SW] Failed to parse JSON, using text:', e);
     data = {
       title: 'Ezras Nashim',
       body: event.data.text()
@@ -344,18 +329,15 @@ self.addEventListener('push', (event) => {
     renotify: data.renotify || false
   };
   
-  console.log('[SW] Showing notification with options:', options);
   
   event.waitUntil(
     self.registration.showNotification(data.title || 'Ezras Nashim', options)
-      .then(() => console.log('[SW] Notification shown successfully'))
       .catch(err => console.error('[SW] Error showing notification:', err))
   );
 });
 
 // Handle notification clicks
 self.addEventListener('notificationclick', (event) => {
-  console.log('Notification clicked:', event);
   event.notification.close();
   
   const url = event.notification.data?.url || '/';
@@ -380,20 +362,17 @@ self.addEventListener('notificationclick', (event) => {
 
 // Handle notification close
 self.addEventListener('notificationclose', (event) => {
-  console.log('Notification closed:', event);
 });
 
 // Handle background sync (for offline support)
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-notifications') {
-    console.log('Background sync for notifications');
   }
 });
 
 // Handle messages from clients (for forced updates)
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
-    console.log('[SW] Received SKIP_WAITING message, activating immediately');
     self.skipWaiting();
   }
 });
