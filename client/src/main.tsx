@@ -67,15 +67,6 @@ function setupSafariViewportFix() {
 async function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     try {
-      // Auto-reload when service worker takes control (prevents stale cache)
-      let refreshing = false;
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (refreshing) return;
-        refreshing = true;
-        console.log('[SW] Controller changed, reloading page...');
-        window.location.reload();
-      });
-      
       const registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/',
         updateViaCache: 'none' // Always fetch fresh service worker
@@ -83,22 +74,25 @@ async function registerServiceWorker() {
       
       console.log('[SW] Service Worker registered successfully:', registration.scope);
       
-      // Force immediate update if there's a waiting worker
-      if (registration.waiting) {
-        console.log('[SW] Waiting worker found, forcing activation...');
-        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-      }
-      
-      // Listen for updates
+      // Handle updates with user notification (no auto-reload to prevent cache issues)
       registration.addEventListener('updatefound', () => {
         const newWorker = registration.installing;
         if (newWorker) {
           console.log('[SW] New Service Worker installing...');
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              console.log('[SW] New version available, activating...');
-              // Send message to activate immediately
-              newWorker.postMessage({ type: 'SKIP_WAITING' });
+              console.log('[SW] New version available! Please refresh the page.');
+              // Clear all caches before reload to prevent serving stale content
+              caches.keys().then(cacheNames => {
+                return Promise.all(cacheNames.map(name => caches.delete(name)));
+              }).then(() => {
+                // Send message to activate immediately
+                newWorker.postMessage({ type: 'SKIP_WAITING' });
+                // Wait a bit for caches to clear, then reload
+                setTimeout(() => {
+                  window.location.reload();
+                }, 500);
+              });
             }
           });
         }
