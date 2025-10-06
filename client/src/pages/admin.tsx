@@ -167,7 +167,8 @@ export default function Admin() {
   });
 
   const handleLogin = async () => {
-    if (!adminPassword) {
+    const trimmedPassword = adminPassword.trim();
+    if (!trimmedPassword) {
       toast({
         title: 'Password Required',
         description: 'Please enter the admin password.',
@@ -179,8 +180,10 @@ export default function Admin() {
     try {
       // Test authentication by trying to fetch messages
       await axiosClient.get('/api/messages?upcoming=true', {
-        headers: { 'Authorization': `Bearer ${adminPassword}` }
+        headers: { 'Authorization': `Bearer ${trimmedPassword}` }
       });
+      // Store the trimmed password for future API calls
+      setAdminPassword(trimmedPassword);
       setIsAuthenticated(true);
       toast({
         title: 'Login Successful',
