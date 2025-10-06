@@ -61,7 +61,9 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     Promise.all([
-      // AGGRESSIVE CLEANUP for v4.4: Delete ALL caches to fix MIME type issues
+      // EMERGENCY CLEANUP for v4.4: Delete ALL caches to fix MIME type corruption from v4.0-4.3
+      // NOTE: Future versions should use targeted cleanup: only delete caches not matching CACHE_VERSION
+      // This aggressive approach is temporary to ensure all users recover from corrupted caches
       caches.keys().then(cacheNames => 
         Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)))
       ),
