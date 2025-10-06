@@ -1,7 +1,7 @@
-// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 4.5
+// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 4.6
 
 // Cache configuration
-const CACHE_VERSION = 'v4.5';
+const CACHE_VERSION = 'v4.6';
 const APP_SHELL_CACHE = `app-shell-${CACHE_VERSION}`;
 const PRAYERS_CACHE = `prayers-${CACHE_VERSION}`;
 const TORAH_CACHE = `torah-${CACHE_VERSION}`;
@@ -61,12 +61,19 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     Promise.all([
-      // EMERGENCY CLEANUP for v4.4-4.5: Delete ALL caches to fix MIME type corruption from v4.0-4.3
-      // NOTE: Future versions (v5.0+) should use targeted cleanup: only delete caches not matching CACHE_VERSION
-      // This aggressive approach is temporary to ensure all users recover from corrupted caches
-      caches.keys().then(cacheNames => 
-        Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)))
-      ),
+      // Targeted cache cleanup: Delete old version caches, keep current version
+      caches.keys().then(cacheNames => {
+        return Promise.all(
+          cacheNames
+            .filter(cacheName => {
+              // Keep caches matching current version
+              return !cacheName.endsWith(CACHE_VERSION);
+            })
+            .map(cacheName => {
+              return caches.delete(cacheName);
+            })
+        );
+      }),
       // Claim all clients immediately
       clients.claim()
     ])
