@@ -1,8 +1,8 @@
-// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 4.1
+// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 4.2
 console.log('[SW] Enhanced Service Worker loading...');
 
 // Cache configuration
-const CACHE_VERSION = 'v4.1';
+const CACHE_VERSION = 'v4.2';
 const APP_SHELL_CACHE = `app-shell-${CACHE_VERSION}`;
 const PRAYERS_CACHE = `prayers-${CACHE_VERSION}`;
 const TORAH_CACHE = `torah-${CACHE_VERSION}`;
@@ -393,5 +393,13 @@ self.addEventListener('notificationclose', (event) => {
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-notifications') {
     console.log('Background sync for notifications');
+  }
+});
+
+// Handle messages from clients (for forced updates)
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('[SW] Received SKIP_WAITING message, activating immediately');
+    self.skipWaiting();
   }
 });

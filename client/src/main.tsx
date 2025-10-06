@@ -67,22 +67,14 @@ function setupSafariViewportFix() {
 async function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     try {
-      // AGGRESSIVE CLEANUP: Unregister all old service workers first
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      for (const reg of registrations) {
-        await reg.unregister();
-        console.log('[SW] Unregistered old service worker');
-      }
-      
-      // Clear ALL caches to force fresh content
-      const cacheNames = await caches.keys();
-      if (cacheNames.length > 0) {
-        console.log('[SW] Clearing ALL caches:', cacheNames);
-        await Promise.all(cacheNames.map(name => caches.delete(name)));
-      }
-      
-      // Small delay to ensure cleanup completes
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Auto-reload when service worker takes control (prevents stale cache)
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        refreshing = true;
+        console.log('[SW] Controller changed, reloading page...');
+        window.location.reload();
+      });
       
       const registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/',
@@ -93,8 +85,8 @@ async function registerServiceWorker() {
       
       // Force immediate update if there's a waiting worker
       if (registration.waiting) {
+        console.log('[SW] Waiting worker found, forcing activation...');
         registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-        window.location.reload();
       }
       
       // Listen for updates
@@ -104,8 +96,9 @@ async function registerServiceWorker() {
           console.log('[SW] New Service Worker installing...');
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              console.log('[SW] New content available! Reloading...');
-              window.location.reload();
+              console.log('[SW] New version available, activating...');
+              // Send message to activate immediately
+              newWorker.postMessage({ type: 'SKIP_WAITING' });
             }
           });
         }
@@ -113,7 +106,7 @@ async function registerServiceWorker() {
       
       // Check for updates every 30 seconds when page is visible
       setInterval(() => {
-        if (!document.hidden) {
+        if (!document.hidden && navigator.onLine) {
           registration.update();
         }
       }, 30000);
