@@ -13,7 +13,7 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "@babel/traverse": "^7.28.4",
+    "@babel/traverse": "^7.22.20",
     "@google-cloud/storage": "^7.17.1",
     "@googlemaps/js-api-loader": "^1.16.10",
     "@hookform/resolvers": "^3.10.0",
