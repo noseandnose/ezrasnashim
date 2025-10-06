@@ -740,6 +740,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Process other items for havdalah and parsha
+      // Get the date of the candle lighting to match parsha/holiday to the same Shabbat
+      let candleLightingDate: Date | null = null;
+      if (closestFridayCandleLighting && closestFridayCandleLighting.date) {
+        candleLightingDate = new Date(closestFridayCandleLighting.date);
+      }
+      
       data.items.forEach((item: any) => {
         if (item.title.includes("Havdalah:")) {
           // Check if it has pm/am at the end of the title  
@@ -763,6 +769,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         } else if (item.title.startsWith("Parashat ") || item.title.startsWith("Parashah ")) {
           result.parsha = item.title;
+        } else if (!result.parsha && item.category === 'holiday' && item.date && candleLightingDate) {
+          // If no parsha found yet, check if this is a holiday on the same Shabbat as our candle lighting
+          const itemDate = new Date(item.date);
+          const dayOfWeek = itemDate.getDay();
+          // Check if this holiday falls on Saturday AND is within 2 days of our candle lighting
+          // (Friday candle lighting + Saturday = same Shabbat)
+          const timeDiff = Math.abs(itemDate.getTime() - candleLightingDate.getTime());
+          const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
+          if (dayOfWeek === 6 && daysDiff <= 2) {
+            result.parsha = item.title;
+          }
         }
       });
 

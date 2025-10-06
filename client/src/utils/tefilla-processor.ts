@@ -517,20 +517,26 @@ export async function getCurrentTefillaConditions(
           hebrewDate.hebrewDay <= 10
         );
         
-        // Check for Sukkot
-        isSukkot = events.some((event: string) => 
-          event.toLowerCase().includes('sukkot') ||
-          event.toLowerCase().includes('hoshanah') ||
-          event.toLowerCase().includes('simchat torah') ||
-          event.toLowerCase().includes('shemini atzeret')
-        );
+        // Check for Sukkot (but not Erev Sukkot)
+        isSukkot = events.some((event: string) => {
+          const eventLower = event.toLowerCase();
+          // Don't match "Erev Sukkot" - only actual Sukkot days
+          if (eventLower.includes('erev')) return false;
+          return eventLower.includes('sukkot') ||
+                 eventLower.includes('hoshanah') ||
+                 eventLower.includes('simchat torah') ||
+                 eventLower.includes('shemini atzeret');
+        });
         
-        // Check for Pesach
-        isPesach = events.some((event: string) => 
-          event.toLowerCase().includes('pesach') ||
-          event.toLowerCase().includes('passover') ||
-          event.toLowerCase().includes('seder')
-        );
+        // Check for Pesach (but not Erev Pesach)
+        isPesach = events.some((event: string) => {
+          const eventLower = event.toLowerCase();
+          // Don't match "Erev Pesach" - only actual Pesach days
+          if (eventLower.includes('erev')) return false;
+          return eventLower.includes('pesach') ||
+                 eventLower.includes('passover') ||
+                 eventLower.includes('seder');
+        });
         
         // Check if we're in any special period (for exclusion logic)
         isRoshChodeshSpecial = isRoshChodesh || isPesach || isSukkot;
