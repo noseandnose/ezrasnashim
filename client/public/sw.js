@@ -1,5 +1,4 @@
 // Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 4.4
-console.log('[SW] Enhanced Service Worker loading...');
 
 // Cache configuration
 const CACHE_VERSION = 'v4.4';
@@ -48,41 +47,27 @@ const CRITICAL_API_PATTERNS = [
 ];
 
 self.addEventListener('install', (event) => {
-  console.log('[SW] Enhanced Service Worker installed - Version 4');
-  
   event.waitUntil(
-    // Only cache app shell resources during install - fonts will be cached on first use
-    caches.open(APP_SHELL_CACHE).then(cache => {
-      console.log('[SW] Caching app shell resources');
-      return cache.addAll(APP_SHELL_RESOURCES.map(url => new Request(url, { cache: 'reload' })));
-    }).then(() => {
-      console.log('[SW] App shell cached successfully');
-      // Skip waiting to activate immediately
-      return self.skipWaiting();
-    }).catch(err => {
-      console.error('[SW] Failed to cache app shell:', err);
-      // Still skip waiting even if caching fails
-      return self.skipWaiting();
-    })
+    caches.open(APP_SHELL_CACHE)
+      .then(cache => cache.addAll(APP_SHELL_RESOURCES.map(url => new Request(url, { cache: 'reload' }))))
+      .then(() => self.skipWaiting())
+      .catch(err => {
+        console.error('[SW] Failed to cache app shell:', err);
+        return self.skipWaiting();
+      })
   );
 });
 
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Enhanced Service Worker activated - Version 4.4');
-  
   event.waitUntil(
     Promise.all([
       // AGGRESSIVE CLEANUP for v4.4: Delete ALL caches to fix MIME type issues
-      caches.keys().then(cacheNames => {
-        console.log('[SW] v4.4 cleanup - deleting ALL caches:', cacheNames);
-        return Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
-      }),
-      
+      caches.keys().then(cacheNames => 
+        Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)))
+      ),
       // Claim all clients immediately
       clients.claim()
-    ]).then(() => {
-      console.log('[SW] All caches cleared and clients claimed');
-    })
+    ])
   );
 });
 
@@ -140,8 +125,6 @@ self.addEventListener('fetch', (event) => {
               caches.open(STATIC_CACHE).then(cache => {
                 cache.put(event.request, responseClone);
               });
-            } else {
-              console.warn('[SW] Skipping cache - MIME type mismatch:', url.pathname, contentType);
             }
           }
           return fetchResponse;
