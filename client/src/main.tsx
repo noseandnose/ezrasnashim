@@ -67,35 +67,24 @@ function setupSafariViewportFix() {
 async function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     try {
-      // EMERGENCY RECOVERY: Check if we have a corrupted service worker
-      // This detects module script errors from corrupted caches
-      const hasCorruptedCache = sessionStorage.getItem('sw-recovery-attempt');
-      if (hasCorruptedCache) {
-        console.log('[SW] Recovery attempt detected, proceeding with normal registration');
+      const hasRecoveryAttempt = sessionStorage.getItem('sw-recovery-attempt');
+      if (hasRecoveryAttempt) {
         sessionStorage.removeItem('sw-recovery-attempt');
       }
       
       const registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/',
-        updateViaCache: 'none' // Always fetch fresh service worker
+        updateViaCache: 'none'
       });
       
-      console.log('[SW] Service Worker registered successfully:', registration.scope);
-      
-      // Handle updates with user notification (no auto-reload to prevent cache issues)
+      // Handle updates
       registration.addEventListener('updatefound', () => {
         const newWorker = registration.installing;
         if (newWorker) {
-          console.log('[SW] New Service Worker installing...');
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              console.log('[SW] New version available! Activating...');
-              // Send message to activate immediately (it will clear caches)
               newWorker.postMessage({ type: 'SKIP_WAITING' });
-              // Wait for activation, then reload
-              setTimeout(() => {
-                window.location.reload();
-              }, 1000);
+              setTimeout(() => window.location.reload(), 1000);
             }
           });
         }
@@ -108,19 +97,15 @@ async function registerServiceWorker() {
         }
       }, 30000);
       
-      // Also check for updates immediately
       setTimeout(() => registration.update(), 1000);
       
     } catch (error) {
       console.error('[SW] Service Worker registration failed:', error);
     }
-  } else {
-    console.log('[SW] Service Worker not supported in this browser');
   }
 }
 
 // Emergency recovery for corrupted service worker caches
-// This runs BEFORE anything else to catch module script errors
 window.addEventListener('error', async (event) => {
   const errorMessage = event.message || '';
   
@@ -129,43 +114,28 @@ window.addEventListener('error', async (event) => {
       errorMessage.includes('MIME type') ||
       errorMessage.includes('text/html')) {
     
-    console.error('[SW RECOVERY] Detected corrupted service worker cache. Attempting recovery...');
-    
     // Prevent infinite recovery loops
-    const recoveryAttempt = sessionStorage.getItem('sw-recovery-attempt');
-    if (recoveryAttempt) {
-      console.error('[SW RECOVERY] Already attempted recovery. Manual intervention needed.');
+    if (sessionStorage.getItem('sw-recovery-attempt')) {
       return;
     }
     
-    // Mark that we're attempting recovery
     sessionStorage.setItem('sw-recovery-attempt', 'true');
     
     try {
-      // Unregister ALL service workers
+      // Unregister ALL service workers and clear ALL caches
       const registrations = await navigator.serviceWorker.getRegistrations();
-      for (const registration of registrations) {
-        await registration.unregister();
-        console.log('[SW RECOVERY] Unregistered service worker');
-      }
+      await Promise.all(registrations.map(reg => reg.unregister()));
       
-      // Clear ALL caches
       const cacheNames = await caches.keys();
-      for (const cacheName of cacheNames) {
-        await caches.delete(cacheName);
-        console.log('[SW RECOVERY] Deleted cache:', cacheName);
-      }
+      await Promise.all(cacheNames.map(name => caches.delete(name)));
       
-      // Reload the page to get fresh content
-      console.log('[SW RECOVERY] Recovery complete. Reloading page...');
       window.location.reload();
-      
     } catch (error) {
-      console.error('[SW RECOVERY] Recovery failed:', error);
+      console.error('[SW] Recovery failed:', error);
       sessionStorage.removeItem('sw-recovery-attempt');
     }
   }
-}, true); // Use capture phase to catch errors early
+}, true);
 
 // App Shell DNS Prefetching and Critical Resource Hints
 function preloadAppShell() {
