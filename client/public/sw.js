@@ -1,8 +1,8 @@
-// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 4.3
+// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 4.4
 console.log('[SW] Enhanced Service Worker loading...');
 
 // Cache configuration
-const CACHE_VERSION = 'v4.3';
+const CACHE_VERSION = 'v4.4';
 const APP_SHELL_CACHE = `app-shell-${CACHE_VERSION}`;
 const PRAYERS_CACHE = `prayers-${CACHE_VERSION}`;
 const TORAH_CACHE = `torah-${CACHE_VERSION}`;
@@ -68,26 +68,20 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Enhanced Service Worker activated - Version 4');
+  console.log('[SW] Enhanced Service Worker activated - Version 4.4');
   
   event.waitUntil(
     Promise.all([
-      // Clean up all old caches (v1, v2, v3)
+      // AGGRESSIVE CLEANUP for v4.4: Delete ALL caches to fix MIME type issues
       caches.keys().then(cacheNames => {
-        return Promise.all(
-          cacheNames.map(cacheName => {
-            if (!cacheName.includes(CACHE_VERSION)) {
-              console.log('[SW] Deleting old cache:', cacheName);
-              return caches.delete(cacheName);
-            }
-          })
-        );
+        console.log('[SW] v4.4 cleanup - deleting ALL caches:', cacheNames);
+        return Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
       }),
       
       // Claim all clients immediately
       clients.claim()
     ]).then(() => {
-      console.log('[SW] Cache cleanup completed and clients claimed');
+      console.log('[SW] All caches cleared and clients claimed');
     })
   );
 });
@@ -128,12 +122,27 @@ self.addEventListener('fetch', (event) => {
         
         // If cached response is invalid or doesn't exist, fetch fresh
         return fetch(event.request).then(fetchResponse => {
-          // Only cache successful responses
+          // Only cache successful responses with correct MIME types
           if (fetchResponse.ok && fetchResponse.status === 200) {
-            const responseClone = fetchResponse.clone();
-            caches.open(STATIC_CACHE).then(cache => {
-              cache.put(event.request, responseClone);
-            });
+            const contentType = fetchResponse.headers.get('content-type') || '';
+            
+            // Validate MIME type matches expected file type
+            const isValidForCache = (
+              (url.pathname.endsWith('.js') && (contentType.includes('javascript') || contentType.includes('application/ecmascript'))) ||
+              (url.pathname.endsWith('.css') && contentType.includes('text/css')) ||
+              (url.pathname.endsWith('.otf') && contentType.includes('font/otf')) ||
+              (url.pathname.endsWith('.png') && contentType.includes('image/png')) ||
+              (url.pathname.endsWith('.svg') && contentType.includes('image/svg'))
+            );
+            
+            if (isValidForCache) {
+              const responseClone = fetchResponse.clone();
+              caches.open(STATIC_CACHE).then(cache => {
+                cache.put(event.request, responseClone);
+              });
+            } else {
+              console.warn('[SW] Skipping cache - MIME type mismatch:', url.pathname, contentType);
+            }
           }
           return fetchResponse;
         });
