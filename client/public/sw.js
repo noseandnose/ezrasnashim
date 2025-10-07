@@ -1,7 +1,7 @@
-// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 4.9
+// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 5.0
 
 // Cache configuration
-const CACHE_VERSION = 'v4.9';
+const CACHE_VERSION = 'v5.0';
 const APP_SHELL_CACHE = `app-shell-${CACHE_VERSION}`;
 const PRAYERS_CACHE = `prayers-${CACHE_VERSION}`;
 const TORAH_CACHE = `torah-${CACHE_VERSION}`;
@@ -60,27 +60,12 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     Promise.all([
-      // Targeted cache cleanup: Delete old version caches, keep current version
+      // Delete old version caches only (index.html is never cached, no need to clean)
       caches.keys().then(cacheNames => {
         return Promise.all(
           cacheNames
-            .filter(cacheName => {
-              // Keep caches matching current version
-              return !cacheName.endsWith(CACHE_VERSION);
-            })
-            .map(cacheName => {
-              return caches.delete(cacheName);
-            })
-        );
-      }),
-      // CRITICAL: Delete any cached index.html from all caches to force fresh fetch
-      caches.keys().then(cacheNames => {
-        return Promise.all(
-          cacheNames.map(async cacheName => {
-            const cache = await caches.open(cacheName);
-            await cache.delete('/');
-            await cache.delete('/index.html');
-          })
+            .filter(cacheName => !cacheName.endsWith(CACHE_VERSION))
+            .map(cacheName => caches.delete(cacheName))
         );
       }),
       // Claim all clients immediately
