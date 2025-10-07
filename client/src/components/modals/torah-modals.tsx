@@ -220,7 +220,11 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                             setTimeout(() => {
                               setShowExplosion(false);
                               completeTask('torah');
-                              checkAndShowCongratulations();
+                              
+                              // Check if all tasks are completed and show congratulations
+                              if (checkAndShowCongratulations()) {
+                                openModal('congratulations', 'torah');
+                              }
                               
                               // Close fullscreen and navigate home
                               const event = new CustomEvent('closeFullscreen');
@@ -396,7 +400,11 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                             setTimeout(() => {
                               setShowExplosion(false);
                               completeTask('torah');
-                              checkAndShowCongratulations();
+                              
+                              // Check if all tasks are completed and show congratulations
+                              if (checkAndShowCongratulations()) {
+                                openModal('congratulations', 'torah');
+                              }
                               
                               // Close fullscreen and navigate home
                               const event = new CustomEvent('closeFullscreen');
@@ -700,7 +708,11 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                             setTimeout(() => {
                               setShowExplosion(false);
                               completeTask('torah');
-                              checkAndShowCongratulations();
+                              
+                              // Check if all tasks are completed and show congratulations
+                              if (checkAndShowCongratulations()) {
+                                openModal('congratulations', 'torah');
+                              }
                               
                               // Close fullscreen and navigate home
                               const event = new CustomEvent('closeFullscreen');

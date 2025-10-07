@@ -11,7 +11,7 @@ import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { Expand, BookOpen } from "lucide-react";
 
 export default function ParshaVortModal() {
-  const { activeModal, closeModal } = useModalStore();
+  const { activeModal, closeModal, openModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
@@ -41,8 +41,13 @@ export default function ParshaVortModal() {
     setShowHeartExplosion(true);
     setTimeout(() => {
       setShowHeartExplosion(false);
-      checkAndShowCongratulations();
-      closeModal();
+      
+      // Check if all tasks are completed and show congratulations
+      if (checkAndShowCongratulations()) {
+        openModal('congratulations', 'torah');
+      } else {
+        closeModal();
+      }
     }, 1000);
   };
 

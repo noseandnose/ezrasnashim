@@ -389,7 +389,11 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
                           markModalComplete('morning-brochas');
                           completeTask('tefilla');
                           setFullscreenContent({ isOpen: false, title: '', content: null });
-                          checkAndShowCongratulations();
+                          
+                          // Check if all tasks are completed and show congratulations
+                          if (checkAndShowCongratulations()) {
+                            openModal('congratulations', 'tefilla');
+                          }
                         }}
                         disabled={isModalComplete('morning-brochas')}
                         className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
@@ -509,9 +513,14 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
             
             setTimeout(() => {
               setShowHeartExplosion(false); // Reset explosion state
-              checkAndShowCongratulations();
-              closeModal();
-              window.location.hash = '#/?section=home&scrollToProgress=true';
+              
+              // Check if all tasks are completed and show congratulations
+              if (checkAndShowCongratulations()) {
+                openModal('congratulations', 'tefilla');
+              } else {
+                closeModal();
+                window.location.hash = '#/?section=home&scrollToProgress=true';
+              }
             }, 2000);
           }}
           disabled={isLoading || isModalComplete('morning-brochas')}
@@ -585,7 +594,12 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
     trackModalComplete('maariv');
     markModalComplete('maariv');
     completeTask('tefilla');
-    checkAndShowCongratulations();
+    
+    // Check if all tasks are completed and show congratulations
+    if (checkAndShowCongratulations()) {
+      openModal('congratulations', 'tefilla');
+    }
+    
     // Close fullscreen
     const event = new CustomEvent('closeFullscreen');
     window.dispatchEvent(event);
@@ -654,7 +668,12 @@ function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
     trackModalComplete('mincha');
     markModalComplete('mincha');
     completeTask('tefilla');
-    checkAndShowCongratulations();
+    
+    // Check if all tasks are completed and show congratulations
+    if (checkAndShowCongratulations()) {
+      openModal('congratulations', 'tefilla');
+    }
+    
     // Close fullscreen
     const event = new CustomEvent('closeFullscreen');
     window.dispatchEvent(event);
@@ -1400,7 +1419,11 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     trackModalComplete(completionKey);
     markModalComplete(completionKey);
     completeTask('tefilla');
-    checkAndShowCongratulations();
+    
+    // Check if all tasks are completed and show congratulations
+    if (checkAndShowCongratulations()) {
+      openModal('congratulations', 'tefilla');
+    }
     
     // Get the saved return tab preference from Zustand store
     const returnTab = tehillimReturnTab || 'all';
@@ -2702,7 +2725,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                           markModalComplete('mincha');
                           completeTask('tefilla');
                           setFullscreenContent({ isOpen: false, title: '', content: null });
-                          checkAndShowCongratulations();
+                          
+                          // Check if all tasks are completed and show congratulations
+                          if (checkAndShowCongratulations()) {
+                            openModal('congratulations', 'tefilla');
+                          }
                         }}
                         disabled={isModalComplete('mincha')}
                         className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
@@ -3028,7 +3055,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                             markModalComplete('nishmas-campaign');
                             completeTask('tefilla');
                             setFullscreenContent({ isOpen: false, title: '', content: null });
-                            checkAndShowCongratulations();
+                            
+                            // Check if all tasks are completed and show congratulations
+                            if (checkAndShowCongratulations()) {
+                              openModal('congratulations', 'tefilla');
+                            }
                           }}
                           disabled={isModalComplete('nishmas-campaign')}
                           className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
@@ -3714,9 +3745,14 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
             
             setTimeout(() => {
               setShowHeartExplosion(false); // Reset explosion state
-              checkAndShowCongratulations();
-              closeModal();
-              window.location.hash = '#/?section=home&scrollToProgress=true';
+              
+              // Check if all tasks are completed and show congratulations
+              if (checkAndShowCongratulations()) {
+                openModal('congratulations', 'tefilla');
+              } else {
+                closeModal();
+                window.location.hash = '#/?section=home&scrollToProgress=true';
+              }
             }, 2000);
           }}
           disabled={isModalComplete(modalKey)}
