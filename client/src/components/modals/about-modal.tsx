@@ -10,7 +10,7 @@ export default function AboutModal() {
 
   return (
     <Dialog open={activeModal === 'about'} onOpenChange={() => closeModal(true)}>
-      <DialogContent className="w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
+      <DialogContent className="max-w-md max-h-[95vh] overflow-y-auto">
         
         {/* Standardized Header - centered title only */}
         <div className="flex items-center justify-center mb-1 relative pr-8">
