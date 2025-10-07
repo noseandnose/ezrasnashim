@@ -72,7 +72,9 @@ async function registerServiceWorker() {
         sessionStorage.removeItem('sw-recovery-attempt');
       }
       
-      const registration = await navigator.serviceWorker.register('/sw.js', {
+      // Force fresh SW download by adding timestamp - bypasses old SW cache
+      const swUrl = `/sw.js?v=${Date.now()}`;
+      const registration = await navigator.serviceWorker.register(swUrl, {
         scope: '/',
         updateViaCache: 'none'
       });

@@ -1,7 +1,7 @@
-// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 4.8
+// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 4.9
 
 // Cache configuration
-const CACHE_VERSION = 'v4.8';
+const CACHE_VERSION = 'v4.9';
 const APP_SHELL_CACHE = `app-shell-${CACHE_VERSION}`;
 const PRAYERS_CACHE = `prayers-${CACHE_VERSION}`;
 const TORAH_CACHE = `torah-${CACHE_VERSION}`;
@@ -96,6 +96,11 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests and chrome-extension URLs
   if (event.request.method !== 'GET' || url.protocol === 'chrome-extension:') {
     return;
+  }
+  
+  // CRITICAL: NEVER cache the service worker itself - always fetch fresh
+  if (url.pathname === '/sw.js') {
+    return; // Let browser fetch directly, no interception
   }
   
   // Handle app shell routes (SPA routing) - ALWAYS fetch fresh to get latest recovery script
