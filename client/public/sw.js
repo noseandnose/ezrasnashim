@@ -1,7 +1,7 @@
-// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 4.7
+// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 4.8
 
 // Cache configuration
-const CACHE_VERSION = 'v4.7';
+const CACHE_VERSION = 'v4.8';
 const APP_SHELL_CACHE = `app-shell-${CACHE_VERSION}`;
 const PRAYERS_CACHE = `prayers-${CACHE_VERSION}`;
 const TORAH_CACHE = `torah-${CACHE_VERSION}`;
@@ -9,9 +9,8 @@ const API_CACHE = `api-${CACHE_VERSION}`;
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 
 // App shell resources for instant loading
+// NOTE: index.html is NOT cached - always fetch fresh to ensure recovery scripts load
 const APP_SHELL_RESOURCES = [
-  '/',
-  '/index.html',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png'
@@ -72,6 +71,16 @@ self.addEventListener('activate', (event) => {
             .map(cacheName => {
               return caches.delete(cacheName);
             })
+        );
+      }),
+      // CRITICAL: Delete any cached index.html from all caches to force fresh fetch
+      caches.keys().then(cacheNames => {
+        return Promise.all(
+          cacheNames.map(async cacheName => {
+            const cache = await caches.open(cacheName);
+            await cache.delete('/');
+            await cache.delete('/index.html');
+          })
         );
       }),
       // Claim all clients immediately
