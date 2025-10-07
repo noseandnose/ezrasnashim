@@ -1,7 +1,7 @@
-// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 4.6
+// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 4.7
 
 // Cache configuration
-const CACHE_VERSION = 'v4.6';
+const CACHE_VERSION = 'v4.7';
 const APP_SHELL_CACHE = `app-shell-${CACHE_VERSION}`;
 const PRAYERS_CACHE = `prayers-${CACHE_VERSION}`;
 const TORAH_CACHE = `torah-${CACHE_VERSION}`;
@@ -109,8 +109,25 @@ self.addEventListener('fetch', (event) => {
   )) {
     event.respondWith(
       caches.match(event.request).then(response => {
-        // Validate cached response - only use if it's a successful response
+        // Validate cached response - check both status AND content-type
         if (response && response.ok && response.status === 200) {
+          const cachedContentType = response.headers.get('content-type') || '';
+          
+          // CRITICAL: Verify cached content matches expected type
+          const isValidCached = (
+            (url.pathname.endsWith('.js') && (cachedContentType.includes('javascript') || cachedContentType.includes('application/ecmascript'))) ||
+            (url.pathname.endsWith('.css') && cachedContentType.includes('text/css')) ||
+            (url.pathname.endsWith('.otf') && cachedContentType.includes('font')) ||
+            (url.pathname.endsWith('.png') && cachedContentType.includes('image/png')) ||
+            (url.pathname.endsWith('.svg') && cachedContentType.includes('image/svg'))
+          );
+          
+          // If cache is corrupted (wrong MIME type), delete it and fetch fresh
+          if (!isValidCached) {
+            caches.open(STATIC_CACHE).then(cache => cache.delete(event.request));
+            return fetch(event.request);
+          }
+          
           return response;
         }
         
@@ -119,6 +136,11 @@ self.addEventListener('fetch', (event) => {
           // Only cache successful responses with correct MIME types
           if (fetchResponse.ok && fetchResponse.status === 200) {
             const contentType = fetchResponse.headers.get('content-type') || '';
+            
+            // CRITICAL: Never cache HTML as JavaScript/CSS - prevents MIME type errors
+            if (contentType.includes('text/html')) {
+              return fetchResponse; // Don't cache, just return
+            }
             
             // Validate MIME type matches expected file type
             const isValidForCache = (
