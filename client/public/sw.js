@@ -89,11 +89,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // Handle app shell routes (SPA routing)
+  // Handle app shell routes (SPA routing) - ALWAYS fetch fresh to get latest recovery script
   if (url.origin === location.origin && url.pathname.startsWith('/') && !url.pathname.includes('.')) {
     event.respondWith(
-      caches.match('/').then(response => {
-        return response || fetch(event.request);
+      fetch(event.request).catch(() => {
+        // Only use cache as fallback if network fails
+        return caches.match('/');
       })
     );
     return;
