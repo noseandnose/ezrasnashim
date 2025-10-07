@@ -73,6 +73,44 @@
       }
     </style>
     
+    <!-- CRITICAL: Emergency recovery for corrupted service worker cache - runs FIRST -->
+    <script>
+      (function() {
+        // Detect MIME type errors immediately
+        window.addEventListener('error', async function(event) {
+          const msg = event.message || '';
+          if (msg.includes('Failed to load module script') || 
+              msg.includes('MIME type') || 
+              msg.includes('text/html')) {
+            
+            // Only try recovery once per session
+            if (sessionStorage.getItem('sw-emergency-recovery')) {
+              return;
+            }
+            sessionStorage.setItem('sw-emergency-recovery', 'true');
+            
+            try {
+              // Unregister service workers
+              if ('serviceWorker' in navigator) {
+                const regs = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(regs.map(r => r.unregister()));
+              }
+              
+              // Clear all caches
+              const names = await caches.keys();
+              await Promise.all(names.map(n => caches.delete(n)));
+              
+              // Force reload
+              location.reload(true);
+            } catch (e) {
+              console.error('Emergency recovery failed:', e);
+              sessionStorage.removeItem('sw-emergency-recovery');
+            }
+          }
+        }, true);
+      })();
+    </script>
+    
     <!-- Load only essential font weights to reduce size -->
     <link href="https://fonts.googleapis.com/css2?family=Platypi:wght@400;600&family=Secular+One&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
