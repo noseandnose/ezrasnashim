@@ -35,6 +35,10 @@ body {
   -webkit-touch-callout: none; /* Disable callout on long press */
   -webkit-user-select: none; /* Prevent text selection on touch */
   user-select: none;
+  
+  /* Performance optimizations for mobile */
+  contain: layout style; /* CSS containment for better rendering */
+  will-change: auto; /* Reset will-change to prevent memory issues */
 }
 
 #root {

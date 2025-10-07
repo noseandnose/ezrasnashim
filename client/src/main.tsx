@@ -38,7 +38,7 @@ function setupSafariViewportFix() {
     window.addEventListener('scroll', () => {
       clearTimeout(scrollTimer);
       scrollTimer = window.setTimeout(setViewportHeight, 50);
-    }, { passive: true });
+    }, { passive: true, capture: false });
 
     // Visual Viewport API support for modern iOS
     if (window.visualViewport) {
