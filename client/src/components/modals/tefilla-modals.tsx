@@ -1193,8 +1193,10 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
       {expandedSection >= 0 && (
         <button
           onClick={scrollToBottomOfSection}
-          className="fixed bottom-6 right-6 bg-gradient-feminine text-white rounded-full p-3 shadow-lg hover:scale-110 transition-all duration-200 z-50"
+          className="fixed bottom-6 right-6 bg-gradient-feminine text-white rounded-full p-3 shadow-lg hover:scale-110 transition-all duration-200"
+          style={{ zIndex: 2147483646 }}
           aria-label="Jump to bottom of section"
+          data-testid="button-scroll-to-section-bottom"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7-7-7" />
