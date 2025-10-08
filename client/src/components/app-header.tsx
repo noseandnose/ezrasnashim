@@ -156,7 +156,7 @@ export default function AppHeader() {
 
   return (
     <>
-      <header className="bg-gradient-soft p-3 border-0 shadow-none">
+      <header className="bg-gradient-soft p-3 border-0 shadow-none" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
         <div className="flex items-center px-2">
           <div className="flex items-center gap-1 flex-1">
             <DropdownMenu>
