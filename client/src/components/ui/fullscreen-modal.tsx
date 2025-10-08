@@ -24,6 +24,8 @@ interface FullscreenModalProps {
   // Info popover content
   infoContent?: React.ReactNode;
   showInfoPopover?: boolean;
+  // Floating element (e.g., navigation arrows) rendered outside scroll container
+  floatingElement?: React.ReactNode;
 }
 
 export function FullscreenModal({ 
@@ -42,7 +44,8 @@ export function FullscreenModal({
   showInfoIcon = false,
   onInfoClick,
   infoContent,
-  showInfoPopover = false
+  showInfoPopover = false,
+  floatingElement
 }: FullscreenModalProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -285,6 +288,9 @@ export function FullscreenModal({
           onLanguageChange={onLanguageChange}
         />
       )}
+
+      {/* Floating Element (e.g., navigation arrows) - Outside scrollable content */}
+      {floatingElement}
     </div>
   );
 }

@@ -21,9 +21,16 @@ import { processTefillaText, getCurrentTefillaConditions, type TefillaConditions
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { Expand } from "lucide-react";
+import { createContext, useContext } from 'react';
 
 // Import simplified compass component
 import { SimpleCompassUI } from '@/components/compass/SimpleCompassUI';
+
+// Context for Morning Brochas navigation arrow
+const MorningBrochasNavigationContext = createContext<{
+  expandedSection: number;
+  scrollToBottomOfSection: () => void;
+} | null>(null);
 
 interface TefillaModalsProps {
   onSectionChange?: (section: 'torah' | 'tefilla' | 'tzedaka' | 'home' | 'table') => void;
@@ -1111,8 +1118,9 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
     .sort((a, b) => a - b);
 
   return (
-    <div className="space-y-4">
-      {sortedOrderIndices.map((orderIndex, sectionIndex) => {
+    <MorningBrochasNavigationContext.Provider value={{ expandedSection, scrollToBottomOfSection }}>
+      <div className="space-y-4">
+        {sortedOrderIndices.map((orderIndex, sectionIndex) => {
         const sectionPrayers = groupedPrayers[orderIndex];
         const isExpanded = expandedSection === sectionIndex;
         const sectionTitle = sectionPrayers[0]?.prayerType || `Section ${orderIndex}`;
@@ -1174,36 +1182,43 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
         );
       })}
       
-      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-        <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of{' '}
-          <a 
-            href="https://korenpub.co.il/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-blue-700"
-          >
-            Koren Publishers Jerusalem
-          </a>
-          {' '}and Rabbi Sacks Legacy
-        </span>
+        <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+          <span className="text-sm platypi-medium text-black">
+            All tefilla texts courtesy of{' '}
+            <a 
+              href="https://korenpub.co.il/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-blue-700"
+            >
+              Koren Publishers Jerusalem
+            </a>
+            {' '}and Rabbi Sacks Legacy
+          </span>
+        </div>
       </div>
+    </MorningBrochasNavigationContext.Provider>
+  );
+}
 
-      {/* Floating Dropdown Arrow - Only show when a section is expanded */}
-      {expandedSection >= 0 && (
-        <button
-          onClick={scrollToBottomOfSection}
-          className="fixed bottom-6 right-6 bg-gradient-feminine text-white rounded-full p-3 shadow-lg hover:scale-110 transition-all duration-200"
-          style={{ zIndex: 2147483646 }}
-          aria-label="Jump to bottom of section"
-          data-testid="button-scroll-to-section-bottom"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7-7-7" />
-          </svg>
-        </button>
-      )}
-    </div>
+// Export the arrow separately for use in floating element
+export function MorningBrochasNavigationArrow() {
+  const navContext = useContext(MorningBrochasNavigationContext);
+  
+  if (!navContext || navContext.expandedSection < 0) return null;
+  
+  return (
+    <button
+      onClick={navContext.scrollToBottomOfSection}
+      className="fixed bottom-6 right-6 bg-gradient-feminine text-white rounded-full p-3 shadow-lg hover:scale-110 transition-all duration-200"
+      style={{ zIndex: 2147483646 }}
+      aria-label="Jump to bottom of section"
+      data-testid="button-scroll-to-section-bottom"
+    >
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7-7-7" />
+      </svg>
+    </button>
   );
 }
 
@@ -3466,6 +3481,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           fullscreenContent.contentType === 'morning-brochas' ? getMorningBrochasTooltip() :
           fullscreenContent.title === 'Maariv Prayer' ? getMaarivTooltip() : undefined
         }
+        floatingElement={fullscreenContent.contentType === 'morning-brochas' ? <MorningBrochasNavigationArrow /> : undefined}
       >
         {fullscreenContent.content || renderPrayerContent(fullscreenContent.contentType, language, fontSize)}
       </FullscreenModal>
