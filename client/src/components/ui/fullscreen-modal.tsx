@@ -263,8 +263,8 @@ export function FullscreenModal({
           height: '100%',
           // Fix iOS Safari scroll bounce issues
           overscrollBehaviorY: 'contain',
-          // Add extra padding bottom for iOS safe area
-          paddingBottom: 'env(safe-area-inset-bottom, 20px)'
+          // Add extra padding bottom for iOS safe area and to clear bottom nav area (80px)
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)'
         }}
       >
         <div className={`max-w-4xl mx-auto ${className}`} style={{ paddingBottom: (showFontControls || showLanguageControls) ? '100px' : '0px' }}>
