@@ -496,12 +496,6 @@ h1, h2, h3, h4, h5, h6,
   font-style: normal;
 }
 
-/* Fix spacing in attribution text */
-.platypi-medium a {
-  word-spacing: normal;
-  letter-spacing: normal;
-}
-
 .platypi-semibold {
   font-family: "Platypi", serif;
   font-optical-sizing: auto;
