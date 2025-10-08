@@ -30,6 +30,7 @@ import { SimpleCompassUI } from '@/components/compass/SimpleCompassUI';
 const MorningBrochasNavigationContext = createContext<{
   expandedSection: number;
   scrollToBottomOfSection: () => void;
+  sectionRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
 } | null>(null);
 
 interface TefillaModalsProps {
@@ -560,7 +561,7 @@ function renderPrayerContent(contentType: string | undefined, language: 'hebrew'
     case 'mincha':
       return <MinchaFullscreenContent language={language} fontSize={fontSize} />;
     case 'morning-brochas':
-      return <MorningBrochasFullscreenContent language={language} fontSize={fontSize} />;
+      return <MorningBrochasWithNavigation language={language} fontSize={fontSize} />;
     case 'nishmas-campaign':
       return <NishmasFullscreenContent language={language} fontSize={fontSize} />;
     case 'individual-tehillim':
@@ -1031,7 +1032,54 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
   );
 }
 
-function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+// Wrapper component that provides context for both content and arrow
+export function MorningBrochasWithNavigation({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  // State for managing which section is expanded
+  const [expandedSection, setExpandedSection] = useState<number>(0);
+  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Scroll to bottom of currently expanded section
+  const scrollToBottomOfSection = () => {
+    if (expandedSection >= 0 && sectionRefs.current[expandedSection]) {
+      const sectionElement = sectionRefs.current[expandedSection];
+      const sectionContent = sectionElement!.querySelector('div[class*="px-6 pb-6"]');
+      const doneButton = sectionContent?.querySelector('button') || 
+                         sectionElement!.querySelector('button[class*="bg-gradient-feminine"], button[class*="bg-sage"]');
+      
+      if (doneButton) {
+        doneButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        sectionElement!.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
+    }
+  };
+
+  return (
+    <MorningBrochasNavigationContext.Provider value={{ expandedSection, scrollToBottomOfSection, sectionRefs }}>
+      <MorningBrochasFullscreenContent 
+        language={language} 
+        fontSize={fontSize}
+        expandedSection={expandedSection}
+        setExpandedSection={setExpandedSection}
+        sectionRefs={sectionRefs}
+      />
+    </MorningBrochasNavigationContext.Provider>
+  );
+}
+
+function MorningBrochasFullscreenContent({ 
+  language, 
+  fontSize,
+  expandedSection,
+  setExpandedSection,
+  sectionRefs
+}: { 
+  language: 'hebrew' | 'english';
+  fontSize: number;
+  expandedSection: number;
+  setExpandedSection: (index: number) => void;
+  sectionRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
+}) {
   const { data: prayers = [], isLoading } = useQuery<MorningPrayer[]>({
     queryKey: ['/api/morning/prayers'],
   });
@@ -1040,12 +1088,6 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
   const { completeTask } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
-
-  // State for managing which section is expanded
-  const [expandedSection, setExpandedSection] = useState<number>(0); // Start with first section expanded
-  
-  // Refs for each section to enable scrolling
-  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
 
@@ -1076,32 +1118,6 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
     }
   };
 
-  // Scroll to bottom of currently expanded section
-  const scrollToBottomOfSection = () => {
-    if (expandedSection >= 0 && sectionRefs.current[expandedSection]) {
-      const sectionElement = sectionRefs.current[expandedSection];
-      
-      // Find the Done button within the expanded section content (not the header)
-      const sectionContent = sectionElement!.querySelector('div[class*="px-6 pb-6"]'); // The content area with padding
-      const doneButton = sectionContent?.querySelector('button') || 
-                         sectionElement!.querySelector('button[class*="bg-gradient-feminine"], button[class*="bg-sage"]');
-      
-      if (doneButton) {
-        // Scroll the Done button into view, which puts us at the bottom of the section
-        doneButton.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'center' // Center the button in the view
-        });
-      } else {
-        // Fallback: scroll to bottom of the section element
-        sectionElement!.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'end' // Scroll to the bottom of the section
-        });
-      }
-    }
-  };
-
   // Group prayers by orderIndex
   const groupedPrayers = prayers.reduce((groups, prayer) => {
     const orderIndex = prayer.orderIndex || 0;
@@ -1118,9 +1134,8 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
     .sort((a, b) => a - b);
 
   return (
-    <MorningBrochasNavigationContext.Provider value={{ expandedSection, scrollToBottomOfSection }}>
-      <div className="space-y-4">
-        {sortedOrderIndices.map((orderIndex, sectionIndex) => {
+    <div className="space-y-4">
+      {sortedOrderIndices.map((orderIndex, sectionIndex) => {
         const sectionPrayers = groupedPrayers[orderIndex];
         const isExpanded = expandedSection === sectionIndex;
         const sectionTitle = sectionPrayers[0]?.prayerType || `Section ${orderIndex}`;
@@ -1182,22 +1197,21 @@ function MorningBrochasFullscreenContent({ language, fontSize }: { language: 'he
         );
       })}
       
-        <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-          <span className="text-sm platypi-medium text-black">
-            All tefilla texts courtesy of{' '}
-            <a 
-              href="https://korenpub.co.il/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-blue-700"
-            >
-              Koren Publishers Jerusalem
-            </a>
-            {' '}and Rabbi Sacks Legacy
-          </span>
-        </div>
+      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
+        <span className="text-sm platypi-medium text-black">
+          All tefilla texts courtesy of{' '}
+          <a 
+            href="https://korenpub.co.il/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-700"
+          >
+            Koren Publishers Jerusalem
+          </a>
+          {' '}and Rabbi Sacks Legacy
+        </span>
       </div>
-    </MorningBrochasNavigationContext.Provider>
+    </div>
   );
 }
 
