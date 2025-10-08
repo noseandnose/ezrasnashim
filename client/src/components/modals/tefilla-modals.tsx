@@ -632,16 +632,12 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of{' '}
-          <a 
+          All tefilla texts courtesy of <a 
             href="https://korenpub.co.il/"
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:text-blue-700"
-          >
-            Koren Publishers Jerusalem
-          </a>
-          {' '}and Rabbi Sacks Legacy
+          >Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
         </span>
       </div>
 
@@ -706,16 +702,12 @@ function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of{' '}
-          <a 
+          All tefilla texts courtesy of <a 
             href="https://korenpub.co.il/"
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:text-blue-700"
-          >
-            Koren Publishers Jerusalem
-          </a>
-          {' '}and Rabbi Sacks Legacy
+          >Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
         </span>
       </div>
 
@@ -870,16 +862,12 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of{' '}
-          <a 
+          All tefilla texts courtesy of <a 
             href="https://korenpub.co.il/"
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:text-blue-700"
-          >
-            Koren Publishers Jerusalem
-          </a>
-          {' '}and Rabbi Sacks Legacy
+          >Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
         </span>
       </div>
 
@@ -1211,16 +1199,12 @@ function MorningBrochasFullscreenContent({
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of{' '}
-          <a 
+          All tefilla texts courtesy of <a 
             href="https://korenpub.co.il/"
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:text-blue-700"
-          >
-            Koren Publishers Jerusalem
-          </a>
-          {' '}and Rabbi Sacks Legacy
+          >Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
         </span>
       </div>
     </div>
@@ -1381,16 +1365,12 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of{' '}
-          <a 
+          All tefilla texts courtesy of <a 
             href="https://korenpub.co.il/"
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:text-blue-700"
-          >
-            Koren Publishers Jerusalem
-          </a>
-          {' '}and Rabbi Sacks Legacy
+          >Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
         </span>
       </div>
 
@@ -1569,16 +1549,12 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of{' '}
-          <a 
+          All tefilla texts courtesy of <a 
             href="https://korenpub.co.il/"
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:text-blue-700"
-          >
-            Koren Publishers Jerusalem
-          </a>
-          {' '}and Rabbi Sacks Legacy
+          >Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
         </span>
       </div>
 
@@ -1896,16 +1872,12 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
       
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of{' '}
-          <a 
+          All tefilla texts courtesy of <a 
             href="https://korenpub.co.il/"
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:text-blue-700"
-          >
-            Koren Publishers Jerusalem
-          </a>
-          {' '}and Rabbi Sacks Legacy
+          >Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
         </span>
       </div>
 
@@ -3965,16 +3937,12 @@ function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'h
 
       <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
         <span className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of{' '}
-          <a 
+          All tefilla texts courtesy of <a 
             href="https://korenpub.co.il/"
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:text-blue-700"
-          >
-            Koren Publishers Jerusalem
-          </a>
-          {' '}and Rabbi Sacks Legacy
+          >Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
         </span>
       </div>
 
