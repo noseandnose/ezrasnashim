@@ -1032,6 +1032,12 @@ function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
   );
 }
 
+// Singleton to store morning brochas navigation state
+let morningBrochasNavState = {
+  expandedSection: 0,
+  scrollToBottom: () => {}
+};
+
 // Wrapper component that provides context for both content and arrow
 export function MorningBrochasWithNavigation({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
   // State for managing which section is expanded
@@ -1054,16 +1060,22 @@ export function MorningBrochasWithNavigation({ language, fontSize }: { language:
     }
   };
 
+  // Update global state
+  useEffect(() => {
+    morningBrochasNavState = {
+      expandedSection,
+      scrollToBottom: scrollToBottomOfSection
+    };
+  }, [expandedSection]);
+
   return (
-    <MorningBrochasNavigationContext.Provider value={{ expandedSection, scrollToBottomOfSection, sectionRefs }}>
-      <MorningBrochasFullscreenContent 
-        language={language} 
-        fontSize={fontSize}
-        expandedSection={expandedSection}
-        setExpandedSection={setExpandedSection}
-        sectionRefs={sectionRefs}
-      />
-    </MorningBrochasNavigationContext.Provider>
+    <MorningBrochasFullscreenContent 
+      language={language} 
+      fontSize={fontSize}
+      expandedSection={expandedSection}
+      setExpandedSection={setExpandedSection}
+      sectionRefs={sectionRefs}
+    />
   );
 }
 
@@ -1217,13 +1229,22 @@ function MorningBrochasFullscreenContent({
 
 // Export the arrow separately for use in floating element
 export function MorningBrochasNavigationArrow() {
-  const navContext = useContext(MorningBrochasNavigationContext);
+  // Force re-render when state changes
+  const [, forceUpdate] = useState(0);
   
-  if (!navContext || navContext.expandedSection < 0) return null;
+  useEffect(() => {
+    const interval = setInterval(() => {
+      forceUpdate(n => n + 1);
+    }, 100); // Poll for state changes
+    
+    return () => clearInterval(interval);
+  }, []);
+  
+  if (morningBrochasNavState.expandedSection < 0) return null;
   
   return (
     <button
-      onClick={navContext.scrollToBottomOfSection}
+      onClick={morningBrochasNavState.scrollToBottom}
       className="fixed bottom-6 right-6 bg-gradient-feminine text-white rounded-full p-3 shadow-lg hover:scale-110 transition-all duration-200"
       style={{ zIndex: 2147483646 }}
       aria-label="Jump to bottom of section"
