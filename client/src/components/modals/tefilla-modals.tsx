@@ -3046,7 +3046,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                 >
                   <Minus className="w-3 h-3" />
                 </button>
-                <span className="text-xs text-black/60 platypi-medium">{nishmasFontSize}px</p>
+                <span className="text-xs text-black/60 platypi-medium">{nishmasFontSize}px</span>
                 <button
                   onClick={() => setNishmasFontSize(Math.min(28, nishmasFontSize + 2))}
                   className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
@@ -3093,10 +3093,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               className="w-full text-left bg-gray-50 hover:bg-gray-100 rounded-2xl p-3 border border-gray-200 transition-colors"
             >
               <div className="flex items-center justify-between">
-                <span className="platypi-medium text-black text-sm">Information</p>
+                <span className="platypi-medium text-black text-sm">Information</span>
                 <span className="platypi-regular text-black/60 text-lg">
                   {showNishmasInfo ? '−' : '+'}
-                </p>
+                </span>
               </div>
             </button>
             
@@ -3636,7 +3636,7 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
             >
               <Minus className="w-3 h-3" />
             </button>
-            <span className="text-xs text-black/60 platypi-medium">{fontSize}px</p>
+            <span className="text-xs text-black/60 platypi-medium">{fontSize}px</span>
             <button
               onClick={() => setFontSize(Math.min(28, fontSize + 2))}
               className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
@@ -4363,7 +4363,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
             >
               <Minus className="w-3 h-3" />
             </button>
-            <span className="text-xs text-black/60 platypi-medium">{fontSize}px</p>
+            <span className="text-xs text-black/60 platypi-medium">{fontSize}px</span>
             <button
               onClick={() => setFontSize(Math.min(28, fontSize + 2))}
               className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
