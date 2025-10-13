@@ -36,9 +36,9 @@ const KorenThankYou = () => {
   
   return (
     <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-      <p className="text-sm platypi-medium text-black">
+      <span className="text-sm platypi-medium text-black">
         All tefilla texts courtesy of <a href={korenUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-700">Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
-      </p>
+      </span>
     </div>
   );
 };
