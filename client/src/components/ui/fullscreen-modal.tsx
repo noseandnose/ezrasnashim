@@ -172,7 +172,8 @@ export function FullscreenModal({
           className="bg-white border-b border-gray-200 px-4 py-3 cursor-pointer"
           style={{
             flexShrink: 0,
-            minHeight: '56px'
+            minHeight: '56px',
+            paddingTop: 'max(0.75rem, env(safe-area-inset-top))'
           }}
           onClick={(e) => {
             // Only scroll to top if not clicking any button (close or info)
@@ -245,7 +246,8 @@ export function FullscreenModal({
             e.nativeEvent.stopImmediatePropagation();
             onClose();
           }}
-          className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm hover:bg-white/90 transition-colors shadow-sm z-10"
+          className="absolute right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm hover:bg-white/90 transition-colors shadow-sm z-10"
+          style={{ top: 'max(0.75rem, env(safe-area-inset-top))' }}
           aria-label="Close"
           type="button"
         >
