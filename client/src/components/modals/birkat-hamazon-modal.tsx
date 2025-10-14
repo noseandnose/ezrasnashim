@@ -716,7 +716,7 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
               onCheckedChange={(checked) => 
                 setSelectedOptions(prev => ({ ...prev, grain: !!checked }))
               }
-              className="border-blush data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+              className="h-5 w-5 border-2 border-gray-600 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
             />
             <label 
               htmlFor="grain-fullscreen" 
@@ -732,7 +732,7 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
               onCheckedChange={(checked) => 
                 setSelectedOptions(prev => ({ ...prev, wine: !!checked }))
               }
-              className="border-blush data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+              className="h-5 w-5 border-2 border-gray-600 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
             />
             <label 
               htmlFor="wine-fullscreen" 
@@ -748,7 +748,7 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
               onCheckedChange={(checked) => 
                 setSelectedOptions(prev => ({ ...prev, fruit: !!checked }))
               }
-              className="border-blush data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+              className="h-5 w-5 border-2 border-gray-600 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
             />
             <label 
               htmlFor="fruit-fullscreen" 
