@@ -866,9 +866,11 @@ html, body, #root {
   height: 0; /* Important for flex child to be scrollable */
   overflow-y: auto;
   overflow-x: hidden;
+  
   /* Add padding for fixed header at top and bottom nav at bottom */
-  padding-top: calc(env(safe-area-inset-top, 0px) + 60px); /* Header height */
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px); /* Bottom nav height */
+  padding-top: calc(env(safe-area-inset-top, 0px) + 60px); /* Header height + safe area */
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 88px); /* Bottom nav height + safe area */
+  
   /* Prevent scroll bounce on iOS */
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
