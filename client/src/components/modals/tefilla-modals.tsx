@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { HandHeart, Scroll, Heart, Plus, Minus, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Unlock, Check, Utensils, Wine, Car, Wheat, Moon, User, Info } from "lucide-react";
@@ -738,15 +739,13 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
           <div className="flex justify-center">
             <div className="flex items-center gap-6">
               <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
+                <Checkbox
                   id="grain"
                   checked={selectedOptions.grain}
-                  onChange={(e) => setSelectedOptions(prev => ({ ...prev, grain: e.target.checked }))}
-                  className="w-4 h-4 rounded border-blush/30 focus:ring-2 focus:ring-blush/20"
-                  style={{ 
-                    accentColor: selectedOptions.grain ? 'hsl(350, 45%, 85%)' : undefined
-                  }}
+                  onCheckedChange={(checked) => 
+                    setSelectedOptions(prev => ({ ...prev, grain: !!checked }))
+                  }
+                  className="h-5 w-5 border-2 border-gray-600 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
                 />
                 <label 
                   htmlFor="grain" 
@@ -756,15 +755,13 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
                 </label>
               </div>
               <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
+                <Checkbox
                   id="wine"
                   checked={selectedOptions.wine}
-                  onChange={(e) => setSelectedOptions(prev => ({ ...prev, wine: e.target.checked }))}
-                  className="w-4 h-4 rounded border-blush/30 focus:ring-2 focus:ring-blush/20"
-                  style={{ 
-                    accentColor: selectedOptions.wine ? 'hsl(350, 45%, 85%)' : undefined
-                  }}
+                  onCheckedChange={(checked) => 
+                    setSelectedOptions(prev => ({ ...prev, wine: !!checked }))
+                  }
+                  className="h-5 w-5 border-2 border-gray-600 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
                 />
                 <label 
                   htmlFor="wine" 
@@ -774,15 +771,13 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
                 </label>
               </div>
               <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
+                <Checkbox
                   id="fruit"
                   checked={selectedOptions.fruit}
-                  onChange={(e) => setSelectedOptions(prev => ({ ...prev, fruit: e.target.checked }))}
-                  className="w-4 h-4 rounded border-blush/30 focus:ring-2 focus:ring-blush/20"
-                  style={{ 
-                    accentColor: selectedOptions.fruit ? 'hsl(350, 45%, 85%)' : undefined
-                  }}
+                  onCheckedChange={(checked) => 
+                    setSelectedOptions(prev => ({ ...prev, fruit: !!checked }))
+                  }
+                  className="h-5 w-5 border-2 border-gray-600 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
                 />
                 <label 
                   htmlFor="fruit" 
