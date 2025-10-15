@@ -18,10 +18,8 @@ export function formatThankYouMessage(message: string): string {
   const result = message.replace(markdownLinkRegex, (match, spaceBefore, linkText, url, spaceAfter) => {
     // Ensure URL has protocol
     const fullUrl = url.startsWith('http') ? url : `https://${url}`;
-    // Preserve single space before/after, but normalize multiple spaces to one
-    const before = spaceBefore ? ' ' : '';
-    const after = spaceAfter ? ' ' : '';
-    return `${before}<a href="${fullUrl}" target="_blank" rel="noopener noreferrer" class="text-blush font-medium underline hover:text-blush/80 transition-colors">${linkText}</a>${after}`;
+    // Return link without adding any spacing
+    return `<a href="${fullUrl}" target="_blank" rel="noopener noreferrer" class="text-blush font-medium underline hover:text-blush/80 transition-colors">${linkText}</a>`;
   });
   
   return sanitizeHTML(result);
