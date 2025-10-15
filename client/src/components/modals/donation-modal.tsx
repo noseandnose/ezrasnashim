@@ -105,14 +105,16 @@ export default function DonationModal() {
         closeModal();
       }
     }}>
-      <DialogContent>
-        <div className="max-h-[80vh] overflow-y-auto rounded-3xl p-6 gradient-soft-glow platypi-regular border border-blush/20">
-          <div className="flex items-center justify-center mb-3 relative">
+      <DialogContent aria-describedby="donation-description">
+        <div className="flex items-center justify-center mb-3 relative">
           <DialogTitle className="text-lg platypi-bold text-black">Put a Coin in Tzedaka</DialogTitle>
         </div>
         <p className="text-sm platypi-regular text-gray-600 text-center mb-4">
           All Donations go towards approved Woman Torah Causes
         </p>
+        <div id="donation-description" className="sr-only">
+          General donation for women's Torah causes
+        </div>
         
         {/* Apple Pay development notice */}
         {(() => {
@@ -130,11 +132,11 @@ export default function DonationModal() {
           return null;
         })()}
 
-        <div className="space-y-3 text-sm text-gray-700">
+        <div className="space-y-4">
           {/* Amount Selection Buttons */}
           <div>
             <p className="text-sm platypi-medium block mb-2">Select Amount</p>
-            <div className="grid grid-cols-5 gap-1">
+            <div className="grid grid-cols-5 gap-2">
               {quickAmounts.map((quickAmount) => (
                 <button
                   key={quickAmount.value}
@@ -154,7 +156,7 @@ export default function DonationModal() {
           {/* Custom Amount Input - Only show when Custom is selected */}
           {isCustom && (
             <div>
-              <label className="text-sm platypi-medium block mb-2">Enter Custom Amount</label>
+              <p className="text-sm platypi-medium block mb-2">Enter Custom Amount</p>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 platypi-semibold">$</span>
                 <Input
@@ -171,7 +173,7 @@ export default function DonationModal() {
           )}
 
           {/* Donation Button */}
-          <div className="mt-4">
+          <div>
             <Button
               onClick={handleDonate}
               disabled={createPaymentMutation.isPending || (isCustom ? !customAmount || parseFloat(customAmount) <= 0 : !amount || parseFloat(amount) <= 0)}
@@ -180,7 +182,6 @@ export default function DonationModal() {
               {createPaymentMutation.isPending ? 'Processing...' : `Donate $${isCustom ? customAmount : amount}`}
             </Button>
           </div>
-        </div>
         </div>
       </DialogContent>
     </Dialog>
