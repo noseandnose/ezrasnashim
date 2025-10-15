@@ -286,7 +286,7 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
   fontSize: number;
   setFontSize: (size: number) => void;
 }) {
-  const { activeModal, closeModal } = useModalStore();
+  const { activeModal, closeModal, openModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
@@ -560,6 +560,7 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
+  const { openModal } = useModalStore();
 
   if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
 
@@ -625,6 +626,7 @@ function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
+  const { openModal } = useModalStore();
 
   if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
 
@@ -1324,7 +1326,7 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
 }
 
 function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
-  const { selectedPsalm, tehillimReturnTab, setTehillimActiveTab } = useModalStore();
+  const { selectedPsalm, tehillimReturnTab, setTehillimActiveTab, openModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
@@ -3572,7 +3574,7 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
   fontSize: number;
   setFontSize: (size: number) => void;
 }) {
-  const { closeModal } = useModalStore();
+  const { closeModal, openModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
