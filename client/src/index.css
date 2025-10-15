@@ -1115,14 +1115,11 @@ nav[class*="fixed"] {
   /* Ensure truly fixed positioning */
   position: fixed !important;
   
-  /* Prevent touch dragging and scrolling */
-  touch-action: none !important;
+  /* Allow vertical scroll (pull-to-refresh) but prevent horizontal dragging */
+  touch-action: pan-y !important;
   -webkit-user-drag: none !important;
   user-select: none !important;
   -webkit-user-select: none !important;
-  
-  /* Prevent the element itself from being interactive for dragging */
-  overscroll-behavior: none !important;
   
   /* Lock in place - prevent any layout shifts */
   contain: layout !important;
