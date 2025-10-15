@@ -3357,11 +3357,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       
       {/* Jerusalem Compass Modal */}
       <Dialog open={activeModal === 'jerusalem-compass'} onOpenChange={() => closeModal(true)}>
-        <DialogContent>
+        <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular">
           <VisuallyHidden>
             <DialogDescription>Compass to find direction to Jerusalem for prayer</DialogDescription>
           </VisuallyHidden>
-          <div className="px-4 select-none" style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none' }}>
+          <div className="select-none" style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none' }}>
             <SimpleCompassUI onClose={() => closeModal()} />
           </div>
         </DialogContent>
