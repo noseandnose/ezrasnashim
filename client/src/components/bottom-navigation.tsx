@@ -41,7 +41,7 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
     <nav 
       className="fixed left-1/2 transform -translate-x-1/2 w-full max-w-md bg-gradient-soft backdrop-blur-sm border-t border-rose-blush/15 shadow-2xl rounded-t-3xl transition-gentle z-50" 
       style={{ 
-        bottom: isSafari ? 'calc(env(safe-area-inset-bottom, 0px) + 50px)' : 'env(safe-area-inset-bottom, 0px)', 
+        bottom: isSafari ? 'calc(env(safe-area-inset-bottom, 0px) + 45px)' : 'env(safe-area-inset-bottom, 0px)', 
         paddingBottom: '0.5rem' 
       }}
     >

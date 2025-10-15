@@ -1111,8 +1111,25 @@ a:active,
   will-change: opacity, transform;
 }
 
-/* Fixed Header and Bottom Navigation - Prevent Dragging */
-header[class*="fixed"],
+/* Fixed Header - Allow Pull-to-Refresh */
+header[class*="fixed"] {
+  /* Ensure truly fixed positioning */
+  position: fixed !important;
+  
+  /* Allow vertical scroll for pull-to-refresh */
+  touch-action: pan-y !important;
+  -webkit-user-drag: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  
+  /* Ensure all content stays visible */
+  overflow: visible !important;
+  
+  /* Prevent transforms from breaking positioning */
+  will-change: auto !important;
+}
+
+/* Fixed Bottom Navigation - Prevent Dragging */
 nav[class*="fixed"] {
   /* Ensure truly fixed positioning */
   position: fixed !important;
@@ -1130,7 +1147,7 @@ nav[class*="fixed"] {
   will-change: auto !important;
 }
 
-/* Allow buttons inside header to be clickable */
+/* Allow buttons inside header and nav to be clickable */
 header[class*="fixed"] button,
 header[class*="fixed"] a,
 nav[class*="fixed"] button,
