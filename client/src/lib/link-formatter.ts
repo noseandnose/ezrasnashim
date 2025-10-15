@@ -15,7 +15,7 @@ export function formatThankYouMessage(message: string): string {
   // Capture surrounding horizontal whitespace only (spaces/tabs, not newlines)
   const markdownLinkRegex = /([^\S\r\n]*)\[([^\]]+)\]\(([^)]+)\)([^\S\r\n]*)/g;
   
-  const result = message.replace(markdownLinkRegex, (match, spaceBefore, linkText, url, spaceAfter) => {
+  const result = message.replace(markdownLinkRegex, (_match, _spaceBefore, linkText, url, _spaceAfter) => {
     // Ensure URL has protocol
     const fullUrl = url.startsWith('http') ? url : `https://${url}`;
     // Return link without adding any spacing
