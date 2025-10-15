@@ -1,0 +1,56 @@
+Merge remote-tracking branch 'origin/main' into staging
+
+# Conflicts:
+#	attached_assets/IMG_6854_1758874362162.PNG
+#	attached_assets/Screenshot 2025-09-26 at 11.16.44_1758874608176.png
+#	attached_assets/Screenshot 2025-09-26 at 11.30.24_1758875426916.png
+#	attached_assets/Screenshot 2025-09-26 at 11.38.49_1758875931703.png
+#	attached_assets/Screenshot 2025-09-26 at 13.39.57_1758883201357.png
+#	attached_assets/Screenshot 2025-09-26 at 13.40.25_1758883228870.png
+#	client/public/sw.js
+#	client/src/components/app-header.tsx
+#	client/src/components/modals/donation-modal.tsx
+#	client/src/components/modals/tefilla-modals.tsx
+#	client/src/components/modals/tzedaka-modals.tsx
+#	client/src/components/ui/fullscreen-modal.tsx
+#	client/src/index.css
+#	client/src/main.tsx
+#	package-lock.json
+#	package.json
+#	server/routes.ts
+#
+# It looks like you may be committing a merge.
+# If this is not correct, please run
+#	git update-ref -d MERGE_HEAD
+# and try again.
+
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch staging
+# Your branch is ahead of 'origin/staging' by 1 commit.
+#   (use "git push" to publish your local commits)
+#
+# All conflicts fixed but you are still merging.
+#
+# Changes to be committed:
+#	modified:   .gitignore
+#	new file:   .vscode/extensions.json
+#	new file:   .vscode/settings.json
+#	modified:   client/src/components/UpdateNotification.tsx
+#	modified:   client/src/components/modals/birkat-hamazon-modal.tsx
+#	modified:   client/src/components/modals/tefilla-modals.tsx
+#	modified:   client/src/components/modals/times-modals.tsx
+#	modified:   client/src/components/modals/tzedaka-modals.tsx
+#	modified:   client/src/components/sections/table-section.tsx
+#	modified:   client/src/components/ui/fullscreen-modal.tsx
+#	modified:   client/src/hooks/use-shabbos-times.ts
+#	modified:   client/src/hooks/useVersionCheck.ts
+#	modified:   client/src/main.tsx
+#	modified:   server/routes.ts
+#	new file:   server/supabase/.gitignore
+#	new file:   server/supabase/config.toml
+#	new file:   server/supabase/migrations/20251015141352_remote_schema.sql
+#	modified:   shared/schema.ts
+#
