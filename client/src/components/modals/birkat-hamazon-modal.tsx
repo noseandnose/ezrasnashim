@@ -611,7 +611,7 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
   const { trackModalComplete } = useTrackModalComplete();
   const { coordinates } = useLocationStore();
   const [conditions, setConditions] = useState<TefillaConditions | null>(null);
-  
+
   // Me'ein Shalosh checkbox states
   const [selectedOptions, setSelectedOptions] = useState({
     grain: false,

@@ -11,9 +11,10 @@ export default function TableSection() {
   const { openModal } = useModalStore();
   const { isModalComplete } = useModalCompletionStore();
   const { data: shabbosData, isLoading: shabbosLoading } = useShabbosTime();
-  
 
-  
+  // Debug: Log shabbos data to see what we're getting
+  console.log('Shabbos Data:', shabbosData);
+
   // Get shared location state and trigger geolocation if needed
   const { coordinates, permissionDenied } = useGeolocation();
   
@@ -141,9 +142,9 @@ export default function TableSection() {
                 </span>
               </div>
               <h3 className="platypi-bold text-lg text-black">
-                Days Until Shabbas {showShabbosError ? "" : 
-                 shabbosData?.parsha?.replace("Parashat ", "") || 
-                 (isShabbosDataLoading ? "" : "")}
+                Days Until Shabbas {shabbosData?.parsha ? (
+                  <span className="text-lavender"> {shabbosData.parsha.replace("Parashat ", "").replace("Parashah ", "")}</span>
+                ) : ""}
               </h3>
             </div>
           </div>
