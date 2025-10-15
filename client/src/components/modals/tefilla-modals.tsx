@@ -745,7 +745,7 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
                   onCheckedChange={(checked) => 
                     setSelectedOptions(prev => ({ ...prev, grain: !!checked }))
                   }
-                  className="h-5 w-5 border-2 border-gray-600 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+                  className="h-4 w-4 border-2 border-gray-600 data-[state=checked]:bg-blush data-[state=checked]:border-blush [&>span>svg]:h-3.5 [&>span>svg]:w-3.5 [&>span>svg]:stroke-[4]"
                 />
                 <label 
                   htmlFor="grain" 
@@ -761,7 +761,7 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
                   onCheckedChange={(checked) => 
                     setSelectedOptions(prev => ({ ...prev, wine: !!checked }))
                   }
-                  className="h-5 w-5 border-2 border-gray-600 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+                  className="h-4 w-4 border-2 border-gray-600 data-[state=checked]:bg-blush data-[state=checked]:border-blush [&>span>svg]:h-3.5 [&>span>svg]:w-3.5 [&>span>svg]:stroke-[4]"
                 />
                 <label 
                   htmlFor="wine" 
@@ -777,7 +777,7 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
                   onCheckedChange={(checked) => 
                     setSelectedOptions(prev => ({ ...prev, fruit: !!checked }))
                   }
-                  className="h-5 w-5 border-2 border-gray-600 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+                  className="h-4 w-4 border-2 border-gray-600 data-[state=checked]:bg-blush data-[state=checked]:border-blush [&>span>svg]:h-3.5 [&>span>svg]:w-3.5 [&>span>svg]:stroke-[4]"
                 />
                 <label 
                   htmlFor="fruit" 
