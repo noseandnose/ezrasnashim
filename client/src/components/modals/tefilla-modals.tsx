@@ -1980,8 +1980,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const tefillaConditions = useTefillaConditions();
   
   // Get Jewish times for info tooltips  
-  const { coordinates } = useLocationStore();
-  const jewishTimesQuery = useJewishTimes(coordinates?.lat, coordinates?.lng);
+  const jewishTimesQuery = useJewishTimes();
 
   // Helper function to create Morning Brochas tooltip content
   const getMorningBrochasTooltip = () => {
@@ -3389,8 +3388,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           fullscreenContent.title === 'Maariv Prayer' ? showMaarivInfo : false
         }
         onInfoClick={
-          fullscreenContent.contentType === 'morning-brochas' ? setShowMorningBrochasInfo :
-          fullscreenContent.title === 'Maariv Prayer' ? setShowMaarivInfo : undefined
+          fullscreenContent.contentType === 'morning-brochas' ? (open: boolean) => setShowMorningBrochasInfo(open) :
+          fullscreenContent.title === 'Maariv Prayer' ? (open: boolean) => setShowMaarivInfo(open) : undefined
         }
         infoContent={
           fullscreenContent.contentType === 'morning-brochas' ? getMorningBrochasTooltip() :
