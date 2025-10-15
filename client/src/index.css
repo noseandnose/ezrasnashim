@@ -869,7 +869,7 @@ html, body, #root {
   
   /* Add padding for fixed header at top and bottom nav at bottom */
   padding-top: calc(env(safe-area-inset-top, 0px) + 60px); /* Header height + safe area */
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 88px); /* Bottom nav height + safe area */
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 138px); /* Bottom nav height + safe area + Safari URL bar space */
   
   /* Prevent scroll bounce on iOS */
   -webkit-overflow-scrolling: touch;

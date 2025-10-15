@@ -29,7 +29,7 @@ export default function BottomNavigation({ activeSection, onSectionChange }: Bot
 
 
   return (
-    <nav className="fixed left-1/2 transform -translate-x-1/2 w-full max-w-md bg-gradient-soft backdrop-blur-sm border-t border-rose-blush/15 shadow-2xl rounded-t-3xl transition-gentle z-50" style={{ bottom: 'env(safe-area-inset-bottom, 0px)', paddingBottom: '0.5rem' }}>
+    <nav className="fixed left-1/2 transform -translate-x-1/2 w-full max-w-md bg-gradient-soft backdrop-blur-sm border-t border-rose-blush/15 shadow-2xl rounded-t-3xl transition-gentle z-50" style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 50px)', paddingBottom: '0.5rem' }}>
       <div className="flex items-center justify-around py-2 px-2">
         {navItems.map(({ id, icon: Icon, label }) => (
           <button
