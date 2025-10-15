@@ -15,13 +15,16 @@ export const useHebrewDateStore = create<HebrewDateState>((set) => ({
 export function useHebrewDate() {
   const { hebrewDate, setHebrewDate } = useHebrewDateStore();
   const today = getLocalDateString();
+  
+  // Get user's timezone (defaults to Jerusalem if unavailable)
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jerusalem';
 
   return useQuery({
-    queryKey: [`/api/hebrew-date`, today],
+    queryKey: [`/api/hebrew-date`, today, timezone],
     queryFn: async () => {
       try {
         const response = await fetch(
-          `https://www.hebcal.com/converter?cfg=json&date=${today}&g2h=1&strict=1`
+          `https://www.hebcal.com/converter?cfg=json&date=${today}&g2h=1&strict=1&tzid=${encodeURIComponent(timezone)}`
         );
         
         if (!response.ok) {
@@ -53,6 +56,9 @@ export function useHebrewDate() {
 
 // Enhanced Hebrew date that respects shkia timing
 export function useHebrewDateWithShkia(shkiaTime?: string) {
+  // Get user's timezone (defaults to Jerusalem if unavailable)
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jerusalem';
+  
   // Parse shkia time and determine if we should use next day
   const getDateToUse = () => {
     const now = new Date();
@@ -91,11 +97,11 @@ export function useHebrewDateWithShkia(shkiaTime?: string) {
   const dateToUse = getDateToUse();
 
   return useQuery({
-    queryKey: [`/api/hebrew-date-shkia`, dateToUse],
+    queryKey: [`/api/hebrew-date-shkia`, dateToUse, timezone],
     queryFn: async () => {
       try {
         const response = await fetch(
-          `https://www.hebcal.com/converter?cfg=json&date=${dateToUse}&g2h=1&strict=1`
+          `https://www.hebcal.com/converter?cfg=json&date=${dateToUse}&g2h=1&strict=1&tzid=${encodeURIComponent(timezone)}`
         );
         
         if (!response.ok) {
