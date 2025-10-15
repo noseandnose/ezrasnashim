@@ -2795,6 +2795,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const session = event.data.object;
           console.log('Webhook: Checkout session completed:', session.id);
           
+          // CRITICAL FIX: Only process if payment was successful
+          // checkout.session.completed fires even for failed payments
+          if (session.payment_status !== 'paid') {
+            console.log(`Webhook: Checkout session ${session.id} payment status is ${session.payment_status} - skipping analytics`);
+            break;
+          }
+          
           // Get the payment intent from the session
           const paymentIntentId = session.payment_intent;
           console.log('Webhook: Payment intent from session:', paymentIntentId);

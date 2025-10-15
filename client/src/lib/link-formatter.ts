@@ -12,12 +12,16 @@ export function formatThankYouMessage(message: string): string {
   if (!message) return '';
   
   // Convert markdown-style links [text](url) to HTML links
-  const markdownLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  // Capture surrounding horizontal whitespace only (spaces/tabs, not newlines)
+  const markdownLinkRegex = /([^\S\r\n]*)\[([^\]]+)\]\(([^)]+)\)([^\S\r\n]*)/g;
   
-  const result = message.replace(markdownLinkRegex, (_, linkText, url) => {
+  const result = message.replace(markdownLinkRegex, (match, spaceBefore, linkText, url, spaceAfter) => {
     // Ensure URL has protocol
     const fullUrl = url.startsWith('http') ? url : `https://${url}`;
-    return `<a href="${fullUrl}" target="_blank" rel="noopener noreferrer" class="text-blush font-medium underline hover:text-blush/80 transition-colors">${linkText}</a>`;
+    // Preserve single space before/after, but normalize multiple spaces to one
+    const before = spaceBefore ? ' ' : '';
+    const after = spaceAfter ? ' ' : '';
+    return `${before}<a href="${fullUrl}" target="_blank" rel="noopener noreferrer" class="text-blush font-medium underline hover:text-blush/80 transition-colors">${linkText}</a>${after}`;
   });
   
   return sanitizeHTML(result);
