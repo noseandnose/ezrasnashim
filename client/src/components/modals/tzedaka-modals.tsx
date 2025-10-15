@@ -630,6 +630,116 @@ export default function TzedakaModals() {
         </DialogContent>
       </Dialog>
 
+      {/* General Donation Modal - Put a Coin in Tzedaka */}
+      <Dialog open={activeModal === 'donate'} onOpenChange={(open) => {
+        if (!open) {
+          closeModal();
+        }
+      }}>
+        <DialogContent aria-describedby="general-donation-description">
+          <div className="flex items-center justify-center mb-3 relative">
+            <DialogTitle className="text-lg platypi-bold text-black">General Donation</DialogTitle>
+          </div>
+          <p className="text-sm platypi-regular text-gray-600 text-center mb-4">
+            Support Women's Causes and Torah Learning
+          </p>
+          <div id="general-donation-description" className="sr-only">
+            General donation for women's causes and Torah learning
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm platypi-medium block mb-2">Select Amount</label>
+              <div className="grid grid-cols-5 gap-2">
+                <button
+                  onClick={() => setDonationAmount("1")}
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                    donationAmount === "1"
+                      ? 'bg-gradient-feminine text-white shadow-soft'
+                      : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
+                  }`}
+                >
+                  $1
+                </button>
+                <button
+                  onClick={() => setDonationAmount("18")}
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                    donationAmount === "18"
+                      ? 'bg-gradient-feminine text-white shadow-soft'
+                      : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
+                  }`}
+                >
+                  $18
+                </button>
+                <button
+                  onClick={() => setDonationAmount("36")}
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                    donationAmount === "36"
+                      ? 'bg-gradient-feminine text-white shadow-soft'
+                      : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
+                  }`}
+                >
+                  $36
+                </button>
+                <button
+                  onClick={() => setDonationAmount("72")}
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                    donationAmount === "72"
+                      ? 'bg-gradient-feminine text-white shadow-soft'
+                      : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
+                  }`}
+                >
+                  $72
+                </button>
+                <button
+                  onClick={() => setDonationAmount("custom")}
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                    donationAmount === "custom"
+                      ? 'bg-gradient-feminine text-white shadow-soft'
+                      : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
+                  }`}
+                >
+                  Custom
+                </button>
+              </div>
+              {donationAmount === "custom" && (
+                <div className="relative mt-2">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 z-10 platypi-semibold">$</span>
+                  <Input 
+                    placeholder="Enter amount" 
+                    className="pl-10 bg-white"
+                    type="number"
+                    value={customAmount}
+                    onChange={(e) => setCustomAmount(e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="text-sm platypi-medium block mb-2">Donor Name (Optional)</label>
+              <Input 
+                placeholder="Your name"
+                value={donorName}
+                onChange={(e) => setDonorName(e.target.value)}
+                className="rounded-xl border-blush/30 focus:border-blush bg-white/80 backdrop-blur-sm"
+                autoFocus={false}
+              />
+            </div>
+
+            <div>
+              <Button 
+                onClick={() => handleDonation()}
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!donationAmount || (donationAmount === "custom" && (!customAmount || parseFloat(customAmount) <= 0))}
+              >
+                Donate {donationAmount === "custom" ? `$${customAmount || ""}` : `$${donationAmount || ""}`}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Gave Tzedaka Elsewhere Modal - Matching Campaign Modal Style */}
       <Dialog open={activeModal === 'gave-elsewhere'} onOpenChange={(open) => {
         if (!open) {
