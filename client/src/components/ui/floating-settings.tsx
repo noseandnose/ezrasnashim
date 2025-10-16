@@ -32,10 +32,11 @@ export function FloatingSettings({
       {/* Floating Settings Button */}
       <button
         onClick={() => setIsDrawerOpen(!isDrawerOpen)}
-        className="fixed bottom-6 left-6 w-12 h-12 bg-gradient-feminine text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-all duration-200 z-50"
+        className="fixed bottom-6 left-6 bg-gradient-feminine text-white rounded-full p-3 shadow-lg hover:scale-110 transition-all duration-200"
+        style={{ zIndex: 2147483646 }}
         aria-label="Open settings"
       >
-        <Settings className="w-5 h-5" />
+        <Settings className="w-6 h-6" />
       </button>
 
       {/* Settings Drawer */}

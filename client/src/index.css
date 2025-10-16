@@ -22,7 +22,7 @@ body {
   height: 100dvh;
   height: 100%;
   overflow-x: hidden;
-  overscroll-behavior-y: contain;
+  overscroll-behavior-y: auto; /* Allow pull-to-refresh */
   /* Safari specific fixes */
   -webkit-overflow-scrolling: touch;
   position: relative;
@@ -169,6 +169,23 @@ body {
   --blush: hsl(350, 45%, 85%);
   --lavender: hsl(260, 30%, 85%);
   --sage: hsl(120, 20%, 75%);
+  
+  /* Safe-area insets and layout variables */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  
+  /* Layout variables (dynamically set by useSafeArea hook) */
+  --safe-area-top: 0px;
+  --safe-area-bottom: 0px;
+  --header-height: 60px;
+  --footer-height: 70px;
+  --nav-offset: 0px;
+  --is-standalone: 0;
+  --is-safari: 0;
+  --safe-top-total: 60px;
+  --safe-bottom-total: 70px;
 }
 
 /* Fix for Hebrew text alignment in modals */
@@ -1071,23 +1088,13 @@ a:active,
   overscroll-behavior: contain;
   scroll-behavior: smooth;
   
-  /* Performance optimizations */
-  contain: layout style paint;
+  /* DO NOT use transform or contain - they break position:fixed! */
   will-change: scroll-position;
-  
-  /* Momentum scrolling for iOS */
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
 }
 
 /* Performance optimizations for scrollable elements */
 .scroll-optimized {
-  /* Hardware acceleration for smooth scrolling */
-  -webkit-transform: translate3d(0, 0, 0);
-  transform: translate3d(0, 0, 0);
-  
-  /* Contain paint for better performance */
-  contain: layout style paint;
+  /* DO NOT use transform or contain - they break position:fixed! */
   
   /* Optimize for scrolling */
   -webkit-overflow-scrolling: touch;
@@ -1101,14 +1108,71 @@ a:active,
   position: fixed;
   overflow: hidden;
   
-  /* Optimize modal rendering */
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
+  /* DO NOT use transform - it breaks position:fixed! */
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   
   /* Smooth animations */
-  will-change: opacity, transform;
+  will-change: opacity;
+}
+
+/* Fixed Header and Footer Positioning - Safe Area Aware */
+header[class*="fixed"] {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 40 !important;
+  
+  /* Allow pull-to-refresh */
+  touch-action: pan-y !important;
+  overscroll-behavior-y: auto !important;
+  
+  /* Prevent dragging */
+  -webkit-user-drag: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  
+  /* Critical: NO transforms or containment! */
+  transform: none !important;
+  contain: none !important;
+  overflow: visible !important;
+}
+
+nav[class*="fixed"] {
+  position: fixed !important;
+  /* Bottom position uses CSS variables set by useSafeArea hook */
+  left: 0 !important;
+  right: 0 !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  z-index: 50 !important;
+  
+  /* Prevent all dragging */
+  touch-action: none !important;
+  -webkit-user-drag: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  
+  /* Critical: NO transforms or containment! */
+  transform: none !important;
+  contain: none !important;
+  overflow: visible !important;
+}
+
+/* Ensure clickable elements in header/nav work */
+header[class*="fixed"] button,
+header[class*="fixed"] a,
+nav[class*="fixed"] button,
+nav[class*="fixed"] a {
+  touch-action: manipulation !important;
+  pointer-events: auto !important;
+}
+
+/* Main content padding for fixed header/footer */
+main {
+  padding-top: var(--safe-top-total) !important;
+  padding-bottom: var(--safe-bottom-total) !important;
 }
 
 /* Fixed Header - Allow Pull-to-Refresh */
