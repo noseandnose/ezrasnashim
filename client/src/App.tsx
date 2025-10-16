@@ -17,6 +17,7 @@ import logoPath from '@assets/EN App Icon_1756705023411.png';
 import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
 import { initializePerformance, whenIdle } from "./lib/startup-performance";
+import { useSafeArea } from "@/hooks/use-safe-area";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));
@@ -42,6 +43,9 @@ function LoadingScreen() {
 function Router() {
   // Track page views when routes change
   useAnalytics();
+  
+  // Initialize safe-area CSS variables for proper layout
+  useSafeArea();
   
   // Initialize location immediately for accurate prayer times
   useGeolocation();
