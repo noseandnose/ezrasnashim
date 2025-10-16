@@ -32,7 +32,7 @@ export function FloatingSettings({
       {/* Floating Settings Button */}
       <button
         onClick={() => setIsDrawerOpen(!isDrawerOpen)}
-        className="fixed left-6 w-8 h-8 bg-gradient-feminine text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-all duration-200 z-50"
+        className="fixed left-3 w-8 h-8 bg-gradient-feminine text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-all duration-200 z-50"
         style={{ bottom: 'max(0.75rem, var(--safe-area-bottom))' }}
         aria-label="Open settings"
       >
@@ -49,7 +49,7 @@ export function FloatingSettings({
           />
           
           {/* Drawer Panel */}
-          <div className="fixed left-20 bg-white rounded-2xl shadow-xl border border-gray-200 p-4 z-50 min-w-[200px]" style={{ bottom: 'max(0.75rem, var(--safe-area-bottom))' }}>
+          <div className="fixed left-16 bg-white rounded-2xl shadow-xl border border-gray-200 p-4 z-50 min-w-[200px]" style={{ bottom: 'max(0.75rem, var(--safe-area-bottom))' }}>
             <div className="space-y-4">
               {/* Language Selector */}
               {showLanguageControls && onLanguageChange && (
