@@ -22,7 +22,7 @@ body {
   height: 100dvh;
   height: 100%;
   overflow-x: hidden;
-  overscroll-behavior-y: contain;
+  overscroll-behavior-y: auto; /* Allow pull-to-refresh */
   /* Safari specific fixes */
   -webkit-overflow-scrolling: touch;
   position: relative;

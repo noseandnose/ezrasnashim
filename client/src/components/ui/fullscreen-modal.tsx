@@ -173,7 +173,7 @@ export function FullscreenModal({
           style={{
             flexShrink: 0,
             minHeight: '56px',
-            paddingTop: 'max(0.75rem, env(safe-area-inset-top))'
+            paddingTop: 'max(0.75rem, var(--safe-area-top))'
           }}
           onClick={(e) => {
             // Only scroll to top if not clicking any button (close or info)
@@ -247,7 +247,7 @@ export function FullscreenModal({
             onClose();
           }}
           className="absolute right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm hover:bg-white/90 transition-colors shadow-sm z-10"
-          style={{ top: 'max(0.75rem, env(safe-area-inset-top))' }}
+          style={{ top: 'max(0.75rem, var(--safe-area-top))' }}
           aria-label="Close"
           type="button"
         >
@@ -268,8 +268,8 @@ export function FullscreenModal({
           height: '100%',
           // Fix iOS Safari scroll bounce issues
           overscrollBehaviorY: 'contain',
-          // Add extra padding bottom for iOS safe area and to clear bottom nav area (80px)
-          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)'
+          // Add padding bottom using safe-area CSS variable
+          paddingBottom: 'calc(var(--safe-bottom-total) + 20px)'
         }}
       >
         <div className={`max-w-4xl mx-auto ${className}`} style={{ paddingBottom: (showFontControls || showLanguageControls) ? '100px' : '0px' }}>

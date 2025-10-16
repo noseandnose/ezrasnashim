@@ -14,8 +14,8 @@ export function useSafeArea() {
                           (window.navigator as any).standalone ||
                           document.referrer.includes('android-app://');
       
-      // Detect Safari
-      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+      // Detect Safari (exclude iOS Chrome, Edge, Firefox which also have "Safari" in UA)
+      const isSafari = /^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(navigator.userAgent);
       
       // Get safe-area insets from CSS env()
       const style = getComputedStyle(root);
