@@ -1,6 +1,5 @@
 import { BookOpen, HandHeart, Heart, Sparkles, Coins } from "lucide-react";
 import type { Section } from "@/pages/home";
-import { useState, useEffect } from "react";
 
 interface BottomNavigationProps {
   activeSection: Section | null;
@@ -11,18 +10,6 @@ export default function BottomNavigation({
   activeSection,
   onSectionChange,
 }: BottomNavigationProps) {
-  const [isSafari, setIsSafari] = useState(false);
-
-  useEffect(() => {
-    // Detect Safari browser
-    const ua = navigator.userAgent.toLowerCase();
-    const isSafariBrowser =
-      /safari/.test(ua) &&
-      !/chrome/.test(ua) &&
-      !/crios/.test(ua) &&
-      !/fxios/.test(ua);
-    setIsSafari(isSafariBrowser);
-  }, []);
   const navItems = [
     { id: "torah" as Section, icon: BookOpen, label: "Torah", isCenter: false },
     {
@@ -60,12 +47,11 @@ export default function BottomNavigation({
 
   return (
     <nav
-      className="fixed left-1/2 transform -translate-x-1/2 w-full max-w-md bg-gradient-soft backdrop-blur-sm border-t border-rose-blush/15 shadow-2xl rounded-t-3xl transition-gentle z-50"
+      className="fixed left-0 right-0 mx-auto w-full max-w-md bg-gradient-soft backdrop-blur-sm border-t border-rose-blush/15 shadow-2xl rounded-t-3xl transition-gentle z-50"
       style={{
-        bottom: isSafari
-          ? "calc(env(safe-area-inset-bottom, 0px) + 45px)"
-          : "env(safe-area-inset-bottom, 0px)",
+        bottom: "calc(var(--safe-area-bottom) + var(--nav-offset))",
         paddingBottom: "0.5rem",
+        touchAction: "none"
       }}
     >
       <div className="flex items-center justify-around py-2 px-2">
