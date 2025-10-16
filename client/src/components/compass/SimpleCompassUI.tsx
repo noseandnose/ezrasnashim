@@ -387,9 +387,9 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
         
         {isIOS && !isStandalone && (
           <div className="mt-3 pt-3 border-t border-blue-200">
-            <p className="font-medium text-xs text-black mb-1">📳 Vibration Note (iOS Safari):</p>
+            <p className="font-medium text-xs text-black mb-1">📳 Vibration Note (iOS):</p>
             <p className="text-xs text-black/60">
-              iOS Safari limits vibration in browsers. For the full heartbeat vibration experience, install this app to your home screen (tap Share → Add to Home Screen)
+              All iOS browsers restrict vibration. For the full heartbeat vibration experience, install this app to your home screen (tap Share → Add to Home Screen in Safari)
             </p>
           </div>
         )}
