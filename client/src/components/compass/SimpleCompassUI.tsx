@@ -41,24 +41,43 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
     };
   }, [compass, vibrationInterval]);
   
-  // Handle vibration when aligned (68bpm = ~882ms intervals)
+  // Handle vibration when aligned - synced with heart animation (1.5s cycle, lub-dub pattern)
   useEffect(() => {
     if (state.isAligned && navigator.vibrate) {
+      // Heart animation: 1500ms cycle with pulses at 14% (210ms) and 42% (630ms)
+      // Vibration pattern: [wait, vibrate, wait, vibrate, wait]
+      // Pattern creates "lub-dub" heartbeat: pause 210ms, pulse 80ms, pause 340ms, pulse 80ms, pause 790ms
+      const heartbeatPattern = [210, 80, 340, 80, 790]; // Total = 1500ms
+      
+      // Start vibration immediately
+      navigator.vibrate(heartbeatPattern);
+      
+      // Repeat pattern every 1500ms to match animation
       const interval = setInterval(() => {
-        navigator.vibrate(100); // 100ms vibration pulse
-      }, 882); // 68bpm = 60000ms/68 = ~882ms
+        navigator.vibrate(heartbeatPattern);
+      }, 1500);
+      
       setVibrationInterval(interval);
-    } else if (vibrationInterval) {
-      clearInterval(vibrationInterval);
-      setVibrationInterval(null);
+    } else {
+      // Stop vibration when not aligned
+      if (vibrationInterval) {
+        clearInterval(vibrationInterval);
+        setVibrationInterval(null);
+      }
+      if (navigator.vibrate) {
+        navigator.vibrate(0); // Cancel any ongoing vibration
+      }
     }
     
     return () => {
       if (vibrationInterval) {
         clearInterval(vibrationInterval);
       }
+      if (navigator.vibrate) {
+        navigator.vibrate(0);
+      }
     };
-  }, [state.isAligned, vibrationInterval]);
+  }, [state.isAligned]);
   
   // Removed device-specific detection
   
