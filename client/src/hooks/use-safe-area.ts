@@ -17,10 +17,20 @@ export function useSafeArea() {
       // Detect Safari (exclude iOS Chrome, Edge, Firefox which also have "Safari" in UA)
       const isSafari = /^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(navigator.userAgent);
       
-      // Get safe-area insets from CSS env()
+      // Get safe-area insets from CSS env() - read the computed values
       const style = getComputedStyle(root);
-      const safeAreaTop = style.getPropertyValue('--sat') || '0px';
-      const safeAreaBottom = style.getPropertyValue('--sab') || '0px';
+      const safeAreaTop = style.getPropertyValue('--sat').trim() || '0px';
+      const safeAreaBottom = style.getPropertyValue('--sab').trim() || '0px';
+      
+      // For debugging: log the actual values
+      if (import.meta.env.DEV) {
+        console.log('Safe area detection:', { 
+          safeAreaTop, 
+          safeAreaBottom, 
+          isStandalone, 
+          isSafari 
+        });
+      }
       
       // Calculate header and footer heights
       const headerHeight = 60; // Header height in px

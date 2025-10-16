@@ -49,7 +49,7 @@ export default function BottomNavigation({
     <nav
       className="fixed left-0 right-0 mx-auto w-full max-w-md bg-gradient-soft backdrop-blur-sm border-t border-rose-blush/15 shadow-2xl rounded-t-3xl transition-gentle z-50"
       style={{
-        bottom: "calc(var(--safe-area-bottom) + var(--nav-offset))",
+        bottom: "calc(env(safe-area-inset-bottom, 0px) + var(--nav-offset, 0px))",
         paddingBottom: "0.5rem",
         touchAction: "none"
       }}
