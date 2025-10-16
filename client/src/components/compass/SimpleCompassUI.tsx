@@ -29,6 +29,18 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
   });
   const [debugMode] = useState(new URLSearchParams(window.location.search).get('debug') === 'compass');
   const [vibrationInterval, setVibrationInterval] = useState<NodeJS.Timeout | null>(null);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+  
+  useEffect(() => {
+    // Detect iOS and standalone mode
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isiOS = /iphone|ipad|ipod/.test(userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+    
+    setIsIOS(isiOS);
+    setIsStandalone(standalone);
+  }, []);
   
   useEffect(() => {
     const unsubscribe = compass.subscribe(setState);
@@ -44,20 +56,28 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
   // Handle vibration when aligned - synced with heart animation (1.5s cycle, lub-dub pattern)
   useEffect(() => {
     if (state.isAligned && navigator.vibrate) {
-      // Heart animation: 1500ms cycle with pulses at 14% (210ms) and 42% (630ms)
-      // Vibration pattern: [wait, vibrate, wait, vibrate, wait]
-      // Pattern creates "lub-dub" heartbeat: pause 210ms, pulse 80ms, pause 340ms, pulse 80ms, pause 790ms
-      const heartbeatPattern = [210, 80, 340, 80, 790]; // Total = 1500ms
-      
-      // Start vibration immediately
-      navigator.vibrate(heartbeatPattern);
-      
-      // Repeat pattern every 1500ms to match animation
-      const interval = setInterval(() => {
+      if (isIOS && !isStandalone) {
+        // iOS Safari has severe Vibration API limitations:
+        // 1. Doesn't support patterns (arrays)
+        // 2. Requires user gesture to trigger vibration
+        // 3. Automatic events (like alignment) get blocked
+        // Solution: Single vibration on alignment change (may still not work in browser)
+        navigator.vibrate(200);
+      } else {
+        // Android and iOS PWA: Use full heartbeat pattern
+        // Heart animation: 1500ms cycle with pulses at 14% (210ms) and 42% (630ms)
+        const heartbeatPattern = [210, 80, 340, 80, 790]; // Total = 1500ms
+        
+        // Start vibration immediately
         navigator.vibrate(heartbeatPattern);
-      }, 1500);
-      
-      setVibrationInterval(interval);
+        
+        // Repeat pattern every 1500ms to match animation
+        const interval = setInterval(() => {
+          navigator.vibrate(heartbeatPattern);
+        }, 1500);
+        
+        setVibrationInterval(interval);
+      }
     } else {
       // Stop vibration when not aligned
       if (vibrationInterval) {
@@ -77,7 +97,7 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
         navigator.vibrate(0);
       }
     };
-  }, [state.isAligned]);
+  }, [state.isAligned, isIOS, isStandalone]);
   
   // Removed device-specific detection
   
@@ -364,6 +384,15 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
             <li>• Restart compass if readings seem wrong</li>
           </ul>
         </div>
+        
+        {isIOS && !isStandalone && (
+          <div className="mt-3 pt-3 border-t border-blue-200">
+            <p className="font-medium text-xs text-black mb-1">📳 Vibration Note (iOS Safari):</p>
+            <p className="text-xs text-black/60">
+              iOS Safari limits vibration in browsers. For the full heartbeat vibration experience, install this app to your home screen (tap Share → Add to Home Screen)
+            </p>
+          </div>
+        )}
       </div>
       
       {/* Debug info */}
