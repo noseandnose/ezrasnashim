@@ -33,7 +33,8 @@ export function useSafeArea() {
       }
       
       // Calculate header and footer heights
-      const headerHeight = 60; // Header height in px
+      // Header: py-2.5 (10px) + logo/content (~28px) + py-2.5 (10px) + safe-area-top = ~48-60px
+      const headerHeight = 48; // Base header height in px (will be added to safe-area-top)
       const footerHeight = 70; // Bottom nav height in px
       
       // Calculate bottom nav offset based on mode

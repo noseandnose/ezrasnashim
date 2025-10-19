@@ -120,8 +120,21 @@ app.use((req, res, next) => {
   // res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   
-  // Performance headers for static assets
-  if (req.url.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$/)) {
+  // CRITICAL: Service worker must NEVER be cached - always fetch fresh for PWA updates
+  if (req.url === '/sw.js' || req.url.startsWith('/sw.js?')) {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+  // Unversioned assets (manifest, icons) - allow revalidation for updates
+  else if (req.url === '/manifest.json' || 
+           req.url.startsWith('/icon-') ||
+           req.url === '/apple-touch-icon.png' ||
+           req.url === '/favicon.ico') {
+    res.setHeader('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400'); // 1 hour + 24 hour stale
+  }
+  // Performance headers for versioned static assets (fingerprinted by Vite)
+  else if (req.url.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$/)) {
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
   }
   

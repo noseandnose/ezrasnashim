@@ -1,8 +1,8 @@
-// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 5.1
-// Updated: 2025-10-16 - Fixed bottom navigation positioning in PWA mode
+// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 1.0.0
+// Updated: 2025-10-19 - Auto-generated cache version
 
 // Cache configuration with timestamp for guaranteed cache busting
-const CACHE_VERSION = 'v5.1-20251016';
+const CACHE_VERSION = 'v1.0.0-1760874145044';
 const APP_SHELL_CACHE = `app-shell-${CACHE_VERSION}`;
 const PRAYERS_CACHE = `prayers-${CACHE_VERSION}`;
 const TORAH_CACHE = `torah-${CACHE_VERSION}`;
@@ -100,7 +100,32 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // Handle static assets (CSS, JS, fonts, images)
+  // Unversioned assets (manifest, icons) - stale-while-revalidate for updates
+  const isUnversionedAsset = url.pathname === '/manifest.json' || 
+                             url.pathname.startsWith('/icon-') ||
+                             url.pathname === '/apple-touch-icon.png' ||
+                             url.pathname === '/favicon.ico';
+  
+  if (isUnversionedAsset) {
+    event.respondWith(
+      caches.open(APP_SHELL_CACHE).then(cache => {
+        return cache.match(event.request).then(cachedResponse => {
+          const fetchPromise = fetch(event.request).then(networkResponse => {
+            if (networkResponse.ok) {
+              cache.put(event.request, networkResponse.clone());
+            }
+            return networkResponse;
+          }).catch(() => cachedResponse);
+          
+          // Return cached version immediately, update in background
+          return cachedResponse || fetchPromise;
+        });
+      })
+    );
+    return;
+  }
+  
+  // Handle versioned static assets (CSS, JS, fonts, images) - Cache First
   if (url.pathname.includes('.') && (
     url.pathname.endsWith('.css') || 
     url.pathname.endsWith('.js') || 

@@ -63,6 +63,47 @@ function setupSafariViewportFix() {
   }
 }
 
+// Check for app updates via version API
+async function checkForAppUpdates() {
+  try {
+    const response = await fetch('/api/version', {
+      cache: 'no-store'
+    });
+    
+    if (!response.ok) return;
+    
+    const serverVersion = await response.json();
+    const storedVersion = localStorage.getItem('app-version');
+    
+    // Store current version on first load
+    if (!storedVersion) {
+      localStorage.setItem('app-version', serverVersion.buildTimestamp.toString());
+      return;
+    }
+    
+    // If server has newer version, force reload
+    if (serverVersion.buildTimestamp > parseInt(storedVersion, 10)) {
+      console.log('[Version] New version detected, updating...');
+      localStorage.setItem('app-version', serverVersion.buildTimestamp.toString());
+      
+      // Clear service worker caches to ensure fresh content
+      if ('serviceWorker' in navigator) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+      }
+      
+      window.location.reload();
+    }
+    
+    // Check again in 60 seconds
+    setTimeout(checkForAppUpdates, 60000);
+  } catch (error) {
+    console.error('[Version] Update check failed:', error);
+    // Retry in 60 seconds
+    setTimeout(checkForAppUpdates, 60000);
+  }
+}
+
 // Service Worker Registration for Offline Capabilities
 async function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
@@ -72,6 +113,8 @@ async function registerServiceWorker() {
         sessionStorage.removeItem('sw-recovery-attempt');
       }
       
+      // Server now serves sw.js with no-cache headers to ensure fresh fetches
+      // updateViaCache: 'none' tells browser to bypass HTTP cache for sw.js
       const registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/',
         updateViaCache: 'none'
@@ -98,6 +141,9 @@ async function registerServiceWorker() {
       }, 30000);
       
       setTimeout(() => registration.update(), 1000);
+      
+      // Version-based update detection (fallback for when SW polling misses updates)
+      checkForAppUpdates();
       
     } catch (error) {
       console.error('[SW] Service Worker registration failed:', error);

@@ -170,22 +170,9 @@ body {
   --lavender: hsl(260, 30%, 85%);
   --sage: hsl(120, 20%, 75%);
   
-  /* Safe-area insets and layout variables */
-  --sat: env(safe-area-inset-top, 0px);
-  --sab: env(safe-area-inset-bottom, 0px);
-  --sal: env(safe-area-inset-left, 0px);
-  --sar: env(safe-area-inset-right, 0px);
-  
-  /* Layout variables (dynamically set by useSafeArea hook) */
-  --safe-area-top: 0px;
-  --safe-area-bottom: 0px;
-  --header-height: 60px;
-  --footer-height: 70px;
-  --nav-offset: 0px;
-  --is-standalone: 0;
-  --is-safari: 0;
-  --safe-top-total: 60px;
-  --safe-bottom-total: 70px;
+  /* Header and footer heights for content padding */
+  --header-height: 56px;
+  --footer-height: 88px;
 }
 
 /* Fix for Hebrew text alignment in modals */
@@ -884,9 +871,8 @@ html, body, #root {
   overflow-y: auto;
   overflow-x: hidden;
   
-  /* Add padding for fixed header at top and bottom nav at bottom */
-  padding-top: calc(env(safe-area-inset-top, 0px) + 60px); /* Header height + safe area */
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 88px); /* Bottom nav height + safe area (Safari offset handled in component) */
+  /* Simple padding for bottom navigation - safe-area handled in nav component itself */
+  padding-bottom: var(--footer-height);
   
   /* Prevent scroll bounce on iOS */
   -webkit-overflow-scrolling: touch;
@@ -1161,30 +1147,20 @@ nav[class*="fixed"] {
 }
 
 /* Ensure clickable elements in header/nav work */
-header[class*="fixed"] button,
-header[class*="fixed"] a,
+header[class*="sticky"] button,
+header[class*="sticky"] a,
 nav[class*="fixed"] button,
 nav[class*="fixed"] a {
   touch-action: manipulation !important;
   pointer-events: auto !important;
 }
 
-/* Main content padding for fixed header/footer */
-main {
-  padding-top: var(--safe-top-total) !important;
-  padding-bottom: var(--safe-bottom-total) !important;
-}
+/* No main padding needed - header is sticky and footer padding handled in .content-area */
 
-/* Fixed Header - Allow Pull-to-Refresh */
-header[class*="fixed"] {
-  /* Ensure truly fixed positioning */
-  position: fixed !important;
-  
-  /* Allow vertical scroll for pull-to-refresh */
-  touch-action: pan-y !important;
-  -webkit-user-drag: none !important;
-  user-select: none !important;
-  -webkit-user-select: none !important;
+/* Sticky Header - Allow Pull-to-Refresh */
+header[class*="sticky"] {
+  /* Ensure truly sticky positioning */
+  position: sticky !important;
   
   /* Ensure all content stays visible */
   overflow: visible !important;
@@ -1212,8 +1188,8 @@ nav[class*="fixed"] {
 }
 
 /* Allow buttons inside header and nav to be clickable */
-header[class*="fixed"] button,
-header[class*="fixed"] a,
+header[class*="sticky"] button,
+header[class*="sticky"] a,
 nav[class*="fixed"] button,
 nav[class*="fixed"] a {
   touch-action: manipulation !important;

@@ -2,10 +2,17 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocationStore } from "./use-jewish-times";
 import axiosClient from "../lib/axiosClient";
 
+interface ShabbosData {
+  parsha?: string;
+  candleLighting?: string;
+  havdalah?: string;
+  location?: string;
+}
+
 export function useShabbosTime() {
   const { coordinates } = useLocationStore();
 
-  return useQuery({
+  return useQuery<ShabbosData | null>({
     queryKey: ['shabbos-times-v3', coordinates?.lat, coordinates?.lng], // Changed key to force cache refresh
     queryFn: async () => {
       if (!coordinates) {
@@ -28,6 +35,6 @@ export function useShabbosTime() {
     enabled: !!coordinates, // Only fetch when coordinates are available
     staleTime: 0, // Always fetch fresh data for debugging
     refetchInterval: 1000 * 60 * 60 * 6, // Refetch every 6 hours
-    cacheTime: 0 // Don't cache for debugging
+    gcTime: 0 // Don't cache for debugging (renamed from cacheTime in v5)
   });
 }

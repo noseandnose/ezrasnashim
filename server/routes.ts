@@ -167,6 +167,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }, 60 * 60 * 1000); // Run every hour
 
+  // Version endpoint for cache busting and update detection
+  app.get("/api/version", async (_req, res) => {
+    try {
+      const versionPath = path.join(__dirname, 'version.json');
+      const { readFileSync } = await import('fs');
+      const versionData = JSON.parse(readFileSync(versionPath, 'utf-8'));
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+      res.json(versionData);
+    } catch (error) {
+      res.json({ 
+        version: '1.0.0', 
+        buildTime: new Date().toISOString(),
+        buildTimestamp: Date.now()
+      });
+    }
+  });
+
   // Calendar download endpoint using GET request to avoid CORS issues
   app.get("/api/download-calendar", async (req, res) => {
     try {
