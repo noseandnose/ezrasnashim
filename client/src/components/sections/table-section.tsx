@@ -109,7 +109,7 @@ export default function TableSection() {
   return (
     <div className="pb-20">
       {/* Spacer for fixed header - reduced to eliminate gap */}
-      <div className="bg-gradient-soft" style={{ height: 'max(40px, calc(env(safe-area-inset-top, 0px) + 30px))' }} />
+      <div className="bg-gradient-soft" style={{ height: 'max(30px, calc(env(safe-area-inset-top, 0px) + 20px))' }} />
       
       {/* Main Table Section - Connected to top bar - Only This Shabbos */}
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">
