@@ -5,6 +5,7 @@ import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import type { Section } from "@/pages/home";
 import BottomNavigation from "@/components/bottom-navigation";
+import AppHeader from "@/components/app-header";
 import { getLocalDateString } from "@/lib/dateUtils";
 
 interface DailyStats {
@@ -261,36 +262,36 @@ export default function Statistics() {
 
   return (
     <div className="mobile-app min-h-screen w-full bg-white relative flex flex-col">
-      {/* Header */}
-      <header className="bg-gradient-soft p-3 border-0 shadow-none flex-shrink-0">
-        <div className="flex items-center justify-between px-2">
-          <button
-            onClick={() => setLocation("/")}
-            className="p-2 rounded-full hover:bg-white/50 transition-colors"
-            aria-label="Back to Home"
-          >
-            <ArrowLeft className="h-5 w-5 text-black/70" />
-          </button>
-          <h1 
-            className="platypi-semibold text-xl text-black tracking-wide cursor-pointer hover:text-black/80 transition-colors"
-            onClick={scrollToTop}
-          >
-            Analytics Dashboard
-          </h1>
-          <button
-            onClick={handleRefresh}
-            className="p-2 rounded-full hover:bg-white/50 transition-all duration-200"
-            aria-label="Refresh Analytics"
-            disabled={isRefreshing}
-          >
-            <RefreshCw className={`h-5 w-5 text-black/70 transition-transform duration-500 ${isRefreshing ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
-      </header>
+      <AppHeader />
       
-      <div className="flex-1 overflow-y-auto overflow-x-hidden pb-24">
-        {/* Time Period Selector */}
-        <div className="bg-gradient-soft -mt-3 rounded-b-3xl px-4 pt-6 pb-6 border-0 shadow-none">
+      <main className="content-area">
+        {/* Back button and title in content area */}
+        <div className="bg-gradient-soft rounded-b-3xl px-4 pt-4 pb-4 mb-4 border-0 shadow-none -mt-2">
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={() => setLocation("/")}
+              className="p-2 rounded-full hover:bg-white/50 transition-colors"
+              aria-label="Back to Home"
+            >
+              <ArrowLeft className="h-5 w-5 text-black/70" />
+            </button>
+            <h1 
+              className="platypi-semibold text-xl text-black tracking-wide cursor-pointer hover:text-black/80 transition-colors"
+              onClick={scrollToTop}
+            >
+              Analytics Dashboard
+            </h1>
+            <button
+              onClick={handleRefresh}
+              className="p-2 rounded-full hover:bg-white/50 transition-all duration-200"
+              aria-label="Refresh Analytics"
+              disabled={isRefreshing}
+            >
+              <RefreshCw className={`h-5 w-5 text-black/70 transition-transform duration-500 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
+          
+          {/* Time Period Selector */}
           <div className="flex bg-white/20 rounded-xl p-1 mb-4">
             <Button
               onClick={() => setSelectedPeriod('today')}
@@ -478,7 +479,7 @@ export default function Statistics() {
           {/* Financial Stats */}
           <FinancialStatsSection period={selectedPeriod} />
         </div>
-      </div>
+      </main>
 
       <BottomNavigation 
         activeSection={null} 
