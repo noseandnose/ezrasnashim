@@ -72,7 +72,10 @@ async function registerServiceWorker() {
         sessionStorage.removeItem('sw-recovery-attempt');
       }
       
-      const registration = await navigator.serviceWorker.register('/sw.js', {
+      // Add cache-busting timestamp to force browser to check for new sw.js
+      // This ensures PWAs get updates immediately after deployment
+      const cacheBuster = `?v=${Date.now()}`;
+      const registration = await navigator.serviceWorker.register(`/sw.js${cacheBuster}`, {
         scope: '/',
         updateViaCache: 'none'
       });

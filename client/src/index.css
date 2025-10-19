@@ -179,12 +179,12 @@ body {
   /* Layout variables (dynamically set by useSafeArea hook) */
   --safe-area-top: 0px;
   --safe-area-bottom: 0px;
-  --header-height: 60px;
+  --header-height: 48px;
   --footer-height: 70px;
   --nav-offset: 0px;
   --is-standalone: 0;
   --is-safari: 0;
-  --safe-top-total: 60px;
+  --safe-top-total: 48px;
   --safe-bottom-total: 70px;
 }
 

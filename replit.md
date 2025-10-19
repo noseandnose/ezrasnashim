@@ -70,6 +70,10 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **Performance**: Lazy loading, code splitting, compression, optimized build, optimized Tehillim chain loading.
 - **Deployment**: Static frontend (S3), backend (ECS), PostgreSQL (Supabase).
 
+## Recent Critical Fixes (October 19, 2025)
+- **PWA Cache Busting Fix**: Fixed fundamental issue where service worker file (sw.js) was being cached with 1-year "immutable" header, preventing PWA users from receiving updates. Server now serves sw.js with no-cache headers (`no-store, no-cache, must-revalidate`). Added timestamp query parameter to SW registration (`/sw.js?v=${Date.now()}`) to force browser checks on every page load. Updated SW version to v5.2-20251019. Users now receive updates within 30 seconds of deployment.
+- **Header Overlap Fix**: Fixed header appearing wider and overlapping content sections. Reduced header padding from `p-3` to `py-2.5 px-3`, updated header height from 60px to 48px across app-header component, use-safe-area hook, and index.css. Content now properly positioned below header without overlap.
+
 ## External Dependencies
 - **Payment Processing**: Stripe (for donations, including Apple Pay/Google Pay).
 - **Jewish Calendar Services**: Hebcal.com (for dates, times, holidays, zmanim, Hebrew date conversion).
