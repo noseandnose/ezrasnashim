@@ -163,8 +163,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
 
   return (
     <div className="pb-20">
-      {/* Spacer for fixed header - matches header background to eliminate white gap */}
-      <div className="bg-gradient-soft" style={{ height: 'max(56px, calc(env(safe-area-inset-top, 0px) + 46px))' }} />
+      {/* Spacer for fixed header - reduced to eliminate gap */}
+      <div className="bg-gradient-soft" style={{ height: 'max(50px, calc(env(safe-area-inset-top, 0px) + 40px))' }} />
       
       {/* Unified Top Section with Greeting, Times, and Today Info - Connected to top bar */}
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">
