@@ -159,7 +159,7 @@ export default function TorahSection({}: TorahSectionProps) {
   return (
     <div className="pb-20">
       {/* Spacer for fixed header - reduced to eliminate gap */}
-      <div className="bg-gradient-soft" style={{ height: 'max(50px, calc(env(safe-area-inset-top, 0px) + 40px))' }} />
+      <div className="bg-gradient-soft" style={{ height: 'max(40px, calc(env(safe-area-inset-top, 0px) + 30px))' }} />
       
       {/* Main Torah Section - Connected to top bar */}
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">
