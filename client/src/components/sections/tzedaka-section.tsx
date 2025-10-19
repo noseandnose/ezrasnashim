@@ -220,7 +220,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
 
 
   return (
-    <div className="overflow-y-auto h-full pb-20">
+    <div className="overflow-y-auto h-full pb-20 pt-16">
       {/* Main Tzedaka Section - ONLY CAMPAIGN */}
       <div className="bg-gradient-soft rounded-b-3xl px-3 pt-3 pb-2 shadow-lg">
         <button 
