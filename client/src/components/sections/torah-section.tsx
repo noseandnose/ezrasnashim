@@ -157,7 +157,7 @@ export default function TorahSection({}: TorahSectionProps) {
   ];
 
   return (
-    <div className="overflow-y-auto h-full pb-20 pt-16">
+    <div className="overflow-y-auto h-full pb-20">
       {/* Main Torah Section - Connected to top bar */}
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">
         {/* Daily Inspiration - Pirkei Avot */}
