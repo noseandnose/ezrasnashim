@@ -1,7 +1,7 @@
 # Ezras Nashim - Daily Jewish Women's Spiritual App
 
 ## Overview
-Ezras Nashim is a mobile-first web application for Jewish women to track and complete daily spiritual practices across Torah study, Tefilla (prayer), and Tzedaka (charity). The app aims to foster consistent spiritual growth through daily engagement with Jewish learning, prayer, and giving. The vision is to facilitate one million mitzvos monthly, serving as a vital tool for spiritual development and community engagement.
+Ezras Nashim is a mobile-first web application designed for Jewish women to engage with and track daily spiritual practices across Torah study, Tefilla (prayer), and Tzedaka (charity). The app aims to promote consistent spiritual growth through daily interaction with Jewish learning, prayer, and giving. The overarching goal is to facilitate one million mitzvos monthly, serving as a significant tool for spiritual development and community involvement.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -16,81 +16,58 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 
 ## System Architecture
 ### Frontend
-- **Framework**: React 18 with TypeScript, Vite for build.
-- **Styling**: Tailwind CSS with a feminine color palette (rose blush, ivory, sand gold, muted lavender).
+- **Framework**: React 18 with TypeScript, Vite.
+- **Styling**: Tailwind CSS with a feminine color palette.
 - **UI Components**: Radix UI primitives and shadcn/ui.
 - **State Management**: Zustand for client state, TanStack Query for server state.
-- **Routing**: Wouter for lightweight client-side routing with full URL routing system (August 2025) - supports direct linking to all sections (/, /torah, /tefilla, /tzedaka, /life), browser back/forward navigation, and backward compatibility redirect from /table to /life.
-- **Design**: Mobile-first responsive design, PWA functionality (Add to Home Screen, service worker for offline caching).
-- **Typography**: Playfair Display for headers, Inter for body text, David Libre/Heebo for Hebrew text, Platypi for English text, Koren Siddur for Tefilla content. Font preloading and `font-display: block` for FOUT prevention.
-- **Visuals**: Flower progress indicators, subtle animations, custom logos, consistent gradients for top bar and modals.
-- **Modals**: Fullscreen overlay system for major content, with consistent headers, font controls, language toggles, and attribution. Direct fullscreen access for all Tefilla prayers (Morning Brochas/Shacharis, Maariv) and Tehillim sections - no intermediate modals.
+- **Routing**: Wouter for lightweight client-side routing, supporting full URL routing and browser navigation.
+- **Design**: Mobile-first responsive, PWA functionality (Add to Home Screen, offline caching).
+- **Typography**: Playfair Display (headers), Inter (body), David Libre/Heebo (Hebrew), Platypi (English), Koren Siddur (Tefilla). Font preloading for FOUT prevention.
+- **Visuals**: Flower progress indicators, subtle animations, custom logos, consistent gradients.
+- **Modals**: Fullscreen overlay system for major content with consistent headers, font controls, language toggles, and attribution. Direct fullscreen access for all Tefilla prayers and Tehillim sections.
 
 ### Backend
 - **Runtime**: Node.js 20 with Express.js.
 - **Language**: TypeScript with ES modules.
-- **API**: RESTful, consistent error handling.
+- **API**: RESTful with consistent error handling.
 - **Session Management**: Express session.
 
 ### Database
 - **Primary**: PostgreSQL (Supabase configured).
-- **ORM**: Drizzle ORM with schema-first approach and Drizzle Kit for migrations.
+- **ORM**: Drizzle ORM with schema-first approach and Drizzle Kit.
 - **Connection**: Node-postgres (pg) with pooling.
-- **Specific Tables**: `tehillim` (ID-based tracking), `after_brochas_prayers`, `pirkei_avot`, `daily_recipes`.
+- **Specific Tables**: `tehillim`, `after_brochas_prayers`, `pirkei_avot`, `daily_recipes`.
 
 ### Core Application Features
-- **Daily Completion Tracking**: Torah, Tefilla, Tzedaka. Ensures all daily activities reset at local midnight for consistency.
-- **Jewish Times Integration**: Real-time zmanim (Jewish prayer times) based on location.
-- **Content Management**: Daily Torah (Halacha, Mussar/Emuna, Chizuk), prayers (Mincha, Nishmas, Tehillim, Morning Brochas, Birkat Hamazon, Maariv), Shabbat resources, Pirkei Avot. Supports text and audio. Dynamic prayer text based on location and Hebrew calendar events.
-- **The Kotel Compass**: Geolocation-based compass for prayer orientation, with robust Android support and stabilization.
-- **Donation System**: Stripe integration for tzedaka campaigns with frontend-driven payment confirmation for idempotency.
-- **Tehillim Global Progress**: Community-wide Tehillim completion tracking and automatic advancement.
+- **Daily Completion Tracking**: Torah, Tefilla, Tzedaka, resetting at local midnight.
+- **Jewish Times Integration**: Real-time zmanim based on location.
+- **Content Management**: Daily Torah, prayers (Mincha, Nishmas, Tehillim, Morning Brochas, Birkat Hamazon, Maariv), Shabbat resources, Pirkei Avot. Supports text and audio; dynamic prayer text based on location and Hebrew calendar.
+- **The Kotel Compass**: Geolocation-based compass for prayer orientation.
+- **Donation System**: Stripe integration for tzedaka campaigns with frontend-driven payment confirmation.
+- **Tehillim Global Progress**: Community-wide Tehillim completion tracking.
 - **Sponsorship System**: Daily content sponsorship.
 - **Analytics**: Tracking of daily/total users, page views, Tehillim completions, names prayed for, and modal completions.
 - **Life Page**: Shabbat countdown, Jewish Date converter (with ICS download), Daily Recipe, Creative Jewish Living, Community Feedback.
 - **Time-based Prayer System**: Dynamic prayer buttons based on zmanim.
-- **Text Cleaning**: Enhanced Hebrew text cleaning to preserve vowels/cantillation and ensure proper display of newlines.
-- **Dynamic Thank You Messages**: Custom thank you messages for daily recipes with markdown link support, replacing hardcoded attributions.
-- **Unified Admin Interface**: Complete admin dashboard at `/admin` with secure authentication featuring four main tabs: Messages (daily inspiration messages), Recipes (daily recipe management with image upload), Table Inspirations (table setting content with multiple image support), and Notifications (push notification history). All content management includes full CRUD operations with proper validation and security controls.
-- **Secure Image Upload System**: Object storage integration with authenticated image upload functionality for both recipes and table inspirations, supporting both URL input and direct file upload with proper access control.
-- **Audio Auto-Completion**: Daily Chizuk and Daily Emuna audio content automatically triggers completion when users finish listening, enhancing user engagement.
-- **Mobile App Support**: Enhanced detection and user guidance for mobile app wrappers (FlutterFlow, etc.) with intelligent permission prompts for location, compass, and notifications. Provides step-by-step instructions for enabling native app permissions on iOS/Android.
-
-### Recent Maintenance (October 5-15, 2025)
-- **Hebrew Date Timezone Fix (October 15)**: Fixed Hebrew date calculation to use user's browser timezone instead of defaulting to Jerusalem time. Updated `useHebrewDate()` and `useHebrewDateWithShkia()` hooks to pass timezone to Hebcal API via `tzid` parameter. Users worldwide now see correct Hebrew date for their location (e.g., Melbourne, Australia users see their local Hebrew date instead of being 3 days behind).
-- **Mobile Hyperlink Spacing Fix (October 15)**: Fixed unwanted spacing around inline hyperlinks in thank you messages on mobile devices. Updated CSS to only apply touch-friendly spacing (min-height: 48px, padding: 12px 16px) to button-like links and navigation, not inline text links. Preserves accessibility for primary navigation while ensuring clean inline text rendering.
-- **PWA Enhancement & Smart Install (October 7)**: Reorganized app header with dropdown menu for cleaner UI - menu button on left contains Analytics, Info, Share, and Install App options. Implemented standalone mode detection to only show install prompt for users visiting via browser (not already installed). Added native beforeinstallprompt handler for one-click Android app installation. Integrated Web Share API for native sharing with clipboard fallback. Install option intelligently hidden when app is running in standalone mode or after successful installation.
-- **Service Worker Performance & Reliability v5.0 (October 7)**: Optimized service worker for fast startup while maintaining MIME type protection. Never intercepts or caches sw.js or index.html (ensures updates and recovery scripts always load fresh). Streamlined activation for 50% faster startup. Triple-layer defense: inline emergency recovery script in index.html, strict MIME validation before caching, and auto-deletion of corrupted entries. Automatic recovery within 1-2 seconds for all users.
-- **Mazal Tov Message Fix (October 7)**: Fixed congratulations modal that appears when completing all three daily tasks (Torah, Tefilla, Tzedaka). Toast and Tefilla completion handlers now properly check and display the celebration message.
-- **Mobile Performance Optimizations (October 6-7)**: Enhanced resource loading with preconnect for Hebcal/Sefaria APIs and dns-prefetch for Maps/Stripe/Storage. Improved viewport settings with zoom support (5x), viewport-fit for notched devices, format-detection, and HandheldFriendly meta tags. Enhanced PWA with black-translucent status bar for iOS. Consolidated Google Fonts from 4 requests to 1 for faster loading. Added CSS containment (contain: layout style) for better rendering performance. Optimized scroll listeners with passive event handlers to prevent blocking.
-- **Console Log Cleanup (October 5)**: Fixed critical infinite recursion bug in logger.ts. Wrapped all development debug logs with environment checks (import.meta.env.DEV for client, process.env.NODE_ENV for server) to reduce production noise while preserving all error logging. Cleaned up verbose API request/response logs, calendar generation debug logs, recipe creation logs, and service worker debug logs.
-- **TODO Cleanup**: Removed inline TODO comments from server/routes.ts (notification/reminder and minhag customization feature suggestions). These items are documented as future enhancements in audit reports.
-- **Error Boundaries**: Added granular error boundaries around all main sections (HomeSection, TorahSection, TefillaSection, TzedakaSection, TableSection) for isolated error handling. If one section fails, users can still navigate to and use other sections.
-- **Push Notification Reliability**: Enhanced push notification system with subscription validation before sending, reducing 17% failure rate. Implemented conservative error handling that only removes subscriptions on terminal errors (400/404/410) while preserving valid subscriptions during transient issues (401/403/429/5xx). Added retry logic with exponential backoff for failed sends.
-- **Code Quality**: Zero TypeScript errors maintained. All changes conservative to preserve functionality.
-
-### Recent Bug Fixes (September 17, 2025)
-- **Error Handling**: Added robust fallback UI for Torah/Tefilla content sections to prevent blank screens when API calls fail
-- **Font Loading**: Fixed Hebrew font loading issues (VC-Koren-Light, Koren Siddur) with proper preloading and font-display:swap
-- **Database Stability**: Optimized connection pool from 100 to 15 connections with min 0 to prevent Supabase free tier exhaustion
-- **User Experience**: Added user-friendly error messages for failed API calls with specific HTTP status handling
-- **Data Prefetching**: Implemented prefetching for prayer modals (Mincha, Maariv, Nishmas, Morning Prayers) to prevent empty content
-- **Error Recovery**: Added error states with "Temporarily unavailable" messages instead of blank screens
-- **Progressive Enhancement**: Content sections now show loading states and gracefully degrade on errors
-
-## Technical Implementations
-- **API Communication**: TanStack Query for requests, caching, optimistic updates, with centralized configuration.
-- **State Persistence**: Daily completion resets automatically; location cached per session.
-- **Audio/Video Playback**: HTML5 audio/video with progress sliders and media proxy.
-- **Analytics**: Scalable system tracking essential completion events and session-based user tracking. Google Analytics (G-7S9ND60DR6) integrated for comprehensive user behavior tracking with automatic page view tracking and custom event capabilities.
-- **Error Handling**: Consistent error boundaries.
+- **Text Cleaning**: Enhanced Hebrew text cleaning for vowel/cantillation preservation and newline display.
+- **Dynamic Thank You Messages**: Custom thank you messages for daily recipes with markdown link support.
+- **Unified Admin Interface**: Comprehensive admin dashboard at `/admin` for Messages, Recipes, Table Inspirations, and Notifications with full CRUD operations, authentication, and security controls.
+- **Secure Image Upload System**: Object storage integration with authenticated image upload for recipes and table inspirations, supporting URL input and direct file upload.
+- **Audio Auto-Completion**: Daily Chizuk and Daily Emuna audio content auto-completes on listening.
+- **Mobile App Support**: Enhanced detection and user guidance for mobile app wrappers with intelligent permission prompts and step-by-step instructions for native app permissions.
+- **PWA Enhancements**: Bottom navigation positioning, service worker cache updates, compass haptic feedback on alignment, smart install prompts, and improved service worker reliability.
+- **Hebrew Date Timezone Fix**: Corrected Hebrew date calculation to use user's browser timezone.
+- **Mobile Hyperlink Spacing Fix**: Addressed unwanted spacing around inline hyperlinks on mobile.
+- **Mazal Tov Message Fix**: Corrected congratulations modal display upon daily task completion.
+- **Mobile Performance Optimizations**: Enhanced resource loading, improved viewport settings, consolidated Google Fonts, CSS containment, and optimized scroll listeners.
+- **Error Boundaries**: Granular error boundaries for main sections for isolated error handling.
+- **Push Notification Reliability**: Enhanced push notification system with subscription validation and retry logic.
+- **Error Handling**: Robust fallback UI for content sections, user-friendly error messages, loading states, and graceful degradation.
+- **Font Loading**: Fixed Hebrew font loading issues with preloading and `font-display:swap`.
+- **Database Stability**: Optimized connection pool.
+- **Data Prefetching**: Implemented prefetching for prayer modals.
 - **Security**: Drizzle ORM for SQL injection prevention.
-- **Performance**: Lazy loading, code splitting, gzip/brotli compression, optimized build configuration, optimized Tehillim chain loading.
-- **Code Quality**: TypeScript compilation warnings present but non-blocking for production (September 2, 2025).
-- **UX Fix**: Resolved dark overlay issue with global tehillim modal - removed auto-redirect behavior for special-tehillim modal (August 28, 2025).
-- **Compass Fix**: Fixed "Try Again" button in Kotel compass to properly restart without redirecting users back to tefilla page (September 2, 2025).
-- **Production Audit**: Comprehensive audit completed - application confirmed ready for launch with all core features functional (September 2, 2025).
-- **Conditional Text Fix**: Fixed ASERET_YEMEI_TESHUVA conditional text processing to properly hide seasonal content when not in that period (September 2, 2025).
+- **Performance**: Lazy loading, code splitting, compression, optimized build, optimized Tehillim chain loading.
 - **Deployment**: Static frontend (S3), backend (ECS), PostgreSQL (Supabase).
 
 ## External Dependencies
@@ -99,3 +76,4 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **Text Content**: Koren Publishers (for prayer texts).
 - **Geolocation**: Browser Geolocation API, OpenStreetMap Nominatim API, Google Maps Places API.
 - **UI Libraries**: Radix UI (component primitives), Lucide React (icons), Tailwind CSS (styling).
+- **Analytics**: Google Analytics (G-7S9ND60DR6).
