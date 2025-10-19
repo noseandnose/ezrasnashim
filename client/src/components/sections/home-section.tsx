@@ -164,7 +164,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   return (
     <div className="overflow-y-auto h-full pb-20">
       {/* Unified Top Section with Greeting, Times, and Today Info - Connected to top bar */}
-      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg -mt-1">
+      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">
         {/* Greeting and Date in one row */}
         <div className="flex items-center justify-between mb-3">
           <h1 className="platypi-bold text-xl text-black tracking-wide">{getGreeting()}</h1>

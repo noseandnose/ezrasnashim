@@ -478,7 +478,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
 
 
       {/* Main Tefilla Section - Tehillim */}
-      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg -mt-1">
+      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">
         {/* Global Tehillim Chain Card */}
         <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
           <div className="flex items-center justify-between mb-2">
