@@ -885,7 +885,8 @@ html, body, #root {
   overflow-x: hidden;
   
   /* Add padding for fixed header at top and bottom nav at bottom */
-  padding-top: calc(env(safe-area-inset-top, 0px) + 56px); /* Header height + safe area */
+  /* Header uses max(10px, safe-area-inset-top) + content(~28px) + bottom-padding(10px) */
+  padding-top: max(56px, calc(env(safe-area-inset-top, 0px) + 38px)); /* Match header's total rendered height */
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 88px); /* Bottom nav height + safe area (Safari offset handled in component) */
   
   /* Prevent scroll bounce on iOS */
