@@ -108,8 +108,8 @@ export default function TableSection() {
 
   return (
     <div className="pb-20">
-      {/* Spacer for fixed header - smaller to connect sections visually */}
-      <div style={{ height: 'max(48px, calc(env(safe-area-inset-top, 0px) + 38px))' }} />
+      {/* Spacer for fixed header */}
+      <div style={{ height: 'max(52px, calc(env(safe-area-inset-top, 0px) + 42px))' }} />
       
       {/* Main Table Section - Connected to top bar - Only This Shabbos */}
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">
