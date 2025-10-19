@@ -285,7 +285,7 @@ export default function Admin() {
   };
 
   // Media upload functions (handles images, videos, and audio)
-  const handleMediaUpload = async (type: 'recipe' | 'inspiration', field?: string) => {
+  const handleMediaUpload = async () => {
     try {
       const response = await axiosClient.post('/api/objects/upload', {}, {
         headers: getAuthHeaders()
@@ -939,7 +939,7 @@ export default function Admin() {
                     />
                     
                     <ObjectUploader
-                      onGetUploadParameters={() => handleMediaUpload('recipe')}
+                      onGetUploadParameters={() => handleMediaUpload()}
                       onComplete={(result) => handleMediaUploadComplete(result, 'recipe')}
                       maxNumberOfFiles={1}
                       buttonClassName="w-full admin-btn-primary"
@@ -1160,7 +1160,7 @@ export default function Admin() {
                         </div>
                         
                         <ObjectUploader
-                          onGetUploadParameters={() => handleMediaUpload('inspiration', mediaUrlField)}
+                          onGetUploadParameters={() => handleMediaUpload()}
                           onComplete={(result) => handleMediaUploadComplete(result, 'inspiration', mediaUrlField)}
                           buttonClassName="w-full admin-btn-primary px-3 py-2 rounded-md text-sm"
                         >
