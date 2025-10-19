@@ -1,8 +1,8 @@
-// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 5.2
-// Updated: 2025-10-19 - Fixed PWA cache busting and header overlap issues
+// Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 1.0.0
+// Updated: 2025-10-19 - Auto-generated cache version
 
 // Cache configuration with timestamp for guaranteed cache busting
-const CACHE_VERSION = 'v5.2-20251019';
+const CACHE_VERSION = 'v1.0.0-1760874145044';
 const APP_SHELL_CACHE = `app-shell-${CACHE_VERSION}`;
 const PRAYERS_CACHE = `prayers-${CACHE_VERSION}`;
 const TORAH_CACHE = `torah-${CACHE_VERSION}`;
