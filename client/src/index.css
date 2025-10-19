@@ -1147,8 +1147,8 @@ nav[class*="fixed"] {
 }
 
 /* Ensure clickable elements in header/nav work */
-header[class*="fixed"] button,
-header[class*="fixed"] a,
+header[class*="sticky"] button,
+header[class*="sticky"] a,
 nav[class*="fixed"] button,
 nav[class*="fixed"] a {
   touch-action: manipulation !important;
@@ -1188,8 +1188,8 @@ nav[class*="fixed"] {
 }
 
 /* Allow buttons inside header and nav to be clickable */
-header[class*="fixed"] button,
-header[class*="fixed"] a,
+header[class*="sticky"] button,
+header[class*="sticky"] a,
 nav[class*="fixed"] button,
 nav[class*="fixed"] a {
   touch-action: manipulation !important;
