@@ -474,7 +474,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
 
 
   return (
-    <div className="overflow-y-auto h-full pb-20">
+    <div className="pb-20">
 
 
       {/* Main Tefilla Section - Tehillim */}

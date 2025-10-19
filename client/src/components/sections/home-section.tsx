@@ -162,7 +162,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   const PrayerIcon = currentPrayer.icon;
 
   return (
-    <div className="overflow-y-auto h-full pb-20">
+    <div className="pb-20">
       {/* Unified Top Section with Greeting, Times, and Today Info - Connected to top bar */}
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">
         {/* Greeting and Date in one row */}

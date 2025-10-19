@@ -107,7 +107,7 @@ export default function TableSection() {
 
 
   return (
-    <div className="overflow-y-auto h-full pb-20">
+    <div className="pb-20">
       {/* Main Table Section - Connected to top bar - Only This Shabbos */}
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">
         {/* Location Permission Prompt */}
