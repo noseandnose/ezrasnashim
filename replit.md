@@ -72,7 +72,7 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 
 ## Recent Critical Fixes (October 19, 2025)
 - **PWA Cache Busting Fix**: Fixed fundamental issue where service worker file (sw.js) was being cached with 1-year "immutable" header, preventing PWA users from receiving updates. Server now serves sw.js with no-cache headers (`no-store, no-cache, must-revalidate`). Added timestamp query parameter to SW registration (`/sw.js?v=${Date.now()}`) to force browser checks on every page load. Updated SW version to v5.2-20251019. Users now receive updates within 30 seconds of deployment.
-- **Header Overlap Fix**: Fixed header appearing wider and overlapping content sections. Reduced header padding from `p-3` to `py-2.5 px-3`, updated header height from 60px to 48px across app-header component, use-safe-area hook, and index.css. Content now properly positioned below header without overlap.
+- **Header Positioning Fix**: Completely resolved header overlap and content visibility issues. Removed all negative margins (-mt-1) from sections that were pulling content behind header. Removed redundant scroll containers (overflow-y-auto h-full) from sections - content-area now handles all scrolling. Added 20px spacer divs with bg-gradient-soft background to all sections, creating seamless visual connection between header and content while ensuring Hebrew date and all top content fully visible. Header height: max(56px, safe-area-inset-top + 46px). Content properly positioned below header across all pages (Home, Torah, Tefilla, Tzedaka, Life, Statistics) without gaps or overlaps.
 
 ## External Dependencies
 - **Payment Processing**: Stripe (for donations, including Apple Pay/Google Pay).
