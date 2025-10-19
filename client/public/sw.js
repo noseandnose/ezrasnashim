@@ -100,7 +100,32 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // Handle static assets (CSS, JS, fonts, images)
+  // Unversioned assets (manifest, icons) - stale-while-revalidate for updates
+  const isUnversionedAsset = url.pathname === '/manifest.json' || 
+                             url.pathname.startsWith('/icon-') ||
+                             url.pathname === '/apple-touch-icon.png' ||
+                             url.pathname === '/favicon.ico';
+  
+  if (isUnversionedAsset) {
+    event.respondWith(
+      caches.open(APP_SHELL_CACHE).then(cache => {
+        return cache.match(event.request).then(cachedResponse => {
+          const fetchPromise = fetch(event.request).then(networkResponse => {
+            if (networkResponse.ok) {
+              cache.put(event.request, networkResponse.clone());
+            }
+            return networkResponse;
+          }).catch(() => cachedResponse);
+          
+          // Return cached version immediately, update in background
+          return cachedResponse || fetchPromise;
+        });
+      })
+    );
+    return;
+  }
+  
+  // Handle versioned static assets (CSS, JS, fonts, images) - Cache First
   if (url.pathname.includes('.') && (
     url.pathname.endsWith('.css') || 
     url.pathname.endsWith('.js') || 
