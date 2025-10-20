@@ -113,9 +113,14 @@ async function registerServiceWorker() {
         sessionStorage.removeItem('sw-recovery-attempt');
       }
       
+      // CRITICAL: Force old PWA users to update by versioning the SW URL
+      // This makes the browser treat it as a completely new service worker
+      // Increment this version whenever you need to force a global PWA update
+      const SW_VERSION = '2';
+      
       // Server now serves sw.js with no-cache headers to ensure fresh fetches
       // updateViaCache: 'none' tells browser to bypass HTTP cache for sw.js
-      const registration = await navigator.serviceWorker.register('/sw.js', {
+      const registration = await navigator.serviceWorker.register(`/sw.js?v=${SW_VERSION}`, {
         scope: '/',
         updateViaCache: 'none'
       });
@@ -132,6 +137,33 @@ async function registerServiceWorker() {
           });
         }
       });
+      
+      // IMMEDIATE: Force clear old service workers and caches on first load
+      // This catches users stuck on old PWA versions
+      const hasForceUpdated = localStorage.getItem('force-update-v2');
+      if (!hasForceUpdated) {
+        console.log('[SW] Forcing update for old PWA installation...');
+        
+        // Unregister old service workers (without version param)
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const reg of registrations) {
+          // Only unregister old SWs (those without ?v= in the scope)
+          if (!reg.active || !reg.active.scriptURL.includes('?v=')) {
+            await reg.unregister();
+          }
+        }
+        
+        // Clear all old caches
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+        
+        // Mark as updated
+        localStorage.setItem('force-update-v2', 'true');
+        
+        // Reload to get fresh content
+        window.location.reload();
+        return;
+      }
       
       // Check for updates every 30 seconds when page is visible
       setInterval(() => {
