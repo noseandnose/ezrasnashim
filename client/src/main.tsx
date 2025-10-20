@@ -113,14 +113,9 @@ async function registerServiceWorker() {
         sessionStorage.removeItem('sw-recovery-attempt');
       }
       
-      // CRITICAL: Force old PWA users to update by versioning the SW URL
-      // This makes the browser treat it as a completely new service worker
-      // Increment this version whenever you need to force a global PWA update
-      const SW_VERSION = '2';
-      
       // Server now serves sw.js with no-cache headers to ensure fresh fetches
       // updateViaCache: 'none' tells browser to bypass HTTP cache for sw.js
-      const registration = await navigator.serviceWorker.register(`/sw.js?v=${SW_VERSION}`, {
+      const registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/',
         updateViaCache: 'none'
       });
@@ -137,44 +132,6 @@ async function registerServiceWorker() {
           });
         }
       });
-      
-      // IMMEDIATE: Force clear old service workers and caches on first load
-      // This catches users stuck on old PWA versions
-      // Use sessionStorage to prevent infinite reload loops
-      const hasForceUpdated = localStorage.getItem('force-update-v2');
-      const isReloading = sessionStorage.getItem('force-update-reloading');
-      
-      if (!hasForceUpdated && !isReloading) {
-        console.log('[SW] Forcing update for old PWA installation...');
-        
-        // Set flag to prevent reload loop
-        sessionStorage.setItem('force-update-reloading', 'true');
-        
-        // Unregister old service workers (without version param)
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        for (const reg of registrations) {
-          // Only unregister old SWs (those without ?v= in the scope)
-          if (!reg.active || !reg.active.scriptURL.includes('?v=')) {
-            await reg.unregister();
-          }
-        }
-        
-        // Clear all old caches
-        const cacheNames = await caches.keys();
-        await Promise.all(cacheNames.map(name => caches.delete(name)));
-        
-        // Mark as updated
-        localStorage.setItem('force-update-v2', 'true');
-        
-        // Reload to get fresh content
-        window.location.reload();
-        return;
-      }
-      
-      // Clear the reloading flag if we've completed the force update
-      if (hasForceUpdated && isReloading) {
-        sessionStorage.removeItem('force-update-reloading');
-      }
       
       // Check for updates every 30 seconds when page is visible
       setInterval(() => {
