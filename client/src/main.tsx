@@ -140,9 +140,15 @@ async function registerServiceWorker() {
       
       // IMMEDIATE: Force clear old service workers and caches on first load
       // This catches users stuck on old PWA versions
+      // Use sessionStorage to prevent infinite reload loops
       const hasForceUpdated = localStorage.getItem('force-update-v2');
-      if (!hasForceUpdated) {
+      const isReloading = sessionStorage.getItem('force-update-reloading');
+      
+      if (!hasForceUpdated && !isReloading) {
         console.log('[SW] Forcing update for old PWA installation...');
+        
+        // Set flag to prevent reload loop
+        sessionStorage.setItem('force-update-reloading', 'true');
         
         // Unregister old service workers (without version param)
         const registrations = await navigator.serviceWorker.getRegistrations();
@@ -163,6 +169,11 @@ async function registerServiceWorker() {
         // Reload to get fresh content
         window.location.reload();
         return;
+      }
+      
+      // Clear the reloading flag if we've completed the force update
+      if (hasForceUpdated && isReloading) {
+        sessionStorage.removeItem('force-update-reloading');
       }
       
       // Check for updates every 30 seconds when page is visible
