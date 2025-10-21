@@ -1,4 +1,5 @@
-import { Storage, File } from "@google-cloud/storage";
+import { S3Client, GetObjectCommand, HeadObjectCommand, PutObjectCommand, CopyObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Response } from "express";
 import { randomUUID } from "crypto";
 import {
@@ -9,26 +10,84 @@ import {
   setObjectAclPolicy,
 } from "./objectAcl";
 
-const REPLIT_SIDECAR_ENDPOINT = "http://127.0.0.1:1106";
+// Upload directory constant - hardcoded as requested
+const UPLOAD_DIR = "uploads";
 
-// The object storage client is used to interact with the object storage service.
-export const objectStorageClient = new Storage({
+// S3 client configuration
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION || "us-east-1",
   credentials: {
-    audience: "replit",
-    subject_token_type: "access_token",
-    token_url: `${REPLIT_SIDECAR_ENDPOINT}/token`,
-    type: "external_account",
-    credential_source: {
-      url: `${REPLIT_SIDECAR_ENDPOINT}/credential`,
-      format: {
-        type: "json",
-        subject_token_field_name: "access_token",
-      },
-    },
-    universe_domain: "googleapis.com",
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "",
   },
-  projectId: "",
 });
+
+// S3 Object wrapper to mimic Google Cloud Storage File interface
+export class S3Object {
+  constructor(
+    public readonly bucketName: string,
+    public readonly key: string,
+    private metadata?: Record<string, string>
+  ) {}
+
+  async exists(): Promise<[boolean]> {
+    try {
+      await s3Client.send(new HeadObjectCommand({
+        Bucket: this.bucketName,
+        Key: this.key,
+      }));
+      return [true];
+    } catch (error: any) {
+      if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
+        return [false];
+      }
+      throw error;
+    }
+  }
+
+  async getMetadata(): Promise<[{ contentType?: string; size?: number; metadata?: Record<string, string> }]> {
+    const command = new HeadObjectCommand({
+      Bucket: this.bucketName,
+      Key: this.key,
+    });
+    const response = await s3Client.send(command);
+    return [{
+      contentType: response.ContentType,
+      size: response.ContentLength,
+      metadata: response.Metadata,
+    }];
+  }
+
+  async setMetadata(options: { metadata: Record<string, string> }): Promise<void> {
+    // Get current object to preserve content type
+    const [currentMetadata] = await this.getMetadata();
+    
+    // Copy object with new metadata (S3 requires copying to update metadata)
+    await s3Client.send(new CopyObjectCommand({
+      Bucket: this.bucketName,
+      Key: this.key,
+      CopySource: `${this.bucketName}/${this.key}`,
+      Metadata: { ...currentMetadata.metadata, ...options.metadata },
+      ContentType: currentMetadata.contentType,
+      MetadataDirective: 'REPLACE',
+    }));
+    
+    this.metadata = { ...currentMetadata.metadata, ...options.metadata };
+  }
+
+  createReadStream() {
+    // Note: This returns a promise, not a stream directly
+    // We'll handle this in downloadObject
+    return s3Client.send(new GetObjectCommand({
+      Bucket: this.bucketName,
+      Key: this.key,
+    }));
+  }
+
+  get name(): string {
+    return this.key;
+  }
+}
 
 export class ObjectNotFoundError extends Error {
   constructor() {
@@ -38,90 +97,84 @@ export class ObjectNotFoundError extends Error {
   }
 }
 
-// The object storage service is used to interact with the object storage service.
+// The object storage service for AWS S3
 export class ObjectStorageService {
-  constructor() {}
+  private readonly bucketName: string;
+  private readonly cdnBaseUrl: string;
 
-  // Gets the public object search paths.
-  getPublicObjectSearchPaths(): Array<string> {
-    const pathsStr = process.env.PUBLIC_OBJECT_SEARCH_PATHS || "";
-    const paths = Array.from(
-      new Set(
-        pathsStr
-          .split(",")
-          .map((path) => path.trim())
-          .filter((path) => path.length > 0)
-      )
-    );
-    if (paths.length === 0) {
+  constructor() {
+    this.bucketName = process.env.AWS_S3_BUCKET || "";
+    this.cdnBaseUrl = process.env.CDN_BASE_URL || "";
+    
+    if (!this.bucketName) {
       throw new Error(
-        "PUBLIC_OBJECT_SEARCH_PATHS not set. Create a bucket in 'Object Storage' " +
-          "tool and set PUBLIC_OBJECT_SEARCH_PATHS env var (comma-separated paths)."
+        "AWS_S3_BUCKET not set. Please configure the S3 bucket name."
       );
     }
-    return paths;
   }
 
-  // Gets the private object directory.
-  getPrivateObjectDir(): string {
-    const dir = process.env.PRIVATE_OBJECT_DIR || "";
-    if (!dir) {
-      throw new Error(
-        "PRIVATE_OBJECT_DIR not set. Create a bucket in 'Object Storage' " +
-          "tool and set PRIVATE_OBJECT_DIR env var."
-      );
-    }
-    return dir;
+  // Gets the S3 bucket name
+  getBucketName(): string {
+    return this.bucketName;
   }
 
-  // Search for a public object from the search paths.
-  async searchPublicObject(filePath: string): Promise<File | null> {
-    for (const searchPath of this.getPublicObjectSearchPaths()) {
-      const fullPath = `${searchPath}/${filePath}`;
+  // Gets the CDN base URL
+  getCdnBaseUrl(): string {
+    return this.cdnBaseUrl;
+  }
 
-      // Full path format: /<bucket_name>/<object_name>
-      const { bucketName, objectName } = parseObjectPath(fullPath);
-      const bucket = objectStorageClient.bucket(bucketName);
-      const file = bucket.file(objectName);
-
-      // Check if file exists
-      const [exists] = await file.exists();
-      if (exists) {
-        return file;
-      }
+  // Search for a public object (simplified for S3 + CDN)
+  async searchPublicObject(filePath: string): Promise<S3Object | null> {
+    const key = filePath.startsWith('/') ? filePath.slice(1) : filePath;
+    const s3Object = new S3Object(this.bucketName, key);
+    
+    const [exists] = await s3Object.exists();
+    if (exists) {
+      return s3Object;
     }
-
+    
     return null;
   }
 
-  // Downloads an object to the response.
-  async downloadObject(file: File, res: Response, cacheTtlSec: number = 3600) {
+  // Downloads an object to the response
+  async downloadObject(file: S3Object, res: Response, cacheTtlSec: number = 3600) {
     try {
-      // Get file metadata
-      const [metadata] = await file.getMetadata();
-      // Get the ACL policy for the object.
+      // Get object from S3
+      const command = new GetObjectCommand({
+        Bucket: file.bucketName,
+        Key: file.key,
+      });
+      
+      const response = await s3Client.send(command);
+      
+      // Get the ACL policy for the object
       const aclPolicy = await getObjectAclPolicy(file);
       const isPublic = aclPolicy?.visibility === "public";
+      
       // Set appropriate headers
       res.set({
-        "Content-Type": metadata.contentType || "application/octet-stream",
-        "Content-Length": metadata.size,
+        "Content-Type": response.ContentType || "application/octet-stream",
+        "Content-Length": response.ContentLength?.toString() || "",
         "Cache-Control": `${
           isPublic ? "public" : "private"
         }, max-age=${cacheTtlSec}`,
       });
 
       // Stream the file to the response
-      const stream = file.createReadStream();
-
-      stream.on("error", (err: any) => {
-        console.error("Stream error:", err);
-        if (!res.headersSent) {
-          res.status(500).json({ error: "Error streaming file" });
-        }
-      });
-
-      stream.pipe(res);
+      if (response.Body) {
+        // @ts-ignore - AWS SDK v3 Body is a stream
+        response.Body.pipe(res);
+        
+        // @ts-ignore
+        response.Body.on("error", (err: any) => {
+          console.error("Stream error:", err);
+          if (!res.headersSent) {
+            res.status(500).json({ error: "Error streaming file" });
+          }
+        });
+      } else {
+        throw new Error("No body in S3 response");
+      }
     } catch (error) {
       console.error("Error downloading file:", error);
       if (!res.headersSent) {
@@ -130,32 +183,26 @@ export class ObjectStorageService {
     }
   }
 
-  // Gets the upload URL for an object entity.
+  // Gets the upload URL for an object entity
   async getObjectEntityUploadURL(): Promise<string> {
-    const privateObjectDir = this.getPrivateObjectDir();
-    if (!privateObjectDir) {
-      throw new Error(
-        "PRIVATE_OBJECT_DIR not set. Create a bucket in 'Object Storage' " +
-          "tool and set PRIVATE_OBJECT_DIR env var."
-      );
-    }
-
     const objectId = randomUUID();
-    const fullPath = `${privateObjectDir}/uploads/${objectId}`;
+    const key = `${UPLOAD_DIR}/${objectId}`;
 
-    const { bucketName, objectName } = parseObjectPath(fullPath);
-
-    // Sign URL for PUT method with TTL
-    return signObjectURL({
-      bucketName,
-      objectName,
-      method: "PUT",
-      ttlSec: 900,
+    // Generate presigned URL for PUT method with 15 minute expiry
+    const command = new PutObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
     });
+    
+    const signedUrl = await getSignedUrl(s3Client, command, {
+      expiresIn: 900, // 15 minutes
+    });
+    
+    return signedUrl;
   }
 
-  // Gets the object entity file from the object path.
-  async getObjectEntityFile(objectPath: string): Promise<File> {
+  // Gets the object entity file from the object path
+  async getObjectEntityFile(objectPath: string): Promise<S3Object> {
     if (!objectPath.startsWith("/objects/")) {
       throw new ObjectNotFoundError();
     }
@@ -166,69 +213,99 @@ export class ObjectStorageService {
     }
 
     const entityId = parts.slice(1).join("/");
-    let entityDir = this.getPrivateObjectDir();
-    if (!entityDir.endsWith("/")) {
-      entityDir = `${entityDir}/`;
-    }
-    const objectEntityPath = `${entityDir}${entityId}`;
-    const { bucketName, objectName } = parseObjectPath(objectEntityPath);
-    const bucket = objectStorageClient.bucket(bucketName);
-    const objectFile = bucket.file(objectName);
-    const [exists] = await objectFile.exists();
+    const key = `${UPLOAD_DIR}/${entityId}`;
+    
+    const s3Object = new S3Object(this.bucketName, key);
+    const [exists] = await s3Object.exists();
+    
     if (!exists) {
       throw new ObjectNotFoundError();
     }
-    return objectFile;
+    
+    return s3Object;
   }
 
-  normalizeObjectEntityPath(
-    rawPath: string,
-  ): string {
-    if (!rawPath.startsWith("https://storage.googleapis.com/")) {
+  // Normalize object entity path from S3 URL to CDN URL or local path
+  normalizeObjectEntityPath(rawPath: string): string {
+    // If it's already a normalized path, return it
+    if (rawPath.startsWith("/objects/")) {
       return rawPath;
     }
-  
-    // Extract the path from the URL by removing query parameters and domain
-    const url = new URL(rawPath);
-    const rawObjectPath = url.pathname;
-  
-    let objectEntityDir = this.getPrivateObjectDir();
-    if (!objectEntityDir.endsWith("/")) {
-      objectEntityDir = `${objectEntityDir}/`;
+
+    // Handle S3 URLs (both s3:// and https://bucket.s3.region.amazonaws.com/)
+    if (rawPath.startsWith("https://") && rawPath.includes(".s3.") && rawPath.includes(".amazonaws.com")) {
+      try {
+        const url = new URL(rawPath);
+        const pathParts = url.pathname.split("/").filter(p => p);
+        
+        // Check if path starts with upload directory
+        if (pathParts[0] === UPLOAD_DIR && pathParts.length > 1) {
+          const entityId = pathParts.slice(1).join("/");
+          
+          // Return CDN URL if available, otherwise return local path
+          if (this.cdnBaseUrl) {
+            return `${this.cdnBaseUrl}/${UPLOAD_DIR}/${entityId}`;
+          }
+          return `/objects/${entityId}`;
+        }
+      } catch (err) {
+        console.error("Error parsing S3 URL:", err);
+      }
     }
-  
-    if (!rawObjectPath.startsWith(objectEntityDir)) {
-      return rawObjectPath;
+    
+    // If it's already a CDN URL, return as-is
+    if (this.cdnBaseUrl && rawPath.startsWith(this.cdnBaseUrl)) {
+      return rawPath;
     }
-  
-    // Extract the entity ID from the path
-    const entityId = rawObjectPath.slice(objectEntityDir.length);
-    return `/objects/${entityId}`;
+
+    return rawPath;
   }
 
-  // Tries to set the ACL policy for the object entity and return the normalized path.
+  // Tries to set the ACL policy for the object entity and return the normalized path
   async trySetObjectEntityAclPolicy(
     rawPath: string,
     aclPolicy: ObjectAclPolicy
   ): Promise<string> {
-    const normalizedPath = this.normalizeObjectEntityPath(rawPath);
-    if (!normalizedPath.startsWith("/")) {
-      return normalizedPath;
+    // Extract object ID from the raw path (S3 signed URL)
+    let objectKey: string | null = null;
+    
+    try {
+      if (rawPath.startsWith("https://") && rawPath.includes(this.bucketName)) {
+        const url = new URL(rawPath);
+        objectKey = url.pathname.split("?")[0]; // Remove query params
+        if (objectKey.startsWith("/")) {
+          objectKey = objectKey.slice(1);
+        }
+      }
+    } catch (err) {
+      console.error("Error parsing upload URL:", err);
     }
-
-    const objectFile = await this.getObjectEntityFile(normalizedPath);
-    await setObjectAclPolicy(objectFile, aclPolicy);
-    return normalizedPath;
+    
+    if (!objectKey || !objectKey.startsWith(UPLOAD_DIR)) {
+      throw new Error("Invalid upload URL");
+    }
+    
+    // Create S3Object and set ACL policy
+    const s3Object = new S3Object(this.bucketName, objectKey);
+    await setObjectAclPolicy(s3Object, aclPolicy);
+    
+    // Return normalized path (CDN URL if available)
+    const entityId = objectKey.replace(`${UPLOAD_DIR}/`, "");
+    if (this.cdnBaseUrl) {
+      return `${this.cdnBaseUrl}/${UPLOAD_DIR}/${entityId}`;
+    }
+    
+    return `/objects/${entityId}`;
   }
 
-  // Checks if the user can access the object entity.
+  // Checks if the user can access the object entity
   async canAccessObjectEntity({
     userId,
     objectFile,
     requestedPermission,
   }: {
     userId?: string;
-    objectFile: File;
+    objectFile: S3Object;
     requestedPermission?: ObjectPermission;
   }): Promise<boolean> {
     return canAccessObject({
@@ -237,63 +314,4 @@ export class ObjectStorageService {
       requestedPermission: requestedPermission ?? ObjectPermission.READ,
     });
   }
-}
-
-function parseObjectPath(path: string): {
-  bucketName: string;
-  objectName: string;
-} {
-  if (!path.startsWith("/")) {
-    path = `/${path}`;
-  }
-  const pathParts = path.split("/");
-  if (pathParts.length < 3) {
-    throw new Error("Invalid path: must contain at least a bucket name");
-  }
-
-  const bucketName = pathParts[1];
-  const objectName = pathParts.slice(2).join("/");
-
-  return {
-    bucketName,
-    objectName,
-  };
-}
-
-async function signObjectURL({
-  bucketName,
-  objectName,
-  method,
-  ttlSec,
-}: {
-  bucketName: string;
-  objectName: string;
-  method: "GET" | "PUT" | "DELETE" | "HEAD";
-  ttlSec: number;
-}): Promise<string> {
-  const request = {
-    bucket_name: bucketName,
-    object_name: objectName,
-    method,
-    expires_at: new Date(Date.now() + ttlSec * 1000).toISOString(),
-  };
-  const response = await fetch(
-    `${REPLIT_SIDECAR_ENDPOINT}/object-storage/signed-object-url`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(request),
-    }
-  );
-  if (!response.ok) {
-    throw new Error(
-      `Failed to sign object URL, errorcode: ${response.status}, ` +
-        `make sure you're running on Replit`
-    );
-  }
-
-  const { signed_url: signedURL } = await response.json();
-  return signedURL;
 }
