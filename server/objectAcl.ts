@@ -1,6 +1,7 @@
 import type { S3Object } from "./objectStorage";
 
-const ACL_POLICY_METADATA_KEY = "custom:aclPolicy";
+// S3 metadata keys must be valid HTTP header names (no colons allowed)
+const ACL_POLICY_METADATA_KEY = "custom-acl-policy";
 
 // The type of the access group.
 //

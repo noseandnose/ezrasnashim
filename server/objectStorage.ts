@@ -14,13 +14,20 @@ import {
 const UPLOAD_DIR = "uploads";
 
 // S3 client configuration
-const s3Client = new S3Client({
+// Only provide explicit credentials if env vars are present
+// Otherwise, rely on default AWS credential provider chain (IAM roles, etc.)
+const s3ClientConfig: any = {
   region: process.env.AWS_REGION || "us-east-1",
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "",
-  },
-});
+};
+
+if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+  s3ClientConfig.credentials = {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  };
+}
+
+const s3Client = new S3Client(s3ClientConfig);
 
 // S3 Object wrapper to mimic Google Cloud Storage File interface
 export class S3Object {
@@ -62,17 +69,20 @@ export class S3Object {
     // Get current object to preserve content type
     const [currentMetadata] = await this.getMetadata();
     
+    // Ensure metadata exists before spreading (null-guard for first write)
+    const existingMetadata = currentMetadata.metadata || {};
+    
     // Copy object with new metadata (S3 requires copying to update metadata)
     await s3Client.send(new CopyObjectCommand({
       Bucket: this.bucketName,
       Key: this.key,
       CopySource: `${this.bucketName}/${this.key}`,
-      Metadata: { ...currentMetadata.metadata, ...options.metadata },
+      Metadata: { ...existingMetadata, ...options.metadata },
       ContentType: currentMetadata.contentType,
       MetadataDirective: 'REPLACE',
     }));
     
-    this.metadata = { ...currentMetadata.metadata, ...options.metadata };
+    this.metadata = { ...existingMetadata, ...options.metadata };
   }
 
   createReadStream() {
