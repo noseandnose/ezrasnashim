@@ -333,7 +333,10 @@ export default function Admin() {
         
         if (response.status === 200) {
           const { objectPath } = response.data;
-          const fullMediaUrl = `${window.location.origin}${objectPath}`;
+          // If objectPath is already a full URL (CDN), use it as-is; otherwise prepend origin
+          const fullMediaUrl = objectPath.startsWith('http') 
+            ? objectPath 
+            : `${window.location.origin}${objectPath}`;
           
           if (type === 'recipe') {
             setRecipeFormData(prev => ({ ...prev, imageUrl: fullMediaUrl }));
