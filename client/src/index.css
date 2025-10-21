@@ -32,13 +32,27 @@ body {
   /* Enhanced mobile touch/gesture optimizations */
   touch-action: manipulation; /* Prevent delay on double-tap zoom */
   -webkit-tap-highlight-color: transparent; /* Remove tap highlights */
-  -webkit-touch-callout: none; /* Disable callout on long press */
-  -webkit-user-select: none; /* Prevent text selection on touch */
-  user-select: none;
   
   /* Performance optimizations for mobile */
   contain: layout style; /* CSS containment for better rendering */
   will-change: auto; /* Reset will-change to prevent memory issues */
+}
+
+/* Allow links to work properly - restore touch callout and selection */
+a, a * {
+  -webkit-touch-callout: default !important;
+  -webkit-user-select: auto !important;
+  user-select: auto !important;
+}
+
+/* Keep touch optimizations for non-link interactive elements */
+button, 
+[role="button"],
+.touch-target {
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 #root {
