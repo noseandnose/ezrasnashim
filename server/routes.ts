@@ -1209,20 +1209,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Object storage endpoints for file uploads
   app.post("/api/objects/upload", requireAdminAuth, async (req, res) => {
     try {
-      // Check if running in Replit environment
-      const isReplitEnv = process.env.REPL_ID || process.env.REPLIT_DEPLOYMENT;
-      if (!isReplitEnv) {
-        return res.status(503).json({ 
-          error: "Object storage is only available in Replit environment",
-          message: "Please use direct image URLs instead of uploading files"
-        });
-      }
-
-      // Check if object storage environment variables are set
-      if (!process.env.PRIVATE_OBJECT_DIR) {
+      // Check if AWS S3 is configured
+      if (!process.env.AWS_S3_BUCKET) {
         return res.status(503).json({ 
           error: "Object storage not configured",
-          message: "Object storage needs to be set up in the Replit environment"
+          message: "AWS S3 bucket not configured. Please set AWS_S3_BUCKET environment variable."
         });
       }
 
@@ -1231,21 +1222,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ uploadURL });
     } catch (error: any) {
       console.error('Error getting upload URL:', error);
-      
-      // Provide more specific error messages
-      if (error.message?.includes('PRIVATE_OBJECT_DIR')) {
-        return res.status(503).json({ 
-          error: "Object storage not configured",
-          message: "Please set up object storage in Replit"
-        });
-      }
-      
-      if (error.message?.includes('Failed to sign object URL')) {
-        return res.status(503).json({ 
-          error: "Object storage service unavailable",
-          message: "The object storage service is not available in this environment"
-        });
-      }
       
       res.status(500).json({ 
         error: "Failed to get upload URL",
@@ -1277,13 +1253,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      // Check if running in Replit environment
-      const isReplitEnv = process.env.REPL_ID || process.env.REPLIT_DEPLOYMENT;
-      if (!isReplitEnv) {
-        // In non-Replit environment, just return the object URL as-is
-        return res.status(200).json({ objectPath: objectURL });
-      }
-
       const objectStorageService = new ObjectStorageService();
       const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
         objectURL,
@@ -1296,12 +1265,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(200).json({ objectPath });
     } catch (error: any) {
       console.error("Error setting object ACL:", error);
-      
-      // If it's an environment issue, return the URL as-is
-      if (error.message?.includes('Failed to sign object URL') || 
-          error.message?.includes('PRIVATE_OBJECT_DIR')) {
-        return res.status(200).json({ objectPath: objectURL });
-      }
       
       res.status(500).json({ 
         error: "Internal server error",
@@ -1318,13 +1281,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      // Check if running in Replit environment
-      const isReplitEnv = process.env.REPL_ID || process.env.REPLIT_DEPLOYMENT;
-      if (!isReplitEnv) {
-        // In non-Replit environment, just return the image URL as-is
-        return res.status(200).json({ objectPath: objectURL });
-      }
-
       const objectStorageService = new ObjectStorageService();
       const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
         objectURL,
@@ -1337,12 +1293,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(200).json({ objectPath });
     } catch (error: any) {
       console.error("Error setting object ACL:", error);
-      
-      // If it's an environment issue, return the URL as-is
-      if (error.message?.includes('Failed to sign object URL') || 
-          error.message?.includes('PRIVATE_OBJECT_DIR')) {
-        return res.status(200).json({ objectPath: objectURL });
-      }
       
       res.status(500).json({ 
         error: "Internal server error",
