@@ -1170,8 +1170,11 @@ export function MorningBrochasNavigationArrow() {
   return (
     <button
       onClick={morningBrochasNavState.scrollToBottom}
-      className="fixed bottom-6 right-6 bg-gradient-feminine text-white rounded-full p-3 shadow-lg hover:scale-110 transition-all duration-200"
-      style={{ zIndex: 2147483646 }}
+      className="fixed right-6 bg-gradient-feminine text-white rounded-full p-3 shadow-lg hover:scale-110 transition-all duration-200"
+      style={{ 
+        zIndex: 2147483646,
+        bottom: 'calc(1.5rem + var(--viewport-bottom-offset, 0px))'
+      }}
       aria-label="Jump to bottom of section"
       data-testid="button-scroll-to-section-bottom"
     >
