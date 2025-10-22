@@ -38,6 +38,19 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **Connection**: Node-postgres (pg) with pooling.
 - **Specific Tables**: `tehillim`, `after_brochas_prayers`, `pirkei_avot`, `daily_recipes`.
 
+### Object Storage
+- **Provider**: AWS S3 with CloudFront CDN.
+- **SDK**: AWS SDK v3 (@aws-sdk/client-s3, @aws-sdk/s3-request-presigner).
+- **Upload Directory**: `uploads/` (hardcoded constant in server/objectStorage.ts).
+- **Upload Flow**: Admin requests presigned PUT URL → Direct upload to S3 → Set ACL metadata → Return CDN URL.
+- **CDN Integration**: Objects served via CDN when CDN_BASE_URL is configured, otherwise via Express /objects/ route.
+- **Required Environment Variables**:
+  - `AWS_S3_BUCKET`: S3 bucket name
+  - `AWS_ACCESS_KEY_ID`: AWS access key ID (standard AWS credential)
+  - `AWS_SECRET_ACCESS_KEY`: AWS secret access key (standard AWS credential)
+  - `AWS_REGION`: AWS region (defaults to us-east-1)
+  - `CDN_BASE_URL`: Base URL for CDN (optional, e.g., https://cdn.example.com)
+
 ### Core Application Features
 - **Daily Completion Tracking**: Torah, Tefilla, Tzedaka, resetting at local midnight.
 - **Jewish Times Integration**: Real-time zmanim based on location.
@@ -69,6 +82,10 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **Security**: Drizzle ORM for SQL injection prevention.
 - **Performance**: Lazy loading, code splitting, compression, optimized build, optimized Tehillim chain loading.
 - **Deployment**: Static frontend (S3), backend (ECS), PostgreSQL (Supabase).
+
+## Recent Updates (October 21, 2025)
+- **AWS S3 Object Storage Migration**: Migrated from Google Cloud Storage to AWS S3 for production deployment. Implemented presigned URL upload system with CDN integration. Objects stored in S3 bucket with configurable CDN serving. ACL metadata system preserved using S3 object metadata. Upload directory hardcoded as `uploads/`. Full environment variable configuration for AWS credentials and bucket settings.
+- **Mobile Hyperlink Fix**: Fixed hyperlink click issues on mobile devices by removing restrictive CSS (`-webkit-touch-callout: none`, `user-select: none`) from body element. Links now properly allow touch callout and selection while buttons maintain optimized touch behavior.
 
 ## Recent Critical Fixes (October 19, 2025)
 - **Automated Cache Busting System**: Implemented comprehensive automated version control and cache management to eliminate stale content issues. Auto-generates CACHE_VERSION with build timestamp via `scripts/generate-version.js`, ensuring every deployment gets unique cache keys. Added `/api/version` endpoint with no-cache headers for update detection. Service worker now uses stale-while-revalidate strategy for unversioned assets (manifest.json, icons) while maintaining cache-first for versioned bundles. Client-side version checking in main.tsx polls `/api/version` every 60 seconds, automatically clearing caches and reloading when new version detected. Server serves manifest/icons with 1-hour max-age + 24-hour stale-while-revalidate headers. Build script must run `node scripts/generate-version.js` before deployment to update version.json and sw.js CACHE_VERSION.

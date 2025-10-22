@@ -47,9 +47,10 @@ export default function BottomNavigation({
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-md bg-gradient-soft backdrop-blur-sm border-t border-rose-blush/15 shadow-2xl rounded-t-3xl transition-gentle z-50"
+      className="fixed left-0 right-0 mx-auto w-full max-w-md bg-gradient-soft backdrop-blur-sm border-t border-rose-blush/15 shadow-2xl rounded-t-3xl transition-gentle z-50"
       style={{
-        paddingBottom: "calc(env(safe-area-inset-bottom) + 0.5rem)",
+        bottom: "var(--viewport-bottom-offset, 0px)",
+        paddingBottom: "calc(var(--safe-area-bottom, 0px) + 0.5rem)",
         touchAction: "none"
       }}
     >
