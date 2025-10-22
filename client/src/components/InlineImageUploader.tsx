@@ -87,7 +87,12 @@ export function InlineImageUploader({
           proudlyDisplayPoweredByUppy={false}
           height={200}
           width="100%"
-          note="Upload image or drag and drop"
+          locale={{
+            strings: {
+              dropPasteFiles: 'Drop your file here or %{browseFiles}',
+              browseFiles: 'Browse files',
+            }
+          }}
         />
       </div>
 
