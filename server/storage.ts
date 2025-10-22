@@ -205,6 +205,12 @@ export interface IStorage {
   createNotification(notification: InsertPushNotification): Promise<PushNotification>;
   getNotificationHistory(limit?: number): Promise<PushNotification[]>;
   updateNotificationStats(id: number, successCount: number, failureCount: number): Promise<void>;
+  
+  // Subscription validation methods
+  markSubscriptionValid(endpoint: string): Promise<void>;
+  markSubscriptionInvalid(endpoint: string, errorCode?: number, errorMessage?: string): Promise<void>;
+  getSubscriptionsNeedingValidation(hoursThreshold?: number): Promise<PushSubscription[]>;
+  getAllSubscriptions(): Promise<PushSubscription[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2096,6 +2102,67 @@ export class DatabaseStorage implements IStorage {
         sentCount: successCount + failureCount
       })
       .where(eq(pushNotifications.id, id));
+  }
+  
+  // Subscription validation methods
+  async markSubscriptionValid(endpoint: string): Promise<void> {
+    await db
+      .update(pushSubscriptions)
+      .set({
+        lastValidatedAt: new Date(),
+        validationFailures: 0,
+        lastErrorCode: null,
+        lastErrorMessage: null,
+        updatedAt: new Date()
+      })
+      .where(eq(pushSubscriptions.endpoint, endpoint));
+  }
+  
+  async markSubscriptionInvalid(endpoint: string, errorCode?: number, errorMessage?: string): Promise<void> {
+    // Increment failure count
+    const [subscription] = await db
+      .select()
+      .from(pushSubscriptions)
+      .where(eq(pushSubscriptions.endpoint, endpoint))
+      .limit(1);
+    
+    if (!subscription) return;
+    
+    const newFailureCount = (subscription.validationFailures || 0) + 1;
+    
+    // If 3 consecutive failures, mark as unsubscribed
+    await db
+      .update(pushSubscriptions)
+      .set({
+        validationFailures: newFailureCount,
+        lastErrorCode: errorCode || null,
+        lastErrorMessage: errorMessage || null,
+        subscribed: newFailureCount < 3, // Unsubscribe after 3 failures
+        updatedAt: new Date()
+      })
+      .where(eq(pushSubscriptions.endpoint, endpoint));
+  }
+  
+  async getSubscriptionsNeedingValidation(hoursThreshold: number = 24): Promise<PushSubscription[]> {
+    const thresholdDate = new Date();
+    thresholdDate.setHours(thresholdDate.getHours() - hoursThreshold);
+    
+    return await db
+      .select()
+      .from(pushSubscriptions)
+      .where(
+        sql`${pushSubscriptions.subscribed} = true AND (
+          ${pushSubscriptions.lastValidatedAt} IS NULL OR 
+          ${pushSubscriptions.lastValidatedAt} < ${thresholdDate}
+        )`
+      );
+  }
+  
+  async getAllSubscriptions(): Promise<PushSubscription[]> {
+    return await db
+      .select()
+      .from(pushSubscriptions)
+      .orderBy(sql`${pushSubscriptions.createdAt} DESC`);
   }
 }
 

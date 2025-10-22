@@ -74,6 +74,10 @@ export const pushSubscriptions = pgTable("push_subscriptions", {
   auth: text("auth").notNull(),
   sessionId: text("session_id"), // Track which session subscribed
   subscribed: boolean("subscribed").default(true),
+  lastValidatedAt: timestamp("last_validated_at"), // Last successful validation
+  validationFailures: integer("validation_failures").default(0), // Consecutive failures
+  lastErrorCode: integer("last_error_code"), // Last error code for debugging
+  lastErrorMessage: text("last_error_message"), // Last error message
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 import { find as findTimezone } from "geo-tz";
 import webpush from "web-push";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
+import { pushRetryQueue, PushRetryQueue } from "./pushRetryQueue";
 
 // Server-side cache with TTL and request coalescing to prevent API rate limiting
 interface CacheEntry {
@@ -3868,10 +3869,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           // Validate subscription before sending
           if (!sub.endpoint || !sub.p256dh || !sub.auth) {
-            if (process.env.NODE_ENV !== 'production') {
-              console.warn(`Invalid subscription structure for ${sub.endpoint?.substring(0, 50) || 'unknown'}...`);
-            }
-            await storage.unsubscribeFromPush(sub.endpoint);
+            await storage.markSubscriptionInvalid(sub.endpoint, 400, "Invalid subscription structure");
             failureCount++;
             return;
           }
@@ -3883,38 +3881,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
               auth: sub.auth
             }
           }, payload);
+          
+          // Success - mark as valid
+          await storage.markSubscriptionValid(sub.endpoint);
           successCount++;
         } catch (error: any) {
-          failureCount++;
-          
-          // Enhanced error handling based on status code
           const statusCode = error.statusCode || error.status;
+          const errorCategory = PushRetryQueue.categorizeError(statusCode);
+          
           console.error(`Push notification failed for ${sub.endpoint.substring(0, 50)}...`, {
             statusCode,
             message: error.message,
-            headers: error.headers
+            category: errorCategory.type,
+            action: errorCategory.action
           });
           
-          // Handle different error types appropriately
-          if (statusCode === 410 || statusCode === 404 || statusCode === 400) {
-            // Subscription expired/invalid/not found - remove it (terminal errors)
-            await storage.unsubscribeFromPush(sub.endpoint);
-            console.log(`Removed invalid/expired subscription (${statusCode}): ${sub.endpoint.substring(0, 50)}...`);
-          } else if (statusCode === 413) {
-            // Payload too large - this is a code issue, not subscription issue
-            console.error('Push payload too large - review notification content');
-          } else if (statusCode === 429) {
-            // Rate limited - temporary issue, subscription is still valid
-            console.warn(`Rate limited for ${sub.endpoint.substring(0, 50)}... - subscription remains active`);
-          } else if (statusCode === 401 || statusCode === 403) {
-            // Auth error - likely VAPID misconfiguration, keep subscription
-            console.error(`Auth error ${statusCode} - check VAPID configuration. Subscription retained.`);
-          } else if (statusCode >= 400 && statusCode < 500) {
-            // Other unexpected client error - log for investigation but keep subscription
-            console.warn(`Unexpected client error ${statusCode} for ${sub.endpoint.substring(0, 50)}... - subscription retained for investigation`);
-          } else if (statusCode >= 500) {
-            // Server error - temporary issue, keep subscription
-            console.warn(`Server error ${statusCode} - temporary issue, retaining subscription`);
+          // Handle based on error category
+          if (errorCategory.action === 'remove') {
+            // Terminal error - mark as invalid and will auto-unsubscribe after 3 failures
+            await storage.markSubscriptionInvalid(sub.endpoint, statusCode, error.message);
+            failureCount++;
+          } else if (errorCategory.action === 'retry') {
+            // Temporary error - add to retry queue
+            pushRetryQueue.add(sub, payload, notification.id);
+            failureCount++; // Count as failure for now, will be retried
+          } else if (errorCategory.action === 'keep') {
+            // Config error - keep subscription, log for admin
+            console.error(`Configuration issue: ${errorCategory.description}`);
+            failureCount++;
+          } else {
+            // Unknown - add to retry queue to be safe
+            pushRetryQueue.add(sub, payload, notification.id);
+            failureCount++;
           }
         }
       });
@@ -4084,6 +4082,112 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("[Test Push] Error:", error);
       return res.status(500).json({ error: "Failed to send test push notification" });
     }
+  });
+
+  // Subscription validation endpoint (admin only)
+  app.post("/api/push/validate-subscriptions", requireAdminAuth, async (req, res) => {
+    try {
+      const subscriptions = await storage.getSubscriptionsNeedingValidation(24);
+      
+      if (subscriptions.length === 0) {
+        return res.json({ 
+          success: true, 
+          message: "All subscriptions are up to date",
+          validated: 0
+        });
+      }
+
+      // Send lightweight validation ping
+      const validationPayload = JSON.stringify({
+        title: "Connection Check",
+        body: "",
+        tag: "validation-ping",
+        silent: true,
+        data: { type: "validation" }
+      });
+
+      let validCount = 0;
+      let invalidCount = 0;
+      const errors: Array<{ endpoint: string; error: string }> = [];
+
+      for (const sub of subscriptions) {
+        try {
+          if (!sub.endpoint || !sub.p256dh || !sub.auth) {
+            await storage.markSubscriptionInvalid(sub.endpoint, 400, "Invalid subscription structure");
+            invalidCount++;
+            continue;
+          }
+
+          await webpush.sendNotification({
+            endpoint: sub.endpoint,
+            keys: {
+              p256dh: sub.p256dh,
+              auth: sub.auth
+            }
+          }, validationPayload);
+
+          // Success - mark as valid
+          await storage.markSubscriptionValid(sub.endpoint);
+          validCount++;
+        } catch (error: any) {
+          const statusCode = error.statusCode || error.status;
+          const errorMessage = error.message;
+          
+          // Mark as invalid with error details
+          await storage.markSubscriptionInvalid(sub.endpoint, statusCode, errorMessage);
+          invalidCount++;
+          
+          errors.push({
+            endpoint: sub.endpoint.substring(0, 50) + "...",
+            error: `${statusCode || 'Unknown'}: ${errorMessage}`
+          });
+        }
+      }
+
+      res.json({
+        success: true,
+        message: `Validated ${subscriptions.length} subscriptions`,
+        validCount,
+        invalidCount,
+        totalChecked: subscriptions.length,
+        errors: errors.length > 0 ? errors : undefined
+      });
+    } catch (error) {
+      console.error("Error validating subscriptions:", error);
+      return res.status(500).json({ error: "Failed to validate subscriptions" });
+    }
+  });
+
+  // Get all subscriptions with health status (admin only)
+  app.get("/api/push/subscriptions", requireAdminAuth, async (req, res) => {
+    try {
+      const subscriptions = await storage.getAllSubscriptions();
+      
+      // Return sanitized subscription data with health metrics
+      const sanitized = subscriptions.map(sub => ({
+        id: sub.id,
+        endpoint: sub.endpoint.substring(0, 50) + "...",
+        sessionId: sub.sessionId,
+        subscribed: sub.subscribed,
+        lastValidatedAt: sub.lastValidatedAt,
+        validationFailures: sub.validationFailures,
+        lastErrorCode: sub.lastErrorCode,
+        lastErrorMessage: sub.lastErrorMessage,
+        createdAt: sub.createdAt,
+        updatedAt: sub.updatedAt
+      }));
+
+      res.json(sanitized);
+    } catch (error) {
+      console.error("Error fetching subscriptions:", error);
+      return res.status(500).json({ error: "Failed to fetch subscriptions" });
+    }
+  });
+
+  // Get retry queue status (admin only)
+  app.get("/api/push/queue-status", requireAdminAuth, (req, res) => {
+    const status = pushRetryQueue.getStatus();
+    res.json(status);
   });
 
   const httpServer = createServer(app);
