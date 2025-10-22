@@ -5,6 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useGeolocation, useJewishTimes } from "@/hooks/use-jewish-times";
+import { useSafeArea } from "@/hooks/use-safe-area";
 import { initializeCache } from "@/lib/cache";
 import { lazy, Suspense } from "react";
 import ErrorBoundary from "@/components/ui/error-boundary";
@@ -42,6 +43,9 @@ function LoadingScreen() {
 function Router() {
   // Track page views when routes change
   useAnalytics();
+  
+  // Initialize safe area CSS variables for proper layout positioning
+  useSafeArea();
   
   // Initialize location immediately for accurate prayer times
   useGeolocation();
