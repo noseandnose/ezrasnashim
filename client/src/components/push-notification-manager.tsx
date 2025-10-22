@@ -58,9 +58,36 @@ export function PushNotificationManager() {
         return;
       }
 
-      // Register service worker
-      const registration = await navigator.serviceWorker.register('/sw.js');
+      // Reuse existing service worker registration
+      let registration = await navigator.serviceWorker.getRegistration('/');
+      if (!registration) {
+        registration = await navigator.serviceWorker.register('/sw.js');
+      }
       await navigator.serviceWorker.ready;
+
+      // Check for existing subscription and validate it
+      const existingSub = await registration.pushManager.getSubscription();
+      if (existingSub) {
+        try {
+          // Test if subscription is still valid by sending it to server
+          const sessionId = localStorage.getItem('sessionId') || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          await apiRequest('POST', '/api/push/subscribe', {
+            subscription: existingSub.toJSON(),
+            sessionId
+          });
+          
+          setSubscription(existingSub);
+          toast({
+            title: 'Already Subscribed',
+            description: 'Push notifications are already enabled.',
+          });
+          return;
+        } catch (error) {
+          // Existing subscription is invalid, unsubscribe and create new
+          console.warn('Existing subscription invalid, creating new one:', error);
+          await existingSub.unsubscribe();
+        }
+      }
 
       // Get VAPID public key from server
       const response = await apiRequest('GET', '/api/push/vapid-public-key');
@@ -95,11 +122,22 @@ export function PushNotificationManager() {
         title: 'Subscribed!',
         description: 'You will now receive push notifications.',
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error subscribing to push:', error);
+      
+      // Provide more specific error messages
+      let description = 'Could not enable push notifications. Please try again.';
+      if (error.message?.includes('not configured')) {
+        description = 'Push notifications are not configured on this server.';
+      } else if (error.name === 'NotAllowedError') {
+        description = 'Notification permission was denied. Please enable it in your browser settings.';
+      } else if (error.name === 'NotSupportedError') {
+        description = 'Push notifications are not supported in this browser.';
+      }
+      
       toast({
         title: 'Subscription Failed',
-        description: 'Could not enable push notifications. Please try again.',
+        description,
         variant: 'destructive'
       });
     } finally {
