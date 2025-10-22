@@ -8,6 +8,7 @@ interface QueuedNotification {
   attempts: number;
   lastAttempt: Date;
   notificationId?: number;
+  queueId: string; // Unique ID for this queued item
 }
 
 export class PushRetryQueue {
@@ -15,18 +16,24 @@ export class PushRetryQueue {
   private maxAttempts = 3;
   private retryDelays = [5000, 15000, 60000]; // 5s, 15s, 1min exponential backoff
   private processing = false;
+  private queueIdCounter = 0;
 
   /**
    * Add a notification to the retry queue
+   * Uses composite key (endpoint + queueId) to allow multiple pending notifications per endpoint
    */
   add(subscription: PushSubscription, payload: string, notificationId?: number): void {
-    const key = subscription.endpoint;
+    // Generate unique queue ID for this specific notification
+    const queueId = `${Date.now()}-${++this.queueIdCounter}`;
+    const key = `${subscription.endpoint}::${queueId}`;
+    
     this.queue.set(key, {
       subscription,
       payload,
       attempts: 0,
       lastAttempt: new Date(),
-      notificationId
+      notificationId,
+      queueId
     });
     
     // Start processing if not already running
@@ -203,9 +210,9 @@ export class PushRetryQueue {
   /**
    * Get queue status
    */
-  getStatus(): { size: number; processing: boolean } {
+  getStatus(): { queueSize: number; processing: boolean } {
     return {
-      size: this.queue.size,
+      queueSize: this.queue.size,
       processing: this.processing
     };
   }
