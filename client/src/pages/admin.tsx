@@ -11,7 +11,6 @@ import { useQuery } from '@tanstack/react-query';
 import { MessageSquare, Plus, Save, Edit, Trash2, Bell, ChefHat, Send, Clock, Users, CheckCircle, XCircle, Image, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Message, TableInspiration } from '@shared/schema';
-import { ObjectUploader } from '@/components/ObjectUploader';
 import { InlineImageUploader } from '@/components/InlineImageUploader';
 import type { UploadResult } from '@uppy/core';
 
@@ -1109,54 +1108,39 @@ export default function Admin() {
                     const mediaTypeField = `mediaType${index}` as keyof typeof inspirationFormData;
                     
                     return (
-                      <div key={index} className="border rounded-lg p-4 bg-gray-50">
-                        <Label className="text-sm font-medium text-gray-700 mb-2">Media {index}</Label>
-                        
-                        <div className="grid grid-cols-3 gap-2 mb-3">
+                      <div key={index} className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Label className="text-sm font-medium text-gray-700">Media {index} Type:</Label>
                           <select
                             value={inspirationFormData[mediaTypeField]}
                             onChange={(e) => setInspirationFormData(prev => ({ 
                               ...prev, 
                               [mediaTypeField]: e.target.value 
                             }))}
-                            className="px-3 py-1.5 text-sm border border-gray-300 rounded-md"
+                            className="px-3 py-1.5 text-sm border border-gray-300 rounded-md bg-white"
                           >
                             <option value="image">Image</option>
                             <option value="audio">Audio</option>
                             <option value="video">Video</option>
                           </select>
-                          
-                          <Input
-                            placeholder="Or enter URL"
-                            value={inspirationFormData[mediaUrlField]}
-                            onChange={(e) => setInspirationFormData(prev => ({ 
-                              ...prev, 
-                              [mediaUrlField]: e.target.value 
-                            }))}
-                            onKeyDown={(e) => {
-                              // Prevent space key from triggering button focus
-                              if (e.key === ' ') {
-                                e.stopPropagation();
-                              }
-                            }}
-                            className="col-span-2 text-sm"
-                          />
                         </div>
                         
-                        <ObjectUploader
+                        <InlineImageUploader
+                          label={`Upload ${inspirationFormData[mediaTypeField]} ${index}`}
+                          value={inspirationFormData[mediaUrlField]}
+                          onChange={(url) => setInspirationFormData(prev => ({ 
+                            ...prev, 
+                            [mediaUrlField]: url 
+                          }))}
                           onGetUploadParameters={() => handleMediaUpload()}
                           onComplete={(result) => handleMediaUploadComplete(result, 'inspiration', mediaUrlField)}
-                          buttonClassName="w-full admin-btn-primary px-3 py-2 rounded-md text-sm"
-                        >
-                          <Image className="w-4 h-4 mr-2" />
-                          Upload {inspirationFormData[mediaTypeField]}
-                        </ObjectUploader>
-                        
-                        {inspirationFormData[mediaUrlField] && (
-                          <div className="mt-2 text-xs text-gray-600 break-all">
-                            Current: {inspirationFormData[mediaUrlField]}
-                          </div>
-                        )}
+                          placeholder={`Or paste ${inspirationFormData[mediaTypeField]} URL here`}
+                          accept={
+                            inspirationFormData[mediaTypeField] === 'image' ? 'image/*' : 
+                            inspirationFormData[mediaTypeField] === 'audio' ? 'audio/*' : 
+                            'video/*'
+                          }
+                        />
                       </div>
                     );
                   })}
