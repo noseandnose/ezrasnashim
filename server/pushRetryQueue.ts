@@ -1,5 +1,5 @@
 import webpush from 'web-push';
-import type { PushSubscription } from '@shared/schema';
+import type { PushSubscription } from '../shared/schema';
 import { storage } from './storage';
 
 interface QueuedNotification {
