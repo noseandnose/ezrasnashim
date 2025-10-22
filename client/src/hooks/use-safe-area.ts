@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 /**
  * Hook to manage safe-area CSS variables for proper header/footer positioning
- * Uses VisualViewport API for dynamic browser UI tracking (Safari toolbar, keyboard, etc.)
+ * Applies fixed offset for Safari browser mode to account for bottom toolbar
  */
 export function useSafeArea() {
   useEffect(() => {
@@ -35,18 +35,6 @@ export function useSafeArea() {
         viewportBottomOffset = Math.max(safeBottomValue, 24);
       }
       
-      // For debugging: log the actual values
-      if (import.meta.env.DEV) {
-        console.log('Safe area detection:', { 
-          safeAreaTop, 
-          safeAreaBottom, 
-          isStandalone,
-          viewportBottomOffset,
-          visualViewportHeight: window.visualViewport?.height,
-          windowInnerHeight: window.innerHeight
-        });
-      }
-      
       // Set CSS variables
       root.style.setProperty('--safe-area-top', safeAreaTop);
       root.style.setProperty('--safe-area-bottom', safeAreaBottom);
@@ -63,15 +51,9 @@ export function useSafeArea() {
     // Initial update
     updateSafeAreaVars();
     
-    // Listen for viewport changes (Safari toolbar, keyboard, rotation, etc.)
+    // Listen for viewport changes
     window.addEventListener('resize', updateSafeAreaVars);
     window.addEventListener('orientationchange', updateSafeAreaVars);
-    
-    // VisualViewport API - tracks browser UI changes in real-time
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', updateSafeAreaVars);
-      window.visualViewport.addEventListener('scroll', updateSafeAreaVars);
-    }
     
     // Listen for display mode changes
     const standaloneQuery = window.matchMedia('(display-mode: standalone)');
@@ -82,11 +64,6 @@ export function useSafeArea() {
     return () => {
       window.removeEventListener('resize', updateSafeAreaVars);
       window.removeEventListener('orientationchange', updateSafeAreaVars);
-      
-      if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', updateSafeAreaVars);
-        window.visualViewport.removeEventListener('scroll', updateSafeAreaVars);
-      }
       
       if (standaloneQuery.removeEventListener) {
         standaloneQuery.removeEventListener('change', updateSafeAreaVars);
