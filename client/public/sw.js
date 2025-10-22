@@ -356,6 +356,7 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('push', (event) => {
   
   if (!event.data) {
+    console.warn('[SW Push] Received push event with no data');
     return;
   }
   
@@ -363,10 +364,29 @@ self.addEventListener('push', (event) => {
   try {
     data = event.data.json();
   } catch (e) {
-    data = {
-      title: 'Ezras Nashim',
-      body: event.data.text()
-    };
+    console.warn('[SW Push] Failed to parse JSON, falling back to text:', e);
+    try {
+      const text = event.data.text();
+      data = {
+        title: 'Ezras Nashim',
+        body: text || 'New notification'
+      };
+    } catch (err) {
+      console.error('[SW Push] Failed to read push data:', err);
+      return;
+    }
+  }
+  
+  // Skip silent validation pings - don't show notification
+  if (data.silent || (data.data && data.data.type === 'validation')) {
+    console.log('[SW Push] Received validation ping, skipping notification display');
+    return;
+  }
+  
+  // Validate data has minimum required fields
+  if (!data.title && !data.body) {
+    console.warn('[SW Push] Received push with no title or body, skipping');
+    return;
   }
   
   const options = {
@@ -376,7 +396,8 @@ self.addEventListener('push', (event) => {
     vibrate: [200, 100, 200],
     data: {
       url: data.url || '/',
-      ...data.data
+      timestamp: data.timestamp || Date.now(),
+      ...(data.data || {})
     },
     actions: data.actions || [],
     requireInteraction: data.requireInteraction || false,
@@ -384,11 +405,25 @@ self.addEventListener('push', (event) => {
     renotify: data.renotify || false
   };
   
+  const notificationPromise = self.registration.showNotification(
+    data.title || 'Ezras Nashim', 
+    options
+  ).catch(err => {
+    console.error('[SW Push] Error showing notification:', err);
+    // If showing notification fails, try simplified version
+    return self.registration.showNotification(
+      data.title || 'Ezras Nashim',
+      {
+        body: data.body || '',
+        icon: '/icon-192x192.png',
+        badge: '/badge-72x72.png'
+      }
+    ).catch(fallbackErr => {
+      console.error('[SW Push] Fallback notification also failed:', fallbackErr);
+    });
+  });
   
-  event.waitUntil(
-    self.registration.showNotification(data.title || 'Ezras Nashim', options)
-      .catch(err => console.error('[SW] Error showing notification:', err))
-  );
+  event.waitUntil(notificationPromise);
 });
 
 // Handle notification clicks
