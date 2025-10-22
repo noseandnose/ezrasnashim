@@ -28,8 +28,10 @@ export function useSafeArea() {
       let viewportBottomOffset = 0;
       if (window.visualViewport) {
         const vp = window.visualViewport;
-        // Calculate how much of the window is obscured by browser UI
-        viewportBottomOffset = Math.max(0, window.innerHeight - vp.height - vp.offsetTop);
+        // Use screen.height because window.innerHeight collapses to viewport height on iOS Safari
+        // This correctly calculates the browser chrome overlap
+        const referenceHeight = window.screen.height || window.innerHeight;
+        viewportBottomOffset = Math.max(0, referenceHeight - (vp.height + vp.offsetTop));
       }
       
       // For debugging: log the actual values
