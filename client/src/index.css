@@ -885,8 +885,8 @@ html, body, #root {
   overflow-y: auto;
   overflow-x: hidden;
   
-  /* Simple padding for bottom navigation - safe-area handled in nav component itself */
-  padding-bottom: var(--footer-height);
+  /* Total safe bottom area includes footer, safe-area-inset, and Safari nav offset */
+  padding-bottom: var(--safe-bottom-total);
   
   /* Prevent scroll bounce on iOS */
   -webkit-overflow-scrolling: touch;
