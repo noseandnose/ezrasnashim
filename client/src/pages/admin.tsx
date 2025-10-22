@@ -12,6 +12,7 @@ import { MessageSquare, Plus, Save, Edit, Trash2, Bell, ChefHat, Send, Clock, Us
 import { format } from 'date-fns';
 import type { Message, TableInspiration } from '@shared/schema';
 import { ObjectUploader } from '@/components/ObjectUploader';
+import { InlineImageUploader } from '@/components/InlineImageUploader';
 import type { UploadResult } from '@uppy/core';
 
 type AdminTab = 'messages' | 'recipes' | 'inspirations' | 'notifications';
@@ -929,34 +930,14 @@ export default function Admin() {
                 </div>
 
                 {/* Recipe Image Upload */}
-                <div className="border rounded-lg p-4 bg-gray-50">
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">Recipe Image</Label>
-                  
-                  <div className="space-y-3">
-                    <Input
-                      placeholder="Image URL (or upload below)"
-                      value={recipeFormData.imageUrl}
-                      onChange={(e) => setRecipeFormData(prev => ({ ...prev, imageUrl: e.target.value }))}
-                      data-testid="input-recipe-image-url"
-                      className="text-sm"
-                    />
-                    
-                    <ObjectUploader
-                      onGetUploadParameters={() => handleMediaUpload()}
-                      onComplete={(result) => handleMediaUploadComplete(result, 'recipe')}
-                      maxNumberOfFiles={1}
-                      buttonClassName="w-full admin-btn-primary"
-                    >
-                      Upload Recipe Image
-                    </ObjectUploader>
-                    
-                    {recipeFormData.imageUrl && (
-                      <div className="mt-2 text-xs text-gray-600 break-all">
-                        Current image: {recipeFormData.imageUrl}
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <InlineImageUploader
+                  label="Recipe Image"
+                  value={recipeFormData.imageUrl}
+                  onChange={(url) => setRecipeFormData(prev => ({ ...prev, imageUrl: url }))}
+                  onGetUploadParameters={() => handleMediaUpload()}
+                  onComplete={(result) => handleMediaUploadComplete(result, 'recipe')}
+                  placeholder="Or paste image URL here"
+                />
 
                 <Button 
                   onClick={handleRecipeSubmit} 
