@@ -80,7 +80,7 @@ export function InlineImageUploader({
       <Label className="text-sm font-medium text-gray-700">{label}</Label>
       
       {/* Inline Upload Area - Primary */}
-      <div className="relative">
+      <div className="relative uppy-custom-text">
         <Dashboard
           uppy={uppy}
           hideUploadButton={false}
@@ -89,6 +89,7 @@ export function InlineImageUploader({
           width="100%"
           locale={{
             strings: {
+              dropHint: '',
               dropPasteFiles: 'Drop your file here or %{browseFiles}',
               browseFiles: 'Browse files',
             }

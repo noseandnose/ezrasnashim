@@ -1303,3 +1303,15 @@ select {
     padding: 12px 16px;
   }
 }
+
+/* Uppy Custom Styling */
+.uppy-custom-text .uppy-Dashboard-browse {
+  color: #2563eb !important; /* Blue-600 */
+  text-decoration: underline !important;
+  cursor: pointer !important;
+  font-weight: 500 !important;
+}
+
+.uppy-custom-text .uppy-Dashboard-browse:hover {
+  color: #1d4ed8 !important; /* Blue-700 */
+}
