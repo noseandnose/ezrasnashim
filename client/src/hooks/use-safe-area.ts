@@ -23,15 +23,16 @@ export function useSafeArea() {
       const headerHeight = 48; // Base header height in px
       const footerHeight = 70; // Bottom nav height in px
       
-      // Calculate viewport bottom offset using VisualViewport API
-      // This automatically accounts for Safari's dynamic toolbar, keyboard, etc.
+      // Detect Safari (exclude iOS Chrome, Edge, Firefox which also have "Safari" in UA)
+      const isSafari = /^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(navigator.userAgent);
+      
+      // Calculate viewport bottom offset - Safari browser mode only
+      // Chrome and Safari standalone mode use bottom: 0
       let viewportBottomOffset = 0;
-      if (window.visualViewport) {
-        const vp = window.visualViewport;
-        // Use screen.height because window.innerHeight collapses to viewport height on iOS Safari
-        // This correctly calculates the browser chrome overlap
-        const referenceHeight = window.screen.height || window.innerHeight;
-        viewportBottomOffset = Math.max(0, referenceHeight - (vp.height + vp.offsetTop));
+      if (isSafari && !isStandalone) {
+        // Safari browser mode: fixed offset for bottom toolbar
+        const safeBottomValue = parseInt(safeAreaBottom, 10) || 0;
+        viewportBottomOffset = Math.max(safeBottomValue, 24);
       }
       
       // For debugging: log the actual values
