@@ -76,6 +76,7 @@ export default function Admin() {
     requireInteraction: false
   });
   const [isSendingNotification, setIsSendingNotification] = useState(false);
+  const [isValidatingSubscriptions, setIsValidatingSubscriptions] = useState(false);
 
   // Set up authorization headers for authenticated requests
   const getAuthHeaders = () => ({
@@ -164,6 +165,47 @@ export default function Admin() {
       }
     },
     enabled: isAuthenticated && activeTab === 'notifications',
+  });
+
+  const { data: subscriptions, refetch: refetchSubscriptions } = useQuery({
+    queryKey: ['admin-push-subscriptions'],
+    queryFn: async () => {
+      if (!isAuthenticated || activeTab !== 'notifications') return [];
+      try {
+        const response = await axiosClient.get('/api/push/subscriptions', {
+          headers: getAuthHeaders()
+        });
+        return response.data;
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          setIsAuthenticated(false);
+          throw new Error('Authentication expired');
+        }
+        throw error;
+      }
+    },
+    enabled: isAuthenticated && activeTab === 'notifications',
+  });
+
+  const { data: queueStatus, refetch: refetchQueueStatus } = useQuery({
+    queryKey: ['admin-push-queue-status'],
+    queryFn: async () => {
+      if (!isAuthenticated || activeTab !== 'notifications') return null;
+      try {
+        const response = await axiosClient.get('/api/push/queue-status', {
+          headers: getAuthHeaders()
+        });
+        return response.data;
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          setIsAuthenticated(false);
+          throw new Error('Authentication expired');
+        }
+        throw error;
+      }
+    },
+    enabled: isAuthenticated && activeTab === 'notifications',
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   const handleLogin = async () => {
@@ -546,6 +588,33 @@ export default function Admin() {
       });
     } finally {
       setIsSendingNotification(false);
+    }
+  };
+
+  const handleValidateSubscriptions = async () => {
+    setIsValidatingSubscriptions(true);
+    try {
+      const response = await axiosClient.post('/api/push/validate-subscriptions', {}, {
+        headers: getAuthHeaders()
+      });
+
+      if (response.status === 200) {
+        const { validCount, invalidCount, totalChecked } = response.data;
+        toast({
+          title: 'Validation Complete',
+          description: `Checked ${totalChecked} subscriptions: ${validCount} valid, ${invalidCount} invalid.`,
+        });
+        await refetchSubscriptions();
+        await refetchQueueStatus();
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Validation Failed',
+        description: 'Failed to validate subscriptions. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsValidatingSubscriptions(false);
     }
   };
 
@@ -1277,7 +1346,71 @@ export default function Admin() {
 
         {/* Notifications Tab */}
         {activeTab === 'notifications' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-8">
+            {/* Subscription Health Dashboard */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Active Subscriptions */}
+              <Card className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Active Subscriptions</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {subscriptions?.filter((sub: any) => sub.subscribed).length || 0}
+                    </p>
+                  </div>
+                  <Users className="w-8 h-8 text-green-600 opacity-50" />
+                </div>
+              </Card>
+
+              {/* Invalid Subscriptions */}
+              <Card className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Invalid Subscriptions</p>
+                    <p className="text-2xl font-bold text-red-600">
+                      {subscriptions?.filter((sub: any) => !sub.subscribed || (sub.validationFailures || 0) >= 3).length || 0}
+                    </p>
+                  </div>
+                  <XCircle className="w-8 h-8 text-red-600 opacity-50" />
+                </div>
+              </Card>
+
+              {/* Retry Queue */}
+              <Card className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Pending Retries</p>
+                    <p className="text-2xl font-bold text-orange-600">
+                      {queueStatus?.queueSize || 0}
+                    </p>
+                  </div>
+                  <Clock className="w-8 h-8 text-orange-600 opacity-50" />
+                </div>
+              </Card>
+            </div>
+
+            {/* Validation Button */}
+            <Card className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold mb-1">Subscription Validation</h3>
+                  <p className="text-sm text-gray-600">
+                    Test all subscriptions and remove invalid ones. Recommended to run every 24 hours.
+                  </p>
+                </div>
+                <Button 
+                  onClick={handleValidateSubscriptions} 
+                  disabled={isValidatingSubscriptions}
+                  className="admin-btn-primary"
+                  data-testid="button-validate-subscriptions"
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  {isValidatingSubscriptions ? 'Validating...' : 'Validate All'}
+                </Button>
+              </div>
+            </Card>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Send Notification Form */}
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-4 flex items-center">
@@ -1392,6 +1525,7 @@ export default function Admin() {
                 )}
               </div>
             </Card>
+          </div>
           </div>
         )}
       </div>
