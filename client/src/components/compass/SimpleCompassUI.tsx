@@ -316,14 +316,22 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
       {!state.hasPermission && state.isSupported && (
         <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200">
           <p className="text-sm text-black mb-3">
-            For accurate direction to Jerusalem, please enable compass access
+            {/Android/i.test(navigator.userAgent)
+              ? 'For accurate direction to Jerusalem, tap the button below to activate motion sensors'
+              : 'For accurate direction to Jerusalem, please enable compass access'}
           </p>
           <Button
             onClick={handleEnableCompass}
             className="w-full bg-gradient-to-r from-blush to-peach text-white py-2 rounded-xl font-medium"
+            data-testid="button-enable-compass"
           >
-            Enable Compass
+            {/Android/i.test(navigator.userAgent) ? 'Activate Sensors' : 'Enable Compass'}
           </Button>
+          {/Android/i.test(navigator.userAgent) && (
+            <p className="text-xs text-black/60 mt-2">
+              Note: On Android, motion sensors activate automatically when you tap this button
+            </p>
+          )}
         </div>
       )}
       
