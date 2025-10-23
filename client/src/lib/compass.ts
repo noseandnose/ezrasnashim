@@ -131,7 +131,10 @@ export class SimpleCompass {
   private state: CompassState;
   private subscribers: Set<(state: CompassState) => void> = new Set();
   private orientationHandler: ((event: DeviceOrientationEvent) => void) | null = null;
+  private absoluteOrientationHandler: ((event: DeviceOrientationEvent) => void) | null = null;
   private watchId: number | null = null;
+  private activeEventType: string | null = null;
+  private eventSwitchTimeout: NodeJS.Timeout | null = null;
   
   // Filtering and smoothing
   private headingBuffer: number[] = [];
@@ -293,31 +296,83 @@ export class SimpleCompass {
   }
   
   private startOrientationTracking() {
-    if (this.orientationHandler) {
+    if (this.orientationHandler || this.absoluteOrientationHandler) {
       this.stopOrientationTracking();
     }
     
     const deviceInfo = getDeviceInfo();
-    let eventType: string;
     
-    // Prioritize native sensors as specified
+    // For iOS with webkitCompassHeading, only use deviceorientation
     if (deviceInfo.isIOS && deviceInfo.hasWebkitCompass) {
-      eventType = 'deviceorientation'; // webkitCompassHeading is handled in the event
-    } else if (deviceInfo.isAndroid && deviceInfo.hasAbsoluteOrientation) {
-      eventType = 'deviceorientationabsolute';
-    } else {
-      eventType = 'deviceorientation';
+      this.activeEventType = 'deviceorientation';
+      this.orientationHandler = (event: DeviceOrientationEvent) => {
+        this.handleOrientationEvent(event, 'deviceorientation');
+      };
+      window.addEventListener('deviceorientation', this.orientationHandler, { passive: true });
+      
+      if (this.debugMode) {
+        console.log('[Compass] iOS: Using deviceorientation with webkitCompassHeading');
+      }
+      return;
     }
     
-    this.orientationHandler = (event: DeviceOrientationEvent) => {
-      this.handleOrientationEvent(event, eventType);
+    // For Android and other devices: Try both events, use whichever fires first
+    // Chrome Android no longer fires deviceorientationabsolute, but we try both
+    let absoluteEventFired = false;
+    let standardEventFired = false;
+    
+    // Handler for deviceorientationabsolute
+    this.absoluteOrientationHandler = (event: DeviceOrientationEvent) => {
+      if (!absoluteEventFired) {
+        absoluteEventFired = true;
+        this.activeEventType = 'deviceorientationabsolute';
+        
+        // Remove standard event listener if absolute works
+        if (this.orientationHandler) {
+          window.removeEventListener('deviceorientation', this.orientationHandler);
+          this.orientationHandler = null;
+        }
+        
+        if (this.debugMode) {
+          console.log('[Compass] Using deviceorientationabsolute');
+        }
+      }
+      this.handleOrientationEvent(event, 'deviceorientationabsolute');
     };
     
-    // Add event listener with passive flag for performance
-    window.addEventListener(eventType as any, this.orientationHandler, { passive: true });
+    // Handler for standard deviceorientation (fallback)
+    this.orientationHandler = (event: DeviceOrientationEvent) => {
+      if (!standardEventFired) {
+        standardEventFired = true;
+        this.activeEventType = 'deviceorientation';
+        
+        if (this.debugMode) {
+          console.log('[Compass] Using deviceorientation (fallback)');
+        }
+      }
+      this.handleOrientationEvent(event, 'deviceorientation');
+    };
+    
+    // Subscribe to both events
+    window.addEventListener('deviceorientationabsolute', this.absoluteOrientationHandler as any, { passive: true });
+    window.addEventListener('deviceorientation', this.orientationHandler, { passive: true });
+    
+    // After 1 second, if deviceorientationabsolute hasn't fired, remove it
+    this.eventSwitchTimeout = setTimeout(() => {
+      if (!absoluteEventFired && this.absoluteOrientationHandler) {
+        window.removeEventListener('deviceorientationabsolute', this.absoluteOrientationHandler as any);
+        this.absoluteOrientationHandler = null;
+        this.activeEventType = 'deviceorientation';
+        
+        if (this.debugMode) {
+          console.log('[Compass] deviceorientationabsolute timeout, using deviceorientation only');
+        }
+      }
+      this.eventSwitchTimeout = null;
+    }, 1000);
     
     if (this.debugMode) {
-      // Started orientation tracking
+      console.log('[Compass] Android: Trying both deviceorientationabsolute and deviceorientation');
     }
   }
   
@@ -340,8 +395,22 @@ export class SimpleCompass {
     } else if (event.alpha !== null && event.alpha !== undefined) {
       // Fallback to alpha-based heading for older iOS devices or when webkitCompassHeading is unavailable
       if (deviceInfo.isAndroid) {
-        // Android: alpha is typically magnetic north, use directly
-        heading = event.alpha;
+        // Android: alpha is device-frame yaw where 0° = portrait pointing East
+        // Need to compensate for screen orientation
+        const screenOrientationAngle = (screen.orientation?.angle ?? window.orientation) || 0;
+        
+        // Convert device-frame yaw to magnetic heading
+        // Formula: heading = 360 - alpha + screenOrientation
+        heading = normalizeDegrees(360 - event.alpha + screenOrientationAngle);
+        
+        if (this.debugMode) {
+          console.log('[Compass] Android heading calculation:', {
+            rawAlpha: event.alpha,
+            screenOrientation: screenOrientationAngle,
+            computedHeading: heading,
+            absolute: event.absolute
+          });
+        }
       } else if (deviceInfo.isIOS) {
         // iOS: webkitCompassHeading unavailable, use alpha with iOS correction
         // For iOS, when webkitCompassHeading is not available, alpha needs correction
@@ -411,11 +480,25 @@ export class SimpleCompass {
   }
   
   private stopOrientationTracking() {
+    // Clear event switch timeout
+    if (this.eventSwitchTimeout) {
+      clearTimeout(this.eventSwitchTimeout);
+      this.eventSwitchTimeout = null;
+    }
+    
+    // Remove deviceorientation listener
     if (this.orientationHandler) {
       window.removeEventListener('deviceorientation', this.orientationHandler);
-      window.removeEventListener('deviceorientationabsolute', this.orientationHandler as any);
       this.orientationHandler = null;
     }
+    
+    // Remove deviceorientationabsolute listener
+    if (this.absoluteOrientationHandler) {
+      window.removeEventListener('deviceorientationabsolute', this.absoluteOrientationHandler as any);
+      this.absoluteOrientationHandler = null;
+    }
+    
+    this.activeEventType = null;
   }
   
   subscribe(callback: (state: CompassState) => void) {
