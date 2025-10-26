@@ -3773,7 +3773,7 @@ function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'h
     
     return {
       psalms: psalmsToShow,
-      title: "Daily Tehillim",
+      title: "Today's Tehillim",
       subtitle
     };
   };
@@ -4039,7 +4039,7 @@ function SpecialTehillimModal() {
     
     return {
       psalms: psalmsToShow,
-      title: "Daily Tehillim",
+      title: "Today's Tehillim",
       subtitle
     };
   };
