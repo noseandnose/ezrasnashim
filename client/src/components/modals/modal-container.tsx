@@ -11,6 +11,7 @@ import LocationModal from "./location-modal";
 import SponsorDetailsModal from "./sponsor-details-modal";
 import { CommunityImpactModal } from "./community-impact-modal";
 import { EventsModal } from "./events-modal";
+import MeditationModals from "./meditation-modals";
 import { useModalStore } from "@/lib/types";
 
 interface ModalContainerProps {
@@ -41,6 +42,7 @@ export default function ModalContainer({ onSectionChange }: ModalContainerProps)
         isOpen={activeModal === 'events'} 
         onClose={closeModal} 
       />
+      <MeditationModals />
     </>
   );
 }
