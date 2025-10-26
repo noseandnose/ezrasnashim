@@ -1329,7 +1329,7 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
 }
 
 function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
-  const { selectedPsalm, tehillimReturnTab, setTehillimActiveTab, openModal } = useModalStore();
+  const { selectedPsalm, tehillimReturnTab, setTehillimActiveTab, openModal, dailyTehillimPsalms } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
@@ -1469,10 +1469,15 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     // The fullscreen content will automatically update due to the dependency on selectedPsalm
   };
 
-  // Determine button layout based on stored return tab from Zustand store
+  // Determine button layout based on stored return tab AND Daily Tehillim
   const isFromSpecialTab = tehillimReturnTab === 'special';
-
-
+  const isFromDailyTehillim = dailyTehillimPsalms && dailyTehillimPsalms.includes(selectedPsalm || 0);
+  const currentIndex = isFromDailyTehillim ? dailyTehillimPsalms.indexOf(selectedPsalm || 0) : -1;
+  const hasNextDailyPsalm = isFromDailyTehillim && currentIndex >= 0 && currentIndex < dailyTehillimPsalms.length - 1;
+  const nextDailyPsalm = hasNextDailyPsalm ? dailyTehillimPsalms[currentIndex + 1] : null;
+  
+  // Show Complete & Next button if from 1-150 tab OR from Daily Tehillim with next psalm available
+  const showCompleteAndNext = !isFromSpecialTab || hasNextDailyPsalm;
 
   return (
     <div className="space-y-6">
@@ -1492,9 +1497,9 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
         </p>
       </div>
 
-      {/* Button(s) based on whether it's from 1-150 or special occasions */}
-      {isFromSpecialTab ? (
-        // Special occasions: Only show "Complete" button
+      {/* Button(s) based on whether Complete & Next should be shown */}
+      {!showCompleteAndNext ? (
+        // Single Complete button (Special occasions with no Daily Tehillim)
         <Button
           onClick={isCompleted ? undefined : handleComplete}
           disabled={isCompleted}
@@ -1507,7 +1512,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
           {isCompleted ? 'Completed Today' : `Complete Tehillim ${selectedPsalm}`}
         </Button>
       ) : (
-        // All psalms (1-150): Show both "Complete" and "Complete & Next" buttons
+        // Show both "Complete" and "Complete & Next" buttons
         !isCompleted ? (
           <div className="flex gap-2">
             <Button
@@ -1518,10 +1523,18 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
             </Button>
             
             <Button
-              onClick={handleCompleteAndNext}
+              onClick={() => {
+                // Complete current psalm
+                handleComplete();
+                // Navigate to next psalm: from Daily Tehillim list or sequential
+                const nextPsalm = nextDailyPsalm || (selectedPsalm && selectedPsalm < 150 ? selectedPsalm + 1 : 1);
+                setTimeout(() => {
+                  handleCompleteAndNext();
+                }, 100);
+              }}
               className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse"
             >
-              Complete & Next ({selectedPsalm && selectedPsalm < 150 ? selectedPsalm + 1 : 1})
+              Complete & Next
             </Button>
           </div>
         ) : (
