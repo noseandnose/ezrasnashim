@@ -3218,7 +3218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { eventType, eventData, sessionId } = req.body;
       
       // Only allow completion events, reject high-volume events like page_view
-      const allowedEvents = ['modal_complete', 'tehillim_complete', 'name_prayed', 'tehillim_book_complete', 'tzedaka_completion'];
+      const allowedEvents = ['modal_complete', 'tehillim_complete', 'name_prayed', 'tehillim_book_complete', 'tzedaka_completion', 'meditation_complete'];
       if (!allowedEvents.includes(eventType)) {
         return res.status(400).json({ message: "Event type not tracked" });
       }

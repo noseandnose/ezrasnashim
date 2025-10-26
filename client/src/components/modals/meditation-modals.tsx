@@ -187,7 +187,7 @@ function MeditationAudioPlayer({
 
   const trackMeditationComplete = async () => {
     try {
-      await fetch(`${import.meta.env.VITE_API_URL}/api/analytics/event`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/analytics/track`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
