@@ -166,6 +166,7 @@ export default function Statistics() {
 
     // Other
     donate: "Donations",
+    meditation: "Meditations",
   };
 
   const modalTypeIcons: Record<string, any> = {
@@ -210,6 +211,7 @@ export default function Statistics() {
     
     // Other
     donate: HandCoins,
+    meditation: Brain,
   };
 
   // Financial Stats Component
@@ -379,12 +381,6 @@ export default function Statistics() {
               icon={Heart}
               color="text-sage"
             />
-            <StatCard
-              title="Meditations Done"
-              value={currentLoading ? "..." : (currentData as any)?.totalMeditationsCompleted?.toLocaleString() || (currentData as any)?.meditationsCompleted || 0}
-              icon={Brain}
-              color="text-lavender"
-            />
           </div>
         </div>
 
@@ -460,6 +456,15 @@ export default function Statistics() {
                     
                     if (totalTzedaka > 0) {
                       processedEntries.push(['tzedaka', totalTzedaka]);
+                    }
+
+                    // Add meditation completions from the meditationsCompleted field
+                    const meditationCompletions = selectedPeriod === 'today'
+                      ? (currentData as any)?.meditationsCompleted || 0
+                      : (currentData as any)?.totalMeditationsCompleted || 0;
+                    
+                    if (meditationCompletions > 0) {
+                      processedEntries.push(['meditation', meditationCompletions]);
                     }
                     
                     return processedEntries
