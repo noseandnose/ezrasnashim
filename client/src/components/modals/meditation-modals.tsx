@@ -1,8 +1,9 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useModalStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useRef, useEffect } from "react";
-import { Brain, Play, Pause, SkipBack, SkipForward, X } from "lucide-react";
+import { useState } from "react";
+import { Brain, Play } from "lucide-react";
+import AudioPlayer from "@/components/audio-player";
 
 interface MeditationCategory {
   section: string;
@@ -143,48 +144,6 @@ function MeditationAudioPlayer({
   isOpen: boolean; 
   onClose: () => void;
 }) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
-  const audioRef = useRef<HTMLAudioElement>(null);
-
-  // Reset audio when modal closes
-  useEffect(() => {
-    if (!isOpen) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
-      setIsPlaying(false);
-      setCurrentTime(0);
-    }
-  }, [isOpen]);
-
-  // Update current time
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const updateTime = () => setCurrentTime(audio.currentTime);
-    const updateDuration = () => setDuration(audio.duration);
-    const handleEnded = () => {
-      setIsPlaying(false);
-      // Track completion
-      trackMeditationComplete();
-    };
-
-    audio.addEventListener('timeupdate', updateTime);
-    audio.addEventListener('loadedmetadata', updateDuration);
-    audio.addEventListener('ended', handleEnded);
-
-    return () => {
-      audio.removeEventListener('timeupdate', updateTime);
-      audio.removeEventListener('loadedmetadata', updateDuration);
-      audio.removeEventListener('ended', handleEnded);
-    };
-  }, []);
-
   const trackMeditationComplete = async () => {
     try {
       await fetch(`${import.meta.env.VITE_API_URL}/api/analytics/track`, {
@@ -200,138 +159,36 @@ function MeditationAudioPlayer({
     }
   };
 
-  const togglePlay = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const time = parseFloat(e.target.value);
-    setCurrentTime(time);
-    if (audioRef.current) {
-      audioRef.current.currentTime = time;
-    }
-  };
-
-  const skipBackward = () => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 10);
-    }
-  };
-
-  const skipForward = () => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = Math.min(duration, audioRef.current.currentTime + 10);
-    }
-  };
-
-  const changeSpeed = () => {
-    const speeds = [1, 1.25, 1.5, 1.75, 2];
-    const currentIndex = speeds.indexOf(playbackSpeed);
-    const nextSpeed = speeds[(currentIndex + 1) % speeds.length];
-    setPlaybackSpeed(nextSpeed);
-    if (audioRef.current) {
-      audioRef.current.playbackRate = nextSpeed;
-    }
-  };
-
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
-
   if (!meditation) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 platypi-regular" aria-describedby="meditation-player-description">
+      <DialogContent aria-describedby="meditation-player-description">
         <div id="meditation-player-description" className="sr-only">Meditation audio player</div>
         
-        <div className="flex items-center justify-between mb-6">
-          <DialogTitle className="text-xl platypi-bold text-black">{meditation.name}</DialogTitle>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-            data-testid="button-close-player"
-          >
-            <X className="w-5 h-5 text-black/70" />
-          </button>
+        {/* Simple Header for Audio Content */}
+        <div className="flex items-center justify-center mb-1 relative">
+          <DialogTitle className="text-lg platypi-bold text-black">Meditation</DialogTitle>
         </div>
-
-        {/* Audio Element */}
-        <audio ref={audioRef} src={meditation.link} />
-
-        {/* Album Art / Icon */}
-        <div className="flex items-center justify-center mb-6">
-          <div className="p-8 rounded-full bg-gradient-feminine">
-            <Brain className="text-white w-16 h-16" strokeWidth={1.5} />
-          </div>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="mb-4">
-          <input
-            type="range"
-            min="0"
-            max={duration || 0}
-            value={currentTime}
-            onChange={handleSeek}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blush"
-            data-testid="slider-progress"
-          />
-          <div className="flex justify-between text-xs text-black/60 mt-2">
-            <span>{formatTime(currentTime)}</span>
-            <span>{formatTime(duration)}</span>
-          </div>
-        </div>
-
-        {/* Controls */}
-        <div className="flex items-center justify-center gap-6 mb-4">
-          <button
-            onClick={skipBackward}
-            className="p-3 rounded-full hover:bg-gray-100 transition-colors"
-            data-testid="button-skip-back"
-          >
-            <SkipBack className="w-6 h-6 text-black/70" />
-          </button>
-
-          <button
-            onClick={togglePlay}
-            className="p-4 rounded-full bg-gradient-feminine hover:scale-110 transition-transform"
-            data-testid="button-play-pause"
-          >
-            {isPlaying ? (
-              <Pause className="w-8 h-8 text-white" fill="white" />
-            ) : (
-              <Play className="w-8 h-8 text-white" fill="white" />
+        
+        <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
+          <div className="space-y-4">
+            {/* Title */}
+            {meditation.name && (
+              <h3 className="platypi-bold text-lg text-black text-center mb-4">
+                {meditation.name}
+              </h3>
             )}
-          </button>
-
-          <button
-            onClick={skipForward}
-            className="p-3 rounded-full hover:bg-gray-100 transition-colors"
-            data-testid="button-skip-forward"
-          >
-            <SkipForward className="w-6 h-6 text-black/70" />
-          </button>
-        </div>
-
-        {/* Speed Control */}
-        <div className="flex items-center justify-center">
-          <button
-            onClick={changeSpeed}
-            className="px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors text-sm platypi-medium text-black"
-            data-testid="button-speed"
-          >
-            Speed: {playbackSpeed}x
-          </button>
+            
+            <AudioPlayer 
+              title={meditation.name || 'Meditation'}
+              duration="0:00"
+              audioUrl={meditation.link}
+              onAudioEnded={() => {
+                trackMeditationComplete();
+              }}
+            />
+          </div>
         </div>
       </DialogContent>
     </Dialog>
