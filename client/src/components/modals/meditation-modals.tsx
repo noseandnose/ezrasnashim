@@ -1,9 +1,12 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { useModalStore } from "@/lib/types";
+import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Brain, Play } from "lucide-react";
 import AudioPlayer from "@/components/audio-player";
+import { Button } from "@/components/ui/button";
+import { HeartExplosion } from "@/components/ui/heart-explosion";
+import { useTrackModalComplete } from "@/hooks/use-analytics";
 
 interface MeditationCategory {
   section: string;
@@ -144,6 +147,10 @@ function MeditationAudioPlayer({
   isOpen: boolean; 
   onClose: () => void;
 }) {
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+  const [showExplosion, setShowExplosion] = useState(false);
+
   const trackMeditationComplete = async () => {
     try {
       await fetch(`${import.meta.env.VITE_API_URL}/api/analytics/track`, {
@@ -157,6 +164,22 @@ function MeditationAudioPlayer({
     } catch (error) {
       console.error('Failed to track meditation completion:', error);
     }
+  };
+
+  const handleMeditationComplete = () => {
+    // Track modal completion
+    trackModalComplete('meditation');
+    markModalComplete('meditation');
+    
+    setShowExplosion(true);
+    
+    // Track the meditation_complete event
+    trackMeditationComplete();
+    
+    // Hide explosion after animation
+    setTimeout(() => {
+      setShowExplosion(false);
+    }, 1500);
   };
 
   if (!meditation) return null;
@@ -185,10 +208,45 @@ function MeditationAudioPlayer({
               duration="0:00"
               audioUrl={meditation.link}
               onAudioEnded={() => {
-                trackMeditationComplete();
+                // Auto-complete when audio finishes, but only if not already completed
+                if (!isModalComplete('meditation')) {
+                  handleMeditationComplete();
+                }
               }}
             />
           </div>
+        </div>
+
+        {/* Thank You Section */}
+        <div className="mt-1 p-4 bg-blue-50 rounded-2xl border border-blue-200">
+          <p className="text-sm text-black platypi-medium">
+            Thank you to{' '}
+            <a 
+              href="https://www.neshima.co/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-600 underline hover:text-blue-800"
+            >
+              Neshima
+            </a>
+            {' '}for providing this content
+          </p>
+        </div>
+
+        <div className="heart-explosion-container">
+          <Button 
+            onClick={isModalComplete('meditation') ? undefined : handleMeditationComplete}
+            disabled={isModalComplete('meditation')}
+            className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
+              isModalComplete('meditation') 
+                ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
+            }`}
+            data-testid="button-complete-meditation"
+          >
+            {isModalComplete('meditation') ? 'Completed Today' : 'Complete'}
+          </Button>
+          <HeartExplosion trigger={showExplosion} />
         </div>
       </DialogContent>
     </Dialog>
