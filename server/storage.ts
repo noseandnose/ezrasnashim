@@ -3,7 +3,7 @@ import {
   shopItems, 
   tehillimNames, tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, birkatHamazonPrayers, afterBrochasPrayers, brochas, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
-  dailyRecipes, parshaVorts, tableInspirations, communityImpact, campaigns, donations, womensPrayers, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
+  dailyRecipes, parshaVorts, tableInspirations, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats, acts,
 
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
@@ -25,6 +25,7 @@ import {
   type Donation, type InsertDonation,
   type Act, type InsertAct,
   type WomensPrayer, type InsertWomensPrayer,
+  type Meditation, type InsertMeditation,
   type DiscountPromotion, type InsertDiscountPromotion,
   type PirkeiAvot, type InsertPirkeiAvot,
   type PirkeiAvotProgress, type InsertPirkeiAvotProgress,
@@ -162,6 +163,11 @@ export interface IStorage {
   getWomensPrayersByCategory(category: string): Promise<WomensPrayer[]>;
   getWomensPrayerById(id: number): Promise<WomensPrayer | undefined>;
   createWomensPrayer(prayer: InsertWomensPrayer): Promise<WomensPrayer>;
+
+  // Meditation methods
+  getMeditationCategories(): Promise<{section: string; subtitle: string}[]>;
+  getMeditationsBySection(section: string): Promise<Meditation[]>;
+  getMeditationById(id: number): Promise<Meditation | undefined>;
 
   // Discount promotion methods
   getActiveDiscountPromotion(): Promise<DiscountPromotion | undefined>;
@@ -1330,6 +1336,33 @@ export class DatabaseStorage implements IStorage {
       .values(insertPrayer)
       .returning();
     return prayer;
+  }
+
+  async getMeditationCategories(): Promise<{section: string; subtitle: string}[]> {
+    const result = await db
+      .selectDistinct({
+        section: meditations.section,
+        subtitle: meditations.subtitle,
+      })
+      .from(meditations);
+    return result;
+  }
+
+  async getMeditationsBySection(section: string): Promise<Meditation[]> {
+    return await db
+      .select()
+      .from(meditations)
+      .where(eq(meditations.section, section))
+      .orderBy(meditations.name);
+  }
+
+  async getMeditationById(id: number): Promise<Meditation | undefined> {
+    const [meditation] = await db
+      .select()
+      .from(meditations)
+      .where(eq(meditations.id, id))
+      .limit(1);
+    return meditation;
   }
 
   async getActiveDiscountPromotion(userLocation?: string): Promise<DiscountPromotion | undefined> {
