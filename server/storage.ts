@@ -1902,10 +1902,14 @@ export class DatabaseStorage implements IStorage {
     totalModalCompletions: Record<string, number>;
   }> {
     try {
-      // Calculate end date (6 days later, making it 7 days total Sunday to Sunday)
+      // Week runs from Sunday 2 AM through the following Sunday at 1:59 AM (7 full days)
+      // Start date is already the Sunday analytics date (accounts for 2 AM boundary)
+      // End date is 6 days later, which gives us Sun -> Mon -> Tue -> Wed -> Thu -> Fri -> Sat
+      // But since analytics days run 2 AM to 1:59 AM, Saturday's day includes Sunday until 1:59 AM
+      // So we actually get 7 full days: Sun 2AM through the next Sun 1:59 AM
       const start = new Date(startDate);
       const end = new Date(start);
-      end.setDate(end.getDate() + 6);
+      end.setDate(end.getDate() + 6); // 6 days later (inclusive of start day = 7 days total)
       const endDate = end.toISOString().split('T')[0];
       
       const weeklyStats = await db
@@ -2044,6 +2048,31 @@ export class DatabaseStorage implements IStorage {
         gte(donations.createdAt, new Date(today + 'T00:00:00')),
         lte(donations.createdAt, new Date(today + 'T23:59:59'))
       );
+    } else if (period === 'week') {
+      // Current week (Sunday 2 AM to following Sunday 1:59 AM)
+      const hours = now.getHours();
+      const adjustedDate = new Date(now);
+      
+      // Adjust for 2 AM boundary - if before 2 AM, use previous day
+      if (hours < 2) {
+        adjustedDate.setDate(adjustedDate.getDate() - 1);
+      }
+      
+      // Find the most recent Sunday (after 2 AM adjustment)
+      const dayOfWeek = adjustedDate.getDay();
+      const weekStart = new Date(adjustedDate);
+      weekStart.setDate(weekStart.getDate() - dayOfWeek);
+      weekStart.setHours(2, 0, 0, 0); // Start at 2 AM on Sunday
+      
+      // Week ends 7 days later at 1:59:59 AM (just before next Sunday 2 AM)
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 7); // Next Sunday
+      weekEnd.setHours(1, 59, 59, 999); // 1:59:59 AM
+      
+      dateFilter = and(
+        gte(donations.createdAt, weekStart),
+        lte(donations.createdAt, weekEnd)
+      );
     } else if (period === 'month') {
       // Current month
       const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -2062,6 +2091,54 @@ export class DatabaseStorage implements IStorage {
         eq(sponsors.isActive, true),
         eq(sponsors.sponsorshipDate, today)
       );
+    } else if (period === 'week') {
+      // Current week (Sunday 2 AM to following Sunday 1:59 AM)
+      const hours = now.getHours();
+      const adjustedDate = new Date(now);
+      
+      // Adjust for 2 AM boundary - if before 2 AM, use previous analytics day
+      if (hours < 2) {
+        adjustedDate.setDate(adjustedDate.getDate() - 1);
+      }
+      
+      // Find the most recent Sunday (after 2 AM adjustment)
+      const dayOfWeek = adjustedDate.getDay();
+      const weekStart = new Date(adjustedDate);
+      weekStart.setDate(weekStart.getDate() - dayOfWeek);
+      const weekStartStr = formatDate(weekStart); // Use local date formatting
+      
+      // Week includes 7 analytics days: the start date + 6 more days
+      // This gives us Sunday through Saturday in analytics terms
+      // But since each analytics day runs 2 AM to 1:59 AM, Saturday's day captures Sunday until 1:59 AM
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      const weekEndStr = formatDate(weekEnd);
+      
+      // Get all sponsors for this week (using local date comparison)
+      const allActiveSponsors = await db.select().from(sponsors).where(eq(sponsors.isActive, true));
+      const weekSponsors = allActiveSponsors.filter(sponsor => 
+        sponsor.sponsorshipDate >= weekStartStr && sponsor.sponsorshipDate <= weekEndStr
+      );
+      
+      // Return early with week-specific sponsor count
+      const totalDaysSponsored = weekSponsors.length;
+      
+      const successfulDonations = await db
+        .select()
+        .from(donations)
+        .where(and(
+          eq(donations.status, 'succeeded'),
+          dateFilter!
+        ));
+      
+      const totalDonations = successfulDonations.length;
+      const totalRaised = successfulDonations.reduce((sum, donation) => sum + (donation.amount || 0), 0) / 100;
+      
+      return {
+        totalDaysSponsored,
+        totalCampaigns: totalDonations,
+        totalRaised
+      };
     } else if (period === 'month') {
       const year = now.getFullYear();
       const month = (now.getMonth() + 1).toString().padStart(2, '0');
