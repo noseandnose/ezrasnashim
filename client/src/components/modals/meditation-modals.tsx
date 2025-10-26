@@ -167,9 +167,12 @@ function MeditationAudioPlayer({
   };
 
   const handleMeditationComplete = () => {
-    // Track modal completion
-    trackModalComplete('meditation');
-    markModalComplete('meditation');
+    if (!meditation) return;
+    
+    // Track each meditation individually using its ID
+    const meditationKey = `meditation-${meditation.id}`;
+    trackModalComplete(meditationKey);
+    markModalComplete(meditationKey);
     
     setShowExplosion(true);
     
@@ -191,6 +194,9 @@ function MeditationAudioPlayer({
   };
 
   if (!meditation) return null;
+
+  // Create unique key for this specific meditation
+  const meditationKey = `meditation-${meditation.id}`;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -217,7 +223,7 @@ function MeditationAudioPlayer({
               audioUrl={meditation.link}
               onAudioEnded={() => {
                 // Auto-complete when audio finishes, but only if not already completed
-                if (!isModalComplete('meditation')) {
+                if (!isModalComplete(meditationKey)) {
                   handleMeditationComplete();
                 }
               }}
@@ -243,16 +249,16 @@ function MeditationAudioPlayer({
 
         <div className="heart-explosion-container">
           <Button 
-            onClick={isModalComplete('meditation') ? undefined : handleMeditationComplete}
-            disabled={isModalComplete('meditation')}
+            onClick={isModalComplete(meditationKey) ? undefined : handleMeditationComplete}
+            disabled={isModalComplete(meditationKey)}
             className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
-              isModalComplete('meditation') 
+              isModalComplete(meditationKey) 
                 ? 'bg-sage text-white cursor-not-allowed opacity-70' 
                 : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
             }`}
             data-testid="button-complete-meditation"
           >
-            {isModalComplete('meditation') ? 'Completed Today' : 'Complete'}
+            {isModalComplete(meditationKey) ? 'Completed Today' : 'Complete'}
           </Button>
           <HeartExplosion trigger={showExplosion} />
         </div>
