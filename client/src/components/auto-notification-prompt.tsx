@@ -1,122 +1,97 @@
 import { useEffect } from 'react';
 import { apiRequest } from '@/lib/queryClient';
+import { PermissionManager } from '@/lib/permission-manager';
 
 export function AutoNotificationPrompt() {
-
   useEffect(() => {
     // Check if browser supports notifications
     if (!('serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window)) {
       return;
     }
 
-    // Always register service worker first
-    registerServiceWorker();
-
-    // Check current permission status
-    if (Notification.permission === 'granted') {
-      // If already granted, ensure we're subscribed
-      ensureSubscribed();
-      return;
-    }
-    
-    if (Notification.permission === 'denied') {
-      // User previously denied, don't prompt again
-      return;
-    }
-
-    // If permission is 'default', request permission immediately
-    if (Notification.permission === 'default') {
-      // Request permission immediately without delay
-      requestNotificationPermission();
-    }
+    initializeNotifications();
   }, []);
+
+  const initializeNotifications = async () => {
+    try {
+      // Always register service worker first
+      await registerServiceWorker();
+
+      // Initialize permission manager
+      await PermissionManager.initialize();
+
+      // If permission is 'granted' in browser, ensure subscription
+      if (Notification.permission === 'granted') {
+        await handleGrantedPermission();
+        return;
+      }
+
+      // If permission is 'denied', just update state
+      if (Notification.permission === 'denied') {
+        return;
+      }
+
+      // If permission is 'default', check if we should prompt
+      if (Notification.permission === 'default' && PermissionManager.shouldPromptForNotifications()) {
+        // Request permission immediately
+        await requestNotificationPermission();
+      }
+    } catch (error) {
+      console.error('[AutoNotificationPrompt] Error initializing notifications:', error);
+    }
+  };
 
   const registerServiceWorker = async () => {
     try {
       await navigator.serviceWorker.register('/sw.js');
-      
-      // Wait for service worker to be ready
       await navigator.serviceWorker.ready;
     } catch (error) {
-      // Service worker registration failed - notifications won't work
+      console.error('[AutoNotificationPrompt] Service worker registration failed:', error);
     }
   };
 
-  const urlBase64ToUint8Array = (base64String: string) => {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding)
-      .replace(/\-/g, '+')
-      .replace(/_/g, '/');
-
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-
-    for (let i = 0; i < rawData.length; ++i) {
-      outputArray[i] = rawData.charCodeAt(i);
-    }
-    return outputArray;
-  };
-
-  const ensureSubscribed = async () => {
+  const handleGrantedPermission = async () => {
     try {
-      // Check if already subscribed
-      const registration = await navigator.serviceWorker.ready;
-      const existingSubscription = await registration.pushManager.getSubscription();
-      
-      if (existingSubscription) {
-        return; // Already subscribed
-      }
-
-      // Subscribe
-      await subscribeToNotifications();
-    } catch (error) {
-      // Error ensuring subscription
-    }
-  };
-
-  const subscribeToNotifications = async () => {
-    try {
-      // Use already registered service worker
-      const registration = await navigator.serviceWorker.ready;
-
       // Get VAPID public key
       const response = await apiRequest('GET', '/api/push/vapid-public-key');
       const { publicKey } = response.data;
-      
+
       if (!publicKey) {
+        console.error('[AutoNotificationPrompt] No VAPID public key available');
         return;
       }
 
-      // Subscribe to push notifications
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicKey)
-      });
+      // Ensure subscription through PermissionManager
+      await PermissionManager.ensureNotificationSubscription(publicKey);
 
-      // Send subscription to server
-      const sessionId = localStorage.getItem('sessionId');
-      
-      await apiRequest('POST', '/api/push/subscribe', {
-        subscription: subscription.toJSON(),
-        sessionId
-      });
-      
-      // Successfully subscribed to push notifications
+      // Get the subscription and send to backend
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+
+      if (subscription) {
+        // Send subscription to server
+        const sessionId = localStorage.getItem('sessionId');
+        await apiRequest('POST', '/api/push/subscribe', {
+          subscription: subscription.toJSON(),
+          sessionId
+        });
+      }
     } catch (error) {
-      // Error subscribing to push notifications
+      console.error('[AutoNotificationPrompt] Error handling granted permission:', error);
     }
   };
 
   const requestNotificationPermission = async () => {
     try {
-      const permission = await Notification.requestPermission();
-      
-      if (permission === 'granted') {
-        // User granted permission, subscribe to notifications
-        await subscribeToNotifications();
+      // Request permission through PermissionManager
+      const result = await PermissionManager.requestNotificationPermission();
+
+      if (result.success && result.permission === 'granted') {
+        // Permission granted, subscribe
+        await handleGrantedPermission();
       }
     } catch (error) {
-      // Error requesting notification permission
+      console.error('[AutoNotificationPrompt] Error requesting permission:', error);
     }
   };
 

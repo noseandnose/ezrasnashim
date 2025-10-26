@@ -7,6 +7,7 @@ import { useLocationStore } from "./use-jewish-times";
 import { useQuery } from "@tanstack/react-query";
 import axiosClient from "../lib/axiosClient";
 import { useEffect } from "react";
+import { PermissionManager } from "@/lib/permission-manager";
 
 // Deferred version of useGeolocation that can be conditionally enabled
 export function useDeferredGeolocation(enabled: boolean = true) {
@@ -32,18 +33,20 @@ export function useDeferredGeolocation(enabled: boolean = true) {
         return; // Successfully loaded from cache
       }
 
-      // Check if browser supports permissions API
-      if (navigator.permissions) {
-        try {
-          const permission = await navigator.permissions.query({ name: 'geolocation' });
-          if (permission.state === 'denied') {
-            setPermissionDenied(true);
-            setLocationRequested(true);
-            return;
-          }
-        } catch (err) {
-          // Could not check permission
-        }
+      // Check permission state from PermissionManager
+      const locationState = PermissionManager.getLocationState();
+      
+      // Only set denied if actually denied, not just in cooldown
+      if (locationState.state === 'denied') {
+        setPermissionDenied(true);
+        setLocationRequested(true);
+        return;
+      }
+
+      // If in cooldown or dismissed, don't prompt but don't mark as denied
+      if (!PermissionManager.shouldPromptForLocation()) {
+        setLocationRequested(true);
+        return;
       }
 
       if (!locationRequested && !coordinates && !permissionDenied) {
@@ -51,30 +54,22 @@ export function useDeferredGeolocation(enabled: boolean = true) {
 
         if (!navigator.geolocation) {
           setPermissionDenied(true);
+          PermissionManager.markLocationDismissed();
           return;
         }
         
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const coords = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            };
-            setCoordinates(coords);
-            
-            // Cache the location
-            localStorage.setItem('user-location', JSON.stringify(coords));
-            localStorage.setItem('user-location-time', Date.now().toString());
-          },
-          (error) => {
-            setPermissionDenied(true);
-          },
-          {
-            enableHighAccuracy: false,
-            timeout: 8000,
-            maximumAge: 60 * 60 * 1000, // 1-hour cache
-          },
-        );
+        // Use PermissionManager to request location
+        const result = await PermissionManager.requestLocationPermission();
+        
+        if (result.success && result.coordinates) {
+          setCoordinates(result.coordinates);
+          
+          // Cache the location
+          localStorage.setItem('user-location', JSON.stringify(result.coordinates));
+          localStorage.setItem('user-location-time', Date.now().toString());
+        } else {
+          setPermissionDenied(true);
+        }
       }
     };
 
