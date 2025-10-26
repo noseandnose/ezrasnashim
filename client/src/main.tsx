@@ -77,14 +77,14 @@ async function checkForAppUpdates() {
     
     // Store current version on first load
     if (!storedVersion) {
-      localStorage.setItem('app-version', serverVersion.buildTimestamp.toString());
+      localStorage.setItem('app-version', serverVersion.timestamp.toString());
       return;
     }
     
     // If server has newer version, force reload
-    if (serverVersion.buildTimestamp > parseInt(storedVersion, 10)) {
+    if (serverVersion.timestamp > parseInt(storedVersion, 10)) {
       console.log('[Version] New version detected, updating...');
-      localStorage.setItem('app-version', serverVersion.buildTimestamp.toString());
+      localStorage.setItem('app-version', serverVersion.timestamp.toString());
       
       // Clear service worker caches to ensure fresh content
       if ('serviceWorker' in navigator) {
