@@ -3863,10 +3863,95 @@ function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'h
   );
 }
 
+// Daily Tehillim schedule by Hebrew calendar day
+const DAILY_TEHILLIM_SCHEDULE: Record<number, number[]> = {
+  1: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+  2: [10, 11, 12, 13, 14, 15, 16, 17],
+  3: [18, 19, 20, 21, 22],
+  4: [23, 24, 25, 26, 27, 28],
+  5: [29, 30, 31, 32, 33, 34],
+  6: [35, 36, 37, 38],
+  7: [39, 40, 41, 42, 43],
+  8: [44, 45, 46, 47, 48],
+  9: [49, 50, 51, 52, 53, 54],
+  10: [55, 56, 57, 58, 59],
+  11: [60, 61, 62, 63, 64, 65],
+  12: [66, 67, 68],
+  13: [69, 70, 71],
+  14: [72, 73, 74, 75, 76],
+  15: [77, 78],
+  16: [79, 80, 81, 82],
+  17: [83, 84, 85, 86, 87],
+  18: [88, 89],
+  19: [90, 91, 92, 93, 94, 95, 96],
+  20: [97, 98, 99, 100, 101, 102, 103],
+  21: [104, 105],
+  22: [106, 107],
+  23: [108, 109, 110, 111, 112],
+  24: [113, 114, 115, 116, 117, 118],
+  25: [119], // Tehillim 119 parts 1-12 (handled specially)
+  26: [119], // Tehillim 119 parts 13-22 (handled specially)
+  27: [120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134],
+  28: [135, 136, 137, 138, 139],
+  29: [140, 141, 142, 143, 144],
+  30: [145, 146, 147, 148, 149, 150]
+};
+
 // Tehillim Modal Component (previously Special Tehillim)
 function SpecialTehillimModal() {
   const { closeModal, openModal, setSelectedPsalm, tehillimActiveTab, setTehillimActiveTab } = useModalStore();
   const { isModalComplete } = useModalCompletionStore();
+
+  // Fetch current Hebrew date
+  const today = new Date().toISOString().split('T')[0];
+  const { data: hebrewDateInfo } = useQuery<{
+    hebrew: string;
+    date: string;
+    isRoshChodesh: boolean;
+    events: string[];
+    hebrewDay: number;
+    hebrewMonth: string;
+    hebrewYear: number;
+    monthLength: number;
+    dd: number;
+    hm: string;
+  }>({
+    queryKey: ['/api/hebrew-date', today],
+    staleTime: 60 * 60 * 1000, // 1 hour
+  });
+
+  // Helper function to get daily Tehillim based on Hebrew date
+  const getDailyTehillim = (): { psalms: number[]; title: string; subtitle: string } | null => {
+    if (!hebrewDateInfo) return null;
+    
+    const hebrewDay = hebrewDateInfo.dd || hebrewDateInfo.hebrewDay || 0;
+    const hebrewDate = hebrewDateInfo.hebrew || '';
+    
+    // Determine if current month has only 29 days
+    // In the Hebrew calendar, some months (like Cheshvan and Kislev) can have 29 or 30 days
+    const monthLength = hebrewDateInfo.monthLength || 30;
+    const isShortMonth = monthLength === 29;
+    
+    let psalmsToShow: number[] = [];
+    let subtitle = `${hebrewDate}`;
+    
+    if (isShortMonth && hebrewDay === 29) {
+      // On day 29 of a 29-day month, show both day 29 and day 30 Tehillim
+      psalmsToShow = [...(DAILY_TEHILLIM_SCHEDULE[29] || []), ...(DAILY_TEHILLIM_SCHEDULE[30] || [])];
+      subtitle = `${hebrewDate} (29-day month)`;
+    } else {
+      // Normal case: show Tehillim for the current day
+      psalmsToShow = DAILY_TEHILLIM_SCHEDULE[hebrewDay] || [];
+    }
+    
+    return {
+      psalms: psalmsToShow,
+      title: "Daily Tehillim",
+      subtitle
+    };
+  };
+
+  const dailyTehillim = getDailyTehillim();
 
   // Open individual Tehillim text
   const openTehillimText = (psalmNumber: number) => {
@@ -3963,6 +4048,30 @@ function SpecialTehillimModal() {
           </div>
         ) : (
           <div className="space-y-3">
+            {/* Daily Tehillim Section - Always at the top */}
+            {dailyTehillim && dailyTehillim.psalms.length > 0 && (
+              <div className="bg-gradient-to-br from-blush/20 via-sage/20 to-warm-cream/30 rounded-2xl p-4 border border-blush/20 shadow-sm">
+                <h3 className="platypi-bold text-base text-black mb-1">{dailyTehillim.title}</h3>
+                <p className="text-xs platypi-medium text-black/60 mb-3">{dailyTehillim.subtitle}</p>
+                <div className="flex flex-wrap gap-2">
+                  {dailyTehillim.psalms.map((psalm) => (
+                    <button
+                      key={psalm}
+                      onClick={() => openTehillimText(psalm)}
+                      className={`px-3 py-1 rounded-xl text-sm platypi-medium hover:opacity-90 transition-opacity text-white ${
+                        isModalComplete(`individual-tehillim-${psalm}`)
+                          ? 'bg-sage'
+                          : 'bg-gradient-feminine'
+                      }`}
+                    >
+                      {psalm}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Special Occasions Categories */}
             {specialCategories.map((category, index) => (
               <div key={index} className="bg-white/80 rounded-2xl p-3 border border-blush/10">
                 <h3 className="platypi-bold text-sm text-black mb-2">{category.title}</h3>

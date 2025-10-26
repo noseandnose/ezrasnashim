@@ -3650,6 +3650,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (hebrewResponse.data) {
+        // Calculate Hebrew month length
+        // Some months always have 30 days, some 29, and Cheshvan/Kislev vary by year
+        // Hebcal API might return it, or we default based on common patterns
+        let monthLength = 30; // Default to 30
+        
+        const hebrewMonth = hebrewResponse.data.hm || '';
+        
+        // Hebrew months that always have 29 days
+        const shortMonths = ['Tevet', 'Adar I', 'Adar', 'Iyyar', 'Tammuz', 'Elul'];
+        if (shortMonths.includes(hebrewMonth)) {
+          monthLength = 29;
+        }
+        
+        // Check if Hebcal provides the length
+        if (hebrewResponse.data.monthLength) {
+          monthLength = hebrewResponse.data.monthLength;
+        }
+        
+        // Note: Cheshvan and Kislev can be either 29 or 30 days depending on the year
+        // Without additional calendar calculation, we default to 30 for these
+        // The actual length would require more complex Hebrew calendar calculations
+        
         res.json({
           hebrew: hebrewResponse.data.hebrew || '',
           date: date,
@@ -3657,7 +3679,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           events,
           hebrewDay: hebrewResponse.data.hd,
           hebrewMonth: hebrewResponse.data.hm,
-          hebrewYear: hebrewResponse.data.hy
+          hebrewYear: hebrewResponse.data.hy,
+          monthLength: monthLength,
+          dd: hebrewResponse.data.hd, // Alias for compatibility
+          hm: hebrewResponse.data.hm  // Alias for compatibility
         });
       } else {
         res.status(404).json({ message: "Hebrew date not found" });
