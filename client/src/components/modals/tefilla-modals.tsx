@@ -3869,24 +3869,25 @@ function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'h
           <div className="space-y-3">
             {/* Daily Tehillim Section - Always at the top */}
             {dailyTehillim && dailyTehillim.psalms.length > 0 && (
-              <div className="bg-gradient-to-br from-blush/20 via-sage/20 to-warm-cream/30 rounded-2xl p-4 border border-blush/20 shadow-sm">
-                <h3 className="platypi-bold text-base text-black mb-1">{dailyTehillim.title}</h3>
-                <p className="text-xs platypi-medium text-black/60 mb-3">{dailyTehillim.subtitle}</p>
-                <div className="flex flex-wrap gap-2">
-                  {dailyTehillim.psalms.map((psalm) => (
-                    <button
-                      key={psalm}
-                      onClick={() => openTehillimText(psalm)}
-                      className={`w-11 h-11 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center ${
-                        isModalComplete(`individual-tehillim-${psalm}`)
-                          ? 'bg-sage text-white'
-                          : 'bg-gradient-feminine text-white'
-                      }`}
-                      style={{ touchAction: 'manipulation' }}
-                    >
-                      {psalm}
-                    </button>
-                  ))}
+              <div className="relative rounded-2xl p-[3px] daily-tehillim-border">
+                <div className="bg-white rounded-2xl p-4">
+                  <h3 className="platypi-bold text-base text-black mb-3">{dailyTehillim.title}</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {dailyTehillim.psalms.map((psalm) => (
+                      <button
+                        key={psalm}
+                        onClick={() => openTehillimText(psalm)}
+                        className={`w-11 h-11 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center ${
+                          isModalComplete(`individual-tehillim-${psalm}`)
+                            ? 'bg-sage text-white'
+                            : 'bg-gradient-feminine text-white'
+                        }`}
+                        style={{ touchAction: 'manipulation' }}
+                      >
+                        {psalm}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
@@ -4122,23 +4123,24 @@ function SpecialTehillimModal() {
           <div className="space-y-3">
             {/* Daily Tehillim Section - Always at the top */}
             {dailyTehillim && dailyTehillim.psalms.length > 0 && (
-              <div className="bg-gradient-to-br from-blush/20 via-sage/20 to-warm-cream/30 rounded-2xl p-4 border border-blush/20 shadow-sm">
-                <h3 className="platypi-bold text-base text-black mb-1">{dailyTehillim.title}</h3>
-                <p className="text-xs platypi-medium text-black/60 mb-3">{dailyTehillim.subtitle}</p>
-                <div className="flex flex-wrap gap-2">
-                  {dailyTehillim.psalms.map((psalm) => (
-                    <button
-                      key={psalm}
-                      onClick={() => openTehillimText(psalm)}
-                      className={`px-3 py-1 rounded-xl text-sm platypi-medium hover:opacity-90 transition-opacity text-white ${
-                        isModalComplete(`individual-tehillim-${psalm}`)
-                          ? 'bg-sage'
-                          : 'bg-gradient-feminine'
-                      }`}
-                    >
-                      {psalm}
-                    </button>
-                  ))}
+              <div className="relative rounded-2xl p-[3px] daily-tehillim-border">
+                <div className="bg-white rounded-2xl p-4">
+                  <h3 className="platypi-bold text-base text-black mb-3">{dailyTehillim.title}</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {dailyTehillim.psalms.map((psalm) => (
+                      <button
+                        key={psalm}
+                        onClick={() => openTehillimText(psalm)}
+                        className={`px-3 py-1 rounded-xl text-sm platypi-medium hover:opacity-90 transition-opacity text-white ${
+                          isModalComplete(`individual-tehillim-${psalm}`)
+                            ? 'bg-sage'
+                            : 'bg-gradient-feminine'
+                        }`}
+                      >
+                        {psalm}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
