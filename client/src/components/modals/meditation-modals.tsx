@@ -176,9 +176,17 @@ function MeditationAudioPlayer({
     // Track the meditation_complete event
     trackMeditationComplete();
     
-    // Hide explosion after animation
+    // Wait for animation to complete before proceeding
     setTimeout(() => {
       setShowExplosion(false);
+      
+      // Close the modal
+      onClose();
+      
+      // Navigate to home
+      setTimeout(() => {
+        window.location.hash = '#/?section=home&scrollToProgress=true';
+      }, 100);
     }, 1500);
   };
 
