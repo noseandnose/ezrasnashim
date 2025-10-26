@@ -3953,6 +3953,10 @@ function SpecialTehillimModal() {
 
   const dailyTehillim = getDailyTehillim();
 
+  // Debug: Log the data
+  console.log('Hebrew Date Info:', hebrewDateInfo);
+  console.log('Daily Tehillim:', dailyTehillim);
+
   // Open individual Tehillim text
   const openTehillimText = (psalmNumber: number) => {
     // Remember the current tab before navigating to individual Tehillim
