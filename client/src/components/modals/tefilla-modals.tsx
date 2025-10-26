@@ -3869,25 +3869,23 @@ function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'h
           <div className="space-y-3">
             {/* Daily Tehillim Section - Always at the top */}
             {dailyTehillim && dailyTehillim.psalms.length > 0 && (
-              <div className="relative rounded-2xl p-[3px] daily-tehillim-border">
-                <div className="bg-white rounded-2xl p-4">
-                  <h3 className="platypi-bold text-base text-black mb-3">{dailyTehillim.title}</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {dailyTehillim.psalms.map((psalm) => (
-                      <button
-                        key={psalm}
-                        onClick={() => openTehillimText(psalm)}
-                        className={`w-11 h-11 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center ${
-                          isModalComplete(`individual-tehillim-${psalm}`)
-                            ? 'bg-sage text-white'
-                            : 'bg-gradient-feminine text-white'
-                        }`}
-                        style={{ touchAction: 'manipulation' }}
-                      >
-                        {psalm}
-                      </button>
-                    ))}
-                  </div>
+              <div className="bg-white/80 rounded-2xl p-4 border border-blush/10 shadow-sm complete-button-pulse">
+                <h3 className="platypi-bold text-base text-black mb-3">{dailyTehillim.title}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {dailyTehillim.psalms.map((psalm) => (
+                    <button
+                      key={psalm}
+                      onClick={() => openTehillimText(psalm)}
+                      className={`w-11 h-11 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center ${
+                        isModalComplete(`individual-tehillim-${psalm}`)
+                          ? 'bg-sage text-white'
+                          : 'bg-gradient-feminine text-white'
+                      }`}
+                      style={{ touchAction: 'manipulation' }}
+                    >
+                      {psalm}
+                    </button>
+                  ))}
                 </div>
               </div>
             )}

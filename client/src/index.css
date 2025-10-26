@@ -1315,29 +1315,3 @@ select {
 .uppy-custom-text .uppy-Dashboard-browse:hover {
   color: #1d4ed8 !important; /* Blue-700 */
 }
-
-/* Daily Tehillim animated gradient border */
-@keyframes daily-tehillim-gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.daily-tehillim-border {
-  background: linear-gradient(
-    90deg,
-    #E8B4CB 0%,
-    #F4A5C4 25%,
-    #D8A8C8 50%,
-    #F4A5C4 75%,
-    #E8B4CB 100%
-  );
-  background-size: 200% 200%;
-  animation: daily-tehillim-gradient 3s ease-in-out infinite;
-}
