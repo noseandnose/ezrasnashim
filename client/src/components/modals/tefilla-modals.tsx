@@ -4391,7 +4391,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
         return current;
       });
     }
-  }, [selectedPsalm, tehillimText, language, fontSize, tehillimActiveTab, setFullscreenContent, tehillimInfo]);
+  }, [selectedPsalm, tehillimText, language, fontSize, tehillimActiveTab, setFullscreenContent, tehillimInfo, dailyTehillimPsalms, isModalComplete, markModalComplete, completeTask, trackModalComplete, queryClient, checkAndShowCongratulations, openModal]);
 
   return (
     <>
