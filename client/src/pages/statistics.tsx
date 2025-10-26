@@ -31,7 +31,28 @@ interface PeriodStats {
   totalModalCompletions: Record<string, number>;
 }
 
-type TimePeriod = 'today' | 'month' | 'alltime';
+type TimePeriod = 'today' | 'week' | 'month' | 'alltime';
+
+// Calculate the start of the current week (Sunday at 2 AM in local timezone)
+function getWeekStartDate(): string {
+  const now = new Date();
+  const hours = now.getHours();
+  
+  // Create a date adjusted for 2 AM boundary
+  const adjustedDate = new Date(now);
+  if (hours < 2) {
+    adjustedDate.setDate(adjustedDate.getDate() - 1);
+  }
+  
+  // Find the most recent Sunday
+  const dayOfWeek = adjustedDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  const daysToSubtract = dayOfWeek; // If Sunday (0), subtract 0 days
+  const weekStart = new Date(adjustedDate);
+  weekStart.setDate(weekStart.getDate() - daysToSubtract);
+  
+  // Return as YYYY-MM-DD
+  return weekStart.toISOString().split('T')[0];
+}
 
 export default function Statistics() {
   const [, setLocation] = useLocation();
@@ -40,18 +61,28 @@ export default function Statistics() {
   
   // Calculate today's analytics date once
   const analyticsToday = getLocalDateString(); // Use client's 2 AM boundary calculation
+  const weekStartDate = getWeekStartDate(); // Calculate week start (Sunday 2 AM)
   
   // Force refresh all stats when component mounts and when period changes
   useEffect(() => {
     // Force invalidate and refetch all queries when page loads or period changes
     queryClient.invalidateQueries({ queryKey: [`/api/analytics/stats/today?date=${analyticsToday}`] });
+    queryClient.invalidateQueries({ queryKey: [`/api/analytics/stats/week?startDate=${weekStartDate}`] });
     queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/month"] });
     queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/total"] });
-  }, [selectedPeriod, analyticsToday, queryClient]); // Invalidate when period changes or date changes
+  }, [selectedPeriod, analyticsToday, weekStartDate, queryClient]); // Invalidate when period changes or date changes
 
   // Fetch today's stats with proper timezone handling
   const { data: todayStats, isLoading: todayLoading } = useQuery<DailyStats>({
     queryKey: [`/api/analytics/stats/today?date=${analyticsToday}`],
+    staleTime: 0, // Never cache - always fresh
+    gcTime: 0, // Don't keep in memory
+    refetchInterval: 30000, // Auto-refresh every 30 seconds
+  });
+
+  // Fetch weekly stats
+  const { data: weeklyStats, isLoading: weeklyLoading } = useQuery<PeriodStats>({
+    queryKey: [`/api/analytics/stats/week?startDate=${weekStartDate}`],
     staleTime: 0, // Never cache - always fresh
     gcTime: 0, // Don't keep in memory
     refetchInterval: 30000, // Auto-refresh every 30 seconds
@@ -78,6 +109,8 @@ export default function Statistics() {
     switch (selectedPeriod) {
       case 'today':
         return { data: todayStats, isLoading: todayLoading };
+      case 'week':
+        return { data: weeklyStats, isLoading: weeklyLoading };
       case 'month':
         return { data: monthlyStats, isLoading: monthlyLoading };
       case 'alltime':
@@ -215,7 +248,7 @@ export default function Statistics() {
   };
 
   // Financial Stats Component
-  function FinancialStatsSection({ period }: { period: 'today' | 'month' | 'alltime' }) {
+  function FinancialStatsSection({ period }: { period: 'today' | 'week' | 'month' | 'alltime' }) {
     const { data: financialStats, isLoading: financialLoading } = useQuery<{
       totalDaysSponsored: number;
       totalCampaigns: number;
@@ -300,7 +333,7 @@ export default function Statistics() {
             <Button
               onClick={() => setSelectedPeriod('today')}
               variant={selectedPeriod === 'today' ? 'default' : 'ghost'}
-              className={`flex-1 rounded-lg text-sm h-10 ${
+              className={`flex-1 rounded-lg text-xs h-10 ${
                 selectedPeriod === 'today' 
                   ? 'bg-white text-black shadow-sm' 
                   : 'text-black/70 hover:text-black hover:bg-white/10'
@@ -309,9 +342,20 @@ export default function Statistics() {
               Today
             </Button>
             <Button
+              onClick={() => setSelectedPeriod('week')}
+              variant={selectedPeriod === 'week' ? 'default' : 'ghost'}
+              className={`flex-1 rounded-lg text-xs h-10 ${
+                selectedPeriod === 'week' 
+                  ? 'bg-white text-black shadow-sm' 
+                  : 'text-black/70 hover:text-black hover:bg-white/10'
+              }`}
+            >
+              This Week
+            </Button>
+            <Button
               onClick={() => setSelectedPeriod('month')}
               variant={selectedPeriod === 'month' ? 'default' : 'ghost'}
-              className={`flex-1 rounded-lg text-sm h-10 ${
+              className={`flex-1 rounded-lg text-xs h-10 ${
                 selectedPeriod === 'month' 
                   ? 'bg-white text-black shadow-sm' 
                   : 'text-black/70 hover:text-black hover:bg-white/10'
@@ -322,7 +366,7 @@ export default function Statistics() {
             <Button
               onClick={() => setSelectedPeriod('alltime')}
               variant={selectedPeriod === 'alltime' ? 'default' : 'ghost'}
-              className={`flex-1 rounded-lg text-sm h-10 ${
+              className={`flex-1 rounded-lg text-xs h-10 ${
                 selectedPeriod === 'alltime' 
                   ? 'bg-white text-black shadow-sm' 
                   : 'text-black/70 hover:text-black hover:bg-white/10'
@@ -335,6 +379,7 @@ export default function Statistics() {
           {/* Period-Specific Stats */}
           <h2 className="text-base platypi-bold text-black mb-3">
             {selectedPeriod === 'today' ? "Today's Activity" : 
+             selectedPeriod === 'week' ? "This Week's Activity" :
              selectedPeriod === 'month' ? "This Month's Activity" : 
              "All Time Activity"}
           </h2>

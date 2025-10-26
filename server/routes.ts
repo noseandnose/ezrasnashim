@@ -3311,6 +3311,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/analytics/stats/week", async (req, res) => {
+    try {
+      // Force no caching for real-time analytics
+      res.set({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store'
+      });
+      
+      // Accept client-provided start date parameter for proper timezone handling
+      // The client should send the start of the current week (Sunday 2 AM in their timezone)
+      let weekStart: string;
+      if (req.query.startDate && typeof req.query.startDate === 'string') {
+        // Client provides the correct week start date accounting for their local 2 AM boundary
+        weekStart = req.query.startDate;
+      } else {
+        // Fallback: calculate using server time (may be incorrect for users in different timezones)
+        const now = new Date();
+        const hours = now.getHours();
+        const currentDate = new Date(now);
+        
+        // Adjust for 2 AM boundary
+        if (hours < 2) {
+          currentDate.setDate(currentDate.getDate() - 1);
+        }
+        
+        // Find the most recent Sunday
+        const dayOfWeek = currentDate.getDay();
+        const daysToSubtract = dayOfWeek; // 0 for Sunday, 1 for Monday, etc.
+        currentDate.setDate(currentDate.getDate() - daysToSubtract);
+        
+        weekStart = currentDate.toISOString().split('T')[0];
+      }
+      
+      const weeklyStats = await storage.getWeeklyStats(weekStart);
+      res.json(weeklyStats);
+    } catch (error) {
+      console.error('Error fetching weekly stats:', error);
+      return res.status(500).json({ message: "Failed to fetch weekly stats" });
+    }
+  });
+
   app.get("/api/analytics/stats/month", async (req, res) => {
     try {
       // Force no caching for real-time analytics
