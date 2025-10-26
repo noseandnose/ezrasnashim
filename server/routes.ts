@@ -2216,6 +2216,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Meditation routes
+  app.get("/api/meditations/categories", async (req, res) => {
+    try {
+      const categories = await storage.getMeditationCategories();
+      res.json(categories);
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to fetch meditation categories" });
+    }
+  });
+
+  app.get("/api/meditations/section/:section", async (req, res) => {
+    try {
+      const { section } = req.params;
+      const meditations = await storage.getMeditationsBySection(section);
+      res.json(meditations);
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to fetch meditations" });
+    }
+  });
+
   // Discount promotion routes
   app.get("/api/discount-promotions/active", async (req, res) => {
     try {
