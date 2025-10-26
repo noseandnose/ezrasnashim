@@ -1,6 +1,6 @@
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate } from "@/hooks/use-hebrew-date";
-import { BarChart3, Info, Share2, Heart, Mail, Share, X, Menu } from "lucide-react";
+import { BarChart3, Info, Share2, Heart, Mail, Share, X, Menu, MessageSquare } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
 import { useState, useEffect, useRef } from "react";
@@ -210,6 +210,14 @@ export default function AppHeader() {
                     Install App
                   </DropdownMenuItem>
                 )}
+                <DropdownMenuItem
+                  onClick={() => window.open('https://tally.so/r/3xqAEy', '_blank')}
+                  className="cursor-pointer"
+                  data-testid="menu-item-feedback"
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Community Feedback
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
