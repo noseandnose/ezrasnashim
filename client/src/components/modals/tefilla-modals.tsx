@@ -3714,7 +3714,7 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
 
 // Special Tehillim Fullscreen Content Component
 function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english'; fontSize: number }) {
-  const { openModal, setSelectedPsalm, tehillimActiveTab, setTehillimActiveTab, setTehillimReturnTab } = useModalStore();
+  const { openModal, setSelectedPsalm, tehillimActiveTab, setTehillimActiveTab, setTehillimReturnTab, setDailyTehillimPsalms } = useModalStore();
   const { isModalComplete } = useModalCompletionStore();
 
   // Fetch current Hebrew date
@@ -3768,11 +3768,16 @@ function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'h
   const dailyTehillim = getDailyTehillim();
 
   // Open individual Tehillim text
-  const openTehillimText = (psalmNumber: number) => {
+  const openTehillimText = (psalmNumber: number, fromDaily = false) => {
     // Store the current tab so we can return to it after completion
 
     setTehillimReturnTab(tehillimActiveTab); // Store in Zustand instead of localStorage
     setSelectedPsalm(psalmNumber);
+    
+    // Clear daily tehillim list if not from Daily Tehillim
+    if (!fromDaily) {
+      setDailyTehillimPsalms(null);
+    }
     
     // Directly switch to individual Tehillim content without modal transitions
     const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
@@ -3875,7 +3880,11 @@ function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'h
                   {dailyTehillim.psalms.map((psalm) => (
                     <button
                       key={psalm}
-                      onClick={() => openTehillimText(psalm)}
+                      onClick={() => {
+                        // Set daily tehillim list for Complete & Next functionality
+                        setDailyTehillimPsalms(dailyTehillim.psalms);
+                        openTehillimText(psalm, true);
+                      }}
                       className={`w-11 h-11 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center ${
                         isModalComplete(`individual-tehillim-${psalm}`)
                           ? 'bg-sage text-white'
@@ -4182,7 +4191,7 @@ function SpecialTehillimModal() {
 
 
 function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenContent?: (content: any) => void }) {
-  const { closeModal, openModal, selectedPsalm, previousModal, tehillimActiveTab } = useModalStore();
+  const { closeModal, openModal, selectedPsalm, previousModal, tehillimActiveTab, dailyTehillimPsalms } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
@@ -4283,85 +4292,91 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                 </div>
                 
                 <div className="heart-explosion-container">
-                  <div className={tehillimActiveTab === 'all' ? 'flex gap-2' : ''}>
-                    {/* Complete button - returns to Tehillim selector */}
-                    <Button 
-                      onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
-                        // Track modal completion immediately
-                        trackModalComplete(`individual-tehillim-${selectedPsalm}`);
-                        markModalComplete(`individual-tehillim-${selectedPsalm}`);
-                        completeTask('tefilla');
-                        setShowHeartExplosion(true);
-                        
-                        // Update global progress in background without waiting
-                        axiosClient.post('/api/tehillim/complete', {
-                          currentPerek: selectedPsalm,
-                          language: language,
-                          completedBy: 'user'
-                        }).then(() => {
-                          queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
-                          queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
-                        }).catch(() => {
-                          // Silently handle errors - local completion is already done
-                        });
-                        
-                        setTimeout(() => {
-                          setShowHeartExplosion(false);
-                          setFullscreenContent({ isOpen: false, title: '', content: null });
-                          checkAndShowCongratulations();
-                          openModal('special-tehillim', 'tefilla');
-                        }, 400);
-                      }}
-                      disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
-                      className={`${tehillimActiveTab === 'all' ? 'flex-1' : 'w-full'} py-3 rounded-xl platypi-medium border-0 ${
-                        isModalComplete(`individual-tehillim-${selectedPsalm}`) 
-                          ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                          : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
-                      }`}
-                    >
-                      {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete'}
-                    </Button>
+                  {(() => {
+                    // Check if from Daily Tehillim
+                    const isFromDailyTehillim = dailyTehillimPsalms && dailyTehillimPsalms.includes(selectedPsalm || 0);
+                    const currentIndex = isFromDailyTehillim ? dailyTehillimPsalms.indexOf(selectedPsalm || 0) : -1;
+                    const hasNextDailyPsalm = isFromDailyTehillim && currentIndex >= 0 && currentIndex < dailyTehillimPsalms.length - 1;
+                    const nextDailyPsalm = hasNextDailyPsalm ? dailyTehillimPsalms[currentIndex + 1] : null;
                     
-                    {/* Complete and Next button - only show when coming from 1-150 tab */}
-                    {tehillimActiveTab === 'all' && (
-                      <Button 
-                        onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
-                          // Track modal completion immediately
-                          trackModalComplete(`individual-tehillim-${selectedPsalm}`);
-                          markModalComplete(`individual-tehillim-${selectedPsalm}`);
-                          completeTask('tefilla');
-                          const nextPsalm = selectedPsalm && selectedPsalm < 150 ? selectedPsalm + 1 : 1;
-                          setShowHeartExplosion(true);
-                          
-                          // Update global progress in background without waiting
-                          axiosClient.post('/api/tehillim/complete', {
-                            currentPerek: selectedPsalm,
-                            language: language,
-                            completedBy: 'user'
-                          }).then(() => {
-                            queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
-                            queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
-                          }).catch(() => {
-                            // Silently handle errors - local completion is already done
-                          });
-                          
-                          setTimeout(() => {
-                            setShowHeartExplosion(false);
-                            // Stay in fullscreen and navigate to next psalm
-                            openModal('individual-tehillim', 'tefilla', nextPsalm);
-                          }, 400);
-                        }}
-                        disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
-                        className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
-                          isModalComplete(`individual-tehillim-${selectedPsalm}`) 
-                            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                            : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse'
-                        }`}
-                      >
-                        {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete & Next'}
-                      </Button>
-                    )}
-                  </div>
+                    // Determine if we should show Complete & Next button
+                    const showCompleteAndNext = tehillimActiveTab === 'all' || hasNextDailyPsalm;
+                    
+                    return (
+                      <div className={showCompleteAndNext ? 'flex gap-2' : ''}>
+                        {/* Complete button */}
+                        <Button 
+                          onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
+                            trackModalComplete(`individual-tehillim-${selectedPsalm}`);
+                            markModalComplete(`individual-tehillim-${selectedPsalm}`);
+                            completeTask('tefilla');
+                            setShowHeartExplosion(true);
+                            
+                            axiosClient.post('/api/tehillim/complete', {
+                              currentPerek: selectedPsalm,
+                              language: language,
+                              completedBy: 'user'
+                            }).then(() => {
+                              queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
+                              queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+                            }).catch(() => {});
+                            
+                            setTimeout(() => {
+                              setShowHeartExplosion(false);
+                              setFullscreenContent({ isOpen: false, title: '', content: null });
+                              checkAndShowCongratulations();
+                              openModal('special-tehillim', 'tefilla');
+                            }, 400);
+                          }}
+                          disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
+                          className={`${showCompleteAndNext ? 'flex-1' : 'w-full'} py-3 rounded-xl platypi-medium border-0 ${
+                            isModalComplete(`individual-tehillim-${selectedPsalm}`) 
+                              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
+                          }`}
+                        >
+                          {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete'}
+                        </Button>
+                        
+                        {/* Complete and Next button - show for 1-150 tab OR Daily Tehillim with next psalm */}
+                        {showCompleteAndNext && (
+                          <Button 
+                            onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
+                              trackModalComplete(`individual-tehillim-${selectedPsalm}`);
+                              markModalComplete(`individual-tehillim-${selectedPsalm}`);
+                              completeTask('tefilla');
+                              
+                              // Determine next psalm: from Daily Tehillim list or sequential
+                              const nextPsalm = nextDailyPsalm || (selectedPsalm && selectedPsalm < 150 ? selectedPsalm + 1 : 1);
+                              setShowHeartExplosion(true);
+                              
+                              axiosClient.post('/api/tehillim/complete', {
+                                currentPerek: selectedPsalm,
+                                language: language,
+                                completedBy: 'user'
+                              }).then(() => {
+                                queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
+                                queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+                              }).catch(() => {});
+                              
+                              setTimeout(() => {
+                                setShowHeartExplosion(false);
+                                openModal('individual-tehillim', 'tefilla', nextPsalm);
+                              }, 400);
+                            }}
+                            disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
+                            className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
+                              isModalComplete(`individual-tehillim-${selectedPsalm}`) 
+                                ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                                : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse'
+                            }`}
+                          >
+                            {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete & Next'}
+                          </Button>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
                 
                 {/* Heart Explosion Animation */}
