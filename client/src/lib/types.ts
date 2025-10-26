@@ -43,12 +43,14 @@ export interface ModalState {
   previousModal: string | null;
   tehillimActiveTab: 'all' | 'special';
   tehillimReturnTab: 'all' | 'special' | null; // Store the return tab preference
+  dailyTehillimPsalms: number[] | null; // Store daily tehillim psalms for Complete & Next navigation
   openModal: (modalId: string, fromSection?: string, psalmNumber?: number, parshaVortId?: number) => void;
   closeModal: (returnToPrevious?: boolean) => void;
   setSelectedPsalm: (psalmNumber: number) => void;
   setSelectedParshaVortId: (parshaVortId: number) => void;
   setTehillimActiveTab: (tab: 'all' | 'special') => void;
   setTehillimReturnTab: (tab: 'all' | 'special') => void;
+  setDailyTehillimPsalms: (psalms: number[] | null) => void;
   
   // Convenience methods for specific modals
   isBirkatHamazonModalOpen: boolean;
@@ -64,6 +66,7 @@ export const useModalStore = create<ModalState>((set, get) => ({
   previousModal: null,
   tehillimActiveTab: 'all',
   tehillimReturnTab: null,
+  dailyTehillimPsalms: null,
   openModal: (modalId: string, fromSection?: string, psalmNumber?: number, parshaVortId?: number) => {
     const currentModal = get().activeModal;
     set({ 
@@ -103,6 +106,7 @@ export const useModalStore = create<ModalState>((set, get) => ({
   setSelectedParshaVortId: (parshaVortId: number) => set({ selectedParshaVortId: parshaVortId }),
   setTehillimActiveTab: (tab: 'all' | 'special') => set({ tehillimActiveTab: tab }),
   setTehillimReturnTab: (tab: 'all' | 'special') => set({ tehillimReturnTab: tab }),
+  setDailyTehillimPsalms: (psalms: number[] | null) => set({ dailyTehillimPsalms: psalms }),
   
   // Convenience methods for specific modals
   get isBirkatHamazonModalOpen() {

@@ -271,6 +271,15 @@ export const womensPrayers = pgTable("womens_prayers", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const meditations = pgTable("meditations", {
+  id: serial("id").primaryKey(),
+  section: text("section").notNull(), // Main category name
+  subtitle: text("subtitle").notNull(), // Category subtitle
+  name: text("name").notNull(), // Meditation title
+  link: text("link").notNull(), // Streaming URL
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const discountPromotions = pgTable("discount_promotions", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
@@ -379,6 +388,7 @@ export const dailyStats = pgTable("daily_stats", {
   namesProcessed: integer("names_processed").default(0),
   booksCompleted: integer("books_completed").default(0), // Track complete Tehillim book finishes
   totalActs: integer("total_acts").default(0), // New field for total acts (Torah + Tefilla + Tzedaka)
+  meditationsCompleted: integer("meditations_completed").default(0), // Track meditation completions
   modalCompletions: jsonb("modal_completions").default({}), // { "torah": 10, "tefilla": 20, etc }
   // Enhanced financial tracking
   tzedakaActs: integer("tzedaka_acts").default(0), // Total tzedaka acts count
@@ -570,6 +580,11 @@ export const insertWomensPrayerSchema = createInsertSchema(womensPrayers).omit({
   createdAt: true,
 });
 
+export const insertMeditationSchema = createInsertSchema(meditations).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertDiscountPromotionSchema = createInsertSchema(discountPromotions).omit({
   id: true,
   createdAt: true,
@@ -630,6 +645,9 @@ export type InsertInspirationalQuote = z.infer<typeof insertInspirationalQuoteSc
 
 export type WomensPrayer = typeof womensPrayers.$inferSelect;
 export type InsertWomensPrayer = z.infer<typeof insertWomensPrayerSchema>;
+
+export type Meditation = typeof meditations.$inferSelect;
+export type InsertMeditation = z.infer<typeof insertMeditationSchema>;
 
 export type DiscountPromotion = typeof discountPromotions.$inferSelect;
 export type InsertDiscountPromotion = z.infer<typeof insertDiscountPromotionSchema>;

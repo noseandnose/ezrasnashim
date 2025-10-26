@@ -3,7 +3,7 @@ import {
   shopItems, 
   tehillimNames, tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, birkatHamazonPrayers, afterBrochasPrayers, brochas, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
-  dailyRecipes, parshaVorts, tableInspirations, communityImpact, campaigns, donations, womensPrayers, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
+  dailyRecipes, parshaVorts, tableInspirations, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats, acts,
 
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
@@ -25,6 +25,7 @@ import {
   type Donation, type InsertDonation,
   type Act, type InsertAct,
   type WomensPrayer, type InsertWomensPrayer,
+  type Meditation, type InsertMeditation,
   type DiscountPromotion, type InsertDiscountPromotion,
   type PirkeiAvot, type InsertPirkeiAvot,
   type PirkeiAvotProgress, type InsertPirkeiAvotProgress,
@@ -163,6 +164,11 @@ export interface IStorage {
   getWomensPrayerById(id: number): Promise<WomensPrayer | undefined>;
   createWomensPrayer(prayer: InsertWomensPrayer): Promise<WomensPrayer>;
 
+  // Meditation methods
+  getMeditationCategories(): Promise<{section: string; subtitle: string}[]>;
+  getMeditationsBySection(section: string): Promise<Meditation[]>;
+  getMeditationById(id: number): Promise<Meditation | undefined>;
+
   // Discount promotion methods
   getActiveDiscountPromotion(): Promise<DiscountPromotion | undefined>;
   getActiveDiscountPromotions(userLocation?: string): Promise<DiscountPromotion[]>;
@@ -174,6 +180,17 @@ export interface IStorage {
   cleanupOldAnalytics(): Promise<void>;
   getDailyStats(date: string): Promise<DailyStats | undefined>;
   updateDailyStats(date: string, updates: Partial<DailyStats>): Promise<DailyStats>;
+  getWeeklyStats(startDate: string): Promise<{
+    totalUsers: number;
+    totalPageViews: number;
+    totalTehillimCompleted: number;
+    totalNamesProcessed: number;
+    totalBooksCompleted: number;
+    totalTzedakaActs: number;
+    totalActs: number;
+    totalMeditationsCompleted: number;
+    totalModalCompletions: Record<string, number>;
+  }>;
   getTotalStats(): Promise<{
     totalUsers: number;
     totalPageViews: number;
@@ -1332,6 +1349,33 @@ export class DatabaseStorage implements IStorage {
     return prayer;
   }
 
+  async getMeditationCategories(): Promise<{section: string; subtitle: string}[]> {
+    const result = await db
+      .selectDistinct({
+        section: meditations.section,
+        subtitle: meditations.subtitle,
+      })
+      .from(meditations);
+    return result;
+  }
+
+  async getMeditationsBySection(section: string): Promise<Meditation[]> {
+    return await db
+      .select()
+      .from(meditations)
+      .where(eq(meditations.section, section))
+      .orderBy(meditations.name);
+  }
+
+  async getMeditationById(id: number): Promise<Meditation | undefined> {
+    const [meditation] = await db
+      .select()
+      .from(meditations)
+      .where(eq(meditations.id, id))
+      .limit(1);
+    return meditation;
+  }
+
   async getActiveDiscountPromotion(userLocation?: string): Promise<DiscountPromotion | undefined> {
     try {
       const targetLocation = userLocation === "israel" ? "israel" : "worldwide";
@@ -1630,6 +1674,7 @@ export class DatabaseStorage implements IStorage {
     ).length;
     const booksCompleted = todayEvents.filter(e => e.eventType === 'tehillim_book_complete').length;
     const tzedakaActs = todayEvents.filter(e => e.eventType === 'tzedaka_completion');
+    const meditationsCompleted = todayEvents.filter(e => e.eventType === 'meditation_complete').length;
     
     // Count modal completions by type
     const modalCompletions: Record<string, number> = {};
@@ -1681,7 +1726,8 @@ export class DatabaseStorage implements IStorage {
           namesProcessed,
           booksCompleted,
           tzedakaActs: tzedakaActs.length,
-          totalActs: this.calculateTotalActs(modalCompletions, gaveElsewhereCompletions, namesProcessed),
+          meditationsCompleted,
+          totalActs: this.calculateTotalActs(modalCompletions, gaveElsewhereCompletions, namesProcessed, meditationsCompleted),
           modalCompletions,
           updatedAt: new Date(),
         })
@@ -1698,7 +1744,8 @@ export class DatabaseStorage implements IStorage {
           namesProcessed,
           booksCompleted,
           tzedakaActs: tzedakaActs.length,
-          totalActs: this.calculateTotalActs(modalCompletions, gaveElsewhereCompletions, namesProcessed),
+          meditationsCompleted,
+          totalActs: this.calculateTotalActs(modalCompletions, gaveElsewhereCompletions, namesProcessed, meditationsCompleted),
         })
         .returning();
       return newStats;
@@ -1726,7 +1773,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Helper method to calculate total acts
-  private calculateTotalActs(modalCompletions: Record<string, number>, gaveElsewhereCompletions: number = 0, namesProcessed: number = 0): number {
+  private calculateTotalActs(modalCompletions: Record<string, number>, gaveElsewhereCompletions: number = 0, namesProcessed: number = 0, meditationsCompleted: number = 0): number {
     const torahActs = ['torah', 'chizuk', 'emuna', 'halacha', 'featured', 'parsha-vort'];
     const tefillaActs = ['tefilla', 'morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'birkat-hamazon', 'al-hamichiya', 'special-tehillim', 'global-tehillim-chain', 'tehillim-text'];
     const tzedakaActs = ['tzedaka', 'donate'];
@@ -1754,6 +1801,9 @@ export class DatabaseStorage implements IStorage {
     // These don't have a modal, so we count separately
     totalActs += gaveElsewhereCompletions;
 
+    // Add meditation completions to total acts
+    totalActs += meditationsCompleted;
+
     return totalActs;
 
   }
@@ -1766,6 +1816,7 @@ export class DatabaseStorage implements IStorage {
     totalBooksCompleted: number;
     totalTzedakaActs: number;
     totalActs: number;
+    totalMeditationsCompleted: number;
     totalModalCompletions: Record<string, number>;
   }> {
     try {
@@ -1791,6 +1842,7 @@ export class DatabaseStorage implements IStorage {
       let totalBooksCompleted = 0;
       let totalTzedakaActs = 0;
       let totalActs = 0;
+      let totalMeditationsCompleted = 0;
       const totalModalCompletions: Record<string, number> = {};
       
       for (const stats of monthlyStats) {
@@ -1801,6 +1853,7 @@ export class DatabaseStorage implements IStorage {
         totalBooksCompleted += stats.booksCompleted || 0;
         totalTzedakaActs += stats.tzedakaActs || 0;
         totalActs += stats.totalActs || 0;
+        totalMeditationsCompleted += stats.meditationsCompleted || 0;
         
         // Merge modal completions
         const completions = stats.modalCompletions as Record<string, number> || {};
@@ -1817,6 +1870,7 @@ export class DatabaseStorage implements IStorage {
         totalBooksCompleted,
         totalTzedakaActs,
         totalActs,
+        totalMeditationsCompleted,
         totalModalCompletions
       };
     } catch (error) {
@@ -1830,6 +1884,95 @@ export class DatabaseStorage implements IStorage {
         totalBooksCompleted: 0,
         totalTzedakaActs: 0,
         totalActs: 0,
+        totalMeditationsCompleted: 0,
+        totalModalCompletions: {}
+      };
+    }
+  }
+
+  async getWeeklyStats(startDate: string): Promise<{
+    totalUsers: number;
+    totalPageViews: number;
+    totalTehillimCompleted: number;
+    totalNamesProcessed: number;
+    totalBooksCompleted: number;
+    totalTzedakaActs: number;
+    totalActs: number;
+    totalMeditationsCompleted: number;
+    totalModalCompletions: Record<string, number>;
+  }> {
+    try {
+      // Week runs from Sunday 2 AM through the following Sunday at 1:59 AM (7 full days)
+      // Start date is already the Sunday analytics date (accounts for 2 AM boundary)
+      // End date is 6 days later, which gives us Sun -> Mon -> Tue -> Wed -> Thu -> Fri -> Sat
+      // But since analytics days run 2 AM to 1:59 AM, Saturday's day includes Sunday until 1:59 AM
+      // So we actually get 7 full days: Sun 2AM through the next Sun 1:59 AM
+      const start = new Date(startDate);
+      const end = new Date(start);
+      end.setDate(end.getDate() + 6); // 6 days later (inclusive of start day = 7 days total)
+      const endDate = end.toISOString().split('T')[0];
+      
+      const weeklyStats = await db
+        .select()
+        .from(dailyStats)
+        .where(
+          and(
+            gte(dailyStats.date, startDate),
+            lte(dailyStats.date, endDate)
+          )
+        );
+      
+      // Aggregate weekly totals
+      let totalUsers = 0;
+      let totalPageViews = 0;
+      let totalTehillimCompleted = 0;
+      let totalNamesProcessed = 0;
+      let totalBooksCompleted = 0;
+      let totalTzedakaActs = 0;
+      let totalActs = 0;
+      let totalMeditationsCompleted = 0;
+      const totalModalCompletions: Record<string, number> = {};
+      
+      for (const stats of weeklyStats) {
+        totalUsers += stats.uniqueUsers || 0;
+        totalPageViews += stats.pageViews || 0;
+        totalTehillimCompleted += stats.tehillimCompleted || 0;
+        totalNamesProcessed += stats.namesProcessed || 0;
+        totalBooksCompleted += stats.booksCompleted || 0;
+        totalTzedakaActs += stats.tzedakaActs || 0;
+        totalActs += stats.totalActs || 0;
+        totalMeditationsCompleted += stats.meditationsCompleted || 0;
+        
+        // Merge modal completions
+        const completions = stats.modalCompletions as Record<string, number> || {};
+        for (const [modalType, count] of Object.entries(completions)) {
+          totalModalCompletions[modalType] = (totalModalCompletions[modalType] || 0) + count;
+        }
+      }
+      
+      return {
+        totalUsers,
+        totalPageViews,
+        totalTehillimCompleted,
+        totalNamesProcessed,
+        totalBooksCompleted,
+        totalTzedakaActs,
+        totalActs,
+        totalMeditationsCompleted,
+        totalModalCompletions
+      };
+    } catch (error) {
+      console.error('Error fetching weekly stats:', error);
+      // Return empty stats if error occurs
+      return {
+        totalUsers: 0,
+        totalPageViews: 0,
+        totalTehillimCompleted: 0,
+        totalNamesProcessed: 0,
+        totalBooksCompleted: 0,
+        totalTzedakaActs: 0,
+        totalActs: 0,
+        totalMeditationsCompleted: 0,
         totalModalCompletions: {}
       };
     }
@@ -1843,6 +1986,7 @@ export class DatabaseStorage implements IStorage {
     totalBooksCompleted: number;
     totalTzedakaActs: number;
     totalActs: number;
+    totalMeditationsCompleted: number;
     totalModalCompletions: Record<string, number>;
   }> {
     // Get all daily stats
@@ -1856,6 +2000,7 @@ export class DatabaseStorage implements IStorage {
     let totalBooksCompleted = 0;
     let totalTzedakaCompleted = 0;
     let totalActs = 0;
+    let totalMeditationsCompleted = 0;
     const totalModalCompletions: Record<string, number> = {};
     
     for (const stats of allStats) {
@@ -1866,6 +2011,7 @@ export class DatabaseStorage implements IStorage {
       totalBooksCompleted += stats.booksCompleted || 0;
       totalTzedakaCompleted += stats.tzedakaActs || 0;
       totalActs += stats.totalActs || 0;
+      totalMeditationsCompleted += stats.meditationsCompleted || 0;
       
       // Merge modal completions
       const completions = stats.modalCompletions as Record<string, number> || {};
@@ -1882,6 +2028,7 @@ export class DatabaseStorage implements IStorage {
       totalBooksCompleted,
       totalTzedakaActs: totalTzedakaCompleted,
       totalActs,
+      totalMeditationsCompleted,
       totalModalCompletions
     };
   }
@@ -1901,6 +2048,31 @@ export class DatabaseStorage implements IStorage {
         gte(donations.createdAt, new Date(today + 'T00:00:00')),
         lte(donations.createdAt, new Date(today + 'T23:59:59'))
       );
+    } else if (period === 'week') {
+      // Current week (Sunday 2 AM to following Sunday 1:59 AM)
+      const hours = now.getHours();
+      const adjustedDate = new Date(now);
+      
+      // Adjust for 2 AM boundary - if before 2 AM, use previous day
+      if (hours < 2) {
+        adjustedDate.setDate(adjustedDate.getDate() - 1);
+      }
+      
+      // Find the most recent Sunday (after 2 AM adjustment)
+      const dayOfWeek = adjustedDate.getDay();
+      const weekStart = new Date(adjustedDate);
+      weekStart.setDate(weekStart.getDate() - dayOfWeek);
+      weekStart.setHours(2, 0, 0, 0); // Start at 2 AM on Sunday
+      
+      // Week ends 7 days later at 1:59:59 AM (just before next Sunday 2 AM)
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 7); // Next Sunday
+      weekEnd.setHours(1, 59, 59, 999); // 1:59:59 AM
+      
+      dateFilter = and(
+        gte(donations.createdAt, weekStart),
+        lte(donations.createdAt, weekEnd)
+      );
     } else if (period === 'month') {
       // Current month
       const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -1919,6 +2091,54 @@ export class DatabaseStorage implements IStorage {
         eq(sponsors.isActive, true),
         eq(sponsors.sponsorshipDate, today)
       );
+    } else if (period === 'week') {
+      // Current week (Sunday 2 AM to following Sunday 1:59 AM)
+      const hours = now.getHours();
+      const adjustedDate = new Date(now);
+      
+      // Adjust for 2 AM boundary - if before 2 AM, use previous analytics day
+      if (hours < 2) {
+        adjustedDate.setDate(adjustedDate.getDate() - 1);
+      }
+      
+      // Find the most recent Sunday (after 2 AM adjustment)
+      const dayOfWeek = adjustedDate.getDay();
+      const weekStart = new Date(adjustedDate);
+      weekStart.setDate(weekStart.getDate() - dayOfWeek);
+      const weekStartStr = formatDate(weekStart); // Use local date formatting
+      
+      // Week includes 7 analytics days: the start date + 6 more days
+      // This gives us Sunday through Saturday in analytics terms
+      // But since each analytics day runs 2 AM to 1:59 AM, Saturday's day captures Sunday until 1:59 AM
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      const weekEndStr = formatDate(weekEnd);
+      
+      // Get all sponsors for this week (using local date comparison)
+      const allActiveSponsors = await db.select().from(sponsors).where(eq(sponsors.isActive, true));
+      const weekSponsors = allActiveSponsors.filter(sponsor => 
+        sponsor.sponsorshipDate >= weekStartStr && sponsor.sponsorshipDate <= weekEndStr
+      );
+      
+      // Return early with week-specific sponsor count
+      const totalDaysSponsored = weekSponsors.length;
+      
+      const successfulDonations = await db
+        .select()
+        .from(donations)
+        .where(and(
+          eq(donations.status, 'succeeded'),
+          dateFilter!
+        ));
+      
+      const totalDonations = successfulDonations.length;
+      const totalRaised = successfulDonations.reduce((sum, donation) => sum + (donation.amount || 0), 0) / 100;
+      
+      return {
+        totalDaysSponsored,
+        totalCampaigns: totalDonations,
+        totalRaised
+      };
     } else if (period === 'month') {
       const year = now.getFullYear();
       const month = (now.getMonth() + 1).toString().padStart(2, '0');

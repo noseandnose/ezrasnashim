@@ -168,23 +168,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }, 60 * 60 * 1000); // Run every hour
 
-  // Version endpoint for cache busting and update detection
-  app.get("/api/version", async (_req, res) => {
-    try {
-      const versionPath = path.join(__dirname, 'version.json');
-      const { readFileSync } = await import('fs');
-      const versionData = JSON.parse(readFileSync(versionPath, 'utf-8'));
-      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
-      res.json(versionData);
-    } catch (error) {
-      res.json({ 
-        version: '1.0.0', 
-        buildTime: new Date().toISOString(),
-        buildTimestamp: Date.now()
-      });
-    }
-  });
-
   // Calendar download endpoint using GET request to avoid CORS issues
   app.get("/api/download-calendar", async (req, res) => {
     try {
@@ -2216,6 +2199,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Meditation routes
+  app.get("/api/meditations/categories", async (req, res) => {
+    try {
+      const categories = await storage.getMeditationCategories();
+      res.json(categories);
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to fetch meditation categories" });
+    }
+  });
+
+  app.get("/api/meditations/section/:section", async (req, res) => {
+    try {
+      const { section } = req.params;
+      const meditations = await storage.getMeditationsBySection(section);
+      res.json(meditations);
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to fetch meditations" });
+    }
+  });
+
   // Discount promotion routes
   app.get("/api/discount-promotions/active", async (req, res) => {
     try {
@@ -3198,7 +3201,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { eventType, eventData, sessionId } = req.body;
       
       // Only allow completion events, reject high-volume events like page_view
-      const allowedEvents = ['modal_complete', 'tehillim_complete', 'name_prayed', 'tehillim_book_complete', 'tzedaka_completion'];
+      const allowedEvents = ['modal_complete', 'tehillim_complete', 'name_prayed', 'tehillim_book_complete', 'tzedaka_completion', 'meditation_complete'];
       if (!allowedEvents.includes(eventType)) {
         return res.status(400).json({ message: "Event type not tracked" });
       }
@@ -3288,6 +3291,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching today stats:', error);
       return res.status(500).json({ message: "Failed to fetch today's stats" });
+    }
+  });
+
+  app.get("/api/analytics/stats/week", async (req, res) => {
+    try {
+      // Force no caching for real-time analytics
+      res.set({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store'
+      });
+      
+      // Accept client-provided start date parameter for proper timezone handling
+      // The client should send the start of the current week (Sunday 2 AM in their timezone)
+      let weekStart: string;
+      if (req.query.startDate && typeof req.query.startDate === 'string') {
+        // Client provides the correct week start date accounting for their local 2 AM boundary
+        weekStart = req.query.startDate;
+      } else {
+        // Fallback: calculate using server time (may be incorrect for users in different timezones)
+        const now = new Date();
+        const hours = now.getHours();
+        const currentDate = new Date(now);
+        
+        // Adjust for 2 AM boundary
+        if (hours < 2) {
+          currentDate.setDate(currentDate.getDate() - 1);
+        }
+        
+        // Find the most recent Sunday
+        const dayOfWeek = currentDate.getDay();
+        const daysToSubtract = dayOfWeek; // 0 for Sunday, 1 for Monday, etc.
+        currentDate.setDate(currentDate.getDate() - daysToSubtract);
+        
+        weekStart = currentDate.toISOString().split('T')[0];
+      }
+      
+      const weeklyStats = await storage.getWeeklyStats(weekStart);
+      res.json(weeklyStats);
+    } catch (error) {
+      console.error('Error fetching weekly stats:', error);
+      return res.status(500).json({ message: "Failed to fetch weekly stats" });
     }
   });
 
@@ -3587,6 +3633,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (hebrewResponse.data) {
+        // Calculate Hebrew month length
+        // Some months always have 30 days, some 29, and Cheshvan/Kislev vary by year
+        // Hebcal API might return it, or we default based on common patterns
+        let monthLength = 30; // Default to 30
+        
+        const hebrewMonth = hebrewResponse.data.hm || '';
+        
+        // Hebrew months that always have 29 days
+        const shortMonths = ['Tevet', 'Adar I', 'Adar', 'Iyyar', 'Tammuz', 'Elul'];
+        if (shortMonths.includes(hebrewMonth)) {
+          monthLength = 29;
+        }
+        
+        // Check if Hebcal provides the length
+        if (hebrewResponse.data.monthLength) {
+          monthLength = hebrewResponse.data.monthLength;
+        }
+        
+        // Note: Cheshvan and Kislev can be either 29 or 30 days depending on the year
+        // Without additional calendar calculation, we default to 30 for these
+        // The actual length would require more complex Hebrew calendar calculations
+        
         res.json({
           hebrew: hebrewResponse.data.hebrew || '',
           date: date,
@@ -3594,7 +3662,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           events,
           hebrewDay: hebrewResponse.data.hd,
           hebrewMonth: hebrewResponse.data.hm,
-          hebrewYear: hebrewResponse.data.hy
+          hebrewYear: hebrewResponse.data.hy,
+          monthLength: monthLength,
+          dd: hebrewResponse.data.hd, // Alias for compatibility
+          hm: hebrewResponse.data.hm  // Alias for compatibility
         });
       } else {
         res.status(404).json({ message: "Hebrew date not found" });
