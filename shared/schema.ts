@@ -271,6 +271,15 @@ export const womensPrayers = pgTable("womens_prayers", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const meditations = pgTable("meditations", {
+  id: serial("id").primaryKey(),
+  section: text("section").notNull(), // Main category name
+  subtitle: text("subtitle").notNull(), // Category subtitle
+  name: text("name").notNull(), // Meditation title
+  link: text("link").notNull(), // Streaming URL
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const discountPromotions = pgTable("discount_promotions", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
@@ -570,6 +579,11 @@ export const insertWomensPrayerSchema = createInsertSchema(womensPrayers).omit({
   createdAt: true,
 });
 
+export const insertMeditationSchema = createInsertSchema(meditations).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertDiscountPromotionSchema = createInsertSchema(discountPromotions).omit({
   id: true,
   createdAt: true,
@@ -630,6 +644,9 @@ export type InsertInspirationalQuote = z.infer<typeof insertInspirationalQuoteSc
 
 export type WomensPrayer = typeof womensPrayers.$inferSelect;
 export type InsertWomensPrayer = z.infer<typeof insertWomensPrayerSchema>;
+
+export type Meditation = typeof meditations.$inferSelect;
+export type InsertMeditation = z.infer<typeof insertMeditationSchema>;
 
 export type DiscountPromotion = typeof discountPromotions.$inferSelect;
 export type InsertDiscountPromotion = z.infer<typeof insertDiscountPromotionSchema>;
