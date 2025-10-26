@@ -3717,8 +3717,55 @@ function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'h
   const { openModal, setSelectedPsalm, tehillimActiveTab, setTehillimActiveTab, setTehillimReturnTab } = useModalStore();
   const { isModalComplete } = useModalCompletionStore();
 
-  // Debug log to track active tab
+  // Fetch current Hebrew date
+  const today = new Date().toISOString().split('T')[0];
+  const { data: hebrewDateInfo } = useQuery<{
+    hebrew: string;
+    date: string;
+    isRoshChodesh: boolean;
+    events: string[];
+    hebrewDay: number;
+    hebrewMonth: string;
+    hebrewYear: number;
+    monthLength: number;
+    dd: number;
+    hm: string;
+  }>({
+    queryKey: ['/api/hebrew-date', today],
+    staleTime: 60 * 60 * 1000, // 1 hour
+  });
 
+  // Helper function to get daily Tehillim based on Hebrew date
+  const getDailyTehillim = (): { psalms: number[]; title: string; subtitle: string } | null => {
+    if (!hebrewDateInfo) return null;
+    
+    const hebrewDay = hebrewDateInfo.dd || hebrewDateInfo.hebrewDay || 0;
+    const hebrewDate = hebrewDateInfo.hebrew || '';
+    
+    // Determine if current month has only 29 days
+    const monthLength = hebrewDateInfo.monthLength || 30;
+    const isShortMonth = monthLength === 29;
+    
+    let psalmsToShow: number[] = [];
+    let subtitle = `${hebrewDate}`;
+    
+    if (isShortMonth && hebrewDay === 29) {
+      // On day 29 of a 29-day month, show both day 29 and day 30 Tehillim
+      psalmsToShow = [...(DAILY_TEHILLIM_SCHEDULE[29] || []), ...(DAILY_TEHILLIM_SCHEDULE[30] || [])];
+      subtitle = `${hebrewDate} (29-day month)`;
+    } else {
+      // Normal case: show Tehillim for the current day
+      psalmsToShow = DAILY_TEHILLIM_SCHEDULE[hebrewDay] || [];
+    }
+    
+    return {
+      psalms: psalmsToShow,
+      title: "Daily Tehillim",
+      subtitle
+    };
+  };
+
+  const dailyTehillim = getDailyTehillim();
 
   // Open individual Tehillim text
   const openTehillimText = (psalmNumber: number) => {
@@ -3820,6 +3867,31 @@ function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'h
           </div>
         ) : (
           <div className="space-y-3">
+            {/* Daily Tehillim Section - Always at the top */}
+            {dailyTehillim && dailyTehillim.psalms.length > 0 && (
+              <div className="bg-gradient-to-br from-blush/20 via-sage/20 to-warm-cream/30 rounded-2xl p-4 border border-blush/20 shadow-sm">
+                <h3 className="platypi-bold text-base text-black mb-1">{dailyTehillim.title}</h3>
+                <p className="text-xs platypi-medium text-black/60 mb-3">{dailyTehillim.subtitle}</p>
+                <div className="flex flex-wrap gap-2">
+                  {dailyTehillim.psalms.map((psalm) => (
+                    <button
+                      key={psalm}
+                      onClick={() => openTehillimText(psalm)}
+                      className={`w-11 h-11 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center ${
+                        isModalComplete(`individual-tehillim-${psalm}`)
+                          ? 'bg-sage text-white'
+                          : 'bg-gradient-feminine text-white'
+                      }`}
+                      style={{ touchAction: 'manipulation' }}
+                    >
+                      {psalm}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Special Occasions Categories */}
             {specialCategories.map((category, index) => (
               <div key={index} className="bg-white/80 rounded-2xl p-3 border border-blush/10">
                 <h3 className="platypi-bold text-sm text-black mb-2">{category.title}</h3>
@@ -3952,10 +4024,6 @@ function SpecialTehillimModal() {
   };
 
   const dailyTehillim = getDailyTehillim();
-
-  // Debug: Log the data
-  console.log('Hebrew Date Info:', hebrewDateInfo);
-  console.log('Daily Tehillim:', dailyTehillim);
 
   // Open individual Tehillim text
   const openTehillimText = (psalmNumber: number) => {
