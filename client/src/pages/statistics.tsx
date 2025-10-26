@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins, DollarSign, Trophy, RefreshCw, HandHeart } from "lucide-react";
+import { Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins, DollarSign, Trophy, RefreshCw, HandHeart, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
@@ -16,6 +16,7 @@ interface DailyStats {
   namesProcessed: number;
   booksCompleted: number;
   totalActs: number;
+  meditationsCompleted: number;
   modalCompletions: Record<string, number>;
 }
 
@@ -26,6 +27,7 @@ interface PeriodStats {
   totalNamesProcessed: number;
   totalBooksCompleted: number;
   totalActs: number;
+  totalMeditationsCompleted: number;
   totalModalCompletions: Record<string, number>;
 }
 
@@ -376,6 +378,12 @@ export default function Statistics() {
               value={currentLoading ? "..." : (currentData as any)?.totalNamesProcessed?.toLocaleString() || (currentData as any)?.namesProcessed || 0}
               icon={Heart}
               color="text-sage"
+            />
+            <StatCard
+              title="Meditations Done"
+              value={currentLoading ? "..." : (currentData as any)?.totalMeditationsCompleted?.toLocaleString() || (currentData as any)?.meditationsCompleted || 0}
+              icon={Brain}
+              color="text-lavender"
             />
           </div>
         </div>

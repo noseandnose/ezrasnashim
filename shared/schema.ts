@@ -388,6 +388,7 @@ export const dailyStats = pgTable("daily_stats", {
   namesProcessed: integer("names_processed").default(0),
   booksCompleted: integer("books_completed").default(0), // Track complete Tehillim book finishes
   totalActs: integer("total_acts").default(0), // New field for total acts (Torah + Tefilla + Tzedaka)
+  meditationsCompleted: integer("meditations_completed").default(0), // Track meditation completions
   modalCompletions: jsonb("modal_completions").default({}), // { "torah": 10, "tefilla": 20, etc }
   // Enhanced financial tracking
   tzedakaActs: integer("tzedaka_acts").default(0), // Total tzedaka acts count
