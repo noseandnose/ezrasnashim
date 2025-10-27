@@ -1425,10 +1425,13 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     completeTask('tefilla');
     checkAndShowCongratulations();
     
-    // Determine next psalm based on whether this is a specific part (by ID) or full psalm (by English number)
+    // Determine next psalm based on context: Daily Tehillim list or sequential
     let nextPsalm: number;
     
-    if (tehillimInfo) {
+    // Check if we're navigating within Daily Tehillim
+    if (isFromDailyTehillim && hasNextDailyPsalm && nextDailyPsalm) {
+      nextPsalm = nextDailyPsalm;
+    } else if (tehillimInfo) {
       // This is a specific part by ID - handle 119 parts specially
       if (tehillimInfo.englishNumber === 119) {
         // For psalm 119, move to next part or to psalm 120 if this is the last part
@@ -1458,7 +1461,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
         nextPsalm = Math.min(tehillimInfo.englishNumber + 1, 150);
       }
     } else {
-      // This is a full psalm by English number - use simple increment
+      // This is a full psalm by English number - use simple increment (for 1-150 tab)
       nextPsalm = selectedPsalm < 150 ? selectedPsalm + 1 : 1;
     }
     
@@ -1478,6 +1481,14 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
   
   // Show Complete & Next button if from 1-150 tab OR from Daily Tehillim with next psalm available
   const showCompleteAndNext = !isFromSpecialTab || hasNextDailyPsalm;
+  
+  // Calculate next psalm number for button label
+  const getNextPsalmNumber = () => {
+    if (isFromDailyTehillim && nextDailyPsalm) {
+      return nextDailyPsalm;
+    }
+    return selectedPsalm && selectedPsalm < 150 ? selectedPsalm + 1 : 1;
+  };
 
   return (
     <div className="space-y-6">
@@ -1523,18 +1534,10 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
             </Button>
             
             <Button
-              onClick={() => {
-                // Complete current psalm
-                handleComplete();
-                // Navigate to next psalm: from Daily Tehillim list or sequential
-                const nextPsalm = nextDailyPsalm || (selectedPsalm && selectedPsalm < 150 ? selectedPsalm + 1 : 1);
-                setTimeout(() => {
-                  handleCompleteAndNext();
-                }, 100);
-              }}
+              onClick={handleCompleteAndNext}
               className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse"
             >
-              Complete & Next
+              Complete & Next ({getNextPsalmNumber()})
             </Button>
           </div>
         ) : (
