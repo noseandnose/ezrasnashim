@@ -3862,6 +3862,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Scheduled Notification endpoints (admin-only)
+  app.get("/api/scheduled-notifications", requireAdminAuth, async (req, res) => {
+    try {
+      const notifications = await storage.getAllScheduledNotifications();
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching scheduled notifications:", error);
+      return res.status(500).json({ message: "Failed to fetch scheduled notifications" });
+    }
+  });
+
+  app.get("/api/scheduled-notifications/upcoming", requireAdminAuth, async (req, res) => {
+    try {
+      const notifications = await storage.getUpcomingScheduledNotifications();
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching upcoming scheduled notifications:", error);
+      return res.status(500).json({ message: "Failed to fetch upcoming scheduled notifications" });
+    }
+  });
+
+  app.get("/api/scheduled-notifications/pending", requireAdminAuth, async (req, res) => {
+    try {
+      const notifications = await storage.getPendingScheduledNotifications();
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching pending scheduled notifications:", error);
+      return res.status(500).json({ message: "Failed to fetch pending scheduled notifications" });
+    }
+  });
+
+  app.post("/api/scheduled-notifications", requireAdminAuth, async (req, res) => {
+    try {
+      const { insertScheduledNotificationSchema } = await import("../shared/schema");
+      const validatedData = insertScheduledNotificationSchema.parse(req.body);
+      const newNotification = await storage.createScheduledNotification(validatedData);
+      res.json(newNotification);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ 
+          message: "Invalid notification data", 
+          errors: error.errors 
+        });
+      }
+      console.error("Error creating scheduled notification:", error);
+      return res.status(500).json({ message: "Failed to create scheduled notification" });
+    }
+  });
+
+  app.put("/api/scheduled-notifications/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { insertScheduledNotificationSchema } = await import("../shared/schema");
+      const updateSchema = insertScheduledNotificationSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+      const updatedNotification = await storage.updateScheduledNotification(parseInt(id), validatedData);
+      res.json(updatedNotification);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ 
+          message: "Invalid notification data", 
+          errors: error.errors 
+        });
+      }
+      console.error("Error updating scheduled notification:", error);
+      return res.status(500).json({ message: "Failed to update scheduled notification" });
+    }
+  });
+
+  app.delete("/api/scheduled-notifications/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteScheduledNotification(parseInt(id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting scheduled notification:", error);
+      return res.status(500).json({ message: "Failed to delete scheduled notification" });
+    }
+  });
+
   // Push notification endpoints
   app.get("/api/push/vapid-public-key", (req, res) => {
     res.json({ publicKey: VAPID_PUBLIC_KEY || null });
