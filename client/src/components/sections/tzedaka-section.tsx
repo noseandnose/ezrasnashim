@@ -153,7 +153,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
       markTzedakaButtonCompleted(buttonType);
       
       // Track tzedaka completion for stats
-      trackEvent('modal_complete', {
+      trackEvent('tzedaka_completion', {
         buttonType: 'gave_elsewhere',
         amount: 0,
         date: new Date().toISOString().split('T')[0]

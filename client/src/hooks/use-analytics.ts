@@ -13,7 +13,7 @@ const getSessionId = () => {
 };
 
 interface TrackEventParams {
-  eventType: "modal_complete" | "tehillim_complete" | "name_prayed" | "tehillim_book_complete";
+  eventType: "modal_complete" | "tehillim_complete" | "name_prayed" | "tehillim_book_complete" | "tzedaka_completion" | "meditation_complete";
   eventData?: Record<string, any>;
 }
 
