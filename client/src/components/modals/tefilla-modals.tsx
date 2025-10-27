@@ -545,6 +545,8 @@ function renderPrayerContent(contentType: string | undefined, language: 'hebrew'
       return <BirkatHamazonFullscreenContent language={language} fontSize={fontSize} />;
     case 'individual-prayer':
       return <IndividualPrayerFullscreenContent language={language} fontSize={fontSize} />;
+    case 'compass':
+      return <CompassFullscreenContent />;
     default:
       return null;
   }
@@ -1328,6 +1330,14 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
   );
 }
 
+function CompassFullscreenContent() {
+  return (
+    <div className="space-y-6">
+      <SimpleCompassUI />
+    </div>
+  );
+}
+
 function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
   const { selectedPsalm, tehillimReturnTab, setTehillimActiveTab, openModal, dailyTehillimPsalms } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
@@ -1425,10 +1435,13 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     completeTask('tefilla');
     checkAndShowCongratulations();
     
-    // Determine next psalm based on whether this is a specific part (by ID) or full psalm (by English number)
+    // Determine next psalm based on context: Daily Tehillim list or sequential
     let nextPsalm: number;
     
-    if (tehillimInfo) {
+    // Check if we're navigating within Daily Tehillim
+    if (isFromDailyTehillim && hasNextDailyPsalm && nextDailyPsalm) {
+      nextPsalm = nextDailyPsalm;
+    } else if (tehillimInfo) {
       // This is a specific part by ID - handle 119 parts specially
       if (tehillimInfo.englishNumber === 119) {
         // For psalm 119, move to next part or to psalm 120 if this is the last part
@@ -1458,7 +1471,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
         nextPsalm = Math.min(tehillimInfo.englishNumber + 1, 150);
       }
     } else {
-      // This is a full psalm by English number - use simple increment
+      // This is a full psalm by English number - use simple increment (for 1-150 tab)
       nextPsalm = selectedPsalm < 150 ? selectedPsalm + 1 : 1;
     }
     
@@ -1478,6 +1491,14 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
   
   // Show Complete & Next button if from 1-150 tab OR from Daily Tehillim with next psalm available
   const showCompleteAndNext = !isFromSpecialTab || hasNextDailyPsalm;
+  
+  // Calculate next psalm number for button label
+  const getNextPsalmNumber = () => {
+    if (isFromDailyTehillim && nextDailyPsalm) {
+      return nextDailyPsalm;
+    }
+    return selectedPsalm && selectedPsalm < 150 ? selectedPsalm + 1 : 1;
+  };
 
   return (
     <div className="space-y-6">
@@ -1523,18 +1544,10 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
             </Button>
             
             <Button
-              onClick={() => {
-                // Complete current psalm
-                handleComplete();
-                // Navigate to next psalm: from Daily Tehillim list or sequential
-                const nextPsalm = nextDailyPsalm || (selectedPsalm && selectedPsalm < 150 ? selectedPsalm + 1 : 1);
-                setTimeout(() => {
-                  handleCompleteAndNext();
-                }, 100);
-              }}
+              onClick={handleCompleteAndNext}
               className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse"
             >
-              Complete & Next
+              Complete & Next ({getNextPsalmNumber()})
             </Button>
           </div>
         ) : (
@@ -3371,27 +3384,18 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       {/* Birkat Hamazon Modal */}
       <BirkatHamazonModal />
       
-      {/* Jerusalem Compass Modal */}
-      <Dialog open={activeModal === 'jerusalem-compass'} onOpenChange={() => closeModal(true)}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-0 platypi-regular" aria-describedby="jerusalem-compass-description">
-          <VisuallyHidden>
-            <DialogDescription id="jerusalem-compass-description">Compass to find direction to Jerusalem for prayer</DialogDescription>
-          </VisuallyHidden>
-          <div className="max-h-[95vh] overflow-y-auto p-6 select-none" style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none' }}>
-            <SimpleCompassUI onClose={() => closeModal()} />
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Jerusalem Compass - Removed modal, now using fullscreen */}
 
       {/* Fullscreen Modal */}
       <FullscreenModal
         isOpen={fullscreenContent.isOpen}
         onClose={() => setFullscreenContent({ isOpen: false, title: '', content: null })}
         title={fullscreenContent.title}
-        showFontControls={fullscreenContent.contentType !== 'special-tehillim' && fullscreenContent.contentType !== 'brochas'}
+        showFontControls={fullscreenContent.contentType !== 'special-tehillim' && fullscreenContent.contentType !== 'brochas' && fullscreenContent.contentType !== 'compass'}
         showLanguageControls={
           fullscreenContent.contentType !== 'special-tehillim' && 
           fullscreenContent.contentType !== 'brochas' &&
+          fullscreenContent.contentType !== 'compass' &&
           (fullscreenContent.contentType !== 'individual-prayer' || fullscreenContent.hasTranslation !== false)
         }
         fontSize={fontSize}

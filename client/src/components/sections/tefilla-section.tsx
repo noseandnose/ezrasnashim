@@ -787,8 +787,17 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
         {/* The Kotel Compass Section */}
         <div className="bg-gradient-soft rounded-3xl p-4 shadow-lg">
           <button
-            onClick={() => openModal('jerusalem-compass', 'tefilla')}
+            onClick={() => {
+              const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
+                detail: {
+                  title: 'The Kotel Compass',
+                  contentType: 'compass'
+                }
+              });
+              window.dispatchEvent(fullscreenEvent);
+            }}
             className="w-full bg-white/70 rounded-2xl p-3 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
+            data-testid="button-open-compass"
           >
             <div className="flex items-center space-x-3">
               <div className="bg-gradient-feminine p-3 rounded-full">

@@ -150,6 +150,12 @@ export default function AdminMessages() {
       }
 
       if (response.data) {
+        // Refresh messages list and invalidate cache (do this BEFORE clearing form)
+        refetchMessages();
+        queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
+        // Also invalidate the specific date query so it appears on home page immediately
+        queryClient.invalidateQueries({ queryKey: [`/api/messages/${messageData.date}`] });
+        
         // Clear form
         setFormData({
           date: '',
@@ -157,10 +163,6 @@ export default function AdminMessages() {
           message: ''
         });
         setEditingMessage(null);
-        
-        // Refresh messages list and invalidate cache
-        refetchMessages();
-        queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
       }
     } catch (error: any) {
       if (error.response?.status === 401) {
@@ -199,6 +201,8 @@ export default function AdminMessages() {
       // Refresh messages list and invalidate cache
       refetchMessages();
       queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
+      // Also invalidate the specific date query so it's removed from home page immediately
+      queryClient.invalidateQueries({ queryKey: [`/api/messages/${message.date}`] });
     } catch (error: any) {
       if (error.response?.status === 401) {
         setIsAuthenticated(false);

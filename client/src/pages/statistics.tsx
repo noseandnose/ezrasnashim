@@ -464,7 +464,7 @@ export default function Statistics() {
                       } else if (modalType.startsWith('brocha-')) {
                         // Aggregate individual brocha completions
                         brochasTotal += (count as number) || 0;
-                      } else if (modalType.startsWith('meditation-')) {
+                      } else if (modalType.startsWith('meditation-') || modalType === 'meditation') {
                         // Skip individual meditation completions - we'll use the meditationsCompleted field instead
                       } else if (modalTypeNames[modalType] && !['unknown', 'test', ''].includes(modalType.toLowerCase())) {
                         // Include regular modal types that have names

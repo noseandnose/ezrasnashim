@@ -1143,11 +1143,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/table/inspiration", requireAdminAuth, async (req, res) => {
     try {
+      if (process.env.NODE_ENV === 'development') {
+        console.log("Inspiration creation request body:", req.body);
+      }
       const validatedData = insertTableInspirationSchema.parse(req.body);
+      if (process.env.NODE_ENV === 'development') {
+        console.log("Inspiration validated data:", validatedData);
+      }
       const inspiration = await storage.createTableInspiration(validatedData);
       res.json(inspiration);
     } catch (error) {
-      return res.status(500).json({ message: "Failed to create table inspiration" });
+      console.error("Failed to create table inspiration:", error);
+      if (error instanceof Error) {
+        return res.status(500).json({ message: "Failed to create table inspiration", error: error.message });
+      } else {
+        return res.status(500).json({ message: "Failed to create table inspiration", error: String(error) });
+      }
     }
   });
 
@@ -1165,14 +1176,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/table/inspiration/:id", requireAdminAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      if (process.env.NODE_ENV === 'development') {
+        console.log("Inspiration update request body:", req.body);
+      }
       const validatedData = insertTableInspirationSchema.parse(req.body);
+      if (process.env.NODE_ENV === 'development') {
+        console.log("Inspiration validated data:", validatedData);
+      }
       const inspiration = await storage.updateTableInspiration(id, validatedData);
       if (!inspiration) {
         return res.status(404).json({ message: "Table inspiration not found" });
       }
       res.json(inspiration);
     } catch (error) {
-      return res.status(500).json({ message: "Failed to update table inspiration" });
+      console.error("Failed to update table inspiration:", error);
+      if (error instanceof Error) {
+        return res.status(500).json({ message: "Failed to update table inspiration", error: error.message });
+      } else {
+        return res.status(500).json({ message: "Failed to update table inspiration", error: String(error) });
+      }
     }
   });
 
