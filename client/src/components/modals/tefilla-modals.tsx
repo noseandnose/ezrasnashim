@@ -3391,10 +3391,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         isOpen={fullscreenContent.isOpen}
         onClose={() => setFullscreenContent({ isOpen: false, title: '', content: null })}
         title={fullscreenContent.title}
-        showFontControls={fullscreenContent.contentType !== 'special-tehillim' && fullscreenContent.contentType !== 'brochas'}
+        showFontControls={fullscreenContent.contentType !== 'special-tehillim' && fullscreenContent.contentType !== 'brochas' && fullscreenContent.contentType !== 'compass'}
         showLanguageControls={
           fullscreenContent.contentType !== 'special-tehillim' && 
           fullscreenContent.contentType !== 'brochas' &&
+          fullscreenContent.contentType !== 'compass' &&
           (fullscreenContent.contentType !== 'individual-prayer' || fullscreenContent.hasTranslation !== false)
         }
         fontSize={fontSize}
