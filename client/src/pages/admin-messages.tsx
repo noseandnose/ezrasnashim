@@ -161,6 +161,8 @@ export default function AdminMessages() {
         // Refresh messages list and invalidate cache
         refetchMessages();
         queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
+        // Also invalidate the specific date query so it appears on home page immediately
+        queryClient.invalidateQueries({ queryKey: [`/api/messages/${formData.date}`] });
       }
     } catch (error: any) {
       if (error.response?.status === 401) {
@@ -199,6 +201,8 @@ export default function AdminMessages() {
       // Refresh messages list and invalidate cache
       refetchMessages();
       queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
+      // Also invalidate the specific date query so it's removed from home page immediately
+      queryClient.invalidateQueries({ queryKey: [`/api/messages/${message.date}`] });
     } catch (error: any) {
       if (error.response?.status === 401) {
         setIsAuthenticated(false);

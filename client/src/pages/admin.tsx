@@ -287,6 +287,8 @@ export default function Admin() {
         setMessageFormData({ date: '', title: '', message: '' });
         setEditingMessage(null);
         queryClient.invalidateQueries({ queryKey: ['admin-messages-upcoming'] });
+        // Also invalidate the specific date query so it appears on home page immediately
+        queryClient.invalidateQueries({ queryKey: [`/api/messages/${messageFormData.date}`] });
         await refetchMessages();
       }
     } catch (error: any) {
@@ -316,6 +318,8 @@ export default function Admin() {
       });
 
       queryClient.invalidateQueries({ queryKey: ['/api/messages', { upcoming: true }] });
+      // Also invalidate the specific date query so it's removed from home page immediately
+      queryClient.invalidateQueries({ queryKey: [`/api/messages/${message.date}`] });
       await refetchMessages();
     } catch (error: any) {
       toast({
