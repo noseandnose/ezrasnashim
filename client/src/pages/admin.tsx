@@ -284,12 +284,13 @@ export default function Admin() {
           description: editingMessage ? 'Message updated successfully!' : 'Message created successfully!',
         });
 
+        // Invalidate cache BEFORE clearing form to use correct date
+        queryClient.invalidateQueries({ queryKey: ['admin-messages-upcoming'] });
+        queryClient.invalidateQueries({ queryKey: [`/api/messages/${messageData.date}`] });
+        await refetchMessages();
+        
         setMessageFormData({ date: '', title: '', message: '' });
         setEditingMessage(null);
-        queryClient.invalidateQueries({ queryKey: ['admin-messages-upcoming'] });
-        // Also invalidate the specific date query so it appears on home page immediately
-        queryClient.invalidateQueries({ queryKey: [`/api/messages/${messageFormData.date}`] });
-        await refetchMessages();
       }
     } catch (error: any) {
       toast({
