@@ -10,11 +10,11 @@ import axiosClient from '@/lib/axiosClient';
 import { useQuery } from '@tanstack/react-query';
 import { MessageSquare, Plus, Save, Edit, Trash2, Bell, ChefHat, Send, Clock, Users, CheckCircle, XCircle, Image, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
-import type { Message, TableInspiration } from '@shared/schema';
+import type { Message, TableInspiration, ScheduledNotification } from '@shared/schema';
 import { InlineImageUploader } from '@/components/InlineImageUploader';
 import type { UploadResult } from '@uppy/core';
 
-type AdminTab = 'messages' | 'recipes' | 'inspirations' | 'notifications';
+type AdminTab = 'messages' | 'recipes' | 'inspirations' | 'notifications' | 'scheduled';
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState<AdminTab>('messages');
@@ -77,6 +77,16 @@ export default function Admin() {
   });
   const [isSendingNotification, setIsSendingNotification] = useState(false);
   const [isValidatingSubscriptions, setIsValidatingSubscriptions] = useState(false);
+
+  // Scheduled notifications state
+  const [scheduledFormData, setScheduledFormData] = useState({
+    scheduledDate: '',
+    scheduledTime: '',
+    title: '',
+    message: ''
+  });
+  const [editingScheduled, setEditingScheduled] = useState<ScheduledNotification | null>(null);
+  const [isSavingScheduled, setIsSavingScheduled] = useState(false);
 
   // Set up authorization headers for authenticated requests
   const getAuthHeaders = () => ({
@@ -206,6 +216,27 @@ export default function Admin() {
     },
     enabled: isAuthenticated && activeTab === 'notifications',
     refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
+  // Scheduled notifications API calls
+  const { data: scheduledNotifications, refetch: refetchScheduledNotifications } = useQuery({
+    queryKey: ['admin-scheduled-notifications'],
+    queryFn: async () => {
+      if (!isAuthenticated || activeTab !== 'scheduled') return [];
+      try {
+        const response = await axiosClient.get('/api/scheduled-notifications', {
+          headers: getAuthHeaders()
+        });
+        return response.data;
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          setIsAuthenticated(false);
+          throw new Error('Authentication expired');
+        }
+        throw error;
+      }
+    },
+    enabled: isAuthenticated && activeTab === 'scheduled',
   });
 
   const handleLogin = async () => {
@@ -623,6 +654,107 @@ export default function Admin() {
     }
   };
 
+  // Scheduled notification functions
+  const handleScheduledSubmit = async () => {
+    if (!scheduledFormData.title || !scheduledFormData.scheduledDate || !scheduledFormData.scheduledTime || !scheduledFormData.message) {
+      toast({
+        title: 'Missing Required Fields',
+        description: 'Please fill in date, time, title, and message.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsSavingScheduled(true);
+    try {
+      const notificationData = {
+        scheduledDate: scheduledFormData.scheduledDate,
+        scheduledTime: scheduledFormData.scheduledTime,
+        title: scheduledFormData.title.trim(),
+        message: scheduledFormData.message.trim()
+      };
+
+      if (editingScheduled) {
+        await axiosClient.put(
+          `/api/scheduled-notifications/${editingScheduled.id}`,
+          notificationData,
+          { headers: getAuthHeaders() }
+        );
+        toast({
+          title: 'Success',
+          description: 'Scheduled notification updated successfully!',
+        });
+      } else {
+        await axiosClient.post(
+          '/api/scheduled-notifications',
+          notificationData,
+          { headers: getAuthHeaders() }
+        );
+        toast({
+          title: 'Success',
+          description: 'Scheduled notification created successfully!',
+        });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['admin-scheduled-notifications'] });
+      setScheduledFormData({ scheduledDate: '', scheduledTime: '', title: '', message: '' });
+      setEditingScheduled(null);
+      await refetchScheduledNotifications();
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        setIsAuthenticated(false);
+        toast({
+          title: 'Authentication Expired',
+          description: 'Please log in again.',
+          variant: 'destructive'
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: error.response?.data?.message || 'Failed to save scheduled notification.',
+          variant: 'destructive'
+        });
+      }
+    } finally {
+      setIsSavingScheduled(false);
+    }
+  };
+
+  const handleDeleteScheduled = async (notification: ScheduledNotification) => {
+    if (!confirm(`Are you sure you want to delete this scheduled notification?`)) {
+      return;
+    }
+
+    try {
+      await axiosClient.delete(`/api/scheduled-notifications/${notification.id}`, {
+        headers: getAuthHeaders()
+      });
+      
+      toast({
+        title: 'Notification Deleted',
+        description: 'The scheduled notification has been deleted.',
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['admin-scheduled-notifications'] });
+      await refetchScheduledNotifications();
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        setIsAuthenticated(false);
+        toast({
+          title: 'Authentication Expired',
+          description: 'Please log in again.',
+          variant: 'destructive'
+        });
+      } else {
+        toast({
+          title: 'Delete Failed',
+          description: 'Failed to delete notification.',
+          variant: 'destructive'
+        });
+      }
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen admin-bg-gradient flex items-center justify-center p-4">
@@ -724,6 +856,18 @@ export default function Admin() {
             >
               <Bell className="w-4 h-4 mr-2" />
               Notifications
+            </button>
+            <button
+              onClick={() => setActiveTab('scheduled')}
+              className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'scheduled'
+                  ? 'admin-tab-active'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              }`}
+              data-testid="tab-scheduled"
+            >
+              <Clock className="w-4 h-4 mr-2" />
+              Scheduled
             </button>
           </div>
         </div>
@@ -1531,6 +1675,170 @@ export default function Admin() {
               </div>
             </Card>
           </div>
+          </div>
+        )}
+
+        {/* Scheduled Notifications Tab */}
+        {activeTab === 'scheduled' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Create Scheduled Notification Form */}
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center">
+                <Plus className="w-5 h-5 mr-2 text-rose-600" />
+                {editingScheduled ? 'Edit Scheduled Notification' : 'Create Scheduled Notification'}
+              </h2>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="scheduled-date">Date *</Label>
+                    <Input
+                      id="scheduled-date"
+                      type="date"
+                      value={scheduledFormData.scheduledDate}
+                      onChange={(e) => setScheduledFormData(prev => ({ ...prev, scheduledDate: e.target.value }))}
+                      data-testid="input-scheduled-date"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="scheduled-time">Time *</Label>
+                    <Input
+                      id="scheduled-time"
+                      type="time"
+                      value={scheduledFormData.scheduledTime}
+                      onChange={(e) => setScheduledFormData(prev => ({ ...prev, scheduledTime: e.target.value }))}
+                      data-testid="input-scheduled-time"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="scheduled-title">Title *</Label>
+                  <Input
+                    id="scheduled-title"
+                    type="text"
+                    value={scheduledFormData.title}
+                    onChange={(e) => setScheduledFormData(prev => ({ ...prev, title: e.target.value }))}
+                    placeholder="Notification title"
+                    data-testid="input-scheduled-title"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="scheduled-message">Message *</Label>
+                  <Textarea
+                    id="scheduled-message"
+                    value={scheduledFormData.message}
+                    onChange={(e) => setScheduledFormData(prev => ({ ...prev, message: e.target.value }))}
+                    placeholder="Notification message"
+                    rows={4}
+                    data-testid="textarea-scheduled-message"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleScheduledSubmit} 
+                    disabled={isSavingScheduled}
+                    className="flex-1 admin-btn-primary"
+                    data-testid="button-save-scheduled"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    {isSavingScheduled ? 'Saving...' : editingScheduled ? 'Update Notification' : 'Create Notification'}
+                  </Button>
+                  {editingScheduled && (
+                    <Button
+                      onClick={() => {
+                        setEditingScheduled(null);
+                        setScheduledFormData({ scheduledDate: '', scheduledTime: '', title: '', message: '' });
+                      }}
+                      variant="outline"
+                      disabled={isSavingScheduled}
+                      data-testid="button-cancel-scheduled"
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </Card>
+
+            {/* Scheduled Notifications List */}
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">All Scheduled Notifications</h2>
+              <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                {scheduledNotifications && scheduledNotifications.length > 0 ? (
+                  scheduledNotifications.map((notification: ScheduledNotification) => (
+                    <div 
+                      key={notification.id} 
+                      className="p-3 bg-gray-50 rounded-lg hover:shadow-md transition-shadow"
+                      data-testid={`scheduled-notification-item-${notification.id}`}
+                    >
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <div className="font-medium text-sm text-gray-900">
+                              {notification.title}
+                            </div>
+                            {notification.sent && (
+                              <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                                Sent
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-sm text-gray-600 mt-1">
+                            {notification.message}
+                          </div>
+                          <div className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            Scheduled: {format(new Date(`${notification.scheduledDate}T${notification.scheduledTime}`), 'MMM dd, yyyy h:mm a')}
+                          </div>
+                          {notification.sentAt && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              Sent at: {format(new Date(notification.sentAt), 'MMM dd, yyyy h:mm a')}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => {
+                              setEditingScheduled(notification);
+                              setScheduledFormData({
+                                scheduledDate: notification.scheduledDate,
+                                scheduledTime: notification.scheduledTime,
+                                title: notification.title,
+                                message: notification.message
+                              });
+                            }}
+                            variant="outline"
+                            size="sm"
+                            data-testid={`button-edit-scheduled-${notification.id}`}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            onClick={() => handleDeleteScheduled(notification)}
+                            variant="destructive"
+                            size="sm"
+                            data-testid={`button-delete-scheduled-${notification.id}`}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    No scheduled notifications found
+                  </div>
+                )}
+              </div>
+            </Card>
           </div>
         )}
       </div>
