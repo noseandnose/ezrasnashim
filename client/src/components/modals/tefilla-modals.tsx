@@ -545,6 +545,8 @@ function renderPrayerContent(contentType: string | undefined, language: 'hebrew'
       return <BirkatHamazonFullscreenContent language={language} fontSize={fontSize} />;
     case 'individual-prayer':
       return <IndividualPrayerFullscreenContent language={language} fontSize={fontSize} />;
+    case 'compass':
+      return <CompassFullscreenContent />;
     default:
       return null;
   }
@@ -1324,6 +1326,14 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
       >
         {todayCompleted ? 'Completed Today' : 'Complete Nishmas'}
       </Button>
+    </div>
+  );
+}
+
+function CompassFullscreenContent() {
+  return (
+    <div className="space-y-6">
+      <SimpleCompassUI />
     </div>
   );
 }
@@ -3374,17 +3384,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       {/* Birkat Hamazon Modal */}
       <BirkatHamazonModal />
       
-      {/* Jerusalem Compass Modal */}
-      <Dialog open={activeModal === 'jerusalem-compass'} onOpenChange={() => closeModal(true)}>
-        <DialogContent className="w-full max-w-md rounded-3xl p-0 platypi-regular" aria-describedby="jerusalem-compass-description">
-          <VisuallyHidden>
-            <DialogDescription id="jerusalem-compass-description">Compass to find direction to Jerusalem for prayer</DialogDescription>
-          </VisuallyHidden>
-          <div className="max-h-[95vh] overflow-y-auto p-6 select-none" style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none' }}>
-            <SimpleCompassUI onClose={() => closeModal()} />
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Jerusalem Compass - Removed modal, now using fullscreen */}
 
       {/* Fullscreen Modal */}
       <FullscreenModal

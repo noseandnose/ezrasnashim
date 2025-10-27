@@ -12,11 +12,7 @@ import { MapPin, Compass as CompassIcon, Heart } from 'lucide-react';
 import bhPinkIcon from '@assets/BH_Pink_1755681221620.png';
 import bhGreenIcon from '@assets/BH_Green_1755681221619.png';
 
-interface SimpleCompassUIProps {
-  onClose?: () => void;
-}
-
-export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
+export function SimpleCompassUI() {
   const [compass, setCompass] = useState(() => new SimpleCompass());
   const [state, setState] = useState<CompassState>({
     deviceHeading: 0,
@@ -405,13 +401,6 @@ export function SimpleCompassUI({ onClose }: SimpleCompassUIProps) {
       
       {/* Debug info */}
       {renderDebugInfo()}
-      
-      {/* Close button */}
-      {onClose && (
-        <Button onClick={onClose} variant="outline" className="w-full">
-          Close Compass
-        </Button>
-      )}
     </div>
   );
 }
