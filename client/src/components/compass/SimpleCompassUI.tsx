@@ -24,7 +24,6 @@ export function SimpleCompassUI() {
     error: null
   });
   const [debugMode] = useState(new URLSearchParams(window.location.search).get('debug') === 'compass');
-  const [vibrationInterval, setVibrationInterval] = useState<NodeJS.Timeout | null>(null);
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   
@@ -43,54 +42,29 @@ export function SimpleCompassUI() {
     return () => {
       unsubscribe();
       compass.dispose();
-      if (vibrationInterval) {
-        clearInterval(vibrationInterval);
-      }
     };
-  }, [compass, vibrationInterval]);
+  }, [compass]);
   
-  // Handle vibration when aligned - synced with heart animation (1.5s cycle, lub-dub pattern)
+  // Handle vibration when aligned - single vibration on alignment change only
+  // Continuous vibration was causing compass to lock on Android
   useEffect(() => {
     if (state.isAligned && navigator.vibrate) {
       if (isIOS && !isStandalone) {
-        // iOS Safari has severe Vibration API limitations:
-        // 1. Doesn't support patterns (arrays)
-        // 2. Requires user gesture to trigger vibration
-        // 3. Automatic events (like alignment) get blocked
-        // Solution: Single vibration on alignment change (may still not work in browser)
+        // iOS Safari: Single vibration on alignment change
         navigator.vibrate(200);
       } else {
-        // Android and iOS PWA: Use full heartbeat pattern
+        // Android and iOS PWA: Single heartbeat pattern on alignment
         // Heart animation: 1500ms cycle with pulses at 14% (210ms) and 42% (630ms)
         const heartbeatPattern = [210, 80, 340, 80, 790]; // Total = 1500ms
         
-        // Start vibration immediately
+        // Single vibration on alignment - no continuous loop to prevent blocking orientation events
         navigator.vibrate(heartbeatPattern);
-        
-        // Repeat pattern every 1500ms to match animation
-        const interval = setInterval(() => {
-          navigator.vibrate(heartbeatPattern);
-        }, 1500);
-        
-        setVibrationInterval(interval);
-      }
-    } else {
-      // Stop vibration when not aligned
-      if (vibrationInterval) {
-        clearInterval(vibrationInterval);
-        setVibrationInterval(null);
-      }
-      if (navigator.vibrate) {
-        navigator.vibrate(0); // Cancel any ongoing vibration
       }
     }
     
     return () => {
-      if (vibrationInterval) {
-        clearInterval(vibrationInterval);
-      }
       if (navigator.vibrate) {
-        navigator.vibrate(0);
+        navigator.vibrate(0); // Cancel any ongoing vibration
       }
     };
   }, [state.isAligned, isIOS, isStandalone]);
