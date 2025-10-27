@@ -698,6 +698,23 @@ export const insertMessagesSchema = createInsertSchema(messages);
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessagesSchema>;
 
+// Scheduled Notifications table for sending push notifications at specific times
+export const scheduledNotifications = pgTable("scheduled_notifications", {
+  id: serial("id").primaryKey(),
+  scheduledDate: date("scheduled_date").notNull(),
+  scheduledTime: varchar("scheduled_time", { length: 5 }).notNull(), // Format: HH:MM (24-hour)
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  sent: boolean("sent").default(false).notNull(),
+  sentAt: timestamp("sent_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertScheduledNotificationSchema = createInsertSchema(scheduledNotifications).omit({ id: true, sent: true, sentAt: true, createdAt: true, updatedAt: true });
+export type ScheduledNotification = typeof scheduledNotifications.$inferSelect;
+export type InsertScheduledNotification = z.infer<typeof insertScheduledNotificationSchema>;
+
 // Push notification schemas and types
 export const insertPushSubscriptionSchema = createInsertSchema(pushSubscriptions).omit({ id: true, createdAt: true, updatedAt: true });
 export type PushSubscription = typeof pushSubscriptions.$inferSelect;
