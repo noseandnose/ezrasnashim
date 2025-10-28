@@ -10,7 +10,7 @@ import axiosClient from '@/lib/axiosClient';
 import { useQuery } from '@tanstack/react-query';
 import { MessageSquare, Plus, Save, Edit, Trash2, Bell, ChefHat, Send, Clock, Users, CheckCircle, XCircle, Image, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
-import type { Message, TableInspiration } from '@shared/schema';
+import type { Message, TableInspiration, ScheduledNotification } from '@shared/schema';
 import { InlineImageUploader } from '@/components/InlineImageUploader';
 import type { UploadResult } from '@uppy/core';
 
@@ -68,13 +68,16 @@ export default function Admin() {
   const [editingInspiration, setEditingInspiration] = useState<TableInspiration | null>(null);
   const [isSavingInspiration, setIsSavingInspiration] = useState(false);
 
-  // Notifications state
+  // Notifications state (unified: instant or scheduled based on date/time fields)
   const [notificationData, setNotificationData] = useState({
     title: '',
     body: '',
     url: '/',
-    requireInteraction: false
+    requireInteraction: false,
+    scheduledDate: '', // Optional: if empty, send instantly
+    scheduledTime: ''  // Optional: if empty, send instantly
   });
+  const [editingNotification, setEditingNotification] = useState<ScheduledNotification | null>(null);
   const [isSendingNotification, setIsSendingNotification] = useState(false);
   const [isValidatingSubscriptions, setIsValidatingSubscriptions] = useState(false);
 
@@ -146,13 +149,33 @@ export default function Admin() {
     enabled: isAuthenticated && activeTab === 'inspirations',
   });
 
-  // Notifications API calls
+  // Notifications API calls (fetches both instant and scheduled)
   const { data: notificationHistory, refetch: refetchNotificationHistory } = useQuery({
     queryKey: ['admin-push-history'],
     queryFn: async () => {
       if (!isAuthenticated || activeTab !== 'notifications') return [];
       try {
         const response = await axiosClient.get('/api/push/history', {
+          headers: getAuthHeaders()
+        });
+        return response.data;
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          setIsAuthenticated(false);
+          throw new Error('Authentication expired');
+        }
+        throw error;
+      }
+    },
+    enabled: isAuthenticated && activeTab === 'notifications',
+  });
+
+  const { data: scheduledNotifications, refetch: refetchScheduledNotifications } = useQuery({
+    queryKey: ['admin-scheduled-notifications'],
+    queryFn: async () => {
+      if (!isAuthenticated || activeTab !== 'notifications') return [];
+      try {
+        const response = await axiosClient.get('/api/scheduled-notifications', {
           headers: getAuthHeaders()
         });
         return response.data;
@@ -207,6 +230,7 @@ export default function Admin() {
     enabled: isAuthenticated && activeTab === 'notifications',
     refetchInterval: 30000, // Refresh every 30 seconds
   });
+
 
   const handleLogin = async () => {
     const trimmedPassword = adminPassword.trim();
@@ -559,7 +583,7 @@ export default function Admin() {
     }
   };
 
-  // Notification functions
+  // Notification functions (handles both instant and scheduled)
   const handleSendNotification = async () => {
     if (!notificationData.title || !notificationData.body) {
       toast({
@@ -570,25 +594,71 @@ export default function Admin() {
       return;
     }
 
+    const hasDate = notificationData.scheduledDate.trim() !== '';
+    const hasTime = notificationData.scheduledTime.trim() !== '';
+    
+    // Both date AND time must be provided to schedule, otherwise send instantly
+    const isScheduled = hasDate && hasTime;
+
     setIsSendingNotification(true);
     try {
-      const response = await axiosClient.post('/api/push/send', notificationData, {
-        headers: getAuthHeaders()
-      });
+      if (isScheduled) {
+        // Schedule the notification
+        const scheduledData = {
+          scheduledDate: notificationData.scheduledDate,
+          scheduledTime: notificationData.scheduledTime,
+          title: notificationData.title,
+          message: notificationData.body
+        };
 
-      if (response.status === 200 || response.status === 201) {
-        toast({
-          title: 'Notification Sent',
-          description: `Notification sent to ${response.data.successCount || 'all'} users.`,
+        let response;
+        if (editingNotification) {
+          response = await axiosClient.patch(`/api/scheduled-notifications/${editingNotification.id}`, scheduledData, {
+            headers: getAuthHeaders()
+          });
+        } else {
+          response = await axiosClient.post('/api/scheduled-notifications', scheduledData, {
+            headers: getAuthHeaders()
+          });
+        }
+
+        if (response.status === 200 || response.status === 201) {
+          toast({
+            title: editingNotification ? 'Notification Updated' : 'Notification Scheduled',
+            description: `Notification ${editingNotification ? 'updated' : 'scheduled'} for ${notificationData.scheduledDate} at ${notificationData.scheduledTime}`,
+          });
+          setNotificationData({ title: '', body: '', url: '/', requireInteraction: false, scheduledDate: '', scheduledTime: '' });
+          setEditingNotification(null);
+          queryClient.invalidateQueries({ queryKey: ['admin-scheduled-notifications'] });
+          await refetchScheduledNotifications();
+        }
+      } else {
+        // Send instantly
+        const instantData = {
+          title: notificationData.title,
+          body: notificationData.body,
+          url: notificationData.url,
+          requireInteraction: notificationData.requireInteraction
+        };
+
+        const response = await axiosClient.post('/api/push/send', instantData, {
+          headers: getAuthHeaders()
         });
-        setNotificationData({ title: '', body: '', url: '/', requireInteraction: false });
-        queryClient.invalidateQueries({ queryKey: ['admin-push-history'] });
-        await refetchNotificationHistory();
+
+        if (response.status === 200 || response.status === 201) {
+          toast({
+            title: 'Notification Sent',
+            description: `Notification sent to ${response.data.successCount || 'all'} users.`,
+          });
+          setNotificationData({ title: '', body: '', url: '/', requireInteraction: false, scheduledDate: '', scheduledTime: '' });
+          queryClient.invalidateQueries({ queryKey: ['admin-push-history'] });
+          await refetchNotificationHistory();
+        }
       }
     } catch (error: any) {
       toast({
-        title: 'Send Failed',
-        description: 'Failed to send notification. Please try again.',
+        title: isScheduled ? 'Schedule Failed' : 'Send Failed',
+        description: `Failed to ${isScheduled ? 'schedule' : 'send'} notification. Please try again.`,
         variant: 'destructive'
       });
     } finally {
@@ -622,6 +692,33 @@ export default function Admin() {
       setIsValidatingSubscriptions(false);
     }
   };
+
+  const handleDeleteScheduledNotification = async (notification: ScheduledNotification) => {
+    if (!confirm(`Are you sure you want to delete the scheduled notification "${notification.title}"?`)) {
+      return;
+    }
+
+    try {
+      await axiosClient.delete(`/api/scheduled-notifications/${notification.id}`, {
+        headers: getAuthHeaders()
+      });
+      
+      toast({
+        title: 'Notification Deleted',
+        description: 'The scheduled notification has been successfully deleted.',
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['admin-scheduled-notifications'] });
+      await refetchScheduledNotifications();
+    } catch (error: any) {
+      toast({
+        title: 'Delete Failed',
+        description: 'Failed to delete notification',
+        variant: 'destructive'
+      });
+    }
+  };
+
 
   if (!isAuthenticated) {
     return (
@@ -1473,6 +1570,36 @@ export default function Admin() {
                   <Label htmlFor="notification-require-interaction">Require user interaction</Label>
                 </div>
 
+                <div className="border-t pt-4 mt-4">
+                  <p className="text-sm text-gray-600 mb-3">
+                    <strong>Optional:</strong> Schedule for later (leave empty to send instantly)
+                  </p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="notification-date">Date (optional)</Label>
+                      <Input
+                        id="notification-date"
+                        type="date"
+                        value={notificationData.scheduledDate}
+                        onChange={(e) => setNotificationData(prev => ({ ...prev, scheduledDate: e.target.value }))}
+                        data-testid="input-notification-date"
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="notification-time">Time (optional)</Label>
+                      <Input
+                        id="notification-time"
+                        type="time"
+                        value={notificationData.scheduledTime}
+                        onChange={(e) => setNotificationData(prev => ({ ...prev, scheduledTime: e.target.value }))}
+                        data-testid="input-notification-time"
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <Button 
                   onClick={handleSendNotification} 
                   disabled={isSendingNotification}
@@ -1480,52 +1607,148 @@ export default function Admin() {
                   data-testid="button-send-notification"
                 >
                   <Send className="w-4 h-4 mr-2" />
-                  {isSendingNotification ? 'Sending...' : 'Send Notification'}
+                  {isSendingNotification 
+                    ? (notificationData.scheduledDate && notificationData.scheduledTime ? 'Scheduling...' : 'Sending...') 
+                    : (notificationData.scheduledDate && notificationData.scheduledTime ? 'Schedule Notification' : 'Send Notification')
+                  }
                 </Button>
+
+                {editingNotification && (
+                  <Button 
+                    onClick={() => {
+                      setEditingNotification(null);
+                      setNotificationData({ title: '', body: '', url: '/', requireInteraction: false, scheduledDate: '', scheduledTime: '' });
+                    }}
+                    variant="outline"
+                    className="w-full"
+                    data-testid="button-cancel-notification"
+                  >
+                    Cancel
+                  </Button>
+                )}
               </div>
             </Card>
 
-            {/* Notification History */}
+            {/* Notification History & Scheduled Notifications */}
             <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Recent Notifications</h2>
+              <h2 className="text-xl font-semibold mb-4">Notifications</h2>
               <div className="space-y-3 max-h-96 overflow-y-auto">
-                {notificationHistory && notificationHistory.length > 0 ? (
-                  notificationHistory.slice(0, 10).map((notification: any, index: number) => (
-                    <div 
-                      key={index} 
-                      className="p-3 bg-gray-50 rounded-lg"
-                      data-testid={`notification-item-${index}`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="font-medium text-sm text-gray-900">
-                            {notification.title}
+                {/* Scheduled Notifications */}
+                {scheduledNotifications && scheduledNotifications.length > 0 && (
+                  <>
+                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Scheduled</h3>
+                    {scheduledNotifications.map((notification: ScheduledNotification) => (
+                      <div 
+                        key={notification.id} 
+                        className="p-3 bg-blue-50 rounded-lg border border-blue-200"
+                        data-testid={`scheduled-notification-item-${notification.id}`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium text-sm text-gray-900">
+                              {notification.title}
+                            </div>
+                            <div className="text-sm text-gray-600 mt-1">
+                              {notification.message}
+                            </div>
+                            <div className="text-xs text-gray-500 mt-2 flex items-center gap-3">
+                              <span className="flex items-center">
+                                <Clock className="w-3 h-3 inline mr-1" />
+                                {format(new Date(notification.scheduledDate), 'MMM dd, yyyy')} at {notification.scheduledTime}
+                              </span>
+                              {notification.sent && notification.sentAt && (
+                                <span className="flex items-center text-green-600">
+                                  <CheckCircle className="w-3 h-3 inline mr-1" />
+                                  Sent {format(new Date(notification.sentAt), 'MMM dd, HH:mm')}
+                                </span>
+                              )}
+                              {!notification.sent && (
+                                <span className="flex items-center text-blue-600">
+                                  <Clock className="w-3 h-3 inline mr-1" />
+                                  Pending
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <div className="text-sm text-gray-600 mt-1">
-                            {notification.body}
-                          </div>
-                          <div className="text-xs text-gray-500 mt-2">
-                            <Clock className="w-3 h-3 inline mr-1" />
-                            {format(new Date(notification.sentAt), 'MMM dd, yyyy HH:mm')}
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2 ml-2">
-                          <div className="text-xs text-gray-500 flex items-center">
-                            <Users className="w-3 h-3 mr-1" />
-                            {notification.successCount || 0}
-                          </div>
-                          {notification.success ? (
-                            <CheckCircle className="w-4 h-4 text-green-500" />
-                          ) : (
-                            <XCircle className="w-4 h-4 text-red-500" />
+                          {!notification.sent && (
+                            <div className="flex gap-2 ml-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingNotification(notification);
+                                  setNotificationData({
+                                    title: notification.title,
+                                    body: notification.message,
+                                    url: '/',
+                                    requireInteraction: false,
+                                    scheduledDate: notification.scheduledDate,
+                                    scheduledTime: notification.scheduledTime
+                                  });
+                                }}
+                                data-testid={`button-edit-scheduled-${notification.id}`}
+                              >
+                                <Edit className="w-3 h-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDeleteScheduledNotification(notification)}
+                                data-testid={`button-delete-scheduled-${notification.id}`}
+                              >
+                                <Trash2 className="w-3 h-3 text-red-600" />
+                              </Button>
+                            </div>
                           )}
                         </div>
                       </div>
-                    </div>
-                  ))
-                ) : (
+                    ))}
+                  </>
+                )}
+
+                {/* Sent Notifications */}
+                {notificationHistory && notificationHistory.length > 0 && (
+                  <>
+                    <h3 className="text-sm font-semibold text-gray-700 mb-2 mt-4">Sent</h3>
+                    {notificationHistory.slice(0, 10).map((notification: any, index: number) => (
+                      <div 
+                        key={index} 
+                        className="p-3 bg-gray-50 rounded-lg"
+                        data-testid={`notification-item-${index}`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium text-sm text-gray-900">
+                              {notification.title}
+                            </div>
+                            <div className="text-sm text-gray-600 mt-1">
+                              {notification.body}
+                            </div>
+                            <div className="text-xs text-gray-500 mt-2">
+                              <Clock className="w-3 h-3 inline mr-1" />
+                              {format(new Date(notification.sentAt), 'MMM dd, yyyy HH:mm')}
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2 ml-2">
+                            <div className="text-xs text-gray-500 flex items-center">
+                              <Users className="w-3 h-3 mr-1" />
+                              {notification.successCount || 0}
+                            </div>
+                            {notification.success ? (
+                              <CheckCircle className="w-4 h-4 text-green-500" />
+                            ) : (
+                              <XCircle className="w-4 h-4 text-red-500" />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
+
+                {(!notificationHistory || notificationHistory.length === 0) && (!scheduledNotifications || scheduledNotifications.length === 0) && (
                   <div className="text-center py-8 text-gray-500">
-                    No notifications sent yet
+                    No notifications yet
                   </div>
                 )}
               </div>
@@ -1533,6 +1756,7 @@ export default function Admin() {
           </div>
           </div>
         )}
+
       </div>
     </div>
   );

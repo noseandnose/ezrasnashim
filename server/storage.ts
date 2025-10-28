@@ -32,6 +32,7 @@ import {
   type AnalyticsEvent, type InsertAnalyticsEvent,
   type DailyStats, type InsertDailyStats,
   type Message, type InsertMessage, messages,
+  scheduledNotifications, type ScheduledNotification, type InsertScheduledNotification,
   pushSubscriptions, pushNotifications,
   type PushSubscription, type InsertPushSubscription,
   type PushNotification, type InsertPushNotification
@@ -214,6 +215,16 @@ export interface IStorage {
   getUpcomingMessages(): Promise<Message[]>;
   updateMessage(id: number, message: Partial<InsertMessage>): Promise<Message>;
   deleteMessage(id: number): Promise<void>;
+  
+  // Scheduled Notification methods
+  getAllScheduledNotifications(): Promise<ScheduledNotification[]>;
+  getScheduledNotificationById(id: number): Promise<ScheduledNotification | undefined>;
+  getUpcomingScheduledNotifications(): Promise<ScheduledNotification[]>;
+  getPendingScheduledNotifications(): Promise<ScheduledNotification[]>;
+  createScheduledNotification(notification: InsertScheduledNotification): Promise<ScheduledNotification>;
+  updateScheduledNotification(id: number, notification: Partial<InsertScheduledNotification>): Promise<ScheduledNotification>;
+  deleteScheduledNotification(id: number): Promise<void>;
+  markScheduledNotificationAsSent(id: number): Promise<void>;
   
   // Push notification methods
   subscribeToPush(subscription: InsertPushSubscription): Promise<PushSubscription>;
@@ -2243,6 +2254,70 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(messages)
       .where(eq(messages.id, id));
+  }
+  
+  // Scheduled Notification methods
+  async getAllScheduledNotifications(): Promise<ScheduledNotification[]> {
+    return await db
+      .select()
+      .from(scheduledNotifications)
+      .orderBy(scheduledNotifications.scheduledDate, scheduledNotifications.scheduledTime);
+  }
+
+  async getScheduledNotificationById(id: number): Promise<ScheduledNotification | undefined> {
+    const [notification] = await db
+      .select()
+      .from(scheduledNotifications)
+      .where(eq(scheduledNotifications.id, id))
+      .limit(1);
+    return notification;
+  }
+
+  async getUpcomingScheduledNotifications(): Promise<ScheduledNotification[]> {
+    const today = new Date().toISOString().split('T')[0];
+    return await db
+      .select()
+      .from(scheduledNotifications)
+      .where(gte(scheduledNotifications.scheduledDate, today))
+      .orderBy(scheduledNotifications.scheduledDate, scheduledNotifications.scheduledTime);
+  }
+
+  async getPendingScheduledNotifications(): Promise<ScheduledNotification[]> {
+    return await db
+      .select()
+      .from(scheduledNotifications)
+      .where(eq(scheduledNotifications.sent, false))
+      .orderBy(scheduledNotifications.scheduledDate, scheduledNotifications.scheduledTime);
+  }
+
+  async createScheduledNotification(notification: InsertScheduledNotification): Promise<ScheduledNotification> {
+    const [newNotification] = await db
+      .insert(scheduledNotifications)
+      .values(notification)
+      .returning();
+    return newNotification;
+  }
+
+  async updateScheduledNotification(id: number, notificationData: Partial<InsertScheduledNotification>): Promise<ScheduledNotification> {
+    const [updatedNotification] = await db
+      .update(scheduledNotifications)
+      .set({ ...notificationData, updatedAt: new Date() })
+      .where(eq(scheduledNotifications.id, id))
+      .returning();
+    return updatedNotification;
+  }
+
+  async deleteScheduledNotification(id: number): Promise<void> {
+    await db
+      .delete(scheduledNotifications)
+      .where(eq(scheduledNotifications.id, id));
+  }
+
+  async markScheduledNotificationAsSent(id: number): Promise<void> {
+    await db
+      .update(scheduledNotifications)
+      .set({ sent: true, sentAt: new Date() })
+      .where(eq(scheduledNotifications.id, id));
   }
   
   // Push notification methods
