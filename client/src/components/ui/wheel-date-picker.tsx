@@ -22,6 +22,7 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
   const [selectedMonth, setSelectedMonth] = useState(1);
   const [selectedDay, setSelectedDay] = useState(1);
   const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [isInitialized, setIsInitialized] = useState(false);
   
   const monthRef = useRef<HTMLDivElement>(null);
   const dayRef = useRef<HTMLDivElement>(null);
@@ -69,6 +70,7 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
   };
 
   const handleMonthScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (!isInitialized) return; // Ignore scroll events during initialization
     const scrollTop = e.currentTarget.scrollTop;
     const itemHeight = 40;
     const index = Math.round(scrollTop / itemHeight);
@@ -77,6 +79,7 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
   };
 
   const handleDayScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (!isInitialized) return; // Ignore scroll events during initialization
     const scrollTop = e.currentTarget.scrollTop;
     const itemHeight = 40;
     const maxDays = getDaysInMonth(selectedYear, selectedMonth);
@@ -86,6 +89,7 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
   };
 
   const handleYearScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (!isInitialized) return; // Ignore scroll events during initialization
     const scrollTop = e.currentTarget.scrollTop;
     const itemHeight = 40;
     const index = Math.round(scrollTop / itemHeight);
@@ -100,6 +104,11 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
       scrollToItem(monthRef, selectedMonth - 1, false);
       scrollToItem(dayRef, selectedDay - 1, false);
       scrollToItem(yearRef, years.indexOf(selectedYear), false);
+      
+      // Enable scroll handlers after a brief delay to ensure positioning is complete
+      setTimeout(() => {
+        setIsInitialized(true);
+      }, 200);
     });
   }, []);
 
