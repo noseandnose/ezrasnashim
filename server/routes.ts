@@ -95,12 +95,16 @@ async function cachedGet(url: string, config: any = {}): Promise<any> {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+let stripe: Stripe | null = null;
+
 if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+  console.warn('⚠️  STRIPE_SECRET_KEY not configured - donation endpoints will be unavailable');
+} else {
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2025-03-31.basil' as any,
+  });
+  console.log('✅ Stripe configured successfully');
 }
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2025-03-31.basil' as any,
-});
 
 // Store VAPID keys at startup
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
@@ -2344,6 +2348,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Test Stripe connection endpoint
   app.get("/api/stripe-test", async (req, res) => {
     try {
+      if (!stripe) {
+        return res.status(503).json({
+          success: false,
+          error: 'Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.'
+        });
+      }
+      
       console.log('Testing Stripe connection...');
       console.log('Stripe key configured:', !!process.env.STRIPE_SECRET_KEY);
       console.log('Stripe key format:', process.env.STRIPE_SECRET_KEY?.substring(0, 7) + '...');
@@ -2383,6 +2394,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Stripe payment route for donations
   app.post("/api/create-session-checkout", async (req, res) => {
     try {
+      if (!stripe) {
+        return res.status(503).json({
+          success: false,
+          error: 'Payment processing is currently unavailable. Please contact support.'
+        });
+      }
+      
       const { amount, donationType, metadata } = req.body;
       
       // console.log('=== PAYMENT INTENT REQUEST ===');
@@ -2660,6 +2678,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error('Missing stripe signature header');
         return res.status(400).json({ error: 'Missing stripe signature' });
       }
+      if (!stripe) {
+        console.error('Stripe not configured - cannot process webhook');
+        return res.status(503).json({ error: 'Stripe not configured' });
+      }
+      
       if (!process.env.STRIPE_WEBHOOK_SECRET) {
         console.error('Missing stripe webhook secret environment variable');
         return res.status(400).json({ error: 'Missing webhook secret configuration' });
@@ -3160,6 +3183,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Only create donation record if payment succeeded
         // Get payment intent details from Stripe to get accurate amount and metadata
         try {
+          if (!stripe) {
+            console.warn('Stripe not configured - cannot retrieve payment intent details');
+            // Fallback - create with minimal info
+            donation = await storage.createDonation({
+              userId: null,
+              stripePaymentIntentId: paymentIntentId,
+              amount: 100, // Default $1
+              type: "put_a_coin",
+              donationType: "General Donation",
+              status: status
+            });
+            return res.json({ success: true, message: "Donation recorded (Stripe unavailable)", donation });
+          }
+          
           const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
           donation = await storage.createDonation({
             userId: null,
