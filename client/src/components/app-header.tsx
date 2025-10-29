@@ -38,6 +38,7 @@ export default function AppHeader() {
     isStandalone,
     canInstall,
     isIOS,
+    isWebview,
   } = useInstallHighlight();
   
   const today = getLocalDateString();
@@ -167,7 +168,7 @@ export default function AppHeader() {
                   <Share2 className="h-4 w-4 mr-2" />
                   Share
                 </DropdownMenuItem>
-                {!isStandalone && (
+                {!isStandalone && !isWebview && (
                   <DropdownMenuItem
                     onClick={handleInstallClick}
                     className={`cursor-pointer ${
