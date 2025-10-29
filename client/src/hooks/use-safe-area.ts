@@ -30,55 +30,30 @@ export function useSafeArea() {
           !!(window as any).Capacitor  // Capacitor
         );
         
-        // Read the CSS-computed safe area values (already set from env() in CSS)
-        const style = getComputedStyle(root);
-        const safeAreaTopFromCSS = style.getPropertyValue('--safe-area-top').trim();
-        const safeAreaBottomFromCSS = style.getPropertyValue('--safe-area-bottom').trim();
-        
-        // Only override to 0px in webview contexts (to avoid double offset)
-        // In PWA/browser, keep the CSS env() value
-        let safeAreaTop = safeAreaTopFromCSS;
-        let safeAreaBottom = safeAreaBottomFromCSS;
-        
-        if (isWebView) {
-          // WebView containers (like FlutterFlow) already apply their own insets
-          safeAreaTop = '0px';
-          safeAreaBottom = '0px';
-        }
-        
         // Dynamically measure actual header height instead of using hardcoded value
         const headerElement = document.querySelector('header');
         const headerHeight = headerElement ? headerElement.getBoundingClientRect().height : 48;
         const footerHeight = 70; // Bottom nav height in px
       
-      // Detect Safari (exclude iOS Chrome, Edge, Firefox which also have "Safari" in UA)
-      const isSafari = /^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(navigator.userAgent);
-      
-      // Calculate viewport bottom offset - Safari browser mode only
-      // Chrome and Safari standalone mode use bottom: 0
-      let viewportBottomOffset = 0;
-      if (isSafari && !isStandalone) {
-        // Safari browser mode: fixed offset for bottom toolbar
-        const safeBottomValue = parseInt(safeAreaBottom, 10) || 0;
-        viewportBottomOffset = Math.max(safeBottomValue, 24);
-      }
-      
-        // Set CSS variables (only override if webview, otherwise keep CSS env() values)
-        if (isWebView) {
-          root.style.setProperty('--safe-area-top', safeAreaTop);
-          root.style.setProperty('--safe-area-bottom', safeAreaBottom);
+        // Detect Safari (exclude iOS Chrome, Edge, Firefox which also have "Safari" in UA)
+        const isSafari = /^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(navigator.userAgent);
+        
+        // Calculate viewport bottom offset - Safari browser mode only
+        // Chrome and Safari standalone mode use bottom: 0
+        let viewportBottomOffset = 0;
+        if (isSafari && !isStandalone) {
+          // Safari browser mode: fixed offset for bottom toolbar
+          viewportBottomOffset = 24;
         }
-        // Always set these derived values
+      
+        // Only set derived values - don't override CSS env() safe-area values
         root.style.setProperty('--header-height', `${headerHeight}px`);
         root.style.setProperty('--footer-height', `${footerHeight}px`);
         root.style.setProperty('--viewport-bottom-offset', `${viewportBottomOffset}px`);
         root.style.setProperty('--is-standalone', isStandalone ? '1' : '0');
         
-        // Calculate total safe areas including UI elements and viewport offset
-        const finalSafeAreaTop = isWebView ? '0px' : safeAreaTop;
-        const finalSafeAreaBottom = isWebView ? '0px' : safeAreaBottom;
-        root.style.setProperty('--safe-top-total', `calc(${finalSafeAreaTop} + ${headerHeight}px)`);
-        root.style.setProperty('--safe-bottom-total', `calc(${finalSafeAreaBottom} + ${footerHeight}px + ${viewportBottomOffset}px)`);
+        // Calculate total safe bottom (for footer)
+        root.style.setProperty('--safe-bottom-total', `calc(env(safe-area-inset-bottom, 0px) + ${footerHeight}px + ${viewportBottomOffset}px)`);
       });
     };
     
