@@ -28,19 +28,8 @@ export function useSafeArea() {
       
       // Total header height including all padding (this is what content needs to clear)
       const totalHeaderHeight = headerPaddingTopPx + headerContentHeight + headerPaddingBottomPx;
-      
-      const footerHeight = 70; // Bottom nav height in px
-      
-      // Debug logging
-      console.log('SafeArea Debug:', {
-        headerPaddingTopPx,
-        headerContentHeight,
-        totalHeaderHeight,
-        headerRectHeight: headerRect?.height,
-        isStandalone
-      });
-      
       const contentStartPosition = totalHeaderHeight;
+      const footerHeight = 70; // Bottom nav height in px
     
       // Detect Safari (exclude iOS Chrome, Edge, Firefox which also have "Safari" in UA)
       const isSafari = /^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(navigator.userAgent);
