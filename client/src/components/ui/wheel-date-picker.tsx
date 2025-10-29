@@ -114,7 +114,7 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
           <div className="text-xs text-gray-500 text-center mb-2 platypi-medium">Month</div>
           <div 
             ref={monthRef}
-            className="h-32 w-24 overflow-y-scroll scrollbar-hide scroll-smooth"
+            className="h-32 w-24 overflow-y-scroll scrollbar-hide"
             style={{ scrollSnapType: 'y mandatory' }}
             onScroll={handleMonthScroll}
             data-testid="wheel-month"
@@ -142,7 +142,7 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
           <div className="text-xs text-gray-500 text-center mb-2 platypi-medium">Day</div>
           <div 
             ref={dayRef}
-            className="h-32 w-16 overflow-y-scroll scrollbar-hide scroll-smooth"
+            className="h-32 w-16 overflow-y-scroll scrollbar-hide"
             style={{ scrollSnapType: 'y mandatory' }}
             onScroll={handleDayScroll}
             data-testid="wheel-day"
@@ -170,7 +170,7 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
           <div className="text-xs text-gray-500 text-center mb-2 platypi-medium">Year</div>
           <div 
             ref={yearRef}
-            className="h-32 w-20 overflow-y-scroll scrollbar-hide scroll-smooth"
+            className="h-32 w-20 overflow-y-scroll scrollbar-hide"
             style={{ scrollSnapType: 'y mandatory' }}
             onScroll={handleYearScroll}
             data-testid="wheel-year"
