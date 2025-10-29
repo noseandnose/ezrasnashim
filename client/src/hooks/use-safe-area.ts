@@ -17,9 +17,11 @@ export function useSafeArea() {
                             document.referrer.includes('android-app://');
         
         
-        // Dynamically measure actual header height instead of using hardcoded value
+        // Dynamically measure where the header actually ends (including all padding and safe area)
         const headerElement = document.querySelector('header');
-        const headerHeight = headerElement ? headerElement.getBoundingClientRect().height : 48;
+        const headerRect = headerElement?.getBoundingClientRect();
+        // The content should start where the header ends (bottom of header)
+        const contentStartPosition = headerRect ? headerRect.bottom : 60;
         const footerHeight = 70; // Bottom nav height in px
       
         // Detect Safari (exclude iOS Chrome, Edge, Firefox which also have "Safari" in UA)
@@ -34,7 +36,7 @@ export function useSafeArea() {
         }
       
         // Only set derived values - don't override CSS env() safe-area values
-        root.style.setProperty('--header-height', `${headerHeight}px`);
+        root.style.setProperty('--content-start', `${contentStartPosition}px`);
         root.style.setProperty('--footer-height', `${footerHeight}px`);
         root.style.setProperty('--viewport-bottom-offset', `${viewportBottomOffset}px`);
         root.style.setProperty('--is-standalone', isStandalone ? '1' : '0');

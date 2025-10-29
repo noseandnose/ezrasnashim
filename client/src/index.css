@@ -907,8 +907,8 @@ html, body, #root {
   height: 0; /* Important for flex child to be scrollable */
   overflow-y: auto;
   overflow-x: hidden;
-  /* Add padding for fixed header - header height already includes safe area */
-  padding-top: var(--header-height, 60px);
+  /* Content starts where header ends (header.bottom position) */
+  padding-top: var(--content-start, 60px);
   
   /* Total safe bottom area includes footer, safe-area-inset, and Safari nav offset */
   padding-bottom: var(--safe-bottom-total);
