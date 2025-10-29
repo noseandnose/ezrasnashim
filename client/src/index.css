@@ -907,8 +907,10 @@ html, body, #root {
   height: 0; /* Important for flex child to be scrollable */
   overflow-y: auto;
   overflow-x: hidden;
-  /* Add padding for fixed header - header is positioned at safe-area-top with its own height */
-  padding-top: calc(var(--safe-area-top, 0px) + var(--header-height, 48px));
+  /* Add padding for fixed header */
+  /* In PWA: env(safe-area-inset-top) + header height */
+  /* In webview/browser: just header height */
+  padding-top: calc(env(safe-area-inset-top, 0px) + var(--header-height, 60px));
   
   /* Total safe bottom area includes footer, safe-area-inset, and Safari nav offset */
   padding-bottom: var(--safe-bottom-total);
