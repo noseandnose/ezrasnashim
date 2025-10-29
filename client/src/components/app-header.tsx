@@ -1,9 +1,10 @@
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate } from "@/hooks/use-hebrew-date";
+import { useInstallHighlight } from "@/hooks/use-install-highlight";
 import { BarChart3, Info, Share2, Heart, Mail, Share, X, Menu, MessageSquare } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import logoImage from "@assets/6LO_1753613081319.png";
 import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
 import MessageModal from "./modals/message-modal";
@@ -24,14 +25,20 @@ export default function AppHeader() {
   const { openModal } = useModalStore();
   const [showAddToHomeScreen, setShowAddToHomeScreen] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
   const [hasReadMessage, setHasReadMessage] = useState(false);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const [lastClickTime, setLastClickTime] = useState(0);
-  const [isStandalone, setIsStandalone] = useState(false);
-  const [canInstall, setCanInstall] = useState(false);
-  const deferredPromptRef = useRef<any>(null);
+  
+  // Use install highlight hook for PWA installation guidance
+  const {
+    shouldHighlight,
+    markDismissed,
+    triggerInstallPrompt,
+    isStandalone,
+    canInstall,
+    isIOS,
+  } = useInstallHighlight();
   
   const today = getLocalDateString();
   
@@ -46,35 +53,6 @@ export default function AppHeader() {
     const readKey = `message-read-${today}`;
     setHasReadMessage(localStorage.getItem(readKey) === 'true');
   }, [today]);
-
-  useEffect(() => {
-    // Detect if iOS device
-    const userAgent = navigator.userAgent.toLowerCase();
-    setIsIOS(/iphone|ipad|ipod/.test(userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
-    
-    // Detect if app is running in standalone mode (already installed)
-    const isStandaloneMode = window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as any).standalone === true;
-    setIsStandalone(isStandaloneMode);
-  }, []);
-  
-  // Listen for beforeinstallprompt event (Android)
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e: Event) => {
-      // Prevent the default mini-infobar from appearing on mobile
-      e.preventDefault();
-      // Stash the event so it can be triggered later
-      deferredPromptRef.current = e;
-      // Update UI to show install button
-      setCanInstall(true);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-  }, []);
   
   const handleOpenMessage = () => {
     setShowMessageModal(true);
@@ -84,28 +62,18 @@ export default function AppHeader() {
   };
 
   const handleInstallClick = async () => {
-    // If app is already installed, don't show prompt
-    if (isStandalone) {
-      return;
-    }
+    // User has engaged with install - dismiss the highlight
+    markDismissed();
     
-    // Try native install prompt first (works on Android)
-    if (deferredPromptRef.current) {
-      const promptEvent = deferredPromptRef.current;
-      // Show the install prompt
-      promptEvent.prompt();
-      // Wait for the user to respond to the prompt
-      const { outcome } = await promptEvent.userChoice;
-      
-      if (outcome === 'accepted') {
-        // User accepted the install prompt
-        deferredPromptRef.current = null;
-        setCanInstall(false);
-      }
-    } else {
-      // Fallback: Show manual instructions (iOS or browser without support)
+    // Try native install prompt
+    const result = await triggerInstallPrompt();
+    
+    // Only show manual instructions if native prompt was unavailable
+    if (result === 'unavailable') {
       setShowAddToHomeScreen(true);
     }
+    // If 'accepted' or 'dismissed', the user has already interacted with the prompt
+    // so we don't need to show manual instructions
   };
   
   const handleShare = async () => {
@@ -162,7 +130,9 @@ export default function AppHeader() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className="p-2 rounded-full hover:bg-white/50 transition-colors"
+                  className={`p-2 rounded-full hover:bg-white/50 transition-colors ${
+                    shouldHighlight ? 'animate-pulse border-2 border-blush shadow-lg' : ''
+                  }`}
                   aria-label="Menu"
                   data-testid="button-menu"
                 >
@@ -198,7 +168,11 @@ export default function AppHeader() {
                   <DropdownMenuItem
                     onClick={handleInstallClick}
                     className={`cursor-pointer ${
-                      canInstall ? 'bg-blush/10 font-semibold' : ''
+                      shouldHighlight 
+                        ? 'bg-blush/20 font-bold animate-pulse border-2 border-blush' 
+                        : canInstall 
+                        ? 'bg-blush/10 font-semibold' 
+                        : ''
                     }`}
                     data-testid="menu-item-install"
                   >
