@@ -51,10 +51,20 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
     }
   }, [selectedMonth, selectedYear, selectedDay]);
 
-  const scrollToItem = (ref: React.RefObject<HTMLDivElement>, index: number) => {
+  const scrollToItem = (ref: React.RefObject<HTMLDivElement>, index: number, smooth = false) => {
     if (ref.current) {
       const itemHeight = 40; // Height of each item
-      ref.current.scrollTop = index * itemHeight;
+      const targetScroll = index * itemHeight;
+      
+      if (smooth) {
+        ref.current.scrollTo({
+          top: targetScroll,
+          behavior: 'smooth'
+        });
+      } else {
+        // Instant scroll without animation
+        ref.current.scrollTop = targetScroll;
+      }
     }
   };
 
@@ -83,13 +93,14 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
     setSelectedYear(years[yearIndex]);
   };
 
-  // Scroll to initial positions when component mounts
+  // Scroll to initial positions when component mounts - instant scroll to prevent shaking
   useEffect(() => {
-    setTimeout(() => {
-      scrollToItem(monthRef, selectedMonth - 1);
-      scrollToItem(dayRef, selectedDay - 1);
-      scrollToItem(yearRef, years.indexOf(selectedYear));
-    }, 100);
+    // Use requestAnimationFrame to ensure DOM is ready, but scroll instantly
+    requestAnimationFrame(() => {
+      scrollToItem(monthRef, selectedMonth - 1, false);
+      scrollToItem(dayRef, selectedDay - 1, false);
+      scrollToItem(yearRef, years.indexOf(selectedYear), false);
+    });
   }, []);
 
   const maxDays = getDaysInMonth(selectedYear, selectedMonth);
