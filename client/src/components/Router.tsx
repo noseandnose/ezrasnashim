@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { useGeolocation, useJewishTimes, useLocationStore } from "@/hooks/use-jewish-times";
 import { initializeCache } from "@/lib/cache";
 import { useEffect, lazy, Suspense } from "react";
@@ -27,10 +27,19 @@ const LoadingSpinner = () => (
 export default function Router() {
   // Early location initialization for faster startup
   const { initializeFromCache } = useLocationStore();
+  const [location] = useLocation();
   
   // Initialize geolocation and preload Jewish times on app startup
   useGeolocation();
   useJewishTimes();
+  
+  // Scroll to top when route changes
+  useEffect(() => {
+    const contentArea = document.querySelector('.content-area');
+    if (contentArea) {
+      contentArea.scrollTop = 0;
+    }
+  }, [location]);
   
   // Initialize cache system and register service worker
   useEffect(() => {
