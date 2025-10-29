@@ -22,6 +22,16 @@ export function useSafeArea() {
       // The content should start where the header ends (bottom of header + viewport offset)
       const contentStartPosition = headerRect ? headerRect.bottom + visualViewportOffset : 60;
       const footerHeight = 70; // Bottom nav height in px
+      
+      // Debug logging
+      console.log('SafeArea Debug:', {
+        headerBottom: headerRect?.bottom,
+        visualViewportOffset,
+        contentStartPosition,
+        headerHeight: headerRect?.height,
+        windowInnerHeight: window.innerHeight,
+        visualViewportHeight: window.visualViewport?.height
+      });
     
       // Detect Safari (exclude iOS Chrome, Edge, Firefox which also have "Safari" in UA)
       const isSafari = /^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(navigator.userAgent);
