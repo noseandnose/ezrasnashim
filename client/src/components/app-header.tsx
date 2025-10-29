@@ -125,7 +125,7 @@ export default function AppHeader() {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 bg-gradient-soft px-3 border-0 shadow-none z-40" style={{ 
-        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.625rem)', 
+        paddingTop: 'calc(var(--safe-area-top-resolved, 0px) + 0.625rem)', 
         paddingBottom: '0.625rem' 
       }}>
         <div className="flex items-center px-2">

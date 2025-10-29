@@ -1,11 +1,11 @@
-import { useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 
 /**
  * Hook to manage safe-area CSS variables for proper header/footer positioning
- * Applies fixed offset for Safari browser mode to account for bottom toolbar
+ * Uses useLayoutEffect to resolve safe-area-top BEFORE first paint, eliminating iOS PWA jump
  */
 export function useSafeArea() {
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = document.documentElement;
     
     const updateSafeAreaVars = () => {
@@ -14,11 +14,33 @@ export function useSafeArea() {
                           (window.navigator as any).standalone ||
                           document.referrer.includes('android-app://');
       
+      // Detect iOS
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+      
+      // Get safe-area-top from visualViewport (available immediately on iOS PWA)
+      const visualViewportTop = window.visualViewport?.offsetTop ?? 0;
+      
+      // Parse current CSS env value if available
+      const computedStyle = getComputedStyle(root);
+      const currentSafeAreaTop = computedStyle.getPropertyValue('--safe-area-top').trim();
+      const parsedEnvValue = currentSafeAreaTop ? parseFloat(currentSafeAreaTop) : 0;
+      
+      // Use max of all measurements, with iOS standalone fallback
+      let resolvedSafeAreaTop = Math.max(visualViewportTop, parsedEnvValue);
+      
+      // iOS PWA fallback: if all measurements are near zero but we're on iOS standalone, assume notch
+      if (isIOS && isStandalone && resolvedSafeAreaTop < 5) {
+        resolvedSafeAreaTop = 44; // Standard iPhone notch height
+      }
+      
+      // Set the resolved value BEFORE browser paints
+      root.style.setProperty('--safe-area-top-resolved', `${resolvedSafeAreaTop}px`);
+      
       // Dynamically measure where the header actually ends (including all padding and safe area)
       const headerElement = document.querySelector('header');
       const headerComputedStyle = headerElement ? getComputedStyle(headerElement) : null;
       
-      // Read the actual computed padding-top which includes env(safe-area-inset-top)
+      // Read the actual computed padding-top which includes our resolved safe-area
       const headerPaddingTopPx = headerComputedStyle ? parseFloat(headerComputedStyle.paddingTop) : 10;
       const headerPaddingBottomPx = headerComputedStyle ? parseFloat(headerComputedStyle.paddingBottom) : 10;
       

@@ -12,6 +12,9 @@
   --safe-area-left: env(safe-area-inset-left, 0px);
   --safe-area-right: env(safe-area-inset-right, 0px);
   
+  /* JS-resolved safe area top - prevents iOS PWA jump by using visualViewport immediately */
+  --safe-area-top-resolved: var(--safe-area-top);
+  
   /* Legacy support for older iOS versions using constant() */
   @supports (padding: constant(safe-area-inset-top)) {
     --safe-area-top: constant(safe-area-inset-top, 0px);
