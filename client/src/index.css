@@ -4,6 +4,26 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Safe Area CSS Variables - Define env() values for notch/safe area support */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  
+  /* Older iOS support with constant() fallback */
+  --sat: constant(safe-area-inset-top, 0px);
+  --sab: constant(safe-area-inset-bottom, 0px);
+  --sal: constant(safe-area-inset-left, 0px);
+  --sar: constant(safe-area-inset-right, 0px);
+  
+  /* Modern env() - will override constant() on newer iOS */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+
 /* Safari mobile viewport fix */
 @supports (-webkit-touch-callout: none) {
   /* Safari specific styles */
