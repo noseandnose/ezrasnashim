@@ -16,28 +16,31 @@ export function useSafeArea() {
       
       // Dynamically measure where the header actually ends (including all padding and safe area)
       const headerElement = document.querySelector('header');
-      const headerRect = headerElement?.getBoundingClientRect();
-      // In iOS PWA, visualViewport.offsetTop accounts for the status bar offset
-      const visualViewportOffset = window.visualViewport?.offsetTop ?? 0;
-      // The content should start where the header ends (bottom of header + viewport offset)
-      const contentStartPosition = headerRect ? headerRect.bottom + visualViewportOffset : 60;
-      const footerHeight = 70; // Bottom nav height in px
-      
-      // Get the actual computed styles
       const headerComputedStyle = headerElement ? getComputedStyle(headerElement) : null;
-      const headerPaddingTop = headerComputedStyle?.paddingTop;
+      
+      // Read the actual computed padding-top which includes env(safe-area-inset-top)
+      const headerPaddingTopPx = headerComputedStyle ? parseFloat(headerComputedStyle.paddingTop) : 10;
+      const headerPaddingBottomPx = headerComputedStyle ? parseFloat(headerComputedStyle.paddingBottom) : 10;
+      
+      // Get header content height (icons, text, etc - without padding)
+      const headerRect = headerElement?.getBoundingClientRect();
+      const headerContentHeight = headerRect ? headerRect.height - headerPaddingTopPx - headerPaddingBottomPx : 50;
+      
+      // Total header height including all padding (this is what content needs to clear)
+      const totalHeaderHeight = headerPaddingTopPx + headerContentHeight + headerPaddingBottomPx;
+      
+      const footerHeight = 70; // Bottom nav height in px
       
       // Debug logging
       console.log('SafeArea Debug:', {
-        headerBottom: headerRect?.bottom,
-        headerPaddingTop,
-        visualViewportOffset,
-        contentStartPosition,
-        headerHeight: headerRect?.height,
-        windowInnerHeight: window.innerHeight,
-        visualViewportHeight: window.visualViewport?.height,
+        headerPaddingTopPx,
+        headerContentHeight,
+        totalHeaderHeight,
+        headerRectHeight: headerRect?.height,
         isStandalone
       });
+      
+      const contentStartPosition = totalHeaderHeight;
     
       // Detect Safari (exclude iOS Chrome, Edge, Firefox which also have "Safari" in UA)
       const isSafari = /^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(navigator.userAgent);
