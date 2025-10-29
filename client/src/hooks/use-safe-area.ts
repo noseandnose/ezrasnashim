@@ -1,59 +1,97 @@
-import { useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 
 /**
  * Hook to manage safe-area CSS variables for proper header/footer positioning
- * Applies fixed offset for Safari browser mode to account for bottom toolbar
+ * Uses useLayoutEffect to resolve safe-area-top BEFORE first paint, eliminating iOS PWA jump
  */
 export function useSafeArea() {
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    
     const updateSafeAreaVars = () => {
-      const root = document.documentElement;
-      
       // Detect if app is in standalone/PWA mode
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
                           (window.navigator as any).standalone ||
                           document.referrer.includes('android-app://');
       
-      // Get safe-area insets from CSS env() - read the computed values
-      const style = getComputedStyle(root);
-      const safeAreaTop = style.getPropertyValue('--sat').trim() || '0px';
-      const safeAreaBottom = style.getPropertyValue('--sab').trim() || '0px';
+      // Detect iOS
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
       
-      // Calculate header and footer heights
-      const headerHeight = 48; // Base header height in px
-      const footerHeight = 70; // Bottom nav height in px
+      // Get safe-area-top from visualViewport (available immediately on iOS PWA)
+      const visualViewportTop = window.visualViewport?.offsetTop ?? 0;
       
-      // Detect Safari (exclude iOS Chrome, Edge, Firefox which also have "Safari" in UA)
-      const isSafari = /^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(navigator.userAgent);
+      // Parse current CSS env value if available
+      const computedStyle = getComputedStyle(root);
+      const currentSafeAreaTop = computedStyle.getPropertyValue('--safe-area-top').trim();
+      const parsedEnvValue = currentSafeAreaTop ? parseFloat(currentSafeAreaTop) : 0;
       
-      // Calculate viewport bottom offset - Safari browser mode only
-      // Chrome and Safari standalone mode use bottom: 0
-      let viewportBottomOffset = 0;
-      if (isSafari && !isStandalone) {
-        // Safari browser mode: fixed offset for bottom toolbar
-        const safeBottomValue = parseInt(safeAreaBottom, 10) || 0;
-        viewportBottomOffset = Math.max(safeBottomValue, 24);
+      // Use max of all measurements, with iOS standalone fallback
+      let resolvedSafeAreaTop = Math.max(visualViewportTop, parsedEnvValue);
+      
+      // iOS PWA fallback: if all measurements are near zero but we're on iOS standalone, assume notch
+      if (isIOS && isStandalone && resolvedSafeAreaTop < 5) {
+        resolvedSafeAreaTop = 44; // Standard iPhone notch height
       }
       
-      // Set CSS variables
-      root.style.setProperty('--safe-area-top', safeAreaTop);
-      root.style.setProperty('--safe-area-bottom', safeAreaBottom);
-      root.style.setProperty('--header-height', `${headerHeight}px`);
-      root.style.setProperty('--footer-height', `${footerHeight}px`);
-      root.style.setProperty('--viewport-bottom-offset', `${viewportBottomOffset}px`);
-      root.style.setProperty('--is-standalone', isStandalone ? '1' : '0');
+      // Set the resolved value BEFORE browser paints
+      root.style.setProperty('--safe-area-top-resolved', `${resolvedSafeAreaTop}px`);
       
-      // Calculate total safe areas including UI elements and viewport offset
-      root.style.setProperty('--safe-top-total', `calc(${safeAreaTop} + ${headerHeight}px)`);
-      root.style.setProperty('--safe-bottom-total', `calc(${safeAreaBottom} + ${footerHeight}px + ${viewportBottomOffset}px)`);
+      // AFTER setting safe-area-top-resolved, measure the header height (using requestAnimationFrame to ensure CSS is applied)
+      requestAnimationFrame(() => {
+        const headerElement = document.querySelector('header');
+        if (!headerElement) return;
+        
+        // Use getBoundingClientRect to get the actual rendered height
+        const headerRect = headerElement.getBoundingClientRect();
+        const totalHeaderHeight = headerRect.height;
+        const contentStartPosition = totalHeaderHeight;
+        const footerHeight = 70; // Bottom nav height in px
+      
+        // Detect Safari (exclude iOS Chrome, Edge, Firefox which also have "Safari" in UA)
+        const isSafari = /^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(navigator.userAgent);
+        
+        // Calculate viewport bottom offset - Safari browser mode only
+        // Chrome and Safari standalone mode use bottom: 0
+        let viewportBottomOffset = 0;
+        if (isSafari && !isStandalone) {
+          // Safari browser mode: fixed offset for bottom toolbar
+          viewportBottomOffset = 24;
+        }
+      
+        // Only set derived values - don't override CSS env() safe-area values
+        root.style.setProperty('--content-start', `${contentStartPosition}px`);
+        root.style.setProperty('--footer-height', `${footerHeight}px`);
+        root.style.setProperty('--viewport-bottom-offset', `${viewportBottomOffset}px`);
+        root.style.setProperty('--is-standalone', isStandalone ? '1' : '0');
+        
+        // Calculate total safe bottom (for footer)
+        root.style.setProperty('--safe-bottom-total', `calc(env(safe-area-inset-bottom, 0px) + ${footerHeight}px + ${viewportBottomOffset}px)`);
+      });
     };
     
     // Initial update
     updateSafeAreaVars();
     
-    // Listen for viewport changes
+    // Set up ResizeObserver to track header size changes (for async safe-area resolution on iOS PWA)
+    const headerElement = document.querySelector('header');
+    let resizeObserver: ResizeObserver | null = null;
+    
+    if (headerElement) {
+      resizeObserver = new ResizeObserver(() => {
+        updateSafeAreaVars();
+      });
+      resizeObserver.observe(headerElement);
+    }
+    
+    // Listen for viewport changes as fallback
     window.addEventListener('resize', updateSafeAreaVars);
     window.addEventListener('orientationchange', updateSafeAreaVars);
+    
+    // Listen for visual viewport changes (iOS PWA safe-area updates)
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', updateSafeAreaVars);
+      window.visualViewport.addEventListener('scroll', updateSafeAreaVars);
+    }
     
     // Listen for display mode changes
     const standaloneQuery = window.matchMedia('(display-mode: standalone)');
@@ -65,8 +103,17 @@ export function useSafeArea() {
       window.removeEventListener('resize', updateSafeAreaVars);
       window.removeEventListener('orientationchange', updateSafeAreaVars);
       
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', updateSafeAreaVars);
+        window.visualViewport.removeEventListener('scroll', updateSafeAreaVars);
+      }
+      
       if (standaloneQuery.removeEventListener) {
         standaloneQuery.removeEventListener('change', updateSafeAreaVars);
+      }
+      
+      if (resizeObserver) {
+        resizeObserver.disconnect();
       }
     };
   }, []);

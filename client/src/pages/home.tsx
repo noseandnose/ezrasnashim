@@ -33,6 +33,14 @@ export default function Home() {
 
   const activeSection = getActiveSectionFromPath(location);
   
+  // Scroll to top when section changes
+  useEffect(() => {
+    const contentArea = document.querySelector('.content-area');
+    if (contentArea) {
+      contentArea.scrollTop = 0;
+    }
+  }, [activeSection]);
+  
   // Navigation function to handle section changes
   const navigateToSection = (section: Section) => {
     if (section === 'home') {
