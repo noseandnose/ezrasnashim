@@ -14,13 +14,32 @@ export function useSafeArea() {
                           (window.navigator as any).standalone ||
                           document.referrer.includes('android-app://');
       
+      // Detect if app is in a webview (FlutterFlow, Capacitor, Cordova, etc.)
+      // Check for:
+      // - Android WebView markers
+      // - iOS WKWebView (used by FlutterFlow)
+      // - FlutterFlow specific global
+      // - Other webview frameworks
+      const isWebView = !isStandalone && (
+        /wv|WebView/i.test(navigator.userAgent) ||  // Android WebView
+        /iPhone|iPad|iPod/.test(navigator.userAgent) && !(window as any).MSStream && !('standalone' in navigator) ||  // iOS WKWebView
+        !!(window as any).flutter_inappwebview ||  // FlutterFlow
+        !!(window as any).cordova ||  // Cordova
+        !!(window as any).Capacitor  // Capacitor
+      );
+      
       // Get safe-area insets from CSS env() - read the computed values
       const style = getComputedStyle(root);
-      const safeAreaTop = style.getPropertyValue('--sat').trim() || '0px';
+      const safeAreaTopRaw = style.getPropertyValue('--sat').trim() || '0px';
       const safeAreaBottom = style.getPropertyValue('--sab').trim() || '0px';
       
-      // Calculate header and footer heights
-      const headerHeight = 48; // Base header height in px
+      // In webview contexts, set safe-area-top to 0 to avoid double offset
+      // WebView containers (like FlutterFlow) already apply their own insets
+      const safeAreaTop = isWebView ? '0px' : safeAreaTopRaw;
+      
+      // Dynamically measure actual header height instead of using hardcoded value
+      const headerElement = document.querySelector('header');
+      const headerHeight = headerElement ? headerElement.getBoundingClientRect().height : 48;
       const footerHeight = 70; // Bottom nav height in px
       
       // Detect Safari (exclude iOS Chrome, Edge, Firefox which also have "Safari" in UA)

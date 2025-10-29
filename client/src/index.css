@@ -884,6 +884,8 @@ html, body, #root {
   height: 0; /* Important for flex child to be scrollable */
   overflow-y: auto;
   overflow-x: hidden;
+  /* Add padding for fixed header - safe-area-top + base padding + header height */
+  padding-top: calc(var(--safe-area-top, 0px) + 0.625rem + var(--header-height, 48px));
   
   /* Total safe bottom area includes footer, safe-area-inset, and Safari nav offset */
   padding-bottom: var(--safe-bottom-total);
@@ -1169,12 +1171,10 @@ nav[class*="fixed"] a {
   pointer-events: auto !important;
 }
 
-/* No main padding needed - header is sticky and footer padding handled in .content-area */
-
-/* Sticky Header - Allow Pull-to-Refresh */
-header[class*="sticky"] {
-  /* Ensure truly sticky positioning */
-  position: sticky !important;
+/* Fixed Header - Always visible at top of viewport */
+header[class*="fixed"] {
+  /* Ensure truly fixed positioning for webview compatibility */
+  position: fixed !important;
   
   /* Ensure all content stays visible */
   overflow: visible !important;
