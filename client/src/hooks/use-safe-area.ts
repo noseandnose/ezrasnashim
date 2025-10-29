@@ -17,8 +17,10 @@ export function useSafeArea() {
       // Dynamically measure where the header actually ends (including all padding and safe area)
       const headerElement = document.querySelector('header');
       const headerRect = headerElement?.getBoundingClientRect();
-      // The content should start where the header ends (bottom of header)
-      const contentStartPosition = headerRect ? headerRect.bottom : 60;
+      // In iOS PWA, visualViewport.offsetTop accounts for the status bar offset
+      const visualViewportOffset = window.visualViewport?.offsetTop ?? 0;
+      // The content should start where the header ends (bottom of header + viewport offset)
+      const contentStartPosition = headerRect ? headerRect.bottom + visualViewportOffset : 60;
       const footerHeight = 70; // Bottom nav height in px
     
       // Detect Safari (exclude iOS Chrome, Edge, Firefox which also have "Safari" in UA)
@@ -60,6 +62,12 @@ export function useSafeArea() {
     window.addEventListener('resize', updateSafeAreaVars);
     window.addEventListener('orientationchange', updateSafeAreaVars);
     
+    // Listen for visual viewport changes (iOS PWA safe-area updates)
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', updateSafeAreaVars);
+      window.visualViewport.addEventListener('scroll', updateSafeAreaVars);
+    }
+    
     // Listen for display mode changes
     const standaloneQuery = window.matchMedia('(display-mode: standalone)');
     if (standaloneQuery.addEventListener) {
@@ -69,6 +77,11 @@ export function useSafeArea() {
     return () => {
       window.removeEventListener('resize', updateSafeAreaVars);
       window.removeEventListener('orientationchange', updateSafeAreaVars);
+      
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', updateSafeAreaVars);
+        window.visualViewport.removeEventListener('scroll', updateSafeAreaVars);
+      }
       
       if (standaloneQuery.removeEventListener) {
         standaloneQuery.removeEventListener('change', updateSafeAreaVars);
