@@ -6,22 +6,25 @@
 
 /* Safe Area CSS Variables - Define env() values for notch/safe area support */
 :root {
-  --sat: env(safe-area-inset-top, 0px);
-  --sab: env(safe-area-inset-bottom, 0px);
-  --sal: env(safe-area-inset-left, 0px);
-  --sar: env(safe-area-inset-right, 0px);
+  /* Primary safe area variables - CSS computes these BEFORE JavaScript runs */
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
   
-  /* Older iOS support with constant() fallback */
-  --sat: constant(safe-area-inset-top, 0px);
-  --sab: constant(safe-area-inset-bottom, 0px);
-  --sal: constant(safe-area-inset-left, 0px);
-  --sar: constant(safe-area-inset-right, 0px);
+  /* Legacy support for older iOS versions using constant() */
+  @supports (padding: constant(safe-area-inset-top)) {
+    --safe-area-top: constant(safe-area-inset-top, 0px);
+    --safe-area-bottom: constant(safe-area-inset-bottom, 0px);
+    --safe-area-left: constant(safe-area-inset-left, 0px);
+    --safe-area-right: constant(safe-area-inset-right, 0px);
+  }
   
-  /* Modern env() - will override constant() on newer iOS */
-  --sat: env(safe-area-inset-top, 0px);
-  --sab: env(safe-area-inset-bottom, 0px);
-  --sal: env(safe-area-inset-left, 0px);
-  --sar: env(safe-area-inset-right, 0px);
+  /* Additional helper variables for backward compatibility */
+  --sat: var(--safe-area-top);
+  --sab: var(--safe-area-bottom);
+  --sal: var(--safe-area-left);
+  --sar: var(--safe-area-right);
 }
 
 /* Safari mobile viewport fix */
