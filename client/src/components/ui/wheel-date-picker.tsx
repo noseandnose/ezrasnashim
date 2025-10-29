@@ -112,7 +112,7 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
               {months.map((month, index) => (
                 <div
                   key={month}
-                  className={`h-10 flex items-center justify-center text-sm platypi-medium transition-colors ${
+                  className={`h-10 flex items-center justify-center text-sm platypi-medium ${
                     selectedMonth === index + 1
                       ? 'text-blush font-semibold'
                       : 'text-gray-600'
@@ -140,7 +140,7 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
               {days.map((day) => (
                 <div
                   key={day}
-                  className={`h-10 flex items-center justify-center text-sm platypi-medium transition-colors ${
+                  className={`h-10 flex items-center justify-center text-sm platypi-medium ${
                     selectedDay === day
                       ? 'text-blush font-semibold'
                       : 'text-gray-600'
@@ -168,7 +168,7 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
               {years.map((year) => (
                 <div
                   key={year}
-                  className={`h-10 flex items-center justify-center text-sm platypi-medium transition-colors ${
+                  className={`h-10 flex items-center justify-center text-sm platypi-medium ${
                     selectedYear === year
                       ? 'text-blush font-semibold'
                       : 'text-gray-600'
