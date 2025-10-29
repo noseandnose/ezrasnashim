@@ -16,19 +16,6 @@ export function useSafeArea() {
                             (window.navigator as any).standalone ||
                             document.referrer.includes('android-app://');
         
-        // Detect if app is in a webview (FlutterFlow, Capacitor, Cordova, etc.)
-        // Check for:
-        // - Android WebView markers
-        // - iOS WKWebView (used by FlutterFlow)
-        // - FlutterFlow specific global
-        // - Other webview frameworks
-        const isWebView = !isStandalone && (
-          /wv|WebView/i.test(navigator.userAgent) ||  // Android WebView
-          /iPhone|iPad|iPod/.test(navigator.userAgent) && !(window as any).MSStream && !('standalone' in navigator) ||  // iOS WKWebView
-          !!(window as any).flutter_inappwebview ||  // FlutterFlow
-          !!(window as any).cordova ||  // Cordova
-          !!(window as any).Capacitor  // Capacitor
-        );
         
         // Dynamically measure actual header height instead of using hardcoded value
         const headerElement = document.querySelector('header');
