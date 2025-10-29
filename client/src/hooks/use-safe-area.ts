@@ -23,14 +23,20 @@ export function useSafeArea() {
       const contentStartPosition = headerRect ? headerRect.bottom + visualViewportOffset : 60;
       const footerHeight = 70; // Bottom nav height in px
       
+      // Get the actual computed styles
+      const headerComputedStyle = headerElement ? getComputedStyle(headerElement) : null;
+      const headerPaddingTop = headerComputedStyle?.paddingTop;
+      
       // Debug logging
       console.log('SafeArea Debug:', {
         headerBottom: headerRect?.bottom,
+        headerPaddingTop,
         visualViewportOffset,
         contentStartPosition,
         headerHeight: headerRect?.height,
         windowInnerHeight: window.innerHeight,
-        visualViewportHeight: window.visualViewport?.height
+        visualViewportHeight: window.visualViewport?.height,
+        isStandalone
       });
     
       // Detect Safari (exclude iOS Chrome, Edge, Firefox which also have "Safari" in UA)
