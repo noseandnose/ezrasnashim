@@ -130,7 +130,7 @@ export default function AppHeader() {
         paddingBottom: '0.625rem',
         minHeight: 'var(--header-total-height)'
       }}>
-        <div className="flex items-center px-2">
+        <div className="flex items-center px-2" style={{ minHeight: 'var(--header-row-height)' }}>
           <div className="flex items-center gap-1 flex-1">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
