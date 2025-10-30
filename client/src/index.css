@@ -32,9 +32,8 @@
   /* Computed layout dimensions (pure CSS calc, includes ALL spacing) */
   /* Header total = safe-area + top-padding + row-height + bottom-padding */
   --header-total-height: calc(var(--safe-area-top) + var(--header-padding-vertical) + var(--header-row-height) + var(--header-padding-vertical));
-  /* Footer total = safe-area + content (Safari toolbar offset added via JS when needed) */
+  /* Footer total = safe-area + content */
   --footer-total-height: calc(var(--safe-area-bottom) + var(--footer-content-height));
-  --safari-toolbar-offset: 0px; /* Will be set by JS for Safari browser mode */
   
   /* Backward compatibility aliases */
   --sat: var(--safe-area-top);
@@ -53,13 +52,17 @@
 }
 
 html {
-  height: 100dvh;
-  height: 100%;
+  /* Use svh (small viewport height) which accounts for Safari's visible UI */
+  height: 100vh; /* Fallback for older browsers */
+  min-height: 100svh; /* Small viewport - when UI is visible */
+  min-height: -webkit-fill-available; /* Safari fallback */
 }
 
 body {
-  height: 100dvh;
-  height: 100%;
+  /* Match html sizing */
+  height: 100vh; /* Fallback */
+  min-height: 100svh; /* Small viewport */
+  min-height: -webkit-fill-available; /* Safari fallback */
   overflow-x: hidden;
   overscroll-behavior-y: auto; /* Allow pull-to-refresh */
   /* Safari specific fixes */
@@ -95,8 +98,10 @@ button,
 }
 
 #root {
-  height: 100dvh;  
-  height: 100%;
+  /* Use svh for proper Safari support */
+  height: 100vh; /* Fallback */
+  min-height: 100svh; /* Small viewport */
+  min-height: -webkit-fill-available; /* Safari fallback */
   display: flex;
   flex-direction: column;
   margin: 0;
@@ -934,8 +939,11 @@ html, body, #root {
   /* Content starts where header ends - pure CSS calculation */
   padding-top: var(--header-total-height);
   
-  /* Bottom padding for footer, safe area, and Safari toolbar - CSS + JS */
-  padding-bottom: calc(var(--footer-total-height) + var(--safari-toolbar-offset));
+  /* Bottom padding for footer and safe area - pure CSS */
+  padding-bottom: var(--footer-total-height);
+  
+  /* Ensure scrolling stops above the bottom navigation */
+  scroll-padding-bottom: var(--footer-total-height);
   
   /* Prevent scroll bounce on iOS */
   -webkit-overflow-scrolling: touch;
