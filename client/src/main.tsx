@@ -90,14 +90,39 @@ async function checkForAppUpdates() {
     const contentType = response.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
       console.error('[Version] Response is not JSON, got:', contentType);
-      // Clear any corrupted cache and retry
-      if ('caches' in window) {
+      console.log('[Version] Old service worker detected - forcing update...');
+      
+      // This means old service worker is still active and returning HTML
+      // Unregister it and reload to get the new service worker
+      if ('serviceWorker' in navigator) {
+        // Unregister all service workers
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map(reg => reg.unregister()));
+        
+        // Clear all caches
         const cacheNames = await caches.keys();
         await Promise.all(cacheNames.map(name => caches.delete(name)));
+        
+        // Set flag to prevent infinite loops
+        const reloadCount = parseInt(sessionStorage.getItem('sw-force-reload') || '0', 10);
+        if (reloadCount < 3) {
+          sessionStorage.setItem('sw-force-reload', (reloadCount + 1).toString());
+          console.log('[Version] Reloading to install new service worker...');
+          window.location.reload();
+          return;
+        } else {
+          // After 3 attempts, give up and continue without service worker
+          console.warn('[Version] Failed to update service worker after 3 attempts, continuing...');
+          sessionStorage.removeItem('sw-force-reload');
+        }
       }
+      
       setTimeout(checkForAppUpdates, 60000);
       return;
     }
+    
+    // Successfully got JSON - clear reload counter
+    sessionStorage.removeItem('sw-force-reload');
     
     const serverVersion = await response.json();
     const storedVersion = localStorage.getItem('app-version');
