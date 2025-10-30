@@ -38,7 +38,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   // Fetch today's sponsor
   const today = new Date().toISOString().split('T')[0];
   const { data: sponsor, isLoading: sponsorLoading } = useQuery<Sponsor>({
-    queryKey: ['daily-sponsor', today],
+    queryKey: ['/api/sponsors/daily', today],
     queryFn: async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sponsors/daily/${today}`);
       if (!response.ok) {

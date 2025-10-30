@@ -215,10 +215,12 @@ app.use(
       }
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
     exposedHeaders: ['Content-Length', 'X-Request-Id'],
-    maxAge: 86400 // Cache preflight response for 1 day
+    maxAge: 86400, // Cache preflight response for 1 day
+    preflightContinue: false,
+    optionsSuccessStatus: 204
   }),
 );
 
@@ -268,9 +270,18 @@ async function initializeServer() {
   // Serve static files in production
   if (process.env.NODE_ENV === 'production') {
     const publicPath = path.join(__dirname, 'public');
-    app.use(express.static(publicPath));
     
-    // Serve React app for any non-API routes
+    // Serve static files BUT exclude API routes
+    app.use((req, res, next) => {
+      // Let API routes pass through to route handlers
+      if (req.path.startsWith('/api')) {
+        return next();
+      }
+      // Serve static files for everything else
+      express.static(publicPath)(req, res, next);
+    });
+    
+    // Serve React app for any non-API routes (SPA fallback)
     app.get('*', (req: Request, res: Response) => {
       if (!req.path.startsWith('/api')) {
         res.sendFile(path.join(publicPath, 'index.html'));

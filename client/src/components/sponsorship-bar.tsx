@@ -20,7 +20,7 @@ export default function SponsorshipBar({ className = "" }: SponsorshipBarProps) 
   const today = getLocalDateString(); // YYYY-MM-DD format
 
   const { data: sponsor, isLoading } = useQuery<Sponsor | null>({
-    queryKey: ['daily-sponsor', today],
+    queryKey: ['/api/sponsors/daily', today],
     queryFn: async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sponsors/daily/${today}`);
       if (!response.ok) return null;
