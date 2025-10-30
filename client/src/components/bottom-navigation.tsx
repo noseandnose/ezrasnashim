@@ -15,39 +15,19 @@ export default function BottomNavigation({
   const [viewportOffset, setViewportOffset] = useState(0);
   
   useEffect(() => {
-    // Use Visual Viewport API for proper Safari support
-    // Calculate the difference between layout viewport and visual viewport
-    const updatePosition = () => {
-      if (window.visualViewport && navRef.current) {
-        // Calculate how much we need to move up
-        // Visual viewport height is smaller when Safari's toolbar is visible
-        const layoutHeight = window.innerHeight;
-        const visualHeight = window.visualViewport.height;
-        const difference = layoutHeight - visualHeight;
-        
-        // Move navigation up by the difference (toolbar height)
-        setViewportOffset(-difference);
-        
-        console.log('Viewport update:', {
-          layoutHeight,
-          visualHeight,
-          difference,
-          offsetTop: window.visualViewport.offsetTop,
-          pageTop: window.visualViewport.pageTop
-        });
-      }
-    };
+    // Safari on iOS: detect browser mode vs PWA mode
+    // Safari's bottom URL bar overlays content, so we need a fixed offset
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                        (window.navigator as any).standalone === true;
     
-    if (!window.visualViewport) return;
-    
-    window.visualViewport.addEventListener('resize', updatePosition);
-    window.visualViewport.addEventListener('scroll', updatePosition);
-    updatePosition(); // Initial position
-    
-    return () => {
-      window.visualViewport?.removeEventListener('resize', updatePosition);
-      window.visualViewport?.removeEventListener('scroll', updatePosition);
-    };
+    // Only apply offset if iOS Safari browser mode (not PWA)
+    if (isIOS && !isStandalone) {
+      // Safari's bottom toolbar is 44px
+      setViewportOffset(-44);
+    } else {
+      setViewportOffset(0);
+    }
   }, []);
   const navItems = [
     { id: "torah" as Section, icon: BookOpen, label: "Torah", isCenter: false },
