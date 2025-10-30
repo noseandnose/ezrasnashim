@@ -51,7 +51,7 @@ function Router() {
   // Handle Android back button navigation
   useBackButton();
   
-  // Initialize location immediately for accurate prayer times
+  // Initialize location for accurate prayer times (non-blocking)
   useGeolocation();
   useJewishTimes();
   
