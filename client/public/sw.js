@@ -1,8 +1,8 @@
 // Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 1.0.0
-// Updated: 2025-10-29 - Auto-generated cache version
+// Updated: 2025-10-30 - Auto-generated cache version
 
 // Cache configuration with timestamp for guaranteed cache busting
-const CACHE_VERSION = 'v1.0.0-1761756104189';
+const CACHE_VERSION = 'v1.0.0-1761807747271';
 const APP_SHELL_CACHE = `app-shell-${CACHE_VERSION}`;
 const PRAYERS_CACHE = `prayers-${CACHE_VERSION}`;
 const TORAH_CACHE = `torah-${CACHE_VERSION}`;
@@ -42,8 +42,7 @@ const TEHILLIM_PATTERNS = [
 const CRITICAL_API_PATTERNS = [
   /\/api\/zmanim\//,
   /\/api\/hebrew-date\//,
-  /\/api\/sponsors\/daily\//,
-  /\/api\/version/
+  /\/api\/sponsors\/daily\//
 ];
 
 self.addEventListener('install', (event) => {
@@ -87,6 +86,27 @@ self.addEventListener('fetch', (event) => {
   // CRITICAL: NEVER cache the service worker itself - always fetch fresh
   if (url.pathname === '/sw.js') {
     return; // Let browser fetch directly, no interception
+  }
+  
+  // CRITICAL: Skip service worker entirely for audio/video streaming and version checks
+  // Audio requests must go directly to network without any caching or fallback
+  // This prevents the PWA from receiving HTML when audio streaming fails temporarily
+  // Version checks must always get fresh data to detect updates
+  const isAudioVideo = event.request.destination === 'audio' || 
+                       event.request.destination === 'video' ||
+                       url.pathname.endsWith('.mp3') ||
+                       url.pathname.endsWith('.m4a') ||
+                       url.pathname.endsWith('.wav') ||
+                       url.pathname.endsWith('.mp4') ||
+                       url.pathname.endsWith('.webm') ||
+                       url.pathname.includes('/api/media-proxy/') ||
+                       event.request.headers.has('range');
+  
+  const isVersionCheck = url.pathname === '/api/version';
+  
+  if (isAudioVideo || isVersionCheck) {
+    // Direct pass-through to network - no caching, no fallback, no interference
+    return; // Let browser handle it directly
   }
   
   // Handle app shell routes (SPA routing) - ALWAYS fetch fresh to get latest recovery script

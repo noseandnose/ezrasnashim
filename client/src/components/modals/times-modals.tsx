@@ -265,7 +265,7 @@ export default function TimesModals() {
         hideHeader={true}
         className="bg-gradient-to-br from-cream via-ivory to-sand"
       >
-        <div className="max-w-lg mx-auto p-3">
+        <div className="max-w-lg mx-auto p-3" style={{ paddingTop: 'calc(var(--safe-area-top-resolved, 0px) + 0.75rem)' }}>
           {/* Form Sections */}
           <div className="space-y-3">
             {/* Event Title */}

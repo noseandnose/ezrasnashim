@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 
 interface WheelDatePickerProps {
   value: string; // ISO format YYYY-MM-DD
@@ -14,31 +14,56 @@ const getDaysInMonth = (year: number, month: number): number => {
   return new Date(year, month, 0).getDate();
 };
 
+// Parse initial value to prevent default state mismatch
+const parseInitialValue = (value: string) => {
+  if (value) {
+    const date = new Date(value + 'T12:00:00');
+    return {
+      month: date.getMonth() + 1,
+      day: date.getDate(),
+      year: date.getFullYear()
+    };
+  }
+  return {
+    month: 1,
+    day: 1,
+    year: new Date().getFullYear()
+  };
+};
 
 const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 241 }, (_, i) => currentYear - 120 + i); // ±120 years
   
-  const [selectedMonth, setSelectedMonth] = useState(1);
-  const [selectedDay, setSelectedDay] = useState(1);
-  const [selectedYear, setSelectedYear] = useState(currentYear);
+  // Initialize state from value to prevent initial jump
+  const initialValue = parseInitialValue(value);
+  const [selectedMonth, setSelectedMonth] = useState(initialValue.month);
+  const [selectedDay, setSelectedDay] = useState(initialValue.day);
+  const [selectedYear, setSelectedYear] = useState(initialValue.year);
   
   const monthRef = useRef<HTMLDivElement>(null);
   const dayRef = useRef<HTMLDivElement>(null);
   const yearRef = useRef<HTMLDivElement>(null);
+  const suppressScrollHandlers = useRef(true);
+  const isFirstRender = useRef(true);
 
-  // Initialize from value prop
+  // Update from value prop only when it actually changes
   useEffect(() => {
     if (value) {
-      const date = new Date(value + 'T12:00:00');
-      setSelectedMonth(date.getMonth() + 1);
-      setSelectedDay(date.getDate());
-      setSelectedYear(date.getFullYear());
+      const parsed = parseInitialValue(value);
+      // Only update if different to avoid triggering re-scroll
+      if (parsed.month !== selectedMonth) setSelectedMonth(parsed.month);
+      if (parsed.day !== selectedDay) setSelectedDay(parsed.day);
+      if (parsed.year !== selectedYear) setSelectedYear(parsed.year);
     }
   }, [value]);
 
-  // Update parent when selection changes (parent handles debouncing)
+  // Update parent when selection changes, but skip first render
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     const dateString = `${selectedYear}-${selectedMonth.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`;
     onChange(dateString);
   }, [selectedMonth, selectedDay, selectedYear, onChange]);
@@ -51,14 +76,8 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
     }
   }, [selectedMonth, selectedYear, selectedDay]);
 
-  const scrollToItem = (ref: React.RefObject<HTMLDivElement>, index: number) => {
-    if (ref.current) {
-      const itemHeight = 40; // Height of each item
-      ref.current.scrollTop = index * itemHeight;
-    }
-  };
-
   const handleMonthScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (suppressScrollHandlers.current) return; // Suppress during programmatic scrolling
     const scrollTop = e.currentTarget.scrollTop;
     const itemHeight = 40;
     const index = Math.round(scrollTop / itemHeight);
@@ -67,6 +86,7 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
   };
 
   const handleDayScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (suppressScrollHandlers.current) return; // Suppress during programmatic scrolling
     const scrollTop = e.currentTarget.scrollTop;
     const itemHeight = 40;
     const maxDays = getDaysInMonth(selectedYear, selectedMonth);
@@ -76,6 +96,7 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
   };
 
   const handleYearScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (suppressScrollHandlers.current) return; // Suppress during programmatic scrolling
     const scrollTop = e.currentTarget.scrollTop;
     const itemHeight = 40;
     const index = Math.round(scrollTop / itemHeight);
@@ -83,12 +104,24 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
     setSelectedYear(years[yearIndex]);
   };
 
-  // Scroll to initial positions when component mounts
-  useEffect(() => {
+  // Use useLayoutEffect to scroll BEFORE paint - prevents visible jump
+  useLayoutEffect(() => {
+    const itemHeight = 40; // Match the h-10 class (40px)
+    
+    // Scroll all wheels to their initial positions synchronously
+    if (monthRef.current) {
+      monthRef.current.scrollTop = (selectedMonth - 1) * itemHeight;
+    }
+    if (dayRef.current) {
+      dayRef.current.scrollTop = (selectedDay - 1) * itemHeight;
+    }
+    if (yearRef.current) {
+      yearRef.current.scrollTop = years.indexOf(selectedYear) * itemHeight;
+    }
+    
+    // Enable scroll handlers after a small delay
     setTimeout(() => {
-      scrollToItem(monthRef, selectedMonth - 1);
-      scrollToItem(dayRef, selectedDay - 1);
-      scrollToItem(yearRef, years.indexOf(selectedYear));
+      suppressScrollHandlers.current = false;
     }, 100);
   }, []);
 
@@ -103,7 +136,7 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
           <div className="text-xs text-gray-500 text-center mb-2 platypi-medium">Month</div>
           <div 
             ref={monthRef}
-            className="h-32 w-24 overflow-y-scroll scrollbar-hide scroll-smooth"
+            className="h-32 w-24 overflow-y-scroll scrollbar-hide"
             style={{ scrollSnapType: 'y mandatory' }}
             onScroll={handleMonthScroll}
             data-testid="wheel-month"
@@ -112,7 +145,7 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
               {months.map((month, index) => (
                 <div
                   key={month}
-                  className={`h-10 flex items-center justify-center text-sm platypi-medium transition-colors ${
+                  className={`h-10 flex items-center justify-center text-sm platypi-medium ${
                     selectedMonth === index + 1
                       ? 'text-blush font-semibold'
                       : 'text-gray-600'
@@ -131,7 +164,7 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
           <div className="text-xs text-gray-500 text-center mb-2 platypi-medium">Day</div>
           <div 
             ref={dayRef}
-            className="h-32 w-16 overflow-y-scroll scrollbar-hide scroll-smooth"
+            className="h-32 w-16 overflow-y-scroll scrollbar-hide"
             style={{ scrollSnapType: 'y mandatory' }}
             onScroll={handleDayScroll}
             data-testid="wheel-day"
@@ -140,7 +173,7 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
               {days.map((day) => (
                 <div
                   key={day}
-                  className={`h-10 flex items-center justify-center text-sm platypi-medium transition-colors ${
+                  className={`h-10 flex items-center justify-center text-sm platypi-medium ${
                     selectedDay === day
                       ? 'text-blush font-semibold'
                       : 'text-gray-600'
@@ -159,7 +192,7 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
           <div className="text-xs text-gray-500 text-center mb-2 platypi-medium">Year</div>
           <div 
             ref={yearRef}
-            className="h-32 w-20 overflow-y-scroll scrollbar-hide scroll-smooth"
+            className="h-32 w-20 overflow-y-scroll scrollbar-hide"
             style={{ scrollSnapType: 'y mandatory' }}
             onScroll={handleYearScroll}
             data-testid="wheel-year"
@@ -168,7 +201,7 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
               {years.map((year) => (
                 <div
                   key={year}
-                  className={`h-10 flex items-center justify-center text-sm platypi-medium transition-colors ${
+                  className={`h-10 flex items-center justify-center text-sm platypi-medium ${
                     selectedYear === year
                       ? 'text-blush font-semibold'
                       : 'text-gray-600'

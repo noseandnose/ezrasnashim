@@ -20,6 +20,7 @@ interface UseInstallHighlightReturn {
   isStandalone: boolean;
   canInstall: boolean;
   isIOS: boolean;
+  isWebview: boolean;
 }
 
 export function useInstallHighlight(): UseInstallHighlightReturn {
@@ -27,18 +28,31 @@ export function useInstallHighlight(): UseInstallHighlightReturn {
   const [isStandalone, setIsStandalone] = useState(false);
   const [canInstall, setCanInstall] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
+  const [isWebview, setIsWebview] = useState(false);
   const deferredPromptRef = useRef<any>(null);
 
   // Initialize state from localStorage and detect environment
   useEffect(() => {
-    // Check if app is in standalone mode (already installed)
+    // Detect if running inside a mobile app webview (FlutterFlow or other app wrappers)
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isInWebview = 
+      // FlutterFlow webview
+      document.referrer.includes('android-app://') ||
+      // Other common webview indicators
+      userAgent.includes('wv') ||
+      userAgent.includes('webview') ||
+      // Check if running in an app wrapper (not Safari/Chrome)
+      ((/iphone|ipod|ipad/.test(userAgent) && !userAgent.includes('safari')) ||
+       (/android/.test(userAgent) && !userAgent.includes('chrome')));
+    setIsWebview(isInWebview);
+    
+    // Check if app is in standalone mode (already installed as PWA)
     const isStandaloneMode = 
       window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as any).standalone === true;
     setIsStandalone(isStandaloneMode);
 
     // Detect iOS
-    const userAgent = navigator.userAgent.toLowerCase();
     const isIOSDevice = /iphone|ipad|ipod/.test(userAgent) || 
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     setIsIOS(isIOSDevice);
@@ -165,5 +179,6 @@ export function useInstallHighlight(): UseInstallHighlightReturn {
     isStandalone,
     canInstall,
     isIOS,
+    isWebview,
   };
 }

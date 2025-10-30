@@ -66,11 +66,63 @@ function setupSafariViewportFix() {
 // Check for app updates via version API
 async function checkForAppUpdates() {
   try {
-    const response = await fetch('/api/version', {
-      cache: 'no-store'
+    // CRITICAL: Use absolute URL with timestamp to completely bypass service worker
+    // This ensures we always get fresh JSON from the server, not cached HTML
+    const timestamp = Date.now();
+    const url = `${window.location.origin}/api/version?t=${timestamp}`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache'
+      }
     });
     
-    if (!response.ok) return;
+    if (!response.ok) {
+      console.warn('[Version] Update check returned non-OK status:', response.status);
+      setTimeout(checkForAppUpdates, 60000);
+      return;
+    }
+    
+    // Validate response is JSON before parsing
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      console.error('[Version] Response is not JSON, got:', contentType);
+      console.log('[Version] Old service worker detected - forcing update...');
+      
+      // This means old service worker is still active and returning HTML
+      // Unregister it and reload to get the new service worker
+      if ('serviceWorker' in navigator) {
+        // Unregister all service workers
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map(reg => reg.unregister()));
+        
+        // Clear all caches
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+        
+        // Set flag to prevent infinite loops
+        const reloadCount = parseInt(sessionStorage.getItem('sw-force-reload') || '0', 10);
+        if (reloadCount < 3) {
+          sessionStorage.setItem('sw-force-reload', (reloadCount + 1).toString());
+          console.log('[Version] Reloading to install new service worker...');
+          window.location.reload();
+          return;
+        } else {
+          // After 3 attempts, give up and continue without service worker
+          console.warn('[Version] Failed to update service worker after 3 attempts, continuing...');
+          sessionStorage.removeItem('sw-force-reload');
+        }
+      }
+      
+      setTimeout(checkForAppUpdates, 60000);
+      return;
+    }
+    
+    // Successfully got JSON - clear reload counter
+    sessionStorage.removeItem('sw-force-reload');
     
     const serverVersion = await response.json();
     const storedVersion = localStorage.getItem('app-version');
@@ -78,6 +130,7 @@ async function checkForAppUpdates() {
     // Store current version on first load
     if (!storedVersion) {
       localStorage.setItem('app-version', serverVersion.timestamp.toString());
+      setTimeout(checkForAppUpdates, 60000);
       return;
     }
     
@@ -158,6 +211,36 @@ async function migrateOldPWAUsers() {
 
 // Service Worker Registration for Offline Capabilities
 async function registerServiceWorker() {
+  // CRITICAL: Only register service workers in production or on localhost
+  // Development mode on replit.dev domains causes service worker issues
+  const isProduction = import.meta.env.MODE === 'production';
+  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  
+  if (!isProduction && !isLocalhost) {
+    console.log('[SW] Skipping service worker registration in development mode (non-localhost)');
+    
+    // Clean up any existing service workers from previous sessions
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        if (registrations.length > 0) {
+          console.log('[SW] Cleaning up', registrations.length, 'existing service worker(s)');
+          Promise.all(registrations.map(reg => reg.unregister())).then(() => {
+            // Clear all caches after unregistering
+            if ('caches' in window) {
+              caches.keys().then(names => {
+                Promise.all(names.map(name => caches.delete(name)));
+              });
+            }
+          });
+        }
+      });
+    }
+    
+    // DON'T run version checks in development - causes issues with old service workers
+    console.log('[Version] Version checks disabled in development mode');
+    return;
+  }
+  
   if ('serviceWorker' in navigator) {
     try {
       // Perform one-time migration for old PWA users BEFORE registering new SW
