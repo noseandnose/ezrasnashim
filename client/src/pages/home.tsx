@@ -91,46 +91,37 @@ export default function Home() {
   }, [navigateToSection]);
 
   const renderSection = () => {
-    // Only render the active section to prevent unnecessary API calls
-    // Each section will load its own data when rendered
-    switch (activeSection) {
-      case 'home':
-        return (
+    // Render all sections but hide inactive ones for instant switching
+    // This keeps components mounted and preserves their state/cache
+    return (
+      <>
+        <div style={{ display: activeSection === 'home' ? 'block' : 'none' }}>
           <ErrorBoundary>
-            <HomeSection key="home" onSectionChange={navigateToSection} />
+            <HomeSection onSectionChange={navigateToSection} />
           </ErrorBoundary>
-        );
-      case 'torah':
-        return (
+        </div>
+        <div style={{ display: activeSection === 'torah' ? 'block' : 'none' }}>
           <ErrorBoundary>
-            <TorahSection key="torah" onSectionChange={navigateToSection} />
+            <TorahSection onSectionChange={navigateToSection} />
           </ErrorBoundary>
-        );
-      case 'tefilla':
-        return (
+        </div>
+        <div style={{ display: activeSection === 'tefilla' ? 'block' : 'none' }}>
           <ErrorBoundary>
-            <TefillaSection key="tefilla" onSectionChange={navigateToSection} />
+            <TefillaSection onSectionChange={navigateToSection} />
           </ErrorBoundary>
-        );
-      case 'tzedaka':
-        return (
+        </div>
+        <div style={{ display: activeSection === 'tzedaka' ? 'block' : 'none' }}>
           <ErrorBoundary>
-            <TzedakaSection key="tzedaka" onSectionChange={navigateToSection} />
+            <TzedakaSection onSectionChange={navigateToSection} />
           </ErrorBoundary>
-        );
-      case 'table':
-        return (
+        </div>
+        <div style={{ display: activeSection === 'table' ? 'block' : 'none' }}>
           <ErrorBoundary>
-            <TableSection key="table" />
+            <TableSection />
           </ErrorBoundary>
-        );
-      default:
-        return (
-          <ErrorBoundary>
-            <HomeSection key="home-default" onSectionChange={navigateToSection} />
-          </ErrorBoundary>
-        );
-    }
+        </div>
+      </>
+    );
   };
 
   return (
