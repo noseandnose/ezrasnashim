@@ -54,13 +54,13 @@
     
     <!-- Inline critical font CSS to prevent flash -->
     <style>
-      /* Critical font definitions - using swap for better performance */
+      /* Critical font definitions - using optional to prevent layout shift */
       @font-face {
         font-family: 'Koren Siddur';
         src: url('/fonts/VC-Koren-Light.otf') format('opentype');
         font-weight: normal;
         font-style: normal;
-        font-display: swap; /* Show fallback immediately, then swap */
+        font-display: optional;
         unicode-range: U+0590-05FF, U+FB1D-FB4F;
       }
       @font-face {
@@ -68,8 +68,13 @@
         src: url('/fonts/ArnoKoren.otf') format('opentype');
         font-weight: normal;
         font-style: normal;
-        font-display: swap; /* Show fallback immediately, then swap */
+        font-display: optional;
         unicode-range: U+0020-007F, U+00A0-00FF;
+      }
+      
+      /* System font stack as immediate fallback to prevent text shift */
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
       }
     </style>
     
@@ -111,8 +116,8 @@
       })();
     </script>
     
-    <!-- Load only essential font weights to reduce size - consolidated request for better mobile performance -->
-    <link href="https://fonts.googleapis.com/css2?family=Platypi:wght@400;600&family=Secular+One&family=Poppins:wght@400;500;600&family=Frank+Ruhl+Libre:wght@400;500&family=Noto+Sans+Hebrew:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Load only essential font weights with optional display to prevent FOUC -->
+    <link href="https://fonts.googleapis.com/css2?family=Platypi:wght@400;600&family=Secular+One&family=Poppins:wght@400;500;600&family=Frank+Ruhl+Libre:wght@400;500&family=Noto+Sans+Hebrew:wght@400;500&display=optional" rel="stylesheet">
   </head>
   <body>
     <div id="root"></div>
