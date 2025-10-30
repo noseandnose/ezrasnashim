@@ -66,11 +66,38 @@ function setupSafariViewportFix() {
 // Check for app updates via version API
 async function checkForAppUpdates() {
   try {
-    const response = await fetch('/api/version', {
-      cache: 'no-store'
+    // CRITICAL: Use absolute URL with timestamp to completely bypass service worker
+    // This ensures we always get fresh JSON from the server, not cached HTML
+    const timestamp = Date.now();
+    const url = `${window.location.origin}/api/version?t=${timestamp}`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache'
+      }
     });
     
-    if (!response.ok) return;
+    if (!response.ok) {
+      console.warn('[Version] Update check returned non-OK status:', response.status);
+      setTimeout(checkForAppUpdates, 60000);
+      return;
+    }
+    
+    // Validate response is JSON before parsing
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      console.error('[Version] Response is not JSON, got:', contentType);
+      // Clear any corrupted cache and retry
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+      }
+      setTimeout(checkForAppUpdates, 60000);
+      return;
+    }
     
     const serverVersion = await response.json();
     const storedVersion = localStorage.getItem('app-version');
@@ -78,6 +105,7 @@ async function checkForAppUpdates() {
     // Store current version on first load
     if (!storedVersion) {
       localStorage.setItem('app-version', serverVersion.timestamp.toString());
+      setTimeout(checkForAppUpdates, 60000);
       return;
     }
     
