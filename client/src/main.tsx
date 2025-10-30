@@ -211,6 +211,29 @@ async function migrateOldPWAUsers() {
 
 // Service Worker Registration for Offline Capabilities
 async function registerServiceWorker() {
+  // CRITICAL: Only register service workers in production or on localhost
+  // Development mode on replit.dev domains causes service worker issues
+  const isProduction = import.meta.env.MODE === 'production';
+  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  
+  if (!isProduction && !isLocalhost) {
+    console.log('[SW] Skipping service worker registration in development mode (non-localhost)');
+    
+    // Clean up any existing service workers from previous sessions
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        if (registrations.length > 0) {
+          console.log('[SW] Cleaning up', registrations.length, 'existing service worker(s)');
+          Promise.all(registrations.map(reg => reg.unregister()));
+        }
+      });
+    }
+    
+    // Still run version checks without service worker
+    checkForAppUpdates();
+    return;
+  }
+  
   if ('serviceWorker' in navigator) {
     try {
       // Perform one-time migration for old PWA users BEFORE registering new SW
