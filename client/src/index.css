@@ -862,13 +862,21 @@ html, body, #root {
 }
 
 .mobile-app {
-  /* Use actual height for Safari compatibility */
+  /* Fallback for older browsers */
   height: 100%;
+  
   /* Flexible layout for better Safari handling */
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
+}
+
+/* Use small viewport height to account for Safari's bottom URL bar */
+@supports (height: 100svh) {
+  .mobile-app {
+    height: 100svh; /* Modern browsers - accounts for visible browser UI */
+  }
 }
 
 /* Prayer completion animation */
