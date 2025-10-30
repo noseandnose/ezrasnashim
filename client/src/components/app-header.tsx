@@ -126,10 +126,11 @@ export default function AppHeader() {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 bg-gradient-soft px-3 border-0 shadow-none z-40" style={{ 
-        paddingTop: 'calc(var(--safe-area-top-resolved, 0px) + 0.625rem)', 
-        paddingBottom: '0.625rem' 
+        paddingTop: `calc(var(--safe-area-top) + 0.625rem)`, 
+        paddingBottom: '0.625rem',
+        minHeight: 'var(--header-total-height)'
       }}>
-        <div className="flex items-center px-2">
+        <div className="flex items-center px-2" style={{ minHeight: 'var(--header-row-height)' }}>
           <div className="flex items-center gap-1 flex-1">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

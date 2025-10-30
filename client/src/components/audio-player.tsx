@@ -257,7 +257,7 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
           <span>{currentTime}</span>
           <span>{isLoading ? duration : actualDuration}</span>
         </div>
-        <div className="audio-progress-bar">
+        <div className="audio-progress-bar py-2">
           <div 
             className="bg-gray-300 rounded-full audio-progress-track w-full h-2 cursor-pointer relative"
             onClick={handleProgressClick}
@@ -273,7 +273,13 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
               className={`audio-progress h-full rounded-full ${isDragging ? 'transition-none' : 'transition-all duration-100'} relative bg-gradient-feminine`}
               style={{ width: `${progress}%` }}
             >
-              <div className={`absolute right-0 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg border-2 border-pink-300 ${isDragging ? 'opacity-100 scale-110' : 'opacity-90'} cursor-pointer transition-all duration-100`}></div>
+              <div 
+                className={`absolute -right-2 -top-1 w-4 h-4 bg-white rounded-full shadow-lg border-2 border-pink-300 ${isDragging ? 'opacity-100 scale-125' : 'opacity-90'} cursor-grab active:cursor-grabbing transition-all duration-100`}
+                style={{ touchAction: 'none' }}
+              >
+                {/* Larger invisible touch target */}
+                <div className="absolute inset-0 -m-2 rounded-full" />
+              </div>
             </div>
           </div>
         </div>
