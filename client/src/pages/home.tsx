@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import AppHeader from "@/components/app-header";
 import BottomNavigation from "@/components/bottom-navigation";
@@ -14,6 +14,11 @@ export type Section = 'torah' | 'tefilla' | 'tzedaka' | 'home' | 'table';
 
 export default function Home() {
   const [location, setLocation] = useLocation();
+  
+  // Track which sections have been mounted for instant switching
+  const [mountedSections, setMountedSections] = useState<Set<Section>>(
+    new Set<Section>(['home']) // Always mount home on initial load
+  );
   
   // Determine active section from URL path
   const getActiveSectionFromPath = (path: string): Section => {
@@ -32,6 +37,13 @@ export default function Home() {
   };
 
   const activeSection = getActiveSectionFromPath(location);
+  
+  // Mount section when it becomes active (lazy mounting)
+  useEffect(() => {
+    if (!mountedSections.has(activeSection)) {
+      setMountedSections(prev => new Set(prev).add(activeSection));
+    }
+  }, [activeSection, mountedSections]);
   
   // Scroll to top when section changes
   useEffect(() => {
@@ -91,35 +103,45 @@ export default function Home() {
   }, [navigateToSection]);
 
   const renderSection = () => {
-    // Render all sections but hide inactive ones for instant switching
-    // This keeps components mounted and preserves their state/cache
+    // Lazy mount sections: only mount when first visited, then keep mounted
+    // This gives fast initial load + instant switching after first visit
     return (
       <>
-        <div style={{ display: activeSection === 'home' ? 'block' : 'none' }}>
-          <ErrorBoundary>
-            <HomeSection onSectionChange={navigateToSection} />
-          </ErrorBoundary>
-        </div>
-        <div style={{ display: activeSection === 'torah' ? 'block' : 'none' }}>
-          <ErrorBoundary>
-            <TorahSection onSectionChange={navigateToSection} />
-          </ErrorBoundary>
-        </div>
-        <div style={{ display: activeSection === 'tefilla' ? 'block' : 'none' }}>
-          <ErrorBoundary>
-            <TefillaSection onSectionChange={navigateToSection} />
-          </ErrorBoundary>
-        </div>
-        <div style={{ display: activeSection === 'tzedaka' ? 'block' : 'none' }}>
-          <ErrorBoundary>
-            <TzedakaSection onSectionChange={navigateToSection} />
-          </ErrorBoundary>
-        </div>
-        <div style={{ display: activeSection === 'table' ? 'block' : 'none' }}>
-          <ErrorBoundary>
-            <TableSection />
-          </ErrorBoundary>
-        </div>
+        {mountedSections.has('home') && (
+          <div style={{ display: activeSection === 'home' ? 'block' : 'none' }}>
+            <ErrorBoundary>
+              <HomeSection onSectionChange={navigateToSection} />
+            </ErrorBoundary>
+          </div>
+        )}
+        {mountedSections.has('torah') && (
+          <div style={{ display: activeSection === 'torah' ? 'block' : 'none' }}>
+            <ErrorBoundary>
+              <TorahSection onSectionChange={navigateToSection} />
+            </ErrorBoundary>
+          </div>
+        )}
+        {mountedSections.has('tefilla') && (
+          <div style={{ display: activeSection === 'tefilla' ? 'block' : 'none' }}>
+            <ErrorBoundary>
+              <TefillaSection onSectionChange={navigateToSection} />
+            </ErrorBoundary>
+          </div>
+        )}
+        {mountedSections.has('tzedaka') && (
+          <div style={{ display: activeSection === 'tzedaka' ? 'block' : 'none' }}>
+            <ErrorBoundary>
+              <TzedakaSection onSectionChange={navigateToSection} />
+            </ErrorBoundary>
+          </div>
+        )}
+        {mountedSections.has('table') && (
+          <div style={{ display: activeSection === 'table' ? 'block' : 'none' }}>
+            <ErrorBoundary>
+              <TableSection />
+            </ErrorBoundary>
+          </div>
+        )}
       </>
     );
   };
