@@ -134,25 +134,8 @@ button,
   padding: 0;
 }
 
-/* VC Koren Light Font for Hebrew Tefilla Content */
-@font-face {
-  font-family: 'Koren Siddur';
-  src: url('/fonts/VC-Koren-Light.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap; /* Better performance - show fallback immediately, then swap */
-  unicode-range: U+0590-05FF, U+FB1D-FB4F; /* Hebrew characters only */
-}
-
-/* Arno Koren Font for English text within Hebrew prayers */
-@font-face {
-  font-family: 'Arno Koren';
-  src: url('./fonts/ArnoKoren.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap; /* Better performance - show fallback immediately, then swap */
-  unicode-range: U+0020-007F, U+00A0-00FF; /* Latin characters only */
-}
+/* Font-face declarations moved to index.html for better loading performance */
+/* Using font-display: optional to prevent FOUC and layout shift */
 
 /* Hebrew prayer text - let browser handle font fallback automatically */
 .vc-koren-hebrew {
