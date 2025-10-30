@@ -1,4 +1,5 @@
 import { BookOpen, HandHeart, Heart, Sparkles, Coins } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { Section } from "@/pages/home";
 
 interface BottomNavigationProps {
@@ -10,6 +11,27 @@ export default function BottomNavigation({
   activeSection,
   onSectionChange,
 }: BottomNavigationProps) {
+  const [safariToolbarOffset, setSafariToolbarOffset] = useState(0);
+  
+  useEffect(() => {
+    // Detect if we're in Safari browser mode (not PWA/standalone)
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                        (window.navigator as any).standalone === true;
+    const isSafari = /^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(navigator.userAgent);
+    
+    // If iOS Safari browser mode (not standalone PWA), add offset for URL bar
+    if (isIOS && isSafari && !isStandalone) {
+      // Safari bottom toolbar is typically 44px
+      const offset = 44;
+      setSafariToolbarOffset(offset);
+      // Also set CSS variable for content padding
+      document.documentElement.style.setProperty('--safari-toolbar-offset', `${offset}px`);
+    } else {
+      setSafariToolbarOffset(0);
+      document.documentElement.style.setProperty('--safari-toolbar-offset', '0px');
+    }
+  }, []);
   const navItems = [
     { id: "torah" as Section, icon: BookOpen, label: "Torah", isCenter: false },
     {
@@ -49,7 +71,7 @@ export default function BottomNavigation({
     <nav
       className="fixed left-0 right-0 mx-auto w-full max-w-md bg-gradient-soft backdrop-blur-sm border-t border-rose-blush/15 shadow-2xl rounded-t-3xl transition-gentle z-50"
       style={{
-        bottom: 0,
+        bottom: `${safariToolbarOffset}px`,
         paddingBottom: "calc(var(--safe-area-bottom) + 0.5rem)",
         touchAction: "none"
       }}
