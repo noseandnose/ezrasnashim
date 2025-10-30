@@ -224,13 +224,20 @@ async function registerServiceWorker() {
       navigator.serviceWorker.getRegistrations().then(registrations => {
         if (registrations.length > 0) {
           console.log('[SW] Cleaning up', registrations.length, 'existing service worker(s)');
-          Promise.all(registrations.map(reg => reg.unregister()));
+          Promise.all(registrations.map(reg => reg.unregister())).then(() => {
+            // Clear all caches after unregistering
+            if ('caches' in window) {
+              caches.keys().then(names => {
+                Promise.all(names.map(name => caches.delete(name)));
+              });
+            }
+          });
         }
       });
     }
     
-    // Still run version checks without service worker
-    checkForAppUpdates();
+    // DON'T run version checks in development - causes issues with old service workers
+    console.log('[Version] Version checks disabled in development mode');
     return;
   }
   
