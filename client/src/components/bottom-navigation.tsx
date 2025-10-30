@@ -1,4 +1,5 @@
 import { BookOpen, HandHeart, Heart, Sparkles, Coins } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import type { Section } from "@/pages/home";
 
 interface BottomNavigationProps {
@@ -10,6 +11,30 @@ export default function BottomNavigation({
   activeSection,
   onSectionChange,
 }: BottomNavigationProps) {
+  const navRef = useRef<HTMLElement>(null);
+  const [viewportOffset, setViewportOffset] = useState(0);
+  
+  useEffect(() => {
+    // Use Visual Viewport API for proper Safari support
+    // This handles Safari's dynamic toolbar (hides/shows on scroll)
+    const updatePosition = () => {
+      if (window.visualViewport && navRef.current) {
+        const offset = window.visualViewport.offsetTop;
+        setViewportOffset(offset);
+      }
+    };
+    
+    if (!window.visualViewport) return;
+    
+    window.visualViewport.addEventListener('resize', updatePosition);
+    window.visualViewport.addEventListener('scroll', updatePosition);
+    updatePosition(); // Initial position
+    
+    return () => {
+      window.visualViewport?.removeEventListener('resize', updatePosition);
+      window.visualViewport?.removeEventListener('scroll', updatePosition);
+    };
+  }, []);
   const navItems = [
     { id: "torah" as Section, icon: BookOpen, label: "Torah", isCenter: false },
     {
@@ -47,10 +72,12 @@ export default function BottomNavigation({
 
   return (
     <nav
+      ref={navRef}
       className="fixed left-0 right-0 mx-auto w-full max-w-md bg-gradient-soft backdrop-blur-sm border-t border-rose-blush/15 shadow-2xl rounded-t-3xl transition-gentle z-50"
       style={{
-        bottom: "env(safe-area-inset-bottom, 0px)",
+        bottom: 0,
         paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.5rem)",
+        transform: `translate3d(0, ${viewportOffset}px, 0)`,
         touchAction: "none"
       }}
     >
