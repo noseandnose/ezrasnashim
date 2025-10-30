@@ -1,5 +1,4 @@
 import { BookOpen, HandHeart, Heart, Sparkles, Coins } from "lucide-react";
-import { useEffect } from "react";
 import type { Section } from "@/pages/home";
 
 interface BottomNavigationProps {
@@ -11,22 +10,6 @@ export default function BottomNavigation({
   activeSection,
   onSectionChange,
 }: BottomNavigationProps) {
-  // Debug: Log viewport calculations
-  useEffect(() => {
-    const browserUIBottom = getComputedStyle(document.documentElement)
-      .getPropertyValue('--browser-ui-bottom');
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                        (window.navigator as any).standalone === true;
-    
-    console.log('Bottom Nav Debug:', {
-      browserUIBottom,
-      isStandalone,
-      innerHeight: window.innerHeight,
-      visualHeight: window.visualViewport?.height,
-      footerTotalHeight: getComputedStyle(document.documentElement)
-        .getPropertyValue('--footer-total-height')
-    });
-  }, []);
   const navItems = [
     { id: "torah" as Section, icon: BookOpen, label: "Torah", isCenter: false },
     {
@@ -66,8 +49,8 @@ export default function BottomNavigation({
     <nav
       className="fixed left-0 right-0 mx-auto w-full max-w-md bg-gradient-soft backdrop-blur-sm border-t border-rose-blush/15 shadow-2xl rounded-t-3xl transition-gentle z-50"
       style={{
-        bottom: "var(--browser-ui-bottom, 0px)",
-        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.5rem)",
+        bottom: "var(--nav-offset, 0px)",
+        paddingBottom: "calc(var(--safe-area-bottom, 0px) + 0.5rem)",
         touchAction: "none"
       }}
     >
