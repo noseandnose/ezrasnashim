@@ -16,11 +16,25 @@ export default function BottomNavigation({
   
   useEffect(() => {
     // Use Visual Viewport API for proper Safari support
-    // This handles Safari's dynamic toolbar (hides/shows on scroll)
+    // Calculate the difference between layout viewport and visual viewport
     const updatePosition = () => {
       if (window.visualViewport && navRef.current) {
-        const offset = window.visualViewport.offsetTop;
-        setViewportOffset(offset);
+        // Calculate how much we need to move up
+        // Visual viewport height is smaller when Safari's toolbar is visible
+        const layoutHeight = window.innerHeight;
+        const visualHeight = window.visualViewport.height;
+        const difference = layoutHeight - visualHeight;
+        
+        // Move navigation up by the difference (toolbar height)
+        setViewportOffset(-difference);
+        
+        console.log('Viewport update:', {
+          layoutHeight,
+          visualHeight,
+          difference,
+          offsetTop: window.visualViewport.offsetTop,
+          pageTop: window.visualViewport.pageTop
+        });
       }
     };
     
