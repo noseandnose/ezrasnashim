@@ -600,8 +600,16 @@ export default function TableModals() {
                       {mediaItems.length > 1 && (
                         <>
                           <button
-                            onClick={prevMedia}
-                            className="absolute left-2 p-2 transition-transform hover:scale-110"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              prevMedia();
+                            }}
+                            onTouchStart={(e) => e.stopPropagation()}
+                            onTouchEnd={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                            }}
+                            className="absolute left-2 p-2 transition-transform hover:scale-110 z-10"
                             style={{
                               top: '160px',
                               filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.8)) drop-shadow(0 0 1px rgba(255,255,255,1))',
@@ -612,8 +620,16 @@ export default function TableModals() {
                             <ChevronLeft size={24} strokeWidth={3} />
                           </button>
                           <button
-                            onClick={nextMedia}
-                            className="absolute right-2 p-2 transition-transform hover:scale-110"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              nextMedia();
+                            }}
+                            onTouchStart={(e) => e.stopPropagation()}
+                            onTouchEnd={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                            }}
+                            className="absolute right-2 p-2 transition-transform hover:scale-110 z-10"
                             style={{
                               top: '160px',
                               filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.8)) drop-shadow(0 0 1px rgba(255,255,255,1))',
@@ -1049,8 +1065,16 @@ export default function TableModals() {
                           {mediaItems.length > 1 && (
                             <>
                               <button
-                                onClick={() => setCurrentMediaIndex((prev) => (prev - 1 + mediaItems.length) % mediaItems.length)}
-                                className="absolute left-2 p-2 transition-transform hover:scale-110"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setCurrentMediaIndex((prev) => (prev - 1 + mediaItems.length) % mediaItems.length);
+                                }}
+                                onTouchStart={(e) => e.stopPropagation()}
+                                onTouchEnd={(e) => {
+                                  e.stopPropagation();
+                                  e.preventDefault();
+                                }}
+                                className="absolute left-2 p-2 transition-transform hover:scale-110 z-10"
                                 style={{
                                   top: '160px',
                                   filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.8)) drop-shadow(0 0 1px rgba(255,255,255,1))',
@@ -1061,8 +1085,16 @@ export default function TableModals() {
                                 <ChevronLeft size={24} strokeWidth={3} />
                               </button>
                               <button
-                                onClick={() => setCurrentMediaIndex((prev) => (prev + 1) % mediaItems.length)}
-                                className="absolute right-2 p-2 transition-transform hover:scale-110"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setCurrentMediaIndex((prev) => (prev + 1) % mediaItems.length);
+                                }}
+                                onTouchStart={(e) => e.stopPropagation()}
+                                onTouchEnd={(e) => {
+                                  e.stopPropagation();
+                                  e.preventDefault();
+                                }}
+                                className="absolute right-2 p-2 transition-transform hover:scale-110 z-10"
                                 style={{
                                   top: '160px',
                                   filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.8)) drop-shadow(0 0 1px rgba(255,255,255,1))',
