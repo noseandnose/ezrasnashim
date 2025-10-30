@@ -601,8 +601,9 @@ export default function TableModals() {
                         <>
                           <button
                             onClick={prevMedia}
-                            className="absolute left-2 top-1/2 transform -translate-y-1/2 p-2 transition-transform hover:scale-110"
+                            className="absolute left-2 p-2 transition-transform hover:scale-110"
                             style={{
+                              top: '160px',
                               filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.8)) drop-shadow(0 0 1px rgba(255,255,255,1))',
                               color: '#000',
                               fontWeight: 'bold'
@@ -612,8 +613,9 @@ export default function TableModals() {
                           </button>
                           <button
                             onClick={nextMedia}
-                            className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 transition-transform hover:scale-110"
+                            className="absolute right-2 p-2 transition-transform hover:scale-110"
                             style={{
+                              top: '160px',
                               filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.8)) drop-shadow(0 0 1px rgba(255,255,255,1))',
                               color: '#000',
                               fontWeight: 'bold'
@@ -1048,8 +1050,9 @@ export default function TableModals() {
                             <>
                               <button
                                 onClick={() => setCurrentMediaIndex((prev) => (prev - 1 + mediaItems.length) % mediaItems.length)}
-                                className="absolute left-2 top-1/2 transform -translate-y-1/2 p-2 transition-transform hover:scale-110"
+                                className="absolute left-2 p-2 transition-transform hover:scale-110"
                                 style={{
+                                  top: '160px',
                                   filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.8)) drop-shadow(0 0 1px rgba(255,255,255,1))',
                                   color: '#000',
                                   fontWeight: 'bold'
@@ -1059,8 +1062,9 @@ export default function TableModals() {
                               </button>
                               <button
                                 onClick={() => setCurrentMediaIndex((prev) => (prev + 1) % mediaItems.length)}
-                                className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 transition-transform hover:scale-110"
+                                className="absolute right-2 p-2 transition-transform hover:scale-110"
                                 style={{
+                                  top: '160px',
                                   filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.8)) drop-shadow(0 0 1px rgba(255,255,255,1))',
                                   color: '#000',
                                   fontWeight: 'bold'
