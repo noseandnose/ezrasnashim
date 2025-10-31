@@ -25,7 +25,7 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **Typography**: Playfair Display (headers), Inter (body), David Libre/Heebo (Hebrew), Platypi (English), Koren Siddur (Tefilla). Font preloading with font-display:optional strategy to prevent FOUC (Flash of Unstyled Content) and layout shift. All fonts loaded via single source in index.html with system font fallbacks.
 - **Visuals**: Flower progress indicators, subtle animations, custom logos, consistent gradients.
 - **Modals**: Fullscreen overlay system for major content with consistent headers, font controls, language toggles, and attribution. Direct fullscreen access for all Tefilla prayers and Tehillim sections.
-- **UI/UX Decisions**: Pure CSS safe area detection (`env(safe-area-inset-*)`) for zero layout shift and optimal performance across devices, replacing JavaScript-based solutions. Enhanced audio player UI with precise positioning and improved drag responsiveness. Navigation arrows for media items are consistently positioned and fully functional in fullscreen mode.
+- **UI/UX Decisions**: Pure CSS safe area detection (`env(safe-area-inset-*)`) for zero layout shift and optimal performance across devices, replacing JavaScript-based solutions. Enhanced audio player UI with precise positioning and improved drag responsiveness. Navigation arrows for media items are consistently positioned and fully functional in fullscreen mode. Lazy section mounting strategy for instant page transitions - sections mount on first visit and stay mounted for zero-delay navigation on subsequent visits.
 
 ### Backend
 - **Runtime**: Node.js 20 with Express.js.
@@ -69,6 +69,7 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **Security**: Drizzle ORM for SQL injection prevention.
 - **Deployment**: Static frontend (S3), backend (ECS), PostgreSQL (Supabase).
 - **Automated Cache Busting**: Automated version control and cache management with build timestamp and `/api/version` endpoint. Service worker uses stale-while-revalidate for unversioned assets and bypasses caching for audio/API endpoints (`/api/version`, `/api/media-proxy/`).
+- **Non-Intrusive Version Checks**: Version checking disabled during active sessions to prevent interrupting users during audio or prayers. Updates only check once every 24 hours and only prompt for critical updates. Regular updates apply automatically on next app launch.
 
 ## External Dependencies
 - **Payment Processing**: Stripe (for donations, including Apple Pay/Google Pay).

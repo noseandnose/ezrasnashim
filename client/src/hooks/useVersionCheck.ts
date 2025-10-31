@@ -15,7 +15,6 @@ export function useVersionCheck() {
   const [currentVersion, setCurrentVersion] = useState<VersionInfo | null>(null);
   const [updateInfo, setUpdateInfo] = useState<VersionInfo | null>(null);
   const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   
   // Get initial version on app load
   const { data: initialVersion } = useQuery<VersionInfo>({
@@ -63,13 +62,15 @@ export function useVersionCheck() {
     }
   }, [currentVersion]);
   
-  // Periodic version checking (every 1 hour)
+  // Periodic version checking - DISABLED to prevent interrupting users
+  // Version updates will happen naturally when user closes/reopens the app
   useEffect(() => {
+    // Only check for critical updates in production, and very infrequently
+    // Never interrupt the user's current session
     const checkForUpdates = async () => {
       if (!currentVersion) return;
       
       try {
-        console.log('🔍 Checking for app updates...');
         // Use the same API base URL as the rest of the app
         const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         const apiUrl = `${baseUrl}/api/version?t=${Date.now()}`;
@@ -81,64 +82,45 @@ export function useVersionCheck() {
         
         const latestVersion: VersionInfo = await response.json();
         
-        console.log('📊 Version comparison:', {
-          current: { 
-            timestamp: currentVersion.timestamp, 
-            date: new Date(currentVersion.timestamp).toISOString() 
-          },
-          latest: { 
-            timestamp: latestVersion.timestamp, 
-            date: new Date(latestVersion.timestamp).toISOString() 
-          },
-          isNewer: latestVersion.timestamp > currentVersion.timestamp
-        });
-        
-        // Compare timestamps to detect updates with minimum threshold
+        // Compare timestamps to detect updates
         const timeDifference = latestVersion.timestamp - currentVersion.timestamp;
-        // Shorter threshold in development for easier testing
-        const minimumUpdateThreshold = import.meta.env.MODE === 'development' ? 1 * 60 * 1000 : 5 * 60 * 1000; // 1 minute in dev, 5 minutes in prod
+        const minimumUpdateThreshold = 5 * 60 * 1000; // 5 minutes
         
         if (timeDifference > minimumUpdateThreshold) {
-          console.log('🚀 New version detected! Showing update prompt.');
-          setUpdateInfo(latestVersion);
-          setShowUpdatePrompt(true);
-
-          // Store latest version separately for post-refresh update
+          // Only show prompt for CRITICAL updates, otherwise just store silently
+          if (latestVersion.isCritical) {
+            console.log('⚠️ Critical update available');
+            setUpdateInfo(latestVersion);
+            setShowUpdatePrompt(true);
+          } else {
+            // Silently store update info, user will get it on next app launch
+            console.log('ℹ️ Update available (will apply on next app launch)');
+          }
           localStorage.setItem('latest-app-version', JSON.stringify(latestVersion));
-        } else {
-          console.log('✅ App is up to date.');
         }
       } catch (error) {
-        // Silently handle version check failures to avoid console noise
+        // Silently handle version check failures
         if (import.meta.env.MODE === 'development') {
           console.warn('⚠️ Version check failed:', error);
         }
       }
     };
     
-    // Start checking after 30 minutes, then every 12 hours
-    // In development, check more frequently for testing
-    const initialDelay = import.meta.env.MODE === 'development' ? 2 * 60 * 1000 : 30 * 60 * 1000; // 2 minutes in dev, 30 minutes in prod
-    const checkInterval = import.meta.env.MODE === 'development' ? 5 * 60 * 1000 : 12 * 60 * 60 * 1000; // 5 minutes in dev, 12 hours in prod
-    
-    const startDelay = setTimeout(() => {
+    // Only check once per session, after 24 hours
+    // This prevents interrupting users mid-session
+    const checkOnce = setTimeout(() => {
       checkForUpdates();
-      intervalRef.current = setInterval(checkForUpdates, checkInterval);
-    }, initialDelay);
+    }, 24 * 60 * 60 * 1000); // Check after 24 hours
     
     return () => {
-      clearTimeout(startDelay);
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      clearTimeout(checkOnce);
     };
   }, [currentVersion]);
   
   const refreshApp = () => {
-    console.log('🔄 Performing app refresh with progress preservation...');
+    console.log('🔄 User requested app refresh...');
     
     // Update current version in localStorage before refresh
-    // This prevents the update prompt from showing again after refresh
     const latestVersionFromStorage = localStorage.getItem('latest-app-version');
     if (latestVersionFromStorage) {
       localStorage.setItem('app-version', latestVersionFromStorage);
@@ -148,74 +130,10 @@ export function useVersionCheck() {
     // Dismiss the update prompt immediately
     setShowUpdatePrompt(false);
     
-    // Update service workers and clear browser caches, but preserve user data
-    const performRefresh = async () => {
-      try {
-        // Update service worker registrations
-        if ('serviceWorker' in navigator) {
-          try {
-            const registrations = await navigator.serviceWorker.getRegistrations();
-            console.log('🔧 Updating service workers...', registrations.length);
-            await Promise.all(
-              registrations.map(registration => registration.update())
-            );
-          } catch (error) {
-            console.warn('⚠️ Service worker update failed:', error);
-          }
-        }
-        
-        // Clear browser caches (but NOT localStorage)
-        if ('caches' in window) {
-          try {
-            const cacheNames = await caches.keys();
-            console.log('🗑️ Clearing browser caches...', cacheNames);
-            await Promise.all(
-              cacheNames.map(cacheName => caches.delete(cacheName))
-            );
-          } catch (error) {
-            console.warn('⚠️ Cache clearing failed:', error);
-          }
-        }
-        
-        // Show loading state briefly
-        const loadingDiv = document.createElement('div');
-        loadingDiv.innerHTML = `
-          <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 9999; color: white; font-family: system-ui;">
-            <div style="text-align: center;">
-              <div style="width: 40px; height: 40px; border: 4px solid #fff3; border-top: 4px solid #fff; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px;"></div>
-              <div>Updating to latest version...</div>
-            </div>
-            <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
-          </div>
-        `;
-        document.body.appendChild(loadingDiv);
-        
-        // Note: We explicitly do NOT clear localStorage to preserve:
-        // - modalCompletions (daily modal completion tracking)
-        // - dailyCompletion (daily task progress)
-        // - tzedaka_button_completions (tzedaka progress)
-        // - share-button-clicked (user preferences)  
-        // - message-read-* (daily message read status)
-        // - lastDonationEmail (donation form data)
-        // - ezras-nashim-compass-location* (location cache)
-        // - app-version (version tracking)
-        
-        console.log('✨ Performing hard refresh to load latest version...');
-        
-        // Small delay to show loading state
-        setTimeout(() => {
-          // Force hard page reload to get fresh content (bypasses cache)
-          window.location.reload(); // Hard refresh
-        }, 800);
-        
-      } catch (error) {
-        console.error('❌ Refresh failed:', error);
-        // Fallback to simple reload
-        window.location.reload();
-      }
-    };
-    
-    performRefresh();
+    // Simple, non-disruptive reload
+    // Let the browser handle caching naturally
+    console.log('✨ Reloading to apply update...');
+    window.location.reload();
   };
   
   const dismissUpdate = () => {
