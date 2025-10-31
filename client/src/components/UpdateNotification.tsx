@@ -23,6 +23,7 @@ export default function UpdateNotification() {
 
       return () => clearInterval(timer);
     }
+    return undefined;
   }, [updateInfo?.isCritical, showUpdatePrompt, refreshApp]);
 
   if (!showUpdatePrompt) return null;
