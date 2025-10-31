@@ -15,98 +15,12 @@ function setupSafariViewportFix() {
   window.addEventListener('resize', setVh, { passive: true });
 }
 
-// Check for app updates via version API
+// DISABLED: Automatic version checking interrupts users during prayers/audio
+// Version updates now handled by useVersionCheck hook in a non-intrusive way
+// This function is kept for backward compatibility but not called
 async function checkForAppUpdates() {
-  try {
-    // CRITICAL: Use absolute URL with timestamp to completely bypass service worker
-    // This ensures we always get fresh JSON from the server, not cached HTML
-    const timestamp = Date.now();
-    const url = `${window.location.origin}/api/version?t=${timestamp}`;
-    
-    const response = await fetch(url, {
-      method: 'GET',
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache'
-      }
-    });
-    
-    if (!response.ok) {
-      console.warn('[Version] Update check returned non-OK status:', response.status);
-      setTimeout(checkForAppUpdates, 60000);
-      return;
-    }
-    
-    // Validate response is JSON before parsing
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      console.error('[Version] Response is not JSON, got:', contentType);
-      console.log('[Version] Old service worker detected - forcing update...');
-      
-      // This means old service worker is still active and returning HTML
-      // Unregister it and reload to get the new service worker
-      if ('serviceWorker' in navigator) {
-        // Unregister all service workers
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(registrations.map(reg => reg.unregister()));
-        
-        // Clear all caches
-        const cacheNames = await caches.keys();
-        await Promise.all(cacheNames.map(name => caches.delete(name)));
-        
-        // Set flag to prevent infinite loops
-        const reloadCount = parseInt(sessionStorage.getItem('sw-force-reload') || '0', 10);
-        if (reloadCount < 3) {
-          sessionStorage.setItem('sw-force-reload', (reloadCount + 1).toString());
-          console.log('[Version] Reloading to install new service worker...');
-          window.location.reload();
-          return;
-        } else {
-          // After 3 attempts, give up and continue without service worker
-          console.warn('[Version] Failed to update service worker after 3 attempts, continuing...');
-          sessionStorage.removeItem('sw-force-reload');
-        }
-      }
-      
-      setTimeout(checkForAppUpdates, 60000);
-      return;
-    }
-    
-    // Successfully got JSON - clear reload counter
-    sessionStorage.removeItem('sw-force-reload');
-    
-    const serverVersion = await response.json();
-    const storedVersion = localStorage.getItem('app-version');
-    
-    // Store current version on first load
-    if (!storedVersion) {
-      localStorage.setItem('app-version', serverVersion.timestamp.toString());
-      setTimeout(checkForAppUpdates, 60000);
-      return;
-    }
-    
-    // If server has newer version, force reload
-    if (serverVersion.timestamp > parseInt(storedVersion, 10)) {
-      console.log('[Version] New version detected, updating...');
-      localStorage.setItem('app-version', serverVersion.timestamp.toString());
-      
-      // Clear service worker caches to ensure fresh content
-      if ('serviceWorker' in navigator) {
-        const cacheNames = await caches.keys();
-        await Promise.all(cacheNames.map(name => caches.delete(name)));
-      }
-      
-      window.location.reload();
-    }
-    
-    // Check again in 60 seconds
-    setTimeout(checkForAppUpdates, 60000);
-  } catch (error) {
-    console.error('[Version] Update check failed:', error);
-    // Retry in 60 seconds
-    setTimeout(checkForAppUpdates, 60000);
-  }
+  // No-op: Version checking disabled to prevent mid-session interruptions
+  return;
 }
 
 // One-time migration for users on old PWA versions
@@ -226,18 +140,10 @@ async function registerServiceWorker() {
         }
       });
       
-      // Check for updates less frequently - every 5 minutes instead of 30 seconds
-      setInterval(() => {
-        if (!document.hidden && navigator.onLine) {
-          registration.update();
-        }
-      }, 300000); // 5 minutes
-      
-      // Check for updates after 30 seconds, not immediately
-      setTimeout(() => {
-        registration.update();
-        checkForAppUpdates();
-      }, 30000);
+      // DISABLED: Aggressive update checking interrupts users mid-session
+      // Service worker will naturally update on next app launch
+      // Only check for updates on initial registration
+      registration.update();
       
     } catch (error) {
       console.error('[SW] Service Worker registration failed:', error);
