@@ -996,7 +996,7 @@ html, body, #root {
 }
 
 .font-english {
-  font-family: 'Poppins', sans-serif;
+  font-family: Platypi, Georgia, Cambria, serif;
 }
 
 /* Hebrew font class - updated to use Noto Sans Hebrew for better Unicode support */
