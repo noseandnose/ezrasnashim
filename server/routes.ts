@@ -3735,9 +3735,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // staging
+  // Enhanced health check with configuration status
   app.get("/healthcheck", (req, res) => {
-    res.json({ status: "OK" });
+    const isProduction = process.env.NODE_ENV === 'production';
+    
+    // Check critical services
+    const health = {
+      status: "OK",
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      services: {
+        database: !!process.env.DATABASE_URL,
+        stripe: !!process.env.STRIPE_SECRET_KEY,
+        pushNotifications: !!(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY),
+        admin: !!process.env.ADMIN_PASSWORD
+      }
+    };
+    
+    // In production, include a warnings array for missing optional services
+    if (isProduction) {
+      const warnings: string[] = [];
+      if (!health.services.stripe) warnings.push('Stripe not configured - donations disabled');
+      if (!health.services.pushNotifications) warnings.push('Push notifications not configured');
+      if (!health.services.admin) warnings.push('Admin panel not configured');
+      
+      if (warnings.length > 0) {
+        (health as any).warnings = warnings;
+      }
+    }
+    
+    res.json(health);
   })
 
   // Development: Inform about frontend port  

@@ -47,10 +47,10 @@ export const DesignSystem = {
   fonts: {
     // Font Families
     serif: '"Playfair Display", serif',   // Headers and elegant text
-    sans: '"Inter", sans-serif',          // Body text and UI elements
+    sans: 'Platypi, Georgia, Cambria, serif', // Body text and UI elements
     hebrew: '"Secular One", cursive',     // Hebrew text (bold weight)
     hebrewRegular: '"Heebo", sans-serif', // Hebrew text (regular weight)
-    english: '"Inter", sans-serif',       // English text in Hebrew contexts
+    english: 'Platypi, Georgia, Cambria, serif', // English text in Hebrew contexts
     
     // Font Weights
     weights: {
@@ -182,7 +182,7 @@ export const DesignSystem = {
     },
     
     english: {
-      fontFamily: '"Inter", sans-serif',
+      fontFamily: 'Platypi, Georgia, Cambria, serif',
       fontWeight: 'normal',
       direction: 'ltr',
       textAlign: 'left',

@@ -187,14 +187,14 @@ export function formatTextContent(text: string | null | undefined): string {
     }
     
     // This is regular grey box content
-    return `<div style="background-color: #f3f4f6; padding: 12px; border-radius: 8px; margin: 8px 0; border-left: 4px solid #d1d5db;">${content}</div>`;
+    return `<div style="background-color: #f3f4f6; padding: 12px; border-radius: 8px; margin: 8px 0; border-left: 4px solid #d1d5db; font-family: 'Koren Siddur', 'Arno Koren', serif;">${content}</div>`;
   });
 
   // Process {{ }} for grey boxes (English content)
   // This handles {{text}} for regular grey box content
   formatted = formatted.replace(/\{\{([^}]+?)\}\}/g, (_match, content) => {
     // This is regular grey box content for English text
-    return `<div style="background-color: #f3f4f6; padding: 12px; border-radius: 8px; margin: 8px 0; border-left: 4px solid #d1d5db;">${content}</div>`;
+    return `<div style="background-color: #f3f4f6; padding: 12px; border-radius: 8px; margin: 8px 0; border-left: 4px solid #d1d5db; font-family: Platypi, Georgia, Cambria, serif;">${content}</div>`;
   });
   
   // First, handle {{grey}} blocks before character-by-character processing
@@ -205,21 +205,21 @@ export function formatTextContent(text: string | null | undefined): string {
   // This approach better handles nested formatting from conditional content
   
   // Process ## (title) markers - bigger and bold
-  formatted = formatted.replace(/##([^#]*?)##/g, '<span style="font-size: 1.5em; font-weight: bold; display: block; margin: 0.5em 0;">$1</span>');
+  formatted = formatted.replace(/##([^#]*?)##/g, '<span style="font-size: 1.5em; font-weight: bold; display: block; margin: 0.5em 0; font-family: inherit;">$1</span>');
   
   // Process ** (bold) markers - handle nested content robustly
   // Use [\s\S] instead of . to properly match all characters including Hebrew with nikud
-  formatted = formatted.replace(/\*\*([\s\S]*?)\*\*/g, '<strong>$1</strong>');
+  formatted = formatted.replace(/\*\*([\s\S]*?)\*\*/g, '<strong style="font-family: inherit;">$1</strong>');
   
   // Process ~~ (grey) markers
-  formatted = formatted.replace(/~~([\s\S]*?)~~/g, '<span style="color: #9CA3AF; opacity: 0.8;">$1</span>');
+  formatted = formatted.replace(/~~([\s\S]*?)~~/g, '<span style="color: #9CA3AF; opacity: 0.8; font-family: inherit;">$1</span>');
   
   // Process ++ (bold text) markers 
-  formatted = formatted.replace(/\+\+([\s\S]*?)\+\+/g, '<strong>$1</strong>');
+  formatted = formatted.replace(/\+\+([\s\S]*?)\+\+/g, '<strong style="font-family: inherit;">$1</strong>');
   
   // Process -- (smaller text) markers - but avoid conflicts with line breaks
   // Use negative lookahead to avoid matching --- (line breaks)
-  formatted = formatted.replace(/--(?!-)([\s\S]+?)--(?!-)/g, '<span style="font-size: 0.85em;">$1</span>');
+  formatted = formatted.replace(/--(?!-)([\s\S]+?)--(?!-)/g, '<span style="font-size: 0.85em; font-family: inherit;">$1</span>');
   
   let result = formatted;
   

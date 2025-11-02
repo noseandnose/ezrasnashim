@@ -6,7 +6,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'system-ui', 'sans-serif'],
+        sans: ['Platypi', 'Georgia', 'Cambria', 'serif'],
         serif: ['Playfair Display', 'Georgia', 'Cambria', 'Times New Roman', 'serif'],
         platypi: ['Platypi', 'Georgia', 'Cambria', 'serif'],
         hebrew: ['David Libre', 'Heebo', 'Arial Hebrew', 'Arial', 'sans-serif'],

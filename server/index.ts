@@ -263,8 +263,53 @@ app.use((req, res, next) => {
   next();
 });
 
+// Environment validation
+function validateEnvironment() {
+  const warnings: string[] = [];
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  // Critical required variables
+  const required = ['DATABASE_URL'];
+  const missing = required.filter(key => !process.env[key]);
+  
+  if (missing.length > 0) {
+    console.error('❌ CRITICAL: Missing required environment variables:', missing.join(', '));
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+  }
+  
+  // Important optional variables - warn if missing in production
+  if (isProduction) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      warnings.push('STRIPE_SECRET_KEY - Donations will not work');
+    }
+    if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
+      warnings.push('VAPID keys - Push notifications will not work');
+    }
+    if (!process.env.ADMIN_PASSWORD) {
+      warnings.push('ADMIN_PASSWORD - Admin panel will be disabled');
+    }
+  }
+  
+  // Log warnings
+  if (warnings.length > 0) {
+    console.warn('⚠️  Missing optional configuration (some features may be unavailable):');
+    warnings.forEach(w => console.warn(`   - ${w}`));
+  } else {
+    console.log('✅ All critical environment variables configured');
+  }
+  
+  return {
+    valid: missing.length === 0,
+    warnings: warnings.length,
+    missing
+  };
+}
+
 // Initialize server configuration
 async function initializeServer() {
+  // Validate environment before starting
+  const envStatus = validateEnvironment();
+  
   const server = await registerRoutes(app);
 
   // Serve static files in production
