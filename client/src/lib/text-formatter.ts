@@ -149,9 +149,11 @@ export function formatTextContent(text: string | null | undefined): string {
   formatted = formatted.replace(/([a-zA-Z])-\s+([a-zA-Z])/g, '$1$2');
   
   // Format footnote numbers for English text BEFORE any other processing
-  // Handle footnotes that appear after punctuation: ". 39 Rashi" becomes ". ^39 Rashi"
-  // Also remove any remaining "- " prefix before the number: ". - 39 Rashi" becomes ". ^39 Rashi"
-  formatted = formatted.replace(/([."\]\)])(\s+)(-\s+)?(\d{1,2})(\s+)/g, '$1$2<sup style="font-size: 0.65em; font-weight: normal;">$4</sup>$5');
+  // Match standalone numbers or numbers after punctuation/spaces
+  // This catches: ". 39 ", " 39 ", "(39)", etc.
+  formatted = formatted.replace(/(\s|^|[."\]\()>])(\d{1,2})(\s|[.,;:!?\)\]]|$)/g, (_match, before, num, after) => {
+    return `${before}<sup style="font-size: 0.65em; font-weight: normal;">${num}</sup>${after}`;
+  });
   
   // Convert newlines to HTML breaks FIRST before any other processing
   formatted = formatted.replace(/\n/g, '<br />');
@@ -259,20 +261,14 @@ export function formatTextContent(text: string | null | undefined): string {
 export function formatHalachaContent(text: string | null | undefined): string {
   if (!text) return '';
   
-  // Use the base formatter first
+  // Use the base formatter first (this already handles footnotes)
   let formatted = formatTextContent(text);
   
   // Replace apostrophes with spaces
   formatted = formatted.replace(/'/g, ' ');
   
-  // Format footnote numbers (1-99) to be smaller
-  formatted = formatted.replace(/\b(\d{1,2})\b/g, (match, num) => {
-    const number = parseInt(num);
-    if (number >= 1 && number <= 99) {
-      return `<sup style="font-size: 0.75em">${num}</sup>`;
-    }
-    return match;
-  });
+  // Don't format footnotes again - formatTextContent already handled them
+  // This prevents duplicate processing and inconsistent sizing
   
   return sanitizeHTML(formatted);
 }
