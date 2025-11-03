@@ -195,8 +195,8 @@ export function formatTextContent(text: string | null | undefined): string {
   // Process {{ }} for grey boxes (English content)
   // This handles {{text}} for regular grey box content
   formatted = formatted.replace(/\{\{([^}]+?)\}\}/g, (_match, content) => {
-    // This is regular grey box content for English text - don't set font, let it inherit
-    return `<div style="background-color: #f3f4f6; padding: 12px; border-radius: 8px; margin: 8px 0; border-left: 4px solid #d1d5db;">${content}</div>`;
+    // This is regular grey box content for English text - add class to identify English content
+    return `<div class="grey-box-english" style="background-color: #f3f4f6; padding: 12px; border-radius: 8px; margin: 8px 0; border-left: 4px solid #d1d5db;">${content}</div>`;
   });
   
   // First, handle {{grey}} blocks before character-by-character processing

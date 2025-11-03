@@ -169,9 +169,9 @@ button,
   font-family: 'VC Koren', serif !important;
 }
 
-/* Override for grey boxes with English content - use Platypi for Latin characters */
-.vc-koren-hebrew div[style*="background-color: #f3f4f6"],
-.koren-siddur-hebrew div[style*="background-color: #f3f4f6"] {
+/* Override ONLY for grey boxes marked as English content - use Platypi */
+.vc-koren-hebrew .grey-box-english,
+.koren-siddur-hebrew .grey-box-english {
   font-family: 'Platypi', serif !important;
 }
 
@@ -230,10 +230,7 @@ button,
   font-family: 'VC Koren', serif !important;
 }
 
-/* Override for grey boxes with English content - use Platypi for Latin characters */
-.koren-siddur-hebrew div[style*="background-color: #f3f4f6"] {
-  font-family: 'Platypi', serif !important;
-}
+/* Override for English grey boxes already covered above */
 
 /* Removed old English text styling */
 
