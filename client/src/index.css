@@ -169,10 +169,20 @@ button,
   font-family: 'VC Koren', serif !important;
 }
 
-/* Override ONLY for grey boxes marked as English content - use Platypi */
+/* Grey boxes with mixed English/Hebrew - use font stack to let browser choose by character */
 .vc-koren-hebrew .grey-box-english,
-.koren-siddur-hebrew .grey-box-english {
-  font-family: 'Platypi', serif !important;
+.koren-siddur-hebrew .grey-box-english,
+.vc-koren-hebrew div[style*="background-color: #f3f4f6"],
+.koren-siddur-hebrew div[style*="background-color: #f3f4f6"] {
+  font-family: 'Platypi', 'VC Koren', serif !important;
+}
+
+/* Ensure children of grey boxes also use the font stack for mixed content */
+.vc-koren-hebrew .grey-box-english *,
+.koren-siddur-hebrew .grey-box-english *,
+.vc-koren-hebrew div[style*="background-color: #f3f4f6"] *,
+.koren-siddur-hebrew div[style*="background-color: #f3f4f6"] * {
+  font-family: 'Platypi', 'VC Koren', serif !important;
 }
 
 /* Bold Hebrew text using VC Koren Bold */
@@ -230,7 +240,7 @@ button,
   font-family: 'VC Koren', serif !important;
 }
 
-/* Override for English grey boxes already covered above */
+/* Grey boxes use font stack defined above */
 
 /* Removed old English text styling */
 
