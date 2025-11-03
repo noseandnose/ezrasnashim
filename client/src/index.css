@@ -162,6 +162,13 @@ button,
   white-space: pre-line !important; /* Preserve line breaks from database */
 }
 
+/* Ensure ALL children of Hebrew text containers use the Hebrew font */
+.vc-koren-hebrew *,
+.vc-koren-hebrew *::before,
+.vc-koren-hebrew *::after {
+  font-family: 'Koren Siddur', 'Arno Koren', serif !important;
+}
+
 /* Bold Hebrew text using increased font size instead of font-weight */
 .vc-koren-hebrew strong,
 .vc-koren-hebrew b,
@@ -208,6 +215,13 @@ button,
   text-rendering: optimizeLegibility !important;
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Ensure ALL children of koren-siddur-hebrew containers use the Hebrew font */
+.koren-siddur-hebrew *,
+.koren-siddur-hebrew *::before,
+.koren-siddur-hebrew *::after {
+  font-family: 'Koren Siddur', 'Arno Koren', serif !important;
 }
 
 /* Removed old English text styling */
