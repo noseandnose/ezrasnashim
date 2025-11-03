@@ -56,12 +56,20 @@
     <style>
       /* Critical font definitions - using optional to prevent layout shift */
       @font-face {
-        font-family: 'Arno Koren';
-        src: url('/fonts/ArnoKoren.otf') format('opentype');
-        font-weight: normal;
+        font-family: 'VC Koren';
+        src: url('/fonts/VC-Koren-Light.otf') format('opentype');
+        font-weight: 300;
         font-style: normal;
         font-display: optional;
-        unicode-range: U+0020-007F, U+00A0-00FF, U+0590-05FF, U+FB1D-FB4F;
+        unicode-range: U+0590-05FF, U+FB1D-FB4F;
+      }
+      @font-face {
+        font-family: 'VC Koren';
+        src: url('/fonts/VC-Koren-Bold.otf') format('opentype');
+        font-weight: 700;
+        font-style: normal;
+        font-display: optional;
+        unicode-range: U+0590-05FF, U+FB1D-FB4F;
       }
       
       /* Prevent layout shift - set stable defaults before React loads */
@@ -105,7 +113,7 @@
       }
       
       .font-hebrew {
-        font-family: 'Arno Koren', serif;
+        font-family: 'VC Koren', serif;
       }
       
       /* Stabilize text sizes */

@@ -145,10 +145,10 @@ button,
 /* Font-face declarations moved to index.html for better loading performance */
 /* Using font-display: optional to prevent FOUC and layout shift */
 
-/* Hebrew prayer text - let browser handle font fallback automatically */
+/* Hebrew prayer text - VC Koren Light by default */
 .vc-koren-hebrew {
-  font-family: 'Arno Koren', serif !important;
-  font-weight: normal !important;
+  font-family: 'VC Koren', serif !important;
+  font-weight: 300 !important;
   font-style: normal !important;
   color: #000000 !important;
   line-height: 1.8 !important;
@@ -166,15 +166,15 @@ button,
 .vc-koren-hebrew *,
 .vc-koren-hebrew *::before,
 .vc-koren-hebrew *::after {
-  font-family: 'Arno Koren', serif !important;
+  font-family: 'VC Koren', serif !important;
 }
 
-/* Bold Hebrew text using increased font size instead of font-weight */
+/* Bold Hebrew text using VC Koren Bold */
 .vc-koren-hebrew strong,
 .vc-koren-hebrew b,
 .vc-koren-hebrew-bold {
-  font-family: 'Arno Koren', serif !important;
-  font-weight: normal !important;
+  font-family: 'VC Koren', serif !important;
+  font-weight: 700 !important;
   font-style: normal !important;
   color: #000000 !important;
   text-align: right !important;
@@ -184,7 +184,7 @@ button,
 
 /* English prayer text */
 .koren-siddur-english {
-  font-family: 'Arno Koren', serif !important;
+  font-family: 'Platypi', serif !important;
   font-weight: normal !important;
   font-style: normal !important;
   line-height: 1.6 !important;
@@ -201,10 +201,10 @@ button,
   overflow-x: hidden !important; /* Hide any horizontal overflow */
 }
 
-/* Update old class to use Arno Koren font */
+/* Update old class to use VC Koren font */
 .koren-siddur-hebrew {
-  font-family: 'Arno Koren', serif !important;
-  font-weight: normal !important;
+  font-family: 'VC Koren', serif !important;
+  font-weight: 300 !important;
   font-style: normal !important;
   color: #000000 !important;
   line-height: 1.8 !important;
@@ -221,7 +221,7 @@ button,
 .koren-siddur-hebrew *,
 .koren-siddur-hebrew *::before,
 .koren-siddur-hebrew *::after {
-  font-family: 'Arno Koren', serif !important;
+  font-family: 'VC Koren', serif !important;
 }
 
 /* Removed old English text styling */
@@ -277,7 +277,7 @@ button,
   text-align: center !important;
 }
 
-/* Enhanced Hebrew font rendering for Arno Koren */
+/* Enhanced Hebrew font rendering for VC Koren */
 .vc-koren-hebrew,
 .koren-siddur-hebrew {
   font-variant-ligatures: normal !important;
@@ -1003,9 +1003,10 @@ html, body, #root {
   border-radius: 2px;
 }
 
-/* Font classes for prayers - using Arno Koren for Hebrew */
+/* Font classes for prayers - using VC Koren for Hebrew */
 .font-hebrew {
-  font-family: "Arno Koren", serif;
+  font-family: "VC Koren", serif;
+  font-weight: 300;
   direction: rtl;
 }
 
@@ -1013,18 +1014,18 @@ html, body, #root {
   font-family: Platypi, serif;
 }
 
-/* Hebrew font class - updated to use Arno Koren */
+/* Hebrew font class - updated to use VC Koren Light */
 .heebo-regular {
-  font-family: "Arno Koren", serif;
-  font-weight: 400;
+  font-family: "VC Koren", serif;
+  font-weight: 300;
   font-style: normal;
   direction: rtl;
 }
 
-/* Bold Hebrew font for modern display */
+/* Bold Hebrew font - using VC Koren Bold */
 .secular-one-bold {
-  font-family: "Arno Koren", serif;
-  font-weight: 700 !important; /* Force bold weight */
+  font-family: "VC Koren", serif;
+  font-weight: 700 !important; /* VC Koren Bold */
   direction: rtl;
   font-style: normal;
 }

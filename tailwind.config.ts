@@ -9,7 +9,7 @@ export default {
         sans: ['Platypi', 'serif'],
         serif: ['Platypi', 'serif'],
         platypi: ['Platypi', 'serif'],
-        hebrew: ['Arno Koren', 'serif'],
+        hebrew: ['VC Koren', 'serif'],
       },
       borderRadius: {
         lg: "var(--radius)",

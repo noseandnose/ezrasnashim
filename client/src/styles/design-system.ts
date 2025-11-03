@@ -48,8 +48,8 @@ export const DesignSystem = {
     // Font Families
     serif: 'Platypi, serif',   // Headers and elegant text
     sans: 'Platypi, serif', // Body text and UI elements
-    hebrew: '"Arno Koren", serif',     // Hebrew text
-    hebrewRegular: '"Arno Koren", serif', // Hebrew text (regular weight)
+    hebrew: '"VC Koren", serif',     // Hebrew text (Light weight 300)
+    hebrewRegular: '"VC Koren", serif', // Hebrew text (Light weight 300)
     english: 'Platypi, serif', // English text in Hebrew contexts
     
     // Font Weights
@@ -174,8 +174,8 @@ export const DesignSystem = {
   // Prayer-specific styling
   prayers: {
     hebrew: {
-      fontFamily: '"Arno Koren", serif',
-      fontWeight: 'normal',
+      fontFamily: '"VC Koren", serif',
+      fontWeight: '300',
       direction: 'rtl',
       textAlign: 'right',
       lineHeight: '1.6',
