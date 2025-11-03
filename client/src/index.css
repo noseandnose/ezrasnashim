@@ -52,7 +52,7 @@
   --sar: var(--safe-area-right);
   
   /* Default font for the app - Platypi for English text */
-  font-family: Platypi, Georgia, Cambria, serif;
+  font-family: Platypi, serif;
 }
 
 /* PWA/Standalone mode: Remove browser UI offset */
@@ -109,7 +109,7 @@ body {
   will-change: auto; /* Reset will-change to prevent memory issues */
   
   /* Set default font immediately to prevent font swap */
-  font-family: Platypi, Georgia, Cambria, serif;
+  font-family: Platypi, serif;
   font-size: 16px;
   line-height: 1.5;
 }
@@ -177,7 +177,7 @@ button,
 
 /* English prayer text */
 .koren-siddur-english {
-  font-family: 'Arno Koren', 'Playfair Display', Georgia, serif !important;
+  font-family: 'Arno Koren', serif !important;
   font-weight: normal !important;
   font-style: normal !important;
   line-height: 1.6 !important;
@@ -595,7 +595,7 @@ button, .btn, [role="button"] {
 
 /* Base text styling - ensure Platypi is used for all English text */
 *, *::before, *::after {
-  font-family: Platypi, Georgia, Cambria, serif;
+  font-family: Platypi, serif;
 }
 
 /* Admin Interface Utility Classes */
@@ -710,7 +710,7 @@ button, .btn, [role="button"] {
 
   body {
     @apply font-sans antialiased bg-background text-foreground overflow-hidden;
-    font-family: Platypi, Georgia, Cambria, serif;
+    font-family: Platypi, serif;
     background: linear-gradient(135deg, hsl(45, 70%, 98%) 0%, hsl(45, 70%, 96%) 100%);
     color: hsl(220, 8%, 35%);
   }
@@ -784,11 +784,11 @@ button, .btn, [role="button"] {
 }
 
 .font-serif {
-  font-family: 'Playfair Display', serif !important;
+  font-family: Platypi, serif !important;
 }
 
 .font-sans {
-  font-family: Platypi, Georgia, Cambria, serif !important;
+  font-family: Platypi, serif !important;
 }
 
 /* Quiet Joy Gradients */
@@ -989,27 +989,27 @@ html, body, #root {
   border-radius: 2px;
 }
 
-/* Font classes for prayers - using Noto Sans Hebrew for better Unicode support */
+/* Font classes for prayers - using Arno Koren for Hebrew */
 .font-hebrew {
-  font-family: "Noto Sans Hebrew", "Frank Ruhl Libre", "Arial Hebrew", sans-serif;
+  font-family: "Arno Koren", serif;
   direction: rtl;
 }
 
 .font-english {
-  font-family: Platypi, Georgia, Cambria, serif;
+  font-family: Platypi, serif;
 }
 
-/* Hebrew font class - updated to use Noto Sans Hebrew for better Unicode support */
+/* Hebrew font class - updated to use Arno Koren */
 .heebo-regular {
-  font-family: "Noto Sans Hebrew", "Frank Ruhl Libre", "Arial Hebrew", sans-serif;
+  font-family: "Arno Koren", serif;
   font-weight: 400;
   font-style: normal;
   direction: rtl;
 }
 
-/* Bold Hebrew font for modern display with proper fallbacks */
+/* Bold Hebrew font for modern display */
 .secular-one-bold {
-  font-family: "Noto Sans Hebrew", "Frank Ruhl Libre", "Arial Hebrew", sans-serif;
+  font-family: "Arno Koren", serif;
   font-weight: 700 !important; /* Force bold weight */
   direction: rtl;
   font-style: normal;
