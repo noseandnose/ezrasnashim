@@ -15,6 +15,28 @@ export function sanitizeHTML(htmlContent: string): string {
 }
 
 /**
+ * Converts URLs in plain text to clickable links
+ */
+export function linkifyText(text: string): string {
+  if (!text) return '';
+  
+  // URL regex pattern that matches http, https, and www URLs
+  const urlPattern = /(https?:\/\/[^\s]+)|(www\.[^\s]+)/gi;
+  
+  // Replace URLs with anchor tags
+  const linkedText = text.replace(urlPattern, (url) => {
+    // Add https:// to www links
+    const href = url.startsWith('www.') ? `https://${url}` : url;
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color: #E91E63; text-decoration: underline;">${url}</a>`;
+  });
+  
+  // Replace newlines with <br> tags
+  const formatted = linkedText.replace(/\n/g, '<br />');
+  
+  return sanitizeHTML(formatted);
+}
+
+/**
  * Aggressively cleans Hebrew text to eliminate all display issues while preserving legitimate Hebrew content
  */
 function cleanHebrewText(text: string): string {
