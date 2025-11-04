@@ -16,13 +16,15 @@ export function useVersionCheck() {
   const [updateInfo, setUpdateInfo] = useState<VersionInfo | null>(null);
   const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
   
-  // Get initial version on app load
+  // Get initial version on app load - ONLY on very first mount
+  // Never refetch during session to prevent reload-on-resume behavior
   const { data: initialVersion } = useQuery<VersionInfo>({
     queryKey: ['/api/version'],
     refetchOnWindowFocus: false,
-    refetchOnMount: true,
+    refetchOnMount: false, // NEVER refetch - prevents version check when app resumes
     staleTime: Infinity, // Don't refetch automatically
     retry: false, // Don't retry failed version checks
+    enabled: !currentVersion, // Only fetch if we don't have a version yet
   });
   
   // Store initial version
@@ -62,60 +64,10 @@ export function useVersionCheck() {
     }
   }, [currentVersion]);
   
-  // Periodic version checking - DISABLED to prevent interrupting users
-  // Version updates will happen naturally when user closes/reopens the app
-  useEffect(() => {
-    // Only check for critical updates in production, and very infrequently
-    // Never interrupt the user's current session
-    const checkForUpdates = async () => {
-      if (!currentVersion) return;
-      
-      try {
-        // Use the same API base URL as the rest of the app
-        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const apiUrl = `${baseUrl}/api/version?t=${Date.now()}`;
-        const response = await fetch(apiUrl);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const latestVersion: VersionInfo = await response.json();
-        
-        // Compare timestamps to detect updates
-        const timeDifference = latestVersion.timestamp - currentVersion.timestamp;
-        const minimumUpdateThreshold = 5 * 60 * 1000; // 5 minutes
-        
-        if (timeDifference > minimumUpdateThreshold) {
-          // Only show prompt for CRITICAL updates, otherwise just store silently
-          if (latestVersion.isCritical) {
-            console.log('⚠️ Critical update available');
-            setUpdateInfo(latestVersion);
-            setShowUpdatePrompt(true);
-          } else {
-            // Silently store update info, user will get it on next app launch
-            console.log('ℹ️ Update available (will apply on next app launch)');
-          }
-          localStorage.setItem('latest-app-version', JSON.stringify(latestVersion));
-        }
-      } catch (error) {
-        // Silently handle version check failures
-        if (import.meta.env.MODE === 'development') {
-          console.warn('⚠️ Version check failed:', error);
-        }
-      }
-    };
-    
-    // Only check once per session, after 24 hours
-    // This prevents interrupting users mid-session
-    const checkOnce = setTimeout(() => {
-      checkForUpdates();
-    }, 24 * 60 * 60 * 1000); // Check after 24 hours
-    
-    return () => {
-      clearTimeout(checkOnce);
-    };
-  }, [currentVersion]);
+  // Periodic version checking - COMPLETELY DISABLED
+  // Version checks were causing app freezes and unwanted reloads when resuming from background
+  // Updates will happen naturally via service worker on next full app launch
+  // No version checks during active sessions
   
   const refreshApp = () => {
     console.log('🔄 User requested app refresh...');
