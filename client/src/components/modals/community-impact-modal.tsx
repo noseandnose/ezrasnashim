@@ -1,6 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
 import { useModalStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 
@@ -30,16 +29,10 @@ export function CommunityImpactModal() {
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent className="w-[95vw] max-w-md rounded-3xl p-0 gap-0 max-h-[95vh] overflow-y-auto">
-        <DialogHeader className="flex flex-row items-center justify-between p-4 pb-1">
-          <DialogTitle className="text-lg platypi-bold text-black text-center flex-1 pr-8">
+        <DialogHeader className="p-4 pb-1">
+          <DialogTitle className="text-lg platypi-bold text-black text-center">
             Community Impact
           </DialogTitle>
-          <button
-            onClick={() => closeModal()}
-            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <X size={20} className="text-black" />
-          </button>
         </DialogHeader>
 
         <div className="px-4 pb-4">
@@ -55,14 +48,16 @@ export function CommunityImpactModal() {
             </div>
           ) : impactContent ? (
             <div className="space-y-4">
-              {/* Main Image */}
-              <div className="w-full h-48 rounded-2xl overflow-hidden">
-                <img 
-                  src={impactContent.imageUrl} 
-                  alt={impactContent.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              {/* Main Image - only show if imageUrl exists */}
+              {impactContent.imageUrl && (
+                <div className="w-full h-48 rounded-2xl overflow-hidden">
+                  <img 
+                    src={impactContent.imageUrl} 
+                    alt={impactContent.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
               
               {/* Content */}
               <div className="bg-white rounded-2xl p-4 border border-blush/10">

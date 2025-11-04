@@ -6,10 +6,10 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Platypi', 'Georgia', 'Cambria', 'serif'],
-        serif: ['Playfair Display', 'Georgia', 'Cambria', 'Times New Roman', 'serif'],
-        platypi: ['Platypi', 'Georgia', 'Cambria', 'serif'],
-        hebrew: ['David Libre', 'Heebo', 'Arial Hebrew', 'Arial', 'sans-serif'],
+        sans: ['Platypi', 'serif'],
+        serif: ['Platypi', 'serif'],
+        platypi: ['Platypi', 'serif'],
+        hebrew: ['VC Koren', 'serif'],
       },
       borderRadius: {
         lg: "var(--radius)",

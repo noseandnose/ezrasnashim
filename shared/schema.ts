@@ -62,7 +62,7 @@ export const communityImpact = pgTable("community_impact", {
   untilDate: date("until_date").notNull(), // End date for article availability
   title: text("title").notNull(),
   description: text("description").notNull(),
-  imageUrl: text("image_url").notNull(),
+  imageUrl: text("image_url"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

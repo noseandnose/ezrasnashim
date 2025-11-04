@@ -52,7 +52,7 @@
   --sar: var(--safe-area-right);
   
   /* Default font for the app - Platypi for English text */
-  font-family: Platypi, Georgia, Cambria, serif;
+  font-family: Platypi, serif;
 }
 
 /* PWA/Standalone mode: Remove browser UI offset */
@@ -109,7 +109,7 @@ body {
   will-change: auto; /* Reset will-change to prevent memory issues */
   
   /* Set default font immediately to prevent font swap */
-  font-family: Platypi, Georgia, Cambria, serif;
+  font-family: Platypi, serif;
   font-size: 16px;
   line-height: 1.5;
 }
@@ -145,10 +145,10 @@ button,
 /* Font-face declarations moved to index.html for better loading performance */
 /* Using font-display: optional to prevent FOUC and layout shift */
 
-/* Hebrew prayer text - let browser handle font fallback automatically */
+/* Hebrew prayer text - VC Koren Light by default */
 .vc-koren-hebrew {
-  font-family: 'Koren Siddur', 'Arno Koren', serif !important;
-  font-weight: normal !important;
+  font-family: 'VC Koren', serif !important;
+  font-weight: 300 !important;
   font-style: normal !important;
   color: #000000 !important;
   line-height: 1.8 !important;
@@ -162,12 +162,35 @@ button,
   white-space: pre-line !important; /* Preserve line breaks from database */
 }
 
-/* Bold Hebrew text using increased font size instead of font-weight */
+/* Ensure ALL children of Hebrew text containers use the Hebrew font */
+.vc-koren-hebrew *,
+.vc-koren-hebrew *::before,
+.vc-koren-hebrew *::after {
+  font-family: 'VC Koren', serif !important;
+}
+
+/* Grey boxes with mixed English/Hebrew - prefer VC Koren first for Hebrew characters */
+.vc-koren-hebrew .grey-box-english,
+.koren-siddur-hebrew .grey-box-english,
+.vc-koren-hebrew div[style*="background-color: #f3f4f6"],
+.koren-siddur-hebrew div[style*="background-color: #f3f4f6"] {
+  font-family: 'VC Koren', 'Platypi', serif !important;
+}
+
+/* Ensure children of grey boxes also use the font stack for mixed content */
+.vc-koren-hebrew .grey-box-english *,
+.koren-siddur-hebrew .grey-box-english *,
+.vc-koren-hebrew div[style*="background-color: #f3f4f6"] *,
+.koren-siddur-hebrew div[style*="background-color: #f3f4f6"] * {
+  font-family: 'VC Koren', 'Platypi', serif !important;
+}
+
+/* Bold Hebrew text using VC Koren Bold */
 .vc-koren-hebrew strong,
 .vc-koren-hebrew b,
 .vc-koren-hebrew-bold {
-  font-family: 'Koren Siddur', 'Arno Koren', serif !important;
-  font-weight: normal !important;
+  font-family: 'VC Koren', serif !important;
+  font-weight: 700 !important;
   font-style: normal !important;
   color: #000000 !important;
   text-align: right !important;
@@ -177,7 +200,7 @@ button,
 
 /* English prayer text */
 .koren-siddur-english {
-  font-family: 'Arno Koren', 'Playfair Display', Georgia, serif !important;
+  font-family: 'Platypi', serif !important;
   font-weight: normal !important;
   font-style: normal !important;
   line-height: 1.6 !important;
@@ -194,10 +217,10 @@ button,
   overflow-x: hidden !important; /* Hide any horizontal overflow */
 }
 
-/* Update old class to use VC Koren Light font (TEST) */
+/* Update old class to use VC Koren font */
 .koren-siddur-hebrew {
-  font-family: 'Koren Siddur', 'Arno Koren', serif !important;
-  font-weight: normal !important;
+  font-family: 'VC Koren', serif !important;
+  font-weight: 300 !important;
   font-style: normal !important;
   color: #000000 !important;
   line-height: 1.8 !important;
@@ -209,6 +232,15 @@ button,
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
 }
+
+/* Ensure ALL children of koren-siddur-hebrew containers use the Hebrew font */
+.koren-siddur-hebrew *,
+.koren-siddur-hebrew *::before,
+.koren-siddur-hebrew *::after {
+  font-family: 'VC Koren', serif !important;
+}
+
+/* Grey boxes use font stack defined above */
 
 /* Removed old English text styling */
 
@@ -263,7 +295,7 @@ button,
   text-align: center !important;
 }
 
-/* Enhanced Hebrew font rendering for Koren Siddur */
+/* Enhanced Hebrew font rendering for VC Koren */
 .vc-koren-hebrew,
 .koren-siddur-hebrew {
   font-variant-ligatures: normal !important;
@@ -595,7 +627,7 @@ button, .btn, [role="button"] {
 
 /* Base text styling - ensure Platypi is used for all English text */
 *, *::before, *::after {
-  font-family: Platypi, Georgia, Cambria, serif;
+  font-family: Platypi, serif;
 }
 
 /* Admin Interface Utility Classes */
@@ -710,8 +742,8 @@ button, .btn, [role="button"] {
 
   body {
     @apply font-sans antialiased bg-background text-foreground overflow-hidden;
-    font-family: Platypi, Georgia, Cambria, serif;
-    background: linear-gradient(135deg, hsl(45, 70%, 98%) 0%, hsl(45, 70%, 96%) 100%);
+    font-family: Platypi, serif;
+    background: #ffffff;
     color: hsl(220, 8%, 35%);
   }
 }
@@ -784,11 +816,11 @@ button, .btn, [role="button"] {
 }
 
 .font-serif {
-  font-family: 'Playfair Display', serif !important;
+  font-family: Platypi, serif !important;
 }
 
 .font-sans {
-  font-family: Platypi, Georgia, Cambria, serif !important;
+  font-family: Platypi, serif !important;
 }
 
 /* Quiet Joy Gradients */
@@ -989,28 +1021,29 @@ html, body, #root {
   border-radius: 2px;
 }
 
-/* Font classes for prayers - using Noto Sans Hebrew for better Unicode support */
+/* Font classes for prayers - using VC Koren for Hebrew */
 .font-hebrew {
-  font-family: "Noto Sans Hebrew", "Frank Ruhl Libre", "Arial Hebrew", sans-serif;
+  font-family: "VC Koren", serif;
+  font-weight: 300;
   direction: rtl;
 }
 
 .font-english {
-  font-family: Platypi, Georgia, Cambria, serif;
+  font-family: Platypi, serif;
 }
 
-/* Hebrew font class - updated to use Noto Sans Hebrew for better Unicode support */
+/* Hebrew font class - updated to use VC Koren Light */
 .heebo-regular {
-  font-family: "Noto Sans Hebrew", "Frank Ruhl Libre", "Arial Hebrew", sans-serif;
-  font-weight: 400;
+  font-family: "VC Koren", serif;
+  font-weight: 300;
   font-style: normal;
   direction: rtl;
 }
 
-/* Bold Hebrew font for modern display with proper fallbacks */
+/* Bold Hebrew font - using VC Koren Bold */
 .secular-one-bold {
-  font-family: "Noto Sans Hebrew", "Frank Ruhl Libre", "Arial Hebrew", sans-serif;
-  font-weight: 700 !important; /* Force bold weight */
+  font-family: "VC Koren", serif;
+  font-weight: 700 !important; /* VC Koren Bold */
   direction: rtl;
   font-style: normal;
 }

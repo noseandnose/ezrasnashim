@@ -46,11 +46,11 @@ export const DesignSystem = {
   // Typography
   fonts: {
     // Font Families
-    serif: '"Playfair Display", serif',   // Headers and elegant text
-    sans: 'Platypi, Georgia, Cambria, serif', // Body text and UI elements
-    hebrew: '"Secular One", cursive',     // Hebrew text (bold weight)
-    hebrewRegular: '"Heebo", sans-serif', // Hebrew text (regular weight)
-    english: 'Platypi, Georgia, Cambria, serif', // English text in Hebrew contexts
+    serif: 'Platypi, serif',   // Headers and elegant text
+    sans: 'Platypi, serif', // Body text and UI elements
+    hebrew: '"VC Koren", serif',     // Hebrew text (Light weight 300)
+    hebrewRegular: '"VC Koren", serif', // Hebrew text (Light weight 300)
+    english: 'Platypi, serif', // English text in Hebrew contexts
     
     // Font Weights
     weights: {
@@ -174,15 +174,15 @@ export const DesignSystem = {
   // Prayer-specific styling
   prayers: {
     hebrew: {
-      fontFamily: '"Secular One", cursive',
-      fontWeight: 'bold',
+      fontFamily: '"VC Koren", serif',
+      fontWeight: '300',
       direction: 'rtl',
       textAlign: 'right',
       lineHeight: '1.6',
     },
     
     english: {
-      fontFamily: 'Platypi, Georgia, Cambria, serif',
+      fontFamily: 'Platypi, serif',
       fontWeight: 'normal',
       direction: 'ltr',
       textAlign: 'left',

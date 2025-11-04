@@ -16,13 +16,15 @@ export function useVersionCheck() {
   const [updateInfo, setUpdateInfo] = useState<VersionInfo | null>(null);
   const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
   
-  // Get initial version on app load
+  // Get initial version on app load - ONLY on very first mount
+  // Never refetch during session to prevent reload-on-resume behavior
   const { data: initialVersion } = useQuery<VersionInfo>({
     queryKey: ['/api/version'],
     refetchOnWindowFocus: false,
-    refetchOnMount: true,
+    refetchOnMount: false, // NEVER refetch - prevents version check when app resumes
     staleTime: Infinity, // Don't refetch automatically
     retry: false, // Don't retry failed version checks
+    enabled: !currentVersion, // Only fetch if we don't have a version yet
   });
   
   // Store initial version
@@ -62,58 +64,54 @@ export function useVersionCheck() {
     }
   }, [currentVersion]);
   
-  // Periodic version checking - DISABLED to prevent interrupting users
-  // Version updates will happen naturally when user closes/reopens the app
+  // Smart version checking on window focus with throttling
+  // Checks for updates when user returns to app, but only once every 5 minutes
+  // Shows update prompt only when there's a real update available
+  // Never auto-reloads - always requires user click
+  const lastCheckRef = useRef<number>(0);
+  
   useEffect(() => {
-    // Only check for critical updates in production, and very infrequently
-    // Never interrupt the user's current session
     const checkForUpdates = async () => {
       if (!currentVersion) return;
       
+      // Throttle checks to once every 5 minutes
+      const now = Date.now();
+      const fiveMinutes = 5 * 60 * 1000;
+      if (now - lastCheckRef.current < fiveMinutes) {
+        return;
+      }
+      
+      lastCheckRef.current = now;
+      
       try {
-        // Use the same API base URL as the rest of the app
-        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const apiUrl = `${baseUrl}/api/version?t=${Date.now()}`;
-        const response = await fetch(apiUrl);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        const response = await fetch(`/api/version?t=${now}`);
+        if (!response.ok) return;
         
         const latestVersion: VersionInfo = await response.json();
         
-        // Compare timestamps to detect updates
-        const timeDifference = latestVersion.timestamp - currentVersion.timestamp;
-        const minimumUpdateThreshold = 5 * 60 * 1000; // 5 minutes
-        
-        if (timeDifference > minimumUpdateThreshold) {
-          // Only show prompt for CRITICAL updates, otherwise just store silently
-          if (latestVersion.isCritical) {
-            console.log('⚠️ Critical update available');
-            setUpdateInfo(latestVersion);
-            setShowUpdatePrompt(true);
-          } else {
-            // Silently store update info, user will get it on next app launch
-            console.log('ℹ️ Update available (will apply on next app launch)');
-          }
+        // Detect any new version by timestamp increase
+        // Accept ANY timestamp difference to catch quick hotfixes and critical updates
+        if (latestVersion.timestamp > currentVersion.timestamp) {
+          console.log('📦 Update available:', latestVersion.version);
+          setUpdateInfo(latestVersion);
+          setShowUpdatePrompt(true);
           localStorage.setItem('latest-app-version', JSON.stringify(latestVersion));
         }
       } catch (error) {
-        // Silently handle version check failures
-        if (import.meta.env.MODE === 'development') {
-          console.warn('⚠️ Version check failed:', error);
-        }
+        // Silently handle version check failures - don't interrupt user
+        console.debug('Version check skipped:', error);
       }
     };
     
-    // Only check once per session, after 24 hours
-    // This prevents interrupting users mid-session
-    const checkOnce = setTimeout(() => {
+    // Check on window focus (when user returns to app)
+    const handleFocus = () => {
       checkForUpdates();
-    }, 24 * 60 * 60 * 1000); // Check after 24 hours
+    };
+    
+    window.addEventListener('focus', handleFocus);
     
     return () => {
-      clearTimeout(checkOnce);
+      window.removeEventListener('focus', handleFocus);
     };
   }, [currentVersion]);
   

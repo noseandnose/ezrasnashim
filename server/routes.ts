@@ -2822,13 +2822,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const paymentIntentId = session.payment_intent;
           console.log('Webhook: Payment intent from session:', paymentIntentId);
           
+          // CRITICAL: Skip if no valid payment intent ID
+          if (!paymentIntentId || typeof paymentIntentId !== 'string' || !paymentIntentId.startsWith('pi_')) {
+            console.log(`Webhook: Invalid or missing payment intent ID in session ${session.id} - skipping to prevent duplicate counting`);
+            break;
+          }
+          
           // BACKUP RECONCILIATION: Check if already processed by frontend
-          if (paymentIntentId) {
-            const existingSessionAct = await storage.getActByPaymentIntentId(paymentIntentId as string);
-            if (existingSessionAct) {
-              console.log(`Webhook: Session ${session.id} already processed by frontend - skipping`);
-              break; // Already handled by frontend confirmation
-            }
+          const existingSessionAct = await storage.getActByPaymentIntentId(paymentIntentId as string);
+          if (existingSessionAct) {
+            console.log(`Webhook: Session ${session.id} already processed by frontend - skipping`);
+            break; // Already handled by frontend confirmation
           }
           
           console.log(`Webhook: Processing session ${session.id} as backup reconciliation`);
@@ -3775,7 +3779,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           <head>
             <title>Ezras Nashim API Server</title>
             <style>
-              body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f5f5f5; }
+              body { font-family: Platypi, serif; text-align: center; padding: 50px; background: #f5f5f5; }
               .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
               h1 { color: #333; margin-bottom: 20px; }
               p { color: #666; line-height: 1.6; margin-bottom: 15px; }
@@ -3838,7 +3842,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       timestamp: versionTimestamp,
       version: APP_VERSION,
       buildDate: new Date(versionTimestamp).toISOString(),
-      serverUptime: Date.now() - SERVER_START_TIME
+      serverUptime: Date.now() - SERVER_START_TIME,
+      // Support for critical updates - set these env vars when deploying urgent fixes
+      isCritical: process.env.CRITICAL_UPDATE === 'true',
+      releaseNotes: process.env.RELEASE_NOTES || undefined
     };
     res.json(version);
   });

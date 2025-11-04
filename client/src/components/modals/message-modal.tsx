@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import type { Message } from "@shared/schema";
+import { linkifyText } from "@/lib/text-formatter";
 
 interface MessageModalProps {
   isOpen: boolean;
@@ -16,6 +17,8 @@ export default function MessageModal({ isOpen, onClose, date }: MessageModalProp
   const { data: message, isLoading } = useQuery<Message>({
     queryKey: [`/api/messages/${date}`],
     enabled: isOpen && !!date,
+    refetchOnWindowFocus: true, // Refetch when user returns to check for updates
+    staleTime: 2 * 60 * 1000, // Consider data stale after 2 minutes
   });
 
   return (
@@ -38,9 +41,10 @@ export default function MessageModal({ isOpen, onClose, date }: MessageModalProp
           ) : message ? (
             <div className="bg-white rounded-2xl p-6 border border-blush/10">
               <div className="space-y-4">
-                <p className="text-warm-gray whitespace-pre-wrap platypi-medium leading-relaxed">
-                  {message.message}
-                </p>
+                <div 
+                  className="text-warm-gray platypi-medium leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: linkifyText(message.message) }}
+                />
                 <p className="text-xs text-warm-gray/60 text-right">
                   {format(new Date(date), "MMMM d, yyyy")}
                 </p>

@@ -44,9 +44,12 @@ export default function AppHeader() {
   const today = getLocalDateString();
   
   // Check if there's a message for today
+  // Refetch on window focus to catch new messages posted mid-day
   const { data: todayMessage } = useQuery({
     queryKey: [`/api/messages/${today}`],
     retry: false,
+    refetchOnWindowFocus: true, // Check for new messages when user returns to app
+    staleTime: 2 * 60 * 1000, // Consider data stale after 2 minutes
   });
   
   // Check if user has read today's message

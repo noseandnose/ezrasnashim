@@ -18,7 +18,7 @@ const cacheConfig: Record<string, number> = {
   '/api/hebrew-date': 24 * 60 * 60 * 1000, // 24 hours for hebrew date
   '/api/tehillim/info': 24 * 60 * 60 * 1000, // 24 hours for tehillim info
   '/api/torah/halacha': 60 * 60 * 1000, // 1 hour for halacha
-  '/api/messages': 60 * 60 * 1000, // 1 hour for messages
+  '/api/messages': 2 * 60 * 1000, // 2 minutes for messages - check frequently for new posts
   '/api/campaigns': 30 * 60 * 1000, // 30 minutes for campaigns
   '/api/table': 60 * 60 * 1000, // 1 hour for table data
 };
