@@ -49,10 +49,14 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(APP_SHELL_CACHE)
       .then(cache => cache.addAll(APP_SHELL_RESOURCES.map(url => new Request(url, { cache: 'reload' }))))
-      .then(() => self.skipWaiting())
+      .then(() => {
+        console.log('[SW] App shell cached successfully');
+        // Don't call skipWaiting here - let the client control when to activate
+        // This prevents blank screens from activating before all assets are ready
+      })
       .catch(err => {
         console.error('[SW] Failed to cache app shell:', err);
-        return self.skipWaiting();
+        // Continue anyway - the service worker can still function
       })
   );
 });
@@ -60,11 +64,49 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     Promise.all([
-      // Delete old version caches only (index.html is never cached, no need to clean)
+      // Delete VERY old version caches, but keep the immediate previous version
+      // This prevents blank screens by ensuring old assets remain available
+      // while new assets are fetched and cached on-demand
       caches.keys().then(cacheNames => {
+        // Extract unique version suffixes (e.g., v1.0.0-1234567890)
+        const versionPattern = /(v[\d.]+-\d+)$/;
+        const uniqueVersions = new Set(
+          cacheNames
+            .map(name => {
+              const match = name.match(versionPattern);
+              return match ? match[1] : null;
+            })
+            .filter(Boolean)
+        );
+        
+        // Sort versions by timestamp (extract numeric suffix at end)
+        const sortedVersions = Array.from(uniqueVersions)
+          .map(version => {
+            // Extract the last numeric part (timestamp) from version string
+            const timestampMatch = version.match(/(\d+)$/);
+            return {
+              version,
+              timestamp: timestampMatch ? parseInt(timestampMatch[1]) : 0
+            };
+          })
+          .sort((a, b) => b.timestamp - a.timestamp);
+        
+        // Keep ALL caches from the most recent 2 versions
+        const versionsToKeep = new Set(
+          sortedVersions.slice(0, 2).map(v => v.version)
+        );
+        
         return Promise.all(
           cacheNames
-            .filter(cacheName => !cacheName.endsWith(CACHE_VERSION))
+            .filter(cacheName => {
+              const match = cacheName.match(versionPattern);
+              const version = match ? match[1] : null;
+              const shouldDelete = version && !versionsToKeep.has(version);
+              if (shouldDelete) {
+                console.log('[SW] Deleting old cache:', cacheName);
+              }
+              return shouldDelete;
+            })
             .map(cacheName => caches.delete(cacheName))
         );
       }),
@@ -483,6 +525,7 @@ self.addEventListener('sync', (event) => {
 // Handle messages from clients (for forced updates)
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('[SW] Received SKIP_WAITING message, activating new service worker');
     self.skipWaiting();
   }
 });

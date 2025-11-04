@@ -127,14 +127,20 @@ async function registerServiceWorker() {
         updateViaCache: 'none'
       });
       
-      // Handle updates
+      // Handle updates - let new service worker activate naturally without forcing reload
+      // This prevents blank screens caused by reloading before assets are cached
       registration.addEventListener('updatefound', () => {
         const newWorker = registration.installing;
         if (newWorker) {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('[SW] New service worker installed and ready');
+              console.log('[SW] Update will take effect on next app launch (no forced reload)');
+              
+              // Allow the new service worker to activate when ready
+              // It will take control on next navigation or page load
+              // This prevents blank screens from forced reloads before caching completes
               newWorker.postMessage({ type: 'SKIP_WAITING' });
-              setTimeout(() => window.location.reload(), 1000);
             }
           });
         }
