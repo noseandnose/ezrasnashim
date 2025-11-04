@@ -26,10 +26,10 @@ export default function SponsorshipBar({ className = "" }: SponsorshipBarProps) 
       if (!response.ok) return null;
       return response.json();
     },
-    staleTime: 2 * 60 * 1000, // Cache for 2 minutes (matches backend cache)
-    gcTime: 2 * 60 * 60 * 1000, // Keep in cache for 2 hours
+    staleTime: 6 * 60 * 60 * 1000, // Cache for 6 hours (sponsors set once per day)
+    gcTime: 12 * 60 * 60 * 1000, // Keep in cache for 12 hours
     refetchOnMount: false,
-    refetchOnWindowFocus: true // Refetch when user returns to page
+    refetchOnWindowFocus: true // Refetch when user returns to page (for mid-day sponsor updates)
   });
 
   if (isLoading || !sponsor) {
