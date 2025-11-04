@@ -52,10 +52,11 @@ export function applyFootnoteSuperscripts(text: string, footnoteNumbers: Set<str
   if (footnoteNumbers.size === 0) return text;
   
   // Build a regex pattern that matches only the specific footnote numbers
-  // Must be surrounded by non-digit boundaries to avoid matching parts of larger numbers
+  // Footnotes appear after punctuation or words, NOT at the start of lines
+  // Use [ \t] instead of \s to exclude newlines - prevents matching ingredient quantities
   const numbersPattern = Array.from(footnoteNumbers).join('|');
   const regex = new RegExp(
-    `(\\s|^|[."\\'\\]\\()>])(${numbersPattern})(\\s|[.,;:!?\\)\\]]|$)`,
+    `([."\\'\\]\\()>][ \t]*|[ \t])(${numbersPattern})([ \t]|[.,;:!?\\)\\]]|$)`,
     'g'
   );
   
