@@ -146,10 +146,10 @@ async function registerServiceWorker() {
         }
       });
       
-      // DISABLED: Aggressive update checking interrupts users mid-session
-      // Service worker will naturally update on next app launch
-      // Only check for updates on initial registration
-      registration.update();
+      // Do NOT call registration.update() - it triggers update checks every time the app
+      // resumes from background, causing unwanted reloads when user minimizes/reopens
+      // The browser will check for updates naturally (typically every 24 hours)
+      // Updates will be applied on next full app launch
       
     } catch (error) {
       console.error('[SW] Service Worker registration failed:', error);
