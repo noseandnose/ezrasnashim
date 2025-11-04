@@ -64,10 +64,56 @@ export function useVersionCheck() {
     }
   }, [currentVersion]);
   
-  // Periodic version checking - COMPLETELY DISABLED
-  // Version checks were causing app freezes and unwanted reloads when resuming from background
-  // Updates will happen naturally via service worker on next full app launch
-  // No version checks during active sessions
+  // Smart version checking on window focus with throttling
+  // Checks for updates when user returns to app, but only once every 5 minutes
+  // Shows update prompt only when there's a real update available
+  // Never auto-reloads - always requires user click
+  const lastCheckRef = useRef<number>(0);
+  
+  useEffect(() => {
+    const checkForUpdates = async () => {
+      if (!currentVersion) return;
+      
+      // Throttle checks to once every 5 minutes
+      const now = Date.now();
+      const fiveMinutes = 5 * 60 * 1000;
+      if (now - lastCheckRef.current < fiveMinutes) {
+        return;
+      }
+      
+      lastCheckRef.current = now;
+      
+      try {
+        const response = await fetch(`/api/version?t=${now}`);
+        if (!response.ok) return;
+        
+        const latestVersion: VersionInfo = await response.json();
+        
+        // Detect any new version by timestamp increase
+        // Accept ANY timestamp difference to catch quick hotfixes and critical updates
+        if (latestVersion.timestamp > currentVersion.timestamp) {
+          console.log('📦 Update available:', latestVersion.version);
+          setUpdateInfo(latestVersion);
+          setShowUpdatePrompt(true);
+          localStorage.setItem('latest-app-version', JSON.stringify(latestVersion));
+        }
+      } catch (error) {
+        // Silently handle version check failures - don't interrupt user
+        console.debug('Version check skipped:', error);
+      }
+    };
+    
+    // Check on window focus (when user returns to app)
+    const handleFocus = () => {
+      checkForUpdates();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [currentVersion]);
   
   const refreshApp = () => {
     console.log('🔄 User requested app refresh...');

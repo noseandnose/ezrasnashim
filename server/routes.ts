@@ -3842,7 +3842,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       timestamp: versionTimestamp,
       version: APP_VERSION,
       buildDate: new Date(versionTimestamp).toISOString(),
-      serverUptime: Date.now() - SERVER_START_TIME
+      serverUptime: Date.now() - SERVER_START_TIME,
+      // Support for critical updates - set these env vars when deploying urgent fixes
+      isCritical: process.env.CRITICAL_UPDATE === 'true',
+      releaseNotes: process.env.RELEASE_NOTES || undefined
     };
     res.json(version);
   });
