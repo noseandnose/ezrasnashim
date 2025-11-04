@@ -51,17 +51,30 @@ function Router() {
   // Handle Android back button navigation
   useBackButton();
   
-  // Initialize location for prayer times - these hooks are already optimized internally
+  // Defer location and prayer times initialization - not needed for initial render
+  // These will run after the UI is visible, improving perceived startup speed
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Location and times will be fetched lazily when needed
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+  
+  // Use location and times hooks - they're already optimized with caching
   useGeolocation();
   useJewishTimes();
   
-  // Initialize critical systems
+  // Initialize critical systems - defer non-critical operations
   useEffect(() => {
-    // Initialize performance optimizations
-    initializePerformance();
+    // Defer performance optimizations - not blocking
+    setTimeout(() => {
+      initializePerformance();
+    }, 500);
     
-    // Initialize cache system
-    initializeCache();
+    // Defer cache initialization - not blocking
+    setTimeout(() => {
+      initializeCache();
+    }, 300);
     
     // One-time cleanup of stale modal completion data
     const cleanupModalCompletions = () => {

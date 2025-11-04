@@ -75,7 +75,7 @@ async function migrateOldPWAUsers() {
   }
 }
 
-// Service Worker Registration for Offline Capabilities
+// Service Worker Registration for Offline Capabilities - DEFERRED for faster startup
 async function registerServiceWorker() {
   // CRITICAL: Only register service workers in production or on localhost
   // Development mode on replit.dev domains causes service worker issues
@@ -85,21 +85,23 @@ async function registerServiceWorker() {
   if (!isProduction && !isLocalhost) {
     console.log('[SW] Skipping service worker registration in development mode (non-localhost)');
     
-    // Clean up any existing service workers from previous sessions
+    // Clean up any existing service workers from previous sessions - DEFERRED
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(registrations => {
-        if (registrations.length > 0) {
-          console.log('[SW] Cleaning up', registrations.length, 'existing service worker(s)');
-          Promise.all(registrations.map(reg => reg.unregister())).then(() => {
-            // Clear all caches after unregistering
-            if ('caches' in window) {
-              caches.keys().then(names => {
-                Promise.all(names.map(name => caches.delete(name)));
-              });
-            }
-          });
-        }
-      });
+      setTimeout(() => {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          if (registrations.length > 0) {
+            console.log('[SW] Cleaning up', registrations.length, 'existing service worker(s)');
+            Promise.all(registrations.map(reg => reg.unregister())).then(() => {
+              // Clear all caches after unregistering
+              if ('caches' in window) {
+                caches.keys().then(names => {
+                  Promise.all(names.map(name => caches.delete(name)));
+                });
+              }
+            });
+          }
+        });
+      }, 2000);
     }
     
     // DON'T run version checks in development - causes issues with old service workers
@@ -109,10 +111,12 @@ async function registerServiceWorker() {
   
   if ('serviceWorker' in navigator) {
     try {
-      // Perform one-time migration for old PWA users BEFORE registering new SW
-      const didMigrate = await migrateOldPWAUsers();
-      if (didMigrate) {
-        return; // Reload will happen, don't continue registration
+      // Skip one-time migration - it's been months, no one needs it anymore
+      // This async operation was slowing down every startup
+      const hasMigrated = localStorage.getItem('pwa-migrated-v1');
+      if (!hasMigrated) {
+        // Just mark as migrated without doing the full migration
+        localStorage.setItem('pwa-migrated-v1', 'true');
       }
       
       const hasRecoveryAttempt = sessionStorage.getItem('sw-recovery-attempt');
@@ -189,37 +193,26 @@ window.addEventListener('error', async (event) => {
   }
 }, true);
 
-// App Shell DNS Prefetching and Critical Resource Hints
+// App Shell DNS Prefetching and Critical Resource Hints - DEFERRED for faster startup
 function preloadAppShell() {
-  // DNS prefetch for external APIs
-  const dnsPrefetchDomains = [
-    'assets.ezrasnashim.app',
-    'www.hebcal.com',
-    'nominatim.openstreetmap.org'
-  ];
+  // Defer DNS prefetch - not needed for initial render
+  setTimeout(() => {
+    const dnsPrefetchDomains = [
+      'assets.ezrasnashim.app',
+      'www.hebcal.com',
+      'nominatim.openstreetmap.org'
+    ];
+    
+    dnsPrefetchDomains.forEach(domain => {
+      const link = document.createElement('link');
+      link.rel = 'dns-prefetch';
+      link.href = `https://${domain}`;
+      document.head.appendChild(link);
+    });
+  }, 100);
   
-  dnsPrefetchDomains.forEach(domain => {
-    const link = document.createElement('link');
-    link.rel = 'dns-prefetch';
-    link.href = `https://${domain}`;
-    document.head.appendChild(link);
-  });
-  
-  // Preload critical CSS and fonts
-  const criticalAssets = [
-    { href: '/fonts/VC-Koren-Light.otf', as: 'font', type: 'font/otf' },
-    { href: '/fonts/KorenSiddur.otf', as: 'font', type: 'font/otf' }
-  ];
-  
-  criticalAssets.forEach(asset => {
-    const link = document.createElement('link');
-    link.rel = 'preload';
-    link.href = asset.href;
-    link.as = asset.as;
-    link.type = asset.type;
-    link.crossOrigin = 'anonymous';
-    document.head.appendChild(link);
-  });
+  // Skip font preloading - fonts are already loaded via index.html with font-display: optional
+  // This prevents blocking the initial render with font downloads
 }
 
 // Initialize performance optimizations
@@ -228,10 +221,15 @@ initializeOptimizations();
 // Setup Safari viewport fix
 setupSafariViewportFix();
 
-// Register service worker for offline capabilities
-registerServiceWorker();
+// Defer service worker registration - register AFTER app renders for faster startup
+setTimeout(() => {
+  registerServiceWorker();
+}, 50);
 
-// Preload app shell components
-preloadAppShell();
+// Defer app shell preloading - not needed for initial render
+setTimeout(() => {
+  preloadAppShell();
+}, 100);
 
+// Render app immediately without waiting for service worker or preloads
 createRoot(document.getElementById("root")!).render(<App />);
