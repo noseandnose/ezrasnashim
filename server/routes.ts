@@ -2822,13 +2822,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const paymentIntentId = session.payment_intent;
           console.log('Webhook: Payment intent from session:', paymentIntentId);
           
+          // CRITICAL: Skip if no valid payment intent ID
+          if (!paymentIntentId || typeof paymentIntentId !== 'string' || !paymentIntentId.startsWith('pi_')) {
+            console.log(`Webhook: Invalid or missing payment intent ID in session ${session.id} - skipping to prevent duplicate counting`);
+            break;
+          }
+          
           // BACKUP RECONCILIATION: Check if already processed by frontend
-          if (paymentIntentId) {
-            const existingSessionAct = await storage.getActByPaymentIntentId(paymentIntentId as string);
-            if (existingSessionAct) {
-              console.log(`Webhook: Session ${session.id} already processed by frontend - skipping`);
-              break; // Already handled by frontend confirmation
-            }
+          const existingSessionAct = await storage.getActByPaymentIntentId(paymentIntentId as string);
+          if (existingSessionAct) {
+            console.log(`Webhook: Session ${session.id} already processed by frontend - skipping`);
+            break; // Already handled by frontend confirmation
           }
           
           console.log(`Webhook: Processing session ${session.id} as backup reconciliation`);
