@@ -50,6 +50,10 @@ export default function Home() {
     const contentArea = document.querySelector('.content-area');
     if (contentArea) {
       contentArea.scrollTop = 0;
+      
+      // Also ensure window scroll is at top to prevent nav bar positioning issues
+      // This is important after closing fullscreen modals that might restore scroll
+      window.scrollTo(0, 0);
     }
   }, [activeSection]);
   
@@ -73,11 +77,18 @@ export default function Home() {
     if (activeSection === 'home' && scrollToProgress) {
       setTimeout(() => {
         const progressElement = document.getElementById('daily-progress-garden');
-        if (progressElement) {
+        const contentArea = document.querySelector('.content-area');
+        if (progressElement && contentArea) {
           progressElement.scrollIntoView({ 
             behavior: 'smooth', 
             block: 'center' 
           });
+          
+          // After scrolling animation completes, ensure window scroll stays at top
+          // This prevents nav bar positioning issues
+          setTimeout(() => {
+            window.scrollTo(0, 0);
+          }, 800); // Wait for smooth scroll animation to complete
         }
       }, 100); // Small delay to ensure DOM is ready
       
