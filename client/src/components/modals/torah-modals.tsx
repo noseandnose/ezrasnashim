@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import AudioPlayer from "@/components/audio-player";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
-import { formatTextContent, formatHalachaContent } from "@/lib/text-formatter";
+import { formatTextContent, formatHalachaContent, formatContentWithFootnotes } from "@/lib/text-formatter";
 import { formatThankYouMessage } from "@/lib/link-formatter";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { Expand } from "lucide-react";
@@ -185,7 +185,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                         <div 
                           className="platypi-regular leading-relaxed text-black whitespace-pre-line"
                           style={{ fontSize: `${fontSize}px` }}
-                          dangerouslySetInnerHTML={{ __html: formatHalachaContent(halachaContent.content) }}
+                          dangerouslySetInnerHTML={{ __html: formatHalachaContent(halachaContent.content, halachaContent.footnotes) }}
                         />
                         {halachaContent.footnotes && (
                           <div className="border-t pt-4 mt-6">
@@ -298,7 +298,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                   className="platypi-regular leading-relaxed text-black whitespace-pre-line"
                   style={{ fontSize: `${fontSize}px` }}
                 >
-                    <div dangerouslySetInnerHTML={{ __html: formatHalachaContent(halachaContent.content) }} />
+                    <div dangerouslySetInnerHTML={{ __html: formatHalachaContent(halachaContent.content, halachaContent.footnotes) }} />
                 </div>
               </div>
             )}
@@ -671,7 +671,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                           className="platypi-regular leading-relaxed text-black whitespace-pre-line"
                           style={{ fontSize: `${fontSize}px` }}
                         >
-                          <div dangerouslySetInnerHTML={{ __html: formatTextContent(featuredContent.content) }} />
+                          <div dangerouslySetInnerHTML={{ __html: formatContentWithFootnotes(featuredContent.content, featuredContent.footnotes) }} />
                         </div>
                       </div>
                       
@@ -788,7 +788,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                   className="platypi-regular leading-relaxed text-black whitespace-pre-line"
                   style={{ fontSize: `${fontSize}px` }}
                 >
-                    <div dangerouslySetInnerHTML={{ __html: formatTextContent(featuredContent.content) }} />
+                    <div dangerouslySetInnerHTML={{ __html: formatContentWithFootnotes(featuredContent.content, featuredContent.footnotes) }} />
                 </div>
               </div>
             )}
@@ -922,7 +922,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                   className="platypi-regular leading-relaxed text-black whitespace-pre-line"
                   style={{ fontSize: `${fontSize}px` }}
                 >
-                  <div dangerouslySetInnerHTML={{ __html: formatHalachaContent(halachaContent.content) }} />
+                  <div dangerouslySetInnerHTML={{ __html: formatHalachaContent(halachaContent.content, halachaContent.footnotes) }} />
                 </div>
 
                 {/* Footnotes Section */}
@@ -1014,7 +1014,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                   className="platypi-regular leading-relaxed text-black whitespace-pre-line"
                   style={{ fontSize: `${fontSize}px` }}
                 >
-                  <div dangerouslySetInnerHTML={{ __html: formatTextContent(featuredContent.content) }} />
+                  <div dangerouslySetInnerHTML={{ __html: formatContentWithFootnotes(featuredContent.content, featuredContent.footnotes) }} />
                 </div>
 
                 {/* Footnotes Section */}

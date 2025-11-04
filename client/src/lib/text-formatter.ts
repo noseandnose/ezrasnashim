@@ -15,6 +15,56 @@ export function sanitizeHTML(htmlContent: string): string {
 }
 
 /**
+ * Extracts footnote numbers from a footnotes string
+ * Handles formats like "39.", "39)", "39-40", etc.
+ */
+export function extractFootnoteNumbers(footnotes: string | null | undefined): Set<string> {
+  if (!footnotes) return new Set();
+  
+  const footnoteNumbers = new Set<string>();
+  
+  // Match patterns like "39.", "39)", "1.", "1-2", etc.
+  // This regex captures numbers at the start of a line or after whitespace
+  const patterns = [
+    /^(\d+)\./gm,           // "39." at start of line
+    /^(\d+)\)/gm,           // "39)" at start of line  
+    /\n(\d+)\./g,           // newline followed by "39."
+    /\n(\d+)\)/g,           // newline followed by "39)"
+    /^\s*(\d+)\s*[.):]/gm  // whitespace, number, punctuation
+  ];
+  
+  patterns.forEach(pattern => {
+    let match;
+    while ((match = pattern.exec(footnotes)) !== null) {
+      footnoteNumbers.add(match[1]);
+    }
+  });
+  
+  return footnoteNumbers;
+}
+
+/**
+ * Applies superscript styling only to specific footnote numbers in text
+ * @param text - The text to process
+ * @param footnoteNumbers - Set of footnote numbers to superscript
+ */
+export function applyFootnoteSuperscripts(text: string, footnoteNumbers: Set<string>): string {
+  if (footnoteNumbers.size === 0) return text;
+  
+  // Build a regex pattern that matches only the specific footnote numbers
+  // Must be surrounded by non-digit boundaries to avoid matching parts of larger numbers
+  const numbersPattern = Array.from(footnoteNumbers).join('|');
+  const regex = new RegExp(
+    `(\\s|^|[."\\'\\]\\()>])(${numbersPattern})(\\s|[.,;:!?\\)\\]]|$)`,
+    'g'
+  );
+  
+  return text.replace(regex, (_match, before, num, after) => {
+    return `${before}<sup style="font-size: 0.65em; font-weight: normal;">${num}</sup>${after}`;
+  });
+}
+
+/**
  * Converts URLs in plain text to clickable links
  */
 export function linkifyText(text: string): string {
@@ -158,9 +208,10 @@ function cleanHebrewText(text: string): string {
  * - {{ }} for grey box content (English content)
  * - Conditional content with [[ ]] tags is processed separately by tefilla processor
  * @param text - The raw text to format
+ * @param footnoteNumbers - Optional set of footnote numbers to superscript
  * @returns The formatted HTML string
  */
-export function formatTextContent(text: string | null | undefined): string {
+export function formatTextContent(text: string | null | undefined, footnoteNumbers?: Set<string>): string {
   if (!text) return '';
   
   // Clean Hebrew text first to remove problematic characters
@@ -170,12 +221,10 @@ export function formatTextContent(text: string | null | undefined): string {
   // This handles cases like "be- gins" -> "begins", "Howev- er" -> "However"
   formatted = formatted.replace(/([a-zA-Z])-\s+([a-zA-Z])/g, '$1$2');
   
-  // Format footnote numbers for English text BEFORE any other processing
-  // Match standalone numbers or numbers after punctuation/spaces
-  // This catches: ". 39 ", " 39 ", "(39)", etc.
-  formatted = formatted.replace(/(\s|^|[."\]\()>])(\d{1,2})(\s|[.,;:!?\)\]]|$)/g, (_match, before, num, after) => {
-    return `${before}<sup style="font-size: 0.65em; font-weight: normal;">${num}</sup>${after}`;
-  });
+  // Apply intelligent footnote superscripting if footnote numbers are provided
+  if (footnoteNumbers && footnoteNumbers.size > 0) {
+    formatted = applyFootnoteSuperscripts(formatted, footnoteNumbers);
+  }
   
   // Convert newlines to HTML breaks FIRST before any other processing
   formatted = formatted.replace(/\n/g, '<br />');
@@ -275,22 +324,40 @@ export function formatTextContent(text: string | null | undefined): string {
 // Removed problematic English text wrapping function
 
 /**
+ * Formats content with intelligent footnote detection
+ * Extracts footnote numbers from the footnotes string and only superscripts those in the main content
+ * @param content - The main text content to format
+ * @param footnotes - The footnotes section text
+ * @returns The formatted HTML string for the content
+ */
+export function formatContentWithFootnotes(content: string | null | undefined, footnotes: string | null | undefined): string {
+  if (!content) return '';
+  
+  // Extract footnote numbers from the footnotes section
+  const footnoteNumbers = extractFootnoteNumbers(footnotes);
+  
+  // Format content with intelligent footnote superscripting
+  return formatTextContent(content, footnoteNumbers);
+}
+
+/**
  * Formats text content with additional processing for apostrophes and footnotes
  * Used specifically for Halacha content
  * @param text - The raw text to format
+ * @param footnotes - Optional footnotes section for intelligent footnote detection
  * @returns The formatted HTML string
  */
-export function formatHalachaContent(text: string | null | undefined): string {
+export function formatHalachaContent(text: string | null | undefined, footnotes?: string | null | undefined): string {
   if (!text) return '';
   
-  // Use the base formatter first (this already handles footnotes)
-  let formatted = formatTextContent(text);
+  // Extract footnote numbers if footnotes are provided
+  const footnoteNumbers = footnotes ? extractFootnoteNumbers(footnotes) : undefined;
+  
+  // Use the base formatter first with intelligent footnote detection
+  let formatted = formatTextContent(text, footnoteNumbers);
   
   // Replace apostrophes with spaces
   formatted = formatted.replace(/'/g, ' ');
-  
-  // Don't format footnotes again - formatTextContent already handled them
-  // This prevents duplicate processing and inconsistent sizing
   
   return sanitizeHTML(formatted);
 }
