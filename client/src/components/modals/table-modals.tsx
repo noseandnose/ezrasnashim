@@ -310,8 +310,8 @@ export default function TableModals() {
                           const cleaned = ingredient.replace(/^\*\s*/, '').trim();
                           return cleaned ? (
                             <li key={index} className="flex items-start">
-                              <span className="text-rose-400 mr-2 mt-1">•</span>
-                              <span className="flex-1" dangerouslySetInnerHTML={{ __html: formatTextContent(cleaned) }} />
+                              <span className="text-rose-400 mr-2 leading-normal">•</span>
+                              <span className="flex-1 leading-normal" dangerouslySetInnerHTML={{ __html: formatTextContent(cleaned) }} />
                             </li>
                           ) : null;
                         });
@@ -321,8 +321,8 @@ export default function TableModals() {
                       if (Array.isArray(recipeContent.ingredients)) {
                         return recipeContent.ingredients.map((ingredient: any, index: number) => (
                           <li key={index} className="flex items-start">
-                            <span className="text-rose-400 mr-2 mt-1">•</span>
-                            <span className="flex-1" dangerouslySetInnerHTML={{ __html: formatTextContent(String(ingredient)) }} />
+                            <span className="text-rose-400 mr-2 leading-normal">•</span>
+                            <span className="flex-1 leading-normal" dangerouslySetInnerHTML={{ __html: formatTextContent(String(ingredient)) }} />
                           </li>
                         ));
                       }
@@ -351,8 +351,8 @@ export default function TableModals() {
                           // The instruction is already cleaned (numbers removed by split)
                           return (
                             <li key={index} className="flex items-start">
-                              <span className="platypi-bold text-rose-400 mr-3 mt-0.5 min-w-[1.5rem]">{index + 1}.</span>
-                              <span className="flex-1" dangerouslySetInnerHTML={{ __html: formatTextContent(instruction) }} />
+                              <span className="platypi-bold text-rose-400 mr-3 min-w-[1.5rem] leading-normal">{index + 1}.</span>
+                              <span className="flex-1 leading-normal" dangerouslySetInnerHTML={{ __html: formatTextContent(instruction) }} />
                             </li>
                           );
                         });
@@ -362,8 +362,8 @@ export default function TableModals() {
                       if (Array.isArray(recipeContent.instructions)) {
                         return recipeContent.instructions.map((instruction: any, index: number) => (
                           <li key={index} className="flex items-start">
-                            <span className="platypi-bold text-rose-400 mr-3 mt-0.5 min-w-[1.5rem]">{index + 1}.</span>
-                            <span className="flex-1" dangerouslySetInnerHTML={{ __html: formatTextContent(String(instruction)) }} />
+                            <span className="platypi-bold text-rose-400 mr-3 min-w-[1.5rem] leading-normal">{index + 1}.</span>
+                            <span className="flex-1 leading-normal" dangerouslySetInnerHTML={{ __html: formatTextContent(String(instruction)) }} />
                           </li>
                         ));
                       }
