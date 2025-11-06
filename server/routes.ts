@@ -1500,7 +1500,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cacheKey = `daily_sponsor_${date}`;
       const now = Date.now();
       
-      // Check cache first (4 hour TTL for daily sponsor data)
+      // Check cache first (5 minute TTL for daily sponsor data)
       const cached = apiCache.get(cacheKey);
       if (cached && cached.expires > now) {
         return res.json(cached.data);
@@ -1508,10 +1508,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const sponsor = await storage.getDailySponsor(date);
       
-      // Cache the result for 4 hours
+      // Cache the result for 5 minutes
       apiCache.set(cacheKey, {
         data: sponsor || null,
-        expires: now + (4 * 60 * 60 * 1000)
+        expires: now + (5 * 60 * 1000)
       });
       
       res.json(sponsor || null);
