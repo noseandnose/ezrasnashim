@@ -621,9 +621,8 @@ export default function TableModals() {
                               e.stopPropagation();
                               e.preventDefault();
                             }}
-                            className="absolute left-2 p-2 transition-transform hover:scale-110 z-10"
+                            className="absolute left-2 top-1/2 -translate-y-1/2 p-2 transition-transform hover:scale-110 z-10"
                             style={{
-                              top: '160px',
                               filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.8)) drop-shadow(0 0 1px rgba(255,255,255,1))',
                               color: '#000',
                               fontWeight: 'bold'
@@ -641,9 +640,8 @@ export default function TableModals() {
                               e.stopPropagation();
                               e.preventDefault();
                             }}
-                            className="absolute right-2 p-2 transition-transform hover:scale-110 z-10"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 transition-transform hover:scale-110 z-10"
                             style={{
-                              top: '160px',
                               filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.8)) drop-shadow(0 0 1px rgba(255,255,255,1))',
                               color: '#000',
                               fontWeight: 'bold'
@@ -1086,9 +1084,8 @@ export default function TableModals() {
                                   e.stopPropagation();
                                   e.preventDefault();
                                 }}
-                                className="absolute left-2 p-2 transition-transform hover:scale-110 z-10"
+                                className="absolute left-2 top-1/2 -translate-y-1/2 p-2 transition-transform hover:scale-110 z-10"
                                 style={{
-                                  top: '160px',
                                   filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.8)) drop-shadow(0 0 1px rgba(255,255,255,1))',
                                   color: '#000',
                                   fontWeight: 'bold'
@@ -1106,9 +1103,8 @@ export default function TableModals() {
                                   e.stopPropagation();
                                   e.preventDefault();
                                 }}
-                                className="absolute right-2 p-2 transition-transform hover:scale-110 z-10"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 transition-transform hover:scale-110 z-10"
                                 style={{
-                                  top: '160px',
                                   filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.8)) drop-shadow(0 0 1px rgba(255,255,255,1))',
                                   color: '#000',
                                   fontWeight: 'bold'
