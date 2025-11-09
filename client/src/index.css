@@ -255,7 +255,7 @@ button,
   --card-foreground: hsl(0, 0%, 0%);
   --border: hsl(300, 18%, 90%);
   --input: hsl(300, 18%, 90%);
-  --primary: hsl(332, 26%, 63%);
+  --primary: hsl(345, 55%, 82%);
   --primary-foreground: hsl(0, 0%, 0%);
   --secondary: hsl(300, 18%, 94%);
   --secondary-foreground: hsl(0, 0%, 0%);
@@ -263,17 +263,17 @@ button,
   --accent-foreground: hsl(0, 0%, 0%);
   --destructive: hsl(0, 84.2%, 60.2%);
   --destructive-foreground: hsl(60, 9.1%, 97.8%);
-  --ring: hsl(332, 26%, 63%);
+  --ring: hsl(345, 55%, 82%);
   --radius: 1.25rem;
   
   /* Quiet Joy - Spiritual Retreat Colors */
-  --rose-blush: hsl(332, 26%, 63%);
+  --rose-blush: hsl(350, 45%, 85%);
   --ivory: hsl(45, 70%, 96%);
   --sand-gold: hsl(40, 35%, 80%);
   --muted-lavender: hsl(260, 30%, 85%);
   --warm-gray: hsl(0, 0%, 0%);
   --soft-white: hsl(45, 70%, 98%);
-  --blush: hsl(332, 26%, 63%);
+  --blush: hsl(350, 45%, 85%);
   --lavender: hsl(260, 30%, 85%);
   --sage: hsl(120, 20%, 75%);
   
@@ -524,12 +524,12 @@ button,
 
 /* Gradient Heart Styling */
 .gradient-heart {
-  color: #b9889f !important;
-  fill: #b9889f !important;
+  color: #E8B4CB !important;
+  fill: #E8B4CB !important;
 }
 
 .gradient-heart svg {
-  fill: #b9889f !important;
+  fill: #E8B4CB !important;
 }
 
 /* Force all text to be pure black except heart icons */
@@ -548,7 +548,7 @@ button,
 
 /* Daily Progress Garden Drop Shadows */
 .drop-shadow-garden-pink {
-  filter: drop-shadow(0 4px 12px rgba(185, 136, 159, 0.3)) drop-shadow(0 2px 4px rgba(185, 136, 159, 0.2));
+  filter: drop-shadow(0 4px 12px rgba(244, 63, 94, 0.3)) drop-shadow(0 2px 4px rgba(244, 63, 94, 0.2));
 }
 
 .drop-shadow-garden-green {
@@ -619,10 +619,10 @@ button, .btn, [role="button"] {
 
 /* Additional CSS variables for admin interface */
 :root {
-  --rose-blush-hover: hsl(332, 26%, 50%);
-  --rose-icon-bg: hsl(332, 26%, 90%);
-  --rose-icon-text: hsl(332, 26%, 55%);
-  --rose-bg-light: hsl(332, 26%, 92%);
+  --rose-blush-hover: hsl(350, 45%, 70%);
+  --rose-icon-bg: hsl(350, 45%, 95%);
+  --rose-icon-text: hsl(350, 45%, 65%);
+  --rose-bg-light: hsl(350, 45%, 96%);
 }
 
 /* Base text styling - ensure Platypi is used for all English text */
@@ -687,7 +687,7 @@ button, .btn, [role="button"] {
   position: absolute;
   width: 16px;
   height: 16px;
-  color: #b9889f;
+  color: #E8B4CB;
   animation: heartExplode 0.5s ease-out forwards;
   opacity: 1;
 }
@@ -750,7 +750,7 @@ button, .btn, [role="button"] {
 
 /* Quiet Joy - Spiritual Colors */
 .text-rose-blush {
-  color: hsl(332, 26%, 63%);
+  color: hsl(350, 45%, 75%);
 }
 
 .text-sand-gold {
@@ -766,7 +766,7 @@ button, .btn, [role="button"] {
 }
 
 .bg-rose-blush {
-  background-color: hsl(332, 26%, 63%);
+  background-color: hsl(350, 45%, 85%);
 }
 
 .bg-sand-gold {
@@ -786,8 +786,8 @@ button, .btn, [role="button"] {
 }
 
 .from-blush {
-  --tw-gradient-from: hsl(332, 26%, 63%);
-  --tw-gradient-to: hsl(332, 26%, 63%);
+  --tw-gradient-from: hsl(350, 45%, 85%);
+  --tw-gradient-to: hsl(350, 45%, 85%);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
@@ -812,7 +812,7 @@ button, .btn, [role="button"] {
 }
 
 .to-rose-blush {
-  --tw-gradient-to: hsl(332, 26%, 63%);
+  --tw-gradient-to: hsl(350, 45%, 85%);
 }
 
 .font-serif {
@@ -825,29 +825,29 @@ button, .btn, [role="button"] {
 
 /* Quiet Joy Gradients */
 .gradient-quiet-joy {
-  background: linear-gradient(135deg, hsl(332, 26%, 63%) 0%, hsl(260, 30%, 88%) 100%);
+  background: linear-gradient(135deg, hsl(350, 45%, 88%) 0%, hsl(260, 30%, 88%) 100%);
 }
 
 .gradient-soft-glow {
-  background: linear-gradient(135deg, hsl(45, 70%, 98%) 0%, hsl(332, 26%, 75%) 50%, hsl(260, 30%, 90%) 100%);
+  background: linear-gradient(135deg, hsl(45, 70%, 98%) 0%, hsl(350, 45%, 92%) 50%, hsl(260, 30%, 90%) 100%);
 }
 
 .gradient-sand-warm {
-  background: linear-gradient(135deg, hsl(40, 35%, 85%) 0%, hsl(332, 26%, 63%) 100%);
+  background: linear-gradient(135deg, hsl(40, 35%, 85%) 0%, hsl(350, 45%, 88%) 100%);
 }
 
 .bg-gradient-feminine {
-  background: linear-gradient(135deg, hsl(332, 26%, 63%) 0%, hsl(260, 30%, 85%) 100%);
+  background: linear-gradient(135deg, hsl(350, 45%, 85%) 0%, hsl(260, 30%, 85%) 100%);
 }
 
 /* Soft gradient backgrounds for featured sections */
 .bg-gradient-soft {
-  background: linear-gradient(135deg, hsl(332, 26%, 90%) 0%, hsl(260, 30%, 96%) 100%);
-  border: 1px solid hsl(332, 26%, 80%);
+  background: linear-gradient(135deg, hsl(350, 45%, 96%) 0%, hsl(260, 30%, 96%) 100%);
+  border: 1px solid hsl(350, 45%, 90%);
 }
 
 .bg-gradient-to-br.from-blush.to-lavender {
-  background: linear-gradient(135deg, hsl(332, 26%, 63%) 0%, hsl(260, 30%, 85%) 100%);
+  background: linear-gradient(135deg, hsl(350, 45%, 85%) 0%, hsl(260, 30%, 85%) 100%);
 }
 
 .bg-gradient-to-br.from-lavender.to-sage {
@@ -855,7 +855,7 @@ button, .btn, [role="button"] {
 }
 
 .bg-gradient-sage-to-blush {
-  background: linear-gradient(to right, hsl(120, 20%, 75%) 0%, hsl(332, 26%, 63%) 100%);
+  background: linear-gradient(to right, hsl(120, 20%, 75%) 0%, hsl(350, 45%, 85%) 100%);
 }
 
 /* Gentle Transitions & Animations */
@@ -864,7 +864,7 @@ button, .btn, [role="button"] {
 }
 
 .glow-hover:hover {
-  box-shadow: 0 8px 32px hsla(332, 26%, 63%, 0.3);
+  box-shadow: 0 8px 32px hsla(350, 45%, 85%, 0.3);
   transform: translateY(-2px);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -876,21 +876,21 @@ button, .btn, [role="button"] {
 /* Soft Focus States */
 .focus-glow:focus {
   outline: none;
-  box-shadow: 0 0 0 3px hsla(332, 26%, 63%, 0.4);
+  box-shadow: 0 0 0 3px hsla(350, 45%, 85%, 0.4);
 }
 
 .gradient-header {
-  background: linear-gradient(90deg, hsl(332, 26%, 63%) 0%, hsl(262, 40%, 88%) 100%);
+  background: linear-gradient(90deg, hsl(345, 55%, 82%) 0%, hsl(262, 40%, 88%) 100%);
 }
 
 .content-card {
-  background: linear-gradient(135deg, hsla(332, 26%, 63%, 0.08) 0%, hsla(262, 40%, 88%, 0.08) 100%);
-  box-shadow: 0 4px 20px rgba(185, 136, 159, 0.1);
+  background: linear-gradient(135deg, hsla(345, 55%, 82%, 0.08) 0%, hsla(262, 40%, 88%, 0.08) 100%);
+  box-shadow: 0 4px 20px rgba(345, 55%, 82%, 0.1);
   border-radius: 1.25rem;
 }
 
 .nav-tab.active {
-  background: linear-gradient(135deg, hsl(332, 26%, 63%) 0%, hsl(262, 40%, 88%) 100%);
+  background: linear-gradient(135deg, hsl(345, 55%, 82%) 0%, hsl(262, 40%, 88%) 100%);
   color: white;
 }
 
@@ -1054,7 +1054,7 @@ html, body, #root {
   padding: 0;
   font-size: 1.125rem;
   font-weight: bold;
-  color: #b9889f;
+  color: #E8B4CB;
   line-height: 1.2;
 }
 
@@ -1068,7 +1068,7 @@ html, body, #root {
 
 /* Audio Player Styling */
 .gradient-blush-peach {
-  background: linear-gradient(135deg, hsl(332, 26%, 63%) 0%, hsl(260, 30%, 85%) 100%);
+  background: linear-gradient(135deg, hsl(350, 45%, 85%) 0%, hsl(260, 30%, 85%) 100%);
 }
 
 .audio-progress {
