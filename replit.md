@@ -78,3 +78,6 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **Geolocation**: Browser Geolocation API, OpenStreetMap Nominatim API, Google Maps Places API.
 - **UI Libraries**: Radix UI (component primitives), Lucide React (icons), Tailwind CSS (styling).
 - **Analytics**: Google Analytics (G-7S9ND60DR6).
+
+## Known Platform Issues
+- **Replit Cartographer Warnings**: The `@replit/vite-plugin-cartographer` plugin (v0.4.2) generates "TypeError: traverse is not a function" warnings during development builds due to an internal plugin bug. These warnings are cosmetic only and do not affect application functionality. The warnings appear because the plugin has an internal issue with its @babel/traverse dependency loading. This is a known Replit platform issue that cannot be resolved without modifying forbidden configuration files (vite.config.ts). The application builds and runs correctly despite these warnings.
