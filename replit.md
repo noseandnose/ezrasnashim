@@ -65,7 +65,7 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **Mobile App Support**: Enhanced detection and user guidance for mobile app wrappers.
 - **PWA Enhancements**: Bottom navigation, service worker cache updates, compass haptic feedback, smart install prompts.
 - **Hebrew Date Timezone Fix**: Corrected Hebrew date calculation to use user's browser timezone.
-- **Performance**: Lazy loading, code splitting, compression, optimized build, optimized Tehillim chain loading.
+- **Performance**: Lazy loading, code splitting, compression, optimized build, optimized Tehillim chain loading. Font optimization (removed unused ArnoKoren.otf 994KB and KorenSiddur.otf 84KB, saving ~1.1MB). Google Fonts using display=swap for faster perceived load. Splash screen using optimized 14KB PWA icon instead of 30KB image. Total initial load reduction: ~1.116MB.
 - **Security**: Drizzle ORM for SQL injection prevention.
 - **Deployment**: Static frontend (S3), backend (ECS), PostgreSQL (Supabase).
 - **Automated Cache Busting**: Automated version control and cache management with build timestamp and `/api/version` endpoint. Service worker uses stale-while-revalidate for unversioned assets and bypasses caching for audio/API endpoints (`/api/version`, `/api/media-proxy/`).
