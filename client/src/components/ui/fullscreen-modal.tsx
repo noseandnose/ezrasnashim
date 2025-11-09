@@ -3,6 +3,7 @@ import { X, Info } from 'lucide-react';
 import logoImage from "@assets/1LO_1755590090315.png";
 import { FloatingSettings } from './floating-settings';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useLocation } from 'wouter';
 
 interface FullscreenModalProps {
   isOpen: boolean;
@@ -48,6 +49,7 @@ export function FullscreenModal({
   floatingElement
 }: FullscreenModalProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -187,13 +189,23 @@ export function FullscreenModal({
           }}
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+                setLocation('/');
+              }}
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+              aria-label="Go to home"
+              type="button"
+            >
               <img 
                 src={logoImage} 
                 alt="Ezras Nashim" 
                 className="h-5 w-auto"
               />
-            </div>
+            </button>
 
             <h1 className="text-lg font-semibold text-gray-900 text-center flex-1 mx-4">
               {title}
