@@ -15,66 +15,6 @@ function setupSafariViewportFix() {
   window.addEventListener('resize', setVh, { passive: true });
 }
 
-// DISABLED: Automatic version checking interrupts users during prayers/audio
-// Version updates now handled by useVersionCheck hook in a non-intrusive way
-// This function is kept for backward compatibility but not called
-async function checkForAppUpdates() {
-  // No-op: Version checking disabled to prevent mid-session interruptions
-  return;
-}
-
-// One-time migration for users on old PWA versions
-async function migrateOldPWAUsers() {
-  // Check if user has already been migrated
-  const hasMigrated = localStorage.getItem('pwa-migrated-v1');
-  const isCurrentlyMigrating = sessionStorage.getItem('pwa-migrating');
-  
-  // Skip if already migrated or currently migrating (prevent loops)
-  if (hasMigrated || isCurrentlyMigrating) {
-    return false;
-  }
-  
-  // Check if this is an old user without the version system
-  const hasVersionSystem = localStorage.getItem('app-version');
-  
-  // If they already have the version system, mark as migrated and skip
-  if (hasVersionSystem) {
-    localStorage.setItem('pwa-migrated-v1', 'true');
-    return false;
-  }
-  
-  // This is an old user - perform one-time migration
-  console.log('[Migration] Detected old PWA installation, performing one-time update...');
-  
-  // Set migration flag to prevent loops
-  sessionStorage.setItem('pwa-migrating', 'true');
-  
-  try {
-    // Unregister all service workers
-    if ('serviceWorker' in navigator) {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(registrations.map(reg => reg.unregister()));
-    }
-    
-    // Clear all caches
-    const cacheNames = await caches.keys();
-    await Promise.all(cacheNames.map(name => caches.delete(name)));
-    
-    // Mark migration as complete
-    localStorage.setItem('pwa-migrated-v1', 'true');
-    
-    console.log('[Migration] Migration complete, reloading...');
-    
-    // Reload to get fresh content
-    window.location.reload();
-    return true;
-  } catch (error) {
-    console.error('[Migration] Migration failed:', error);
-    sessionStorage.removeItem('pwa-migrating');
-    return false;
-  }
-}
-
 // Service Worker Registration for Offline Capabilities - DEFERRED for faster startup
 async function registerServiceWorker() {
   // CRITICAL: Only register service workers in production or on localhost

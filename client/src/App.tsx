@@ -15,7 +15,6 @@ import { AutoNotificationPrompt } from "@/components/auto-notification-prompt";
 import { OfflineIndicator } from "@/components/offline-indicator";
 import "@/utils/clear-modal-completions";
 import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
-import logoPath from '@assets/EN App Icon_1756705023411.png';
 import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
 import { initializePerformance, whenIdle } from "./lib/startup-performance";
@@ -28,12 +27,13 @@ const Statistics = lazy(() => import("@/pages/statistics"));
 const Admin = lazy(() => import("@/pages/admin"));
 const Privacy = lazy(() => import("@/pages/privacy"));
 
-// Unified loading screen with dove - serves as both splash and loading indicator
+// Unified loading screen with app icon - serves as both splash and loading indicator
+// Using PWA icon instead of attached_assets for faster load (14KB vs 30KB)
 function LoadingScreen() {
   return (
     <div className="fixed inset-0 bg-white z-[9999] flex items-center justify-center">
       <img 
-        src={logoPath} 
+        src="/icon-192.png" 
         alt="Loading..." 
         className="w-24 h-24 object-contain animate-pulse"
       />
