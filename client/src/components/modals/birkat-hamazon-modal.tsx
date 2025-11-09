@@ -21,16 +21,6 @@ interface BirkatHamazonPrayer {
   orderIndex: number;
 }
 
-// Helper function to trigger congratulations modal if all tasks are completed
-const triggerCongratulationsIfReady = (
-  checkAndShowCongratulations: () => boolean,
-  openModal: (modalId: string, fromSection?: string) => void
-) => {
-  if (checkAndShowCongratulations()) {
-    openModal('congratulations', 'tefilla');
-  }
-};
-
 // Koren Thank You Component
 const KorenThankYou = () => {
   const { coordinates } = useLocationStore();
