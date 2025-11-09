@@ -1247,15 +1247,21 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
 
   // Mark today's Nishmas as completed
   const markNishmasCompleted = () => {
-    if (todayCompleted) return; // Prevent multiple completions on same day
-    
-    const today = new Date().toDateString();
-    const newDay = nishmasDay + 1;
-    
-    // Track Nishmas completion and mark as completed
+    // Always track analytics and completion for repeatable prayers
     trackModalComplete('nishmas-campaign');
     markModalComplete('nishmas-campaign');
     completeTask('tefilla');
+    
+    // Check if 40-day campaign already completed today
+    if (todayCompleted) {
+      // Already completed today's 40-day campaign step, just close fullscreen
+      const event = new CustomEvent('closeFullscreen');
+      window.dispatchEvent(event);
+      return;
+    }
+    
+    const today = new Date().toDateString();
+    const newDay = nishmasDay + 1;
     
     if (newDay <= 40) {
       setNishmasDay(newDay);
@@ -1316,15 +1322,14 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
       </div>
 
       <Button
-        onClick={todayCompleted ? undefined : markNishmasCompleted}
-        disabled={todayCompleted}
+        onClick={markNishmasCompleted}
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           todayCompleted 
-            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            ? 'bg-sage text-white hover:scale-105 transition-transform' 
             : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
-        {todayCompleted ? 'Completed Today' : 'Complete Nishmas'}
+        {todayCompleted ? 'Complete Again' : 'Complete Nishmas'}
       </Button>
     </div>
   );
@@ -1522,42 +1527,36 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
       {!showCompleteAndNext ? (
         // Single Complete button (Special occasions with no Daily Tehillim)
         <Button
-          onClick={isCompleted ? undefined : handleComplete}
-          disabled={isCompleted}
+          onClick={handleComplete}
           className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
             isCompleted 
-              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+              ? 'bg-sage text-white hover:scale-105 transition-transform' 
               : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
           }`}
         >
-          {isCompleted ? 'Completed Today' : `Complete Tehillim ${selectedPsalm}`}
+          {isCompleted ? 'Complete Again' : `Complete Tehillim ${selectedPsalm}`}
         </Button>
       ) : (
         // Show both "Complete" and "Complete & Next" buttons
-        !isCompleted ? (
-          <div className="flex gap-2">
-            <Button
-              onClick={handleComplete}
-              className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse"
-            >
-              Complete
-            </Button>
-            
-            <Button
-              onClick={handleCompleteAndNext}
-              className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse"
-            >
-              Complete & Next ({getNextPsalmNumber()})
-            </Button>
-          </div>
-        ) : (
+        <div className="flex gap-2">
           <Button
-            disabled
-            className="w-full py-3 rounded-xl platypi-medium border-0 bg-sage text-white cursor-not-allowed opacity-70"
+            onClick={handleComplete}
+            className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
+              isCompleted 
+                ? 'bg-sage text-white hover:scale-105 transition-transform' 
+                : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
+            }`}
           >
-            Completed Today
+            {isCompleted ? 'Again' : 'Complete'}
           </Button>
-        )
+          
+          <Button
+            onClick={handleCompleteAndNext}
+            className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse"
+          >
+            Complete & Next ({getNextPsalmNumber()})
+          </Button>
+        </div>
       )}
     </div>
   );
@@ -1839,28 +1838,24 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
       <div className="flex gap-2 mt-6">
         {/* Complete button - returns to previous view */}
         <Button
-          onClick={isCompleted ? undefined : handleComplete}
-          disabled={isCompleted || advanceChainMutation.isPending || completeAndNextMutation.isPending}
+          onClick={handleComplete}
+          disabled={advanceChainMutation.isPending || completeAndNextMutation.isPending}
           className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
             isCompleted 
-              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+              ? 'bg-sage text-white hover:scale-105 transition-transform' 
               : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
           }`}
         >
-          {isCompleted ? 'Completed' : advanceChainMutation.isPending ? 'Completing...' : 'Complete'}
+          {advanceChainMutation.isPending ? 'Completing...' : isCompleted ? 'Complete Again' : 'Complete'}
         </Button>
         
         {/* Complete and Next button - goes to next tehillim in chain */}
         <Button
-          onClick={isCompleted ? undefined : handleCompleteAndNext}
-          disabled={isCompleted || advanceChainMutation.isPending || completeAndNextMutation.isPending}
-          className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
-            isCompleted 
-              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-              : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse'
-          }`}
+          onClick={handleCompleteAndNext}
+          disabled={advanceChainMutation.isPending || completeAndNextMutation.isPending}
+          className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse"
         >
-          {isCompleted ? 'Completed' : completeAndNextMutation.isPending ? 'Loading Next...' : 'Complete & Next'}
+          {completeAndNextMutation.isPending ? 'Loading Next...' : 'Complete & Next'}
         </Button>
       </div>
     </div>
@@ -1943,15 +1938,14 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
       )}
       
       <Button 
-        onClick={isModalComplete(modalKey) ? undefined : handleComplete}
-        disabled={isModalComplete(modalKey)}
+        onClick={handleComplete}
         className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
           isModalComplete(modalKey) 
-            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            ? 'bg-sage text-white hover:scale-105 transition-transform' 
             : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
-        {isModalComplete(modalKey) ? 'Completed Today' : 'Complete'}
+        {isModalComplete(modalKey) ? 'Complete Again' : 'Complete'}
       </Button>
     </div>
   );
@@ -2587,16 +2581,40 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
   // Mark today's Nishmas as completed
   const markNishmasCompleted = () => {
-    if (todayCompleted) return; // Prevent multiple completions on same day
+    // Always track analytics and completion for repeatable prayers
+    trackModalComplete('nishmas');
+    markModalComplete('nishmas');
+    completeTask('tefilla');
+    
+    // Check if 40-day campaign already completed today
+    if (todayCompleted) {
+      // Already completed today's 40-day campaign step, just redirect home
+      setShowExplosion(true);
+      setTimeout(() => {
+        setShowExplosion(false);
+        checkAndShowCongratulations();
+        closeModal();
+        
+        if (onSectionChange) {
+          onSectionChange('home');
+          setTimeout(() => {
+            const progressElement = document.getElementById('daily-progress-garden');
+            if (progressElement) {
+              progressElement.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+              });
+            }
+          }, 300);
+        } else {
+          window.location.hash = '#/?section=home&scrollToProgress=true';
+        }
+      }, 2000);
+      return;
+    }
     
     const today = new Date().toDateString();
     const newDay = nishmasDay + 1;
-    
-
-    
-    // Track Nishmas completion and mark as completed
-    trackModalComplete('nishmas');
-    markModalComplete('nishmas');
     
     if (newDay <= 40) {
       setNishmasDay(newDay);
@@ -2609,12 +2627,9 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         setNishmasStartDate(startDate);
         localStorage.setItem('nishmas-start-date', startDate);
       }
-      
-
     }
     
-    // Complete tefilla task and redirect to home
-    completeTask('tefilla');
+    // Redirect to home with explosion animation
     setShowExplosion(true);
     
     setTimeout(() => {
@@ -2882,15 +2897,14 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={isModalComplete('blessings') ? undefined : () => completeWithAnimation('blessings')}
-              disabled={isModalComplete('blessings')}
+              onClick={() => completeWithAnimation('blessings')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('blessings') 
-                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  ? 'bg-sage text-white hover:scale-105 transition-transform' 
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
-              {isModalComplete('blessings') ? 'Completed Today' : 'Complete Blessings'}
+              {isModalComplete('blessings') ? 'Complete Again' : 'Complete Blessings'}
             </Button>
             <HeartExplosion trigger={showExplosion && activeExplosionModal === 'blessings'} />
           </div>
@@ -2913,15 +2927,14 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={isModalComplete('tefillos') ? undefined : () => completeWithAnimation('tefillos')}
-              disabled={isModalComplete('tefillos')}
+              onClick={() => completeWithAnimation('tefillos')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('tefillos') 
-                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  ? 'bg-sage text-white hover:scale-105 transition-transform' 
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
-              {isModalComplete('tefillos') ? 'Completed Today' : 'Complete Tefillos'}
+              {isModalComplete('tefillos') ? 'Complete Again' : 'Complete Tefillos'}
             </Button>
             <HeartExplosion trigger={showExplosion && activeExplosionModal === 'tefillos'} />
           </div>
@@ -2958,15 +2971,14 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={isModalComplete('personal-prayers') ? undefined : () => completeWithAnimation('personal-prayers')}
-              disabled={isModalComplete('personal-prayers')}
+              onClick={() => completeWithAnimation('personal-prayers')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('personal-prayers') 
-                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  ? 'bg-sage text-white hover:scale-105 transition-transform' 
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
-              {isModalComplete('personal-prayers') ? 'Completed Today' : 'Complete Personal Prayers'}
+              {isModalComplete('personal-prayers') ? 'Complete Again' : 'Complete Personal Prayers'}
             </Button>
             <HeartExplosion trigger={showExplosion && activeExplosionModal === 'personal-prayers'} />
           </div>
@@ -3010,7 +3022,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                       
                       <div className="heart-explosion-container">
                         <Button 
-                          onClick={isModalComplete('nishmas-campaign') ? undefined : () => {
+                          onClick={() => {
                             trackModalComplete('nishmas-campaign');
                             markModalComplete('nishmas-campaign');
                             completeTask('tefilla');
@@ -3021,14 +3033,13 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                               openModal('congratulations', 'tefilla');
                             }
                           }}
-                          disabled={isModalComplete('nishmas-campaign')}
                           className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                             isModalComplete('nishmas-campaign') 
-                              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                              ? 'bg-sage text-white hover:scale-105 transition-transform' 
                               : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                           }`}
                         >
-                          {isModalComplete('nishmas-campaign') ? 'Completed Today' : 'Complete'}
+                          {isModalComplete('nishmas-campaign') ? 'Complete Again' : 'Complete'}
                         </Button>
                       </div>
                     </div>
@@ -3687,7 +3698,7 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
 
       <div className="heart-explosion-container">
         <Button 
-          onClick={isModalComplete(modalKey) ? undefined : () => {
+          onClick={() => {
             // Track modal completion and mark as completed globally
             trackModalComplete(modalKey);
             markModalComplete(modalKey);
@@ -3707,14 +3718,13 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
               }
             }, 2000);
           }}
-          disabled={isModalComplete(modalKey)}
           className={`w-full py-3 rounded-xl platypi-medium border-0 ${
             isModalComplete(modalKey) 
-              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+              ? 'bg-sage text-white hover:scale-105 transition-transform' 
               : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
           }`}
         >
-          {isModalComplete(modalKey) ? 'Completed Today' : 'Complete'}
+          {isModalComplete(modalKey) ? 'Complete Again' : 'Complete'}
         </Button>
         
         {/* Heart Explosion Animation */}
@@ -4323,7 +4333,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                       <div className={showCompleteAndNext ? 'flex gap-2' : ''}>
                         {/* Complete button */}
                         <Button 
-                          onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
+                          onClick={() => {
                             trackModalComplete(`individual-tehillim-${selectedPsalm}`);
                             markModalComplete(`individual-tehillim-${selectedPsalm}`);
                             completeTask('tefilla');
@@ -4345,20 +4355,19 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                               openModal('special-tehillim', 'tefilla');
                             }, 400);
                           }}
-                          disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
                           className={`${showCompleteAndNext ? 'flex-1' : 'w-full'} py-3 rounded-xl platypi-medium border-0 ${
                             isModalComplete(`individual-tehillim-${selectedPsalm}`) 
-                              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                              ? 'bg-sage text-white hover:scale-105 transition-transform' 
                               : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                           }`}
                         >
-                          {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete'}
+                          {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Again' : 'Complete'}
                         </Button>
                         
                         {/* Complete and Next button - show for 1-150 tab OR Daily Tehillim with next psalm */}
                         {showCompleteAndNext && (
                           <Button 
-                            onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
+                            onClick={() => {
                               trackModalComplete(`individual-tehillim-${selectedPsalm}`);
                               markModalComplete(`individual-tehillim-${selectedPsalm}`);
                               completeTask('tefilla');
@@ -4381,14 +4390,13 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                                 openModal('individual-tehillim', 'tefilla', nextPsalm);
                               }, 400);
                             }}
-                            disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
                             className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
                               isModalComplete(`individual-tehillim-${selectedPsalm}`) 
-                                ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                                ? 'bg-sage text-white hover:scale-105 transition-transform' 
                                 : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse'
                             }`}
                           >
-                            {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete & Next'}
+                            {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Next' : 'Complete & Next'}
                           </Button>
                         )}
                       </div>
@@ -4453,7 +4461,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                     <div className={tehillimActiveTab === 'all' ? 'flex gap-2' : ''}>
                       {/* Complete button - returns to Tehillim selector */}
                       <Button 
-                        onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
+                        onClick={() => {
                           // Track modal completion immediately
                           trackModalComplete(`individual-tehillim-${selectedPsalm}`);
                           markModalComplete(`individual-tehillim-${selectedPsalm}`);
@@ -4478,20 +4486,19 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                             openModal('special-tehillim', 'tefilla');
                           }, 400);
                         }}
-                        disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
                         className={`${tehillimActiveTab === 'all' ? 'flex-1' : 'w-full'} py-3 rounded-xl platypi-medium border-0 ${
                           isModalComplete(`individual-tehillim-${selectedPsalm}`) 
-                            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                            ? 'bg-sage text-white hover:scale-105 transition-transform' 
                             : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                         }`}
                       >
-                        {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete'}
+                        {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Again' : 'Complete'}
                       </Button>
                       
                       {/* Complete and Next button - only show when coming from 1-150 tab */}
                       {tehillimActiveTab === 'all' && (
                         <Button 
-                          onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
+                          onClick={() => {
                             // Track modal completion immediately
                             trackModalComplete(`individual-tehillim-${selectedPsalm}`);
                             markModalComplete(`individual-tehillim-${selectedPsalm}`);
@@ -4518,14 +4525,13 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                               openModal('individual-tehillim', 'tefilla', nextPsalm);
                             }, 400);
                           }}
-                          disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
                           className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
                             isModalComplete(`individual-tehillim-${selectedPsalm}`) 
-                              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                              ? 'bg-sage text-white hover:scale-105 transition-transform' 
                               : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse'
                           }`}
                         >
-                          {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete & Next'}
+                          {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Next' : 'Complete & Next'}
                         </Button>
                       )}
                     </div>
@@ -4612,7 +4618,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
       <div className={tehillimActiveTab === 'all' ? 'flex gap-2' : ''}>
         {/* Complete button - returns to Tehillim selector */}
         <Button 
-          onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
+          onClick={() => {
             // Track modal completion immediately
             trackModalComplete(`individual-tehillim-${selectedPsalm}`);
             markModalComplete(`individual-tehillim-${selectedPsalm}`);
@@ -4637,20 +4643,19 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
               openModal('special-tehillim', 'tefilla');
             }, 400);
           }}
-          disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
           className={`${tehillimActiveTab === 'all' ? 'flex-1' : 'w-full'} py-3 rounded-xl platypi-medium border-0 ${
             isModalComplete(`individual-tehillim-${selectedPsalm}`) 
-              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+              ? 'bg-sage text-white hover:scale-105 transition-transform' 
               : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
           }`}
         >
-          {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Completed' : 'Complete'}
+          {isModalComplete(`individual-tehillim-${selectedPsalm}`) ? 'Again' : 'Complete'}
         </Button>
 
         {/* Complete and Next button - only show when coming from 1-150 tab */}
         {tehillimActiveTab === 'all' && (
           <Button 
-            onClick={isModalComplete(`individual-tehillim-${selectedPsalm}`) ? undefined : () => {
+            onClick={() => {
               // Track modal completion immediately
               trackModalComplete(`individual-tehillim-${selectedPsalm}`);
               markModalComplete(`individual-tehillim-${selectedPsalm}`);
@@ -4680,10 +4685,9 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                 }
               }, 400);
             }}
-            disabled={isModalComplete(`individual-tehillim-${selectedPsalm}`)}
             className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
               isModalComplete(`individual-tehillim-${selectedPsalm}`) 
-                ? 'bg-muted-lavender text-white cursor-not-allowed opacity-70' 
+                ? 'bg-sage text-white hover:scale-105 transition-transform' 
                 : 'bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse'
             }`}
           >

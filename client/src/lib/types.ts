@@ -129,17 +129,36 @@ export interface DailyCompletionState {
   checkAndShowCongratulations: () => boolean;
 }
 
-// Daily modal completion tracking
+// Daily modal completion tracking with support for repeatable prayers
+export interface DailyCompletionData {
+  singles: Set<string>; // Single-completion prayers (once per day)
+  repeatables: Record<string, number>; // Repeatable prayers with completion counts
+}
+
 export interface ModalCompletionState {
-  completedModals: Record<string, Set<string>>; // date -> set of modalIds
+  completedModals: Record<string, DailyCompletionData>; // date -> completion data
   markModalComplete: (modalId: string) => void;
   isModalComplete: (modalId: string) => boolean;
+  getCompletionCount: (modalId: string) => number;
+  isSingleCompletionPrayer: (modalId: string) => boolean;
   resetModalCompletions: () => void;
 }
 
 export const useModalCompletionStore = create<ModalCompletionState>((set, get) => {
-  // Load initial state from localStorage
-  const loadFromStorage = () => {
+  // Define which prayers can only be completed once per day
+  const SINGLE_COMPLETION_PRAYERS = new Set([
+    'morning-brochas',  // Shacharis
+    'mincha',           // Mincha
+    'maariv'            // Maariv
+  ]);
+  
+  // Helper to check if a prayer is single-completion
+  const isSingleCompletionPrayer = (modalId: string): boolean => {
+    return SINGLE_COMPLETION_PRAYERS.has(modalId);
+  };
+  
+  // Load initial state from localStorage with migration support
+  const loadFromStorage = (): Record<string, DailyCompletionData> => {
     try {
       const stored = localStorage.getItem('modalCompletions');
       if (stored) {
@@ -152,31 +171,53 @@ export const useModalCompletionStore = create<ModalCompletionState>((set, get) =
         const yesterdayDay = String(yesterday.getDate()).padStart(2, '0');
         const yesterdayStr = `${yesterdayYear}-${yesterdayMonth}-${yesterdayDay}`;
         
-        // Convert arrays back to Sets, but only keep today and yesterday
-        const completedModals: Record<string, Set<string>> = {};
-        for (const [date, modals] of Object.entries(parsed)) {
+        const completedModals: Record<string, DailyCompletionData> = {};
+        
+        for (const [date, data] of Object.entries(parsed)) {
           // Only load today's and yesterday's data (for midnight transition)
           if (date === today || date === yesterdayStr) {
-            completedModals[date] = new Set(modals as string[]);
+            // Check if this is old format (array) or new format (object with singles/repeatables)
+            if (Array.isArray(data)) {
+              // Migrate from old format: convert array to new structure
+              completedModals[date] = {
+                singles: new Set(data.filter((id: string) => isSingleCompletionPrayer(id))),
+                repeatables: {}
+              };
+              // Initialize repeatable counters from old data
+              data.forEach((id: string) => {
+                if (!isSingleCompletionPrayer(id)) {
+                  completedModals[date].repeatables[id] = 1;
+                }
+              });
+            } else if (data && typeof data === 'object') {
+              // New format: restore Sets and counters
+              const typedData = data as any;
+              completedModals[date] = {
+                singles: new Set(typedData.singles || []),
+                repeatables: typedData.repeatables || {}
+              };
+            }
           }
         }
         return completedModals;
       }
     } catch (e) {
       console.error('Failed to load modal completions from storage:', e);
-      // Clear corrupted data
       localStorage.removeItem('modalCompletions');
     }
     return {};
   };
 
   // Save to localStorage whenever state changes
-  const saveToStorage = (completedModals: Record<string, Set<string>>) => {
+  const saveToStorage = (completedModals: Record<string, DailyCompletionData>) => {
     try {
       // Convert Sets to arrays for JSON serialization
-      const toStore: Record<string, string[]> = {};
-      for (const [date, modals] of Object.entries(completedModals)) {
-        toStore[date] = Array.from(modals);
+      const toStore: Record<string, { singles: string[]; repeatables: Record<string, number> }> = {};
+      for (const [date, data] of Object.entries(completedModals)) {
+        toStore[date] = {
+          singles: Array.from(data.singles),
+          repeatables: data.repeatables
+        };
       }
       localStorage.setItem('modalCompletions', JSON.stringify(toStore));
     } catch (e) {
@@ -186,17 +227,35 @@ export const useModalCompletionStore = create<ModalCompletionState>((set, get) =
 
   return {
     completedModals: loadFromStorage(),
+    isSingleCompletionPrayer,
+    
     markModalComplete: (modalId: string) => {
       const today = getLocalDateString();
       set(state => {
         const newState = { ...state.completedModals };
+        
+        // Initialize today's data if it doesn't exist
         if (!newState[today]) {
-          newState[today] = new Set();
+          newState[today] = {
+            singles: new Set(),
+            repeatables: {}
+          };
         } else {
-          // Clone the existing Set to ensure proper state update
-          newState[today] = new Set(newState[today]);
+          // Clone to ensure proper state update
+          newState[today] = {
+            singles: new Set(newState[today].singles),
+            repeatables: { ...newState[today].repeatables }
+          };
         }
-        newState[today].add(modalId);
+        
+        // Handle single-completion vs repeatable prayers differently
+        if (isSingleCompletionPrayer(modalId)) {
+          // Single-completion: add to set (idempotent)
+          newState[today].singles.add(modalId);
+        } else {
+          // Repeatable: increment counter
+          newState[today].repeatables[modalId] = (newState[today].repeatables[modalId] || 0) + 1;
+        }
         
         // Clean up old dates (keep only today and yesterday for transition period)
         const yesterday = new Date();
@@ -216,11 +275,30 @@ export const useModalCompletionStore = create<ModalCompletionState>((set, get) =
         return { completedModals: newState };
       });
     },
+    
     isModalComplete: (modalId: string) => {
       const today = getLocalDateString();
-      const todaysCompletions = get().completedModals[today];
-      return todaysCompletions ? todaysCompletions.has(modalId) : false;
+      const todaysData = get().completedModals[today];
+      if (!todaysData) return false;
+      
+      // Check both singles set and repeatables counters
+      return todaysData.singles.has(modalId) || (todaysData.repeatables[modalId] || 0) > 0;
     },
+    
+    getCompletionCount: (modalId: string) => {
+      const today = getLocalDateString();
+      const todaysData = get().completedModals[today];
+      if (!todaysData) return 0;
+      
+      // Single-completion prayers return 1 if completed, 0 otherwise
+      if (isSingleCompletionPrayer(modalId)) {
+        return todaysData.singles.has(modalId) ? 1 : 0;
+      }
+      
+      // Repeatable prayers return their counter value
+      return todaysData.repeatables[modalId] || 0;
+    },
+    
     resetModalCompletions: () => {
       localStorage.removeItem('modalCompletions');
       set({ completedModals: {} });

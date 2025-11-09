@@ -148,9 +148,8 @@ export function BirkatHamazonModal() {
   });
 
   const handleComplete = (modalType: string) => {
-    if (isModalComplete(modalType)) return;
-    
     // Track modal completion and mark as completed globally
+    // (always track for repeatable prayers to count multiple completions)
     trackModalComplete(modalType);
     markModalComplete(modalType);
     
@@ -522,15 +521,14 @@ export function BirkatHamazonModal() {
             
             <div className="heart-explosion-container">
               <Button 
-                onClick={isModalComplete('birkat-hamazon') ? undefined : () => handleComplete('birkat-hamazon')}
-                disabled={isModalComplete('birkat-hamazon')}
+                onClick={() => handleComplete('birkat-hamazon')}
                 className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                   isModalComplete('birkat-hamazon') 
-                    ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                    ? 'bg-sage text-white hover:scale-105 transition-transform' 
                     : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                 }`}
               >
-                {isModalComplete('birkat-hamazon') ? 'Completed Today' : 'Complete'}
+                {isModalComplete('birkat-hamazon') ? 'Complete Again' : 'Complete'}
               </Button>
               <HeartExplosion trigger={showHeartExplosion} />
             </div>
@@ -561,15 +559,14 @@ export function BirkatHamazonModal() {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={isModalComplete('birkat-hamazon') ? undefined : () => handleComplete('birkat-hamazon')}
-              disabled={isModalComplete('birkat-hamazon')}
+              onClick={() => handleComplete('birkat-hamazon')}
               className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                 isModalComplete('birkat-hamazon') 
-                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  ? 'bg-sage text-white hover:scale-105 transition-transform' 
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
-              {isModalComplete('birkat-hamazon') ? 'Completed Today' : 'Complete'}
+              {isModalComplete('birkat-hamazon') ? 'Complete Again' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showHeartExplosion} />
           </div>
@@ -896,15 +893,14 @@ export function BirkatHamazonFullscreenContent({ language, fontSize }: { languag
       </div>
 
       <Button
-        onClick={isModalComplete('birkat-hamazon') ? undefined : handleComplete}
-        disabled={isModalComplete('birkat-hamazon')}
+        onClick={handleComplete}
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           isModalComplete('birkat-hamazon') 
-            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            ? 'bg-sage text-white hover:scale-105 transition-transform' 
             : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
-        {isModalComplete('birkat-hamazon') ? 'Completed Today' : 'Complete'}
+        {isModalComplete('birkat-hamazon') ? 'Complete Again' : 'Complete'}
       </Button>
     </div>
   );
