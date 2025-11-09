@@ -1572,6 +1572,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { trackEvent } = useAnalytics();
+  const { openModal } = useModalStore();
   const tefillaConditions = useTefillaConditions();
   const queryClient = useQueryClient();
 
