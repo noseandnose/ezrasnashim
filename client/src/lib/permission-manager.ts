@@ -340,13 +340,24 @@ export class PermissionManager {
 
       return { success: true, subscription };
     } catch (error) {
-      console.error('[PermissionManager] Error subscribing to push:', error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : error instanceof DOMException 
+          ? `${error.name}: ${error.message}` 
+          : String(error);
+      
+      console.error('[PermissionManager] Error subscribing to push:', {
+        message: errorMessage,
+        name: error instanceof Error ? error.name : 'Unknown',
+        error: error
+      });
+      
       store.setNotificationState({
         subscribed: false,
-        lastError: String(error),
+        lastError: errorMessage,
         lastChecked: Date.now(),
       });
-      return { success: false, error: String(error) };
+      return { success: false, error: errorMessage };
     }
   }
 
