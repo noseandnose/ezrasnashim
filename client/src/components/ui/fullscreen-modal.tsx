@@ -78,8 +78,7 @@ export function FullscreenModal({
     // Add popstate listener to catch browser back gestures
     window.addEventListener('popstate', handlePopState, true);
     
-    // Save current scroll position and body styles
-    const scrollY = window.scrollY;
+    // Save body styles
     const originalBodyStyle = {
       overflow: document.body.style.overflow,
       position: document.body.style.position,
