@@ -28,6 +28,7 @@ export default function TableModals() {
   }>({ isOpen: false, title: '', content: null });
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
+  const lastArrowTouchTime = useRef<number>(0);
 
   const handleComplete = (modalId: string) => {
     trackModalComplete(modalId);
@@ -614,12 +615,15 @@ export default function TableModals() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              // Prevent double-firing if touch just happened
+                              if (Date.now() - lastArrowTouchTime.current < 500) return;
                               prevMedia();
                             }}
                             onTouchStart={(e) => e.stopPropagation()}
                             onTouchEnd={(e) => {
                               e.stopPropagation();
-                              e.preventDefault();
+                              lastArrowTouchTime.current = Date.now();
+                              prevMedia();
                             }}
                             className="absolute left-2 top-1/2 -translate-y-1/2 p-2 transition-transform hover:scale-110 z-10"
                             style={{
@@ -633,12 +637,15 @@ export default function TableModals() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              // Prevent double-firing if touch just happened
+                              if (Date.now() - lastArrowTouchTime.current < 500) return;
                               nextMedia();
                             }}
                             onTouchStart={(e) => e.stopPropagation()}
                             onTouchEnd={(e) => {
                               e.stopPropagation();
-                              e.preventDefault();
+                              lastArrowTouchTime.current = Date.now();
+                              nextMedia();
                             }}
                             className="absolute right-2 top-1/2 -translate-y-1/2 p-2 transition-transform hover:scale-110 z-10"
                             style={{
@@ -1077,12 +1084,15 @@ export default function TableModals() {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  // Prevent double-firing if touch just happened
+                                  if (Date.now() - lastArrowTouchTime.current < 500) return;
                                   setCurrentMediaIndex((prev) => (prev - 1 + mediaItems.length) % mediaItems.length);
                                 }}
                                 onTouchStart={(e) => e.stopPropagation()}
                                 onTouchEnd={(e) => {
                                   e.stopPropagation();
-                                  e.preventDefault();
+                                  lastArrowTouchTime.current = Date.now();
+                                  setCurrentMediaIndex((prev) => (prev - 1 + mediaItems.length) % mediaItems.length);
                                 }}
                                 className="absolute left-2 top-1/2 -translate-y-1/2 p-2 transition-transform hover:scale-110 z-10"
                                 style={{
@@ -1096,12 +1106,15 @@ export default function TableModals() {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  // Prevent double-firing if touch just happened
+                                  if (Date.now() - lastArrowTouchTime.current < 500) return;
                                   setCurrentMediaIndex((prev) => (prev + 1) % mediaItems.length);
                                 }}
                                 onTouchStart={(e) => e.stopPropagation()}
                                 onTouchEnd={(e) => {
                                   e.stopPropagation();
-                                  e.preventDefault();
+                                  lastArrowTouchTime.current = Date.now();
+                                  setCurrentMediaIndex((prev) => (prev + 1) % mediaItems.length);
                                 }}
                                 className="absolute right-2 top-1/2 -translate-y-1/2 p-2 transition-transform hover:scale-110 z-10"
                                 style={{
