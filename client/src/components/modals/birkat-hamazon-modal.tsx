@@ -21,6 +21,16 @@ interface BirkatHamazonPrayer {
   orderIndex: number;
 }
 
+// Helper function to trigger congratulations modal if all tasks are completed
+const triggerCongratulationsIfReady = (
+  checkAndShowCongratulations: () => boolean,
+  openModal: (modalId: string, fromSection?: string) => void
+) => {
+  if (checkAndShowCongratulations()) {
+    openModal('congratulations', 'tefilla');
+  }
+};
+
 // Koren Thank You Component
 const KorenThankYou = () => {
   const { coordinates } = useLocationStore();
@@ -44,7 +54,7 @@ const KorenThankYou = () => {
 };
 
 export function BirkatHamazonModal() {
-  const { activeModal, closeModal } = useModalStore();
+  const { activeModal, closeModal, openModal } = useModalStore();
   const [language, setLanguage] = useState<"hebrew" | "english">("hebrew");
   const [fontSize, setFontSize] = useState(20);
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
@@ -158,9 +168,13 @@ export function BirkatHamazonModal() {
     
     setTimeout(() => {
       setShowHeartExplosion(false);
-      checkAndShowCongratulations();
-      closeModal();
-      window.location.hash = '#/?section=home&scrollToProgress=true';
+      // Only close and navigate if congratulations modal wasn't triggered
+      if (!checkAndShowCongratulations()) {
+        closeModal();
+        window.location.hash = '#/?section=home&scrollToProgress=true';
+      } else {
+        openModal('congratulations', 'tefilla');
+      }
     }, 2000);
   };
 

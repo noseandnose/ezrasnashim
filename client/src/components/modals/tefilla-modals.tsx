@@ -188,6 +188,16 @@ const processTefillaContent = (text: string, conditions: TefillaConditions | nul
   return formatTextContent(processedText);
 };
 
+// Helper function to trigger congratulations modal if all tasks are completed
+const triggerCongratulationsIfReady = (
+  checkAndShowCongratulations: () => boolean,
+  openModal: (modalId: string, fromSection?: string) => void
+) => {
+  if (checkAndShowCongratulations()) {
+    openModal('congratulations', 'tefilla');
+  }
+};
+
 // Helper functions for prayer reason icons and short text
 const getReasonIcon = (reason: string, reasonEnglish?: string) => {
   // Map Hebrew reasons and English translations to icons
@@ -1438,7 +1448,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     trackModalComplete(completionKey);
     markModalComplete(completionKey);
     completeTask('tefilla');
-    checkAndShowCongratulations();
+    triggerCongratulationsIfReady(checkAndShowCongratulations, openModal);
     
     // Determine next psalm based on context: Daily Tehillim list or sequential
     let nextPsalm: number;
@@ -1765,7 +1775,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
     
     // Show congratulations
     setTimeout(() => {
-      checkAndShowCongratulations();
+      triggerCongratulationsIfReady(checkAndShowCongratulations, openModal);
     }, 100);
   };
 
@@ -1780,7 +1790,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
       const result = await completeAndNextMutation.mutateAsync();
       
       // Show congratulations briefly
-      checkAndShowCongratulations();
+      triggerCongratulationsIfReady(checkAndShowCongratulations, openModal);
       
       // Small delay to let congratulations show, then reopen fullscreen with next perek
       setTimeout(() => {
@@ -2451,7 +2461,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       
       // Check for congratulations after completion
       setTimeout(() => {
-        checkAndShowCongratulations();
+        triggerCongratulationsIfReady(checkAndShowCongratulations, openModal);
       }, 100);
       
       // Close modal after short delay to show toast
@@ -2509,7 +2519,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       
       // Check for congratulations after completion
       setTimeout(() => {
-        checkAndShowCongratulations();
+        triggerCongratulationsIfReady(checkAndShowCongratulations, openModal);
       }, 100);
       
       // Immediately refetch all data to show the new perek
@@ -2592,7 +2602,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       setShowExplosion(true);
       setTimeout(() => {
         setShowExplosion(false);
-        checkAndShowCongratulations();
+        triggerCongratulationsIfReady(checkAndShowCongratulations, openModal);
         closeModal();
         
         if (onSectionChange) {
@@ -2634,7 +2644,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     
     setTimeout(() => {
       setShowExplosion(false);
-      checkAndShowCongratulations();
+      triggerCongratulationsIfReady(checkAndShowCongratulations, openModal);
       closeModal();
       
       // Navigate to home section and scroll to progress to show flower growth
@@ -4351,7 +4361,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                             setTimeout(() => {
                               setShowHeartExplosion(false);
                               setFullscreenContent({ isOpen: false, title: '', content: null });
-                              checkAndShowCongratulations();
+                              triggerCongratulationsIfReady(checkAndShowCongratulations, openModal);
                               openModal('special-tehillim', 'tefilla');
                             }, 400);
                           }}
@@ -4520,7 +4530,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                             
                             setTimeout(() => {
                               setShowHeartExplosion(false);
-                              checkAndShowCongratulations();
+                              triggerCongratulationsIfReady(checkAndShowCongratulations, openModal);
                               // Stay in fullscreen and navigate to next psalm
                               openModal('individual-tehillim', 'tefilla', nextPsalm);
                             }, 400);
@@ -4639,7 +4649,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
             
             setTimeout(() => {
               setShowHeartExplosion(false);
-              checkAndShowCongratulations();
+              triggerCongratulationsIfReady(checkAndShowCongratulations, openModal);
               openModal('special-tehillim', 'tefilla');
             }, 400);
           }}
@@ -4677,7 +4687,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
               
               setTimeout(() => {
                 setShowHeartExplosion(false);
-                checkAndShowCongratulations();
+                triggerCongratulationsIfReady(checkAndShowCongratulations, openModal);
                 if (nextPsalm <= 150) {
                   openModal('individual-tehillim', 'special-tehillim', nextPsalm);
                 } else {
