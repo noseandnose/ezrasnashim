@@ -65,19 +65,12 @@ export default function AppHeader() {
     setHasReadMessage(true);
   };
 
-  const handleInstallClick = async () => {
+  const handleInstallClick = () => {
     // User has engaged with install - dismiss the highlight
     markDismissed();
     
-    // Try native install prompt
-    const result = await triggerInstallPrompt();
-    
-    // Only show manual instructions if native prompt was unavailable
-    if (result === 'unavailable') {
-      setShowAddToHomeScreen(true);
-    }
-    // If 'accepted' or 'dismissed', the user has already interacted with the prompt
-    // so we don't need to show manual instructions
+    // Redirect to the app download page
+    window.open('https://onelink.to/e93hq9', '_blank');
   };
   
   const handleShare = async () => {
