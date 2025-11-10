@@ -9,51 +9,16 @@ import TorahSection from "@/components/sections/torah-section";
 import TefillaSection from "@/components/sections/tefilla-section";
 import TzedakaSection from "@/components/sections/tzedaka-section";
 import TableSection from "@/components/sections/table-section";
-import { useGeolocation, useJewishTimes, useLocationStore } from "@/hooks/use-jewish-times";
+import { useGeolocation, useJewishTimes } from "@/hooks/use-jewish-times";
 
 export type Section = 'torah' | 'tefilla' | 'tzedaka' | 'home' | 'table';
 
 export default function Home() {
   const [location, setLocation] = useLocation();
-  const [geoReady, setGeoReady] = useState(false);
-  const initializeFromCache = useLocationStore(state => state.initializeFromCache);
   
-  // Initialize from cache synchronously for instant startup
-  useEffect(() => {
-    initializeFromCache();
-    
-    // Defer expensive geolocation and Jewish times initialization until after first paint
-    // Use requestIdleCallback to wait for browser idle time
-    const handleIdleInit = () => {
-      setGeoReady(true);
-    };
-    
-    let idleId: number | undefined;
-    let timerId: number | undefined;
-    
-    // Proper feature detection for Safari/iOS compatibility
-    if (typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function') {
-      idleId = window.requestIdleCallback(handleIdleInit, { timeout: 300 });
-    } else {
-      // Fallback for browsers without requestIdleCallback (Safari, iOS)
-      timerId = window.setTimeout(handleIdleInit, 150);
-    }
-    
-    // Single cleanup function that cancels whichever was scheduled
-    return () => {
-      if (idleId !== undefined && typeof window.cancelIdleCallback === 'function') {
-        window.cancelIdleCallback(idleId);
-      }
-      if (timerId !== undefined) {
-        window.clearTimeout(timerId);
-      }
-    };
-  }, [initializeFromCache]);
-  
-  // Call hooks unconditionally but with enabled gate for boot time optimization
-  // Hooks won't trigger expensive operations (permission dialogs, API calls) until geoReady=true
-  useGeolocation({ enabled: geoReady });
-  useJewishTimes({ enabled: geoReady });
+  // Initialize geolocation and Jewish times immediately (core app functionality)
+  useGeolocation();
+  useJewishTimes();
   
   // Track which sections have been mounted for instant switching
   const [mountedSections, setMountedSections] = useState<Set<Section>>(
