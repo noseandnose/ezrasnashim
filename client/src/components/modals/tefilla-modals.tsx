@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -10,7 +10,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
 
 import { MinchaPrayer, MorningPrayer, NishmasText, GlobalTehillimProgress, TehillimName, WomensPrayer } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import axiosClient from "@/lib/axiosClient";
@@ -22,17 +21,9 @@ import { processTefillaText, getCurrentTefillaConditions, type TefillaConditions
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { Expand } from "lucide-react";
-import { createContext, useContext } from 'react';
 
 // Import simplified compass component
 import { SimpleCompassUI } from '@/components/compass/SimpleCompassUI';
-
-// Context for Morning Brochas navigation arrow
-const MorningBrochasNavigationContext = createContext<{
-  expandedSection: number;
-  scrollToBottomOfSection: () => void;
-  sectionRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
-} | null>(null);
 
 interface TefillaModalsProps {
   onSectionChange?: (section: 'torah' | 'tefilla' | 'tzedaka' | 'home' | 'table') => void;
@@ -668,7 +659,6 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
   const selectedBrochaId = (window as any).selectedBrochaId;
   const tefillaConditions = useTefillaConditions();
   const { completeTask } = useDailyCompletionStore();
-  const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
 
   // Me'ein Shalosh food selection state
@@ -808,7 +798,7 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
   );
 }
 
-function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english'; fontSize: number }) {
   const [activeTab, setActiveTab] = useState<'daily' | 'special'>('daily');
   
   const { data: dailyBrochas = [], isLoading: dailyLoading } = useQuery<any[]>({
@@ -1941,7 +1931,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
-  const { trackEvent } = useAnalytics();
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
   const [fontSize, setFontSize] = useState(20);
   const [showHebrew, setShowHebrew] = useState(() => {
@@ -1982,7 +1971,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       delete (window as any).updateFullscreenTitle;
     };
   }, []);
-  const queryClient = useQueryClient();
   
   // Load Tefilla conditions for conditional content processing
   const tefillaConditions = useTefillaConditions();
@@ -2290,15 +2278,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   };
 
   // Nishmas 40-Day Campaign state with localStorage persistence
-  const [nishmasDay, setNishmasDay] = useState(() => {
+  const [, setNishmasDay] = useState(() => {
     const saved = localStorage.getItem('nishmas-day');
     return saved ? parseInt(saved, 10) : 0;
   });
-  const [nishmasStartDate, setNishmasStartDate] = useState<string | null>(() => {
+  const [, setNishmasStartDate] = useState<string | null>(() => {
     return localStorage.getItem('nishmas-start-date');
   });
   const [nishmasLanguage, setNishmasLanguage] = useState<'hebrew' | 'english'>('hebrew');
-  const [todayCompleted, setTodayCompleted] = useState(() => {
+  const [, setTodayCompleted] = useState(() => {
     const today = new Date().toDateString();
     const lastCompleted = localStorage.getItem('nishmas-last-completed');
     return lastCompleted === today;
@@ -2331,7 +2319,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   });
 
   // Fetch global Tehillim progress
-  const { data: progress, refetch: refetchProgress } = useQuery<GlobalTehillimProgress>({
+  const { data: progress } = useQuery<GlobalTehillimProgress>({
     queryKey: ['/api/tehillim/progress'], 
     queryFn: async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress`);
@@ -2344,7 +2332,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   });
 
   // Fetch current name for the perek
-  const { data: currentName, refetch: refetchCurrentName } = useQuery<TehillimName | null>({
+  useQuery<TehillimName | null>({
     queryKey: ['/api/tehillim/current-name'],
     enabled: activeModal === 'tehillim-text',
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
@@ -2352,7 +2340,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   });
 
   // Get the tehillim info first to get the English number
-  const { data: tehillimInfo, refetch: refetchTehillimInfo } = useQuery<{
+  useQuery<{
     id: number;
     englishNumber: number;
     partNumber: number;
@@ -2370,7 +2358,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   });
 
   // Fetch Tehillim text from Supabase using ID (for proper part handling)
-  const { refetch: refetchTehillimText } = useQuery<{text: string; perek: number; language: string}>({
+  useQuery<{text: string; perek: number; language: string}>({
     queryKey: ['/api/tehillim/text/by-id', progress?.currentPerek, showHebrew ? 'hebrew' : 'english'],
     queryFn: async () => {
       if (!progress?.currentPerek) return null;
@@ -2379,154 +2367,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     },
     enabled: activeModal === 'tehillim-text' && !!progress?.currentPerek,
     staleTime: 0 // Always consider data stale to force fresh fetches
-  });
-
-  // Store closeModal reference to ensure it's available in mutation callbacks
-  const closeModalRef = useRef(closeModal);
-  useEffect(() => {
-    closeModalRef.current = closeModal;
-  }, [closeModal]);
-
-  // Mutation to complete a perek and return to selector
-  const completePerekMutation = useMutation({
-    mutationFn: async () => {
-      if (!progress) throw new Error('No progress data');
-      return apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/tehillim/complete`, { 
-        currentPerek: progress.currentPerek,
-        language: showHebrew ? 'hebrew' : 'english',
-        completedBy: 'user' 
-      });
-    },
-    onSuccess: async (response) => {
-      // Track tehillim completion for analytics
-      trackEvent("tehillim_complete", { 
-        perek: progress?.currentPerek,
-        language: showHebrew ? 'hebrew' : 'english',
-        type: 'global'
-      });
-      
-      // Track modal completion for daily tracking  
-      trackModalComplete('global-tehillim-chain');
-      markModalComplete('global-tehillim-chain');
-      completeTask('tefilla');
-      
-      // Track name prayed for if there was one
-      if (currentName) {
-        trackEvent("name_prayed", {
-          nameId: currentName.id,
-          reason: currentName.reason,
-          perek: progress?.currentPerek
-        });
-      }
-      
-      toast({
-        title: "Perek Completed!",
-        description: tehillimInfo?.partNumber && tehillimInfo.partNumber > 1 
-          ? `Perek ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber} has been completed.`
-          : `Perek ${tehillimInfo?.englishNumber || 'current'} has been completed.`,
-      });
-      
-      // Dispatch event for the tefilla section to refresh
-      window.dispatchEvent(new Event('tehillimCompleted'));
-      
-      // Invalidate analytics stats to show updated counts immediately
-      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/today'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/month'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/total'] });
-      
-      // Check for congratulations after completion
-      setTimeout(() => {
-        if (checkAndShowCongratulations()) {
-          openModal('congratulations', 'tefilla');
-        } else {
-          // Only close modal if congratulations wasn't shown
-          setTimeout(() => {
-            closeModal();
-          }, 900); // 900ms more after 100ms = 1000ms total
-        }
-      }, 100);
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to complete perek. Please try again.",
-        variant: "destructive"
-      });
-    }
-  });
-
-  // Mutation to complete and go to next
-  const completeAndNextMutation = useMutation({
-    mutationFn: async () => {
-      if (!progress) throw new Error('No progress data');
-      return apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/tehillim/complete`, { 
-        currentPerek: progress.currentPerek,
-        language: showHebrew ? 'hebrew' : 'english',
-        completedBy: 'user' 
-      });
-    },
-    onSuccess: async (response) => {
-      // Track tehillim completion for analytics
-      trackEvent("tehillim_complete", { 
-        perek: progress?.currentPerek,
-        language: showHebrew ? 'hebrew' : 'english',
-        type: 'global'
-      });
-      
-      // Track modal completion for daily tracking  
-      trackModalComplete('global-tehillim-chain');
-      markModalComplete('global-tehillim-chain');
-      completeTask('tefilla');
-      
-      // Track name prayed for if there was one
-      if (currentName) {
-        trackEvent("name_prayed", {
-          nameId: currentName.id,
-          reason: currentName.reason,
-          perek: progress?.currentPerek
-        });
-      }
-      
-      toast({
-        title: "Perek Completed!",
-        description: tehillimInfo?.partNumber && tehillimInfo.partNumber > 1 
-          ? `Perek ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber} has been completed. Loading next section...`
-          : `Perek ${tehillimInfo?.englishNumber || 'current'} has been completed. Loading next perek...`,
-      });
-      
-      // Check for congratulations - if shown, don't proceed with refetch/next
-      if (checkAndShowCongratulations()) {
-        openModal('congratulations', 'tefilla');
-        return;
-      }
-      
-      // Immediately refetch all data to show the new perek
-      await Promise.all([
-        refetchProgress(),
-        refetchCurrentName(),
-        refetchTehillimInfo(),
-        refetchTehillimText()
-      ]);
-      
-      // Also invalidate queries for other components
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/preview'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/text'] });
-      
-      // Invalidate analytics stats to show updated counts immediately
-      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/today'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/month'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/total'] });
-      
-      // Dispatch event for the tefilla section to refresh
-      window.dispatchEvent(new Event('tehillimCompleted'));
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to complete perek. Please try again.",
-        variant: "destructive"
-      });
-    }
   });
 
 
@@ -2566,95 +2406,6 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       setNishmasStartDate(savedStartDate);
     }
   }, []);
-
-  // Mark today's Nishmas as completed
-  const markNishmasCompleted = () => {
-    // Always track analytics and completion for repeatable prayers
-    trackModalComplete('nishmas');
-    markModalComplete('nishmas');
-    completeTask('tefilla');
-    
-    // Check if 40-day campaign already completed today
-    if (todayCompleted) {
-      // Already completed today's 40-day campaign step, just redirect home
-      setShowExplosion(true);
-      setTimeout(() => {
-        setShowExplosion(false);
-        
-        // Check if congratulations should be shown
-        if (checkAndShowCongratulations()) {
-          openModal('congratulations', 'tefilla');
-        } else {
-          // Only close and navigate if congratulations wasn't shown
-          closeModal();
-          
-          if (onSectionChange) {
-            onSectionChange('home');
-            setTimeout(() => {
-              const progressElement = document.getElementById('daily-progress-garden');
-              if (progressElement) {
-                progressElement.scrollIntoView({ 
-                  behavior: 'smooth', 
-                  block: 'center' 
-                });
-              }
-            }, 300);
-          } else {
-            window.location.hash = '#/?section=home&scrollToProgress=true';
-          }
-        }
-      }, 2000);
-      return;
-    }
-    
-    const today = new Date().toDateString();
-    const newDay = nishmasDay + 1;
-    
-    if (newDay <= 40) {
-      setNishmasDay(newDay);
-      setTodayCompleted(true);
-      localStorage.setItem('nishmas-day', newDay.toString());
-      localStorage.setItem('nishmas-last-completed', today);
-      
-      if (!nishmasStartDate) {
-        const startDate = today;
-        setNishmasStartDate(startDate);
-        localStorage.setItem('nishmas-start-date', startDate);
-      }
-    }
-    
-    // Redirect to home with explosion animation
-    setShowExplosion(true);
-    
-    setTimeout(() => {
-      setShowExplosion(false);
-      
-      // Check if congratulations should be shown
-      if (checkAndShowCongratulations()) {
-        openModal('congratulations', 'tefilla');
-      } else {
-        // Only close and navigate if congratulations wasn't shown
-        closeModal();
-        
-        // Navigate to home section and scroll to progress to show flower growth
-        if (onSectionChange) {
-          onSectionChange('home');
-          setTimeout(() => {
-            const progressElement = document.getElementById('daily-progress-garden');
-            if (progressElement) {
-              progressElement.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'center' 
-              });
-            }
-          }, 300);
-        } else {
-          // Fallback: redirect to home with scroll parameter
-          window.location.hash = '#/?section=home&scrollToProgress=true';
-        }
-      }
-    }, 2000);
-  };
 
 
 
@@ -3419,8 +3170,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           fullscreenContent.title === 'Maariv Prayer' ? showMaarivInfo : false
         }
         onInfoClick={
-          fullscreenContent.contentType === 'morning-brochas' ? (open: boolean) => setShowMorningBrochasInfo(open) :
-          fullscreenContent.title === 'Maariv Prayer' ? (open: boolean) => setShowMaarivInfo(open) : undefined
+          fullscreenContent.contentType === 'morning-brochas' 
+            ? (open: boolean) => setShowMorningBrochasInfo(open)
+            : fullscreenContent.title === 'Maariv Prayer' 
+            ? (open: boolean) => setShowMaarivInfo(open)
+            : () => {}
         }
         infoContent={
           fullscreenContent.contentType === 'morning-brochas' ? getMorningBrochasTooltip() :
@@ -3741,7 +3495,7 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
 
 // Special Tehillim Fullscreen Content Component
 function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english'; fontSize: number }) {
-  const { openModal, setSelectedPsalm, tehillimActiveTab, setTehillimActiveTab, setTehillimReturnTab, setDailyTehillimPsalms } = useModalStore();
+  const { setSelectedPsalm, tehillimActiveTab, setTehillimActiveTab, setTehillimReturnTab, setDailyTehillimPsalms } = useModalStore();
   const { isModalComplete } = useModalCompletionStore();
 
   // Fetch current Hebrew date
@@ -4218,7 +3972,7 @@ function SpecialTehillimModal() {
 
 
 function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenContent?: (content: any) => void }) {
-  const { closeModal, openModal, selectedPsalm, previousModal, tehillimActiveTab, dailyTehillimPsalms } = useModalStore();
+  const { openModal, selectedPsalm, tehillimActiveTab, dailyTehillimPsalms } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
