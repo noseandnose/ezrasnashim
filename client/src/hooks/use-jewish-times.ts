@@ -120,7 +120,8 @@ export const useLocationStore = create<LocationState>((set) => ({
 
 
 // Hook to get user's location
-export function useGeolocation() {
+export function useGeolocation(options: { enabled?: boolean } = {}) {
+  const { enabled = true } = options;
   const {
     coordinates,
     locationRequested,
@@ -131,6 +132,8 @@ export function useGeolocation() {
   } = useLocationStore();
 
   useEffect(() => {
+    // Gate expensive operations on enabled flag for boot time optimization
+    if (!enabled) return;
     const checkLocationPermission = async () => {
       // If coordinates are already set, periodically check for location changes
       if (coordinates) {
@@ -199,6 +202,7 @@ export function useGeolocation() {
     // Execute immediately for fastest location detection
     checkLocationPermission();
   }, [
+    enabled,
     locationRequested,
     coordinates,
     permissionDenied,
@@ -210,12 +214,15 @@ export function useGeolocation() {
   return { coordinates, permissionDenied };
 }
 
-export function useJewishTimes() {
-  const { coordinates } = useGeolocation();
+export function useJewishTimes(options: { enabled?: boolean } = {}) {
+  const { enabled = true } = options;
+  // Read coordinates directly from store instead of calling useGeolocation
+  const coordinates = useLocationStore(state => state.coordinates);
   const today = new Date().toISOString().split("T")[0];
 
   return useQuery({
     queryKey: ["zmanim", coordinates?.lat, coordinates?.lng, today],
+    enabled: enabled && !!coordinates, // Only fetch when enabled and coordinates available
     staleTime: 60 * 60 * 1000, // 1 hour cache
     gcTime: 24 * 60 * 60 * 1000, // 24 hours in memory
     queryFn: async () => {
@@ -232,7 +239,6 @@ export function useJewishTimes() {
         return null;
       }
     },
-    enabled: !!coordinates, // Only fetch when we have coordinates
     refetchInterval: false,
     refetchOnWindowFocus: false, // Optimized: Avoid excessive refetches
     refetchOnMount: false, // Optimized: Use cached data when fresh
