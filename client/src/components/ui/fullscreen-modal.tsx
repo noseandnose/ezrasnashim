@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react';
-import { X, Info } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { X, Info, Compass } from 'lucide-react';
 import logoImage from "@assets/1LO_1755590090315.png";
 import { FloatingSettings } from './floating-settings';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useLocation } from 'wouter';
+import { MiniCompassModal } from '@/components/modals/mini-compass-modal';
 
 interface FullscreenModalProps {
   isOpen: boolean;
@@ -27,6 +28,8 @@ interface FullscreenModalProps {
   showInfoPopover?: boolean;
   // Floating element (e.g., navigation arrows) rendered outside scroll container
   floatingElement?: React.ReactNode;
+  // Compass button (for prayer modals)
+  showCompassButton?: boolean;
 }
 
 export function FullscreenModal({ 
@@ -46,10 +49,12 @@ export function FullscreenModal({
   onInfoClick,
   infoContent,
   showInfoPopover = false,
-  floatingElement
+  floatingElement,
+  showCompassButton = false
 }: FullscreenModalProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [, setLocation] = useLocation();
+  const [showCompass, setShowCompass] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -188,23 +193,40 @@ export function FullscreenModal({
           }}
         >
           <div className="flex items-center justify-between">
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onClose();
-                setLocation('/');
-              }}
-              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-              aria-label="Go to home"
-              type="button"
-            >
-              <img 
-                src={logoImage} 
-                alt="Ezras Nashim" 
-                className="h-5 w-auto"
-              />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onClose();
+                  setLocation('/');
+                }}
+                className="hover:opacity-80 transition-opacity"
+                aria-label="Go to home"
+                type="button"
+              >
+                <img 
+                  src={logoImage} 
+                  alt="Ezras Nashim" 
+                  className="h-5 w-auto"
+                />
+              </button>
+
+              {showCompassButton && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowCompass(true);
+                  }}
+                  className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+                  aria-label="Open compass"
+                  type="button"
+                >
+                  <Compass className="h-5 w-5 text-blush/70" />
+                </button>
+              )}
+            </div>
 
             <h1 className="text-lg font-semibold text-gray-900 text-center flex-1 mx-4">
               {title}
@@ -305,6 +327,12 @@ export function FullscreenModal({
 
       {/* Floating Element (e.g., navigation arrows) - Outside scrollable content */}
       {floatingElement}
+
+      {/* Mini Compass Modal */}
+      <MiniCompassModal 
+        isOpen={showCompass} 
+        onClose={() => setShowCompass(false)} 
+      />
     </div>
   );
 }
