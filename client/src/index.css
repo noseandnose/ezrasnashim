@@ -105,7 +105,7 @@ body {
   -webkit-tap-highlight-color: transparent; /* Remove tap highlights */
   
   /* Performance optimizations for mobile */
-  contain: layout style; /* CSS containment for better rendering */
+  /* REMOVED: contain: layout style - breaks position:fixed for headers and floating elements */
   will-change: auto; /* Reset will-change to prevent memory issues */
   
   /* Set default font immediately to prevent font swap */

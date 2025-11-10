@@ -81,3 +81,6 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 
 ## Known Platform Issues
 - **Replit Cartographer Warnings**: The `@replit/vite-plugin-cartographer` plugin (v0.4.2) generates "TypeError: traverse is not a function" warnings during development builds due to an internal plugin bug. These warnings are cosmetic only and do not affect application functionality. The warnings appear because the plugin has an internal issue with its @babel/traverse dependency loading. This is a known Replit platform issue that cannot be resolved without modifying forbidden configuration files (vite.config.ts). The application builds and runs correctly despite these warnings.
+
+## Fixed Layout Issues
+- **CSS Containment Breaking Fixed Positioning** (Fixed 2025-11-09): Removed `contain: layout style;` from body element in index.css. This CSS containment rule was creating a new containing block that broke `position: fixed` for all headers and floating UI elements (AppHeader, FloatingSettings, navigation arrows). The containment caused fixed elements to scroll with the page instead of staying viewport-fixed. This was a recurring issue that has now been permanently resolved by removing the problematic containment rule.
