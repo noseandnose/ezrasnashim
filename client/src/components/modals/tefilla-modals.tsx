@@ -93,16 +93,6 @@ const useTefillaConditions = () => {
           coordinates?.lng
         );
         
-        // Debug TTI/TBI conditions
-        console.log('Loaded Tefilla conditions:', {
-          isTTI: tefillaConditions.isTTI,
-          isTBI: tefillaConditions.isTBI,
-          isTTC: tefillaConditions.isTTC,
-          isTBC: tefillaConditions.isTBC,
-          isInIsrael: tefillaConditions.isInIsrael,
-          allConditions: tefillaConditions
-        });
-        
         setConditions(tefillaConditions);
       } catch (error) {
         
@@ -169,17 +159,6 @@ const processTefillaContent = (text: string, conditions: TefillaConditions | nul
   };
   
   const effectiveConditions = conditions || defaultConditions;
-  
-  // Debug text processing for TTI issues
-  if (text && text.includes('[[TTI]]')) {
-    console.log('Processing text with TTI:', {
-      hasConditions: !!effectiveConditions,
-      isTTI: effectiveConditions.isTTI,
-      isTBI: effectiveConditions.isTBI,
-      isTTC: effectiveConditions.isTTC,
-      isTBC: effectiveConditions.isTBC
-    });
-  }
   
   // Process conditional text FIRST (removes/shows conditional sections)
   const processedText = processTefillaText(text, effectiveConditions);
