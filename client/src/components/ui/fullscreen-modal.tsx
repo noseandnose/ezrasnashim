@@ -223,7 +223,7 @@ export function FullscreenModal({
                   aria-label="Open compass"
                   type="button"
                 >
-                  <Compass className="h-5 w-5 text-blush/70" />
+                  <Compass className="h-6 w-6 text-blush/70" />
                 </button>
               )}
             </div>
@@ -247,7 +247,7 @@ export function FullscreenModal({
                         onInfoClick?.(!showInfoPopover);
                       }}
                     >
-                      <Info className="h-5 w-5 text-blush/60" />
+                      <Info className="h-6 w-6 text-blush/60" />
                     </button>
                   </PopoverTrigger>
                   <PopoverContent className="max-w-xs p-3 bg-white border border-blush/20 shadow-lg z-[9999]">
@@ -266,7 +266,7 @@ export function FullscreenModal({
                 aria-label="Close fullscreen"
                 type="button"
               >
-                <X className="h-5 w-5 text-gray-600" />
+                <X className="h-6 w-6 text-gray-600" />
               </button>
             </div>
           </div>
@@ -285,7 +285,7 @@ export function FullscreenModal({
           aria-label="Close"
           type="button"
         >
-          <X className="h-4 w-4 text-gray-600" />
+          <X className="h-5 w-5 text-gray-600" />
         </button>
       )}
 

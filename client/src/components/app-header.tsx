@@ -137,7 +137,7 @@ export default function AppHeader() {
                   aria-label="Menu"
                   data-testid="button-menu"
                 >
-                  <Menu className="h-5 w-5 text-black/70" />
+                  <Menu className="h-6 w-6 text-black/70" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48">
@@ -146,7 +146,7 @@ export default function AppHeader() {
                   className="cursor-pointer"
                   data-testid="menu-item-analytics"
                 >
-                  <BarChart3 className="h-4 w-4 mr-2" />
+                  <BarChart3 className="h-5 w-5 mr-2" />
                   Analytics
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -154,7 +154,7 @@ export default function AppHeader() {
                   className="cursor-pointer"
                   data-testid="menu-item-info"
                 >
-                  <Info className="h-4 w-4 mr-2" />
+                  <Info className="h-5 w-5 mr-2" />
                   Info
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -162,7 +162,7 @@ export default function AppHeader() {
                   className="cursor-pointer"
                   data-testid="menu-item-share"
                 >
-                  <Share2 className="h-4 w-4 mr-2" />
+                  <Share2 className="h-5 w-5 mr-2" />
                   Share
                 </DropdownMenuItem>
                 {!isStandalone && !isWebview && (
@@ -178,9 +178,9 @@ export default function AppHeader() {
                     data-testid="menu-item-install"
                   >
                     {isIOS ? (
-                      <Share className="h-4 w-4 mr-2" />
+                      <Share className="h-5 w-5 mr-2" />
                     ) : (
-                      <Share2 className="h-4 w-4 mr-2" />
+                      <Share2 className="h-5 w-5 mr-2" />
                     )}
                     Install App
                   </DropdownMenuItem>
@@ -190,7 +190,7 @@ export default function AppHeader() {
                   className="cursor-pointer"
                   data-testid="menu-item-feedback"
                 >
-                  <MessageSquare className="h-4 w-4 mr-2" />
+                  <MessageSquare className="h-5 w-5 mr-2" />
                   Community Feedback
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -212,7 +212,7 @@ export default function AppHeader() {
               aria-label="Daily Message"
               data-testid="button-message"
             >
-              <Mail className="h-5 w-5 text-black/70" />
+              <Mail className="h-6 w-6 text-black/70" />
               {!!todayMessage && !hasReadMessage && (
                 <span className="absolute top-1 right-1 w-2 h-2 bg-blush rounded-full" data-testid="indicator-unread-message" />
               )}
@@ -241,7 +241,7 @@ export default function AppHeader() {
               className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
               aria-label="Close"
             >
-              <X className="h-5 w-5 text-gray-500" />
+              <X className="h-6 w-6 text-gray-500" />
             </button>
             
             <div className="flex justify-center mb-4">
