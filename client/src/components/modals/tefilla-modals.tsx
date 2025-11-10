@@ -3181,7 +3181,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           fullscreenContent.contentType === 'morning-brochas' ? getMorningBrochasTooltip() :
           fullscreenContent.title === 'Maariv Prayer' ? getMaarivTooltip() : undefined
         }
-        showCompassButton={fullscreenContent.contentType === 'morning-brochas' || fullscreenContent.contentType === 'mincha'}
+        showCompassButton={fullscreenContent.contentType === 'morning-brochas' || fullscreenContent.contentType === 'mincha' || fullscreenContent.contentType === 'maariv'}
         floatingElement={fullscreenContent.contentType === 'morning-brochas' ? <MorningBrochasNavigationArrow /> : undefined}
       >
         {fullscreenContent.content || renderPrayerContent(fullscreenContent.contentType, language, fontSize)}
