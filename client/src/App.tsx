@@ -145,7 +145,7 @@ export default function App() {
         // App is now visible - invalidate critical queries to fetch fresh data
         // This prevents stale state when app resumes from long background periods
         const today = getLocalDateString();
-        queryClient.invalidateQueries({ queryKey: [`/api/messages/${today}`] });
+        queryClient.invalidateQueries({ queryKey: ['/api/home-summary', today] });
         queryClient.invalidateQueries({ queryKey: ['/api/daily-completion'] });
         queryClient.invalidateQueries({ queryKey: ['/api/global-progress'] });
       }

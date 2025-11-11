@@ -1,18 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
 import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Star } from "lucide-react";
 import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
 import { useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
+import { useHomeSummary } from "@/hooks/use-home-summary";
 import HeartProgress from "@/components/heart-progress";
 import DailyProgress from "@/components/daily-progress";
 import type { Section } from "@/pages/home";
 import { useMemo } from "react";
-
-interface Sponsor {
-  name: string;
-  inHonorMemoryOf?: string;
-  message?: string;
-}
 
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
@@ -35,23 +29,9 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     return "Good Evening";
   };
 
-  // Fetch today's sponsor
-  const today = new Date().toISOString().split('T')[0];
-  const { data: sponsor, isLoading: sponsorLoading } = useQuery<Sponsor>({
-    queryKey: ['/api/sponsors/daily', today],
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sponsors/daily/${today}`);
-      if (!response.ok) {
-        return null;
-      }
-      const data = await response.json();
-      return data;
-    },
-    staleTime: 6 * 60 * 60 * 1000, // Cache for 6 hours (sponsors set once per day)
-    gcTime: 12 * 60 * 60 * 1000, // Keep in cache for 12 hours
-    refetchOnMount: false,
-    refetchOnWindowFocus: true // Refetch when user returns to page (for mid-day sponsor updates)
-  });
+  // Use batched home summary for better performance
+  const { data: homeSummary, isLoading: sponsorLoading } = useHomeSummary();
+  const sponsor = homeSummary?.sponsor;
 
 
 

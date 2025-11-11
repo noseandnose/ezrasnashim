@@ -3850,6 +3850,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(version);
   });
 
+  // Batched homepage data endpoint - reduces initial load requests from 2+ to 1
+  app.get("/api/home-summary", async (req, res) => {
+    try {
+      const date = req.query.date as string;
+      
+      if (!date) {
+        return res.status(400).json({ error: "Date parameter required (YYYY-MM-DD format)" });
+      }
+
+      const errors: { field: string; error: string }[] = [];
+      
+      // Fetch all data in parallel with individual error handling
+      const [message, sponsor] = await Promise.allSettled([
+        storage.getMessageByDate(date),
+        storage.getDailySponsor(date)
+      ]);
+
+      // Track any errors
+      if (message.status === 'rejected') {
+        errors.push({ field: 'message', error: message.reason?.message || 'Failed to fetch message' });
+      }
+      if (sponsor.status === 'rejected') {
+        errors.push({ field: 'sponsor', error: sponsor.reason?.message || 'Failed to fetch sponsor' });
+      }
+
+      const summary = {
+        message: message.status === 'fulfilled' ? message.value : null,
+        sponsor: sponsor.status === 'fulfilled' ? sponsor.value : null,
+        errors: errors.length > 0 ? errors : undefined,
+        fetchedAt: new Date().toISOString()
+      };
+
+      // Set caching: 2 minutes for messages (check frequently), 15 minutes for sponsors
+      res.set({
+        'Cache-Control': 'public, max-age=120', // 2 minutes
+      });
+
+      res.json(summary);
+    } catch (error) {
+      console.error('Error fetching home summary:', error);
+      return res.status(500).json({ error: "Failed to fetch home summary" });
+    }
+  });
+
   // Messages routes - Public endpoint for fetching messages by date (no auth required)
   app.get("/api/messages/:date", async (req, res) => {
     try {

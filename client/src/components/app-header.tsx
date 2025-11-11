@@ -1,6 +1,7 @@
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate } from "@/hooks/use-hebrew-date";
 import { useInstallHighlight } from "@/hooks/use-install-highlight";
+import { useHomeSummary } from "@/hooks/use-home-summary";
 import { BarChart3, Info, Share2, Heart, Mail, Share, X, Menu, MessageSquare } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
@@ -8,7 +9,6 @@ import { useState, useEffect } from "react";
 import logoImage from "@assets/6LO_1753613081319.png";
 import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
 import MessageModal from "./modals/message-modal";
-import { useQuery } from "@tanstack/react-query";
 import { getLocalDateString } from "@/lib/dateUtils";
 import {
   DropdownMenu,
@@ -43,14 +43,9 @@ export default function AppHeader() {
   
   const today = getLocalDateString();
   
-  // Check if there's a message for today
-  // Refetch on window focus to catch new messages posted mid-day
-  const { data: todayMessage } = useQuery({
-    queryKey: [`/api/messages/${today}`],
-    retry: false,
-    refetchOnWindowFocus: true, // Check for new messages when user returns to app
-    staleTime: 2 * 60 * 1000, // Consider data stale after 2 minutes
-  });
+  // Use batched home summary for better performance
+  const { data: homeSummary } = useHomeSummary();
+  const todayMessage = homeSummary?.message;
   
   // Check if user has read today's message
   useEffect(() => {
