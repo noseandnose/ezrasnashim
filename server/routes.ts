@@ -9,6 +9,8 @@ import { find as findTimezone } from "geo-tz";
 import webpush from "web-push";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { pushRetryQueue, PushRetryQueue } from "./pushRetryQueue";
+import { cacheMiddleware } from "./middleware/cache";
+import { CACHE_TTL, cache } from "./cache/categoryCache";
 
 // Server-side cache with TTL and request coalescing to prevent API rate limiting
 interface CacheEntry {
@@ -1323,14 +1325,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Mincha routes
-  app.get("/api/mincha/prayers", async (req, res) => {
-    try {
-      const prayers = await storage.getMinchaPrayers();
-      res.json(prayers);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch Mincha prayers" });
+  app.get("/api/mincha/prayers",
+    cacheMiddleware({ ttl: CACHE_TTL.STATIC_PRAYERS, category: 'prayers-mincha' }),
+    async (req, res) => {
+      try {
+        const prayers = await storage.getMinchaPrayers();
+        res.json(prayers);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch Mincha prayers" });
+      }
     }
-  });
+  );
 
   app.get("/api/mincha/prayer", async (req, res) => {
     try {
@@ -1342,24 +1347,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Morning prayer routes
-  app.get("/api/morning/prayers", async (req, res) => {
-    try {
-      const prayers = await storage.getMorningPrayers();
-      res.json(prayers);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch Morning prayers" });
+  app.get("/api/morning/prayers",
+    cacheMiddleware({ ttl: CACHE_TTL.STATIC_PRAYERS, category: 'prayers-morning' }),
+    async (req, res) => {
+      try {
+        const prayers = await storage.getMorningPrayers();
+        res.json(prayers);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch Morning prayers" });
+      }
     }
-  });
+  );
 
   // Maariv routes
-  app.get("/api/maariv/prayers", async (req, res) => {
-    try {
-      const prayers = await storage.getMaarivPrayers();
-      res.json(prayers);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch Maariv prayers" });
+  app.get("/api/maariv/prayers",
+    cacheMiddleware({ ttl: CACHE_TTL.STATIC_PRAYERS, category: 'prayers-maariv' }),
+    async (req, res) => {
+      try {
+        const prayers = await storage.getMaarivPrayers();
+        res.json(prayers);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch Maariv prayers" });
+      }
     }
-  });
+  );
 
   app.get("/api/maariv/prayer", async (req, res) => {
     try {
@@ -1371,14 +1382,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // After Brochas routes
-  app.get("/api/after-brochas/prayers", async (req, res) => {
-    try {
-      const prayers = await storage.getAfterBrochasPrayers();
-      res.json(prayers);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch After Brochas prayers" });
+  app.get("/api/after-brochas/prayers",
+    cacheMiddleware({ ttl: CACHE_TTL.STATIC_PRAYERS, category: 'prayers-after-brochas' }),
+    async (req, res) => {
+      try {
+        const prayers = await storage.getAfterBrochasPrayers();
+        res.json(prayers);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch After Brochas prayers" });
+      }
     }
-  });
+  );
 
   app.post("/api/after-brochas/prayers", async (req, res) => {
     try {
@@ -1449,14 +1463,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Birkat Hamazon routes
-  app.get("/api/birkat-hamazon/prayers", async (req, res) => {
-    try {
-      const prayers = await storage.getBirkatHamazonPrayers();
-      res.json(prayers);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch Birkat Hamazon prayers" });
+  app.get("/api/birkat-hamazon/prayers",
+    cacheMiddleware({ ttl: CACHE_TTL.STATIC_PRAYERS, category: 'prayers-birkat-hamazon' }),
+    async (req, res) => {
+      try {
+        const prayers = await storage.getBirkatHamazonPrayers();
+        res.json(prayers);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch Birkat Hamazon prayers" });
+      }
     }
-  });
+  );
 
   app.post("/api/birkat-hamazon/prayers", async (req, res) => {
     try {
@@ -1600,111 +1617,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Daily Torah content routes
-  app.get("/api/torah/halacha/:date", async (req, res) => {
-    try {
-      const { date } = req.params;
-      const halacha = await storage.getDailyHalachaByDate(date);
-      res.json(halacha || null);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch daily halacha" });
+  app.get("/api/torah/halacha/:date", 
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'torah-halacha' }),
+    async (req, res) => {
+      try {
+        const { date } = req.params;
+        const halacha = await storage.getDailyHalachaByDate(date);
+        res.json(halacha || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch daily halacha" });
+      }
     }
-  });
+  );
 
   app.post("/api/torah/halacha", async (req, res) => {
     try {
       const validatedData = insertDailyHalachaSchema.parse(req.body);
       const halacha = await storage.createDailyHalacha(validatedData);
+      cache.clearCategory('torah-halacha');
       res.json(halacha);
     } catch (error) {
       return res.status(500).json({ message: "Failed to create daily halacha" });
     }
   });
 
-  app.get("/api/torah/emuna/:date", async (req, res) => {
-    try {
-      const { date } = req.params;
-      const emuna = await storage.getDailyEmunaByDate(date);
-      res.json(emuna || null);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch daily emuna" });
+  app.get("/api/torah/emuna/:date",
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'torah-emuna' }),
+    async (req, res) => {
+      try {
+        const { date } = req.params;
+        const emuna = await storage.getDailyEmunaByDate(date);
+        res.json(emuna || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch daily emuna" });
+      }
     }
-  });
+  );
 
   app.post("/api/torah/emuna", async (req, res) => {
     try {
       const validatedData = insertDailyEmunaSchema.parse(req.body);
       const emuna = await storage.createDailyEmuna(validatedData);
+      cache.clearCategory('torah-emuna');
       res.json(emuna);
     } catch (error) {
       return res.status(500).json({ message: "Failed to create daily emuna" });
     }
   });
 
-  app.get("/api/torah/chizuk/:date", async (req, res) => {
-    try {
-      const { date } = req.params;
-      const chizuk = await storage.getDailyChizukByDate(date);
-      res.json(chizuk || null);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch daily chizuk" });
+  app.get("/api/torah/chizuk/:date",
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'torah-chizuk' }),
+    async (req, res) => {
+      try {
+        const { date } = req.params;
+        const chizuk = await storage.getDailyChizukByDate(date);
+        res.json(chizuk || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch daily chizuk" });
+      }
     }
-  });
+  );
 
   app.post("/api/torah/chizuk", async (req, res) => {
     try {
       const validatedData = insertDailyChizukSchema.parse(req.body);
       const chizuk = await storage.createDailyChizuk(validatedData);
+      cache.clearCategory('torah-chizuk');
       res.json(chizuk);
     } catch (error) {
       return res.status(500).json({ message: "Failed to create daily chizuk" });
     }
   });
 
-  app.get("/api/torah/featured/:date", async (req, res) => {
-    try {
-      const { date } = req.params;
-      const featured = await storage.getFeaturedContentByDate(date);
-      res.json(featured || null);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch featured content" });
+  app.get("/api/torah/featured/:date",
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'torah-featured' }),
+    async (req, res) => {
+      try {
+        const { date } = req.params;
+        const featured = await storage.getFeaturedContentByDate(date);
+        res.json(featured || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch featured content" });
+      }
     }
-  });
+  );
 
   app.post("/api/torah/featured", async (req, res) => {
     try {
       const validatedData = insertFeaturedContentSchema.parse(req.body);
       const featured = await storage.createFeaturedContent(validatedData);
+      cache.clearCategory('torah-featured');
       res.json(featured);
     } catch (error) {
       return res.status(500).json({ message: "Failed to create featured content" });
     }
   });
 
-  app.get("/api/torah/pirkei-avot/:date", async (req, res) => {
-    try {
-      const { date } = req.params;
-      // Get the current Pirkei Avot content from the database
-      const currentPirkeiAvot = await storage.getCurrentPirkeiAvot();
-      
-      if (currentPirkeiAvot) {
-        // Return formatted response similar to other Torah content
-        res.json({
-          text: currentPirkeiAvot.content,
-          chapter: currentPirkeiAvot.chapter,
-          source: `${currentPirkeiAvot.chapter}.${currentPirkeiAvot.perek}`
-        });
-      } else {
-        res.json(null);
+  app.get("/api/torah/pirkei-avot/:date",
+    cacheMiddleware({ ttl: CACHE_TTL.PIRKEI_AVOT, category: 'pirkei-avot' }),
+    async (req, res) => {
+      try {
+        const { date } = req.params;
+        // Get the current Pirkei Avot content from the database
+        const currentPirkeiAvot = await storage.getCurrentPirkeiAvot();
+        
+        if (currentPirkeiAvot) {
+          // Return formatted response similar to other Torah content
+          res.json({
+            text: currentPirkeiAvot.content,
+            chapter: currentPirkeiAvot.chapter,
+            source: `${currentPirkeiAvot.chapter}.${currentPirkeiAvot.perek}`
+          });
+        } else {
+          res.json(null);
+        }
+      } catch (error) {
+        console.error('Error fetching Pirkei Avot:', error);
+        return res.status(500).json({ message: "Failed to fetch Pirkei Avot content" });
       }
-    } catch (error) {
-      console.error('Error fetching Pirkei Avot:', error);
-      return res.status(500).json({ message: "Failed to fetch Pirkei Avot content" });
     }
-  });
+  );
 
   app.post("/api/torah/pirkei-avot/advance", async (req, res) => {
     try {
       const progress = await storage.advancePirkeiAvotProgress();
+      cache.clearCategory('pirkei-avot');
+      cache.clearCategory('pirkei-avot-all');
       res.json(progress);
     } catch (error) {
       return res.status(500).json({ message: "Failed to advance Pirkei Avot progress" });
@@ -1712,14 +1750,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // New routes for Pirkei Avot management
-  app.get("/api/pirkei-avot", async (req, res) => {
-    try {
-      const allPirkeiAvot = await storage.getAllPirkeiAvot();
-      res.json(allPirkeiAvot);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch all Pirkei Avot content" });
+  app.get("/api/pirkei-avot",
+    cacheMiddleware({ ttl: CACHE_TTL.PIRKEI_AVOT, category: 'pirkei-avot-all' }),
+    async (req, res) => {
+      try {
+        const allPirkeiAvot = await storage.getAllPirkeiAvot();
+        res.json(allPirkeiAvot);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch all Pirkei Avot content" });
+      }
     }
-  });
+  );
 
   app.post("/api/pirkei-avot", async (req, res) => {
     try {
@@ -1986,48 +2027,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get Tehillim text from Supabase
-  app.get("/api/tehillim/text/:perek", async (req, res) => {
-    try {
-      const perek = parseInt(req.params.perek);
-      const language = req.query.language as string || 'english';
-      
-      if (isNaN(perek) || perek < 1 || perek > 171) {
-        return res.status(400).json({ error: "Perek must be between 1 and 171" });
+  app.get("/api/tehillim/text/:perek",
+    cacheMiddleware({ ttl: CACHE_TTL.TEHILLIM, category: 'tehillim-text' }),
+    async (req, res) => {
+      try {
+        const perek = parseInt(req.params.perek);
+        const language = req.query.language as string || 'english';
+        
+        if (isNaN(perek) || perek < 1 || perek > 171) {
+          return res.status(400).json({ error: "Perek must be between 1 and 171" });
+        }
+        
+        if (!['english', 'hebrew'].includes(language)) {
+          return res.status(400).json({ error: "Language must be 'english' or 'hebrew'" });
+        }
+        
+        // Use new Supabase method instead of Sefaria
+        const tehillimData = await storage.getSupabaseTehillim(perek, language);
+        res.json(tehillimData);
+      } catch (error) {
+        console.error('Error fetching Tehillim text:', error);
+        return res.status(500).json({ error: "Failed to fetch Tehillim text" });
       }
-      
-      if (!['english', 'hebrew'].includes(language)) {
-        return res.status(400).json({ error: "Language must be 'english' or 'hebrew'" });
-      }
-      
-      // Use new Supabase method instead of Sefaria
-      const tehillimData = await storage.getSupabaseTehillim(perek, language);
-      res.json(tehillimData);
-    } catch (error) {
-      console.error('Error fetching Tehillim text:', error);
-      return res.status(500).json({ error: "Failed to fetch Tehillim text" });
     }
-  });
+  );
 
   // Get Tehillim text by ID (for proper part handling of Psalm 119)
-  app.get("/api/tehillim/text/by-id/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const language = req.query.language as string || 'english';
-      
-      if (isNaN(id) || id < 1 || id > 171) {
-        return res.status(400).json({ error: "Invalid ID" });
-      }
-      
-      if (!['english', 'hebrew'].includes(language)) {
-        return res.status(400).json({ error: "Language must be 'english' or 'hebrew'" });
-      }
-      
-      // Get the specific part by ID
-      const tehillimData = await storage.getTehillimById(id, language);
-      res.json(tehillimData);
-    } catch (error) {
-      console.error('Error fetching Tehillim text by ID:', error);
-      return res.status(500).json({ error: "Failed to fetch Tehillim text" });
+  app.get("/api/tehillim/text/by-id/:id",
+    cacheMiddleware({ ttl: CACHE_TTL.TEHILLIM, category: 'tehillim-text-by-id' }),
+    async (req, res) => {
+      try {
+        const id = parseInt(req.params.id);
+        const language = req.query.language as string || 'english';
+        
+        if (isNaN(id) || id < 1 || id > 171) {
+          return res.status(400).json({ error: "Invalid ID" });
+        }
+        
+        if (!['english', 'hebrew'].includes(language)) {
+          return res.status(400).json({ error: "Language must be 'english' or 'hebrew'" });
+        }
+        
+        // Get the specific part by ID
+        const tehillimData = await storage.getTehillimById(id, language);
+        res.json(tehillimData);
+      } catch (error) {
+        console.error('Error fetching Tehillim text by ID:', error);
+        return res.status(500).json({ error: "Failed to fetch Tehillim text" });
     }
   });
 
