@@ -10,8 +10,8 @@
   
   /* Base dimensions (CSS constants) - these are the CONTENT heights */
   /* IMPORTANT: If header controls change size, update --header-row-height to maintain proper spacing */
-  --header-row-height: 44px; /* Menu + Logo + Message buttons (p-2 buttons with icons + touch targets) */
-  --footer-content-height: 70px; /* Bottom navigation height */
+  --header-row-height: 48px; /* Menu + Logo + Message buttons (p-2 buttons with h-6 w-6 icons + touch targets) */
+  --footer-content-height: 76px; /* Bottom navigation height (updated for larger icons) */
   
   /* Safe area insets from browser (automatically resolved by CSS engine) */
   --safe-area-top: env(safe-area-inset-top, 0px);

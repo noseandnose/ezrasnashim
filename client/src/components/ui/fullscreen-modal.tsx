@@ -127,11 +127,8 @@ export function FullscreenModal({
       // Restore html overflow
       document.documentElement.style.overflow = originalHtmlOverflow;
       
-      // CRITICAL FIX: Always reset window scroll to 0 instead of restoring saved position
-      // This prevents nav bar positioning issues when returning from fullscreen modals
-      // The saved scrollY was from before opening the modal, and restoring it can cause
-      // the nav bar to appear "pulled up" from the bottom
-      window.scrollTo(0, 0);
+      // Don't force window scroll - let the app's scroll containers maintain their position
+      // The main scroll container is .content-area, so forcing window scroll fights it
       
       document.removeEventListener('keydown', handleEscape, true);
       window.removeEventListener('closeFullscreen', handleCloseFullscreen);
