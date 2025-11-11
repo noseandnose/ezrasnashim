@@ -19,7 +19,7 @@ interface ModalContainerProps {
 }
 
 const torahModals = ['halacha', 'emuna', 'chizuk', 'loshon', 'featured', 'pirkei-avot'];
-const tefillaModals = ['morning-brochas', 'mincha', 'maariv', 'womens-prayers', 'blessings', 'tefillos', 'personal-prayers', 'nishmas-campaign', 'tehillim-text', 'tehillim', 'special-tehillim', 'individual-tehillim', 'nishmas', 'birkat-hamazon', 'after-brochas', 'al-hamichiya'];
+const tefillaModals = ['morning-brochas', 'mincha', 'maariv', 'womens-prayers', 'blessings', 'tefillos', 'personal-prayers', 'nishmas-campaign', 'tehillim-text', 'tehillim', 'special-tehillim', 'individual-tehillim', 'nishmas', 'birkat-hamazon', 'after-brochas', 'al-hamichiya', 'brochas', 'individual-brocha', 'global-tehillim', 'me-ein-shalosh', 'compass'];
 const timesModals = ['jerusalem-compass', 'date-calculator-fullscreen', 'location'];
 const tableModals = ['recipe', 'inspiration', 'parsha', 'parsha-vort'];
 const tzedakaModals = ['donate', 'refuah', 'family', 'life', 'individual-prayer', 'gave-elsewhere', 'support-torah', 'torah-dedication', 'wedding-campaign', 'womens-causes', 'infertility-support', 'abuse-support', 'sponsor-day'];
