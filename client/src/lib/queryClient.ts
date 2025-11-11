@@ -78,7 +78,7 @@ export const queryClient = new QueryClient({
       staleTime: 15 * 60 * 1000, // 15 minutes for better performance
       gcTime: 60 * 60 * 1000, // 1 hour in memory
       refetchOnMount: false, // Only refetch when stale or invalidated
-      refetchOnWindowFocus: true, // Refetch when app resumes to prevent stale state
+      refetchOnWindowFocus: true, // Enabled by default - stable data opts-out individually
       retry: (failureCount, error) => {
         // Don't retry on 404s, 401s, or any 4xx client errors
         if (error && typeof error === 'object' && 'response' in error) {
