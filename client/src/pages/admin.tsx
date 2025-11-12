@@ -8,13 +8,13 @@ import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
 import axiosClient from '@/lib/axiosClient';
 import { useQuery } from '@tanstack/react-query';
-import { MessageSquare, Plus, Save, Edit, Trash2, Bell, ChefHat, Send, Clock, Users, CheckCircle, XCircle, Image, Calendar } from 'lucide-react';
+import { MessageSquare, Plus, Save, Edit, Trash2, Bell, ChefHat, Send, Clock, Users, CheckCircle, XCircle, Image, Calendar, Scroll } from 'lucide-react';
 import { format } from 'date-fns';
-import type { Message, TableInspiration, ScheduledNotification } from '@shared/schema';
+import type { Message, TableInspiration, ScheduledNotification, ParshaVort } from '@shared/schema';
 import { InlineImageUploader } from '@/components/InlineImageUploader';
 import type { UploadResult } from '@uppy/core';
 
-type AdminTab = 'messages' | 'recipes' | 'inspirations' | 'notifications';
+type AdminTab = 'messages' | 'recipes' | 'inspirations' | 'notifications' | 'parsha-vorts';
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState<AdminTab>('messages');
@@ -80,6 +80,21 @@ export default function Admin() {
   const [editingNotification, setEditingNotification] = useState<ScheduledNotification | null>(null);
   const [isSendingNotification, setIsSendingNotification] = useState(false);
   const [isValidatingSubscriptions, setIsValidatingSubscriptions] = useState(false);
+
+  // Parsha Vorts state
+  const [parshaVortFormData, setParshaVortFormData] = useState({
+    fromDate: '',
+    untilDate: '',
+    title: '',
+    content: '',
+    audioUrl: '',
+    videoUrl: '',
+    speaker: '',
+    speakerWebsite: '',
+    thankYouMessage: ''
+  });
+  const [editingParshaVort, setEditingParshaVort] = useState<ParshaVort | null>(null);
+  const [isSavingParshaVort, setIsSavingParshaVort] = useState(false);
 
   // Set up authorization headers for authenticated requests
   const getAuthHeaders = () => ({
@@ -229,6 +244,27 @@ export default function Admin() {
     },
     enabled: isAuthenticated && activeTab === 'notifications',
     refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
+  // Parsha Vorts API calls
+  const { data: parshaVorts, refetch: refetchParshaVorts } = useQuery({
+    queryKey: ['admin-parsha-vorts'],
+    queryFn: async () => {
+      if (!isAuthenticated || activeTab !== 'parsha-vorts') return [];
+      try {
+        const response = await axiosClient.get('/api/table/vorts', {
+          headers: getAuthHeaders()
+        });
+        return response.data;
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          setIsAuthenticated(false);
+          throw new Error('Authentication expired');
+        }
+        throw error;
+      }
+    },
+    enabled: isAuthenticated && activeTab === 'parsha-vorts',
   });
 
 
@@ -583,6 +619,101 @@ export default function Admin() {
     }
   };
 
+  // Parsha Vorts functions
+  const handleParshaVortSubmit = async () => {
+    if (!parshaVortFormData.title || !parshaVortFormData.fromDate || !parshaVortFormData.untilDate) {
+      toast({
+        title: 'Missing Required Fields',
+        description: 'Please fill in title, from date, and until date.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    // At least one of audioUrl or videoUrl must be provided
+    if (!parshaVortFormData.audioUrl && !parshaVortFormData.videoUrl) {
+      toast({
+        title: 'Missing Media',
+        description: 'Please provide at least one of audio URL or video URL.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsSavingParshaVort(true);
+    try {
+      const vortData = {
+        ...parshaVortFormData,
+        content: parshaVortFormData.content || null,
+        audioUrl: parshaVortFormData.audioUrl || null,
+        videoUrl: parshaVortFormData.videoUrl || null,
+        speaker: parshaVortFormData.speaker || null,
+        speakerWebsite: parshaVortFormData.speakerWebsite || null,
+        thankYouMessage: parshaVortFormData.thankYouMessage || null
+      };
+
+      let response;
+      if (editingParshaVort) {
+        response = await axiosClient.put(`/api/table/vort/${editingParshaVort.id}`, vortData, {
+          headers: getAuthHeaders()
+        });
+      } else {
+        response = await axiosClient.post('/api/table/vort', vortData, {
+          headers: getAuthHeaders()
+        });
+      }
+
+      if (response.status === 200 || response.status === 201) {
+        toast({
+          title: 'Success',
+          description: editingParshaVort ? 'Parsha Vort updated successfully!' : 'Parsha Vort created successfully!',
+        });
+        setParshaVortFormData({
+          fromDate: '', untilDate: '', title: '', content: '',
+          audioUrl: '', videoUrl: '', speaker: '', speakerWebsite: '', thankYouMessage: ''
+        });
+        setEditingParshaVort(null);
+        queryClient.invalidateQueries({ queryKey: ['admin-parsha-vorts'] });
+        await refetchParshaVorts();
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save Parsha Vort. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSavingParshaVort(false);
+    }
+  };
+
+  const handleDeleteParshaVort = async (vort: any) => {
+    if (!confirm(`Are you sure you want to delete the Parsha Vort "${vort.title}"?`)) {
+      return;
+    }
+
+    try {
+      const response = await axiosClient.delete(`/api/table/vort/${vort.id}`, {
+        headers: getAuthHeaders()
+      });
+      
+      if (response.status === 200 || response.status === 204) {
+        toast({
+          title: 'Parsha Vort Deleted',
+          description: 'The Parsha Vort has been successfully deleted.',
+        });
+        queryClient.invalidateQueries({ queryKey: ['admin-parsha-vorts'] });
+        await refetchParshaVorts();
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Delete Failed',
+        description: 'Failed to delete Parsha Vort',
+        variant: 'destructive'
+      });
+    }
+  };
+
   // Notification functions (handles both instant and scheduled)
   const handleSendNotification = async () => {
     if (!notificationData.title || !notificationData.body) {
@@ -821,6 +952,18 @@ export default function Admin() {
             >
               <Bell className="w-4 h-4 mr-2" />
               Notifications
+            </button>
+            <button
+              onClick={() => setActiveTab('parsha-vorts')}
+              className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'parsha-vorts'
+                  ? 'admin-tab-active'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              }`}
+              data-testid="tab-parsha-vorts"
+            >
+              <Scroll className="w-4 h-4 mr-2" />
+              Parsha Vorts
             </button>
           </div>
         </div>
@@ -1440,6 +1583,255 @@ export default function Admin() {
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   No table inspirations found
+                </div>
+              )}
+            </Card>
+          </div>
+        )}
+
+        {/* Parsha Vorts Tab */}
+        {activeTab === 'parsha-vorts' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Create Parsha Vort Form */}
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center">
+                <Plus className="w-5 h-5 mr-2 text-rose-600" />
+                {editingParshaVort ? 'Edit' : 'Create New'} Parsha Vort
+              </h2>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="vort-from-date">From Date *</Label>
+                    <Input
+                      id="vort-from-date"
+                      type="date"
+                      value={parshaVortFormData.fromDate}
+                      onChange={(e) => setParshaVortFormData(prev => ({ ...prev, fromDate: e.target.value }))}
+                      data-testid="input-vort-from-date"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="vort-until-date">Until Date *</Label>
+                    <Input
+                      id="vort-until-date"
+                      type="date"
+                      value={parshaVortFormData.untilDate}
+                      onChange={(e) => setParshaVortFormData(prev => ({ ...prev, untilDate: e.target.value }))}
+                      data-testid="input-vort-until-date"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="vort-title">Title *</Label>
+                  <Input
+                    id="vort-title"
+                    value={parshaVortFormData.title}
+                    onChange={(e) => setParshaVortFormData(prev => ({ ...prev, title: e.target.value }))}
+                    data-testid="input-vort-title"
+                    placeholder="Parsha Vort title"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="vort-content">Content</Label>
+                  <Textarea
+                    id="vort-content"
+                    value={parshaVortFormData.content}
+                    onChange={(e) => setParshaVortFormData(prev => ({ ...prev, content: e.target.value }))}
+                    data-testid="textarea-vort-content"
+                    placeholder="Optional written content"
+                    rows={4}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="vort-audio-url">Audio URL</Label>
+                  <Input
+                    id="vort-audio-url"
+                    value={parshaVortFormData.audioUrl}
+                    onChange={(e) => setParshaVortFormData(prev => ({ ...prev, audioUrl: e.target.value }))}
+                    data-testid="input-vort-audio-url"
+                    placeholder="Audio URL (at least one media required)"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="vort-video-url">Video URL</Label>
+                  <Input
+                    id="vort-video-url"
+                    value={parshaVortFormData.videoUrl}
+                    onChange={(e) => setParshaVortFormData(prev => ({ ...prev, videoUrl: e.target.value }))}
+                    data-testid="input-vort-video-url"
+                    placeholder="Video URL (at least one media required)"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="vort-speaker">Speaker</Label>
+                  <Input
+                    id="vort-speaker"
+                    value={parshaVortFormData.speaker}
+                    onChange={(e) => setParshaVortFormData(prev => ({ ...prev, speaker: e.target.value }))}
+                    data-testid="input-vort-speaker"
+                    placeholder="Speaker name (optional)"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="vort-speaker-website">Speaker Website</Label>
+                  <Input
+                    id="vort-speaker-website"
+                    value={parshaVortFormData.speakerWebsite}
+                    onChange={(e) => setParshaVortFormData(prev => ({ ...prev, speakerWebsite: e.target.value }))}
+                    data-testid="input-vort-speaker-website"
+                    placeholder="Speaker website URL (optional)"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="vort-thank-you">Thank You Message</Label>
+                  <Textarea
+                    id="vort-thank-you"
+                    value={parshaVortFormData.thankYouMessage}
+                    onChange={(e) => setParshaVortFormData(prev => ({ ...prev, thankYouMessage: e.target.value }))}
+                    data-testid="textarea-vort-thank-you"
+                    placeholder="Custom thank you message (supports markdown links)"
+                    rows={2}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleParshaVortSubmit}
+                    disabled={isSavingParshaVort}
+                    className="flex-1 admin-btn-primary"
+                    data-testid="button-save-vort"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    {isSavingParshaVort ? 'Saving...' : (editingParshaVort ? 'Update' : 'Create')} Parsha Vort
+                  </Button>
+                  
+                  {editingParshaVort && (
+                    <Button 
+                      onClick={() => {
+                        setEditingParshaVort(null);
+                        setParshaVortFormData({
+                          fromDate: '', untilDate: '', title: '', content: '',
+                          audioUrl: '', videoUrl: '', speaker: '', speakerWebsite: '', thankYouMessage: ''
+                        });
+                      }}
+                      variant="outline"
+                      data-testid="button-cancel-vort"
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </Card>
+
+            {/* Recent Parsha Vorts */}
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center">
+                <Scroll className="w-5 h-5 mr-2 text-rose-600" />
+                Recent Parsha Vorts
+              </h2>
+              
+              {parshaVorts && parshaVorts.length > 0 ? (
+                <div className="space-y-4 max-h-[700px] overflow-y-auto">
+                  {parshaVorts.map((vort: any) => {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const untilDate = new Date(vort.untilDate);
+                    const isFuture = untilDate >= today;
+                    
+                    return (
+                      <div key={vort.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-900">{vort.title}</h3>
+                            <p className="text-sm text-gray-600">
+                              {format(new Date(vort.fromDate), 'MMM d')} - {format(new Date(vort.untilDate), 'MMM d, yyyy')}
+                            </p>
+                          </div>
+                          
+                          {/* Only show edit/delete for future vorts */}
+                          {isFuture && (
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingParshaVort(vort);
+                                  setParshaVortFormData({
+                                    fromDate: vort.fromDate,
+                                    untilDate: vort.untilDate,
+                                    title: vort.title,
+                                    content: vort.content || '',
+                                    audioUrl: vort.audioUrl || '',
+                                    videoUrl: vort.videoUrl || '',
+                                    speaker: vort.speaker || '',
+                                    speakerWebsite: vort.speakerWebsite || '',
+                                    thankYouMessage: vort.thankYouMessage || ''
+                                  });
+                                }}
+                                data-testid={`button-edit-vort-${vort.id}`}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDeleteParshaVort(vort)}
+                                data-testid={`button-delete-vort-${vort.id}`}
+                              >
+                                <Trash2 className="w-4 h-4 text-red-500" />
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {vort.speaker && (
+                          <p className="text-sm text-gray-700 mb-2">
+                            <span className="font-medium">Speaker:</span> {vort.speaker}
+                          </p>
+                        )}
+                        
+                        {vort.content && (
+                          <p className="text-sm text-gray-700 mb-2 leading-relaxed line-clamp-2">{vort.content}</p>
+                        )}
+                        
+                        {/* Show media types available */}
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {vort.audioUrl && (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700">
+                              Audio
+                            </span>
+                          )}
+                          {vort.videoUrl && (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-purple-100 text-purple-700">
+                              Video
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  No Parsha Vorts found
                 </div>
               )}
             </Card>

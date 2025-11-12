@@ -1858,7 +1858,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/table/vort", async (req, res) => {
+  app.post("/api/table/vort", requireAdminAuth, async (req, res) => {
     try {
       const validatedData = insertParshaVortSchema.parse(req.body);
       const vort = await storage.createParshaVort(validatedData);
@@ -1866,6 +1866,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error creating Parsha vort:', error);
       return res.status(500).json({ message: "Failed to create Parsha vort" });
+    }
+  });
+
+  // Get all Parsha vorts (admin only)
+  app.get("/api/table/vorts", requireAdminAuth, async (req, res) => {
+    try {
+      const vorts = await storage.getAllParshaVorts();
+      res.json(vorts);
+    } catch (error) {
+      console.error('Error fetching all Parsha vorts:', error);
+      return res.status(500).json({ message: "Failed to fetch Parsha vorts" });
+    }
+  });
+
+  // Update Parsha vort (admin only)
+  app.put("/api/table/vort/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID" });
+      }
+      
+      // Get existing vort
+      const existingVort = await storage.getParshaVortById(id);
+      if (!existingVort) {
+        return res.status(404).json({ message: "Parsha vort not found" });
+      }
+      
+      const validatedData = insertParshaVortSchema.partial().parse(req.body);
+      
+      // Merge existing data with update to check final state
+      const mergedData = { ...existingVort, ...validatedData };
+      
+      // Validate that merged result has at least one media URL
+      if (!mergedData.audioUrl && !mergedData.videoUrl) {
+        return res.status(400).json({ 
+          message: "Update failed: vort must have at least one of audioUrl or videoUrl" 
+        });
+      }
+      
+      const vort = await storage.updateParshaVort(id, validatedData);
+      
+      if (!vort) {
+        return res.status(404).json({ message: "Parsha vort not found" });
+      }
+      
+      res.json(vort);
+    } catch (error) {
+      console.error('Error updating Parsha vort:', error);
+      return res.status(500).json({ message: "Failed to update Parsha vort" });
+    }
+  });
+
+  // Delete Parsha vort (admin only)
+  app.delete("/api/table/vort/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID" });
+      }
+      
+      const success = await storage.deleteParshaVort(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Parsha vort not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting Parsha vort:', error);
+      return res.status(500).json({ message: "Failed to delete Parsha vort" });
     }
   });
 

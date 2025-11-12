@@ -38,7 +38,7 @@ import {
   type PushNotification, type InsertPushNotification
 } from "../shared/schema";
 import { db, pool } from "./db";
-import { eq, gt, lt, gte, lte, and, sql, like } from "drizzle-orm";
+import { eq, gt, lt, gte, lte, and, sql, like, desc } from "drizzle-orm";
 import { cleanHebrewText, memoize, withRetry, formatDate } from './typeHelpers';
 
 export interface IStorage {
@@ -74,7 +74,10 @@ export interface IStorage {
   getParshaVortByWeek(week: string): Promise<ParshaVort | undefined>;
   getParshaVortByDate(date: string): Promise<ParshaVort | undefined>;
   getParshaVortsByDate(date: string): Promise<ParshaVort[]>;
+  getAllParshaVorts(): Promise<ParshaVort[]>;
   createParshaVort(vort: InsertParshaVort): Promise<ParshaVort>;
+  updateParshaVort(id: number, vort: Partial<InsertParshaVort>): Promise<ParshaVort | undefined>;
+  deleteParshaVort(id: number): Promise<boolean>;
 
   // Table inspiration methods
   getTableInspirationByDate(date: string): Promise<TableInspiration | undefined>;
@@ -1164,6 +1167,34 @@ export class DatabaseStorage implements IStorage {
   async createParshaVort(insertVort: InsertParshaVort): Promise<ParshaVort> {
     const [vort] = await db.insert(parshaVorts).values(insertVort).returning();
     return vort;
+  }
+
+  async getAllParshaVorts(): Promise<ParshaVort[]> {
+    return await db.select().from(parshaVorts).orderBy(desc(parshaVorts.fromDate), desc(parshaVorts.id));
+  }
+
+  async getParshaVortById(id: number): Promise<ParshaVort | undefined> {
+    const [vort] = await db.select().from(parshaVorts).where(eq(parshaVorts.id, id));
+    return vort || undefined;
+  }
+
+  async updateParshaVort(id: number, updatedVort: Partial<InsertParshaVort>): Promise<ParshaVort | undefined> {
+    // Filter out undefined values to prevent accidental nullification
+    const cleanedData = Object.fromEntries(
+      Object.entries(updatedVort).filter(([_, value]) => value !== undefined)
+    );
+    
+    const [vort] = await db
+      .update(parshaVorts)
+      .set(cleanedData)
+      .where(eq(parshaVorts.id, id))
+      .returning();
+    return vort || undefined;
+  }
+
+  async deleteParshaVort(id: number): Promise<boolean> {
+    const result = await db.delete(parshaVorts).where(eq(parshaVorts.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
   }
 
   async getNishmasTextByLanguage(language: string): Promise<NishmasText | undefined> {
