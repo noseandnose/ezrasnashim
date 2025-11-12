@@ -1,8 +1,11 @@
-import { Book, Heart, Shield, BookOpen, Star, Scroll, Triangle } from "lucide-react";
+import { Book, Heart, Shield, BookOpen, Star, Scroll, Triangle, Check } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
-import { useModalStore, useModalCompletionStore } from "@/lib/types";
+import { useModalStore, useModalCompletionStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import type { Section } from "@/pages/home";
+import { useState } from "react";
+import { HeartExplosion } from "@/components/ui/heart-explosion";
+import { useTrackModalComplete } from "@/hooks/use-analytics";
 
 // Calculate reading time based on word count (average 200 words per minute)
 const calculateReadingTime = (text: string): string => {
@@ -32,7 +35,10 @@ interface TorahSectionProps {
 
 export default function TorahSection({}: TorahSectionProps) {
   const { openModal } = useModalStore();
-  const { isModalComplete } = useModalCompletionStore();
+  const { isModalComplete, markModalComplete } = useModalCompletionStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+  const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   
   // Fetch today's Pirkei Avot for daily inspiration
   const today = new Date().toISOString().split('T')[0];
@@ -109,6 +115,33 @@ export default function TorahSection({}: TorahSectionProps) {
     openModal(modalType, 'torah');
   };
 
+  // Handle Pirkei Avot completion
+  const handlePirkeiAvotComplete = () => {
+    // Guard: Only allow completion if already completed (no-op) or if content exists
+    if (isModalComplete('pirkei-avot')) {
+      return; // Already completed, do nothing
+    }
+    
+    // Guard: Require Pirkei Avot content to be loaded
+    if (!pirkeiAvot?.text) {
+      return; // No content available, don't allow completion
+    }
+    
+    trackModalComplete('pirkei-avot');
+    markModalComplete('pirkei-avot');
+    completeTask('torah');
+    setShowHeartExplosion(true);
+    
+    setTimeout(() => {
+      setShowHeartExplosion(false);
+      
+      // Check if all tasks are completed and show congratulations
+      if (checkAndShowCongratulations()) {
+        openModal('congratulations', 'torah');
+      }
+    }, 1000);
+  };
+
   const torahItems = [
     {
       id: 'chizuk',
@@ -163,7 +196,7 @@ export default function TorahSection({}: TorahSectionProps) {
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">
         {/* Daily Inspiration - Pirkei Avot */}
         {(pirkeiAvot || pirkeiError) && (
-          <div className="bg-white/70 rounded-2xl p-3 mb-3 border border-blush/10"
+          <div className="bg-white/70 rounded-2xl p-3 mb-3 border border-blush/10 relative"
                style={{
                  animation: 'gentle-glow-pink 3s ease-in-out infinite'
                }}>
@@ -175,6 +208,29 @@ export default function TorahSection({}: TorahSectionProps) {
               {pirkeiAvot && (
                 <span className="text-xs text-black/60 platypi-regular">{pirkeiAvot.source?.replace('.', ':') || ''}</span>
               )}
+              
+              {/* Complete Button */}
+              <button
+                onClick={handlePirkeiAvotComplete}
+                disabled={isModalComplete('pirkei-avot') || !pirkeiAvot?.text}
+                className={`ml-auto px-3 py-1.5 rounded-lg text-xs platypi-medium transition-all ${
+                  isModalComplete('pirkei-avot')
+                    ? 'bg-sage text-white cursor-not-allowed'
+                    : !pirkeiAvot?.text
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-gradient-feminine text-white hover:scale-105 active:scale-95'
+                }`}
+                data-testid="button-complete-pirkei-avot"
+              >
+                {isModalComplete('pirkei-avot') ? (
+                  <span className="flex items-center gap-1">
+                    <Check size={14} />
+                    Done
+                  </span>
+                ) : (
+                  'Complete'
+                )}
+              </button>
             </div>
             <p className="koren-siddur-english text-base text-black font-bold leading-relaxed text-justify">
               {pirkeiError ? (
@@ -386,6 +442,12 @@ export default function TorahSection({}: TorahSectionProps) {
         {/* Bottom padding */}
         <div className="h-16"></div>
       </div>
+
+      {/* Heart Explosion Animation */}
+      <HeartExplosion 
+        trigger={showHeartExplosion}
+        onComplete={() => setShowHeartExplosion(false)} 
+      />
     </div>
   );
 }
