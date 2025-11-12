@@ -132,6 +132,7 @@ import {
   insertDailyChizukSchema,
   insertFeaturedContentSchema,
   insertDailyRecipeSchema,
+  baseParshaVortSchema,
   insertParshaVortSchema,
   insertTableInspirationSchema,
   insertNishmasTextSchema,
@@ -1894,7 +1895,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Parsha vort not found" });
       }
       
-      const validatedData = insertParshaVortSchema.partial().parse(req.body);
+      const validatedData = baseParshaVortSchema.partial().parse(req.body);
       
       // Merge existing data with update to check final state
       const mergedData = { ...existingVort, ...validatedData };
