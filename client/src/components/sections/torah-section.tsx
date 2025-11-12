@@ -213,7 +213,7 @@ export default function TorahSection({}: TorahSectionProps) {
               <button
                 onClick={handlePirkeiAvotComplete}
                 disabled={isModalComplete('pirkei-avot') || !pirkeiAvot?.text}
-                className={`ml-auto px-3 py-1.5 rounded-lg text-xs platypi-medium transition-all ${
+                className={`ml-auto px-3 py-1 rounded-lg text-xs platypi-medium transition-all ${
                   isModalComplete('pirkei-avot')
                     ? 'bg-sage text-white cursor-not-allowed'
                     : !pirkeiAvot?.text
