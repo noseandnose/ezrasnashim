@@ -84,10 +84,20 @@ export default function Home() {
     if (activeSection === 'home' && scrollToProgress) {
       setTimeout(() => {
         const progressElement = document.getElementById('daily-progress-garden');
-        if (progressElement) {
-          progressElement.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
+        const contentArea = document.querySelector('.content-area');
+        
+        if (progressElement && contentArea) {
+          // Calculate scroll position to show element without blocking top scroll
+          const elementTop = progressElement.offsetTop;
+          const contentAreaHeight = contentArea.clientHeight;
+          const elementHeight = progressElement.offsetHeight;
+          
+          // Scroll to position that shows the element but allows scrolling back up
+          const targetScroll = Math.max(0, elementTop - (contentAreaHeight / 2) + (elementHeight / 2));
+          
+          contentArea.scrollTo({
+            top: targetScroll,
+            behavior: 'smooth'
           });
         }
       }, 100); // Small delay to ensure DOM is ready

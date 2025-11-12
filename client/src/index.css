@@ -997,11 +997,12 @@ html, body, #root {
   padding-bottom: var(--footer-total-height);
   
   /* Ensure scrolling stops above the bottom navigation */
+  scroll-padding-top: 0px; /* Allow scrolling to the very top */
   scroll-padding-bottom: var(--footer-total-height);
   
   /* Prevent scroll bounce on iOS */
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
+  overscroll-behavior-y: auto; /* Changed from contain to auto to allow native scroll behavior */
   /* Ensure content is always accessible on Safari */
   position: relative;
 }
