@@ -536,10 +536,14 @@ export const insertDailyRecipeSchema = createInsertSchema(dailyRecipes).omit({
   createdAt: true,
 });
 
-export const insertParshaVortSchema = createInsertSchema(parshaVorts).omit({
+// Base schema without refinement - used for partial updates
+export const baseParshaVortSchema = createInsertSchema(parshaVorts).omit({
   id: true,
   createdAt: true,
-}).refine(data => {
+});
+
+// Insert schema with refinement - used for creating new vorts
+export const insertParshaVortSchema = baseParshaVortSchema.refine(data => {
   // Ensure at least one media URL (audio or video) is provided
   return data.audioUrl || data.videoUrl;
 }, {
