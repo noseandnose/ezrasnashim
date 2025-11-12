@@ -195,6 +195,7 @@ export default function TableModals() {
     content: string;
     duration?: string;
     audioUrl?: string;
+    videoUrl?: string;
     speaker?: string;
     thankYouMessage?: string;
   }
@@ -777,11 +778,27 @@ export default function TableModals() {
             </p>
           )}
           
-          <AudioPlayer 
-            title={parshaContent?.title || "Parsha Shiur"}
-            duration={parshaContent?.duration || "0:00"}
-            audioUrl={parshaContent?.audioUrl || ""}
-          />
+          {/* Video Player */}
+          {parshaContent?.videoUrl && (
+            <div className="mb-4">
+              <video 
+                controls 
+                className="w-full rounded-lg"
+                src={parshaContent.videoUrl}
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          )}
+
+          {/* Audio Player */}
+          {parshaContent?.audioUrl && (
+            <AudioPlayer 
+              title={parshaContent?.title || "Parsha Shiur"}
+              duration={parshaContent?.duration || "0:00"}
+              audioUrl={parshaContent.audioUrl}
+            />
+          )}
 
           {/* Thank You Message with Links */}
           {parshaContent?.thankYouMessage && (
