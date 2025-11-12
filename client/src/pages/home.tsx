@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation } from "wouter";
 import AppHeader from "@/components/app-header";
 import BottomNavigation from "@/components/bottom-navigation";
@@ -25,6 +25,9 @@ export default function Home() {
     new Set<Section>(['home']) // Always mount home on initial load
   );
   
+  // Track previous section to only scroll when it actually changes
+  const previousSectionRef = useRef<Section | null>(null);
+  
   // Determine active section from URL path
   const getActiveSectionFromPath = (path: string): Section => {
     switch (path) {
@@ -50,12 +53,15 @@ export default function Home() {
     }
   }, [activeSection, mountedSections]);
   
-  // Scroll to top when section changes
+  // Scroll to top ONLY when section actually changes (not on modal close)
   useEffect(() => {
-    const contentArea = document.querySelector('.content-area');
-    if (contentArea) {
-      contentArea.scrollTop = 0;
+    if (previousSectionRef.current !== null && previousSectionRef.current !== activeSection) {
+      const contentArea = document.querySelector('.content-area');
+      if (contentArea) {
+        contentArea.scrollTop = 0;
+      }
     }
+    previousSectionRef.current = activeSection;
   }, [activeSection]);
   
   // Navigation function to handle section changes
