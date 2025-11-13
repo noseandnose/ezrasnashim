@@ -36,30 +36,26 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
-    <!-- Preconnect to critical external APIs for reduced latency -->
+    <!-- Critical preconnect for Jewish times (needed on initial load) -->
     <link rel="preconnect" href="https://www.hebcal.com">
-    <link rel="preconnect" href="https://www.sefaria.org">
-    <link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
-    <link rel="dns-prefetch" href="https://maps.googleapis.com">
-    <link rel="dns-prefetch" href="https://js.stripe.com">
-    <link rel="dns-prefetch" href="https://storage.googleapis.com">
     
-    <!-- Preload VC Koren fonts to prevent flash -->
-    <link rel="preload" href="/fonts/VC-Koren-Light.otf" as="font" type="font/otf" crossorigin>
-    <link rel="preload" href="/fonts/VC-Koren-Bold.otf" as="font" type="font/otf" crossorigin>
+    <!-- Non-critical preconnects deferred via JS for faster initial load -->
+    <!-- Deferred: sefaria, nominatim, maps, stripe, storage -->
+    
+    <!-- VC Koren fonts loaded on demand - removed preload for faster initial render -->
     
     <!-- Preload splash screen logo - using smaller PWA icon for faster load -->
     <link rel="preload" href="/icon-192.png" as="image" type="image/png">
     
     <!-- Inline critical font CSS to prevent flash -->
     <style>
-      /* Critical font definitions - using block to prevent flash of fallback font */
+      /* Hebrew font definitions - using optional to prevent render blocking */
       @font-face {
         font-family: 'VC Koren';
         src: url('/fonts/VC-Koren-Light.otf') format('opentype');
         font-weight: 300;
         font-style: normal;
-        font-display: block;
+        font-display: optional;
         unicode-range: U+0590-05FF, U+FB1D-FB4F;
       }
       @font-face {
@@ -67,7 +63,7 @@
         src: url('/fonts/VC-Koren-Bold.otf') format('opentype');
         font-weight: 700;
         font-style: normal;
-        font-display: block;
+        font-display: optional;
         unicode-range: U+0590-05FF, U+FB1D-FB4F;
       }
       

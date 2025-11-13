@@ -16,7 +16,7 @@ export type Section = 'torah' | 'tefilla' | 'tzedaka' | 'home' | 'table';
 export default function Home() {
   const [location, setLocation] = useLocation();
   
-  // Initialize geolocation and Jewish times immediately (core app functionality)
+  // Initialize geolocation and Jewish times (uses cache-first strategy internally)
   useGeolocation();
   useJewishTimes();
   

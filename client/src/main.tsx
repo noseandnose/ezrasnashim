@@ -135,14 +135,29 @@ window.addEventListener('error', async (event) => {
 
 // App Shell DNS Prefetching and Critical Resource Hints - DEFERRED for faster startup
 function preloadAppShell() {
-  // Defer DNS prefetch - not needed for initial render
+  // Defer non-critical preconnects and DNS prefetch - not needed for initial render
   setTimeout(() => {
-    const dnsPrefetchDomains = [
-      'assets.ezrasnashim.app',
-      'www.hebcal.com',
-      'nominatim.openstreetmap.org'
+    const preconnectDomains = [
+      'www.sefaria.org',
+      'js.stripe.com',
+      'storage.googleapis.com'
     ];
     
+    const dnsPrefetchDomains = [
+      'assets.ezrasnashim.app',
+      'nominatim.openstreetmap.org',
+      'maps.googleapis.com'
+    ];
+    
+    // Inject preconnects
+    preconnectDomains.forEach(domain => {
+      const link = document.createElement('link');
+      link.rel = 'preconnect';
+      link.href = `https://${domain}`;
+      document.head.appendChild(link);
+    });
+    
+    // Inject DNS prefetch
     dnsPrefetchDomains.forEach(domain => {
       const link = document.createElement('link');
       link.rel = 'dns-prefetch';
