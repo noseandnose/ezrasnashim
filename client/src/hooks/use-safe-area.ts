@@ -1,6 +1,27 @@
 import { useEffect } from 'react';
 
 /**
+ * Ensures safe-area CSS variables are applied to the document root
+ * Call this after modal close to restore proper header/footer padding
+ */
+export function ensureSafeAreaVariables() {
+  const root = document.documentElement;
+  const computedStyle = getComputedStyle(root);
+  
+  // Read the current computed values
+  const safeAreaTop = computedStyle.getPropertyValue('--safe-area-top') || 'env(safe-area-inset-top, 0px)';
+  const safeAreaBottom = computedStyle.getPropertyValue('--safe-area-bottom') || 'env(safe-area-inset-bottom, 0px)';
+  const safeAreaLeft = computedStyle.getPropertyValue('--safe-area-left') || 'env(safe-area-inset-left, 0px)';
+  const safeAreaRight = computedStyle.getPropertyValue('--safe-area-right') || 'env(safe-area-inset-right, 0px)';
+  
+  // Reapply to ensure they're still set
+  root.style.setProperty('--safe-area-top', safeAreaTop);
+  root.style.setProperty('--safe-area-bottom', safeAreaBottom);
+  root.style.setProperty('--safe-area-left', safeAreaLeft);
+  root.style.setProperty('--safe-area-right', safeAreaRight);
+}
+
+/**
  * Lightweight safe-area hook for legacy Safari fallback only
  * Modern browsers use CSS env(safe-area-inset-*) natively
  * This hook only runs AFTER first paint, preventing any blocking or layout freeze
