@@ -189,6 +189,7 @@ export default function Statistics() {
     "featured-content": "Featured Content",
     featured: "Featured",
     "parsha-vort": "Parsha Shiur",
+    "pirkei-avot": "Pirkei Avot",
     
     // Life section
     recipe: "Daily Recipe",
@@ -235,6 +236,7 @@ export default function Statistics() {
     halacha: BookOpen,
     "featured-content": Star,
     featured: Star,
+    "pirkei-avot": ScrollText,
     
     // Life section
     recipe: Sparkles,
