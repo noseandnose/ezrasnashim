@@ -87,7 +87,20 @@ export function useVersionCheck() {
         const response = await fetch(`/api/version?t=${now}`);
         if (!response.ok) return;
         
+        // Validate response is JSON before parsing
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          console.debug('Version check skipped: Invalid content type', contentType);
+          return;
+        }
+        
         const latestVersion: VersionInfo = await response.json();
+        
+        // Validate response structure
+        if (!latestVersion || typeof latestVersion.timestamp !== 'number') {
+          console.debug('Version check skipped: Invalid response structure');
+          return;
+        }
         
         // Detect any new version by timestamp increase
         // Accept ANY timestamp difference to catch quick hotfixes and critical updates

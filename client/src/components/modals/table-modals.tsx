@@ -28,6 +28,7 @@ export default function TableModals() {
   }>({ isOpen: false, title: '', content: null });
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
+  const lastArrowTouchTime = useRef<number>(0);
 
   const handleComplete = (modalId: string) => {
     trackModalComplete(modalId);
@@ -194,7 +195,9 @@ export default function TableModals() {
     content: string;
     duration?: string;
     audioUrl?: string;
+    videoUrl?: string;
     speaker?: string;
+    speakerWebsite?: string;
     thankYouMessage?: string;
   }
 
@@ -614,16 +617,18 @@ export default function TableModals() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              // Prevent double-firing if touch just happened
+                              if (Date.now() - lastArrowTouchTime.current < 500) return;
                               prevMedia();
                             }}
                             onTouchStart={(e) => e.stopPropagation()}
                             onTouchEnd={(e) => {
                               e.stopPropagation();
-                              e.preventDefault();
+                              lastArrowTouchTime.current = Date.now();
+                              prevMedia();
                             }}
-                            className="absolute left-2 p-2 transition-transform hover:scale-110 z-10"
+                            className="absolute left-2 top-1/2 -translate-y-1/2 p-2 transition-transform hover:scale-110 z-10"
                             style={{
-                              top: '160px',
                               filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.8)) drop-shadow(0 0 1px rgba(255,255,255,1))',
                               color: '#000',
                               fontWeight: 'bold'
@@ -634,16 +639,18 @@ export default function TableModals() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              // Prevent double-firing if touch just happened
+                              if (Date.now() - lastArrowTouchTime.current < 500) return;
                               nextMedia();
                             }}
                             onTouchStart={(e) => e.stopPropagation()}
                             onTouchEnd={(e) => {
                               e.stopPropagation();
-                              e.preventDefault();
+                              lastArrowTouchTime.current = Date.now();
+                              nextMedia();
                             }}
-                            className="absolute right-2 p-2 transition-transform hover:scale-110 z-10"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 transition-transform hover:scale-110 z-10"
                             style={{
-                              top: '160px',
                               filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.8)) drop-shadow(0 0 1px rgba(255,255,255,1))',
                               color: '#000',
                               fontWeight: 'bold'
@@ -772,20 +779,51 @@ export default function TableModals() {
             </p>
           )}
           
-          <AudioPlayer 
-            title={parshaContent?.title || "Parsha Shiur"}
-            duration={parshaContent?.duration || "0:00"}
-            audioUrl={parshaContent?.audioUrl || ""}
-          />
+          {/* Video Player */}
+          {parshaContent?.videoUrl && (
+            <div className="mb-4">
+              <video 
+                controls 
+                className="w-full rounded-lg"
+                src={parshaContent.videoUrl}
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          )}
+
+          {/* Audio Player */}
+          {parshaContent?.audioUrl && (
+            <AudioPlayer 
+              title={parshaContent?.title || "Parsha Shiur"}
+              duration={parshaContent?.duration || "0:00"}
+              audioUrl={parshaContent.audioUrl}
+            />
+          )}
 
           {/* Thank You Message with Links */}
           {parshaContent?.thankYouMessage && (
-            <div 
-              className="bg-blue-50 rounded-2xl px-2 py-3 mt-4 border border-blue-200 text-sm text-gray-600 text-center leading-relaxed"
-              dangerouslySetInnerHTML={{
-                __html: formatThankYouMessageFull(parshaContent.thankYouMessage)
-              }}
-            />
+            parshaContent.speakerWebsite ? (
+              <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-4 border border-blue-200 text-sm text-center leading-relaxed">
+                <a
+                  href={parshaContent.speakerWebsite}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blush font-medium hover:text-blush/80 transition-colors underline"
+                  data-testid="link-parsha-thank-you"
+                  dangerouslySetInnerHTML={{
+                    __html: formatThankYouMessageFull(parshaContent.thankYouMessage)
+                  }}
+                />
+              </div>
+            ) : (
+              <div 
+                className="bg-blue-50 rounded-2xl px-2 py-3 mt-4 border border-blue-200 text-sm text-gray-600 text-center leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: formatThankYouMessageFull(parshaContent.thankYouMessage)
+                }}
+              />
+            )
           )}
 
           <Button 
@@ -1079,16 +1117,18 @@ export default function TableModals() {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  // Prevent double-firing if touch just happened
+                                  if (Date.now() - lastArrowTouchTime.current < 500) return;
                                   setCurrentMediaIndex((prev) => (prev - 1 + mediaItems.length) % mediaItems.length);
                                 }}
                                 onTouchStart={(e) => e.stopPropagation()}
                                 onTouchEnd={(e) => {
                                   e.stopPropagation();
-                                  e.preventDefault();
+                                  lastArrowTouchTime.current = Date.now();
+                                  setCurrentMediaIndex((prev) => (prev - 1 + mediaItems.length) % mediaItems.length);
                                 }}
-                                className="absolute left-2 p-2 transition-transform hover:scale-110 z-10"
+                                className="absolute left-2 top-1/2 -translate-y-1/2 p-2 transition-transform hover:scale-110 z-10"
                                 style={{
-                                  top: '160px',
                                   filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.8)) drop-shadow(0 0 1px rgba(255,255,255,1))',
                                   color: '#000',
                                   fontWeight: 'bold'
@@ -1099,16 +1139,18 @@ export default function TableModals() {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  // Prevent double-firing if touch just happened
+                                  if (Date.now() - lastArrowTouchTime.current < 500) return;
                                   setCurrentMediaIndex((prev) => (prev + 1) % mediaItems.length);
                                 }}
                                 onTouchStart={(e) => e.stopPropagation()}
                                 onTouchEnd={(e) => {
                                   e.stopPropagation();
-                                  e.preventDefault();
+                                  lastArrowTouchTime.current = Date.now();
+                                  setCurrentMediaIndex((prev) => (prev + 1) % mediaItems.length);
                                 }}
-                                className="absolute right-2 p-2 transition-transform hover:scale-110 z-10"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 transition-transform hover:scale-110 z-10"
                                 style={{
-                                  top: '160px',
                                   filter: 'drop-shadow(0 0 3px rgba(255,255,255,0.8)) drop-shadow(0 0 1px rgba(255,255,255,1))',
                                   color: '#000',
                                   fontWeight: 'bold'

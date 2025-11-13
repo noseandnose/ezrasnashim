@@ -26,7 +26,8 @@ export const parshaVorts = pgTable("parsha_vorts", {
   untilDate: date("until_date").notNull(), // Week end date
   title: text("title").notNull(),
   content: text("content"),
-  audioUrl: text("audio_url").notNull(),
+  audioUrl: text("audio_url"), // Optional: audio content URL
+  videoUrl: text("video_url"), // Optional: video content URL
   speaker: text("speaker"),
   speakerWebsite: text("speaker_website"),
   thankYouMessage: text("thank_you_message"), // Dynamic thank you message with support for clickable links
@@ -535,9 +536,18 @@ export const insertDailyRecipeSchema = createInsertSchema(dailyRecipes).omit({
   createdAt: true,
 });
 
-export const insertParshaVortSchema = createInsertSchema(parshaVorts).omit({
+// Base schema without refinement - used for partial updates
+export const baseParshaVortSchema = createInsertSchema(parshaVorts).omit({
   id: true,
   createdAt: true,
+});
+
+// Insert schema with refinement - used for creating new vorts
+export const insertParshaVortSchema = baseParshaVortSchema.refine(data => {
+  // Ensure at least one media URL (audio or video) is provided
+  return data.audioUrl || data.videoUrl;
+}, {
+  message: "Either audioUrl or videoUrl must be provided"
 });
 
 export const insertTableInspirationSchema = createInsertSchema(tableInspirations).omit({

@@ -1,8 +1,67 @@
-import { useEffect, useRef } from 'react';
-import { X, Info } from 'lucide-react';
+import { useLayoutEffect, useRef, useState } from 'react';
+import { X, Info, Compass } from 'lucide-react';
 import logoImage from "@assets/1LO_1755590090315.png";
 import { FloatingSettings } from './floating-settings';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useLocation } from 'wouter';
+import { MiniCompassModal } from '@/components/modals/mini-compass-modal';
+import { ensureSafeAreaVariables } from '@/hooks/use-safe-area';
+
+// Global counter and state to track active fullscreen modals
+// Prevents race conditions when closing one modal while another opens
+let activeFullscreenModals = 0;
+let savedScrollState: {
+  container: HTMLElement | null;
+  scrollTop: number;
+  originalOverflow: string;
+  originalPointerEvents: string;
+} | null = null;
+
+// Safety function to reset scroll lock state
+function resetScrollLockIfNeeded() {
+  if (activeFullscreenModals === 0) {
+    // Find scroll container
+    const scrollContainer = document.querySelector('[data-scroll-lock-target]') as HTMLElement 
+      ?? document.querySelector('.content-area') as HTMLElement;
+    
+    if (scrollContainer) {
+      // Restore scroll functionality
+      scrollContainer.style.overflow = '';
+      scrollContainer.style.pointerEvents = '';
+    }
+    
+    // Restore body/html  
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+    delete (window as any).__fallbackScrollLock;
+    
+    // Clear saved state
+    savedScrollState = null;
+  }
+}
+
+// Emergency reset function (ignores counter)
+function forceResetScrollLock() {
+  const scrollContainer = document.querySelector('[data-scroll-lock-target]') as HTMLElement 
+    ?? document.querySelector('.content-area') as HTMLElement;
+  
+  if (scrollContainer) {
+    scrollContainer.style.overflow = '';
+    scrollContainer.style.pointerEvents = '';
+  }
+  
+  document.body.style.overflow = '';
+  document.documentElement.style.overflow = '';
+  delete (window as any).__fallbackScrollLock;
+  
+  savedScrollState = null;
+  activeFullscreenModals = 0;
+}
+
+// Make available globally for debugging
+if (typeof window !== 'undefined') {
+  (window as any).__forceResetScrollLock = forceResetScrollLock;
+}
 
 interface FullscreenModalProps {
   isOpen: boolean;
@@ -26,6 +85,8 @@ interface FullscreenModalProps {
   showInfoPopover?: boolean;
   // Floating element (e.g., navigation arrows) rendered outside scroll container
   floatingElement?: React.ReactNode;
+  // Compass button (for prayer modals)
+  showCompassButton?: boolean;
 }
 
 export function FullscreenModal({ 
@@ -45,12 +106,24 @@ export function FullscreenModal({
   onInfoClick,
   infoContent,
   showInfoPopover = false,
-  floatingElement
+  floatingElement,
+  showCompassButton = false
 }: FullscreenModalProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [, setLocation] = useLocation();
+  const [showCompass, setShowCompass] = useState(false);
 
-  useEffect(() => {
-    if (!isOpen) return;
+  // Use useLayoutEffect to ensure new modal increments counter before old modal's cleanup runs
+  // This prevents race conditions in chained modal scenarios
+  useLayoutEffect(() => {
+    if (!isOpen) {
+      // Safety check: if modal is closed and counter is 0, ensure scroll is unlocked
+      resetScrollLockIfNeeded();
+      return;
+    }
+
+    // Increment the modal counter
+    activeFullscreenModals++;
 
     // Handle escape key
     const handleEscape = (e: KeyboardEvent) => {
@@ -76,31 +149,40 @@ export function FullscreenModal({
     // Add popstate listener to catch browser back gestures
     window.addEventListener('popstate', handlePopState, true);
     
-    // Save current scroll position and body styles
-    const scrollY = window.scrollY;
-    const originalBodyStyle = {
-      overflow: document.body.style.overflow,
-      position: document.body.style.position,
-      top: document.body.style.top,
-      width: document.body.style.width,
-      touchAction: document.body.style.touchAction,
-      overscrollBehavior: document.body.style.overscrollBehavior,
-      webkitOverscrollBehavior: (document.body.style as any).webkitOverscrollBehavior
-    };
+    // Find and lock the scroll container (.content-area) instead of body
+    const scrollContainer = document.querySelector('[data-scroll-lock-target]') as HTMLElement 
+      ?? document.querySelector('.content-area') as HTMLElement;
     
-    // Try minimal body style changes to avoid interfering with gestures
-    document.body.style.overflow = 'hidden';
-    // Don't fix the body position - this might be interfering with gesture detection
-    // document.body.style.position = 'fixed';
-    // document.body.style.top = `-${scrollY}px`;
-    document.body.style.touchAction = 'auto';
-    document.body.style.overscrollBehavior = 'auto';
-    // @ts-ignore - WebKit specific property
-    document.body.style.webkitOverscrollBehavior = 'auto';
-    
-    // Also prevent scrolling on the document element for iOS
-    const originalHtmlOverflow = document.documentElement.style.overflow;
-    document.documentElement.style.overflow = 'hidden';
+    if (scrollContainer) {
+      // Save the current scroll position and styles (only if this is the first modal)
+      if (activeFullscreenModals === 1) {
+        savedScrollState = {
+          container: scrollContainer,
+          scrollTop: scrollContainer.scrollTop,
+          originalOverflow: scrollContainer.style.overflow,
+          originalPointerEvents: scrollContainer.style.pointerEvents
+        };
+        
+        // Lock the scroll container
+        scrollContainer.style.overflow = 'hidden';
+        scrollContainer.style.pointerEvents = 'none';
+      }
+      // If activeFullscreenModals > 1, the lock is already in place, don't change anything
+    } else {
+      // Fallback: lock body if no scroll container found (admin pages, etc.)
+      if (activeFullscreenModals === 1) {
+        const originalBodyOverflow = document.body.style.overflow;
+        const originalHtmlOverflow = document.documentElement.style.overflow;
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+        
+        // Store for cleanup
+        (window as any).__fallbackScrollLock = {
+          bodyOverflow: originalBodyOverflow,
+          htmlOverflow: originalHtmlOverflow
+        };
+      }
+    }
     
     // Add escape listener with capture
     document.addEventListener('keydown', handleEscape, true);
@@ -108,24 +190,58 @@ export function FullscreenModal({
     window.addEventListener('closeFullscreen', handleCloseFullscreen);
 
     return () => {
-      // Restore body styles
-      document.body.style.overflow = originalBodyStyle.overflow;
-      document.body.style.position = originalBodyStyle.position;
-      document.body.style.top = originalBodyStyle.top;
-      document.body.style.width = originalBodyStyle.width;
-      document.body.style.touchAction = originalBodyStyle.touchAction;
-      document.body.style.overscrollBehavior = originalBodyStyle.overscrollBehavior;
-      // @ts-ignore - WebKit specific property
-      document.body.style.webkitOverscrollBehavior = originalBodyStyle.webkitOverscrollBehavior;
+      // Decrement the modal counter
+      activeFullscreenModals--;
       
-      // Restore html overflow
-      document.documentElement.style.overflow = originalHtmlOverflow;
+      // Capture current state locally to prevent race conditions
+      const capturedState = savedScrollState;
+      const capturedFallbackLock = (window as any).__fallbackScrollLock;
       
-      // CRITICAL FIX: Always reset window scroll to 0 instead of restoring saved position
-      // This prevents nav bar positioning issues when returning from fullscreen modals
-      // The saved scrollY was from before opening the modal, and restoring it can cause
-      // the nav bar to appear "pulled up" from the bottom
-      window.scrollTo(0, 0);
+      // Only restore scroll when no other fullscreen modals are active
+      if (activeFullscreenModals === 0) {
+        // Defer scroll restoration to prevent closing gesture from interfering
+        // Double rAF ensures iOS Safari's tap doesn't override our scroll position
+        requestAnimationFrame(() => {
+          // Re-check counter in case new modal opened
+          if (activeFullscreenModals > 0) return;
+          
+          // Restore scroll container if we locked it
+          if (capturedState && capturedState.container) {
+            // Restore original styles first
+            capturedState.container.style.overflow = capturedState.originalOverflow;
+            capturedState.container.style.pointerEvents = capturedState.originalPointerEvents;
+            
+            // Then restore scroll position in next frame to avoid gesture interference
+            requestAnimationFrame(() => {
+              // Re-check counter again before final restore
+              if (activeFullscreenModals > 0) return;
+              
+              if (capturedState && capturedState.container) {
+                capturedState.container.scrollTop = capturedState.scrollTop;
+              }
+              // Clear the saved state only if still at 0
+              if (activeFullscreenModals === 0) {
+                savedScrollState = null;
+              }
+              // Ensure safe-area CSS variables are still applied
+              ensureSafeAreaVariables();
+            });
+          } else if (capturedFallbackLock) {
+            // Restore fallback body/html lock
+            document.body.style.overflow = capturedFallbackLock.bodyOverflow;
+            document.documentElement.style.overflow = capturedFallbackLock.htmlOverflow;
+            if (activeFullscreenModals === 0) {
+              delete (window as any).__fallbackScrollLock;
+            }
+            
+            requestAnimationFrame(() => {
+              // Re-check counter before safe-area restore
+              if (activeFullscreenModals > 0) return;
+              ensureSafeAreaVariables();
+            });
+          }
+        });
+      }
       
       document.removeEventListener('keydown', handleEscape, true);
       window.removeEventListener('closeFullscreen', handleCloseFullscreen);
@@ -187,12 +303,39 @@ export function FullscreenModal({
           }}
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img 
-                src={logoImage} 
-                alt="Ezras Nashim" 
-                className="h-5 w-auto"
-              />
+            <div className="flex items-center gap-2">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onClose();
+                  setLocation('/');
+                }}
+                className="hover:opacity-80 transition-opacity"
+                aria-label="Go to home"
+                type="button"
+              >
+                <img 
+                  src={logoImage} 
+                  alt="Ezras Nashim" 
+                  className="h-5 w-auto"
+                />
+              </button>
+
+              {showCompassButton && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowCompass(true);
+                  }}
+                  className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+                  aria-label="Open compass"
+                  type="button"
+                >
+                  <Compass className="h-6 w-6 text-blush/70" />
+                </button>
+              )}
             </div>
 
             <h1 className="text-lg font-semibold text-gray-900 text-center flex-1 mx-4">
@@ -214,7 +357,7 @@ export function FullscreenModal({
                         onInfoClick?.(!showInfoPopover);
                       }}
                     >
-                      <Info className="h-5 w-5 text-blush/60" />
+                      <Info className="h-6 w-6 text-blush/60" />
                     </button>
                   </PopoverTrigger>
                   <PopoverContent className="max-w-xs p-3 bg-white border border-blush/20 shadow-lg z-[9999]">
@@ -233,7 +376,7 @@ export function FullscreenModal({
                 aria-label="Close fullscreen"
                 type="button"
               >
-                <X className="h-5 w-5 text-gray-600" />
+                <X className="h-6 w-6 text-gray-600" />
               </button>
             </div>
           </div>
@@ -252,7 +395,7 @@ export function FullscreenModal({
           aria-label="Close"
           type="button"
         >
-          <X className="h-4 w-4 text-gray-600" />
+          <X className="h-5 w-5 text-gray-600" />
         </button>
       )}
 
@@ -294,6 +437,12 @@ export function FullscreenModal({
 
       {/* Floating Element (e.g., navigation arrows) - Outside scrollable content */}
       {floatingElement}
+
+      {/* Mini Compass Modal */}
+      <MiniCompassModal 
+        isOpen={showCompass} 
+        onClose={() => setShowCompass(false)} 
+      />
     </div>
   );
 }

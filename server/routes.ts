@@ -9,6 +9,8 @@ import { find as findTimezone } from "geo-tz";
 import webpush from "web-push";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { pushRetryQueue, PushRetryQueue } from "./pushRetryQueue";
+import { cacheMiddleware } from "./middleware/cache";
+import { CACHE_TTL, cache } from "./cache/categoryCache";
 
 // Server-side cache with TTL and request coalescing to prevent API rate limiting
 interface CacheEntry {
@@ -130,6 +132,7 @@ import {
   insertDailyChizukSchema,
   insertFeaturedContentSchema,
   insertDailyRecipeSchema,
+  baseParshaVortSchema,
   insertParshaVortSchema,
   insertTableInspirationSchema,
   insertNishmasTextSchema,
@@ -1323,14 +1326,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Mincha routes
-  app.get("/api/mincha/prayers", async (req, res) => {
-    try {
-      const prayers = await storage.getMinchaPrayers();
-      res.json(prayers);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch Mincha prayers" });
+  app.get("/api/mincha/prayers",
+    cacheMiddleware({ ttl: CACHE_TTL.STATIC_PRAYERS, category: 'prayers-mincha' }),
+    async (req, res) => {
+      try {
+        const prayers = await storage.getMinchaPrayers();
+        res.json(prayers);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch Mincha prayers" });
+      }
     }
-  });
+  );
 
   app.get("/api/mincha/prayer", async (req, res) => {
     try {
@@ -1342,24 +1348,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Morning prayer routes
-  app.get("/api/morning/prayers", async (req, res) => {
-    try {
-      const prayers = await storage.getMorningPrayers();
-      res.json(prayers);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch Morning prayers" });
+  app.get("/api/morning/prayers",
+    cacheMiddleware({ ttl: CACHE_TTL.STATIC_PRAYERS, category: 'prayers-morning' }),
+    async (req, res) => {
+      try {
+        const prayers = await storage.getMorningPrayers();
+        res.json(prayers);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch Morning prayers" });
+      }
     }
-  });
+  );
 
   // Maariv routes
-  app.get("/api/maariv/prayers", async (req, res) => {
-    try {
-      const prayers = await storage.getMaarivPrayers();
-      res.json(prayers);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch Maariv prayers" });
+  app.get("/api/maariv/prayers",
+    cacheMiddleware({ ttl: CACHE_TTL.STATIC_PRAYERS, category: 'prayers-maariv' }),
+    async (req, res) => {
+      try {
+        const prayers = await storage.getMaarivPrayers();
+        res.json(prayers);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch Maariv prayers" });
+      }
     }
-  });
+  );
 
   app.get("/api/maariv/prayer", async (req, res) => {
     try {
@@ -1371,16 +1383,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // After Brochas routes
-  app.get("/api/after-brochas/prayers", async (req, res) => {
-    try {
-      const prayers = await storage.getAfterBrochasPrayers();
-      res.json(prayers);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch After Brochas prayers" });
+  app.get("/api/after-brochas/prayers",
+    cacheMiddleware({ ttl: CACHE_TTL.STATIC_PRAYERS, category: 'prayers-after-brochas' }),
+    async (req, res) => {
+      try {
+        const prayers = await storage.getAfterBrochasPrayers();
+        res.json(prayers);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch After Brochas prayers" });
+      }
     }
-  });
+  );
 
-  app.post("/api/after-brochas/prayers", async (req, res) => {
+  app.post("/api/after-brochas/prayers", requireAdminAuth, async (req, res) => {
     try {
       const prayer = await storage.createAfterBrochasPrayer(req.body);
       res.json(prayer);
@@ -1438,7 +1453,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/brochas", async (req, res) => {
+  app.post("/api/brochas", requireAdminAuth, async (req, res) => {
     try {
       const brocha = await storage.createBrocha(req.body);
       res.json(brocha);
@@ -1449,16 +1464,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Birkat Hamazon routes
-  app.get("/api/birkat-hamazon/prayers", async (req, res) => {
-    try {
-      const prayers = await storage.getBirkatHamazonPrayers();
-      res.json(prayers);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch Birkat Hamazon prayers" });
+  app.get("/api/birkat-hamazon/prayers",
+    cacheMiddleware({ ttl: CACHE_TTL.STATIC_PRAYERS, category: 'prayers-birkat-hamazon' }),
+    async (req, res) => {
+      try {
+        const prayers = await storage.getBirkatHamazonPrayers();
+        res.json(prayers);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch Birkat Hamazon prayers" });
+      }
     }
-  });
+  );
 
-  app.post("/api/birkat-hamazon/prayers", async (req, res) => {
+  app.post("/api/birkat-hamazon/prayers", requireAdminAuth, async (req, res) => {
     try {
       const prayer = await storage.createBirkatHamazonPrayer(req.body);
       res.json(prayer);
@@ -1545,7 +1563,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/sponsors", async (req, res) => {
+  app.post("/api/sponsors", requireAdminAuth, async (req, res) => {
     try {
       const sponsor = await storage.createSponsor(req.body);
       
@@ -1590,7 +1608,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/campaigns", async (req, res) => {
+  app.post("/api/campaigns", requireAdminAuth, async (req, res) => {
     try {
       const campaign = await storage.createCampaign(req.body);
       res.json(campaign);
@@ -1600,111 +1618,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Daily Torah content routes
-  app.get("/api/torah/halacha/:date", async (req, res) => {
-    try {
-      const { date } = req.params;
-      const halacha = await storage.getDailyHalachaByDate(date);
-      res.json(halacha || null);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch daily halacha" });
+  app.get("/api/torah/halacha/:date", 
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'torah-halacha' }),
+    async (req, res) => {
+      try {
+        const { date } = req.params;
+        const halacha = await storage.getDailyHalachaByDate(date);
+        res.json(halacha || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch daily halacha" });
+      }
     }
-  });
+  );
 
-  app.post("/api/torah/halacha", async (req, res) => {
+  app.post("/api/torah/halacha", requireAdminAuth, async (req, res) => {
     try {
       const validatedData = insertDailyHalachaSchema.parse(req.body);
       const halacha = await storage.createDailyHalacha(validatedData);
+      cache.clearCategory('torah-halacha');
       res.json(halacha);
     } catch (error) {
       return res.status(500).json({ message: "Failed to create daily halacha" });
     }
   });
 
-  app.get("/api/torah/emuna/:date", async (req, res) => {
-    try {
-      const { date } = req.params;
-      const emuna = await storage.getDailyEmunaByDate(date);
-      res.json(emuna || null);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch daily emuna" });
+  app.get("/api/torah/emuna/:date",
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'torah-emuna' }),
+    async (req, res) => {
+      try {
+        const { date } = req.params;
+        const emuna = await storage.getDailyEmunaByDate(date);
+        res.json(emuna || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch daily emuna" });
+      }
     }
-  });
+  );
 
-  app.post("/api/torah/emuna", async (req, res) => {
+  app.post("/api/torah/emuna", requireAdminAuth, async (req, res) => {
     try {
       const validatedData = insertDailyEmunaSchema.parse(req.body);
       const emuna = await storage.createDailyEmuna(validatedData);
+      cache.clearCategory('torah-emuna');
       res.json(emuna);
     } catch (error) {
       return res.status(500).json({ message: "Failed to create daily emuna" });
     }
   });
 
-  app.get("/api/torah/chizuk/:date", async (req, res) => {
-    try {
-      const { date } = req.params;
-      const chizuk = await storage.getDailyChizukByDate(date);
-      res.json(chizuk || null);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch daily chizuk" });
+  app.get("/api/torah/chizuk/:date",
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'torah-chizuk' }),
+    async (req, res) => {
+      try {
+        const { date } = req.params;
+        const chizuk = await storage.getDailyChizukByDate(date);
+        res.json(chizuk || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch daily chizuk" });
+      }
     }
-  });
+  );
 
-  app.post("/api/torah/chizuk", async (req, res) => {
+  app.post("/api/torah/chizuk", requireAdminAuth, async (req, res) => {
     try {
       const validatedData = insertDailyChizukSchema.parse(req.body);
       const chizuk = await storage.createDailyChizuk(validatedData);
+      cache.clearCategory('torah-chizuk');
       res.json(chizuk);
     } catch (error) {
       return res.status(500).json({ message: "Failed to create daily chizuk" });
     }
   });
 
-  app.get("/api/torah/featured/:date", async (req, res) => {
-    try {
-      const { date } = req.params;
-      const featured = await storage.getFeaturedContentByDate(date);
-      res.json(featured || null);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch featured content" });
+  app.get("/api/torah/featured/:date",
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'torah-featured' }),
+    async (req, res) => {
+      try {
+        const { date } = req.params;
+        const featured = await storage.getFeaturedContentByDate(date);
+        res.json(featured || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch featured content" });
+      }
     }
-  });
+  );
 
-  app.post("/api/torah/featured", async (req, res) => {
+  app.post("/api/torah/featured", requireAdminAuth, async (req, res) => {
     try {
       const validatedData = insertFeaturedContentSchema.parse(req.body);
       const featured = await storage.createFeaturedContent(validatedData);
+      cache.clearCategory('torah-featured');
       res.json(featured);
     } catch (error) {
       return res.status(500).json({ message: "Failed to create featured content" });
     }
   });
 
-  app.get("/api/torah/pirkei-avot/:date", async (req, res) => {
-    try {
-      const { date } = req.params;
-      // Get the current Pirkei Avot content from the database
-      const currentPirkeiAvot = await storage.getCurrentPirkeiAvot();
-      
-      if (currentPirkeiAvot) {
-        // Return formatted response similar to other Torah content
-        res.json({
-          text: currentPirkeiAvot.content,
-          chapter: currentPirkeiAvot.chapter,
-          source: `${currentPirkeiAvot.chapter}.${currentPirkeiAvot.perek}`
-        });
-      } else {
-        res.json(null);
+  app.get("/api/torah/pirkei-avot/:date",
+    cacheMiddleware({ ttl: CACHE_TTL.PIRKEI_AVOT, category: 'pirkei-avot' }),
+    async (req, res) => {
+      try {
+        const { date } = req.params;
+        // Get the current Pirkei Avot content from the database
+        const currentPirkeiAvot = await storage.getCurrentPirkeiAvot();
+        
+        if (currentPirkeiAvot) {
+          // Return formatted response similar to other Torah content
+          res.json({
+            text: currentPirkeiAvot.content,
+            chapter: currentPirkeiAvot.chapter,
+            source: `${currentPirkeiAvot.chapter}.${currentPirkeiAvot.perek}`
+          });
+        } else {
+          res.json(null);
+        }
+      } catch (error) {
+        console.error('Error fetching Pirkei Avot:', error);
+        return res.status(500).json({ message: "Failed to fetch Pirkei Avot content" });
       }
-    } catch (error) {
-      console.error('Error fetching Pirkei Avot:', error);
-      return res.status(500).json({ message: "Failed to fetch Pirkei Avot content" });
     }
-  });
+  );
 
-  app.post("/api/torah/pirkei-avot/advance", async (req, res) => {
+  app.post("/api/torah/pirkei-avot/advance", requireAdminAuth, async (req, res) => {
     try {
       const progress = await storage.advancePirkeiAvotProgress();
+      cache.clearCategory('pirkei-avot');
+      cache.clearCategory('pirkei-avot-all');
       res.json(progress);
     } catch (error) {
       return res.status(500).json({ message: "Failed to advance Pirkei Avot progress" });
@@ -1712,16 +1751,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // New routes for Pirkei Avot management
-  app.get("/api/pirkei-avot", async (req, res) => {
-    try {
-      const allPirkeiAvot = await storage.getAllPirkeiAvot();
-      res.json(allPirkeiAvot);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch all Pirkei Avot content" });
+  app.get("/api/pirkei-avot",
+    cacheMiddleware({ ttl: CACHE_TTL.PIRKEI_AVOT, category: 'pirkei-avot-all' }),
+    async (req, res) => {
+      try {
+        const allPirkeiAvot = await storage.getAllPirkeiAvot();
+        res.json(allPirkeiAvot);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch all Pirkei Avot content" });
+      }
     }
-  });
+  );
 
-  app.post("/api/pirkei-avot", async (req, res) => {
+  app.post("/api/pirkei-avot", requireAdminAuth, async (req, res) => {
     try {
       const newPirkeiAvot = await storage.createPirkeiAvot(req.body);
       res.json(newPirkeiAvot);
@@ -1817,7 +1859,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/table/vort", async (req, res) => {
+  app.post("/api/table/vort", requireAdminAuth, async (req, res) => {
     try {
       const validatedData = insertParshaVortSchema.parse(req.body);
       const vort = await storage.createParshaVort(validatedData);
@@ -1825,6 +1867,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error creating Parsha vort:', error);
       return res.status(500).json({ message: "Failed to create Parsha vort" });
+    }
+  });
+
+  // Get all Parsha vorts (admin only)
+  app.get("/api/table/vorts", requireAdminAuth, async (req, res) => {
+    try {
+      const vorts = await storage.getAllParshaVorts();
+      res.json(vorts);
+    } catch (error) {
+      console.error('Error fetching all Parsha vorts:', error);
+      return res.status(500).json({ message: "Failed to fetch Parsha vorts" });
+    }
+  });
+
+  // Update Parsha vort (admin only)
+  app.put("/api/table/vort/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID" });
+      }
+      
+      // Get existing vort
+      const existingVort = await storage.getParshaVortById(id);
+      if (!existingVort) {
+        return res.status(404).json({ message: "Parsha vort not found" });
+      }
+      
+      const validatedData = baseParshaVortSchema.partial().parse(req.body);
+      
+      // Merge existing data with update to check final state
+      const mergedData = { ...existingVort, ...validatedData };
+      
+      // Validate that merged result has at least one media URL
+      if (!mergedData.audioUrl && !mergedData.videoUrl) {
+        return res.status(400).json({ 
+          message: "Update failed: vort must have at least one of audioUrl or videoUrl" 
+        });
+      }
+      
+      const vort = await storage.updateParshaVort(id, validatedData);
+      
+      if (!vort) {
+        return res.status(404).json({ message: "Parsha vort not found" });
+      }
+      
+      res.json(vort);
+    } catch (error) {
+      console.error('Error updating Parsha vort:', error);
+      return res.status(500).json({ message: "Failed to update Parsha vort" });
+    }
+  });
+
+  // Delete Parsha vort (admin only)
+  app.delete("/api/table/vort/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID" });
+      }
+      
+      const success = await storage.deleteParshaVort(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Parsha vort not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting Parsha vort:', error);
+      return res.status(500).json({ message: "Failed to delete Parsha vort" });
     }
   });
 
@@ -1986,48 +2099,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get Tehillim text from Supabase
-  app.get("/api/tehillim/text/:perek", async (req, res) => {
-    try {
-      const perek = parseInt(req.params.perek);
-      const language = req.query.language as string || 'english';
-      
-      if (isNaN(perek) || perek < 1 || perek > 171) {
-        return res.status(400).json({ error: "Perek must be between 1 and 171" });
+  app.get("/api/tehillim/text/:perek",
+    cacheMiddleware({ ttl: CACHE_TTL.TEHILLIM, category: 'tehillim-text' }),
+    async (req, res) => {
+      try {
+        const perek = parseInt(req.params.perek);
+        const language = req.query.language as string || 'english';
+        
+        if (isNaN(perek) || perek < 1 || perek > 171) {
+          return res.status(400).json({ error: "Perek must be between 1 and 171" });
+        }
+        
+        if (!['english', 'hebrew'].includes(language)) {
+          return res.status(400).json({ error: "Language must be 'english' or 'hebrew'" });
+        }
+        
+        // Use new Supabase method instead of Sefaria
+        const tehillimData = await storage.getSupabaseTehillim(perek, language);
+        res.json(tehillimData);
+      } catch (error) {
+        console.error('Error fetching Tehillim text:', error);
+        return res.status(500).json({ error: "Failed to fetch Tehillim text" });
       }
-      
-      if (!['english', 'hebrew'].includes(language)) {
-        return res.status(400).json({ error: "Language must be 'english' or 'hebrew'" });
-      }
-      
-      // Use new Supabase method instead of Sefaria
-      const tehillimData = await storage.getSupabaseTehillim(perek, language);
-      res.json(tehillimData);
-    } catch (error) {
-      console.error('Error fetching Tehillim text:', error);
-      return res.status(500).json({ error: "Failed to fetch Tehillim text" });
     }
-  });
+  );
 
   // Get Tehillim text by ID (for proper part handling of Psalm 119)
-  app.get("/api/tehillim/text/by-id/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const language = req.query.language as string || 'english';
-      
-      if (isNaN(id) || id < 1 || id > 171) {
-        return res.status(400).json({ error: "Invalid ID" });
-      }
-      
-      if (!['english', 'hebrew'].includes(language)) {
-        return res.status(400).json({ error: "Language must be 'english' or 'hebrew'" });
-      }
-      
-      // Get the specific part by ID
-      const tehillimData = await storage.getTehillimById(id, language);
-      res.json(tehillimData);
-    } catch (error) {
-      console.error('Error fetching Tehillim text by ID:', error);
-      return res.status(500).json({ error: "Failed to fetch Tehillim text" });
+  app.get("/api/tehillim/text/by-id/:id",
+    cacheMiddleware({ ttl: CACHE_TTL.TEHILLIM, category: 'tehillim-text-by-id' }),
+    async (req, res) => {
+      try {
+        const id = parseInt(req.params.id);
+        const language = req.query.language as string || 'english';
+        
+        if (isNaN(id) || id < 1 || id > 171) {
+          return res.status(400).json({ error: "Invalid ID" });
+        }
+        
+        if (!['english', 'hebrew'].includes(language)) {
+          return res.status(400).json({ error: "Language must be 'english' or 'hebrew'" });
+        }
+        
+        // Get the specific part by ID
+        const tehillimData = await storage.getTehillimById(id, language);
+        res.json(tehillimData);
+      } catch (error) {
+        console.error('Error fetching Tehillim text by ID:', error);
+        return res.status(500).json({ error: "Failed to fetch Tehillim text" });
     }
   });
 
@@ -2173,7 +2291,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/nishmas", async (req, res) => {
+  app.post("/api/nishmas", requireAdminAuth, async (req, res) => {
     try {
       const validatedData = insertNishmasTextSchema.parse(req.body);
       const text = await storage.createNishmasText(validatedData);
@@ -2183,7 +2301,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/nishmas/:language", async (req, res) => {
+  app.put("/api/nishmas/:language", requireAdminAuth, async (req, res) => {
     try {
       const { language } = req.params;
       const validatedData = insertNishmasTextSchema.partial().parse(req.body);
@@ -3304,7 +3422,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Data cleanup endpoint - remove old analytics data
-  app.post("/api/analytics/cleanup", async (req, res) => {
+  app.post("/api/analytics/cleanup", requireAdminAuth, async (req, res) => {
     try {
       await storage.cleanupOldAnalytics();
       res.json({ success: true, message: "Old analytics data cleaned up" });
@@ -3441,7 +3559,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Recalculate all historical analytics to fix brocha counting
-  app.post("/api/analytics/recalculate-all", async (req, res) => {
+  app.post("/api/analytics/recalculate-all", requireAdminAuth, async (req, res) => {
     try {
       console.log('Starting recalculation of all historical analytics...');
       const result = await storage.recalculateAllHistoricalStats();
@@ -3848,6 +3966,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       releaseNotes: process.env.RELEASE_NOTES || undefined
     };
     res.json(version);
+  });
+
+  // Batched homepage data endpoint - reduces initial load requests from 2+ to 1
+  app.get("/api/home-summary", async (req, res) => {
+    try {
+      const date = req.query.date as string;
+      
+      if (!date) {
+        return res.status(400).json({ error: "Date parameter required (YYYY-MM-DD format)" });
+      }
+
+      const errors: { field: string; error: string }[] = [];
+      
+      // Fetch all data in parallel with individual error handling
+      const [message, sponsor] = await Promise.allSettled([
+        storage.getMessageByDate(date),
+        storage.getDailySponsor(date)
+      ]);
+
+      // Track any errors
+      if (message.status === 'rejected') {
+        errors.push({ field: 'message', error: message.reason?.message || 'Failed to fetch message' });
+      }
+      if (sponsor.status === 'rejected') {
+        errors.push({ field: 'sponsor', error: sponsor.reason?.message || 'Failed to fetch sponsor' });
+      }
+
+      const summary = {
+        message: message.status === 'fulfilled' ? message.value : null,
+        sponsor: sponsor.status === 'fulfilled' ? sponsor.value : null,
+        errors: errors.length > 0 ? errors : undefined,
+        fetchedAt: new Date().toISOString()
+      };
+
+      // Set caching: 2 minutes for messages (check frequently), 15 minutes for sponsors
+      res.set({
+        'Cache-Control': 'public, max-age=120', // 2 minutes
+      });
+
+      res.json(summary);
+    } catch (error) {
+      console.error('Error fetching home summary:', error);
+      return res.status(500).json({ error: "Failed to fetch home summary" });
+    }
   });
 
   // Messages routes - Public endpoint for fetching messages by date (no auth required)

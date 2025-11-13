@@ -1,6 +1,7 @@
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate } from "@/hooks/use-hebrew-date";
 import { useInstallHighlight } from "@/hooks/use-install-highlight";
+import { useHomeSummary } from "@/hooks/use-home-summary";
 import { BarChart3, Info, Share2, Heart, Mail, Share, X, Menu, MessageSquare } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
@@ -8,7 +9,6 @@ import { useState, useEffect } from "react";
 import logoImage from "@assets/6LO_1753613081319.png";
 import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
 import MessageModal from "./modals/message-modal";
-import { useQuery } from "@tanstack/react-query";
 import { getLocalDateString } from "@/lib/dateUtils";
 import {
   DropdownMenu,
@@ -43,14 +43,9 @@ export default function AppHeader() {
   
   const today = getLocalDateString();
   
-  // Check if there's a message for today
-  // Refetch on window focus to catch new messages posted mid-day
-  const { data: todayMessage } = useQuery({
-    queryKey: [`/api/messages/${today}`],
-    retry: false,
-    refetchOnWindowFocus: true, // Check for new messages when user returns to app
-    staleTime: 2 * 60 * 1000, // Consider data stale after 2 minutes
-  });
+  // Use batched home summary for better performance
+  const { data: homeSummary } = useHomeSummary();
+  const todayMessage = homeSummary?.message;
   
   // Check if user has read today's message
   useEffect(() => {
@@ -65,19 +60,12 @@ export default function AppHeader() {
     setHasReadMessage(true);
   };
 
-  const handleInstallClick = async () => {
+  const handleInstallClick = () => {
     // User has engaged with install - dismiss the highlight
     markDismissed();
     
-    // Try native install prompt
-    const result = await triggerInstallPrompt();
-    
-    // Only show manual instructions if native prompt was unavailable
-    if (result === 'unavailable') {
-      setShowAddToHomeScreen(true);
-    }
-    // If 'accepted' or 'dismissed', the user has already interacted with the prompt
-    // so we don't need to show manual instructions
+    // Redirect to the app download page
+    window.open('https://onelink.to/e93hq9', '_blank');
   };
   
   const handleShare = async () => {
@@ -144,7 +132,7 @@ export default function AppHeader() {
                   aria-label="Menu"
                   data-testid="button-menu"
                 >
-                  <Menu className="h-5 w-5 text-black/70" />
+                  <Menu className="h-6 w-6 text-black/70" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48">
@@ -153,7 +141,7 @@ export default function AppHeader() {
                   className="cursor-pointer"
                   data-testid="menu-item-analytics"
                 >
-                  <BarChart3 className="h-4 w-4 mr-2" />
+                  <BarChart3 className="h-5 w-5 mr-2" />
                   Analytics
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -161,7 +149,7 @@ export default function AppHeader() {
                   className="cursor-pointer"
                   data-testid="menu-item-info"
                 >
-                  <Info className="h-4 w-4 mr-2" />
+                  <Info className="h-5 w-5 mr-2" />
                   Info
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -169,7 +157,7 @@ export default function AppHeader() {
                   className="cursor-pointer"
                   data-testid="menu-item-share"
                 >
-                  <Share2 className="h-4 w-4 mr-2" />
+                  <Share2 className="h-5 w-5 mr-2" />
                   Share
                 </DropdownMenuItem>
                 {!isStandalone && !isWebview && (
@@ -185,9 +173,9 @@ export default function AppHeader() {
                     data-testid="menu-item-install"
                   >
                     {isIOS ? (
-                      <Share className="h-4 w-4 mr-2" />
+                      <Share className="h-5 w-5 mr-2" />
                     ) : (
-                      <Share2 className="h-4 w-4 mr-2" />
+                      <Share2 className="h-5 w-5 mr-2" />
                     )}
                     Install App
                   </DropdownMenuItem>
@@ -197,7 +185,7 @@ export default function AppHeader() {
                   className="cursor-pointer"
                   data-testid="menu-item-feedback"
                 >
-                  <MessageSquare className="h-4 w-4 mr-2" />
+                  <MessageSquare className="h-5 w-5 mr-2" />
                   Community Feedback
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -219,7 +207,7 @@ export default function AppHeader() {
               aria-label="Daily Message"
               data-testid="button-message"
             >
-              <Mail className="h-5 w-5 text-black/70" />
+              <Mail className="h-6 w-6 text-black/70" />
               {!!todayMessage && !hasReadMessage && (
                 <span className="absolute top-1 right-1 w-2 h-2 bg-blush rounded-full" data-testid="indicator-unread-message" />
               )}
@@ -248,7 +236,7 @@ export default function AppHeader() {
               className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
               aria-label="Close"
             >
-              <X className="h-5 w-5 text-gray-500" />
+              <X className="h-6 w-6 text-gray-500" />
             </button>
             
             <div className="flex justify-center mb-4">

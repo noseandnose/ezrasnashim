@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation } from "wouter";
 import AppHeader from "@/components/app-header";
 import BottomNavigation from "@/components/bottom-navigation";
@@ -9,16 +9,24 @@ import TorahSection from "@/components/sections/torah-section";
 import TefillaSection from "@/components/sections/tefilla-section";
 import TzedakaSection from "@/components/sections/tzedaka-section";
 import TableSection from "@/components/sections/table-section";
+import { useGeolocation, useJewishTimes } from "@/hooks/use-jewish-times";
 
 export type Section = 'torah' | 'tefilla' | 'tzedaka' | 'home' | 'table';
 
 export default function Home() {
   const [location, setLocation] = useLocation();
   
+  // Initialize geolocation and Jewish times (uses cache-first strategy internally)
+  useGeolocation();
+  useJewishTimes();
+  
   // Track which sections have been mounted for instant switching
   const [mountedSections, setMountedSections] = useState<Set<Section>>(
     new Set<Section>(['home']) // Always mount home on initial load
   );
+  
+  // Track previous section to only scroll when it actually changes
+  const previousSectionRef = useRef<Section | null>(null);
   
   // Determine active section from URL path
   const getActiveSectionFromPath = (path: string): Section => {
@@ -45,12 +53,15 @@ export default function Home() {
     }
   }, [activeSection, mountedSections]);
   
-  // Scroll to top when section changes
+  // Scroll to top ONLY when section actually changes (not on modal close)
   useEffect(() => {
-    const contentArea = document.querySelector('.content-area');
-    if (contentArea) {
-      contentArea.scrollTop = 0;
+    if (previousSectionRef.current !== null && previousSectionRef.current !== activeSection) {
+      const contentArea = document.querySelector('.content-area');
+      if (contentArea) {
+        contentArea.scrollTop = 0;
+      }
     }
+    previousSectionRef.current = activeSection;
   }, [activeSection]);
   
   // Navigation function to handle section changes
@@ -73,10 +84,20 @@ export default function Home() {
     if (activeSection === 'home' && scrollToProgress) {
       setTimeout(() => {
         const progressElement = document.getElementById('daily-progress-garden');
-        if (progressElement) {
-          progressElement.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
+        const contentArea = document.querySelector('.content-area');
+        
+        if (progressElement && contentArea) {
+          // Calculate scroll position to show element without blocking top scroll
+          const elementTop = progressElement.offsetTop;
+          const contentAreaHeight = contentArea.clientHeight;
+          const elementHeight = progressElement.offsetHeight;
+          
+          // Scroll to position that shows the element but allows scrolling back up
+          const targetScroll = Math.max(0, elementTop - (contentAreaHeight / 2) + (elementHeight / 2));
+          
+          contentArea.scrollTo({
+            top: targetScroll,
+            behavior: 'smooth'
           });
         }
       }, 100); // Small delay to ensure DOM is ready
@@ -150,7 +171,7 @@ export default function Home() {
     <div className="mobile-app bg-white">
       <AppHeader />
       
-      <main className="content-area">
+      <main className="content-area" data-scroll-lock-target>
         {renderSection()}
       </main>
 

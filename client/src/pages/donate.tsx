@@ -657,10 +657,15 @@ export default function Donate() {
                     description: `Your ${donation.buttonType.replace('_', ' ')} action has been recorded.`,
                   });
                   
-                  // Navigate back to home
-                  setTimeout(() => {
-                    setLocation('/?scrollToProgress=true');
-                  }, 1000);
+                  // Check if congratulations should be shown
+                  if (checkAndShowCongratulations()) {
+                    openModal('congratulations', 'tzedaka');
+                  } else {
+                    // Only navigate if congratulations wasn't shown
+                    setTimeout(() => {
+                      setLocation('/?scrollToProgress=true');
+                    }, 1000);
+                  }
                 } else {
                   console.log('BACKUP: No completion found yet');
                 }

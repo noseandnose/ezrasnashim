@@ -164,25 +164,24 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
         setShowExplosion(false);
         completeTask('tzedaka');
         
-        if (onSectionChange) {
-          onSectionChange('home');
-          setTimeout(() => {
-            const progressElement = document.getElementById('daily-progress-garden');
-            if (progressElement) {
-              progressElement.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'center' 
-              });
-            }
-          }, 300);
-        }
-        
         // Check if all tasks are completed and show congratulations
-        setTimeout(() => {
-          if (checkAndShowCongratulations()) {
-            openModal('congratulations', 'tzedaka');
+        if (checkAndShowCongratulations()) {
+          openModal('congratulations', 'tzedaka');
+        } else {
+          // Only navigate if congratulations wasn't shown
+          if (onSectionChange) {
+            onSectionChange('home');
+            setTimeout(() => {
+              const progressElement = document.getElementById('daily-progress-garden');
+              if (progressElement) {
+                progressElement.scrollIntoView({ 
+                  behavior: 'smooth', 
+                  block: 'center' 
+                });
+              }
+            }, 300);
           }
-        }, 200);
+        }
       }, 500);
     } else {
       // Money buttons - open appropriate modal for Stripe checkout

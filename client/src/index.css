@@ -10,8 +10,8 @@
   
   /* Base dimensions (CSS constants) - these are the CONTENT heights */
   /* IMPORTANT: If header controls change size, update --header-row-height to maintain proper spacing */
-  --header-row-height: 44px; /* Menu + Logo + Message buttons (p-2 buttons with icons + touch targets) */
-  --footer-content-height: 70px; /* Bottom navigation height */
+  --header-row-height: 48px; /* Menu + Logo + Message buttons (p-2 buttons with h-6 w-6 icons + touch targets) */
+  --footer-content-height: 76px; /* Bottom navigation height (updated for larger icons) */
   
   /* Safe area insets from browser (automatically resolved by CSS engine) */
   --safe-area-top: env(safe-area-inset-top, 0px);
@@ -105,7 +105,7 @@ body {
   -webkit-tap-highlight-color: transparent; /* Remove tap highlights */
   
   /* Performance optimizations for mobile */
-  contain: layout style; /* CSS containment for better rendering */
+  /* REMOVED: contain: layout style - breaks position:fixed for headers and floating elements */
   will-change: auto; /* Reset will-change to prevent memory issues */
   
   /* Set default font immediately to prevent font swap */
@@ -997,11 +997,12 @@ html, body, #root {
   padding-bottom: var(--footer-total-height);
   
   /* Ensure scrolling stops above the bottom navigation */
+  scroll-padding-top: 0px; /* Allow scrolling to the very top */
   scroll-padding-bottom: var(--footer-total-height);
   
   /* Prevent scroll bounce on iOS */
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
+  overscroll-behavior-y: auto; /* Changed from contain to auto to allow native scroll behavior */
   /* Ensure content is always accessible on Safari */
   position: relative;
 }

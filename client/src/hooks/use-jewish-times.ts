@@ -216,6 +216,7 @@ export function useJewishTimes() {
 
   return useQuery({
     queryKey: ["zmanim", coordinates?.lat, coordinates?.lng, today],
+    enabled: !!coordinates, // Only fetch when we have coordinates
     staleTime: 60 * 60 * 1000, // 1 hour cache
     gcTime: 24 * 60 * 60 * 1000, // 24 hours in memory
     queryFn: async () => {
@@ -232,7 +233,6 @@ export function useJewishTimes() {
         return null;
       }
     },
-    enabled: !!coordinates, // Only fetch when we have coordinates
     refetchInterval: false,
     refetchOnWindowFocus: false, // Optimized: Avoid excessive refetches
     refetchOnMount: false, // Optimized: Use cached data when fresh

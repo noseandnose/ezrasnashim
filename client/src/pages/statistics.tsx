@@ -189,6 +189,7 @@ export default function Statistics() {
     "featured-content": "Featured Content",
     featured: "Featured",
     "parsha-vort": "Parsha Shiur",
+    "pirkei-avot": "Pirkei Avot",
     
     // Life section
     recipe: "Daily Recipe",
@@ -235,6 +236,7 @@ export default function Statistics() {
     halacha: BookOpen,
     "featured-content": Star,
     featured: Star,
+    "pirkei-avot": ScrollText,
     
     // Life section
     recipe: Sparkles,
@@ -301,7 +303,7 @@ export default function Statistics() {
     <div className="mobile-app min-h-screen w-full bg-white relative flex flex-col">
       <AppHeader />
       
-      <main className="content-area">
+      <main className="content-area pb-[calc(var(--footer-total-height)+1rem)]" data-scroll-lock-target>
         {/* Back button and title in content area */}
         <div className="bg-gradient-soft rounded-b-3xl px-4 pt-4 pb-4 mb-4 border-0 shadow-none -mt-2">
           <div className="flex items-center justify-between mb-4">

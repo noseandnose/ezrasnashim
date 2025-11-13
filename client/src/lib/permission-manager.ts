@@ -223,6 +223,16 @@ export class PermissionManager {
     const store = usePermissionStore.getState();
     const current = store.location;
 
+    // If cooldown has expired, reset state to 'prompt' to allow re-prompting
+    if (current.cooldownUntil && Date.now() >= current.cooldownUntil) {
+      // Cooldown expired - clear it and reset to prompt state
+      store.setLocationState({
+        state: 'prompt',
+        cooldownUntil: null,
+      });
+      return;
+    }
+
     // Check if we're in cooldown period
     if (current.cooldownUntil && Date.now() < current.cooldownUntil) {
       // Still in cooldown, don't prompt
@@ -230,18 +240,19 @@ export class PermissionManager {
     }
 
     // Try to check actual browser permission if API is available
+    // IMPORTANT: Only trust 'granted' state, not 'denied' state on Android
+    // Android Permissions API often incorrectly reports 'denied' before user has been prompted
     if (navigator.permissions) {
       navigator.permissions.query({ name: 'geolocation' }).then((permission) => {
-        if (permission.state === 'denied' && current.state !== 'denied') {
-          store.setLocationState({
-            state: 'denied',
-            cooldownUntil: Date.now() + this.LOCATION_COOLDOWN_MS,
-          });
-        } else if (permission.state === 'granted' && current.state !== 'granted') {
+        // Only update to 'granted' if permission is actually granted
+        // Do NOT update to 'denied' based on Permissions API alone - wait for actual user response
+        if (permission.state === 'granted' && current.state !== 'granted') {
           store.setLocationState({
             state: 'granted',
           });
         }
+        // If permission.state is 'denied' but we never actually prompted the user,
+        // ignore it - Android often incorrectly reports this before prompting
       }).catch(() => {
         // Permission API not supported, will rely on geolocation API callbacks
       });
@@ -340,13 +351,24 @@ export class PermissionManager {
 
       return { success: true, subscription };
     } catch (error) {
-      console.error('[PermissionManager] Error subscribing to push:', error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : error instanceof DOMException 
+          ? `${error.name}: ${error.message}` 
+          : String(error);
+      
+      console.error('[PermissionManager] Error subscribing to push:', {
+        message: errorMessage,
+        name: error instanceof Error ? error.name : 'Unknown',
+        error: error
+      });
+      
       store.setNotificationState({
         subscribed: false,
-        lastError: String(error),
+        lastError: errorMessage,
         lastChecked: Date.now(),
       });
-      return { success: false, error: String(error) };
+      return { success: false, error: errorMessage };
     }
   }
 
@@ -396,9 +418,11 @@ export class PermissionManager {
       return { success: false, error: 'In cooldown period' };
     }
 
-    // Check if already denied
-    if (current.state === 'denied') {
-      return { success: false, error: 'Permission previously denied' };
+    // Only skip if already granted - always try if state is denied/prompt/dismissed
+    // This handles Android quirks where Permissions API incorrectly reports state
+    if (current.state === 'granted') {
+      // Already have permission, no need to request again
+      return { success: true };
     }
 
     return new Promise((resolve) => {
@@ -431,17 +455,28 @@ export class PermissionManager {
           resolve({ success: true, coordinates: coords });
         },
         (error) => {
-          // Permission denied
-          store.setLocationState({
-            state: 'denied',
-            cooldownUntil: Date.now() + this.LOCATION_COOLDOWN_MS,
-          });
+          // Only mark as 'denied' if user explicitly denied permission
+          // PERMISSION_DENIED = 1, POSITION_UNAVAILABLE = 2, TIMEOUT = 3
+          if (error.code === 1) {
+            // User explicitly denied permission
+            store.setLocationState({
+              state: 'denied',
+              cooldownUntil: Date.now() + this.LOCATION_COOLDOWN_MS,
+            });
+          } else {
+            // Timeout or position unavailable - don't mark as denied
+            // Leave state as 'prompt' so we can try again
+            store.setLocationState({
+              state: 'prompt',
+              cooldownUntil: null,
+            });
+          }
           
           resolve({ success: false, error: error.message });
         },
         {
           enableHighAccuracy: false,
-          timeout: 8000,
+          timeout: 10000, // Increased timeout for slower Android devices
           maximumAge: 60 * 60 * 1000, // 1-hour cache
         }
       );
@@ -453,12 +488,24 @@ export class PermissionManager {
     const store = usePermissionStore.getState();
     const current = store.location;
 
-    // Don't prompt if denied or in cooldown
-    if (current.state === 'denied') return false;
+    // If cooldown has expired, reset state to 'prompt'
+    if (current.cooldownUntil && Date.now() >= current.cooldownUntil) {
+      store.setLocationState({
+        state: 'prompt',
+        cooldownUntil: null,
+      });
+      // Now allow prompting
+      return true;
+    }
+
+    // Don't prompt if in active cooldown
     if (current.cooldownUntil && Date.now() < current.cooldownUntil) return false;
 
     // Don't prompt if already granted
     if (current.state === 'granted') return false;
+
+    // Don't prompt if denied (unless cooldown expired, handled above)
+    if (current.state === 'denied') return false;
 
     return true;
   }

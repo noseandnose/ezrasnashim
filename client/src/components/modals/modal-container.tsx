@@ -4,10 +4,8 @@ import TimesModals from "./times-modals";
 import TableModals from "./table-modals";
 import TzedakaModals from "./tzedaka-modals";
 import ShopModals from "./shop-modals";
-import DonationModal from "./donation-modal";
 import CongratulationsModal from "./congratulations-modal";
 import AboutModal from "./about-modal";
-import LocationModal from "./location-modal";
 import SponsorDetailsModal from "./sponsor-details-modal";
 import { CommunityImpactModal } from "./community-impact-modal";
 import { EventsModal } from "./events-modal";
@@ -29,20 +27,12 @@ export default function ModalContainer({ onSectionChange }: ModalContainerProps)
       <TableModals />
       <TzedakaModals />
       <ShopModals />
-      <DonationModal />
-      <CongratulationsModal />
-      <AboutModal />
-      <LocationModal 
-        isOpen={activeModal === 'location'} 
-        onClose={closeModal} 
-      />
-      <SponsorDetailsModal />
-      <CommunityImpactModal />
-      <EventsModal 
-        isOpen={activeModal === 'events'} 
-        onClose={closeModal} 
-      />
       <MeditationModals />
+      {activeModal === 'congratulations' && <CongratulationsModal />}
+      {activeModal === 'about' && <AboutModal />}
+      {activeModal === 'sponsor-details' && <SponsorDetailsModal />}
+      {activeModal === 'community-impact' && <CommunityImpactModal />}
+      {activeModal === 'events' && <EventsModal isOpen={true} onClose={closeModal} />}
     </>
   );
 }
