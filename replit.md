@@ -22,7 +22,7 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **State Management**: Zustand for client state, TanStack Query for server state.
 - **Routing**: Wouter for lightweight client-side routing.
 - **Design**: Mobile-first responsive, PWA functionality.
-- **Typography**: Playfair Display (headers), Inter (body), David Libre/Heebo (Hebrew), Platypi (English), Koren Siddur (Tefilla). Font preloading with `font-display:optional`.
+- **Typography**: Playfair Display (headers), Inter (body), David Libre/Heebo (Hebrew), Platypi (English), Koren Siddur (Tefilla). VC Koren fonts preloaded with `font-display:swap` for instant prayer text rendering.
 - **Visuals**: Flower progress indicators, subtle animations, custom logos, consistent gradients.
 - **Modals**: Fullscreen overlay system for major content with consistent headers, font controls, language toggles, and attribution. Prayer fullscreens include a compass button for quick orientation.
 - **UI/UX Decisions**: Pure CSS safe area detection (`env(safe-area-inset-*)`) for zero layout shift. Enhanced audio player UI. Lazy section mounting for instant page transitions.
