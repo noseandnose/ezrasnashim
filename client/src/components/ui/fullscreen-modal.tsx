@@ -5,6 +5,7 @@ import { FloatingSettings } from './floating-settings';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useLocation } from 'wouter';
 import { MiniCompassModal } from '@/components/modals/mini-compass-modal';
+import { ensureSafeAreaVariables } from '@/hooks/use-safe-area';
 
 interface FullscreenModalProps {
   isOpen: boolean;
@@ -83,30 +84,40 @@ export function FullscreenModal({
     // Add popstate listener to catch browser back gestures
     window.addEventListener('popstate', handlePopState, true);
     
-    // Save body styles
-    const originalBodyStyle = {
-      overflow: document.body.style.overflow,
-      position: document.body.style.position,
-      top: document.body.style.top,
-      width: document.body.style.width,
-      touchAction: document.body.style.touchAction,
-      overscrollBehavior: document.body.style.overscrollBehavior,
-      webkitOverscrollBehavior: (document.body.style as any).webkitOverscrollBehavior
-    };
+    // Find and lock the scroll container (.content-area) instead of body
+    const scrollContainer = document.querySelector('[data-scroll-lock-target]') as HTMLElement 
+      ?? document.querySelector('.content-area') as HTMLElement;
     
-    // Try minimal body style changes to avoid interfering with gestures
-    document.body.style.overflow = 'hidden';
-    // Don't fix the body position - this might be interfering with gesture detection
-    // document.body.style.position = 'fixed';
-    // document.body.style.top = `-${scrollY}px`;
-    document.body.style.touchAction = 'auto';
-    document.body.style.overscrollBehavior = 'auto';
-    // @ts-ignore - WebKit specific property
-    document.body.style.webkitOverscrollBehavior = 'auto';
+    let originalContainerStyle: {
+      overflow: string;
+      pointerEvents: string;
+    } | null = null;
+    let savedScrollTop = 0;
     
-    // Also prevent scrolling on the document element for iOS
-    const originalHtmlOverflow = document.documentElement.style.overflow;
-    document.documentElement.style.overflow = 'hidden';
+    if (scrollContainer) {
+      // Save the current scroll position and styles
+      savedScrollTop = scrollContainer.scrollTop;
+      originalContainerStyle = {
+        overflow: scrollContainer.style.overflow,
+        pointerEvents: scrollContainer.style.pointerEvents
+      };
+      
+      // Lock the scroll container
+      scrollContainer.style.overflow = 'hidden';
+      scrollContainer.style.pointerEvents = 'none';
+    } else {
+      // Fallback: lock body if no scroll container found (admin pages, etc.)
+      const originalBodyOverflow = document.body.style.overflow;
+      const originalHtmlOverflow = document.documentElement.style.overflow;
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      
+      // Store for cleanup
+      (window as any).__fallbackScrollLock = {
+        bodyOverflow: originalBodyOverflow,
+        htmlOverflow: originalHtmlOverflow
+      };
+    }
     
     // Add escape listener with capture
     document.addEventListener('keydown', handleEscape, true);
@@ -114,21 +125,26 @@ export function FullscreenModal({
     window.addEventListener('closeFullscreen', handleCloseFullscreen);
 
     return () => {
-      // Restore body styles
-      document.body.style.overflow = originalBodyStyle.overflow;
-      document.body.style.position = originalBodyStyle.position;
-      document.body.style.top = originalBodyStyle.top;
-      document.body.style.width = originalBodyStyle.width;
-      document.body.style.touchAction = originalBodyStyle.touchAction;
-      document.body.style.overscrollBehavior = originalBodyStyle.overscrollBehavior;
-      // @ts-ignore - WebKit specific property
-      document.body.style.webkitOverscrollBehavior = originalBodyStyle.webkitOverscrollBehavior;
+      // Restore scroll container if we locked it
+      if (scrollContainer && originalContainerStyle) {
+        // Restore original styles
+        scrollContainer.style.overflow = originalContainerStyle.overflow;
+        scrollContainer.style.pointerEvents = originalContainerStyle.pointerEvents;
+        
+        // Restore scroll position
+        scrollContainer.scrollTop = savedScrollTop;
+      } else {
+        // Restore fallback body/html lock
+        const fallbackLock = (window as any).__fallbackScrollLock;
+        if (fallbackLock) {
+          document.body.style.overflow = fallbackLock.bodyOverflow;
+          document.documentElement.style.overflow = fallbackLock.htmlOverflow;
+          delete (window as any).__fallbackScrollLock;
+        }
+      }
       
-      // Restore html overflow
-      document.documentElement.style.overflow = originalHtmlOverflow;
-      
-      // Don't force window scroll - let the app's scroll containers maintain their position
-      // The main scroll container is .content-area, so forcing window scroll fights it
+      // Ensure safe-area CSS variables are still applied
+      ensureSafeAreaVariables();
       
       document.removeEventListener('keydown', handleEscape, true);
       window.removeEventListener('closeFullscreen', handleCloseFullscreen);
