@@ -35,7 +35,8 @@ interface TorahSectionProps {
 
 export default function TorahSection({}: TorahSectionProps) {
   const { openModal } = useModalStore();
-  const { isModalComplete, markModalComplete } = useModalCompletionStore();
+  const markModalComplete = useModalCompletionStore(state => state.markModalComplete);
+  const isModalComplete = useModalCompletionStore(state => state.isModalComplete);
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
