@@ -13,13 +13,13 @@ import { Expand, BookOpen } from "lucide-react";
 export default function ParshaVortModal() {
   const { activeModal, closeModal, openModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const markModalComplete = useModalCompletionStore(state => state.markModalComplete);
-  const isCompleted = useModalCompletionStore(state => state.isModalComplete('parsha-vort'));
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [fullscreenContent, setFullscreenContent] = useState<any>({ isOpen: false });
 
   const isOpen = activeModal === 'parsha-vort';
+  const isCompleted = isModalComplete('parsha-vort');
 
   // This modal was the wrong file - actual modal is in table-modals.tsx
   // Keeping minimal structure for future use
