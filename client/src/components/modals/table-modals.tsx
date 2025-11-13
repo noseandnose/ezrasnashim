@@ -782,12 +782,23 @@ export default function TableModals() {
           
           {/* Video Player */}
           {parshaContent?.videoUrl && (
-            <div className="mb-4">
+            <div className="mb-4 relative">
               <video 
                 controls 
-                className="w-full rounded-lg"
-                src={parshaContent.videoUrl}
+                className="w-full rounded-lg bg-gray-50"
+                preload="metadata"
+                playsInline
+                poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Cpolygon points='40,30 70,50 40,70' fill='%23d1d5db'/%3E%3C/svg%3E"
+                onLoadStart={(e) => {
+                  const video = e.currentTarget;
+                  video.style.opacity = '0.7';
+                }}
+                onCanPlay={(e) => {
+                  const video = e.currentTarget;
+                  video.style.opacity = '1';
+                }}
               >
+                <source src={parshaContent.videoUrl} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>
