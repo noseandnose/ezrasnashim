@@ -622,12 +622,27 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           
           {/* Thank You Section - Dynamic from database */}
           {parshaVortContent?.thankYouMessage && (
-            <div className="mt-1 p-4 bg-blue-50 rounded-2xl border border-blue-200">
-              <div 
-                className="text-sm text-black platypi-medium"
-                dangerouslySetInnerHTML={{ __html: formatThankYouMessage(parshaVortContent.thankYouMessage) }}
-              />
-            </div>
+            parshaVortContent.speakerWebsite ? (
+              <div className="mt-1 p-4 bg-blue-50 rounded-2xl border border-blue-200 text-center">
+                <a
+                  href={parshaVortContent.speakerWebsite}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blush platypi-medium hover:text-blush/80 transition-colors underline"
+                  data-testid="link-parsha-thank-you"
+                  dangerouslySetInnerHTML={{
+                    __html: formatThankYouMessage(parshaVortContent.thankYouMessage)
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="mt-1 p-4 bg-blue-50 rounded-2xl border border-blue-200">
+                <div 
+                  className="text-sm text-black platypi-medium"
+                  dangerouslySetInnerHTML={{ __html: formatThankYouMessage(parshaVortContent.thankYouMessage) }}
+                />
+              </div>
+            )
           )}
 
           <div className="heart-explosion-container">

@@ -197,6 +197,7 @@ export default function TableModals() {
     audioUrl?: string;
     videoUrl?: string;
     speaker?: string;
+    speakerWebsite?: string;
     thankYouMessage?: string;
   }
 
@@ -802,12 +803,27 @@ export default function TableModals() {
 
           {/* Thank You Message with Links */}
           {parshaContent?.thankYouMessage && (
-            <div 
-              className="bg-blue-50 rounded-2xl px-2 py-3 mt-4 border border-blue-200 text-sm text-gray-600 text-center leading-relaxed"
-              dangerouslySetInnerHTML={{
-                __html: formatThankYouMessageFull(parshaContent.thankYouMessage)
-              }}
-            />
+            parshaContent.speakerWebsite ? (
+              <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-4 border border-blue-200 text-sm text-center leading-relaxed">
+                <a
+                  href={parshaContent.speakerWebsite}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blush font-medium hover:text-blush/80 transition-colors underline"
+                  data-testid="link-parsha-thank-you"
+                  dangerouslySetInnerHTML={{
+                    __html: formatThankYouMessageFull(parshaContent.thankYouMessage)
+                  }}
+                />
+              </div>
+            ) : (
+              <div 
+                className="bg-blue-50 rounded-2xl px-2 py-3 mt-4 border border-blue-200 text-sm text-gray-600 text-center leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: formatThankYouMessageFull(parshaContent.thankYouMessage)
+                }}
+              />
+            )
           )}
 
           <Button 

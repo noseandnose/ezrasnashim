@@ -92,12 +92,25 @@ export default function ParshaVortModal() {
                 <BookOpen className="h-4 w-4 text-blush" />
                 <span className="text-sm platypi-bold text-black">Special Thanks</span>
               </div>
-              <div 
-                className="text-sm platypi-regular text-black leading-relaxed"
-                dangerouslySetInnerHTML={{
-                  __html: formatThankYouMessageFull(parshaVort.thankYouMessage)
-                }}
-              />
+              {parshaVort.speakerWebsite ? (
+                <a
+                  href={parshaVort.speakerWebsite}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm platypi-regular text-blush leading-relaxed hover:text-blush/80 transition-colors underline block"
+                  data-testid="link-parsha-thank-you"
+                  dangerouslySetInnerHTML={{
+                    __html: formatThankYouMessageFull(parshaVort.thankYouMessage)
+                  }}
+                />
+              ) : (
+                <div 
+                  className="text-sm platypi-regular text-black leading-relaxed"
+                  dangerouslySetInnerHTML={{
+                    __html: formatThankYouMessageFull(parshaVort.thankYouMessage)
+                  }}
+                />
+              )}
             </div>
           )}
 
@@ -217,12 +230,25 @@ export default function ParshaVortModal() {
                 {/* Thank You Message */}
                 {parshaVort.thankYouMessage && (
                   <div className="bg-white/60 rounded-xl p-3 text-center">
-                    <div 
-                      className="text-xs platypi-regular text-black/80 line-clamp-2"
-                      dangerouslySetInnerHTML={{
-                        __html: formatThankYouMessageFull(parshaVort.thankYouMessage)
-                      }}
-                    />
+                    {parshaVort.speakerWebsite ? (
+                      <a
+                        href={parshaVort.speakerWebsite}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs platypi-regular text-blush hover:text-blush/80 transition-colors underline line-clamp-2 block"
+                        data-testid="link-parsha-thank-you"
+                        dangerouslySetInnerHTML={{
+                          __html: formatThankYouMessageFull(parshaVort.thankYouMessage)
+                        }}
+                      />
+                    ) : (
+                      <div 
+                        className="text-xs platypi-regular text-black/80 line-clamp-2"
+                        dangerouslySetInnerHTML={{
+                          __html: formatThankYouMessageFull(parshaVort.thankYouMessage)
+                        }}
+                      />
+                    )}
                   </div>
                 )}
 
