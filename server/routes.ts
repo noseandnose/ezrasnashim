@@ -1395,7 +1395,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  app.post("/api/after-brochas/prayers", async (req, res) => {
+  app.post("/api/after-brochas/prayers", requireAdminAuth, async (req, res) => {
     try {
       const prayer = await storage.createAfterBrochasPrayer(req.body);
       res.json(prayer);
@@ -1453,7 +1453,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/brochas", async (req, res) => {
+  app.post("/api/brochas", requireAdminAuth, async (req, res) => {
     try {
       const brocha = await storage.createBrocha(req.body);
       res.json(brocha);
@@ -1476,7 +1476,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  app.post("/api/birkat-hamazon/prayers", async (req, res) => {
+  app.post("/api/birkat-hamazon/prayers", requireAdminAuth, async (req, res) => {
     try {
       const prayer = await storage.createBirkatHamazonPrayer(req.body);
       res.json(prayer);
@@ -1563,7 +1563,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/sponsors", async (req, res) => {
+  app.post("/api/sponsors", requireAdminAuth, async (req, res) => {
     try {
       const sponsor = await storage.createSponsor(req.body);
       
@@ -1608,7 +1608,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/campaigns", async (req, res) => {
+  app.post("/api/campaigns", requireAdminAuth, async (req, res) => {
     try {
       const campaign = await storage.createCampaign(req.body);
       res.json(campaign);
@@ -1631,7 +1631,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  app.post("/api/torah/halacha", async (req, res) => {
+  app.post("/api/torah/halacha", requireAdminAuth, async (req, res) => {
     try {
       const validatedData = insertDailyHalachaSchema.parse(req.body);
       const halacha = await storage.createDailyHalacha(validatedData);
@@ -1655,7 +1655,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  app.post("/api/torah/emuna", async (req, res) => {
+  app.post("/api/torah/emuna", requireAdminAuth, async (req, res) => {
     try {
       const validatedData = insertDailyEmunaSchema.parse(req.body);
       const emuna = await storage.createDailyEmuna(validatedData);
@@ -1679,7 +1679,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  app.post("/api/torah/chizuk", async (req, res) => {
+  app.post("/api/torah/chizuk", requireAdminAuth, async (req, res) => {
     try {
       const validatedData = insertDailyChizukSchema.parse(req.body);
       const chizuk = await storage.createDailyChizuk(validatedData);
@@ -1703,7 +1703,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  app.post("/api/torah/featured", async (req, res) => {
+  app.post("/api/torah/featured", requireAdminAuth, async (req, res) => {
     try {
       const validatedData = insertFeaturedContentSchema.parse(req.body);
       const featured = await storage.createFeaturedContent(validatedData);
@@ -1739,7 +1739,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  app.post("/api/torah/pirkei-avot/advance", async (req, res) => {
+  app.post("/api/torah/pirkei-avot/advance", requireAdminAuth, async (req, res) => {
     try {
       const progress = await storage.advancePirkeiAvotProgress();
       cache.clearCategory('pirkei-avot');
@@ -1763,7 +1763,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  app.post("/api/pirkei-avot", async (req, res) => {
+  app.post("/api/pirkei-avot", requireAdminAuth, async (req, res) => {
     try {
       const newPirkeiAvot = await storage.createPirkeiAvot(req.body);
       res.json(newPirkeiAvot);
@@ -2291,7 +2291,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/nishmas", async (req, res) => {
+  app.post("/api/nishmas", requireAdminAuth, async (req, res) => {
     try {
       const validatedData = insertNishmasTextSchema.parse(req.body);
       const text = await storage.createNishmasText(validatedData);
@@ -2301,7 +2301,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/nishmas/:language", async (req, res) => {
+  app.put("/api/nishmas/:language", requireAdminAuth, async (req, res) => {
     try {
       const { language } = req.params;
       const validatedData = insertNishmasTextSchema.partial().parse(req.body);
@@ -3422,7 +3422,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Data cleanup endpoint - remove old analytics data
-  app.post("/api/analytics/cleanup", async (req, res) => {
+  app.post("/api/analytics/cleanup", requireAdminAuth, async (req, res) => {
     try {
       await storage.cleanupOldAnalytics();
       res.json({ success: true, message: "Old analytics data cleaned up" });
@@ -3559,7 +3559,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Recalculate all historical analytics to fix brocha counting
-  app.post("/api/analytics/recalculate-all", async (req, res) => {
+  app.post("/api/analytics/recalculate-all", requireAdminAuth, async (req, res) => {
     try {
       console.log('Starting recalculation of all historical analytics...');
       const result = await storage.recalculateAllHistoricalStats();

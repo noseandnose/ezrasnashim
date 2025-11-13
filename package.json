@@ -66,6 +66,7 @@
     "express-session": "^1.18.1",
     "geo-tz": "^8.1.4",
     "helmet": "^8.1.0",
+    "isomorphic-dompurify": "^2.30.0",
     "lucide-react": "^0.453.0",
     "memoizee": "^0.4.17",
     "memorystore": "^1.6.7",
