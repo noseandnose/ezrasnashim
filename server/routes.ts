@@ -4029,13 +4029,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Admin-only endpoints - require authentication
-  // TEMPORARY: Auth removed for debugging
-  app.post("/api/messages", async (req, res) => {
+  app.post("/api/messages", requireAdminAuth, async (req, res) => {
     try {
       // Validate request body with Zod schema
       const validatedData = insertMessagesSchema.parse(req.body);
       const newMessage = await storage.createMessage(validatedData);
-      res.json(newMessage);
+      res.status(201).json(newMessage);
     } catch (error: any) {
       if (error.name === 'ZodError') {
         return res.status(400).json({ 
