@@ -1,5 +1,4 @@
-// Remove unused useState import
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -28,9 +27,6 @@ export default function MessageModal({ isOpen, onClose, date }: MessageModalProp
           <DialogTitle className="platypi-bold text-xl text-black">
             {isLoading ? "Loading..." : message?.title || "Daily Message"}
           </DialogTitle>
-          <DialogDescription>
-            Updates on New Features and other Exciting activity
-          </DialogDescription>
         </DialogHeader>
         
         <div className="py-4 overflow-y-auto flex-1">
