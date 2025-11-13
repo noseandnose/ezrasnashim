@@ -90,11 +90,13 @@ async function registerServiceWorker() {
         }
       });
       
-      // Check for service worker updates on app launch
+      // Check for service worker updates on app launch after it's ready
       // This ensures users get new versions within hours instead of 24+ hours
       // Only check once on initial registration, not on every focus/resume
-      registration.update().catch(err => {
-        console.debug('[SW] Update check skipped:', err);
+      navigator.serviceWorker.ready.then(reg => {
+        reg.update().catch(err => {
+          console.debug('[SW] Update check skipped:', err);
+        });
       });
       
     } catch (error) {

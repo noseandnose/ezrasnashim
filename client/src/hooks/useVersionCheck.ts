@@ -15,29 +15,40 @@ export function useVersionCheck() {
   const [currentVersion, setCurrentVersion] = useState<VersionInfo | null>(null);
   const [updateInfo, setUpdateInfo] = useState<VersionInfo | null>(null);
   const [showUpdatePrompt, setShowUpdatePrompt] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
   
   // Get initial version on app load - ONLY on very first mount
-  // Never refetch during session to prevent reload-on-resume behavior
+  // Fetch once when component mounts, then never again
   const { data: initialVersion } = useQuery<VersionInfo>({
     queryKey: ['/api/version'],
     refetchOnWindowFocus: false,
-    refetchOnMount: false, // NEVER refetch - prevents version check when app resumes
+    refetchOnMount: 'always', // Fetch on first mount to get initial version
     staleTime: Infinity, // Don't refetch automatically
     retry: false, // Don't retry failed version checks
-    enabled: !currentVersion, // Only fetch if we don't have a version yet
+    enabled: !hasInitialized, // Only fetch if we haven't initialized yet
   });
   
-  // Store initial version
+  // Store initial version - runs whenever query succeeds
   useEffect(() => {
-    if (initialVersion && !currentVersion) {
+    if (initialVersion) {
+      // Always mark as initialized when query succeeds
+      setHasInitialized(true);
+      
+      // Update current version from server (even if localStorage had one)
+      // This ensures we have the latest server version before polling starts
       setCurrentVersion(initialVersion);
+      
       // Store in localStorage for persistence across sessions
       localStorage.setItem('app-version', JSON.stringify(initialVersion));
       
-      // Clear any stale update prompts since we have fresh version info
-      setShowUpdatePrompt(false);
+      // Only clear update prompt if we don't have a pending update
+      // This prevents the initial fetch from wiping out an update detected by polling
+      // If updateInfo exists, it means polling detected a newer version - preserve the prompt
+      if (!updateInfo) {
+        setShowUpdatePrompt(false);
+      }
     }
-  }, [initialVersion, currentVersion]);
+  }, [initialVersion, updateInfo]);
   
   // Load version from localStorage on mount
   useEffect(() => {
@@ -51,6 +62,7 @@ export function useVersionCheck() {
         
         if (isRecent) {
           setCurrentVersion(parsedVersion);
+          // Don't set hasInitialized here - let the query run to check for updates
         } else {
           // Clear old version data
           localStorage.removeItem('app-version');
@@ -151,20 +163,33 @@ export function useVersionCheck() {
     setShowUpdatePrompt(false);
     
     try {
-      // Force service worker to skip waiting and take control immediately
-      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+      // Wait for service worker to be ready before updating
+      if ('serviceWorker' in navigator) {
+        await navigator.serviceWorker.ready;
+        
+        // Force service worker to skip waiting and take control immediately
+        if (navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+        }
+        
+        // Wait for new service worker to take control (1s to ensure activation on slow devices)
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Only clear this app's caches (those matching our naming pattern)
+        // This preserves other apps' caches and avoids offline state
+        if ('caches' in window) {
+          const cacheNames = await caches.keys();
+          const appCacheNames = cacheNames.filter(name => 
+            name.startsWith('app-shell-') || 
+            name.startsWith('prayers-') || 
+            name.startsWith('torah-') || 
+            name.startsWith('api-') || 
+            name.startsWith('static-')
+          );
+          await Promise.all(appCacheNames.map(name => caches.delete(name)));
+          console.log('✨ Cleared app caches for fresh update');
+        }
       }
-      
-      // Clear all caches to ensure fresh content loads
-      if ('caches' in window) {
-        const cacheNames = await caches.keys();
-        await Promise.all(cacheNames.map(name => caches.delete(name)));
-        console.log('✨ Cleared all caches for fresh update');
-      }
-      
-      // Wait a moment for service worker to update
-      await new Promise(resolve => setTimeout(resolve, 500));
       
     } catch (error) {
       console.debug('[Update] Cache clear failed, continuing with reload:', error);

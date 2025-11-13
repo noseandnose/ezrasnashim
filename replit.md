@@ -67,7 +67,7 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **Security**: Drizzle ORM for SQL injection prevention. HTML Sanitization using DOMPurify for user-generated content.
 - **Deployment**: Static frontend (S3), backend (ECS), PostgreSQL (Supabase).
 - **Automated Cache Busting**: Automated version control and cache management with build timestamp and `/api/version` endpoint. Service worker uses `stale-while-revalidate`.
-- **Non-Intrusive Version Checks**: Version checking disabled during active sessions; critical updates prompt, regular updates apply on next app launch.
+- **Aggressive Update Distribution**: Version checking runs on app start (not just window focus), service worker update check on every app launch. When update detected, users get immediate prompt. Refresh button clears all caches and forces hard reload to ensure fresh content. Admin endpoint `/api/regenerate-cache-version` available to trigger cache version update post-deployment. Critical updates support via env vars (CRITICAL_UPDATE=true, RELEASE_NOTES) with 5-minute auto-refresh countdown.
 
 ## External Dependencies
 - **Payment Processing**: Stripe (donations, Apple Pay/Google Pay).
