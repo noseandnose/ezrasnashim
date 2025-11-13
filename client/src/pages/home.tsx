@@ -171,7 +171,7 @@ export default function Home() {
     <div className="mobile-app bg-white">
       <AppHeader />
       
-      <main className="content-area">
+      <main className="content-area" data-scroll-lock-target>
         {renderSection()}
       </main>
 
