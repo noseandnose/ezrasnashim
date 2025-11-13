@@ -732,7 +732,7 @@ export default function TableModals() {
 
       {/* Parsha Shiur Modal - Regular (Only when NOT parsha-vort) */}
       <Dialog open={activeModal === 'parsha' && !fullscreenContent.isOpen} onOpenChange={() => closeModal(true)}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg platypi-bold text-black">Parsha Shiur</DialogTitle>
           </div>
@@ -764,7 +764,7 @@ export default function TableModals() {
 
       {/* Parsha Vort Modal - Specific Selection (Higher priority) */}
       <Dialog open={activeModal === 'parsha-vort' && !fullscreenContent.isOpen} onOpenChange={() => closeModal(true)}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <div className="flex items-center justify-center mb-3 relative">
             <DialogTitle className="text-lg platypi-bold text-black">Parsha Shiur</DialogTitle>
           </div>
