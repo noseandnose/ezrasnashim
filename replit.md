@@ -1,7 +1,7 @@
 # Ezras Nashim - Daily Jewish Women's Spiritual App
 
 ## Overview
-Ezras Nashim is a mobile-first web application for Jewish women to engage with and track daily spiritual practices in Torah study, Tefilla (prayer), and Tzedaka (charity). Its purpose is to promote consistent spiritual growth through daily interaction with Jewish learning, prayer, and giving. The project's ambition is to facilitate one million mitzvos monthly, serving as a significant tool for spiritual development and community involvement.
+Ezras Nashim is a mobile-first web application designed for Jewish women to engage with and track daily spiritual practices in Torah study, Tefilla (prayer), and Tzedaka (charity). Its core purpose is to foster consistent spiritual growth through daily interaction with Jewish learning, prayer, and giving. The project aims to facilitate one million mitzvos monthly, serving as a significant tool for spiritual development and community involvement.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -21,11 +21,11 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **UI Components**: Radix UI primitives and shadcn/ui.
 - **State Management**: Zustand for client state, TanStack Query for server state.
 - **Routing**: Wouter for lightweight client-side routing.
-- **Design**: Mobile-first responsive, PWA functionality (Add to Home Screen, offline caching).
-- **Typography**: Playfair Display (headers), Inter (body), David Libre/Heebo (Hebrew), Platypi (English), Koren Siddur (Tefilla). Font preloading with font-display:optional strategy to prevent FOUC (Flash of Unstyled Content) and layout shift. All fonts loaded via single source in index.html with system font fallbacks.
+- **Design**: Mobile-first responsive, PWA functionality.
+- **Typography**: Playfair Display (headers), Inter (body), David Libre/Heebo (Hebrew), Platypi (English), Koren Siddur (Tefilla). Font preloading with `font-display:optional`.
 - **Visuals**: Flower progress indicators, subtle animations, custom logos, consistent gradients.
-- **Modals**: Fullscreen overlay system for major content with consistent headers, font controls, language toggles, and attribution. Direct fullscreen access for all Tefilla prayers and Tehillim sections. **Mini Compass Integration (2025-11-10)**: Prayer fullscreens (Morning Brochas, Mincha, Maariv) include compass button in header for quick orientation towards Jerusalem during prayer.
-- **UI/UX Decisions**: Pure CSS safe area detection (`env(safe-area-inset-*)`) for zero layout shift and optimal performance across devices, replacing JavaScript-based solutions. Enhanced audio player UI with precise positioning and improved drag responsiveness. Navigation arrows for media items are consistently positioned and fully functional in fullscreen mode. Lazy section mounting strategy for instant page transitions - sections mount on first visit and stay mounted for zero-delay navigation on subsequent visits.
+- **Modals**: Fullscreen overlay system for major content with consistent headers, font controls, language toggles, and attribution. Prayer fullscreens include a compass button for quick orientation.
+- **UI/UX Decisions**: Pure CSS safe area detection (`env(safe-area-inset-*)`) for zero layout shift. Enhanced audio player UI. Lazy section mounting for instant page transitions.
 
 ### Backend
 - **Runtime**: Node.js 20 with Express.js.
@@ -43,46 +43,36 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **Provider**: AWS S3 with CloudFront CDN.
 - **SDK**: AWS SDK v3.
 - **Upload Flow**: Admin requests presigned PUT URL → Direct upload to S3 → Set ACL metadata → Return CDN URL.
-- **CDN Integration**: Objects served via CDN or Express /objects/ route.
-- **Required Environment Variables**: `AWS_S3_BUCKET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `CDN_BASE_URL`.
+- **CDN Integration**: Objects served via CDN or Express `/objects/` route.
 
 ### Core Application Features
 - **Daily Completion Tracking**: Torah, Tefilla, Tzedaka.
-- **Jewish Times Integration**: Real-time zmanim based on location.
+- **Jewish Times Integration**: Real-time zmanim based on location (Hebcal.com).
 - **Content Management**: Daily Torah, prayers (Mincha, Nishmas, Tehillim, Morning Brochas, Birkat Hamazon, Maariv), Shabbat resources, Pirkei Avot. Supports text and audio; dynamic prayer text.
 - **The Kotel Compass**: Geolocation-based compass for prayer orientation.
 - **Donation System**: Stripe integration for tzedaka.
 - **Tehillim Global Progress**: Community-wide tracking.
 - **Sponsorship System**: Daily content sponsorship.
-- **Analytics**: Tracking of daily/total users, page views, Tehillim completions, names prayed for, modal completions.
+- **Analytics**: Tracking of daily/total users, page views, Tehillim completions, names prayed for, modal completions via Google Analytics. Analytics deferred via whenIdle.
 - **Life Page**: Shabbat countdown, Jewish Date converter, Daily Recipe, Creative Jewish Living, Community Feedback.
 - **Time-based Prayer System**: Dynamic prayer buttons based on zmanim.
-- **Text Cleaning**: Enhanced Hebrew text cleaning.
+- **Text Cleaning**: Enhanced Hebrew text cleaning and markdown-style formatting.
 - **Dynamic Thank You Messages**: Custom messages for daily recipes.
-- **Unified Admin Interface**: Comprehensive dashboard at `/admin` for Messages, Recipes, Table Inspirations, Notifications with CRUD.
-- **Secure Image Upload System**: Object storage integration with authenticated image upload.
+- **Unified Admin Interface**: Comprehensive dashboard at `/admin` for Messages, Recipes, Table Inspirations, Notifications with CRUD and secure image upload.
 - **Audio Auto-Completion**: Daily Chizuk and Emuna audio content auto-completes.
 - **Mobile App Support**: Enhanced detection and user guidance for mobile app wrappers.
 - **PWA Enhancements**: Bottom navigation, service worker cache updates, compass haptic feedback, smart install prompts.
 - **Hebrew Date Timezone Fix**: Corrected Hebrew date calculation to use user's browser timezone.
-- **Performance**: Lazy loading, code splitting, compression, optimized build, optimized Tehillim chain loading. Font optimization (removed unused ArnoKoren.otf 994KB and KorenSiddur.otf 84KB, saving ~1.1MB). Google Fonts using display=swap for faster perceived load. Splash screen using optimized 14KB PWA icon instead of 30KB image. Total initial load reduction: ~1.116MB. **Analytics Optimization (2025-11-10)**: Google Analytics deferred via whenIdle (500ms) to reduce initial boot bundle size by ~80-100KB without impacting core functionality. **Stale State Prevention (2025-11-10)**: Re-enabled refetchOnWindowFocus in TanStack Query to refetch stale data when app resumes. Added visibility change listener to invalidate critical queries (daily messages, completions, global progress) when app foregrounds from background. These changes prevent the app from entering a stale state where users need to kill and restart. **Server-Side Caching (2025-11-11)**: Implemented in-memory cache with category-based TTL management. Daily Torah content (halacha, emuna, chizuk, featured) cached for 24h, static prayers (Mincha, Maariv, Morning Brochas, Birkat Hamazon, After Brochas) cached for 7d, Pirkei Avot cached for 7d, Tehillim text cached for 30d. Cache middleware only caches successful (2xx) responses and sets appropriate Cache-Control headers (public, max-age, stale-while-revalidate) for client-side caching. Error responses (4xx/5xx) get Cache-Control: no-store to prevent edge caching. Admin mutations automatically invalidate relevant cache categories. X-Cache header (HIT/MISS) added for debugging. Significantly reduces database load and improves response times for static content.
-- **Security**: Drizzle ORM for SQL injection prevention.
+- **Performance**: Lazy loading, code splitting, compression, optimized build, optimized Tehillim chain loading, font optimization, splash screen optimization. Server-side in-memory caching for daily Torah, static prayers, Pirkei Avot, and Tehillim text. Re-enabled `refetchOnWindowFocus` and visibility change listener for critical queries to prevent stale state.
+- **Security**: Drizzle ORM for SQL injection prevention. HTML Sanitization using DOMPurify for user-generated content.
 - **Deployment**: Static frontend (S3), backend (ECS), PostgreSQL (Supabase).
-- **Automated Cache Busting**: Automated version control and cache management with build timestamp and `/api/version` endpoint. Service worker uses stale-while-revalidate for unversioned assets and bypasses caching for audio/API endpoints (`/api/version`, `/api/media-proxy/`).
-- **Non-Intrusive Version Checks**: Version checking disabled during active sessions to prevent interrupting users during audio or prayers. Updates only check once every 24 hours and only prompt for critical updates. Regular updates apply automatically on next app launch.
+- **Automated Cache Busting**: Automated version control and cache management with build timestamp and `/api/version` endpoint. Service worker uses `stale-while-revalidate`.
+- **Non-Intrusive Version Checks**: Version checking disabled during active sessions; critical updates prompt, regular updates apply on next app launch.
 
 ## External Dependencies
-- **Payment Processing**: Stripe (for donations, including Apple Pay/Google Pay).
-- **Jewish Calendar Services**: Hebcal.com (for dates, times, holidays, zmanim, Hebrew date conversion).
-- **Text Content**: Koren Publishers (for prayer texts).
+- **Payment Processing**: Stripe (donations, Apple Pay/Google Pay).
+- **Jewish Calendar Services**: Hebcal.com (dates, times, holidays, zmanim, Hebrew date conversion).
+- **Text Content**: Koren Publishers (prayer texts).
 - **Geolocation**: Browser Geolocation API, OpenStreetMap Nominatim API, Google Maps Places API.
 - **UI Libraries**: Radix UI (component primitives), Lucide React (icons), Tailwind CSS (styling).
 - **Analytics**: Google Analytics (G-7S9ND60DR6).
-
-## Known Platform Issues
-- **Replit Cartographer Warnings**: The `@replit/vite-plugin-cartographer` plugin (v0.4.2) generates "TypeError: traverse is not a function" warnings during development builds due to an internal plugin bug. These warnings are cosmetic only and do not affect application functionality. The warnings appear because the plugin has an internal issue with its @babel/traverse dependency loading. This is a known Replit platform issue that cannot be resolved without modifying forbidden configuration files (vite.config.ts). The application builds and runs correctly despite these warnings.
-
-## Fixed Issues
-- **CSS Containment Breaking Fixed Positioning** (Fixed 2025-11-09): Removed `contain: layout style;` from body element in index.css. This CSS containment rule was creating a new containing block that broke `position: fixed` for all headers and floating UI elements (AppHeader, FloatingSettings, navigation arrows). The containment caused fixed elements to scroll with the page instead of staying viewport-fixed. This was a recurring issue that has now been permanently resolved by removing the problematic containment rule.
-- **Modal Scroll Position and Analytics Footer Visibility** (Fixed 2025-11-13): Resolved critical scroll behavior issues where closing large modals would hide home screen content behind the header, requiring multiple swipes to reveal. Fixed by refactoring FullscreenModal to lock the `.content-area` scroll container instead of `document.body`, properly saving and restoring scroll position on modal close. Added `data-scroll-lock-target` attribute to main scroll containers in Home and Statistics pages for proper targeting. Created `ensureSafeAreaVariables()` helper in use-safe-area.ts to restore safe-area CSS variables after modal transitions, ensuring header/footer padding persists. Added extra bottom padding (`pb-[calc(var(--footer-total-height)+1rem)]`) to Statistics page to ensure Financial Impact section clears footer navigation on all devices. **Chained Modal Race Condition Fix**: Switched from `useEffect` to `useLayoutEffect` for scroll locking lifecycle to prevent race conditions in chained modal scenarios (close→open). useLayoutEffect runs synchronously before browser paint, ensuring new modal increments counter before old modal's cleanup runs. Combined with modal counter guards and deferred requestAnimationFrame restoration, this prevents scroll lock from flickering during modal transitions. Locally captured state prevents successor modals from overwriting restoration snapshots. Radix UI modal components (Dialog, Sheet, StandardModal) use built-in scroll locking and require no changes.
-- **Android Location Permission Not Prompting** (Fixed 2025-11-13): Resolved issue where some Android users were never prompted for location permission, causing all location-based features (zmanim, compass, etc.) to fail. Root cause: Android's Permissions API (`navigator.permissions.query`) incorrectly reports 'denied' before user is prompted, causing app to permanently block prompting. Solution: (1) Ignore 'denied' state from Permissions API, only trust actual user responses from `navigator.geolocation.getCurrentPosition()` callbacks. (2) Reset expired denial cooldowns from 'denied' back to 'prompt' state to allow re-prompting. (3) Distinguish between error codes: only set 'denied' for code 1 (PERMISSION_DENIED), reset to 'prompt' for codes 2/3 (POSITION_UNAVAILABLE/TIMEOUT). (4) Increased timeout from 8s to 10s for slower Android devices. Users with stale 'denied' state will be reset to 'prompt' on next app load if 24-hour cooldown expired.
