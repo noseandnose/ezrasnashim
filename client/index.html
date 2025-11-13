@@ -42,20 +42,22 @@
     <!-- Non-critical preconnects deferred via JS for faster initial load -->
     <!-- Deferred: sefaria, nominatim, maps, stripe, storage -->
     
-    <!-- VC Koren fonts loaded on demand - removed preload for faster initial render -->
+    <!-- Preload VC Koren fonts for instant prayer text rendering -->
+    <link rel="preload" href="/fonts/VC-Koren-Light.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="/fonts/VC-Koren-Bold.otf" as="font" type="font/otf" crossorigin>
     
     <!-- Preload splash screen logo - using smaller PWA icon for faster load -->
     <link rel="preload" href="/icon-192.png" as="image" type="image/png">
     
     <!-- Inline critical font CSS to prevent flash -->
     <style>
-      /* Hebrew font definitions - using optional to prevent render blocking */
+      /* Hebrew font definitions - using swap for authentic prayer experience */
       @font-face {
         font-family: 'VC Koren';
         src: url('/fonts/VC-Koren-Light.otf') format('opentype');
         font-weight: 300;
         font-style: normal;
-        font-display: optional;
+        font-display: swap;
         unicode-range: U+0590-05FF, U+FB1D-FB4F;
       }
       @font-face {
@@ -63,7 +65,7 @@
         src: url('/fonts/VC-Koren-Bold.otf') format('opentype');
         font-weight: 700;
         font-style: normal;
-        font-display: optional;
+        font-display: swap;
         unicode-range: U+0590-05FF, U+FB1D-FB4F;
       }
       

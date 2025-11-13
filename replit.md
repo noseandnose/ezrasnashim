@@ -22,7 +22,7 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **State Management**: Zustand for client state, TanStack Query for server state.
 - **Routing**: Wouter for lightweight client-side routing.
 - **Design**: Mobile-first responsive, PWA functionality.
-- **Typography**: Playfair Display (headers), Inter (body), David Libre/Heebo (Hebrew), Platypi (English), Koren Siddur (Tefilla). Font preloading with `font-display:optional`.
+- **Typography**: Playfair Display (headers), Inter (body), David Libre/Heebo (Hebrew), Platypi (English), Koren Siddur (Tefilla). VC Koren fonts preloaded with `font-display:swap` for instant prayer text rendering.
 - **Visuals**: Flower progress indicators, subtle animations, custom logos, consistent gradients.
 - **Modals**: Fullscreen overlay system for major content with consistent headers, font controls, language toggles, and attribution. Prayer fullscreens include a compass button for quick orientation.
 - **UI/UX Decisions**: Pure CSS safe area detection (`env(safe-area-inset-*)`) for zero layout shift. Enhanced audio player UI. Lazy section mounting for instant page transitions.
@@ -67,7 +67,7 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **Security**: Drizzle ORM for SQL injection prevention. HTML Sanitization using DOMPurify for user-generated content.
 - **Deployment**: Static frontend (S3), backend (ECS), PostgreSQL (Supabase).
 - **Automated Cache Busting**: Automated version control and cache management with build timestamp and `/api/version` endpoint. Service worker uses `stale-while-revalidate`.
-- **Non-Intrusive Version Checks**: Version checking disabled during active sessions; critical updates prompt, regular updates apply on next app launch.
+- **Aggressive Update Distribution**: Version checking runs on app start (not just window focus), service worker update check on every app launch. When update detected, users get immediate prompt. Refresh button clears all caches and forces hard reload to ensure fresh content. Cache version regenerated automatically via `node scripts/generate-version.js` after code changes to ensure users receive updates. Admin endpoint `/api/regenerate-cache-version` available for manual post-deployment triggers. Critical updates support via env vars (CRITICAL_UPDATE=true, RELEASE_NOTES) with 5-minute auto-refresh countdown.
 
 ## External Dependencies
 - **Payment Processing**: Stripe (donations, Apple Pay/Google Pay).

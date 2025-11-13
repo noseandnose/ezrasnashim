@@ -3968,6 +3968,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(version);
   });
 
+  // Admin endpoint to regenerate cache version - Forces PWA update
+  app.post("/api/regenerate-cache-version", requireAdminAuth, async (req, res) => {
+    try {
+      const { execSync } = await import('child_process');
+      const __dirname = path.dirname(fileURLToPath(import.meta.url));
+      const scriptPath = path.join(__dirname, '../scripts/generate-version.js');
+      
+      // Execute the version generation script
+      const output = execSync(`node ${scriptPath}`, { encoding: 'utf-8' });
+      
+      console.log('[Admin] Cache version regenerated:', output);
+      
+      res.status(200).json({
+        success: true,
+        message: 'Cache version regenerated successfully',
+        output: output.trim(),
+        newVersion: `v1.0.0-${Date.now()}`,
+        note: 'Users will receive update prompt on next app focus'
+      });
+    } catch (error: any) {
+      console.error('[Admin] Failed to regenerate cache version:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to regenerate cache version',
+        error: error.message
+      });
+    }
+  });
+
   // Batched homepage data endpoint - reduces initial load requests from 2+ to 1
   app.get("/api/home-summary", async (req, res) => {
     try {
@@ -4034,7 +4063,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate request body with Zod schema
       const validatedData = insertMessagesSchema.parse(req.body);
       const newMessage = await storage.createMessage(validatedData);
-      res.json(newMessage);
+      res.status(201).json(newMessage);
     } catch (error: any) {
       if (error.name === 'ZodError') {
         return res.status(400).json({ 

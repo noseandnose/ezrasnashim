@@ -90,10 +90,14 @@ async function registerServiceWorker() {
         }
       });
       
-      // Do NOT call registration.update() - it triggers update checks every time the app
-      // resumes from background, causing unwanted reloads when user minimizes/reopens
-      // The browser will check for updates naturally (typically every 24 hours)
-      // Updates will be applied on next full app launch
+      // Check for service worker updates on app launch after it's ready
+      // This ensures users get new versions within hours instead of 24+ hours
+      // Only check once on initial registration, not on every focus/resume
+      navigator.serviceWorker.ready.then(reg => {
+        reg.update().catch(err => {
+          console.debug('[SW] Update check skipped:', err);
+        });
+      });
       
     } catch (error) {
       console.error('[SW] Service Worker registration failed:', error);

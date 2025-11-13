@@ -1315,7 +1315,7 @@ function CompassFullscreenContent() {
 function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
   const { selectedPsalm, tehillimReturnTab, setTehillimActiveTab, openModal, dailyTehillimPsalms } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const markModalComplete = useModalCompletionStore(state => state.markModalComplete);
   const { trackModalComplete } = useTrackModalComplete();
   const tefillaConditions = useTefillaConditions();
 
@@ -1368,7 +1368,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
   if (!selectedPsalm) return <div className="text-center py-8">No Tehillim selected</div>;
 
   const completionKey = `individual-tehillim-${selectedPsalm}`;
-  const isCompleted = isModalComplete(completionKey);
+  const isCompleted = useModalCompletionStore(state => state.isModalComplete(completionKey));
 
   const handleComplete = () => {
     trackModalComplete(completionKey);
@@ -1538,7 +1538,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
 
 function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const markModalComplete = useModalCompletionStore(state => state.markModalComplete);
   const { trackModalComplete } = useTrackModalComplete();
   const { trackEvent } = useAnalytics();
   const { openModal } = useModalStore();
@@ -1723,7 +1723,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
 
   // Use unique key per Tehillim number for proper individual tracking
   const completionKey = `tehillim-chain-${activePerek}`;
-  const isCompleted = isModalComplete(completionKey);
+  const isCompleted = useModalCompletionStore(state => state.isModalComplete(completionKey));
 
   const handleComplete = () => {
     // Track modal completion for feature usage (use unique key to avoid double counting)

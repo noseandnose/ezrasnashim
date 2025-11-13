@@ -13,7 +13,8 @@ import { Expand, BookOpen } from "lucide-react";
 export default function ParshaVortModal() {
   const { activeModal, closeModal, openModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const markModalComplete = useModalCompletionStore(state => state.markModalComplete);
+  const isCompleted = useModalCompletionStore(state => state.isModalComplete('parsha-vort'));
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [fullscreenContent, setFullscreenContent] = useState<any>({ isOpen: false });
@@ -29,10 +30,6 @@ export default function ParshaVortModal() {
     gcTime: 4 * 60 * 60 * 1000,
     select: (data) => data && data[0]
   });
-  
-
-
-  const isCompleted = isModalComplete('parsha-vort');
 
   const handleComplete = () => {
     trackModalComplete('parsha-vort');
