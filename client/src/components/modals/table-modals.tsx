@@ -15,7 +15,8 @@ import { FullscreenImageModal } from "@/components/modals/fullscreen-image-modal
 
 export default function TableModals() {
   const { activeModal, closeModal } = useModalStore();
-  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const markModalComplete = useModalCompletionStore(state => state.markModalComplete);
+  const isModalComplete = useModalCompletionStore(state => state.isModalComplete);
   const { trackModalComplete } = useTrackModalComplete();
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [fullscreenImages, setFullscreenImages] = useState<{isOpen: boolean; images: string[]; initialIndex: number}>({isOpen: false, images: [], initialIndex: 0});
@@ -827,10 +828,15 @@ export default function TableModals() {
           )}
 
           <Button 
-            onClick={() => handleComplete('parsha-vort')}
-            className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
+            onClick={isModalComplete('parsha-vort') ? undefined : () => handleComplete('parsha-vort')}
+            disabled={isModalComplete('parsha-vort')}
+            className={`w-full py-3 rounded-xl platypi-medium border-0 mt-4 ${
+              isModalComplete('parsha-vort')
+                ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
+            }`}
           >
-            Completed Parsha
+            {isModalComplete('parsha-vort') ? 'Completed Today' : 'Complete Parsha'}
           </Button>
         </DialogContent>
       </Dialog>
