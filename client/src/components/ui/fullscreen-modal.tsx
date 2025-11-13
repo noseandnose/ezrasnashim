@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { X, Info, Compass } from 'lucide-react';
 import logoImage from "@assets/1LO_1755590090315.png";
 import { FloatingSettings } from './floating-settings';
@@ -6,6 +6,16 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { useLocation } from 'wouter';
 import { MiniCompassModal } from '@/components/modals/mini-compass-modal';
 import { ensureSafeAreaVariables } from '@/hooks/use-safe-area';
+
+// Global counter and state to track active fullscreen modals
+// Prevents race conditions when closing one modal while another opens
+let activeFullscreenModals = 0;
+let savedScrollState: {
+  container: HTMLElement | null;
+  scrollTop: number;
+  originalOverflow: string;
+  originalPointerEvents: string;
+} | null = null;
 
 interface FullscreenModalProps {
   isOpen: boolean;
@@ -57,8 +67,13 @@ export function FullscreenModal({
   const [, setLocation] = useLocation();
   const [showCompass, setShowCompass] = useState(false);
 
-  useEffect(() => {
+  // Use useLayoutEffect to ensure new modal increments counter before old modal's cleanup runs
+  // This prevents race conditions in chained modal scenarios
+  useLayoutEffect(() => {
     if (!isOpen) return;
+
+    // Increment the modal counter
+    activeFullscreenModals++;
 
     // Handle escape key
     const handleEscape = (e: KeyboardEvent) => {
@@ -88,35 +103,35 @@ export function FullscreenModal({
     const scrollContainer = document.querySelector('[data-scroll-lock-target]') as HTMLElement 
       ?? document.querySelector('.content-area') as HTMLElement;
     
-    let originalContainerStyle: {
-      overflow: string;
-      pointerEvents: string;
-    } | null = null;
-    let savedScrollTop = 0;
-    
     if (scrollContainer) {
-      // Save the current scroll position and styles
-      savedScrollTop = scrollContainer.scrollTop;
-      originalContainerStyle = {
-        overflow: scrollContainer.style.overflow,
-        pointerEvents: scrollContainer.style.pointerEvents
-      };
-      
-      // Lock the scroll container
-      scrollContainer.style.overflow = 'hidden';
-      scrollContainer.style.pointerEvents = 'none';
+      // Save the current scroll position and styles (only if this is the first modal)
+      if (activeFullscreenModals === 1) {
+        savedScrollState = {
+          container: scrollContainer,
+          scrollTop: scrollContainer.scrollTop,
+          originalOverflow: scrollContainer.style.overflow,
+          originalPointerEvents: scrollContainer.style.pointerEvents
+        };
+        
+        // Lock the scroll container
+        scrollContainer.style.overflow = 'hidden';
+        scrollContainer.style.pointerEvents = 'none';
+      }
+      // If activeFullscreenModals > 1, the lock is already in place, don't change anything
     } else {
       // Fallback: lock body if no scroll container found (admin pages, etc.)
-      const originalBodyOverflow = document.body.style.overflow;
-      const originalHtmlOverflow = document.documentElement.style.overflow;
-      document.body.style.overflow = 'hidden';
-      document.documentElement.style.overflow = 'hidden';
-      
-      // Store for cleanup
-      (window as any).__fallbackScrollLock = {
-        bodyOverflow: originalBodyOverflow,
-        htmlOverflow: originalHtmlOverflow
-      };
+      if (activeFullscreenModals === 1) {
+        const originalBodyOverflow = document.body.style.overflow;
+        const originalHtmlOverflow = document.documentElement.style.overflow;
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+        
+        // Store for cleanup
+        (window as any).__fallbackScrollLock = {
+          bodyOverflow: originalBodyOverflow,
+          htmlOverflow: originalHtmlOverflow
+        };
+      }
     }
     
     // Add escape listener with capture
@@ -125,26 +140,58 @@ export function FullscreenModal({
     window.addEventListener('closeFullscreen', handleCloseFullscreen);
 
     return () => {
-      // Restore scroll container if we locked it
-      if (scrollContainer && originalContainerStyle) {
-        // Restore original styles
-        scrollContainer.style.overflow = originalContainerStyle.overflow;
-        scrollContainer.style.pointerEvents = originalContainerStyle.pointerEvents;
-        
-        // Restore scroll position
-        scrollContainer.scrollTop = savedScrollTop;
-      } else {
-        // Restore fallback body/html lock
-        const fallbackLock = (window as any).__fallbackScrollLock;
-        if (fallbackLock) {
-          document.body.style.overflow = fallbackLock.bodyOverflow;
-          document.documentElement.style.overflow = fallbackLock.htmlOverflow;
-          delete (window as any).__fallbackScrollLock;
-        }
-      }
+      // Decrement the modal counter
+      activeFullscreenModals--;
       
-      // Ensure safe-area CSS variables are still applied
-      ensureSafeAreaVariables();
+      // Capture current state locally to prevent race conditions
+      const capturedState = savedScrollState;
+      const capturedFallbackLock = (window as any).__fallbackScrollLock;
+      
+      // Only restore scroll when no other fullscreen modals are active
+      if (activeFullscreenModals === 0) {
+        // Defer scroll restoration to prevent closing gesture from interfering
+        // Double rAF ensures iOS Safari's tap doesn't override our scroll position
+        requestAnimationFrame(() => {
+          // Re-check counter in case new modal opened
+          if (activeFullscreenModals > 0) return;
+          
+          // Restore scroll container if we locked it
+          if (capturedState && capturedState.container) {
+            // Restore original styles first
+            capturedState.container.style.overflow = capturedState.originalOverflow;
+            capturedState.container.style.pointerEvents = capturedState.originalPointerEvents;
+            
+            // Then restore scroll position in next frame to avoid gesture interference
+            requestAnimationFrame(() => {
+              // Re-check counter again before final restore
+              if (activeFullscreenModals > 0) return;
+              
+              if (capturedState && capturedState.container) {
+                capturedState.container.scrollTop = capturedState.scrollTop;
+              }
+              // Clear the saved state only if still at 0
+              if (activeFullscreenModals === 0) {
+                savedScrollState = null;
+              }
+              // Ensure safe-area CSS variables are still applied
+              ensureSafeAreaVariables();
+            });
+          } else if (capturedFallbackLock) {
+            // Restore fallback body/html lock
+            document.body.style.overflow = capturedFallbackLock.bodyOverflow;
+            document.documentElement.style.overflow = capturedFallbackLock.htmlOverflow;
+            if (activeFullscreenModals === 0) {
+              delete (window as any).__fallbackScrollLock;
+            }
+            
+            requestAnimationFrame(() => {
+              // Re-check counter before safe-area restore
+              if (activeFullscreenModals > 0) return;
+              ensureSafeAreaVariables();
+            });
+          }
+        });
+      }
       
       document.removeEventListener('keydown', handleEscape, true);
       window.removeEventListener('closeFullscreen', handleCloseFullscreen);
