@@ -125,6 +125,36 @@ export function FullscreenModal({
     // Increment the modal counter
     activeFullscreenModals++;
 
+    // Fix for buttons not working after app minimize/resume
+    // Ensure scroll lock is properly restored when visibility changes
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        // Page is being hidden/backgrounded - no action needed
+        return;
+      }
+      
+      // Page is visible again - ensure scroll lock state is correct
+      if (activeFullscreenModals > 0) {
+        // Modal(s) are still open - reapply scroll lock
+        const scrollContainer = document.querySelector('[data-scroll-lock-target]') as HTMLElement 
+          ?? document.querySelector('.content-area') as HTMLElement;
+        
+        if (scrollContainer) {
+          scrollContainer.style.overflow = 'hidden';
+          scrollContainer.style.pointerEvents = 'none';
+        } else {
+          // Fallback: lock body
+          document.body.style.overflow = 'hidden';
+          document.documentElement.style.overflow = 'hidden';
+        }
+      } else {
+        // No modals open - ensure scroll is unlocked
+        resetScrollLockIfNeeded();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     // Handle escape key
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -246,6 +276,7 @@ export function FullscreenModal({
       document.removeEventListener('keydown', handleEscape, true);
       window.removeEventListener('closeFullscreen', handleCloseFullscreen);
       window.removeEventListener('popstate', handlePopState, true);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [isOpen, onClose]);
 
