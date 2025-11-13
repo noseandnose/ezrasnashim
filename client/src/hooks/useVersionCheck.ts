@@ -76,11 +76,10 @@ export function useVersionCheck() {
     }
   }, [currentVersion]);
   
-  // Aggressive version checking - on app start AND window focus with throttling
-  // Checks for updates immediately on app load, then when user returns to app
+  // Aggressive version checking - on app start AND window focus (no throttling)
+  // Checks for updates immediately on app load, then EVERY time user returns to app
   // Shows update prompt when there's a real update available
   // Never auto-reloads - always requires user click
-  const lastCheckRef = useRef<number>(0);
   const hasCheckedOnStartRef = useRef<boolean>(false);
   
   useEffect(() => {
@@ -89,9 +88,8 @@ export function useVersionCheck() {
       
       // No throttling - check every time for immediate update detection
       // The endpoint is cheap and already fully cache-busted
-      const now = Date.now();
-      
       hasCheckedOnStartRef.current = true;
+      const now = Date.now();
       
       try {
         const response = await fetch(`/api/version?t=${now}`, {
