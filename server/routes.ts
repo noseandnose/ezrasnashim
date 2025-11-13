@@ -3955,6 +3955,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
   
   app.get("/api/version", (req, res) => {
+    // Aggressive no-cache headers to ensure users always get fresh version info
+    res.set({
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+      'Surrogate-Control': 'no-store'
+    });
+    
     const versionTimestamp = getVersionTimestamp();
     const version = {
       timestamp: versionTimestamp,

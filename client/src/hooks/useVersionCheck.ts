@@ -87,20 +87,19 @@ export function useVersionCheck() {
     const checkForUpdates = async () => {
       if (!currentVersion) return;
       
-      // Allow first check immediately on app start (no throttling)
+      // No throttling - check every time for immediate update detection
+      // The endpoint is cheap and already fully cache-busted
       const now = Date.now();
-      const fiveMinutes = 5 * 60 * 1000;
-      const isFirstCheck = !hasCheckedOnStartRef.current;
-      
-      if (!isFirstCheck && now - lastCheckRef.current < fiveMinutes) {
-        return;
-      }
       
       hasCheckedOnStartRef.current = true;
-      lastCheckRef.current = now;
       
       try {
-        const response = await fetch(`/api/version?t=${now}`);
+        const response = await fetch(`/api/version?t=${now}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        });
         if (!response.ok) return;
         
         // Validate response is JSON before parsing
