@@ -1,8 +1,6 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/lib/types";
-import { LazyImage } from "@/components/ui/lazy-image";
-import justOneChesedImage from '@assets/Second print Photo Signs - Chamal  copy_1753336662272.png';
 import projectOfImage from "@assets/A project of_1756118917799.png";
 
 export default function AboutModal() {
@@ -81,23 +79,6 @@ export default function AboutModal() {
             </a>
             .
           </p>
-          
-          {/* JustOneChesed Logo - Now Clickable */}
-          <div className="flex justify-center mt-4">
-            <a 
-              href="https://justonechesed.org/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="hover:opacity-80 transition-opacity"
-            >
-              <LazyImage 
-                src={justOneChesedImage} 
-                alt="JustOneChesed Logo" 
-                className="max-w-full h-auto rounded-lg cursor-pointer"
-                style={{ maxHeight: '120px' }}
-              />
-            </a>
-          </div>
         </div>
 
         {/* Project of JustOneChesed Image */}
