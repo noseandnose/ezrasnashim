@@ -165,7 +165,7 @@ export default function ParshaVortModal() {
       />
 
       <Dialog open={isOpen} onOpenChange={closeModal}>
-        <DialogContent className="w-[95vw] max-w-md mx-auto bg-gradient-to-br from-blush to-lavender border-0 shadow-2xl">
+        <DialogContent className="w-[95vw] max-w-md mx-auto bg-gradient-to-br from-blush to-lavender border-0 shadow-2xl max-h-[90vh] overflow-y-auto">
           <div className="relative">
             {/* Fullscreen button */}
             <button
