@@ -64,23 +64,27 @@ export function useVersionCheck() {
     }
   }, [currentVersion]);
   
-  // Smart version checking on window focus with throttling
-  // Checks for updates when user returns to app, but only once every 5 minutes
-  // Shows update prompt only when there's a real update available
+  // Aggressive version checking - on app start AND window focus with throttling
+  // Checks for updates immediately on app load, then when user returns to app
+  // Shows update prompt when there's a real update available
   // Never auto-reloads - always requires user click
   const lastCheckRef = useRef<number>(0);
+  const hasCheckedOnStartRef = useRef<boolean>(false);
   
   useEffect(() => {
     const checkForUpdates = async () => {
       if (!currentVersion) return;
       
-      // Throttle checks to once every 5 minutes
+      // Allow first check immediately on app start (no throttling)
       const now = Date.now();
       const fiveMinutes = 5 * 60 * 1000;
-      if (now - lastCheckRef.current < fiveMinutes) {
+      const isFirstCheck = !hasCheckedOnStartRef.current;
+      
+      if (!isFirstCheck && now - lastCheckRef.current < fiveMinutes) {
         return;
       }
       
+      hasCheckedOnStartRef.current = true;
       lastCheckRef.current = now;
       
       try {
@@ -116,7 +120,12 @@ export function useVersionCheck() {
       }
     };
     
-    // Check on window focus (when user returns to app)
+    // Check immediately on app start (when currentVersion is first set)
+    if (!hasCheckedOnStartRef.current) {
+      checkForUpdates();
+    }
+    
+    // Also check on window focus (when user returns to app)
     const handleFocus = () => {
       checkForUpdates();
     };
@@ -128,7 +137,7 @@ export function useVersionCheck() {
     };
   }, [currentVersion]);
   
-  const refreshApp = () => {
+  const refreshApp = async () => {
     console.log('🔄 User requested app refresh...');
     
     // Update current version in localStorage before refresh
@@ -141,8 +150,27 @@ export function useVersionCheck() {
     // Dismiss the update prompt immediately
     setShowUpdatePrompt(false);
     
-    // Simple, non-disruptive reload
-    // Let the browser handle caching naturally
+    try {
+      // Force service worker to skip waiting and take control immediately
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+      }
+      
+      // Clear all caches to ensure fresh content loads
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+        console.log('✨ Cleared all caches for fresh update');
+      }
+      
+      // Wait a moment for service worker to update
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+    } catch (error) {
+      console.debug('[Update] Cache clear failed, continuing with reload:', error);
+    }
+    
+    // Hard reload to bypass any remaining cache
     console.log('✨ Reloading to apply update...');
     window.location.reload();
   };
