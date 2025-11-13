@@ -17,6 +17,52 @@ let savedScrollState: {
   originalPointerEvents: string;
 } | null = null;
 
+// Safety function to reset scroll lock state
+function resetScrollLockIfNeeded() {
+  if (activeFullscreenModals === 0) {
+    // Find scroll container
+    const scrollContainer = document.querySelector('[data-scroll-lock-target]') as HTMLElement 
+      ?? document.querySelector('.content-area') as HTMLElement;
+    
+    if (scrollContainer) {
+      // Restore scroll functionality
+      scrollContainer.style.overflow = '';
+      scrollContainer.style.pointerEvents = '';
+    }
+    
+    // Restore body/html  
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+    delete (window as any).__fallbackScrollLock;
+    
+    // Clear saved state
+    savedScrollState = null;
+  }
+}
+
+// Emergency reset function (ignores counter)
+function forceResetScrollLock() {
+  const scrollContainer = document.querySelector('[data-scroll-lock-target]') as HTMLElement 
+    ?? document.querySelector('.content-area') as HTMLElement;
+  
+  if (scrollContainer) {
+    scrollContainer.style.overflow = '';
+    scrollContainer.style.pointerEvents = '';
+  }
+  
+  document.body.style.overflow = '';
+  document.documentElement.style.overflow = '';
+  delete (window as any).__fallbackScrollLock;
+  
+  savedScrollState = null;
+  activeFullscreenModals = 0;
+}
+
+// Make available globally for debugging
+if (typeof window !== 'undefined') {
+  (window as any).__forceResetScrollLock = forceResetScrollLock;
+}
+
 interface FullscreenModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -70,7 +116,11 @@ export function FullscreenModal({
   // Use useLayoutEffect to ensure new modal increments counter before old modal's cleanup runs
   // This prevents race conditions in chained modal scenarios
   useLayoutEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      // Safety check: if modal is closed and counter is 0, ensure scroll is unlocked
+      resetScrollLockIfNeeded();
+      return;
+    }
 
     // Increment the modal counter
     activeFullscreenModals++;
