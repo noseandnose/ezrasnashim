@@ -12,6 +12,7 @@ import ErrorBoundary from "@/components/ui/error-boundary";
 import UpdateNotification from "@/components/UpdateNotification";
 import { AutoNotificationPrompt } from "@/components/auto-notification-prompt";
 import { OfflineIndicator } from "@/components/offline-indicator";
+import { SearchProvider } from "@/contexts/SearchContext";
 import "@/utils/clear-modal-completions";
 import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
 import { initGA } from "./lib/analytics";
@@ -158,13 +159,15 @@ export default function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <UpdateNotification />
-          <AutoNotificationPrompt />
-          <OfflineIndicator />
-          <Router />
-          <Toaster />
-        </TooltipProvider>
+        <SearchProvider>
+          <TooltipProvider>
+            <UpdateNotification />
+            <AutoNotificationPrompt />
+            <OfflineIndicator />
+            <Router />
+            <Toaster />
+          </TooltipProvider>
+        </SearchProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );
