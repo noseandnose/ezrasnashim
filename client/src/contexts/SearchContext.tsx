@@ -13,58 +13,74 @@ const SearchContext = createContext<SearchContextValue | null>(null);
 export function SearchProvider({ children }: { children: React.ReactNode }) {
   const { openModal } = useModalStore();
   
-  // Get data from existing queries
-  const { data: dailyTorah } = useQuery<any>({ queryKey: ['/api/daily-torah'] });
+  // Get today's date for content queries
+  const today = new Date().toISOString().split('T')[0];
+  
+  // Torah content queries
+  const { data: halachaContent } = useQuery<{title?: string; englishTitle?: string; hebrewTitle?: string}>({ 
+    queryKey: ['/api/torah/halacha', today],
+    staleTime: 15 * 60 * 1000,
+  });
+  const { data: chizukContent } = useQuery<{title?: string; englishTitle?: string; hebrewTitle?: string}>({ 
+    queryKey: ['/api/torah/chizuk', today],
+    staleTime: 15 * 60 * 1000,
+  });
+  const { data: emunaContent } = useQuery<{title?: string; englishTitle?: string; hebrewTitle?: string}>({ 
+    queryKey: ['/api/torah/emuna', today],
+    staleTime: 15 * 60 * 1000,
+  });
+  
+  // Prayer queries
   const { data: minchaPrayers } = useQuery<any[]>({ queryKey: ['/api/mincha/prayers'] });
   const { data: maarivPrayers } = useQuery<any[]>({ queryKey: ['/api/maariv/prayers'] });
   const { data: morningPrayers } = useQuery<any[]>({ queryKey: ['/api/morning/prayers'] });
-  const { data: womensPrayers } = useQuery<any[]>({ queryKey: ['/api/womens/prayers'] });
+  
+  // Brochas queries
   const { data: dailyBrochas } = useQuery<any[]>({ queryKey: ['/api/brochas/daily'] });
   const { data: specialBrochas } = useQuery<any[]>({ queryKey: ['/api/brochas/special'] });
+  
+  // Life page queries
   const { data: recipeContent } = useQuery<any>({ queryKey: ['/api/table/recipe'] });
-  const { data: tableInspirations } = useQuery<any[]>({ queryKey: ['/api/table-inspirations'] });
   const { data: pirkeiAvot } = useQuery<any>({ queryKey: ['/api/pirkei-avot'] });
   
   const searchIndex = useMemo(() => {
     const index: SearchRecord[] = [];
     
-    // Daily Torah Content
-    if (dailyTorah) {
-      if (dailyTorah.halacha) {
-        index.push({
-          id: 'torah-halacha',
-          category: 'Torah',
-          title: 'Learn Shabbas',
-          secondaryText: dailyTorah.halacha.englishTitle || 'Halachic insights',
-          keywords: ['halacha', 'הלכה', 'law', 'torah', 'תורה', 'daily', 'learn', 'shabbas', 'shabbat', 'שבת', 'learn shabbas', dailyTorah.halacha.englishTitle, dailyTorah.halacha.hebrewTitle].filter(Boolean),
-          modalId: 'halacha',
-          action: () => openModal('halacha')
-        });
-      }
-      
-      if (dailyTorah.chizuk) {
-        index.push({
-          id: 'torah-chizuk',
-          category: 'Torah',
-          title: 'Daily Chizuk',
-          secondaryText: dailyTorah.chizuk.englishTitle || 'Spiritual strength',
-          keywords: ['chizuk', 'חיזוק', 'inspiration', 'torah', 'תורה', 'daily', 'strength', 'encouragement', dailyTorah.chizuk.englishTitle, dailyTorah.chizuk.hebrewTitle].filter(Boolean),
-          modalId: 'chizuk',
-          action: () => openModal('chizuk')
-        });
-      }
-      
-      if (dailyTorah.emuna) {
-        index.push({
-          id: 'torah-emuna',
-          category: 'Torah',
-          title: 'Daily Emuna',
-          secondaryText: dailyTorah.emuna.englishTitle || 'Faith & trust',
-          keywords: ['emuna', 'אמונה', 'faith', 'torah', 'תורה', 'daily', 'trust', 'belief', dailyTorah.emuna.englishTitle, dailyTorah.emuna.hebrewTitle].filter(Boolean),
-          modalId: 'emuna',
-          action: () => openModal('emuna')
-        });
-      }
+    // Torah Content
+    if (halachaContent) {
+      index.push({
+        id: 'torah-halacha',
+        category: 'Torah',
+        title: 'Learn Shabbas',
+        secondaryText: halachaContent.englishTitle || halachaContent.title || 'Halachic insights',
+        keywords: ['halacha', 'הלכה', 'law', 'torah', 'תורה', 'daily', 'learn', 'shabbas', 'shabbat', 'שבת', 'learn shabbas', halachaContent.englishTitle, halachaContent.hebrewTitle, halachaContent.title].filter(Boolean) as string[],
+        modalId: 'halacha',
+        action: () => openModal('halacha')
+      });
+    }
+    
+    if (chizukContent) {
+      index.push({
+        id: 'torah-chizuk',
+        category: 'Torah',
+        title: 'Daily Chizuk',
+        secondaryText: chizukContent.englishTitle || chizukContent.title || 'Spiritual strength',
+        keywords: ['chizuk', 'חיזוק', 'inspiration', 'torah', 'תורה', 'daily', 'strength', 'encouragement', chizukContent.englishTitle, chizukContent.hebrewTitle, chizukContent.title].filter(Boolean) as string[],
+        modalId: 'chizuk',
+        action: () => openModal('chizuk')
+      });
+    }
+    
+    if (emunaContent) {
+      index.push({
+        id: 'torah-emuna',
+        category: 'Torah',
+        title: 'Daily Emuna',
+        secondaryText: emunaContent.englishTitle || emunaContent.title || 'Faith & trust',
+        keywords: ['emuna', 'אמונה', 'faith', 'torah', 'תורה', 'daily', 'trust', 'belief', emunaContent.englishTitle, emunaContent.hebrewTitle, emunaContent.title].filter(Boolean) as string[],
+        modalId: 'emuna',
+        action: () => openModal('emuna')
+      });
     }
     
     // Prayers
@@ -190,23 +206,6 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       action: () => openModal('womens-prayers')
     });
     
-    // Individual Women's Prayers
-    if (womensPrayers && Array.isArray(womensPrayers)) {
-      womensPrayers.forEach((prayer: any, idx: number) => {
-        const title = prayer.englishTitle || prayer.hebrewTitle || `Women's Prayer ${idx + 1}`;
-        const secondary = prayer.hebrewTitle || prayer.englishTitle;
-        index.push({
-          id: `womens-prayer-${idx}`,
-          category: 'Personal Prayers',
-          title: title,
-          secondaryText: secondary,
-          keywords: ['women', 'prayer', 'womens', 'tefilla', 'nashim', 'נשים', 'personal', title, secondary].filter(Boolean),
-          modalId: 'womens-prayers',
-          action: () => openModal('womens-prayers')
-        });
-      });
-    }
-    
     // Tehillim - Main modal
     index.push({
       id: 'prayer-tehillim',
@@ -268,31 +267,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       });
     }
     
-    // Table Inspirations
-    index.push({
-      id: 'table-inspirations-category',
-      category: 'Life',
-      title: 'Table Inspirations',
-      secondaryText: 'Shabbat & Yom Tov ideas',
-      keywords: ['table', 'shabbat', 'שבת', 'yom tov', 'inspiration', 'ideas'],
-      route: '/life',
-      action: () => window.location.hash = '/life'
-    });
-    
-    if (tableInspirations && Array.isArray(tableInspirations) && tableInspirations.length > 0) {
-      tableInspirations.forEach((inspiration: any, idx: number) => {
-        const title = inspiration.title || `Inspiration ${idx + 1}`;
-        index.push({
-          id: `inspiration-${inspiration.id || idx}`,
-          category: 'Life',
-          title: title,
-          secondaryText: 'Shabbat table idea',
-          keywords: ['table', 'inspiration', 'shabbat', 'שבת', title].filter(Boolean),
-          route: '/life',
-          action: () => window.location.hash = '/life'
-        });
-      });
-    }
+    // Note: Table Inspirations are admin-only, skipping from search
     
     // Special Women's Prayer Categories
     index.push({
@@ -380,8 +355,20 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       }
     ];
     
-    return [...index, ...fixedItems];
-  }, [dailyTorah, minchaPrayers, maarivPrayers, morningPrayers, womensPrayers, dailyBrochas, specialBrochas, recipeContent, tableInspirations, pirkeiAvot, openModal]);
+    const finalIndex = [...index, ...fixedItems];
+    
+    // Debug logging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[SearchContext] Search index built:', finalIndex.length, 'items');
+      console.log('[SearchContext] Torah data:', { 
+        hasHalacha: !!halachaContent,
+        hasChizuk: !!chizukContent,
+        hasEmuna: !!emunaContent
+      });
+    }
+    
+    return finalIndex;
+  }, [halachaContent, chizukContent, emunaContent, minchaPrayers, maarivPrayers, morningPrayers, dailyBrochas, specialBrochas, recipeContent, pirkeiAvot, openModal]);
   
   const isLoading = false; // We're using cached data, so no loading state needed
   
