@@ -36,7 +36,6 @@ export default function AppHeader() {
   const {
     shouldHighlight,
     markDismissed,
-    triggerInstallPrompt,
     isStandalone,
     canInstall,
     isIOS,
