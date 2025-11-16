@@ -247,32 +247,88 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       });
     }
     
-    // Daily Recipe
-    if (recipes && recipes.length > 0) {
-      const todayRecipe = recipes[0];
-      index.push({
-        id: 'daily-recipe',
-        category: 'Life',
-        title: todayRecipe.title || 'Daily Recipe',
-        secondaryText: 'Recipe of the Day',
-        keywords: ['recipe', 'cooking', 'food', 'daily', 'kitchen', 'מתכון'],
-        route: '/life',
-        action: () => window.location.hash = '/life'
+    // Recipes - Add general category plus individual recipes
+    index.push({
+      id: 'recipes-category',
+      category: 'Life',
+      title: 'Daily Recipes',
+      secondaryText: 'Kosher cooking ideas',
+      keywords: ['recipe', 'recipes', 'cooking', 'food', 'daily', 'kitchen', 'מתכון', 'מתכונים'],
+      route: '/life',
+      action: () => window.location.hash = '/life'
+    });
+    
+    if (recipes && Array.isArray(recipes) && recipes.length > 0) {
+      recipes.forEach((recipe: any, idx: number) => {
+        const title = recipe.title || `Recipe ${idx + 1}`;
+        index.push({
+          id: `recipe-${recipe.id || idx}`,
+          category: 'Recipes',
+          title: title,
+          secondaryText: recipe.description || 'Delicious recipe',
+          keywords: ['recipe', 'cooking', 'food', 'kitchen', 'מתכון', title].filter(Boolean),
+          route: '/life',
+          action: () => window.location.hash = '/life'
+        });
       });
     }
     
     // Table Inspirations
-    if (tableInspirations && tableInspirations.length > 0) {
-      index.push({
-        id: 'table-inspirations',
-        category: 'Life',
-        title: 'Table Inspirations',
-        secondaryText: 'Shabbat & Yom Tov ideas',
-        keywords: ['table', 'shabbat', 'שבת', 'yom tov', 'inspiration', 'ideas'],
-        route: '/life',
-        action: () => window.location.hash = '/life'
+    index.push({
+      id: 'table-inspirations-category',
+      category: 'Life',
+      title: 'Table Inspirations',
+      secondaryText: 'Shabbat & Yom Tov ideas',
+      keywords: ['table', 'shabbat', 'שבת', 'yom tov', 'inspiration', 'ideas'],
+      route: '/life',
+      action: () => window.location.hash = '/life'
+    });
+    
+    if (tableInspirations && Array.isArray(tableInspirations) && tableInspirations.length > 0) {
+      tableInspirations.forEach((inspiration: any, idx: number) => {
+        const title = inspiration.title || `Inspiration ${idx + 1}`;
+        index.push({
+          id: `inspiration-${inspiration.id || idx}`,
+          category: 'Life',
+          title: title,
+          secondaryText: 'Shabbat table idea',
+          keywords: ['table', 'inspiration', 'shabbat', 'שבת', title].filter(Boolean),
+          route: '/life',
+          action: () => window.location.hash = '/life'
+        });
       });
     }
+    
+    // Special Women's Prayer Categories
+    index.push({
+      id: 'prayer-refuah',
+      category: 'Personal Prayers',
+      title: 'Refuah Prayers',
+      secondaryText: 'Prayers for healing',
+      keywords: ['refuah', 'רפואה', 'healing', 'health', 'prayer', 'women', 'personal'],
+      modalId: 'refuah',
+      action: () => openModal('refuah', 'tefilla')
+    });
+    
+    index.push({
+      id: 'prayer-family',
+      category: 'Personal Prayers',
+      title: 'Family Prayers',
+      secondaryText: 'Prayers for family',
+      keywords: ['family', 'משפחה', 'children', 'ילדים', 'prayer', 'women', 'personal', 'shidduch', 'שידוך', 'marriage'],
+      modalId: 'family',
+      action: () => openModal('family', 'tefilla')
+    });
+    
+    index.push({
+      id: 'prayer-life',
+      category: 'Personal Prayers',
+      title: 'Life Prayers',
+      secondaryText: 'Prayers for life events',
+      keywords: ['life', 'חיים', 'parnasa', 'פרנסה', 'success', 'הצלחה', 'prayer', 'women', 'personal'],
+      modalId: 'life',
+      action: () => openModal('life', 'tefilla')
+    });
     
     // Fixed navigation items
     const fixedItems: SearchRecord[] = [
