@@ -1,8 +1,8 @@
 // Enhanced Service Worker for Offline Capabilities & Push Notifications - Version 1.0.0
-// Updated: 2025-11-13 - Auto-generated cache version
+// Updated: 2025-11-16 - Auto-generated cache version
 
 // Cache configuration with timestamp for guaranteed cache busting
-const CACHE_VERSION = 'v1.0.0-1763066303830';
+const CACHE_VERSION = 'v1.0.0-1763307374121';
 const APP_SHELL_CACHE = `app-shell-${CACHE_VERSION}`;
 const PRAYERS_CACHE = `prayers-${CACHE_VERSION}`;
 const TORAH_CACHE = `torah-${CACHE_VERSION}`;
