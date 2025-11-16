@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Volume2, Maximize2 } from "lucide-react";
 import AudioPlayer from "@/components/audio-player";
-import { useTrackModalComplete } from "@/hooks/use-analytics";
+import { useTrackModalComplete, useTrackFeatureUsage } from "@/hooks/use-analytics";
 import { formatTextContent } from "@/lib/text-formatter";
 import { formatThankYouMessageFull } from "@/lib/link-formatter";
 import { LazyImage } from "@/components/ui/lazy-image";
@@ -18,6 +18,7 @@ export default function TableModals() {
   const markModalComplete = useModalCompletionStore(state => state.markModalComplete);
   const isModalComplete = useModalCompletionStore(state => state.isModalComplete);
   const { trackModalComplete } = useTrackModalComplete();
+  const { trackFeatureUsage } = useTrackFeatureUsage();
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [fullscreenImages, setFullscreenImages] = useState<{isOpen: boolean; images: string[]; initialIndex: number}>({isOpen: false, images: [], initialIndex: 0});
   const [lastTap, setLastTap] = useState<number>(0);
@@ -46,6 +47,19 @@ export default function TableModals() {
     
     // Navigate to home and scroll to progress to show flower growth
     window.location.hash = '#/?section=home&scrollToProgress=true';
+  };
+
+  // Separate handler for marriage insights (tracks as feature usage, not mitzvah)
+  const handleMarriageInsightComplete = () => {
+    trackFeatureUsage('marriage-insights');
+    markModalComplete('marriage-insights');
+    
+    // Reset fullscreen content state
+    if (fullscreenContent.isOpen) {
+      setFullscreenContent({ isOpen: false, title: '', content: null });
+    }
+    
+    closeModal();
   };
   
 
@@ -1294,51 +1308,53 @@ export default function TableModals() {
               
               {/* Collapsible Bio Section */}
               <div className="mb-1">
-                <button
-                  onClick={() => setShowBio(!showBio)}
-                  className="w-full text-left bg-gray-50 hover:bg-gray-100 rounded-2xl p-3 border border-gray-200 transition-colors"
-                  data-testid="button-toggle-bio"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="platypi-medium text-black text-sm">Provided by Devora Levy</span>
-                    <span className="platypi-regular text-black/60 text-lg">
-                      {showBio ? '−' : '+'}
-                    </span>
-                  </div>
-                </button>
-                
-                {showBio && (
-                  <div className="bg-white rounded-2xl p-4 mt-2 border border-gray-200" data-testid="content-bio">
-                    <div className="platypi-regular leading-relaxed text-black/80 text-sm space-y-2">
-                      <p>Certified Life Coach, Marriage & Intimacy Coach, and Kallah Teacher.</p>
-                      <p>An Aish.com author, Devora helps women and couples create balance, joy, and purpose in their relationships and is the creator of an online course on intimacy in marriage.</p>
-                      <p>
-                        Learn more at{' '}
-                        <a 
-                          href="https://devoralevy.com"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800 underline"
-                        >
-                          Devoralevy.com
-                        </a>
-                        {' '}or email{' '}
-                        <a 
-                          href="mailto:dlevycoaching@gmail.com"
-                          className="text-blue-600 hover:text-blue-800 underline"
-                        >
-                          dlevycoaching@gmail.com
-                        </a>
-                      </p>
+                <div className="bg-gray-50 hover:bg-gray-100 rounded-2xl border border-gray-200 transition-colors overflow-hidden">
+                  <button
+                    onClick={() => setShowBio(!showBio)}
+                    className="w-full text-left p-3"
+                    data-testid="button-toggle-bio"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="platypi-medium text-black text-sm">Provided by Devora Levy</span>
+                      <span className="platypi-regular text-black/60 text-lg">
+                        {showBio ? '−' : '+'}
+                      </span>
                     </div>
-                  </div>
-                )}
+                  </button>
+                  
+                  {showBio && (
+                    <div className="bg-white p-4 border-t border-gray-200" data-testid="content-bio">
+                      <div className="platypi-regular leading-relaxed text-black/80 text-sm space-y-2">
+                        <p>Certified Life Coach, Marriage & Intimacy Coach, and Kallah Teacher.</p>
+                        <p>An Aish.com author, Devora helps women and couples create balance, joy, and purpose in their relationships and is the creator of an online course on intimacy in marriage.</p>
+                        <p>
+                          Learn more at{' '}
+                          <a 
+                            href="https://devoralevy.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 underline"
+                          >
+                            Devoralevy.com
+                          </a>
+                          {' '}or email{' '}
+                          <a 
+                            href="mailto:dlevycoaching@gmail.com"
+                            className="text-blue-600 hover:text-blue-800 underline"
+                          >
+                            dlevycoaching@gmail.com
+                          </a>
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
               
               <div className="heart-explosion-container">
                 <Button 
                   data-testid="button-complete-marriage-insights"
-                  onClick={isModalComplete('marriage-insights') ? undefined : () => handleComplete('marriage-insights')}
+                  onClick={isModalComplete('marriage-insights') ? undefined : handleMarriageInsightComplete}
                   disabled={isModalComplete('marriage-insights')}
                   className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                     isModalComplete('marriage-insights') 
