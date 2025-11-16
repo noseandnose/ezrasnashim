@@ -69,6 +69,17 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
       >
         {/* Search Header */}
         <div className="p-4 border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
+          <div className="flex items-center gap-3 mb-3">
+            <h2 className="text-lg font-semibold text-gray-900 flex-1">Search</h2>
+            <button
+              onClick={onClose}
+              className="rounded-full w-8 h-8 bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all duration-200"
+              aria-label="Close search"
+              data-testid="button-close-search"
+            >
+              <X className="w-4 h-4 text-gray-600" />
+            </button>
+          </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <Input
