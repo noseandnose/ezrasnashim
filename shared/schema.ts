@@ -53,6 +53,16 @@ export const tableInspirations = pgTable("table_inspirations", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const marriageInsights = pgTable("marriage_insights", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  sectionNumber: integer("section_number").notNull(),
+  content: text("content").notNull(),
+  date: date("date").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  dateIdx: index("idx_marriage_insights_date").on(table.date),
+}));
 
 
 
@@ -550,6 +560,11 @@ export const insertParshaVortSchema = baseParshaVortSchema.refine(data => {
   message: "Either audioUrl or videoUrl must be provided"
 });
 
+export const insertMarriageInsightSchema = createInsertSchema(marriageInsights).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertTableInspirationSchema = createInsertSchema(tableInspirations).omit({
   id: true,
   createdAt: true,
@@ -643,6 +658,9 @@ export type ParshaVort = typeof parshaVorts.$inferSelect;
 export type InsertParshaVort = z.infer<typeof insertParshaVortSchema>;
 export type TableInspiration = typeof tableInspirations.$inferSelect;
 export type InsertTableInspiration = z.infer<typeof insertTableInspirationSchema>;
+
+export type MarriageInsight = typeof marriageInsights.$inferSelect;
+export type InsertMarriageInsight = z.infer<typeof insertMarriageInsightSchema>;
 
 export type CommunityImpact = typeof communityImpact.$inferSelect;
 export type InsertCommunityImpact = z.infer<typeof insertCommunityImpactSchema>;

@@ -3,7 +3,7 @@ import {
   shopItems, 
   tehillimNames, tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, birkatHamazonPrayers, afterBrochasPrayers, brochas, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
-  dailyRecipes, parshaVorts, tableInspirations, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
+  dailyRecipes, parshaVorts, tableInspirations, marriageInsights, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats, acts,
 
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
@@ -20,6 +20,7 @@ import {
   type DailyRecipe, type InsertDailyRecipe,
   type ParshaVort, type InsertParshaVort,
   type TableInspiration, type InsertTableInspiration,
+  type MarriageInsight, type InsertMarriageInsight,
   type CommunityImpact, type InsertCommunityImpact,
   type Campaign, type InsertCampaign,
   type Donation, type InsertDonation,
@@ -85,6 +86,13 @@ export interface IStorage {
   getAllTableInspirations(): Promise<TableInspiration[]>;
   updateTableInspiration(id: number, inspiration: InsertTableInspiration): Promise<TableInspiration | undefined>;
   deleteTableInspiration(id: number): Promise<boolean>;
+
+  // Marriage insights methods
+  getMarriageInsightByDate(date: string): Promise<MarriageInsight | undefined>;
+  createMarriageInsight(insight: InsertMarriageInsight): Promise<MarriageInsight>;
+  getAllMarriageInsights(): Promise<MarriageInsight[]>;
+  updateMarriageInsight(id: number, insight: Partial<InsertMarriageInsight>): Promise<MarriageInsight | undefined>;
+  deleteMarriageInsight(id: number): Promise<boolean>;
 
   // Community impact methods
   getCommunityImpactByDate(date: string): Promise<CommunityImpact | undefined>;
@@ -1543,6 +1551,54 @@ export class DatabaseStorage implements IStorage {
       .delete(tableInspirations)
       .where(eq(tableInspirations.id, id))
       .returning({ id: tableInspirations.id });
+    return deletedRows.length > 0;
+  }
+
+  // Marriage insights implementation
+  async getMarriageInsightByDate(date: string): Promise<MarriageInsight | undefined> {
+    const [insight] = await db
+      .select()
+      .from(marriageInsights)
+      .where(eq(marriageInsights.date, date))
+      .limit(1);
+    return insight;
+  }
+
+  async createMarriageInsight(insertInsight: InsertMarriageInsight): Promise<MarriageInsight> {
+    const [maxIdResult] = await db
+      .select({ maxId: sql<number>`COALESCE(MAX(${marriageInsights.id}), 0)` })
+      .from(marriageInsights);
+    
+    const nextId = (maxIdResult?.maxId || 0) + 1;
+    
+    const [insight] = await db
+      .insert(marriageInsights)
+      .values({ ...insertInsight, id: nextId })
+      .returning();
+    return insight;
+  }
+
+  async getAllMarriageInsights(): Promise<MarriageInsight[]> {
+    return await db
+      .select()
+      .from(marriageInsights)
+      .orderBy(marriageInsights.date);
+  }
+
+  async updateMarriageInsight(id: number, updateData: Partial<InsertMarriageInsight>): Promise<MarriageInsight | undefined> {
+    const [insight] = await db
+      .update(marriageInsights)
+      .set(updateData)
+      .where(eq(marriageInsights.id, id))
+      .returning();
+    return insight;
+  }
+
+  async deleteMarriageInsight(id: number): Promise<boolean> {
+    const deletedRows = await db
+      .delete(marriageInsights)
+      .where(eq(marriageInsights.id, id))
+      .returning({ id: marriageInsights.id });
     return deletedRows.length > 0;
   }
 

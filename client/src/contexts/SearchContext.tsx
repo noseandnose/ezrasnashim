@@ -42,6 +42,10 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
   // Life page queries
   const { data: recipeContent } = useQuery<any>({ queryKey: ['/api/table/recipe'] });
   const { data: pirkeiAvot } = useQuery<any>({ queryKey: ['/api/pirkei-avot'] });
+  const { data: marriageInsight } = useQuery<any>({ 
+    queryKey: [`/api/marriage-insights/${today}`],
+    staleTime: 15 * 60 * 1000,
+  });
   
   const searchIndex = useMemo(() => {
     const index: SearchRecord[] = [];
@@ -267,6 +271,26 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       });
     }
     
+    if (marriageInsight) {
+      index.push({
+        id: 'marriage-insights',
+        category: 'Life',
+        title: marriageInsight.title || 'Marriage Insights',
+        secondaryText: marriageInsight.sectionNumber ? `Section ${marriageInsight.sectionNumber}` : 'Daily Marriage Wisdom',
+        keywords: ['marriage', 'insights', 'wisdom', 'relationship', 'spouse', 'husband', 'wife', 'family', 'נישואין', 'משפחה', marriageInsight.title].filter(Boolean),
+        route: '/life',
+        action: () => {
+          // Open marriage insights in fullscreen - modal will fetch fresh data
+          const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
+            detail: {
+              modalKey: 'marriage-insights'
+            }
+          });
+          window.dispatchEvent(fullscreenEvent);
+        }
+      });
+    }
+    
     // Note: Table Inspirations are admin-only, skipping from search
     
     // Special Women's Prayer Categories
@@ -368,7 +392,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     }
     
     return finalIndex;
-  }, [halachaContent, chizukContent, emunaContent, minchaPrayers, maarivPrayers, morningPrayers, dailyBrochas, specialBrochas, recipeContent, pirkeiAvot, openModal]);
+  }, [halachaContent, chizukContent, emunaContent, minchaPrayers, maarivPrayers, morningPrayers, dailyBrochas, specialBrochas, recipeContent, marriageInsight, pirkeiAvot, openModal]);
   
   const isLoading = false; // We're using cached data, so no loading state needed
   

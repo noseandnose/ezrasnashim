@@ -1,4 +1,4 @@
-import { Utensils, Flame, Star, Calendar, MapPin, Brain } from "lucide-react";
+import { Utensils, Flame, Star, Heart, MapPin, Brain } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
@@ -233,17 +233,24 @@ export default function TableSection() {
             </p>
           </button>
 
-          {/* Jewish Date Converter Button */}
+          {/* Marriage Insights Button */}
           <button
-            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
-            onClick={() => openModal('date-calculator-fullscreen', 'table')}
+            data-testid="button-marriage-insights"
+            className={`rounded-3xl p-3 text-center transition-all duration-300 shadow-lg border border-blush/10 relative ${
+              isModalComplete('marriage-insights') ? 'bg-sage/20 hover:scale-105' : 'bg-white hover:scale-105'
+            }`}
+            onClick={() => openModal('marriage-insights', 'table')}
           >
-            <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-feminine">
-              <Calendar className="text-white" size={18} strokeWidth={1.5} />
+            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
+              isModalComplete('marriage-insights') ? 'bg-sage' : 'bg-gradient-feminine'
+            }`}>
+              <Heart className="text-white" size={18} strokeWidth={1.5} />
             </div>
-            <h3 className="platypi-bold text-xs text-black mb-1 platypi-bold">Jewish Date</h3>
-            <p className="platypi-regular text-xs text-black/60 leading-relaxed">
-              Convert & Download
+            <h3 className="platypi-bold text-xs text-black mb-1 platypi-bold" data-testid="text-marriage-insights-title">Marriage Insights</h3>
+            <p className={`platypi-regular text-xs leading-relaxed ${
+              isModalComplete('marriage-insights') ? 'text-black/60' : 'text-black/60'
+            }`} data-testid="text-marriage-insights-subtitle">
+              {isModalComplete('marriage-insights') ? 'Completed' : 'Daily wisdom'}
             </p>
           </button>
         </div>

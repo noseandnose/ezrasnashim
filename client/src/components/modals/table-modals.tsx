@@ -27,6 +27,7 @@ export default function TableModals() {
     content: React.ReactNode;
     contentType?: string;
   }>({ isOpen: false, title: '', content: null });
+  const [fontSize, setFontSize] = useState(16);
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
   const lastArrowTouchTime = useRef<number>(0);
@@ -34,6 +35,12 @@ export default function TableModals() {
   const handleComplete = (modalId: string) => {
     trackModalComplete(modalId);
     markModalComplete(modalId);
+    
+    // Reset fullscreen content state if coming from fullscreen
+    if (fullscreenContent.isOpen) {
+      setFullscreenContent({ isOpen: false, title: '', content: null });
+    }
+    
     closeModal();
     
     // Navigate to home and scroll to progress to show flower growth
@@ -97,9 +104,16 @@ export default function TableModals() {
     return timeString;
   };
 
+  // Reset fontSize when content type changes away from marriage-insights
+  useEffect(() => {
+    if (fullscreenContent.contentType !== 'marriage-insights') {
+      setFontSize(16);
+    }
+  }, [fullscreenContent.contentType]);
+
   // Auto-redirect table modals to fullscreen
   useEffect(() => {
-    const fullscreenTableModals = ['recipe', 'inspiration'];
+    const fullscreenTableModals = ['recipe', 'inspiration', 'marriage-insights'];
     
     if (activeModal && fullscreenTableModals.includes(activeModal)) {
       let title = '';
@@ -113,6 +127,10 @@ export default function TableModals() {
         case 'inspiration':
           title = 'Creative Jewish Living';
           contentType = 'inspiration';
+          break;
+        case 'marriage-insights':
+          title = 'Marriage Insights';
+          contentType = 'marriage-insights';
           break;
       }
       
@@ -133,7 +151,7 @@ export default function TableModals() {
     const handleDirectFullscreen = (event: CustomEvent) => {
       const { modalKey } = event.detail;
       
-      if (['recipe', 'inspiration'].includes(modalKey)) {
+      if (['recipe', 'inspiration', 'marriage-insights'].includes(modalKey)) {
         let title = '';
         
         switch (modalKey) {
@@ -142,6 +160,9 @@ export default function TableModals() {
             break;
           case 'inspiration':
             title = 'Creative Jewish Living';
+            break;
+          case 'marriage-insights':
+            title = 'Marriage Insights';
             break;
         }
         
@@ -187,6 +208,14 @@ export default function TableModals() {
   const { data: inspirationContent } = useQuery<InspirationContent>({
     queryKey: [`/api/table/inspiration/${getLocalDateString()}`],
     enabled: activeModal === 'inspiration' || fullscreenContent.contentType === 'inspiration'
+  });
+
+  const { data: marriageInsight } = useQuery<{id?: number; title?: string; sectionNumber?: number; content?: string; date?: string}>({
+    queryKey: [`/api/marriage-insights/${getLocalDateString()}`],
+    enabled: activeModal === 'marriage-insights' || fullscreenContent.contentType === 'marriage-insights',
+    staleTime: 15 * 60 * 1000,
+    refetchOnWindowFocus: true,
+    refetchOnMount: 'always',
   });
 
   interface ParshaContent {
@@ -865,7 +894,9 @@ export default function TableModals() {
           }));
         }}
         title={fullscreenContent.title}
-        showFontControls={false}
+        showFontControls={fullscreenContent.contentType === 'marriage-insights'}
+        fontSize={fontSize}
+        onFontSizeChange={setFontSize}
         showLanguageControls={false}
       >
         {fullscreenContent.contentType === 'recipe' ? (
@@ -1233,6 +1264,45 @@ export default function TableModals() {
                   }`}
                 >
                   {isModalComplete('inspiration') ? 'Completed Today' : 'Done'}
+                </Button>
+              </div>
+            </div>
+          )
+        ) : fullscreenContent.contentType === 'marriage-insights' ? (
+          marriageInsight && (
+            <div className="space-y-4">
+              <div className="bg-white rounded-2xl p-6 border border-blush/10">
+                {marriageInsight.title && marriageInsight.sectionNumber && (
+                  <h3 
+                    className="platypi-bold text-lg text-black text-center mb-4"
+                    data-testid="text-marriage-insights-header"
+                  >
+                    {marriageInsight.title} - Section {marriageInsight.sectionNumber}
+                  </h3>
+                )}
+                
+                {marriageInsight.content && (
+                  <div 
+                    className="platypi-regular leading-relaxed text-black whitespace-pre-line"
+                    style={{ fontSize: `${fontSize}px` }}
+                    data-testid="text-marriage-insights-content"
+                    dangerouslySetInnerHTML={{ __html: formatTextContent(marriageInsight.content) }}
+                  />
+                )}
+              </div>
+              
+              <div className="heart-explosion-container">
+                <Button 
+                  data-testid="button-complete-marriage-insights"
+                  onClick={isModalComplete('marriage-insights') ? undefined : () => handleComplete('marriage-insights')}
+                  disabled={isModalComplete('marriage-insights')}
+                  className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
+                    isModalComplete('marriage-insights') 
+                      ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                  }`}
+                >
+                  {isModalComplete('marriage-insights') ? 'Completed Today' : 'Done'}
                 </Button>
               </div>
             </div>
