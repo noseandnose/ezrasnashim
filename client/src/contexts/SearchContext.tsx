@@ -125,7 +125,18 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
           secondaryText: secondary,
           keywords: ['brocha', 'blessing', 'ברכה', 'daily', title, secondary].filter(Boolean),
           modalId: 'brochas',
-          action: () => openModal('brochas', 'tefilla')
+          action: () => {
+            // Store the brocha ID and open individual brocha fullscreen
+            (window as any).selectedBrochaId = brocha.id;
+            const openEvent = new CustomEvent('openDirectFullscreen', {
+              detail: {
+                title: brocha.title,
+                contentType: 'individual-brocha',
+                hasTranslation: true
+              }
+            });
+            window.dispatchEvent(openEvent);
+          }
         });
       });
     }
@@ -142,7 +153,18 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
           secondaryText: secondary,
           keywords: ['brocha', 'blessing', 'ברכה', 'special', title, secondary].filter(Boolean),
           modalId: 'brochas',
-          action: () => openModal('brochas', 'tefilla')
+          action: () => {
+            // Store the brocha ID and open individual brocha fullscreen
+            (window as any).selectedBrochaId = brocha.id;
+            const openEvent = new CustomEvent('openDirectFullscreen', {
+              detail: {
+                title: brocha.title,
+                contentType: 'individual-brocha',
+                hasTranslation: true
+              }
+            });
+            window.dispatchEvent(openEvent);
+          }
         });
       });
     }
