@@ -14,8 +14,14 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
   const { openModal } = useModalStore();
   
   // Get data from existing queries
+  // Get data from existing queries
   const { data: dailyTorah } = useQuery<any>({ queryKey: ['/api/daily-torah'] });
-  const { data: prayers } = useQuery<any[]>({ queryKey: ['/api/prayers'] });
+  const { data: minchaPrayers } = useQuery<any[]>({ queryKey: ['/api/mincha/prayers'] });
+  const { data: maarivPrayers } = useQuery<any[]>({ queryKey: ['/api/maariv/prayers'] });
+  const { data: morningPrayers } = useQuery<any[]>({ queryKey: ['/api/morning/prayers'] });
+  const { data: birkatHamazonPrayers } = useQuery<any[]>({ queryKey: ['/api/birkat-hamazon/prayers'] });
+  const { data: womensPrayers } = useQuery<any[]>({ queryKey: ['/api/womens/prayers'] });
+  const { data: afterBrochasPrayers } = useQuery<any[]>({ queryKey: ['/api/after-brochas/prayers'] });
   const { data: recipes } = useQuery<any[]>({ queryKey: ['/api/daily-recipes'] });
   const { data: tableInspirations } = useQuery<any[]>({ queryKey: ['/api/table-inspirations'] });
   const { data: pirkeiAvot } = useQuery<any>({ queryKey: ['/api/pirkei-avot'] });
@@ -63,26 +69,99 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     }
     
     // Prayers
-    if (prayers && Array.isArray(prayers)) {
-      const prayerData = [
-        { id: 'morning-brochas', english: 'Morning Brochas', hebrew: 'ברכות השחר', keywords: ['morning', 'blessings', 'brochas', 'ברכות', 'shacharit', 'שחרית'] },
-        { id: 'mincha', english: 'Mincha', hebrew: 'מנחה', keywords: ['mincha', 'מנחה', 'afternoon', 'prayer'] },
-        { id: 'maariv', english: 'Maariv', hebrew: 'מעריב', keywords: ['maariv', 'מעריב', 'evening', 'prayer', 'night'] },
-        { id: 'nishmas', english: 'Nishmas', hebrew: 'נשמת', keywords: ['nishmas', 'נשמת', 'shabbat', 'שבת', 'prayer'] },
-        { id: 'tehillim', english: 'Tehillim', hebrew: 'תהילים', keywords: ['tehillim', 'תהילים', 'psalms', 'prayer'] },
-        { id: 'birkat-hamazon', english: 'Birkat Hamazon', hebrew: 'ברכת המזון', keywords: ['birkat', 'hamazon', 'ברכת', 'המזון', 'grace', 'after', 'meals', 'bentching'] },
-      ];
-      
-      prayerData.forEach(prayer => {
+    // Mincha
+    index.push({
+      id: 'prayer-mincha',
+      category: 'Tefilla',
+      title: 'Mincha',
+      secondaryText: 'מנחה',
+      keywords: ['mincha', 'מנחה', 'afternoon', 'prayer', 'tefilla'],
+      modalId: 'mincha',
+      action: () => openModal('mincha')
+    });
+    
+    // Maariv
+    index.push({
+      id: 'prayer-maariv',
+      category: 'Tefilla',
+      title: 'Maariv',
+      secondaryText: 'מעריב',
+      keywords: ['maariv', 'מעריב', 'evening', 'prayer', 'night', 'tefilla'],
+      modalId: 'maariv',
+      action: () => openModal('maariv')
+    });
+    
+    // Morning Brochas
+    index.push({
+      id: 'prayer-morning-brochas',
+      category: 'Tefilla',
+      title: 'Morning Brochas',
+      secondaryText: 'ברכות השחר',
+      keywords: ['morning', 'brochas', 'blessings', 'ברכות', 'השחר', 'shacharit', 'שחרית', 'tefilla'],
+      modalId: 'morning-brochas',
+      action: () => openModal('morning-brochas')
+    });
+    
+    // Birkat Hamazon
+    index.push({
+      id: 'prayer-birkat-hamazon',
+      category: 'Tefilla',
+      title: 'Birkat Hamazon',
+      secondaryText: 'ברכת המזון',
+      keywords: ['birkat', 'hamazon', 'ברכת', 'המזון', 'grace', 'after', 'meals', 'bentching', 'tefilla'],
+      modalId: 'birkat-hamazon',
+      action: () => openModal('birkat-hamazon')
+    });
+    
+    // Nishmas
+    index.push({
+      id: 'prayer-nishmas',
+      category: 'Tefilla',
+      title: 'Nishmas',
+      secondaryText: 'נשמת',
+      keywords: ['nishmas', 'נשמת', 'shabbat', 'שבת', 'prayer', 'tefilla'],
+      modalId: 'nishmas',
+      action: () => openModal('nishmas')
+    });
+    
+    // Women's Prayers
+    if (womensPrayers && Array.isArray(womensPrayers)) {
+      womensPrayers.forEach((prayer: any, idx: number) => {
         index.push({
-          id: `prayer-${prayer.id}`,
+          id: `womens-prayer-${idx}`,
           category: 'Tefilla',
-          title: prayer.english,
-          secondaryText: prayer.hebrew,
-          keywords: prayer.keywords,
-          modalId: prayer.id,
-          action: () => openModal(prayer.id as any)
+          title: prayer.englishTitle || prayer.hebrewTitle || `Women's Prayer ${idx + 1}`,
+          secondaryText: prayer.hebrewTitle || prayer.englishTitle,
+          keywords: ['women', 'prayer', 'womens', 'tefilla', 'nashim', 'נשים', prayer.englishTitle, prayer.hebrewTitle].filter(Boolean),
+          modalId: 'womens-prayers',
+          action: () => openModal('womens-prayers')
         });
+      });
+    }
+    
+    // Tehillim - Main modal
+    index.push({
+      id: 'prayer-tehillim',
+      category: 'Tefilla',
+      title: 'Tehillim',
+      secondaryText: 'תהילים',
+      keywords: ['tehillim', 'תהילים', 'psalms', 'prayer', 'tefilla'],
+      modalId: 'tehillim',
+      action: () => openModal('tehillim')
+    });
+    
+    // Individual Tehillim psalms (1-150)
+    for (let i = 1; i <= 150; i++) {
+      index.push({
+        id: `tehillim-${i}`,
+        category: 'Tehillim',
+        title: `Tehillim ${i}`,
+        secondaryText: `תהילים ${i}`,
+        keywords: ['tehillim', 'תהילים', 'psalm', 'psalms', i.toString()],
+        modalId: 'tehillim',
+        action: () => {
+          openModal('individual-tehillim', 'tefilla', i);
+        }
       });
     }
     
@@ -158,7 +237,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     ];
     
     return [...index, ...fixedItems];
-  }, [dailyTorah, prayers, recipes, tableInspirations, pirkeiAvot, openModal]);
+  }, [dailyTorah, minchaPrayers, maarivPrayers, morningPrayers, birkatHamazonPrayers, womensPrayers, afterBrochasPrayers, recipes, tableInspirations, pirkeiAvot, openModal]);
   
   const isLoading = false; // We're using cached data, so no loading state needed
   
