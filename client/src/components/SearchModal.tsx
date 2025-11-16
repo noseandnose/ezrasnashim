@@ -101,26 +101,6 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
               <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
               <p className="text-lg font-medium mb-2">Search for content</p>
               <p className="text-sm">Try searching for prayers, Torah topics, or recipes</p>
-              
-              {/* Quick links */}
-              <div className="mt-8 space-y-2">
-                <p className="text-xs uppercase font-semibold text-gray-400 mb-3">Quick Access</p>
-                <div className="grid grid-cols-1 gap-2 max-w-md mx-auto">
-                  {searchIndex.slice(0, 6).map(item => (
-                    <button
-                      key={item.id}
-                      onClick={() => handleResultClick(item)}
-                      className="text-left p-3 rounded-lg bg-white hover:bg-rose-50 transition-colors border border-gray-200"
-                      data-testid={`quick-link-${item.id}`}
-                    >
-                      <div className="font-medium text-gray-900">{item.title}</div>
-                      {item.secondaryText && (
-                        <div className="text-sm text-gray-500">{item.secondaryText}</div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
           )}
           

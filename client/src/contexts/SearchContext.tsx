@@ -14,7 +14,6 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
   const { openModal } = useModalStore();
   
   // Get data from existing queries
-  // Get data from existing queries
   const { data: dailyTorah } = useQuery<any>({ queryKey: ['/api/daily-torah'] });
   const { data: minchaPrayers } = useQuery<any[]>({ queryKey: ['/api/mincha/prayers'] });
   const { data: maarivPrayers } = useQuery<any[]>({ queryKey: ['/api/maariv/prayers'] });
@@ -22,7 +21,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
   const { data: womensPrayers } = useQuery<any[]>({ queryKey: ['/api/womens/prayers'] });
   const { data: dailyBrochas } = useQuery<any[]>({ queryKey: ['/api/brochas/daily'] });
   const { data: specialBrochas } = useQuery<any[]>({ queryKey: ['/api/brochas/special'] });
-  const { data: recipes } = useQuery<any[]>({ queryKey: ['/api/daily-recipes'] });
+  const { data: recipeContent } = useQuery<any>({ queryKey: ['/api/table/recipe'] });
   const { data: tableInspirations } = useQuery<any[]>({ queryKey: ['/api/table-inspirations'] });
   const { data: pirkeiAvot } = useQuery<any>({ queryKey: ['/api/pirkei-avot'] });
   
@@ -248,21 +247,20 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     }
     
     // Daily Recipe - Use fullscreen event pattern
-    if (recipes && Array.isArray(recipes) && recipes.length > 0) {
-      const todayRecipe = recipes[0]; // Get today's recipe
+    if (recipeContent) {
       index.push({
         id: 'daily-recipe',
         category: 'Life',
-        title: todayRecipe.title || 'Daily Recipe',
+        title: recipeContent.title || 'Daily Recipe',
         secondaryText: 'Recipe of the Day',
-        keywords: ['recipe', 'recipes', 'cooking', 'food', 'daily', 'kitchen', 'מתכון', todayRecipe.title].filter(Boolean),
+        keywords: ['recipe', 'recipes', 'cooking', 'food', 'daily', 'kitchen', 'מתכון', 'מתכונים', recipeContent.title].filter(Boolean),
         route: '/life',
         action: () => {
           // Open recipe in fullscreen using the same pattern as table section
           const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
             detail: {
               modalKey: 'recipe',
-              content: todayRecipe
+              content: recipeContent
             }
           });
           window.dispatchEvent(fullscreenEvent);
@@ -321,8 +319,8 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       id: 'prayer-life',
       category: 'Personal Prayers',
       title: 'Life Prayers',
-      secondaryText: 'Prayers for life events',
-      keywords: ['life', 'חיים', 'parnasa', 'פרנסה', 'success', 'הצלחה', 'prayer', 'women', 'personal'],
+      secondaryText: 'Prayers for life guidance',
+      keywords: ['life', 'חיים', 'parnasa', 'parnassa', 'פרנסה', 'livelihood', 'success', 'הצלחה', 'prayer', 'women', 'personal', 'guidance'],
       modalId: 'life',
       action: () => openModal('life', 'tefilla')
     });
@@ -383,7 +381,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     ];
     
     return [...index, ...fixedItems];
-  }, [dailyTorah, minchaPrayers, maarivPrayers, morningPrayers, womensPrayers, dailyBrochas, specialBrochas, recipes, tableInspirations, pirkeiAvot, openModal]);
+  }, [dailyTorah, minchaPrayers, maarivPrayers, morningPrayers, womensPrayers, dailyBrochas, specialBrochas, recipeContent, tableInspirations, pirkeiAvot, openModal]);
   
   const isLoading = false; // We're using cached data, so no loading state needed
   
