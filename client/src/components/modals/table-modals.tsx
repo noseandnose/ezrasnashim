@@ -28,6 +28,7 @@ export default function TableModals() {
     contentType?: string;
   }>({ isOpen: false, title: '', content: null });
   const [fontSize, setFontSize] = useState(16);
+  const [showBio, setShowBio] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
   const lastArrowTouchTime = useRef<number>(0);
@@ -1288,6 +1289,49 @@ export default function TableModals() {
                     data-testid="text-marriage-insights-content"
                     dangerouslySetInnerHTML={{ __html: formatTextContent(marriageInsight.content) }}
                   />
+                )}
+              </div>
+              
+              {/* Collapsible Bio Section */}
+              <div className="mb-1">
+                <button
+                  onClick={() => setShowBio(!showBio)}
+                  className="w-full text-left bg-gray-50 hover:bg-gray-100 rounded-2xl p-3 border border-gray-200 transition-colors"
+                  data-testid="button-toggle-bio"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="platypi-medium text-black text-sm">Provided by Devorah Levy</span>
+                    <span className="platypi-regular text-black/60 text-lg">
+                      {showBio ? '−' : '+'}
+                    </span>
+                  </div>
+                </button>
+                
+                {showBio && (
+                  <div className="bg-white rounded-2xl p-4 mt-2 border border-gray-200" data-testid="content-bio">
+                    <div className="platypi-regular leading-relaxed text-black/80 text-sm space-y-2">
+                      <p>Certified Life Coach, Marriage & Intimacy Coach, and Kallah Teacher.</p>
+                      <p>An Aish.com author, Devora helps women and couples create balance, joy, and purpose in their relationships and is the creator of an online course on intimacy in marriage.</p>
+                      <p>
+                        Learn more at{' '}
+                        <a 
+                          href="https://devoralevy.com"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 underline"
+                        >
+                          Devoralevy.com
+                        </a>
+                        {' '}or email{' '}
+                        <a 
+                          href="mailto:dlevycoaching@gmail.com"
+                          className="text-blue-600 hover:text-blue-800 underline"
+                        >
+                          dlevycoaching@gmail.com
+                        </a>
+                      </p>
+                    </div>
+                  </div>
                 )}
               </div>
               
