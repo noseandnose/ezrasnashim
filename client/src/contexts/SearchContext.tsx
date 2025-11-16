@@ -91,7 +91,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       action: () => openModal('maariv')
     });
     
-    // Morning Brochas
+    // Morning Brochas - Main modal
     index.push({
       id: 'prayer-morning-brochas',
       category: 'Tefilla',
@@ -101,6 +101,40 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       modalId: 'morning-brochas',
       action: () => openModal('morning-brochas')
     });
+    
+    // Individual Morning Brochas
+    if (morningPrayers && Array.isArray(morningPrayers)) {
+      morningPrayers.forEach((prayer: any, idx: number) => {
+        const title = prayer.englishTitle || prayer.hebrewTitle || `Morning Brocha ${idx + 1}`;
+        const secondary = prayer.hebrewTitle || prayer.englishTitle;
+        index.push({
+          id: `morning-prayer-${idx}`,
+          category: 'Brochas',
+          title: title,
+          secondaryText: secondary,
+          keywords: ['morning', 'brocha', 'blessing', 'ברכה', 'שחרית', title, secondary].filter(Boolean),
+          modalId: 'morning-brochas',
+          action: () => openModal('morning-brochas')
+        });
+      });
+    }
+    
+    // Individual After Brochas
+    if (afterBrochasPrayers && Array.isArray(afterBrochasPrayers)) {
+      afterBrochasPrayers.forEach((prayer: any, idx: number) => {
+        const title = prayer.englishTitle || prayer.hebrewTitle || `After Brocha ${idx + 1}`;
+        const secondary = prayer.hebrewTitle || prayer.englishTitle;
+        index.push({
+          id: `after-brocha-${idx}`,
+          category: 'Brochas',
+          title: title,
+          secondaryText: secondary,
+          keywords: ['after', 'brocha', 'blessing', 'ברכה', title, secondary].filter(Boolean),
+          modalId: 'after-brochas',
+          action: () => openModal('after-brochas')
+        });
+      });
+    }
     
     // Birkat Hamazon
     index.push({
@@ -124,15 +158,28 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       action: () => openModal('nishmas')
     });
     
-    // Women's Prayers
+    // Women's Prayers - Main modal
+    index.push({
+      id: 'prayer-womens',
+      category: 'Tefilla',
+      title: "Women's Prayers",
+      secondaryText: 'תפילות לנשים',
+      keywords: ['women', 'womens', 'prayer', 'prayers', 'tefilla', 'nashim', 'נשים', 'תפילות'],
+      modalId: 'womens-prayers',
+      action: () => openModal('womens-prayers')
+    });
+    
+    // Individual Women's Prayers
     if (womensPrayers && Array.isArray(womensPrayers)) {
       womensPrayers.forEach((prayer: any, idx: number) => {
+        const title = prayer.englishTitle || prayer.hebrewTitle || `Women's Prayer ${idx + 1}`;
+        const secondary = prayer.hebrewTitle || prayer.englishTitle;
         index.push({
           id: `womens-prayer-${idx}`,
-          category: 'Tefilla',
-          title: prayer.englishTitle || prayer.hebrewTitle || `Women's Prayer ${idx + 1}`,
-          secondaryText: prayer.hebrewTitle || prayer.englishTitle,
-          keywords: ['women', 'prayer', 'womens', 'tefilla', 'nashim', 'נשים', prayer.englishTitle, prayer.hebrewTitle].filter(Boolean),
+          category: 'Personal Prayers',
+          title: title,
+          secondaryText: secondary,
+          keywords: ['women', 'prayer', 'womens', 'tefilla', 'nashim', 'נשים', 'personal', title, secondary].filter(Boolean),
           modalId: 'womens-prayers',
           action: () => openModal('womens-prayers')
         });
