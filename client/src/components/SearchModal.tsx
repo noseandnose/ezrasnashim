@@ -4,7 +4,6 @@ import { Input } from '@/components/ui/input';
 import { Search, X } from 'lucide-react';
 import { useSearch } from '@/contexts/SearchContext';
 import { searchRecords } from '@/lib/searchUtils';
-import { Button } from '@/components/ui/button';
 
 interface SearchModalProps {
   isOpen: boolean;
