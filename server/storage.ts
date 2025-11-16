@@ -2075,6 +2075,230 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
+  async getDateRangeStats(startDate: string, endDate: string): Promise<{
+    totalUsers: number;
+    totalPageViews: number;
+    totalTehillimCompleted: number;
+    totalNamesProcessed: number;
+    totalBooksCompleted: number;
+    totalTzedakaActs: number;
+    totalActs: number;
+    totalMeditationsCompleted: number;
+    totalModalCompletions: Record<string, number>;
+    moneyRaised: number;
+    activeCampaignTotal: number;
+    putACoinTotal: number;
+    sponsorADayTotal: number;
+    gaveElsewhereCount: number;
+  }> {
+    try {
+      const rangeStats = await db
+        .select()
+        .from(dailyStats)
+        .where(
+          and(
+            gte(dailyStats.date, startDate),
+            lte(dailyStats.date, endDate)
+          )
+        );
+      
+      // Aggregate totals across the date range
+      let totalUsers = 0;
+      let totalPageViews = 0;
+      let totalTehillimCompleted = 0;
+      let totalNamesProcessed = 0;
+      let totalBooksCompleted = 0;
+      let totalTzedakaActs = 0;
+      let totalActs = 0;
+      let totalMeditationsCompleted = 0;
+      let moneyRaised = 0;
+      let activeCampaignTotal = 0;
+      let putACoinTotal = 0;
+      let sponsorADayTotal = 0;
+      let gaveElsewhereCount = 0;
+      const totalModalCompletions: Record<string, number> = {};
+      
+      for (const stats of rangeStats) {
+        totalUsers += stats.uniqueUsers || 0;
+        totalPageViews += stats.pageViews || 0;
+        totalTehillimCompleted += stats.tehillimCompleted || 0;
+        totalNamesProcessed += stats.namesProcessed || 0;
+        totalBooksCompleted += stats.booksCompleted || 0;
+        totalTzedakaActs += stats.tzedakaActs || 0;
+        totalActs += stats.totalActs || 0;
+        totalMeditationsCompleted += stats.meditationsCompleted || 0;
+        moneyRaised += stats.moneyRaised || 0;
+        activeCampaignTotal += stats.activeCampaignTotal || 0;
+        putACoinTotal += stats.putACoinTotal || 0;
+        sponsorADayTotal += stats.sponsorADayTotal || 0;
+        gaveElsewhereCount += stats.gaveElsewhereCount || 0;
+        
+        // Merge modal completions
+        const completions = stats.modalCompletions as Record<string, number> || {};
+        for (const [modalType, count] of Object.entries(completions)) {
+          totalModalCompletions[modalType] = (totalModalCompletions[modalType] || 0) + count;
+        }
+      }
+      
+      return {
+        totalUsers,
+        totalPageViews,
+        totalTehillimCompleted,
+        totalNamesProcessed,
+        totalBooksCompleted,
+        totalTzedakaActs,
+        totalActs,
+        totalMeditationsCompleted,
+        totalModalCompletions,
+        moneyRaised,
+        activeCampaignTotal,
+        putACoinTotal,
+        sponsorADayTotal,
+        gaveElsewhereCount
+      };
+    } catch (error) {
+      console.error('Error fetching date range stats:', error);
+      return {
+        totalUsers: 0,
+        totalPageViews: 0,
+        totalTehillimCompleted: 0,
+        totalNamesProcessed: 0,
+        totalBooksCompleted: 0,
+        totalTzedakaActs: 0,
+        totalActs: 0,
+        totalMeditationsCompleted: 0,
+        totalModalCompletions: {},
+        moneyRaised: 0,
+        activeCampaignTotal: 0,
+        putACoinTotal: 0,
+        sponsorADayTotal: 0,
+        gaveElsewhereCount: 0
+      };
+    }
+  }
+
+  async getComparisonStats(period: 'week' | 'month'): Promise<{
+    current: {
+      totalUsers: number;
+      totalActs: number;
+      totalTehillimCompleted: number;
+      totalNamesProcessed: number;
+      totalBooksCompleted: number;
+      totalTzedakaActs: number;
+      totalMeditationsCompleted: number;
+      moneyRaised: number;
+      activeCampaignTotal: number;
+      putACoinTotal: number;
+      sponsorADayTotal: number;
+      totalModalCompletions: Record<string, number>;
+    };
+    previous: {
+      totalUsers: number;
+      totalActs: number;
+      totalTehillimCompleted: number;
+      totalNamesProcessed: number;
+      totalBooksCompleted: number;
+      totalTzedakaActs: number;
+      totalMeditationsCompleted: number;
+      moneyRaised: number;
+      activeCampaignTotal: number;
+      putACoinTotal: number;
+      sponsorADayTotal: number;
+      totalModalCompletions: Record<string, number>;
+    };
+    changes: {
+      users: number;
+      acts: number;
+      tehillim: number;
+      names: number;
+      books: number;
+      tzedaka: number;
+      meditations: number;
+      moneyRaised: number;
+    };
+  }> {
+    const now = new Date();
+    let currentStart: string, currentEnd: string, previousStart: string, previousEnd: string;
+
+    if (period === 'week') {
+      // Current week: most recent Sunday to today
+      const dayOfWeek = now.getDay();
+      const currentWeekStart = new Date(now);
+      currentWeekStart.setDate(currentWeekStart.getDate() - dayOfWeek);
+      currentStart = currentWeekStart.toISOString().split('T')[0];
+      currentEnd = now.toISOString().split('T')[0];
+
+      // Previous week: 7 days before current week start
+      const previousWeekStart = new Date(currentWeekStart);
+      previousWeekStart.setDate(previousWeekStart.getDate() - 7);
+      const previousWeekEnd = new Date(currentWeekStart);
+      previousWeekEnd.setDate(previousWeekEnd.getDate() - 1);
+      previousStart = previousWeekStart.toISOString().split('T')[0];
+      previousEnd = previousWeekEnd.toISOString().split('T')[0];
+    } else {
+      // Current month
+      currentStart = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-01`;
+      currentEnd = now.toISOString().split('T')[0];
+
+      // Previous month
+      const prevMonth = now.getMonth() === 0 ? 11 : now.getMonth() - 1;
+      const prevYear = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
+      previousStart = `${prevYear}-${(prevMonth + 1).toString().padStart(2, '0')}-01`;
+      const lastDayPrevMonth = new Date(prevYear, prevMonth + 1, 0).getDate();
+      previousEnd = `${prevYear}-${(prevMonth + 1).toString().padStart(2, '0')}-${lastDayPrevMonth}`;
+    }
+
+    const currentStats = await this.getDateRangeStats(currentStart, currentEnd);
+    const previousStats = await this.getDateRangeStats(previousStart, previousEnd);
+
+    // Calculate percentage changes
+    const calculateChange = (current: number, previous: number) => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return ((current - previous) / previous) * 100;
+    };
+
+    return {
+      current: {
+        totalUsers: currentStats.totalUsers,
+        totalActs: currentStats.totalActs,
+        totalTehillimCompleted: currentStats.totalTehillimCompleted,
+        totalNamesProcessed: currentStats.totalNamesProcessed,
+        totalBooksCompleted: currentStats.totalBooksCompleted,
+        totalTzedakaActs: currentStats.totalTzedakaActs,
+        totalMeditationsCompleted: currentStats.totalMeditationsCompleted,
+        moneyRaised: currentStats.moneyRaised,
+        activeCampaignTotal: currentStats.activeCampaignTotal,
+        putACoinTotal: currentStats.putACoinTotal,
+        sponsorADayTotal: currentStats.sponsorADayTotal,
+        totalModalCompletions: currentStats.totalModalCompletions
+      },
+      previous: {
+        totalUsers: previousStats.totalUsers,
+        totalActs: previousStats.totalActs,
+        totalTehillimCompleted: previousStats.totalTehillimCompleted,
+        totalNamesProcessed: previousStats.totalNamesProcessed,
+        totalBooksCompleted: previousStats.totalBooksCompleted,
+        totalTzedakaActs: previousStats.totalTzedakaActs,
+        totalMeditationsCompleted: previousStats.totalMeditationsCompleted,
+        moneyRaised: previousStats.moneyRaised,
+        activeCampaignTotal: previousStats.activeCampaignTotal,
+        putACoinTotal: previousStats.putACoinTotal,
+        sponsorADayTotal: previousStats.sponsorADayTotal,
+        totalModalCompletions: previousStats.totalModalCompletions
+      },
+      changes: {
+        users: calculateChange(currentStats.totalUsers, previousStats.totalUsers),
+        acts: calculateChange(currentStats.totalActs, previousStats.totalActs),
+        tehillim: calculateChange(currentStats.totalTehillimCompleted, previousStats.totalTehillimCompleted),
+        names: calculateChange(currentStats.totalNamesProcessed, previousStats.totalNamesProcessed),
+        books: calculateChange(currentStats.totalBooksCompleted, previousStats.totalBooksCompleted),
+        tzedaka: calculateChange(currentStats.totalTzedakaActs, previousStats.totalTzedakaActs),
+        meditations: calculateChange(currentStats.totalMeditationsCompleted, previousStats.totalMeditationsCompleted),
+        moneyRaised: calculateChange(currentStats.moneyRaised, previousStats.moneyRaised)
+      }
+    };
+  }
+
   async getCommunityImpact(period: string = 'alltime'): Promise<{
     totalDaysSponsored: number;
     totalCampaigns: number;

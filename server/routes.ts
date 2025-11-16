@@ -3601,6 +3601,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/analytics/stats/range", requireAdminAuth, async (req, res) => {
+    try {
+      // Force no caching for real-time analytics
+      res.set({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store'
+      });
+
+      const startDate = req.query.startDate as string;
+      const endDate = req.query.endDate as string;
+
+      if (!startDate || !endDate) {
+        return res.status(400).json({ message: "startDate and endDate are required" });
+      }
+
+      const rangeStats = await storage.getDateRangeStats(startDate, endDate);
+      res.json(rangeStats);
+    } catch (error) {
+      console.error('Error fetching date range stats:', error);
+      return res.status(500).json({ message: "Failed to fetch date range stats" });
+    }
+  });
+
+  app.get("/api/analytics/stats/compare", requireAdminAuth, async (req, res) => {
+    try {
+      // Force no caching for real-time analytics
+      res.set({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store'
+      });
+
+      const period = req.query.period as 'week' | 'month';
+
+      if (!period || (period !== 'week' && period !== 'month')) {
+        return res.status(400).json({ message: "period must be 'week' or 'month'" });
+      }
+
+      const comparisonStats = await storage.getComparisonStats(period);
+      res.json(comparisonStats);
+    } catch (error) {
+      console.error('Error fetching comparison stats:', error);
+      return res.status(500).json({ message: "Failed to fetch comparison stats" });
+    }
+  });
+
   app.get("/api/analytics/community-impact", async (req, res) => {
     try {
       const period = req.query.period as string || 'alltime';
