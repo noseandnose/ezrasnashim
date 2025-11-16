@@ -19,9 +19,9 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
   const { data: minchaPrayers } = useQuery<any[]>({ queryKey: ['/api/mincha/prayers'] });
   const { data: maarivPrayers } = useQuery<any[]>({ queryKey: ['/api/maariv/prayers'] });
   const { data: morningPrayers } = useQuery<any[]>({ queryKey: ['/api/morning/prayers'] });
-  const { data: birkatHamazonPrayers } = useQuery<any[]>({ queryKey: ['/api/birkat-hamazon/prayers'] });
   const { data: womensPrayers } = useQuery<any[]>({ queryKey: ['/api/womens/prayers'] });
-  const { data: afterBrochasPrayers } = useQuery<any[]>({ queryKey: ['/api/after-brochas/prayers'] });
+  const { data: dailyBrochas } = useQuery<any[]>({ queryKey: ['/api/brochas/daily'] });
+  const { data: specialBrochas } = useQuery<any[]>({ queryKey: ['/api/brochas/special'] });
   const { data: recipes } = useQuery<any[]>({ queryKey: ['/api/daily-recipes'] });
   const { data: tableInspirations } = useQuery<any[]>({ queryKey: ['/api/table-inspirations'] });
   const { data: pirkeiAvot } = useQuery<any>({ queryKey: ['/api/pirkei-avot'] });
@@ -102,50 +102,50 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       action: () => openModal('morning-brochas')
     });
     
-    // Individual Morning Brochas
-    if (morningPrayers && Array.isArray(morningPrayers)) {
-      morningPrayers.forEach((prayer: any, idx: number) => {
-        const title = prayer.englishTitle || prayer.hebrewTitle || `Morning Brocha ${idx + 1}`;
-        const secondary = prayer.hebrewTitle || prayer.englishTitle;
-        index.push({
-          id: `morning-prayer-${idx}`,
-          category: 'Brochas',
-          title: title,
-          secondaryText: secondary,
-          keywords: ['morning', 'brocha', 'blessing', 'ברכה', 'שחרית', title, secondary].filter(Boolean),
-          modalId: 'morning-brochas',
-          action: () => openModal('morning-brochas')
-        });
-      });
-    }
-    
-    // Individual After Brochas
-    if (afterBrochasPrayers && Array.isArray(afterBrochasPrayers)) {
-      afterBrochasPrayers.forEach((prayer: any, idx: number) => {
-        const title = prayer.englishTitle || prayer.hebrewTitle || `After Brocha ${idx + 1}`;
-        const secondary = prayer.hebrewTitle || prayer.englishTitle;
-        index.push({
-          id: `after-brocha-${idx}`,
-          category: 'Brochas',
-          title: title,
-          secondaryText: secondary,
-          keywords: ['after', 'brocha', 'blessing', 'ברכה', title, secondary].filter(Boolean),
-          modalId: 'after-brochas',
-          action: () => openModal('after-brochas')
-        });
-      });
-    }
-    
-    // Birkat Hamazon
+    // Brochas (Daily and Special) - Main category
     index.push({
-      id: 'prayer-birkat-hamazon',
+      id: 'prayer-brochas',
       category: 'Tefilla',
-      title: 'Birkat Hamazon',
-      secondaryText: 'ברכת המזון',
-      keywords: ['birkat', 'hamazon', 'ברכת', 'המזון', 'grace', 'after', 'meals', 'bentching', 'tefilla'],
-      modalId: 'birkat-hamazon',
-      action: () => openModal('birkat-hamazon')
+      title: 'Brochas',
+      secondaryText: 'ברכות',
+      keywords: ['brochas', 'blessings', 'ברכות', 'daily', 'special', 'tefilla'],
+      modalId: 'brochas',
+      action: () => openModal('brochas', 'tefilla')
     });
+    
+    // Individual Daily Brochas
+    if (dailyBrochas && Array.isArray(dailyBrochas)) {
+      dailyBrochas.forEach((brocha: any) => {
+        const title = brocha.title || brocha.englishTitle || brocha.hebrewTitle;
+        const secondary = brocha.description || brocha.hebrewTitle;
+        index.push({
+          id: `daily-brocha-${brocha.id}`,
+          category: 'Brochas',
+          title: title,
+          secondaryText: secondary,
+          keywords: ['brocha', 'blessing', 'ברכה', 'daily', title, secondary].filter(Boolean),
+          modalId: 'brochas',
+          action: () => openModal('brochas', 'tefilla')
+        });
+      });
+    }
+    
+    // Individual Special Brochas
+    if (specialBrochas && Array.isArray(specialBrochas)) {
+      specialBrochas.forEach((brocha: any) => {
+        const title = brocha.title || brocha.englishTitle || brocha.hebrewTitle;
+        const secondary = brocha.description || brocha.hebrewTitle;
+        index.push({
+          id: `special-brocha-${brocha.id}`,
+          category: 'Brochas',
+          title: title,
+          secondaryText: secondary,
+          keywords: ['brocha', 'blessing', 'ברכה', 'special', title, secondary].filter(Boolean),
+          modalId: 'brochas',
+          action: () => openModal('brochas', 'tefilla')
+        });
+      });
+    }
     
     // Nishmas
     index.push({
@@ -284,7 +284,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     ];
     
     return [...index, ...fixedItems];
-  }, [dailyTorah, minchaPrayers, maarivPrayers, morningPrayers, birkatHamazonPrayers, womensPrayers, afterBrochasPrayers, recipes, tableInspirations, pirkeiAvot, openModal]);
+  }, [dailyTorah, minchaPrayers, maarivPrayers, morningPrayers, womensPrayers, dailyBrochas, specialBrochas, recipes, tableInspirations, pirkeiAvot, openModal]);
   
   const isLoading = false; // We're using cached data, so no loading state needed
   
