@@ -126,16 +126,17 @@ export function FullscreenModal({
     activeFullscreenModals++;
 
     // Fix for buttons not working after app minimize/resume
-    // Ensure scroll lock is properly restored when visibility changes
+    // Restore pointer events and scroll lock when app becomes visible again
+    // WITHOUT remounting (which would lose user state/data)
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         // Page is being hidden/backgrounded - no action needed
         return;
       }
       
-      // Page is visible again - ensure scroll lock state is correct
+      // Page is visible again - restore interaction capabilities
       if (activeFullscreenModals > 0) {
-        // Modal(s) are still open - reapply scroll lock
+        // Modal(s) are still open - reapply scroll lock and pointer events
         const scrollContainer = document.querySelector('[data-scroll-lock-target]') as HTMLElement 
           ?? document.querySelector('.content-area') as HTMLElement;
         
@@ -146,6 +147,14 @@ export function FullscreenModal({
           // Fallback: lock body
           document.body.style.overflow = 'hidden';
           document.documentElement.style.overflow = 'hidden';
+        }
+        
+        // Restore pointer events on the modal itself
+        const modalElement = document.querySelector('[data-fullscreen-modal]') as HTMLElement;
+        if (modalElement) {
+          modalElement.style.pointerEvents = 'auto';
+          // Force a small style recalc to ensure browser re-processes event handlers
+          void modalElement.offsetHeight;
         }
       } else {
         // No modals open - ensure scroll is unlocked
@@ -286,6 +295,7 @@ export function FullscreenModal({
   // Render directly without portal to ensure it works
   return (
     <div 
+      data-fullscreen-modal
       className="fixed inset-0 bg-white"
       style={{ 
         zIndex: 2147483647,
