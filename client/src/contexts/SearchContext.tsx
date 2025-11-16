@@ -34,9 +34,9 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
         index.push({
           id: 'torah-halacha',
           category: 'Torah',
-          title: dailyTorah.halacha.englishTitle || 'Daily Halacha',
-          secondaryText: dailyTorah.halacha.hebrewTitle,
-          keywords: ['halacha', 'הלכה', 'law', 'torah', 'תורה', 'daily'],
+          title: 'Learn Shabbas',
+          secondaryText: dailyTorah.halacha.englishTitle || 'Halachic insights',
+          keywords: ['halacha', 'הלכה', 'law', 'torah', 'תורה', 'daily', 'learn', 'shabbas', 'shabbat', 'שבת', 'learn shabbas', dailyTorah.halacha.englishTitle, dailyTorah.halacha.hebrewTitle].filter(Boolean),
           modalId: 'halacha',
           action: () => openModal('halacha')
         });
@@ -46,9 +46,9 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
         index.push({
           id: 'torah-chizuk',
           category: 'Torah',
-          title: dailyTorah.chizuk.englishTitle || 'Daily Chizuk',
-          secondaryText: dailyTorah.chizuk.hebrewTitle,
-          keywords: ['chizuk', 'חיזוק', 'inspiration', 'torah', 'תורה', 'daily'],
+          title: 'Daily Chizuk',
+          secondaryText: dailyTorah.chizuk.englishTitle || 'Spiritual strength',
+          keywords: ['chizuk', 'חיזוק', 'inspiration', 'torah', 'תורה', 'daily', 'strength', 'encouragement', dailyTorah.chizuk.englishTitle, dailyTorah.chizuk.hebrewTitle].filter(Boolean),
           modalId: 'chizuk',
           action: () => openModal('chizuk')
         });
@@ -58,9 +58,9 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
         index.push({
           id: 'torah-emuna',
           category: 'Torah',
-          title: dailyTorah.emuna.englishTitle || 'Daily Emuna',
-          secondaryText: dailyTorah.emuna.hebrewTitle,
-          keywords: ['emuna', 'אמונה', 'faith', 'torah', 'תורה', 'daily'],
+          title: 'Daily Emuna',
+          secondaryText: dailyTorah.emuna.englishTitle || 'Faith & trust',
+          keywords: ['emuna', 'אמונה', 'faith', 'torah', 'תורה', 'daily', 'trust', 'belief', dailyTorah.emuna.englishTitle, dailyTorah.emuna.hebrewTitle].filter(Boolean),
           modalId: 'emuna',
           action: () => openModal('emuna')
         });
