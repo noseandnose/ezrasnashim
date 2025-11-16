@@ -1300,7 +1300,7 @@ export default function TableModals() {
                   data-testid="button-toggle-bio"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="platypi-medium text-black text-sm">Provided by Devorah Levy</span>
+                    <span className="platypi-medium text-black text-sm">Provided by Devora Levy</span>
                     <span className="platypi-regular text-black/60 text-lg">
                       {showBio ? '−' : '+'}
                     </span>
