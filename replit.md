@@ -37,7 +37,7 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **Primary**: PostgreSQL (Supabase configured).
 - **ORM**: Drizzle ORM with schema-first approach and Drizzle Kit.
 - **Connection**: Node-postgres (pg) with pooling.
-- **Specific Tables**: `tehillim`, `after_brochas_prayers`, `pirkei_avot`, `daily_recipes`.
+- **Specific Tables**: `tehillim`, `after_brochas_prayers`, `pirkei_avot`, `daily_recipes`, `marriage_insights`.
 
 ### Object Storage
 - **Provider**: AWS S3 with CloudFront CDN.
@@ -54,12 +54,13 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 - **Tehillim Global Progress**: Community-wide tracking.
 - **Sponsorship System**: Daily content sponsorship.
 - **Analytics**: Tracking of daily/total users, page views, Tehillim completions, names prayed for, modal completions via Google Analytics. Analytics deferred via whenIdle.
-- **Life Page**: Shabbat countdown, Jewish Date converter, Daily Recipe, Creative Jewish Living, Community Feedback.
+- **Life Page**: Shabbat countdown, Daily Recipe, Marriage Insights, Creative Jewish Living, Community Feedback. Hebrew Date Converter moved to hamburger menu for better accessibility.
 - **Time-based Prayer System**: Dynamic prayer buttons based on zmanim.
 - **Text Cleaning**: Enhanced Hebrew text cleaning and markdown-style formatting.
 - **Dynamic Thank You Messages**: Custom messages for daily recipes.
 - **Unified Admin Interface**: Comprehensive dashboard at `/admin` for Messages, Recipes, Table Inspirations, Notifications with CRUD and secure image upload.
 - **Audio Auto-Completion**: Daily Chizuk and Emuna audio content auto-completes.
+- **Marriage Insights**: Daily marriage wisdom content accessible from Life page with Heart icon button. Features fullscreen modal with font controls, completion tracking, search integration with Hebrew/English keywords, and fresh data refetch on window focus.
 - **Mobile App Support**: Enhanced detection and user guidance for mobile app wrappers.
 - **PWA Enhancements**: Bottom navigation, service worker cache updates, compass haptic feedback, smart install prompts.
 - **Hebrew Date Timezone Fix**: Corrected Hebrew date calculation to use user's browser timezone.
