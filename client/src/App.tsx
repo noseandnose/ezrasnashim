@@ -53,18 +53,29 @@ function Router() {
   
   // Initialize critical systems - defer non-critical operations
   useEffect(() => {
-    // Detect Safari browser mode and apply browser UI offset
-    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                         (window.navigator as any).standalone === true;
-    const isWebView = /(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(navigator.userAgent);
+    // CRITICAL FIX: Reset --nav-offset on mount to clear any stale cached values
+    document.documentElement.style.setProperty('--nav-offset', '0px');
     
-    // Only apply browser UI offset in Safari mobile browser (not PWA/standalone/webview)
-    if (isSafari && !isStandalone && !isWebView) {
-      document.documentElement.style.setProperty('--nav-offset', 'var(--browser-ui-bottom)');
-    } else {
-      document.documentElement.style.setProperty('--nav-offset', '0px');
-    }
+    // Dynamically adjust nav offset based on actual viewport comparison
+    // Only apply offset when browser UI is visibly consuming vertical space
+    const updateNavOffset = () => {
+      const visualHeight = window.visualViewport?.height || window.innerHeight;
+      const fullHeight = window.innerHeight;
+      
+      // If visual viewport is smaller than inner height, browser UI is visible
+      // This works across all browsers and standalone modes
+      if (visualHeight < fullHeight) {
+        const offset = fullHeight - visualHeight;
+        document.documentElement.style.setProperty('--nav-offset', `${offset}px`);
+      } else {
+        document.documentElement.style.setProperty('--nav-offset', '0px');
+      }
+    };
+    
+    // Run on mount and when viewport changes
+    updateNavOffset();
+    window.addEventListener('resize', updateNavOffset, { passive: true });
+    window.addEventListener('orientationchange', updateNavOffset, { passive: true });
     
     // Defer performance optimizations - not blocking
     setTimeout(() => {
@@ -105,6 +116,12 @@ function Router() {
     whenIdle(() => {
       cleanupModalCompletions();
     }, 3000);
+    
+    // Cleanup function for event listeners
+    return () => {
+      window.removeEventListener('resize', updateNavOffset);
+      window.removeEventListener('orientationchange', updateNavOffset);
+    };
   }, []);
   
   return (
