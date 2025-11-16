@@ -51,7 +51,10 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     if (result.action) {
       result.action();
     }
-    onClose();
+    // Delay close to allow navigation/modal actions to complete
+    setTimeout(() => {
+      onClose();
+    }, 100);
   };
   
   const handleClearQuery = () => {

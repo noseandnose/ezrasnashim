@@ -247,29 +247,26 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       });
     }
     
-    // Recipes - Add general category plus individual recipes
-    index.push({
-      id: 'recipes-category',
-      category: 'Life',
-      title: 'Daily Recipes',
-      secondaryText: 'Kosher cooking ideas',
-      keywords: ['recipe', 'recipes', 'cooking', 'food', 'daily', 'kitchen', 'מתכון', 'מתכונים'],
-      route: '/life',
-      action: () => window.location.hash = '/life'
-    });
-    
+    // Daily Recipe - Use fullscreen event pattern
     if (recipes && Array.isArray(recipes) && recipes.length > 0) {
-      recipes.forEach((recipe: any, idx: number) => {
-        const title = recipe.title || `Recipe ${idx + 1}`;
-        index.push({
-          id: `recipe-${recipe.id || idx}`,
-          category: 'Recipes',
-          title: title,
-          secondaryText: recipe.description || 'Delicious recipe',
-          keywords: ['recipe', 'cooking', 'food', 'kitchen', 'מתכון', title].filter(Boolean),
-          route: '/life',
-          action: () => window.location.hash = '/life'
-        });
+      const todayRecipe = recipes[0]; // Get today's recipe
+      index.push({
+        id: 'daily-recipe',
+        category: 'Life',
+        title: todayRecipe.title || 'Daily Recipe',
+        secondaryText: 'Recipe of the Day',
+        keywords: ['recipe', 'recipes', 'cooking', 'food', 'daily', 'kitchen', 'מתכון', todayRecipe.title].filter(Boolean),
+        route: '/life',
+        action: () => {
+          // Open recipe in fullscreen using the same pattern as table section
+          const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
+            detail: {
+              modalKey: 'recipe',
+              content: todayRecipe
+            }
+          });
+          window.dispatchEvent(fullscreenEvent);
+        }
       });
     }
     
@@ -330,23 +327,30 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       action: () => openModal('life', 'tefilla')
     });
     
-    // Fixed navigation items
+    // Additional features and tools
     const fixedItems: SearchRecord[] = [
       {
         id: 'compass',
         category: 'Tools',
         title: 'The Kotel Compass',
-        secondaryText: 'Find Jerusalem',
-        keywords: ['compass', 'kotel', 'כותל', 'jerusalem', 'ירושלים', 'direction', 'prayer'],
-        route: '/compass',
-        action: () => window.location.hash = '/compass'
+        secondaryText: 'Find Jerusalem for prayer',
+        keywords: ['compass', 'kotel', 'כותל', 'jerusalem', 'ירושלים', 'direction', 'prayer', 'mizrach', 'מזרח'],
+        action: () => {
+          const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
+            detail: {
+              title: 'The Kotel Compass',
+              contentType: 'compass'
+            }
+          });
+          window.dispatchEvent(fullscreenEvent);
+        }
       },
       {
         id: 'shabbat-times',
         category: 'Life',
         title: 'Shabbat Times',
         secondaryText: 'Candle lighting & Havdalah',
-        keywords: ['shabbat', 'שבת', 'times', 'candles', 'havdalah', 'הבדלה'],
+        keywords: ['shabbat', 'שבת', 'times', 'candles', 'havdalah', 'הבדלה', 'candle lighting'],
         route: '/life',
         action: () => window.location.hash = '/life'
       },
@@ -355,9 +359,26 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
         category: 'Life',
         title: 'Hebrew Date Converter',
         secondaryText: 'Convert dates',
-        keywords: ['hebrew', 'date', 'converter', 'calendar', 'לוח', 'עברי'],
-        route: '/life',
-        action: () => window.location.hash = '/life'
+        keywords: ['hebrew', 'date', 'converter', 'calendar', 'לוח', 'עברי', 'jewish date'],
+        action: () => openModal('date-calculator-fullscreen', 'table')
+      },
+      {
+        id: 'donate',
+        category: 'Tzedaka',
+        title: 'Donate',
+        secondaryText: 'Give tzedaka',
+        keywords: ['donate', 'tzedaka', 'צדקה', 'charity', 'give', 'contribution'],
+        route: '/donate',
+        action: () => window.location.hash = '/donate'
+      },
+      {
+        id: 'sponsor-day',
+        category: 'Tzedaka',
+        title: 'Sponsor a Day',
+        secondaryText: 'Sponsor daily content',
+        keywords: ['sponsor', 'sponsorship', 'day', 'dedication', 'לעילוי נשמת'],
+        modalId: 'sponsor-details',
+        action: () => openModal('sponsor-details', 'tzedaka')
       }
     ];
     
