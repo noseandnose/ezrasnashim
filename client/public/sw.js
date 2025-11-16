@@ -2,7 +2,7 @@
 // Updated: 2025-11-16 - Auto-generated cache version
 
 // Cache configuration with timestamp for guaranteed cache busting
-const CACHE_VERSION = 'v1.1.2-1763324540732';
+const CACHE_VERSION = 'v1.1.2-1763325010940';
 const APP_SHELL_CACHE = `app-shell-${CACHE_VERSION}`;
 const PRAYERS_CACHE = `prayers-${CACHE_VERSION}`;
 const TORAH_CACHE = `torah-${CACHE_VERSION}`;

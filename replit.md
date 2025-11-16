@@ -14,6 +14,7 @@ Text formatting: Database content supports markdown-style formatting - **text** 
 Compass alignment message: When compass is aligned with Jerusalem, displays "Your heart is in the right place" instead of technical alignment message.
 Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20% bigger (w-8 h-8), both BH Green icon and center heart pulse when aligned.
 Header layout: Search icon moved from header to hamburger menu to keep logo perfectly centered. Header now shows only hamburger menu (left), centered logo, and message button (right).
+Layout fixes (Nov 2025): Fixed bottom nav positioning and header scrolling issues. Bottom nav now defaults to `--nav-offset: 0px` (flush with safe area), with browser UI offset applied only in Safari browser mode via JavaScript detection. Header ensured to stay fixed at top with additional CSS safeguards. Works correctly across Chrome, Safari, and mobile app wrappers.
 
 ## System Architecture
 ### Frontend

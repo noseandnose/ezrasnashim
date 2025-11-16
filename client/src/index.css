@@ -36,8 +36,9 @@
     --browser-ui-bottom: 0px;
   }
   
-  /* Navigation offset (defaults to browser UI offset, overridden in PWA mode) */
-  --nav-offset: var(--browser-ui-bottom);
+  /* Navigation offset - default to 0 for PWA/mobile apps */
+  /* Only add browser UI offset in Safari browser mode (set via JS) */
+  --nav-offset: 0px;
   
   /* Computed layout dimensions (pure CSS calc, includes ALL spacing) */
   /* Header total = safe-area + top-padding + row-height + bottom-padding */
@@ -1250,6 +1251,11 @@ header[class*="fixed"] {
   transform: none !important;
   contain: none !important;
   overflow: visible !important;
+  
+  /* Ensure header never scrolls */
+  will-change: auto !important;
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
 }
 
 nav[class*="fixed"] {

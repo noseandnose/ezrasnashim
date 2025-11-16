@@ -53,6 +53,19 @@ function Router() {
   
   // Initialize critical systems - defer non-critical operations
   useEffect(() => {
+    // Detect Safari browser mode and apply browser UI offset
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                         (window.navigator as any).standalone === true;
+    const isWebView = /(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(navigator.userAgent);
+    
+    // Only apply browser UI offset in Safari mobile browser (not PWA/standalone/webview)
+    if (isSafari && !isStandalone && !isWebView) {
+      document.documentElement.style.setProperty('--nav-offset', 'var(--browser-ui-bottom)');
+    } else {
+      document.documentElement.style.setProperty('--nav-offset', '0px');
+    }
+    
     // Defer performance optimizations - not blocking
     setTimeout(() => {
       initializePerformance();
