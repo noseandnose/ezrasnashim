@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const version = {
-  version: '1.0.0',
+  version: '1.1.0',
   buildTime: new Date().toISOString(),
   buildTimestamp: Date.now()
 };
