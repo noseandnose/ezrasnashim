@@ -1,3 +1,6 @@
+import MiniSearch from 'minisearch';
+import { normalizeHebrew, transliterateHebrew, containsHebrew, expandSearchTerm } from './hebrewUtils';
+
 export interface SearchRecord {
   id: string;
   category: string;
@@ -9,91 +12,151 @@ export interface SearchRecord {
   action?: () => void;
 }
 
-export function normalizeHebrew(text: string): string {
-  if (!text) return '';
-  
-  // Remove nikkud (Hebrew vowel points) - Unicode range U+0591 to U+05C7
-  let normalized = text.replace(/[\u0591-\u05C7]/g, '');
-  
-  // Normalize final forms to regular forms
-  const finalForms: Record<string, string> = {
-    'ך': 'כ',
-    'ם': 'מ',
-    'ן': 'נ',
-    'ף': 'פ',
-    'ץ': 'צ'
-  };
-  
-  normalized = normalized.split('').map(char => finalForms[char] || char).join('');
-  
-  return normalized.trim().toLowerCase();
+// Document type for MiniSearch indexing
+interface SearchDocument {
+  id: string;
+  title: string;
+  titleTransliterated: string;
+  secondary: string;
+  secondaryTransliterated: string;
+  keywords: string;
+  category: string;
 }
 
-export function normalizeEnglish(text: string): string {
-  if (!text) return '';
+/**
+ * Create a MiniSearch instance with fuzzy matching and Hebrew support
+ */
+export function createSearchIndex(records: SearchRecord[]): MiniSearch<SearchDocument> {
+  const miniSearch = new MiniSearch<SearchDocument>({
+    fields: ['title', 'titleTransliterated', 'secondary', 'secondaryTransliterated', 'keywords', 'category'],
+    storeFields: ['id'],
+    searchOptions: {
+      boost: {
+        title: 5,           // Title matches get highest priority
+        titleTransliterated: 4,  // Transliterated title matches
+        secondary: 3,       // Secondary text matches
+        secondaryTransliterated: 2, // Transliterated secondary
+        keywords: 1,        // Keywords
+        category: 0.5       // Category matches
+      },
+      fuzzy: 0.2,          // Allow ~20% character difference for typos
+      prefix: true,        // Enable prefix matching
+      combineWith: 'AND'   // All terms must match (can be changed to 'OR')
+    }
+  });
   
-  return text
-    .toLowerCase()
-    .normalize('NFD') // Decompose accented characters
-    .replace(/[\u0300-\u036f]/g, '') // Remove accent marks
-    .trim();
+  // Prepare documents for indexing
+  const documents: SearchDocument[] = records.map(record => {
+    const titleNormalized = containsHebrew(record.title) 
+      ? normalizeHebrew(record.title)
+      : record.title.toLowerCase();
+    
+    const titleTransliterated = containsHebrew(record.title)
+      ? transliterateHebrew(record.title)
+      : '';
+    
+    const secondaryNormalized = record.secondaryText && containsHebrew(record.secondaryText)
+      ? normalizeHebrew(record.secondaryText)
+      : (record.secondaryText || '').toLowerCase();
+    
+    const secondaryTransliterated = record.secondaryText && containsHebrew(record.secondaryText)
+      ? transliterateHebrew(record.secondaryText)
+      : '';
+    
+    // Expand keywords with synonyms and transliterations
+    const expandedKeywords = record.keywords.flatMap(kw => expandSearchTerm(kw));
+    const keywordsNormalized = expandedKeywords
+      .map(kw => containsHebrew(kw) ? normalizeHebrew(kw) : kw.toLowerCase())
+      .join(' ');
+    
+    return {
+      id: record.id,
+      title: titleNormalized,
+      titleTransliterated,
+      secondary: secondaryNormalized,
+      secondaryTransliterated,
+      keywords: keywordsNormalized,
+      category: record.category.toLowerCase()
+    };
+  });
+  
+  // Index all documents
+  miniSearch.addAll(documents);
+  
+  return miniSearch;
 }
 
-export function normalizeText(text: string): string {
-  if (!text) return '';
-  
-  // Check if text contains Hebrew characters
-  const hasHebrew = /[\u0590-\u05FF]/.test(text);
-  
-  if (hasHebrew) {
-    return normalizeHebrew(text);
-  }
-  
-  return normalizeEnglish(text);
-}
-
-export function searchRecords(records: SearchRecord[], query: string): SearchRecord[] {
+/**
+ * Search records with fuzzy matching, Hebrew support, and synonym expansion
+ */
+export function searchRecords(
+  records: SearchRecord[], 
+  query: string,
+  miniSearch?: MiniSearch<SearchDocument>
+): SearchRecord[] {
   if (!query || !query.trim()) {
     return [];
   }
   
-  const normalizedQuery = normalizeText(query);
+  // If no MiniSearch index provided, fall back to simple search
+  if (!miniSearch) {
+    return simpleSearch(records, query);
+  }
+  
+  // Normalize and expand the query
+  const queryTerms = query.toLowerCase().trim().split(/\s+/);
+  const expandedTerms = queryTerms.flatMap(term => expandSearchTerm(term));
+  
+  // Detect if query contains Hebrew
+  const isHebrewQuery = containsHebrew(query);
+  
+  // For Hebrew queries, search Hebrew fields; for English, search both
+  const searchQuery = isHebrewQuery
+    ? expandedTerms.map(term => normalizeHebrew(term)).join(' ')
+    : expandedTerms.join(' ');
+  
+  try {
+    // Perform fuzzy search
+    const results = miniSearch.search(searchQuery, {
+      fuzzy: 0.2,
+      prefix: true,
+      combineWith: 'OR' // Use OR for more results with expanded synonyms
+    });
+    
+    // Map results back to original records
+    const resultIds = new Set(results.map(r => r.id));
+    return records
+      .filter(record => resultIds.has(record.id))
+      .sort((a, b) => {
+        const scoreA = results.find(r => r.id === a.id)?.score || 0;
+        const scoreB = results.find(r => r.id === b.id)?.score || 0;
+        return scoreB - scoreA;
+      });
+  } catch (error) {
+    // Fallback to simple search if MiniSearch fails
+    console.error('MiniSearch error:', error);
+    return simpleSearch(records, query);
+  }
+}
+
+/**
+ * Simple fallback search without MiniSearch (for compatibility)
+ */
+function simpleSearch(records: SearchRecord[], query: string): SearchRecord[] {
+  const normalizedQuery = query.toLowerCase().trim();
   const queryWords = normalizedQuery.split(/\s+/).filter(w => w.length > 0);
   
   const scored = records.map(record => {
-    const normalizedTitle = normalizeText(record.title);
-    const normalizedSecondary = normalizeText(record.secondaryText || '');
-    const normalizedKeywords = record.keywords.map(k => normalizeText(k));
+    const normalizedTitle = record.title.toLowerCase();
+    const normalizedSecondary = (record.secondaryText || '').toLowerCase();
+    const normalizedKeywords = record.keywords.map(k => k.toLowerCase());
     
     let score = 0;
     
     for (const word of queryWords) {
-      // Prefix match in title (highest priority)
-      if (normalizedTitle.startsWith(word)) {
-        score += 100;
-      }
-      // Contains match in title
-      else if (normalizedTitle.includes(word)) {
-        score += 50;
-      }
-      
-      // Secondary text match
-      if (normalizedSecondary.includes(word)) {
-        score += 30;
-      }
-      
-      // Keyword match
-      for (const keyword of normalizedKeywords) {
-        if (keyword.includes(word)) {
-          score += 20;
-          break;
-        }
-      }
-      
-      // Category match
-      if (normalizeText(record.category).includes(word)) {
-        score += 10;
-      }
+      if (normalizedTitle.includes(word)) score += 50;
+      if (normalizedSecondary.includes(word)) score += 30;
+      if (normalizedKeywords.some(k => k.includes(word))) score += 20;
     }
     
     return { record, score };

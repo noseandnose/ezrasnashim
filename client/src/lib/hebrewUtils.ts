@@ -26,52 +26,105 @@ export function normalizeHebrew(text: string): string {
 /**
  * Transliterate Hebrew characters to English phonetic equivalents
  * This allows English queries to match Hebrew content
+ * Uses vowel-aware mapping for better matches with common English spellings
  */
 export function transliterateHebrew(text: string): string {
   if (!text) return '';
   
-  const transliterationMap: Record<string, string> = {
-    // Regular letters
-    'א': 'a',
-    'ב': 'b',
-    'ג': 'g',
-    'ד': 'd',
-    'ה': 'h',
-    'ו': 'v',
-    'ז': 'z',
-    'ח': 'ch',
-    'ט': 't',
-    'י': 'y',
-    'כ': 'k',
-    'ל': 'l',
-    'מ': 'm',
-    'נ': 'n',
-    'ס': 's',
-    'ע': '',
-    'פ': 'p',
-    'צ': 'tz',
-    'ק': 'k',
-    'ר': 'r',
-    'ש': 'sh',
-    'ת': 't',
-    // Final forms (will be normalized first, but including for completeness)
-    'ך': 'k',
-    'ם': 'm',
-    'ן': 'n',
-    'ף': 'p',
-    'ץ': 'tz'
-  };
-  
   // First normalize Hebrew to remove niqqud and final forms
   const normalized = normalizeHebrew(text);
+  const chars = normalized.split('');
   
-  // Then transliterate each character
-  return normalized
-    .split('')
-    .map(char => transliterationMap[char] || char)
-    .join('')
-    .toLowerCase()
-    .trim();
+  const result: string[] = [];
+  
+  for (let i = 0; i < chars.length; i++) {
+    const char = chars[i];
+    
+    // Transliteration with vowel awareness
+    switch (char) {
+      case 'א':
+        // Alef often silent or 'a' depending on context
+        result.push(i === 0 ? 'a' : 'a');
+        break;
+      case 'ב':
+        result.push('b');
+        break;
+      case 'ג':
+        result.push('g');
+        break;
+      case 'ד':
+        result.push('d');
+        break;
+      case 'ה':
+        // Heh at end is often silent or 'a', otherwise 'h'
+        result.push(i === chars.length - 1 ? 'a' : 'h');
+        break;
+      case 'ו':
+        // Vav can be 'v', 'o', or 'u' - use 'o' for better matching
+        result.push('o');
+        break;
+      case 'ז':
+        result.push('z');
+        break;
+      case 'ח':
+        result.push('ch');
+        break;
+      case 'ט':
+        result.push('t');
+        break;
+      case 'י':
+        // Yud can be 'y' or 'i' - use 'i' for better matching
+        result.push(i === chars.length - 1 ? 'i' : 'i');
+        break;
+      case 'כ':
+      case 'ך':
+        result.push('k');
+        break;
+      case 'ל':
+        result.push('l');
+        break;
+      case 'מ':
+      case 'ם':
+        result.push('m');
+        break;
+      case 'נ':
+      case 'ן':
+        result.push('n');
+        break;
+      case 'ס':
+        result.push('s');
+        break;
+      case 'ע':
+        // Ayin is often 'a' or silent
+        result.push('a');
+        break;
+      case 'פ':
+      case 'ף':
+        result.push('p');
+        break;
+      case 'צ':
+      case 'ץ':
+        result.push('tz');
+        break;
+      case 'ק':
+        result.push('k');
+        break;
+      case 'ר':
+        result.push('r');
+        break;
+      case 'ש':
+        result.push('sh');
+        break;
+      case 'ת':
+        result.push('t');
+        break;
+      default:
+        // Keep non-Hebrew characters as-is
+        result.push(char);
+    }
+  }
+  
+  return result.join('').toLowerCase().trim();
 }
 
 /**
@@ -152,5 +205,5 @@ export function expandSearchTerm(term: string): string[] {
   });
   
   // Return unique results
-  return [...new Set(results)];
+  return Array.from(new Set(results));
 }
