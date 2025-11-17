@@ -12,15 +12,15 @@ interface SearchModalProps {
 
 export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [query, setQuery] = useState('');
-  const { searchIndex } = useSearch();
+  const { searchIndex, miniSearchIndex } = useSearch();
   const inputRef = useRef<HTMLInputElement>(null);
   
   const results = useMemo(() => {
     if (!query.trim()) {
       return [];
     }
-    return searchRecords(searchIndex, query).slice(0, 20); // Limit to top 20 results
-  }, [query, searchIndex]);
+    return searchRecords(searchIndex, query, miniSearchIndex || undefined).slice(0, 20); // Limit to top 20 results
+  }, [query, searchIndex, miniSearchIndex]);
   
   // Group results by category
   const groupedResults = useMemo(() => {
@@ -151,7 +151,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
         
         {/* Footer hint */}
         <div className="p-3 border-t border-gray-200 bg-white/80 backdrop-blur-sm text-center text-xs text-gray-500">
-          Works with both English and Hebrew • {searchIndex.length} items indexed
+          Smart search with Hebrew • Typo-tolerant • {searchIndex.length} items
         </div>
       </DialogContent>
     </Dialog>

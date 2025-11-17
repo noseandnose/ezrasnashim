@@ -1,10 +1,12 @@
 import { createContext, useContext, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { SearchRecord } from '@/lib/searchUtils';
+import { SearchRecord, createSearchIndex } from '@/lib/searchUtils';
 import { useModalStore } from '@/lib/types';
+import type MiniSearch from 'minisearch';
 
 interface SearchContextValue {
   searchIndex: SearchRecord[];
+  miniSearchIndex: MiniSearch<any> | null;
   isLoading: boolean;
 }
 
@@ -94,7 +96,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       category: 'Tefilla',
       title: 'Mincha',
       secondaryText: 'מנחה',
-      keywords: ['mincha', 'מנחה', 'afternoon', 'prayer', 'tefilla'],
+      keywords: ['mincha', 'minchah', 'מנחה', 'afternoon', 'prayer', 'tefilla', 'tefillah'],
       modalId: 'mincha',
       action: () => openModal('mincha')
     });
@@ -105,7 +107,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       category: 'Tefilla',
       title: 'Maariv',
       secondaryText: 'מעריב',
-      keywords: ['maariv', 'מעריב', 'evening', 'prayer', 'night', 'tefilla'],
+      keywords: ['maariv', 'maariv', 'מעריב', 'evening', 'prayer', 'night', 'tefilla', 'tefillah', 'arvit'],
       modalId: 'maariv',
       action: () => openModal('maariv')
     });
@@ -116,7 +118,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       category: 'Tefilla',
       title: 'Morning Brochas',
       secondaryText: 'ברכות השחר',
-      keywords: ['morning', 'brochas', 'blessings', 'ברכות', 'השחר', 'shacharit', 'שחרית', 'tefilla'],
+      keywords: ['morning', 'brochas', 'brachot', 'blessings', 'ברכות', 'berachot', 'השחר', 'hashachar', 'shacharit', 'שחרית', 'tefilla', 'tefillah'],
       modalId: 'morning-brochas',
       action: () => openModal('morning-brochas')
     });
@@ -194,7 +196,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       category: 'Tefilla',
       title: 'Nishmas',
       secondaryText: 'נשמת',
-      keywords: ['nishmas', 'נשמת', 'shabbat', 'שבת', 'prayer', 'tefilla'],
+      keywords: ['nishmas', 'nishmat', 'neshamas', 'נשמת', 'shabbat', 'shabbos', 'שבת', 'prayer', 'tefilla', 'tefillah'],
       modalId: 'nishmas',
       action: () => openModal('nishmas')
     });
@@ -216,7 +218,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       category: 'Tefilla',
       title: 'Tehillim',
       secondaryText: 'תהילים',
-      keywords: ['tehillim', 'תהילים', 'psalms', 'prayer', 'tefilla'],
+      keywords: ['tehillim', 'tehilim', 'תהילים', 'psalms', 'psalm', 'prayer', 'tefilla', 'tefillah', 'davening'],
       modalId: 'tehillim',
       action: () => openModal('tehillim')
     });
@@ -394,10 +396,21 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     return finalIndex;
   }, [halachaContent, chizukContent, emunaContent, minchaPrayers, maarivPrayers, morningPrayers, dailyBrochas, specialBrochas, recipeContent, marriageInsight, pirkeiAvot, openModal]);
   
+  // Build MiniSearch index for fuzzy matching
+  const miniSearchIndex = useMemo(() => {
+    try {
+      if (searchIndex.length === 0) return null;
+      return createSearchIndex(searchIndex);
+    } catch (error) {
+      console.error('[SearchContext] Failed to create MiniSearch index:', error);
+      return null;
+    }
+  }, [searchIndex]);
+  
   const isLoading = false; // We're using cached data, so no loading state needed
   
   return (
-    <SearchContext.Provider value={{ searchIndex, isLoading }}>
+    <SearchContext.Provider value={{ searchIndex, miniSearchIndex, isLoading }}>
       {children}
     </SearchContext.Provider>
   );
