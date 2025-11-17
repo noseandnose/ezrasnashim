@@ -88,7 +88,8 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
               placeholder="Search prayers, Torah, recipes..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="pl-10 pr-10 h-12 text-base bg-white border-gray-300 focus-visible:ring-rose-500"
+              className="pl-10 pr-10 h-12 text-base bg-white border-gray-300 focus-visible:ring-blush"
+              autoFocus
               data-testid="search-input"
             />
             {query && (

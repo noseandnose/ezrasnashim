@@ -201,15 +201,35 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       action: () => openModal('nishmas')
     });
     
-    // Women's Prayers - Main modal
+    // Women's Prayers - Personal Prayer Categories
     index.push({
-      id: 'prayer-womens',
+      id: 'prayer-refuah',
       category: 'Tefilla',
-      title: "Women's Prayers",
-      secondaryText: 'תפילות לנשים',
-      keywords: ['women', 'womens', 'prayer', 'prayers', 'tefilla', 'nashim', 'נשים', 'תפילות'],
-      modalId: 'womens-prayers',
-      action: () => openModal('womens-prayers')
+      title: 'Refuah',
+      secondaryText: 'Healing',
+      keywords: ['refuah', 'refua', 'healing', 'health', 'prayer', 'women', 'womens', 'personal', 'tefilla', 'רפואה'],
+      modalId: 'refuah',
+      action: () => openModal('refuah', 'tefilla')
+    });
+    
+    index.push({
+      id: 'prayer-family',
+      category: 'Tefilla',
+      title: 'Family',
+      secondaryText: 'Peace in Home',
+      keywords: ['family', 'home', 'peace', 'shalom', 'bayit', 'prayer', 'women', 'womens', 'personal', 'tefilla', 'משפחה', 'שלום בית'],
+      modalId: 'family',
+      action: () => openModal('family', 'tefilla')
+    });
+    
+    index.push({
+      id: 'prayer-life',
+      category: 'Tefilla',
+      title: 'Life',
+      secondaryText: 'Guidance',
+      keywords: ['life', 'guidance', 'personal', 'prayer', 'women', 'womens', 'tefilla', 'חיים', 'הדרכה'],
+      modalId: 'life',
+      action: () => openModal('life', 'tefilla')
     });
     
     // Tehillim - Main modal
