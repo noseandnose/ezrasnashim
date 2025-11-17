@@ -13,7 +13,7 @@ const getSessionId = () => {
 };
 
 interface TrackEventParams {
-  eventType: "modal_complete" | "tehillim_complete" | "name_prayed" | "tehillim_book_complete" | "tzedaka_completion" | "meditation_complete";
+  eventType: "modal_complete" | "tehillim_complete" | "name_prayed" | "tehillim_book_complete" | "tzedaka_completion" | "meditation_complete" | "feature_usage";
   eventData?: Record<string, any>;
 }
 
@@ -74,4 +74,18 @@ export const useTrackModalComplete = () => {
   };
 
   return { trackModalComplete };
+};
+
+// Hook for tracking feature usage (non-mitzvah activities)
+export const useTrackFeatureUsage = () => {
+  const { trackEvent } = useAnalytics();
+
+  const trackFeatureUsage = (featureName: string, featureData?: Record<string, any>) => {
+    if (import.meta.env.MODE === 'development') {
+      // Tracking feature usage
+    }
+    trackEvent("feature_usage", { feature: featureName, ...featureData });
+  };
+
+  return { trackFeatureUsage };
 };

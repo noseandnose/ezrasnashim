@@ -12,6 +12,7 @@ import ErrorBoundary from "@/components/ui/error-boundary";
 import UpdateNotification from "@/components/UpdateNotification";
 import { AutoNotificationPrompt } from "@/components/auto-notification-prompt";
 import { OfflineIndicator } from "@/components/offline-indicator";
+import { SearchProvider } from "@/contexts/SearchContext";
 import "@/utils/clear-modal-completions";
 import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
 import { initGA } from "./lib/analytics";
@@ -52,6 +53,30 @@ function Router() {
   
   // Initialize critical systems - defer non-critical operations
   useEffect(() => {
+    // CRITICAL FIX: Reset --nav-offset on mount to clear any stale cached values
+    document.documentElement.style.setProperty('--nav-offset', '0px');
+    
+    // Dynamically adjust nav offset based on actual viewport comparison
+    // Only apply offset when browser UI is visibly consuming vertical space
+    const updateNavOffset = () => {
+      const visualHeight = window.visualViewport?.height || window.innerHeight;
+      const fullHeight = window.innerHeight;
+      
+      // If visual viewport is smaller than inner height, browser UI is visible
+      // This works across all browsers and standalone modes
+      if (visualHeight < fullHeight) {
+        const offset = fullHeight - visualHeight;
+        document.documentElement.style.setProperty('--nav-offset', `${offset}px`);
+      } else {
+        document.documentElement.style.setProperty('--nav-offset', '0px');
+      }
+    };
+    
+    // Run on mount and when viewport changes
+    updateNavOffset();
+    window.addEventListener('resize', updateNavOffset, { passive: true });
+    window.addEventListener('orientationchange', updateNavOffset, { passive: true });
+    
     // Defer performance optimizations - not blocking
     setTimeout(() => {
       initializePerformance();
@@ -91,6 +116,12 @@ function Router() {
     whenIdle(() => {
       cleanupModalCompletions();
     }, 3000);
+    
+    // Cleanup function for event listeners
+    return () => {
+      window.removeEventListener('resize', updateNavOffset);
+      window.removeEventListener('orientationchange', updateNavOffset);
+    };
   }, []);
   
   return (
@@ -158,13 +189,15 @@ export default function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <UpdateNotification />
-          <AutoNotificationPrompt />
-          <OfflineIndicator />
-          <Router />
-          <Toaster />
-        </TooltipProvider>
+        <SearchProvider>
+          <TooltipProvider>
+            <UpdateNotification />
+            <AutoNotificationPrompt />
+            <OfflineIndicator />
+            <Router />
+            <Toaster />
+          </TooltipProvider>
+        </SearchProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

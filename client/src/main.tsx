@@ -71,23 +71,29 @@ async function registerServiceWorker() {
         updateViaCache: 'none'
       });
       
-      // Handle updates - let new service worker activate naturally without forcing reload
-      // This prevents blank screens caused by reloading before assets are cached
+      // Handle updates - automatically activate and reload when new version is ready
       registration.addEventListener('updatefound', () => {
         const newWorker = registration.installing;
         if (newWorker) {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              console.log('[SW] New service worker installed and ready');
-              console.log('[SW] Update will take effect on next app launch (no forced reload)');
+              console.log('[SW] New service worker installed, activating immediately...');
               
-              // Allow the new service worker to activate when ready
-              // It will take control on next navigation or page load
-              // This prevents blank screens from forced reloads before caching completes
+              // Tell new service worker to skip waiting and activate immediately
               newWorker.postMessage({ type: 'SKIP_WAITING' });
             }
           });
         }
+      });
+      
+      // Listen for when the new service worker takes control and reload automatically
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        refreshing = true;
+        
+        console.log('[SW] New service worker activated, reloading for fresh content...');
+        window.location.reload();
       });
       
       // Check for service worker updates on app launch after it's ready

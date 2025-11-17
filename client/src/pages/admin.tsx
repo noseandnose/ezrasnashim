@@ -8,13 +8,13 @@ import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
 import axiosClient from '@/lib/axiosClient';
 import { useQuery } from '@tanstack/react-query';
-import { MessageSquare, Plus, Save, Edit, Trash2, Bell, ChefHat, Send, Clock, Users, CheckCircle, XCircle, Image, Calendar, Scroll } from 'lucide-react';
+import { MessageSquare, Plus, Save, Edit, Trash2, Bell, ChefHat, Send, Clock, Users, CheckCircle, XCircle, Image, Calendar, Scroll, BarChart3, TrendingUp, TrendingDown } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Message, TableInspiration, ScheduledNotification, ParshaVort } from '@shared/schema';
 import { InlineImageUploader } from '@/components/InlineImageUploader';
 import type { UploadResult } from '@uppy/core';
 
-type AdminTab = 'messages' | 'recipes' | 'inspirations' | 'notifications' | 'parsha-vorts';
+type AdminTab = 'messages' | 'recipes' | 'inspirations' | 'notifications' | 'parsha-vorts' | 'analytics';
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState<AdminTab>('messages');
@@ -95,6 +95,14 @@ export default function Admin() {
   });
   const [editingParshaVort, setEditingParshaVort] = useState<ParshaVort | null>(null);
   const [isSavingParshaVort, setIsSavingParshaVort] = useState(false);
+
+  // Analytics state
+  const [analyticsStartDate, setAnalyticsStartDate] = useState('');
+  const [analyticsEndDate, setAnalyticsEndDate] = useState('');
+  const [dateRangeStats, setDateRangeStats] = useState<any>(null);
+  const [weekComparison, setWeekComparison] = useState<any>(null);
+  const [monthComparison, setMonthComparison] = useState<any>(null);
+  const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
 
   // Set up authorization headers for authenticated requests
   const getAuthHeaders = () => ({
@@ -850,6 +858,92 @@ export default function Admin() {
     }
   };
 
+  // Analytics functions
+  const handleLoadDateRangeStats = async () => {
+    if (!analyticsStartDate || !analyticsEndDate) {
+      toast({
+        title: 'Missing Dates',
+        description: 'Please select both start and end dates',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsLoadingAnalytics(true);
+    try {
+      const response = await axiosClient.get(
+        `/api/analytics/stats/range?startDate=${analyticsStartDate}&endDate=${analyticsEndDate}`,
+        { headers: getAuthHeaders() }
+      );
+      setDateRangeStats(response.data);
+      toast({
+        title: 'Analytics Loaded',
+        description: 'Successfully loaded analytics for the selected date range'
+      });
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        setIsAuthenticated(false);
+      }
+      toast({
+        title: 'Error',
+        description: 'Failed to load analytics',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoadingAnalytics(false);
+    }
+  };
+
+  const handleLoadWeekComparison = async () => {
+    setIsLoadingAnalytics(true);
+    try {
+      const response = await axiosClient.get('/api/analytics/stats/compare?period=week', {
+        headers: getAuthHeaders()
+      });
+      setWeekComparison(response.data);
+      toast({
+        title: 'Week Comparison Loaded',
+        description: 'Successfully loaded week over week comparison'
+      });
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        setIsAuthenticated(false);
+      }
+      toast({
+        title: 'Error',
+        description: 'Failed to load week comparison',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoadingAnalytics(false);
+    }
+  };
+
+  const handleLoadMonthComparison = async () => {
+    setIsLoadingAnalytics(true);
+    try {
+      const response = await axiosClient.get('/api/analytics/stats/compare?period=month', {
+        headers: getAuthHeaders()
+      });
+      setMonthComparison(response.data);
+      toast({
+        title: 'Month Comparison Loaded',
+        description: 'Successfully loaded month over month comparison'
+      });
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        setIsAuthenticated(false);
+      }
+      toast({
+        title: 'Error',
+        description: 'Failed to load month comparison',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoadingAnalytics(false);
+    }
+  };
+
 
   if (!isAuthenticated) {
     return (
@@ -964,6 +1058,18 @@ export default function Admin() {
             >
               <Scroll className="w-4 h-4 mr-2" />
               Parsha Vorts
+            </button>
+            <button
+              onClick={() => setActiveTab('analytics')}
+              className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'analytics'
+                  ? 'admin-tab-active'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              }`}
+              data-testid="tab-analytics"
+            >
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Analytics
             </button>
           </div>
         </div>
@@ -2146,6 +2252,275 @@ export default function Admin() {
               </div>
             </Card>
           </div>
+          </div>
+        )}
+
+        {/* Analytics Tab */}
+        {activeTab === 'analytics' && (
+          <div className="space-y-6">
+            {/* Date Range Stats */}
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center">
+                <BarChart3 className="w-5 h-5 mr-2 text-rose-600" />
+                Custom Date Range Analytics
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <Label htmlFor="analytics-start-date">Start Date</Label>
+                  <Input
+                    id="analytics-start-date"
+                    type="date"
+                    value={analyticsStartDate}
+                    onChange={(e) => setAnalyticsStartDate(e.target.value)}
+                    className="mt-1"
+                    data-testid="input-analytics-start-date"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="analytics-end-date">End Date</Label>
+                  <Input
+                    id="analytics-end-date"
+                    type="date"
+                    value={analyticsEndDate}
+                    onChange={(e) => setAnalyticsEndDate(e.target.value)}
+                    className="mt-1"
+                    data-testid="input-analytics-end-date"
+                  />
+                </div>
+              </div>
+
+              <Button 
+                onClick={handleLoadDateRangeStats}
+                disabled={isLoadingAnalytics}
+                className="w-full admin-btn-primary" 
+                data-testid="button-load-analytics"
+              >
+                {isLoadingAnalytics ? 'Loading...' : 'Load Analytics'}
+              </Button>
+
+              {/* Stats will be displayed here after loading */}
+              <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
+                  <div className="text-sm text-gray-600 font-medium">Total Users</div>
+                  <div className="text-2xl font-bold text-gray-900 mt-1">
+                    {dateRangeStats ? dateRangeStats.totalUsers.toLocaleString() : '-'}
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg">
+                  <div className="text-sm text-gray-600 font-medium">Total Acts</div>
+                  <div className="text-2xl font-bold text-gray-900 mt-1">
+                    {dateRangeStats ? dateRangeStats.totalActs.toLocaleString() : '-'}
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg">
+                  <div className="text-sm text-gray-600 font-medium">Tehillim</div>
+                  <div className="text-2xl font-bold text-gray-900 mt-1">
+                    {dateRangeStats ? dateRangeStats.totalTehillimCompleted.toLocaleString() : '-'}
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-rose-50 to-rose-100 p-4 rounded-lg">
+                  <div className="text-sm text-gray-600 font-medium">Money Raised</div>
+                  <div className="text-2xl font-bold text-gray-900 mt-1">
+                    {dateRangeStats ? `$${(dateRangeStats.moneyRaised / 100).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : '$-'}
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Week over Week Comparison */}
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center">
+                <TrendingUp className="w-5 h-5 mr-2 text-green-600" />
+                Week over Week Comparison
+              </h2>
+
+              <Button 
+                onClick={handleLoadWeekComparison}
+                disabled={isLoadingAnalytics}
+                className="w-full admin-btn-primary mb-4" 
+                data-testid="button-load-week-comparison"
+              >
+                {isLoadingAnalytics ? 'Loading...' : 'Load Week Comparison'}
+              </Button>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Current Week */}
+                <div>
+                  <h3 className="font-semibold text-gray-700 mb-3">This Week</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-600">Users</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">{weekComparison ? weekComparison.current.totalUsers.toLocaleString() : '-'}</span>
+                        {weekComparison && (
+                          <span className={`text-xs flex items-center ${weekComparison.changes.users > 0 ? 'text-green-600' : weekComparison.changes.users < 0 ? 'text-red-600' : 'text-gray-500'}`}>
+                            {weekComparison.changes.users > 0 ? <TrendingUp className="w-3 h-3" /> : weekComparison.changes.users < 0 ? <TrendingDown className="w-3 h-3" /> : null}
+                            {weekComparison.changes.users > 0 ? '+' : ''}{weekComparison.changes.users.toFixed(1)}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-600">Total Acts</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">{weekComparison ? weekComparison.current.totalActs.toLocaleString() : '-'}</span>
+                        {weekComparison && (
+                          <span className={`text-xs flex items-center ${weekComparison.changes.acts > 0 ? 'text-green-600' : weekComparison.changes.acts < 0 ? 'text-red-600' : 'text-gray-500'}`}>
+                            {weekComparison.changes.acts > 0 ? <TrendingUp className="w-3 h-3" /> : weekComparison.changes.acts < 0 ? <TrendingDown className="w-3 h-3" /> : null}
+                            {weekComparison.changes.acts > 0 ? '+' : ''}{weekComparison.changes.acts.toFixed(1)}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-600">Tehillim</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">{weekComparison ? weekComparison.current.totalTehillimCompleted.toLocaleString() : '-'}</span>
+                        {weekComparison && (
+                          <span className={`text-xs flex items-center ${weekComparison.changes.tehillim > 0 ? 'text-green-600' : weekComparison.changes.tehillim < 0 ? 'text-red-600' : 'text-gray-500'}`}>
+                            {weekComparison.changes.tehillim > 0 ? <TrendingUp className="w-3 h-3" /> : weekComparison.changes.tehillim < 0 ? <TrendingDown className="w-3 h-3" /> : null}
+                            {weekComparison.changes.tehillim > 0 ? '+' : ''}{weekComparison.changes.tehillim.toFixed(1)}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-600">Money Raised</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">{weekComparison ? `$${(weekComparison.current.moneyRaised / 100).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : '$-'}</span>
+                        {weekComparison && (
+                          <span className={`text-xs flex items-center ${weekComparison.changes.moneyRaised > 0 ? 'text-green-600' : weekComparison.changes.moneyRaised < 0 ? 'text-red-600' : 'text-gray-500'}`}>
+                            {weekComparison.changes.moneyRaised > 0 ? <TrendingUp className="w-3 h-3" /> : weekComparison.changes.moneyRaised < 0 ? <TrendingDown className="w-3 h-3" /> : null}
+                            {weekComparison.changes.moneyRaised > 0 ? '+' : ''}{weekComparison.changes.moneyRaised.toFixed(1)}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Previous Week */}
+                <div>
+                  <h3 className="font-semibold text-gray-700 mb-3">Last Week</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-600">Users</span>
+                      <span className="font-semibold">{weekComparison ? weekComparison.previous.totalUsers.toLocaleString() : '-'}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-600">Total Acts</span>
+                      <span className="font-semibold">{weekComparison ? weekComparison.previous.totalActs.toLocaleString() : '-'}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-600">Tehillim</span>
+                      <span className="font-semibold">{weekComparison ? weekComparison.previous.totalTehillimCompleted.toLocaleString() : '-'}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-600">Money Raised</span>
+                      <span className="font-semibold">{weekComparison ? `$${(weekComparison.previous.moneyRaised / 100).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : '$-'}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Month over Month Comparison */}
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center">
+                <Calendar className="w-5 h-5 mr-2 text-purple-600" />
+                Month over Month Comparison
+              </h2>
+
+              <Button 
+                onClick={handleLoadMonthComparison}
+                disabled={isLoadingAnalytics}
+                className="w-full admin-btn-primary mb-4" 
+                data-testid="button-load-month-comparison"
+              >
+                {isLoadingAnalytics ? 'Loading...' : 'Load Month Comparison'}
+              </Button>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Current Month */}
+                <div>
+                  <h3 className="font-semibold text-gray-700 mb-3">This Month</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-600">Users</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">{monthComparison ? monthComparison.current.totalUsers.toLocaleString() : '-'}</span>
+                        {monthComparison && (
+                          <span className={`text-xs flex items-center ${monthComparison.changes.users > 0 ? 'text-green-600' : monthComparison.changes.users < 0 ? 'text-red-600' : 'text-gray-500'}`}>
+                            {monthComparison.changes.users > 0 ? <TrendingUp className="w-3 h-3" /> : monthComparison.changes.users < 0 ? <TrendingDown className="w-3 h-3" /> : null}
+                            {monthComparison.changes.users > 0 ? '+' : ''}{monthComparison.changes.users.toFixed(1)}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-600">Total Acts</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">{monthComparison ? monthComparison.current.totalActs.toLocaleString() : '-'}</span>
+                        {monthComparison && (
+                          <span className={`text-xs flex items-center ${monthComparison.changes.acts > 0 ? 'text-green-600' : monthComparison.changes.acts < 0 ? 'text-red-600' : 'text-gray-500'}`}>
+                            {monthComparison.changes.acts > 0 ? <TrendingUp className="w-3 h-3" /> : monthComparison.changes.acts < 0 ? <TrendingDown className="w-3 h-3" /> : null}
+                            {monthComparison.changes.acts > 0 ? '+' : ''}{monthComparison.changes.acts.toFixed(1)}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-600">Tehillim</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">{monthComparison ? monthComparison.current.totalTehillimCompleted.toLocaleString() : '-'}</span>
+                        {monthComparison && (
+                          <span className={`text-xs flex items-center ${monthComparison.changes.tehillim > 0 ? 'text-green-600' : monthComparison.changes.tehillim < 0 ? 'text-red-600' : 'text-gray-500'}`}>
+                            {monthComparison.changes.tehillim > 0 ? <TrendingUp className="w-3 h-3" /> : monthComparison.changes.tehillim < 0 ? <TrendingDown className="w-3 h-3" /> : null}
+                            {monthComparison.changes.tehillim > 0 ? '+' : ''}{monthComparison.changes.tehillim.toFixed(1)}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-600">Money Raised</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">{monthComparison ? `$${(monthComparison.current.moneyRaised / 100).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : '$-'}</span>
+                        {monthComparison && (
+                          <span className={`text-xs flex items-center ${monthComparison.changes.moneyRaised > 0 ? 'text-green-600' : monthComparison.changes.moneyRaised < 0 ? 'text-red-600' : 'text-gray-500'}`}>
+                            {monthComparison.changes.moneyRaised > 0 ? <TrendingUp className="w-3 h-3" /> : monthComparison.changes.moneyRaised < 0 ? <TrendingDown className="w-3 h-3" /> : null}
+                            {monthComparison.changes.moneyRaised > 0 ? '+' : ''}{monthComparison.changes.moneyRaised.toFixed(1)}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Previous Month */}
+                <div>
+                  <h3 className="font-semibold text-gray-700 mb-3">Last Month</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-600">Users</span>
+                      <span className="font-semibold">{monthComparison ? monthComparison.previous.totalUsers.toLocaleString() : '-'}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-600">Total Acts</span>
+                      <span className="font-semibold">{monthComparison ? monthComparison.previous.totalActs.toLocaleString() : '-'}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-600">Tehillim</span>
+                      <span className="font-semibold">{monthComparison ? monthComparison.previous.totalTehillimCompleted.toLocaleString() : '-'}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-600">Money Raised</span>
+                      <span className="font-semibold">{monthComparison ? `$${(monthComparison.previous.moneyRaised / 100).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : '$-'}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
           </div>
         )}
 

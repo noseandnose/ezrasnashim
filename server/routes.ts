@@ -135,6 +135,7 @@ import {
   baseParshaVortSchema,
   insertParshaVortSchema,
   insertTableInspirationSchema,
+  insertMarriageInsightSchema,
   insertNishmasTextSchema,
   insertMessagesSchema
 } from "../shared/schema";
@@ -1216,6 +1217,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Table inspiration deleted successfully" });
     } catch (error) {
       return res.status(500).json({ message: "Failed to delete table inspiration" });
+    }
+  });
+
+  // Marriage Insights routes
+  app.get("/api/marriage-insights/:date", 
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'marriage-insights' }),
+    async (req, res) => {
+      try {
+        const { date } = req.params;
+        const insight = await storage.getMarriageInsightByDate(date);
+        res.json(insight || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch marriage insight" });
+      }
+    }
+  );
+
+  app.post("/api/marriage-insights", requireAdminAuth, async (req, res) => {
+    try {
+      const validatedData = insertMarriageInsightSchema.parse(req.body);
+      const insight = await storage.createMarriageInsight(validatedData);
+      cache.clearCategory('marriage-insights');
+      res.json(insight);
+    } catch (error) {
+      console.error("Failed to create marriage insight:", error);
+      return res.status(500).json({ message: "Failed to create marriage insight" });
+    }
+  });
+
+  app.get("/api/marriage-insights", requireAdminAuth, async (req, res) => {
+    try {
+      const insights = await storage.getAllMarriageInsights();
+      res.json(insights);
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to fetch marriage insights" });
+    }
+  });
+
+  app.patch("/api/marriage-insights/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertMarriageInsightSchema.partial().parse(req.body);
+      const insight = await storage.updateMarriageInsight(id, validatedData);
+      if (!insight) {
+        return res.status(404).json({ message: "Marriage insight not found" });
+      }
+      cache.clearCategory('marriage-insights');
+      res.json(insight);
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to update marriage insight" });
+    }
+  });
+
+  app.delete("/api/marriage-insights/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteMarriageInsight(id);
+      if (!success) {
+        return res.status(404).json({ message: "Marriage insight not found" });
+      }
+      cache.clearCategory('marriage-insights');
+      res.json({ message: "Marriage insight deleted successfully" });
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to delete marriage insight" });
     }
   });
 
@@ -3598,6 +3663,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching daily stats:', error);
       return res.status(500).json({ message: "Failed to fetch daily stats" });
+    }
+  });
+
+  app.get("/api/analytics/stats/range", requireAdminAuth, async (req, res) => {
+    try {
+      // Force no caching for real-time analytics
+      res.set({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store'
+      });
+
+      const startDate = req.query.startDate as string;
+      const endDate = req.query.endDate as string;
+
+      if (!startDate || !endDate) {
+        return res.status(400).json({ message: "startDate and endDate are required" });
+      }
+
+      const rangeStats = await storage.getDateRangeStats(startDate, endDate);
+      res.json(rangeStats);
+    } catch (error) {
+      console.error('Error fetching date range stats:', error);
+      return res.status(500).json({ message: "Failed to fetch date range stats" });
+    }
+  });
+
+  app.get("/api/analytics/stats/compare", requireAdminAuth, async (req, res) => {
+    try {
+      // Force no caching for real-time analytics
+      res.set({
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store'
+      });
+
+      const period = req.query.period as 'week' | 'month';
+
+      if (!period || (period !== 'week' && period !== 'month')) {
+        return res.status(400).json({ message: "period must be 'week' or 'month'" });
+      }
+
+      const comparisonStats = await storage.getComparisonStats(period);
+      res.json(comparisonStats);
+    } catch (error) {
+      console.error('Error fetching comparison stats:', error);
+      return res.status(500).json({ message: "Failed to fetch comparison stats" });
     }
   });
 

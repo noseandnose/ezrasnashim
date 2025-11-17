@@ -2,13 +2,14 @@ import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate } from "@/hooks/use-hebrew-date";
 import { useInstallHighlight } from "@/hooks/use-install-highlight";
 import { useHomeSummary } from "@/hooks/use-home-summary";
-import { BarChart3, Info, Share2, Heart, Mail, Share, X, Menu, MessageSquare } from "lucide-react";
+import { BarChart3, Info, Share2, Heart, Mail, Share, X, Menu, MessageSquare, Search, Calendar } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
 import { useState, useEffect } from "react";
 import logoImage from "@assets/6LO_1753613081319.png";
 import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
 import MessageModal from "./modals/message-modal";
+import { SearchModal } from "./SearchModal";
 import { getLocalDateString } from "@/lib/dateUtils";
 import {
   DropdownMenu,
@@ -25,6 +26,7 @@ export default function AppHeader() {
   const { openModal } = useModalStore();
   const [showAddToHomeScreen, setShowAddToHomeScreen] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
+  const [showSearchModal, setShowSearchModal] = useState(false);
   const [hasReadMessage, setHasReadMessage] = useState(false);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
   const [clickCount, setClickCount] = useState(0);
@@ -34,7 +36,6 @@ export default function AppHeader() {
   const {
     shouldHighlight,
     markDismissed,
-    triggerInstallPrompt,
     isStandalone,
     canInstall,
     isIOS,
@@ -137,6 +138,14 @@ export default function AppHeader() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48">
                 <DropdownMenuItem
+                  onClick={() => setShowSearchModal(true)}
+                  className="cursor-pointer"
+                  data-testid="menu-item-search"
+                >
+                  <Search className="h-5 w-5 mr-2" />
+                  Search
+                </DropdownMenuItem>
+                <DropdownMenuItem
                   onClick={() => setLocation("/statistics")}
                   className="cursor-pointer"
                   data-testid="menu-item-analytics"
@@ -151,6 +160,14 @@ export default function AppHeader() {
                 >
                   <Info className="h-5 w-5 mr-2" />
                   Info
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => openModal('date-calculator-fullscreen', 'table')}
+                  className="cursor-pointer"
+                  data-testid="menu-item-date-converter"
+                >
+                  <Calendar className="h-5 w-5 mr-2" />
+                  Hebrew Date Converter
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleShare}
@@ -225,6 +242,11 @@ export default function AppHeader() {
         isOpen={showMessageModal}
         onClose={() => setShowMessageModal(false)}
         date={today}
+      />
+      
+      <SearchModal
+        isOpen={showSearchModal}
+        onClose={() => setShowSearchModal(false)}
       />
       
       {/* Easter Egg Modal */}
