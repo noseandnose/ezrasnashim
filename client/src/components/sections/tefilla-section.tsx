@@ -155,12 +155,12 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       // Gap between Shkia and Plag Hamincha - show when Maariv will be available
       return {
         title: "Maariv",
-        subtitle: `from ${times.plagHamincha} until ${times.chatzotNight}`,
+        subtitle: `from ${times.plagHamincha}`,
         modal: "maariv",
         disabled: true
       };
     } else if (now >= plagHamincha || now < alos) {
-      // Maariv time - from Plag Hamincha until Chatzot HaLyla (halachic midnight)
+      // Maariv time - Available from Plag Hamincha until next Alos, but ideally until Chatzot HaLyla
       return {
         title: "Maariv",
         subtitle: `${times.plagHamincha} - ${times.chatzotNight}`,
