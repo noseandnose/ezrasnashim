@@ -49,6 +49,11 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     staleTime: 15 * 60 * 1000,
   });
   
+  // Women's prayers queries
+  const { data: refuahPrayers } = useQuery<any[]>({ queryKey: ['/api/womens-prayers/refuah'] });
+  const { data: familyPrayers } = useQuery<any[]>({ queryKey: ['/api/womens-prayers/family'] });
+  const { data: lifePrayers } = useQuery<any[]>({ queryKey: ['/api/womens-prayers/life'] });
+  
   const searchIndex = useMemo(() => {
     const index: SearchRecord[] = [];
     
@@ -232,6 +237,72 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       action: () => openModal('life', 'tefilla')
     });
     
+    // Individual Women's Prayers - Refuah
+    if (refuahPrayers) {
+      refuahPrayers.forEach(prayer => {
+        index.push({
+          id: `womens-prayer-refuah-${prayer.id}`,
+          category: 'Tefilla',
+          title: prayer.prayerName,
+          secondaryText: prayer.description || 'Healing Prayer',
+          keywords: ['women', 'womens', 'prayer', 'refuah', 'healing', 'health', 'tefilla', prayer.prayerName].filter(Boolean),
+          modalId: 'refuah',
+          action: () => {
+            openModal('refuah', 'tefilla');
+            // Small delay to ensure modal is open before selecting prayer
+            setTimeout(() => {
+              const event = new CustomEvent('selectWomensPrayer', { detail: { prayerId: prayer.id } });
+              window.dispatchEvent(event);
+            }, 100);
+          }
+        });
+      });
+    }
+    
+    // Individual Women's Prayers - Family
+    if (familyPrayers) {
+      familyPrayers.forEach(prayer => {
+        index.push({
+          id: `womens-prayer-family-${prayer.id}`,
+          category: 'Tefilla',
+          title: prayer.prayerName,
+          secondaryText: prayer.description || 'Family Prayer',
+          keywords: ['women', 'womens', 'prayer', 'family', 'home', 'shalom', 'bayit', 'tefilla', prayer.prayerName].filter(Boolean),
+          modalId: 'family',
+          action: () => {
+            openModal('family', 'tefilla');
+            // Small delay to ensure modal is open before selecting prayer
+            setTimeout(() => {
+              const event = new CustomEvent('selectWomensPrayer', { detail: { prayerId: prayer.id } });
+              window.dispatchEvent(event);
+            }, 100);
+          }
+        });
+      });
+    }
+    
+    // Individual Women's Prayers - Life
+    if (lifePrayers) {
+      lifePrayers.forEach(prayer => {
+        index.push({
+          id: `womens-prayer-life-${prayer.id}`,
+          category: 'Tefilla',
+          title: prayer.prayerName,
+          secondaryText: prayer.description || 'Life Guidance Prayer',
+          keywords: ['women', 'womens', 'prayer', 'life', 'guidance', 'livelihood', 'parnassa', 'tefilla', prayer.prayerName, 'parashat', 'hamann', 'mann'].filter(Boolean),
+          modalId: 'life',
+          action: () => {
+            openModal('life', 'tefilla');
+            // Small delay to ensure modal is open before selecting prayer
+            setTimeout(() => {
+              const event = new CustomEvent('selectWomensPrayer', { detail: { prayerId: prayer.id } });
+              window.dispatchEvent(event);
+            }, 100);
+          }
+        });
+      });
+    }
+    
     // Tehillim - Main modal
     index.push({
       id: 'prayer-tehillim',
@@ -414,7 +485,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     }
     
     return finalIndex;
-  }, [halachaContent, chizukContent, emunaContent, minchaPrayers, maarivPrayers, morningPrayers, dailyBrochas, specialBrochas, recipeContent, marriageInsight, pirkeiAvot, openModal]);
+  }, [halachaContent, chizukContent, emunaContent, minchaPrayers, maarivPrayers, morningPrayers, dailyBrochas, specialBrochas, recipeContent, marriageInsight, pirkeiAvot, refuahPrayers, familyPrayers, lifePrayers, openModal]);
   
   // Build MiniSearch index for fuzzy matching
   const miniSearchIndex = useMemo(() => {
