@@ -123,13 +123,13 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     
     const alos = parseTimeToday(times.alosHashachar);
     const chatzos = parseTimeToday(times.chatzos);
+    const chatzotNight = parseTimeToday(times.chatzotNight);
     const minchaGedola = parseTimeToday(times.minchaGedolah);
     const shkia = parseTimeToday(times.shkia);
     const plagHamincha = parseTimeToday(times.plagHamincha);
-    // Note: We still use sunrise for next day calculation in the future if needed
     
     // Handle null times gracefully
-    if (!alos || !chatzos || !minchaGedola || !shkia || !plagHamincha) {
+    if (!alos || !chatzos || !chatzotNight || !minchaGedola || !shkia || !plagHamincha) {
       return {
         title: "Shacharis",
         subtitle: "Times unavailable",
@@ -138,7 +138,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     }
     
     if (now >= alos && now < chatzos) {
-      // Shacharis time - from Alos Hashachar until Chatzos
+      // Shacharis time - from Alos Hashachar until Chatzos (solar noon)
       return {
         title: "Shacharis",
         subtitle: `${times.alosHashachar} - ${times.chatzos}`,
@@ -155,15 +155,15 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       // Gap between Shkia and Plag Hamincha - show when Maariv will be available
       return {
         title: "Maariv",
-        subtitle: `from ${times.plagHamincha} until ${times.alosHashachar}`,
+        subtitle: `from ${times.plagHamincha} until ${times.chatzotNight}`,
         modal: "maariv",
         disabled: true
       };
     } else if (now >= plagHamincha || now < alos) {
-      // Maariv time - from Plag Hamincha until next Alos Hashachar
+      // Maariv time - from Plag Hamincha until Chatzot HaLyla (halachic midnight)
       return {
         title: "Maariv",
-        subtitle: `${times.plagHamincha} - ${times.alosHashachar}`,
+        subtitle: `${times.plagHamincha} - ${times.chatzotNight}`,
         modal: "maariv"
       };
     } else {
