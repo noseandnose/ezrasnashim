@@ -250,7 +250,7 @@ export default function TableSection() {
             <p className={`platypi-regular text-xs leading-relaxed ${
               isModalComplete('marriage-insights') ? 'text-black/60' : 'text-black/60'
             }`} data-testid="text-marriage-insights-subtitle">
-              {isModalComplete('marriage-insights') ? 'Completed' : 'Daily wisdom'}
+              {isModalComplete('marriage-insights') ? 'Completed' : 'by Devora Levy'}
             </p>
           </button>
         </div>
