@@ -534,6 +534,7 @@ export interface JewishTimes {
   minchaKetanah: string;
   alosHashachar: string;
   chatzos: string;
+  chatzotNight: string;
   plagHamincha: string;
   candleLighting?: string;
   havdalah?: string;
