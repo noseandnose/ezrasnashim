@@ -77,7 +77,7 @@ export default function Statistics() {
     queryKey: [`/api/analytics/stats/today?date=${analyticsToday}`],
     staleTime: 0, // Never cache - always fresh
     gcTime: 0, // Don't keep in memory
-    refetchInterval: 30000, // Auto-refresh every 30 seconds
+    refetchInterval: 120000, // Auto-refresh every 2 minutes (reduced from 30s for performance)
   });
 
   // Fetch weekly stats
@@ -85,7 +85,7 @@ export default function Statistics() {
     queryKey: [`/api/analytics/stats/week?startDate=${weekStartDate}`],
     staleTime: 0, // Never cache - always fresh
     gcTime: 0, // Don't keep in memory
-    refetchInterval: 30000, // Auto-refresh every 30 seconds
+    refetchInterval: 120000, // Auto-refresh every 2 minutes (reduced from 30s for performance)
   });
 
   // Fetch monthly stats
@@ -93,7 +93,7 @@ export default function Statistics() {
     queryKey: ["/api/analytics/stats/month"],
     staleTime: 0, // Never cache - always fresh
     gcTime: 0, // Don't keep in memory
-    refetchInterval: 30000, // Auto-refresh every 30 seconds
+    refetchInterval: 120000, // Auto-refresh every 2 minutes (reduced from 30s for performance)
   });
 
   // Fetch total stats
@@ -101,7 +101,7 @@ export default function Statistics() {
     queryKey: ["/api/analytics/stats/total"],
     staleTime: 0, // Never cache - always fresh
     gcTime: 0, // Don't keep in memory
-    refetchInterval: 30000, // Auto-refresh every 30 seconds
+    refetchInterval: 120000, // Auto-refresh every 2 minutes (reduced from 30s for performance)
   });
 
   // Get current data based on selected period
@@ -263,8 +263,8 @@ export default function Statistics() {
       totalRaised: number;
     }>({
       queryKey: [`/api/analytics/community-impact?period=${period}`],
-      staleTime: 5000, // 5 seconds
-      refetchInterval: 30000, // Refresh every 30 seconds
+      staleTime: 60000, // 1 minute
+      refetchInterval: 120000, // Refresh every 2 minutes (reduced from 30s for performance)
     });
 
     return (

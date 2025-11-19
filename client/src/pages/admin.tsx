@@ -251,7 +251,7 @@ export default function Admin() {
       }
     },
     enabled: isAuthenticated && activeTab === 'notifications',
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 120000, // Refresh every 2 minutes (reduced from 30s for performance)
   });
 
   // Parsha Vorts API calls

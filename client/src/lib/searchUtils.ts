@@ -45,39 +45,68 @@ export function createSearchIndex(records: SearchRecord[]): MiniSearch<SearchDoc
     }
   });
   
-  // Prepare documents for indexing
+  // Prepare documents for indexing with error handling
   const documents: SearchDocument[] = records.map(record => {
-    const titleNormalized = containsHebrew(record.title) 
-      ? normalizeHebrew(record.title)
-      : record.title.toLowerCase();
-    
-    const titleTransliterated = containsHebrew(record.title)
-      ? transliterateHebrew(record.title)
-      : '';
-    
-    const secondaryNormalized = record.secondaryText && containsHebrew(record.secondaryText)
-      ? normalizeHebrew(record.secondaryText)
-      : (record.secondaryText || '').toLowerCase();
-    
-    const secondaryTransliterated = record.secondaryText && containsHebrew(record.secondaryText)
-      ? transliterateHebrew(record.secondaryText)
-      : '';
-    
-    // Expand keywords with synonyms and transliterations
-    const expandedKeywords = record.keywords.flatMap(kw => expandSearchTerm(kw));
-    const keywordsNormalized = expandedKeywords
-      .map(kw => containsHebrew(kw) ? normalizeHebrew(kw) : kw.toLowerCase())
-      .join(' ');
-    
-    return {
-      id: record.id,
-      title: titleNormalized,
-      titleTransliterated,
-      secondary: secondaryNormalized,
-      secondaryTransliterated,
-      keywords: keywordsNormalized,
-      category: record.category.toLowerCase()
-    };
+    try {
+      const titleNormalized = containsHebrew(record.title) 
+        ? normalizeHebrew(record.title)
+        : record.title.toLowerCase();
+      
+      const titleTransliterated = containsHebrew(record.title)
+        ? transliterateHebrew(record.title)
+        : '';
+      
+      const secondaryNormalized = record.secondaryText && containsHebrew(record.secondaryText)
+        ? normalizeHebrew(record.secondaryText)
+        : (record.secondaryText || '').toLowerCase();
+      
+      const secondaryTransliterated = record.secondaryText && containsHebrew(record.secondaryText)
+        ? transliterateHebrew(record.secondaryText)
+        : '';
+      
+      // Expand keywords with synonyms and transliterations - handle errors
+      const expandedKeywords = record.keywords.flatMap(kw => {
+        try {
+          return expandSearchTerm(kw);
+        } catch (err) {
+          console.warn(`Failed to expand keyword: ${kw}`, err);
+          return [kw]; // Return original keyword if expansion fails
+        }
+      });
+      
+      const keywordsNormalized = expandedKeywords
+        .map(kw => {
+          try {
+            return containsHebrew(kw) ? normalizeHebrew(kw) : kw.toLowerCase();
+          } catch (err) {
+            console.warn(`Failed to normalize keyword: ${kw}`, err);
+            return kw.toLowerCase(); // Fallback to simple lowercase
+          }
+        })
+        .join(' ');
+      
+      return {
+        id: record.id,
+        title: titleNormalized,
+        titleTransliterated,
+        secondary: secondaryNormalized,
+        secondaryTransliterated,
+        keywords: keywordsNormalized,
+        category: record.category.toLowerCase()
+      };
+    } catch (error) {
+      console.error(`Failed to process search record: ${record.id}`, error);
+      // Return minimal valid document if processing fails
+      return {
+        id: record.id,
+        title: (record.title || '').toLowerCase(),
+        titleTransliterated: '',
+        secondary: (record.secondaryText || '').toLowerCase(),
+        secondaryTransliterated: '',
+        keywords: record.keywords.join(' ').toLowerCase(),
+        category: (record.category || 'other').toLowerCase()
+      };
+    }
   });
   
   // Index all documents

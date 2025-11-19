@@ -169,7 +169,7 @@ export default function TorahSection({}: TorahSectionProps) {
     {
       id: 'halacha',
       icon: Book,
-      title: 'Learn Shabbas',
+      title: 'Learn Shabbos',
       subtitle: 'Halachic insights',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
@@ -347,7 +347,7 @@ export default function TorahSection({}: TorahSectionProps) {
                   {id === 'halacha' ? (
                     <img 
                       src={customCandleIcon} 
-                      alt="Learn Shabbas" 
+                      alt="Learn Shabbos" 
                       className="w-[18px] h-[18px] object-contain"
                     />
                   ) : (
