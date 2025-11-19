@@ -35,7 +35,7 @@ export default function UpdateNotification() {
   };
 
   return (
-    <div className={`fixed top-0 left-0 right-0 ${updateInfo?.isCritical ? 'bg-gradient-to-r from-rose-500 to-red-600' : 'bg-gradient-to-r from-blush to-peach'} text-white shadow-lg z-50 animate-in slide-in-from-top duration-300`}>
+    <div className={`fixed top-0 left-0 right-0 ${updateInfo?.isCritical ? 'bg-gradient-to-r from-purple-500 to-pink-500' : 'bg-gradient-to-r from-blush to-peach'} text-white shadow-lg z-50 animate-in slide-in-from-top duration-300`}>
       <div className="max-w-4xl mx-auto p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 flex-1">
@@ -52,7 +52,7 @@ export default function UpdateNotification() {
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-sm">
-                  {updateInfo?.isCritical ? '⚡ Critical Update Required' : '🚀 New Update Available'}
+                  {updateInfo?.isCritical ? '✨ Important Update Available' : '🚀 New Update Available'}
                 </h3>
                 {countdown !== null && (
                   <div className="flex items-center gap-1 bg-white/20 px-2 py-0.5 rounded text-xs">
@@ -63,7 +63,7 @@ export default function UpdateNotification() {
               </div>
               <p className="text-xs opacity-90">
                 {updateInfo?.isCritical
-                  ? 'This update contains critical security fixes and will auto-refresh soon'
+                  ? 'We have an important update ready. Your app will refresh automatically in a few minutes.'
                   : 'Tap refresh to get the latest features & improvements'}
               </p>
               {currentVersion && (
