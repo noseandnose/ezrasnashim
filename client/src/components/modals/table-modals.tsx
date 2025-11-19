@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { getLocalDateString } from "@/lib/dateUtils";
 import { Button } from "@/components/ui/button";
-import { useModalStore, useModalCompletionStore } from "@/lib/types";
+import { useModalStore, useModalCompletionStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Volume2, Maximize2 } from "lucide-react";
@@ -12,11 +12,13 @@ import { formatThankYouMessageFull } from "@/lib/link-formatter";
 import { LazyImage } from "@/components/ui/lazy-image";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { FullscreenImageModal } from "@/components/modals/fullscreen-image-modal";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function TableModals() {
   const { activeModal, closeModal } = useModalStore();
   const markModalComplete = useModalCompletionStore(state => state.markModalComplete);
   const isModalComplete = useModalCompletionStore(state => state.isModalComplete);
+  const { completeTask } = useDailyCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { trackFeatureUsage } = useTrackFeatureUsage();
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
@@ -50,16 +52,40 @@ export default function TableModals() {
   };
 
   // Separate handler for marriage insights (tracks as feature usage, not mitzvah)
-  const handleMarriageInsightComplete = () => {
-    trackFeatureUsage('marriage-insights');
-    markModalComplete('marriage-insights');
-    
-    // Reset fullscreen content state
-    if (fullscreenContent.isOpen) {
-      setFullscreenContent({ isOpen: false, title: '', content: null });
+  const handleMarriageInsightComplete = async () => {
+    try {
+      // Track feature usage in Google Analytics
+      trackFeatureUsage('marriage-insights');
+      
+      // Log to backend for analytics
+      await apiRequest('POST', '/api/feature-usage', {
+        featureName: 'marriage-insights',
+        category: 'torah'
+      });
+      
+      // Mark as complete in local storage
+      markModalComplete('marriage-insights');
+      
+      // Complete the Torah daily task
+      completeTask('torah');
+      
+      // Reset fullscreen content state
+      if (fullscreenContent.isOpen) {
+        setFullscreenContent({ isOpen: false, title: '', content: null });
+      }
+      
+      closeModal();
+      
+      // Navigate to home and scroll to progress to show flower growth
+      window.location.hash = '#/?section=home&scrollToProgress=true';
+    } catch (error) {
+      console.error('Error completing marriage insights:', error);
+      // Still mark as complete locally even if backend logging fails
+      markModalComplete('marriage-insights');
+      completeTask('torah');
+      closeModal();
+      window.location.hash = '#/?section=home&scrollToProgress=true';
     }
-    
-    closeModal();
   };
   
 

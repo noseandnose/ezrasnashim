@@ -201,6 +201,9 @@ export default function Statistics() {
     // Other
     donate: "Donations",
     meditation: "Meditations",
+    
+    // Feature usage (with feature: prefix)
+    "feature:marriage-insights": "Marriage Insights",
   };
 
   const modalTypeIcons: Record<string, any> = {
@@ -247,6 +250,9 @@ export default function Statistics() {
     // Other
     donate: HandCoins,
     meditation: Brain,
+    
+    // Feature usage (with feature: prefix)
+    "feature:marriage-insights": Heart,
   };
 
   // Financial Stats Component
