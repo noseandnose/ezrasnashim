@@ -265,9 +265,9 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       // Progress data updated
       return data;
     },
-    staleTime: 0,               // NO caching - keep real-time for global chain
+    staleTime: 60000,           // Cache for 1 minute
     refetchOnWindowFocus: true, // Refetch when users return to app
-    refetchInterval: 30000,     // Check every 30 seconds for chain updates
+    refetchInterval: 180000,    // Check every 3 minutes (reduced from 30s for performance)
     retry: 3,
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
@@ -345,7 +345,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       }
     },
     queryKey: ['/api/tehillim/names'],
-    refetchInterval: 60000, // Refresh every minute
+    refetchInterval: 180000, // Refresh every 3 minutes (reduced from 1min for performance)
     retry: 3, // Retry failed requests 3 times
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });

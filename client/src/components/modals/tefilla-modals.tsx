@@ -1556,8 +1556,8 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
       if (!response.ok) throw new Error('Failed to fetch progress');
       return response.json();
     },
-    staleTime: 30000, // 30 seconds
-    refetchInterval: 60000 // Refetch every minute
+    staleTime: 60000, // 1 minute
+    refetchInterval: 180000 // Refetch every 3 minutes (reduced from 1min for performance)
   });
 
   // Lock onto current perek when component mounts to prevent auto-refresh
@@ -1590,8 +1590,8 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
       if (!response.ok) throw new Error('Failed to fetch current name');
       return response.json();
     },
-    staleTime: 60000, // 1 minute
-    refetchInterval: 30000 // Refetch every 30 seconds
+    staleTime: 120000, // 2 minutes
+    refetchInterval: 180000 // Refetch every 3 minutes (reduced from 30s for performance)
   });
 
   // Define mutations before any conditional returns (hooks rule)

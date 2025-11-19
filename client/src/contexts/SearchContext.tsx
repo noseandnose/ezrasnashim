@@ -32,27 +32,57 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     staleTime: 15 * 60 * 1000,
   });
   
-  // Prayer queries
-  const { data: minchaPrayers } = useQuery<any[]>({ queryKey: ['/api/mincha/prayers'] });
-  const { data: maarivPrayers } = useQuery<any[]>({ queryKey: ['/api/maariv/prayers'] });
-  const { data: morningPrayers } = useQuery<any[]>({ queryKey: ['/api/morning/prayers'] });
-  
-  // Brochas queries
-  const { data: dailyBrochas } = useQuery<any[]>({ queryKey: ['/api/brochas/daily'] });
-  const { data: specialBrochas } = useQuery<any[]>({ queryKey: ['/api/brochas/special'] });
-  
-  // Life page queries
-  const { data: recipeContent } = useQuery<any>({ queryKey: ['/api/table/recipe'] });
-  const { data: pirkeiAvot } = useQuery<any>({ queryKey: ['/api/pirkei-avot'] });
-  const { data: marriageInsight } = useQuery<any>({ 
-    queryKey: [`/api/marriage-insights/${today}`],
-    staleTime: 15 * 60 * 1000,
+  // Prayer queries - curated content updated via admin, cache for 12 hours
+  const { data: minchaPrayers } = useQuery<any[]>({ 
+    queryKey: ['/api/mincha/prayers'],
+    staleTime: 12 * 60 * 60 * 1000, // 12 hours (admin can update)
+  });
+  const { data: maarivPrayers } = useQuery<any[]>({ 
+    queryKey: ['/api/maariv/prayers'],
+    staleTime: 12 * 60 * 60 * 1000, // 12 hours (admin can update)
+  });
+  const { data: morningPrayers } = useQuery<any[]>({ 
+    queryKey: ['/api/morning/prayers'],
+    staleTime: 12 * 60 * 60 * 1000, // 12 hours (admin can update)
   });
   
-  // Women's prayers queries
-  const { data: refuahPrayers } = useQuery<any[]>({ queryKey: ['/api/womens-prayers/refuah'] });
-  const { data: familyPrayers } = useQuery<any[]>({ queryKey: ['/api/womens-prayers/family'] });
-  const { data: lifePrayers } = useQuery<any[]>({ queryKey: ['/api/womens-prayers/life'] });
+  // Brochas queries - curated content updated via admin, cache for 12 hours
+  const { data: dailyBrochas } = useQuery<any[]>({ 
+    queryKey: ['/api/brochas/daily'],
+    staleTime: 12 * 60 * 60 * 1000, // 12 hours (admin can update)
+  });
+  const { data: specialBrochas } = useQuery<any[]>({ 
+    queryKey: ['/api/brochas/special'],
+    staleTime: 12 * 60 * 60 * 1000, // 12 hours (admin can update)
+  });
+  
+  // Life page queries
+  const { data: recipeContent } = useQuery<any>({ 
+    queryKey: ['/api/table/recipe'],
+    staleTime: 15 * 60 * 1000, // 15 minutes
+  });
+  const { data: pirkeiAvot } = useQuery<any>({ 
+    queryKey: ['/api/pirkei-avot'],
+    staleTime: 12 * 60 * 60 * 1000, // 12 hours (admin can update)
+  });
+  const { data: marriageInsight } = useQuery<any>({ 
+    queryKey: [`/api/marriage-insights/${today}`],
+    staleTime: 15 * 60 * 1000, // 15 minutes
+  });
+  
+  // Women's prayers queries - curated content updated via admin, cache for 12 hours
+  const { data: refuahPrayers } = useQuery<any[]>({ 
+    queryKey: ['/api/womens-prayers/refuah'],
+    staleTime: 12 * 60 * 60 * 1000, // 12 hours (admin can update)
+  });
+  const { data: familyPrayers } = useQuery<any[]>({ 
+    queryKey: ['/api/womens-prayers/family'],
+    staleTime: 12 * 60 * 60 * 1000, // 12 hours (admin can update)
+  });
+  const { data: lifePrayers } = useQuery<any[]>({ 
+    queryKey: ['/api/womens-prayers/life'],
+    staleTime: 12 * 60 * 60 * 1000, // 12 hours (admin can update)
+  });
   
   const searchIndex = useMemo(() => {
     const index: SearchRecord[] = [];
@@ -487,14 +517,33 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     return finalIndex;
   }, [halachaContent, chizukContent, emunaContent, minchaPrayers, maarivPrayers, morningPrayers, dailyBrochas, specialBrochas, recipeContent, marriageInsight, pirkeiAvot, refuahPrayers, familyPrayers, lifePrayers, openModal]);
   
-  // Build MiniSearch index for fuzzy matching
+  // Build MiniSearch index for fuzzy matching with enhanced error handling
   const miniSearchIndex = useMemo(() => {
     try {
-      if (searchIndex.length === 0) return null;
-      return createSearchIndex(searchIndex);
+      if (searchIndex.length === 0) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[SearchContext] Search index is empty, skipping MiniSearch creation');
+        }
+        return null;
+      }
+      
+      const index = createSearchIndex(searchIndex);
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[SearchContext] MiniSearch index created successfully with', searchIndex.length, 'records');
+      }
+      
+      return index;
     } catch (error) {
       console.error('[SearchContext] Failed to create MiniSearch index:', error);
-      return null;
+      // Log the error details for debugging
+      if (error instanceof Error) {
+        console.error('[SearchContext] Error details:', {
+          message: error.message,
+          stack: error.stack
+        });
+      }
+      return null; // Gracefully degrade - search will use simple fallback
     }
   }, [searchIndex]);
   
