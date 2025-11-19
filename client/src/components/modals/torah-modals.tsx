@@ -49,7 +49,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
       
       switch (activeModal) {
         case 'halacha':
-          title = 'Learn Shabbas';
+          title = 'Learn Shabbos';
           contentType = 'halacha';
           break;
         case 'featured':

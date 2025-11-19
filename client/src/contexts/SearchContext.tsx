@@ -92,7 +92,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       index.push({
         id: 'torah-halacha',
         category: 'Torah',
-        title: 'Learn Shabbas',
+        title: 'Learn Shabbos',
         secondaryText: halachaContent.englishTitle || halachaContent.title || 'Halachic insights',
         keywords: ['halacha', 'הלכה', 'law', 'torah', 'תורה', 'daily', 'learn', 'shabbas', 'shabbat', 'שבת', 'learn shabbas', halachaContent.englishTitle, halachaContent.hebrewTitle, halachaContent.title].filter(Boolean) as string[],
         modalId: 'halacha',
