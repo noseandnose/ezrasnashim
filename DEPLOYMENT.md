@@ -50,13 +50,17 @@ Set these when deploying urgent fixes:
 
 ```bash
 CRITICAL_UPDATE=true
-RELEASE_NOTES="Fixed critical security issue. Please update immediately."
+RELEASE_NOTES="Updated prayer times to show correct midnight for Maariv. Your app will refresh in a few minutes to ensure you have the most accurate zmanim."
 ```
 
+**In Replit:** Add these as Secrets in your environment settings, then restart the server.
+
 This will:
-- Show red update banner instead of default
+- Show friendly purple/pink update banner with sparkles ✨
+- Display "Important Update Available" (warm and friendly)
 - Auto-refresh after 5-minute countdown
 - Prevent dismissal of update prompt
+- Show your custom release notes to explain the update
 
 ## Testing Updates Locally
 
