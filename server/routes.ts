@@ -3448,7 +3448,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { eventType, eventData, sessionId } = req.body;
       
       // Only allow completion events, reject high-volume events like page_view
-      const allowedEvents = ['modal_complete', 'tehillim_complete', 'name_prayed', 'tehillim_book_complete', 'tzedaka_completion', 'meditation_complete'];
+      const allowedEvents = ['modal_complete', 'tehillim_complete', 'name_prayed', 'tehillim_book_complete', 'tzedaka_completion', 'meditation_complete', 'feature_usage'];
       if (!allowedEvents.includes(eventType)) {
         return res.status(400).json({ message: "Event type not tracked" });
       }
@@ -3467,6 +3467,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error tracking analytics event:', error);
       return res.status(500).json({ message: "Failed to track event" });
+    }
+  });
+
+  // Feature usage tracking endpoint
+  app.post("/api/feature-usage", async (req, res) => {
+    try {
+      const { featureName, category } = req.body;
+      
+      if (!featureName) {
+        return res.status(400).json({ message: "Feature name required" });
+      }
+      
+      const event = await storage.trackEvent({
+        eventType: 'feature_usage',
+        eventData: {
+          feature: featureName,
+          category: category || 'general'
+        },
+        sessionId: null
+      });
+      
+      res.json({ success: true, event });
+    } catch (error) {
+      console.error('Error tracking feature usage:', error);
+      return res.status(500).json({ message: "Failed to track feature usage" });
     }
   });
 
