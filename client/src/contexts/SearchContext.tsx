@@ -416,37 +416,6 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     
     // Note: Table Inspirations are admin-only, skipping from search
     
-    // Special Women's Prayer Categories
-    index.push({
-      id: 'prayer-refuah',
-      category: 'Personal Prayers',
-      title: 'Refuah Prayers',
-      secondaryText: 'Prayers for healing',
-      keywords: ['refuah', 'רפואה', 'healing', 'health', 'prayer', 'women', 'personal'],
-      modalId: 'refuah',
-      action: () => openModal('refuah', 'tefilla')
-    });
-    
-    index.push({
-      id: 'prayer-family',
-      category: 'Personal Prayers',
-      title: 'Family Prayers',
-      secondaryText: 'Prayers for family',
-      keywords: ['family', 'משפחה', 'children', 'ילדים', 'prayer', 'women', 'personal', 'shidduch', 'שידוך', 'marriage'],
-      modalId: 'family',
-      action: () => openModal('family', 'tefilla')
-    });
-    
-    index.push({
-      id: 'prayer-life',
-      category: 'Personal Prayers',
-      title: 'Life Prayers',
-      secondaryText: 'Prayers for life guidance',
-      keywords: ['life', 'חיים', 'parnasa', 'parnassa', 'פרנסה', 'livelihood', 'success', 'הצלחה', 'prayer', 'women', 'personal', 'guidance'],
-      modalId: 'life',
-      action: () => openModal('life', 'tefilla')
-    });
-    
     // Additional features and tools
     const fixedItems: SearchRecord[] = [
       {
