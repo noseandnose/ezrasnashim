@@ -1784,6 +1784,17 @@ export class DatabaseStorage implements IStorage {
           modalCompletions[modalType] = (modalCompletions[modalType] || 0) + 1;
         }
       });
+    
+    // Count feature usage events
+    todayEvents
+      .filter(e => e.eventType === 'feature_usage')
+      .forEach(e => {
+        const featureName = (e.eventData as any)?.feature || 'unknown';
+        if(featureName != 'unknown'){
+          // Use 'feature:' prefix to distinguish from modal completions
+          modalCompletions[`feature:${featureName}`] = (modalCompletions[`feature:${featureName}`] || 0) + 1;
+        }
+      });
 
     // IMPORTANT: Fix global chain analytics counting
     // The problem: older global chain completions only have tehillim_complete events, 
