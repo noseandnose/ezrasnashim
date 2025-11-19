@@ -943,23 +943,23 @@ export default function TableModals() {
         {fullscreenContent.contentType === 'recipe' ? (
           recipeContent && (
             <div className="space-y-4">
+              {/* Recipe Image - Full Width, Outside Card */}
+              {recipeContent.imageUrl && (
+                <div className="w-full -mx-4 mb-4 overflow-hidden">
+                  <LazyImage 
+                    src={recipeContent.imageUrl} 
+                    alt={recipeContent.title || "Recipe"} 
+                    className="w-full h-80 object-cover cursor-pointer"
+                    onClick={() => handleImageTap(recipeContent.imageUrl!)}
+                  />
+                </div>
+              )}
+              
               <div className="bg-white rounded-2xl p-6 border border-blush/10">
                 {recipeContent.title && (
                   <h3 className="platypi-bold text-lg text-black text-center mb-4">
                     {recipeContent.title}
                   </h3>
-                )}
-                
-                {/* Recipe Image */}
-                {recipeContent.imageUrl && (
-                  <div className="w-full rounded-lg overflow-hidden mb-4 bg-gray-50 flex items-center justify-center">
-                    <LazyImage 
-                      src={recipeContent.imageUrl} 
-                      alt={recipeContent.title || "Recipe"} 
-                      className="w-full h-80 object-contain cursor-pointer"
-                      onClick={() => handleImageTap(recipeContent.imageUrl!)}
-                    />
-                  </div>
                 )}
                 
                 {/* Recipe Description */}
