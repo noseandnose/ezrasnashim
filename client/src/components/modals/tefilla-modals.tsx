@@ -1995,7 +1995,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     const times = jewishTimesQuery.data;
     return (
       <p className="text-xs text-black">
-        It is better to daven between Tzeitz {times.tzaitHakochavim} and Chatsos Halyla {times.chatzos}.
+        It is better to daven between Tzeitz {times.tzaitHakochavim} and Chatsos Halyla {times.chatzotNight}.
       </p>
     );
   };
