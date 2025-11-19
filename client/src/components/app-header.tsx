@@ -117,11 +117,10 @@ export default function AppHeader() {
 
   return (
     <>
-      <header className="fixed left-0 right-0 bg-gradient-soft px-3 border-0 shadow-none z-40" style={{ 
-        top: '-100px',
-        paddingTop: `calc(100px + var(--safe-area-top) + 0.625rem)`, 
+      <header className="header-extended fixed top-0 left-0 right-0 bg-gradient-soft px-3 border-0 shadow-none z-40" style={{ 
+        paddingTop: `calc(var(--safe-area-top) + 0.625rem)`, 
         paddingBottom: '0.625rem',
-        minHeight: 'calc(100px + var(--header-total-height))'
+        minHeight: 'var(--header-total-height)'
       }}>
         <div className="flex items-center px-2" style={{ minHeight: 'var(--header-row-height)' }}>
           <div className="flex items-center gap-1 flex-1">
