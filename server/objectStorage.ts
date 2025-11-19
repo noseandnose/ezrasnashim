@@ -254,7 +254,11 @@ export class ObjectStorageService {
           
           // Return CDN URL if available, otherwise return local path
           if (this.cdnBaseUrl) {
-            return `${this.cdnBaseUrl}/${UPLOAD_DIR}/${entityId}`;
+            // Ensure CDN URL has https:// protocol
+            const cdnUrl = this.cdnBaseUrl.startsWith('http') 
+              ? this.cdnBaseUrl 
+              : `https://${this.cdnBaseUrl}`;
+            return `${cdnUrl}/${UPLOAD_DIR}/${entityId}`;
           }
           return `/objects/${entityId}`;
         }
@@ -263,8 +267,9 @@ export class ObjectStorageService {
       }
     }
     
-    // If it's already a CDN URL, return as-is
-    if (this.cdnBaseUrl && rawPath.startsWith(this.cdnBaseUrl)) {
+    // If it's already a CDN URL, return as-is (check both with and without protocol)
+    const cdnBaseWithoutProtocol = this.cdnBaseUrl?.replace(/^https?:\/\//, '');
+    if (this.cdnBaseUrl && (rawPath.startsWith(this.cdnBaseUrl) || rawPath.startsWith(cdnBaseWithoutProtocol || ''))) {
       return rawPath;
     }
 
@@ -302,7 +307,11 @@ export class ObjectStorageService {
     // Return normalized path (CDN URL if available)
     const entityId = objectKey.replace(`${UPLOAD_DIR}/`, "");
     if (this.cdnBaseUrl) {
-      return `${this.cdnBaseUrl}/${UPLOAD_DIR}/${entityId}`;
+      // Ensure CDN URL has https:// protocol
+      const cdnUrl = this.cdnBaseUrl.startsWith('http') 
+        ? this.cdnBaseUrl 
+        : `https://${this.cdnBaseUrl}`;
+      return `${cdnUrl}/${UPLOAD_DIR}/${entityId}`;
     }
     
     return `/objects/${entityId}`;
