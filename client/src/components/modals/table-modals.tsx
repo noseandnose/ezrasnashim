@@ -945,7 +945,7 @@ export default function TableModals() {
             <div className="space-y-4">
               {/* Recipe Image - Full Width, Outside Card */}
               {recipeContent.imageUrl && (
-                <div className="w-full -mx-4 mb-4 overflow-hidden">
+                <div className="relative w-screen -ml-4 mb-4 overflow-hidden" style={{ left: '50%', right: '50%', marginLeft: '-50vw', marginRight: '-50vw' }}>
                   <LazyImage 
                     src={recipeContent.imageUrl} 
                     alt={recipeContent.title || "Recipe"} 
