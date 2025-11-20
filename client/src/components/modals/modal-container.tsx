@@ -10,6 +10,7 @@ import SponsorDetailsModal from "./sponsor-details-modal";
 import { CommunityImpactModal } from "./community-impact-modal";
 import { EventsModal } from "./events-modal";
 import MeditationModals from "./meditation-modals";
+import ParshaVortModal from "./parsha-vort-modal";
 import { useModalStore } from "@/lib/types";
 
 interface ModalContainerProps {
@@ -28,6 +29,7 @@ export default function ModalContainer({ onSectionChange }: ModalContainerProps)
       <TzedakaModals />
       <ShopModals />
       <MeditationModals />
+      <ParshaVortModal />
       {activeModal === 'congratulations' && <CongratulationsModal />}
       {activeModal === 'about' && <AboutModal />}
       {activeModal === 'sponsor-details' && <SponsorDetailsModal />}

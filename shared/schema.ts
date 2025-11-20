@@ -552,13 +552,8 @@ export const baseParshaVortSchema = createInsertSchema(parshaVorts).omit({
   createdAt: true,
 });
 
-// Insert schema with refinement - used for creating new vorts
-export const insertParshaVortSchema = baseParshaVortSchema.refine(data => {
-  // Ensure at least one media URL (audio or video) is provided
-  return data.audioUrl || data.videoUrl;
-}, {
-  message: "Either audioUrl or videoUrl must be provided"
-});
+// Insert schema - allows text-only, audio-only, video-only, or any combination
+export const insertParshaVortSchema = baseParshaVortSchema;
 
 export const insertMarriageInsightSchema = createInsertSchema(marriageInsights).omit({
   id: true,
