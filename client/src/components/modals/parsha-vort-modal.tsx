@@ -10,7 +10,7 @@ import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { BookOpen } from "lucide-react";
 
 export default function ParshaVortModal() {
-  const { activeModal, closeModal, openModal } = useModalStore();
+  const { activeModal, closeModal, openModal, selectedParshaVortId } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
@@ -24,7 +24,15 @@ export default function ParshaVortModal() {
     enabled: isOpen,
     staleTime: 60 * 60 * 1000,
     gcTime: 4 * 60 * 60 * 1000,
-    select: (data) => data && data[0]
+    select: (data) => {
+      if (!data || !Array.isArray(data)) return null;
+      // If a specific parsha vort ID is selected, find that one
+      if (selectedParshaVortId) {
+        return data.find((vort: any) => vort.id === selectedParshaVortId) || data[0];
+      }
+      // Otherwise return the first one
+      return data[0];
+    }
   });
 
   const handleComplete = () => {
