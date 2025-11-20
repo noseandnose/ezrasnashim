@@ -193,10 +193,12 @@ export default function ParshaVortModal() {
                   </span>
                 </div>
 
-                {/* Content Preview */}
+                {/* Content - Full text if no audio/video, preview otherwise */}
                 {parshaVort.content && (
                   <div className="bg-white/80 rounded-2xl p-4">
-                    <div className="koren-siddur-english text-sm leading-relaxed text-black line-clamp-4">
+                    <div className={`koren-siddur-english text-sm leading-relaxed text-black ${
+                      parshaVort.audioUrl || parshaVort.videoUrl ? 'line-clamp-4' : ''
+                    }`}>
                       {parshaVort.content}
                     </div>
                   </div>
