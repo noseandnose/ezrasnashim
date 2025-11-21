@@ -173,7 +173,9 @@ export default function App() {
   // When app resumes from background, invalidate critical queries
   useEffect(() => {
     const handleVisibilityChange = () => {
+      console.log('[Visibility] Change detected, hidden:', document.hidden);
       if (!document.hidden) {
+        console.log('[Visibility] App resumed from background');
         // App is now visible - invalidate critical queries to fetch fresh data
         // This prevents stale state when app resumes from long background periods
         const today = getLocalDateString();
@@ -191,19 +193,28 @@ export default function App() {
           const hasRadixModal = document.querySelector('[role="dialog"][data-state="open"]');
           const hasFullscreenModal = document.querySelector('[data-fullscreen-modal]');
           
+          console.log('[Visibility] Modal check - Radix:', !!hasRadixModal, 'Fullscreen:', !!hasFullscreenModal);
+          
+          const scrollContainer = document.querySelector('[data-scroll-lock-target]') as HTMLElement 
+            ?? document.querySelector('.content-area') as HTMLElement;
+          
+          console.log('[Visibility] Scroll container found:', !!scrollContainer);
+          if (scrollContainer) {
+            console.log('[Visibility] Scroll container pointer-events before:', scrollContainer.style.pointerEvents);
+          }
+          
           if (!hasRadixModal && !hasFullscreenModal) {
+            console.log('[Visibility] No modals open - running reset');
             // No modals actually open - force reset scroll locks from fullscreen modal system
             // The fullscreen modal uses requestAnimationFrame for cleanup, which doesn't run
             // when the app is backgrounded, leaving pointer-events: none stuck on scroll container
             forceResetScrollLock();
             
             // Also clear any other potential pointer-event locks
-            const scrollContainer = document.querySelector('[data-scroll-lock-target]') as HTMLElement 
-              ?? document.querySelector('.content-area') as HTMLElement;
-            
             if (scrollContainer) {
               scrollContainer.style.overflow = '';
               scrollContainer.style.pointerEvents = '';
+              console.log('[Visibility] Reset scroll container styles');
             }
             
             // Restore body/html
@@ -218,6 +229,9 @@ export default function App() {
             
             // Force a reflow to ensure styles are applied
             document.body.offsetHeight;
+            console.log('[Visibility] Reset complete');
+          } else {
+            console.log('[Visibility] Modal is open - skipping reset');
           }
         }, 100); // Small delay to ensure app is fully visible
       }
