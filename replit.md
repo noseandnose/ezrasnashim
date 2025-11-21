@@ -15,6 +15,7 @@ Compass alignment message: When compass is aligned with Jerusalem, displays "You
 Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20% bigger (w-8 h-8), both BH Green icon and center heart pulse when aligned.
 Header layout: Search icon moved from header to hamburger menu to keep logo perfectly centered. Header now shows only hamburger menu (left), centered logo, and message button (right).
 Layout fixes (Nov 2025): Fixed bottom nav positioning and header scrolling issues. Bottom nav now defaults to `--nav-offset: 0px` (flush with safe area), with browser UI offset applied only in Safari browser mode via JavaScript detection. Header ensured to stay fixed at top with additional CSS safeguards. Works correctly across Chrome, Safari, and mobile app wrappers.
+Button interaction fix (Nov 2025): Fixed buttons becoming unresponsive after app is minimized/backgrounded. Enhanced visibility change handler in App.tsx to forcibly restore pointer events on all interactive elements (buttons, inputs, links) when app resumes, with 100ms delay and reflow trigger to ensure complete restoration. Prevents frozen UI after minimize/resume cycles.
 
 ## System Architecture
 ### Frontend
@@ -34,6 +35,7 @@ Layout fixes (Nov 2025): Fixed bottom nav positioning and header scrolling issue
 - **Language**: TypeScript with ES modules.
 - **API**: RESTful with consistent error handling.
 - **Session Management**: Express session.
+- **Development Environment**: Vite dev server runs on port 5173 (frontend) with `host: '0.0.0.0'` for Replit network accessibility, Express runs on port 5000 (backend/API). Replit port mapping uses subdomain pattern: `<repl-id>-00-<slug>.<workspace>.replit.dev` for default port (5173) and `<repl-id>-00-5000-<slug>.<workspace>.replit.dev` for backend port (5000). Frontend axios client automatically constructs correct backend URL by inserting `-5000` after the `-00-` segment when on Replit domains.
 
 ### Database
 - **Primary**: PostgreSQL (Supabase configured).
