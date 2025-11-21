@@ -34,6 +34,7 @@ Layout fixes (Nov 2025): Fixed bottom nav positioning and header scrolling issue
 - **Language**: TypeScript with ES modules.
 - **API**: RESTful with consistent error handling.
 - **Session Management**: Express session.
+- **Development Environment**: Vite dev server runs on port 5173 (frontend), Express runs on port 5000 (backend/API). Replit port mapping uses subdomain pattern: `<repl-id>-00-<slug>.<workspace>.replit.dev` for default port (5173) and `<repl-id>-00-5000-<slug>.<workspace>.replit.dev` for backend port (5000). Frontend axios client automatically constructs correct backend URL by inserting `-5000` after the `-00-` segment when on Replit domains.
 
 ### Database
 - **Primary**: PostgreSQL (Supabase configured).
