@@ -3,9 +3,25 @@ import axios, { AxiosResponse, AxiosError } from 'axios';
 
 // Determine the correct base URL for API calls
 function getBaseURL() {
-  // Use VITE_API_URL if it's set
+  // If VITE_API_URL is explicitly set and non-empty, use it (for production/custom deployments)
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
+  }
+  
+  // In browser, derive backend URL dynamically from current location
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    
+    // If we're on a Replit domain, use the same hostname with backend port 5000
+    if (hostname.includes('replit.dev') || hostname.includes('replit.app') || hostname.includes('repl.co')) {
+      const protocol = window.location.protocol; // https: or http:
+      return `${protocol}//${hostname}:5000`;
+    }
+    
+    // For production domains, use same origin (empty baseURL for relative paths)
+    if (hostname !== 'localhost') {
+      return '';
+    }
   }
   
   // Default for local development - backend runs on port 5000
