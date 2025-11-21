@@ -11,11 +11,24 @@ function getBaseURL() {
   // In browser, derive backend URL dynamically from current location
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
+    const protocol = window.location.protocol;
     
-    // If we're on a Replit domain, use the same hostname with backend port 5000
+    // If we're on a Replit domain, construct the backend URL with port-specific subdomain
+    // Replit uses pattern: <repl-id>-00-<slug>.<workspace>.replit.dev (for port 80/5173)
+    //                      <repl-id>-00-5000-<slug>.<workspace>.replit.dev (for port 5000)
+    // Example: abc-00-xyz.pike.replit.dev → abc-00-5000-xyz.pike.replit.dev
     if (hostname.includes('replit.dev') || hostname.includes('replit.app') || hostname.includes('repl.co')) {
-      const protocol = window.location.protocol; // https: or http:
-      return `${protocol}//${hostname}:5000`;
+      // Check if we're already on the backend port subdomain
+      if (hostname.includes('-00-5000-')) {
+        // Already on port 5000, use same origin
+        return '';
+      }
+      
+      // Insert -5000 after the -00 part to construct backend hostname
+      // Replace first occurrence of '-00-' with '-00-5000-'
+      const backendHost = hostname.replace(/-00-/, '-00-5000-');
+      
+      return `${protocol}//${backendHost}`;
     }
     
     // For production domains, use same origin (empty baseURL for relative paths)
