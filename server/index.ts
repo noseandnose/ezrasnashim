@@ -6,6 +6,7 @@ import { fileURLToPath } from "url";
 import compression from "compression";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import { createProxyMiddleware } from "http-proxy-middleware";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -333,13 +334,40 @@ async function initializeServer() {
       }
     });
   } else {
-    // Handle client-side routing
-    app.get('*', (req: Request, res: Response) => {
-      if (!req.path.startsWith('/api') && !req.path.startsWith('/attached_assets')) {
-        // Redirect to the frontend dev server for client-side routing
-        const frontendUrl = process.env.VITE_DEV_URL || 'http://localhost:5173';
-        res.redirect(301, `${frontendUrl}${req.path}`);
+    // In development, proxy to Vite dev server instead of redirecting
+    // This allows the Replit webview to work properly
+    const viteUrl = process.env.VITE_DEV_URL || 'http://localhost:5173';
+    
+    // Create proxy middleware for Vite dev server
+    const viteProxy = createProxyMiddleware({
+      target: viteUrl,
+      changeOrigin: true,
+      ws: true, // Enable WebSocket proxying for HMR
+    });
+    
+    // Mount proxy for specific Vite paths (not API routes)
+    app.use('/@vite', viteProxy); // Vite client
+    app.use('/@fs', viteProxy);   // Vite file system
+    app.use('/@id', viteProxy);   // Vite module resolution
+    app.use('/src', viteProxy);   // Source files
+    app.use('/node_modules', viteProxy); // Dependencies
+    app.use('/client', viteProxy); // Client directory
+    
+    // Helper to check if URL should bypass proxy (API routes and static assets)
+    const shouldBypassProxy = (url: string) => {
+      return url.startsWith('/api') || url.startsWith('/attached_assets') || url.startsWith('/objects');
+    };
+    
+    // Fallback: proxy ONLY frontend GET requests to Vite for SPA routing
+    // Use req.originalUrl (not req.path) to properly detect API routes
+    // This runs AFTER all route handlers, so API routes are processed first
+    app.get('*', (req: Request, res: Response, next: NextFunction) => {
+      // Check originalUrl to bypass API and asset routes
+      if (shouldBypassProxy(req.originalUrl ?? '')) {
+        return next();
       }
+      // Proxy only frontend navigation to Vite
+      viteProxy(req, res, next);
     });
   }
 
