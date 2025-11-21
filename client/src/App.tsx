@@ -179,6 +179,32 @@ export default function App() {
         queryClient.invalidateQueries({ queryKey: ['/api/home-summary', today] });
         queryClient.invalidateQueries({ queryKey: ['/api/daily-completion'] });
         queryClient.invalidateQueries({ queryKey: ['/api/global-progress'] });
+        
+        // CRITICAL FIX: Ensure pointer events are restored when app becomes visible
+        // This prevents buttons from becoming unresponsive after app minimize/resume
+        const scrollContainer = document.querySelector('[data-scroll-lock-target]') as HTMLElement 
+          ?? document.querySelector('.content-area') as HTMLElement;
+        
+        if (scrollContainer) {
+          // Check if there are any active modals
+          const hasActiveModals = document.querySelector('[data-fullscreen-modal]') || 
+                                   document.querySelector('[role="dialog"]');
+          
+          // If no modals are open, ensure scroll container is unlocked
+          if (!hasActiveModals) {
+            scrollContainer.style.overflow = '';
+            scrollContainer.style.pointerEvents = '';
+          }
+        }
+        
+        // Also ensure body/html are unlocked if no modals
+        const hasActiveModals = document.querySelector('[data-fullscreen-modal]') || 
+                                 document.querySelector('[role="dialog"]');
+        if (!hasActiveModals) {
+          document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
+          document.body.style.pointerEvents = '';
+        }
       }
     };
     

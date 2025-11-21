@@ -399,7 +399,7 @@ export default function TorahSection({}: TorahSectionProps) {
                     <BookOpen className="text-white" size={16} strokeWidth={1.5} />
                   </div>
                   <div className="text-left flex-grow">
-                    <h3 className="platypi-bold text-sm text-black">
+                    <h3 className={`text-sm text-black ${parsha?.hebrew_parsha ? 'koren-siddur-hebrew' : 'platypi-bold'}`}>
                       {parsha?.hebrew_parsha || parsha?.parsha || 'Parsha Shiur'}
                     </h3>
                     <p className="platypi-regular text-xs text-black/60">

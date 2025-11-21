@@ -6,6 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { useLocation } from 'wouter';
 import { MiniCompassModal } from '@/components/modals/mini-compass-modal';
 import { ensureSafeAreaVariables } from '@/hooks/use-safe-area';
+import { getHebrewFontClass } from '@/lib/hebrewUtils';
 
 // Global counter and state to track active fullscreen modals
 // Prevents race conditions when closing one modal while another opens
@@ -379,7 +380,7 @@ export function FullscreenModal({
               )}
             </div>
 
-            <h1 className="text-lg font-semibold text-gray-900 text-center flex-1 mx-4">
+            <h1 className={`text-lg font-semibold text-gray-900 text-center flex-1 mx-4 ${title ? getHebrewFontClass(title, 'platypi-semibold') : 'platypi-semibold'}`}>
               {title}
             </h1>
             

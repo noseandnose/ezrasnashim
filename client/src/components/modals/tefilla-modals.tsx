@@ -120,6 +120,56 @@ const useTefillaConditions = () => {
   return conditions;
 };
 
+// Custom hook for Maariv - checks tomorrow for Rosh Chodesh since Jewish days start at sunset
+const useMaarivTefillaConditions = () => {
+  const { coordinates } = useLocationStore();
+  const [conditions, setConditions] = useState<TefillaConditions | null>(null);
+
+  useEffect(() => {
+    const loadConditions = async () => {
+      try {
+        const tefillaConditions = await getCurrentTefillaConditions(
+          coordinates?.lat,
+          coordinates?.lng,
+          true // Check tomorrow for Rosh Chodesh for Maariv
+        );
+        
+        setConditions(tefillaConditions);
+      } catch (error) {
+        
+        // Could not load Tefilla conditions - Set default conditions
+        setConditions({
+          isInIsrael: false,
+          isRoshChodesh: false,
+          isFastDay: false,
+          isAseretYemeiTeshuva: false,
+          isSukkot: false,
+          isPesach: false,
+          isRoshChodeshSpecial: false,
+          isSunday: false,
+          isMonday: false,
+          isTuesday: false,
+          isWednesday: false,
+          isThursday: false,
+          isFriday: false,
+          isSaturday: false,
+          // New seasonal conditions
+          isMH: false,
+          isMT: false,
+          isTBI: false,
+          isTTI: false,
+          isTTC: false,
+          isTBC: false
+        });
+      }
+    };
+
+    loadConditions();
+  }, [coordinates]);
+
+  return conditions;
+};
+
 // Enhanced text processing function for Tefilla content
 const processTefillaContent = (text: string, conditions: TefillaConditions | null): string => {
   if (!text) return text;
@@ -528,7 +578,8 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
     queryKey: ['/api/maariv/prayers'],
   });
 
-  const tefillaConditions = useTefillaConditions();
+  // Use special Maariv hook that checks tomorrow for Rosh Chodesh (Jewish days start at sunset)
+  const tefillaConditions = useMaarivTefillaConditions();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
@@ -798,7 +849,7 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
   );
 }
 
-function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english'; fontSize: number }) {
+function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: { language: 'hebrew' | 'english'; fontSize: number }) {
   const [activeTab, setActiveTab] = useState<'daily' | 'special'>('daily');
   
   const { data: dailyBrochas = [], isLoading: dailyLoading } = useQuery<any[]>({
@@ -3496,7 +3547,7 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
 }
 
 // Special Tehillim Fullscreen Content Component
-function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english'; fontSize: number }) {
+function SpecialTehillimFullscreenContent({ language: _language, fontSize: _fontSize }: { language: 'hebrew' | 'english'; fontSize: number }) {
   const { setSelectedPsalm, tehillimActiveTab, setTehillimActiveTab, setTehillimReturnTab, setDailyTehillimPsalms } = useModalStore();
   const { isModalComplete } = useModalCompletionStore();
 

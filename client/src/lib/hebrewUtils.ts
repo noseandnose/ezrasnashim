@@ -135,6 +135,15 @@ export function containsHebrew(text: string): boolean {
 }
 
 /**
+ * Get the appropriate font class based on whether text contains Hebrew
+ * Returns 'koren-siddur-hebrew' for Hebrew text, 'koren-siddur-english' for English
+ */
+export function getHebrewFontClass(text: string | null | undefined, defaultClass: string = 'koren-siddur-english'): string {
+  if (!text) return defaultClass;
+  return containsHebrew(text) ? 'koren-siddur-hebrew' : defaultClass;
+}
+
+/**
  * Common search synonyms for cross-language matching
  * Maps English terms to Hebrew equivalents and common variations
  */

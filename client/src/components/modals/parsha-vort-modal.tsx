@@ -8,6 +8,7 @@ import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { formatThankYouMessageFull } from "@/lib/link-formatter";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { BookOpen } from "lucide-react";
+import { getHebrewFontClass } from "@/lib/hebrewUtils";
 
 export default function ParshaVortModal() {
   const { activeModal, closeModal, openModal, selectedParshaVortId } = useModalStore();
@@ -52,11 +53,13 @@ export default function ParshaVortModal() {
     }, 1000);
   };
 
+  const titleText = parshaVort?.hebrew_parsha || parshaVort?.title || 'Weekly Parsha Vort';
+  
   return (
     <FullscreenModal
       isOpen={isOpen}
       onClose={closeModal}
-      title={parshaVort?.title || 'Weekly Parsha Vort'}
+      title={titleText}
     >
       {isLoading ? (
         <div className="text-center py-8">
@@ -88,7 +91,7 @@ export default function ParshaVortModal() {
           {/* Main Content */}
           {parshaVort.content && (
             <div className="bg-white rounded-2xl p-6 border border-blush/10">
-              <div className="koren-siddur-english text-base leading-relaxed text-black">
+              <div className={`${getHebrewFontClass(parshaVort.content, 'koren-siddur-english')} text-base leading-relaxed text-black`}>
                 {parshaVort.content}
               </div>
             </div>
