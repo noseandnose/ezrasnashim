@@ -64,6 +64,13 @@ if (typeof window !== 'undefined') {
   (window as any).__forceResetScrollLock = forceResetScrollLock;
 }
 
+// Export helper functions for external use (e.g., App.tsx visibility handler)
+export function isFullscreenModalActive(): boolean {
+  return activeFullscreenModals > 0;
+}
+
+export { forceResetScrollLock };
+
 interface FullscreenModalProps {
   isOpen: boolean;
   onClose: () => void;

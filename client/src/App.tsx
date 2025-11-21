@@ -18,6 +18,7 @@ import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
 import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
 import { initializePerformance, whenIdle } from "./lib/startup-performance";
+import { forceResetScrollLock } from "@/components/ui/fullscreen-modal";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));
@@ -183,12 +184,20 @@ export default function App() {
         // CRITICAL FIX: Force complete interaction restore after app resume
         // This prevents buttons from becoming unresponsive after app minimize/resume
         setTimeout(() => {
-          // Check if there are any active modals
-          const hasActiveModals = document.querySelector('[data-fullscreen-modal]') || 
-                                   document.querySelector('[role="dialog"]');
+          // Check if there are any ACTUALLY OPEN modals (not just closed ones in DOM)
+          // Need to check both Radix dialogs AND fullscreen modals:
+          // - [role="dialog"][data-state="open"] for Radix dialogs (excludes closed ones)
+          // - [data-fullscreen-modal] for custom fullscreen modals
+          const hasRadixModal = document.querySelector('[role="dialog"][data-state="open"]');
+          const hasFullscreenModal = document.querySelector('[data-fullscreen-modal]');
           
-          if (!hasActiveModals) {
-            // No modals open - ensure ALL elements are fully interactive
+          if (!hasRadixModal && !hasFullscreenModal) {
+            // No modals actually open - force reset scroll locks from fullscreen modal system
+            // The fullscreen modal uses requestAnimationFrame for cleanup, which doesn't run
+            // when the app is backgrounded, leaving pointer-events: none stuck on scroll container
+            forceResetScrollLock();
+            
+            // Also clear any other potential pointer-event locks
             const scrollContainer = document.querySelector('[data-scroll-lock-target]') as HTMLElement 
               ?? document.querySelector('.content-area') as HTMLElement;
             
