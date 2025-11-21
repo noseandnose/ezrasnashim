@@ -38,3 +38,55 @@ export const getLocalYesterdayString = (): string => {
   const day = String(yesterday.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 };
+
+/**
+ * Add days to a YYYY-MM-DD date string using pure arithmetic - no Date objects
+ * This ensures consistent results regardless of timezone or execution environment
+ */
+function addDaysToDateString(dateString: string, daysToAdd: number): string {
+  const [year, month, day] = dateString.split('-').map(Number);
+  
+  // Days in each month (non-leap year)
+  const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  
+  // Check for leap year
+  const isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+  if (isLeap) {
+    daysInMonth[1] = 29; // February has 29 days in leap year
+  }
+  
+  let newDay = day + daysToAdd;
+  let newMonth = month;
+  let newYear = year;
+  
+  // Handle day overflow
+  while (newDay > daysInMonth[newMonth - 1]) {
+    newDay -= daysInMonth[newMonth - 1];
+    newMonth++;
+    
+    // Handle month overflow
+    if (newMonth > 12) {
+      newMonth = 1;
+      newYear++;
+      
+      // Recalculate leap year for new year
+      const newIsLeap = (newYear % 4 === 0 && newYear % 100 !== 0) || (newYear % 400 === 0);
+      daysInMonth[1] = newIsLeap ? 29 : 28;
+    }
+  }
+  
+  // Format back to YYYY-MM-DD
+  const yearStr = String(newYear);
+  const monthStr = String(newMonth).padStart(2, '0');
+  const dayStr = String(newDay).padStart(2, '0');
+  
+  return `${yearStr}-${monthStr}-${dayStr}`;
+}
+
+export const getLocalTomorrowString = (): string => {
+  // Get today's date using the app's consistent day-start logic
+  const today = getLocalDateString();
+  
+  // Add one day using pure string arithmetic (no Date objects = no timezone issues)
+  return addDaysToDateString(today, 1);
+};

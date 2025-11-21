@@ -402,32 +402,45 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
 }
 
 // Cache for Tefilla conditions to avoid redundant API calls
-let conditionsCache: {
-  key: string;
+// Using a Map to support multiple cache entries (Maariv, daytime prayers, etc.)
+const conditionsCache = new Map<string, {
   data: TefillaConditions;
   timestamp: number;
-} | null = null;
+}>();
 
 const CONDITIONS_CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
+const MAX_CACHE_ENTRIES = 10; // Prevent unbounded growth
 
 /**
  * Get current conditions based on location and Hebrew calendar data
+ * @param latitude - Optional latitude coordinate
+ * @param longitude - Optional longitude coordinate
+ * @param checkTomorrowForRoshChodesh - If true, checks tomorrow's date for Rosh Chodesh (for Maariv which starts the next Jewish day)
  */
 export async function getCurrentTefillaConditions(
   latitude?: number, 
-  longitude?: number
+  longitude?: number,
+  checkTomorrowForRoshChodesh: boolean = false
 ): Promise<TefillaConditions> {
   try {
     // Create cache key from coordinates and date
     const { getLocalDateString } = await import('../lib/dateUtils');
     const today = getLocalDateString();
-    const cacheKey = `${today}-${latitude}-${longitude}`;
+    // Safe cache key that handles undefined coordinates and boolean flag
+    const cacheKey = `${today}-${latitude ?? 'no-lat'}-${longitude ?? 'no-lng'}-${checkTomorrowForRoshChodesh ? 'tomorrow' : 'today'}`;
     
     // Check if we have valid cached data
-    if (conditionsCache && 
-        conditionsCache.key === cacheKey && 
-        Date.now() - conditionsCache.timestamp < CONDITIONS_CACHE_DURATION) {
-      return conditionsCache.data;
+    const cached = conditionsCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < CONDITIONS_CACHE_DURATION) {
+      return cached.data;
+    }
+    
+    // Clean up old cache entries if we have too many
+    if (conditionsCache.size >= MAX_CACHE_ENTRIES) {
+      const oldestKey = conditionsCache.keys().next().value;
+      if (oldestKey) {
+        conditionsCache.delete(oldestKey);
+      }
     }
     // Get location information
     let isInIsrael = false;
@@ -484,11 +497,16 @@ export async function getCurrentTefillaConditions(
     let hebrewDate = undefined;
 
     try {
-      const { getLocalDateString } = await import('../lib/dateUtils');
+      const { getLocalDateString, getLocalTomorrowString } = await import('../lib/dateUtils');
       const today = getLocalDateString();
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      
+      // For Maariv (evening prayer), check tomorrow's date for Rosh Chodesh
+      // since Jewish days begin at sunset
+      const dateToCheck = checkTomorrowForRoshChodesh ? getLocalTomorrowString() : today;
+      
       const hebrewResponse = await fetch(
-        `${apiUrl}/api/hebrew-date/${today}`
+        `${apiUrl}/api/hebrew-date/${dateToCheck}`
       );
       
       if (hebrewResponse.ok) {
@@ -630,11 +648,10 @@ export async function getCurrentTefillaConditions(
     };
     
     // Cache the result
-    conditionsCache = {
-      key: cacheKey,
+    conditionsCache.set(cacheKey, {
       data: finalConditions,
       timestamp: Date.now()
-    };
+    });
     
     return finalConditions;
   } catch (error) {
