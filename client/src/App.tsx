@@ -180,31 +180,37 @@ export default function App() {
         queryClient.invalidateQueries({ queryKey: ['/api/daily-completion'] });
         queryClient.invalidateQueries({ queryKey: ['/api/global-progress'] });
         
-        // CRITICAL FIX: Ensure pointer events are restored when app becomes visible
+        // CRITICAL FIX: Force complete interaction restore after app resume
         // This prevents buttons from becoming unresponsive after app minimize/resume
-        const scrollContainer = document.querySelector('[data-scroll-lock-target]') as HTMLElement 
-          ?? document.querySelector('.content-area') as HTMLElement;
-        
-        if (scrollContainer) {
+        setTimeout(() => {
           // Check if there are any active modals
           const hasActiveModals = document.querySelector('[data-fullscreen-modal]') || 
                                    document.querySelector('[role="dialog"]');
           
-          // If no modals are open, ensure scroll container is unlocked
           if (!hasActiveModals) {
-            scrollContainer.style.overflow = '';
-            scrollContainer.style.pointerEvents = '';
+            // No modals open - ensure ALL elements are fully interactive
+            const scrollContainer = document.querySelector('[data-scroll-lock-target]') as HTMLElement 
+              ?? document.querySelector('.content-area') as HTMLElement;
+            
+            if (scrollContainer) {
+              scrollContainer.style.overflow = '';
+              scrollContainer.style.pointerEvents = '';
+            }
+            
+            // Restore body/html
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+            document.body.style.pointerEvents = '';
+            
+            // Force restore pointer events on all interactive elements
+            document.querySelectorAll('button, a, input, select, textarea').forEach(el => {
+              (el as HTMLElement).style.pointerEvents = '';
+            });
+            
+            // Force a reflow to ensure styles are applied
+            document.body.offsetHeight;
           }
-        }
-        
-        // Also ensure body/html are unlocked if no modals
-        const hasActiveModals = document.querySelector('[data-fullscreen-modal]') || 
-                                 document.querySelector('[role="dialog"]');
-        if (!hasActiveModals) {
-          document.body.style.overflow = '';
-          document.documentElement.style.overflow = '';
-          document.body.style.pointerEvents = '';
-        }
+        }, 100); // Small delay to ensure app is fully visible
       }
     };
     
