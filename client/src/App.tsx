@@ -169,76 +169,85 @@ export default function App() {
     }, 500);
   }, []);
   
-  // Add visibility change listener to prevent stale state
-  // When app resumes from background, invalidate critical queries
+  // CRITICAL: Restore interactions after app resume
+  // PWA/app environments have unreliable visibilitychange events, so we listen to multiple signals
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      console.log('[Visibility] Change detected, hidden:', document.hidden);
-      if (!document.hidden) {
-        console.log('[Visibility] App resumed from background');
-        // App is now visible - invalidate critical queries to fetch fresh data
-        // This prevents stale state when app resumes from long background periods
-        const today = getLocalDateString();
-        queryClient.invalidateQueries({ queryKey: ['/api/home-summary', today] });
-        queryClient.invalidateQueries({ queryKey: ['/api/daily-completion'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/global-progress'] });
+    // Shared helper to restore all interactions after app resume
+    const restoreInteractions = () => {
+      // Invalidate critical queries to fetch fresh data
+      const today = getLocalDateString();
+      queryClient.invalidateQueries({ queryKey: ['/api/home-summary', today] });
+      queryClient.invalidateQueries({ queryKey: ['/api/daily-completion'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/global-progress'] });
+      
+      // Force complete interaction restore after app resume
+      // This prevents buttons from becoming unresponsive after app minimize/resume
+      setTimeout(() => {
+        // Check if there are any ACTUALLY OPEN modals (not just closed ones in DOM)
+        // Need to check both Radix dialogs AND fullscreen modals:
+        // - [role="dialog"][data-state="open"] for Radix dialogs (excludes closed ones)
+        // - [data-fullscreen-modal] for custom fullscreen modals
+        const hasRadixModal = document.querySelector('[role="dialog"][data-state="open"]');
+        const hasFullscreenModal = document.querySelector('[data-fullscreen-modal]');
         
-        // CRITICAL FIX: Force complete interaction restore after app resume
-        // This prevents buttons from becoming unresponsive after app minimize/resume
-        setTimeout(() => {
-          // Check if there are any ACTUALLY OPEN modals (not just closed ones in DOM)
-          // Need to check both Radix dialogs AND fullscreen modals:
-          // - [role="dialog"][data-state="open"] for Radix dialogs (excludes closed ones)
-          // - [data-fullscreen-modal] for custom fullscreen modals
-          const hasRadixModal = document.querySelector('[role="dialog"][data-state="open"]');
-          const hasFullscreenModal = document.querySelector('[data-fullscreen-modal]');
+        if (!hasRadixModal && !hasFullscreenModal) {
+          // No modals actually open - force reset scroll locks from fullscreen modal system
+          // The fullscreen modal uses requestAnimationFrame for cleanup, which doesn't run
+          // when the app is backgrounded, leaving pointer-events: none stuck on scroll container
+          forceResetScrollLock();
           
-          console.log('[Visibility] Modal check - Radix:', !!hasRadixModal, 'Fullscreen:', !!hasFullscreenModal);
-          
+          // Also clear any other potential pointer-event locks
           const scrollContainer = document.querySelector('[data-scroll-lock-target]') as HTMLElement 
             ?? document.querySelector('.content-area') as HTMLElement;
           
-          console.log('[Visibility] Scroll container found:', !!scrollContainer);
           if (scrollContainer) {
-            console.log('[Visibility] Scroll container pointer-events before:', scrollContainer.style.pointerEvents);
+            scrollContainer.style.overflow = '';
+            scrollContainer.style.pointerEvents = '';
           }
           
-          if (!hasRadixModal && !hasFullscreenModal) {
-            console.log('[Visibility] No modals open - running reset');
-            // No modals actually open - force reset scroll locks from fullscreen modal system
-            // The fullscreen modal uses requestAnimationFrame for cleanup, which doesn't run
-            // when the app is backgrounded, leaving pointer-events: none stuck on scroll container
-            forceResetScrollLock();
-            
-            // Also clear any other potential pointer-event locks
-            if (scrollContainer) {
-              scrollContainer.style.overflow = '';
-              scrollContainer.style.pointerEvents = '';
-              console.log('[Visibility] Reset scroll container styles');
-            }
-            
-            // Restore body/html
-            document.body.style.overflow = '';
-            document.documentElement.style.overflow = '';
-            document.body.style.pointerEvents = '';
-            
-            // Force restore pointer events on all interactive elements
-            document.querySelectorAll('button, a, input, select, textarea').forEach(el => {
-              (el as HTMLElement).style.pointerEvents = '';
-            });
-            
-            // Force a reflow to ensure styles are applied
-            document.body.offsetHeight;
-            console.log('[Visibility] Reset complete');
-          } else {
-            console.log('[Visibility] Modal is open - skipping reset');
-          }
-        }, 100); // Small delay to ensure app is fully visible
+          // Restore body/html
+          document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
+          document.body.style.pointerEvents = '';
+          
+          // Force restore pointer events on all interactive elements
+          document.querySelectorAll('button, a, input, select, textarea').forEach(el => {
+            (el as HTMLElement).style.pointerEvents = '';
+          });
+          
+          // Force a reflow to ensure styles are applied
+          document.body.offsetHeight;
+        }
+      }, 100); // Small delay to ensure app is fully visible
+    };
+    
+    // Listen to visibilitychange (works in most browsers)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        restoreInteractions();
       }
     };
     
+    // Listen to focus (catches when app regains focus)
+    const handleFocus = () => {
+      restoreInteractions();
+    };
+    
+    // Listen to pageshow (catches bfcache restores and iOS PWA resume)
+    const handlePageShow = () => {
+      // Always restore on pageshow, including persisted (bfcache) events
+      restoreInteractions();
+    };
+    
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('pageshow', handlePageShow);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('pageshow', handlePageShow);
+    };
   }, []);
 
   return (
