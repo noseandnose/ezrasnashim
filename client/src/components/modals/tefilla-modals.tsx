@@ -849,7 +849,7 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
   );
 }
 
-function BrochasFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english'; fontSize: number }) {
+function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: { language: 'hebrew' | 'english'; fontSize: number }) {
   const [activeTab, setActiveTab] = useState<'daily' | 'special'>('daily');
   
   const { data: dailyBrochas = [], isLoading: dailyLoading } = useQuery<any[]>({
@@ -3547,7 +3547,7 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
 }
 
 // Special Tehillim Fullscreen Content Component
-function SpecialTehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english'; fontSize: number }) {
+function SpecialTehillimFullscreenContent({ language: _language, fontSize: _fontSize }: { language: 'hebrew' | 'english'; fontSize: number }) {
   const { setSelectedPsalm, tehillimActiveTab, setTehillimActiveTab, setTehillimReturnTab, setDailyTehillimPsalms } = useModalStore();
   const { isModalComplete } = useModalCompletionStore();
 
