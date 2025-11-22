@@ -9,8 +9,32 @@ export function AutoNotificationPrompt() {
       return;
     }
 
+    // Check if storage is available (required for service workers)
+    // Some browsers/environments block IndexedDB which breaks push notifications
+    if (!isStorageAvailable()) {
+      console.log('[AutoNotificationPrompt] Storage not available - skipping push notifications');
+      return;
+    }
+
     initializeNotifications();
   }, []);
+
+  const isStorageAvailable = (): boolean => {
+    try {
+      // Check if indexedDB exists
+      if (typeof indexedDB === 'undefined') {
+        return false;
+      }
+      
+      // Try to access localStorage (quick check for storage availability)
+      const test = '__storage_test__';
+      localStorage.setItem(test, test);
+      localStorage.removeItem(test);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
 
   const initializeNotifications = async () => {
     try {

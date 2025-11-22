@@ -19,7 +19,6 @@ import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
 import { initializePerformance, whenIdle } from "./lib/startup-performance";
 import { forceResetScrollLock } from "@/components/ui/fullscreen-modal";
-import { getEnvironmentType } from "@/utils/environment";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));
@@ -184,40 +183,45 @@ export default function App() {
       // Force complete interaction restore after app resume
       // This prevents buttons from becoming unresponsive after app minimize/resume
       setTimeout(() => {
-        // Check if there are any ACTUALLY OPEN modals (not just closed ones in DOM)
+        // CRITICAL FIX: Always force reset scroll locks FIRST, regardless of modal state
+        // The fullscreen modal uses requestAnimationFrame for cleanup, which doesn't run
+        // when the app is backgrounded, leaving pointer-events: none stuck on scroll container
+        forceResetScrollLock();
+        
+        // Also clear any other potential pointer-event locks
+        const scrollContainer = document.querySelector('[data-scroll-lock-target]') as HTMLElement 
+          ?? document.querySelector('.content-area') as HTMLElement;
+        
+        if (scrollContainer) {
+          scrollContainer.style.overflow = '';
+          scrollContainer.style.pointerEvents = '';
+        }
+        
+        // Restore body/html
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+        document.body.style.pointerEvents = '';
+        
+        // Force restore pointer events on all interactive elements
+        document.querySelectorAll('button, a, input, select, textarea').forEach(el => {
+          (el as HTMLElement).style.pointerEvents = '';
+        });
+        
+        // Force a reflow to ensure styles are applied
+        document.body.offsetHeight;
+        
+        // Now check if there are any ACTUALLY OPEN modals and reapply locks if needed
         // Need to check both Radix dialogs AND fullscreen modals:
-        // - [role="dialog"][data-state="open"] for Radix dialogs (excludes closed ones)
+        // - [role="dialog"][data-state="open"] for Radix dialogs
         // - [data-fullscreen-modal] for custom fullscreen modals
         const hasRadixModal = document.querySelector('[role="dialog"][data-state="open"]');
         const hasFullscreenModal = document.querySelector('[data-fullscreen-modal]');
         
-        if (!hasRadixModal && !hasFullscreenModal) {
-          // No modals actually open - force reset scroll locks from fullscreen modal system
-          // The fullscreen modal uses requestAnimationFrame for cleanup, which doesn't run
-          // when the app is backgrounded, leaving pointer-events: none stuck on scroll container
-          forceResetScrollLock();
-          
-          // Also clear any other potential pointer-event locks
-          const scrollContainer = document.querySelector('[data-scroll-lock-target]') as HTMLElement 
-            ?? document.querySelector('.content-area') as HTMLElement;
-          
+        if (hasRadixModal || hasFullscreenModal) {
+          // Modal is genuinely open - reapply scroll lock
           if (scrollContainer) {
-            scrollContainer.style.overflow = '';
-            scrollContainer.style.pointerEvents = '';
+            scrollContainer.style.overflow = 'hidden';
           }
-          
-          // Restore body/html
-          document.body.style.overflow = '';
-          document.documentElement.style.overflow = '';
-          document.body.style.pointerEvents = '';
-          
-          // Force restore pointer events on all interactive elements
-          document.querySelectorAll('button, a, input, select, textarea').forEach(el => {
-            (el as HTMLElement).style.pointerEvents = '';
-          });
-          
-          // Force a reflow to ensure styles are applied
-          document.body.offsetHeight;
         }
       }, 100); // Small delay to ensure app is fully visible
     };

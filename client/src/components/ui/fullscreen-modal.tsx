@@ -285,11 +285,11 @@ export function FullscreenModal({
               ensureSafeAreaVariables();
             };
             
-            if (inWebView) {
-              // Immediate restoration in web views
+            if (inWebView || document.visibilityState !== 'visible') {
+              // Immediate restoration in web views or when page is hidden
               restoreScroll();
             } else {
-              // Deferred restoration in browsers
+              // Deferred restoration in browsers (only when visible)
               requestAnimationFrame(restoreScroll);
             }
           } else if (capturedFallbackLock) {
@@ -300,8 +300,8 @@ export function FullscreenModal({
               delete (window as any).__fallbackScrollLock;
             }
             
-            // Ensure safe-area in next frame (or immediately in web views)
-            if (inWebView) {
+            // Ensure safe-area in next frame (or immediately in web views/hidden pages)
+            if (inWebView || document.visibilityState !== 'visible') {
               ensureSafeAreaVariables();
             } else {
               requestAnimationFrame(() => {
@@ -312,11 +312,13 @@ export function FullscreenModal({
           }
         };
         
-        if (inWebView) {
-          // Immediate cleanup in web views to prevent stuck state
+        // CRITICAL: If page is backgrounded, do immediate cleanup
+        // requestAnimationFrame won't execute while page is hidden, causing stuck state
+        if (inWebView || document.visibilityState !== 'visible') {
+          // Immediate cleanup in web views or when page is hidden
           cleanupFn();
         } else {
-          // Double rAF in browsers for smooth gesture handling
+          // Double rAF in browsers for smooth gesture handling (only when visible)
           requestAnimationFrame(cleanupFn);
         }
       }

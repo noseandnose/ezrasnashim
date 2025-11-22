@@ -326,6 +326,15 @@ export class PermissionManager {
         throw new Error('Push notifications not supported');
       }
 
+      // Check if storage is available (required for service workers)
+      try {
+        if (typeof indexedDB === 'undefined') {
+          throw new Error('IndexedDB not available - required for push notifications');
+        }
+      } catch (storageError) {
+        throw new Error('Storage not available - push notifications require IndexedDB/Cache Storage');
+      }
+
       const registration = await navigator.serviceWorker.ready;
       
       // Check for existing subscription
