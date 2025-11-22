@@ -19,6 +19,7 @@ import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
 import { initializePerformance, whenIdle } from "./lib/startup-performance";
 import { forceResetScrollLock } from "@/components/ui/fullscreen-modal";
+import { getEnvironmentType } from "@/utils/environment";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));

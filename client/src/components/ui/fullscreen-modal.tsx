@@ -7,6 +7,7 @@ import { useLocation } from 'wouter';
 import { MiniCompassModal } from '@/components/modals/mini-compass-modal';
 import { ensureSafeAreaVariables } from '@/hooks/use-safe-area';
 import { getHebrewFontClass } from '@/lib/hebrewUtils';
+import { isWebView } from '@/utils/environment';
 
 // Global counter and state to track active fullscreen modals
 // Prevents race conditions when closing one modal while another opens
@@ -130,6 +131,12 @@ export function FullscreenModal({
       return;
     }
 
+    // Log environment detection for debugging
+    const inWebView = isWebView();
+    if (inWebView) {
+      console.log('[FullscreenModal] Web view environment detected - using immediate cleanup');
+    }
+
     // Increment the modal counter
     activeFullscreenModals++;
 
@@ -244,11 +251,14 @@ export function FullscreenModal({
       const capturedState = savedScrollState;
       const capturedFallbackLock = (window as any).__fallbackScrollLock;
       
+      // Check if we're in a web view environment
+      const inWebView = isWebView();
+      
       // Only restore scroll when no other fullscreen modals are active
       if (activeFullscreenModals === 0) {
-        // Defer scroll restoration to prevent closing gesture from interfering
-        // Double rAF ensures iOS Safari's tap doesn't override our scroll position
-        requestAnimationFrame(() => {
+        // In web views, do immediate cleanup to prevent stuck pointer-events
+        // In browsers, defer to prevent closing gesture from interfering
+        const cleanupFn = () => {
           // Re-check counter in case new modal opened
           if (activeFullscreenModals > 0) return;
           
@@ -258,8 +268,9 @@ export function FullscreenModal({
             capturedState.container.style.overflow = capturedState.originalOverflow;
             capturedState.container.style.pointerEvents = capturedState.originalPointerEvents;
             
-            // Then restore scroll position in next frame to avoid gesture interference
-            requestAnimationFrame(() => {
+            // In web views, restore scroll position immediately
+            // In browsers, defer to next frame to avoid gesture interference
+            const restoreScroll = () => {
               // Re-check counter again before final restore
               if (activeFullscreenModals > 0) return;
               
@@ -272,7 +283,15 @@ export function FullscreenModal({
               }
               // Ensure safe-area CSS variables are still applied
               ensureSafeAreaVariables();
-            });
+            };
+            
+            if (inWebView) {
+              // Immediate restoration in web views
+              restoreScroll();
+            } else {
+              // Deferred restoration in browsers
+              requestAnimationFrame(restoreScroll);
+            }
           } else if (capturedFallbackLock) {
             // Restore fallback body/html lock
             document.body.style.overflow = capturedFallbackLock.bodyOverflow;
@@ -281,13 +300,25 @@ export function FullscreenModal({
               delete (window as any).__fallbackScrollLock;
             }
             
-            requestAnimationFrame(() => {
-              // Re-check counter before safe-area restore
-              if (activeFullscreenModals > 0) return;
+            // Ensure safe-area in next frame (or immediately in web views)
+            if (inWebView) {
               ensureSafeAreaVariables();
-            });
+            } else {
+              requestAnimationFrame(() => {
+                if (activeFullscreenModals > 0) return;
+                ensureSafeAreaVariables();
+              });
+            }
           }
-        });
+        };
+        
+        if (inWebView) {
+          // Immediate cleanup in web views to prevent stuck state
+          cleanupFn();
+        } else {
+          // Double rAF in browsers for smooth gesture handling
+          requestAnimationFrame(cleanupFn);
+        }
       }
       
       document.removeEventListener('keydown', handleEscape, true);
