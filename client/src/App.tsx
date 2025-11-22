@@ -172,7 +172,84 @@ export default function App() {
   // CRITICAL: Restore interactions after app resume
   // PWA/app environments have unreliable visibilitychange events, so we listen to multiple signals
   useEffect(() => {
-    // Shared helper to restore all interactions after app resume
+    let pollInterval: NodeJS.Timeout | null = null;
+    
+    // Import isWebView dynamically
+    import('@/utils/environment').then(({ isWebView }) => {
+      const inWebView = isWebView();
+      
+      // CRITICAL FIX FOR FLUTTERFLOW: FlutterFlow web views suspend ALL events
+      // (visibilitychange, focus, pageshow) and requestAnimationFrame while backgrounded.
+      // We need a polling mechanism that works even when events don't fire.
+      if (inWebView) {
+        let lastVisibilityState = document.visibilityState;
+        let wasHidden = document.hidden;
+        
+        // Poll for visibility changes since FlutterFlow doesn't fire events reliably
+        pollInterval = setInterval(() => {
+          const currentVisibilityState = document.visibilityState;
+          const isHidden = document.hidden;
+          
+          // Detect transition from hidden to visible
+          if ((wasHidden && !isHidden) || (lastVisibilityState === 'hidden' && currentVisibilityState === 'visible')) {
+            console.log('[FlutterFlow Resume] Detected app resume via polling');
+            
+            // Use setTimeout (NOT requestAnimationFrame) for FlutterFlow
+            // rAF doesn't work in FlutterFlow web views
+            setTimeout(() => {
+              console.log('[FlutterFlow Resume] Forcing pointer-events restore');
+              
+              // Force restore ALL pointer-events immediately
+              const contentArea = document.querySelector('.content-area') as HTMLElement;
+              const mobileApp = document.querySelector('.mobile-app') as HTMLElement;
+              const bottomNav = document.querySelector('[data-bottom-nav]') as HTMLElement;
+              
+              if (contentArea) {
+                contentArea.style.pointerEvents = 'auto';
+                contentArea.style.overflow = 'auto';
+                console.log('[FlutterFlow Resume] .content-area pointer-events:', window.getComputedStyle(contentArea).pointerEvents);
+              }
+              
+              if (mobileApp) {
+                mobileApp.style.pointerEvents = 'auto';
+                mobileApp.style.overflow = 'auto';
+              }
+              
+              if (bottomNav) {
+                bottomNav.style.pointerEvents = 'auto';
+                console.log('[FlutterFlow Resume] bottom-nav pointer-events:', window.getComputedStyle(bottomNav).pointerEvents);
+              }
+              
+              // Restore body/html
+              document.body.style.overflow = 'auto';
+              document.body.style.pointerEvents = 'auto';
+              document.documentElement.style.overflow = 'auto';
+              
+              // Force restore all interactive elements
+              document.querySelectorAll('button, a, input, select, textarea').forEach(el => {
+                (el as HTMLElement).style.pointerEvents = 'auto';
+              });
+              
+              // Force reflow
+              document.body.offsetHeight;
+              
+              console.log('[FlutterFlow Resume] Pointer-events restore complete');
+              
+              // Invalidate queries after restore
+              const today = getLocalDateString();
+              queryClient.invalidateQueries({ queryKey: ['/api/home-summary', today] });
+              queryClient.invalidateQueries({ queryKey: ['/api/daily-completion'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/global-progress'] });
+            }, 0); // Immediate setTimeout (not rAF)
+          }
+          
+          lastVisibilityState = currentVisibilityState;
+          wasHidden = isHidden;
+        }, 500); // Poll every 500ms
+      }
+    });
+    
+    // Shared helper to restore all interactions after app resume (for non-FlutterFlow)
     const restoreInteractions = () => {
       // Invalidate critical queries to fetch fresh data
       const today = getLocalDateString();
@@ -249,6 +326,10 @@ export default function App() {
     window.addEventListener('pageshow', handlePageShow);
     
     return () => {
+      // Clean up FlutterFlow polling interval if it exists
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
       window.removeEventListener('pageshow', handlePageShow);
