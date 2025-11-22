@@ -1,24 +1,40 @@
 import { useEffect } from 'react';
 import { apiRequest } from '@/lib/queryClient';
 import { PermissionManager } from '@/lib/permission-manager';
-import { isWebView } from '@/utils/environment';
 
 export function AutoNotificationPrompt() {
   useEffect(() => {
-    // Skip push notifications in web views (Flutter, etc.) as they often lack
-    // proper IndexedDB/Cache Storage support required for service workers
-    if (isWebView()) {
-      console.log('[AutoNotificationPrompt] Skipping push notifications in web view environment');
-      return;
-    }
-
     // Check if browser supports notifications
     if (!('serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window)) {
       return;
     }
 
+    // Check if storage is available (required for service workers)
+    // Some browsers/environments block IndexedDB which breaks push notifications
+    if (!isStorageAvailable()) {
+      console.log('[AutoNotificationPrompt] Storage not available - skipping push notifications');
+      return;
+    }
+
     initializeNotifications();
   }, []);
+
+  const isStorageAvailable = (): boolean => {
+    try {
+      // Check if indexedDB exists
+      if (typeof indexedDB === 'undefined') {
+        return false;
+      }
+      
+      // Try to access localStorage (quick check for storage availability)
+      const test = '__storage_test__';
+      localStorage.setItem(test, test);
+      localStorage.removeItem(test);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
 
   const initializeNotifications = async () => {
     try {
