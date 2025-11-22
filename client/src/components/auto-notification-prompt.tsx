@@ -1,9 +1,17 @@
 import { useEffect } from 'react';
 import { apiRequest } from '@/lib/queryClient';
 import { PermissionManager } from '@/lib/permission-manager';
+import { isWebView } from '@/utils/environment';
 
 export function AutoNotificationPrompt() {
   useEffect(() => {
+    // Skip push notifications in web views (Flutter, etc.) as they often lack
+    // proper IndexedDB/Cache Storage support required for service workers
+    if (isWebView()) {
+      console.log('[AutoNotificationPrompt] Skipping push notifications in web view environment');
+      return;
+    }
+
     // Check if browser supports notifications
     if (!('serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window)) {
       return;
