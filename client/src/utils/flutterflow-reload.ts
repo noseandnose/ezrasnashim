@@ -15,70 +15,69 @@ let lastVisibilityChange = 0;
 const DEBOUNCE_MS = 1000; // Prevent multiple rapid reloads
 
 /**
- * Detect if device is mobile (iOS or Android)
- */
-function isMobileDevice(): boolean {
-  const ua = navigator.userAgent.toLowerCase();
-  return /android|iphone|ipad|ipod/.test(ua);
-}
-
-/**
- * Initialize FlutterFlow reload-on-resume behavior
+ * Initialize webview reload-on-resume behavior
  * Call this once on app startup
  */
 export function initializeFlutterFlowReload() {
   if (reloadInitialized || typeof window === 'undefined') return;
   
-  // Log user agent for debugging
-  console.log('[FlutterFlow Reload] User Agent:', navigator.userAgent);
-  console.log('[FlutterFlow Reload] isWebView():', isWebView());
-  console.log('[FlutterFlow Reload] isMobileDevice():', isMobileDevice());
+  const isDebugMode = localStorage.getItem('debugReloadOnResume') === 'true';
   
   // Check for manual override via localStorage (for testing)
   const forceReload = localStorage.getItem('forceReloadOnResume') === 'true';
-  if (forceReload) {
-    console.log('[FlutterFlow Reload] Manual override enabled via localStorage');
-  }
   
   // Check for FlutterFlow-specific indicators
   const hasFlutterGlobal = !!(window as any).flutter || !!(window as any).Flutter;
-  const isMobile = isMobileDevice();
+  const inWebView = isWebView();
   
-  console.log('[FlutterFlow Reload] Detection results:', {
-    hasFlutterGlobal,
-    isMobile,
-    isWebView: isWebView(),
-    forceReload,
-    willActivate: isMobile || isWebView() || hasFlutterGlobal || forceReload
-  });
+  // Only log in debug mode to reduce production console noise
+  if (isDebugMode) {
+    console.log('[FlutterFlow Reload] User Agent:', navigator.userAgent);
+    console.log('[FlutterFlow Reload] Detection results:', {
+      hasFlutterGlobal,
+      inWebView,
+      forceReload,
+      willActivate: inWebView || hasFlutterGlobal || forceReload
+    });
+  }
   
-  // Activate on ALL mobile devices (iOS/Android) OR webview OR FlutterFlow OR manual override
-  if (!isMobile && !isWebView() && !hasFlutterGlobal && !forceReload) {
-    console.log('[FlutterFlow Reload] Not on mobile device, skipping reload-on-resume');
-    console.log('[FlutterFlow Reload] To enable manually, run: localStorage.setItem("forceReloadOnResume", "true")');
+  // Activate ONLY in webviews OR if FlutterFlow indicators present OR manual override
+  // DO NOT activate on regular mobile browsers (Safari, Chrome) to avoid UX regression
+  if (!inWebView && !hasFlutterGlobal && !forceReload) {
+    if (isDebugMode) {
+      console.log('[FlutterFlow Reload] Not in webview, skipping reload-on-resume');
+      console.log('[FlutterFlow Reload] To enable manually, run: localStorage.setItem("forceReloadOnResume", "true")');
+    }
     return;
   }
   
   reloadInitialized = true;
-  console.log('[FlutterFlow Reload] ✓ Reload-on-resume ACTIVATED (mobile device detected)');
+  if (isDebugMode) {
+    console.log('[FlutterFlow Reload] ✓ Reload-on-resume ACTIVATED (webview detected)');
+  }
   
   // Track if we were hidden
   let wasHidden = document.hidden;
   
   const handleVisibilityChange = () => {
     const now = Date.now();
+    const isDebugMode = localStorage.getItem('debugReloadOnResume') === 'true';
     
     // Only reload when transitioning from hidden to visible
     if (wasHidden && !document.hidden) {
       // Debounce to prevent multiple rapid reloads
       if (now - lastVisibilityChange < DEBOUNCE_MS) {
-        console.log('[FlutterFlow Reload] Skipping reload (debounced)');
+        if (isDebugMode) {
+          console.log('[FlutterFlow Reload] Skipping reload (debounced)');
+        }
         return;
       }
       
       lastVisibilityChange = now;
       
-      console.log('[FlutterFlow Reload] App resumed from background - reloading to restore interactivity');
+      if (isDebugMode) {
+        console.log('[FlutterFlow Reload] App resumed from background - reloading to restore interactivity');
+      }
       
       // Use location.replace() for clean reload without history entry
       window.location.replace(window.location.href);
@@ -92,9 +91,12 @@ export function initializeFlutterFlowReload() {
   
   // Also listen for pageshow (handles iOS back/forward cache)
   window.addEventListener('pageshow', (event) => {
+    const isDebugMode = localStorage.getItem('debugReloadOnResume') === 'true';
     // If page was restored from cache, reload it
     if (event.persisted) {
-      console.log('[FlutterFlow Reload] Page restored from cache - reloading');
+      if (isDebugMode) {
+        console.log('[FlutterFlow Reload] Page restored from cache - reloading');
+      }
       window.location.replace(window.location.href);
     }
   });
