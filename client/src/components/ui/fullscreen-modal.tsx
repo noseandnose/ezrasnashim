@@ -63,6 +63,21 @@ function forceResetScrollLock() {
 // Make available globally for debugging
 if (typeof window !== 'undefined') {
   (window as any).__forceResetScrollLock = forceResetScrollLock;
+  
+  // CRITICAL: Global visibility listener that survives React lifecycle suspension
+  // This fixes button freeze in FlutterFlow web views after backgrounding
+  // React's event delegation breaks when pointer-events: none is left on body/containers
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      // Page resumed - if no modals are active, ensure scroll lock is released
+      if (activeFullscreenModals === 0) {
+        console.log('[Global Cleanup] Page resumed with no active modals - forcing scroll lock reset');
+        forceResetScrollLock();
+      } else {
+        console.log('[Global Cleanup] Page resumed with', activeFullscreenModals, 'active modal(s) - preserving locks');
+      }
+    }
+  });
 }
 
 // Export helper functions for external use (e.g., App.tsx visibility handler)
