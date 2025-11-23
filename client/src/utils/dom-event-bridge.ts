@@ -15,8 +15,6 @@ type ActionHandler = (element: HTMLElement, event: MouseEvent | TouchEvent) => v
 const actionHandlers = new Map<string, ActionHandler>();
 
 let bridgeInitialized = false;
-let reactDelegationHealthy = true;
-let lastHealthCheck = Date.now();
 
 /**
  * Register a named action handler
@@ -72,7 +70,11 @@ function initializeBridge() {
   
   bridgeInitialized = true;
   
-  console.log('[DOM Bridge] Initializing resilient click handler for FlutterFlow');
+  const isDebugMode = localStorage.getItem('debugDOMBridge') === 'true';
+  
+  if (isDebugMode) {
+    console.log('[DOM Bridge] Initializing resilient click handler for FlutterFlow');
+  }
   
   // Use capture phase to catch events before they might be stopped
   const handleClick = (e: MouseEvent | TouchEvent) => {
@@ -84,7 +86,9 @@ function initializeBridge() {
       const action = currentElement.getAttribute('data-action');
       
       if (action && actionHandlers.has(action)) {
-        console.log('[DOM Bridge] Invoking registered action:', action);
+        if (isDebugMode) {
+          console.log('[DOM Bridge] Invoking registered action:', action);
+        }
         const handler = actionHandlers.get(action)!;
         
         try {
@@ -111,13 +115,12 @@ function initializeBridge() {
     document.removeEventListener('touchend', handleClick, true);
     document.addEventListener('click', handleClick, true);
     document.addEventListener('touchend', handleClick, true);
-    console.log('[DOM Bridge] Re-attached event listeners');
+    // Only log in debug mode to reduce console noise
   }, 5000);
   
   // Health check: Detect when React's event delegation fails
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-      const now = Date.now();
+    if (document.visibilityState === 'visible' && isDebugMode) {
       console.log('[DOM Bridge] Page resumed, checking React health');
       
       // Test if React's delegation is working by checking for React-managed properties
@@ -126,13 +129,10 @@ function initializeBridge() {
         const reactKeys = Object.keys(reactRoot).filter(k => k.startsWith('__react'));
         if (reactKeys.length === 0) {
           console.warn('[DOM Bridge] React root properties missing - delegation may be broken!');
-          reactDelegationHealthy = false;
         } else {
-          reactDelegationHealthy = true;
+          console.log('[DOM Bridge] React event delegation appears healthy');
         }
       }
-      
-      lastHealthCheck = now;
     }
   });
   
