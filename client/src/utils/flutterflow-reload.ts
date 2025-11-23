@@ -1,10 +1,11 @@
 /**
- * FlutterFlow-specific reload-on-resume handler
+ * Mobile webview reload-on-resume handler
  * 
- * Problem: FlutterFlow webview sometimes swallows touchend/click events after resume,
- * making all buttons unresponsive even though CSS :active still works.
+ * Problem: Mobile webviews (FlutterFlow, etc.) sometimes swallow touchend/click events 
+ * after resume, making all buttons unresponsive even though CSS :active still works.
  * 
- * Solution: Detect FlutterFlow environment and reload the page when app regains visibility.
+ * Solution: Detect mobile devices and reload the page when app regains visibility
+ * after being backgrounded. Activates automatically on all iOS and Android devices.
  */
 
 import { isWebView } from './environment';
@@ -12,6 +13,14 @@ import { isWebView } from './environment';
 let reloadInitialized = false;
 let lastVisibilityChange = 0;
 const DEBOUNCE_MS = 1000; // Prevent multiple rapid reloads
+
+/**
+ * Detect if device is mobile (iOS or Android)
+ */
+function isMobileDevice(): boolean {
+  const ua = navigator.userAgent.toLowerCase();
+  return /android|iphone|ipad|ipod/.test(ua);
+}
 
 /**
  * Initialize FlutterFlow reload-on-resume behavior
@@ -23,6 +32,7 @@ export function initializeFlutterFlowReload() {
   // Log user agent for debugging
   console.log('[FlutterFlow Reload] User Agent:', navigator.userAgent);
   console.log('[FlutterFlow Reload] isWebView():', isWebView());
+  console.log('[FlutterFlow Reload] isMobileDevice():', isMobileDevice());
   
   // Check for manual override via localStorage (for testing)
   const forceReload = localStorage.getItem('forceReloadOnResume') === 'true';
@@ -32,23 +42,25 @@ export function initializeFlutterFlowReload() {
   
   // Check for FlutterFlow-specific indicators
   const hasFlutterGlobal = !!(window as any).flutter || !!(window as any).Flutter;
-  const inFlutterFlow = hasFlutterGlobal || forceReload;
+  const isMobile = isMobileDevice();
   
-  console.log('[FlutterFlow Reload] FlutterFlow detected:', {
+  console.log('[FlutterFlow Reload] Detection results:', {
     hasFlutterGlobal,
+    isMobile,
+    isWebView: isWebView(),
     forceReload,
-    willActivate: isWebView() || inFlutterFlow
+    willActivate: isMobile || isWebView() || hasFlutterGlobal || forceReload
   });
   
-  // Activate in webview OR if FlutterFlow indicators present OR manual override
-  if (!isWebView() && !inFlutterFlow) {
-    console.log('[FlutterFlow Reload] Not in webview/FlutterFlow, skipping reload-on-resume');
+  // Activate on ALL mobile devices (iOS/Android) OR webview OR FlutterFlow OR manual override
+  if (!isMobile && !isWebView() && !hasFlutterGlobal && !forceReload) {
+    console.log('[FlutterFlow Reload] Not on mobile device, skipping reload-on-resume');
     console.log('[FlutterFlow Reload] To enable manually, run: localStorage.setItem("forceReloadOnResume", "true")');
     return;
   }
   
   reloadInitialized = true;
-  console.log('[FlutterFlow Reload] ✓ Reload-on-resume ACTIVATED');
+  console.log('[FlutterFlow Reload] ✓ Reload-on-resume ACTIVATED (mobile device detected)');
   
   // Track if we were hidden
   let wasHidden = document.hidden;
