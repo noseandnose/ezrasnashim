@@ -7,7 +7,6 @@ import { useLocation } from 'wouter';
 import { MiniCompassModal } from '@/components/modals/mini-compass-modal';
 import { ensureSafeAreaVariables } from '@/hooks/use-safe-area';
 import { getHebrewFontClass } from '@/lib/hebrewUtils';
-import { isWebView } from '@/utils/environment';
 
 // Global counter and state to track active fullscreen modals
 // Prevents race conditions when closing one modal while another opens
@@ -16,7 +15,6 @@ let savedScrollState: {
   container: HTMLElement | null;
   scrollTop: number;
   originalOverflow: string;
-  originalPointerEvents: string;
 } | null = null;
 
 // Safety function to reset scroll lock state
@@ -27,9 +25,8 @@ function resetScrollLockIfNeeded() {
       ?? document.querySelector('.content-area') as HTMLElement;
     
     if (scrollContainer) {
-      // Restore scroll functionality
+      // Restore scroll functionality (overflow only - never touch pointer-events)
       scrollContainer.style.overflow = '';
-      scrollContainer.style.pointerEvents = '';
     }
     
     // Restore body/html  
@@ -48,8 +45,8 @@ function forceResetScrollLock() {
     ?? document.querySelector('.content-area') as HTMLElement;
   
   if (scrollContainer) {
+    // Restore scroll functionality (overflow only - never touch pointer-events)
     scrollContainer.style.overflow = '';
-    scrollContainer.style.pointerEvents = '';
   }
   
   document.body.style.overflow = '';
@@ -131,12 +128,6 @@ export function FullscreenModal({
       return;
     }
 
-    // Detect environment to determine scroll lock strategy
-    const inWebView = isWebView();
-    if (inWebView) {
-      console.log('[FullscreenModal] Web view detected - using overflow-only scroll lock (no pointer-events)');
-    }
-
     // Increment the modal counter
     activeFullscreenModals++;
 
@@ -174,18 +165,11 @@ export function FullscreenModal({
         savedScrollState = {
           container: scrollContainer,
           scrollTop: scrollContainer.scrollTop,
-          originalOverflow: scrollContainer.style.overflow,
-          originalPointerEvents: scrollContainer.style.pointerEvents
+          originalOverflow: scrollContainer.style.overflow
         };
         
-        // Lock the scroll container
+        // Lock the scroll container (overflow only - never touch pointer-events)
         scrollContainer.style.overflow = 'hidden';
-        
-        // Only use pointer-events locking in browsers (not webviews)
-        // Webviews use overflow-only locking to avoid button freeze after backgrounding
-        if (!inWebView) {
-          scrollContainer.style.pointerEvents = 'none';
-        }
       }
       // If activeFullscreenModals > 1, the lock is already in place, don't change anything
     } else {
@@ -217,9 +201,6 @@ export function FullscreenModal({
       const capturedState = savedScrollState;
       const capturedFallbackLock = (window as any).__fallbackScrollLock;
       
-      // Check if we're in a web view environment
-      const inWebView = isWebView();
-      
       // Only restore scroll when no other fullscreen modals are active
       if (activeFullscreenModals === 0) {
         // In web views, do immediate cleanup to prevent stuck pointer-events
@@ -230,12 +211,10 @@ export function FullscreenModal({
           
           // Restore scroll container if we locked it
           if (capturedState && capturedState.container) {
-            // Restore original styles first
+            // Restore original overflow style
             capturedState.container.style.overflow = capturedState.originalOverflow;
-            capturedState.container.style.pointerEvents = capturedState.originalPointerEvents;
             
-            // In web views, restore scroll position immediately
-            // In browsers, defer to next frame to avoid gesture interference
+            // Restore scroll position in next frame to avoid gesture interference
             const restoreScroll = () => {
               // Re-check counter again before final restore
               if (activeFullscreenModals > 0) return;
@@ -251,11 +230,11 @@ export function FullscreenModal({
               ensureSafeAreaVariables();
             };
             
-            if (inWebView || document.visibilityState !== 'visible') {
-              // Immediate restoration in web views or when page is hidden
+            if (document.visibilityState !== 'visible') {
+              // Immediate restoration when page is hidden
               restoreScroll();
             } else {
-              // Deferred restoration in browsers (only when visible)
+              // Deferred restoration when visible to avoid gesture interference
               requestAnimationFrame(restoreScroll);
             }
           } else if (capturedFallbackLock) {
@@ -266,8 +245,8 @@ export function FullscreenModal({
               delete (window as any).__fallbackScrollLock;
             }
             
-            // Ensure safe-area in next frame (or immediately in web views/hidden pages)
-            if (inWebView || document.visibilityState !== 'visible') {
+            // Ensure safe-area variables are applied
+            if (document.visibilityState !== 'visible') {
               ensureSafeAreaVariables();
             } else {
               requestAnimationFrame(() => {
@@ -280,11 +259,11 @@ export function FullscreenModal({
         
         // CRITICAL: If page is backgrounded, do immediate cleanup
         // requestAnimationFrame won't execute while page is hidden, causing stuck state
-        if (inWebView || document.visibilityState !== 'visible') {
-          // Immediate cleanup in web views or when page is hidden
+        if (document.visibilityState !== 'visible') {
+          // Immediate cleanup when page is hidden
           cleanupFn();
         } else {
-          // Double rAF in browsers for smooth gesture handling (only when visible)
+          // Deferred cleanup for smooth gesture handling when visible
           requestAnimationFrame(cleanupFn);
         }
       }
