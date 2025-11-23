@@ -16,6 +16,7 @@ export function isWebView(): boolean {
     'flutter',      // Flutter web view
     'dart',         // Dart runtime
     'flutterflow',  // FlutterFlow
+    'replit-bonsai', // FlutterFlow app wrapper for Replit
     'react-native', // React Native WebView
     'webview'       // Generic WebView
   ];
