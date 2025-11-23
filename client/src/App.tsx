@@ -18,6 +18,7 @@ import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
 import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
 import { initializePerformance, whenIdle } from "./lib/startup-performance";
+import { initializeFlutterFlowReload } from "@/utils/flutterflow-reload";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));
@@ -53,6 +54,9 @@ function Router() {
   
   // Initialize critical systems - defer non-critical operations
   useEffect(() => {
+    // CRITICAL: Initialize FlutterFlow reload-on-resume (fixes button freeze)
+    initializeFlutterFlowReload();
+    
     // CRITICAL FIX: Reset --nav-offset on mount to clear any stale cached values
     document.documentElement.style.setProperty('--nav-offset', '0px');
     
