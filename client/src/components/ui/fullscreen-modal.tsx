@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState, useEffect } from 'react';
 import { X, Info, Compass } from 'lucide-react';
 import logoImage from "@assets/1LO_1755590090315.png";
 import { FloatingSettings } from './floating-settings';
@@ -7,6 +7,7 @@ import { useLocation } from 'wouter';
 import { MiniCompassModal } from '@/components/modals/mini-compass-modal';
 import { ensureSafeAreaVariables } from '@/hooks/use-safe-area';
 import { getHebrewFontClass } from '@/lib/hebrewUtils';
+import { registerAction, unregisterAction } from '@/utils/dom-event-bridge';
 
 // Global counter and state to track active fullscreen modals
 // Prevents race conditions when closing one modal while another opens
@@ -118,6 +119,21 @@ export function FullscreenModal({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [, setLocation] = useLocation();
   const [showCompass, setShowCompass] = useState(false);
+
+  // Generate unique action ID for this modal instance
+  const actionId = useRef(`close-modal-${Math.random().toString(36).substr(2, 9)}`).current;
+
+  // Register DOM event bridge for resilient click handling in FlutterFlow
+  useEffect(() => {
+    registerAction(actionId, () => {
+      console.log('[DOM Bridge] Close button clicked via DOM bridge');
+      onClose();
+    });
+    
+    return () => {
+      unregisterAction(actionId);
+    };
+  }, [actionId, onClose]);
 
   // Use useLayoutEffect to ensure new modal increments counter before old modal's cleanup runs
   // This prevents race conditions in chained modal scenarios
@@ -398,6 +414,8 @@ export function FullscreenModal({
                   e.nativeEvent.stopImmediatePropagation();
                   onClose();
                 }}
+                data-action={actionId}
+                data-testid="button-close-modal"
                 className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
                 aria-label="Close fullscreen"
                 type="button"
@@ -416,6 +434,8 @@ export function FullscreenModal({
             e.nativeEvent.stopImmediatePropagation();
             onClose();
           }}
+          data-action={actionId}
+          data-testid="button-close-modal"
           className="absolute right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm hover:bg-white/90 transition-colors shadow-sm z-10"
           style={{ top: 'max(12px, env(safe-area-inset-top))' }}
           aria-label="Close"

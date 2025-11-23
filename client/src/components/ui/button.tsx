@@ -3,6 +3,7 @@ import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
+import { useDomBridgeAction } from "@/utils/dom-event-bridge"
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm platypi-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
@@ -40,12 +41,23 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, onClick, ...props }, ref) => {
+    // Add DOM bridge fallback for FlutterFlow resilience
+    const bridgeProps = onClick ? useDomBridgeAction(() => {
+      // Only call if the element isn't disabled
+      const element = ref && 'current' in ref ? ref.current : null;
+      if (element && !(element as HTMLButtonElement).disabled && onClick) {
+        onClick({} as any); // Bridge calls with empty event when React fails
+      }
+    }) : {};
+    
     const Comp = asChild ? Slot : "button"
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
+        onClick={onClick}
+        {...bridgeProps}
         {...props}
       />
     )
