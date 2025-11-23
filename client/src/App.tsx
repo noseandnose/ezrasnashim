@@ -18,7 +18,6 @@ import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
 import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
 import { initializePerformance, whenIdle } from "./lib/startup-performance";
-import { forceResetScrollLock } from "@/components/ui/fullscreen-modal";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));
@@ -169,170 +168,25 @@ export default function App() {
     }, 500);
   }, []);
   
-  // CRITICAL: Restore interactions after app resume
-  // PWA/app environments have unreliable visibilitychange events, so we listen to multiple signals
+  // Invalidate queries when app resumes to fetch fresh data
   useEffect(() => {
-    let pollInterval: NodeJS.Timeout | null = null;
-    
-    // Import isWebView dynamically
-    import('@/utils/environment').then(({ isWebView }) => {
-      const inWebView = isWebView();
-      
-      // CRITICAL FIX FOR FLUTTERFLOW: FlutterFlow web views suspend ALL events
-      // (visibilitychange, focus, pageshow) and requestAnimationFrame while backgrounded.
-      // We need a polling mechanism that works even when events don't fire.
-      if (inWebView) {
-        let lastVisibilityState = document.visibilityState;
-        let wasHidden = document.hidden;
-        
-        // Poll for visibility changes since FlutterFlow doesn't fire events reliably
-        pollInterval = setInterval(() => {
-          const currentVisibilityState = document.visibilityState;
-          const isHidden = document.hidden;
-          
-          // Detect transition from hidden to visible
-          if ((wasHidden && !isHidden) || (lastVisibilityState === 'hidden' && currentVisibilityState === 'visible')) {
-            console.log('[FlutterFlow Resume] Detected app resume via polling');
-            
-            // Use setTimeout (NOT requestAnimationFrame) for FlutterFlow
-            // rAF doesn't work in FlutterFlow web views
-            setTimeout(() => {
-              console.log('[FlutterFlow Resume] Forcing pointer-events restore');
-              
-              // Force restore ALL pointer-events immediately
-              const contentArea = document.querySelector('.content-area') as HTMLElement;
-              const mobileApp = document.querySelector('.mobile-app') as HTMLElement;
-              const bottomNav = document.querySelector('[data-bottom-nav]') as HTMLElement;
-              
-              if (contentArea) {
-                contentArea.style.pointerEvents = 'auto';
-                contentArea.style.overflow = 'auto';
-                console.log('[FlutterFlow Resume] .content-area pointer-events:', window.getComputedStyle(contentArea).pointerEvents);
-              }
-              
-              if (mobileApp) {
-                mobileApp.style.pointerEvents = 'auto';
-                mobileApp.style.overflow = 'auto';
-              }
-              
-              if (bottomNav) {
-                bottomNav.style.pointerEvents = 'auto';
-                console.log('[FlutterFlow Resume] bottom-nav pointer-events:', window.getComputedStyle(bottomNav).pointerEvents);
-              }
-              
-              // Restore body/html
-              document.body.style.overflow = 'auto';
-              document.body.style.pointerEvents = 'auto';
-              document.documentElement.style.overflow = 'auto';
-              
-              // Force restore all interactive elements
-              document.querySelectorAll('button, a, input, select, textarea').forEach(el => {
-                (el as HTMLElement).style.pointerEvents = 'auto';
-              });
-              
-              // Force reflow
-              document.body.offsetHeight;
-              
-              console.log('[FlutterFlow Resume] Pointer-events restore complete');
-              
-              // Invalidate queries after restore
-              const today = getLocalDateString();
-              queryClient.invalidateQueries({ queryKey: ['/api/home-summary', today] });
-              queryClient.invalidateQueries({ queryKey: ['/api/daily-completion'] });
-              queryClient.invalidateQueries({ queryKey: ['/api/global-progress'] });
-            }, 0); // Immediate setTimeout (not rAF)
-          }
-          
-          lastVisibilityState = currentVisibilityState;
-          wasHidden = isHidden;
-        }, 500); // Poll every 500ms
-      }
-    });
-    
-    // Shared helper to restore all interactions after app resume (for non-FlutterFlow)
-    const restoreInteractions = () => {
-      // Invalidate critical queries to fetch fresh data
-      const today = getLocalDateString();
-      queryClient.invalidateQueries({ queryKey: ['/api/home-summary', today] });
-      queryClient.invalidateQueries({ queryKey: ['/api/daily-completion'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/global-progress'] });
-      
-      // Force complete interaction restore after app resume
-      // This prevents buttons from becoming unresponsive after app minimize/resume
-      setTimeout(() => {
-        // CRITICAL FIX: Always force reset scroll locks FIRST, regardless of modal state
-        // The fullscreen modal uses requestAnimationFrame for cleanup, which doesn't run
-        // when the app is backgrounded, leaving pointer-events: none stuck on scroll container
-        forceResetScrollLock();
-        
-        // Also clear any other potential pointer-event locks
-        const scrollContainer = document.querySelector('[data-scroll-lock-target]') as HTMLElement 
-          ?? document.querySelector('.content-area') as HTMLElement;
-        
-        if (scrollContainer) {
-          scrollContainer.style.overflow = '';
-          scrollContainer.style.pointerEvents = '';
-        }
-        
-        // Restore body/html
-        document.body.style.overflow = '';
-        document.documentElement.style.overflow = '';
-        document.body.style.pointerEvents = '';
-        
-        // Force restore pointer events on all interactive elements
-        document.querySelectorAll('button, a, input, select, textarea').forEach(el => {
-          (el as HTMLElement).style.pointerEvents = '';
-        });
-        
-        // Force a reflow to ensure styles are applied
-        document.body.offsetHeight;
-        
-        // Now check if there are any ACTUALLY OPEN modals and reapply locks if needed
-        // Need to check both Radix dialogs AND fullscreen modals:
-        // - [role="dialog"][data-state="open"] for Radix dialogs
-        // - [data-fullscreen-modal] for custom fullscreen modals
-        const hasRadixModal = document.querySelector('[role="dialog"][data-state="open"]');
-        const hasFullscreenModal = document.querySelector('[data-fullscreen-modal]');
-        
-        if (hasRadixModal || hasFullscreenModal) {
-          // Modal is genuinely open - reapply scroll lock
-          if (scrollContainer) {
-            scrollContainer.style.overflow = 'hidden';
-          }
-        }
-      }, 100); // Small delay to ensure app is fully visible
-    };
-    
-    // Listen to visibilitychange (works in most browsers)
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        restoreInteractions();
+        const today = getLocalDateString();
+        queryClient.invalidateQueries({ queryKey: ['/api/home-summary', today] });
+        queryClient.invalidateQueries({ queryKey: ['/api/daily-completion'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/global-progress'] });
       }
-    };
-    
-    // Listen to focus (catches when app regains focus)
-    const handleFocus = () => {
-      restoreInteractions();
-    };
-    
-    // Listen to pageshow (catches bfcache restores and iOS PWA resume)
-    const handlePageShow = () => {
-      // Always restore on pageshow, including persisted (bfcache) events
-      restoreInteractions();
     };
     
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
-    window.addEventListener('pageshow', handlePageShow);
+    window.addEventListener('focus', handleVisibilityChange);
+    window.addEventListener('pageshow', handleVisibilityChange);
     
     return () => {
-      // Clean up FlutterFlow polling interval if it exists
-      if (pollInterval) {
-        clearInterval(pollInterval);
-      }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleFocus);
-      window.removeEventListener('pageshow', handlePageShow);
+      window.removeEventListener('focus', handleVisibilityChange);
+      window.removeEventListener('pageshow', handleVisibilityChange);
     };
   }, []);
 
