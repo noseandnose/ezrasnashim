@@ -8,11 +8,15 @@
  * registered handlers via data-action attributes, bypassing React entirely.
  */
 
+import { useEffect, useRef } from 'react';
+
 type ActionHandler = (element: HTMLElement, event: MouseEvent | TouchEvent) => void;
 
 const actionHandlers = new Map<string, ActionHandler>();
 
 let bridgeInitialized = false;
+let reactDelegationHealthy = true;
+let lastHealthCheck = Date.now();
 
 /**
  * Register a named action handler
@@ -29,6 +33,34 @@ export function registerAction(name: string, handler: ActionHandler) {
  */
 export function unregisterAction(name: string) {
   actionHandlers.delete(name);
+}
+
+/**
+ * React hook for resilient button/action handlers
+ * Automatically registers and cleans up DOM bridge actions
+ * 
+ * Usage:
+ * const bridgeProps = useDomBridgeAction(() => {
+ *   // your click handler
+ * });
+ * <button {...bridgeProps}>Click me</button>
+ */
+export function useDomBridgeAction(handler: () => void) {
+  const actionId = useRef(`action-${Math.random().toString(36).substr(2, 9)}`).current;
+  
+  useEffect(() => {
+    registerAction(actionId, () => {
+      handler();
+    });
+    
+    return () => {
+      unregisterAction(actionId);
+    };
+  }, [actionId, handler]);
+  
+  return {
+    'data-action': actionId
+  };
 }
 
 /**
@@ -52,7 +84,7 @@ function initializeBridge() {
       const action = currentElement.getAttribute('data-action');
       
       if (action && actionHandlers.has(action)) {
-        console.log('[DOM Bridge] Invoking action:', action);
+        console.log('[DOM Bridge] Invoking registered action:', action);
         const handler = actionHandlers.get(action)!;
         
         try {
@@ -61,7 +93,7 @@ function initializeBridge() {
           console.error('[DOM Bridge] Error in action handler:', action, error);
         }
         
-        // Action handled, stop here
+        // Action handled
         return;
       }
       
@@ -81,6 +113,28 @@ function initializeBridge() {
     document.addEventListener('touchend', handleClick, true);
     console.log('[DOM Bridge] Re-attached event listeners');
   }, 5000);
+  
+  // Health check: Detect when React's event delegation fails
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      const now = Date.now();
+      console.log('[DOM Bridge] Page resumed, checking React health');
+      
+      // Test if React's delegation is working by checking for React-managed properties
+      const reactRoot = document.getElementById('root');
+      if (reactRoot) {
+        const reactKeys = Object.keys(reactRoot).filter(k => k.startsWith('__react'));
+        if (reactKeys.length === 0) {
+          console.warn('[DOM Bridge] React root properties missing - delegation may be broken!');
+          reactDelegationHealthy = false;
+        } else {
+          reactDelegationHealthy = true;
+        }
+      }
+      
+      lastHealthCheck = now;
+    }
+  });
   
   // Diagnostic: Log when document listeners might be removed
   if (process.env.NODE_ENV === 'development') {
