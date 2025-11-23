@@ -60,51 +60,9 @@ function forceResetScrollLock() {
   activeFullscreenModals = 0;
 }
 
-// Make available globally for debugging and create persistent resume handler
+// Make available globally for debugging
 if (typeof window !== 'undefined') {
   (window as any).__forceResetScrollLock = forceResetScrollLock;
-  
-  // CRITICAL: Persistent resume handler that survives FlutterFlow backgrounding
-  // FlutterFlow web views detach listeners, so we store handler on window and re-attach if needed
-  const resumeHandler = () => {
-    if (document.visibilityState === 'visible' || !document.hidden) {
-      // Page resumed - if no modals are active, ensure scroll lock is released
-      if (activeFullscreenModals === 0) {
-        console.log('[Global Cleanup] Page resumed with no active modals - forcing scroll lock reset');
-        forceResetScrollLock();
-      } else {
-        console.log('[Global Cleanup] Page resumed with', activeFullscreenModals, 'active modal(s) - preserving locks');
-      }
-    }
-  };
-  
-  // Store handler on window so it persists across FlutterFlow suspensions
-  (window as any).__resumeHandler = resumeHandler;
-  
-  // Attach to multiple resume signals for maximum reliability in FlutterFlow
-  document.addEventListener('visibilitychange', resumeHandler);
-  document.addEventListener('webkitvisibilitychange', resumeHandler); // Safari/WebKit
-  window.addEventListener('focus', resumeHandler);
-  window.addEventListener('pageshow', resumeHandler);
-  
-  // Re-attach handler every 10 seconds if it gets detached (FlutterFlow workaround)
-  setInterval(() => {
-    const handler = (window as any).__resumeHandler;
-    if (handler) {
-      // Re-register to ensure it's still attached
-      document.removeEventListener('visibilitychange', handler);
-      document.removeEventListener('webkitvisibilitychange', handler);
-      window.removeEventListener('focus', handler);
-      window.removeEventListener('pageshow', handler);
-      
-      document.addEventListener('visibilitychange', handler);
-      document.addEventListener('webkitvisibilitychange', handler);
-      window.addEventListener('focus', handler);
-      window.addEventListener('pageshow', handler);
-    }
-  }, 10000);
-  
-  console.log('[Global Cleanup] Resume handler installed with multi-signal detection');
 }
 
 // Export helper functions for external use (e.g., App.tsx visibility handler)
@@ -173,53 +131,14 @@ export function FullscreenModal({
       return;
     }
 
-    // Log environment detection for debugging
+    // Detect environment to determine scroll lock strategy
     const inWebView = isWebView();
     if (inWebView) {
-      console.log('[FullscreenModal] Web view environment detected - using immediate cleanup');
+      console.log('[FullscreenModal] Web view detected - using overflow-only scroll lock (no pointer-events)');
     }
 
     // Increment the modal counter
     activeFullscreenModals++;
-
-    // Fix for buttons not working after app minimize/resume
-    // Restore pointer events and scroll lock when app becomes visible again
-    // WITHOUT remounting (which would lose user state/data)
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        // Page is being hidden/backgrounded - no action needed
-        return;
-      }
-      
-      // Page is visible again - restore interaction capabilities
-      if (activeFullscreenModals > 0) {
-        // Modal(s) are still open - reapply scroll lock and pointer events
-        const scrollContainer = document.querySelector('[data-scroll-lock-target]') as HTMLElement 
-          ?? document.querySelector('.content-area') as HTMLElement;
-        
-        if (scrollContainer) {
-          scrollContainer.style.overflow = 'hidden';
-          scrollContainer.style.pointerEvents = 'none';
-        } else {
-          // Fallback: lock body
-          document.body.style.overflow = 'hidden';
-          document.documentElement.style.overflow = 'hidden';
-        }
-        
-        // Restore pointer events on the modal itself
-        const modalElement = document.querySelector('[data-fullscreen-modal]') as HTMLElement;
-        if (modalElement) {
-          modalElement.style.pointerEvents = 'auto';
-          // Force a small style recalc to ensure browser re-processes event handlers
-          void modalElement.offsetHeight;
-        }
-      } else {
-        // No modals open - ensure scroll is unlocked
-        resetScrollLockIfNeeded();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     // Handle escape key
     const handleEscape = (e: KeyboardEvent) => {
@@ -261,7 +180,12 @@ export function FullscreenModal({
         
         // Lock the scroll container
         scrollContainer.style.overflow = 'hidden';
-        scrollContainer.style.pointerEvents = 'none';
+        
+        // Only use pointer-events locking in browsers (not webviews)
+        // Webviews use overflow-only locking to avoid button freeze after backgrounding
+        if (!inWebView) {
+          scrollContainer.style.pointerEvents = 'none';
+        }
       }
       // If activeFullscreenModals > 1, the lock is already in place, don't change anything
     } else {
@@ -368,7 +292,6 @@ export function FullscreenModal({
       document.removeEventListener('keydown', handleEscape, true);
       window.removeEventListener('closeFullscreen', handleCloseFullscreen);
       window.removeEventListener('popstate', handlePopState, true);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [isOpen, onClose]);
 
