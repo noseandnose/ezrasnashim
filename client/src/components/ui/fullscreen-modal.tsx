@@ -60,15 +60,14 @@ function forceResetScrollLock() {
   activeFullscreenModals = 0;
 }
 
-// Make available globally for debugging
+// Make available globally for debugging and create persistent resume handler
 if (typeof window !== 'undefined') {
   (window as any).__forceResetScrollLock = forceResetScrollLock;
   
-  // CRITICAL: Global visibility listener that survives React lifecycle suspension
-  // This fixes button freeze in FlutterFlow web views after backgrounding
-  // React's event delegation breaks when pointer-events: none is left on body/containers
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
+  // CRITICAL: Persistent resume handler that survives FlutterFlow backgrounding
+  // FlutterFlow web views detach listeners, so we store handler on window and re-attach if needed
+  const resumeHandler = () => {
+    if (document.visibilityState === 'visible' || !document.hidden) {
       // Page resumed - if no modals are active, ensure scroll lock is released
       if (activeFullscreenModals === 0) {
         console.log('[Global Cleanup] Page resumed with no active modals - forcing scroll lock reset');
@@ -77,7 +76,35 @@ if (typeof window !== 'undefined') {
         console.log('[Global Cleanup] Page resumed with', activeFullscreenModals, 'active modal(s) - preserving locks');
       }
     }
-  });
+  };
+  
+  // Store handler on window so it persists across FlutterFlow suspensions
+  (window as any).__resumeHandler = resumeHandler;
+  
+  // Attach to multiple resume signals for maximum reliability in FlutterFlow
+  document.addEventListener('visibilitychange', resumeHandler);
+  document.addEventListener('webkitvisibilitychange', resumeHandler); // Safari/WebKit
+  window.addEventListener('focus', resumeHandler);
+  window.addEventListener('pageshow', resumeHandler);
+  
+  // Re-attach handler every 10 seconds if it gets detached (FlutterFlow workaround)
+  setInterval(() => {
+    const handler = (window as any).__resumeHandler;
+    if (handler) {
+      // Re-register to ensure it's still attached
+      document.removeEventListener('visibilitychange', handler);
+      document.removeEventListener('webkitvisibilitychange', handler);
+      window.removeEventListener('focus', handler);
+      window.removeEventListener('pageshow', handler);
+      
+      document.addEventListener('visibilitychange', handler);
+      document.addEventListener('webkitvisibilitychange', handler);
+      window.addEventListener('focus', handler);
+      window.addEventListener('pageshow', handler);
+    }
+  }, 10000);
+  
+  console.log('[Global Cleanup] Resume handler installed with multi-signal detection');
 }
 
 // Export helper functions for external use (e.g., App.tsx visibility handler)
