@@ -127,7 +127,8 @@ export function FullscreenModal({
   useEffect(() => {
     registerAction(actionId, () => {
       console.log('[DOM Bridge] Close button clicked via DOM bridge');
-      onClose();
+      // Defer onClose to prevent click-through to buttons beneath modal
+      requestAnimationFrame(() => onClose());
     });
     
     return () => {
@@ -412,7 +413,8 @@ export function FullscreenModal({
                   e.preventDefault();
                   e.stopPropagation();
                   e.nativeEvent.stopImmediatePropagation();
-                  onClose();
+                  // Defer onClose to prevent click-through to buttons beneath modal
+                  requestAnimationFrame(() => onClose());
                 }}
                 data-action={actionId}
                 data-testid="button-close-modal"
@@ -432,7 +434,8 @@ export function FullscreenModal({
             e.preventDefault();
             e.stopPropagation();
             e.nativeEvent.stopImmediatePropagation();
-            onClose();
+            // Defer onClose to prevent click-through to buttons beneath modal
+            requestAnimationFrame(() => onClose());
           }}
           data-action={actionId}
           data-testid="button-close-modal"

@@ -20,14 +20,35 @@ const DEBOUNCE_MS = 1000; // Prevent multiple rapid reloads
 export function initializeFlutterFlowReload() {
   if (reloadInitialized || typeof window === 'undefined') return;
   
-  // Only activate in webview environments (FlutterFlow, etc.)
-  if (!isWebView()) {
-    console.log('[FlutterFlow Reload] Not in webview, skipping reload-on-resume');
+  // Log user agent for debugging
+  console.log('[FlutterFlow Reload] User Agent:', navigator.userAgent);
+  console.log('[FlutterFlow Reload] isWebView():', isWebView());
+  
+  // Check for manual override via localStorage (for testing)
+  const forceReload = localStorage.getItem('forceReloadOnResume') === 'true';
+  if (forceReload) {
+    console.log('[FlutterFlow Reload] Manual override enabled via localStorage');
+  }
+  
+  // Check for FlutterFlow-specific indicators
+  const hasFlutterGlobal = !!(window as any).flutter || !!(window as any).Flutter;
+  const inFlutterFlow = hasFlutterGlobal || forceReload;
+  
+  console.log('[FlutterFlow Reload] FlutterFlow detected:', {
+    hasFlutterGlobal,
+    forceReload,
+    willActivate: isWebView() || inFlutterFlow
+  });
+  
+  // Activate in webview OR if FlutterFlow indicators present OR manual override
+  if (!isWebView() && !inFlutterFlow) {
+    console.log('[FlutterFlow Reload] Not in webview/FlutterFlow, skipping reload-on-resume');
+    console.log('[FlutterFlow Reload] To enable manually, run: localStorage.setItem("forceReloadOnResume", "true")');
     return;
   }
   
   reloadInitialized = true;
-  console.log('[FlutterFlow Reload] Initializing reload-on-resume for webview environment');
+  console.log('[FlutterFlow Reload] ✓ Reload-on-resume ACTIVATED');
   
   // Track if we were hidden
   let wasHidden = document.hidden;
