@@ -1,11 +1,13 @@
 /**
- * Mobile reload-on-resume handler (DISABLED - Root cause fixed in dom-event-bridge.ts)
+ * Mobile reload-on-resume handler
  * 
- * This was a workaround for button freeze issues caused by the DOM Event Bridge's
- * periodic listener removal/reattachment. Now that the root cause is fixed,
- * this reload mechanism is no longer needed and would only break audio playback.
+ * Problem: Mobile webviews (FlutterFlow, etc.) sometimes swallow touchend/click events 
+ * after resume, making all buttons unresponsive even though CSS :active still works.
  * 
- * Keeping this file for reference/emergency rollback if needed.
+ * Solution: Reload the page when app regains visibility after being backgrounded.
+ * Activates automatically on all mobile devices (iOS, Android) to ensure FlutterFlow
+ * functionality. Regular mobile browser users may experience a brief reload after
+ * returning from background, but this ensures button interactivity is restored.
  */
 
 let reloadInitialized = false;
@@ -13,24 +15,35 @@ let lastVisibilityChange = 0;
 const DEBOUNCE_MS = 1000; // Prevent multiple rapid reloads
 
 /**
- * Initialize mobile reload-on-resume behavior (DISABLED)
- * Root cause fixed - no longer needed
+ * Initialize mobile reload-on-resume behavior
+ * Call this once on app startup
  */
 export function initializeFlutterFlowReload() {
   if (reloadInitialized || typeof window === 'undefined') return;
   
   const isDebugMode = localStorage.getItem('debugReloadOnResume') === 'true';
   
+  // Check if we're on a mobile device
+  const isMobile = /mobile|android|iphone|ipad|ipod/i.test(navigator.userAgent);
+  
+  // Only log in debug mode to reduce production console noise
   if (isDebugMode) {
-    console.log('[FlutterFlow Reload] DISABLED - Root cause fixed in DOM Event Bridge');
-    console.log('[FlutterFlow Reload] Buttons should work without reload workaround');
+    console.log('[FlutterFlow Reload] User Agent:', navigator.userAgent);
+    console.log('[FlutterFlow Reload] Mobile device:', isMobile);
   }
   
-  // DO NOT activate reload - root cause is fixed
-  // If buttons freeze again, re-enable by uncommenting below and removing early return
-  return;
+  // Activate on all mobile devices to ensure FlutterFlow functionality
+  if (!isMobile) {
+    if (isDebugMode) {
+      console.log('[FlutterFlow Reload] Not a mobile device, skipping reload-on-resume');
+    }
+    return;
+  }
   
   reloadInitialized = true;
+  if (isDebugMode) {
+    console.log('[FlutterFlow Reload] ✓ Reload-on-resume ACTIVATED (mobile device detected)');
+  }
   
   // Track if we were hidden
   let wasHidden = document.hidden;

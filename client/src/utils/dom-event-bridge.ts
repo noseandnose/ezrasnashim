@@ -65,55 +65,6 @@ export function useDomBridgeAction(handler: () => void) {
  * Initialize the DOM event bridge
  * Attaches a capture-phase listener to handle clicks even when React fails
  */
-let handleClick: ((e: MouseEvent | TouchEvent) => void) | null = null;
-
-function attachListeners() {
-  const isDebugMode = localStorage.getItem('debugDOMBridge') === 'true';
-  
-  if (!handleClick) {
-    // Create the handler only once
-    handleClick = (e: MouseEvent | TouchEvent) => {
-      const target = e.target as HTMLElement;
-      
-      // Walk up the DOM tree to find an element with data-action
-      let currentElement: HTMLElement | null = target;
-      while (currentElement && currentElement !== document.body) {
-        const action = currentElement.getAttribute('data-action');
-        
-        if (action && actionHandlers.has(action)) {
-          if (isDebugMode) {
-            console.log('[DOM Bridge] Invoking registered action:', action);
-          }
-          const handler = actionHandlers.get(action)!;
-          
-          try {
-            handler(currentElement, e);
-          } catch (error) {
-            console.error('[DOM Bridge] Error in action handler:', action, error);
-          }
-          
-          // Action handled
-          return;
-        }
-        
-        currentElement = currentElement.parentElement;
-      }
-    };
-  }
-  
-  // Remove existing listeners first (idempotent)
-  document.removeEventListener('click', handleClick, true);
-  document.removeEventListener('touchend', handleClick, true);
-  
-  // Attach both click and touchend for maximum compatibility
-  document.addEventListener('click', handleClick, true);
-  document.addEventListener('touchend', handleClick, true);
-  
-  if (isDebugMode) {
-    console.log('[DOM Bridge] Event listeners (re)attached');
-  }
-}
-
 function initializeBridge() {
   if (typeof window === 'undefined' || bridgeInitialized) return;
   
@@ -125,65 +76,76 @@ function initializeBridge() {
     console.log('[DOM Bridge] Initializing resilient click handler for FlutterFlow');
   }
   
-  // Initial attachment
-  attachListeners();
-  
-  // Re-attach listeners when page becomes visible again (after background/resume)
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-      if (isDebugMode) {
-        console.log('[DOM Bridge] Page resumed - re-attaching listeners');
-      }
-      // Re-attach to ensure listeners survive FlutterFlow's background/resume cycle
-      attachListeners();
+  // Use capture phase to catch events before they might be stopped
+  const handleClick = (e: MouseEvent | TouchEvent) => {
+    const target = e.target as HTMLElement;
+    
+    // Walk up the DOM tree to find an element with data-action
+    let currentElement: HTMLElement | null = target;
+    while (currentElement && currentElement !== document.body) {
+      const action = currentElement.getAttribute('data-action');
       
-      // Health check: Detect when React's event delegation fails
-      if (isDebugMode) {
-        const reactRoot = document.getElementById('root');
-        if (reactRoot) {
-          const reactKeys = Object.keys(reactRoot).filter(k => k.startsWith('__react'));
-          if (reactKeys.length === 0) {
-            console.warn('[DOM Bridge] React root properties missing - delegation may be broken!');
-          } else {
-            console.log('[DOM Bridge] React event delegation appears healthy');
-          }
+      if (action && actionHandlers.has(action)) {
+        if (isDebugMode) {
+          console.log('[DOM Bridge] Invoking registered action:', action);
+        }
+        const handler = actionHandlers.get(action)!;
+        
+        try {
+          handler(currentElement, e);
+        } catch (error) {
+          console.error('[DOM Bridge] Error in action handler:', action, error);
+        }
+        
+        // Action handled
+        return;
+      }
+      
+      currentElement = currentElement.parentElement;
+    }
+  };
+  
+  // Attach both click and touchend for maximum compatibility
+  document.addEventListener('click', handleClick, true);
+  document.addEventListener('touchend', handleClick, true);
+  
+  // Re-attach every 5 seconds in case FlutterFlow removes them
+  setInterval(() => {
+    document.removeEventListener('click', handleClick, true);
+    document.removeEventListener('touchend', handleClick, true);
+    document.addEventListener('click', handleClick, true);
+    document.addEventListener('touchend', handleClick, true);
+    // Only log in debug mode to reduce console noise
+  }, 5000);
+  
+  // Health check: Detect when React's event delegation fails
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && isDebugMode) {
+      console.log('[DOM Bridge] Page resumed, checking React health');
+      
+      // Test if React's delegation is working by checking for React-managed properties
+      const reactRoot = document.getElementById('root');
+      if (reactRoot) {
+        const reactKeys = Object.keys(reactRoot).filter(k => k.startsWith('__react'));
+        if (reactKeys.length === 0) {
+          console.warn('[DOM Bridge] React root properties missing - delegation may be broken!');
+        } else {
+          console.log('[DOM Bridge] React event delegation appears healthy');
         }
       }
     }
   });
   
-  // NUCLEAR OPTION: Make our listeners indestructible
-  // FlutterFlow tries to remove ALL document listeners after first tap post-resume
-  // We intercept removeEventListener and immediately re-attach our handlers
-  const originalRemoveEventListener = document.removeEventListener.bind(document);
-  document.removeEventListener = function(type: string, listener: any, options?: any) {
-    const result = originalRemoveEventListener(type, listener, options);
-    
-    // If FlutterFlow (or anyone) tries to remove click/touchend listeners from document
-    if ((type === 'click' || type === 'touchend') && listener !== handleClick) {
-      if (isDebugMode) {
-        console.warn('[DOM Bridge] External code removed', type, 'listener - immediately re-attaching our handlers');
+  // Diagnostic: Log when document listeners might be removed
+  if (process.env.NODE_ENV === 'development') {
+    const originalRemoveEventListener = document.removeEventListener.bind(document);
+    document.removeEventListener = function(type: string, listener: any, options?: any) {
+      if (type === 'click' && listener !== handleClick) {
+        console.warn('[DOM Bridge Diagnostic] External code removing click listener from document');
       }
-      
-      // Re-attach our handlers on the next microtask (gives FlutterFlow time to finish cleanup)
-      queueMicrotask(() => {
-        attachListeners();
-      });
-    }
-    
-    // Never allow removal of OUR handlers
-    if ((type === 'click' || type === 'touchend') && listener === handleClick) {
-      if (isDebugMode) {
-        console.warn('[DOM Bridge] Blocked attempt to remove our protected', type, 'handler - re-attaching');
-      }
-      // Re-attach immediately
-      queueMicrotask(() => {
-        attachListeners();
-      });
-    }
-    
-    return result;
-  };
+      return originalRemoveEventListener(type, listener, options);
+    };
+  }
 }
 
 /**
