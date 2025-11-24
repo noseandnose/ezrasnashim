@@ -152,16 +152,38 @@ function initializeBridge() {
     }
   });
   
-  // Diagnostic: Log when document listeners might be removed
-  if (process.env.NODE_ENV === 'development') {
-    const originalRemoveEventListener = document.removeEventListener.bind(document);
-    document.removeEventListener = function(type: string, listener: any, options?: any) {
-      if (type === 'click' && listener !== handleClick) {
-        console.warn('[DOM Bridge Diagnostic] External code removing click listener from document');
+  // NUCLEAR OPTION: Make our listeners indestructible
+  // FlutterFlow tries to remove ALL document listeners after first tap post-resume
+  // We intercept removeEventListener and immediately re-attach our handlers
+  const originalRemoveEventListener = document.removeEventListener.bind(document);
+  document.removeEventListener = function(type: string, listener: any, options?: any) {
+    const result = originalRemoveEventListener(type, listener, options);
+    
+    // If FlutterFlow (or anyone) tries to remove click/touchend listeners from document
+    if ((type === 'click' || type === 'touchend') && listener !== handleClick) {
+      if (isDebugMode) {
+        console.warn('[DOM Bridge] External code removed', type, 'listener - immediately re-attaching our handlers');
       }
-      return originalRemoveEventListener(type, listener, options);
-    };
-  }
+      
+      // Re-attach our handlers on the next microtask (gives FlutterFlow time to finish cleanup)
+      queueMicrotask(() => {
+        attachListeners();
+      });
+    }
+    
+    // Never allow removal of OUR handlers
+    if ((type === 'click' || type === 'touchend') && listener === handleClick) {
+      if (isDebugMode) {
+        console.warn('[DOM Bridge] Blocked attempt to remove our protected', type, 'handler - re-attaching');
+      }
+      // Re-attach immediately
+      queueMicrotask(() => {
+        attachListeners();
+      });
+    }
+    
+    return result;
+  };
 }
 
 /**
