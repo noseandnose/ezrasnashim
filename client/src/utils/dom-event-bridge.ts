@@ -109,14 +109,9 @@ function initializeBridge() {
   document.addEventListener('click', handleClick, true);
   document.addEventListener('touchend', handleClick, true);
   
-  // Re-attach every 5 seconds in case FlutterFlow removes them
-  setInterval(() => {
-    document.removeEventListener('click', handleClick, true);
-    document.removeEventListener('touchend', handleClick, true);
-    document.addEventListener('click', handleClick, true);
-    document.addEventListener('touchend', handleClick, true);
-    // Only log in debug mode to reduce console noise
-  }, 5000);
+  if (isDebugMode) {
+    console.log('[DOM Bridge] Event listeners attached');
+  }
   
   // Health check: Detect when React's event delegation fails
   document.addEventListener('visibilitychange', () => {
