@@ -126,7 +126,6 @@ export function FullscreenModal({
   // Register DOM event bridge for resilient click handling in FlutterFlow
   useEffect(() => {
     registerAction(actionId, () => {
-      console.log('[DOM Bridge] Close button clicked via DOM bridge');
       // Defer onClose to prevent click-through to buttons beneath modal
       requestAnimationFrame(() => onClose());
     });
@@ -396,7 +395,6 @@ export function FullscreenModal({
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        console.log('Info button clicked directly');
                         onInfoClick?.(!showInfoPopover);
                       }}
                     >
