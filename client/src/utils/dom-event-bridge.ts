@@ -65,6 +65,55 @@ export function useDomBridgeAction(handler: () => void) {
  * Initialize the DOM event bridge
  * Attaches a capture-phase listener to handle clicks even when React fails
  */
+let handleClick: ((e: MouseEvent | TouchEvent) => void) | null = null;
+
+function attachListeners() {
+  const isDebugMode = localStorage.getItem('debugDOMBridge') === 'true';
+  
+  if (!handleClick) {
+    // Create the handler only once
+    handleClick = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement;
+      
+      // Walk up the DOM tree to find an element with data-action
+      let currentElement: HTMLElement | null = target;
+      while (currentElement && currentElement !== document.body) {
+        const action = currentElement.getAttribute('data-action');
+        
+        if (action && actionHandlers.has(action)) {
+          if (isDebugMode) {
+            console.log('[DOM Bridge] Invoking registered action:', action);
+          }
+          const handler = actionHandlers.get(action)!;
+          
+          try {
+            handler(currentElement, e);
+          } catch (error) {
+            console.error('[DOM Bridge] Error in action handler:', action, error);
+          }
+          
+          // Action handled
+          return;
+        }
+        
+        currentElement = currentElement.parentElement;
+      }
+    };
+  }
+  
+  // Remove existing listeners first (idempotent)
+  document.removeEventListener('click', handleClick, true);
+  document.removeEventListener('touchend', handleClick, true);
+  
+  // Attach both click and touchend for maximum compatibility
+  document.addEventListener('click', handleClick, true);
+  document.addEventListener('touchend', handleClick, true);
+  
+  if (isDebugMode) {
+    console.log('[DOM Bridge] Event listeners (re)attached');
+  }
+}
+
 function initializeBridge() {
   if (typeof window === 'undefined' || bridgeInitialized) return;
   
@@ -76,56 +125,28 @@ function initializeBridge() {
     console.log('[DOM Bridge] Initializing resilient click handler for FlutterFlow');
   }
   
-  // Use capture phase to catch events before they might be stopped
-  const handleClick = (e: MouseEvent | TouchEvent) => {
-    const target = e.target as HTMLElement;
-    
-    // Walk up the DOM tree to find an element with data-action
-    let currentElement: HTMLElement | null = target;
-    while (currentElement && currentElement !== document.body) {
-      const action = currentElement.getAttribute('data-action');
-      
-      if (action && actionHandlers.has(action)) {
-        if (isDebugMode) {
-          console.log('[DOM Bridge] Invoking registered action:', action);
-        }
-        const handler = actionHandlers.get(action)!;
-        
-        try {
-          handler(currentElement, e);
-        } catch (error) {
-          console.error('[DOM Bridge] Error in action handler:', action, error);
-        }
-        
-        // Action handled
-        return;
-      }
-      
-      currentElement = currentElement.parentElement;
-    }
-  };
+  // Initial attachment
+  attachListeners();
   
-  // Attach both click and touchend for maximum compatibility
-  document.addEventListener('click', handleClick, true);
-  document.addEventListener('touchend', handleClick, true);
-  
-  if (isDebugMode) {
-    console.log('[DOM Bridge] Event listeners attached');
-  }
-  
-  // Health check: Detect when React's event delegation fails
+  // Re-attach listeners when page becomes visible again (after background/resume)
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && isDebugMode) {
-      console.log('[DOM Bridge] Page resumed, checking React health');
+    if (document.visibilityState === 'visible') {
+      if (isDebugMode) {
+        console.log('[DOM Bridge] Page resumed - re-attaching listeners');
+      }
+      // Re-attach to ensure listeners survive FlutterFlow's background/resume cycle
+      attachListeners();
       
-      // Test if React's delegation is working by checking for React-managed properties
-      const reactRoot = document.getElementById('root');
-      if (reactRoot) {
-        const reactKeys = Object.keys(reactRoot).filter(k => k.startsWith('__react'));
-        if (reactKeys.length === 0) {
-          console.warn('[DOM Bridge] React root properties missing - delegation may be broken!');
-        } else {
-          console.log('[DOM Bridge] React event delegation appears healthy');
+      // Health check: Detect when React's event delegation fails
+      if (isDebugMode) {
+        const reactRoot = document.getElementById('root');
+        if (reactRoot) {
+          const reactKeys = Object.keys(reactRoot).filter(k => k.startsWith('__react'));
+          if (reactKeys.length === 0) {
+            console.warn('[DOM Bridge] React root properties missing - delegation may be broken!');
+          } else {
+            console.log('[DOM Bridge] React event delegation appears healthy');
+          }
         }
       }
     }
