@@ -1002,7 +1002,7 @@ export default function TableModals() {
                   : "Recipe provided with permission by Kosher.com. Visit Kosher.com for thousands more delicious kosher recipes!"}
                 labelHtml={!!recipeContent.thankYouMessage}
                 logoUrl={recipeContent.attributionLogoUrl}
-                aboutText={recipeContent.attributionAboutText}
+                aboutText={recipeContent.attributionAboutText || "Kosher.com is the premier destination for kosher recipes, featuring thousands of delicious dishes for every occasion, from weeknight dinners to Shabbos and holiday meals."}
                 websiteUrl={recipeContent.websiteUrl || "https://kosher.com"}
                 websiteLabel="Visit Kosher.com"
                 emailAddress={recipeContent.emailAddress}
@@ -1180,7 +1180,7 @@ export default function TableModals() {
               <AttributionSection
                 label={inspirationContent.thankYouLabel || "Thank you to YidWithAKid for providing this Table inspiration"}
                 logoUrl={inspirationContent.attributionLogoUrl}
-                aboutText={inspirationContent.attributionAboutText}
+                aboutText={inspirationContent.attributionAboutText || "YidWithAKid shares creative ideas for bringing joy and meaning to Jewish family life through crafts, activities, and inspiration for your home and Shabbos table."}
                 websiteUrl={inspirationContent.websiteUrl || "https://www.instagram.com/yidwithakid/"}
                 websiteLabel="Follow on Instagram"
                 emailAddress={inspirationContent.emailAddress}

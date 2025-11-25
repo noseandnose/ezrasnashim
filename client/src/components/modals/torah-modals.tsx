@@ -969,7 +969,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               <AttributionSection
                 label={halachaContent.attributionLabel || "Thank you to Rabbi Daniel Braude for this content"}
                 logoUrl={halachaContent.attributionLogoUrl}
-                aboutText={halachaContent.attributionAboutText}
+                aboutText={halachaContent.attributionAboutText || "Rabbi Daniel Braude is a Torah educator whose 'Learn Shabbos in Just 3 Minutes a Day' book makes the complex laws of Shabbos accessible and engaging for everyone."}
                 websiteUrl="https://feldheim.com/learn-shabbos-in-just-3-minutes-a-day"
                 websiteLabel="Learn Shabbos in just 3 minutes a day"
               />
@@ -1055,7 +1055,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               <AttributionSection
                 label={featuredContent.attributionLabel || `Thank you to ${featuredContent.provider || 'Rabbi Daniel Braude'} for this content`}
                 logoUrl={featuredContent.attributionLogoUrl}
-                aboutText={featuredContent.attributionAboutText}
+                aboutText={featuredContent.attributionAboutText || "Rabbi Daniel Braude is a Torah educator whose 'Learn Hilchos Lashon Hara in Just 3 Minutes a Day' book makes the laws of proper speech accessible and practical for daily life."}
                 websiteUrl={featuredContent.provider === 'Rabbi Daniel Braude' ? "https://feldheim.com/learn-hilchos-lashon-hara-in-just-3-minutes-a-day" : undefined}
                 websiteLabel="Learn Hilchos Lashon Hara in just 3 minutes a day"
               />

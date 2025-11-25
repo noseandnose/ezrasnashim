@@ -120,8 +120,8 @@ export default function DailyChizukModal() {
           <AttributionSection
             label={chizukContent.attributionLabel || `Thank you to ${chizukContent.speaker || 'Rabbi David Ashear'} for this content`}
             logoUrl={chizukContent.attributionLogoUrl}
-            aboutText={chizukContent.attributionAboutText}
-            websiteUrl={chizukContent.speakerWebsite}
+            aboutText={chizukContent.attributionAboutText || "Rabbi David Ashear is a renowned speaker and author, best known for his 'Living Emunah' series which has inspired countless individuals to strengthen their faith and trust in Hashem."}
+            websiteUrl={chizukContent.speakerWebsite || "https://www.livingemunah.com/"}
             websiteLabel="Visit Website"
           />
 

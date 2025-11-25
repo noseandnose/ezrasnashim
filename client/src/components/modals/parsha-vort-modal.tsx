@@ -128,7 +128,7 @@ export default function ParshaVortModal() {
               : `Thank you to ${parshaVort.speaker || 'the speaker'} for this content`}
             labelHtml={!!parshaVort.thankYouMessage}
             logoUrl={parshaVort.attributionLogoUrl}
-            aboutText={parshaVort.attributionAboutText}
+            aboutText={parshaVort.attributionAboutText || `${parshaVort.speaker || 'This speaker'} shares inspiring Torah insights on the weekly parsha to help you connect more deeply with the timeless wisdom of the Torah.`}
             websiteUrl={parshaVort.speakerWebsite}
             websiteLabel="Visit Website"
           />

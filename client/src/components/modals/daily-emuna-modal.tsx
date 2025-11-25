@@ -120,8 +120,8 @@ export default function DailyEmunaModal() {
           <AttributionSection
             label={emunaContent.attributionLabel || `Thank you to ${emunaContent.speaker || 'Rav Reuven Garber'} and TransformYourEmuna for this content`}
             logoUrl={emunaContent.attributionLogoUrl}
-            aboutText={emunaContent.attributionAboutText}
-            websiteUrl={emunaContent.speakerWebsite}
+            aboutText={emunaContent.attributionAboutText || "Rav Reuven Garber is a dynamic Torah educator who inspires people to transform their emunah through practical and meaningful teachings."}
+            websiteUrl={emunaContent.speakerWebsite || "https://transformyouremunah.com/"}
             websiteLabel="Visit Website"
           />
 
