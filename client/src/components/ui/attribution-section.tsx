@@ -66,20 +66,20 @@ export function AttributionSection({
         </button>
         
         {isExpanded && (
-          <div className="bg-white p-4 border-t border-gray-200" data-testid="content-attribution-expanded">
-            <div className="flex gap-4">
+          <div className="bg-white border-t border-gray-200 overflow-hidden" data-testid="content-attribution-expanded">
+            <div className="flex">
               {logoUrl && (
                 <div className="flex-shrink-0 w-[35%]">
                   <img 
                     src={logoUrl} 
                     alt="Provider logo"
-                    className="w-full h-auto rounded-xl object-contain max-h-32"
+                    className="w-full h-full object-cover"
                     loading="lazy"
                   />
                 </div>
               )}
               
-              <div className={logoUrl ? "w-[65%]" : "w-full"}>
+              <div className={logoUrl ? "w-[65%] p-4" : "w-full p-4"}>
                 {aboutText && (
                   <div className="platypi-regular leading-relaxed text-black/80 text-sm space-y-2">
                     {aboutText.split('\n').map((paragraph, index) => (
