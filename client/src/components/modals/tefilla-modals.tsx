@@ -49,6 +49,7 @@ const KorenThankYou = () => {
   return (
     <AttributionSection
       label="All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy"
+      logoUrl="https://res.cloudinary.com/dsqq7a7ab/image/upload/v1764084655/koren_ghxkyz.webp"
       aboutText="Koren Publishers Jerusalem is the leading publisher of Jewish religious texts, known for its beautiful typography and scholarly editions. Founded by Eliyahu Koren, the company has set the standard for Hebrew-language religious publishing with its distinctive Koren typeface and acclaimed editions of the Siddur, Tanakh, and Talmud."
       websiteUrl={korenUrl}
       websiteLabel="Visit Koren Publishers"
@@ -73,6 +74,7 @@ const NishmasThankYou = () => {
   return (
     <AttributionSection
       label="All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy"
+      logoUrl="https://res.cloudinary.com/dsqq7a7ab/image/upload/v1764084655/koren_ghxkyz.webp"
       aboutText="Koren Publishers Jerusalem is the leading publisher of Jewish religious texts, known for its beautiful typography and scholarly editions. Founded by Eliyahu Koren, the company has set the standard for Hebrew-language religious publishing with its distinctive Koren typeface and acclaimed editions of the Siddur, Tanakh, and Talmud."
       websiteUrl={korenUrl}
       websiteLabel="Visit Koren Publishers"
