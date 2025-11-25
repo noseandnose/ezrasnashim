@@ -67,19 +67,19 @@ export function AttributionSection({
         
         {isExpanded && (
           <div className="bg-white border-t border-gray-200 overflow-hidden" data-testid="content-attribution-expanded">
-            <div className="flex items-stretch">
+            <div className="flex">
               {logoUrl && (
-                <div className="flex-shrink-0 w-[35%] overflow-hidden">
+                <div className="flex-shrink-0 w-[30%] self-start overflow-hidden">
                   <img 
                     src={logoUrl} 
                     alt="Provider logo"
-                    className="w-full h-full object-cover object-top"
+                    className="w-full h-auto object-cover object-top"
                     loading="lazy"
                   />
                 </div>
               )}
               
-              <div className={logoUrl ? "w-[65%] p-4" : "w-full p-4"}>
+              <div className={logoUrl ? "w-[70%] p-4" : "w-full p-4"}>
                 {aboutText && (
                   <div className="platypi-regular leading-relaxed text-black/80 text-sm space-y-2">
                     {aboutText.split('\n').map((paragraph, index) => (
