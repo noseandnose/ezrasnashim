@@ -7,6 +7,8 @@ import AudioPlayer from "@/components/audio-player";
 import { Button } from "@/components/ui/button";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
+import { FullscreenModal } from "@/components/ui/fullscreen-modal";
+import { AttributionSection } from "@/components/ui/attribution-section";
 
 interface MeditationCategory {
   section: string;
@@ -19,6 +21,9 @@ interface Meditation {
   subtitle: string;
   name: string;
   link: string;
+  attributionLabel?: string;
+  attributionLogoUrl?: string;
+  attributionAboutText?: string;
 }
 
 export default function MeditationModals() {
@@ -137,7 +142,7 @@ export default function MeditationModals() {
   );
 }
 
-// Audio Player Component
+// Audio Player Component - Fullscreen like Daily Chizuk
 function MeditationAudioPlayer({ 
   meditation, 
   isOpen, 
@@ -169,24 +174,17 @@ function MeditationAudioPlayer({
   const handleMeditationComplete = () => {
     if (!meditation) return;
     
-    // Track each meditation individually using its ID
     const meditationKey = `meditation-${meditation.id}`;
     trackModalComplete(meditationKey);
     markModalComplete(meditationKey);
     
     setShowExplosion(true);
     
-    // Track the meditation_complete event
     trackMeditationComplete();
     
-    // Wait for animation to complete before proceeding
     setTimeout(() => {
       setShowExplosion(false);
-      
-      // Close the modal
       onClose();
-      
-      // Navigate to home
       setTimeout(() => {
         window.location.hash = '#/?section=home&scrollToProgress=true';
       }, 100);
@@ -195,74 +193,60 @@ function MeditationAudioPlayer({
 
   if (!meditation) return null;
 
-  // Create unique key for this specific meditation
   const meditationKey = `meditation-${meditation.id}`;
+  const isCompleted = isModalComplete(meditationKey);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent aria-describedby="meditation-player-description">
-        <div id="meditation-player-description" className="sr-only">Meditation audio player</div>
-        
-        {/* Simple Header for Audio Content */}
-        <div className="flex items-center justify-center mb-1 relative">
-          <DialogTitle className="text-lg platypi-bold text-black">Meditation</DialogTitle>
-        </div>
-        
-        <div className="bg-white rounded-2xl p-6 mb-1 shadow-sm border border-warm-gray/10 max-h-[60vh] overflow-y-auto">
-          <div className="space-y-4">
-            {/* Title */}
-            {meditation.name && (
-              <h3 className="platypi-bold text-lg text-black text-center mb-4">
-                {meditation.name}
-              </h3>
-            )}
-            
-            <AudioPlayer 
-              title={meditation.name || 'Meditation'}
-              duration="0:00"
-              audioUrl={meditation.link}
-              onAudioEnded={() => {
-                // Auto-complete when audio finishes, but only if not already completed
-                if (!isModalComplete(meditationKey)) {
-                  handleMeditationComplete();
-                }
-              }}
-            />
+    <FullscreenModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Meditation"
+    >
+      <div className="space-y-4">
+        {meditation.name && (
+          <div className="bg-blush/10 rounded-2xl px-4 py-3 border border-blush/20">
+            <h3 className="text-base platypi-bold text-black text-center">
+              {meditation.name}
+            </h3>
           </div>
+        )}
+
+        <div className="bg-white rounded-2xl p-4 border border-blush/10">
+          <AudioPlayer 
+            title={meditation.name || 'Meditation'}
+            duration="0:00"
+            audioUrl={meditation.link}
+            onAudioEnded={() => {
+              if (!isCompleted) {
+                handleMeditationComplete();
+              }
+            }}
+          />
         </div>
 
-        {/* Thank You Section */}
-        <div className="mt-1 p-4 bg-blue-50 rounded-2xl border border-blue-200">
-          <p className="text-sm text-black platypi-medium">
-            Thank you to{' '}
-            <a 
-              href="https://www.neshima.co/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-blue-600 underline hover:text-blue-800"
-            >
-              Neshima
-            </a>
-            {' '}for providing this content
-          </p>
-        </div>
+        <AttributionSection
+          label={meditation.attributionLabel || "Thank you to Neshima for providing this content"}
+          logoUrl={meditation.attributionLogoUrl}
+          aboutText={meditation.attributionAboutText || "Neshima offers guided meditations and mindfulness practices rooted in Jewish wisdom to help you find inner peace and spiritual connection."}
+          websiteUrl="https://www.neshima.co/"
+          websiteLabel="Visit Website"
+        />
 
-        <div className="heart-explosion-container">
-          <Button 
-            onClick={isModalComplete(meditationKey) ? undefined : handleMeditationComplete}
-            disabled={isModalComplete(meditationKey)}
-            className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
-              isModalComplete(meditationKey) 
-                ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
-            }`}
-            data-testid="button-complete-meditation"
-          >
-            {isModalComplete(meditationKey) ? 'Completed Today' : 'Complete'}
-          </Button>
-          <HeartExplosion trigger={showExplosion} />
-        </div>
-      </DialogContent>
-    </Dialog>
+        <Button
+          onClick={isCompleted ? undefined : handleMeditationComplete}
+          disabled={isCompleted}
+          className={`w-full py-3 rounded-xl platypi-medium border-0 ${
+            isCompleted 
+              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+              : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
+          }`}
+          data-testid="button-complete-meditation"
+        >
+          {isCompleted ? 'Completed Today' : 'Complete Meditation'}
+        </Button>
+
+        <HeartExplosion trigger={showExplosion} />
+      </div>
+    </FullscreenModal>
   );
 }
