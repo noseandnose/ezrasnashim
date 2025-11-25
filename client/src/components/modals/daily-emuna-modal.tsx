@@ -79,17 +79,6 @@ export default function DailyEmunaModal() {
             <div className="text-center">
               <span className="text-sm platypi-medium text-black/70">
                 By {emunaContent.speaker}
-                {emunaContent.speakerWebsite && (
-                  <a 
-                    href={emunaContent.speakerWebsite} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="ml-2 text-blush underline hover:text-blush/80"
-                    data-testid="link-emuna-speaker-website"
-                  >
-                    Visit Website
-                  </a>
-                )}
               </span>
             </div>
           )}

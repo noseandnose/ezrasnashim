@@ -79,17 +79,6 @@ export default function DailyChizukModal() {
             <div className="text-center">
               <span className="text-sm platypi-medium text-black/70">
                 By {chizukContent.speaker}
-                {chizukContent.speakerWebsite && (
-                  <a 
-                    href={chizukContent.speakerWebsite} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="ml-2 text-blush underline hover:text-blush/80"
-                    data-testid="link-chizuk-speaker-website"
-                  >
-                    Visit Website
-                  </a>
-                )}
               </span>
             </div>
           )}
