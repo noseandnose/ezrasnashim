@@ -67,14 +67,6 @@ export default function DailyChizukModal() {
         </div>
       ) : chizukContent ? (
         <div className="space-y-4">
-          {chizukContent.title && (
-            <div className="bg-blush/10 rounded-2xl px-4 py-3 border border-blush/20">
-              <h3 className="text-base platypi-bold text-black text-center">
-                {chizukContent.title}
-              </h3>
-            </div>
-          )}
-
           {chizukContent.speaker && (
             <div className="text-center">
               <span className="text-sm platypi-medium text-black/70">
