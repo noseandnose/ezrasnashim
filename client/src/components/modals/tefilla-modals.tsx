@@ -378,11 +378,7 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
                       ))}
                     </div>
                     
-                    <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-                      <span className="text-sm platypi-medium text-black">
-                        All tefilla texts courtesy of <a href="https://korenpub.co.il/" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-700">Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
-                      </span>
-                    </div>
+                    <KorenThankYou />
                     
                     <div className="heart-explosion-container">
                       <Button 
@@ -628,11 +624,7 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
         </div>
       ))}
       
-      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-        <p className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of <a href="https://korenpub.co.il/" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-700">Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
-        </p>
-      </div>
+      <KorenThankYou />
 
       <Button
         onClick={isModalComplete('maariv') ? undefined : handleComplete}
@@ -694,11 +686,7 @@ function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
         </div>
       ))}
       
-      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-        <p className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of <a href="https://korenpub.co.il/" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-700">Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
-        </p>
-      </div>
+      <KorenThankYou />
 
       <Button
         onClick={isModalComplete('mincha') ? undefined : handleComplete}
@@ -842,11 +830,7 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
         )}
       </div>
       
-      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-        <p className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of <a href="https://korenpub.co.il/" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-700">Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
-        </p>
-      </div>
+      <KorenThankYou />
 
       <Button
         onClick={handleComplete}
@@ -1174,11 +1158,7 @@ function MorningBrochasFullscreenContent({
         );
       })}
       
-      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-        <p className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of <a href="https://korenpub.co.il/" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-700">Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
-        </p>
-      </div>
+      <KorenThankYou />
     </div>
   );
 }
@@ -1344,11 +1324,7 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
         </p>
       </div>
       
-      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-        <p className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of <a href="https://korenpub.co.il/" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-700">Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
-        </p>
-      </div>
+      <KorenThankYou />
 
       <Button
         onClick={markNishmasCompleted}
@@ -1551,11 +1527,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
         />
       </div>
       
-      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-        <p className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of <a href="https://korenpub.co.il/" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-700">Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
-        </p>
-      </div>
+      <KorenThankYou />
 
       {/* Button(s) based on whether Complete & Next should be shown */}
       {!showCompleteAndNext ? (
@@ -1864,11 +1836,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
         />
       </div>
       
-      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-        <p className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of <a href="https://korenpub.co.il/" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-700">Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
-        </p>
-      </div>
+      <KorenThankYou />
 
       <div className="flex gap-2 mt-6">
         {/* Complete button - returns to previous view */}
@@ -2507,11 +2475,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                       ))}
                     </div>
                     
-                    <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-                      <span className="text-sm platypi-medium text-black">
-                        All tefilla texts courtesy of <a href="https://korenpub.co.il/" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-700">Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
-                      </span>
-                    </div>
+                    <KorenThankYou />
                     
                     <div className="heart-explosion-container">
                       <Button 
@@ -2825,11 +2789,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                         </div>
                       </div>
                       
-                      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-                        <p className="text-sm platypi-medium text-black">
-                          All tefilla texts courtesy of <a href="https://korenpub.co.il/" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-700">Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
-                        </p>
-                      </div>
+                      <KorenThankYou />
                       
                       <div className="heart-explosion-container">
                         <Button 
@@ -3768,11 +3728,7 @@ function SpecialTehillimFullscreenContent({ language: _language, fontSize: _font
         )}
       </div>
 
-      <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-        <p className="text-sm platypi-medium text-black">
-          All tefilla texts courtesy of <a href="https://korenpub.co.il/" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-700">Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
-        </p>
-      </div>
+      <KorenThankYou />
 
       <Button 
         onClick={() => {
@@ -4128,11 +4084,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                   />
                 </div>
                 
-                <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-                  <p className="text-sm platypi-medium text-black">
-                    All tefilla texts courtesy of <a href="https://korenpub.co.il/" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-700">Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
-                  </p>
-                </div>
+                <KorenThankYou />
                 
                 <div className="heart-explosion-container">
                   {(() => {
@@ -4273,11 +4225,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                     />
                   </div>
                   
-                  <div className="bg-blue-50 rounded-2xl px-2 py-3 mt-1 border border-blue-200">
-                    <p className="text-sm platypi-medium text-black">
-                      All tefilla texts courtesy of <a href="https://korenpub.co.il/" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-700">Koren Publishers Jerusalem</a> and Rabbi Sacks Legacy
-                    </p>
-                  </div>
+                  <KorenThankYou />
                   
                   <div className="heart-explosion-container">
                     <div className={tehillimActiveTab === 'all' ? 'flex gap-2' : ''}>
