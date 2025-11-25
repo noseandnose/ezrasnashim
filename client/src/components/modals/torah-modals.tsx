@@ -9,6 +9,7 @@ import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { formatTextContent, formatHalachaContent, formatContentWithFootnotes } from "@/lib/text-formatter";
 import { formatThankYouMessage } from "@/lib/link-formatter";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
+import { AttributionSection } from "@/components/ui/attribution-section";
 import { Expand } from "lucide-react";
 
 
@@ -115,7 +116,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const { data: halachaContent } = useQuery<{title?: string; content?: string; footnotes?: string}>({
+  const { data: halachaContent } = useQuery<{title?: string; content?: string; footnotes?: string; attributionLabel?: string; attributionLogoUrl?: string; attributionAboutText?: string}>({
     queryKey: ['/api/torah/halacha', today],
     enabled: activeModal === 'halacha',
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -136,7 +137,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000
   });
 
-  const { data: featuredContent } = useQuery<{title?: string; content?: string; provider?: string; footnotes?: string}>({
+  const { data: featuredContent } = useQuery<{title?: string; content?: string; provider?: string; footnotes?: string; attributionLabel?: string; attributionLogoUrl?: string; attributionAboutText?: string}>({
     queryKey: ['/api/torah/featured', today],
     enabled: activeModal === 'featured',
     staleTime: 5 * 60 * 1000,
@@ -363,8 +364,8 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Emuna Modal */}
-      <Dialog open={activeModal === 'emuna'} onOpenChange={() => closeModal(true)}>
+      {/* Emuna Modal - DISABLED: Now handled in daily-emuna-modal.tsx as fullscreen */}
+      <Dialog open={false} onOpenChange={() => closeModal(true)}>
         <DialogContent aria-describedby="emuna-description">
           <div id="emuna-description" className="sr-only">Daily faith strengthening and spiritual trust content</div>
           
@@ -523,8 +524,8 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Chizuk Modal */}
-      <Dialog open={activeModal === 'chizuk'} onOpenChange={() => closeModal(true)}>
+      {/* Chizuk Modal - DISABLED: Now handled in daily-chizuk-modal.tsx as fullscreen */}
+      <Dialog open={false} onOpenChange={() => closeModal(true)}>
         <DialogContent aria-describedby="chizuk-description">
           <div id="chizuk-description" className="sr-only">5-minute daily inspiration and spiritual strengthening content</div>
           
@@ -964,20 +965,14 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                 )}
               </div>
               
-              {/* Thank You Section for Halacha */}
-              <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
-                <p className="text-sm text-blue-900 platypi-medium">
-                  Thank you to Rabbi Daniel Braude from{' '}
-                  <a 
-                    href="https://feldheim.com/learn-shabbos-in-just-3-minutes-a-day"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline hover:text-blue-800"
-                  >
-                    Learn Shabbos in just 3 minutes a day
-                  </a>
-                </p>
-              </div>
+              {/* Attribution Section for Halacha */}
+              <AttributionSection
+                label={halachaContent.attributionLabel || "Thank you to Rabbi Daniel Braude for this content"}
+                logoUrl={halachaContent.attributionLogoUrl}
+                aboutText={halachaContent.attributionAboutText}
+                websiteUrl="https://feldheim.com/learn-shabbos-in-just-3-minutes-a-day"
+                websiteLabel="Learn Shabbos in just 3 minutes a day"
+              />
               
               <div className="heart-explosion-container">
                 <Button 
@@ -1056,29 +1051,14 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                 )}
               </div>
               
-              {/* Thank You Section for Featured Content */}
-              {featuredContent.provider && (
-                <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
-                  <p className="text-sm text-blue-900 platypi-medium">
-                    Thank you to{' '}
-                    {featuredContent.provider === 'Rabbi Daniel Braude' ? (
-                      <>
-                        Rabbi Daniel Braude from{' '}
-                        <a 
-                          href="https://feldheim.com/learn-hilchos-lashon-hara-in-just-3-minutes-a-day"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 underline hover:text-blue-800"
-                        >
-                          Learn Hilchos Lashon Hara in just 3 minutes a day
-                        </a>
-                      </>
-                    ) : (
-                      featuredContent.provider
-                    )}
-                  </p>
-                </div>
-              )}
+              {/* Attribution Section for Featured Content */}
+              <AttributionSection
+                label={featuredContent.attributionLabel || `Thank you to ${featuredContent.provider || 'Rabbi Daniel Braude'} for this content`}
+                logoUrl={featuredContent.attributionLogoUrl}
+                aboutText={featuredContent.attributionAboutText}
+                websiteUrl={featuredContent.provider === 'Rabbi Daniel Braude' ? "https://feldheim.com/learn-hilchos-lashon-hara-in-just-3-minutes-a-day" : undefined}
+                websiteLabel="Learn Hilchos Lashon Hara in just 3 minutes a day"
+              />
               
               <div className="heart-explosion-container">
                 <Button 

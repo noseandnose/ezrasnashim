@@ -5,10 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 import AudioPlayer from "@/components/audio-player";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
-import { formatThankYouMessageFull } from "@/lib/link-formatter";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
-import { BookOpen } from "lucide-react";
+import { AttributionSection } from "@/components/ui/attribution-section";
 import { getHebrewFontClass } from "@/lib/hebrewUtils";
+import { formatThankYouMessageFull } from "@/lib/link-formatter";
 
 export default function ParshaVortModal() {
   const { activeModal, closeModal, openModal, selectedParshaVortId } = useModalStore();
@@ -121,34 +121,17 @@ export default function ParshaVortModal() {
             </div>
           )}
 
-          {/* Thank You Message */}
-          {parshaVort.thankYouMessage && (
-            <div className="bg-gradient-to-r from-blush/10 to-lavender/10 rounded-2xl p-4 border border-blush/20">
-              <div className="flex items-center gap-2 mb-2">
-                <BookOpen className="h-4 w-4 text-blush" />
-                <span className="text-sm platypi-bold text-black">Special Thanks</span>
-              </div>
-              {parshaVort.speakerWebsite ? (
-                <a
-                  href={parshaVort.speakerWebsite}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm platypi-regular text-blush leading-relaxed hover:text-blush/80 transition-colors underline block"
-                  data-testid="link-parsha-thank-you"
-                  dangerouslySetInnerHTML={{
-                    __html: formatThankYouMessageFull(parshaVort.thankYouMessage)
-                  }}
-                />
-              ) : (
-                <div 
-                  className="text-sm platypi-regular text-black leading-relaxed"
-                  dangerouslySetInnerHTML={{
-                    __html: formatThankYouMessageFull(parshaVort.thankYouMessage)
-                  }}
-                />
-              )}
-            </div>
-          )}
+          {/* Attribution Section */}
+          <AttributionSection
+            label={parshaVort.thankYouMessage 
+              ? formatThankYouMessageFull(parshaVort.thankYouMessage)
+              : `Thank you to ${parshaVort.speaker || 'the speaker'} for this content`}
+            labelHtml={!!parshaVort.thankYouMessage}
+            logoUrl={parshaVort.attributionLogoUrl}
+            aboutText={parshaVort.attributionAboutText}
+            websiteUrl={parshaVort.speakerWebsite}
+            websiteLabel="Visit Website"
+          />
 
           {/* Complete Button */}
           <Button

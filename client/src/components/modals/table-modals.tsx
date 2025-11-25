@@ -12,6 +12,7 @@ import { formatThankYouMessageFull } from "@/lib/link-formatter";
 import { LazyImage } from "@/components/ui/lazy-image";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { FullscreenImageModal } from "@/components/modals/fullscreen-image-modal";
+import { AttributionSection } from "@/components/ui/attribution-section";
 import { apiRequest } from "@/lib/queryClient";
 
 export default function TableModals() {
@@ -31,7 +32,6 @@ export default function TableModals() {
     contentType?: string;
   }>({ isOpen: false, title: '', content: null });
   const [fontSize, setFontSize] = useState(16);
-  const [showBio, setShowBio] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
   const lastArrowTouchTime = useRef<number>(0);
@@ -224,7 +224,7 @@ export default function TableModals() {
     };
   }, [setFullscreenContent]);
 
-  const { data: recipeContent } = useQuery<{title?: string; description?: string; ingredients?: string[]; instructions?: string[]; cookingTime?: string; servings?: number; imageUrl?: string; prepTime?: string; cookTime?: string; difficulty?: string; thankYouMessage?: string}>({
+  const { data: recipeContent } = useQuery<{title?: string; description?: string; ingredients?: string[]; instructions?: string[]; cookingTime?: string; servings?: number; imageUrl?: string; prepTime?: string; cookTime?: string; difficulty?: string; thankYouMessage?: string; attributionLogoUrl?: string; attributionAboutText?: string; websiteUrl?: string; emailAddress?: string}>({
     queryKey: ['/api/table/recipe'],
     enabled: activeModal === 'recipe' || fullscreenContent.contentType === 'recipe'
   });
@@ -244,6 +244,11 @@ export default function TableModals() {
     mediaUrl4?: string;
     mediaType5?: string;
     mediaUrl5?: string;
+    thankYouLabel?: string;
+    attributionLogoUrl?: string;
+    attributionAboutText?: string;
+    websiteUrl?: string;
+    emailAddress?: string;
   }
 
   const { data: inspirationContent } = useQuery<InspirationContent>({
@@ -251,7 +256,7 @@ export default function TableModals() {
     enabled: activeModal === 'inspiration' || fullscreenContent.contentType === 'inspiration'
   });
 
-  const { data: marriageInsight } = useQuery<{id?: number; title?: string; sectionNumber?: number; content?: string; date?: string}>({
+  const { data: marriageInsight } = useQuery<{id?: number; title?: string; sectionNumber?: number; content?: string; date?: string; thankYouLabel?: string; attributionLogoUrl?: string; attributionAboutText?: string; websiteUrl?: string; emailAddress?: string}>({
     queryKey: [`/api/marriage-insights/${getLocalDateString()}`],
     enabled: activeModal === 'marriage-insights' || fullscreenContent.contentType === 'marriage-insights',
     staleTime: 15 * 60 * 1000,
@@ -761,21 +766,14 @@ export default function TableModals() {
                 </div>
               </div>
 
-              {/* Thank You Attribution - Moved BEFORE Done button */}
-              <div className="bg-blue-50 p-3 rounded-xl mt-4 text-center">
-                <p className="text-sm text-blue-800">
-                  Thank you to{' '}
-                  <a 
-                    href="https://www.instagram.com/yidwithakid/" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 underline platypi-medium"
-                  >
-                    YidWithAKid
-                  </a>
-                  {' '}for providing this.
-                </p>
-              </div>
+              {/* Attribution Section for Creative Jewish Living */}
+              <AttributionSection
+                label={inspirationContent?.thankYouLabel || "Thank you to YidWithAKid for providing this"}
+                logoUrl={inspirationContent?.attributionLogoUrl}
+                aboutText={inspirationContent?.attributionAboutText}
+                websiteUrl="https://www.instagram.com/yidwithakid/"
+                websiteLabel="Follow on Instagram"
+              />
             </>
           ) : (
             <div className="text-center py-8">
@@ -997,27 +995,18 @@ export default function TableModals() {
                 )}
               </div>
               
-              {/* Thank You Section for Recipe */}
-              <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
-                <p className="text-sm text-blue-900 platypi-medium">
-                  {recipeContent.thankYouMessage ? (
-                    <span dangerouslySetInnerHTML={{ __html: formatThankYouMessageFull(recipeContent.thankYouMessage) }} />
-                  ) : (
-                    <>
-                      Recipe provided with permission by{' '}
-                      <a 
-                        href="https://kosher.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline hover:text-blue-800"
-                      >
-                        Kosher.com
-                      </a>
-                      . Visit Kosher.com for thousands more delicious kosher recipes!
-                    </>
-                  )}
-                </p>
-              </div>
+              {/* Attribution Section for Recipe */}
+              <AttributionSection
+                label={recipeContent.thankYouMessage 
+                  ? formatThankYouMessageFull(recipeContent.thankYouMessage)
+                  : "Recipe provided with permission by Kosher.com. Visit Kosher.com for thousands more delicious kosher recipes!"}
+                labelHtml={!!recipeContent.thankYouMessage}
+                logoUrl={recipeContent.attributionLogoUrl}
+                aboutText={recipeContent.attributionAboutText}
+                websiteUrl={recipeContent.websiteUrl || "https://kosher.com"}
+                websiteLabel="Visit Kosher.com"
+                emailAddress={recipeContent.emailAddress}
+              />
               
               <div className="heart-explosion-container">
                 <Button 
@@ -1187,21 +1176,15 @@ export default function TableModals() {
                 )}
               </div>
               
-              {/* Thank You Section for Creative Jewish Living */}
-              <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
-                <p className="text-sm text-blue-900 platypi-medium">
-                  Thank you to{' '}
-                  <a 
-                    href="https://www.instagram.com/yidwithakid/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline hover:text-blue-800"
-                  >
-                    YidWithAKid
-                  </a>
-                  {' '}for providing this Table inspiration
-                </p>
-              </div>
+              {/* Attribution Section for Creative Jewish Living */}
+              <AttributionSection
+                label={inspirationContent.thankYouLabel || "Thank you to YidWithAKid for providing this Table inspiration"}
+                logoUrl={inspirationContent.attributionLogoUrl}
+                aboutText={inspirationContent.attributionAboutText}
+                websiteUrl={inspirationContent.websiteUrl || "https://www.instagram.com/yidwithakid/"}
+                websiteLabel="Follow on Instagram"
+                emailAddress={inspirationContent.emailAddress}
+              />
               
               <div className="heart-explosion-container">
                 <Button 
@@ -1244,50 +1227,15 @@ export default function TableModals() {
                 )}
               </div>
               
-              {/* Collapsible Bio Section */}
-              <div className="mb-1">
-                <div className="bg-gray-50 hover:bg-gray-100 rounded-2xl border border-gray-200 transition-colors overflow-hidden">
-                  <button
-                    onClick={() => setShowBio(!showBio)}
-                    className="w-full text-left p-3"
-                    data-testid="button-toggle-bio"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="platypi-medium text-black text-sm">Provided by Devora Levy</span>
-                      <span className="platypi-regular text-black/60 text-lg">
-                        {showBio ? '−' : '+'}
-                      </span>
-                    </div>
-                  </button>
-                  
-                  {showBio && (
-                    <div className="bg-white p-4 border-t border-gray-200" data-testid="content-bio">
-                      <div className="platypi-regular leading-relaxed text-black/80 text-sm space-y-2">
-                        <p>Certified Life Coach, Marriage & Intimacy Coach, and Kallah Teacher.</p>
-                        <p>An Aish.com author, Devora helps women and couples create balance, joy, and purpose in their relationships and is the creator of an online course on intimacy in marriage.</p>
-                        <p>
-                          Learn more at{' '}
-                          <a 
-                            href="https://devoralevy.com"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 underline"
-                          >
-                            Devoralevy.com
-                          </a>
-                          {' '}or email{' '}
-                          <a 
-                            href="mailto:dlevycoaching@gmail.com"
-                            className="text-blue-600 hover:text-blue-800 underline"
-                          >
-                            dlevycoaching@gmail.com
-                          </a>
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+              {/* Attribution Section for Marriage Insights */}
+              <AttributionSection
+                label={marriageInsight.thankYouLabel || "Provided by Devora Levy"}
+                logoUrl={marriageInsight.attributionLogoUrl}
+                aboutText={marriageInsight.attributionAboutText || "Certified Life Coach, Marriage & Intimacy Coach, and Kallah Teacher.\n\nAn Aish.com author, Devora helps women and couples create balance, joy, and purpose in their relationships and is the creator of an online course on intimacy in marriage."}
+                websiteUrl={marriageInsight.websiteUrl || "https://devoralevy.com"}
+                websiteLabel="Devoralevy.com"
+                emailAddress={marriageInsight.emailAddress || "dlevycoaching@gmail.com"}
+              />
               
               <div className="heart-explosion-container">
                 <Button 
