@@ -69,11 +69,11 @@ export function AttributionSection({
           <div className="bg-white border-t border-gray-200 overflow-hidden" data-testid="content-attribution-expanded">
             <div className="flex">
               {logoUrl && (
-                <div className="flex-shrink-0 w-[30%] self-start overflow-hidden">
+                <div className="flex-shrink-0 w-[30%] self-start overflow-hidden max-h-24">
                   <img 
                     src={logoUrl} 
                     alt="Provider logo"
-                    className="w-full h-auto object-cover object-top"
+                    className="w-full h-full object-cover object-top"
                     loading="lazy"
                   />
                 </div>
