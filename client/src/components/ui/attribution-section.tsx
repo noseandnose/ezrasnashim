@@ -67,13 +67,13 @@ export function AttributionSection({
         
         {isExpanded && (
           <div className="bg-white border-t border-gray-200 overflow-hidden" data-testid="content-attribution-expanded">
-            <div className="flex">
+            <div className="flex items-stretch">
               {logoUrl && (
-                <div className="flex-shrink-0 w-[35%]">
+                <div className="flex-shrink-0 w-[35%] overflow-hidden">
                   <img 
                     src={logoUrl} 
                     alt="Provider logo"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover object-top"
                     loading="lazy"
                   />
                 </div>
