@@ -67,6 +67,14 @@ export default function DailyEmunaModal() {
         </div>
       ) : emunaContent ? (
         <div className="space-y-4">
+          {emunaContent.title && (
+            <div className="bg-blush/10 rounded-2xl px-4 py-3 border border-blush/20">
+              <h3 className="text-base platypi-bold text-black text-center">
+                {emunaContent.title}
+              </h3>
+            </div>
+          )}
+
           {emunaContent.speaker && (
             <div className="text-center">
               <span className="text-sm platypi-medium text-black/70">
@@ -98,14 +106,6 @@ export default function DailyEmunaModal() {
                   }
                 }}
               />
-            </div>
-          )}
-
-          {emunaContent.content && (
-            <div className="bg-white rounded-2xl p-6 border border-blush/10">
-              <div className="platypi-regular text-base leading-relaxed text-black">
-                {emunaContent.content}
-              </div>
             </div>
           )}
 
