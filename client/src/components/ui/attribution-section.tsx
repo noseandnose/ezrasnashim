@@ -69,17 +69,17 @@ export function AttributionSection({
           <div className="bg-white overflow-hidden" data-testid="content-attribution-expanded">
             <div className="flex">
               {logoUrl && (
-                <div className="flex-shrink-0 w-24 h-24 flex items-center justify-center p-2">
+                <div className="flex-shrink-0 w-24 self-stretch">
                   <img 
                     src={logoUrl} 
                     alt="Provider logo"
-                    className="max-w-full max-h-full object-contain"
+                    className="w-full h-full object-cover object-center"
                     loading="lazy"
                   />
                 </div>
               )}
               
-              <div className={logoUrl ? "w-[70%] p-4" : "w-full p-4"}>
+              <div className={logoUrl ? "flex-1 p-4" : "w-full p-4"}>
                 {aboutText && (
                   <div className="platypi-regular leading-relaxed text-black/80 text-sm space-y-2">
                     {aboutText.split('\n').map((paragraph, index) => (
