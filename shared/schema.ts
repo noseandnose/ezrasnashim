@@ -362,7 +362,9 @@ export const featuredContent = pgTable("featured_content", {
   id: serial("id").primaryKey(),
   date: date("date").notNull().unique(),
   title: text("title").notNull(),
-  content: text("content").notNull(),
+  content: text("content"),
+  audioUrl: text("audio_url"), // Optional: audio content URL
+  videoUrl: text("video_url"), // Optional: video content URL
   provider: text("provider"),
   footnotes: text("footnotes"),
   attributionLabel: text("attribution_label"), // Short label for collapsed attribution

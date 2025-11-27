@@ -1,4 +1,4 @@
-import { Book, Heart, Shield, BookOpen, Star, Scroll, Triangle, Check } from "lucide-react";
+import { Book, Heart, Shield, BookOpen, Star, Scroll, Triangle, Check, Video } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import { useModalStore, useModalCompletionStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
@@ -99,7 +99,7 @@ export default function TorahSection({}: TorahSectionProps) {
   });
 
   // Fetch today's Featured content
-  const { data: featuredContent, isError: featuredError, isLoading: featuredLoading } = useQuery<{title?: string; content?: string; provider?: string; footnotes?: string}>({
+  const { data: featuredContent, isError: featuredError, isLoading: featuredLoading } = useQuery<{title?: string; content?: string; audioUrl?: string; videoUrl?: string; provider?: string; footnotes?: string}>({
     queryKey: ['/api/torah/featured', today],
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
@@ -180,13 +180,13 @@ export default function TorahSection({}: TorahSectionProps) {
     {
       id: 'featured',
       icon: Star,
-      title: 'Shmirat Halashon',
-      subtitle: 'Special Topics',
+      title: 'Featured Speaker',
+      subtitle: 'Daily Torah Inspiration',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
       border: 'border-blush/10',
-      contentType: 'text'
+      contentType: 'dynamic' // Will be determined based on content
     }
   ];
 
@@ -300,18 +300,34 @@ export default function TorahSection({}: TorahSectionProps) {
               case 'featured':
                 isError = featuredError;
                 isLoading = featuredLoading;
-                hasContent = !!featuredContent?.content && !isError;
+                // Check if any content exists (text, audio, or video)
+                hasContent = !isError && !!(featuredContent?.content || featuredContent?.audioUrl || featuredContent?.videoUrl);
                 if (hasContent && !isCompleted && featuredContent) {
-                  readingTime = calculateReadingTime(featuredContent.content || '');
                   const camelCaseTitle = toCamelCase(featuredContent.title || '');
-                  displaySubtitle = camelCaseTitle || 'Special Topics';
+                  displaySubtitle = camelCaseTitle || 'Daily Torah Inspiration';
+                  // Calculate reading time only for text content
+                  if (featuredContent.content && !featuredContent.audioUrl && !featuredContent.videoUrl) {
+                    readingTime = calculateReadingTime(featuredContent.content || '');
+                  }
                 } else if (isError) {
                   displaySubtitle = 'Temporarily unavailable';
                 } else if (isLoading) {
                   displaySubtitle = 'Loading...';
                 }
-                // Always show text indicator for featured content
-                contentType = hasContent ? 'text' : contentType;
+                // Determine content type dynamically: video > audio > text > none
+                if (hasContent && featuredContent) {
+                  if (featuredContent.videoUrl) {
+                    contentType = 'video';
+                  } else if (featuredContent.audioUrl) {
+                    contentType = 'audio';
+                  } else if (featuredContent.content) {
+                    contentType = 'text';
+                  } else {
+                    contentType = ''; // No icon if no content
+                  }
+                } else {
+                  contentType = ''; // No icon if no content
+                }
                 break;
             }
             
@@ -332,14 +348,16 @@ export default function TorahSection({}: TorahSectionProps) {
                 }}
                 disabled={!hasContent}
               >
-                {/* Content Type Indicator */}
+                {/* Content Type Indicator - only show if there's content and a valid type */}
                 {contentType && hasContent && (
                   <div className="absolute top-2 left-2 bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-                    {contentType === 'audio' ? (
+                    {contentType === 'video' ? (
+                      <Video className="w-2.5 h-2.5" />
+                    ) : contentType === 'audio' ? (
                       <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
-                    ) : (
+                    ) : contentType === 'text' ? (
                       <span className="platypi-bold text-xs">T</span>
-                    )}
+                    ) : null}
                   </div>
                 )}
                 
