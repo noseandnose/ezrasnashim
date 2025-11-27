@@ -97,6 +97,18 @@ export default function ParshaVortModal() {
             </div>
           )}
 
+          {/* Image / Source Sheet */}
+          {parshaVort.imageUrl && (
+            <div className="bg-white rounded-2xl p-4 border border-blush/10">
+              <img 
+                src={parshaVort.imageUrl} 
+                alt="Source sheet"
+                className="w-full rounded-lg"
+                loading="lazy"
+              />
+            </div>
+          )}
+
           {/* Video Player */}
           {parshaVort.videoUrl && (
             <div className="bg-white rounded-2xl p-4 border border-blush/10">

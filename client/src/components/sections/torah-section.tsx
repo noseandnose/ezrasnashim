@@ -60,6 +60,8 @@ export default function TorahSection({}: TorahSectionProps) {
     speaker?: string;
     content?: string;
     audioUrl?: string;
+    videoUrl?: string;
+    imageUrl?: string;
     speakerWebsite?: string;
     thankYouMessage?: string;
     fromDate?: string;
@@ -405,9 +407,9 @@ export default function TorahSection({}: TorahSectionProps) {
             // Render multiple bars for each available shiur
             activeVorts.map((parsha, index) => {
               // Determine content type for dynamic icon
-              const hasVideo = false; // parsha_vorts doesn't have video yet, but ready for future
+              const hasVideo = !!parsha?.videoUrl;
               const hasAudio = !!parsha?.audioUrl;
-              const hasText = !!parsha?.content;
+              const hasText = !!parsha?.content || !!parsha?.imageUrl;
               const hasAnyContent = hasVideo || hasAudio || hasText;
               
               return (

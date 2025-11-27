@@ -30,6 +30,7 @@ export const parshaVorts = pgTable("parsha_vorts", {
   content: text("content"),
   audioUrl: text("audio_url"), // Optional: audio content URL
   videoUrl: text("video_url"), // Optional: video content URL
+  imageUrl: text("image_url"), // Optional: image URL (e.g., source sheet)
   speaker: text("speaker"),
   speakerWebsite: text("speaker_website"),
   thankYouMessage: text("thank_you_message"), // Dynamic thank you message with support for clickable links
