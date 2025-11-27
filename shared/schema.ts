@@ -85,6 +85,7 @@ export const communityImpact = pgTable("community_impact", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   imageUrl: text("image_url"),
+  videoUrl: text("video_url"), // Optional: video content URL
   createdAt: timestamp("created_at").defaultNow(),
 });
 

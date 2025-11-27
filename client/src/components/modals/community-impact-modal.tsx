@@ -13,7 +13,8 @@ export function CommunityImpactModal() {
     id: number;
     title: string;
     description: string;
-    imageUrl: string;
+    imageUrl?: string;
+    videoUrl?: string;
   }>({
     queryKey: [`/api/community/impact/${today}`],
     queryFn: async () => {
@@ -48,8 +49,21 @@ export function CommunityImpactModal() {
             </div>
           ) : impactContent ? (
             <div className="space-y-4">
-              {/* Main Image - only show if imageUrl exists */}
-              {impactContent.imageUrl && (
+              {/* Video Player - show if videoUrl exists */}
+              {impactContent.videoUrl && (
+                <div className="w-full rounded-2xl overflow-hidden">
+                  <video 
+                    controls 
+                    className="w-full rounded-lg"
+                    src={impactContent.videoUrl}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              )}
+              
+              {/* Main Image - only show if imageUrl exists and no video */}
+              {impactContent.imageUrl && !impactContent.videoUrl && (
                 <div className="w-full h-48 rounded-2xl overflow-hidden">
                   <img 
                     src={impactContent.imageUrl} 
