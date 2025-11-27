@@ -292,7 +292,7 @@ export default function TableSection() {
               <Star className={`${!inspirationContent ? 'text-gray-500' : 'text-white'}`} size={18} strokeWidth={1.5} />
             </div>
             <h3 className={`platypi-bold text-xs mb-1 platypi-bold ${!inspirationContent ? 'text-gray-500' : 'text-black'}`}>
-              Special Feature
+              Table Inspiration
             </h3>
             <p className={`platypi-regular text-xs leading-relaxed ${!inspirationContent ? 'text-gray-400' : 'text-black/60'}`}>
               {!inspirationContent ? 'Coming Soon' : isModalComplete('inspiration') ? 'Completed' : inspirationContent.title}
