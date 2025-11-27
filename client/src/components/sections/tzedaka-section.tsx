@@ -316,7 +316,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
             <div className="text-left">
               <h3 className="platypi-bold text-lg text-black mb-1">Put a Coin in Tzedaka</h3>
               <p className="platypi-regular text-sm text-black/60">
-                {isTzedakaButtonCompleted('put_a_coin') ? 'Completed' : 'Approved Women and Torah causes'}
+                {isTzedakaButtonCompleted('put_a_coin') ? 'Completed' : 'Approved Women Organizations and Kollels'}
               </p>
             </div>
           </div>

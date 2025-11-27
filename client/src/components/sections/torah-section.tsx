@@ -1,4 +1,4 @@
-import { Book, Heart, Shield, BookOpen, Star, Scroll, Triangle, Check } from "lucide-react";
+import { Book, Heart, Shield, BookOpen, Star, Scroll, Triangle, Check, Video } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import { useModalStore, useModalCompletionStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
@@ -60,6 +60,8 @@ export default function TorahSection({}: TorahSectionProps) {
     speaker?: string;
     content?: string;
     audioUrl?: string;
+    videoUrl?: string;
+    imageUrl?: string;
     speakerWebsite?: string;
     thankYouMessage?: string;
     fromDate?: string;
@@ -99,7 +101,7 @@ export default function TorahSection({}: TorahSectionProps) {
   });
 
   // Fetch today's Featured content
-  const { data: featuredContent, isError: featuredError, isLoading: featuredLoading } = useQuery<{title?: string; content?: string; provider?: string; footnotes?: string}>({
+  const { data: featuredContent, isError: featuredError, isLoading: featuredLoading } = useQuery<{title?: string; content?: string; audioUrl?: string; videoUrl?: string; provider?: string; footnotes?: string}>({
     queryKey: ['/api/torah/featured', today],
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
@@ -186,7 +188,7 @@ export default function TorahSection({}: TorahSectionProps) {
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
       border: 'border-blush/10',
-      contentType: 'text'
+      contentType: 'dynamic' // Will be determined based on content
     }
   ];
 
@@ -300,18 +302,34 @@ export default function TorahSection({}: TorahSectionProps) {
               case 'featured':
                 isError = featuredError;
                 isLoading = featuredLoading;
-                hasContent = !!featuredContent?.content && !isError;
+                // Check if any content exists (text, audio, or video)
+                hasContent = !isError && !!(featuredContent?.content || featuredContent?.audioUrl || featuredContent?.videoUrl);
                 if (hasContent && !isCompleted && featuredContent) {
-                  readingTime = calculateReadingTime(featuredContent.content || '');
                   const camelCaseTitle = toCamelCase(featuredContent.title || '');
                   displaySubtitle = camelCaseTitle || 'Special Topics';
+                  // Calculate reading time only for text content
+                  if (featuredContent.content && !featuredContent.audioUrl && !featuredContent.videoUrl) {
+                    readingTime = calculateReadingTime(featuredContent.content || '');
+                  }
                 } else if (isError) {
                   displaySubtitle = 'Temporarily unavailable';
                 } else if (isLoading) {
                   displaySubtitle = 'Loading...';
                 }
-                // Always show text indicator for featured content
-                contentType = hasContent ? 'text' : contentType;
+                // Determine content type dynamically: video > audio > text > none
+                if (hasContent && featuredContent) {
+                  if (featuredContent.videoUrl) {
+                    contentType = 'video';
+                  } else if (featuredContent.audioUrl) {
+                    contentType = 'audio';
+                  } else if (featuredContent.content) {
+                    contentType = 'text';
+                  } else {
+                    contentType = ''; // No icon if no content
+                  }
+                } else {
+                  contentType = ''; // No icon if no content
+                }
                 break;
             }
             
@@ -332,14 +350,16 @@ export default function TorahSection({}: TorahSectionProps) {
                 }}
                 disabled={!hasContent}
               >
-                {/* Content Type Indicator */}
+                {/* Content Type Indicator - only show if there's content and a valid type */}
                 {contentType && hasContent && (
                   <div className="absolute top-2 left-2 bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-                    {contentType === 'audio' ? (
+                    {contentType === 'video' ? (
+                      <Video className="w-2.5 h-2.5" />
+                    ) : contentType === 'audio' ? (
                       <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
-                    ) : (
+                    ) : contentType === 'text' ? (
                       <span className="platypi-bold text-xs">T</span>
-                    )}
+                    ) : null}
                   </div>
                 )}
                 
@@ -374,7 +394,7 @@ export default function TorahSection({}: TorahSectionProps) {
           })}
         </div>
 
-        {/* Parsha Vort Bars - Support multiple shiurim with date validation */}
+        {/* Featured Speaker Bars - Support multiple shiurim with date validation */}
         {(() => {
           // Filter vorts to only show currently active ones based on date range
           const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
@@ -385,36 +405,51 @@ export default function TorahSection({}: TorahSectionProps) {
 
           return activeVorts.length > 0 ? (
             // Render multiple bars for each available shiur
-            activeVorts.map((parsha, index) => (
-              <div key={parsha.id || index} className="w-full bg-white rounded-2xl p-3 shadow-lg border border-blush/10 mb-3 relative">
-                <div 
-                  className="flex items-center gap-3 cursor-pointer hover:scale-[1.02] transition-transform"
-                  onClick={() => {
-                    if (parsha?.title || parsha?.audioUrl) {
-                      openModal('parsha-vort', 'torah', undefined, parsha.id);
-                    }
-                  }}
-                >
-                  <div className="bg-gradient-feminine p-2 rounded-full">
-                    <BookOpen className="text-white" size={16} strokeWidth={1.5} />
-                  </div>
-                  <div className="text-left flex-grow">
-                    <h3 className={`text-sm text-black ${parsha?.hebrew_parsha ? 'koren-siddur-hebrew' : 'platypi-bold'}`}>
-                      {parsha?.hebrew_parsha || parsha?.parsha || 'Parsha Shiur'}
-                    </h3>
-                    <p className="platypi-regular text-xs text-black/60">
-                      {parsha?.title || 'Weekly Torah insight'}
-                      {parsha?.speaker && ` • ${parsha.speaker}`}
-                    </p>
-                  </div>
-                  <div className="bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-                    <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+            activeVorts.map((parsha, index) => {
+              // Determine content type for dynamic icon
+              const hasVideo = !!parsha?.videoUrl;
+              const hasAudio = !!parsha?.audioUrl;
+              const hasText = !!parsha?.content || !!parsha?.imageUrl;
+              const hasAnyContent = hasVideo || hasAudio || hasText;
+              
+              return (
+                <div key={parsha.id || index} className="w-full bg-white rounded-2xl p-3 shadow-lg border border-blush/10 mb-3 relative">
+                  <div 
+                    className="flex items-center gap-3 cursor-pointer hover:scale-[1.02] transition-transform"
+                    onClick={() => {
+                      if (parsha?.title || parsha?.audioUrl) {
+                        openModal('parsha-vort', 'torah', undefined, parsha.id);
+                      }
+                    }}
+                  >
+                    <div className="bg-gradient-feminine p-2 rounded-full">
+                      <BookOpen className="text-white" size={16} strokeWidth={1.5} />
+                    </div>
+                    <div className="text-left flex-grow">
+                      <h3 className="platypi-bold text-sm text-black">Featured Speakers</h3>
+                      <p className="platypi-regular text-xs text-black/60">
+                        Daily Torah Inspiration
+                        {parsha?.speaker && ` • ${parsha.speaker}`}
+                      </p>
+                    </div>
+                    {/* Dynamic content type icon - only show if there's content */}
+                    {hasAnyContent && (
+                      <div className="bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
+                        {hasVideo ? (
+                          <Video className="w-2.5 h-2.5" />
+                        ) : hasAudio ? (
+                          <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+                        ) : hasText ? (
+                          <span className="platypi-bold text-xs">T</span>
+                        ) : null}
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           ) : (
-            // Show single "Coming Soon" bar when no shiurim available
+            // Show single "Coming Soon" bar when no content available
             <div className="w-full bg-white rounded-2xl p-3 shadow-lg border border-blush/10 mb-3 relative">
               {/* Coming Soon Overlay */}
               <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center z-10">
@@ -423,18 +458,16 @@ export default function TorahSection({}: TorahSectionProps) {
                 </div>
               </div>
               
-              {/* Content (unclickable) */}
+              {/* Content (unclickable) - no play icon when no content */}
               <div className="flex items-center gap-3 opacity-60 cursor-not-allowed">
                 <div className="bg-gray-300 p-2 rounded-full">
                   <BookOpen className="text-gray-500" size={16} strokeWidth={1.5} />
                 </div>
                 <div className="text-left flex-grow">
-                  <h3 className="platypi-bold text-sm text-black">Parsha Shiur</h3>
-                  <p className="platypi-regular text-xs text-black/60">Weekly Torah insight</p>
+                  <h3 className="platypi-bold text-sm text-black">Featured Speakers</h3>
+                  <p className="platypi-regular text-xs text-black/60">Daily Torah Inspiration</p>
                 </div>
-                <div className="bg-gray-200 text-gray-500 text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-                  <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
-                </div>
+                {/* No play icon when there's no content */}
               </div>
             </div>
           );

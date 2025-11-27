@@ -11,6 +11,8 @@ import { CommunityImpactModal } from "./community-impact-modal";
 import { EventsModal } from "./events-modal";
 import MeditationModals from "./meditation-modals";
 import ParshaVortModal from "./parsha-vort-modal";
+import DailyChizukModal from "./daily-chizuk-modal";
+import DailyEmunaModal from "./daily-emuna-modal";
 import { useModalStore } from "@/lib/types";
 
 interface ModalContainerProps {
@@ -30,6 +32,8 @@ export default function ModalContainer({ onSectionChange }: ModalContainerProps)
       <ShopModals />
       <MeditationModals />
       <ParshaVortModal />
+      <DailyChizukModal />
+      <DailyEmunaModal />
       {activeModal === 'congratulations' && <CongratulationsModal />}
       {activeModal === 'about' && <AboutModal />}
       {activeModal === 'sponsor-details' && <SponsorDetailsModal />}

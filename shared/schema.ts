@@ -17,6 +17,8 @@ export const dailyRecipes = pgTable("daily_recipes", {
   imageUrl: text("image_url"),
   tags: text("tags"), // JSON array: kosher, pareve, dairy, meat
   thankYouMessage: text("thank_you_message"), // Dynamic thank you message with support for clickable links
+  attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
+  attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -28,9 +30,12 @@ export const parshaVorts = pgTable("parsha_vorts", {
   content: text("content"),
   audioUrl: text("audio_url"), // Optional: audio content URL
   videoUrl: text("video_url"), // Optional: video content URL
+  imageUrl: text("image_url"), // Optional: image URL (e.g., source sheet)
   speaker: text("speaker"),
   speakerWebsite: text("speaker_website"),
   thankYouMessage: text("thank_you_message"), // Dynamic thank you message with support for clickable links
+  attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
+  attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -50,6 +55,9 @@ export const tableInspirations = pgTable("table_inspirations", {
   mediaType4: text("media_type_4"), // 'image', 'audio', 'video'
   mediaUrl5: text("media_url_5"),
   mediaType5: text("media_type_5"), // 'image', 'audio', 'video'
+  attributionLabel: text("attribution_label"), // Short label for collapsed attribution
+  attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
+  attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -59,6 +67,9 @@ export const marriageInsights = pgTable("marriage_insights", {
   sectionNumber: integer("section_number").notNull(),
   content: text("content").notNull(),
   date: date("date").notNull(),
+  attributionLabel: text("attribution_label"), // Short label for collapsed attribution
+  attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
+  attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   dateIdx: index("idx_marriage_insights_date").on(table.date),
@@ -74,6 +85,7 @@ export const communityImpact = pgTable("community_impact", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   imageUrl: text("image_url"),
+  videoUrl: text("video_url"), // Optional: video content URL
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -288,6 +300,9 @@ export const meditations = pgTable("meditations", {
   subtitle: text("subtitle").notNull(), // Category subtitle
   name: text("name").notNull(), // Meditation title
   link: text("link").notNull(), // Streaming URL
+  attributionLabel: text("attribution_label"), // Short label for collapsed attribution
+  attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
+  attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -311,6 +326,9 @@ export const dailyHalacha = pgTable("daily_halacha", {
   title: text("title").notNull(),
   content: text("content").notNull(), // Main halacha text content
   footnotes: text("footnotes"), // Optional footnotes section
+  attributionLabel: text("attribution_label"), // Short label for collapsed attribution
+  attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
+  attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -322,6 +340,9 @@ export const dailyEmuna = pgTable("daily_emuna", {
   audioUrl: text("audio_url").notNull(),
   speaker: text("speaker"),
   speakerWebsite: text("speaker_website"),
+  attributionLabel: text("attribution_label"), // Short label for collapsed attribution
+  attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
+  attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -333,6 +354,9 @@ export const dailyChizuk = pgTable("daily_chizuk", {
   audioUrl: text("audio_url").notNull(),
   speaker: text("speaker"),
   speakerWebsite: text("speaker_website"),
+  attributionLabel: text("attribution_label"), // Short label for collapsed attribution
+  attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
+  attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -340,9 +364,14 @@ export const featuredContent = pgTable("featured_content", {
   id: serial("id").primaryKey(),
   date: date("date").notNull().unique(),
   title: text("title").notNull(),
-  content: text("content").notNull(),
+  content: text("content"),
+  audioUrl: text("audio_url"), // Optional: audio content URL
+  videoUrl: text("video_url"), // Optional: video content URL
   provider: text("provider"),
   footnotes: text("footnotes"),
+  attributionLabel: text("attribution_label"), // Short label for collapsed attribution
+  attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
+  attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
 });
 
