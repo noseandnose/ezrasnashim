@@ -426,7 +426,7 @@ export default function TorahSection({}: TorahSectionProps) {
                       <BookOpen className="text-white" size={16} strokeWidth={1.5} />
                     </div>
                     <div className="text-left flex-grow">
-                      <h3 className="platypi-bold text-sm text-black">Featured Speaker</h3>
+                      <h3 className="platypi-bold text-sm text-black">Featured Speakers</h3>
                       <p className="platypi-regular text-xs text-black/60">
                         Daily Torah Inspiration
                         {parsha?.speaker && ` • ${parsha.speaker}`}
@@ -464,7 +464,7 @@ export default function TorahSection({}: TorahSectionProps) {
                   <BookOpen className="text-gray-500" size={16} strokeWidth={1.5} />
                 </div>
                 <div className="text-left flex-grow">
-                  <h3 className="platypi-bold text-sm text-black">Featured Speaker</h3>
+                  <h3 className="platypi-bold text-sm text-black">Featured Speakers</h3>
                   <p className="platypi-regular text-xs text-black/60">Daily Torah Inspiration</p>
                 </div>
                 {/* No play icon when there's no content */}
