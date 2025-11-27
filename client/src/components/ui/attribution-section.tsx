@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface AttributionSectionProps {
   label: string;
@@ -22,8 +22,22 @@ export function AttributionSection({
   className = ""
 }: AttributionSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  
+  // Preload image when component mounts or logoUrl changes
+  useEffect(() => {
+    if (logoUrl) {
+      setImageLoaded(false);
+      setImageError(false);
+      const img = new Image();
+      img.onload = () => setImageLoaded(true);
+      img.onerror = () => setImageError(true);
+      img.src = logoUrl;
+    }
+  }, [logoUrl]);
 
-  const hasExpandableContent = logoUrl || aboutText;
+  const hasExpandableContent = (logoUrl && !imageError) || aboutText;
 
   if (!hasExpandableContent) {
     return (
@@ -68,18 +82,22 @@ export function AttributionSection({
         {isExpanded && (
           <div className="bg-white overflow-hidden" data-testid="content-attribution-expanded">
             <div className="flex">
-              {logoUrl && (
+              {logoUrl && !imageError && (
                 <div className="flex-shrink-0 w-24 self-stretch flex items-center justify-center" style={{ backgroundColor: '#ba89a0' }}>
-                  <img 
-                    src={logoUrl} 
-                    alt="Provider logo"
-                    className="max-w-full max-h-full object-contain"
-                    loading="lazy"
-                  />
+                  {!imageLoaded ? (
+                    <div className="w-12 h-12 animate-pulse bg-white/20 rounded-lg" />
+                  ) : (
+                    <img 
+                      src={logoUrl} 
+                      alt="Provider logo"
+                      className="max-w-full max-h-full object-contain"
+                      onError={() => setImageError(true)}
+                    />
+                  )}
                 </div>
               )}
               
-              <div className={logoUrl ? "flex-1 p-4" : "w-full p-4"}>
+              <div className={(logoUrl && !imageError) ? "flex-1 p-4" : "w-full p-4"}>
                 {aboutText && (
                   <div className="platypi-regular leading-relaxed text-black/80 text-sm space-y-2">
                     {aboutText.split('\n').map((paragraph, index) => (
