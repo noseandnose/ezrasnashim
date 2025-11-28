@@ -106,9 +106,9 @@ export function AttributionSection({
               
               <div className={(logoUrl && !imageError) ? "flex-1 p-4" : "w-full p-4"}>
                 {aboutText && (
-                  <div className="platypi-regular leading-relaxed text-black/80 text-sm space-y-2">
+                  <div className="platypi-regular leading-relaxed text-black/80 text-sm space-y-2" dir="auto">
                     {aboutText.split('\n').map((paragraph, index) => (
-                      <p key={index}>{paragraph}</p>
+                      <p key={index} dir="auto" style={{ unicodeBidi: 'plaintext' }}>{paragraph}</p>
                     ))}
                   </div>
                 )}
