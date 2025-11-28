@@ -38,6 +38,13 @@ export function AttributionSection({
   }, [logoUrl]);
 
   const hasExpandableContent = (logoUrl && !imageError) || aboutText;
+  
+  // Check if the website URL is already included in the label (either as text or as a link)
+  const websiteAlreadyInLabel = websiteUrl && (
+    label.includes(websiteUrl) || 
+    label.includes('href=') ||
+    (labelHtml && label.includes('<a'))
+  );
 
   if (!hasExpandableContent) {
     return (
@@ -106,9 +113,9 @@ export function AttributionSection({
                   </div>
                 )}
                 
-                {(websiteUrl || emailAddress) && (
+                {((websiteUrl && !websiteAlreadyInLabel) || emailAddress) && (
                   <div className="mt-3 space-y-1">
-                    {websiteUrl && (
+                    {websiteUrl && !websiteAlreadyInLabel && (
                       <p className="text-sm">
                         <a 
                           href={websiteUrl}
