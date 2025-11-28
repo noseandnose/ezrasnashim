@@ -106,10 +106,23 @@ export function AttributionSection({
               
               <div className={(logoUrl && !imageError) ? "flex-1 p-4" : "w-full p-4"}>
                 {aboutText && (
-                  <div className="platypi-regular leading-relaxed text-black/80 text-sm space-y-2" dir="auto">
-                    {aboutText.split('\n').map((paragraph, index) => (
-                      <p key={index} dir="auto" style={{ unicodeBidi: 'plaintext' }}>{paragraph}</p>
-                    ))}
+                  <div className="platypi-regular leading-relaxed text-black/80 text-sm space-y-2" dir="ltr" style={{ textAlign: 'left' }}>
+                    {aboutText.split('\n').map((paragraph, index) => {
+                      const hasHebrew = /[\u0590-\u05FF]/.test(paragraph);
+                      const isMainlyHebrew = hasHebrew && (paragraph.match(/[\u0590-\u05FF]/g)?.length || 0) > paragraph.length / 3;
+                      return (
+                        <p 
+                          key={index} 
+                          dir={isMainlyHebrew ? "rtl" : "ltr"}
+                          style={{ 
+                            textAlign: isMainlyHebrew ? 'right' : 'left',
+                            unicodeBidi: 'isolate'
+                          }}
+                        >
+                          {paragraph}
+                        </p>
+                      );
+                    })}
                   </div>
                 )}
                 
