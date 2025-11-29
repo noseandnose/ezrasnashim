@@ -679,8 +679,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid coordinates" });
       }
 
-      // Build API URL - get current week's Shabbat data
-      const apiUrl = `https://www.hebcal.com/shabbat/?cfg=json&latitude=${latitude}&longitude=${longitude}`;
+      const now = new Date();
+      const dayOfWeek = now.getDay(); // 0=Sunday, 6=Saturday
+      const currentHour = now.getHours();
+      
+      // On Saturday evening (after ~6pm which is typically after Havdalah),
+      // we should show next week's Shabbat information
+      // The Jewish day starts at nightfall, so after Saturday night Havdalah,
+      // it's already the next week
+      let targetDate = new Date(now);
+      if (dayOfWeek === 6 && currentHour >= 18) {
+        // It's Saturday evening after typical Havdalah time - show next week
+        targetDate.setDate(targetDate.getDate() + 7);
+      } else if (dayOfWeek === 0 && currentHour < 4) {
+        // It's very early Sunday morning (still feels like Saturday night) - show next week
+        targetDate.setDate(targetDate.getDate() + 6);
+      }
+
+      // Build API URL - include date to get the correct week's Shabbat data
+      const year = targetDate.getFullYear();
+      const month = targetDate.getMonth() + 1; // 1-indexed
+      const day = targetDate.getDate();
+      const apiUrl = `https://www.hebcal.com/shabbat/?cfg=json&latitude=${latitude}&longitude=${longitude}&gy=${year}&gm=${month}&gd=${day}`;
 
       // Server API Request
       
@@ -703,7 +723,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       // Find the upcoming Friday's candle lighting (closest Friday candle lighting)
-      const now = new Date();
       let closestFridayCandleLighting: any = null;
       let closestDistance = Infinity;
       
