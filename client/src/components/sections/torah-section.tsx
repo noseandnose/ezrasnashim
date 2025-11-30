@@ -250,15 +250,16 @@ export default function TorahSection({}: TorahSectionProps) {
                 {pirkeiAvot?.text && pirkeiAvot.text.length > 250 && (
                   <button
                     onClick={() => setPirkeiAvotExpanded(!pirkeiAvotExpanded)}
-                    className="absolute -bottom-1 right-0 w-4 h-4 bg-gradient-feminine rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
+                    className="absolute -bottom-1 right-0 bg-gradient-feminine rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
+                    style={{ width: '10px', height: '10px' }}
                     data-testid="button-toggle-pirkei-avot"
                   >
                     {pirkeiAvotExpanded ? (
-                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="18 15 12 9 6 15"></polyline>
                       </svg>
                     ) : (
-                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                       </svg>
                     )}
