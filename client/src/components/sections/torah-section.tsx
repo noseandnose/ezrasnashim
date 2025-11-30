@@ -255,11 +255,11 @@ export default function TorahSection({}: TorahSectionProps) {
                     data-testid="button-toggle-pirkei-avot"
                   >
                     {pirkeiAvotExpanded ? (
-                      <svg width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="18 15 12 9 6 15"></polyline>
                       </svg>
                     ) : (
-                      <svg width="6" height="6" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                       </svg>
                     )}
