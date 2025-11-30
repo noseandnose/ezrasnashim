@@ -250,22 +250,18 @@ export default function TorahSection({}: TorahSectionProps) {
                 {pirkeiAvot?.text && pirkeiAvot.text.length > 250 && (
                   <button
                     onClick={() => setPirkeiAvotExpanded(!pirkeiAvotExpanded)}
-                    className="absolute -bottom-1 right-0 w-6 h-6 bg-blush rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
+                    className="absolute -bottom-1 right-0 w-5 h-5 bg-gradient-feminine rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
                     data-testid="button-toggle-pirkei-avot"
                   >
-                    <svg 
-                      width="12" 
-                      height="12" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="white" 
-                      strokeWidth="3" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                      className={`transition-transform ${pirkeiAvotExpanded ? 'rotate-180' : ''}`}
-                    >
-                      <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
+                    {pirkeiAvotExpanded ? (
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="18 15 12 9 6 15"></polyline>
+                      </svg>
+                    ) : (
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    )}
                   </button>
                 )}
               </div>
