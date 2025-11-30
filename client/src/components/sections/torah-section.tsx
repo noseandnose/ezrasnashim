@@ -251,7 +251,7 @@ export default function TorahSection({}: TorahSectionProps) {
                   <button
                     onClick={() => setPirkeiAvotExpanded(!pirkeiAvotExpanded)}
                     className="absolute -bottom-1 right-0 bg-gradient-feminine rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
-                    style={{ width: '8px', height: '8px' }}
+                    style={{ width: '4px', height: '4px' }}
                     data-testid="button-toggle-pirkei-avot"
                   >
                     {pirkeiAvotExpanded ? (
