@@ -250,19 +250,23 @@ export default function TorahSection({}: TorahSectionProps) {
                 {pirkeiAvot?.text && pirkeiAvot.text.length > 250 && (
                   <button
                     onClick={() => setPirkeiAvotExpanded(!pirkeiAvotExpanded)}
-                    className="absolute -bottom-1 right-0 bg-gradient-feminine rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
-                    style={{ width: '4px', height: '4px' }}
+                    className="absolute -bottom-1 right-0 bg-gradient-feminine rounded-full shadow-sm hover:scale-110 transition-transform p-0 overflow-visible"
+                    style={{ width: '4px', height: '4px', minWidth: '4px', minHeight: '4px', padding: 0 }}
                     data-testid="button-toggle-pirkei-avot"
                   >
-                    {pirkeiAvotExpanded ? (
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="18 15 12 9 6 15"></polyline>
-                      </svg>
-                    ) : (
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                      </svg>
-                    )}
+                    <svg 
+                      width="10" 
+                      height="10" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="black" 
+                      strokeWidth="4" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                      style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
+                    >
+                      <polyline points={pirkeiAvotExpanded ? "18 15 12 9 6 15" : "6 9 12 15 18 9"}></polyline>
+                    </svg>
                   </button>
                 )}
               </div>
