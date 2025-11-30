@@ -239,7 +239,7 @@ export default function TorahSection({}: TorahSectionProps) {
             {pirkeiError ? (
               <p className="text-sm text-black/60 platypi-regular">Daily inspiration temporarily unavailable. Please check back later.</p>
             ) : (
-              <div>
+              <div className="relative">
                 <p className="koren-siddur-english text-base text-black font-bold leading-relaxed text-justify">
                   {!pirkeiAvot?.text ? 'Loading...' : 
                     pirkeiAvot.text.length > 250 && !pirkeiAvotExpanded 
@@ -250,10 +250,22 @@ export default function TorahSection({}: TorahSectionProps) {
                 {pirkeiAvot?.text && pirkeiAvot.text.length > 250 && (
                   <button
                     onClick={() => setPirkeiAvotExpanded(!pirkeiAvotExpanded)}
-                    className="text-blush platypi-medium text-sm mt-2 hover:underline"
+                    className="absolute -bottom-1 right-0 w-6 h-6 bg-blush rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
                     data-testid="button-toggle-pirkei-avot"
                   >
-                    {pirkeiAvotExpanded ? 'Show less' : 'Show more'}
+                    <svg 
+                      width="12" 
+                      height="12" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="white" 
+                      strokeWidth="3" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                      className={`transition-transform ${pirkeiAvotExpanded ? 'rotate-180' : ''}`}
+                    >
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
                   </button>
                 )}
               </div>
