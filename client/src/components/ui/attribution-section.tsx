@@ -38,6 +38,13 @@ export function AttributionSection({
   }, [logoUrl]);
 
   const hasExpandableContent = (logoUrl && !imageError) || aboutText;
+  
+  // Check if the website URL is already included in the label (either as text or as a link)
+  const websiteAlreadyInLabel = websiteUrl && (
+    label.includes(websiteUrl) || 
+    label.includes('href=') ||
+    (labelHtml && label.includes('<a'))
+  );
 
   if (!hasExpandableContent) {
     return (
@@ -99,16 +106,29 @@ export function AttributionSection({
               
               <div className={(logoUrl && !imageError) ? "flex-1 p-4" : "w-full p-4"}>
                 {aboutText && (
-                  <div className="platypi-regular leading-relaxed text-black/80 text-sm space-y-2">
-                    {aboutText.split('\n').map((paragraph, index) => (
-                      <p key={index}>{paragraph}</p>
-                    ))}
+                  <div className="platypi-regular leading-relaxed text-black/80 text-sm space-y-2" dir="ltr" style={{ textAlign: 'left' }}>
+                    {aboutText.split('\n').map((paragraph, index) => {
+                      const hasHebrew = /[\u0590-\u05FF]/.test(paragraph);
+                      const isMainlyHebrew = hasHebrew && (paragraph.match(/[\u0590-\u05FF]/g)?.length || 0) > paragraph.length / 3;
+                      return (
+                        <p 
+                          key={index} 
+                          dir={isMainlyHebrew ? "rtl" : "ltr"}
+                          style={{ 
+                            textAlign: isMainlyHebrew ? 'right' : 'left',
+                            unicodeBidi: 'isolate'
+                          }}
+                        >
+                          {paragraph}
+                        </p>
+                      );
+                    })}
                   </div>
                 )}
                 
-                {(websiteUrl || emailAddress) && (
+                {((websiteUrl && !websiteAlreadyInLabel) || emailAddress) && (
                   <div className="mt-3 space-y-1">
-                    {websiteUrl && (
+                    {websiteUrl && !websiteAlreadyInLabel && (
                       <p className="text-sm">
                         <a 
                           href={websiteUrl}

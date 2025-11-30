@@ -3,6 +3,8 @@
  * Uses native device sensors with minimal logic
  */
 
+import { useLocationStore } from '@/hooks/use-jewish-times';
+
 // Jerusalem coordinates (Kotel)
 export const JERUSALEM_COORDS = { lat: 31.7767, lng: 35.2345 };
 
@@ -174,9 +176,19 @@ export class SimpleCompass {
   }
   
   private requestLocation() {
-    if (!navigator.geolocation) {
-      this.state.error = 'Geolocation not supported';
+    // First, try to get location from the shared location store (home screen uses this)
+    const storeState = useLocationStore.getState();
+    if (storeState.coordinates) {
+      this.state.location = {
+        lat: storeState.coordinates.lat,
+        lng: storeState.coordinates.lng
+      };
+      this.calculateBearing();
       this.notifySubscribers();
+      
+      if (this.debugMode) {
+        console.log('[Compass] Using location from shared store:', this.state.location);
+      }
       return;
     }
     
@@ -189,32 +201,54 @@ export class SimpleCompass {
       return;
     }
     
+    if (!navigator.geolocation) {
+      this.state.error = 'Geolocation not supported';
+      this.notifySubscribers();
+      return;
+    }
+    
     const options: PositionOptions = {
       enableHighAccuracy: true,
       timeout: 10000,
       maximumAge: 5 * 60 * 1000 // 5 minutes
     };
     
-    navigator.geolocation.watchPosition(
+    // Directly try to get position without checking Permissions API first
+    // (Android WebViews don't properly support Permissions API)
+    navigator.geolocation.getCurrentPosition(
       (position) => {
         const newLocation = {
           lat: position.coords.latitude,
           lng: position.coords.longitude
         };
         
-        // Only update if location changed significantly
-        if (!this.state.location || this.locationChanged(this.state.location, newLocation, position.coords.accuracy)) {
-          this.state.location = newLocation;
-          this.cacheLocation(newLocation);
-          this.calculateBearing();
-          this.notifySubscribers();
+        this.state.location = newLocation;
+        this.cacheLocation(newLocation);
+        this.calculateBearing();
+        this.notifySubscribers();
+        
+        if (this.debugMode) {
+          console.log('[Compass] Got fresh location:', newLocation);
         }
       },
       (error) => {
-        this.state.error = `Location error: ${error.message}`;
+        // Only report as permission denied if it's actually a permission error
+        if (error.code === error.PERMISSION_DENIED) {
+          this.state.error = 'Location permission denied. Please enable location access in your device settings.';
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          this.state.error = 'Location unavailable. Please try again.';
+        } else if (error.code === error.TIMEOUT) {
+          this.state.error = 'Location request timed out. Please try again.';
+        } else {
+          this.state.error = `Location error: ${error.message}`;
+        }
         // Fallback to approximate bearing
         this.state.bearing = 90; // East (approximate for most locations)
         this.notifySubscribers();
+        
+        if (this.debugMode) {
+          console.log('[Compass] Location error:', error.code, error.message);
+        }
       },
       options
     );

@@ -40,6 +40,7 @@ export default function TorahSection({}: TorahSectionProps) {
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
+  const [pirkeiAvotExpanded, setPirkeiAvotExpanded] = useState(false);
   
   // Fetch today's Pirkei Avot for daily inspiration
   const today = new Date().toISOString().split('T')[0];
@@ -235,13 +236,41 @@ export default function TorahSection({}: TorahSectionProps) {
                 )}
               </button>
             </div>
-            <p className="koren-siddur-english text-base text-black font-bold leading-relaxed text-justify">
-              {pirkeiError ? (
-                <span className="text-sm text-black/60 platypi-regular">Daily inspiration temporarily unavailable. Please check back later.</span>
-              ) : (
-                pirkeiAvot?.text || 'Loading...'
-              )}
-            </p>
+            {pirkeiError ? (
+              <p className="text-sm text-black/60 platypi-regular">Daily inspiration temporarily unavailable. Please check back later.</p>
+            ) : (
+              <div className="relative">
+                <p className="koren-siddur-english text-base text-black font-bold leading-relaxed text-justify">
+                  {!pirkeiAvot?.text ? 'Loading...' : 
+                    pirkeiAvot.text.length > 250 && !pirkeiAvotExpanded 
+                      ? pirkeiAvot.text.slice(0, 250) + '...' 
+                      : pirkeiAvot.text
+                  }
+                </p>
+                {pirkeiAvot?.text && pirkeiAvot.text.length > 250 && (
+                  <button
+                    onClick={() => setPirkeiAvotExpanded(!pirkeiAvotExpanded)}
+                    className="absolute -bottom-1 right-0 bg-gradient-feminine rounded-full shadow-sm hover:scale-110 transition-transform p-0 overflow-visible"
+                    style={{ width: '16px', height: '16px', minWidth: '16px', minHeight: '16px', padding: 0 }}
+                    data-testid="button-toggle-pirkei-avot"
+                  >
+                    <svg 
+                      width="10" 
+                      height="10" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="black" 
+                      strokeWidth="4" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                      style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
+                    >
+                      <polyline points={pirkeiAvotExpanded ? "18 15 12 9 6 15" : "6 9 12 15 18 9"}></polyline>
+                    </svg>
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
