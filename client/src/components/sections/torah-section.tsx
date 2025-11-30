@@ -40,6 +40,7 @@ export default function TorahSection({}: TorahSectionProps) {
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
+  const [pirkeiAvotExpanded, setPirkeiAvotExpanded] = useState(false);
   
   // Fetch today's Pirkei Avot for daily inspiration
   const today = new Date().toISOString().split('T')[0];
@@ -235,13 +236,28 @@ export default function TorahSection({}: TorahSectionProps) {
                 )}
               </button>
             </div>
-            <p className="koren-siddur-english text-base text-black font-bold leading-relaxed text-justify">
-              {pirkeiError ? (
-                <span className="text-sm text-black/60 platypi-regular">Daily inspiration temporarily unavailable. Please check back later.</span>
-              ) : (
-                pirkeiAvot?.text || 'Loading...'
-              )}
-            </p>
+            {pirkeiError ? (
+              <p className="text-sm text-black/60 platypi-regular">Daily inspiration temporarily unavailable. Please check back later.</p>
+            ) : (
+              <div>
+                <p className="koren-siddur-english text-base text-black font-bold leading-relaxed text-justify">
+                  {!pirkeiAvot?.text ? 'Loading...' : 
+                    pirkeiAvot.text.length > 250 && !pirkeiAvotExpanded 
+                      ? pirkeiAvot.text.slice(0, 250) + '...' 
+                      : pirkeiAvot.text
+                  }
+                </p>
+                {pirkeiAvot?.text && pirkeiAvot.text.length > 250 && (
+                  <button
+                    onClick={() => setPirkeiAvotExpanded(!pirkeiAvotExpanded)}
+                    className="text-blush platypi-medium text-sm mt-2 hover:underline"
+                    data-testid="button-toggle-pirkei-avot"
+                  >
+                    {pirkeiAvotExpanded ? 'Show less' : 'Show more'}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
