@@ -135,12 +135,31 @@ export function containsHebrew(text: string): boolean {
 }
 
 /**
- * Get the appropriate font class based on whether text contains Hebrew
- * Returns 'koren-siddur-hebrew' for Hebrew text, 'koren-siddur-english' for English
+ * Determine the predominant text direction based on character count
+ * Returns 'rtl' if more than 1/3 of characters are Hebrew, otherwise 'ltr'
+ */
+export function getTextDirection(text: string | null | undefined): 'ltr' | 'rtl' {
+  if (!text) return 'ltr';
+  
+  const hebrewChars = (text.match(/[\u0590-\u05FF]/g) || []).length;
+  const latinChars = (text.match(/[a-zA-Z]/g) || []).length;
+  const totalChars = hebrewChars + latinChars;
+  
+  if (totalChars === 0) return 'ltr';
+  
+  // If more than 1/3 of alphabetic characters are Hebrew, use RTL
+  return hebrewChars / totalChars > 0.33 ? 'rtl' : 'ltr';
+}
+
+/**
+ * Get the appropriate font class based on predominant language direction
+ * Returns 'koren-siddur-hebrew' only for RTL (Hebrew-dominant) text
+ * Returns defaultClass for LTR (English-dominant) text, even if it contains some Hebrew
  */
 export function getHebrewFontClass(text: string | null | undefined, defaultClass: string = 'koren-siddur-english'): string {
   if (!text) return defaultClass;
-  return containsHebrew(text) ? 'koren-siddur-hebrew' : defaultClass;
+  // Use direction-based logic: only apply Hebrew class if text is predominantly Hebrew
+  return getTextDirection(text) === 'rtl' ? 'koren-siddur-hebrew' : defaultClass;
 }
 
 /**

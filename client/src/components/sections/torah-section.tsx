@@ -240,7 +240,11 @@ export default function TorahSection({}: TorahSectionProps) {
               <p className="text-sm text-black/60 platypi-regular">Daily inspiration temporarily unavailable. Please check back later.</p>
             ) : (
               <div className="relative">
-                <p className="koren-siddur-english text-base text-black font-bold leading-relaxed text-justify">
+                <p 
+                  className="koren-siddur-english text-base text-black font-bold leading-relaxed text-justify"
+                  dir="auto"
+                  style={{ unicodeBidi: 'plaintext' }}
+                >
                   {!pirkeiAvot?.text ? 'Loading...' : 
                     pirkeiAvot.text.length > 250 && !pirkeiAvotExpanded 
                       ? pirkeiAvot.text.slice(0, 250) + '...' 

@@ -7,7 +7,7 @@ import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { AttributionSection } from "@/components/ui/attribution-section";
-import { getHebrewFontClass } from "@/lib/hebrewUtils";
+import { getHebrewFontClass, getTextDirection } from "@/lib/hebrewUtils";
 import { formatThankYouMessageFull } from "@/lib/link-formatter";
 
 export default function ParshaVortModal() {
@@ -91,7 +91,11 @@ export default function ParshaVortModal() {
           {/* Main Content */}
           {parshaVort.content && (
             <div className="bg-white rounded-2xl p-6 border border-blush/10">
-              <div className={`${getHebrewFontClass(parshaVort.content, 'koren-siddur-english')} text-base leading-relaxed text-black`}>
+              <div 
+                className={`${getHebrewFontClass(parshaVort.content, 'koren-siddur-english')} text-base leading-relaxed text-black`}
+                dir={getTextDirection(parshaVort.content)}
+                style={{ textAlign: getTextDirection(parshaVort.content) === 'rtl' ? 'right' : 'left' }}
+              >
                 {parshaVort.content}
               </div>
             </div>
