@@ -91,7 +91,11 @@ export default function ParshaVortModal() {
           {/* Main Content */}
           {parshaVort.content && (
             <div className="bg-white rounded-2xl p-6 border border-blush/10">
-              <div className={`${getHebrewFontClass(parshaVort.content, 'koren-siddur-english')} text-base leading-relaxed text-black`}>
+              <div 
+                className={`${getHebrewFontClass(parshaVort.content, 'koren-siddur-english')} text-base leading-relaxed text-black`}
+                dir="auto"
+                style={{ unicodeBidi: 'plaintext' }}
+              >
                 {parshaVort.content}
               </div>
             </div>
