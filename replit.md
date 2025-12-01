@@ -15,21 +15,7 @@ Compass alignment message: When compass is aligned with Jerusalem, displays "You
 Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20% bigger (w-8 h-8), both BH Green icon and center heart pulse when aligned.
 Header layout: Search icon moved from header to hamburger menu to keep logo perfectly centered. Header now shows only hamburger menu (left), centered logo, and message button (right).
 Layout fixes (Nov 2025): Fixed bottom nav positioning and header scrolling issues. Bottom nav now defaults to `--nav-offset: 0px` (flush with safe area), with browser UI offset applied only in Safari browser mode via JavaScript detection. Header ensured to stay fixed at top with additional CSS safeguards. Works correctly across Chrome, Safari, and mobile app wrappers.
-Button interaction fix (Dec 2025): Fixed critical button freeze bug in mobile environments (FlutterFlow app, mobile browsers). ROOT CAUSE IDENTIFIED: FlutterFlow WebView has a known issue where it doesn't properly handle app lifecycle when transitioning from paused → resumed state, causing all touch/click events to stop working. This is a Flutter WebView bug, not a web app issue. Click synthesis was attempted but caused phantom clicks. CURRENT FIX: Pointer-events reset for Radix Dialog edge cases only. The real fix must be done in FlutterFlow.
-FLUTTERFLOW FIX REQUIRED: Add App Lifecycle Listener in FlutterFlow custom code that reloads WebView on resume:
-```dart
-class WebViewPageState extends State<WebViewPage> with WidgetsBindingObserver {
-  WebViewController? _webViewController;
-  @override
-  void initState() { super.initState(); WidgetsBinding.instance.addObserver(this); }
-  @override
-  void dispose() { WidgetsBinding.instance.removeObserver(this); super.dispose(); }
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) { _webViewController?.reload(); }
-  }
-}
-```
+Button interaction fix (Nov 2025): Fixed critical button freeze bug in mobile environments (FlutterFlow app, mobile browsers). Root cause: Mobile webviews can swallow touchend/click events entirely after certain background/resume cycles, making all buttons unresponsive (CSS :active still works since pointerdown fires, but the release event never reaches JavaScript). Solution: Implemented reload-on-resume system (flutterflow-reload.ts) that activates on all mobile devices and reloads the page when the app regains visibility after being backgrounded. Uses visibilitychange and pageshow events with debouncing. System includes optional debug logging via localStorage.setItem("debugReloadOnResume", "true"). Activates on all iOS/Android devices to ensure reliable FlutterFlow functionality. Also fixed modal click-through bug where clicking X button would trigger buttons beneath the modal - all onClose calls now deferred with requestAnimationFrame to prevent event retargeting during DOM unmounting. Additionally removed pointer-events manipulation from modal scroll locking (overflow-only) to eliminate CSS-based click blocking. Console logging gated behind debug flags (debugReloadOnResume, debugDOMBridge) for production cleanliness. This ensures reliable button functionality across all mobile environments.
 Push notification fix (Nov 2025): Fixed "Registration failed - storage error" exception that occurred when IndexedDB/Cache Storage is unavailable or restricted (e.g., in incognito mode, certain browser settings, or web view environments). Auto-notification prompt now validates storage availability before attempting service worker registration. Permission manager also checks IndexedDB availability before subscription attempts. This prevents errors while allowing notifications to work in environments where storage is available.
 Compass Android fix (Nov 2025): Fixed compass showing "denied geolocation permissions" on Android WebViews even when location was already granted (home screen showed correct location). Root cause: Android WebViews don't properly support the browser Permissions API, returning "denied" even when permissions were granted. Solution: Compass now uses shared location store (useLocationStore) first - if home screen already has location coordinates, compass uses those directly instead of re-requesting. Falls back to direct getCurrentPosition call (skipping Permissions API check) and only reports denial when actual geolocation request fails with PERMISSION_DENIED error code.
 

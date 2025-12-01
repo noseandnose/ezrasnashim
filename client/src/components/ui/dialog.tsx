@@ -33,50 +33,24 @@ const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, children, ...props }, ref) => {
-  // FIX: Radix Dialog sets pointer-events: none on <body> when dialogs are open
-  // This can get stuck after closing, especially in mobile WebViews after background/resume
-  // We reset pointer-events on body when app becomes visible or when dialog unmounts
+  // Ensure dialog portals to body (bypasses any scroll-locked containers)
+  // This prevents buttons from becoming unresponsive after app minimize/resume
   React.useEffect(() => {
-    const resetPointerEvents = () => {
-      // Check if any dialogs are currently open
-      const openDialogs = document.querySelectorAll('[role="dialog"][data-state="open"]');
-      
-      // If no dialogs are open, ensure body pointer-events is reset
-      if (openDialogs.length === 0) {
-        if (document.body.style.pointerEvents === 'none') {
-          document.body.style.pointerEvents = '';
-        }
-      }
-      
-      // Also reset any stuck pointer-events on dialog elements themselves
-      const allDialogs = document.querySelectorAll('[role="dialog"]');
-      allDialogs.forEach((dialog) => {
-        const htmlDialog = dialog as HTMLElement;
-        if (htmlDialog.style.pointerEvents === 'none') {
-          htmlDialog.style.pointerEvents = 'auto';
-        }
-      });
-    };
-    
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        // Delay slightly to let Radix finish its cleanup
-        requestAnimationFrame(() => {
-          resetPointerEvents();
+        // Ensure dialogs maintain pointer events when app becomes visible
+        const dialogs = document.querySelectorAll('[role="dialog"]');
+        dialogs.forEach((dialog) => {
+          const htmlDialog = dialog as HTMLElement;
+          if (htmlDialog.style.pointerEvents === 'none') {
+            htmlDialog.style.pointerEvents = 'auto';
+          }
         });
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    // Also reset on unmount in case dialog closes while app is backgrounded
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      // Delay cleanup to not interfere with Radix's own cleanup
-      requestAnimationFrame(() => {
-        resetPointerEvents();
-      });
-    };
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
   return (
