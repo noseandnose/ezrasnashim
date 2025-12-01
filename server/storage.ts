@@ -5,6 +5,7 @@ import {
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
   dailyRecipes, parshaVorts, tableInspirations, marriageInsights, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats, acts,
+  mitzvahSessions, mitzvahCompletions, mitzvahDailyTotals,
 
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
@@ -39,7 +40,7 @@ import {
   type PushNotification, type InsertPushNotification
 } from "../shared/schema";
 import { db, pool } from "./db";
-import { eq, gt, lt, gte, lte, and, sql, like, desc } from "drizzle-orm";
+import { eq, gt, lt, gte, lte, and, sql, like, desc, inArray } from "drizzle-orm";
 import { cleanHebrewText, memoize, withRetry, formatDate } from './typeHelpers';
 
 export interface IStorage {
@@ -185,6 +186,11 @@ export interface IStorage {
   getActiveDiscountPromotion(): Promise<DiscountPromotion | undefined>;
   getActiveDiscountPromotions(userLocation?: string): Promise<DiscountPromotion[]>;
   createDiscountPromotion(promotion: InsertDiscountPromotion): Promise<DiscountPromotion>;
+
+  // Mitzvah tracking methods
+  syncMitzvahCompletions(deviceId: string, completions: Array<{ category: string; modalId?: string; date: string; idempotencyKey: string }>): Promise<{ synced: number; totals: { torah: number; tefilla: number; tzedaka: number; total: number } }>;
+  getMitzvahTotals(date?: string): Promise<{ torah: number; tefilla: number; tzedaka: number; total: number; monthlyTotal: number }>;
+  getDeviceStreak(deviceId: string): Promise<number>;
 
   // Analytics methods
   trackEvent(event: InsertAnalyticsEvent): Promise<AnalyticsEvent>;
@@ -1283,6 +1289,167 @@ export class DatabaseStorage implements IStorage {
       .where(eq(acts.paymentIntentId, paymentIntentId))
       .limit(1);
     return result || null;
+  }
+
+  // Mitzvah tracking methods
+  async syncMitzvahCompletions(
+    deviceId: string, 
+    completions: Array<{ category: string; modalId?: string; date: string; idempotencyKey: string }>
+  ): Promise<{ synced: number; totals: { torah: number; tefilla: number; tzedaka: number; total: number } }> {
+    let syncedCount = 0;
+    
+    // Upsert device session
+    await db
+      .insert(mitzvahSessions)
+      .values({ deviceId })
+      .onConflictDoUpdate({
+        target: mitzvahSessions.deviceId,
+        set: { lastSeen: new Date() }
+      });
+    
+    // Get unique dates from the payload
+    const uniqueDates = [...new Set(completions.map(c => c.date))];
+    
+    // Pre-check which dates this device already has completions for
+    const existingDateRecords = await db
+      .select({ date: mitzvahCompletions.date })
+      .from(mitzvahCompletions)
+      .where(and(
+        eq(mitzvahCompletions.deviceId, deviceId),
+        inArray(mitzvahCompletions.date, uniqueDates)
+      ));
+    
+    const datesWithExistingCompletions = new Set(
+      existingDateRecords.map(r => r.date)
+    );
+    
+    // Track which dates we've already counted as new in THIS batch
+    const newDatesInBatch = new Set<string>();
+    
+    // Process each completion
+    for (const completion of completions) {
+      // Check for idempotency - skip if already exists
+      const [existing] = await db
+        .select()
+        .from(mitzvahCompletions)
+        .where(eq(mitzvahCompletions.idempotencyKey, completion.idempotencyKey))
+        .limit(1);
+      
+      if (existing) continue;
+      
+      // Determine if this is a new device for this day
+      // True only if: no existing completions for this date AND we haven't already counted this date in this batch
+      const isNewDeviceForDay = !datesWithExistingCompletions.has(completion.date) && 
+                                 !newDatesInBatch.has(completion.date);
+      
+      if (isNewDeviceForDay) {
+        newDatesInBatch.add(completion.date);
+      }
+      
+      // Insert new completion
+      await db.insert(mitzvahCompletions).values({
+        deviceId,
+        date: completion.date,
+        category: completion.category,
+        modalId: completion.modalId,
+        idempotencyKey: completion.idempotencyKey
+      });
+      syncedCount++;
+      
+      // Update daily totals
+      const categoryColumn = completion.category === 'torah' ? 'torahCount' : 
+                            completion.category === 'tefilla' ? 'tefillaCount' : 'tzedakaCount';
+      
+      await db
+        .insert(mitzvahDailyTotals)
+        .values({
+          date: completion.date,
+          torahCount: completion.category === 'torah' ? 1 : 0,
+          tefillaCount: completion.category === 'tefilla' ? 1 : 0,
+          tzedakaCount: completion.category === 'tzedaka' ? 1 : 0,
+          totalCount: 1,
+          uniqueDevices: isNewDeviceForDay ? 1 : 0
+        })
+        .onConflictDoUpdate({
+          target: mitzvahDailyTotals.date,
+          set: {
+            [categoryColumn]: sql`${mitzvahDailyTotals[categoryColumn as keyof typeof mitzvahDailyTotals]} + 1`,
+            totalCount: sql`${mitzvahDailyTotals.totalCount} + 1`,
+            uniqueDevices: isNewDeviceForDay 
+              ? sql`${mitzvahDailyTotals.uniqueDevices} + 1`
+              : mitzvahDailyTotals.uniqueDevices,
+            updatedAt: new Date()
+          }
+        });
+    }
+    
+    // Update session total completions in one go
+    if (syncedCount > 0) {
+      await db
+        .update(mitzvahSessions)
+        .set({ totalCompletions: sql`${mitzvahSessions.totalCompletions} + ${syncedCount}` })
+        .where(eq(mitzvahSessions.deviceId, deviceId));
+    }
+    
+    // Get today's totals
+    const today = new Date().toISOString().split('T')[0];
+    const totals = await this.getMitzvahTotals(today);
+    
+    return { synced: syncedCount, totals };
+  }
+
+  async getMitzvahTotals(date?: string): Promise<{ torah: number; tefilla: number; tzedaka: number; total: number; monthlyTotal: number }> {
+    const targetDate = date || new Date().toISOString().split('T')[0];
+    
+    // Get today's totals
+    const [dailyTotal] = await db
+      .select()
+      .from(mitzvahDailyTotals)
+      .where(eq(mitzvahDailyTotals.date, targetDate))
+      .limit(1);
+    
+    // Get monthly total (current month)
+    const monthStart = targetDate.slice(0, 7) + '-01';
+    const monthlyResult = await db
+      .select({ total: sql<number>`COALESCE(SUM(${mitzvahDailyTotals.totalCount}), 0)` })
+      .from(mitzvahDailyTotals)
+      .where(gte(mitzvahDailyTotals.date, monthStart));
+    
+    return {
+      torah: dailyTotal?.torahCount ?? 0,
+      tefilla: dailyTotal?.tefillaCount ?? 0,
+      tzedaka: dailyTotal?.tzedakaCount ?? 0,
+      total: dailyTotal?.totalCount ?? 0,
+      monthlyTotal: Number(monthlyResult[0]?.total) || 0
+    };
+  }
+
+  async getDeviceStreak(deviceId: string): Promise<number> {
+    // Count consecutive days with completions ending today
+    const today = new Date();
+    let streak = 0;
+    let checkDate = new Date(today);
+    
+    while (true) {
+      const dateStr = checkDate.toISOString().split('T')[0];
+      const [completion] = await db
+        .select()
+        .from(mitzvahCompletions)
+        .where(and(
+          eq(mitzvahCompletions.deviceId, deviceId),
+          eq(mitzvahCompletions.date, dateStr)
+        ))
+        .limit(1);
+      
+      if (!completion) break;
+      streak++;
+      checkDate.setDate(checkDate.getDate() - 1);
+      
+      // Safety limit
+      if (streak > 365) break;
+    }
+    
+    return streak;
   }
 
   async getDonationByPaymentIntentId(stripePaymentIntentId: string) {

@@ -52,7 +52,7 @@ Compass Android fix (Nov 2025): Fixed compass showing "denied geolocation permis
 - **CDN Integration**: Objects served via CDN or Express `/objects/` route.
 
 ### Core Application Features
-- **Daily Completion Tracking**: Torah, Tefilla, Tzedaka.
+- **Daily Completion Tracking**: Torah, Tefilla, Tzedaka. Server-side mitzvah tracking with anonymous device-based counting (UUID stored in localStorage). Three database tables: mitzvah_sessions (device tracking), mitzvah_completions (individual completions with idempotency), mitzvah_daily_totals (aggregated daily counts). Offline queue in localStorage syncs when online. API endpoints: POST /api/mitzvos/sync, GET /api/mitzvos/totals, GET /api/mitzvos/streak/:deviceId.
 - **Jewish Times Integration**: Real-time zmanim based on location (Hebcal.com).
 - **Content Management**: Daily Torah, prayers (Mincha, Nishmas, Tehillim, Morning Brochas, Birkat Hamazon, Maariv), Shabbat resources, Pirkei Avot. Supports text and audio; dynamic prayer text.
 - **The Kotel Compass**: Geolocation-based compass for prayer orientation.
