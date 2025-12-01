@@ -144,6 +144,23 @@ export function getHebrewFontClass(text: string | null | undefined, defaultClass
 }
 
 /**
+ * Determine the predominant text direction based on character count
+ * Returns 'rtl' if more than 1/3 of characters are Hebrew, otherwise 'ltr'
+ */
+export function getTextDirection(text: string | null | undefined): 'ltr' | 'rtl' {
+  if (!text) return 'ltr';
+  
+  const hebrewChars = (text.match(/[\u0590-\u05FF]/g) || []).length;
+  const latinChars = (text.match(/[a-zA-Z]/g) || []).length;
+  const totalChars = hebrewChars + latinChars;
+  
+  if (totalChars === 0) return 'ltr';
+  
+  // If more than 1/3 of alphabetic characters are Hebrew, use RTL
+  return hebrewChars / totalChars > 0.33 ? 'rtl' : 'ltr';
+}
+
+/**
  * Common search synonyms for cross-language matching
  * Maps English terms to Hebrew equivalents and common variations
  */
