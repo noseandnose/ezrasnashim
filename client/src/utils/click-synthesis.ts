@@ -4,17 +4,22 @@
  * Problem: After FlutterFlow WebView resume, touchend events fire but don't 
  * promote to click events, breaking React's event delegation.
  * 
- * Solution: On visibility resume, add a temporary touchend listener that
- * synthesizes click events when native clicks aren't happening. This preserves
- * app state (audio, scroll position) unlike full page reload.
+ * Solution: On visibility resume, add a touchend listener that synthesizes 
+ * click events when native clicks aren't happening. This preserves app state
+ * (audio, scroll position) unlike full page reload.
+ * 
+ * Key behavior: Synthesis stays active until multiple consecutive native clicks
+ * are observed, ensuring the UI remains responsive even if the user waits
+ * before interacting.
  */
 
 let synthesisActive = false;
 let lastClickTimestamp = 0;
-let synthesisTimeout: number | null = null;
+let consecutiveNativeClicks = 0;
+let synthesisHandler: ((e: TouchEvent) => void) | null = null;
 
-const SYNTHESIS_DURATION_MS = 10000; // How long to keep synthesis active after resume
 const CLICK_DELAY_THRESHOLD_MS = 100; // If click doesn't follow touchend within this, synthesize
+const NATIVE_CLICKS_TO_DEACTIVATE = 3; // Require multiple native clicks before deactivating
 
 /**
  * Initialize click synthesis for FlutterFlow WebView
@@ -23,43 +28,58 @@ const CLICK_DELAY_THRESHOLD_MS = 100; // If click doesn't follow touchend within
 export function initializeClickSynthesis() {
   if (typeof window === 'undefined') return;
   
-  const isDebugMode = localStorage.getItem('debugClickSynthesis') === 'true';
+  const isDebugMode = () => localStorage.getItem('debugClickSynthesis') === 'true';
   
   // Check if we're on a mobile device
   const isMobile = /mobile|android|iphone|ipad|ipod/i.test(navigator.userAgent);
   
   if (!isMobile) {
-    if (isDebugMode) {
+    if (isDebugMode()) {
       console.log('[Click Synthesis] Not a mobile device, skipping initialization');
     }
     return;
   }
   
-  if (isDebugMode) {
+  if (isDebugMode()) {
     console.log('[Click Synthesis] Initializing for mobile device');
   }
   
   // Track when we receive natural click events
   document.addEventListener('click', () => {
     lastClickTimestamp = Date.now();
+    
+    // Count consecutive native clicks when synthesis is active
+    if (synthesisActive) {
+      consecutiveNativeClicks++;
+      if (isDebugMode()) {
+        console.log('[Click Synthesis] Native click detected, count:', consecutiveNativeClicks);
+      }
+      
+      // Deactivate after enough consecutive native clicks confirm it's working
+      if (consecutiveNativeClicks >= NATIVE_CLICKS_TO_DEACTIVATE) {
+        if (isDebugMode()) {
+          console.log('[Click Synthesis] Native clicks restored, deactivating synthesis');
+        }
+        deactivateSynthesis();
+      }
+    }
   }, true);
   
-  // Handle visibility changes
+  // Handle visibility changes - activate on resume
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-      if (isDebugMode) {
+      if (isDebugMode()) {
         console.log('[Click Synthesis] App resumed, activating synthesis mode');
       }
       activateSynthesis();
-    } else {
-      deactivateSynthesis();
     }
+    // Note: Don't deactivate when hiding - let it stay ready for resume
   });
   
   // Also handle pageshow for iOS back/forward cache
   window.addEventListener('pageshow', (event) => {
     if (event.persisted) {
-      if (isDebugMode) {
+      if (isDebugMode()) {
         console.log('[Click Synthesis] Page restored from cache, activating synthesis');
       }
       activateSynthesis();
@@ -69,18 +89,15 @@ export function initializeClickSynthesis() {
 
 /**
  * Activate click synthesis mode
- * This adds handlers that will synthesize clicks if native ones aren't firing
+ * Stays active until native clicks are confirmed working
  */
 function activateSynthesis() {
   if (synthesisActive) return;
   
   synthesisActive = true;
-  const isDebugMode = localStorage.getItem('debugClickSynthesis') === 'true';
+  consecutiveNativeClicks = 0; // Reset counter on each activation
   
-  // Clear any existing timeout
-  if (synthesisTimeout) {
-    clearTimeout(synthesisTimeout);
-  }
+  const isDebugMode = () => localStorage.getItem('debugClickSynthesis') === 'true';
   
   // Set up the synthesis handler
   const handleTouchEnd = (e: TouchEvent) => {
@@ -92,55 +109,48 @@ function activateSynthesis() {
       return;
     }
     
+    const touchTimestamp = Date.now();
+    
     // Wait a short time to see if a natural click follows
     setTimeout(() => {
-      // If no click happened after our touch, the click was swallowed
-      if (Date.now() - lastClickTimestamp > CLICK_DELAY_THRESHOLD_MS) {
-        if (isDebugMode) {
-          console.log('[Click Synthesis] No native click detected, synthesizing for:', target.tagName, target.className);
+      // Only synthesize if no click happened after our touch
+      if (lastClickTimestamp < touchTimestamp) {
+        if (isDebugMode()) {
+          console.log('[Click Synthesis] No native click detected, synthesizing for:', 
+            target.tagName, target.className?.substring(0, 50));
         }
+        consecutiveNativeClicks = 0; // Reset - native clicks aren't working
         synthesizeClick(target, e);
-      } else {
-        if (isDebugMode) {
-          console.log('[Click Synthesis] Native click detected, no synthesis needed');
-        }
-        // Native clicks are working, we can deactivate early
-        deactivateSynthesis();
       }
+      // If native click happened, the click listener will handle counting
     }, CLICK_DELAY_THRESHOLD_MS);
   };
   
+  synthesisHandler = handleTouchEnd;
   document.addEventListener('touchend', handleTouchEnd, { capture: true, passive: true });
   
-  // Store handler reference for cleanup
-  (window as any).__clickSynthesisHandler = handleTouchEnd;
-  
-  // Auto-deactivate after timeout (native clicks should be working by then)
-  synthesisTimeout = window.setTimeout(() => {
-    if (isDebugMode) {
-      console.log('[Click Synthesis] Timeout reached, deactivating');
-    }
-    deactivateSynthesis();
-  }, SYNTHESIS_DURATION_MS);
+  if (isDebugMode()) {
+    console.log('[Click Synthesis] Synthesis mode activated');
+  }
 }
 
 /**
  * Deactivate click synthesis mode
+ * Only called when native clicks are confirmed working
  */
 function deactivateSynthesis() {
   if (!synthesisActive) return;
   
   synthesisActive = false;
   
-  const handler = (window as any).__clickSynthesisHandler;
-  if (handler) {
-    document.removeEventListener('touchend', handler, { capture: true } as any);
-    delete (window as any).__clickSynthesisHandler;
+  if (synthesisHandler) {
+    document.removeEventListener('touchend', synthesisHandler, { capture: true } as EventListenerOptions);
+    synthesisHandler = null;
   }
   
-  if (synthesisTimeout) {
-    clearTimeout(synthesisTimeout);
-    synthesisTimeout = null;
+  const isDebugMode = () => localStorage.getItem('debugClickSynthesis') === 'true';
+  if (isDebugMode()) {
+    console.log('[Click Synthesis] Synthesis mode deactivated');
   }
 }
 
@@ -191,13 +201,13 @@ function isInteractiveElement(element: HTMLElement): boolean {
  * Synthesize a click event on the target element
  */
 function synthesizeClick(target: HTMLElement, originalEvent: TouchEvent) {
-  const isDebugMode = localStorage.getItem('debugClickSynthesis') === 'true';
+  const isDebugMode = () => localStorage.getItem('debugClickSynthesis') === 'true';
   
   // Find the actual clickable element (might be a parent)
-  let clickTarget = findClickableAncestor(target);
+  const clickTarget = findClickableAncestor(target);
   
   if (!clickTarget) {
-    if (isDebugMode) {
+    if (isDebugMode()) {
       console.log('[Click Synthesis] No clickable ancestor found');
     }
     return;
@@ -211,12 +221,12 @@ function synthesizeClick(target: HTMLElement, originalEvent: TouchEvent) {
   // Method 1: Try direct click() call (most reliable for React)
   try {
     clickTarget.click();
-    if (isDebugMode) {
+    if (isDebugMode()) {
       console.log('[Click Synthesis] Called click() on:', clickTarget.tagName);
     }
     return;
   } catch (e) {
-    if (isDebugMode) {
+    if (isDebugMode()) {
       console.log('[Click Synthesis] click() failed, trying MouseEvent');
     }
   }
@@ -234,11 +244,11 @@ function synthesizeClick(target: HTMLElement, originalEvent: TouchEvent) {
     });
     
     clickTarget.dispatchEvent(clickEvent);
-    if (isDebugMode) {
+    if (isDebugMode()) {
       console.log('[Click Synthesis] Dispatched synthetic click event');
     }
   } catch (e) {
-    if (isDebugMode) {
+    if (isDebugMode()) {
       console.error('[Click Synthesis] Failed to dispatch click:', e);
     }
   }
