@@ -15,7 +15,21 @@ Compass alignment message: When compass is aligned with Jerusalem, displays "You
 Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20% bigger (w-8 h-8), both BH Green icon and center heart pulse when aligned.
 Header layout: Search icon moved from header to hamburger menu to keep logo perfectly centered. Header now shows only hamburger menu (left), centered logo, and message button (right).
 Layout fixes (Nov 2025): Fixed bottom nav positioning and header scrolling issues. Bottom nav now defaults to `--nav-offset: 0px` (flush with safe area), with browser UI offset applied only in Safari browser mode via JavaScript detection. Header ensured to stay fixed at top with additional CSS safeguards. Works correctly across Chrome, Safari, and mobile app wrappers.
-Button interaction fix (Dec 2025): Fixed critical button freeze bug in mobile environments (FlutterFlow app, mobile browsers). ROOT CAUSE IDENTIFIED: Radix UI Dialog sets `pointer-events: none` on the `<body>` element when dialogs are open. This is a known Radix bug (GitHub issue #1241) that gets stuck after closing dialogs, especially in mobile WebViews after background/resume cycles. FIX: Added pointer-events reset on visibility change in both dialog.tsx and App.tsx that checks if any dialogs are open and resets `body.style.pointerEvents` to empty string if none are open. Also preserves click synthesis (click-synthesis.ts) as backup that synthesizes click events when native clicks aren't firing after resume. Fallback reload mode available via localStorage.setItem("forceReloadOnResume", "true"). Debug mode: localStorage.setItem("debugClickSynthesis", "true").
+Button interaction fix (Dec 2025): Fixed critical button freeze bug in mobile environments (FlutterFlow app, mobile browsers). ROOT CAUSE IDENTIFIED: FlutterFlow WebView has a known issue where it doesn't properly handle app lifecycle when transitioning from paused → resumed state, causing all touch/click events to stop working. This is a Flutter WebView bug, not a web app issue. CURRENT FIX: Click synthesis (click-synthesis.ts) that synthesizes click events when native clicks aren't firing after resume. Also includes pointer-events reset for Radix Dialog edge cases. Fallback reload mode available via localStorage.setItem("forceReloadOnResume", "true"). Debug mode: localStorage.setItem("debugClickSynthesis", "true").
+FUTURE FLUTTERFLOW FIX: Add App Lifecycle Listener in FlutterFlow custom code that reloads WebView on resume:
+```dart
+class WebViewPageState extends State<WebViewPage> with WidgetsBindingObserver {
+  WebViewController? _webViewController;
+  @override
+  void initState() { super.initState(); WidgetsBinding.instance.addObserver(this); }
+  @override
+  void dispose() { WidgetsBinding.instance.removeObserver(this); super.dispose(); }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) { _webViewController?.reload(); }
+  }
+}
+```
 Push notification fix (Nov 2025): Fixed "Registration failed - storage error" exception that occurred when IndexedDB/Cache Storage is unavailable or restricted (e.g., in incognito mode, certain browser settings, or web view environments). Auto-notification prompt now validates storage availability before attempting service worker registration. Permission manager also checks IndexedDB availability before subscription attempts. This prevents errors while allowing notifications to work in environments where storage is available.
 Compass Android fix (Nov 2025): Fixed compass showing "denied geolocation permissions" on Android WebViews even when location was already granted (home screen showed correct location). Root cause: Android WebViews don't properly support the browser Permissions API, returning "denied" even when permissions were granted. Solution: Compass now uses shared location store (useLocationStore) first - if home screen already has location coordinates, compass uses those directly instead of re-requesting. Falls back to direct getCurrentPosition call (skipping Permissions API check) and only reports denial when actual geolocation request fails with PERMISSION_DENIED error code.
 
