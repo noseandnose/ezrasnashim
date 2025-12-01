@@ -173,6 +173,7 @@ export default function App() {
   }, []);
   
   // Invalidate queries when app resumes to fetch fresh data
+  // Also reset any stuck pointer-events from Radix Dialog (known WebView bug)
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden) {
@@ -180,6 +181,16 @@ export default function App() {
         queryClient.invalidateQueries({ queryKey: ['/api/home-summary', today] });
         queryClient.invalidateQueries({ queryKey: ['/api/daily-completion'] });
         queryClient.invalidateQueries({ queryKey: ['/api/global-progress'] });
+        
+        // FIX: Reset stuck pointer-events from Radix Dialog
+        // Radix sets pointer-events: none on body when dialogs are open
+        // This can get stuck after background/resume in mobile WebViews
+        requestAnimationFrame(() => {
+          const openDialogs = document.querySelectorAll('[role="dialog"][data-state="open"]');
+          if (openDialogs.length === 0 && document.body.style.pointerEvents === 'none') {
+            document.body.style.pointerEvents = '';
+          }
+        });
       }
     };
     
