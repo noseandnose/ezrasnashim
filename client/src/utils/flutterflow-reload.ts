@@ -1,110 +1,37 @@
 /**
- * Mobile resume handler with click synthesis
+ * Mobile resume handler - DISABLED
  * 
- * Problem: Mobile webviews (FlutterFlow, etc.) sometimes swallow touchend/click events 
- * after resume, making all buttons unresponsive even though CSS :active still works.
+ * Click synthesis caused phantom clicks, so it's been disabled.
+ * The proper fix is on the FlutterFlow side - add App Lifecycle Listener
+ * that reloads the WebView on resume (see replit.md for Dart code).
  * 
- * Solution (Updated): Use click synthesis to restore interactivity WITHOUT reloading.
- * This preserves audio playback, scroll position, and prayer state.
- * 
- * Only falls back to reload if:
- * 1. Synthesis fails multiple times
- * 2. User explicitly enables forced reload mode
+ * This file is kept for the iOS bfcache handler only.
  */
-
-import { initializeClickSynthesis } from './click-synthesis';
 
 let initialized = false;
 
 /**
  * Initialize mobile resume handling
- * Uses click synthesis to restore interactivity without losing state
+ * Currently only handles iOS bfcache - FlutterFlow fix is done on native side
  */
 export function initializeFlutterFlowReload() {
   if (initialized || typeof window === 'undefined') return;
   
-  const isDebugMode = localStorage.getItem('debugReloadOnResume') === 'true';
-  const forceReloadMode = localStorage.getItem('forceReloadOnResume') === 'true';
-  
   // Check if we're on a mobile device
   const isMobile = /mobile|android|iphone|ipad|ipod/i.test(navigator.userAgent);
   
-  if (isDebugMode) {
-    console.log('[FlutterFlow] User Agent:', navigator.userAgent);
-    console.log('[FlutterFlow] Mobile device:', isMobile);
-    console.log('[FlutterFlow] Force reload mode:', forceReloadMode);
-  }
-  
   // Only activate on mobile devices
   if (!isMobile) {
-    if (isDebugMode) {
-      console.log('[FlutterFlow] Not a mobile device, skipping mobile resume handling');
-    }
     return;
   }
   
   initialized = true;
   
-  // If force reload mode is enabled (for troubleshooting), use old behavior
-  if (forceReloadMode) {
-    if (isDebugMode) {
-      console.log('[FlutterFlow] ⚠️ Force reload mode enabled - will reload on resume');
-    }
-    initializeForcedReload();
-    return;
-  }
-  
-  // Use click synthesis (preferred approach - preserves state)
-  if (isDebugMode) {
-    console.log('[FlutterFlow] ✓ Click synthesis mode - will preserve audio/prayer state');
-  }
-  initializeClickSynthesis();
-  
-  // Also handle pageshow for iOS back/forward cache
+  // Handle pageshow for iOS back/forward cache only
   // For bfcache, we still need to reload since the JS state is stale
   window.addEventListener('pageshow', (event) => {
     if (event.persisted) {
-      if (isDebugMode) {
-        console.log('[FlutterFlow] Page restored from bfcache - reloading (unavoidable)');
-      }
       window.location.replace(window.location.href);
     }
   });
-}
-
-/**
- * Legacy forced reload behavior
- * Only used when localStorage.forceReloadOnResume === 'true'
- */
-function initializeForcedReload() {
-  let lastVisibilityChange = 0;
-  const DEBOUNCE_MS = 1000;
-  let wasHidden = document.hidden;
-  
-  const handleVisibilityChange = () => {
-    const now = Date.now();
-    const isDebugMode = localStorage.getItem('debugReloadOnResume') === 'true';
-    
-    if (wasHidden && !document.hidden) {
-      if (now - lastVisibilityChange < DEBOUNCE_MS) {
-        if (isDebugMode) {
-          console.log('[FlutterFlow] Skipping reload (debounced)');
-        }
-        wasHidden = document.hidden;
-        return;
-      }
-      
-      lastVisibilityChange = now;
-      
-      if (isDebugMode) {
-        console.log('[FlutterFlow] Force reload mode - reloading page');
-      }
-      
-      window.location.replace(window.location.href);
-    }
-    
-    wasHidden = document.hidden;
-  };
-  
-  document.addEventListener('visibilitychange', handleVisibilityChange);
 }
