@@ -109,7 +109,7 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-black platypi-bold">Direction to Jerusalem</h3>
+          <h3 className="text-lg font-bold text-black platypi-bold">Direct your Heart Home</h3>
           <button
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
