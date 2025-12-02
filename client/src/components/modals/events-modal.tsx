@@ -131,34 +131,36 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
       title="Important Days and Times"
       showFontControls={false}
     >
-      {/* Tab Navigation */}
-      <div className="flex bg-warm-gray/10 rounded-xl p-1 mb-4">
-        <button
-          onClick={() => setActiveTab('zmanim')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
-            activeTab === 'zmanim'
-              ? 'bg-white text-black'
-              : 'text-black/60 hover:text-black'
-          }`}
-          style={activeTab === 'zmanim' ? { boxShadow: '0 4px 6px -1px hsla(350, 45%, 85%, 0.5), 0 2px 4px -1px hsla(350, 45%, 85%, 0.3)' } : {}}
-          data-testid="tab-zmanim"
-        >
-          <Clock size={16} />
-          Zmanim
-        </button>
-        <button
-          onClick={() => setActiveTab('days')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
-            activeTab === 'days'
-              ? 'bg-white text-black'
-              : 'text-black/60 hover:text-black'
-          }`}
-          style={activeTab === 'days' ? { boxShadow: '0 4px 6px -1px hsla(350, 45%, 85%, 0.5), 0 2px 4px -1px hsla(350, 45%, 85%, 0.3)' } : {}}
-          data-testid="tab-days"
-        >
-          <Calendar size={16} />
-          Days
-        </button>
+      {/* Tab Navigation - Sticky so it stays visible when scrolling */}
+      <div className="sticky top-0 z-10 bg-white pb-4" style={{ margin: '-1rem -1rem 0 -1rem', padding: '0.5rem 1rem 1rem 1rem' }}>
+        <div className="flex bg-warm-gray/10 rounded-xl p-1">
+          <button
+            onClick={() => setActiveTab('zmanim')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
+              activeTab === 'zmanim'
+                ? 'bg-white text-black'
+                : 'text-black/60 hover:text-black'
+            }`}
+            style={activeTab === 'zmanim' ? { boxShadow: '0 4px 6px -1px hsla(350, 45%, 85%, 0.5), 0 2px 4px -1px hsla(350, 45%, 85%, 0.3)' } : {}}
+            data-testid="tab-zmanim"
+          >
+            <Clock size={16} />
+            Zmanim
+          </button>
+          <button
+            onClick={() => setActiveTab('days')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
+              activeTab === 'days'
+                ? 'bg-white text-black'
+                : 'text-black/60 hover:text-black'
+            }`}
+            style={activeTab === 'days' ? { boxShadow: '0 4px 6px -1px hsla(350, 45%, 85%, 0.5), 0 2px 4px -1px hsla(350, 45%, 85%, 0.3)' } : {}}
+            data-testid="tab-days"
+          >
+            <Calendar size={16} />
+            Days
+          </button>
+        </div>
       </div>
 
       {/* Zmanim Tab Content */}
