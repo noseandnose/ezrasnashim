@@ -533,18 +533,18 @@ self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-notifications') {
   }
   
-  // Sync mitzvah completions when back online
-  if (event.tag === 'sync-mitzvos') {
+  // Sync analytics events when back online
+  if (event.tag === 'sync-analytics') {
     event.waitUntil(
       (async () => {
         try {
-          // Get pending completions from IndexedDB or localStorage via client
+          // Notify clients to sync pending analytics events
           const allClients = await clients.matchAll({ type: 'window' });
           for (const client of allClients) {
-            client.postMessage({ type: 'SYNC_MITZVOS' });
+            client.postMessage({ type: 'SYNC_ANALYTICS' });
           }
         } catch (error) {
-          console.error('[SW] Error syncing mitzvos:', error);
+          console.error('[SW] Error syncing analytics:', error);
         }
       })()
     );

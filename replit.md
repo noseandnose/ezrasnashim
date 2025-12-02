@@ -52,14 +52,14 @@ Compass Android fix (Nov 2025): Fixed compass showing "denied geolocation permis
 - **CDN Integration**: Objects served via CDN or Express `/objects/` route.
 
 ### Core Application Features
-- **Daily Completion Tracking**: Torah, Tefilla, Tzedaka. Server-side mitzvah tracking with anonymous device-based counting (UUID stored in localStorage). Three database tables: mitzvah_sessions (device tracking), mitzvah_completions (individual completions with idempotency), mitzvah_daily_totals (aggregated daily counts). Offline queue in localStorage syncs when online. API endpoints: POST /api/mitzvos/sync, GET /api/mitzvos/totals, GET /api/mitzvos/streak/:deviceId.
+- **Daily Completion Tracking**: Torah, Tefilla, Tzedaka tracked via unified analytics system with offline support.
 - **Jewish Times Integration**: Real-time zmanim based on location (Hebcal.com).
 - **Content Management**: Daily Torah, prayers (Mincha, Nishmas, Tehillim, Morning Brochas, Birkat Hamazon, Maariv), Shabbat resources, Pirkei Avot. Supports text and audio; dynamic prayer text.
 - **The Kotel Compass**: Geolocation-based compass for prayer orientation.
 - **Donation System**: Stripe integration for tzedaka.
 - **Tehillim Global Progress**: Community-wide tracking.
 - **Sponsorship System**: Daily content sponsorship.
-- **Analytics**: Tracking of daily/total users, page views, Tehillim completions, names prayed for, modal completions via Google Analytics. Analytics deferred via whenIdle.
+- **Analytics**: Tracking of daily/total users, page views, Tehillim completions, names prayed for, modal completions. In-app analytics dashboard at `/statistics`. Analytics events have offline queue support with idempotency - events queued locally sync when online via `/api/analytics/sync` endpoint. Completions made offline are preserved in localStorage and synced on app launch, coming online, or service worker triggers. Google Analytics (G-7S9ND60DR6) for complementary engagement insights.
 - **Life Page**: Shabbat countdown, Daily Recipe, Marriage Insights, Creative Jewish Living, Community Feedback. Hebrew Date Converter moved to hamburger menu for better accessibility.
 - **Time-based Prayer System**: Dynamic prayer buttons based on zmanim.
 - **Text Cleaning**: Enhanced Hebrew text cleaning and markdown-style formatting.

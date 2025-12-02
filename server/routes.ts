@@ -3561,7 +3561,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Only track essential completion events (not page views)
   app.post("/api/analytics/track", async (req, res) => {
     try {
-      const { eventType, eventData, sessionId } = req.body;
+      const { eventType, eventData, sessionId, idempotencyKey } = req.body;
       
       // Only allow completion events, reject high-volume events like page_view
       const allowedEvents = ['modal_complete', 'tehillim_complete', 'name_prayed', 'tehillim_book_complete', 'tzedaka_completion', 'meditation_complete', 'feature_usage'];
@@ -3572,7 +3572,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const event = await storage.trackEvent({
         eventType,
         eventData,
-        sessionId
+        sessionId,
+        idempotencyKey
       });
       
       // Note: Daily stats recalculation is now handled by client-side requests
@@ -3583,6 +3584,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error tracking analytics event:', error);
       return res.status(500).json({ message: "Failed to track event" });
+    }
+  });
+  
+  // Sync endpoint for offline queued analytics events
+  app.post("/api/analytics/sync", async (req, res) => {
+    try {
+      const { events } = req.body;
+      
+      if (!events || !Array.isArray(events)) {
+        return res.status(400).json({ message: "Events array required" });
+      }
+      
+      // Filter to only allowed event types
+      const allowedEvents = ['modal_complete', 'tehillim_complete', 'name_prayed', 'tehillim_book_complete', 'tzedaka_completion', 'meditation_complete', 'feature_usage'];
+      const validEvents = events.filter((e: any) => allowedEvents.includes(e.eventType));
+      
+      const result = await storage.syncAnalyticsEvents(validEvents);
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Error syncing analytics events:', error);
+      return res.status(500).json({ message: "Failed to sync events" });
     }
   });
 

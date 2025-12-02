@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { getLocalDateString } from './dateUtils';
-import { queueCompletion } from './mitzvahSync';
 
 export type ModalType = 
   | 'halacha' 
@@ -403,7 +402,6 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
       };
       set(newState);
       localStorage.setItem('dailyCompletion', JSON.stringify(newState));
-      queueCompletion(task);
     },
     markTefillaComplete: () => {
       const state = get();
@@ -413,7 +411,6 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
       };
       set(newState);
       localStorage.setItem('dailyCompletion', JSON.stringify(newState));
-      queueCompletion('tefilla');
     },
     resetDaily: () => {
       const newState = {

@@ -402,10 +402,12 @@ export const analyticsEvents = pgTable("analytics_events", {
   eventType: text("event_type").notNull(), // Only: 'modal_complete', 'tehillim_complete', 'name_prayed', 'tehillim_book_complete'
   eventData: jsonb("event_data"), // Additional context data
   sessionId: text("session_id"),
+  idempotencyKey: text("idempotency_key"), // For offline sync deduplication
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   eventTypeIdx: index("analytics_events_type_idx").on(table.eventType),
   createdAtIdx: index("analytics_events_created_idx").on(table.createdAt),
+  idempotencyKeyIdx: index("analytics_events_idempotency_idx").on(table.idempotencyKey),
 }));
 
 // Acts table for tracking individual Tzedaka acts  

@@ -193,7 +193,8 @@ export interface IStorage {
   getDeviceStreak(deviceId: string): Promise<number>;
 
   // Analytics methods
-  trackEvent(event: InsertAnalyticsEvent): Promise<AnalyticsEvent>;
+  trackEvent(event: InsertAnalyticsEvent & { idempotencyKey?: string }): Promise<AnalyticsEvent | null>;
+  syncAnalyticsEvents(events: Array<{ eventType: string; eventData: Record<string, any>; sessionId: string; idempotencyKey: string; date?: string }>): Promise<{ synced: number }>;
   recordActiveSession(sessionId: string): Promise<void>;
   cleanupOldAnalytics(): Promise<void>;
   getDailyStats(date: string): Promise<DailyStats | undefined>;
@@ -1308,7 +1309,7 @@ export class DatabaseStorage implements IStorage {
       });
     
     // Get unique dates from the payload
-    const uniqueDates = [...new Set(completions.map(c => c.date))];
+    const uniqueDates = Array.from(new Set(completions.map(c => c.date)));
     
     // Pre-check which dates this device already has completions for
     const existingDateRecords = await db
@@ -1793,7 +1794,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Analytics methods implementation
-  async trackEvent(event: InsertAnalyticsEvent): Promise<AnalyticsEvent> {
+  async trackEvent(event: InsertAnalyticsEvent & { idempotencyKey?: string }): Promise<AnalyticsEvent | null> {
+    // Check for idempotency - skip if already exists
+    if (event.idempotencyKey) {
+      const [existing] = await db
+        .select()
+        .from(analyticsEvents)
+        .where(eq(analyticsEvents.idempotencyKey, event.idempotencyKey))
+        .limit(1);
+      
+      if (existing) {
+        return existing; // Return existing event instead of creating duplicate
+      }
+    }
+    
     const [newEvent] = await db
       .insert(analyticsEvents)
       .values(event)
@@ -1804,6 +1818,37 @@ export class DatabaseStorage implements IStorage {
     await this.recalculateDailyStats(today);
     
     return newEvent;
+  }
+  
+  async syncAnalyticsEvents(events: Array<{ eventType: string; eventData: Record<string, any>; sessionId: string; idempotencyKey: string; date?: string }>): Promise<{ synced: number }> {
+    let syncedCount = 0;
+    
+    for (const event of events) {
+      // Check for idempotency - skip if already exists
+      if (event.idempotencyKey) {
+        const [existing] = await db
+          .select()
+          .from(analyticsEvents)
+          .where(eq(analyticsEvents.idempotencyKey, event.idempotencyKey))
+          .limit(1);
+        
+        if (existing) continue;
+      }
+      
+      await db.insert(analyticsEvents).values({
+        eventType: event.eventType,
+        eventData: event.eventData,
+        sessionId: event.sessionId,
+        idempotencyKey: event.idempotencyKey
+      });
+      syncedCount++;
+      
+      // Update daily stats for the event's date
+      const eventDate = event.date || formatDate(new Date());
+      await this.recalculateDailyStats(eventDate);
+    }
+    
+    return { synced: syncedCount };
   }
 
   // Efficient session tracking - only record unique sessions once per day
