@@ -110,6 +110,30 @@ export function AttributionSection({
                     {aboutText.split('\n').map((paragraph, index) => {
                       const hasHebrew = /[\u0590-\u05FF]/.test(paragraph);
                       const isMainlyHebrew = hasHebrew && (paragraph.match(/[\u0590-\u05FF]/g)?.length || 0) > paragraph.length / 3;
+                      
+                      const renderTextWithLinks = (text: string) => {
+                        const urlRegex = /(https?:\/\/[^\s]+)/g;
+                        const parts = text.split(urlRegex);
+                        
+                        return parts.map((part, i) => {
+                          if (urlRegex.test(part)) {
+                            urlRegex.lastIndex = 0;
+                            return (
+                              <a
+                                key={i}
+                                href={part}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800 underline"
+                              >
+                                {part}
+                              </a>
+                            );
+                          }
+                          return part;
+                        });
+                      };
+                      
                       return (
                         <p 
                           key={index} 
@@ -119,7 +143,7 @@ export function AttributionSection({
                             unicodeBidi: 'isolate'
                           }}
                         >
-                          {paragraph}
+                          {renderTextWithLinks(paragraph)}
                         </p>
                       );
                     })}
