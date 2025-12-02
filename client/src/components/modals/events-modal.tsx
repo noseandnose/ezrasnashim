@@ -131,8 +131,8 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
       title="Important Days and Times"
       showFontControls={false}
     >
-      {/* Tab Navigation - Sticky so it stays visible when scrolling */}
-      <div className="sticky top-0 z-10 bg-white pb-4" style={{ margin: '-1rem -1rem 0 -1rem', padding: '0.5rem 1rem 1rem 1rem' }}>
+      {/* Tab Navigation - Sticky so it stays visible when scrolling, flush with header */}
+      <div className="sticky z-10 bg-white pb-4" style={{ top: '-1rem', margin: '0 -1rem', padding: '1rem 1rem 1rem 1rem', boxShadow: '0 2px 4px -2px rgba(0,0,0,0.05)' }}>
         <div className="flex bg-warm-gray/10 rounded-xl p-1">
           <button
             onClick={() => setActiveTab('zmanim')}
