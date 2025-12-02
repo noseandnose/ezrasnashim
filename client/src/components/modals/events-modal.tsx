@@ -61,7 +61,7 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
       setTimeout(() => {
         const upcomingElement = document.getElementById(`event-${upcomingEventIndex}`);
         if (upcomingElement) {
-          upcomingElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          upcomingElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       }, 100);
     }
@@ -132,36 +132,32 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
       showFontControls={false}
     >
       {/* Tab Navigation */}
-      <div className="flex border-b border-blush/20 mb-4 -mx-4 px-4">
+      <div className="flex bg-warm-gray/10 rounded-xl p-1 mb-4">
         <button
           onClick={() => setActiveTab('zmanim')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all relative ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
             activeTab === 'zmanim'
-              ? 'text-blush'
-              : 'text-gray-500 hover:text-gray-700'
+              ? 'bg-white text-black'
+              : 'text-black/60 hover:text-black'
           }`}
+          style={activeTab === 'zmanim' ? { boxShadow: '0 4px 6px -1px hsla(350, 45%, 85%, 0.5), 0 2px 4px -1px hsla(350, 45%, 85%, 0.3)' } : {}}
           data-testid="tab-zmanim"
         >
           <Clock size={16} />
           Zmanim
-          {activeTab === 'zmanim' && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blush to-peach" />
-          )}
         </button>
         <button
           onClick={() => setActiveTab('days')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all relative ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
             activeTab === 'days'
-              ? 'text-blush'
-              : 'text-gray-500 hover:text-gray-700'
+              ? 'bg-white text-black'
+              : 'text-black/60 hover:text-black'
           }`}
+          style={activeTab === 'days' ? { boxShadow: '0 4px 6px -1px hsla(350, 45%, 85%, 0.5), 0 2px 4px -1px hsla(350, 45%, 85%, 0.3)' } : {}}
           data-testid="tab-days"
         >
           <Calendar size={16} />
           Days
-          {activeTab === 'days' && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blush to-peach" />
-          )}
         </button>
       </div>
 
