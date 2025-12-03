@@ -208,11 +208,12 @@ export default function AppHeader() {
               <Search className="h-6 w-6 text-black/70" />
             </button>
           </div>
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 flex items-center" style={{ height: 'var(--header-row-height)' }}>
             <img 
               src={logoImage} 
               alt="Ezras Nashim" 
-              className="h-7 w-auto cursor-pointer select-none"
+              className="w-auto cursor-pointer select-none"
+              style={{ height: 'calc(var(--header-row-height) - 10px)', marginTop: '5px', marginBottom: '5px' }}
               onClick={handleLogoClick}
               draggable={false}
             />
