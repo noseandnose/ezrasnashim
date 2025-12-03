@@ -61,6 +61,24 @@ function forceResetScrollLock() {
 // Make available globally for debugging
 if (typeof window !== 'undefined') {
   (window as any).__forceResetScrollLock = forceResetScrollLock;
+  
+  // Safety net: Reset scroll lock when page becomes visible if no modals are actually mounted
+  // This catches cases where modals got stuck during background/foreground transitions
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      // Small delay to let React reconcile first
+      setTimeout(() => {
+        // If counter says modals are active but no modal elements exist, reset
+        if (activeFullscreenModals > 0) {
+          const modalElements = document.querySelectorAll('[data-fullscreen-modal]');
+          if (modalElements.length === 0) {
+            console.warn('[FullscreenModal] Detected stuck modal counter, resetting scroll lock');
+            forceResetScrollLock();
+          }
+        }
+      }, 100);
+    }
+  });
 }
 
 // Export helper functions for external use (e.g., App.tsx visibility handler)
@@ -123,17 +141,34 @@ export function FullscreenModal({
   // Generate unique action ID for this modal instance
   const actionId = useRef(`close-modal-${Math.random().toString(36).substr(2, 9)}`).current;
 
+  // Safe close handler that works even when page is hidden
+  const safeClose = () => {
+    // If page is hidden, close immediately (rAF won't fire when hidden)
+    if (document.visibilityState !== 'visible') {
+      onClose();
+      forceResetScrollLock();
+      return;
+    }
+    // Use rAF with timeout fallback to ensure close always runs
+    let closed = false;
+    const doClose = () => {
+      if (closed) return;
+      closed = true;
+      onClose();
+    };
+    requestAnimationFrame(doClose);
+    // Fallback: if rAF doesn't fire within 250ms, close anyway
+    setTimeout(doClose, 250);
+  };
+
   // Register DOM event bridge for resilient click handling in FlutterFlow
   useEffect(() => {
-    registerAction(actionId, () => {
-      // Defer onClose to prevent click-through to buttons beneath modal
-      requestAnimationFrame(() => onClose());
-    });
+    registerAction(actionId, safeClose);
     
     return () => {
       unregisterAction(actionId);
     };
-  }, [actionId, onClose]);
+  }, [actionId, safeClose]);
 
   // Use useLayoutEffect to ensure new modal increments counter before old modal's cleanup runs
   // This prevents race conditions in chained modal scenarios
@@ -411,8 +446,7 @@ export function FullscreenModal({
                   e.preventDefault();
                   e.stopPropagation();
                   e.nativeEvent.stopImmediatePropagation();
-                  // Defer onClose to prevent click-through to buttons beneath modal
-                  requestAnimationFrame(() => onClose());
+                  safeClose();
                 }}
                 data-action={actionId}
                 data-testid="button-close-modal"
@@ -432,8 +466,7 @@ export function FullscreenModal({
             e.preventDefault();
             e.stopPropagation();
             e.nativeEvent.stopImmediatePropagation();
-            // Defer onClose to prevent click-through to buttons beneath modal
-            requestAnimationFrame(() => onClose());
+            safeClose();
           }}
           data-action={actionId}
           data-testid="button-close-modal"
