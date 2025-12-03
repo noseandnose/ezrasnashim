@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Search, X } from 'lucide-react';
 import { useSearch } from '@/contexts/SearchContext';
 import { searchRecords } from '@/lib/searchUtils';
+import { useLocation } from 'wouter';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [query, setQuery] = useState('');
   const { searchIndex, miniSearchIndex } = useSearch();
   const inputRef = useRef<HTMLInputElement>(null);
+  const [location, setLocation] = useLocation();
   
   const results = useMemo(() => {
     if (!query.trim()) {
@@ -47,13 +49,29 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   }, [isOpen]);
   
   const handleResultClick = (result: typeof results[0]) => {
-    if (result.action) {
-      result.action();
+    // If not on home page, navigate there first before opening the modal
+    const isOnHomePage = location === '/' || location === '/torah' || location === '/tefilla' || location === '/tzedaka' || location === '/life';
+    
+    if (!isOnHomePage) {
+      // Navigate to home first
+      setLocation('/');
+      // Then execute the action after a short delay to allow navigation
+      setTimeout(() => {
+        if (result.action) {
+          result.action();
+        }
+        onClose();
+      }, 150);
+    } else {
+      // Already on home page, just execute the action
+      if (result.action) {
+        result.action();
+      }
+      // Delay close to allow navigation/modal actions to complete
+      setTimeout(() => {
+        onClose();
+      }, 100);
     }
-    // Delay close to allow navigation/modal actions to complete
-    setTimeout(() => {
-      onClose();
-    }, 100);
   };
   
   const handleClearQuery = () => {
