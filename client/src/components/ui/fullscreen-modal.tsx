@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, useEffect } from 'react';
+import { useLayoutEffect, useRef, useState, useEffect, useCallback } from 'react';
 import { X, Info, Compass } from 'lucide-react';
 import logoImage from "@assets/1LO_1755590090315.png";
 import { FloatingSettings } from './floating-settings';
@@ -140,9 +140,25 @@ export function FullscreenModal({
 
   // Generate unique action ID for this modal instance
   const actionId = useRef(`close-modal-${Math.random().toString(36).substr(2, 9)}`).current;
+  
+  // Track if this modal instance is already closing (prevents double-close from rapid clicks)
+  const isClosingRef = useRef(false);
+  
+  // Reset closing flag when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      isClosingRef.current = false;
+    }
+  }, [isOpen]);
 
-  // Safe close handler that works even when page is hidden
-  const safeClose = () => {
+  // Memoized safe close handler - stable reference prevents constant re-registration
+  const safeClose = useCallback(() => {
+    // Prevent double-close from rapid clicking
+    if (isClosingRef.current) {
+      return;
+    }
+    isClosingRef.current = true;
+    
     // If page is hidden, close immediately (rAF won't fire when hidden)
     if (document.visibilityState !== 'visible') {
       onClose();
@@ -159,7 +175,7 @@ export function FullscreenModal({
     requestAnimationFrame(doClose);
     // Fallback: if rAF doesn't fire within 250ms, close anyway
     setTimeout(doClose, 250);
-  };
+  }, [onClose]);
 
   // Register DOM event bridge for resilient click handling in FlutterFlow
   useEffect(() => {
