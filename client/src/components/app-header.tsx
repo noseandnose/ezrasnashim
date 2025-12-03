@@ -6,7 +6,7 @@ import { BarChart3, Info, Share2, Heart, Mail, Share, X, Menu, MessageSquare, Se
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
 import { useState, useEffect } from "react";
-import logoImage from "@assets/6LO_1753613081319.png";
+import logoImage from "@assets/A_project_of_(4)_1764762086237.png";
 import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
 import MessageModal from "./modals/message-modal";
 import { SearchModal } from "./SearchModal";
@@ -133,18 +133,10 @@ export default function AppHeader() {
                   aria-label="Menu"
                   data-testid="button-menu"
                 >
-                  <Menu className="h-6 w-6 text-black/70" />
+                  <Menu className="h-5 w-5 text-black/70" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48">
-                <DropdownMenuItem
-                  onClick={() => setShowSearchModal(true)}
-                  className="cursor-pointer"
-                  data-testid="menu-item-search"
-                >
-                  <Search className="h-5 w-5 mr-2" />
-                  Search
-                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => setLocation("/statistics")}
                   className="cursor-pointer"
@@ -207,12 +199,21 @@ export default function AppHeader() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <button
+              onClick={() => setShowSearchModal(true)}
+              className="p-2 rounded-full hover:bg-white/50 transition-colors"
+              aria-label="Search"
+              data-testid="button-search"
+            >
+              <Search className="h-5 w-5 text-black/70" />
+            </button>
           </div>
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 flex items-center" style={{ height: 'var(--header-row-height)' }}>
             <img 
               src={logoImage} 
               alt="Ezras Nashim" 
-              className="h-7 w-auto cursor-pointer select-none"
+              className="w-auto cursor-pointer select-none"
+              style={{ height: 'calc(var(--header-row-height) - 10px)', marginTop: '5px', marginBottom: '5px' }}
               onClick={handleLogoClick}
               draggable={false}
             />
@@ -224,7 +225,7 @@ export default function AppHeader() {
               aria-label="Daily Message"
               data-testid="button-message"
             >
-              <Mail className="h-6 w-6 text-black/70" />
+              <Mail className="h-5 w-5 text-black/70" />
               {!!todayMessage && !hasReadMessage && (
                 <span className="absolute top-1 right-1 w-2 h-2 bg-blush rounded-full" data-testid="indicator-unread-message" />
               )}

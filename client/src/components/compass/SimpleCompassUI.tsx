@@ -279,7 +279,7 @@ export function SimpleCompassUI() {
       {/* Header */}
       <div className="text-center">
         <h2 className="text-xl font-bold text-black mb-2">The Kotel Compass</h2>
-        <p className="text-sm text-gray-600">Beta. Currently in testing</p>
+        <p className="text-sm text-gray-600">Direct your Heart Home</p>
       </div>
       
       {/* Permission Request */}

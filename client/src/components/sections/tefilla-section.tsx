@@ -805,7 +805,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
               </div>
               <div className="flex-grow">
                 <h3 className="platypi-bold text-lg text-black">The Kotel Compass</h3>
-                <p className="platypi-regular text-sm text-black/70">Beta. Currently in testing</p>
+                <p className="platypi-regular text-sm text-black/70">Direct your Heart Home</p>
               </div>
               <div className="bg-gradient-feminine p-2 rounded-full shadow-lg">
                 <ArrowRight className="text-white" size={16} />

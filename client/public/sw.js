@@ -47,17 +47,29 @@ const CRITICAL_API_PATTERNS = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(APP_SHELL_CACHE)
-      .then(cache => cache.addAll(APP_SHELL_RESOURCES.map(url => new Request(url, { cache: 'reload' }))))
-      .then(() => {
-        console.log('[SW] App shell cached successfully');
-        // Don't call skipWaiting here - let the client control when to activate
-        // This prevents blank screens from activating before all assets are ready
-      })
-      .catch(err => {
-        console.error('[SW] Failed to cache app shell:', err);
-        // Continue anyway - the service worker can still function
-      })
+    Promise.all([
+      caches.open(APP_SHELL_CACHE)
+        .then(cache => cache.addAll(APP_SHELL_RESOURCES.map(url => new Request(url, { cache: 'reload' }))))
+        .then(() => {
+          console.log('[SW] App shell cached successfully');
+        })
+        .catch(err => {
+          console.error('[SW] Failed to cache app shell:', err);
+        }),
+      // Prefetch offline bootstrap content
+      caches.open(PRAYERS_CACHE)
+        .then(async cache => {
+          try {
+            const response = await fetch('/api/offline/bootstrap');
+            if (response.ok) {
+              await cache.put('/api/offline/bootstrap', response);
+              console.log('[SW] Offline bootstrap content cached');
+            }
+          } catch (err) {
+            console.log('[SW] Could not prefetch offline content:', err);
+          }
+        })
+    ])
   );
 });
 
@@ -520,12 +532,48 @@ self.addEventListener('notificationclose', (event) => {
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-notifications') {
   }
+  
+  // Sync analytics events when back online
+  if (event.tag === 'sync-analytics') {
+    event.waitUntil(
+      (async () => {
+        try {
+          // Notify clients to sync pending analytics events
+          const allClients = await clients.matchAll({ type: 'window' });
+          for (const client of allClients) {
+            client.postMessage({ type: 'SYNC_ANALYTICS' });
+          }
+        } catch (error) {
+          console.error('[SW] Error syncing analytics:', error);
+        }
+      })()
+    );
+  }
 });
 
-// Handle messages from clients (for forced updates)
+// Prefetch offline bootstrap content on install
+async function prefetchOfflineContent() {
+  try {
+    const cache = await caches.open(PRAYERS_CACHE);
+    const response = await fetch('/api/offline/bootstrap');
+    if (response.ok) {
+      await cache.put('/api/offline/bootstrap', response);
+      console.log('[SW] Offline bootstrap content cached');
+    }
+  } catch (error) {
+    console.log('[SW] Could not prefetch offline content:', error);
+  }
+}
+
+// Handle messages from clients (for forced updates and sync)
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     console.log('[SW] Received SKIP_WAITING message, activating new service worker');
     self.skipWaiting();
+  }
+  
+  // Trigger offline content prefetch
+  if (event.data && event.data.type === 'PREFETCH_OFFLINE') {
+    prefetchOfflineContent();
   }
 });

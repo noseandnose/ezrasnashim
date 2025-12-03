@@ -402,10 +402,12 @@ export const analyticsEvents = pgTable("analytics_events", {
   eventType: text("event_type").notNull(), // Only: 'modal_complete', 'tehillim_complete', 'name_prayed', 'tehillim_book_complete'
   eventData: jsonb("event_data"), // Additional context data
   sessionId: text("session_id"),
+  idempotencyKey: text("idempotency_key"), // For offline sync deduplication
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   eventTypeIdx: index("analytics_events_type_idx").on(table.eventType),
   createdAtIdx: index("analytics_events_created_idx").on(table.createdAt),
+  idempotencyKeyIdx: index("analytics_events_idempotency_idx").on(table.idempotencyKey),
 }));
 
 // Acts table for tracking individual Tzedaka acts  
@@ -418,6 +420,46 @@ export const acts = pgTable("acts", {
   paymentIntentId: text("payment_intent_id"), // Stripe payment intent ID for idempotency
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+// Device sessions for anonymous mitzvah tracking
+export const mitzvahSessions = pgTable("mitzvah_sessions", {
+  id: serial("id").primaryKey(),
+  deviceId: text("device_id").notNull().unique(), // UUID generated on client
+  firstSeen: timestamp("first_seen").defaultNow().notNull(),
+  lastSeen: timestamp("last_seen").defaultNow().notNull(),
+  totalCompletions: integer("total_completions").default(0).notNull(), // Total mitzvos completed by this device
+}, (table) => ({
+  deviceIdIdx: index("mitzvah_sessions_device_id_idx").on(table.deviceId),
+}));
+
+// Individual mitzvah completions
+export const mitzvahCompletions = pgTable("mitzvah_completions", {
+  id: serial("id").primaryKey(),
+  deviceId: text("device_id").notNull(), // Links to mitzvahSessions
+  date: date("date").notNull(), // Date of completion
+  category: text("category").notNull(), // 'torah', 'tefilla', 'tzedaka'
+  modalId: text("modal_id"), // Which specific modal was completed (e.g., 'halacha', 'mincha')
+  idempotencyKey: text("idempotency_key"), // Prevent duplicate submissions
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  deviceDateIdx: index("mitzvah_completions_device_date_idx").on(table.deviceId, table.date),
+  dateIdx: index("mitzvah_completions_date_idx").on(table.date),
+  idempotencyIdx: index("mitzvah_completions_idempotency_idx").on(table.idempotencyKey),
+}));
+
+// Daily mitzvah totals for community tracking
+export const mitzvahDailyTotals = pgTable("mitzvah_daily_totals", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull().unique(),
+  torahCount: integer("torah_count").default(0).notNull(),
+  tefillaCount: integer("tefilla_count").default(0).notNull(),
+  tzedakaCount: integer("tzedaka_count").default(0).notNull(),
+  totalCount: integer("total_count").default(0).notNull(), // Sum of all three
+  uniqueDevices: integer("unique_devices").default(0).notNull(), // Unique devices that completed today
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  dateIdx: index("mitzvah_daily_totals_date_idx").on(table.date),
+}));
 
 export const dailyStats = pgTable("daily_stats", {
   id: serial("id").primaryKey(),
@@ -561,6 +603,24 @@ export const insertDonationSchema = createInsertSchema(donations).omit({
 export const insertActSchema = createInsertSchema(acts).omit({
   id: true,
   createdAt: true,
+});
+
+// Mitzvah tracking schemas
+export const insertMitzvahSessionSchema = createInsertSchema(mitzvahSessions).omit({
+  id: true,
+  firstSeen: true,
+  lastSeen: true,
+  totalCompletions: true,
+});
+
+export const insertMitzvahCompletionSchema = createInsertSchema(mitzvahCompletions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertMitzvahDailyTotalsSchema = createInsertSchema(mitzvahDailyTotals).omit({
+  id: true,
+  updatedAt: true,
 });
 
 // Types
@@ -721,6 +781,14 @@ export type InsertDonation = z.infer<typeof insertDonationSchema>;
 
 export type Act = typeof acts.$inferSelect;
 export type InsertAct = z.infer<typeof insertActSchema>;
+
+// Mitzvah tracking types
+export type MitzvahSession = typeof mitzvahSessions.$inferSelect;
+export type InsertMitzvahSession = z.infer<typeof insertMitzvahSessionSchema>;
+export type MitzvahCompletion = typeof mitzvahCompletions.$inferSelect;
+export type InsertMitzvahCompletion = z.infer<typeof insertMitzvahCompletionSchema>;
+export type MitzvahDailyTotals = typeof mitzvahDailyTotals.$inferSelect;
+export type InsertMitzvahDailyTotals = z.infer<typeof insertMitzvahDailyTotalsSchema>;
 
 // Tehillim table
 export const tehillim = pgTable("tehillim", {
