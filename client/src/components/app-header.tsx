@@ -138,14 +138,6 @@ export default function AppHeader() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48">
                 <DropdownMenuItem
-                  onClick={() => setShowSearchModal(true)}
-                  className="cursor-pointer"
-                  data-testid="menu-item-search"
-                >
-                  <Search className="h-5 w-5 mr-2" />
-                  Search
-                </DropdownMenuItem>
-                <DropdownMenuItem
                   onClick={() => setLocation("/statistics")}
                   className="cursor-pointer"
                   data-testid="menu-item-analytics"
@@ -207,6 +199,14 @@ export default function AppHeader() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <button
+              onClick={() => setShowSearchModal(true)}
+              className="p-2 rounded-full hover:bg-white/50 transition-colors"
+              aria-label="Search"
+              data-testid="button-search"
+            >
+              <Search className="h-6 w-6 text-black/70" />
+            </button>
           </div>
           <div className="flex-shrink-0">
             <img 
