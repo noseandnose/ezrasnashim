@@ -133,7 +133,7 @@ export default function AppHeader() {
                   aria-label="Menu"
                   data-testid="button-menu"
                 >
-                  <Menu className="h-6 w-6 text-black/70" />
+                  <Menu className="h-5 w-5 text-black/70" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48">
@@ -205,7 +205,7 @@ export default function AppHeader() {
               aria-label="Search"
               data-testid="button-search"
             >
-              <Search className="h-6 w-6 text-black/70" />
+              <Search className="h-5 w-5 text-black/70" />
             </button>
           </div>
           <div className="flex-shrink-0 flex items-center" style={{ height: 'var(--header-row-height)' }}>
@@ -225,7 +225,7 @@ export default function AppHeader() {
               aria-label="Daily Message"
               data-testid="button-message"
             >
-              <Mail className="h-6 w-6 text-black/70" />
+              <Mail className="h-5 w-5 text-black/70" />
               {!!todayMessage && !hasReadMessage && (
                 <span className="absolute top-1 right-1 w-2 h-2 bg-blush rounded-full" data-testid="indicator-unread-message" />
               )}
