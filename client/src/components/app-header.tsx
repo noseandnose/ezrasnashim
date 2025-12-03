@@ -6,7 +6,7 @@ import { BarChart3, Info, Share2, Heart, Mail, Share, X, Menu, MessageSquare, Se
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
 import { useState, useEffect } from "react";
-import logoImage from "@assets/6LO_1753613081319.png";
+import logoImage from "@assets/A_project_of_1764757798909.png";
 import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
 import MessageModal from "./modals/message-modal";
 import { SearchModal } from "./SearchModal";
