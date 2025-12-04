@@ -3561,7 +3561,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Only track essential completion events (not page views)
   app.post("/api/analytics/track", async (req, res) => {
     try {
-      const { eventType, eventData, sessionId, idempotencyKey } = req.body;
+      const { eventType, eventData, sessionId, idempotencyKey, date } = req.body;
       
       // Only allow completion events, reject high-volume events like page_view
       const allowedEvents = ['modal_complete', 'tehillim_complete', 'name_prayed', 'tehillim_book_complete', 'tzedaka_completion', 'meditation_complete', 'feature_usage'];
@@ -3573,12 +3573,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         eventType,
         eventData,
         sessionId,
-        idempotencyKey
+        idempotencyKey,
+        analyticsDate: date // Store client-provided date for accurate timezone-aware aggregation
       });
-      
-      // Note: Daily stats recalculation is now handled by client-side requests
-      // to ensure proper timezone handling. The client determines the correct
-      // analytics date based on their local 2 AM boundary.
       
       res.json(event);
     } catch (error) {

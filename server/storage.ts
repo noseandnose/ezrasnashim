@@ -40,7 +40,7 @@ import {
   type PushNotification, type InsertPushNotification
 } from "../shared/schema";
 import { db, pool } from "./db";
-import { eq, gt, lt, gte, lte, and, sql, like, desc, inArray } from "drizzle-orm";
+import { eq, gt, lt, gte, lte, and, sql, like, desc, inArray, isNull } from "drizzle-orm";
 import { cleanHebrewText, memoize, withRetry, formatDate } from './typeHelpers';
 
 export interface IStorage {
@@ -193,7 +193,7 @@ export interface IStorage {
   getDeviceStreak(deviceId: string): Promise<number>;
 
   // Analytics methods
-  trackEvent(event: InsertAnalyticsEvent & { idempotencyKey?: string }): Promise<AnalyticsEvent | null>;
+  trackEvent(event: InsertAnalyticsEvent & { idempotencyKey?: string; analyticsDate?: string }): Promise<AnalyticsEvent | null>;
   syncAnalyticsEvents(events: Array<{ eventType: string; eventData: Record<string, any>; sessionId: string; idempotencyKey: string; date?: string }>): Promise<{ synced: number }>;
   recordActiveSession(sessionId: string): Promise<void>;
   cleanupOldAnalytics(): Promise<void>;
@@ -1794,7 +1794,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Analytics methods implementation
-  async trackEvent(event: InsertAnalyticsEvent & { idempotencyKey?: string }): Promise<AnalyticsEvent | null> {
+  async trackEvent(event: InsertAnalyticsEvent & { idempotencyKey?: string; analyticsDate?: string }): Promise<AnalyticsEvent | null> {
     // Check for idempotency - skip if already exists
     if (event.idempotencyKey) {
       const [existing] = await db
@@ -1808,20 +1808,30 @@ export class DatabaseStorage implements IStorage {
       }
     }
     
+    // Use client-provided analyticsDate for accurate timezone handling
+    // Fall back to server date if not provided (for backward compatibility)
+    const eventDate = event.analyticsDate || formatDate(new Date());
+    
     const [newEvent] = await db
       .insert(analyticsEvents)
-      .values(event)
+      .values({
+        eventType: event.eventType,
+        eventData: event.eventData,
+        sessionId: event.sessionId,
+        idempotencyKey: event.idempotencyKey,
+        analyticsDate: eventDate
+      })
       .returning();
     
-    // Update daily stats with proper aggregation
-    const today = formatDate(new Date());
-    await this.recalculateDailyStats(today);
+    // Update daily stats using the correct analytics date
+    await this.recalculateDailyStats(eventDate);
     
     return newEvent;
   }
   
   async syncAnalyticsEvents(events: Array<{ eventType: string; eventData: Record<string, any>; sessionId: string; idempotencyKey: string; date?: string }>): Promise<{ synced: number }> {
     let syncedCount = 0;
+    const datesToRecalculate = new Set<string>();
     
     for (const event of events) {
       // Check for idempotency - skip if already exists
@@ -1835,17 +1845,25 @@ export class DatabaseStorage implements IStorage {
         if (existing) continue;
       }
       
+      // Use client-provided date for accurate timezone handling
+      const eventDate = event.date || formatDate(new Date());
+      
       await db.insert(analyticsEvents).values({
         eventType: event.eventType,
         eventData: event.eventData,
         sessionId: event.sessionId,
-        idempotencyKey: event.idempotencyKey
+        idempotencyKey: event.idempotencyKey,
+        analyticsDate: eventDate // Store client-provided date
       });
       syncedCount++;
       
-      // Update daily stats for the event's date
-      const eventDate = event.date || formatDate(new Date());
-      await this.recalculateDailyStats(eventDate);
+      // Track dates to recalculate (avoid recalculating same date multiple times)
+      datesToRecalculate.add(eventDate);
+    }
+    
+    // Recalculate stats for each affected date
+    for (const date of Array.from(datesToRecalculate)) {
+      await this.recalculateDailyStats(date);
     }
     
     return { synced: syncedCount };
@@ -1931,28 +1949,36 @@ export class DatabaseStorage implements IStorage {
   }
 
   async recalculateDailyStats(date: string): Promise<DailyStats> {
-    // Count today's events for recalculation (only completion events now)
-    // Analytics day starts at 2 AM local time to align with client-side logic
-    
-    // The client sends us a date string that represents an analytics day (already adjusted for 2 AM boundary)
-    // We need to count events from 2 AM local time on this date to 2 AM local time on the next date
-    // Since events are stored in UTC, we need to query a 24-hour window
+    // Query events by their stored analyticsDate field
+    // This field contains the client-provided date (YYYY-MM-DD) that correctly accounts for 
+    // their local 2 AM boundary, ensuring accurate timezone-aware aggregation
     // 
-    // The date parameter comes from client's getLocalDateString() which already considers the 2 AM boundary
-    // So we just need a 24-hour window starting from the beginning of this analytics day
+    // For legacy events without analyticsDate, we fall back to the old createdAt-based query
+    
+    // First, get events with the matching analyticsDate
+    const eventsWithDate = await db
+      .select()
+      .from(analyticsEvents)
+      .where(eq(analyticsEvents.analyticsDate, date));
+    
+    // Also get legacy events (no analyticsDate) from the same UTC date range for backward compatibility
     const start = new Date(`${date}T00:00:00.000Z`);
     const end = new Date(`${date}T00:00:00.000Z`);
-    end.setUTCDate(end.getUTCDate() + 1); // 24 hours later
-
-    const todayEvents = await db
+    end.setUTCDate(end.getUTCDate() + 1);
+    
+    const legacyEvents = await db
       .select()
       .from(analyticsEvents)
       .where(
         and(
+          isNull(analyticsEvents.analyticsDate), // Only events without analyticsDate
           gte(analyticsEvents.createdAt, start),
           lt(analyticsEvents.createdAt, end)
         )
       );
+    
+    // Combine both sets of events
+    const todayEvents = [...eventsWithDate, ...legacyEvents];
     
     // Count unique users (by session ID)
     // const uniqueSessions = new Set(todayEvents.map(e => e.sessionId).filter(Boolean));

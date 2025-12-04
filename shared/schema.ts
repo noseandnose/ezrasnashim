@@ -403,11 +403,13 @@ export const analyticsEvents = pgTable("analytics_events", {
   eventData: jsonb("event_data"), // Additional context data
   sessionId: text("session_id"),
   idempotencyKey: text("idempotency_key"), // For offline sync deduplication
+  analyticsDate: text("analytics_date"), // Client-provided date (YYYY-MM-DD) for accurate timezone-aware aggregation
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   eventTypeIdx: index("analytics_events_type_idx").on(table.eventType),
   createdAtIdx: index("analytics_events_created_idx").on(table.createdAt),
   idempotencyKeyIdx: index("analytics_events_idempotency_idx").on(table.idempotencyKey),
+  analyticsDateIdx: index("analytics_events_date_idx").on(table.analyticsDate),
 }));
 
 // Acts table for tracking individual Tzedaka acts  
