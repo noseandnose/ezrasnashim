@@ -33,8 +33,9 @@ export function useShabbosTime() {
       }
     },
     enabled: !!coordinates, // Only fetch when coordinates are available
-    staleTime: 0, // Always fetch fresh data for debugging
+    staleTime: 1000 * 60 * 60, // 1 hour - Shabbos times don't change frequently
     refetchInterval: 1000 * 60 * 60 * 6, // Refetch every 6 hours
-    gcTime: 0 // Don't cache for debugging (renamed from cacheTime in v5)
+    gcTime: 1000 * 60 * 60 * 2, // Keep in cache for 2 hours
+    refetchOnWindowFocus: false, // Don't refetch on every focus
   });
 }
