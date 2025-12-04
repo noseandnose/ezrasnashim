@@ -40,7 +40,7 @@ import {
   type PushNotification, type InsertPushNotification
 } from "../shared/schema";
 import { db, pool } from "./db";
-import { eq, gt, lt, gte, lte, and, sql, like, desc, inArray } from "drizzle-orm";
+import { eq, gt, lt, gte, lte, and, sql, like, desc, inArray, isNull } from "drizzle-orm";
 import { cleanHebrewText, memoize, withRetry, formatDate } from './typeHelpers';
 
 export interface IStorage {
@@ -1862,7 +1862,7 @@ export class DatabaseStorage implements IStorage {
     }
     
     // Recalculate stats for each affected date
-    for (const date of datesToRecalculate) {
+    for (const date of Array.from(datesToRecalculate)) {
       await this.recalculateDailyStats(date);
     }
     
@@ -1949,28 +1949,36 @@ export class DatabaseStorage implements IStorage {
   }
 
   async recalculateDailyStats(date: string): Promise<DailyStats> {
-    // Count today's events for recalculation (only completion events now)
-    // Analytics day starts at 2 AM local time to align with client-side logic
-    
-    // The client sends us a date string that represents an analytics day (already adjusted for 2 AM boundary)
-    // We need to count events from 2 AM local time on this date to 2 AM local time on the next date
-    // Since events are stored in UTC, we need to query a 24-hour window
+    // Query events by their stored analyticsDate field
+    // This field contains the client-provided date (YYYY-MM-DD) that correctly accounts for 
+    // their local 2 AM boundary, ensuring accurate timezone-aware aggregation
     // 
-    // The date parameter comes from client's getLocalDateString() which already considers the 2 AM boundary
-    // So we just need a 24-hour window starting from the beginning of this analytics day
+    // For legacy events without analyticsDate, we fall back to the old createdAt-based query
+    
+    // First, get events with the matching analyticsDate
+    const eventsWithDate = await db
+      .select()
+      .from(analyticsEvents)
+      .where(eq(analyticsEvents.analyticsDate, date));
+    
+    // Also get legacy events (no analyticsDate) from the same UTC date range for backward compatibility
     const start = new Date(`${date}T00:00:00.000Z`);
     const end = new Date(`${date}T00:00:00.000Z`);
-    end.setUTCDate(end.getUTCDate() + 1); // 24 hours later
-
-    const todayEvents = await db
+    end.setUTCDate(end.getUTCDate() + 1);
+    
+    const legacyEvents = await db
       .select()
       .from(analyticsEvents)
       .where(
         and(
+          isNull(analyticsEvents.analyticsDate), // Only events without analyticsDate
           gte(analyticsEvents.createdAt, start),
           lt(analyticsEvents.createdAt, end)
         )
       );
+    
+    // Combine both sets of events
+    const todayEvents = [...eventsWithDate, ...legacyEvents];
     
     // Count unique users (by session ID)
     // const uniqueSessions = new Set(todayEvents.map(e => e.sessionId).filter(Boolean));
