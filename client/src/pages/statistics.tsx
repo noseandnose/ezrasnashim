@@ -8,6 +8,24 @@ import BottomNavigation from "@/components/bottom-navigation";
 import AppHeader from "@/components/app-header";
 import { getLocalDateString } from "@/lib/dateUtils";
 
+// Hook to track if page is visible and focused
+function usePageVisible() {
+  const [isVisible, setIsVisible] = useState(!document.hidden);
+  
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setIsVisible(!document.hidden);
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+  
+  return isVisible;
+}
+
 interface DailyStats {
   date: string;
   uniqueUsers: number;
@@ -58,50 +76,56 @@ export default function Statistics() {
   const [, setLocation] = useLocation();
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('today');
   const queryClient = useQueryClient();
+  const isPageVisible = usePageVisible();
   
   // Calculate today's analytics date once
   const analyticsToday = getLocalDateString(); // Use client's 2 AM boundary calculation
   const weekStartDate = getWeekStartDate(); // Calculate week start (Sunday 2 AM)
   
-  // Force refresh all stats when component mounts and when period changes
+  // Invalidate queries on mount only (not on every period change)
   useEffect(() => {
-    // Force invalidate and refetch all queries when page loads or period changes
+    // Only invalidate once when component mounts
     queryClient.invalidateQueries({ queryKey: [`/api/analytics/stats/today?date=${analyticsToday}`] });
     queryClient.invalidateQueries({ queryKey: [`/api/analytics/stats/week?startDate=${weekStartDate}`] });
     queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/month"] });
     queryClient.invalidateQueries({ queryKey: ["/api/analytics/stats/total"] });
-  }, [selectedPeriod, analyticsToday, weekStartDate, queryClient]); // Invalidate when period changes or date changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
 
-  // Fetch today's stats with proper timezone handling
+  // Fetch today's stats - only refetch when page is visible AND this period is selected
   const { data: todayStats, isLoading: todayLoading } = useQuery<DailyStats>({
     queryKey: [`/api/analytics/stats/today?date=${analyticsToday}`],
-    staleTime: 0, // Never cache - always fresh
-    gcTime: 0, // Don't keep in memory
-    refetchInterval: 120000, // Auto-refresh every 2 minutes (reduced from 30s for performance)
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    gcTime: 300000, // Keep in memory for 5 minutes
+    refetchInterval: isPageVisible && selectedPeriod === 'today' ? 120000 : false, // Only auto-refresh when visible and selected
+    refetchOnWindowFocus: false, // Don't refetch on every focus
   });
 
-  // Fetch weekly stats
+  // Fetch weekly stats - only refetch when page is visible AND this period is selected
   const { data: weeklyStats, isLoading: weeklyLoading } = useQuery<PeriodStats>({
     queryKey: [`/api/analytics/stats/week?startDate=${weekStartDate}`],
-    staleTime: 0, // Never cache - always fresh
-    gcTime: 0, // Don't keep in memory
-    refetchInterval: 120000, // Auto-refresh every 2 minutes (reduced from 30s for performance)
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    gcTime: 300000, // Keep in memory for 5 minutes
+    refetchInterval: isPageVisible && selectedPeriod === 'week' ? 120000 : false,
+    refetchOnWindowFocus: false,
   });
 
-  // Fetch monthly stats
+  // Fetch monthly stats - only refetch when page is visible AND this period is selected
   const { data: monthlyStats, isLoading: monthlyLoading } = useQuery<PeriodStats>({
     queryKey: ["/api/analytics/stats/month"],
-    staleTime: 0, // Never cache - always fresh
-    gcTime: 0, // Don't keep in memory
-    refetchInterval: 120000, // Auto-refresh every 2 minutes (reduced from 30s for performance)
+    staleTime: 60000, // Monthly data can be stale for 1 minute
+    gcTime: 300000, // Keep in memory for 5 minutes
+    refetchInterval: isPageVisible && selectedPeriod === 'month' ? 120000 : false,
+    refetchOnWindowFocus: false,
   });
 
-  // Fetch total stats
+  // Fetch total stats - only refetch when page is visible AND this period is selected
   const { data: totalStats, isLoading: totalLoading } = useQuery<PeriodStats>({
     queryKey: ["/api/analytics/stats/total"],
-    staleTime: 0, // Never cache - always fresh
-    gcTime: 0, // Don't keep in memory
-    refetchInterval: 120000, // Auto-refresh every 2 minutes (reduced from 30s for performance)
+    staleTime: 60000, // Total data can be stale for 1 minute
+    gcTime: 300000, // Keep in memory for 5 minutes
+    refetchInterval: isPageVisible && selectedPeriod === 'alltime' ? 120000 : false,
+    refetchOnWindowFocus: false,
   });
 
   // Get current data based on selected period
@@ -256,7 +280,7 @@ export default function Statistics() {
   };
 
   // Financial Stats Component
-  function FinancialStatsSection({ period }: { period: 'today' | 'week' | 'month' | 'alltime' }) {
+  function FinancialStatsSection({ period, isVisible }: { period: 'today' | 'week' | 'month' | 'alltime'; isVisible: boolean }) {
     const { data: financialStats, isLoading: financialLoading } = useQuery<{
       totalDaysSponsored: number;
       totalCampaigns: number;
@@ -264,7 +288,9 @@ export default function Statistics() {
     }>({
       queryKey: [`/api/analytics/community-impact?period=${period}`],
       staleTime: 60000, // 1 minute
-      refetchInterval: 120000, // Refresh every 2 minutes (reduced from 30s for performance)
+      gcTime: 300000, // Keep in memory for 5 minutes
+      refetchInterval: isVisible ? 120000 : false, // Only refresh when page is visible
+      refetchOnWindowFocus: false,
     });
 
     return (
@@ -545,7 +571,7 @@ export default function Statistics() {
           </div>
 
           {/* Financial Stats */}
-          <FinancialStatsSection period={selectedPeriod} />
+          <FinancialStatsSection period={selectedPeriod} isVisible={isPageVisible} />
         </div>
       </main>
 
