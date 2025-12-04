@@ -193,7 +193,7 @@ export interface IStorage {
   getDeviceStreak(deviceId: string): Promise<number>;
 
   // Analytics methods
-  trackEvent(event: InsertAnalyticsEvent & { idempotencyKey?: string }): Promise<AnalyticsEvent | null>;
+  trackEvent(event: InsertAnalyticsEvent & { idempotencyKey?: string; analyticsDate?: string }): Promise<AnalyticsEvent | null>;
   syncAnalyticsEvents(events: Array<{ eventType: string; eventData: Record<string, any>; sessionId: string; idempotencyKey: string; date?: string }>): Promise<{ synced: number }>;
   recordActiveSession(sessionId: string): Promise<void>;
   cleanupOldAnalytics(): Promise<void>;
@@ -1794,7 +1794,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Analytics methods implementation
-  async trackEvent(event: InsertAnalyticsEvent & { idempotencyKey?: string }): Promise<AnalyticsEvent | null> {
+  async trackEvent(event: InsertAnalyticsEvent & { idempotencyKey?: string; analyticsDate?: string }): Promise<AnalyticsEvent | null> {
     // Check for idempotency - skip if already exists
     if (event.idempotencyKey) {
       const [existing] = await db
@@ -1808,20 +1808,30 @@ export class DatabaseStorage implements IStorage {
       }
     }
     
+    // Use client-provided analyticsDate for accurate timezone handling
+    // Fall back to server date if not provided (for backward compatibility)
+    const eventDate = event.analyticsDate || formatDate(new Date());
+    
     const [newEvent] = await db
       .insert(analyticsEvents)
-      .values(event)
+      .values({
+        eventType: event.eventType,
+        eventData: event.eventData,
+        sessionId: event.sessionId,
+        idempotencyKey: event.idempotencyKey,
+        analyticsDate: eventDate
+      })
       .returning();
     
-    // Update daily stats with proper aggregation
-    const today = formatDate(new Date());
-    await this.recalculateDailyStats(today);
+    // Update daily stats using the correct analytics date
+    await this.recalculateDailyStats(eventDate);
     
     return newEvent;
   }
   
   async syncAnalyticsEvents(events: Array<{ eventType: string; eventData: Record<string, any>; sessionId: string; idempotencyKey: string; date?: string }>): Promise<{ synced: number }> {
     let syncedCount = 0;
+    const datesToRecalculate = new Set<string>();
     
     for (const event of events) {
       // Check for idempotency - skip if already exists
@@ -1835,17 +1845,25 @@ export class DatabaseStorage implements IStorage {
         if (existing) continue;
       }
       
+      // Use client-provided date for accurate timezone handling
+      const eventDate = event.date || formatDate(new Date());
+      
       await db.insert(analyticsEvents).values({
         eventType: event.eventType,
         eventData: event.eventData,
         sessionId: event.sessionId,
-        idempotencyKey: event.idempotencyKey
+        idempotencyKey: event.idempotencyKey,
+        analyticsDate: eventDate // Store client-provided date
       });
       syncedCount++;
       
-      // Update daily stats for the event's date
-      const eventDate = event.date || formatDate(new Date());
-      await this.recalculateDailyStats(eventDate);
+      // Track dates to recalculate (avoid recalculating same date multiple times)
+      datesToRecalculate.add(eventDate);
+    }
+    
+    // Recalculate stats for each affected date
+    for (const date of datesToRecalculate) {
+      await this.recalculateDailyStats(date);
     }
     
     return { synced: syncedCount };
