@@ -171,6 +171,9 @@ function initializeBridge() {
     lastPointerDownTime = Date.now();
   };
   
+  // Track if we've already dispatched a synthetic click for this tap sequence
+  let syntheticClickDispatched = false;
+  
   // pointerup-based click detection - works when touchend/click are swallowed
   const handlePointerUp = (e: PointerEvent) => {
     // Skip if app hasn't fully loaded yet
@@ -181,6 +184,7 @@ function initializeBridge() {
     // Only process as tap if it was quick and on same element
     if (timeSinceDown > TAP_THRESHOLD_MS) {
       lastPointerDownTarget = null;
+      syntheticClickDispatched = false;
       return;
     }
     
@@ -194,12 +198,15 @@ function initializeBridge() {
       
       if (!isOnSameElement) {
         lastPointerDownTarget = null;
+        syntheticClickDispatched = false;
         return;
       }
     }
     
     // Find action element from the pointerdown target (more reliable than pointerup target)
     let currentElement: HTMLElement | null = lastPointerDownTarget || target;
+    let foundSpecificHandler = false;
+    
     while (currentElement && currentElement !== document.body) {
       const action = currentElement.getAttribute('data-action');
       
@@ -219,6 +226,7 @@ function initializeBridge() {
         }
         
         lastPointerDownTarget = null;
+        syntheticClickDispatched = false;
         return;
       }
       
@@ -240,10 +248,59 @@ function initializeBridge() {
         }
         
         lastPointerDownTarget = null;
+        syntheticClickDispatched = false;
         return;
       }
       
       currentElement = currentElement.parentElement;
+    }
+    
+    // FALLBACK: If no specific handler found, dispatch a synthetic click on the target
+    // This helps ALL interactive elements work even without data attributes
+    // (e.g., audio play buttons, Tehillim selections, form inputs inside modals)
+    if (!foundSpecificHandler && !syntheticClickDispatched) {
+      // Find the closest clickable element
+      let clickableElement: HTMLElement | null = lastPointerDownTarget || target;
+      while (clickableElement && clickableElement !== document.body) {
+        const tagName = clickableElement.tagName.toLowerCase();
+        const isClickable = tagName === 'button' || 
+                           tagName === 'a' || 
+                           tagName === 'input' ||
+                           tagName === 'select' ||
+                           tagName === 'textarea' ||
+                           clickableElement.getAttribute('role') === 'button' ||
+                           clickableElement.getAttribute('tabindex') !== null ||
+                           clickableElement.onclick !== null ||
+                           clickableElement.classList.contains('cursor-pointer');
+        
+        if (isClickable) {
+          if (isDebugMode) {
+            console.log('[DOM Bridge] Dispatching synthetic click on:', clickableElement.tagName, clickableElement.className.slice(0, 50));
+          }
+          
+          // Mark that we've dispatched to prevent double-clicks
+          syntheticClickDispatched = true;
+          
+          // Dispatch a synthetic click event
+          const syntheticClick = new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            view: window,
+            clientX: e.clientX,
+            clientY: e.clientY
+          });
+          
+          // Small delay to ensure React has a chance to process
+          setTimeout(() => {
+            clickableElement!.dispatchEvent(syntheticClick);
+            syntheticClickDispatched = false;
+          }, 10);
+          
+          break;
+        }
+        
+        clickableElement = clickableElement.parentElement;
+      }
     }
     
     lastPointerDownTarget = null;
