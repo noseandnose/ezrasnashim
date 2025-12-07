@@ -481,7 +481,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
 
 
   return (
-    <div className="pb-20">
+    <div className="pb-20" data-bridge-container>
 
       {/* Main Tefilla Section - Tehillim */}
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">

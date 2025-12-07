@@ -22,7 +22,7 @@ export default function TimesSection() {
   };
 
   return (
-    <div className="h-full p-2">
+    <div className="h-full p-2" data-bridge-container>
       <div className="space-y-2 h-full">
         {/* Today's Times */}
         <div className="content-card rounded-2xl p-3">

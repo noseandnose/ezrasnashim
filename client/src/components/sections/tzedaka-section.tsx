@@ -222,7 +222,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
 
 
   return (
-    <div className="pb-20">
+    <div className="pb-20" data-bridge-container>
       
       {/* Main Tzedaka Section - ONLY CAMPAIGN */}
       <div className="bg-gradient-soft rounded-b-3xl px-3 pt-3 pb-2 shadow-lg">
