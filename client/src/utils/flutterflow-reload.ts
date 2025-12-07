@@ -1,13 +1,15 @@
 /**
  * Mobile reload-on-resume handler
  * 
- * Problem: Mobile webviews (FlutterFlow, etc.) sometimes swallow touchend/click events 
- * after resume, making all buttons unresponsive even though CSS :active still works.
+ * UPDATED: Now uses pointerup-based tap detection via DOM event bridge as primary fix.
+ * Force reload is DISABLED by default since pointerup events should work after resume
+ * even when touchend/click events are swallowed by FlutterFlow WebView.
  * 
- * Solution: Reload the page when app regains visibility after being backgrounded.
- * Activates automatically on all mobile devices (iOS, Android) to ensure FlutterFlow
- * functionality. Regular mobile browser users may experience a brief reload after
- * returning from background, but this ensures button interactivity is restored.
+ * The pointerdown event fires (hence CSS :active works), and pointerup should fire too
+ * since they're part of the same Pointer Events API.
+ * 
+ * Force reload can be enabled for testing via:
+ * localStorage.setItem('forceReloadOnResume', 'true');
  */
 
 let reloadInitialized = false;
@@ -22,6 +24,7 @@ export function initializeFlutterFlowReload() {
   if (reloadInitialized || typeof window === 'undefined') return;
   
   const isDebugMode = localStorage.getItem('debugReloadOnResume') === 'true';
+  const forceReloadEnabled = localStorage.getItem('forceReloadOnResume') === 'true';
   
   // Check if we're on a mobile device
   const isMobile = /mobile|android|iphone|ipad|ipod/i.test(navigator.userAgent);
@@ -30,9 +33,10 @@ export function initializeFlutterFlowReload() {
   if (isDebugMode) {
     console.log('[FlutterFlow Reload] User Agent:', navigator.userAgent);
     console.log('[FlutterFlow Reload] Mobile device:', isMobile);
+    console.log('[FlutterFlow Reload] Force reload enabled:', forceReloadEnabled);
   }
   
-  // Activate on all mobile devices to ensure FlutterFlow functionality
+  // Only activate if explicitly enabled or not mobile
   if (!isMobile) {
     if (isDebugMode) {
       console.log('[FlutterFlow Reload] Not a mobile device, skipping reload-on-resume');
@@ -40,9 +44,20 @@ export function initializeFlutterFlowReload() {
     return;
   }
   
+  // DISABLED BY DEFAULT: Pointerup-based tap detection in dom-event-bridge.ts should handle this
+  // Force reload is now opt-in via localStorage.setItem('forceReloadOnResume', 'true')
+  if (!forceReloadEnabled) {
+    if (isDebugMode) {
+      console.log('[FlutterFlow Reload] Force reload DISABLED - using pointerup detection instead');
+      console.log('[FlutterFlow Reload] To enable: localStorage.setItem("forceReloadOnResume", "true")');
+    }
+    reloadInitialized = true;
+    return;
+  }
+  
   reloadInitialized = true;
   if (isDebugMode) {
-    console.log('[FlutterFlow Reload] ✓ Reload-on-resume ACTIVATED (mobile device detected)');
+    console.log('[FlutterFlow Reload] ✓ Reload-on-resume ACTIVATED (force reload enabled)');
   }
   
   // Track if we were hidden

@@ -76,8 +76,13 @@ function initializeBridge() {
     console.log('[DOM Bridge] Initializing resilient click handler for FlutterFlow');
   }
   
+  // Track pointerdown targets to detect tap gestures via pointerup
+  let lastPointerDownTarget: HTMLElement | null = null;
+  let lastPointerDownTime = 0;
+  const TAP_THRESHOLD_MS = 500; // Maximum time between down and up for a tap
+  
   // Use capture phase to catch events before they might be stopped
-  const handleClick = (e: MouseEvent | TouchEvent) => {
+  const handleClick = (e: MouseEvent | TouchEvent | PointerEvent) => {
     const target = e.target as HTMLElement;
     
     // Walk up the DOM tree to find an element with data-action
@@ -87,7 +92,7 @@ function initializeBridge() {
       
       if (action && actionHandlers.has(action)) {
         if (isDebugMode) {
-          console.log('[DOM Bridge] Invoking registered action:', action);
+          console.log('[DOM Bridge] Invoking registered action:', action, 'via', e.type);
         }
         const handler = actionHandlers.get(action)!;
         
@@ -105,32 +110,116 @@ function initializeBridge() {
     }
   };
   
-  // Attach both click and touchend for maximum compatibility
+  // Track pointerdown for pointerup-based tap detection
+  // This is CRITICAL: pointerdown fires even when click/touchend don't (FlutterFlow bug)
+  const handlePointerDown = (e: PointerEvent) => {
+    lastPointerDownTarget = e.target as HTMLElement;
+    lastPointerDownTime = Date.now();
+  };
+  
+  // pointerup-based click detection - works when touchend/click are swallowed
+  const handlePointerUp = (e: PointerEvent) => {
+    const timeSinceDown = Date.now() - lastPointerDownTime;
+    
+    // Only process as tap if it was quick and on same element
+    if (timeSinceDown > TAP_THRESHOLD_MS) {
+      lastPointerDownTarget = null;
+      return;
+    }
+    
+    const target = e.target as HTMLElement;
+    
+    // Verify the up is on the same element tree as the down (it's a tap, not a drag)
+    if (lastPointerDownTarget) {
+      const isOnSameElement = target === lastPointerDownTarget || 
+                              target.contains(lastPointerDownTarget) || 
+                              lastPointerDownTarget.contains(target);
+      
+      if (!isOnSameElement) {
+        lastPointerDownTarget = null;
+        return;
+      }
+    }
+    
+    // Find action element from the pointerdown target (more reliable than pointerup target)
+    let currentElement: HTMLElement | null = lastPointerDownTarget || target;
+    while (currentElement && currentElement !== document.body) {
+      const action = currentElement.getAttribute('data-action');
+      
+      if (action && actionHandlers.has(action)) {
+        if (isDebugMode) {
+          console.log('[DOM Bridge] Invoking registered action via pointerup:', action);
+        }
+        const handler = actionHandlers.get(action)!;
+        
+        try {
+          // Prevent the default to avoid duplicate handling if click also fires
+          e.preventDefault();
+          handler(currentElement, e);
+        } catch (error) {
+          console.error('[DOM Bridge] Error in action handler:', action, error);
+        }
+        
+        lastPointerDownTarget = null;
+        return;
+      }
+      
+      currentElement = currentElement.parentElement;
+    }
+    
+    lastPointerDownTarget = null;
+  };
+  
+  // Attach all event listeners - use multiple for maximum compatibility
+  // Priority: pointerup (most reliable after WebView resume) > click > touchend
+  document.addEventListener('pointerdown', handlePointerDown, true);
+  document.addEventListener('pointerup', handlePointerUp, true);
   document.addEventListener('click', handleClick, true);
   document.addEventListener('touchend', handleClick, true);
   
   // Re-attach every 5 seconds in case FlutterFlow removes them
   setInterval(() => {
+    document.removeEventListener('pointerdown', handlePointerDown, true);
+    document.removeEventListener('pointerup', handlePointerUp, true);
     document.removeEventListener('click', handleClick, true);
     document.removeEventListener('touchend', handleClick, true);
+    document.addEventListener('pointerdown', handlePointerDown, true);
+    document.addEventListener('pointerup', handlePointerUp, true);
     document.addEventListener('click', handleClick, true);
     document.addEventListener('touchend', handleClick, true);
     // Only log in debug mode to reduce console noise
   }, 5000);
   
-  // Health check: Detect when React's event delegation fails
+  // CRITICAL: Immediately re-attach listeners when page becomes visible
+  // This ensures button interactivity is restored after FlutterFlow WebView resume
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && isDebugMode) {
-      console.log('[DOM Bridge] Page resumed, checking React health');
+    if (document.visibilityState === 'visible') {
+      if (isDebugMode) {
+        console.log('[DOM Bridge] Page resumed - immediately re-attaching event listeners');
+      }
       
-      // Test if React's delegation is working by checking for React-managed properties
-      const reactRoot = document.getElementById('root');
-      if (reactRoot) {
-        const reactKeys = Object.keys(reactRoot).filter(k => k.startsWith('__react'));
-        if (reactKeys.length === 0) {
-          console.warn('[DOM Bridge] React root properties missing - delegation may be broken!');
-        } else {
-          console.log('[DOM Bridge] React event delegation appears healthy');
+      // Immediately re-attach all listeners to ensure they're fresh
+      document.removeEventListener('pointerdown', handlePointerDown, true);
+      document.removeEventListener('pointerup', handlePointerUp, true);
+      document.removeEventListener('click', handleClick, true);
+      document.removeEventListener('touchend', handleClick, true);
+      document.addEventListener('pointerdown', handlePointerDown, true);
+      document.addEventListener('pointerup', handlePointerUp, true);
+      document.addEventListener('click', handleClick, true);
+      document.addEventListener('touchend', handleClick, true);
+      
+      // Health check: Test if React's delegation is working
+      if (isDebugMode) {
+        console.log('[DOM Bridge] Page resumed, checking React health');
+        
+        const reactRoot = document.getElementById('root');
+        if (reactRoot) {
+          const reactKeys = Object.keys(reactRoot).filter(k => k.startsWith('__react'));
+          if (reactKeys.length === 0) {
+            console.warn('[DOM Bridge] React root properties missing - delegation may be broken!');
+          } else {
+            console.log('[DOM Bridge] React event delegation appears healthy');
+          }
         }
       }
     }

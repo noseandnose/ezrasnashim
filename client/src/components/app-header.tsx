@@ -5,12 +5,13 @@ import { useHomeSummary } from "@/hooks/use-home-summary";
 import { BarChart3, Info, Share2, Heart, Mail, Share, X, Menu, MessageSquare, Search, Calendar } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import logoImage from "@assets/A_project_of_(4)_1764762086237.png";
 import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
 import MessageModal from "./modals/message-modal";
 import { SearchModal } from "./SearchModal";
 import { getLocalDateString } from "@/lib/dateUtils";
+import { registerAction, unregisterAction } from "@/utils/dom-event-bridge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -115,6 +116,42 @@ export default function AppHeader() {
     }
   };
 
+  // Store callbacks in refs for DOM bridge to access current versions
+  const setLocationRef = useRef(setLocation);
+  const openModalRef = useRef(openModal);
+  const handleShareRef = useRef(handleShare);
+  const handleInstallClickRef = useRef(handleInstallClick);
+  const handleOpenMessageRef = useRef(handleOpenMessage);
+  const setShowSearchModalRef = useRef(setShowSearchModal);
+  
+  setLocationRef.current = setLocation;
+  openModalRef.current = openModal;
+  handleShareRef.current = handleShare;
+  handleInstallClickRef.current = handleInstallClick;
+  handleOpenMessageRef.current = handleOpenMessage;
+  setShowSearchModalRef.current = setShowSearchModal;
+
+  // Register DOM bridge actions for header buttons (FlutterFlow resilience)
+  useEffect(() => {
+    registerAction('menu-analytics', () => setLocationRef.current('/statistics'));
+    registerAction('menu-info', () => openModalRef.current('about', 'about'));
+    registerAction('menu-date-converter', () => openModalRef.current('date-calculator-fullscreen', 'table'));
+    registerAction('menu-share', () => handleShareRef.current());
+    registerAction('menu-install', () => handleInstallClickRef.current());
+    registerAction('header-message', () => handleOpenMessageRef.current());
+    registerAction('header-search', () => setShowSearchModalRef.current(true));
+    
+    return () => {
+      unregisterAction('menu-analytics');
+      unregisterAction('menu-info');
+      unregisterAction('menu-date-converter');
+      unregisterAction('menu-share');
+      unregisterAction('menu-install');
+      unregisterAction('header-message');
+      unregisterAction('header-search');
+    };
+  }, []);
+
   return (
     <>
       <header className="header-extended fixed top-0 left-0 right-0 bg-gradient-soft px-3 border-0 shadow-none z-40" style={{ 
@@ -141,6 +178,7 @@ export default function AppHeader() {
                   onClick={() => setLocation("/statistics")}
                   className="cursor-pointer"
                   data-testid="menu-item-analytics"
+                  data-action="menu-analytics"
                 >
                   <BarChart3 className="h-5 w-5 mr-2" />
                   Analytics
@@ -149,6 +187,7 @@ export default function AppHeader() {
                   onClick={() => openModal('about', 'about')}
                   className="cursor-pointer"
                   data-testid="menu-item-info"
+                  data-action="menu-info"
                 >
                   <Info className="h-5 w-5 mr-2" />
                   Info
@@ -157,6 +196,7 @@ export default function AppHeader() {
                   onClick={() => openModal('date-calculator-fullscreen', 'table')}
                   className="cursor-pointer"
                   data-testid="menu-item-date-converter"
+                  data-action="menu-date-converter"
                 >
                   <Calendar className="h-5 w-5 mr-2" />
                   Hebrew Date Converter
@@ -165,6 +205,7 @@ export default function AppHeader() {
                   onClick={handleShare}
                   className="cursor-pointer"
                   data-testid="menu-item-share"
+                  data-action="menu-share"
                 >
                   <Share2 className="h-5 w-5 mr-2" />
                   Share
@@ -180,6 +221,7 @@ export default function AppHeader() {
                         : ''
                     }`}
                     data-testid="menu-item-install"
+                    data-action="menu-install"
                   >
                     {isIOS ? (
                       <Share className="h-5 w-5 mr-2" />
@@ -204,6 +246,7 @@ export default function AppHeader() {
               className="p-2 rounded-full hover:bg-white/50 transition-colors"
               aria-label="Search"
               data-testid="button-search"
+              data-action="header-search"
             >
               <Search className="h-5 w-5 text-black/70" />
             </button>
@@ -224,6 +267,7 @@ export default function AppHeader() {
               className="p-2 rounded-full hover:bg-white/50 transition-colors relative"
               aria-label="Daily Message"
               data-testid="button-message"
+              data-action="header-message"
             >
               <Mail className="h-5 w-5 text-black/70" />
               {!!todayMessage && !hasReadMessage && (
