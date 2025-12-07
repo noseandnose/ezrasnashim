@@ -164,7 +164,7 @@ export default function AppHeader() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={`p-2 rounded-full hover:bg-white/50 transition-colors ${
+                  className={`p-2 rounded-full hover:bg-white/50 transition-colors focus:outline-none ${
                     shouldHighlight ? 'animate-pulse border-2 border-blush shadow-lg' : ''
                   }`}
                   aria-label="Menu"
