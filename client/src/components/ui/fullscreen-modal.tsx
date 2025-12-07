@@ -348,6 +348,7 @@ export function FullscreenModal({
   return (
     <div 
       data-fullscreen-modal
+      data-bridge-container
       className="fixed inset-0 bg-white"
       style={{ 
         zIndex: 2147483647,
