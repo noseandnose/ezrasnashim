@@ -12,6 +12,8 @@ export const dailyRecipes = pgTable("daily_recipes", {
   instructions: text("instructions").notNull(),
   servings: text("servings"),
   totalTime: text("total_time"),
+  prepTime: text("prep_time"), // Legacy - kept for backward compatibility
+  cookTime: text("cook_time"), // Legacy - kept for backward compatibility
   difficulty: text("difficulty"), // 'easy', 'medium', 'hard'
   imageUrl: text("image_url"),
   tags: text("tags"), // JSON array: kosher, pareve, dairy, meat
