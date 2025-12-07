@@ -15,6 +15,7 @@ type ActionHandler = (element: HTMLElement, event: MouseEvent | TouchEvent) => v
 const actionHandlers = new Map<string, ActionHandler>();
 
 let bridgeInitialized = false;
+let appFullyLoaded = false; // Guard against firing during initial hydration
 
 /**
  * Register a named action handler
@@ -81,8 +82,20 @@ function initializeBridge() {
   let lastPointerDownTime = 0;
   const TAP_THRESHOLD_MS = 500; // Maximum time between down and up for a tap
   
+  // Delay activation to avoid interfering with initial page load/hydration
+  // This prevents the "pre-selected menu" issue
+  setTimeout(() => {
+    appFullyLoaded = true;
+    if (isDebugMode) {
+      console.log('[DOM Bridge] App fully loaded, now tracking pointer events');
+    }
+  }, 1000);
+  
   // Use capture phase to catch events before they might be stopped
   const handleClick = (e: MouseEvent | TouchEvent | PointerEvent) => {
+    // Skip if app hasn't fully loaded yet (prevents pre-selection during hydration)
+    if (!appFullyLoaded) return;
+    
     const target = e.target as HTMLElement;
     
     // Walk up the DOM tree to find an element with data-action
@@ -113,12 +126,18 @@ function initializeBridge() {
   // Track pointerdown for pointerup-based tap detection
   // This is CRITICAL: pointerdown fires even when click/touchend don't (FlutterFlow bug)
   const handlePointerDown = (e: PointerEvent) => {
+    // Skip if app hasn't fully loaded yet
+    if (!appFullyLoaded) return;
+    
     lastPointerDownTarget = e.target as HTMLElement;
     lastPointerDownTime = Date.now();
   };
   
   // pointerup-based click detection - works when touchend/click are swallowed
   const handlePointerUp = (e: PointerEvent) => {
+    // Skip if app hasn't fully loaded yet
+    if (!appFullyLoaded) return;
+    
     const timeSinceDown = Date.now() - lastPointerDownTime;
     
     // Only process as tap if it was quick and on same element
