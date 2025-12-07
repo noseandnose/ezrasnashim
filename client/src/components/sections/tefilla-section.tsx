@@ -75,7 +75,14 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     if (!todaysCompletions) return false;
     
     // Check for any completion key that starts with 'individual-tehillim-'
-    for (const modalId of Array.from(todaysCompletions)) {
+    // Check in singles (Set<string>) - convert to array for iteration
+    for (const modalId of Array.from(todaysCompletions.singles)) {
+      if (modalId.startsWith('individual-tehillim-')) {
+        return true;
+      }
+    }
+    // Also check in repeatables (Record<string, number>)
+    for (const modalId of Object.keys(todaysCompletions.repeatables)) {
       if (modalId.startsWith('individual-tehillim-')) {
         return true;
       }
@@ -656,6 +663,9 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                     ? 'bg-sage/20 hover:scale-105' 
                     : 'bg-white hover:scale-105'
               }`}
+              data-modal-type={currentPrayer.modal}
+              data-modal-section="tefilla"
+              data-testid="button-tefilla-prayer"
             >
               <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
                 currentPrayer.disabled 
@@ -686,6 +696,9 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
               (isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'bg-sage/20' : 'bg-white'
             }`}
+            data-modal-type="brochas"
+            data-modal-section="tefilla"
+            data-testid="button-tefilla-brochas"
           >
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
               (isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'bg-sage' : 'bg-gradient-feminine'
@@ -706,6 +719,9 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
               hasAnyTehillimCompleted() ? 'bg-sage/20' : 'bg-white'
             }`}
+            data-modal-type="special-tehillim"
+            data-modal-section="tefilla"
+            data-testid="button-tefilla-tehillim"
           >
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
               hasAnyTehillimCompleted() ? 'bg-sage' : 'bg-gradient-feminine'
@@ -723,6 +739,9 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
               isModalComplete('nishmas-campaign') ? 'bg-sage/20' : 'bg-white'
             }`}
+            data-modal-type="nishmas-campaign"
+            data-modal-section="tefilla"
+            data-testid="button-tefilla-nishmas"
           >
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
               isModalComplete('nishmas-campaign') ? 'bg-sage' : 'bg-gradient-feminine'
@@ -752,6 +771,9 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             <button 
               onClick={() => openModal('refuah', 'tefilla')}
               className="bg-gradient-to-br from-blush/10 to-blush/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-blush/20"
+              data-modal-type="refuah"
+              data-modal-section="tefilla"
+              data-testid="button-tefilla-refuah"
             >
               <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-1 w-fit">
                 <Stethoscope className="text-white" size={16} strokeWidth={1.5} />
@@ -763,6 +785,9 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             <button 
               onClick={() => openModal('family', 'tefilla')}
               className="bg-gradient-to-br from-lavender/10 to-lavender/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-lavender/20"
+              data-modal-type="family"
+              data-modal-section="tefilla"
+              data-testid="button-tefilla-family"
             >
               <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-1 w-fit">
                 <Users className="text-white" size={16} strokeWidth={1.5} />
@@ -774,6 +799,9 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             <button 
               onClick={() => openModal('life', 'tefilla')}
               className="bg-gradient-to-br from-sage/10 to-sage/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-sage/20"
+              data-modal-type="life"
+              data-modal-section="tefilla"
+              data-testid="button-tefilla-life"
             >
               <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-1 w-fit">
                 <Heart className="text-white" size={16} strokeWidth={1.5} />

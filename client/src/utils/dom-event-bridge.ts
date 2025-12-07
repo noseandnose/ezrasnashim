@@ -14,6 +14,24 @@ type ActionHandler = (element: HTMLElement, event: MouseEvent | TouchEvent) => v
 
 const actionHandlers = new Map<string, ActionHandler>();
 
+// Store for the global modal opener function
+let globalModalOpener: ((modalType: string, section: string, vortId?: number) => void) | null = null;
+
+/**
+ * Register the global modal opener function from React
+ * This allows the DOM bridge to open modals even when React event handlers fail
+ */
+export function setGlobalModalOpener(opener: (modalType: string, section: string, vortId?: number) => void) {
+  globalModalOpener = opener;
+}
+
+/**
+ * Get the global modal opener
+ */
+export function getGlobalModalOpener() {
+  return globalModalOpener;
+}
+
 let bridgeInitialized = false;
 let appFullyLoaded = false; // Guard against firing during initial hydration
 
@@ -98,11 +116,12 @@ function initializeBridge() {
     
     const target = e.target as HTMLElement;
     
-    // Walk up the DOM tree to find an element with data-action
+    // Walk up the DOM tree to find an element with data-action or data-modal-type
     let currentElement: HTMLElement | null = target;
     while (currentElement && currentElement !== document.body) {
       const action = currentElement.getAttribute('data-action');
       
+      // Check for registered action handlers first
       if (action && actionHandlers.has(action)) {
         if (isDebugMode) {
           console.log('[DOM Bridge] Invoking registered action:', action, 'via', e.type);
@@ -116,6 +135,25 @@ function initializeBridge() {
         }
         
         // Action handled
+        return;
+      }
+      
+      // Check for modal opener data attributes (fallback for page buttons)
+      const modalType = currentElement.getAttribute('data-modal-type');
+      const modalSection = currentElement.getAttribute('data-modal-section') || 'home';
+      const vortId = currentElement.getAttribute('data-vort-id');
+      
+      if (modalType && globalModalOpener) {
+        if (isDebugMode) {
+          console.log('[DOM Bridge] Opening modal via data attributes:', modalType, modalSection, vortId);
+        }
+        
+        try {
+          globalModalOpener(modalType, modalSection, vortId ? parseInt(vortId) : undefined);
+        } catch (error) {
+          console.error('[DOM Bridge] Error opening modal:', modalType, error);
+        }
+        
         return;
       }
       
@@ -165,6 +203,7 @@ function initializeBridge() {
     while (currentElement && currentElement !== document.body) {
       const action = currentElement.getAttribute('data-action');
       
+      // Check for registered action handlers first
       if (action && actionHandlers.has(action)) {
         if (isDebugMode) {
           console.log('[DOM Bridge] Invoking registered action via pointerup:', action);
@@ -177,6 +216,27 @@ function initializeBridge() {
           handler(currentElement, e);
         } catch (error) {
           console.error('[DOM Bridge] Error in action handler:', action, error);
+        }
+        
+        lastPointerDownTarget = null;
+        return;
+      }
+      
+      // Check for modal opener data attributes (fallback for page buttons)
+      const modalType = currentElement.getAttribute('data-modal-type');
+      const modalSection = currentElement.getAttribute('data-modal-section') || 'home';
+      const vortId = currentElement.getAttribute('data-vort-id');
+      
+      if (modalType && globalModalOpener) {
+        if (isDebugMode) {
+          console.log('[DOM Bridge] Opening modal via pointerup:', modalType, modalSection, vortId);
+        }
+        
+        try {
+          e.preventDefault();
+          globalModalOpener(modalType, modalSection, vortId ? parseInt(vortId) : undefined);
+        } catch (error) {
+          console.error('[DOM Bridge] Error opening modal via pointerup:', modalType, error);
         }
         
         lastPointerDownTarget = null;

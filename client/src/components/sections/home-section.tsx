@@ -155,6 +155,9 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               onClick={() => openModal('location', 'home')}
               className={`flex items-center justify-end space-x-1 hover:bg-white/80 px-2 py-1 rounded-xl transition-colors h-auto ${(permissionDenied || !coordinates) ? 'animate-pulse border-2 border-blush bg-blush/10' : 'border border-gray-200 bg-white/60'}`}
               style={{ height: 'auto', minHeight: 'auto' }}
+              data-modal-type="location"
+              data-modal-section="home"
+              data-testid="button-home-location"
             >
               <MapPin className="text-gray-600" size={10} />
               <p className="platypi-medium text-xs text-gray-700">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
@@ -203,6 +206,9 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
                   ? 'bg-gray-100 border-gray-200 opacity-60 cursor-not-allowed' 
                   : 'bg-white/80 border-blush/20 hover:scale-105 hover:bg-white/95'
               }`}
+              data-modal-type={currentPrayer.modal}
+              data-modal-section="tefilla"
+              data-testid="button-home-prayer"
             >
               <div className="flex items-center justify-center mb-1">
                 <div className={`p-1.5 rounded-full mr-1 ${
@@ -227,6 +233,9 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             <button 
               onClick={() => openModal('events', 'home')}
               className="w-full bg-white/80 rounded-xl p-3 text-center border border-blush/20 hover:scale-105 hover:bg-white/95 transition-all duration-300"
+              data-modal-type="events"
+              data-modal-section="home"
+              data-testid="button-home-events"
             >
               <div className="flex items-center justify-center mb-1">
                 <div className="bg-gradient-feminine p-1.5 rounded-full relative">
