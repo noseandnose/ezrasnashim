@@ -20,8 +20,7 @@ export default function AdminRecipes() {
     ingredients: '',
     instructions: '',
     servings: '',
-    prepTime: '',
-    cookTime: '',
+    totalTime: '',
     difficulty: 'easy',
     imageUrl: '',
     tags: '',
@@ -89,8 +88,7 @@ export default function AdminRecipes() {
           ingredients: '',
           instructions: '',
           servings: '',
-          prepTime: '',
-          cookTime: '',
+          totalTime: '',
           difficulty: 'easy',
           imageUrl: '',
           tags: '',
@@ -226,7 +224,7 @@ export default function AdminRecipes() {
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="servings">Servings</Label>
                   <Input
@@ -237,21 +235,12 @@ export default function AdminRecipes() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="prepTime">Prep Time</Label>
+                  <Label htmlFor="totalTime">Total Time</Label>
                   <Input
-                    id="prepTime"
-                    value={formData.prepTime}
-                    onChange={(e) => handleInputChange('prepTime', e.target.value)}
-                    placeholder="30 min"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="cookTime">Cook Time</Label>
-                  <Input
-                    id="cookTime"
-                    value={formData.cookTime}
-                    onChange={(e) => handleInputChange('cookTime', e.target.value)}
-                    placeholder="45 min"
+                    id="totalTime"
+                    value={formData.totalTime}
+                    onChange={(e) => handleInputChange('totalTime', e.target.value)}
+                    placeholder="1 hour 15 min"
                   />
                 </div>
               </div>
@@ -354,11 +343,8 @@ export default function AdminRecipes() {
                       {recipe.difficulty && (
                         <span className="capitalize">{recipe.difficulty}</span>
                       )}
-                      {recipe.prepTime && (
-                        <span>Prep: {recipe.prepTime}</span>
-                      )}
-                      {recipe.cookTime && (
-                        <span>Cook: {recipe.cookTime}</span>
+                      {recipe.totalTime && (
+                        <span>Time: {recipe.totalTime}</span>
                       )}
                     </div>
                   </div>

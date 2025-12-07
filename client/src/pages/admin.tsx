@@ -39,8 +39,7 @@ export default function Admin() {
     ingredients: '',
     instructions: '',
     servings: '',
-    prepTime: '',
-    cookTime: '',
+    totalTime: '',
     difficulty: 'easy',
     imageUrl: '',
     tags: '',
@@ -519,7 +518,7 @@ export default function Admin() {
         });
         setRecipeFormData({
           date: '', title: '', description: '', ingredients: '', instructions: '',
-          servings: '', prepTime: '', cookTime: '', difficulty: 'easy', imageUrl: '', tags: '', thankYouMessage: ''
+          servings: '', totalTime: '', difficulty: 'easy', imageUrl: '', tags: '', thankYouMessage: ''
         });
         queryClient.invalidateQueries({ queryKey: ['admin-table-recipes'] });
         await refetchRecipes();
@@ -1299,7 +1298,7 @@ export default function Admin() {
                   />
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="recipe-servings">Servings</Label>
                     <Input
@@ -1312,24 +1311,13 @@ export default function Admin() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="recipe-prep-time">Prep Time</Label>
+                    <Label htmlFor="recipe-total-time">Total Time</Label>
                     <Input
-                      id="recipe-prep-time"
-                      value={recipeFormData.prepTime}
-                      onChange={(e) => setRecipeFormData(prev => ({ ...prev, prepTime: e.target.value }))}
-                      data-testid="input-recipe-prep-time"
-                      placeholder="e.g., 15 min"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="recipe-cook-time">Cook Time</Label>
-                    <Input
-                      id="recipe-cook-time"
-                      value={recipeFormData.cookTime}
-                      onChange={(e) => setRecipeFormData(prev => ({ ...prev, cookTime: e.target.value }))}
-                      data-testid="input-recipe-cook-time"
-                      placeholder="e.g., 30 min"
+                      id="recipe-total-time"
+                      value={recipeFormData.totalTime}
+                      onChange={(e) => setRecipeFormData(prev => ({ ...prev, totalTime: e.target.value }))}
+                      data-testid="input-recipe-total-time"
+                      placeholder="e.g., 1 hour 15 min"
                       className="mt-1"
                     />
                   </div>

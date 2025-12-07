@@ -224,7 +224,7 @@ export default function TableModals() {
     };
   }, [setFullscreenContent]);
 
-  const { data: recipeContent } = useQuery<{title?: string; description?: string; ingredients?: string[]; instructions?: string[]; cookingTime?: string; servings?: number; imageUrl?: string; prepTime?: string; cookTime?: string; difficulty?: string; thankYouMessage?: string; attributionLogoUrl?: string; attributionAboutText?: string; websiteUrl?: string; emailAddress?: string}>({
+  const { data: recipeContent } = useQuery<{title?: string; description?: string; ingredients?: string[]; instructions?: string[]; cookingTime?: string; servings?: number; imageUrl?: string; totalTime?: string; difficulty?: string; thankYouMessage?: string; attributionLogoUrl?: string; attributionAboutText?: string; websiteUrl?: string; emailAddress?: string}>({
     queryKey: ['/api/table/recipe'],
     enabled: activeModal === 'recipe' || fullscreenContent.contentType === 'recipe'
   });
@@ -339,19 +339,13 @@ export default function TableModals() {
               )}
               
               {/* Cooking Info */}
-              {(recipeContent.prepTime || recipeContent.cookTime || recipeContent.servings || recipeContent.difficulty) && (
+              {(recipeContent.totalTime || recipeContent.servings || recipeContent.difficulty) && (
                 <div className="bg-blush/10 p-3 rounded-lg">
                   <div className="grid grid-cols-2 gap-2">
-                    {recipeContent.prepTime && (
+                    {recipeContent.totalTime && (
                       <div>
-                        <span className="platypi-semibold">Prep Time: </span>
-                        <span>{formatTimeDisplay(recipeContent.prepTime)}</span>
-                      </div>
-                    )}
-                    {recipeContent.cookTime && (
-                      <div>
-                        <span className="platypi-semibold">Cook Time: </span>
-                        <span>{formatTimeDisplay(recipeContent.cookTime)}</span>
+                        <span className="platypi-semibold">Total Time: </span>
+                        <span>{formatTimeDisplay(recipeContent.totalTime)}</span>
                       </div>
                     )}
                     {recipeContent.servings && (
@@ -880,19 +874,13 @@ export default function TableModals() {
                 )}
                 
                 {/* Cooking Info */}
-                {(recipeContent.prepTime || recipeContent.cookTime || recipeContent.servings || recipeContent.difficulty) && (
+                {(recipeContent.totalTime || recipeContent.servings || recipeContent.difficulty) && (
                   <div className="bg-blush/10 p-4 rounded-lg mb-4">
                     <div className="grid grid-cols-2 gap-3">
-                      {recipeContent.prepTime && (
+                      {recipeContent.totalTime && (
                         <div>
-                          <span className="platypi-semibold text-black">Prep Time: </span>
-                          <span className="platypi-regular text-black">{formatTimeDisplay(recipeContent.prepTime)}</span>
-                        </div>
-                      )}
-                      {recipeContent.cookTime && (
-                        <div>
-                          <span className="platypi-semibold text-black">Cook Time: </span>
-                          <span className="platypi-regular text-black">{formatTimeDisplay(recipeContent.cookTime)}</span>
+                          <span className="platypi-semibold text-black">Total Time: </span>
+                          <span className="platypi-regular text-black">{formatTimeDisplay(recipeContent.totalTime)}</span>
                         </div>
                       )}
                       {recipeContent.servings && (
