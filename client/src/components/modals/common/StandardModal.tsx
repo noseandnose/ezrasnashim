@@ -53,6 +53,7 @@ export function StandardModal({
       <DialogContent 
         className={`${baseClasses} ${contentClassName}`}
         style={{ maxHeight }}
+        data-bridge-container
       >
         <div className="relative">
           {/* Custom Close Button */}
