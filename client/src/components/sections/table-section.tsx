@@ -121,6 +121,9 @@ export default function TableSection() {
             <button 
               onClick={() => openModal('location', 'table')}
               className="bg-yellow-600 text-white px-3 py-1.5 rounded-lg text-xs platypi-medium hover:bg-yellow-700 transition-colors"
+              data-modal-type="location"
+              data-modal-section="table"
+              data-testid="button-table-location"
             >
               Set Location Manually
             </button>
@@ -237,6 +240,8 @@ export default function TableSection() {
               isModalComplete('marriage-insights') ? 'bg-sage/20 hover:scale-105' : 'bg-white hover:scale-105'
             }`}
             onClick={() => openModal('marriage-insights', 'table')}
+            data-modal-type="marriage-insights"
+            data-modal-section="table"
           >
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
               isModalComplete('marriage-insights') ? 'bg-sage' : 'bg-gradient-feminine'
@@ -304,6 +309,8 @@ export default function TableSection() {
             className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
             onClick={() => openModal('meditation-categories', 'table')}
             data-testid="button-meditation"
+            data-modal-type="meditation-categories"
+            data-modal-section="table"
           >
             <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-feminine">
               <Brain className="text-white" size={18} strokeWidth={1.5} />

@@ -64,6 +64,9 @@ function CommunityImpactButton() {
     <button
       onClick={() => openModal('community-impact', 'tzedaka')}
       className="w-full bg-white rounded-3xl p-3 border border-blush/10 shadow-lg hover:shadow-md transition-all duration-300 text-left"
+      data-modal-type="community-impact"
+      data-modal-section="tzedaka"
+      data-testid="button-tzedaka-community-impact"
     >
       <div className="flex items-center space-x-3">
         <div className="w-12 h-12 flex-shrink-0">

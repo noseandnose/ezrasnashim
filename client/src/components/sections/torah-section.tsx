@@ -382,6 +382,9 @@ export default function TorahSection({}: TorahSectionProps) {
                   }
                 }}
                 disabled={!hasContent}
+                data-modal-type={id}
+                data-modal-section="torah"
+                data-testid={`button-torah-${id}`}
               >
                 {/* Content Type Indicator - only show if there's content and a valid type */}
                 {contentType && hasContent && (
@@ -454,6 +457,10 @@ export default function TorahSection({}: TorahSectionProps) {
                         openModal('parsha-vort', 'torah', undefined, parsha.id);
                       }
                     }}
+                    data-modal-type="parsha-vort"
+                    data-modal-section="torah"
+                    data-vort-id={parsha.id}
+                    data-testid={`button-parsha-vort-${parsha.id}`}
                   >
                     <div className="bg-gradient-feminine p-2 rounded-full">
                       <BookOpen className="text-white" size={16} strokeWidth={1.5} />
