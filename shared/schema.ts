@@ -11,8 +11,7 @@ export const dailyRecipes = pgTable("daily_recipes", {
   ingredients: text("ingredients").notNull(), // JSON array as text
   instructions: text("instructions").notNull(),
   servings: text("servings"),
-  prepTime: text("prep_time"),
-  cookTime: text("cook_time"),
+  totalTime: text("total_time"),
   difficulty: text("difficulty"), // 'easy', 'medium', 'hard'
   imageUrl: text("image_url"),
   tags: text("tags"), // JSON array: kosher, pareve, dairy, meat
