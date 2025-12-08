@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Play, Pause } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { registerClickHandler } from "@/utils/dom-event-bridge";
 
 interface AudioPlayerProps {
   title: string;
@@ -75,6 +75,16 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
   // Keep a stable ref for the bridge
   const togglePlayRef = useRef(togglePlay);
   togglePlayRef.current = togglePlay;
+  
+  // Ref callback for play button - explicit DOM bridge registration for FlutterFlow
+  const playButtonRef = useCallback((element: HTMLButtonElement | null) => {
+    if (element) {
+      registerClickHandler(element, () => {
+        // Use the ref to get latest togglePlay function
+        togglePlayRef.current();
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -226,19 +236,21 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
       <div className="flex items-center justify-between mb-4">
         <div className="w-16"></div> {/* Left spacer */}
         
-        <Button
+        <button
+          ref={playButtonRef}
           onClick={togglePlay}
           disabled={audioError}
-          className="bg-gradient-feminine rounded-full p-4 hover:scale-105 transition-all border-0 text-white audio-play-button disabled:opacity-50"
-          style={{ WebkitTapHighlightColor: 'transparent' }}
+          className="bg-gradient-feminine rounded-full p-4 hover:scale-105 transition-all border-0 text-white audio-play-button disabled:opacity-50 inline-flex items-center justify-center"
+          style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
           data-testid="button-audio-play"
+          type="button"
         >
           {isPlaying ? (
             <Pause className="w-7 h-7" />
           ) : (
             <Play className="w-7 h-7 ml-0.5" />
           )}
-        </Button>
+        </button>
         
         <div className="bg-gray-200 rounded-lg p-1">
           <Select value={playbackSpeed} onValueChange={setPlaybackSpeed}>
