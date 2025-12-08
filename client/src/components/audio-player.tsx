@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Play, Pause } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { registerClickHandler } from "@/utils/dom-event-bridge";
 
 interface AudioPlayerProps {
   title: string;
@@ -81,22 +80,6 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
     }
   }, []);
   
-  // Keep a stable ref for the bridge
-  const togglePlayRef = useRef(togglePlay);
-  togglePlayRef.current = togglePlay;
-  
-  // Ref callback for play button - explicit DOM bridge registration for FlutterFlow/WebView
-  const playButtonRef = useCallback((element: HTMLButtonElement | null) => {
-    if (element) {
-      registerClickHandler(element, (event?: any) => {
-        // Prevent default and stop propagation for consistent behavior
-        if (event?.preventDefault) event.preventDefault();
-        if (event?.stopPropagation) event.stopPropagation();
-        // Use the ref to get latest togglePlay function
-        togglePlayRef.current();
-      });
-    }
-  }, []);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -249,7 +232,6 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
         <div className="w-16"></div> {/* Left spacer */}
         
         <button
-          ref={playButtonRef}
           onClick={(e) => {
             console.log('[AudioPlayer] onClick fired');
             e.preventDefault();
