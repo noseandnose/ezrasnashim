@@ -5,6 +5,7 @@ import { Share2, BookOpen, Users, CheckCircle2, Clock, ChevronLeft } from "lucid
 import { toast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { FloatingSettings } from "@/components/ui/floating-settings";
+import { formatTextContent } from "@/lib/text-formatter";
 import type { TehillimChain } from "@shared/schema";
 
 interface ChainStats {
@@ -320,9 +321,10 @@ export default function ChainPage() {
               className={`leading-relaxed text-black ${showHebrew ? 'text-right vc-koren-hebrew' : 'text-left koren-siddur-english'}`}
               style={{ fontSize: showHebrew ? `${fontSize + 1}px` : `${fontSize}px` }}
               dir={showHebrew ? 'rtl' : 'ltr'}
-            >
-              {showHebrew ? psalmContent.hebrewText : psalmContent.englishText}
-            </div>
+              dangerouslySetInnerHTML={{
+                __html: formatTextContent(showHebrew ? psalmContent.hebrewText : psalmContent.englishText)
+              }}
+            />
           ) : (
             <div className="flex items-center justify-center h-full min-h-[200px]">
               <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
