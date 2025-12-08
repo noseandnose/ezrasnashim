@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -139,8 +139,15 @@ function Router() {
     };
   }, []);
   
+  // Check if we're on a chain page route
+  const [location] = useLocation();
+  const isChainRoute = location.startsWith('/c/');
+  
   return (
     <Suspense fallback={<LoadingScreen />}>
+      {/* Always render Home in background for chain routes - enables fast back navigation */}
+      {isChainRoute && <Home />}
+      
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/torah" component={Home} />
