@@ -161,9 +161,42 @@ function initializeBridge() {
   
   // Invoke action or click on an element directly
   const invokeElement = (element: HTMLElement, event: PointerEvent) => {
-    // Check for registered action handlers first
+    // PRIORITY 1: Check WeakMap for direct handler on the target element FIRST
+    // This prevents parent data-modal-type from hijacking child button taps
+    if (clickHandlerRegistry.has(element)) {
+      const handler = clickHandlerRegistry.get(element);
+      if (handler) {
+        if (isDebugMode) {
+          console.log('[DOM Bridge] Invoking WeakMap handler on target');
+        }
+        try {
+          handler();
+        } catch (error) {
+          console.error('[DOM Bridge] Error in WeakMap handler:', error);
+        }
+        return true;
+      }
+    }
+    
+    // PRIORITY 2: Walk ancestors for registered handlers and modal types
     let currentElement: HTMLElement | null = element;
     while (currentElement && currentElement !== document.body) {
+      // Check WeakMap for handler on this ancestor
+      if (clickHandlerRegistry.has(currentElement)) {
+        const handler = clickHandlerRegistry.get(currentElement);
+        if (handler) {
+          if (isDebugMode) {
+            console.log('[DOM Bridge] Invoking WeakMap handler on ancestor');
+          }
+          try {
+            handler();
+          } catch (error) {
+            console.error('[DOM Bridge] Error in WeakMap handler:', error);
+          }
+          return true;
+        }
+      }
+      
       const action = currentElement.getAttribute('data-action');
       if (action && actionHandlers.has(action)) {
         if (isDebugMode) {
