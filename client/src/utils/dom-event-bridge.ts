@@ -4,16 +4,13 @@
  * Problem: FlutterFlow occasionally detaches React's root event delegation listener
  * during background/resume cycles, causing onClick handlers to stop firing.
  * 
- * Solution: Attach capture-phase listeners that handle clicks via:
- * 1. data-action: For registered action handlers (bottom nav, header buttons)
- * 2. data-modal-type: For modal openers on page buttons
- * 3. data-bridge-container: Container attribute for modals - all interactive 
- *    descendants get synthetic click fallback when React delegation fails
+ * Solution: Use native .click() method and direct handler invocation which bypasses
+ * event delegation entirely. Track scroll gestures to avoid phantom clicks.
  */
 
 import { useEffect, useRef } from 'react';
 
-type ActionHandler = (element: HTMLElement, event: MouseEvent | TouchEvent) => void;
+type ActionHandler = (element: HTMLElement, event: MouseEvent | TouchEvent | PointerEvent) => void;
 
 const actionHandlers = new Map<string, ActionHandler>();
 
@@ -78,11 +75,10 @@ function initializeBridge() {
   let lastPointerDownTime = 0;
   let lastPointerDownX = 0;
   let lastPointerDownY = 0;
-  let currentTapId = 0;
-  let realClickFiredForCurrentTap = false;
-  const TAP_THRESHOLD_MS = 500;
-  const CLICK_GRACE_PERIOD_MS = 50;
-  const SCROLL_MOVEMENT_THRESHOLD = 15; // pixels - if moved more than this, it's a scroll not a tap
+  let isScrolling = false;
+  
+  const TAP_THRESHOLD_MS = 400;
+  const SCROLL_MOVEMENT_THRESHOLD = 10; // pixels - reduced for better scroll detection
   
   // Delay activation to avoid interfering with initial page load
   setTimeout(() => {
@@ -90,37 +86,36 @@ function initializeBridge() {
     if (isDebugMode) {
       console.log('[DOM Bridge] App fully loaded, now tracking pointer events');
     }
-  }, 1000);
+  }, 500);
   
-  // Detect when real clicks fire - prevents double-clicks when React works
-  const handleRealClick = () => {
-    if (!appFullyLoaded) return;
-    realClickFiredForCurrentTap = true;
+  // Track scroll events to prevent phantom clicks during scroll
+  let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
+  const handleScroll = () => {
+    isScrolling = true;
+    if (scrollTimeout) clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      isScrolling = false;
+    }, 150);
   };
   
-  // Handle elements with data-action or data-modal-type
-  const handleBridgeClick = (e: MouseEvent | TouchEvent) => {
-    if (!appFullyLoaded) return;
-    
-    const target = e.target as HTMLElement;
-    let currentElement: HTMLElement | null = target;
-    
+  // Invoke action or click on an element directly
+  const invokeElement = (element: HTMLElement, event: PointerEvent) => {
+    // Check for registered action handlers first
+    let currentElement: HTMLElement | null = element;
     while (currentElement && currentElement !== document.body) {
-      // Check for registered action handlers
       const action = currentElement.getAttribute('data-action');
       if (action && actionHandlers.has(action)) {
         if (isDebugMode) {
-          console.log('[DOM Bridge] Invoking action:', action);
+          console.log('[DOM Bridge] Invoking registered action:', action);
         }
         try {
-          actionHandlers.get(action)!(currentElement, e);
+          actionHandlers.get(action)!(currentElement, event);
         } catch (error) {
           console.error('[DOM Bridge] Error in action handler:', action, error);
         }
-        return;
+        return true;
       }
       
-      // Check for modal opener
       const modalType = currentElement.getAttribute('data-modal-type');
       if (modalType && globalModalOpener) {
         const section = currentElement.getAttribute('data-modal-section') || 'home';
@@ -133,11 +128,13 @@ function initializeBridge() {
         } catch (error) {
           console.error('[DOM Bridge] Error opening modal:', error);
         }
-        return;
+        return true;
       }
       
       currentElement = currentElement.parentElement;
     }
+    
+    return false;
   };
   
   const handlePointerDown = (e: PointerEvent) => {
@@ -147,170 +144,118 @@ function initializeBridge() {
     lastPointerDownTime = Date.now();
     lastPointerDownX = e.clientX;
     lastPointerDownY = e.clientY;
-    currentTapId++;
-    realClickFiredForCurrentTap = false;
+    
+    if (isDebugMode) {
+      console.log('[DOM Bridge] Pointer down at', e.clientX.toFixed(0), e.clientY.toFixed(0));
+    }
   };
   
   const handlePointerUp = (e: PointerEvent) => {
-    if (!appFullyLoaded) return;
+    if (!appFullyLoaded || !lastPointerDownTarget) return;
     
     const timeSinceDown = Date.now() - lastPointerDownTime;
-    if (timeSinceDown > TAP_THRESHOLD_MS) {
-      lastPointerDownTarget = null;
-      return;
-    }
-    
-    // Check if this was a scroll gesture (finger moved too much)
     const movementX = Math.abs(e.clientX - lastPointerDownX);
     const movementY = Math.abs(e.clientY - lastPointerDownY);
     const totalMovement = Math.sqrt(movementX * movementX + movementY * movementY);
     
-    if (totalMovement > SCROLL_MOVEMENT_THRESHOLD) {
-      if (isDebugMode) {
-        console.log('[DOM Bridge] Scroll detected, movement:', totalMovement.toFixed(1), 'px - ignoring as tap');
+    if (isDebugMode) {
+      console.log('[DOM Bridge] Pointer up - movement:', totalMovement.toFixed(1), 'px, time:', timeSinceDown, 'ms, scrolling:', isScrolling);
+    }
+    
+    // Reject if: took too long, moved too much, or currently scrolling
+    if (timeSinceDown > TAP_THRESHOLD_MS || totalMovement > SCROLL_MOVEMENT_THRESHOLD || isScrolling) {
+      if (isDebugMode && (totalMovement > SCROLL_MOVEMENT_THRESHOLD || isScrolling)) {
+        console.log('[DOM Bridge] Rejected as scroll gesture');
       }
       lastPointerDownTarget = null;
       return;
     }
     
     const target = e.target as HTMLElement;
-    const thisTapId = currentTapId;
     
-    // Verify tap (not drag)
-    if (lastPointerDownTarget) {
-      const isOnSameElement = target === lastPointerDownTarget || 
-                              target.contains(lastPointerDownTarget) || 
-                              lastPointerDownTarget.contains(target);
-      if (!isOnSameElement) {
-        lastPointerDownTarget = null;
-        return;
-      }
+    // Verify we're still on same element (or child/parent)
+    const isOnSameElement = target === lastPointerDownTarget || 
+                            target.contains(lastPointerDownTarget) || 
+                            lastPointerDownTarget.contains(target);
+    if (!isOnSameElement) {
+      lastPointerDownTarget = null;
+      return;
     }
     
-    const tapTarget = lastPointerDownTarget || target;
+    const tapTarget = lastPointerDownTarget;
+    lastPointerDownTarget = null;
     
-    // First check for data-action or data-modal-type - handle directly
-    let currentElement: HTMLElement | null = tapTarget;
-    while (currentElement && currentElement !== document.body) {
-      const action = currentElement.getAttribute('data-action');
-      if (action && actionHandlers.has(action)) {
-        if (isDebugMode) {
-          console.log('[DOM Bridge] Invoking action via pointerup:', action);
-        }
-        try {
-          actionHandlers.get(action)!(currentElement, e);
-        } catch (error) {
-          console.error('[DOM Bridge] Error:', error);
-        }
-        lastPointerDownTarget = null;
-        return;
-      }
-      
-      const modalType = currentElement.getAttribute('data-modal-type');
-      if (modalType && globalModalOpener) {
-        const section = currentElement.getAttribute('data-modal-section') || 'home';
-        const vortId = currentElement.getAttribute('data-vort-id');
-        if (isDebugMode) {
-          console.log('[DOM Bridge] Opening modal via pointerup:', modalType);
-        }
-        try {
-          globalModalOpener(modalType, section, vortId ? parseInt(vortId) : undefined);
-        } catch (error) {
-          console.error('[DOM Bridge] Error:', error);
-        }
-        lastPointerDownTarget = null;
-        return;
-      }
-      
-      currentElement = currentElement.parentElement;
+    // First try data-action or data-modal-type
+    if (invokeElement(tapTarget, e)) {
+      return;
     }
     
-    // Check if tap target is inside a bridge container
+    // Check if inside a bridge container
     const bridgeContainer = tapTarget.closest('[data-bridge-container]');
     if (!bridgeContainer) {
-      lastPointerDownTarget = null;
       return;
     }
     
-    // Find the closest interactive element from the tap target
+    // Find closest interactive element
     const interactiveElement = tapTarget.closest(INTERACTIVE_SELECTORS) as HTMLElement | null;
     if (!interactiveElement || !bridgeContainer.contains(interactiveElement)) {
-      lastPointerDownTarget = null;
       return;
     }
     
-    // Wait for grace period to see if real click fires
-    setTimeout(() => {
-      if (thisTapId !== currentTapId) {
-        return; // A new tap started, ignore this one
-      }
-      
-      if (realClickFiredForCurrentTap) {
-        if (isDebugMode) {
-          console.log('[DOM Bridge] Real click fired, skipping synthetic');
-        }
-        return;
-      }
-      
-      // No real click fired - dispatch synthetic click
-      if (isDebugMode) {
-        console.log('[DOM Bridge] No real click, dispatching synthetic on:', 
-          interactiveElement.tagName, interactiveElement.className?.slice?.(0, 30) || '');
-      }
-      
-      const syntheticClick = new MouseEvent('click', {
-        bubbles: true,
-        cancelable: true,
-        view: window,
-        clientX: e.clientX,
-        clientY: e.clientY
-      });
-      
-      interactiveElement.dispatchEvent(syntheticClick);
-    }, CLICK_GRACE_PERIOD_MS);
+    // Use native .click() method - more reliable than dispatchEvent
+    if (isDebugMode) {
+      console.log('[DOM Bridge] Invoking native click on:', interactiveElement.tagName, 
+        interactiveElement.className?.toString().slice(0, 40) || '');
+    }
     
-    lastPointerDownTarget = null;
+    // Small delay to let React's normal click fire first
+    setTimeout(() => {
+      interactiveElement.click();
+    }, 0);
   };
   
-  // Attach listeners
-  document.addEventListener('click', handleRealClick, false);
-  document.addEventListener('click', handleBridgeClick, true);
-  document.addEventListener('touchend', handleBridgeClick, true);
-  document.addEventListener('pointerdown', handlePointerDown, true);
-  document.addEventListener('pointerup', handlePointerUp, true);
+  // Attach listeners with capture phase for early interception
+  const attachListeners = () => {
+    document.addEventListener('pointerdown', handlePointerDown, { capture: true, passive: true });
+    document.addEventListener('pointerup', handlePointerUp, { capture: true, passive: true });
+    document.addEventListener('scroll', handleScroll, { capture: true, passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
+  };
   
-  // Re-attach periodically
-  setInterval(() => {
-    document.removeEventListener('click', handleRealClick, false);
-    document.removeEventListener('click', handleBridgeClick, true);
-    document.removeEventListener('touchend', handleBridgeClick, true);
+  const detachListeners = () => {
     document.removeEventListener('pointerdown', handlePointerDown, true);
     document.removeEventListener('pointerup', handlePointerUp, true);
-    document.addEventListener('click', handleRealClick, false);
-    document.addEventListener('click', handleBridgeClick, true);
-    document.addEventListener('touchend', handleBridgeClick, true);
-    document.addEventListener('pointerdown', handlePointerDown, true);
-    document.addEventListener('pointerup', handlePointerUp, true);
-  }, 5000);
+    document.removeEventListener('scroll', handleScroll, true);
+    window.removeEventListener('scroll', handleScroll);
+  };
   
-  // Re-attach on visibility change
+  attachListeners();
+  
+  // Re-attach on visibility change (app resume)
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
       if (isDebugMode) {
-        console.log('[DOM Bridge] Page resumed - re-attaching listeners');
+        console.log('[DOM Bridge] Page resumed from background - refreshing listeners');
       }
-      document.removeEventListener('click', handleRealClick, false);
-      document.removeEventListener('click', handleBridgeClick, true);
-      document.removeEventListener('touchend', handleBridgeClick, true);
-      document.removeEventListener('pointerdown', handlePointerDown, true);
-      document.removeEventListener('pointerup', handlePointerUp, true);
-      document.addEventListener('click', handleRealClick, false);
-      document.addEventListener('click', handleBridgeClick, true);
-      document.addEventListener('touchend', handleBridgeClick, true);
-      document.addEventListener('pointerdown', handlePointerDown, true);
-      document.addEventListener('pointerup', handlePointerUp, true);
+      
+      // Force re-attach listeners
+      detachListeners();
+      
+      // Small delay before re-attaching to let WebView stabilize
+      setTimeout(() => {
+        attachListeners();
+        if (isDebugMode) {
+          console.log('[DOM Bridge] Listeners re-attached after resume');
+        }
+      }, 100);
     }
   });
+  
+  // Periodic refresh as backup
+  setInterval(() => {
+    detachListeners();
+    attachListeners();
+  }, 10000);
 }
 
 if (typeof window !== 'undefined') {
