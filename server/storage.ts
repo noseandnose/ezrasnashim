@@ -122,6 +122,7 @@ export interface IStorage {
   getTehillimChainBySlug(slug: string): Promise<TehillimChain | null>;
   searchTehillimChains(query: string): Promise<TehillimChain[]>;
   getRandomTehillimChain(): Promise<TehillimChain | null>;
+  getActiveTehillimChainCount(): Promise<number>;
   getTehillimChainStats(chainId: number): Promise<{totalSaid: number; booksCompleted: number; currentlyReading: number; available: number}>;
   startChainReading(chainId: number, psalmNumber: number, deviceId: string): Promise<TehillimChainReading>;
   completeChainReading(chainId: number, psalmNumber: number, deviceId: string): Promise<TehillimChainReading | null>;
@@ -784,6 +785,13 @@ export class DatabaseStorage implements IStorage {
     return chains[Math.floor(Math.random() * chains.length)];
   }
 
+  async getActiveTehillimChainCount(): Promise<number> {
+    const result = await db.select({ count: sql<number>`count(*)` })
+      .from(tehillimChains)
+      .where(eq(tehillimChains.isActive, true));
+    return Number(result[0]?.count || 0);
+  }
+
   async getTehillimChainStats(chainId: number): Promise<{totalSaid: number; booksCompleted: number; currentlyReading: number; available: number}> {
     // Get total completed
     const completedResult = await db.select({ count: sql<number>`count(*)` })
@@ -855,6 +863,8 @@ export class DatabaseStorage implements IStorage {
       ))
       .limit(1);
     
+    let completedReading: TehillimChainReading | null = null;
+    
     if (!reading) {
       // If no active reading found, create a completed one
       const [newReading] = await db.insert(tehillimChainReadings).values({
@@ -863,16 +873,56 @@ export class DatabaseStorage implements IStorage {
         deviceId,
         status: 'completed',
       }).returning();
-      return newReading;
+      completedReading = newReading;
+    } else {
+      // Update existing reading
+      const [updatedReading] = await db.update(tehillimChainReadings)
+        .set({ status: 'completed', completedAt: new Date() })
+        .where(eq(tehillimChainReadings.id, reading.id))
+        .returning();
+      completedReading = updatedReading;
     }
     
-    // Update existing reading
-    const [updatedReading] = await db.update(tehillimChainReadings)
-      .set({ status: 'completed', completedAt: new Date() })
-      .where(eq(tehillimChainReadings.id, reading.id))
-      .returning();
+    // Track analytics event for chain tehillim completion
+    try {
+      // Get chain info for analytics
+      const [chain] = await db.select().from(tehillimChains).where(eq(tehillimChains.id, chainId));
+      
+      // Track as tehillim_complete event
+      await db.insert(analyticsEvents).values({
+        eventType: 'tehillim_complete',
+        eventData: {
+          perekNumber: psalmNumber,
+          chainId: chainId,
+          chainName: chain?.name || 'Unknown',
+          chainReason: chain?.reason || 'Unknown',
+          isChainTehillim: true
+        },
+        sessionId: deviceId,
+        analyticsDate: formatDate(new Date())
+      });
+      
+      // Track as modal_complete for mitzvah counting
+      await db.insert(analyticsEvents).values({
+        eventType: 'modal_complete',
+        eventData: {
+          modalType: 'chain-tehillim',
+          perekNumber: psalmNumber,
+          chainId: chainId,
+          chainName: chain?.name || 'Unknown'
+        },
+        sessionId: deviceId,
+        analyticsDate: formatDate(new Date())
+      });
+      
+      // Recalculate daily stats
+      const today = formatDate(new Date());
+      await this.recalculateDailyStats(today);
+    } catch (analyticsError) {
+      console.error('Failed to track chain tehillim analytics:', analyticsError);
+    }
     
-    return updatedReading;
+    return completedReading;
   }
 
   async getAvailablePsalmForChain(chainId: number, excludeDeviceId?: string): Promise<number | null> {

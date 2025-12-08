@@ -2477,6 +2477,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get active campaign (chain) count
+  app.get("/api/tehillim-chains/stats/active-count", async (req, res) => {
+    try {
+      const count = await storage.getActiveTehillimChainCount();
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching active chain count:", error);
+      res.json({ count: 0 });
+    }
+  });
+
   // Get a random Tehillim Chain
   app.get("/api/tehillim-chains/random", async (req, res) => {
     try {
