@@ -221,6 +221,7 @@ export const brochas = pgTable("brochas", {
 export const sponsors = pgTable("sponsors", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  email: text("email"), // Donor email for receipts and prize contact
   hebrewName: text("hebrew_name"),
   sponsorshipDate: text("sponsorship_date").notNull(), // Store as YYYY-MM-DD string
   inHonorMemoryOf: text("in_honor_memory_of"), // Single line dedication text

@@ -419,7 +419,7 @@ export default function Donate() {
   const sponsorName = urlParams.get('sponsor') || '';
   const dedication = urlParams.get('dedication') || '';
   const message = urlParams.get('message') || '';
-  //const emailFromUrl = urlParams.get('email') || '';
+  const donorEmail = urlParams.get('email') || '';
 
   
   // Function to mark individual button as complete (from tzedaka-section)
@@ -469,6 +469,7 @@ export default function Donate() {
           buttonType: buttonType,
           donationType: donationType,
           sponsorName: sponsorName,
+          email: donorEmail,
           dedication: dedication,
           message: message,
           sessionId: sessionId
@@ -492,6 +493,7 @@ export default function Donate() {
               buttonType,
               donationType: donationType,
               sponsorName: sponsorName || 'Anonymous',
+              email: donorEmail || null,
               dedication: dedication || null,
               message: message || null
             });

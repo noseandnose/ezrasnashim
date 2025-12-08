@@ -3631,13 +3631,13 @@ function SpecialTehillimFullscreenContent({ language: _language, fontSize: _font
   return (
     <div className="space-y-4">
       {/* Tab Navigation */}
-      <div className="flex bg-warm-gray/10 rounded-xl p-1 mb-4">
+      <div className="flex bg-blush/20 rounded-xl p-1 mb-4">
         <button
           onClick={() => setTehillimActiveTab('all')}
           className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
             tehillimActiveTab === 'all'
-              ? 'bg-white text-black shadow-sm'
-              : 'text-black/60 hover:text-black'
+              ? 'bg-white text-black shadow-md border border-blush/30'
+              : 'text-black/50 hover:text-black/70'
           }`}
         >
           Sefer Tehillim
@@ -3646,8 +3646,8 @@ function SpecialTehillimFullscreenContent({ language: _language, fontSize: _font
           onClick={() => setTehillimActiveTab('special')}
           className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
             tehillimActiveTab === 'special'
-              ? 'bg-white text-black shadow-sm'
-              : 'text-black/60 hover:text-black'
+              ? 'bg-white text-black shadow-md border border-blush/30'
+              : 'text-black/50 hover:text-black/70'
           }`}
         >
           Special Occasions
@@ -3883,13 +3883,13 @@ function SpecialTehillimModal() {
       </DialogHeader>
 
       {/* Tab Navigation */}
-      <div className="flex bg-warm-gray/10 rounded-xl p-1 mb-4">
+      <div className="flex bg-blush/20 rounded-xl p-1 mb-4">
         <button
           onClick={() => setTehillimActiveTab('all')}
           className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
             tehillimActiveTab === 'all'
-              ? 'bg-white text-black shadow-sm'
-              : 'text-black/60 hover:text-black'
+              ? 'bg-white text-black shadow-md border border-blush/30'
+              : 'text-black/50 hover:text-black/70'
           }`}
         >
           Sefer Tehillim
@@ -3898,8 +3898,8 @@ function SpecialTehillimModal() {
           onClick={() => setTehillimActiveTab('special')}
           className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
             tehillimActiveTab === 'special'
-              ? 'bg-white text-black shadow-sm'
-              : 'text-black/60 hover:text-black'
+              ? 'bg-white text-black shadow-md border border-blush/30'
+              : 'text-black/50 hover:text-black/70'
           }`}
         >
           Special Occasions

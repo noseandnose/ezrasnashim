@@ -2478,11 +2478,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Donation completion handler
   app.post("/api/donation-complete", async (req, res) => {
     try {
-      const { buttonType, donationType, sponsorName, dedication, message } = req.body;
+      const { buttonType, donationType, sponsorName, dedication, message, email } = req.body;
       
       console.log('📋 Donation completion request received:', {
         donationType,
         sponsorName,
+        email,
         dedication,
         message,
         hasName: !!sponsorName,
@@ -2501,6 +2502,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         const sponsorData = {
           name: sponsorName,
+          email: email || null,
           sponsorshipDate: today,
           inHonorMemoryOf: dedication || null,
           message: message || null,
