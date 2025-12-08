@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useRoute, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Share2, BookOpen, Users, CheckCircle2, Clock, ChevronLeft, Heart, Briefcase, Baby, Home, Star, Shield, Sparkles, HeartPulse } from "lucide-react";
+import { Share2, ChevronLeft, Heart, Briefcase, Baby, Home, Star, Shield, Sparkles, HeartPulse } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { FloatingSettings } from "@/components/ui/floating-settings";
@@ -113,17 +113,19 @@ export default function ChainPage() {
         description: "May all your tefillas be answered.",
       });
       
-      // Force immediate refetch of stats (not just invalidate)
-      await queryClient.refetchQueries({ queryKey: ['/api/tehillim-chains', slug, 'stats'] });
-      await queryClient.refetchQueries({ queryKey: ['/api/tehillim-chains/stats/total'] });
-      
-      // Automatically load the next available psalm
+      // Refetch stats and load next psalm in parallel for speed
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/next-available?deviceId=${deviceId}`
-        );
-        if (response.ok) {
-          const data = await response.json();
+        const [, nextPsalmResponse] = await Promise.all([
+          Promise.all([
+            queryClient.refetchQueries({ queryKey: ['/api/tehillim-chains', slug, 'stats'] }),
+            queryClient.refetchQueries({ queryKey: ['/api/tehillim-chains/stats/total'] }),
+          ]),
+          fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/next-available?deviceId=${deviceId}`)
+        ]);
+        
+        // Process next psalm response
+        if (nextPsalmResponse.ok) {
+          const data = await nextPsalmResponse.json();
           setCurrentPsalm(data.psalmNumber);
           setIsReading(true);
           startReadingMutation.mutate(data.psalmNumber);
@@ -133,6 +135,7 @@ export default function ChainPage() {
           setCurrentPsalm(null);
         }
       } catch {
+        // Network error - reset state gracefully
         setIsReading(false);
         setCurrentPsalm(null);
       }
@@ -337,25 +340,21 @@ export default function ChainPage() {
         </div>
         
         <div className={`grid gap-2 ${visibleStats === 3 ? 'grid-cols-3 max-w-xs mx-auto' : 'grid-cols-4'}`}>
-          <div className="bg-white rounded-xl p-2 text-center border border-blush/10">
-            <BookOpen size={16} className="text-blush mx-auto mb-1" />
+          <div className="bg-white rounded-xl px-2 py-1.5 text-center border border-blush/10">
             <p className="platypi-bold text-sm text-black">{stats?.totalCompleted || 0}</p>
-            <p className="platypi-regular text-[10px] text-black/60">Tehillim Said</p>
+            <p className="platypi-regular text-[10px] text-black/60">Said</p>
           </div>
           {showBooksCompleted && (
-            <div className="bg-white rounded-xl p-2 text-center border border-blush/10">
-              <CheckCircle2 size={16} className="text-sage mx-auto mb-1" />
+            <div className="bg-white rounded-xl px-2 py-1.5 text-center border border-blush/10">
               <p className="platypi-bold text-sm text-black">{stats?.booksCompleted || 0}</p>
               <p className="platypi-regular text-[10px] text-black/60">Books</p>
             </div>
           )}
-          <div className="bg-white rounded-xl p-2 text-center border border-blush/10">
-            <Users size={16} className="text-lavender mx-auto mb-1" />
+          <div className="bg-white rounded-xl px-2 py-1.5 text-center border border-blush/10">
             <p className="platypi-bold text-sm text-black">{stats?.currentlyReading || 0}</p>
             <p className="platypi-regular text-[10px] text-black/60">Reading</p>
           </div>
-          <div className="bg-white rounded-xl p-2 text-center border border-blush/10">
-            <Clock size={16} className="text-gold mx-auto mb-1" />
+          <div className="bg-white rounded-xl px-2 py-1.5 text-center border border-blush/10">
             <p className="platypi-bold text-sm text-black">{stats?.available || 150}</p>
             <p className="platypi-regular text-[10px] text-black/60">Available</p>
           </div>
