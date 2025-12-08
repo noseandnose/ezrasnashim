@@ -92,15 +92,33 @@ export default function ChainPage() {
         psalmNumber,
       });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast({
         title: "Tehillim Completed!",
-        description: "May your prayers be answered.",
+        description: "May all your tefillas be answered.",
       });
-      setIsReading(false);
-      setCurrentPsalm(null);
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains', slug, 'stats'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/stats/total'] });
+      
+      // Automatically load the next available psalm
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/next-available?deviceId=${deviceId}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setCurrentPsalm(data.psalmNumber);
+          setIsReading(true);
+          startReadingMutation.mutate(data.psalmNumber);
+        } else {
+          // No more psalms available
+          setIsReading(false);
+          setCurrentPsalm(null);
+        }
+      } catch {
+        setIsReading(false);
+        setCurrentPsalm(null);
+      }
     },
   });
 
