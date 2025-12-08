@@ -206,11 +206,8 @@ export default function Statistics() {
     maariv: "Maariv",
     nishmas: "Nishmas",
     "birkat-hamazon": "Birkat Hamazon",
-    "global-tehillim-chain": "Global Tehillim Chain",
-    "tehillim-text": "Global Tehillim Chain", // Legacy key for existing data
-    "chain-tehillim": "Tehillim Campaigns",
-    "special-tehillim": "Special Tehillim",
-    "individual-tehillim": "Individual Tehillim", 
+    "tehillim": "Tehillim",
+    "special-tehillim": "Special Tehillim", 
     "nishmas-campaign": "Nishmas Kol Chai",
     "al-hamichiya": "Al Hamichiya",
     "individual-prayer": "Individual Prayer",
@@ -485,21 +482,19 @@ export default function Statistics() {
                   {(() => {
                     const modalCompletions = (currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {};
                     
-                    // Create a processed entries array with individual tehillim aggregated
+                    // Create a processed entries array with tehillim aggregated
                     const processedEntries: Array<[string, number]> = [];
-                    let individualTehillimTotal = 0;
+                    let tehillimTotal = 0;
                     let womensPrayerTotal = 0;
+                    let brochasTotal = 0;
 
                     // Process all modal completion entries
-                    let globalTehillimTotal = 0;
-                    let brochasTotal = 0;
                     Object.entries(modalCompletions).forEach(([modalType, count]) => {
-                      if (modalType.startsWith('individual-tehillim-')) {
-                        // Aggregate individual tehillim completions
-                        individualTehillimTotal += (count as number) || 0;
-                      } else if (modalType === 'global-tehillim-chain' || modalType === 'tehillim-text') {
-                        // Aggregate global tehillim from both keys
-                        globalTehillimTotal += (count as number) || 0;
+                      if (modalType.startsWith('individual-tehillim-') || modalType === 'individual-tehillim' ||
+                          modalType === 'global-tehillim-chain' || modalType === 'tehillim-text' ||
+                          modalType === 'chain-tehillim') {
+                        // Aggregate all tehillim types into one
+                        tehillimTotal += (count as number) || 0;
                       } else if (modalType === 'tzedaka' || modalType === 'donate') {
                         // Skip tzedaka modals - we'll aggregate them separately with tzedakaActs
                       } else if (modalType.startsWith('womens-prayer-')) {
@@ -516,14 +511,9 @@ export default function Statistics() {
                       }
                     });
                     
-                    // Add aggregated individual tehillim if there are any
-                    if (individualTehillimTotal > 0) {
-                      processedEntries.push(['individual-tehillim', individualTehillimTotal]);
-                    }
-                    
-                    // Add aggregated global tehillim if there are any
-                    if (globalTehillimTotal > 0) {
-                      processedEntries.push(['global-tehillim-chain', globalTehillimTotal]);
+                    // Add aggregated tehillim if there are any
+                    if (tehillimTotal > 0) {
+                      processedEntries.push(['tehillim', tehillimTotal]);
                     }
 
                     if (womensPrayerTotal > 0) {
