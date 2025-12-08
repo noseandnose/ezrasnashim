@@ -208,7 +208,7 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
   const directAudioUrl = getDirectAudioUrl(audioUrl);
 
   return (
-    <div className="bg-gray-50 rounded-2xl p-4 mb-4 audio-controls border border-gray-200">
+    <div className="bg-gray-50 rounded-2xl p-4 mb-4 audio-controls border border-gray-200" data-bridge-container>
       <audio 
         ref={audioRef} 
         src={directAudioUrl} 

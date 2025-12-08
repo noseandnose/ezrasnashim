@@ -69,6 +69,7 @@ export default function BottomNavigation({
   return (
     <nav
       data-bottom-nav
+      data-bridge-container
       className="nav-extended fixed left-0 right-0 mx-auto w-full max-w-md bg-gradient-soft backdrop-blur-sm border-t border-rose-blush/15 shadow-2xl rounded-t-3xl transition-gentle z-50"
       style={{
         bottom: "var(--nav-offset, 0px)",

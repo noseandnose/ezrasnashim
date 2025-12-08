@@ -104,7 +104,7 @@ export default function TableSection() {
 
 
   return (
-    <div className="pb-20">
+    <div className="pb-20" data-bridge-container>
       
       {/* Main Table Section - Connected to top bar - Only This Shabbos */}
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">

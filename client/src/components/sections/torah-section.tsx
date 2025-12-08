@@ -194,7 +194,7 @@ export default function TorahSection({}: TorahSectionProps) {
   ];
 
   return (
-    <div className="pb-20">
+    <div className="pb-20" data-bridge-container>
       
       {/* Main Torah Section - Connected to top bar */}
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">

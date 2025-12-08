@@ -67,7 +67,7 @@ export default function ShopSection() {
   ];
 
   return (
-    <div className="p-2 space-y-1">
+    <div className="p-2 space-y-1" data-bridge-container>
       {/* Header */}
       <div className="text-center">
         <h2 className="platypi-bold text-lg text-warm-gray mb-1 tracking-wide">Jewish Shop</h2>
