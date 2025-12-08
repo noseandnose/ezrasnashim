@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useRoute, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Share2, BookOpen, Users, CheckCircle2, Clock, ChevronLeft } from "lucide-react";
+import { Share2, BookOpen, Users, CheckCircle2, Clock, ChevronLeft, Heart, Briefcase, Baby, Home, Star, Shield, Sparkles, HeartPulse } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { FloatingSettings } from "@/components/ui/floating-settings";
@@ -14,6 +14,18 @@ interface ChainStats {
   currentlyReading: number;
   available: number;
 }
+
+const getReasonIcon = (reason: string) => {
+  const lowerReason = reason.toLowerCase();
+  if (lowerReason.includes('refuah') || lowerReason.includes('health')) return HeartPulse;
+  if (lowerReason.includes('shidduch') || lowerReason.includes('match')) return Heart;
+  if (lowerReason.includes('parnassa') || lowerReason.includes('livelihood')) return Briefcase;
+  if (lowerReason.includes('children') || lowerReason.includes('child')) return Baby;
+  if (lowerReason.includes('shalom') || lowerReason.includes('peace')) return Home;
+  if (lowerReason.includes('success')) return Star;
+  if (lowerReason.includes('protection')) return Shield;
+  return Sparkles;
+};
 
 interface TehillimContent {
   hebrewText: string;
@@ -293,22 +305,22 @@ export default function ChainPage() {
 
   return (
     <div className="fixed inset-0 bg-gradient-soft flex flex-col z-50 overflow-hidden">
-      <div className="flex items-center justify-between p-4 border-b border-blush/10 bg-white/80 backdrop-blur-sm safe-area-top">
+      <div className="flex items-center p-4 border-b border-blush/10 bg-white/80 backdrop-blur-sm safe-area-top">
         <button
           onClick={() => setLocation('/')}
-          className="p-2 rounded-full hover:bg-blush/10 transition-colors"
+          className="p-2 rounded-full hover:bg-blush/10 transition-colors flex-shrink-0"
           data-testid="button-back"
         >
           <ChevronLeft size={24} className="text-black" />
         </button>
         
-        <div className="flex-1 text-center">
-          <h1 className="platypi-bold text-lg text-black truncate px-2">{chain.name}</h1>
+        <div className="flex-1 min-w-0 text-center px-2">
+          <h1 className="platypi-bold text-lg text-black truncate">{chain.name}</h1>
         </div>
         
         <button
           onClick={handleShare}
-          className="p-2 rounded-full hover:bg-blush/10 transition-colors"
+          className="p-2 rounded-full hover:bg-blush/10 transition-colors flex-shrink-0"
           data-testid="button-share"
         >
           <Share2 size={20} className="text-blush" />
@@ -316,7 +328,13 @@ export default function ChainPage() {
       </div>
 
       <div className="p-4 bg-white/50 border-b border-blush/10">
-        <p className="platypi-regular text-sm text-black/70 text-center mb-3">{chain.reason}</p>
+        <div className="flex items-center justify-center gap-2 mb-3">
+          {(() => {
+            const ReasonIcon = getReasonIcon(chain.reason);
+            return <ReasonIcon size={16} className="text-blush" />;
+          })()}
+          <p className="platypi-regular text-sm text-black/70">{chain.reason}</p>
+        </div>
         
         <div className={`grid gap-2 ${visibleStats === 3 ? 'grid-cols-3 max-w-xs mx-auto' : 'grid-cols-4'}`}>
           <div className="bg-white rounded-xl p-2 text-center border border-blush/10">

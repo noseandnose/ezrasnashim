@@ -1,4 +1,4 @@
-import { HandHeart, Plus, Heart, Star, Compass, ArrowRight, Sunrise, Sun, Moon, Stars, Search, Link2, ChevronRight, Stethoscope, Users, Shuffle } from "lucide-react";
+import { HandHeart, Plus, Heart, Star, Compass, ArrowRight, Sunrise, Sun, Moon, Stars, Search, Link2, ChevronRight, Stethoscope, Users, Shuffle, Briefcase, Baby, Home, Shield, Sparkles, HeartPulse } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -17,6 +17,18 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
 import type { TehillimChain } from "@shared/schema";
+
+const getReasonIcon = (reason: string) => {
+  const lowerReason = reason.toLowerCase();
+  if (lowerReason.includes('refuah') || lowerReason.includes('health')) return HeartPulse;
+  if (lowerReason.includes('shidduch') || lowerReason.includes('match')) return Heart;
+  if (lowerReason.includes('parnassa') || lowerReason.includes('livelihood')) return Briefcase;
+  if (lowerReason.includes('children') || lowerReason.includes('child')) return Baby;
+  if (lowerReason.includes('shalom') || lowerReason.includes('peace')) return Home;
+  if (lowerReason.includes('success')) return Star;
+  if (lowerReason.includes('protection')) return Shield;
+  return Sparkles;
+};
 
 export default function TefillaSection({ onSectionChange: _onSectionChange }: TefillaSectionProps) {
   const { openModal } = useModalStore();
@@ -438,19 +450,25 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
               
               {!isSearching && searchResults.length > 0 && (
                 <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {searchResults.map((chain) => (
-                    <button
-                      key={chain.id}
-                      onClick={() => setLocation(`/c/${chain.slug}`)}
-                      className="w-full p-3 bg-white rounded-xl border border-blush/20 hover:bg-blush/5 transition-all flex items-center justify-between"
-                    >
-                      <div className="text-left">
-                        <p className="platypi-medium text-sm text-black">{chain.name}</p>
-                        <p className="platypi-regular text-xs text-black/60">{chain.reason}</p>
-                      </div>
-                      <ChevronRight size={16} className="text-blush" />
-                    </button>
-                  ))}
+                  {searchResults.map((chain) => {
+                    const ReasonIcon = getReasonIcon(chain.reason);
+                    return (
+                      <button
+                        key={chain.id}
+                        onClick={() => setLocation(`/c/${chain.slug}`)}
+                        className="w-full p-3 bg-white rounded-xl border border-blush/20 hover:bg-blush/5 transition-all flex items-center justify-between"
+                      >
+                        <div className="text-left">
+                          <p className="platypi-medium text-sm text-black">{chain.name}</p>
+                          <div className="flex items-center gap-1.5">
+                            <ReasonIcon size={12} className="text-blush/70" />
+                            <p className="platypi-regular text-xs text-black/60">{chain.reason}</p>
+                          </div>
+                        </div>
+                        <ChevronRight size={16} className="text-blush" />
+                      </button>
+                    );
+                  })}
                 </div>
               )}
               
