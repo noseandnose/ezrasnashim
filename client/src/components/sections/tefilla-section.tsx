@@ -2,12 +2,13 @@ import { HandHeart, Plus, User, AlertCircle, Heart, Star, Compass, ArrowRight, B
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
+import { registerClickHandler } from "@/utils/dom-event-bridge";
 
 interface TefillaSectionProps {
   onSectionChange?: (section: Section) => void;
 }
 import { useJewishTimes } from "@/hooks/use-jewish-times";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -476,8 +477,32 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     }
   ];
 
+  // Ref callback for global tehillim button (FlutterFlow WebView fix)
+  const globalTehillimButtonRef = useCallback((element: HTMLButtonElement | null) => {
+    if (element) {
+      registerClickHandler(element, () => {
+        const event = new CustomEvent('openGlobalTehillimFullscreen', { 
+          detail: { nextPerek: progress?.currentPerek || 59 } 
+        });
+        window.dispatchEvent(event);
+      });
+    }
+  }, [progress?.currentPerek]);
 
-
+  // Ref callback for compass button (FlutterFlow WebView fix)
+  const compassButtonRef = useCallback((element: HTMLButtonElement | null) => {
+    if (element) {
+      registerClickHandler(element, () => {
+        const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
+          detail: {
+            title: 'The Kotel Compass',
+            contentType: 'compass'
+          }
+        });
+        window.dispatchEvent(fullscreenEvent);
+      });
+    }
+  }, []);
 
 
   return (
@@ -567,6 +592,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             </div>
           ) : (
             <button
+              ref={globalTehillimButtonRef}
               onClick={() => {
                 // Dispatch custom event to open global tehillim directly in fullscreen
                 const event = new CustomEvent('openGlobalTehillimFullscreen', { 
@@ -815,6 +841,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
         {/* The Kotel Compass Section */}
         <div className="bg-gradient-soft rounded-3xl p-4 shadow-lg">
           <button
+            ref={compassButtonRef}
             onClick={() => {
               const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
                 detail: {

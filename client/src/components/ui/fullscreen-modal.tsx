@@ -7,7 +7,7 @@ import { useLocation } from 'wouter';
 import { MiniCompassModal } from '@/components/modals/mini-compass-modal';
 import { ensureSafeAreaVariables } from '@/hooks/use-safe-area';
 import { getHebrewFontClass } from '@/lib/hebrewUtils';
-import { registerAction, unregisterAction } from '@/utils/dom-event-bridge';
+import { registerAction, unregisterAction, registerClickHandler } from '@/utils/dom-event-bridge';
 
 // Global counter and state to track active fullscreen modals
 // Prevents race conditions when closing one modal while another opens
@@ -185,6 +185,43 @@ export function FullscreenModal({
       unregisterAction(actionId);
     };
   }, [actionId, safeClose]);
+  
+  // Ref callback for close buttons to register with WeakMap (FlutterFlow fix)
+  const closeButtonRef = useCallback((element: HTMLButtonElement | null) => {
+    if (element) {
+      registerClickHandler(element, () => {
+        safeClose();
+      });
+    }
+  }, [safeClose]);
+  
+  // Ref callback for logo/home button
+  const logoButtonRef = useCallback((element: HTMLButtonElement | null) => {
+    if (element) {
+      registerClickHandler(element, () => {
+        onClose();
+        setLocation('/');
+      });
+    }
+  }, [onClose, setLocation]);
+  
+  // Ref callback for compass button
+  const compassButtonRef = useCallback((element: HTMLButtonElement | null) => {
+    if (element) {
+      registerClickHandler(element, () => {
+        setShowCompass(true);
+      });
+    }
+  }, []);
+  
+  // Ref callback for info button
+  const infoButtonRef = useCallback((element: HTMLButtonElement | null) => {
+    if (element && onInfoClick) {
+      registerClickHandler(element, () => {
+        onInfoClick(!showInfoPopover);
+      });
+    }
+  }, [onInfoClick, showInfoPopover]);
 
   // Use useLayoutEffect to ensure new modal increments counter before old modal's cleanup runs
   // This prevents race conditions in chained modal scenarios
@@ -399,6 +436,7 @@ export function FullscreenModal({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <button
+                ref={logoButtonRef}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -418,6 +456,7 @@ export function FullscreenModal({
 
               {showCompassButton && (
                 <button
+                  ref={compassButtonRef}
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -441,6 +480,7 @@ export function FullscreenModal({
                 <Popover open={showInfoPopover} onOpenChange={(open) => onInfoClick?.(open)}>
                   <PopoverTrigger asChild>
                     <button
+                      ref={infoButtonRef}
                       className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
                       aria-label="Prayer timing information"
                       type="button"
@@ -459,6 +499,7 @@ export function FullscreenModal({
                 </Popover>
               )}
               <button
+                ref={closeButtonRef}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -479,6 +520,7 @@ export function FullscreenModal({
       ) : (
         /* Compact close button for headerless modals */
         <button
+          ref={closeButtonRef}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
