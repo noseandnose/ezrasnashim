@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { registerAction } from "@/utils/dom-event-bridge";
 
 interface AudioPlayerProps {
   title: string;
@@ -210,17 +209,6 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
   }, []);
 
   const directAudioUrl = getDirectAudioUrl(audioUrl);
-  
-  // Generate a stable unique ID for this audio player instance
-  const playerIdRef = useRef(`audio-player-${Math.random().toString(36).substr(2, 9)}`);
-  const actionName = `toggle-audio-${playerIdRef.current}`;
-  
-  // Register the action with the bridge for FlutterFlow resilience
-  useEffect(() => {
-    registerAction(actionName, () => {
-      togglePlayRef.current();
-    });
-  }, [actionName]);
 
   return (
     <div className="bg-gray-50 rounded-2xl p-4 mb-4 audio-controls border border-gray-200" data-bridge-container>
@@ -243,7 +231,6 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
           disabled={audioError}
           className="bg-gradient-feminine rounded-full p-4 hover:scale-105 transition-all border-0 text-white audio-play-button disabled:opacity-50"
           style={{ WebkitTapHighlightColor: 'transparent' }}
-          data-action={actionName}
           data-testid="button-audio-play"
         >
           {isPlaying ? (
