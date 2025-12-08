@@ -849,10 +849,11 @@ export class DatabaseStorage implements IStorage {
       ))
       .limit(1);
     
-    // If there's an existing reading, mark it as completed (they moved on)
+    // If there's an existing reading, mark it as ABANDONED (not completed)
+    // Completions should ONLY happen via explicit "Complete" button click
     if (existingReading.length > 0) {
       await db.update(tehillimChainReadings)
-        .set({ status: 'completed', completedAt: new Date() })
+        .set({ status: 'abandoned' })
         .where(eq(tehillimChainReadings.id, existingReading[0].id));
     }
     
