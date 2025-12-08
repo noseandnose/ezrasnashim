@@ -24,50 +24,29 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const { isModalComplete, completedModals } = useModalCompletionStore();
   const { data: times, isLoading } = useJewishTimes();
 
-  // Prefetch brochas data to speed up loading when user clicks
+  // Lazy prefetch prayer data when browser is idle (not on mount)
   const queryClient = useQueryClient();
   
-  useQuery({
-    queryKey: ['/api/brochas/daily'],
-    staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (garbage collection time)
-  });
-
-  useQuery({
-    queryKey: ['/api/brochas/special'],
-    staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (garbage collection time)
-  });
-  
-  // Prefetch Mincha and Maariv prayers to prevent empty modals
   useEffect(() => {
-    // Prefetch Mincha prayer - uses default queryFn from queryClient
-    queryClient.prefetchQuery({
-      queryKey: ['/api/mincha/prayer'],
-      staleTime: 10 * 60 * 1000,
-      gcTime: 30 * 60 * 1000,
-    });
+    // Use requestIdleCallback to defer prefetching until browser is idle
+    const prefetchPrayers = () => {
+      const prefetchOptions = { staleTime: 10 * 60 * 1000, gcTime: 30 * 60 * 1000 };
+      queryClient.prefetchQuery({ queryKey: ['/api/brochas/daily'], ...prefetchOptions });
+      queryClient.prefetchQuery({ queryKey: ['/api/brochas/special'], ...prefetchOptions });
+      queryClient.prefetchQuery({ queryKey: ['/api/mincha/prayer'], ...prefetchOptions });
+      queryClient.prefetchQuery({ queryKey: ['/api/maariv/prayer'], ...prefetchOptions });
+      queryClient.prefetchQuery({ queryKey: ['/api/nishmas/prayer'], ...prefetchOptions });
+      queryClient.prefetchQuery({ queryKey: ['/api/morning/prayers'], ...prefetchOptions });
+    };
     
-    // Prefetch Maariv prayer - uses default queryFn from queryClient
-    queryClient.prefetchQuery({
-      queryKey: ['/api/maariv/prayer'],
-      staleTime: 10 * 60 * 1000,
-      gcTime: 30 * 60 * 1000,
-    });
-    
-    // Prefetch Nishmas prayer - uses default queryFn from queryClient
-    queryClient.prefetchQuery({
-      queryKey: ['/api/nishmas/prayer'],
-      staleTime: 10 * 60 * 1000,
-      gcTime: 30 * 60 * 1000,
-    });
-    
-    // Prefetch morning prayers - uses default queryFn from queryClient
-    queryClient.prefetchQuery({
-      queryKey: ['/api/morning/prayers'],
-      staleTime: 10 * 60 * 1000,
-      gcTime: 30 * 60 * 1000,
-    });
+    // Defer prefetching until browser is idle (fallback: 2 seconds)
+    if ('requestIdleCallback' in window) {
+      const id = requestIdleCallback(prefetchPrayers, { timeout: 3000 });
+      return () => cancelIdleCallback(id);
+    } else {
+      const id = setTimeout(prefetchPrayers, 2000);
+      return () => clearTimeout(id);
+    }
   }, [queryClient]);
 
   // Helper function to check if any individual Tehillim has been completed

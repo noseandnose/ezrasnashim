@@ -1,519 +1,295 @@
 /**
  * DOM Event Bridge - Resilient click handler for FlutterFlow WebView
  * 
- * Problem: FlutterFlow occasionally detaches React's root event delegation listener
- * during background/resume cycles, causing onClick handlers to stop firing.
+ * Problem: FlutterFlow occasionally breaks React's event delegation during background/resume.
  * 
- * Solution: Store onClick handlers in a WeakMap during render and invoke them directly
- * from pointerup, completely bypassing React's event delegation system.
+ * Solution: Direct handler invocation via WeakMap, with synthetic click fallback for unregistered elements.
+ * Fixes: Proper cleanup, no dedup window that drops clicks, proper event objects.
  */
 
 import { useEffect, useRef, useCallback } from 'react';
 import { useModalStore } from '@/lib/types';
 
-type ActionHandler = (element: HTMLElement, event: MouseEvent | TouchEvent | PointerEvent) => void;
 type ClickHandler = (event?: any) => void;
+type ModalOpener = (modalType: string, section: string, vortId?: number) => void;
 
-const actionHandlers = new Map<string, ActionHandler>();
-
-// WeakMap to store onClick handlers for direct invocation
-// This bypasses React's broken event delegation after FlutterFlow resume
+// WeakMap stores handlers - auto-cleans when elements are garbage collected
 const clickHandlerRegistry = new WeakMap<HTMLElement, ClickHandler>();
 
-// Track recent handler invocations to prevent double-firing
-// Key is element, value is timestamp of last invocation
-const recentInvocations = new WeakMap<HTMLElement, number>();
-const DEDUP_WINDOW_MS = 100; // Ignore duplicate invocations within this window
+// Global modal opener - can be set externally for legacy compatibility
+let globalModalOpenerFn: ModalOpener | null = null;
 
 /**
- * Open a modal directly using Zustand's getState() to avoid stale closures
- * This is the key fix for FlutterFlow resume - we always get fresh state
+ * Open a modal - uses global opener if set, otherwise falls back to Zustand getState()
  */
-function openModalDirect(modalType: string, section: string, vortId?: number) {
-  const { openModal } = useModalStore.getState();
-  openModal(modalType, section, undefined, vortId);
+function openModal(modalType: string, section: string, vortId?: number) {
+  if (globalModalOpenerFn) {
+    globalModalOpenerFn(modalType, section, vortId);
+  } else {
+    const { openModal } = useModalStore.getState();
+    openModal(modalType, section, undefined, vortId);
+  }
 }
 
 /**
- * Register an element's click handler for direct invocation by the bridge.
- * IMPORTANT: When React's onClick works normally, it fires first. The bridge
- * tracks this and skips its invocation to prevent double-firing.
+ * Create a proper synthetic event that tracks preventDefault calls
+ */
+function createSyntheticEvent(element: HTMLElement, pointerEvent: PointerEvent) {
+  let _defaultPrevented = false;
+  let _propagationStopped = false;
+  
+  return {
+    get defaultPrevented() { return _defaultPrevented; },
+    preventDefault() { _defaultPrevented = true; },
+    stopPropagation() { _propagationStopped = true; },
+    stopImmediatePropagation() { _propagationStopped = true; },
+    persist() {}, // No-op for compatibility
+    isPropagationStopped() { return _propagationStopped; },
+    isDefaultPrevented() { return _defaultPrevented; },
+    target: element,
+    currentTarget: element,
+    nativeEvent: pointerEvent,
+    clientX: pointerEvent.clientX,
+    clientY: pointerEvent.clientY,
+    pageX: pointerEvent.pageX,
+    pageY: pointerEvent.pageY,
+    screenX: pointerEvent.screenX,
+    screenY: pointerEvent.screenY,
+    type: 'click',
+    bubbles: true,
+    cancelable: true,
+    button: 0,
+    buttons: 1,
+    detail: 1,
+    eventPhase: 3, // AT_TARGET
+    isTrusted: false,
+    timeStamp: Date.now(),
+  };
+}
+
+/**
+ * Register an element's click handler for direct invocation.
+ * Pass undefined to unregister.
  */
 export function registerClickHandler(element: HTMLElement | null, handler: ClickHandler | undefined) {
   if (!element) return;
   
   if (handler) {
-    // Store the handler directly - deduplication happens at invocation points
     clickHandlerRegistry.set(element, handler);
-    
-    // Add a click listener to track when React's onClick fires successfully
-    // This allows the bridge to skip invocation if click already worked
-    const clickTracker = () => {
-      recentInvocations.set(element, Date.now());
-    };
-    element.addEventListener('click', clickTracker, { capture: true });
-    
-    // Store cleanup function
-    (element as any).__bridgeClickTracker = clickTracker;
   } else {
-    // Clean up click tracker
-    const tracker = (element as any).__bridgeClickTracker;
-    if (tracker) {
-      element.removeEventListener('click', tracker, { capture: true });
-      delete (element as any).__bridgeClickTracker;
-    }
     clickHandlerRegistry.delete(element);
   }
 }
 
 /**
- * Get registered click handler for an element
- */
-export function getClickHandler(element: HTMLElement): ClickHandler | undefined {
-  return clickHandlerRegistry.get(element);
-}
-
-/**
- * Hook to register a button's onClick handler with the bridge
- * Use this in Button and other interactive components
+ * Hook to register a button's onClick handler with the bridge.
+ * Returns a ref callback that properly cleans up on unmount.
  */
 export function useBridgeClick<T extends HTMLElement>(
   onClick: ((event: React.MouseEvent<T>) => void) | undefined
 ): React.RefCallback<T> {
   const handlerRef = useRef(onClick);
+  const elementRef = useRef<T | null>(null);
+  
+  // Keep handler ref updated
   handlerRef.current = onClick;
   
-  return useCallback((element: T | null) => {
-    if (element) {
-      if (handlerRef.current) {
-        registerClickHandler(element, (event?: any) => {
-          // Don't call if element is disabled
-          if ((element as any).disabled) return;
-          handlerRef.current?.(event);
-        });
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (elementRef.current) {
+        registerClickHandler(elementRef.current, undefined);
+        elementRef.current = null;
       }
+    };
+  }, []);
+  
+  return useCallback((element: T | null) => {
+    // Clean up previous element if different
+    if (elementRef.current && elementRef.current !== element) {
+      registerClickHandler(elementRef.current, undefined);
+    }
+    
+    elementRef.current = element;
+    
+    if (element && handlerRef.current) {
+      registerClickHandler(element, (event?: any) => {
+        if (!(element as any).disabled) {
+          handlerRef.current?.(event);
+        }
+      });
     }
   }, []);
 }
 
-// DEPRECATED: globalModalOpener is no longer needed since we use openModalDirect with getState()
-// Keeping exports for backward compatibility but they are no-ops now
-let globalModalOpener: ((modalType: string, section: string, vortId?: number) => void) | null = null;
-
-export function setGlobalModalOpener(opener: (modalType: string, section: string, vortId?: number) => void) {
-  globalModalOpener = opener;
-  // Note: This is now a no-op - openModalDirect uses getState() directly
+/**
+ * Set global modal opener - called from App.tsx for legacy compatibility
+ */
+export function setGlobalModalOpener(opener: ModalOpener) {
+  globalModalOpenerFn = opener;
 }
 
-export function getGlobalModalOpener() {
-  return globalModalOpener;
+/**
+ * Get global modal opener
+ */
+export function getGlobalModalOpener(): ModalOpener | null {
+  return globalModalOpenerFn;
 }
 
 let bridgeInitialized = false;
-let appFullyLoaded = false;
 
-export function registerAction(name: string, handler: ActionHandler) {
-  actionHandlers.set(name, handler);
-  if (!bridgeInitialized) {
-    initializeBridge();
-  }
-}
-
-export function unregisterAction(name: string) {
-  actionHandlers.delete(name);
-}
-
-export function useDomBridgeAction(handler: () => void) {
-  const actionId = useRef(`action-${Math.random().toString(36).substr(2, 9)}`).current;
-  
-  useEffect(() => {
-    registerAction(actionId, () => {
-      handler();
-    });
-    
-    return () => {
-      unregisterAction(actionId);
-    };
-  }, [actionId, handler]);
-  
-  return {
-    'data-action': actionId
-  };
-}
-
-// Interactive element selectors for bridge containers
+// Interactive element selectors for fallback click dispatch
 const INTERACTIVE_SELECTORS = 'button, a, input, select, textarea, [role="button"], [tabindex]';
 
 function initializeBridge() {
   if (typeof window === 'undefined' || bridgeInitialized) return;
-  
   bridgeInitialized = true;
   
   const isDebugMode = localStorage.getItem('debugDOMBridge') === 'true';
   
   if (isDebugMode) {
-    console.log('[DOM Bridge] Initializing resilient click handler for FlutterFlow');
+    console.log('[DOM Bridge] Initializing resilient click handler');
   }
   
-  // Track pointer state for tap detection
-  let lastPointerDownTarget: HTMLElement | null = null;
-  let lastPointerDownTime = 0;
-  let lastPointerDownX = 0;
-  let lastPointerDownY = 0;
-  let isScrolling = false;
+  // Track pointer state
+  let pointerDownTarget: HTMLElement | null = null;
+  let pointerDownTime = 0;
+  let pointerDownX = 0;
+  let pointerDownY = 0;
   
-  const TAP_THRESHOLD_MS = 400;
-  const SCROLL_MOVEMENT_THRESHOLD = 10; // pixels - reduced for better scroll detection
+  const TAP_THRESHOLD_MS = 500;
+  const MOVEMENT_THRESHOLD = 15;
   
-  // Delay activation to avoid interfering with initial page load
-  setTimeout(() => {
-    appFullyLoaded = true;
-    if (isDebugMode) {
-      console.log('[DOM Bridge] App fully loaded, now tracking pointer events');
-    }
-  }, 500);
-  
-  // Track scroll events to prevent phantom clicks during scroll
-  let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
+  // Simple scroll tracking
+  let lastScrollTime = 0;
   const handleScroll = () => {
-    isScrolling = true;
-    if (scrollTimeout) clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(() => {
-      isScrolling = false;
-    }, 150);
-  };
-  
-  // Invoke action or click on an element directly
-  const invokeElement = (element: HTMLElement, event: PointerEvent) => {
-    // PRIORITY 1: Check WeakMap for direct handler on the target element FIRST
-    // This prevents parent data-modal-type from hijacking child button taps
-    if (clickHandlerRegistry.has(element)) {
-      const handler = clickHandlerRegistry.get(element);
-      if (handler) {
-        // Check for recent invocation to prevent double-firing
-        const lastInvoke = recentInvocations.get(element);
-        const now = Date.now();
-        if (lastInvoke && (now - lastInvoke) < DEDUP_WINDOW_MS) {
-          if (isDebugMode) {
-            console.log('[DOM Bridge] Skipping duplicate invocation (target)');
-          }
-          return true; // Already invoked recently
-        }
-        recentInvocations.set(element, now);
-        
-        if (isDebugMode) {
-          console.log('[DOM Bridge] Invoking WeakMap handler on target');
-        }
-        try {
-          handler();
-        } catch (error) {
-          console.error('[DOM Bridge] Error in WeakMap handler:', error);
-        }
-        return true;
-      }
-    }
-    
-    // PRIORITY 2: Walk ancestors for registered handlers and modal types
-    let currentElement: HTMLElement | null = element;
-    while (currentElement && currentElement !== document.body) {
-      // Check WeakMap for handler on this ancestor
-      if (clickHandlerRegistry.has(currentElement)) {
-        const handler = clickHandlerRegistry.get(currentElement);
-        if (handler) {
-          // Check for recent invocation to prevent double-firing
-          const lastInvoke = recentInvocations.get(currentElement);
-          const now = Date.now();
-          if (lastInvoke && (now - lastInvoke) < DEDUP_WINDOW_MS) {
-            if (isDebugMode) {
-              console.log('[DOM Bridge] Skipping duplicate invocation (ancestor)');
-            }
-            return true; // Already invoked recently
-          }
-          recentInvocations.set(currentElement, now);
-          
-          if (isDebugMode) {
-            console.log('[DOM Bridge] Invoking WeakMap handler on ancestor');
-          }
-          try {
-            handler();
-          } catch (error) {
-            console.error('[DOM Bridge] Error in WeakMap handler:', error);
-          }
-          return true;
-        }
-      }
-      
-      const action = currentElement.getAttribute('data-action');
-      if (action && actionHandlers.has(action)) {
-        if (isDebugMode) {
-          console.log('[DOM Bridge] Invoking registered action:', action);
-        }
-        try {
-          actionHandlers.get(action)!(currentElement, event);
-        } catch (error) {
-          console.error('[DOM Bridge] Error in action handler:', action, error);
-        }
-        return true;
-      }
-      
-      const modalType = currentElement.getAttribute('data-modal-type');
-      if (modalType) {
-        const section = currentElement.getAttribute('data-modal-section') || 'home';
-        const vortId = currentElement.getAttribute('data-vort-id');
-        if (isDebugMode) {
-          console.log('[DOM Bridge] Opening modal directly:', modalType, section);
-        }
-        try {
-          // Use openModalDirect which calls getState() to avoid stale closures
-          openModalDirect(modalType, section, vortId ? parseInt(vortId) : undefined);
-        } catch (error) {
-          console.error('[DOM Bridge] Error opening modal:', error);
-        }
-        return true;
-      }
-      
-      currentElement = currentElement.parentElement;
-    }
-    
-    return false;
+    lastScrollTime = Date.now();
   };
   
   const handlePointerDown = (e: PointerEvent) => {
-    if (!appFullyLoaded) return;
-    
-    lastPointerDownTarget = e.target as HTMLElement;
-    lastPointerDownTime = Date.now();
-    lastPointerDownX = e.clientX;
-    lastPointerDownY = e.clientY;
-    
-    if (isDebugMode) {
-      console.log('[DOM Bridge] Pointer down at', e.clientX.toFixed(0), e.clientY.toFixed(0));
-    }
+    pointerDownTarget = e.target as HTMLElement;
+    pointerDownTime = Date.now();
+    pointerDownX = e.clientX;
+    pointerDownY = e.clientY;
   };
   
   const handlePointerUp = (e: PointerEvent) => {
-    if (!appFullyLoaded || !lastPointerDownTarget) return;
+    if (!pointerDownTarget) return;
     
-    const timeSinceDown = Date.now() - lastPointerDownTime;
-    const movementX = Math.abs(e.clientX - lastPointerDownX);
-    const movementY = Math.abs(e.clientY - lastPointerDownY);
-    const totalMovement = Math.sqrt(movementX * movementX + movementY * movementY);
+    const elapsed = Date.now() - pointerDownTime;
+    const dx = Math.abs(e.clientX - pointerDownX);
+    const dy = Math.abs(e.clientY - pointerDownY);
+    const moved = Math.sqrt(dx * dx + dy * dy);
+    const recentScroll = Date.now() - lastScrollTime < 200;
     
-    if (isDebugMode) {
-      console.log('[DOM Bridge] Pointer up - movement:', totalMovement.toFixed(1), 'px, time:', timeSinceDown, 'ms, scrolling:', isScrolling);
-    }
-    
-    // Reject if: took too long, moved too much, or currently scrolling
-    if (timeSinceDown > TAP_THRESHOLD_MS || totalMovement > SCROLL_MOVEMENT_THRESHOLD || isScrolling) {
-      if (isDebugMode && (totalMovement > SCROLL_MOVEMENT_THRESHOLD || isScrolling)) {
-        console.log('[DOM Bridge] Rejected as scroll gesture');
+    // Reject if took too long, moved too much, or was scrolling
+    if (elapsed > TAP_THRESHOLD_MS || moved > MOVEMENT_THRESHOLD || recentScroll) {
+      if (isDebugMode && (moved > MOVEMENT_THRESHOLD || recentScroll)) {
+        console.log('[DOM Bridge] Rejected as scroll/move gesture');
       }
-      lastPointerDownTarget = null;
+      pointerDownTarget = null;
       return;
     }
     
-    const target = e.target as HTMLElement;
+    const target = pointerDownTarget;
+    pointerDownTarget = null;
     
-    // Verify we're still on same element (or child/parent)
-    const isOnSameElement = target === lastPointerDownTarget || 
-                            target.contains(lastPointerDownTarget) || 
-                            lastPointerDownTarget.contains(target);
-    if (!isOnSameElement) {
-      lastPointerDownTarget = null;
-      return;
-    }
+    // Check if tap ended on same element
+    const upTarget = e.target as HTMLElement;
+    const isSameElement = target === upTarget || 
+                          target.contains(upTarget) || 
+                          upTarget.contains(target);
+    if (!isSameElement) return;
     
-    const tapTarget = lastPointerDownTarget;
-    lastPointerDownTarget = null;
+    // Walk up from target to find registered handler or modal trigger
+    let current: HTMLElement | null = target;
+    let handlerResult: ReturnType<typeof createSyntheticEvent> | null = null;
     
-    // First try data-action or data-modal-type
-    if (invokeElement(tapTarget, e)) {
-      return;
-    }
-    
-    // Check if inside a bridge container
-    const bridgeContainer = tapTarget.closest('[data-bridge-container]');
-    if (!bridgeContainer) {
-      return;
-    }
-    
-    // Find closest interactive element
-    const interactiveElement = tapTarget.closest(INTERACTIVE_SELECTORS) as HTMLElement | null;
-    if (!interactiveElement || !bridgeContainer.contains(interactiveElement)) {
-      return;
-    }
-    
-    if (isDebugMode) {
-      console.log('[DOM Bridge] Processing tap on:', interactiveElement.tagName, 
-        interactiveElement.className?.toString().slice(0, 40) || '');
-    }
-    
-    // Check if element is disabled
-    if ((interactiveElement as any).disabled) {
-      if (isDebugMode) {
-        console.log('[DOM Bridge] Element is disabled, skipping');
-      }
-      return;
-    }
-    
-    // METHOD 1 (PRIORITY): Check WeakMap registry for direct handler invocation
-    // This completely bypasses React's event delegation
-    const registeredHandler = clickHandlerRegistry.get(interactiveElement);
-    if (registeredHandler) {
-      // Check for recent invocation to prevent double-firing
-      const lastInvoke = recentInvocations.get(interactiveElement);
-      const now = Date.now();
-      if (lastInvoke && (now - lastInvoke) < DEDUP_WINDOW_MS) {
+    while (current && current !== document.body) {
+      // Check WeakMap for direct handler
+      const handler = clickHandlerRegistry.get(current);
+      if (handler) {
         if (isDebugMode) {
-          console.log('[DOM Bridge] Skipping duplicate invocation (METHOD 1)');
-        }
-        return; // Already invoked recently
-      }
-      recentInvocations.set(interactiveElement, now);
-      
-      if (isDebugMode) {
-        console.log('[DOM Bridge] Found registered handler, invoking directly');
-      }
-      try {
-        // Create a minimal event object that React handlers expect
-        const syntheticEvent = {
-          preventDefault: () => {},
-          stopPropagation: () => {},
-          target: interactiveElement,
-          currentTarget: interactiveElement,
-          nativeEvent: e,
-          clientX: e.clientX,
-          clientY: e.clientY,
-          type: 'click'
-        };
-        registeredHandler(syntheticEvent);
-        return; // Success - no need for fallbacks
-      } catch (error) {
-        console.error('[DOM Bridge] Error invoking registered handler:', error);
-      }
-    }
-    
-    // METHOD 2: Walk up the tree to find any parent with a registered handler
-    let parentElement = interactiveElement.parentElement;
-    while (parentElement && parentElement !== document.body) {
-      const parentHandler = clickHandlerRegistry.get(parentElement);
-      if (parentHandler) {
-        // Check for recent invocation to prevent double-firing
-        const lastInvoke = recentInvocations.get(parentElement);
-        const now = Date.now();
-        if (lastInvoke && (now - lastInvoke) < DEDUP_WINDOW_MS) {
-          if (isDebugMode) {
-            console.log('[DOM Bridge] Skipping duplicate invocation (METHOD 2)');
-          }
-          return; // Already invoked recently
-        }
-        recentInvocations.set(parentElement, now);
-        
-        if (isDebugMode) {
-          console.log('[DOM Bridge] Found parent handler, invoking');
+          console.log('[DOM Bridge] Invoking registered handler');
         }
         try {
-          const syntheticEvent = {
-            preventDefault: () => {},
-            stopPropagation: () => {},
-            target: interactiveElement,
-            currentTarget: parentElement,
-            nativeEvent: e,
-            clientX: e.clientX,
-            clientY: e.clientY,
-            type: 'click'
-          };
-          parentHandler(syntheticEvent);
-          return;
+          handlerResult = createSyntheticEvent(current, e);
+          handler(handlerResult);
+          // If handler called preventDefault, don't do fallback dispatch
+          if (handlerResult.defaultPrevented) {
+            return;
+          }
         } catch (error) {
-          console.error('[DOM Bridge] Error invoking parent handler:', error);
+          console.error('[DOM Bridge] Handler error:', error);
         }
+        return; // Handler was found and invoked
       }
-      parentElement = parentElement.parentElement;
-    }
-    
-    // METHOD 3: Focus and dispatch click event (fallback for unregistered elements)
-    if (isDebugMode) {
-      console.log('[DOM Bridge] No registered handler, using click fallback');
-    }
-    
-    try {
-      interactiveElement.focus();
-    } catch (focusErr) {
-      // Ignore focus errors
-    }
-    
-    // Dispatch click event
-    const clickEvent = new MouseEvent('click', {
-      bubbles: true,
-      cancelable: true,
-      view: window,
-      detail: 1,
-      screenX: e.screenX,
-      screenY: e.screenY,
-      clientX: e.clientX,
-      clientY: e.clientY,
-      button: 0,
-      buttons: 1
-    });
-    interactiveElement.dispatchEvent(clickEvent);
-    
-    // METHOD 4: Native click as final backup
-    setTimeout(() => {
-      try {
-        interactiveElement.click();
-      } catch (err) {
+      
+      // Check for modal trigger
+      const modalType = current.getAttribute('data-modal-type');
+      if (modalType) {
+        const section = current.getAttribute('data-modal-section') || 'home';
+        const vortId = current.getAttribute('data-vort-id');
         if (isDebugMode) {
-          console.log('[DOM Bridge] Native click failed:', err);
+          console.log('[DOM Bridge] Opening modal:', modalType);
         }
+        openModal(modalType, section, vortId ? parseInt(vortId) : undefined);
+        return;
       }
-    }, 10);
+      
+      current = current.parentElement;
+    }
+    
+    // FALLBACK: No registered handler found - dispatch synthetic click for unregistered elements
+    // This ensures elements relying on React's normal delegation still work in FlutterFlow
+    const interactiveElement = target.closest(INTERACTIVE_SELECTORS) as HTMLElement | null;
+    if (interactiveElement && !(interactiveElement as any).disabled) {
+      if (isDebugMode) {
+        console.log('[DOM Bridge] Dispatching synthetic click on:', interactiveElement.tagName);
+      }
+      
+      // Focus first (some elements need this)
+      try {
+        interactiveElement.focus();
+      } catch (err) {
+        // Ignore focus errors
+      }
+      
+      // Dispatch synthetic click event
+      const clickEvent = new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+        detail: 1,
+        screenX: e.screenX,
+        screenY: e.screenY,
+        clientX: e.clientX,
+        clientY: e.clientY,
+        button: 0,
+        buttons: 1
+      });
+      interactiveElement.dispatchEvent(clickEvent);
+    }
   };
   
-  // Attach listeners with capture phase for early interception
-  const attachListeners = () => {
-    document.addEventListener('pointerdown', handlePointerDown, { capture: true, passive: true });
-    document.addEventListener('pointerup', handlePointerUp, { capture: true, passive: true });
-    document.addEventListener('scroll', handleScroll, { capture: true, passive: true });
-    window.addEventListener('scroll', handleScroll, { passive: true });
-  };
+  // Attach with capture phase
+  document.addEventListener('pointerdown', handlePointerDown, { capture: true, passive: true });
+  document.addEventListener('pointerup', handlePointerUp, { capture: true, passive: true });
+  document.addEventListener('scroll', handleScroll, { capture: true, passive: true });
+  window.addEventListener('scroll', handleScroll, { passive: true });
   
-  const detachListeners = () => {
-    document.removeEventListener('pointerdown', handlePointerDown, true);
-    document.removeEventListener('pointerup', handlePointerUp, true);
-    document.removeEventListener('scroll', handleScroll, true);
-    window.removeEventListener('scroll', handleScroll);
-  };
-  
-  attachListeners();
-  
-  // Re-attach on visibility change (app resume)
+  // Reset state on visibility change (app resume)
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
+      pointerDownTarget = null;
       if (isDebugMode) {
-        console.log('[DOM Bridge] Page resumed from background - refreshing listeners');
+        console.log('[DOM Bridge] Reset state on resume');
       }
-      
-      // Force re-attach listeners
-      detachListeners();
-      
-      // Small delay before re-attaching to let WebView stabilize
-      setTimeout(() => {
-        attachListeners();
-        if (isDebugMode) {
-          console.log('[DOM Bridge] Listeners re-attached after resume');
-        }
-      }, 100);
     }
   });
-  
-  // Periodic refresh as backup
-  setInterval(() => {
-    detachListeners();
-    attachListeners();
-  }, 10000);
 }
 
+// Initialize on load
 if (typeof window !== 'undefined') {
   initializeBridge();
 }
