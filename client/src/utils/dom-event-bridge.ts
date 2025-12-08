@@ -139,6 +139,8 @@ export function getGlobalModalOpener(): ModalOpener | null {
 // Action handlers for data-action attribute system
 type ActionHandler = (element: HTMLElement, event: MouseEvent | TouchEvent | PointerEvent) => void;
 const actionHandlers = new Map<string, ActionHandler>();
+const actionLastInvoked = new Map<string, number>();
+const ACTION_DEDUP_MS = 50; // Prevent double-invocation within 50ms
 
 export function registerAction(name: string, handler: ActionHandler) {
   actionHandlers.set(name, handler);
@@ -261,6 +263,17 @@ function initializeBridge() {
       // Check for data-action attribute
       const action = current.getAttribute('data-action');
       if (action && actionHandlers.has(action)) {
+        // Deduplicate: skip if same action was invoked very recently (prevents double-firing)
+        const lastInvoked = actionLastInvoked.get(action) || 0;
+        const now = Date.now();
+        if (now - lastInvoked < ACTION_DEDUP_MS) {
+          if (isDebugMode) {
+            console.log('[DOM Bridge] Skipping duplicate action:', action);
+          }
+          return;
+        }
+        actionLastInvoked.set(action, now);
+        
         if (isDebugMode) {
           console.log('[DOM Bridge] Invoking action:', action);
         }
