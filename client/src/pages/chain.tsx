@@ -97,8 +97,10 @@ export default function ChainPage() {
         title: "Tehillim Completed!",
         description: "May all your tefillas be answered.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains', slug, 'stats'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/stats/total'] });
+      
+      // Force immediate refetch of stats (not just invalidate)
+      await queryClient.refetchQueries({ queryKey: ['/api/tehillim-chains', slug, 'stats'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/tehillim-chains/stats/total'] });
       
       // Automatically load the next available psalm
       try {
