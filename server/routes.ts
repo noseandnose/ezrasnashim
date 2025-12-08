@@ -2369,6 +2369,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get Tehillim text by psalm number (for chain reading) - MUST be after all specific routes
+  app.get("/api/tehillim/:psalmNumber", async (req, res) => {
+    try {
+      const psalmNumber = parseInt(req.params.psalmNumber);
+      
+      if (isNaN(psalmNumber) || psalmNumber < 1 || psalmNumber > 150) {
+        return res.status(400).json({ error: "Psalm number must be between 1 and 150" });
+      }
+      
+      // Fetch both Hebrew and English text
+      const [hebrewResult, englishResult] = await Promise.all([
+        storage.getSupabaseTehillim(psalmNumber, 'hebrew'),
+        storage.getSupabaseTehillim(psalmNumber, 'english')
+      ]);
+      
+      res.json({
+        psalmNumber,
+        hebrewText: hebrewResult?.text || '',
+        englishText: englishResult?.text || ''
+      });
+    } catch (error) {
+      console.error('Error fetching Tehillim:', error);
+      return res.status(500).json({ error: "Failed to fetch Tehillim" });
+    }
+  });
+
   // =====================
   // Tehillim Chains Routes
   // =====================
@@ -2448,6 +2474,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Return 0 if database tables don't exist yet or query fails
       console.error("Error fetching total chains tehillim (returning 0):", error);
       res.json({ total: 0 });
+    }
+  });
+
+  // Get a random Tehillim Chain
+  app.get("/api/tehillim-chains/random", async (req, res) => {
+    try {
+      const randomChain = await storage.getRandomTehillimChain();
+      if (!randomChain) {
+        return res.status(404).json({ error: "No chains found" });
+      }
+      res.json(randomChain);
+    } catch (error) {
+      console.error("Error getting random chain:", error);
+      res.status(500).json({ error: "Failed to get random chain" });
     }
   });
 
@@ -2541,6 +2581,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get next sequential available psalm for a chain (default on page load)
+  app.get("/api/tehillim-chains/:slug/next-available", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const { deviceId } = req.query;
+
+      const chain = await storage.getTehillimChainBySlug(slug);
+      if (!chain) {
+        return res.status(404).json({ error: "Chain not found" });
+      }
+
+      const psalm = await storage.getAvailablePsalmForChain(chain.id, deviceId as string);
+      if (!psalm) {
+        return res.status(404).json({ error: "No psalms available" });
+      }
+
+      res.json({ psalmNumber: psalm });
+    } catch (error) {
+      console.error("Error getting next psalm:", error);
+      res.status(500).json({ error: "Failed to get next psalm" });
+    }
+  });
+
   // Get a random available psalm for a chain (for "Find me another" button)
   app.get("/api/tehillim-chains/:slug/random-available", async (req, res) => {
     try {
@@ -2552,7 +2615,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Chain not found" });
       }
 
-      const psalm = await storage.getAvailablePsalmForChain(chain.id, deviceId as string);
+      const psalm = await storage.getRandomAvailablePsalmForChain(chain.id, deviceId as string);
       if (!psalm) {
         return res.status(404).json({ error: "No psalms available" });
       }

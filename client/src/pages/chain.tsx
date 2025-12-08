@@ -2,9 +2,9 @@ import { useEffect, useState, useCallback } from "react";
 import { useRoute, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Share2, BookOpen, Users, CheckCircle2, Clock, ChevronLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { FloatingSettings } from "@/components/ui/floating-settings";
 import type { TehillimChain } from "@shared/schema";
 
 interface ChainStats {
@@ -27,6 +27,7 @@ export default function ChainPage() {
   const queryClient = useQueryClient();
   
   const [showHebrew, setShowHebrew] = useState(true);
+  const [fontSize, setFontSize] = useState(18);
   const [currentPsalm, setCurrentPsalm] = useState<number | null>(null);
   const [isReading, setIsReading] = useState(false);
 
@@ -61,7 +62,7 @@ export default function ChainPage() {
   });
 
   const { data: psalmContent } = useQuery<TehillimContent>({
-    queryKey: ['/api/tehillim-chains', slug, 'psalm', currentPsalm],
+    queryKey: ['/api/tehillim', currentPsalm],
     queryFn: async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/${currentPsalm}`);
       if (!response.ok) throw new Error('Failed to fetch psalm');
@@ -102,6 +103,36 @@ export default function ChainPage() {
     },
   });
 
+  // Get the next sequential psalm (used on initial page load)
+  const getNextPsalm = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/next-available?deviceId=${deviceId}`
+      );
+      if (!response.ok) {
+        if (response.status === 404) {
+          toast({
+            title: "All Tehillim Complete!",
+            description: "Amazing! The entire Sefer Tehillim has been completed.",
+          });
+          return;
+        }
+        throw new Error('Failed to get psalm');
+      }
+      const data = await response.json();
+      setCurrentPsalm(data.psalmNumber);
+      setIsReading(true);
+      startReadingMutation.mutate(data.psalmNumber);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Could not find an available psalm.",
+        variant: "destructive",
+      });
+    }
+  }, [slug, deviceId, startReadingMutation]);
+
+  // Get a random psalm (used for "Find me another" button)
   const getRandomPsalm = useCallback(async () => {
     try {
       const response = await fetch(
@@ -132,12 +163,14 @@ export default function ChainPage() {
 
   useEffect(() => {
     if (chain && !currentPsalm && !isReading) {
-      getRandomPsalm();
+      getNextPsalm();
     }
-  }, [chain, currentPsalm, isReading, getRandomPsalm]);
+  }, [chain, currentPsalm, isReading, getNextPsalm]);
 
   const handleShare = async () => {
     const url = `${window.location.origin}/c/${slug}`;
+    
+    // Try native share first
     if (navigator.share) {
       try {
         await navigator.share({
@@ -145,15 +178,37 @@ export default function ChainPage() {
           text: `Join me in saying Tehillim for ${chain?.name} - ${chain?.reason}`,
           url,
         });
+        return;
       } catch (error) {
-        if ((error as Error).name !== 'AbortError') {
-          await navigator.clipboard.writeText(url);
-          toast({ title: "Link copied!", description: "Share it with others." });
+        if ((error as Error).name === 'AbortError') {
+          return; // User cancelled share
         }
+        // Fall through to clipboard fallback
       }
-    } else {
+    }
+    
+    // Clipboard fallback with error handling
+    try {
       await navigator.clipboard.writeText(url);
       toast({ title: "Link copied!", description: "Share it with others." });
+    } catch (clipboardError) {
+      // Final fallback: create temporary textarea
+      const textArea = document.createElement('textarea');
+      textArea.value = url;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        toast({ title: "Link copied!", description: "Share it with others." });
+      } catch {
+        toast({ 
+          title: "Share this link", 
+          description: url,
+        });
+      }
+      document.body.removeChild(textArea);
     }
   };
 
@@ -184,15 +239,20 @@ export default function ChainPage() {
         <p className="platypi-regular text-black/60 text-center mb-6">
           This Tehillim chain doesn't exist or may have been removed.
         </p>
-        <Button
+        <button
           onClick={() => setLocation('/')}
-          className="bg-gradient-feminine text-white rounded-full px-6"
+          className="bg-gradient-feminine text-white rounded-full px-6 py-3 platypi-medium"
+          data-testid="button-go-home"
         >
           Go Home
-        </Button>
+        </button>
       </div>
     );
   }
+
+  // Count visible stats to determine centering
+  const showBooksCompleted = (stats?.booksCompleted || 0) > 0;
+  const visibleStats = showBooksCompleted ? 4 : 3;
 
   return (
     <div className="fixed inset-0 bg-gradient-soft flex flex-col z-50 overflow-hidden">
@@ -221,13 +281,13 @@ export default function ChainPage() {
       <div className="p-4 bg-white/50 border-b border-blush/10">
         <p className="platypi-regular text-sm text-black/70 text-center mb-3">{chain.reason}</p>
         
-        <div className="grid grid-cols-4 gap-2">
+        <div className={`grid gap-2 ${visibleStats === 3 ? 'grid-cols-3 max-w-xs mx-auto' : 'grid-cols-4'}`}>
           <div className="bg-white rounded-xl p-2 text-center border border-blush/10">
             <BookOpen size={16} className="text-blush mx-auto mb-1" />
             <p className="platypi-bold text-sm text-black">{stats?.totalCompleted || 0}</p>
             <p className="platypi-regular text-[10px] text-black/60">Said</p>
           </div>
-          {(stats?.booksCompleted || 0) > 0 && (
+          {showBooksCompleted && (
             <div className="bg-white rounded-xl p-2 text-center border border-blush/10">
               <CheckCircle2 size={16} className="text-sage mx-auto mb-1" />
               <p className="platypi-bold text-sm text-black">{stats?.booksCompleted || 0}</p>
@@ -247,36 +307,17 @@ export default function ChainPage() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between p-3 bg-white/30">
+      <div className="flex items-center justify-center p-3 bg-white/30">
         <span className="platypi-medium text-sm text-black">
           {currentPsalm ? `Psalm ${currentPsalm}` : 'Loading...'}
         </span>
-        <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowHebrew(true)}
-            className={`text-xs px-3 py-1 h-7 rounded-full ${showHebrew ? 'bg-blush text-white border-blush' : 'bg-white border-blush/30 text-black'}`}
-            data-testid="button-hebrew"
-          >
-            עברית
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowHebrew(false)}
-            className={`text-xs px-3 py-1 h-7 rounded-full ${!showHebrew ? 'bg-blush text-white border-blush' : 'bg-white border-blush/30 text-black'}`}
-            data-testid="button-english"
-          >
-            English
-          </Button>
-        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">
         {psalmContent ? (
           <div
-            className={`text-lg leading-relaxed ${showHebrew ? 'text-right koren-siddur' : 'text-left platypi-regular'}`}
+            className={`leading-relaxed ${showHebrew ? 'text-right koren-siddur' : 'text-left platypi-regular'}`}
+            style={{ fontSize: `${fontSize}px` }}
             dir={showHebrew ? 'rtl' : 'ltr'}
           >
             {showHebrew ? psalmContent.hebrewText : psalmContent.englishText}
@@ -290,25 +331,33 @@ export default function ChainPage() {
 
       <div className="p-4 bg-white/80 backdrop-blur-sm border-t border-blush/10 safe-area-bottom">
         <div className="flex space-x-3">
-          <Button
+          <button
             onClick={handleFindAnother}
-            variant="outline"
-            className="flex-1 py-6 rounded-2xl bg-amber-100 border-amber-300 text-amber-800 hover:bg-amber-200 platypi-medium"
             disabled={!currentPsalm}
+            className="flex-1 py-4 rounded-2xl border-2 border-blush/30 bg-white text-black platypi-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blush/5 transition-colors"
             data-testid="button-find-another"
           >
             Find me another
-          </Button>
-          <Button
+          </button>
+          <button
             onClick={handleComplete}
-            className="flex-1 py-6 rounded-2xl bg-sage hover:bg-sage/90 text-white platypi-medium"
             disabled={!currentPsalm || completeReadingMutation.isPending}
+            className="flex-1 py-4 rounded-2xl bg-gradient-feminine text-white platypi-medium disabled:opacity-50 disabled:cursor-not-allowed"
             data-testid="button-complete"
           >
             {completeReadingMutation.isPending ? "Completing..." : "Complete"}
-          </Button>
+          </button>
         </div>
       </div>
+
+      <FloatingSettings
+        showLanguageControls={true}
+        language={showHebrew ? 'hebrew' : 'english'}
+        onLanguageChange={(lang) => setShowHebrew(lang === 'hebrew')}
+        showFontControls={true}
+        fontSize={fontSize}
+        onFontSizeChange={setFontSize}
+      />
     </div>
   );
 }

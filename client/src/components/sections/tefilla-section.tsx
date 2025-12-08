@@ -1,4 +1,4 @@
-import { HandHeart, Plus, Heart, Star, Compass, ArrowRight, Sunrise, Sun, Moon, Stars, Search, Link2, ChevronRight, Stethoscope, Users } from "lucide-react";
+import { HandHeart, Plus, Heart, Star, Compass, ArrowRight, Sunrise, Sun, Moon, Stars, Search, Link2, ChevronRight, Stethoscope, Users, Shuffle } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -332,6 +332,25 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
               >
                 <Search size={14} className="mr-1" />
                 Find
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/tehillim-chains/random`);
+                    if (response.ok) {
+                      const chain = await response.json();
+                      setLocation(`/c/${chain.slug}`);
+                    }
+                  } catch (error) {
+                    console.error('Failed to get random chain:', error);
+                  }
+                }}
+                className="text-xs px-3 py-1 h-auto bg-white border border-blush/30 rounded-md hover:bg-blush/5 inline-flex items-center text-blush"
+                data-testid="button-chain-random"
+              >
+                <Shuffle size={14} className="mr-1" />
+                Random
               </button>
             </div>
           </div>

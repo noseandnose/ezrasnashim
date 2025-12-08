@@ -121,10 +121,12 @@ export interface IStorage {
   createTehillimChain(chain: InsertTehillimChain): Promise<TehillimChain>;
   getTehillimChainBySlug(slug: string): Promise<TehillimChain | null>;
   searchTehillimChains(query: string): Promise<TehillimChain[]>;
+  getRandomTehillimChain(): Promise<TehillimChain | null>;
   getTehillimChainStats(chainId: number): Promise<{totalSaid: number; booksCompleted: number; currentlyReading: number; available: number}>;
   startChainReading(chainId: number, psalmNumber: number, deviceId: string): Promise<TehillimChainReading>;
   completeChainReading(chainId: number, psalmNumber: number, deviceId: string): Promise<TehillimChainReading | null>;
   getAvailablePsalmForChain(chainId: number, excludeDeviceId?: string): Promise<number | null>;
+  getRandomAvailablePsalmForChain(chainId: number, excludeDeviceId?: string): Promise<number | null>;
   getTotalChainTehillimCompleted(): Promise<number>;
   migrateTehillimNamesToChains(): Promise<{ migrated: number; skipped: number; errors: string[] }>;
 
@@ -752,7 +754,7 @@ export class DatabaseStorage implements IStorage {
       return db.select().from(tehillimChains)
         .where(eq(tehillimChains.isActive, true))
         .orderBy(desc(tehillimChains.createdAt))
-        .limit(20);
+        .limit(5);
     }
     
     // Search by name (case-insensitive)
@@ -764,6 +766,19 @@ export class DatabaseStorage implements IStorage {
       ))
       .orderBy(desc(tehillimChains.createdAt))
       .limit(20);
+  }
+
+  async getRandomTehillimChain(): Promise<TehillimChain | null> {
+    // Get all active chains
+    const chains = await db.select().from(tehillimChains)
+      .where(eq(tehillimChains.isActive, true));
+    
+    if (chains.length === 0) {
+      return null;
+    }
+    
+    // Return a random chain
+    return chains[Math.floor(Math.random() * chains.length)];
   }
 
   async getTehillimChainStats(chainId: number): Promise<{totalSaid: number; booksCompleted: number; currentlyReading: number; available: number}> {
@@ -895,6 +910,43 @@ export class DatabaseStorage implements IStorage {
     if (available.length === 0) {
       // All psalms are taken or completed in this cycle
       // Start a new cycle - return psalm 1
+      return 1;
+    }
+    
+    // Return the first available psalm (sequential order starting from 1)
+    return available[0];
+  }
+
+  async getRandomAvailablePsalmForChain(chainId: number, excludeDeviceId?: string): Promise<number | null> {
+    // Get chain stats to understand current cycle
+    const stats = await this.getTehillimChainStats(chainId);
+    
+    // Get all psalms that are currently being read (active in last 30 min)
+    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+    const activeReadings = await db.select({ psalmNumber: tehillimChainReadings.psalmNumber })
+      .from(tehillimChainReadings)
+      .where(and(
+        eq(tehillimChainReadings.chainId, chainId),
+        eq(tehillimChainReadings.status, 'reading'),
+        gt(tehillimChainReadings.startedAt, thirtyMinutesAgo)
+      ));
+    
+    const completedInCycle = stats.totalSaid % 150;
+    const completedPsalms = new Set<number>();
+    for (let i = 1; i <= completedInCycle; i++) {
+      completedPsalms.add(i);
+    }
+    
+    const readingPsalms = new Set(activeReadings.map(r => r.psalmNumber));
+    
+    const available: number[] = [];
+    for (let i = 1; i <= 150; i++) {
+      if (!completedPsalms.has(i) && !readingPsalms.has(i)) {
+        available.push(i);
+      }
+    }
+    
+    if (available.length === 0) {
       return 1;
     }
     
