@@ -19,6 +19,9 @@ const clickHandlerRegistry = new WeakMap<HTMLElement, ClickHandler>();
 // Global modal opener - can be set externally for legacy compatibility
 let globalModalOpenerFn: ModalOpener | null = null;
 
+// Cooldown after visibility change to prevent ghost events
+let resumeCooldownUntil = 0;
+
 /**
  * Open a modal - uses global opener if set, otherwise falls back to Zustand getState()
  */
@@ -202,6 +205,10 @@ function initializeBridge() {
   };
   
   const handlePointerDown = (e: PointerEvent) => {
+    // Ignore ghost events during resume cooldown
+    if (Date.now() < resumeCooldownUntil) {
+      return;
+    }
     pointerDownTarget = e.target as HTMLElement;
     pointerDownTime = Date.now();
     pointerDownX = e.clientX;
@@ -210,6 +217,15 @@ function initializeBridge() {
   
   const handlePointerUp = (e: PointerEvent) => {
     if (!pointerDownTarget) return;
+    
+    // Ignore ghost events during resume cooldown
+    if (Date.now() < resumeCooldownUntil) {
+      if (isDebugMode) {
+        console.log('[DOM Bridge] Ignoring event during resume cooldown');
+      }
+      pointerDownTarget = null;
+      return;
+    }
     
     const elapsed = Date.now() - pointerDownTime;
     const dx = Math.abs(e.clientX - pointerDownX);
@@ -341,12 +357,14 @@ function initializeBridge() {
   document.addEventListener('scroll', handleScroll, { capture: true, passive: true });
   window.addEventListener('scroll', handleScroll, { passive: true });
   
-  // Reset state on visibility change (app resume)
+  // Reset state on visibility change (app resume) with cooldown to prevent ghost events
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
       pointerDownTarget = null;
+      // 300ms cooldown to ignore ghost pointer events after resume
+      resumeCooldownUntil = Date.now() + 300;
       if (isDebugMode) {
-        console.log('[DOM Bridge] Reset state on resume');
+        console.log('[DOM Bridge] Reset state on resume, cooldown until', resumeCooldownUntil);
       }
     }
   });
