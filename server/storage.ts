@@ -926,33 +926,58 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAvailablePsalmForChain(chainId: number, excludeDeviceId?: string): Promise<number | null> {
-    // Get chain stats to understand current cycle
-    const stats = await this.getTehillimChainStats(chainId);
+    // Get all psalms currently being read by OTHER devices (active in last 10 min)
+    // Shorter timeout to avoid stale readings blocking psalms
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
     
-    // Get all psalms that are currently being read (active in last 30 min)
-    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+    // Build where clause - exclude current device's readings so they can get a fresh psalm
+    const whereConditions = [
+      eq(tehillimChainReadings.chainId, chainId),
+      eq(tehillimChainReadings.status, 'reading'),
+      gt(tehillimChainReadings.startedAt, tenMinutesAgo)
+    ];
+    
+    // If we have a device ID, exclude that device's readings (so same user can get new psalms)
+    if (excludeDeviceId) {
+      whereConditions.push(sql`${tehillimChainReadings.deviceId} != ${excludeDeviceId}`);
+    }
+    
     const activeReadings = await db.select({ psalmNumber: tehillimChainReadings.psalmNumber })
+      .from(tehillimChainReadings)
+      .where(and(...whereConditions));
+    
+    // Get actually completed psalms in current cycle (not assumed sequential)
+    // Count completions per psalm number to determine cycle position
+    const completedResult = await db.select({ 
+      psalmNumber: tehillimChainReadings.psalmNumber,
+      count: sql<number>`count(*)`
+    })
       .from(tehillimChainReadings)
       .where(and(
         eq(tehillimChainReadings.chainId, chainId),
-        eq(tehillimChainReadings.status, 'reading'),
-        gt(tehillimChainReadings.startedAt, thirtyMinutesAgo)
-      ));
+        eq(tehillimChainReadings.status, 'completed')
+      ))
+      .groupBy(tehillimChainReadings.psalmNumber);
     
-    // Get completed psalms in current cycle
-    const completedInCycle = stats.totalSaid % 150;
+    // Calculate which cycle we're in based on total completions
+    const totalCompleted = completedResult.reduce((sum, r) => sum + Number(r.count), 0);
+    const currentCycle = Math.floor(totalCompleted / 150);
+    
+    // Find psalms completed in current cycle
     const completedPsalms = new Set<number>();
-    
-    // Simulate which psalms are completed in current cycle
-    // (Assuming sequential completion for simplicity)
-    for (let i = 1; i <= completedInCycle; i++) {
-      completedPsalms.add(i);
+    for (const row of completedResult) {
+      const completionsForPsalm = Number(row.count);
+      // If this psalm has been completed more times than the current cycle number,
+      // it's been completed in this cycle
+      if (completionsForPsalm > currentCycle) {
+        completedPsalms.add(row.psalmNumber);
+      }
     }
     
-    // Add currently reading psalms
+    // Get psalms being read by others
     const readingPsalms = new Set(activeReadings.map(r => r.psalmNumber));
     
-    // Find available psalms
+    // Find available psalms (not completed in this cycle, not being read by others)
     const available: number[] = [];
     for (let i = 1; i <= 150; i++) {
       if (!completedPsalms.has(i) && !readingPsalms.has(i)) {
@@ -961,8 +986,7 @@ export class DatabaseStorage implements IStorage {
     }
     
     if (available.length === 0) {
-      // All psalms are taken or completed in this cycle
-      // Start a new cycle - return psalm 1
+      // All psalms completed or being read - start new cycle with psalm 1
       return 1;
     }
     
@@ -971,23 +995,45 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRandomAvailablePsalmForChain(chainId: number, excludeDeviceId?: string): Promise<number | null> {
-    // Get chain stats to understand current cycle
-    const stats = await this.getTehillimChainStats(chainId);
+    // Get all psalms currently being read by OTHER devices (active in last 10 min)
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
     
-    // Get all psalms that are currently being read (active in last 30 min)
-    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+    // Build where clause - exclude current device's readings
+    const whereConditions = [
+      eq(tehillimChainReadings.chainId, chainId),
+      eq(tehillimChainReadings.status, 'reading'),
+      gt(tehillimChainReadings.startedAt, tenMinutesAgo)
+    ];
+    
+    if (excludeDeviceId) {
+      whereConditions.push(sql`${tehillimChainReadings.deviceId} != ${excludeDeviceId}`);
+    }
+    
     const activeReadings = await db.select({ psalmNumber: tehillimChainReadings.psalmNumber })
+      .from(tehillimChainReadings)
+      .where(and(...whereConditions));
+    
+    // Get actually completed psalms in current cycle
+    const completedResult = await db.select({ 
+      psalmNumber: tehillimChainReadings.psalmNumber,
+      count: sql<number>`count(*)`
+    })
       .from(tehillimChainReadings)
       .where(and(
         eq(tehillimChainReadings.chainId, chainId),
-        eq(tehillimChainReadings.status, 'reading'),
-        gt(tehillimChainReadings.startedAt, thirtyMinutesAgo)
-      ));
+        eq(tehillimChainReadings.status, 'completed')
+      ))
+      .groupBy(tehillimChainReadings.psalmNumber);
     
-    const completedInCycle = stats.totalSaid % 150;
+    const totalCompleted = completedResult.reduce((sum, r) => sum + Number(r.count), 0);
+    const currentCycle = Math.floor(totalCompleted / 150);
+    
     const completedPsalms = new Set<number>();
-    for (let i = 1; i <= completedInCycle; i++) {
-      completedPsalms.add(i);
+    for (const row of completedResult) {
+      const completionsForPsalm = Number(row.count);
+      if (completionsForPsalm > currentCycle) {
+        completedPsalms.add(row.psalmNumber);
+      }
     }
     
     const readingPsalms = new Set(activeReadings.map(r => r.psalmNumber));
