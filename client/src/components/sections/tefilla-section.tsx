@@ -12,6 +12,7 @@ import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
@@ -202,16 +203,23 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   });
   const chainTotal = chainTotalData?.total || 0;
 
-  // Search chains query
+  // Reason options for the dropdown
+  const reasonOptions = [
+    { value: 'refuah', label: 'Refuah (Health)' },
+    { value: 'shidduch', label: 'Shidduch (Match)' },
+    { value: 'parnassa', label: 'Parnassa (Livelihood)' },
+    { value: 'children', label: 'Children' },
+    { value: 'shalom-bayis', label: 'Shalom Bayis (Peace)' },
+    { value: 'success', label: 'Success' },
+    { value: 'protection', label: 'Protection' },
+    { value: 'general', label: 'General Prayer' },
+  ];
+
+  // Search chains query - fetch recent by default when Find is open
   const { data: searchResults = [], isLoading: isSearching } = useQuery<TehillimChain[]>({
     queryKey: ['/api/tehillim-chains/search', searchQuery],
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/search?q=${encodeURIComponent(searchQuery)}`);
-      if (!response.ok) throw new Error('Search failed');
-      return response.json();
-    },
-    enabled: chainView === 'find',
     staleTime: 30000,
+    enabled: chainView === 'find',
   });
 
   // Create chain mutation
@@ -339,13 +347,18 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                 data-testid="input-chain-name"
               />
               
-              <Input
-                placeholder="Reason (e.g., Recovery, Wedding, etc.)"
-                value={chainReason}
-                onChange={(e) => setChainReason(e.target.value)}
-                className="text-left rounded-2xl border-blush/20 focus:border-blush bg-white"
-                data-testid="input-chain-reason"
-              />
+              <Select value={chainReason} onValueChange={setChainReason}>
+                <SelectTrigger className="rounded-2xl border-blush/20 focus:border-blush bg-white" data-testid="select-chain-reason">
+                  <SelectValue placeholder="Select a reason..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {reasonOptions.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               
               <div className="flex space-x-3">
                 <Button 
@@ -404,9 +417,9 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                 </div>
               )}
               
-              {!isSearching && searchQuery && searchResults.length === 0 && (
+              {!isSearching && searchResults.length === 0 && (
                 <p className="text-center text-sm text-black/50 py-4 platypi-regular">
-                  No chains found. Try a different search or create a new one.
+                  {searchQuery ? "No chains found. Try a different search or create a new one." : "No chains created yet. Be the first to create one!"}
                 </p>
               )}
               
