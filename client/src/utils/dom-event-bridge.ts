@@ -136,6 +136,39 @@ export function getGlobalModalOpener(): ModalOpener | null {
   return globalModalOpenerFn;
 }
 
+// Action handlers for data-action attribute system
+type ActionHandler = (element: HTMLElement, event: MouseEvent | TouchEvent | PointerEvent) => void;
+const actionHandlers = new Map<string, ActionHandler>();
+
+export function registerAction(name: string, handler: ActionHandler) {
+  actionHandlers.set(name, handler);
+}
+
+export function unregisterAction(name: string) {
+  actionHandlers.delete(name);
+}
+
+/**
+ * Hook to register a DOM bridge action
+ */
+export function useDomBridgeAction(handler: () => void) {
+  const actionId = useRef(`action-${Math.random().toString(36).substr(2, 9)}`).current;
+  
+  useEffect(() => {
+    registerAction(actionId, () => {
+      handler();
+    });
+    
+    return () => {
+      unregisterAction(actionId);
+    };
+  }, [actionId, handler]);
+  
+  return {
+    'data-action': actionId
+  };
+}
+
 let bridgeInitialized = false;
 
 // Interactive element selectors for fallback click dispatch
@@ -223,6 +256,20 @@ function initializeBridge() {
           console.error('[DOM Bridge] Handler error:', error);
         }
         return; // Handler was found and invoked
+      }
+      
+      // Check for data-action attribute
+      const action = current.getAttribute('data-action');
+      if (action && actionHandlers.has(action)) {
+        if (isDebugMode) {
+          console.log('[DOM Bridge] Invoking action:', action);
+        }
+        try {
+          actionHandlers.get(action)!(current, e);
+        } catch (error) {
+          console.error('[DOM Bridge] Action error:', action, error);
+        }
+        return;
       }
       
       // Check for modal trigger
