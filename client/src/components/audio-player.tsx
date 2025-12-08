@@ -63,7 +63,17 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
     const audio = audioRef.current;
     if (audio) {
       if (audio.paused) {
-        audio.play().catch(() => {
+        // Resume audio context if suspended (required for PWA/home screen mode)
+        const audioContext = (window as any).AudioContext || (window as any).webkitAudioContext;
+        if (audioContext) {
+          const ctx = new audioContext();
+          if (ctx.state === 'suspended') {
+            ctx.resume();
+          }
+        }
+        
+        audio.play().catch((err) => {
+          console.error('[AudioPlayer] Play failed:', err);
           setAudioError(true);
         });
       } else {

@@ -87,7 +87,6 @@ export function AttributionSection({
       <div className="bg-gray-50 hover:bg-gray-100 rounded-2xl border border-gray-200 transition-colors overflow-hidden">
         <button
           ref={buttonRef}
-          onClick={handleToggle}
           className="w-full text-left p-3"
           data-testid="button-toggle-attribution"
           data-bridge-container="true"
