@@ -4,15 +4,63 @@
  * Problem: FlutterFlow occasionally detaches React's root event delegation listener
  * during background/resume cycles, causing onClick handlers to stop firing.
  * 
- * Solution: Use native .click() method and direct handler invocation which bypasses
- * event delegation entirely. Track scroll gestures to avoid phantom clicks.
+ * Solution: Store onClick handlers in a WeakMap during render and invoke them directly
+ * from pointerup, completely bypassing React's event delegation system.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 
 type ActionHandler = (element: HTMLElement, event: MouseEvent | TouchEvent | PointerEvent) => void;
+type ClickHandler = (event?: any) => void;
 
 const actionHandlers = new Map<string, ActionHandler>();
+
+// WeakMap to store onClick handlers for direct invocation
+// This bypasses React's broken event delegation after FlutterFlow resume
+const clickHandlerRegistry = new WeakMap<HTMLElement, ClickHandler>();
+
+/**
+ * Register an element's click handler for direct invocation by the bridge
+ */
+export function registerClickHandler(element: HTMLElement | null, handler: ClickHandler | undefined) {
+  if (!element) return;
+  
+  if (handler) {
+    clickHandlerRegistry.set(element, handler);
+  } else {
+    clickHandlerRegistry.delete(element);
+  }
+}
+
+/**
+ * Get registered click handler for an element
+ */
+export function getClickHandler(element: HTMLElement): ClickHandler | undefined {
+  return clickHandlerRegistry.get(element);
+}
+
+/**
+ * Hook to register a button's onClick handler with the bridge
+ * Use this in Button and other interactive components
+ */
+export function useBridgeClick<T extends HTMLElement>(
+  onClick: ((event: React.MouseEvent<T>) => void) | undefined
+): React.RefCallback<T> {
+  const handlerRef = useRef(onClick);
+  handlerRef.current = onClick;
+  
+  return useCallback((element: T | null) => {
+    if (element) {
+      if (handlerRef.current) {
+        registerClickHandler(element, (event?: any) => {
+          // Don't call if element is disabled
+          if ((element as any).disabled) return;
+          handlerRef.current?.(event);
+        });
+      }
+    }
+  }, []);
+}
 
 let globalModalOpener: ((modalType: string, section: string, vortId?: number) => void) | null = null;
 
@@ -202,20 +250,85 @@ function initializeBridge() {
       return;
     }
     
-    // Force click through multiple methods
     if (isDebugMode) {
-      console.log('[DOM Bridge] Forcing click on:', interactiveElement.tagName, 
+      console.log('[DOM Bridge] Processing tap on:', interactiveElement.tagName, 
         interactiveElement.className?.toString().slice(0, 40) || '');
     }
     
-    // Method 1: Focus the element first (some handlers require focus)
+    // Check if element is disabled
+    if ((interactiveElement as any).disabled) {
+      if (isDebugMode) {
+        console.log('[DOM Bridge] Element is disabled, skipping');
+      }
+      return;
+    }
+    
+    // METHOD 1 (PRIORITY): Check WeakMap registry for direct handler invocation
+    // This completely bypasses React's event delegation
+    const registeredHandler = clickHandlerRegistry.get(interactiveElement);
+    if (registeredHandler) {
+      if (isDebugMode) {
+        console.log('[DOM Bridge] Found registered handler, invoking directly');
+      }
+      try {
+        // Create a minimal event object that React handlers expect
+        const syntheticEvent = {
+          preventDefault: () => {},
+          stopPropagation: () => {},
+          target: interactiveElement,
+          currentTarget: interactiveElement,
+          nativeEvent: e,
+          clientX: e.clientX,
+          clientY: e.clientY,
+          type: 'click'
+        };
+        registeredHandler(syntheticEvent);
+        return; // Success - no need for fallbacks
+      } catch (error) {
+        console.error('[DOM Bridge] Error invoking registered handler:', error);
+      }
+    }
+    
+    // METHOD 2: Walk up the tree to find any parent with a registered handler
+    let parentElement = interactiveElement.parentElement;
+    while (parentElement && parentElement !== document.body) {
+      const parentHandler = clickHandlerRegistry.get(parentElement);
+      if (parentHandler) {
+        if (isDebugMode) {
+          console.log('[DOM Bridge] Found parent handler, invoking');
+        }
+        try {
+          const syntheticEvent = {
+            preventDefault: () => {},
+            stopPropagation: () => {},
+            target: interactiveElement,
+            currentTarget: parentElement,
+            nativeEvent: e,
+            clientX: e.clientX,
+            clientY: e.clientY,
+            type: 'click'
+          };
+          parentHandler(syntheticEvent);
+          return;
+        } catch (error) {
+          console.error('[DOM Bridge] Error invoking parent handler:', error);
+        }
+      }
+      parentElement = parentElement.parentElement;
+    }
+    
+    // METHOD 3: Focus and dispatch click event (fallback for unregistered elements)
+    if (isDebugMode) {
+      console.log('[DOM Bridge] No registered handler, using click fallback');
+    }
+    
     try {
       interactiveElement.focus();
-    } catch (e) {
+    } catch (focusErr) {
       // Ignore focus errors
     }
     
-    // Method 2: Dispatch a trusted-like MouseEvent
+    // Dispatch click event
     const clickEvent = new MouseEvent('click', {
       bubbles: true,
       cancelable: true,
@@ -228,11 +341,9 @@ function initializeBridge() {
       button: 0,
       buttons: 1
     });
-    
-    // Dispatch immediately (don't wait)
     interactiveElement.dispatchEvent(clickEvent);
     
-    // Method 3: Also call native click as backup
+    // METHOD 4: Native click as final backup
     setTimeout(() => {
       try {
         interactiveElement.click();
@@ -242,17 +353,6 @@ function initializeBridge() {
         }
       }
     }, 10);
-    
-    // Method 4: For buttons, try direct form submission or anchor navigation
-    if (interactiveElement.tagName === 'A' && (interactiveElement as HTMLAnchorElement).href) {
-      // Anchor links - trigger navigation if click didn't work
-      setTimeout(() => {
-        const anchor = interactiveElement as HTMLAnchorElement;
-        if (anchor.href && !anchor.href.startsWith('javascript:')) {
-          // Only for same-origin links, let the click handle it
-        }
-      }, 50);
-    }
   };
   
   // Attach listeners with capture phase for early interception
