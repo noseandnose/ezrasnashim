@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRoute, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Share2, BookOpen, Users, CheckCircle2, Clock, ChevronLeft } from "lucide-react";
@@ -31,6 +31,9 @@ export default function ChainPage() {
   const [fontSize, setFontSize] = useState(18);
   const [currentPsalm, setCurrentPsalm] = useState<number | null>(null);
   const [isReading, setIsReading] = useState(false);
+  
+  // Prevent duplicate psalm loading (React strict mode / double renders)
+  const isLoadingPsalmRef = useRef(false);
 
   const deviceId = (() => {
     let id = localStorage.getItem('deviceId');
@@ -126,6 +129,10 @@ export default function ChainPage() {
 
   // Get the next sequential psalm (used on initial page load)
   const getNextPsalm = useCallback(async () => {
+    // Prevent duplicate calls (React strict mode / rapid re-renders)
+    if (isLoadingPsalmRef.current) return;
+    isLoadingPsalmRef.current = true;
+    
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/next-available?deviceId=${deviceId}`
@@ -136,6 +143,7 @@ export default function ChainPage() {
             title: "All Tehillim Complete!",
             description: "Amazing! The entire Sefer Tehillim has been completed.",
           });
+          isLoadingPsalmRef.current = false;
           return;
         }
         throw new Error('Failed to get psalm');
@@ -150,6 +158,7 @@ export default function ChainPage() {
         description: "Could not find an available psalm.",
         variant: "destructive",
       });
+      isLoadingPsalmRef.current = false;
     }
   }, [slug, deviceId, startReadingMutation]);
 
@@ -181,6 +190,13 @@ export default function ChainPage() {
       });
     }
   }, [slug, deviceId, startReadingMutation]);
+
+  // Reset loading ref when slug changes (navigating to different chain)
+  useEffect(() => {
+    isLoadingPsalmRef.current = false;
+    setCurrentPsalm(null);
+    setIsReading(false);
+  }, [slug]);
 
   useEffect(() => {
     if (chain && !currentPsalm && !isReading) {
