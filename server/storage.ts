@@ -126,6 +126,7 @@ export interface IStorage {
   completeChainReading(chainId: number, psalmNumber: number, deviceId: string): Promise<TehillimChainReading | null>;
   getAvailablePsalmForChain(chainId: number, excludeDeviceId?: string): Promise<number | null>;
   getTotalChainTehillimCompleted(): Promise<number>;
+  migrateTehillimNamesToChains(): Promise<{ migrated: number; skipped: number; errors: string[] }>;
 
   // Mincha methods
   getMinchaPrayers(): Promise<MinchaPrayer[]>;
@@ -902,10 +903,76 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTotalChainTehillimCompleted(): Promise<number> {
-    const result = await db.select({ count: sql<number>`count(*)` })
+    // Get chain completions
+    const chainResult = await db.select({ count: sql<number>`count(*)` })
       .from(tehillimChainReadings)
       .where(eq(tehillimChainReadings.status, 'completed'));
-    return Number(result[0]?.count || 0);
+    const chainCount = Number(chainResult[0]?.count || 0);
+    
+    // Get global tehillim total from daily stats (includes legacy global chain completions)
+    const allStats = await db.select({ tehillimCompleted: dailyStats.tehillimCompleted }).from(dailyStats);
+    let globalCount = 0;
+    for (const stats of allStats) {
+      globalCount += stats.tehillimCompleted || 0;
+    }
+    
+    // Return combined total: global tehillim from analytics + chain completions
+    return globalCount + chainCount;
+  }
+
+  async migrateTehillimNamesToChains(): Promise<{ migrated: number; skipped: number; errors: string[] }> {
+    let migrated = 0;
+    let skipped = 0;
+    const errors: string[] = [];
+    
+    try {
+      // Get all tehillim names
+      const names = await db.select().from(tehillimNames);
+      
+      for (const name of names) {
+        try {
+          // Generate slug from name - use numeric ID for Hebrew names
+          let slug: string;
+          const isLatin = /^[a-zA-Z0-9\s-]+$/.test(name.hebrewName);
+          if (isLatin) {
+            // Convert to URL-friendly slug
+            slug = name.hebrewName
+              .toLowerCase()
+              .replace(/[^a-z0-9\s-]/g, '')
+              .replace(/\s+/g, '-')
+              .replace(/-+/g, '-')
+              .substring(0, 50);
+          } else {
+            // Use numeric ID for Hebrew/non-Latin names
+            slug = `chain-${name.id}`;
+          }
+          
+          // Check if chain with this slug already exists
+          const existing = await db.select().from(tehillimChains).where(eq(tehillimChains.slug, slug)).limit(1);
+          if (existing.length > 0) {
+            skipped++;
+            continue;
+          }
+          
+          // Create the chain
+          await db.insert(tehillimChains).values({
+            name: name.hebrewName,
+            reason: name.reasonEnglish || name.reason || 'Prayer',
+            slug,
+            creatorDeviceId: 'migrated-from-global',
+            createdAt: name.dateAdded || new Date(),
+          });
+          
+          migrated++;
+        } catch (err) {
+          errors.push(`Error migrating name ID ${name.id}: ${err}`);
+        }
+      }
+    } catch (err) {
+      errors.push(`Error fetching tehillim names: ${err}`);
+    }
+    
+    return { migrated, skipped, errors };
   }
 
   // DEPRECATED - Use getSupabaseTehillim instead

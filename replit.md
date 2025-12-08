@@ -70,7 +70,7 @@ Compass Android fix (Nov 2025): Fixed compass showing "denied geolocation permis
 - **Content Management**: Daily Torah, prayers (Mincha, Nishmas, Tehillim, Morning Brochas, Birkat Hamazon, Maariv), Shabbat resources, Pirkei Avot. Supports text and audio; dynamic prayer text.
 - **The Kotel Compass**: Geolocation-based compass for prayer orientation.
 - **Donation System**: Stripe integration for tzedaka.
-- **Tehillim Global Progress**: Community-wide tracking.
+- **Personal Tehillim Chains**: Individual prayer chains at /c/:slug URLs with Create/Find functionality, stats tracking (total said, books completed, currently reading, available), and shareable links. Replaced the deprecated Global Tehillim Chain. Total tehillim count aggregates legacy global completions (from daily stats) + new chain completions.
 - **Sponsorship System**: Daily content sponsorship.
 - **Analytics**: Tracking of daily/total users, page views, Tehillim completions, names prayed for, modal completions. In-app analytics dashboard at `/statistics`. Analytics events have offline queue support with idempotency - events queued locally sync when online via `/api/analytics/sync` endpoint. Completions made offline are preserved in localStorage and synced on app launch, coming online, or service worker triggers. Google Analytics (G-7S9ND60DR6) for complementary engagement insights.
 - **Life Page**: Shabbat countdown, Daily Recipe, Marriage Insights, Creative Jewish Living, Community Feedback. Hebrew Date Converter moved to hamburger menu for better accessibility.

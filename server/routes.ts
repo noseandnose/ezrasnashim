@@ -2564,6 +2564,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Migrate tehillim_names to tehillim_chains
+  app.post("/api/admin/migrate-tehillim-names", requireAdminAuth, async (req, res) => {
+    try {
+      const result = await storage.migrateTehillimNamesToChains();
+      res.json(result);
+    } catch (error) {
+      console.error("Error migrating tehillim names:", error);
+      res.status(500).json({ error: "Failed to migrate tehillim names" });
+    }
+  });
+
   // Nishmas text routes
   app.get("/api/nishmas/:language", async (req, res) => {
     try {
