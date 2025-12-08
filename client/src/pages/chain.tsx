@@ -286,7 +286,7 @@ export default function ChainPage() {
           <div className="bg-white rounded-xl p-2 text-center border border-blush/10">
             <BookOpen size={16} className="text-blush mx-auto mb-1" />
             <p className="platypi-bold text-sm text-black">{stats?.totalCompleted || 0}</p>
-            <p className="platypi-regular text-[10px] text-black/60">Said</p>
+            <p className="platypi-regular text-[10px] text-black/60">Tehillim Said</p>
           </div>
           {showBooksCompleted && (
             <div className="bg-white rounded-xl p-2 text-center border border-blush/10">
