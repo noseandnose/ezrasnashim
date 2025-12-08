@@ -275,22 +275,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     }
   }, []);
 
-  // Ref callbacks for chain buttons (FlutterFlow WebView fix)
-  const createButtonRef = useCallback((element: HTMLButtonElement | null) => {
-    if (element) {
-      registerClickHandler(element, () => {
-        setChainView(prev => prev === 'create' ? 'none' : 'create');
-      });
-    }
-  }, []);
-
-  const findButtonRef = useCallback((element: HTMLButtonElement | null) => {
-    if (element) {
-      registerClickHandler(element, () => {
-        setChainView(prev => prev === 'find' ? 'none' : 'find');
-      });
-    }
-  }, []);
 
 
   return (
@@ -317,30 +301,30 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <Button
-                ref={createButtonRef}
-                size="sm"
-                variant="outline"
-                onClick={() => setChainView(chainView === 'create' ? 'none' : 'create')}
-                className={`text-xs px-3 py-1 h-auto bg-white border-blush/30 hover:bg-blush/5 ${chainView === 'create' ? 'text-blush border-blush' : 'text-blush'}`}
+              <button
+                type="button"
+                onClick={() => {
+                  console.log('Create button clicked, current view:', chainView);
+                  setChainView(chainView === 'create' ? 'none' : 'create');
+                }}
+                className={`text-xs px-3 py-1 h-auto bg-white border rounded-md hover:bg-blush/5 inline-flex items-center ${chainView === 'create' ? 'text-blush border-blush' : 'text-blush border-blush/30'}`}
                 data-testid="button-chain-create"
-                data-action="toggle-chain-create"
               >
                 <Plus size={14} className="mr-1" />
                 Create
-              </Button>
-              <Button
-                ref={findButtonRef}
-                size="sm"
-                variant="outline"
-                onClick={() => setChainView(chainView === 'find' ? 'none' : 'find')}
-                className={`text-xs px-3 py-1 h-auto bg-white border-blush/30 hover:bg-blush/5 ${chainView === 'find' ? 'text-blush border-blush' : 'text-blush'}`}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  console.log('Find button clicked, current view:', chainView);
+                  setChainView(chainView === 'find' ? 'none' : 'find');
+                }}
+                className={`text-xs px-3 py-1 h-auto bg-white border rounded-md hover:bg-blush/5 inline-flex items-center ${chainView === 'find' ? 'text-blush border-blush' : 'text-blush border-blush/30'}`}
                 data-testid="button-chain-find"
-                data-action="toggle-chain-find"
               >
                 <Search size={14} className="mr-1" />
                 Find
-              </Button>
+              </button>
             </div>
           </div>
 
