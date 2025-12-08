@@ -18,15 +18,23 @@ export default function TzedakaModals() {
   const [donationAmount, setDonationAmount] = useState("");
   const [customAmount, setCustomAmount] = useState("");
   const [donorName, setDonorName] = useState("");
+  const [donorEmail, setDonorEmail] = useState("");
   const [dedicationText, setDedicationText] = useState("");
   const [sponsorMessage, setSponsorMessage] = useState("");
   const [torahPortion, setTorahPortion] = useState("");
 
-
-  // Preselect $1 when wedding-campaign modal opens
+  // Reset form when modals open
   useEffect(() => {
     if (activeModal === 'wedding-campaign') {
       setDonationAmount("1");
+      setDonorEmail("");
+    } else if (activeModal === 'sponsor-day' || activeModal === 'donate') {
+      setDonorEmail("");
+      setDonationAmount("");
+      setCustomAmount("");
+      setDonorName("");
+      setDedicationText("");
+      setSponsorMessage("");
     }
   }, [activeModal]);
 
@@ -117,12 +125,18 @@ export default function TzedakaModals() {
         buttonType: buttonType, // Include button type for Stripe metadata
         sponsor: donorName,
         dedication: dedicationText,
-        message: sponsorMessage
+        message: sponsorMessage,
+        email: donorEmail
       });
 
       closeModal();
       setLocation(`/donate?${params.toString()}`);
     }
+  }
+
+  // Email validation helper
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
   return (
@@ -185,12 +199,24 @@ export default function TzedakaModals() {
               />
             </div>
 
-
+            <div>
+              <label className="text-sm platypi-medium text-warm-gray block mb-2">Email Address *</label>
+              <Input 
+                placeholder="your@email.com"
+                type="email"
+                value={donorEmail}
+                onChange={(e) => setDonorEmail(e.target.value)}
+                className="rounded-xl border-blush/30 focus:border-blush bg-white/80 backdrop-blur-sm"
+                autoFocus={false}
+                required
+              />
+              <p className="text-xs text-warm-gray/60 mt-1 platypi-regular">For your tax receipt</p>
+            </div>
 
             <div>
               <Button 
                 onClick={() => handleDonation()}
-                disabled={!donorName.trim() || !dedicationText.trim() || !sponsorMessage.trim()}
+                disabled={!donorName.trim() || !dedicationText.trim() || !sponsorMessage.trim() || !isValidEmail(donorEmail)}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Sponsor for $180
@@ -618,10 +644,23 @@ export default function TzedakaModals() {
             </div>
 
             <div>
+              <label className="text-sm platypi-medium text-warm-gray block mb-2">Email Address *</label>
+              <Input 
+                placeholder="your@email.com"
+                type="email"
+                value={donorEmail}
+                onChange={(e) => setDonorEmail(e.target.value)}
+                className="rounded-xl border-blush/30 focus:border-blush bg-white/80 backdrop-blur-sm"
+                required
+              />
+              <p className="text-xs text-warm-gray/60 mt-1 platypi-regular">For your tax receipt</p>
+            </div>
+
+            <div>
               <Button 
                 onClick={() => handleDonation()}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
-                disabled={!donationAmount}
+                disabled={!donationAmount || !isValidEmail(donorEmail)}
               >
                 Donate {donationAmount === "custom" ? `$${customAmount || ""}` : `$${donationAmount || "1"}`}
               </Button>
@@ -728,10 +767,23 @@ export default function TzedakaModals() {
             </div>
 
             <div>
+              <label className="text-sm platypi-medium text-warm-gray block mb-2">Email Address *</label>
+              <Input 
+                placeholder="your@email.com"
+                type="email"
+                value={donorEmail}
+                onChange={(e) => setDonorEmail(e.target.value)}
+                className="rounded-xl border-blush/30 focus:border-blush bg-white/80 backdrop-blur-sm"
+                required
+              />
+              <p className="text-xs text-warm-gray/60 mt-1 platypi-regular">For your tax receipt</p>
+            </div>
+
+            <div>
               <Button 
                 onClick={() => handleDonation()}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={!donationAmount || (donationAmount === "custom" && (!customAmount || parseFloat(customAmount) <= 0))}
+                disabled={!donationAmount || (donationAmount === "custom" && (!customAmount || parseFloat(customAmount) <= 0)) || !isValidEmail(donorEmail)}
               >
                 Donate {donationAmount === "custom" ? `$${customAmount || ""}` : `$${donationAmount || ""}`}
               </Button>
