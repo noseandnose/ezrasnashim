@@ -16,6 +16,9 @@ type ModalOpener = (modalType: string, section: string, vortId?: number) => void
 // WeakMap stores handlers - auto-cleans when elements are garbage collected
 const clickHandlerRegistry = new WeakMap<HTMLElement, ClickHandler>();
 
+// Flag to cancel the next native click (prevents click-through on collapse)
+let cancelNextClick = false;
+
 // Global modal opener - can be set externally for legacy compatibility
 let globalModalOpenerFn: ModalOpener | null = null;
 
@@ -250,6 +253,8 @@ function initializeBridge() {
         try {
           handlerResult = createSyntheticEvent(current, e);
           handler(handlerResult);
+          // Cancel the next native click to prevent click-through on collapse
+          cancelNextClick = true;
           // If handler called preventDefault, don't do fallback dispatch
           if (handlerResult.defaultPrevented) {
             return;
@@ -332,7 +337,20 @@ function initializeBridge() {
     }
   };
   
+  // Click capture listener to cancel click-through when handler was invoked
+  const handleClickCapture = (e: MouseEvent) => {
+    if (cancelNextClick) {
+      cancelNextClick = false;
+      e.stopPropagation();
+      e.preventDefault();
+      if (isDebugMode) {
+        console.log('[DOM Bridge] Cancelled click-through');
+      }
+    }
+  };
+  
   // Attach with capture phase
+  document.addEventListener('click', handleClickCapture, { capture: true });
   document.addEventListener('pointerdown', handlePointerDown, { capture: true, passive: true });
   document.addEventListener('pointerup', handlePointerUp, { capture: true, passive: true });
   document.addEventListener('scroll', handleScroll, { capture: true, passive: true });
