@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Play, Pause } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { registerClickHandler } from "@/utils/dom-event-bridge";
 
 interface AudioPlayerProps {
   title: string;
@@ -80,6 +81,21 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
     }
   }, []);
   
+  // Keep a stable ref for the bridge
+  const togglePlayRef = useRef(togglePlay);
+  togglePlayRef.current = togglePlay;
+  
+  // Ref callback for play button - DOM bridge handles ALL clicks (both web and FlutterFlow)
+  // This prevents double-firing: the bridge invokes the handler and returns early,
+  // so no synthetic click is dispatched and the native click is consumed by the bridge
+  const playButtonRef = useCallback((element: HTMLButtonElement | null) => {
+    if (element) {
+      registerClickHandler(element, () => {
+        console.log('[AudioPlayer] Bridge handler invoked');
+        togglePlayRef.current();
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -232,12 +248,7 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
         <div className="w-16"></div> {/* Left spacer */}
         
         <button
-          onClick={(e) => {
-            console.log('[AudioPlayer] onClick fired');
-            e.preventDefault();
-            e.stopPropagation();
-            togglePlay();
-          }}
+          ref={playButtonRef}
           className={`bg-gradient-feminine rounded-full p-4 hover:scale-105 transition-all border-0 text-white audio-play-button inline-flex items-center justify-center ${audioError ? 'opacity-50' : ''}`}
           style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
           data-testid="button-audio-play"
