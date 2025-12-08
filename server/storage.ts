@@ -43,7 +43,7 @@ import {
   type TehillimChainReading, type InsertTehillimChainReading
 } from "../shared/schema";
 import { db, pool } from "./db";
-import { eq, gt, lt, gte, lte, and, sql, like, desc, inArray, isNull } from "drizzle-orm";
+import { eq, gt, lt, gte, lte, and, or, sql, like, desc, inArray, isNull } from "drizzle-orm";
 import { cleanHebrewText, memoize, withRetry, formatDate } from './typeHelpers';
 
 export interface IStorage {
@@ -757,12 +757,15 @@ export class DatabaseStorage implements IStorage {
         .limit(5);
     }
     
-    // Search by name (case-insensitive)
+    // Search by name or reason (case-insensitive)
     const searchPattern = `%${query}%`;
     return db.select().from(tehillimChains)
       .where(and(
         eq(tehillimChains.isActive, true),
-        like(tehillimChains.name, searchPattern)
+        or(
+          like(tehillimChains.name, searchPattern),
+          like(tehillimChains.reason, searchPattern)
+        )
       ))
       .orderBy(desc(tehillimChains.createdAt))
       .limit(20);

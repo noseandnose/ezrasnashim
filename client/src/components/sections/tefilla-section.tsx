@@ -218,6 +218,11 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   // Search chains query - fetch recent by default when Find is open
   const { data: searchResults = [], isLoading: isSearching } = useQuery<TehillimChain[]>({
     queryKey: ['/api/tehillim-chains/search', searchQuery],
+    queryFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/search?q=${encodeURIComponent(searchQuery)}`);
+      if (!response.ok) throw new Error('Search failed');
+      return response.json();
+    },
     staleTime: 30000,
     enabled: chainView === 'find',
   });
