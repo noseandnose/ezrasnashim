@@ -660,7 +660,7 @@ export default function TzedakaModals() {
               <Button 
                 onClick={() => handleDonation()}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
-                disabled={!donationAmount || !isValidEmail(donorEmail)}
+                disabled={!donationAmount || (donationAmount === "custom" && (!customAmount || parseFloat(customAmount) <= 0)) || !isValidEmail(donorEmail)}
               >
                 Donate {donationAmount === "custom" ? `$${customAmount || ""}` : `$${donationAmount || "1"}`}
               </Button>
