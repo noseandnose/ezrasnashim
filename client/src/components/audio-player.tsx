@@ -76,10 +76,13 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
   const togglePlayRef = useRef(togglePlay);
   togglePlayRef.current = togglePlay;
   
-  // Ref callback for play button - explicit DOM bridge registration for FlutterFlow
+  // Ref callback for play button - explicit DOM bridge registration for FlutterFlow/WebView
   const playButtonRef = useCallback((element: HTMLButtonElement | null) => {
     if (element) {
-      registerClickHandler(element, () => {
+      registerClickHandler(element, (event?: any) => {
+        // Prevent default and stop propagation for consistent behavior
+        if (event?.preventDefault) event.preventDefault();
+        if (event?.stopPropagation) event.stopPropagation();
         // Use the ref to get latest togglePlay function
         togglePlayRef.current();
       });
@@ -238,9 +241,12 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
         
         <button
           ref={playButtonRef}
-          onClick={togglePlay}
-          disabled={audioError}
-          className="bg-gradient-feminine rounded-full p-4 hover:scale-105 transition-all border-0 text-white audio-play-button disabled:opacity-50 inline-flex items-center justify-center"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            togglePlay();
+          }}
+          className={`bg-gradient-feminine rounded-full p-4 hover:scale-105 transition-all border-0 text-white audio-play-button inline-flex items-center justify-center ${audioError ? 'opacity-50' : ''}`}
           style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
           data-testid="button-audio-play"
           type="button"
