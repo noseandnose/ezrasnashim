@@ -309,7 +309,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
               <div>
                 <h3 className="platypi-bold text-lg text-black">Tehillim Chains</h3>
                 <p className="platypi-regular text-xs text-black/60">
-                  {chainTotal.toLocaleString()} tehillim said
+                  {chainTotal.toLocaleString()} Tehillim Said
                 </p>
               </div>
             </div>

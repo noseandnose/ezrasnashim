@@ -1008,21 +1008,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTotalChainTehillimCompleted(): Promise<number> {
-    // Get chain completions
+    // Get chain completions only (not individual tehillim from dailyStats)
     const chainResult = await db.select({ count: sql<number>`count(*)` })
       .from(tehillimChainReadings)
       .where(eq(tehillimChainReadings.status, 'completed'));
     const chainCount = Number(chainResult[0]?.count || 0);
     
-    // Get global tehillim total from daily stats (includes legacy global chain completions)
-    const allStats = await db.select({ tehillimCompleted: dailyStats.tehillimCompleted }).from(dailyStats);
-    let globalCount = 0;
-    for (const stats of allStats) {
-      globalCount += stats.tehillimCompleted || 0;
-    }
-    
-    // Return combined total: global tehillim from analytics + chain completions
-    return globalCount + chainCount;
+    return chainCount;
   }
 
   async migrateTehillimNamesToChains(): Promise<{ migrated: number; skipped: number; errors: string[] }> {
