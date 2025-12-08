@@ -76,10 +76,13 @@ function initializeBridge() {
   // Track pointer state for tap detection
   let lastPointerDownTarget: HTMLElement | null = null;
   let lastPointerDownTime = 0;
+  let lastPointerDownX = 0;
+  let lastPointerDownY = 0;
   let currentTapId = 0;
   let realClickFiredForCurrentTap = false;
   const TAP_THRESHOLD_MS = 500;
   const CLICK_GRACE_PERIOD_MS = 50;
+  const SCROLL_MOVEMENT_THRESHOLD = 15; // pixels - if moved more than this, it's a scroll not a tap
   
   // Delay activation to avoid interfering with initial page load
   setTimeout(() => {
@@ -142,6 +145,8 @@ function initializeBridge() {
     
     lastPointerDownTarget = e.target as HTMLElement;
     lastPointerDownTime = Date.now();
+    lastPointerDownX = e.clientX;
+    lastPointerDownY = e.clientY;
     currentTapId++;
     realClickFiredForCurrentTap = false;
   };
@@ -151,6 +156,19 @@ function initializeBridge() {
     
     const timeSinceDown = Date.now() - lastPointerDownTime;
     if (timeSinceDown > TAP_THRESHOLD_MS) {
+      lastPointerDownTarget = null;
+      return;
+    }
+    
+    // Check if this was a scroll gesture (finger moved too much)
+    const movementX = Math.abs(e.clientX - lastPointerDownX);
+    const movementY = Math.abs(e.clientY - lastPointerDownY);
+    const totalMovement = Math.sqrt(movementX * movementX + movementY * movementY);
+    
+    if (totalMovement > SCROLL_MOVEMENT_THRESHOLD) {
+      if (isDebugMode) {
+        console.log('[DOM Bridge] Scroll detected, movement:', totalMovement.toFixed(1), 'px - ignoring as tap');
+      }
       lastPointerDownTarget = null;
       return;
     }
