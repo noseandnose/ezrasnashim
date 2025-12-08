@@ -793,35 +793,50 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTehillimChainStats(chainId: number): Promise<{totalSaid: number; booksCompleted: number; currentlyReading: number; available: number}> {
-    // Get total completed
-    const completedResult = await db.select({ count: sql<number>`count(*)` })
+    // Get unique psalms completed (count distinct psalm numbers, not total entries)
+    const uniqueCompletedResult = await db.select({ 
+      count: sql<number>`count(DISTINCT ${tehillimChainReadings.psalmNumber})` 
+    })
       .from(tehillimChainReadings)
       .where(and(
         eq(tehillimChainReadings.chainId, chainId),
         eq(tehillimChainReadings.status, 'completed')
       ));
-    const totalSaid = Number(completedResult[0]?.count || 0);
+    const uniquePsalmsCompleted = Number(uniqueCompletedResult[0]?.count || 0);
+    
+    // Get total completions (for calculating books - multiple cycles)
+    const totalCompletionsResult = await db.select({ count: sql<number>`count(*)` })
+      .from(tehillimChainReadings)
+      .where(and(
+        eq(tehillimChainReadings.chainId, chainId),
+        eq(tehillimChainReadings.status, 'completed')
+      ));
+    const totalCompletions = Number(totalCompletionsResult[0]?.count || 0);
     
     // Calculate books completed (150 psalms per book)
-    const booksCompleted = Math.floor(totalSaid / 150);
+    // Each unique psalm completion in a cycle counts toward the book
+    const booksCompleted = Math.floor(totalCompletions / 150);
     
-    // Get currently reading (active readings started in last 30 minutes)
-    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
-    const readingResult = await db.select({ count: sql<number>`count(*)` })
+    // Get currently reading (active readings started in last 10 minutes to match next-available logic)
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+    const readingResult = await db.select({ 
+      count: sql<number>`count(DISTINCT ${tehillimChainReadings.psalmNumber})` 
+    })
       .from(tehillimChainReadings)
       .where(and(
         eq(tehillimChainReadings.chainId, chainId),
         eq(tehillimChainReadings.status, 'reading'),
-        gt(tehillimChainReadings.startedAt, thirtyMinutesAgo)
+        gt(tehillimChainReadings.startedAt, tenMinutesAgo)
       ));
     const currentlyReading = Number(readingResult[0]?.count || 0);
     
     // Calculate available psalms in current book cycle
-    // Available = 150 - (completed in current cycle + currently reading)
-    const completedInCurrentCycle = totalSaid % 150;
+    // Use unique psalms for accurate calculation
+    const completedInCurrentCycle = uniquePsalmsCompleted % 150;
     const available = Math.max(0, 150 - completedInCurrentCycle - currentlyReading);
     
-    return { totalSaid, booksCompleted, currentlyReading, available };
+    // Return unique psalms as "totalSaid" for clearer user understanding
+    return { totalSaid: uniquePsalmsCompleted, booksCompleted, currentlyReading, available };
   }
 
   async startChainReading(chainId: number, psalmNumber: number, deviceId: string): Promise<TehillimChainReading> {
