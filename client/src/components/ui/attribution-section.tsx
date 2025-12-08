@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { registerClickHandler } from "@/utils/dom-event-bridge";
 
 interface AttributionSectionProps {
   label: string;
@@ -24,6 +25,24 @@ export function AttributionSection({
   const [isExpanded, setIsExpanded] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  
+  // Toggle handler for DOM bridge
+  const handleToggle = useCallback(() => {
+    setIsExpanded(prev => !prev);
+  }, []);
+  
+  // Register with DOM event bridge for FlutterFlow WebView compatibility
+  useEffect(() => {
+    if (buttonRef.current) {
+      registerClickHandler(buttonRef.current, handleToggle);
+    }
+    return () => {
+      if (buttonRef.current) {
+        registerClickHandler(buttonRef.current, undefined);
+      }
+    };
+  }, [handleToggle]);
   
   // Preload image when component mounts or logoUrl changes
   useEffect(() => {
@@ -67,9 +86,11 @@ export function AttributionSection({
     <div className={`mb-1 ${className}`}>
       <div className="bg-gray-50 hover:bg-gray-100 rounded-2xl border border-gray-200 transition-colors overflow-hidden">
         <button
-          onClick={() => setIsExpanded(!isExpanded)}
+          ref={buttonRef}
+          onClick={handleToggle}
           className="w-full text-left p-3"
           data-testid="button-toggle-attribution"
+          data-bridge-container="true"
         >
           <div className="flex items-center justify-between">
             {labelHtml ? (
