@@ -275,6 +275,23 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     }
   }, []);
 
+  // Ref callbacks for chain buttons (FlutterFlow WebView fix)
+  const createButtonRef = useCallback((element: HTMLButtonElement | null) => {
+    if (element) {
+      registerClickHandler(element, () => {
+        setChainView(prev => prev === 'create' ? 'none' : 'create');
+      });
+    }
+  }, []);
+
+  const findButtonRef = useCallback((element: HTMLButtonElement | null) => {
+    if (element) {
+      registerClickHandler(element, () => {
+        setChainView(prev => prev === 'find' ? 'none' : 'find');
+      });
+    }
+  }, []);
+
 
   return (
     <div className="pb-20" data-bridge-container>
@@ -301,21 +318,25 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             </div>
             <div className="flex items-center space-x-2">
               <Button
+                ref={createButtonRef}
                 size="sm"
                 variant="outline"
                 onClick={() => setChainView(chainView === 'create' ? 'none' : 'create')}
                 className={`text-xs px-3 py-1 h-auto bg-white border-blush/30 hover:bg-blush/5 ${chainView === 'create' ? 'text-blush border-blush' : 'text-blush'}`}
                 data-testid="button-chain-create"
+                data-action="toggle-chain-create"
               >
                 <Plus size={14} className="mr-1" />
                 Create
               </Button>
               <Button
+                ref={findButtonRef}
                 size="sm"
                 variant="outline"
                 onClick={() => setChainView(chainView === 'find' ? 'none' : 'find')}
                 className={`text-xs px-3 py-1 h-auto bg-white border-blush/30 hover:bg-blush/5 ${chainView === 'find' ? 'text-blush border-blush' : 'text-blush'}`}
                 data-testid="button-chain-find"
+                data-action="toggle-chain-find"
               >
                 <Search size={14} className="mr-1" />
                 Find
