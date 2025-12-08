@@ -172,6 +172,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const [chainName, setChainName] = useState("");
   const [chainReason, setChainReason] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoadingRandom, setIsLoadingRandom] = useState(false);
   const [, setLocation] = useLocation();
   
   // Refs for DOM bridge support (FlutterFlow WebView compatibility)
@@ -348,7 +349,10 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             </button>
             <button
               type="button"
+              disabled={isLoadingRandom}
               onClick={async () => {
+                if (isLoadingRandom) return;
+                setIsLoadingRandom(true);
                 try {
                   const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/tehillim-chains/random`);
                   if (response.ok) {
@@ -357,13 +361,15 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                   }
                 } catch (error) {
                   console.error('Failed to get random chain:', error);
+                } finally {
+                  setIsLoadingRandom(false);
                 }
               }}
-              className="text-sm px-4 py-2 bg-white border border-blush/30 rounded-xl hover:bg-blush/5 inline-flex items-center text-blush"
+              className={`text-sm px-4 py-2 bg-white border border-blush/30 rounded-xl hover:bg-blush/5 inline-flex items-center text-blush ${isLoadingRandom ? 'opacity-50 cursor-not-allowed' : ''}`}
               data-testid="button-chain-random"
             >
-              <Shuffle size={18} className="mr-2" />
-              Random
+              <Shuffle size={18} className={`mr-2 ${isLoadingRandom ? 'animate-spin' : ''}`} />
+              {isLoadingRandom ? 'Loading...' : 'Random'}
             </button>
           </div>
 
