@@ -60,24 +60,15 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
 
   // Use ref-based toggle to avoid stale closure issues after backgrounding
   const togglePlay = useCallback(() => {
-    console.log('[AudioPlayer] togglePlay called');
     const audio = audioRef.current;
-    console.log('[AudioPlayer] audio ref:', audio ? 'exists' : 'null', 'paused:', audio?.paused, 'src:', audio?.src?.slice(0, 50));
     if (audio) {
       if (audio.paused) {
-        console.log('[AudioPlayer] Attempting to play...');
-        audio.play().then(() => {
-          console.log('[AudioPlayer] Play succeeded');
-        }).catch((err) => {
-          console.error('[AudioPlayer] Play failed:', err);
+        audio.play().catch(() => {
           setAudioError(true);
         });
       } else {
-        console.log('[AudioPlayer] Pausing...');
         audio.pause();
       }
-    } else {
-      console.error('[AudioPlayer] No audio element ref!');
     }
   }, []);
   
@@ -85,13 +76,21 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
   const togglePlayRef = useRef(togglePlay);
   togglePlayRef.current = togglePlay;
   
+  // Track the current button element for cleanup
+  const buttonElementRef = useRef<HTMLButtonElement | null>(null);
+  
   // Ref callback for play button - DOM bridge handles ALL clicks (both web and FlutterFlow)
   // This prevents double-firing: the bridge invokes the handler and returns early,
   // so no synthetic click is dispatched and the native click is consumed by the bridge
   const playButtonRef = useCallback((element: HTMLButtonElement | null) => {
+    // Clean up previous registration if element changed
+    if (buttonElementRef.current && buttonElementRef.current !== element) {
+      registerClickHandler(buttonElementRef.current, undefined);
+    }
+    buttonElementRef.current = element;
+    
     if (element) {
       registerClickHandler(element, () => {
-        console.log('[AudioPlayer] Bridge handler invoked');
         togglePlayRef.current();
       });
     }
