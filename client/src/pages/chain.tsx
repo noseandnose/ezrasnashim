@@ -307,29 +307,41 @@ export default function ChainPage() {
         </div>
       </div>
 
-      <div className="flex items-center justify-center p-3 bg-white/30">
+      <div className="flex items-center justify-center p-3 bg-white border-b border-blush/10">
         <span className="platypi-medium text-sm text-black">
           {currentPsalm ? `Psalm ${currentPsalm}` : 'Loading...'}
         </span>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4">
-        {psalmContent ? (
-          <div
-            className={`leading-relaxed ${showHebrew ? 'text-right koren-siddur' : 'text-left platypi-regular'}`}
-            style={{ fontSize: `${fontSize}px` }}
-            dir={showHebrew ? 'rtl' : 'ltr'}
-          >
-            {showHebrew ? psalmContent.hebrewText : psalmContent.englishText}
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
-          </div>
-        )}
+      <div className="flex-1 overflow-y-auto bg-white relative">
+        <div className="p-4 pb-20">
+          {psalmContent ? (
+            <div
+              className={`leading-relaxed text-black ${showHebrew ? 'text-right vc-koren-hebrew' : 'text-left koren-siddur-english'}`}
+              style={{ fontSize: showHebrew ? `${fontSize + 1}px` : `${fontSize}px` }}
+              dir={showHebrew ? 'rtl' : 'ltr'}
+            >
+              {showHebrew ? psalmContent.hebrewText : psalmContent.englishText}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-full min-h-[200px]">
+              <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
+            </div>
+          )}
+        </div>
+        
+        <FloatingSettings
+          showLanguageControls={true}
+          language={showHebrew ? 'hebrew' : 'english'}
+          onLanguageChange={(lang) => setShowHebrew(lang === 'hebrew')}
+          showFontControls={true}
+          fontSize={fontSize}
+          onFontSizeChange={setFontSize}
+          bottomOffset="6rem"
+        />
       </div>
 
-      <div className="p-4 bg-white/80 backdrop-blur-sm border-t border-blush/10 safe-area-bottom">
+      <div className="p-4 bg-white border-t border-blush/10 safe-area-bottom">
         <div className="flex space-x-3">
           <button
             onClick={handleFindAnother}
@@ -349,15 +361,6 @@ export default function ChainPage() {
           </button>
         </div>
       </div>
-
-      <FloatingSettings
-        showLanguageControls={true}
-        language={showHebrew ? 'hebrew' : 'english'}
-        onLanguageChange={(lang) => setShowHebrew(lang === 'hebrew')}
-        showFontControls={true}
-        fontSize={fontSize}
-        onFontSizeChange={setFontSize}
-      />
     </div>
   );
 }
