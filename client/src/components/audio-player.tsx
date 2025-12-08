@@ -60,15 +60,24 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
 
   // Use ref-based toggle to avoid stale closure issues after backgrounding
   const togglePlay = useCallback(() => {
+    console.log('[AudioPlayer] togglePlay called');
     const audio = audioRef.current;
+    console.log('[AudioPlayer] audio ref:', audio ? 'exists' : 'null', 'paused:', audio?.paused, 'src:', audio?.src?.slice(0, 50));
     if (audio) {
       if (audio.paused) {
-        audio.play().catch(() => {
+        console.log('[AudioPlayer] Attempting to play...');
+        audio.play().then(() => {
+          console.log('[AudioPlayer] Play succeeded');
+        }).catch((err) => {
+          console.error('[AudioPlayer] Play failed:', err);
           setAudioError(true);
         });
       } else {
+        console.log('[AudioPlayer] Pausing...');
         audio.pause();
       }
+    } else {
+      console.error('[AudioPlayer] No audio element ref!');
     }
   }, []);
   
@@ -242,6 +251,7 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
         <button
           ref={playButtonRef}
           onClick={(e) => {
+            console.log('[AudioPlayer] onClick fired');
             e.preventDefault();
             e.stopPropagation();
             togglePlay();
