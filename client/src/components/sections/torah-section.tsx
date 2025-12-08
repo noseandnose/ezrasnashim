@@ -6,7 +6,6 @@ import type { Section } from "@/pages/home";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
-import { registerClickHandler } from "@/utils/dom-event-bridge";
 
 // Calculate reading time based on word count (average 200 words per minute)
 const calculateReadingTime = (text: string): string => {
@@ -44,26 +43,34 @@ export default function TorahSection({}: TorahSectionProps) {
   const [pirkeiAvotExpanded, setPirkeiAvotExpanded] = useState(false);
   const pirkeiExpandButtonRef = useRef<HTMLButtonElement>(null);
   
-  // Toggle handler for Pirkei Avot expand button (DOM bridge compatible)
-  const handlePirkeiAvotToggle = useCallback((event?: React.MouseEvent | { stopPropagation?: () => void }) => {
-    // Prevent event from bubbling to parent elements (avoids triggering other buttons)
+  // Cancel next click helper - prevents click-through when content collapses
+  const cancelNextClickRef = useRef(false);
+  
+  useEffect(() => {
+    const handleClickCapture = (e: MouseEvent) => {
+      if (cancelNextClickRef.current) {
+        cancelNextClickRef.current = false;
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    };
+    document.addEventListener('click', handleClickCapture, true);
+    return () => document.removeEventListener('click', handleClickCapture, true);
+  }, []);
+  
+  // Toggle handler for Pirkei Avot expand button
+  const handlePirkeiAvotToggle = useCallback((event?: React.MouseEvent | { stopPropagation?: () => void; preventDefault?: () => void }) => {
+    // Prevent event from bubbling
     if (event?.stopPropagation) {
       event.stopPropagation();
     }
+    if (event?.preventDefault) {
+      (event as any).preventDefault();
+    }
+    // Cancel the next native click to prevent click-through on collapse
+    cancelNextClickRef.current = true;
     setPirkeiAvotExpanded(prev => !prev);
   }, []);
-  
-  // Register expand button with DOM event bridge for FlutterFlow WebView compatibility
-  useEffect(() => {
-    if (pirkeiExpandButtonRef.current) {
-      registerClickHandler(pirkeiExpandButtonRef.current, handlePirkeiAvotToggle);
-    }
-    return () => {
-      if (pirkeiExpandButtonRef.current) {
-        registerClickHandler(pirkeiExpandButtonRef.current, undefined);
-      }
-    };
-  }, [handlePirkeiAvotToggle]);
   
   // Fetch today's Pirkei Avot for daily inspiration
   const today = new Date().toISOString().split('T')[0];
@@ -277,6 +284,7 @@ export default function TorahSection({}: TorahSectionProps) {
                 {pirkeiAvot?.text && pirkeiAvot.text.length > 250 && (
                   <button
                     ref={pirkeiExpandButtonRef}
+                    onClick={handlePirkeiAvotToggle}
                     className="absolute -bottom-1 right-0 bg-gradient-feminine rounded-full shadow-sm hover:scale-110 transition-transform p-0 overflow-visible"
                     style={{ width: '16px', height: '16px', minWidth: '16px', minHeight: '16px', padding: 0 }}
                     data-testid="button-toggle-pirkei-avot"
