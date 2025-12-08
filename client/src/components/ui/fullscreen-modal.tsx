@@ -7,7 +7,7 @@ import { useLocation } from 'wouter';
 import { MiniCompassModal } from '@/components/modals/mini-compass-modal';
 import { ensureSafeAreaVariables } from '@/hooks/use-safe-area';
 import { getHebrewFontClass } from '@/lib/hebrewUtils';
-import { registerAction, unregisterAction } from '@/utils/dom-event-bridge';
+import { registerAction, unregisterAction, registerClickHandler } from '@/utils/dom-event-bridge';
 
 // Global counter and state to track active fullscreen modals
 // Prevents race conditions when closing one modal while another opens
@@ -185,6 +185,15 @@ export function FullscreenModal({
       unregisterAction(actionId);
     };
   }, [actionId, safeClose]);
+  
+  // Ref callback for close buttons to register with WeakMap (FlutterFlow fix)
+  const closeButtonRef = useCallback((element: HTMLButtonElement | null) => {
+    if (element) {
+      registerClickHandler(element, () => {
+        safeClose();
+      });
+    }
+  }, [safeClose]);
 
   // Use useLayoutEffect to ensure new modal increments counter before old modal's cleanup runs
   // This prevents race conditions in chained modal scenarios
@@ -459,6 +468,7 @@ export function FullscreenModal({
                 </Popover>
               )}
               <button
+                ref={closeButtonRef}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -479,6 +489,7 @@ export function FullscreenModal({
       ) : (
         /* Compact close button for headerless modals */
         <button
+          ref={closeButtonRef}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();

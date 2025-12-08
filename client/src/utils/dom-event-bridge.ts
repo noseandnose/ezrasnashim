@@ -9,6 +9,7 @@
  */
 
 import { useEffect, useRef, useCallback } from 'react';
+import { useModalStore } from '@/lib/types';
 
 type ActionHandler = (element: HTMLElement, event: MouseEvent | TouchEvent | PointerEvent) => void;
 type ClickHandler = (event?: any) => void;
@@ -18,6 +19,15 @@ const actionHandlers = new Map<string, ActionHandler>();
 // WeakMap to store onClick handlers for direct invocation
 // This bypasses React's broken event delegation after FlutterFlow resume
 const clickHandlerRegistry = new WeakMap<HTMLElement, ClickHandler>();
+
+/**
+ * Open a modal directly using Zustand's getState() to avoid stale closures
+ * This is the key fix for FlutterFlow resume - we always get fresh state
+ */
+function openModalDirect(modalType: string, section: string, vortId?: number) {
+  const { openModal } = useModalStore.getState();
+  openModal(modalType, section, undefined, vortId);
+}
 
 /**
  * Register an element's click handler for direct invocation by the bridge
@@ -62,10 +72,13 @@ export function useBridgeClick<T extends HTMLElement>(
   }, []);
 }
 
+// DEPRECATED: globalModalOpener is no longer needed since we use openModalDirect with getState()
+// Keeping exports for backward compatibility but they are no-ops now
 let globalModalOpener: ((modalType: string, section: string, vortId?: number) => void) | null = null;
 
 export function setGlobalModalOpener(opener: (modalType: string, section: string, vortId?: number) => void) {
   globalModalOpener = opener;
+  // Note: This is now a no-op - openModalDirect uses getState() directly
 }
 
 export function getGlobalModalOpener() {
@@ -165,14 +178,15 @@ function initializeBridge() {
       }
       
       const modalType = currentElement.getAttribute('data-modal-type');
-      if (modalType && globalModalOpener) {
+      if (modalType) {
         const section = currentElement.getAttribute('data-modal-section') || 'home';
         const vortId = currentElement.getAttribute('data-vort-id');
         if (isDebugMode) {
-          console.log('[DOM Bridge] Opening modal:', modalType, section);
+          console.log('[DOM Bridge] Opening modal directly:', modalType, section);
         }
         try {
-          globalModalOpener(modalType, section, vortId ? parseInt(vortId) : undefined);
+          // Use openModalDirect which calls getState() to avoid stale closures
+          openModalDirect(modalType, section, vortId ? parseInt(vortId) : undefined);
         } catch (error) {
           console.error('[DOM Bridge] Error opening modal:', error);
         }
