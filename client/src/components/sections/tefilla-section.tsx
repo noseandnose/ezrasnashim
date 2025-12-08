@@ -1,8 +1,9 @@
-import { HandHeart, Plus, User, AlertCircle, Heart, Star, Compass, ArrowRight, Baby, HeartHandshake, GraduationCap, Users, Stethoscope, DollarSign, Smile, TrendingUp, Sunrise, Sun, Moon, Stars, Globe, Unlock } from "lucide-react";
+import { HandHeart, Plus, User, AlertCircle, Heart, Star, Compass, ArrowRight, Baby, HeartHandshake, GraduationCap, Users, Stethoscope, DollarSign, Smile, TrendingUp, Sunrise, Sun, Moon, Stars, Globe, Unlock, Search, Link2, ChevronRight } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
 import { registerClickHandler } from "@/utils/dom-event-bridge";
+import { useLocation } from "wouter";
 
 interface TefillaSectionProps {
   onSectionChange?: (section: Section) => void;
@@ -15,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
-import type { TehillimName, GlobalTehillimProgress } from "@shared/schema";
+import type { TehillimName, GlobalTehillimProgress, TehillimChain } from "@shared/schema";
 
 export default function TefillaSection({ onSectionChange: _onSectionChange }: TefillaSectionProps) {
   const { openModal } = useModalStore();
@@ -260,6 +261,13 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const [reasonEnglish, setReasonEnglish] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [_showHebrew, _setShowHebrew] = useState(true);
+  
+  // Tehillim Chains state
+  const [chainView, setChainView] = useState<'none' | 'create' | 'find'>('none');
+  const [chainName, setChainName] = useState("");
+  const [chainReason, setChainReason] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [, setLocation] = useLocation();
 
   // Fetch global Tehillim progress
   const { data: progress, isError: progressError } = useQuery<GlobalTehillimProgress>({
@@ -406,6 +414,72 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     }
   });
 
+  // Fetch total tehillim from all chains
+  const { data: chainTotalData } = useQuery<{ total: number }>({
+    queryKey: ['/api/tehillim-chains/stats/total'],
+    staleTime: 60000,
+    refetchOnWindowFocus: true,
+  });
+  const chainTotal = chainTotalData?.total || 0;
+
+  // Search chains query
+  const { data: searchResults = [], isLoading: isSearching } = useQuery<TehillimChain[]>({
+    queryKey: ['/api/tehillim-chains/search', searchQuery],
+    queryFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/search?q=${encodeURIComponent(searchQuery)}`);
+      if (!response.ok) throw new Error('Search failed');
+      return response.json();
+    },
+    enabled: chainView === 'find',
+    staleTime: 30000,
+  });
+
+  // Create chain mutation
+  const createChainMutation = useMutation({
+    mutationFn: async (data: { name: string; reason: string; deviceId?: string }) => {
+      return apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/tehillim-chains`, data);
+    },
+    onSuccess: async (response) => {
+      const chain = await response.json();
+      toast({
+        title: "Chain Created!",
+        description: "Your Tehillim chain has been created.",
+      });
+      setChainName("");
+      setChainReason("");
+      setChainView('none');
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/stats/total'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/search'] });
+      // Navigate to the new chain
+      setLocation(`/c/${chain.slug}`);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to create chain. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleCreateChain = () => {
+    if (!chainName.trim() || !chainReason.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter both a name and reason.",
+        variant: "destructive"
+      });
+      return;
+    }
+    // Get device ID from localStorage or generate one
+    let deviceId = localStorage.getItem('deviceId');
+    if (!deviceId) {
+      deviceId = 'device-' + Date.now().toString(36) + Math.random().toString(36).substring(2);
+      localStorage.setItem('deviceId', deviceId);
+    }
+    createChainMutation.mutate({ name: chainName, reason: chainReason, deviceId });
+  };
+
   const handleAddName = () => {
     if (!hebrewName.trim() || !reason.trim()) {
       toast({
@@ -509,7 +583,140 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     <div className="pb-20" data-bridge-container>
 
       {/* Main Tefilla Section - Tehillim */}
-      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">
+      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg space-y-3">
+        
+        {/* Personal Tehillim Chains Card */}
+        <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center space-x-3">
+              <div className="bg-gradient-feminine p-3 rounded-full">
+                <Link2 className="text-white" size={20} />
+              </div>
+              <div>
+                <h3 className="platypi-bold text-lg text-black">Tehillim Chains</h3>
+                <p className="platypi-regular text-xs text-black/60">
+                  {chainTotal.toLocaleString()} tehillim said
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setChainView(chainView === 'create' ? 'none' : 'create')}
+                className={`text-xs px-3 py-1 h-auto bg-white border-blush/30 hover:bg-blush/5 ${chainView === 'create' ? 'text-blush border-blush' : 'text-blush'}`}
+                data-testid="button-chain-create"
+              >
+                <Plus size={14} className="mr-1" />
+                Create
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setChainView(chainView === 'find' ? 'none' : 'find')}
+                className={`text-xs px-3 py-1 h-auto bg-white border-blush/30 hover:bg-blush/5 ${chainView === 'find' ? 'text-blush border-blush' : 'text-blush'}`}
+                data-testid="button-chain-find"
+              >
+                <Search size={14} className="mr-1" />
+                Find
+              </Button>
+            </div>
+          </div>
+
+          {/* Create Chain Form */}
+          {chainView === 'create' && (
+            <div className="space-y-3 p-3 bg-gradient-to-r from-ivory to-lavender/5 rounded-2xl border border-lavender/20">
+              <Input
+                placeholder="Chain Name (e.g., Refuah for Sarah)"
+                value={chainName}
+                onChange={(e) => setChainName(e.target.value)}
+                className="text-left rounded-2xl border-blush/20 focus:border-blush bg-white"
+                data-testid="input-chain-name"
+              />
+              
+              <Input
+                placeholder="Reason (e.g., Recovery, Wedding, etc.)"
+                value={chainReason}
+                onChange={(e) => setChainReason(e.target.value)}
+                className="text-left rounded-2xl border-blush/20 focus:border-blush bg-white"
+                data-testid="input-chain-reason"
+              />
+              
+              <div className="flex space-x-3">
+                <Button 
+                  onClick={() => setChainView('none')} 
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 rounded-2xl border-blush/30 hover:bg-blush/5 bg-white"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleCreateChain}
+                  disabled={createChainMutation.isPending}
+                  size="sm"
+                  className="flex-1 rounded-2xl bg-gradient-feminine hover:opacity-90 text-white"
+                  data-testid="button-create-chain"
+                >
+                  {createChainMutation.isPending ? "Creating..." : "Create Chain"}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Find Chain Form */}
+          {chainView === 'find' && (
+            <div className="space-y-3 p-3 bg-gradient-to-r from-ivory to-lavender/5 rounded-2xl border border-lavender/20">
+              <Input
+                placeholder="Search by name or reason..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="text-left rounded-2xl border-blush/20 focus:border-blush bg-white"
+                data-testid="input-chain-search"
+              />
+              
+              {isSearching && (
+                <div className="flex items-center justify-center py-4">
+                  <div className="animate-spin w-5 h-5 border-2 border-blush border-t-transparent rounded-full"></div>
+                </div>
+              )}
+              
+              {!isSearching && searchResults.length > 0 && (
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {searchResults.map((chain) => (
+                    <button
+                      key={chain.id}
+                      onClick={() => setLocation(`/c/${chain.slug}`)}
+                      className="w-full p-3 bg-white rounded-xl border border-blush/20 hover:bg-blush/5 transition-all flex items-center justify-between"
+                    >
+                      <div className="text-left">
+                        <p className="platypi-medium text-sm text-black">{chain.name}</p>
+                        <p className="platypi-regular text-xs text-black/60">{chain.reason}</p>
+                      </div>
+                      <ChevronRight size={16} className="text-blush" />
+                    </button>
+                  ))}
+                </div>
+              )}
+              
+              {!isSearching && searchQuery && searchResults.length === 0 && (
+                <p className="text-center text-sm text-black/50 py-4 platypi-regular">
+                  No chains found. Try a different search or create a new one.
+                </p>
+              )}
+              
+              <Button 
+                onClick={() => setChainView('none')} 
+                variant="outline"
+                size="sm"
+                className="w-full rounded-2xl border-blush/30 hover:bg-blush/5 bg-white"
+              >
+                Close
+              </Button>
+            </div>
+          )}
+        </div>
+
         {/* Global Tehillim Chain Card */}
         <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
           <div className="flex items-center justify-between mb-2">
