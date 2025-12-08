@@ -465,7 +465,7 @@ export default function Statistics() {
               color="text-lavender"
             />
             <StatCard
-              title="Active Campaigns"
+              title="Tehillim Chains"
               value={activeCampaigns.toLocaleString()}
               icon={Heart}
               color="text-sage"
