@@ -3,9 +3,10 @@ import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import { useModalStore, useModalCompletionStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import type { Section } from "@/pages/home";
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
+import { registerClickHandler } from "@/utils/dom-event-bridge";
 
 // Calculate reading time based on word count (average 200 words per minute)
 const calculateReadingTime = (text: string): string => {
@@ -41,6 +42,24 @@ export default function TorahSection({}: TorahSectionProps) {
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [pirkeiAvotExpanded, setPirkeiAvotExpanded] = useState(false);
+  const pirkeiExpandButtonRef = useRef<HTMLButtonElement>(null);
+  
+  // Toggle handler for Pirkei Avot expand button (DOM bridge compatible)
+  const handlePirkeiAvotToggle = useCallback(() => {
+    setPirkeiAvotExpanded(prev => !prev);
+  }, []);
+  
+  // Register expand button with DOM event bridge for FlutterFlow WebView compatibility
+  useEffect(() => {
+    if (pirkeiExpandButtonRef.current) {
+      registerClickHandler(pirkeiExpandButtonRef.current, handlePirkeiAvotToggle);
+    }
+    return () => {
+      if (pirkeiExpandButtonRef.current) {
+        registerClickHandler(pirkeiExpandButtonRef.current, undefined);
+      }
+    };
+  }, [handlePirkeiAvotToggle]);
   
   // Fetch today's Pirkei Avot for daily inspiration
   const today = new Date().toISOString().split('T')[0];
@@ -253,10 +272,12 @@ export default function TorahSection({}: TorahSectionProps) {
                 </p>
                 {pirkeiAvot?.text && pirkeiAvot.text.length > 250 && (
                   <button
-                    onClick={() => setPirkeiAvotExpanded(!pirkeiAvotExpanded)}
+                    ref={pirkeiExpandButtonRef}
+                    onClick={handlePirkeiAvotToggle}
                     className="absolute -bottom-1 right-0 bg-gradient-feminine rounded-full shadow-sm hover:scale-110 transition-transform p-0 overflow-visible"
                     style={{ width: '16px', height: '16px', minWidth: '16px', minHeight: '16px', padding: 0 }}
                     data-testid="button-toggle-pirkei-avot"
+                    data-bridge-container="true"
                   >
                     <svg 
                       width="10" 
