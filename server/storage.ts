@@ -881,7 +881,25 @@ export class DatabaseStorage implements IStorage {
     let completedReading: TehillimChainReading | null = null;
     
     if (!reading) {
-      // If no active reading found, create a completed one
+      // Check if there's already a completed reading for this psalm by this device
+      // This prevents duplicate completions when the user clicks complete multiple times
+      const [existingCompleted] = await db.select().from(tehillimChainReadings)
+        .where(and(
+          eq(tehillimChainReadings.chainId, chainId),
+          eq(tehillimChainReadings.psalmNumber, psalmNumber),
+          eq(tehillimChainReadings.deviceId, deviceId),
+          eq(tehillimChainReadings.status, 'completed')
+        ))
+        .orderBy(desc(tehillimChainReadings.completedAt))
+        .limit(1);
+      
+      if (existingCompleted) {
+        // Already completed by this device - return existing without creating duplicate
+        console.log(`Chain ${chainId} psalm ${psalmNumber} already completed by device ${deviceId.slice(0, 20)}...`);
+        return existingCompleted;
+      }
+      
+      // No active reading and no existing completion - create a new completed one
       const [newReading] = await db.insert(tehillimChainReadings).values({
         chainId,
         psalmNumber,
