@@ -9,7 +9,7 @@ interface TefillaSectionProps {
   onSectionChange?: (section: Section) => void;
 }
 import { useJewishTimes } from "@/hooks/use-jewish-times";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -194,6 +194,37 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const [chainReason, setChainReason] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [, setLocation] = useLocation();
+  
+  // Refs for DOM bridge support (FlutterFlow WebView compatibility)
+  const createButtonRef = useRef<HTMLButtonElement>(null);
+  const findButtonRef = useRef<HTMLButtonElement>(null);
+  
+  // Toggle handlers for Create/Find buttons (DOM bridge compatible)
+  const handleCreateToggle = useCallback(() => {
+    setChainView(prev => prev === 'create' ? 'none' : 'create');
+  }, []);
+  
+  const handleFindToggle = useCallback(() => {
+    setChainView(prev => prev === 'find' ? 'none' : 'find');
+  }, []);
+  
+  // Register buttons with DOM event bridge for FlutterFlow WebView compatibility
+  useEffect(() => {
+    if (createButtonRef.current) {
+      registerClickHandler(createButtonRef.current, handleCreateToggle);
+    }
+    if (findButtonRef.current) {
+      registerClickHandler(findButtonRef.current, handleFindToggle);
+    }
+    return () => {
+      if (createButtonRef.current) {
+        registerClickHandler(createButtonRef.current, undefined);
+      }
+      if (findButtonRef.current) {
+        registerClickHandler(findButtonRef.current, undefined);
+      }
+    };
+  }, [handleCreateToggle, handleFindToggle]);
 
   // Fetch total tehillim from all chains
   const { data: chainTotalData } = useQuery<{ total: number }>({
@@ -315,25 +346,23 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             </div>
             <div className="flex items-center space-x-2">
               <button
+                ref={createButtonRef}
                 type="button"
-                onClick={() => {
-                  console.log('Create button clicked, current view:', chainView);
-                  setChainView(chainView === 'create' ? 'none' : 'create');
-                }}
+                onClick={handleCreateToggle}
                 className={`text-xs px-3 py-1 h-auto bg-white border rounded-md hover:bg-blush/5 inline-flex items-center ${chainView === 'create' ? 'text-blush border-blush' : 'text-blush border-blush/30'}`}
                 data-testid="button-chain-create"
+                data-bridge-container="true"
               >
                 <Plus size={14} className="mr-1" />
                 Create
               </button>
               <button
+                ref={findButtonRef}
                 type="button"
-                onClick={() => {
-                  console.log('Find button clicked, current view:', chainView);
-                  setChainView(chainView === 'find' ? 'none' : 'find');
-                }}
+                onClick={handleFindToggle}
                 className={`text-xs px-3 py-1 h-auto bg-white border rounded-md hover:bg-blush/5 inline-flex items-center ${chainView === 'find' ? 'text-blush border-blush' : 'text-blush border-blush/30'}`}
                 data-testid="button-chain-find"
+                data-bridge-container="true"
               >
                 <Search size={14} className="mr-1" />
                 Find
