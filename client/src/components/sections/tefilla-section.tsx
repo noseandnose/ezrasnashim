@@ -2,14 +2,13 @@ import { HandHeart, Plus, Heart, Star, Compass, ArrowRight, Sunrise, Sun, Moon, 
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
-import { registerClickHandler } from "@/utils/dom-event-bridge";
 import { useLocation } from "wouter";
 
 interface TefillaSectionProps {
   onSectionChange?: (section: Section) => void;
 }
 import { useJewishTimes } from "@/hooks/use-jewish-times";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -187,11 +186,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const [isLoadingRandom, setIsLoadingRandom] = useState(false);
   const [, setLocation] = useLocation();
   
-  // Refs for DOM bridge support (FlutterFlow WebView compatibility)
-  const createButtonRef = useRef<HTMLButtonElement>(null);
-  const findButtonRef = useRef<HTMLButtonElement>(null);
-  
-  // Toggle handlers for Create/Find buttons (DOM bridge compatible)
+  // Toggle handlers for Create/Find buttons
   const handleCreateToggle = useCallback(() => {
     setChainView(prev => prev === 'create' ? 'none' : 'create');
   }, []);
@@ -199,24 +194,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const handleFindToggle = useCallback(() => {
     setChainView(prev => prev === 'find' ? 'none' : 'find');
   }, []);
-  
-  // Register buttons with DOM event bridge for FlutterFlow WebView compatibility
-  useEffect(() => {
-    if (createButtonRef.current) {
-      registerClickHandler(createButtonRef.current, handleCreateToggle);
-    }
-    if (findButtonRef.current) {
-      registerClickHandler(findButtonRef.current, handleFindToggle);
-    }
-    return () => {
-      if (createButtonRef.current) {
-        registerClickHandler(createButtonRef.current, undefined);
-      }
-      if (findButtonRef.current) {
-        registerClickHandler(findButtonRef.current, undefined);
-      }
-    };
-  }, [handleCreateToggle, handleFindToggle]);
 
   // Fetch total tehillim from all chains
   const { data: chainTotalData } = useQuery<{ total: number }>({
@@ -296,19 +273,15 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     createChainMutation.mutate({ name: chainName, reason: chainReason, deviceId });
   };
 
-  // Ref callback for compass button (FlutterFlow WebView fix)
-  const compassButtonRef = useCallback((element: HTMLButtonElement | null) => {
-    if (element) {
-      registerClickHandler(element, () => {
-        const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
-          detail: {
-            title: 'The Kotel Compass',
-            contentType: 'compass'
-          }
-        });
-        window.dispatchEvent(fullscreenEvent);
-      });
-    }
+  // Compass button handler
+  const handleOpenCompass = useCallback(() => {
+    const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
+      detail: {
+        title: 'The Kotel Compass',
+        contentType: 'compass'
+      }
+    });
+    window.dispatchEvent(fullscreenEvent);
   }, []);
 
 
@@ -339,28 +312,29 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
           
           {/* Buttons Row */}
           <div className="flex items-center justify-center space-x-3 mb-2">
-            <button
-              ref={createButtonRef}
+            <Button
               type="button"
+              variant="outline"
               onClick={handleCreateToggle}
               className={`text-sm px-4 py-2 bg-white border rounded-xl hover:bg-blush/5 inline-flex items-center ${chainView === 'create' ? 'text-blush border-blush' : 'text-blush border-blush/30'}`}
               data-testid="button-chain-create"
             >
               <Plus size={18} className="mr-2" />
               Create
-            </button>
-            <button
-              ref={findButtonRef}
+            </Button>
+            <Button
               type="button"
+              variant="outline"
               onClick={handleFindToggle}
               className={`text-sm px-4 py-2 bg-white border rounded-xl hover:bg-blush/5 inline-flex items-center ${chainView === 'find' ? 'text-blush border-blush' : 'text-blush border-blush/30'}`}
               data-testid="button-chain-find"
             >
               <Search size={18} className="mr-2" />
               Find
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="outline"
               disabled={isLoadingRandom}
               onClick={async () => {
                 if (isLoadingRandom) return;
@@ -382,7 +356,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             >
               <Shuffle size={18} className={`mr-2 ${isLoadingRandom ? 'animate-spin' : ''}`} />
               {isLoadingRandom ? 'Loading...' : 'Random'}
-            </button>
+            </Button>
           </div>
 
           {/* Create Chain Form */}
@@ -663,18 +637,10 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
 
         {/* The Kotel Compass Section */}
         <div className="bg-gradient-soft rounded-3xl p-4 shadow-lg">
-          <button
-            ref={compassButtonRef}
-            onClick={() => {
-              const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
-                detail: {
-                  title: 'The Kotel Compass',
-                  contentType: 'compass'
-                }
-              });
-              window.dispatchEvent(fullscreenEvent);
-            }}
-            className="w-full bg-white/70 rounded-2xl p-3 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
+          <Button
+            variant="ghost"
+            onClick={handleOpenCompass}
+            className="w-full bg-white/70 rounded-2xl p-3 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left h-auto"
             data-testid="button-open-compass"
           >
             <div className="flex items-center space-x-3">
@@ -689,7 +655,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                 <ArrowRight className="text-white" size={16} />
               </div>
             </div>
-          </button>
+          </Button>
         </div>
 
         {/* Bottom padding */}
