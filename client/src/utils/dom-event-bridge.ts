@@ -20,6 +20,11 @@ const actionHandlers = new Map<string, ActionHandler>();
 // This bypasses React's broken event delegation after FlutterFlow resume
 const clickHandlerRegistry = new WeakMap<HTMLElement, ClickHandler>();
 
+// Track recent handler invocations to prevent double-firing
+// Key is element, value is timestamp of last invocation
+const recentInvocations = new WeakMap<HTMLElement, number>();
+const DEDUP_WINDOW_MS = 100; // Ignore duplicate invocations within this window
+
 /**
  * Open a modal directly using Zustand's getState() to avoid stale closures
  * This is the key fix for FlutterFlow resume - we always get fresh state
@@ -30,14 +35,33 @@ function openModalDirect(modalType: string, section: string, vortId?: number) {
 }
 
 /**
- * Register an element's click handler for direct invocation by the bridge
+ * Register an element's click handler for direct invocation by the bridge.
+ * IMPORTANT: When React's onClick works normally, it fires first. The bridge
+ * tracks this and skips its invocation to prevent double-firing.
  */
 export function registerClickHandler(element: HTMLElement | null, handler: ClickHandler | undefined) {
   if (!element) return;
   
   if (handler) {
+    // Store the handler directly - deduplication happens at invocation points
     clickHandlerRegistry.set(element, handler);
+    
+    // Add a click listener to track when React's onClick fires successfully
+    // This allows the bridge to skip invocation if click already worked
+    const clickTracker = () => {
+      recentInvocations.set(element, Date.now());
+    };
+    element.addEventListener('click', clickTracker, { capture: true });
+    
+    // Store cleanup function
+    (element as any).__bridgeClickTracker = clickTracker;
   } else {
+    // Clean up click tracker
+    const tracker = (element as any).__bridgeClickTracker;
+    if (tracker) {
+      element.removeEventListener('click', tracker, { capture: true });
+      delete (element as any).__bridgeClickTracker;
+    }
     clickHandlerRegistry.delete(element);
   }
 }
@@ -166,6 +190,17 @@ function initializeBridge() {
     if (clickHandlerRegistry.has(element)) {
       const handler = clickHandlerRegistry.get(element);
       if (handler) {
+        // Check for recent invocation to prevent double-firing
+        const lastInvoke = recentInvocations.get(element);
+        const now = Date.now();
+        if (lastInvoke && (now - lastInvoke) < DEDUP_WINDOW_MS) {
+          if (isDebugMode) {
+            console.log('[DOM Bridge] Skipping duplicate invocation (target)');
+          }
+          return true; // Already invoked recently
+        }
+        recentInvocations.set(element, now);
+        
         if (isDebugMode) {
           console.log('[DOM Bridge] Invoking WeakMap handler on target');
         }
@@ -185,6 +220,17 @@ function initializeBridge() {
       if (clickHandlerRegistry.has(currentElement)) {
         const handler = clickHandlerRegistry.get(currentElement);
         if (handler) {
+          // Check for recent invocation to prevent double-firing
+          const lastInvoke = recentInvocations.get(currentElement);
+          const now = Date.now();
+          if (lastInvoke && (now - lastInvoke) < DEDUP_WINDOW_MS) {
+            if (isDebugMode) {
+              console.log('[DOM Bridge] Skipping duplicate invocation (ancestor)');
+            }
+            return true; // Already invoked recently
+          }
+          recentInvocations.set(currentElement, now);
+          
           if (isDebugMode) {
             console.log('[DOM Bridge] Invoking WeakMap handler on ancestor');
           }
@@ -314,6 +360,17 @@ function initializeBridge() {
     // This completely bypasses React's event delegation
     const registeredHandler = clickHandlerRegistry.get(interactiveElement);
     if (registeredHandler) {
+      // Check for recent invocation to prevent double-firing
+      const lastInvoke = recentInvocations.get(interactiveElement);
+      const now = Date.now();
+      if (lastInvoke && (now - lastInvoke) < DEDUP_WINDOW_MS) {
+        if (isDebugMode) {
+          console.log('[DOM Bridge] Skipping duplicate invocation (METHOD 1)');
+        }
+        return; // Already invoked recently
+      }
+      recentInvocations.set(interactiveElement, now);
+      
       if (isDebugMode) {
         console.log('[DOM Bridge] Found registered handler, invoking directly');
       }
@@ -341,6 +398,17 @@ function initializeBridge() {
     while (parentElement && parentElement !== document.body) {
       const parentHandler = clickHandlerRegistry.get(parentElement);
       if (parentHandler) {
+        // Check for recent invocation to prevent double-firing
+        const lastInvoke = recentInvocations.get(parentElement);
+        const now = Date.now();
+        if (lastInvoke && (now - lastInvoke) < DEDUP_WINDOW_MS) {
+          if (isDebugMode) {
+            console.log('[DOM Bridge] Skipping duplicate invocation (METHOD 2)');
+          }
+          return; // Already invoked recently
+        }
+        recentInvocations.set(parentElement, now);
+        
         if (isDebugMode) {
           console.log('[DOM Bridge] Found parent handler, invoking');
         }
