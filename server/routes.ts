@@ -2530,7 +2530,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const stats = await storage.getTehillimChainStats(chain.id);
-      res.json(stats);
+      // Map totalSaid to totalCompleted for frontend compatibility
+      res.json({
+        totalCompleted: stats.totalSaid,
+        booksCompleted: stats.booksCompleted,
+        currentlyReading: stats.currentlyReading,
+        available: stats.available
+      });
     } catch (error) {
       console.error("Error fetching chain stats:", error);
       res.status(500).json({ error: "Failed to fetch chain stats" });
