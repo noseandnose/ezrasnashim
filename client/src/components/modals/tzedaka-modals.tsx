@@ -5,16 +5,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useModalStore } from "@/lib/types";
 import { useState, useEffect } from "react";
-
-import { useLocation } from "wouter";
-
+import { loadStripe } from "@stripe/stripe-js";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { Campaign } from "@shared/schema";
 
+// Load Stripe outside of component
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+
 export default function TzedakaModals() {
   const { activeModal, closeModal } = useModalStore();
+  const { toast } = useToast();
 
-  const [, setLocation] = useLocation();
   const [donationAmount, setDonationAmount] = useState("");
   const [customAmount, setCustomAmount] = useState("");
   const [donorName, setDonorName] = useState("");
@@ -22,9 +26,11 @@ export default function TzedakaModals() {
   const [dedicationText, setDedicationText] = useState("");
   const [sponsorMessage, setSponsorMessage] = useState("");
   const [torahPortion, setTorahPortion] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Reset form when modals open
   useEffect(() => {
+    setIsProcessing(false); // Always reset processing state
     if (activeModal === 'wedding-campaign') {
       setDonationAmount("1");
       setDonorEmail("");
@@ -67,7 +73,7 @@ export default function TzedakaModals() {
     return amounts[torahPortion] || 0;
   };
 
-  const handleDonation = () => {
+  const handleDonation = async () => {
     let amount = 0;
     let typeDescription = "";
     let buttonType = ""; // New field for Stripe metadata
@@ -116,21 +122,53 @@ export default function TzedakaModals() {
     }
 
     if (amount > 0) {
-      // Don't track completion here - only after successful payment
-      // Completion will be tracked in the donate page after payment succeeds
+      setIsProcessing(true);
       
-      const params = new URLSearchParams({
-        amount: amount.toString(),
-        type: typeDescription,
-        buttonType: buttonType, // Include button type for Stripe metadata
-        sponsor: donorName,
-        dedication: dedicationText,
-        message: sponsorMessage,
-        email: donorEmail
-      });
-
-      closeModal();
-      setLocation(`/donate?${params.toString()}`);
+      try {
+        // Build return URL with all donation metadata
+        const returnUrl = `${window.location.origin}/donate?success=true&amount=${amount}&type=${encodeURIComponent(typeDescription)}&buttonType=${buttonType}&sponsor=${encodeURIComponent(donorName)}&dedication=${encodeURIComponent(dedicationText)}&message=${encodeURIComponent(sponsorMessage)}&email=${encodeURIComponent(donorEmail)}`;
+        
+        // Create Stripe session directly from modal
+        const response = await apiRequest('POST', '/api/create-session-checkout', {
+          amount,
+          donationType: typeDescription,
+          metadata: {
+            buttonType,
+            sponsorName: donorName,
+            dedication: dedicationText,
+            message: sponsorMessage,
+            email: donorEmail,
+            timestamp: new Date().toISOString()
+          },
+          returnUrl
+        });
+        
+        const sessionId = response.data.sessionId;
+        
+        // Store session info for completion tracking
+        localStorage.setItem('pending_donation', JSON.stringify({
+          sessionId: sessionId,
+          buttonType: buttonType,
+          amount: amount,
+          timestamp: new Date().toISOString()
+        }));
+        localStorage.setItem('has_been_redirected_to_stripe', 'true');
+        
+        // Redirect to Stripe checkout
+        const stripe = await stripePromise;
+        if (stripe) {
+          closeModal();
+          await stripe.redirectToCheckout({ sessionId });
+        }
+      } catch (error) {
+        console.error('Failed to create checkout session:', error);
+        toast({
+          title: "Error",
+          description: "Unable to process donation. Please try again.",
+          variant: "destructive"
+        });
+        setIsProcessing(false);
+      }
     }
   }
 
@@ -216,10 +254,17 @@ export default function TzedakaModals() {
             <div>
               <Button 
                 onClick={() => handleDonation()}
-                disabled={!donorName.trim() || !dedicationText.trim() || !sponsorMessage.trim() || !isValidEmail(donorEmail)}
+                disabled={isProcessing || !donorName.trim() || !dedicationText.trim() || !sponsorMessage.trim() || !isValidEmail(donorEmail)}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Sponsor for $180
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  "Sponsor for $180"
+                )}
               </Button>
             </div>
           </div>
@@ -279,9 +324,16 @@ export default function TzedakaModals() {
               <Button 
                 onClick={() => handleDonation()}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
-                disabled={!torahPortion}
+                disabled={isProcessing || !torahPortion}
               >
-                Continue to Payment
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  "Continue to Payment"
+                )}
               </Button>
             </div>
           </div>
@@ -660,9 +712,16 @@ export default function TzedakaModals() {
               <Button 
                 onClick={() => handleDonation()}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
-                disabled={!donationAmount || (donationAmount === "custom" && (!customAmount || parseFloat(customAmount) <= 0)) || !isValidEmail(donorEmail)}
+                disabled={isProcessing || !donationAmount || (donationAmount === "custom" && (!customAmount || parseFloat(customAmount) <= 0)) || !isValidEmail(donorEmail)}
               >
-                Donate {donationAmount === "custom" ? `$${customAmount || ""}` : `$${donationAmount || "1"}`}
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  `Donate ${donationAmount === "custom" ? `$${customAmount || ""}` : `$${donationAmount || "1"}`}`
+                )}
               </Button>
             </div>
           </div>
@@ -783,9 +842,16 @@ export default function TzedakaModals() {
               <Button 
                 onClick={() => handleDonation()}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={!donationAmount || (donationAmount === "custom" && (!customAmount || parseFloat(customAmount) <= 0)) || !isValidEmail(donorEmail)}
+                disabled={isProcessing || !donationAmount || (donationAmount === "custom" && (!customAmount || parseFloat(customAmount) <= 0)) || !isValidEmail(donorEmail)}
               >
-                Donate {donationAmount === "custom" ? `$${customAmount || ""}` : `$${donationAmount || ""}`}
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  `Donate ${donationAmount === "custom" ? `$${customAmount || ""}` : `$${donationAmount || ""}`}`
+                )}
               </Button>
             </div>
           </div>
