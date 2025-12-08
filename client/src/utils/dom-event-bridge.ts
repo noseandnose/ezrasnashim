@@ -202,16 +202,57 @@ function initializeBridge() {
       return;
     }
     
-    // Use native .click() method - more reliable than dispatchEvent
+    // Force click through multiple methods
     if (isDebugMode) {
-      console.log('[DOM Bridge] Invoking native click on:', interactiveElement.tagName, 
+      console.log('[DOM Bridge] Forcing click on:', interactiveElement.tagName, 
         interactiveElement.className?.toString().slice(0, 40) || '');
     }
     
-    // Small delay to let React's normal click fire first
+    // Method 1: Focus the element first (some handlers require focus)
+    try {
+      interactiveElement.focus();
+    } catch (e) {
+      // Ignore focus errors
+    }
+    
+    // Method 2: Dispatch a trusted-like MouseEvent
+    const clickEvent = new MouseEvent('click', {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+      detail: 1,
+      screenX: e.screenX,
+      screenY: e.screenY,
+      clientX: e.clientX,
+      clientY: e.clientY,
+      button: 0,
+      buttons: 1
+    });
+    
+    // Dispatch immediately (don't wait)
+    interactiveElement.dispatchEvent(clickEvent);
+    
+    // Method 3: Also call native click as backup
     setTimeout(() => {
-      interactiveElement.click();
-    }, 0);
+      try {
+        interactiveElement.click();
+      } catch (err) {
+        if (isDebugMode) {
+          console.log('[DOM Bridge] Native click failed:', err);
+        }
+      }
+    }, 10);
+    
+    // Method 4: For buttons, try direct form submission or anchor navigation
+    if (interactiveElement.tagName === 'A' && (interactiveElement as HTMLAnchorElement).href) {
+      // Anchor links - trigger navigation if click didn't work
+      setTimeout(() => {
+        const anchor = interactiveElement as HTMLAnchorElement;
+        if (anchor.href && !anchor.href.startsWith('javascript:')) {
+          // Only for same-origin links, let the click handle it
+        }
+      }, 50);
+    }
   };
   
   // Attach listeners with capture phase for early interception
