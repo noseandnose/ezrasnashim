@@ -45,7 +45,11 @@ export default function TorahSection({}: TorahSectionProps) {
   const pirkeiExpandButtonRef = useRef<HTMLButtonElement>(null);
   
   // Toggle handler for Pirkei Avot expand button (DOM bridge compatible)
-  const handlePirkeiAvotToggle = useCallback(() => {
+  const handlePirkeiAvotToggle = useCallback((event?: React.MouseEvent | { stopPropagation?: () => void }) => {
+    // Prevent event from bubbling to parent elements (avoids triggering other buttons)
+    if (event?.stopPropagation) {
+      event.stopPropagation();
+    }
     setPirkeiAvotExpanded(prev => !prev);
   }, []);
   
@@ -277,7 +281,6 @@ export default function TorahSection({}: TorahSectionProps) {
                     className="absolute -bottom-1 right-0 bg-gradient-feminine rounded-full shadow-sm hover:scale-110 transition-transform p-0 overflow-visible"
                     style={{ width: '16px', height: '16px', minWidth: '16px', minHeight: '16px', padding: 0 }}
                     data-testid="button-toggle-pirkei-avot"
-                    data-bridge-container="true"
                   >
                     <svg 
                       width="10" 
