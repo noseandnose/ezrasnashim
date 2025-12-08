@@ -106,6 +106,7 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
     >
       <div 
         className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl"
+        data-bridge-container
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">

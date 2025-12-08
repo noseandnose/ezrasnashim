@@ -59,7 +59,7 @@ export default function MeditationModals() {
     <>
       {/* Category Selection Modal */}
       <Dialog open={activeModal === 'meditation-categories'} onOpenChange={() => closeModal()}>
-        <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="meditation-categories-description">
+        <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" data-bridge-container aria-describedby="meditation-categories-description">
           <div id="meditation-categories-description" className="sr-only">Select a meditation category</div>
           
           <div className="flex items-center justify-center mb-4 relative">
@@ -97,7 +97,7 @@ export default function MeditationModals() {
 
       {/* Meditation List Modal */}
       <Dialog open={activeModal === 'meditation-list'} onOpenChange={() => closeModal(true)}>
-        <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" aria-describedby="meditation-list-description">
+        <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" data-bridge-container aria-describedby="meditation-list-description">
           <div id="meditation-list-description" className="sr-only">Select a meditation to listen</div>
           
           <div className="flex items-center justify-center mb-4 relative">
