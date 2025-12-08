@@ -332,61 +332,60 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
           className="bg-white/70 rounded-2xl p-3 border border-blush/10"
           style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}
         >
-          <div className="flex items-center justify-between mb-2">
+          {/* Header Row - Title and Counter */}
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center space-x-3">
               <div className="bg-gradient-feminine p-3 rounded-full">
                 <Link2 className="text-white" size={20} />
               </div>
-              <div>
-                <h3 className="platypi-bold text-lg text-black">Tehillim Chains</h3>
-                <p className="platypi-regular text-xs text-black/60">
-                  {chainTotal.toLocaleString()} Tehillim Said
-                </p>
-              </div>
+              <h3 className="platypi-bold text-lg text-black">Tehillim Chains</h3>
             </div>
-            <div className="flex items-center space-x-2">
-              <button
-                ref={createButtonRef}
-                type="button"
-                onClick={handleCreateToggle}
-                className={`text-xs px-3 py-1 h-auto bg-white border rounded-md hover:bg-blush/5 inline-flex items-center ${chainView === 'create' ? 'text-blush border-blush' : 'text-blush border-blush/30'}`}
-                data-testid="button-chain-create"
-                data-bridge-container="true"
-              >
-                <Plus size={14} className="mr-1" />
-                Create
-              </button>
-              <button
-                ref={findButtonRef}
-                type="button"
-                onClick={handleFindToggle}
-                className={`text-xs px-3 py-1 h-auto bg-white border rounded-md hover:bg-blush/5 inline-flex items-center ${chainView === 'find' ? 'text-blush border-blush' : 'text-blush border-blush/30'}`}
-                data-testid="button-chain-find"
-                data-bridge-container="true"
-              >
-                <Search size={14} className="mr-1" />
-                Find
-              </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  try {
-                    const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/tehillim-chains/random`);
-                    if (response.ok) {
-                      const chain = await response.json();
-                      setLocation(`/c/${chain.slug}`);
-                    }
-                  } catch (error) {
-                    console.error('Failed to get random chain:', error);
+            <p className="platypi-regular text-sm text-black/60">
+              {chainTotal.toLocaleString()} Tehillim Said
+            </p>
+          </div>
+          
+          {/* Buttons Row */}
+          <div className="flex items-center justify-center space-x-3 mb-2">
+            <button
+              ref={createButtonRef}
+              type="button"
+              onClick={handleCreateToggle}
+              className={`text-sm px-4 py-2 bg-white border rounded-xl hover:bg-blush/5 inline-flex items-center ${chainView === 'create' ? 'text-blush border-blush' : 'text-blush border-blush/30'}`}
+              data-testid="button-chain-create"
+            >
+              <Plus size={18} className="mr-2" />
+              Create
+            </button>
+            <button
+              ref={findButtonRef}
+              type="button"
+              onClick={handleFindToggle}
+              className={`text-sm px-4 py-2 bg-white border rounded-xl hover:bg-blush/5 inline-flex items-center ${chainView === 'find' ? 'text-blush border-blush' : 'text-blush border-blush/30'}`}
+              data-testid="button-chain-find"
+            >
+              <Search size={18} className="mr-2" />
+              Find
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/tehillim-chains/random`);
+                  if (response.ok) {
+                    const chain = await response.json();
+                    setLocation(`/c/${chain.slug}`);
                   }
-                }}
-                className="text-xs px-3 py-1 h-auto bg-white border border-blush/30 rounded-md hover:bg-blush/5 inline-flex items-center text-blush"
-                data-testid="button-chain-random"
-              >
-                <Shuffle size={14} className="mr-1" />
-                Random
-              </button>
-            </div>
+                } catch (error) {
+                  console.error('Failed to get random chain:', error);
+                }
+              }}
+              className="text-sm px-4 py-2 bg-white border border-blush/30 rounded-xl hover:bg-blush/5 inline-flex items-center text-blush"
+              data-testid="button-chain-random"
+            >
+              <Shuffle size={18} className="mr-2" />
+              Random
+            </button>
           </div>
 
           {/* Create Chain Form */}
