@@ -412,15 +412,6 @@ export default function ChainPage() {
               </div>
             )}
             
-            {/* Settings button inside tehillim box */}
-            <div className="absolute bottom-4 left-4">
-              <SettingsButton
-                fontSize={fontSize}
-                onFontSizeChange={setFontSize}
-                showHebrew={showHebrew}
-                onLanguageChange={(lang) => setShowHebrew(lang === 'hebrew')}
-              />
-            </div>
           </div>
 
           {/* Koren Attribution */}
@@ -453,11 +444,27 @@ export default function ChainPage() {
           </div>
         </div>
       </div>
+      
+      {/* Fixed settings button at bottom left */}
+      <div 
+        className="fixed left-6"
+        style={{ 
+          bottom: 'calc(1.5rem + var(--viewport-bottom-offset, 0px))',
+          zIndex: 2147483646
+        }}
+      >
+        <SettingsButton
+          fontSize={fontSize}
+          onFontSizeChange={setFontSize}
+          showHebrew={showHebrew}
+          onLanguageChange={(lang) => setShowHebrew(lang === 'hebrew')}
+        />
+      </div>
     </div>
   );
 }
 
-// Settings button component for inside the tehillim box
+// Settings button component - fixed position at bottom left
 function SettingsButton({ 
   fontSize, 
   onFontSizeChange, 
