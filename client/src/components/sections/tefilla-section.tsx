@@ -339,19 +339,23 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             <Button
               type="button"
               onClick={handleCreateToggle}
-              className={`text-sm px-4 py-2 bg-gradient-feminine text-white rounded-xl hover:opacity-90 inline-flex items-center ${chainView === 'create' ? 'ring-2 ring-blush ring-offset-1' : ''}`}
+              className={`text-sm px-4 py-2 bg-white border border-blush/30 text-black rounded-xl hover:bg-blush/5 inline-flex items-center ${chainView === 'create' ? 'border-blush' : ''}`}
               data-testid="button-chain-create"
             >
-              <Plus size={18} className="mr-2" />
+              <div className="bg-gradient-feminine p-1.5 rounded-full mr-2">
+                <Plus size={14} className="text-white" />
+              </div>
               Create
             </Button>
             <Button
               type="button"
               onClick={handleFindToggle}
-              className={`text-sm px-4 py-2 bg-gradient-feminine text-white rounded-xl hover:opacity-90 inline-flex items-center ${chainView === 'find' ? 'ring-2 ring-blush ring-offset-1' : ''}`}
+              className={`text-sm px-4 py-2 bg-white border border-blush/30 text-black rounded-xl hover:bg-blush/5 inline-flex items-center ${chainView === 'find' ? 'border-blush' : ''}`}
               data-testid="button-chain-find"
             >
-              <Search size={18} className="mr-2" />
+              <div className="bg-gradient-feminine p-1.5 rounded-full mr-2">
+                <Search size={14} className="text-white" />
+              </div>
               Find
             </Button>
             <Button
@@ -372,10 +376,12 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                   setIsLoadingRandom(false);
                 }
               }}
-              className={`text-sm px-4 py-2 bg-gradient-feminine text-white rounded-xl hover:opacity-90 inline-flex items-center ${isLoadingRandom ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`text-sm px-4 py-2 bg-white border border-blush/30 text-black rounded-xl hover:bg-blush/5 inline-flex items-center ${isLoadingRandom ? 'opacity-50 cursor-not-allowed' : ''}`}
               data-testid="button-chain-random"
             >
-              <Shuffle size={18} className={`mr-2 ${isLoadingRandom ? 'animate-spin' : ''}`} />
+              <div className="bg-gradient-feminine p-1.5 rounded-full mr-2">
+                <Shuffle size={14} className={`text-white ${isLoadingRandom ? 'animate-spin' : ''}`} />
+              </div>
               {isLoadingRandom ? 'Loading...' : 'Random'}
             </Button>
           </div>
