@@ -864,13 +864,25 @@ export class DatabaseStorage implements IStorage {
       ))
       .limit(1);
     
-    // If there's an existing reading, mark it as ABANDONED (not completed)
+    // If there's an existing reading, DELETE it (don't store abandoned readings)
     // Completions should ONLY happen via explicit "Complete" button click
     if (existingReading.length > 0) {
-      await db.update(tehillimChainReadings)
-        .set({ status: 'abandoned' })
+      await db.delete(tehillimChainReadings)
         .where(eq(tehillimChainReadings.id, existingReading[0].id));
     }
+    
+    // Also cleanup any stale readings older than 10 minutes (from any device on this chain)
+    // Include readings with null startedAt (legacy data) in the cleanup
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+    await db.delete(tehillimChainReadings)
+      .where(and(
+        eq(tehillimChainReadings.chainId, chainId),
+        eq(tehillimChainReadings.status, 'reading'),
+        or(
+          lt(tehillimChainReadings.startedAt, tenMinutesAgo),
+          isNull(tehillimChainReadings.startedAt)
+        )
+      ));
     
     // Create new reading
     const [reading] = await db.insert(tehillimChainReadings).values({
