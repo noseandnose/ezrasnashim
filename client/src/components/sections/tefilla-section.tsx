@@ -393,8 +393,8 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                   <ChevronDown size={16} className="text-muted-foreground" />
                 </button>
                 {reasonDropdownOpen && (
-                  <div className="absolute z-50 mt-1 w-full rounded-xl border border-blush/20 bg-white shadow-lg">
-                    {reasonOptions.map((option) => {
+                  <div className="absolute z-50 mt-1 w-full rounded-xl border border-blush/20 bg-white/95 backdrop-blur-sm shadow-lg">
+                    {reasonOptions.map((option, index) => {
                       const OptionIcon = getReasonIcon(option.value);
                       return (
                         <button
@@ -404,7 +404,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                             setChainReason(option.value);
                             setReasonDropdownOpen(false);
                           }}
-                          className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-blush/5 first:rounded-t-xl last:rounded-b-xl"
+                          className={`flex w-full items-center gap-2 px-3 py-2 text-sm font-semibold hover:bg-blush/5 first:rounded-t-xl last:rounded-b-xl ${index !== reasonOptions.length - 1 ? 'border-b border-blush/10' : ''}`}
                         >
                           <OptionIcon size={16} className="text-blush" />
                           {option.label}
