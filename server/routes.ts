@@ -2542,14 +2542,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Return active reading if exists, otherwise next available
       const nextPsalm = activeReading || nextAvailable;
 
+      // Pre-adjust stats when a new reading is about to start
+      // This ensures consistent numbers between fresh visits and refreshes
+      const willStartNewReading = !activeReading && nextAvailable !== null;
+      const adjustedStats = {
+        totalCompleted: stats.totalSaid,
+        booksCompleted: stats.booksCompleted,
+        currentlyReading: willStartNewReading ? stats.currentlyReading + 1 : stats.currentlyReading,
+        available: willStartNewReading ? Math.max(0, stats.available - 1) : stats.available
+      };
+
       res.json({
         ...chain,
-        stats: {
-          totalCompleted: stats.totalSaid,
-          booksCompleted: stats.booksCompleted,
-          currentlyReading: stats.currentlyReading,
-          available: stats.available
-        },
+        stats: adjustedStats,
         nextPsalm: nextPsalm || null,
         hasActiveReading: !!activeReading
       });
