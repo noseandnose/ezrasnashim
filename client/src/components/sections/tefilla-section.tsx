@@ -324,7 +324,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
               </div>
               <div>
                 <h3 className="platypi-bold text-lg text-black">Tehillim Chains</h3>
-                <span className="platypi-medium text-sm text-black border border-blush/30 rounded-lg px-2 py-0.5">Completed Today: <span className="platypi-bold">{(chainTotal + countIndividualTehillim()).toLocaleString()}</span></span>
+                <span className="platypi-medium text-sm text-black/60">Completed Today: <span className="platypi-bold text-black">{(chainTotal + countIndividualTehillim()).toLocaleString()}</span></span>
               </div>
             </div>
           </div>
@@ -338,9 +338,8 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             <div className="flex items-center justify-center space-x-3 mb-2">
             <Button
               type="button"
-              variant="outline"
               onClick={handleCreateToggle}
-              className={`text-sm px-4 py-2 bg-white border rounded-xl hover:bg-blush/5 inline-flex items-center ${chainView === 'create' ? 'text-blush border-blush' : 'text-blush border-blush/30'}`}
+              className={`text-sm px-4 py-2 bg-gradient-feminine text-white rounded-xl hover:opacity-90 inline-flex items-center ${chainView === 'create' ? 'ring-2 ring-blush ring-offset-1' : ''}`}
               data-testid="button-chain-create"
             >
               <Plus size={18} className="mr-2" />
@@ -348,9 +347,8 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             </Button>
             <Button
               type="button"
-              variant="outline"
               onClick={handleFindToggle}
-              className={`text-sm px-4 py-2 bg-white border rounded-xl hover:bg-blush/5 inline-flex items-center ${chainView === 'find' ? 'text-blush border-blush' : 'text-blush border-blush/30'}`}
+              className={`text-sm px-4 py-2 bg-gradient-feminine text-white rounded-xl hover:opacity-90 inline-flex items-center ${chainView === 'find' ? 'ring-2 ring-blush ring-offset-1' : ''}`}
               data-testid="button-chain-find"
             >
               <Search size={18} className="mr-2" />
@@ -358,7 +356,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             </Button>
             <Button
               type="button"
-              variant="outline"
               disabled={isLoadingRandom}
               onClick={async () => {
                 if (isLoadingRandom) return;
@@ -375,7 +372,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                   setIsLoadingRandom(false);
                 }
               }}
-              className={`text-sm px-4 py-2 bg-white border border-blush/30 rounded-xl hover:bg-blush/5 inline-flex items-center text-blush ${isLoadingRandom ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`text-sm px-4 py-2 bg-gradient-feminine text-white rounded-xl hover:opacity-90 inline-flex items-center ${isLoadingRandom ? 'opacity-50 cursor-not-allowed' : ''}`}
               data-testid="button-chain-random"
             >
               <Shuffle size={18} className={`mr-2 ${isLoadingRandom ? 'animate-spin' : ''}`} />
