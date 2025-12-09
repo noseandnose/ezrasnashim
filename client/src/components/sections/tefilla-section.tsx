@@ -1,4 +1,4 @@
-import { HandHeart, Plus, Heart, Star, Compass, ArrowRight, Sunrise, Sun, Moon, Stars, Search, Link2, ChevronRight, Stethoscope, Users, Shuffle, Briefcase, Baby, Home, Shield, Sparkles, HeartPulse } from "lucide-react";
+import { HandHeart, Plus, Heart, Star, Compass, ArrowRight, Sunrise, Sun, Moon, Stars, Search, Link2, ChevronRight, ChevronDown, Stethoscope, Users, Shuffle, Briefcase, Baby, Home, Shield, Sparkles, HeartPulse } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -11,7 +11,6 @@ import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
@@ -182,6 +181,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const [chainView, setChainView] = useState<'none' | 'create' | 'find'>('none');
   const [chainName, setChainName] = useState("");
   const [chainReason, setChainReason] = useState("");
+  const [reasonDropdownOpen, setReasonDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoadingRandom, setIsLoadingRandom] = useState(false);
   const [, setLocation] = useLocation();
@@ -372,37 +372,48 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                 data-testid="input-chain-name"
               />
               
-              <Select value={chainReason} onValueChange={setChainReason}>
-                <SelectTrigger className="rounded-2xl border-blush/20 focus:border-blush bg-white" data-testid="select-chain-reason">
-                  <SelectValue placeholder="Select a reason..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="refuah">
-                    <span className="inline-flex items-center gap-2"><HeartPulse size={16} className="text-blush" /> Refuah Shleima</span>
-                  </SelectItem>
-                  <SelectItem value="shidduch">
-                    <span className="inline-flex items-center gap-2"><Heart size={16} className="text-blush" /> Shidduch</span>
-                  </SelectItem>
-                  <SelectItem value="parnassa">
-                    <span className="inline-flex items-center gap-2"><Briefcase size={16} className="text-blush" /> Parnassa</span>
-                  </SelectItem>
-                  <SelectItem value="children">
-                    <span className="inline-flex items-center gap-2"><Baby size={16} className="text-blush" /> Children</span>
-                  </SelectItem>
-                  <SelectItem value="shalom-bayis">
-                    <span className="inline-flex items-center gap-2"><Home size={16} className="text-blush" /> Shalom Bayis</span>
-                  </SelectItem>
-                  <SelectItem value="success">
-                    <span className="inline-flex items-center gap-2"><Star size={16} className="text-blush" /> Success</span>
-                  </SelectItem>
-                  <SelectItem value="protection">
-                    <span className="inline-flex items-center gap-2"><Shield size={16} className="text-blush" /> Protection</span>
-                  </SelectItem>
-                  <SelectItem value="general">
-                    <span className="inline-flex items-center gap-2"><Sparkles size={16} className="text-blush" /> General Tefillas</span>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setReasonDropdownOpen(!reasonDropdownOpen)}
+                  className="flex h-10 w-full items-center justify-between rounded-2xl border border-blush/20 bg-white px-3 py-2 text-sm focus:border-blush focus:outline-none focus:ring-2 focus:ring-blush/20"
+                  data-testid="select-chain-reason"
+                >
+                  {chainReason ? (
+                    <span className="inline-flex items-center gap-2">
+                      {(() => {
+                        const ReasonIcon = getReasonIcon(chainReason);
+                        return <ReasonIcon size={16} className="text-blush" />;
+                      })()}
+                      {reasonOptions.find(o => o.value === chainReason)?.label}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">Select a reason...</span>
+                  )}
+                  <ChevronDown size={16} className="text-muted-foreground" />
+                </button>
+                {reasonDropdownOpen && (
+                  <div className="absolute z-50 mt-1 w-full rounded-xl border border-blush/20 bg-white shadow-lg">
+                    {reasonOptions.map((option) => {
+                      const OptionIcon = getReasonIcon(option.value);
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => {
+                            setChainReason(option.value);
+                            setReasonDropdownOpen(false);
+                          }}
+                          className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-blush/5 first:rounded-t-xl last:rounded-b-xl"
+                        >
+                          <OptionIcon size={16} className="text-blush" />
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
               
               <div className="flex space-x-3">
                 <Button 
