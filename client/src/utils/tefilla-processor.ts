@@ -286,16 +286,6 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
         startIndex: match.index!,
         endIndex: match.index! + fullMatch.length
       });
-      
-      // Debug logging for SPECIAL_REMOVE
-      if (openTag === 'SPECIAL_REMOVE') {
-        console.log('[DEBUG] Found SPECIAL_REMOVE tag:', {
-          tag: openTag,
-          contentLength: content.length,
-          startIndex: match.index,
-          isRoshChodeshSpecial: conditions.isRoshChodeshSpecial
-        });
-      }
     }
   }
   
@@ -348,15 +338,6 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
       // Check if this match's conditions conflict with already-selected matches in this cluster
       const hasConflict = matchInfo.conditions.some(cond => usedConditionsInCluster.has(cond));
       
-      // Debug logging for SPECIAL_REMOVE
-      if (matchInfo.tag === 'SPECIAL_REMOVE') {
-        console.log('[DEBUG] Processing SPECIAL_REMOVE:', {
-          hasConflict,
-          usedConditions: Array.from(usedConditionsInCluster),
-          isRoshChodeshSpecial: conditions.isRoshChodeshSpecial
-        });
-      }
-      
       if (!hasConflict) {
         // Check if conditions are met
         let conditionsMet = false;
@@ -369,23 +350,8 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
         } else {
           conditionsMet = matchInfo.conditions.every((condition: string) => {
             const checker = conditionCheckers[condition as keyof typeof conditionCheckers];
-            const result = checker ? checker() : false;
-            // Debug logging for SPECIAL_REMOVE
-            if (condition === 'SPECIAL_REMOVE') {
-              console.log('[DEBUG] SPECIAL_REMOVE condition check:', {
-                condition,
-                checkerExists: !!checker,
-                result,
-                isRoshChodeshSpecial: conditions.isRoshChodeshSpecial
-              });
-            }
-            return result;
+            return checker ? checker() : false;
           });
-        }
-        
-        // Debug logging for SPECIAL_REMOVE
-        if (matchInfo.tag === 'SPECIAL_REMOVE') {
-          console.log('[DEBUG] SPECIAL_REMOVE conditionsMet:', conditionsMet);
         }
         
         if (conditionsMet) {
@@ -402,27 +368,9 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
   // Now process the text, keeping only the matches we want
   // Create a new regex to avoid lastIndex issues from the exec() loop
   const replacementPattern = /\[\[([^\]]+)\]\]([\s\S]*?)\[\[\/([^\]]+)\]\]/g;
-  
-  // Debug: Log matchesToKeep for SPECIAL_REMOVE
-  const specialRemoveInKeep = Array.from(matchesToKeep).filter(m => m.includes('SPECIAL_REMOVE'));
-  if (specialRemoveInKeep.length > 0) {
-    console.log('[DEBUG] matchesToKeep has SPECIAL_REMOVE entries:', specialRemoveInKeep.length);
-  }
-  
   processedText = processedText.replace(replacementPattern, (match, openTag, content, closeTag) => {
     if (openTag !== closeTag) {
       return match;
-    }
-    
-    // Debug logging for SPECIAL_REMOVE
-    if (openTag === 'SPECIAL_REMOVE') {
-      const isInKeep = matchesToKeep.has(match);
-      console.log('[DEBUG] SPECIAL_REMOVE replacement:', {
-        openTag,
-        isInMatchesToKeep: isInKeep,
-        matchLength: match.length,
-        contentLength: content.length
-      });
     }
     
     // When we keep content, preserve any formatting markers like ** that might be inside
