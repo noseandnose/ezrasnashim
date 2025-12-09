@@ -393,13 +393,9 @@ export default function ChainPage() {
 
           {/* Tehillim text in white rounded box */}
           <div className="bg-white rounded-2xl p-6 border border-blush/10 relative">
-            {psalmLoading ? (
-              <div className="flex items-center justify-center min-h-[200px]">
-                <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
-              </div>
-            ) : psalmContent ? (
+            {psalmContent ? (
               <div
-                className={`leading-relaxed text-black pb-16 ${showHebrew ? 'text-right vc-koren-hebrew' : 'text-left koren-siddur-english'}`}
+                className={`leading-relaxed text-black pb-16 ${showHebrew ? 'text-right vc-koren-hebrew' : 'text-left koren-siddur-english'} ${psalmLoading || isFindingAnother ? 'opacity-50' : ''}`}
                 style={{ fontSize: showHebrew ? `${fontSize + 1}px` : `${fontSize}px` }}
                 dir={showHebrew ? 'rtl' : 'ltr'}
                 dangerouslySetInnerHTML={{
@@ -408,7 +404,7 @@ export default function ChainPage() {
               />
             ) : (
               <div className="flex items-center justify-center min-h-[200px]">
-                <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
+                <p className="platypi-regular text-black/60">Loading tehillim...</p>
               </div>
             )}
             
