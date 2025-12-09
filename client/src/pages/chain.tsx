@@ -367,9 +367,9 @@ export default function ChainPage() {
                   <span className="platypi-regular text-black/60">{completed} of 171 completed</span>
                   <span className="platypi-bold text-black">{percentage}%</span>
                 </div>
-                <div className="h-3 bg-blush/10 rounded-full overflow-hidden border border-blush/20">
+                <div className="h-3 bg-gradient-feminine rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-feminine rounded-full transition-all duration-500"
+                    className="h-full bg-sage rounded-full transition-all duration-500"
                     style={{ width: `${percentage}%` }}
                   />
                 </div>
