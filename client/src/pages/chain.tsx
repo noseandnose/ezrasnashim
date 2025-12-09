@@ -357,23 +357,30 @@ export default function ChainPage() {
             Sefer Tehillim completed together, One chapter at a time.
           </p>
 
-          {/* Stats section - removed Reading */}
-          <div className={`grid gap-2 ${showBooksCompleted ? 'grid-cols-3' : 'grid-cols-2'} max-w-xs mx-auto`}>
-            <div className="bg-white rounded-xl px-2 py-2 text-center border border-blush/10">
-              <p className="platypi-bold text-sm text-black">{displayStats?.totalCompleted || 0}</p>
-              <p className="platypi-regular text-[10px] text-black/60">Completed</p>
-            </div>
-            {showBooksCompleted && (
-              <div className="bg-white rounded-xl px-2 py-2 text-center border border-blush/10">
-                <p className="platypi-bold text-sm text-black">{displayStats?.booksCompleted || 0}</p>
-                <p className="platypi-regular text-[10px] text-black/60">Books</p>
+          {/* Progress bar */}
+          {(() => {
+            const completed = 171 - (displayStats?.available || 171);
+            const percentage = Math.round((completed / 171) * 100);
+            return (
+              <div className="max-w-xs mx-auto space-y-1">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="platypi-regular text-black/60">{completed} of 171 completed</span>
+                  <span className="platypi-bold text-black">{percentage}%</span>
+                </div>
+                <div className="h-3 bg-blush/10 rounded-full overflow-hidden border border-blush/20">
+                  <div 
+                    className="h-full bg-gradient-feminine rounded-full transition-all duration-500"
+                    style={{ width: `${percentage}%` }}
+                  />
+                </div>
+                {showBooksCompleted && (
+                  <p className="platypi-regular text-[10px] text-black/50 text-center">
+                    {displayStats?.booksCompleted} complete {displayStats?.booksCompleted === 1 ? 'book' : 'books'}
+                  </p>
+                )}
               </div>
-            )}
-            <div className="bg-white rounded-xl px-2 py-2 text-center border border-blush/10">
-              <p className="platypi-bold text-sm text-black">{displayStats?.available || 171}</p>
-              <p className="platypi-regular text-[10px] text-black/60">Available</p>
-            </div>
-          </div>
+            );
+          })()}
 
           {/* Davening for section with border */}
           <div className="text-center py-3 px-4 border border-blush/20 rounded-xl bg-white">
