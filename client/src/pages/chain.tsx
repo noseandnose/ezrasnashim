@@ -354,7 +354,7 @@ export default function ChainPage() {
         <div className="p-4 space-y-4">
           {/* Community message */}
           <p className="platypi-regular text-sm text-black/70 text-center">
-            One chapter per person, Sefers completed together.
+            Sefer Tehillim completed together, One chapter at a time.
           </p>
 
           {/* Stats section */}
@@ -381,16 +381,18 @@ export default function ChainPage() {
 
           {/* Davening for section */}
           <div className="text-center py-2">
-            <p className="platypi-medium text-base text-black">
-              Davening for: <span className="platypi-bold">{chain.name}</span>
+            <p className="platypi-medium text-base text-black flex items-center justify-center gap-2 flex-wrap">
+              <span>Davening for: <span className="platypi-bold">{chain.name}</span></span>
+              <span className="flex items-center gap-1">
+                <span className="text-black/50">(</span>
+                {(() => {
+                  const ReasonIcon = getReasonIcon(chain.reason);
+                  return <ReasonIcon size={14} className="text-blush" />;
+                })()}
+                <span className="platypi-regular text-black/70">{chain.reason}</span>
+                <span className="text-black/50">)</span>
+              </span>
             </p>
-            <div className="flex items-center justify-center gap-2 mt-1">
-              {(() => {
-                const ReasonIcon = getReasonIcon(chain.reason);
-                return <ReasonIcon size={14} className="text-blush" />;
-              })()}
-              <p className="platypi-regular text-sm text-black/70">{chain.reason}</p>
-            </div>
           </div>
 
           {/* Tehillim text in white rounded box */}
@@ -423,7 +425,7 @@ export default function ChainPage() {
             <button
               onClick={handleFindAnother}
               disabled={!currentPsalm || isFindingAnother}
-              className="flex-1 py-4 rounded-2xl border-2 border-blush/30 bg-white text-black platypi-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blush/5 transition-colors"
+              className="flex-1 py-4 rounded-2xl border-2 border-blush/30 bg-white text-black platypi-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blush/5 transition-colors hover:scale-105 transition-transform"
               data-testid="button-find-another"
             >
               {isFindingAnother ? 'Loading...' : 'Find me another'}
@@ -431,7 +433,7 @@ export default function ChainPage() {
             <button
               onClick={handleComplete}
               disabled={!currentPsalm || completeReadingMutation.isPending}
-              className="flex-1 py-4 rounded-2xl bg-gradient-feminine text-white platypi-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 py-4 rounded-2xl bg-gradient-feminine text-white platypi-medium disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transition-transform complete-button-pulse"
               data-testid="button-complete"
             >
               {completeReadingMutation.isPending ? "Completing..." : "Complete"}
