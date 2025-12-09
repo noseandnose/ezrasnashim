@@ -126,39 +126,36 @@ export default function ChainPage() {
 
   const completeReadingMutation = useMutation({
     mutationFn: async (psalmNumber: number) => {
-      return apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/complete`, {
+      const result = await apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/complete`, {
         deviceId,
         psalmNumber,
       });
+      // Also fetch next psalm in the same request cycle
+      const nextResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/next-available?deviceId=${deviceId}`);
+      const nextData = nextResponse.ok ? await nextResponse.json() : null;
+      return { result, nextPsalm: nextData?.psalmNumber || null };
     },
-    onMutate: async () => {
-      // OPTIMISTIC UPDATE: Show success immediately for instant feedback
+    onSuccess: async (data) => {
       toast({
         title: "Tehillim Completed!",
         description: "May all your tefillas be answered.",
       });
       
-      // Start fetching next psalm immediately (don't wait for API)
-      const nextPsalmPromise = fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/next-available?deviceId=${deviceId}`);
-      
-      // Process next psalm as soon as it's ready
-      nextPsalmPromise.then(async (response) => {
-        if (response.ok) {
-          const data = await response.json();
-          setCurrentPsalm(data.psalmNumber);
-          setIsReading(true);
-          startReadingMutation.mutate(data.psalmNumber);
-        } else {
-          setIsReading(false);
-          setCurrentPsalm(null);
-        }
-      }).catch(() => {
-        setIsReading(false);
+      // Load next psalm
+      if (data.nextPsalm) {
+        setCurrentPsalm(data.nextPsalm);
+        setIsReading(true);
+        startReadingMutation.mutate(data.nextPsalm);
+      } else {
         setCurrentPsalm(null);
-      });
-    },
-    onSuccess: async () => {
-      // Background: refresh stats after completion confirmed
+        setIsReading(false);
+        toast({
+          title: "All Tehillim Complete!",
+          description: "Amazing! The entire book has been completed.",
+        });
+      }
+      
+      // Refresh stats
       queryClient.refetchQueries({ queryKey: ['/api/tehillim-chains', slug, 'stats'] });
       queryClient.refetchQueries({ queryKey: ['/api/tehillim-chains/stats/total'] });
     },
