@@ -179,11 +179,13 @@ export default function ChainPage() {
   });
 
   // Get a random psalm
-  const getRandomPsalm = useCallback(async () => {
+  const getRandomPsalm = useCallback(async (excludePsalm?: number | null) => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/random-available?deviceId=${deviceId}`
-      );
+      let url = `${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/random-available?deviceId=${deviceId}`;
+      if (excludePsalm) {
+        url += `&excludePsalm=${excludePsalm}`;
+      }
+      const response = await fetch(url);
       if (!response.ok) {
         if (response.status === 404) {
           toast({
@@ -272,7 +274,7 @@ export default function ChainPage() {
   const handleFindAnother = () => {
     if (isFindingAnother) return;
     setIsFindingAnother(true);
-    getRandomPsalm();
+    getRandomPsalm(currentPsalm);
   };
 
   if (chainLoading) {

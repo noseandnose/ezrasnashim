@@ -127,7 +127,7 @@ export interface IStorage {
   startChainReading(chainId: number, psalmNumber: number, deviceId: string): Promise<TehillimChainReading>;
   completeChainReading(chainId: number, psalmNumber: number, deviceId: string): Promise<TehillimChainReading | null>;
   getAvailablePsalmForChain(chainId: number, excludeDeviceId?: string): Promise<number | null>;
-  getRandomAvailablePsalmForChain(chainId: number, excludeDeviceId?: string): Promise<number | null>;
+  getRandomAvailablePsalmForChain(chainId: number, excludeDeviceId?: string, excludePsalm?: number): Promise<number | null>;
   getTotalChainTehillimCompleted(): Promise<number>;
   migrateTehillimNamesToChains(): Promise<{ migrated: number; skipped: number; errors: string[] }>;
 
@@ -1059,27 +1059,9 @@ export class DatabaseStorage implements IStorage {
     return available[0];
   }
 
-  async getRandomAvailablePsalmForChain(chainId: number, excludeDeviceId?: string): Promise<number | null> {
+  async getRandomAvailablePsalmForChain(chainId: number, excludeDeviceId?: string, excludePsalm?: number): Promise<number | null> {
     // Total tehillim units: 171 (psalms 1-150, but psalm 119 has 22 parts instead of 1)
     const TOTAL_TEHILLIM_UNITS = 171;
-    
-    // Get all units currently being read by OTHER devices (active in last 10 min)
-    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
-    
-    // Build where clause - exclude current device's readings
-    const whereConditions = [
-      eq(tehillimChainReadings.chainId, chainId),
-      eq(tehillimChainReadings.status, 'reading'),
-      gt(tehillimChainReadings.startedAt, tenMinutesAgo)
-    ];
-    
-    if (excludeDeviceId) {
-      whereConditions.push(sql`${tehillimChainReadings.deviceId} != ${excludeDeviceId}`);
-    }
-    
-    const activeReadings = await db.select({ psalmNumber: tehillimChainReadings.psalmNumber })
-      .from(tehillimChainReadings)
-      .where(and(...whereConditions));
     
     // Get completed units in current cycle
     const completedResult = await db.select({ 
@@ -1109,16 +1091,23 @@ export class DatabaseStorage implements IStorage {
       }
     }
     
-    const readingUnits = new Set(activeReadings.map(r => r.psalmNumber));
-    
+    // Build available list - exclude completed units and the currently displayed psalm
     const available: number[] = [];
     for (let i = 1; i <= TOTAL_TEHILLIM_UNITS; i++) {
-      if (!completedUnits.has(i) && !readingUnits.has(i)) {
-        available.push(i);
-      }
+      // Skip if already completed in this cycle
+      if (completedUnits.has(i)) continue;
+      // Skip the currently displayed psalm (for "Find me another")
+      if (excludePsalm && i === excludePsalm) continue;
+      available.push(i);
     }
     
     if (available.length === 0) {
+      // All units completed - if we excluded one, try returning any random one
+      if (excludePsalm) {
+        const allUnits = Array.from({ length: TOTAL_TEHILLIM_UNITS }, (_, i) => i + 1)
+          .filter(i => i !== excludePsalm);
+        return allUnits[Math.floor(Math.random() * allUnits.length)] || 1;
+      }
       return 1;
     }
     

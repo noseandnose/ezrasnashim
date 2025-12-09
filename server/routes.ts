@@ -2686,14 +2686,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/tehillim-chains/:slug/random-available", async (req, res) => {
     try {
       const { slug } = req.params;
-      const { deviceId } = req.query;
+      const { deviceId, excludePsalm } = req.query;
 
       const chain = await storage.getTehillimChainBySlug(slug);
       if (!chain) {
         return res.status(404).json({ error: "Chain not found" });
       }
 
-      const psalm = await storage.getRandomAvailablePsalmForChain(chain.id, deviceId as string);
+      const excludePsalmNum = excludePsalm ? parseInt(excludePsalm as string) : undefined;
+      const psalm = await storage.getRandomAvailablePsalmForChain(chain.id, deviceId as string, excludePsalmNum);
       if (!psalm) {
         return res.status(404).json({ error: "No psalms available" });
       }
