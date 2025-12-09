@@ -305,8 +305,8 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
               </div>
               <h3 className="platypi-bold text-lg text-black">Tehillim Chains</h3>
             </div>
-            <div className="bg-gradient-to-r from-blush/10 to-lavender/10 border border-blush/20 rounded-xl px-3 py-1.5">
-              <p className="platypi-medium text-sm text-black">
+            <div className="bg-gradient-feminine border border-blush/30 rounded-xl px-3 py-1.5 shadow-sm">
+              <p className="platypi-medium text-sm text-white">
                 Total Tehillim: <span className="platypi-bold">{chainTotal.toLocaleString()}</span>
               </p>
             </div>
