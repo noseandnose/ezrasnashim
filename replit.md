@@ -27,7 +27,7 @@ Header layout: Search icon placed next to hamburger menu for quick access. Heade
 - **Typography**: Playfair Display (headers), Inter (body), David Libre/Heebo (Hebrew), Platypi (English), Koren Siddur (Tefilla). VC Koren fonts preloaded.
 - **Visuals**: Flower progress indicators, subtle animations, custom logos, consistent gradients.
 - **Modals**: Fullscreen overlay system with consistent headers, font controls, language toggles, and attribution. Prayer fullscreens include a compass button.
-- **UI/UX Decisions**: Pure CSS safe area detection, enhanced audio player UI, lazy section mounting for instant page transitions. Redesigned FlutterFlow WebView button interaction to use pointerup-based tap detection and a DOM event bridge for resilience, avoiding disruptive page reloads. Implemented AudioContext resume logic for PWA audio fix. SafeClose helper function for modals to prevent freezing during rapid interactions or background/foreground transitions.
+- **UI/UX Decisions**: Pure CSS safe area detection, enhanced audio player UI, lazy section mounting for instant page transitions. Simple visibility-change based refresh (after 5+ minutes in background) for mobile app WebView support. Implemented AudioContext resume logic for PWA audio fix. Double-click protection on modal close buttons to prevent freezing during rapid interactions.
 
 ### Backend
 - **Runtime**: Node.js 20 with Express.js.
