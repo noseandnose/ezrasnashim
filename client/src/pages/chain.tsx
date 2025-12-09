@@ -329,10 +329,11 @@ export default function ChainPage() {
         
         <button
           onClick={handleShare}
-          className="p-2 rounded-full hover:bg-blush/10 transition-colors flex-shrink-0"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-feminine text-white hover:scale-105 transition-all shadow-sm flex-shrink-0"
           data-testid="button-share"
         >
-          <Share2 size={20} className="text-blush" />
+          <Share2 size={16} />
+          <span className="text-sm platypi-medium">Share</span>
         </button>
       </div>
 
