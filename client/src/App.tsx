@@ -80,16 +80,22 @@ function Router() {
     
     // Simple visibility change handler for mobile app WebView
     // Refreshes when returning from background to ensure UI state is fresh
-    let lastVisibilityChange = 0;
+    let hiddenTimestamp: number | null = null;
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        const now = Date.now();
-        // Only reload if more than 5 minutes have passed since last visibility change
-        // This prevents unnecessary reloads on quick tab switches
-        if (now - lastVisibilityChange > 5 * 60 * 1000) {
-          window.location.reload();
+      if (document.visibilityState === 'hidden') {
+        // Always record/update when the page is hidden
+        // This ensures we track the most recent hidden time
+        hiddenTimestamp = Date.now();
+      } else if (document.visibilityState === 'visible') {
+        // Only reload if we have a recorded hidden time AND more than 5 minutes elapsed
+        if (hiddenTimestamp !== null) {
+          const timeHidden = Date.now() - hiddenTimestamp;
+          if (timeHidden > 5 * 60 * 1000) {
+            window.location.reload();
+          }
         }
-        lastVisibilityChange = now;
+        // Reset after checking (but after the reload condition check)
+        hiddenTimestamp = null;
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
