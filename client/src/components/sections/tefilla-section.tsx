@@ -316,18 +316,16 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
         
         {/* Total Tehillim Said Card */}
         <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
-          {/* Header Row - Title and Counter */}
-          <div className="flex items-center justify-between mb-3">
+          {/* Header Row - Title and Subheading */}
+          <div className="flex items-center mb-3">
             <div className="flex items-center space-x-3">
               <div className="bg-gradient-feminine p-3 rounded-full">
                 <Link2 className="text-white" size={20} />
               </div>
-              <h3 className="platypi-bold text-lg text-black">Total Tehillim Said</h3>
-            </div>
-            <div className="bg-white border border-blush/30 rounded-xl px-3 py-1.5 shadow-sm">
-              <p className="platypi-medium text-sm text-black">
-                Today's Total: <span className="platypi-bold">{(chainTotal + countIndividualTehillim()).toLocaleString()}</span>
-              </p>
+              <div>
+                <h3 className="platypi-bold text-lg text-black">Total Tehillim Said</h3>
+                <p className="platypi-medium text-sm text-black/60">Today's Total: <span className="platypi-bold text-black">{(chainTotal + countIndividualTehillim()).toLocaleString()}</span></p>
+              </div>
             </div>
           </div>
           
