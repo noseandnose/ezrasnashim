@@ -3,7 +3,6 @@ import { useRoute, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Share2, ChevronLeft, Heart, Briefcase, Baby, Home, Star, Shield, Sparkles, HeartPulse, Settings } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
 import { formatTextContent } from "@/lib/text-formatter";
 import { AttributionSection } from "@/components/ui/attribution-section";
 import { useLocationStore } from "@/hooks/use-jewish-times";
@@ -148,14 +147,28 @@ export default function ChainPage() {
 
   const completeReadingMutation = useMutation({
     mutationFn: async (psalmNumber: number) => {
-      const result = await apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/complete`, {
-        deviceId,
-        psalmNumber,
-      });
-      // Also fetch next psalm in the same request cycle
-      const nextResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/random-available?deviceId=${deviceId}`);
+      // Fire and forget the completion - don't wait for it
+      fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/complete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deviceId, psalmNumber }),
+      }).catch(() => {});
+      
+      // Immediately get next psalm
+      const nextResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/random-available?deviceId=${deviceId}&excludePsalm=${psalmNumber}`);
       const nextData = nextResponse.ok ? await nextResponse.json() : null;
-      return { result, nextPsalm: nextData?.psalmNumber || null };
+      return { nextPsalm: nextData?.psalmNumber || null };
+    },
+    onMutate: () => {
+      // Optimistically update stats display
+      queryClient.setQueryData(['/api/tehillim-chains', slug, 'stats'], (old: ChainStats | undefined) => {
+        if (!old) return old;
+        return {
+          ...old,
+          totalCompleted: (old.totalCompleted || 0) + 1,
+          available: Math.max(0, (old.available || 171) - 1),
+        };
+      });
     },
     onSuccess: async (data) => {
       // Load next psalm silently (no popup)
@@ -165,9 +178,11 @@ export default function ChainPage() {
         setCurrentPsalm(null);
       }
       
-      // Refresh stats
-      queryClient.refetchQueries({ queryKey: ['/api/tehillim-chains', slug, 'stats'] });
-      queryClient.refetchQueries({ queryKey: ['/api/tehillim-chains/stats/total'] });
+      // Background refresh stats after a delay
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains', slug, 'stats'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/stats/total'] });
+      }, 2000);
     },
     onError: () => {
       toast({
