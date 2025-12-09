@@ -324,7 +324,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
               </div>
               <div>
                 <h3 className="platypi-bold text-lg text-black">Total Tehillim Said</h3>
-                <p className="platypi-medium text-sm text-black/60">Today's Total: <span className="platypi-bold text-black">{(chainTotal + countIndividualTehillim()).toLocaleString()}</span></p>
+                <span className="platypi-bold text-sm text-black border border-blush/30 rounded-lg px-2 py-0.5">{(chainTotal + countIndividualTehillim()).toLocaleString()}</span>
               </div>
             </div>
           </div>
