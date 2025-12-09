@@ -637,7 +637,7 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
             : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
-        {isModalComplete('maariv') ? 'Completed Today' : 'Complete Maariv'}
+        {isModalComplete('maariv') ? 'Completed Today' : 'Complete'}
       </Button>
     </div>
   );
@@ -699,7 +699,7 @@ function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
             : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
-        {isModalComplete('mincha') ? 'Completed Today' : 'Complete Mincha'}
+        {isModalComplete('mincha') ? 'Completed Today' : 'Complete'}
       </Button>
     </div>
   );
@@ -1336,7 +1336,7 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
             : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
-        {todayCompleted ? 'Complete Again' : 'Complete Nishmas'}
+        {todayCompleted ? 'Complete Again' : 'Complete'}
       </Button>
     </div>
   );
@@ -1542,7 +1542,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
               : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
           }`}
         >
-          {isCompleted ? 'Complete Again' : `Complete Tehillim ${selectedPsalm}`}
+          {isCompleted ? 'Complete Again' : 'Complete'}
         </Button>
       ) : (
         // Show both "Complete" and "Complete & Next" buttons
@@ -2563,7 +2563,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
-              {isModalComplete('mincha') ? 'Completed Today' : 'Complete Mincha'}
+              {isModalComplete('mincha') ? 'Completed Today' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -2681,7 +2681,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
-              {isModalComplete('blessings') ? 'Complete Again' : 'Complete Blessings'}
+              {isModalComplete('blessings') ? 'Complete Again' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showExplosion && activeExplosionModal === 'blessings'} />
           </div>
@@ -2711,7 +2711,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
-              {isModalComplete('tefillos') ? 'Complete Again' : 'Complete Tefillos'}
+              {isModalComplete('tefillos') ? 'Complete Again' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showExplosion && activeExplosionModal === 'tefillos'} />
           </div>
@@ -2755,7 +2755,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
-              {isModalComplete('personal-prayers') ? 'Complete Again' : 'Complete Personal Prayers'}
+              {isModalComplete('personal-prayers') ? 'Complete Again' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showExplosion && activeExplosionModal === 'personal-prayers'} />
           </div>
@@ -3130,7 +3130,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
-              {isModalComplete('maariv') ? 'Completed Today' : 'Complete Maariv'}
+              {isModalComplete('maariv') ? 'Completed Today' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>

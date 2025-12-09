@@ -116,7 +116,7 @@ export default function DailyChizukModal() {
             }`}
             data-testid={isCompleted ? 'button-chizuk-completed' : 'button-complete-chizuk'}
           >
-            {isCompleted ? 'Completed Today' : 'Complete Daily Chizuk'}
+            {isCompleted ? 'Completed Today' : 'Complete'}
           </Button>
 
           <HeartExplosion 
