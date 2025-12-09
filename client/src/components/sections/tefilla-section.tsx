@@ -212,7 +212,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     { value: 'shalom-bayis', label: 'Shalom Bayis (Peace)' },
     { value: 'success', label: 'Success' },
     { value: 'protection', label: 'Protection' },
-    { value: 'general', label: 'General Prayer' },
+    { value: 'general', label: 'General Tefillas' },
   ];
 
   // Search chains query - fetch recent by default when Find is open
@@ -380,11 +380,11 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                   {reasonOptions.map(option => {
                     const Icon = getReasonIcon(option.value);
                     return (
-                      <SelectItem key={option.value} value={option.value}>
-                        <span className="flex items-center gap-2">
-                          <Icon size={16} className="text-blush" />
-                          {option.label}
-                        </span>
+                      <SelectItem key={option.value} value={option.value} className="flex items-center">
+                        <div className="flex items-center gap-2">
+                          <Icon size={16} className="text-blush shrink-0" />
+                          <span>{option.label}</span>
+                        </div>
                       </SelectItem>
                     );
                   })}
