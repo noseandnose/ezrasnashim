@@ -910,15 +910,14 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
   return (
     <div className="space-y-6">
       {/* Tab Navigation */}
-      <div className="flex bg-warm-gray/10 rounded-xl p-1 mb-4">
+      <div className="flex bg-blush/20 rounded-xl p-1 mb-4">
         <button
           onClick={() => setActiveTab('daily')}
           className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
             activeTab === 'daily'
-              ? 'bg-white text-black'
-              : 'text-black/60 hover:text-black'
+              ? 'bg-white text-black shadow-md border border-blush/30'
+              : 'text-black/50 hover:text-black/70'
           }`}
-          style={activeTab === 'daily' ? { boxShadow: '0 4px 6px -1px hsla(350, 45%, 85%, 0.5), 0 2px 4px -1px hsla(350, 45%, 85%, 0.3)' } : {}}
         >
           Daily ({hasDaily ? dailyBrochas.length : 0})
         </button>
@@ -926,10 +925,9 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
           onClick={() => setActiveTab('special')}
           className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
             activeTab === 'special'
-              ? 'bg-white text-black'
-              : 'text-black/60 hover:text-black'
+              ? 'bg-white text-black shadow-md border border-blush/30'
+              : 'text-black/50 hover:text-black/70'
           }`}
-          style={activeTab === 'special' ? { boxShadow: '0 4px 6px -1px hsla(350, 45%, 85%, 0.5), 0 2px 4px -1px hsla(350, 45%, 85%, 0.3)' } : {}}
         >
           Special ({hasSpecial ? specialBrochas.length : 0})
         </button>

@@ -133,15 +133,14 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
     >
       {/* Tab Navigation - Sticky so it stays visible when scrolling, flush with header */}
       <div className="sticky z-10 bg-white pb-4" style={{ top: '-1rem', margin: '0 -1rem', padding: '1rem 1rem 1rem 1rem', boxShadow: '0 2px 4px -2px rgba(0,0,0,0.05)' }}>
-        <div className="flex bg-warm-gray/10 rounded-xl p-1">
+        <div className="flex bg-blush/20 rounded-xl p-1">
           <button
             onClick={() => setActiveTab('zmanim')}
             className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
               activeTab === 'zmanim'
-                ? 'bg-white text-black'
-                : 'text-black/60 hover:text-black'
+                ? 'bg-white text-black shadow-md border border-blush/30'
+                : 'text-black/50 hover:text-black/70'
             }`}
-            style={activeTab === 'zmanim' ? { boxShadow: '0 4px 6px -1px hsla(350, 45%, 85%, 0.5), 0 2px 4px -1px hsla(350, 45%, 85%, 0.3)' } : {}}
             data-testid="tab-zmanim"
           >
             <Clock size={16} />
@@ -151,10 +150,9 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
             onClick={() => setActiveTab('days')}
             className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
               activeTab === 'days'
-                ? 'bg-white text-black'
-                : 'text-black/60 hover:text-black'
+                ? 'bg-white text-black shadow-md border border-blush/30'
+                : 'text-black/50 hover:text-black/70'
             }`}
-            style={activeTab === 'days' ? { boxShadow: '0 4px 6px -1px hsla(350, 45%, 85%, 0.5), 0 2px 4px -1px hsla(350, 45%, 85%, 0.3)' } : {}}
             data-testid="tab-days"
           >
             <Calendar size={16} />
