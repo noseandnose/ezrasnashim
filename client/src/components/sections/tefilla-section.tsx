@@ -11,6 +11,7 @@ import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
@@ -371,19 +372,37 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                 data-testid="input-chain-name"
               />
               
-              <select
-                value={chainReason}
-                onChange={(e) => setChainReason(e.target.value)}
-                className="w-full h-10 px-3 py-2 text-sm rounded-2xl border border-blush/20 focus:border-blush focus:outline-none focus:ring-2 focus:ring-blush/20 bg-white"
-                data-testid="select-chain-reason"
-              >
-                <option value="" disabled>Select a reason...</option>
-                {reasonOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              <Select value={chainReason} onValueChange={setChainReason}>
+                <SelectTrigger className="rounded-2xl border-blush/20 focus:border-blush bg-white" data-testid="select-chain-reason">
+                  <SelectValue placeholder="Select a reason..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="refuah">
+                    <span className="inline-flex items-center gap-2"><HeartPulse size={16} className="text-blush" /> Refuah Shleima</span>
+                  </SelectItem>
+                  <SelectItem value="shidduch">
+                    <span className="inline-flex items-center gap-2"><Heart size={16} className="text-blush" /> Shidduch</span>
+                  </SelectItem>
+                  <SelectItem value="parnassa">
+                    <span className="inline-flex items-center gap-2"><Briefcase size={16} className="text-blush" /> Parnassa</span>
+                  </SelectItem>
+                  <SelectItem value="children">
+                    <span className="inline-flex items-center gap-2"><Baby size={16} className="text-blush" /> Children</span>
+                  </SelectItem>
+                  <SelectItem value="shalom-bayis">
+                    <span className="inline-flex items-center gap-2"><Home size={16} className="text-blush" /> Shalom Bayis</span>
+                  </SelectItem>
+                  <SelectItem value="success">
+                    <span className="inline-flex items-center gap-2"><Star size={16} className="text-blush" /> Success</span>
+                  </SelectItem>
+                  <SelectItem value="protection">
+                    <span className="inline-flex items-center gap-2"><Shield size={16} className="text-blush" /> Protection</span>
+                  </SelectItem>
+                  <SelectItem value="general">
+                    <span className="inline-flex items-center gap-2"><Sparkles size={16} className="text-blush" /> General Tefillas</span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
               
               <div className="flex space-x-3">
                 <Button 
