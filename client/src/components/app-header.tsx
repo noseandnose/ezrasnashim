@@ -127,13 +127,16 @@ export default function AppHeader() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={`p-2 rounded-full hover:bg-white/50 transition-colors focus:outline-none ${
+                  className={`p-2 rounded-full hover:bg-white/50 transition-colors focus:outline-none relative ${
                     shouldHighlight ? 'animate-pulse border-2 border-blush shadow-lg' : ''
                   }`}
                   aria-label="Menu"
                   data-testid="button-menu"
                 >
                   <Menu className="h-5 w-5 text-black/70" />
+                  {!!todayMessage && !hasReadMessage && (
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-blush rounded-full" data-testid="indicator-unread-menu" />
+                  )}
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48">
@@ -202,17 +205,20 @@ export default function AppHeader() {
                   <MessageSquare className="h-5 w-5 mr-2" />
                   Community Feedback
                 </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleOpenMessage}
+                  className="cursor-pointer relative"
+                  data-testid="menu-item-message"
+                  data-action="menu-message"
+                >
+                  <Mail className="h-5 w-5 mr-2" />
+                  Daily Message
+                  {!!todayMessage && !hasReadMessage && (
+                    <span className="ml-auto w-2 h-2 bg-blush rounded-full" />
+                  )}
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <button
-              onClick={() => setShowSearchModal(true)}
-              className="p-2 rounded-full hover:bg-white/50 transition-colors"
-              aria-label="Search"
-              data-testid="button-search"
-              data-action="header-search"
-            >
-              <Search className="h-5 w-5 text-black/70" />
-            </button>
           </div>
           <div className="flex-shrink-0 flex items-center" style={{ height: 'var(--header-row-height)' }}>
             <img 
@@ -226,16 +232,13 @@ export default function AppHeader() {
           </div>
           <div className="flex items-center gap-1 flex-1 justify-end">
             <button
-              onClick={handleOpenMessage}
-              className="p-2 rounded-full hover:bg-white/50 transition-colors relative"
-              aria-label="Daily Message"
-              data-testid="button-message"
-              data-action="header-message"
+              onClick={() => setShowSearchModal(true)}
+              className="p-2 rounded-full hover:bg-white/50 transition-colors"
+              aria-label="Search"
+              data-testid="button-search"
+              data-action="header-search"
             >
-              <Mail className="h-5 w-5 text-black/70" />
-              {!!todayMessage && !hasReadMessage && (
-                <span className="absolute top-1 right-1 w-2 h-2 bg-blush rounded-full" data-testid="indicator-unread-message" />
-              )}
+              <Search className="h-5 w-5 text-black/70" />
             </button>
           </div>
         </div>
