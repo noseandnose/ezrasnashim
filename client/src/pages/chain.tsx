@@ -366,7 +366,7 @@ export default function ChainPage() {
         <div className="p-4 space-y-4">
           {/* Community message */}
           <p className="platypi-regular text-sm text-black/70 text-center">
-            Sefer Tehillim completed together, One chapter at a time.
+            Sefer Tehillim completed together, One Tehillim at a time.
           </p>
 
           {/* Progress bar */}
