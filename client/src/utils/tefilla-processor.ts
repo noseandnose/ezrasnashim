@@ -137,7 +137,9 @@ export interface TefillaConditions {
   isAseretYemeiTeshuva: boolean;
   isSukkot: boolean;
   isPesach: boolean;
-  isRoshChodeshSpecial: boolean;
+  isChanuka: boolean;
+  isPurim: boolean;
+  isRoshChodeshSpecial: boolean;  // True when ANY special day (Rosh Chodesh, Pesach, Sukkot, Chanuka, Purim)
   isSunday: boolean;
   isMonday: boolean;
   isTuesday: boolean;
@@ -176,7 +178,9 @@ export interface TefillaConditions {
  * [[ASERET_YEMEI_TESHUVA]]content[[/ASERET_YEMEI_TESHUVA]] - Only shows during days between Rosh Hashana and Yom Kippur
  * [[SUKKOT]]content[[/SUKKOT]] - Only shows during Sukkot
  * [[PESACH]]content[[/PESACH]] - Only shows during Pesach
- * [[ROSH_CHODESH_SPECIAL]]content[[/ROSH_CHODESH_SPECIAL]] - HIDES content during Rosh Chodesh, Pesach, or Sukkot
+ * [[CHANUKA]]content[[/CHANUKA]] - Only shows during Chanuka
+ * [[PURIM]]content[[/PURIM]] - Only shows during Purim
+ * [[ROSH_CHODESH_SPECIAL]]content[[/ROSH_CHODESH_SPECIAL]] - HIDES content during ANY special day (Rosh Chodesh, Pesach, Sukkot, Chanuka, Purim)
  * [[SUNDAY]]content[[/SUNDAY]] - Only shows on Sundays
  * [[MONDAY]]content[[/MONDAY]] - Only shows on Mondays
  * [[TUESDAY]]content[[/TUESDAY]] - Only shows on Tuesdays
@@ -216,7 +220,9 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     ASERET_YEMEI_TESHUVA: () => conditions.isAseretYemeiTeshuva,
     SUKKOT: () => conditions.isSukkot,
     PESACH: () => conditions.isPesach,
-    ROSH_CHODESH_SPECIAL: () => !conditions.isRoshChodeshSpecial, // Exclusion logic: shows when NOT in special periods
+    CHANUKA: () => conditions.isChanuka,
+    PURIM: () => conditions.isPurim,
+    ROSH_CHODESH_SPECIAL: () => !conditions.isRoshChodeshSpecial, // Exclusion logic: shows when NOT in any special period
     SUNDAY: () => conditions.isSunday,
     MONDAY: () => conditions.isMonday,
     TUESDAY: () => conditions.isTuesday,
@@ -383,7 +389,7 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
   }
   
   // Clean up any orphaned conditional tags that weren't properly matched
-  const orphanedTagPattern = /\[\[(?:\/?)(?:OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH|FAST_DAY|ASERET_YEMEI_TESHUVA|SUKKOT|PESACH|ROSH_CHODESH_SPECIAL|MH|MT|TBI|TTI|TTC|TBC|grain|wine|fruit)(?:,[^\\]]*)?(?:\|[^\\]]*)?\]\]/g;
+  const orphanedTagPattern = /\[\[(?:\/?)(?:OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH|FAST_DAY|ASERET_YEMEI_TESHUVA|SUKKOT|PESACH|CHANUKA|PURIM|ROSH_CHODESH_SPECIAL|MH|MT|TBI|TTI|TTC|TBC|grain|wine|fruit)(?:,[^\\]]*)?(?:\|[^\\]]*)?\]\]/g;
   
   processedText = processedText.replace(orphanedTagPattern, () => {
     return ''; // Remove orphaned conditional tags only
@@ -483,6 +489,8 @@ export async function getCurrentTefillaConditions(
     let isAseretYemeiTeshuva = false;
     let isSukkot = false;
     let isPesach = false;
+    let isChanuka = false;
+    let isPurim = false;
     let isRoshChodeshSpecial = false;
     
     // Check individual days of the week
@@ -556,8 +564,26 @@ export async function getCurrentTefillaConditions(
                  eventLower.includes('seder');
         });
         
+        // Check for Chanuka
+        isChanuka = events.some((event: string) => {
+          const eventLower = event.toLowerCase();
+          return eventLower.includes('chanuk') ||
+                 eventLower.includes('hanuk') ||
+                 eventLower.includes('chanukkah') ||
+                 eventLower.includes('hanukkah');
+        });
+        
+        // Check for Purim (but not Erev Purim)
+        isPurim = events.some((event: string) => {
+          const eventLower = event.toLowerCase();
+          if (eventLower.includes('erev')) return false;
+          return eventLower.includes('purim') ||
+                 eventLower.includes('shushan purim');
+        });
+        
         // Check if we're in any special period (for exclusion logic)
-        isRoshChodeshSpecial = isRoshChodesh || isPesach || isSukkot;
+        // ROSH_CHODESH_SPECIAL hides content during ANY of these special days
+        isRoshChodeshSpecial = isRoshChodesh || isPesach || isSukkot || isChanuka || isPurim;
         
       }
     } catch (error) {
@@ -628,6 +654,8 @@ export async function getCurrentTefillaConditions(
       isAseretYemeiTeshuva,
       isSukkot,
       isPesach,
+      isChanuka,
+      isPurim,
       isRoshChodeshSpecial,
       isSunday,
       isMonday,
@@ -675,6 +703,8 @@ export async function getCurrentTefillaConditions(
       isAseretYemeiTeshuva: false,
       isSukkot: false,
       isPesach: false,
+      isChanuka: false,
+      isPurim: false,
       isRoshChodeshSpecial: false,
       isSunday,
       isMonday,
