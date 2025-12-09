@@ -323,8 +323,8 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                 <Link2 className="text-white" size={20} />
               </div>
               <div>
-                <h3 className="platypi-bold text-lg text-black">Today's Total Tehillim</h3>
-                <span className="platypi-bold text-sm text-black border border-blush/30 rounded-lg px-2 py-0.5">{(chainTotal + countIndividualTehillim()).toLocaleString()}</span>
+                <h3 className="platypi-bold text-lg text-black">Tehillim Chains</h3>
+                <span className="platypi-medium text-sm text-black border border-blush/30 rounded-lg px-2 py-0.5">Completed Today: <span className="platypi-bold">{(chainTotal + countIndividualTehillim()).toLocaleString()}</span></span>
               </div>
             </div>
           </div>
@@ -334,7 +334,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             className="rounded-xl p-3 border border-blush/20"
             style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}
           >
-            <h4 className="platypi-bold text-sm text-black mb-2 text-center">Tehillim Chains</h4>
             {/* Buttons Row */}
             <div className="flex items-center justify-center space-x-3 mb-2">
             <Button
