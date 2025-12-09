@@ -793,31 +793,44 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTehillimChainStats(chainId: number): Promise<{totalSaid: number; booksCompleted: number; currentlyReading: number; available: number}> {
-    // Get unique psalms completed (count distinct psalm numbers, not total entries)
-    const uniqueCompletedResult = await db.select({ 
-      count: sql<number>`count(DISTINCT ${tehillimChainReadings.psalmNumber})` 
+    // Get completions per psalm number to properly track cycles
+    const completedResult = await db.select({ 
+      psalmNumber: tehillimChainReadings.psalmNumber,
+      count: sql<number>`count(*)`
     })
       .from(tehillimChainReadings)
       .where(and(
         eq(tehillimChainReadings.chainId, chainId),
         eq(tehillimChainReadings.status, 'completed')
-      ));
-    const uniquePsalmsCompleted = Number(uniqueCompletedResult[0]?.count || 0);
+      ))
+      .groupBy(tehillimChainReadings.psalmNumber);
     
-    // Get total completions (for calculating books - multiple cycles)
-    const totalCompletionsResult = await db.select({ count: sql<number>`count(*)` })
-      .from(tehillimChainReadings)
-      .where(and(
-        eq(tehillimChainReadings.chainId, chainId),
-        eq(tehillimChainReadings.status, 'completed')
-      ));
-    const totalCompletions = Number(totalCompletionsResult[0]?.count || 0);
+    // Calculate total completions
+    const totalCompletions = completedResult.reduce((sum, r) => sum + Number(r.count), 0);
     
-    // Calculate books completed (150 psalms per book)
-    // Each unique psalm completion in a cycle counts toward the book
-    const booksCompleted = Math.floor(totalCompletions / 150);
+    // A book is complete when ALL 150 psalms have been read at least once in that cycle
+    // booksCompleted = minimum completion count across all 150 psalms
+    // If any psalm has never been completed, booksCompleted = 0
+    const uniquePsalmsCompleted = completedResult.length;
+    let booksCompleted = 0;
+    if (uniquePsalmsCompleted === 150) {
+      // All psalms have been completed at least once
+      // Find the minimum completion count - that's how many full books
+      const minCompletions = Math.min(...completedResult.map(r => Number(r.count)));
+      booksCompleted = minCompletions;
+    }
     
-    // Get currently reading (active readings started in last 10 minutes to match next-available logic)
+    // Count psalms completed in the CURRENT cycle (after the completed books)
+    // A psalm is completed in current cycle if its completion count > booksCompleted
+    let completedInCurrentCycle = 0;
+    for (const row of completedResult) {
+      const completionsForPsalm = Number(row.count);
+      if (completionsForPsalm > booksCompleted) {
+        completedInCurrentCycle++;
+      }
+    }
+    
+    // Get currently reading (active readings started in last 10 minutes)
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
     const readingResult = await db.select({ 
       count: sql<number>`count(DISTINCT ${tehillimChainReadings.psalmNumber})` 
@@ -830,13 +843,11 @@ export class DatabaseStorage implements IStorage {
       ));
     const currentlyReading = Number(readingResult[0]?.count || 0);
     
-    // Calculate available psalms in current book cycle
-    // Use unique psalms for accurate calculation
-    const completedInCurrentCycle = uniquePsalmsCompleted % 150;
+    // Calculate available psalms in current cycle
     const available = Math.max(0, 150 - completedInCurrentCycle - currentlyReading);
     
-    // Return unique psalms as "totalSaid" for clearer user understanding
-    return { totalSaid: uniquePsalmsCompleted, booksCompleted, currentlyReading, available };
+    // Return total completions as "totalSaid" (shows all psalms ever read across all cycles)
+    return { totalSaid: totalCompletions, booksCompleted, currentlyReading, available };
   }
 
   async startChainReading(chainId: number, psalmNumber: number, deviceId: string): Promise<TehillimChainReading> {
@@ -993,17 +1004,22 @@ export class DatabaseStorage implements IStorage {
       ))
       .groupBy(tehillimChainReadings.psalmNumber);
     
-    // Calculate which cycle we're in based on total completions
-    const totalCompleted = completedResult.reduce((sum, r) => sum + Number(r.count), 0);
-    const currentCycle = Math.floor(totalCompleted / 150);
+    // Calculate books completed (a book is complete when ALL 150 psalms are read)
+    const uniquePsalmsCompleted = completedResult.length;
+    let booksCompleted = 0;
+    if (uniquePsalmsCompleted === 150) {
+      // All psalms have been completed at least once
+      const minCompletions = Math.min(...completedResult.map(r => Number(r.count)));
+      booksCompleted = minCompletions;
+    }
     
-    // Find psalms completed in current cycle
+    // Find psalms completed in current cycle (after the completed books)
     const completedPsalms = new Set<number>();
     for (const row of completedResult) {
       const completionsForPsalm = Number(row.count);
-      // If this psalm has been completed more times than the current cycle number,
-      // it's been completed in this cycle
-      if (completionsForPsalm > currentCycle) {
+      // If this psalm has been completed more times than booksCompleted,
+      // it's been completed in the current cycle
+      if (completionsForPsalm > booksCompleted) {
         completedPsalms.add(row.psalmNumber);
       }
     }
@@ -1059,13 +1075,18 @@ export class DatabaseStorage implements IStorage {
       ))
       .groupBy(tehillimChainReadings.psalmNumber);
     
-    const totalCompleted = completedResult.reduce((sum, r) => sum + Number(r.count), 0);
-    const currentCycle = Math.floor(totalCompleted / 150);
+    // Calculate books completed (a book is complete when ALL 150 psalms are read)
+    const uniquePsalmsCompleted = completedResult.length;
+    let booksCompleted = 0;
+    if (uniquePsalmsCompleted === 150) {
+      const minCompletions = Math.min(...completedResult.map(r => Number(r.count)));
+      booksCompleted = minCompletions;
+    }
     
     const completedPsalms = new Set<number>();
     for (const row of completedResult) {
       const completionsForPsalm = Number(row.count);
-      if (completionsForPsalm > currentCycle) {
+      if (completionsForPsalm > booksCompleted) {
         completedPsalms.add(row.psalmNumber);
       }
     }
