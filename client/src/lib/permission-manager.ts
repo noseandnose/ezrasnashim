@@ -366,11 +366,22 @@ export class PermissionManager {
           ? `${error.name}: ${error.message}` 
           : String(error);
       
-      console.error('[PermissionManager] Error subscribing to push:', {
-        message: errorMessage,
-        name: error instanceof Error ? error.name : 'Unknown',
-        error: error
-      });
+      // Known environment issues - downgrade to warning (expected in WebViews, restricted contexts)
+      const isKnownEnvironmentIssue = 
+        errorMessage.includes('storage error') ||
+        errorMessage.includes('Storage not available') ||
+        errorMessage.includes('not supported') ||
+        (error instanceof DOMException && error.name === 'AbortError');
+      
+      if (isKnownEnvironmentIssue) {
+        console.warn('[PermissionManager] Push notifications unavailable in this environment:', errorMessage);
+      } else {
+        console.error('[PermissionManager] Error subscribing to push:', {
+          message: errorMessage,
+          name: error instanceof Error ? error.name : 'Unknown',
+          error: error
+        });
+      }
       
       store.setNotificationState({
         subscribed: false,
