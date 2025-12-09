@@ -4,9 +4,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Share2, ChevronLeft, Heart, Briefcase, Baby, Home, Star, Shield, Sparkles, HeartPulse } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Minus, Plus, Languages } from "lucide-react";
 import { formatTextContent } from "@/lib/text-formatter";
 import { AttributionSection } from "@/components/ui/attribution-section";
+import { FloatingSettings } from "@/components/ui/floating-settings";
 import { useLocationStore } from "@/hooks/use-jewish-times";
 import type { TehillimChain } from "@shared/schema";
 
@@ -391,35 +391,6 @@ export default function ChainPage() {
                 <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
               </div>
             )}
-            
-            {/* Inline settings at bottom left of tehillim box */}
-            <div className="flex items-center gap-3 mt-4 pt-4 border-t border-blush/10">
-              {/* Language toggle */}
-              <button
-                onClick={() => setShowHebrew(!showHebrew)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blush/10 text-black/70 hover:bg-blush/20 transition-colors text-sm platypi-medium"
-              >
-                <Languages size={14} />
-                {showHebrew ? 'עב' : 'EN'}
-              </button>
-              
-              {/* Font size controls */}
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setFontSize(Math.max(12, fontSize - 2))}
-                  className="w-7 h-7 flex items-center justify-center rounded-full bg-blush/10 text-black/70 hover:bg-blush/20 transition-colors"
-                >
-                  <Minus size={14} />
-                </button>
-                <span className="text-xs text-black/50 w-6 text-center">{fontSize}</span>
-                <button
-                  onClick={() => setFontSize(Math.min(32, fontSize + 2))}
-                  className="w-7 h-7 flex items-center justify-center rounded-full bg-blush/10 text-black/70 hover:bg-blush/20 transition-colors"
-                >
-                  <Plus size={14} />
-                </button>
-              </div>
-            </div>
           </div>
 
           {/* Koren Attribution */}
@@ -452,6 +423,17 @@ export default function ChainPage() {
           </div>
         </div>
       </div>
+      
+      {/* Floating Settings Button */}
+      <FloatingSettings
+        showFontControls={true}
+        fontSize={fontSize}
+        onFontSizeChange={setFontSize}
+        showLanguageControls={true}
+        language={showHebrew ? 'hebrew' : 'english'}
+        onLanguageChange={(lang) => setShowHebrew(lang === 'hebrew')}
+        bottomOffset="5rem"
+      />
     </div>
   );
 }
