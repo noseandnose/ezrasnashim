@@ -363,7 +363,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
           {chainView === 'create' && (
             <div className="space-y-3 p-3 bg-gradient-to-r from-ivory to-lavender/5 rounded-2xl border border-lavender/20">
               <Input
-                placeholder="Chain Name (e.g., Refuah for Sarah)"
+                placeholder="Chain Name (Name Ben/Bat Name)"
                 value={chainName}
                 onChange={(e) => setChainName(e.target.value)}
                 className="text-left rounded-2xl border-blush/20 focus:border-blush bg-white"
