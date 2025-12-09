@@ -56,6 +56,9 @@ export default function ChainPage() {
   
   // Prevent duplicate psalm loading (React strict mode / double renders)
   const isLoadingPsalmRef = useRef(false);
+  // Prevent auto-load useEffect from interfering when manually finding another psalm
+  const isFindingAnotherRef = useRef(false);
+  const [isFindingAnother, setIsFindingAnother] = useState(false);
 
   const deviceId = (() => {
     let id = localStorage.getItem('deviceId');
@@ -189,18 +192,29 @@ export default function ChainPage() {
         description: "Could not find an available psalm.",
         variant: "destructive",
       });
+    } finally {
+      // Reset the finding another flag after the operation completes
+      isFindingAnotherRef.current = false;
+      setIsFindingAnother(false);
     }
   }, [slug, deviceId, startReadingMutation]);
 
-  // Reset loading ref when slug changes (navigating to different chain)
+  // Reset loading refs when slug changes (navigating to different chain)
   useEffect(() => {
     isLoadingPsalmRef.current = false;
+    isFindingAnotherRef.current = false;
+    setIsFindingAnother(false);
     setCurrentPsalm(null);
     setIsReading(false);
   }, [slug]);
 
   // Use nextPsalm from initial response for instant loading
   useEffect(() => {
+    // Skip if user is manually finding another psalm (prevents race condition)
+    if (isFindingAnotherRef.current) {
+      return;
+    }
+    
     if (chainData?.nextPsalm && !currentPsalm && !isReading) {
       setCurrentPsalm(chainData.nextPsalm);
       setIsReading(true);
@@ -209,7 +223,7 @@ export default function ChainPage() {
         startReadingMutation.mutate(chainData.nextPsalm);
       }
       isLoadingPsalmRef.current = false;
-    } else if (chainData && chainData.nextPsalm === null && !currentPsalm) {
+    } else if (chainData && chainData.nextPsalm === null && !currentPsalm && !isFindingAnotherRef.current) {
       // All psalms completed
       toast({
         title: "All Tehillim Complete!",
@@ -270,6 +284,15 @@ export default function ChainPage() {
   };
 
   const handleFindAnother = () => {
+    // Prevent double-clicks and race conditions
+    if (isFindingAnother || isFindingAnotherRef.current) {
+      return;
+    }
+    
+    // Set flag BEFORE resetting state to prevent useEffect from interfering
+    isFindingAnotherRef.current = true;
+    setIsFindingAnother(true);
+    
     setIsReading(false);
     setCurrentPsalm(null);
     getRandomPsalm();
@@ -403,11 +426,11 @@ export default function ChainPage() {
         <div className="flex space-x-3">
           <button
             onClick={handleFindAnother}
-            disabled={!currentPsalm}
+            disabled={!currentPsalm || isFindingAnother}
             className="flex-1 py-4 rounded-2xl border-2 border-blush/30 bg-white text-black platypi-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blush/5 transition-colors"
             data-testid="button-find-another"
           >
-            Find me another
+            {isFindingAnother ? 'Loading...' : 'Find me another'}
           </button>
           <button
             onClick={handleComplete}
