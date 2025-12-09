@@ -793,7 +793,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTehillimChainStats(chainId: number): Promise<{totalSaid: number; booksCompleted: number; currentlyReading: number; available: number}> {
-    // Get completions per psalm number to properly track cycles
+    // Total tehillim units: 171 (psalms 1-150, but psalm 119 has 22 parts instead of 1)
+    const TOTAL_TEHILLIM_UNITS = 171;
+    
+    // Get completions per tehillim id to properly track cycles
+    // psalmNumber in the database represents tehillim table id (1-171), not psalm number
     const completedResult = await db.select({ 
       psalmNumber: tehillimChainReadings.psalmNumber,
       count: sql<number>`count(*)`
@@ -808,24 +812,24 @@ export class DatabaseStorage implements IStorage {
     // Calculate total completions
     const totalCompletions = completedResult.reduce((sum, r) => sum + Number(r.count), 0);
     
-    // A book is complete when ALL 150 psalms have been read at least once in that cycle
-    // booksCompleted = minimum completion count across all 150 psalms
-    // If any psalm has never been completed, booksCompleted = 0
-    const uniquePsalmsCompleted = completedResult.length;
+    // A book is complete when ALL 171 tehillim units have been read at least once
+    // booksCompleted = minimum completion count across all 171 units
+    // If any unit has never been completed, booksCompleted = 0
+    const uniqueUnitsCompleted = completedResult.length;
     let booksCompleted = 0;
-    if (uniquePsalmsCompleted === 150) {
-      // All psalms have been completed at least once
+    if (uniqueUnitsCompleted === TOTAL_TEHILLIM_UNITS) {
+      // All units have been completed at least once
       // Find the minimum completion count - that's how many full books
       const minCompletions = Math.min(...completedResult.map(r => Number(r.count)));
       booksCompleted = minCompletions;
     }
     
-    // Count psalms completed in the CURRENT cycle (after the completed books)
-    // A psalm is completed in current cycle if its completion count > booksCompleted
+    // Count units completed in the CURRENT cycle (after the completed books)
+    // A unit is completed in current cycle if its completion count > booksCompleted
     let completedInCurrentCycle = 0;
     for (const row of completedResult) {
-      const completionsForPsalm = Number(row.count);
-      if (completionsForPsalm > booksCompleted) {
+      const completionsForUnit = Number(row.count);
+      if (completionsForUnit > booksCompleted) {
         completedInCurrentCycle++;
       }
     }
@@ -843,10 +847,10 @@ export class DatabaseStorage implements IStorage {
       ));
     const currentlyReading = Number(readingResult[0]?.count || 0);
     
-    // Calculate available psalms in current cycle
-    const available = Math.max(0, 150 - completedInCurrentCycle - currentlyReading);
+    // Calculate available units in current cycle
+    const available = Math.max(0, TOTAL_TEHILLIM_UNITS - completedInCurrentCycle - currentlyReading);
     
-    // Return total completions as "totalSaid" (shows all psalms ever read across all cycles)
+    // Return total completions as "totalSaid" (shows all units ever read across all cycles)
     return { totalSaid: totalCompletions, booksCompleted, currentlyReading, available };
   }
 
@@ -971,18 +975,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAvailablePsalmForChain(chainId: number, excludeDeviceId?: string): Promise<number | null> {
-    // Get all psalms currently being read by OTHER devices (active in last 10 min)
-    // Shorter timeout to avoid stale readings blocking psalms
+    // Total tehillim units: 171 (psalms 1-150, but psalm 119 has 22 parts instead of 1)
+    const TOTAL_TEHILLIM_UNITS = 171;
+    
+    // Get all units currently being read by OTHER devices (active in last 10 min)
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
     
-    // Build where clause - exclude current device's readings so they can get a fresh psalm
+    // Build where clause - exclude current device's readings so they can get a fresh unit
     const whereConditions = [
       eq(tehillimChainReadings.chainId, chainId),
       eq(tehillimChainReadings.status, 'reading'),
       gt(tehillimChainReadings.startedAt, tenMinutesAgo)
     ];
     
-    // If we have a device ID, exclude that device's readings (so same user can get new psalms)
+    // If we have a device ID, exclude that device's readings (so same user can get new units)
     if (excludeDeviceId) {
       whereConditions.push(sql`${tehillimChainReadings.deviceId} != ${excludeDeviceId}`);
     }
@@ -991,8 +997,8 @@ export class DatabaseStorage implements IStorage {
       .from(tehillimChainReadings)
       .where(and(...whereConditions));
     
-    // Get actually completed psalms in current cycle (not assumed sequential)
-    // Count completions per psalm number to determine cycle position
+    // Get completed units in current cycle
+    // psalmNumber represents tehillim table id (1-171)
     const completedResult = await db.select({ 
       psalmNumber: tehillimChainReadings.psalmNumber,
       count: sql<number>`count(*)`
@@ -1004,48 +1010,49 @@ export class DatabaseStorage implements IStorage {
       ))
       .groupBy(tehillimChainReadings.psalmNumber);
     
-    // Calculate books completed (a book is complete when ALL 150 psalms are read)
-    const uniquePsalmsCompleted = completedResult.length;
+    // Calculate books completed (a book is complete when ALL 171 units are read)
+    const uniqueUnitsCompleted = completedResult.length;
     let booksCompleted = 0;
-    if (uniquePsalmsCompleted === 150) {
-      // All psalms have been completed at least once
+    if (uniqueUnitsCompleted === TOTAL_TEHILLIM_UNITS) {
       const minCompletions = Math.min(...completedResult.map(r => Number(r.count)));
       booksCompleted = minCompletions;
     }
     
-    // Find psalms completed in current cycle (after the completed books)
-    const completedPsalms = new Set<number>();
+    // Find units completed in current cycle (after the completed books)
+    const completedUnits = new Set<number>();
     for (const row of completedResult) {
-      const completionsForPsalm = Number(row.count);
-      // If this psalm has been completed more times than booksCompleted,
-      // it's been completed in the current cycle
-      if (completionsForPsalm > booksCompleted) {
-        completedPsalms.add(row.psalmNumber);
+      const completionsForUnit = Number(row.count);
+      if (completionsForUnit > booksCompleted) {
+        completedUnits.add(row.psalmNumber);
       }
     }
     
-    // Get psalms being read by others
-    const readingPsalms = new Set(activeReadings.map(r => r.psalmNumber));
+    // Get units being read by others
+    const readingUnits = new Set(activeReadings.map(r => r.psalmNumber));
     
-    // Find available psalms (not completed in this cycle, not being read by others)
+    // Find available units (not completed in this cycle, not being read by others)
+    // Iterate through tehillim ids 1-171
     const available: number[] = [];
-    for (let i = 1; i <= 150; i++) {
-      if (!completedPsalms.has(i) && !readingPsalms.has(i)) {
+    for (let i = 1; i <= TOTAL_TEHILLIM_UNITS; i++) {
+      if (!completedUnits.has(i) && !readingUnits.has(i)) {
         available.push(i);
       }
     }
     
     if (available.length === 0) {
-      // All psalms completed or being read - start new cycle with psalm 1
+      // All units completed or being read - start new cycle with id 1
       return 1;
     }
     
-    // Return the first available psalm (sequential order starting from 1)
+    // Return the first available tehillim id (sequential order starting from 1)
     return available[0];
   }
 
   async getRandomAvailablePsalmForChain(chainId: number, excludeDeviceId?: string): Promise<number | null> {
-    // Get all psalms currently being read by OTHER devices (active in last 10 min)
+    // Total tehillim units: 171 (psalms 1-150, but psalm 119 has 22 parts instead of 1)
+    const TOTAL_TEHILLIM_UNITS = 171;
+    
+    // Get all units currently being read by OTHER devices (active in last 10 min)
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
     
     // Build where clause - exclude current device's readings
@@ -1063,7 +1070,7 @@ export class DatabaseStorage implements IStorage {
       .from(tehillimChainReadings)
       .where(and(...whereConditions));
     
-    // Get actually completed psalms in current cycle
+    // Get completed units in current cycle
     const completedResult = await db.select({ 
       psalmNumber: tehillimChainReadings.psalmNumber,
       count: sql<number>`count(*)`
@@ -1075,27 +1082,27 @@ export class DatabaseStorage implements IStorage {
       ))
       .groupBy(tehillimChainReadings.psalmNumber);
     
-    // Calculate books completed (a book is complete when ALL 150 psalms are read)
-    const uniquePsalmsCompleted = completedResult.length;
+    // Calculate books completed (a book is complete when ALL 171 units are read)
+    const uniqueUnitsCompleted = completedResult.length;
     let booksCompleted = 0;
-    if (uniquePsalmsCompleted === 150) {
+    if (uniqueUnitsCompleted === TOTAL_TEHILLIM_UNITS) {
       const minCompletions = Math.min(...completedResult.map(r => Number(r.count)));
       booksCompleted = minCompletions;
     }
     
-    const completedPsalms = new Set<number>();
+    const completedUnits = new Set<number>();
     for (const row of completedResult) {
-      const completionsForPsalm = Number(row.count);
-      if (completionsForPsalm > booksCompleted) {
-        completedPsalms.add(row.psalmNumber);
+      const completionsForUnit = Number(row.count);
+      if (completionsForUnit > booksCompleted) {
+        completedUnits.add(row.psalmNumber);
       }
     }
     
-    const readingPsalms = new Set(activeReadings.map(r => r.psalmNumber));
+    const readingUnits = new Set(activeReadings.map(r => r.psalmNumber));
     
     const available: number[] = [];
-    for (let i = 1; i <= 150; i++) {
-      if (!completedPsalms.has(i) && !readingPsalms.has(i)) {
+    for (let i = 1; i <= TOTAL_TEHILLIM_UNITS; i++) {
+      if (!completedUnits.has(i) && !readingUnits.has(i)) {
         available.push(i);
       }
     }
@@ -1104,7 +1111,7 @@ export class DatabaseStorage implements IStorage {
       return 1;
     }
     
-    // Return a random available psalm
+    // Return a random available tehillim id
     return available[Math.floor(Math.random() * available.length)];
   }
 

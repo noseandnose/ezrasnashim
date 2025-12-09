@@ -2371,25 +2371,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get Tehillim text by psalm number (for chain reading) - MUST be after all specific routes
-  app.get("/api/tehillim/:psalmNumber", async (req, res) => {
+  // Get Tehillim text by tehillim id (1-171 for chain reading) - MUST be after all specific routes
+  // Psalm 119 has 22 parts (ids 119-140), giving 171 total units
+  app.get("/api/tehillim/:tehillimId", async (req, res) => {
     try {
-      const psalmNumber = parseInt(req.params.psalmNumber);
+      const tehillimId = parseInt(req.params.tehillimId);
       
-      if (isNaN(psalmNumber) || psalmNumber < 1 || psalmNumber > 150) {
-        return res.status(400).json({ error: "Psalm number must be between 1 and 150" });
+      // 171 total tehillim units (150 psalms, but psalm 119 has 22 parts)
+      if (isNaN(tehillimId) || tehillimId < 1 || tehillimId > 171) {
+        return res.status(400).json({ error: "Tehillim ID must be between 1 and 171" });
       }
       
-      // Fetch both Hebrew and English text
-      const [hebrewResult, englishResult] = await Promise.all([
-        storage.getSupabaseTehillim(psalmNumber, 'hebrew'),
-        storage.getSupabaseTehillim(psalmNumber, 'english')
-      ]);
+      // Fetch by tehillim table id - this handles psalm 119 parts correctly
+      const tehillimRow = await storage.getSupabaseTehillimById(tehillimId);
+      
+      if (!tehillimRow) {
+        return res.status(404).json({ error: "Tehillim not found" });
+      }
+      
+      // Build display title: "Psalm X" or "Psalm 119 (Part Y)"
+      let displayTitle = `Psalm ${tehillimRow.englishNumber}`;
+      if (tehillimRow.englishNumber === 119 && tehillimRow.partNumber > 1) {
+        // Show part number for psalm 119 parts 2-22
+        displayTitle = `Psalm 119 (Part ${tehillimRow.partNumber})`;
+      } else if (tehillimRow.englishNumber === 119 && tehillimRow.partNumber === 1) {
+        displayTitle = `Psalm 119 (Part 1)`;
+      }
       
       res.json({
-        psalmNumber,
-        hebrewText: hebrewResult?.text || '',
-        englishText: englishResult?.text || ''
+        tehillimId,
+        psalmNumber: tehillimRow.englishNumber,
+        partNumber: tehillimRow.partNumber,
+        displayTitle,
+        hebrewNumber: tehillimRow.hebrewNumber,
+        hebrewText: tehillimRow.hebrewText || '',
+        englishText: tehillimRow.englishText || ''
       });
     } catch (error) {
       console.error('Error fetching Tehillim:', error);

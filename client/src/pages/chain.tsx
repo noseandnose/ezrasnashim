@@ -37,6 +37,10 @@ interface TehillimContent {
   hebrewText: string;
   englishText: string;
   psalmNumber: number;
+  tehillimId: number;
+  partNumber: number;
+  displayTitle: string;
+  hebrewNumber?: string;
 }
 
 export default function ChainPage() {
@@ -357,7 +361,7 @@ export default function ChainPage() {
 
       <div className="flex items-center justify-center p-3 bg-white border-b border-blush/10">
         <span className="platypi-medium text-sm text-black">
-          {currentPsalm ? `Psalm ${currentPsalm}` : 'Loading...'}
+          {psalmContent?.displayTitle || (currentPsalm ? `Psalm ${currentPsalm}` : 'Loading...')}
         </span>
       </div>
 
