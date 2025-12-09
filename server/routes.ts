@@ -2552,7 +2552,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Fetch stats and next psalm in parallel to eliminate waterfall
       const [stats, nextAvailable] = await Promise.all([
         storage.getTehillimChainStats(chain.id),
-        storage.getAvailablePsalmForChain(chain.id, deviceId as string | undefined)
+        storage.getRandomAvailablePsalmForChain(chain.id, deviceId as string | undefined)
       ]);
 
       // Return active reading if exists, otherwise next available
@@ -2619,10 +2619,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Chain not found" });
       }
 
-      // If no psalm specified, get an available one
+      // If no psalm specified, get a random available one
       let psalm = psalmNumber;
       if (!psalm) {
-        psalm = await storage.getAvailablePsalmForChain(chain.id);
+        psalm = await storage.getRandomAvailablePsalmForChain(chain.id);
         if (!psalm) {
           return res.status(404).json({ error: "No psalms available - all have been completed or are being read" });
         }
@@ -2659,7 +2659,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get next sequential available psalm for a chain (default on page load)
+  // Get next random available psalm for a chain (default on page load)
   app.get("/api/tehillim-chains/:slug/next-available", async (req, res) => {
     try {
       const { slug } = req.params;
@@ -2670,7 +2670,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Chain not found" });
       }
 
-      const psalm = await storage.getAvailablePsalmForChain(chain.id, deviceId as string);
+      const psalm = await storage.getRandomAvailablePsalmForChain(chain.id, deviceId as string);
       if (!psalm) {
         return res.status(404).json({ error: "No psalms available" });
       }
