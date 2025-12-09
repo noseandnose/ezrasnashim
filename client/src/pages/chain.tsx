@@ -91,7 +91,7 @@ export default function ChainPage() {
     },
     enabled: !!slug && !!chainData,
     refetchInterval: 30000,
-    staleTime: 10000, // Don't refetch immediately
+    staleTime: 0, // Always refetch when requested
   });
 
   // Use refreshed stats if available, otherwise use initial stats
@@ -116,7 +116,8 @@ export default function ChainPage() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains', slug, 'stats'] });
+      // Refetch stats to update currentlyReading count
+      queryClient.refetchQueries({ queryKey: ['/api/tehillim-chains', slug, 'stats'] });
     },
   });
 
@@ -340,7 +341,7 @@ export default function ChainPage() {
         <div className={`grid gap-2 ${visibleStats === 3 ? 'grid-cols-3 max-w-xs mx-auto' : 'grid-cols-4'}`}>
           <div className="bg-white rounded-xl px-2 py-1.5 text-center border border-blush/10">
             <p className="platypi-bold text-sm text-black">{displayStats?.totalCompleted || 0}</p>
-            <p className="platypi-regular text-[10px] text-black/60">Said</p>
+            <p className="platypi-regular text-[10px] text-black/60">Completed</p>
           </div>
           {showBooksCompleted && (
             <div className="bg-white rounded-xl px-2 py-1.5 text-center border border-blush/10">
