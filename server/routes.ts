@@ -2389,13 +2389,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Tehillim not found" });
       }
       
-      // Build display title: "Psalm X" or "Psalm 119 (Part Y)"
-      let displayTitle = `Psalm ${tehillimRow.englishNumber}`;
+      // Build display title: "Tehillim X" or "Tehillim 119 (Part Y)"
+      let displayTitle = `Tehillim ${tehillimRow.englishNumber}`;
       if (tehillimRow.englishNumber === 119 && tehillimRow.partNumber > 1) {
         // Show part number for psalm 119 parts 2-22
-        displayTitle = `Psalm 119 (Part ${tehillimRow.partNumber})`;
+        displayTitle = `Tehillim 119 (Part ${tehillimRow.partNumber})`;
       } else if (tehillimRow.englishNumber === 119 && tehillimRow.partNumber === 1) {
-        displayTitle = `Psalm 119 (Part 1)`;
+        displayTitle = `Tehillim 119 (Part 1)`;
       }
       
       res.json({
@@ -2693,7 +2693,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Chain not found" });
       }
 
-      const excludePsalmNum = excludePsalm ? parseInt(excludePsalm as string) : undefined;
+      // Parse excludePsalm and ensure it's a valid number
+      let excludePsalmNum: number | undefined;
+      if (excludePsalm) {
+        const parsed = parseInt(excludePsalm as string, 10);
+        if (!isNaN(parsed) && parsed >= 1 && parsed <= 171) {
+          excludePsalmNum = parsed;
+        }
+      }
+      
       const psalm = await storage.getRandomAvailablePsalmForChain(chain.id, deviceId as string, excludePsalmNum);
       if (!psalm) {
         return res.status(404).json({ error: "No psalms available" });
