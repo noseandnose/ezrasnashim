@@ -33,29 +33,6 @@ const getReasonIcon = (reason: string) => {
   return Sparkles;
 };
 
-// Format reason code to display text
-const formatReason = (reason: string): string => {
-  const reasonMap: Record<string, string> = {
-    'refuah': 'Refuah Shleima',
-    'refuah shleima': 'Refuah Shleima',
-    'shidduch': 'Shidduch',
-    'parnassa': 'Parnassa',
-    'children': 'Children',
-    'shalom-bayis': 'Shalom Bayis',
-    'shalom bayis': 'Shalom Bayis',
-    'success': 'Success',
-    'protection': 'Protection',
-    'general': 'General Tefillos',
-    'general tefillos': 'General Tefillos',
-  };
-  const mapped = reasonMap[reason.toLowerCase()];
-  if (mapped) return mapped;
-  // Fallback: capitalize first letter of each word
-  return reason.split(/[\s-]+/).map(word => 
-    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-  ).join(' ');
-};
-
 // Koren URL based on user location
 const useKorenUrl = () => {
   const { coordinates } = useLocationStore();
@@ -364,20 +341,18 @@ export default function ChainPage() {
       {/* Scrollable content area */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-4 space-y-4">
-          {/* Davening for section with border */}
-          <div className="text-center py-3 px-4 border border-blush/20 rounded-xl bg-white">
-            <p className="platypi-medium text-base text-black flex items-center justify-center gap-2 flex-wrap">
-              <span>Davening for: <span className="platypi-bold">{chain.name}</span></span>
-              <span className="flex items-center gap-1">
-                <span className="text-black/50">(</span>
-                {(() => {
-                  const ReasonIcon = getReasonIcon(chain.reason);
-                  return <ReasonIcon size={14} className="text-blush" />;
-                })()}
-                <span className="platypi-regular text-black/70">{formatReason(chain.reason)}</span>
-                <span className="text-black/50">)</span>
-              </span>
-            </p>
+          {/* Tehillim Chain section with border */}
+          <div className="py-3 px-4 border border-blush/20 rounded-xl bg-white flex items-center justify-between">
+            <div className="text-left">
+              <p className="platypi-medium text-sm text-black/60">Tehillim Chain for</p>
+              <p className="platypi-bold text-base text-black">{chain.name}</p>
+            </div>
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blush/10">
+              {(() => {
+                const ReasonIcon = getReasonIcon(chain.reason);
+                return <ReasonIcon size={20} className="text-blush" />;
+              })()}
+            </div>
           </div>
 
           {/* Progress bar */}
