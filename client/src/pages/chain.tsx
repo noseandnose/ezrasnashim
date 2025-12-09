@@ -384,7 +384,7 @@ export default function ChainPage() {
           <div className="bg-white rounded-2xl p-6 border border-blush/10 relative">
             {psalmContent ? (
               <div
-                className={`leading-relaxed text-black pb-16 ${showHebrew ? 'text-right vc-koren-hebrew' : 'text-left koren-siddur-english'} ${psalmLoading || isFindingAnother ? 'opacity-50' : ''}`}
+                className={`leading-relaxed text-black pb-4 ${showHebrew ? 'text-right vc-koren-hebrew' : 'text-left koren-siddur-english'} ${psalmLoading || isFindingAnother ? 'opacity-50' : ''}`}
                 style={{ fontSize: showHebrew ? `${fontSize + 1}px` : `${fontSize}px` }}
                 dir={showHebrew ? 'rtl' : 'ltr'}
                 dangerouslySetInnerHTML={{
