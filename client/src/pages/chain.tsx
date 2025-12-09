@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRoute, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Share2, ChevronLeft, Heart, Briefcase, Baby, Home, Star, Shield, Sparkles, HeartPulse, Settings } from "lucide-react";
@@ -89,8 +89,7 @@ export default function ChainPage() {
   const [fontSize, setFontSize] = useState(18);
   const [currentPsalm, setCurrentPsalm] = useState<number | null>(null);
   
-  // Prevent duplicate operations
-  const isFindingAnotherRef = useRef(false);
+  // Track loading state for find another button
   const [isFindingAnother, setIsFindingAnother] = useState(false);
   
   // Koren URL for attribution
@@ -204,31 +203,29 @@ export default function ChainPage() {
         variant: "destructive",
       });
     } finally {
-      isFindingAnotherRef.current = false;
       setIsFindingAnother(false);
     }
   }, [slug, deviceId]);
 
   // Reset when slug changes
   useEffect(() => {
-    isFindingAnotherRef.current = false;
     setIsFindingAnother(false);
     setCurrentPsalm(null);
   }, [slug]);
 
   // Load initial psalm from chain data
   useEffect(() => {
-    if (isFindingAnotherRef.current) return;
+    if (isFindingAnother) return;
     
     if (chainData?.nextPsalm && !currentPsalm) {
       setCurrentPsalm(chainData.nextPsalm);
-    } else if (chainData && chainData.nextPsalm === null && !currentPsalm && !isFindingAnotherRef.current) {
+    } else if (chainData && chainData.nextPsalm === null && !currentPsalm && !isFindingAnother) {
       toast({
         title: "All Tehillim Complete!",
         description: "Amazing! The entire Sefer Tehillim has been completed.",
       });
     }
-  }, [chainData, currentPsalm]);
+  }, [chainData, currentPsalm, isFindingAnother]);
 
   const handleShare = async () => {
     const url = `${window.location.origin}/c/${slug}`;
@@ -273,9 +270,7 @@ export default function ChainPage() {
   };
 
   const handleFindAnother = () => {
-    if (isFindingAnother || isFindingAnotherRef.current) return;
-    
-    isFindingAnotherRef.current = true;
+    if (isFindingAnother) return;
     setIsFindingAnother(true);
     getRandomPsalm();
   };
