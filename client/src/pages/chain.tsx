@@ -160,13 +160,25 @@ export default function ChainPage() {
       return { nextPsalm: nextData?.psalmNumber || null };
     },
     onMutate: () => {
-      // Optimistically update stats display
+      // Optimistically update both stats sources
       queryClient.setQueryData(['/api/tehillim-chains', slug, 'stats'], (old: ChainStats | undefined) => {
         if (!old) return old;
         return {
           ...old,
           totalCompleted: (old.totalCompleted || 0) + 1,
           available: Math.max(0, (old.available || 171) - 1),
+        };
+      });
+      // Also update the main chain data stats
+      queryClient.setQueryData(['/api/tehillim-chains', slug, deviceId], (old: ChainWithMeta | undefined) => {
+        if (!old?.stats) return old;
+        return {
+          ...old,
+          stats: {
+            ...old.stats,
+            totalCompleted: (old.stats.totalCompleted || 0) + 1,
+            available: Math.max(0, (old.stats.available || 171) - 1),
+          },
         };
       });
     },
@@ -362,9 +374,9 @@ export default function ChainPage() {
             const completed = 171 - (displayStats?.available || 171);
             const percentage = Math.round((completed / 171) * 100);
             return (
-              <div className="max-w-xs mx-auto space-y-1">
+              <div className="space-y-1">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="platypi-regular text-black/60">{completed} of 171 completed</span>
+                  <span className="platypi-regular text-black/60">Progress</span>
                   <span className="platypi-bold text-black">{percentage}%</span>
                 </div>
                 <div className="h-3 bg-gradient-feminine rounded-full overflow-hidden">
