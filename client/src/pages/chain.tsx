@@ -6,7 +6,8 @@ import { toast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Minus, Plus, Languages } from "lucide-react";
 import { formatTextContent } from "@/lib/text-formatter";
-import { KorenThankYou } from "@/components/shared/modal-components";
+import { AttributionSection } from "@/components/ui/attribution-section";
+import { useLocationStore } from "@/hooks/use-jewish-times";
 import type { TehillimChain } from "@shared/schema";
 
 interface ChainStats {
@@ -49,6 +50,18 @@ const formatReason = (reason: string): string => {
   return reasonMap[reason.toLowerCase()] || reason;
 };
 
+// Koren URL based on user location
+const useKorenUrl = () => {
+  const { coordinates } = useLocationStore();
+  const isInIsrael = coordinates && 
+    coordinates.lat >= 29.5 && coordinates.lat <= 33.5 && 
+    coordinates.lng >= 34.0 && coordinates.lng <= 36.0;
+  
+  return isInIsrael 
+    ? "https://korenpub.co.il/collections/siddurim/products/koren-shalem-siddurhardcoverstandardashkenaz"
+    : "https://korenpub.com/collections/siddurim/products/koren-shalem-siddur-ashkenaz-1";
+};
+
 interface TehillimContent {
   hebrewText: string;
   englishText: string;
@@ -72,6 +85,9 @@ export default function ChainPage() {
   // Prevent duplicate operations
   const isFindingAnotherRef = useRef(false);
   const [isFindingAnother, setIsFindingAnother] = useState(false);
+  
+  // Koren URL for attribution
+  const korenUrl = useKorenUrl();
 
   const deviceId = (() => {
     let id = localStorage.getItem('deviceId');
@@ -406,8 +422,14 @@ export default function ChainPage() {
             </div>
           </div>
 
-          {/* Koren Thank You */}
-          <KorenThankYou />
+          {/* Koren Attribution */}
+          <AttributionSection
+            label="All tefilla texts courtesy of Koren Publishers Jerusalem and Rabbi Sacks Legacy"
+            logoUrl="https://res.cloudinary.com/dsqq7a7ab/image/upload/v1764147872/1_gbfqps.png"
+            aboutText="Koren Publishers Jerusalem is the leading publisher of Jewish religious texts, known for its beautiful typography and scholarly editions. Founded by Eliyahu Koren, the company has set the standard for Hebrew-language religious publishing with its distinctive Koren typeface and acclaimed editions of the Siddur, Tanakh, and Talmud."
+            websiteUrl={korenUrl}
+            websiteLabel="Visit Koren Publishers"
+          />
 
           {/* Buttons */}
           <div className="flex space-x-3 pt-2 pb-4">
