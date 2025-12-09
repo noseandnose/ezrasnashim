@@ -809,9 +809,6 @@ export class DatabaseStorage implements IStorage {
       ))
       .groupBy(tehillimChainReadings.psalmNumber);
     
-    // Calculate total completions
-    const totalCompletions = completedResult.reduce((sum, r) => sum + Number(r.count), 0);
-    
     // A book is complete when ALL 171 tehillim units have been read at least once
     // booksCompleted = minimum completion count across all 171 units
     // If any unit has never been completed, booksCompleted = 0
@@ -824,7 +821,7 @@ export class DatabaseStorage implements IStorage {
       booksCompleted = minCompletions;
     }
     
-    // Count units completed in the CURRENT cycle (after the completed books)
+    // Count UNIQUE units completed in the CURRENT cycle (after the completed books)
     // A unit is completed in current cycle if its completion count > booksCompleted
     let completedInCurrentCycle = 0;
     for (const row of completedResult) {
@@ -848,10 +845,12 @@ export class DatabaseStorage implements IStorage {
     const currentlyReading = Number(readingResult[0]?.count || 0);
     
     // Calculate available units in current cycle
+    // IMPORTANT: completed + reading + available must equal 171
     const available = Math.max(0, TOTAL_TEHILLIM_UNITS - completedInCurrentCycle - currentlyReading);
     
-    // Return total completions as "totalSaid" (shows all units ever read across all cycles)
-    return { totalSaid: totalCompletions, booksCompleted, currentlyReading, available };
+    // Return UNIQUE completions in current cycle as "totalSaid" for display
+    // This ensures: totalSaid + currentlyReading + available = 171
+    return { totalSaid: completedInCurrentCycle, booksCompleted, currentlyReading, available };
   }
 
   async startChainReading(chainId: number, psalmNumber: number, deviceId: string): Promise<TehillimChainReading> {
