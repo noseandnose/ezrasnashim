@@ -136,12 +136,7 @@ export default function ChainPage() {
       return { result, nextPsalm: nextData?.psalmNumber || null };
     },
     onSuccess: async (data) => {
-      toast({
-        title: "Tehillim Completed!",
-        description: "May all your tefillas be answered.",
-      });
-      
-      // Load next psalm
+      // Load next psalm silently (no popup)
       if (data.nextPsalm) {
         setCurrentPsalm(data.nextPsalm);
         setIsReading(true);
@@ -149,10 +144,6 @@ export default function ChainPage() {
       } else {
         setCurrentPsalm(null);
         setIsReading(false);
-        toast({
-          title: "All Tehillim Complete!",
-          description: "Amazing! The entire book has been completed.",
-        });
       }
       
       // Refresh stats
@@ -291,12 +282,12 @@ export default function ChainPage() {
       return;
     }
     
-    // Set flag BEFORE resetting state to prevent useEffect from interfering
+    // Set flag BEFORE calling getRandomPsalm to prevent useEffect from interfering
     isFindingAnotherRef.current = true;
     setIsFindingAnother(true);
     
+    // Don't clear currentPsalm - keep showing current one until new one loads
     setIsReading(false);
-    setCurrentPsalm(null);
     getRandomPsalm();
   };
 
