@@ -375,11 +375,17 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                   <SelectValue placeholder="Select a reason..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {reasonOptions.map(option => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
+                  {reasonOptions.map(option => {
+                    const Icon = getReasonIcon(option.value);
+                    return (
+                      <SelectItem key={option.value} value={option.value}>
+                        <span className="flex items-center gap-2">
+                          <Icon size={16} className="text-blush" />
+                          {option.label}
+                        </span>
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
               
