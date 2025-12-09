@@ -376,10 +376,10 @@ export default function ChainPage() {
             return (
               <div className="space-y-1">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="platypi-regular text-black/60">Progress</span>
+                  <span className="platypi-bold text-black/60">Progress</span>
                   <span className="platypi-bold text-black">{percentage}%</span>
                 </div>
-                <div className="h-3 bg-gradient-feminine rounded-full overflow-hidden">
+                <div className="h-4 bg-gradient-feminine rounded-full overflow-hidden">
                   <div 
                     className="h-full bg-sage rounded-full transition-all duration-500"
                     style={{ width: `${percentage}%` }}
