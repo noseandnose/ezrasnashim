@@ -6,6 +6,7 @@ import { toast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { FloatingSettings } from "@/components/ui/floating-settings";
 import { formatTextContent } from "@/lib/text-formatter";
+import { KorenThankYou } from "@/components/shared/modal-components";
 import type { TehillimChain } from "@shared/schema";
 
 interface ChainStats {
@@ -323,6 +324,7 @@ export default function ChainPage() {
 
   return (
     <div className="fixed inset-0 bg-gradient-soft flex flex-col z-50 overflow-hidden">
+      {/* Header with Tehillim name */}
       <div className="flex items-center p-4 border-b border-blush/10 bg-white/80 backdrop-blur-sm safe-area-top">
         <button
           onClick={() => setLocation('/')}
@@ -333,7 +335,9 @@ export default function ChainPage() {
         </button>
         
         <div className="flex-1 min-w-0 text-center px-2">
-          <h1 className="platypi-bold text-lg text-black truncate">{chain.name}</h1>
+          <h1 className="platypi-bold text-lg text-black truncate">
+            {psalmContent?.displayTitle || (currentPsalm ? `Tehillim ${currentPsalm}` : chain.name)}
+          </h1>
         </div>
         
         <button
@@ -345,63 +349,94 @@ export default function ChainPage() {
         </button>
       </div>
 
-      <div className="p-4 bg-white/50 border-b border-blush/10">
-        <div className="flex items-center justify-center gap-2 mb-3">
-          {(() => {
-            const ReasonIcon = getReasonIcon(chain.reason);
-            return <ReasonIcon size={16} className="text-blush" />;
-          })()}
-          <p className="platypi-regular text-sm text-black/70">{chain.reason}</p>
-        </div>
-        
-        <div className={`grid gap-2 ${visibleStats === 3 ? 'grid-cols-3 max-w-xs mx-auto' : 'grid-cols-4'}`}>
-          <div className="bg-white rounded-xl px-2 py-1.5 text-center border border-blush/10">
-            <p className="platypi-bold text-sm text-black">{displayStats?.totalCompleted || 0}</p>
-            <p className="platypi-regular text-[10px] text-black/60">Completed</p>
-          </div>
-          {showBooksCompleted && (
-            <div className="bg-white rounded-xl px-2 py-1.5 text-center border border-blush/10">
-              <p className="platypi-bold text-sm text-black">{displayStats?.booksCompleted || 0}</p>
-              <p className="platypi-regular text-[10px] text-black/60">Books</p>
-            </div>
-          )}
-          <div className="bg-white rounded-xl px-2 py-1.5 text-center border border-blush/10">
-            <p className="platypi-bold text-sm text-black">{displayStats?.currentlyReading || 0}</p>
-            <p className="platypi-regular text-[10px] text-black/60">Reading</p>
-          </div>
-          <div className="bg-white rounded-xl px-2 py-1.5 text-center border border-blush/10">
-            <p className="platypi-bold text-sm text-black">{displayStats?.available || 150}</p>
-            <p className="platypi-regular text-[10px] text-black/60">Available</p>
-          </div>
-        </div>
-      </div>
+      {/* Scrollable content area */}
+      <div className="flex-1 overflow-y-auto relative">
+        <div className="p-4 space-y-4">
+          {/* Community message */}
+          <p className="platypi-regular text-sm text-black/70 text-center">
+            One chapter per person, Sefers completed together.
+          </p>
 
-      <div className="flex items-center justify-center p-3 bg-white border-b border-blush/10">
-        <span className="platypi-medium text-sm text-black">
-          {psalmContent?.displayTitle || (currentPsalm ? `Tehillim ${currentPsalm}` : 'Loading...')}
-        </span>
-      </div>
+          {/* Stats section */}
+          <div className={`grid gap-2 ${visibleStats === 3 ? 'grid-cols-3 max-w-xs mx-auto' : 'grid-cols-4'}`}>
+            <div className="bg-white rounded-xl px-2 py-2 text-center border border-blush/10">
+              <p className="platypi-bold text-sm text-black">{displayStats?.totalCompleted || 0}</p>
+              <p className="platypi-regular text-[10px] text-black/60">Completed</p>
+            </div>
+            {showBooksCompleted && (
+              <div className="bg-white rounded-xl px-2 py-2 text-center border border-blush/10">
+                <p className="platypi-bold text-sm text-black">{displayStats?.booksCompleted || 0}</p>
+                <p className="platypi-regular text-[10px] text-black/60">Books</p>
+              </div>
+            )}
+            <div className="bg-white rounded-xl px-2 py-2 text-center border border-blush/10">
+              <p className="platypi-bold text-sm text-black">{displayStats?.currentlyReading || 0}</p>
+              <p className="platypi-regular text-[10px] text-black/60">Reading</p>
+            </div>
+            <div className="bg-white rounded-xl px-2 py-2 text-center border border-blush/10">
+              <p className="platypi-bold text-sm text-black">{displayStats?.available || 150}</p>
+              <p className="platypi-regular text-[10px] text-black/60">Available</p>
+            </div>
+          </div>
 
-      <div className="flex-1 overflow-y-auto bg-white relative">
-        <div className="p-4 pb-20">
-          {psalmLoading ? (
-            <div className="flex items-center justify-center h-full min-h-[200px]">
-              <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
+          {/* Davening for section */}
+          <div className="text-center py-2">
+            <p className="platypi-medium text-base text-black">
+              Davening for: <span className="platypi-bold">{chain.name}</span>
+            </p>
+            <div className="flex items-center justify-center gap-2 mt-1">
+              {(() => {
+                const ReasonIcon = getReasonIcon(chain.reason);
+                return <ReasonIcon size={14} className="text-blush" />;
+              })()}
+              <p className="platypi-regular text-sm text-black/70">{chain.reason}</p>
             </div>
-          ) : psalmContent ? (
-            <div
-              className={`leading-relaxed text-black ${showHebrew ? 'text-right vc-koren-hebrew' : 'text-left koren-siddur-english'}`}
-              style={{ fontSize: showHebrew ? `${fontSize + 1}px` : `${fontSize}px` }}
-              dir={showHebrew ? 'rtl' : 'ltr'}
-              dangerouslySetInnerHTML={{
-                __html: formatTextContent(showHebrew ? psalmContent.hebrewText : psalmContent.englishText)
-              }}
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full min-h-[200px]">
-              <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
-            </div>
-          )}
+          </div>
+
+          {/* Tehillim text in white rounded box */}
+          <div className="bg-white rounded-2xl p-6 border border-blush/10">
+            {psalmLoading ? (
+              <div className="flex items-center justify-center min-h-[200px]">
+                <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
+              </div>
+            ) : psalmContent ? (
+              <div
+                className={`leading-relaxed text-black ${showHebrew ? 'text-right vc-koren-hebrew' : 'text-left koren-siddur-english'}`}
+                style={{ fontSize: showHebrew ? `${fontSize + 1}px` : `${fontSize}px` }}
+                dir={showHebrew ? 'rtl' : 'ltr'}
+                dangerouslySetInnerHTML={{
+                  __html: formatTextContent(showHebrew ? psalmContent.hebrewText : psalmContent.englishText)
+                }}
+              />
+            ) : (
+              <div className="flex items-center justify-center min-h-[200px]">
+                <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
+              </div>
+            )}
+          </div>
+
+          {/* Koren Thank You */}
+          <KorenThankYou />
+
+          {/* Buttons */}
+          <div className="flex space-x-3 pt-2 pb-4">
+            <button
+              onClick={handleFindAnother}
+              disabled={!currentPsalm || isFindingAnother}
+              className="flex-1 py-4 rounded-2xl border-2 border-blush/30 bg-white text-black platypi-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blush/5 transition-colors"
+              data-testid="button-find-another"
+            >
+              {isFindingAnother ? 'Loading...' : 'Find me another'}
+            </button>
+            <button
+              onClick={handleComplete}
+              disabled={!currentPsalm || completeReadingMutation.isPending}
+              className="flex-1 py-4 rounded-2xl bg-gradient-feminine text-white platypi-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              data-testid="button-complete"
+            >
+              {completeReadingMutation.isPending ? "Completing..." : "Complete"}
+            </button>
+          </div>
         </div>
         
         <FloatingSettings
@@ -411,29 +446,8 @@ export default function ChainPage() {
           showFontControls={true}
           fontSize={fontSize}
           onFontSizeChange={setFontSize}
-          bottomOffset="6rem"
+          bottomOffset="2rem"
         />
-      </div>
-
-      <div className="p-4 bg-white border-t border-blush/10 safe-area-bottom">
-        <div className="flex space-x-3">
-          <button
-            onClick={handleFindAnother}
-            disabled={!currentPsalm || isFindingAnother}
-            className="flex-1 py-4 rounded-2xl border-2 border-blush/30 bg-white text-black platypi-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blush/5 transition-colors"
-            data-testid="button-find-another"
-          >
-            {isFindingAnother ? 'Loading...' : 'Find me another'}
-          </button>
-          <button
-            onClick={handleComplete}
-            disabled={!currentPsalm || completeReadingMutation.isPending}
-            className="flex-1 py-4 rounded-2xl bg-gradient-feminine text-white platypi-medium disabled:opacity-50 disabled:cursor-not-allowed"
-            data-testid="button-complete"
-          >
-            {completeReadingMutation.isPending ? "Completing..." : "Complete"}
-          </button>
-        </div>
       </div>
     </div>
   );
