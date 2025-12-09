@@ -205,11 +205,11 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
 
   // Reason options for the dropdown
   const reasonOptions = [
-    { value: 'refuah', label: 'Refuah (Health)' },
-    { value: 'shidduch', label: 'Shidduch (Match)' },
-    { value: 'parnassa', label: 'Parnassa (Livelihood)' },
+    { value: 'refuah', label: 'Refuah Shleima' },
+    { value: 'shidduch', label: 'Shidduch' },
+    { value: 'parnassa', label: 'Parnassa' },
     { value: 'children', label: 'Children' },
-    { value: 'shalom-bayis', label: 'Shalom Bayis (Peace)' },
+    { value: 'shalom-bayis', label: 'Shalom Bayis' },
     { value: 'success', label: 'Success' },
     { value: 'protection', label: 'Protection' },
     { value: 'general', label: 'General Tefillas' },
