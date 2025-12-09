@@ -342,7 +342,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                 if (isLoadingRandom) return;
                 setIsLoadingRandom(true);
                 try {
-                  const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/tehillim-chains/random`);
+                  const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/tehillim-chains/random?t=${Date.now()}`);
                   if (response.ok) {
                     const chain = await response.json();
                     setLocation(`/c/${chain.slug}`);
