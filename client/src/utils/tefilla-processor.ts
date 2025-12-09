@@ -180,7 +180,7 @@ export interface TefillaConditions {
  * [[PESACH]]content[[/PESACH]] - Only shows during Pesach
  * [[CHANUKA]]content[[/CHANUKA]] - Only shows during Chanuka
  * [[PURIM]]content[[/PURIM]] - Only shows during Purim
- * [[ROSH_CHODESH_SPECIAL]]content[[/ROSH_CHODESH_SPECIAL]] - HIDES content during ANY special day (Rosh Chodesh, Pesach, Sukkot, Chanuka, Purim)
+ * [[SPECIAL_REMOVE]]content[[/SPECIAL_REMOVE]] - HIDES content during ANY special day (Rosh Chodesh, Pesach, Sukkot, Chanuka, Purim)
  * [[SUNDAY]]content[[/SUNDAY]] - Only shows on Sundays
  * [[MONDAY]]content[[/MONDAY]] - Only shows on Mondays
  * [[TUESDAY]]content[[/TUESDAY]] - Only shows on Tuesdays
@@ -222,7 +222,7 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     PESACH: () => conditions.isPesach,
     CHANUKA: () => conditions.isChanuka,
     PURIM: () => conditions.isPurim,
-    ROSH_CHODESH_SPECIAL: () => !conditions.isRoshChodeshSpecial, // Exclusion logic: shows when NOT in any special period
+    SPECIAL_REMOVE: () => !conditions.isRoshChodeshSpecial, // Exclusion logic: shows when NOT in any special period
     SUNDAY: () => conditions.isSunday,
     MONDAY: () => conditions.isMonday,
     TUESDAY: () => conditions.isTuesday,
@@ -389,7 +389,7 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
   }
   
   // Clean up any orphaned conditional tags that weren't properly matched
-  const orphanedTagPattern = /\[\[(?:\/?)(?:OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH|FAST_DAY|ASERET_YEMEI_TESHUVA|SUKKOT|PESACH|CHANUKA|PURIM|ROSH_CHODESH_SPECIAL|MH|MT|TBI|TTI|TTC|TBC|grain|wine|fruit)(?:,[^\\]]*)?(?:\|[^\\]]*)?\]\]/g;
+  const orphanedTagPattern = /\[\[(?:\/?)(?:OUTSIDE_ISRAEL|ONLY_ISRAEL|ROSH_CHODESH|FAST_DAY|ASERET_YEMEI_TESHUVA|SUKKOT|PESACH|CHANUKA|PURIM|SPECIAL_REMOVE|MH|MT|TBI|TTI|TTC|TBC|grain|wine|fruit)(?:,[^\\]]*)?(?:\|[^\\]]*)?\]\]/g;
   
   processedText = processedText.replace(orphanedTagPattern, () => {
     return ''; // Remove orphaned conditional tags only
@@ -582,7 +582,7 @@ export async function getCurrentTefillaConditions(
         });
         
         // Check if we're in any special period (for exclusion logic)
-        // ROSH_CHODESH_SPECIAL hides content during ANY of these special days
+        // SPECIAL_REMOVE hides content during ANY of these special days
         isRoshChodeshSpecial = isRoshChodesh || isPesach || isSukkot || isChanuka || isPurim;
         
       }

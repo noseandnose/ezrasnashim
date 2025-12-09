@@ -239,7 +239,7 @@ export function formatTextContent(text: string | null | undefined, footnoteNumbe
     // Check if this is conditional content (contains known keywords)
     const conditionalKeywords = [
       'OUTSIDE_ISRAEL', 'ONLY_ISRAEL', 'ROSH_CHODESH', 'FAST_DAY', 
-      'ASERET_YEMEI_TESHUVA', 'SUKKOT', 'PESACH', 'ROSH_CHODESH_SPECIAL',
+      'ASERET_YEMEI_TESHUVA', 'SUKKOT', 'PESACH', 'SPECIAL_REMOVE',
       // Seasonal and location conditions
       'MH', 'MT', 'TTI', 'TBI', 'TTC', 'TBC',
       // Day conditions
