@@ -364,10 +364,21 @@ export default function ChainPage() {
       {/* Scrollable content area */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-4 space-y-4">
-          {/* Community message */}
-          <p className="platypi-regular text-sm text-black/70 text-center">
-            Sefer Tehillim completed together, One Tehillim at a time.
-          </p>
+          {/* Davening for section with border */}
+          <div className="text-center py-3 px-4 border border-blush/20 rounded-xl bg-white">
+            <p className="platypi-medium text-base text-black flex items-center justify-center gap-2 flex-wrap">
+              <span>Davening for: <span className="platypi-bold">{chain.name}</span></span>
+              <span className="flex items-center gap-1">
+                <span className="text-black/50">(</span>
+                {(() => {
+                  const ReasonIcon = getReasonIcon(chain.reason);
+                  return <ReasonIcon size={14} className="text-blush" />;
+                })()}
+                <span className="platypi-regular text-black/70">{formatReason(chain.reason)}</span>
+                <span className="text-black/50">)</span>
+              </span>
+            </p>
+          </div>
 
           {/* Progress bar */}
           {(() => {
@@ -393,22 +404,6 @@ export default function ChainPage() {
               </div>
             );
           })()}
-
-          {/* Davening for section with border */}
-          <div className="text-center py-3 px-4 border border-blush/20 rounded-xl bg-white">
-            <p className="platypi-medium text-base text-black flex items-center justify-center gap-2 flex-wrap">
-              <span>Davening for: <span className="platypi-bold">{chain.name}</span></span>
-              <span className="flex items-center gap-1">
-                <span className="text-black/50">(</span>
-                {(() => {
-                  const ReasonIcon = getReasonIcon(chain.reason);
-                  return <ReasonIcon size={14} className="text-blush" />;
-                })()}
-                <span className="platypi-regular text-black/70">{formatReason(chain.reason)}</span>
-                <span className="text-black/50">)</span>
-              </span>
-            </p>
-          </div>
 
           {/* Tehillim text in white rounded box */}
           <div className="bg-white rounded-2xl p-6 border border-blush/10 relative">
