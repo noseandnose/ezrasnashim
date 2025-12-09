@@ -2,6 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
+import { db } from "./db";
+import { and, eq, gt } from "drizzle-orm";
 import serverAxiosClient from "./axiosClient";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -2502,17 +2504,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get a specific Tehillim Chain by slug
+  // Get a specific Tehillim Chain by slug (includes stats and next psalm for fast loading)
   app.get("/api/tehillim-chains/:slug", async (req, res) => {
     try {
       const { slug } = req.params;
+      const { deviceId } = req.query;
       const chain = await storage.getTehillimChainBySlug(slug);
       
       if (!chain) {
         return res.status(404).json({ error: "Chain not found" });
       }
 
-      res.json(chain);
+      // Check if device has an active reading first (for returning users)
+      let activeReading: number | null = null;
+      if (deviceId) {
+        const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+        const readings = await db.select({ psalmNumber: tehillimChainReadings.psalmNumber })
+          .from(tehillimChainReadings)
+          .where(and(
+            eq(tehillimChainReadings.chainId, chain.id),
+            eq(tehillimChainReadings.deviceId, deviceId as string),
+            eq(tehillimChainReadings.status, 'reading'),
+            gt(tehillimChainReadings.startedAt, tenMinutesAgo)
+          ))
+          .limit(1);
+        if (readings.length > 0) {
+          activeReading = readings[0].psalmNumber;
+        }
+      }
+
+      // Fetch stats and next psalm in parallel to eliminate waterfall
+      const [stats, nextAvailable] = await Promise.all([
+        storage.getTehillimChainStats(chain.id),
+        storage.getAvailablePsalmForChain(chain.id, deviceId as string | undefined)
+      ]);
+
+      // Return active reading if exists, otherwise next available
+      const nextPsalm = activeReading || nextAvailable;
+
+      res.json({
+        ...chain,
+        stats: {
+          totalCompleted: stats.totalSaid,
+          booksCompleted: stats.booksCompleted,
+          currentlyReading: stats.currentlyReading,
+          available: stats.available
+        },
+        nextPsalm: nextPsalm || null,
+        hasActiveReading: !!activeReading
+      });
     } catch (error) {
       console.error("Error fetching Tehillim chain:", error);
       res.status(500).json({ error: "Failed to fetch Tehillim chain" });

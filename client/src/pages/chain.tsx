@@ -15,6 +15,12 @@ interface ChainStats {
   available: number;
 }
 
+interface ChainWithMeta extends TehillimChain {
+  stats: ChainStats;
+  nextPsalm: number | null;
+  hasActiveReading?: boolean;
+}
+
 const getReasonIcon = (reason: string) => {
   const lowerReason = reason.toLowerCase();
   if (lowerReason.includes('refuah') || lowerReason.includes('health')) return HeartPulse;
@@ -56,35 +62,45 @@ export default function ChainPage() {
     return id;
   })();
 
-  const { data: chain, isLoading: chainLoading, error: chainError } = useQuery<TehillimChain>({
-    queryKey: ['/api/tehillim-chains', slug],
+  // Single query fetches chain + stats + next psalm (eliminates waterfall)
+  const { data: chainData, isLoading: chainLoading, error: chainError } = useQuery<ChainWithMeta>({
+    queryKey: ['/api/tehillim-chains', slug, deviceId],
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}?deviceId=${deviceId}`);
       if (!response.ok) throw new Error('Chain not found');
       return response.json();
     },
     enabled: !!slug,
   });
 
-  const { data: stats } = useQuery<ChainStats>({
+  // Extract chain and stats from combined response
+  const chain = chainData;
+  const stats = chainData?.stats;
+
+  // Separate stats query for periodic refresh only (not blocking initial load)
+  const { data: refreshedStats } = useQuery<ChainStats>({
     queryKey: ['/api/tehillim-chains', slug, 'stats'],
     queryFn: async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/stats`);
       if (!response.ok) throw new Error('Failed to fetch stats');
       return response.json();
     },
-    enabled: !!slug && !!chain,
+    enabled: !!slug && !!chainData,
     refetchInterval: 30000,
+    staleTime: 10000, // Don't refetch immediately
   });
 
-  const { data: psalmContent } = useQuery<TehillimContent>({
+  // Use refreshed stats if available, otherwise use initial stats
+  const displayStats = refreshedStats || stats;
+
+  const { data: psalmContent, isLoading: psalmLoading } = useQuery<TehillimContent>({
     queryKey: ['/api/tehillim', currentPsalm],
     queryFn: async () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/${currentPsalm}`);
       if (!response.ok) throw new Error('Failed to fetch psalm');
       return response.json();
     },
-    enabled: !!currentPsalm && isReading,
+    enabled: !!currentPsalm,
     staleTime: 10 * 60 * 1000,
   });
 
@@ -142,41 +158,6 @@ export default function ChainPage() {
     },
   });
 
-  // Get the next sequential psalm (used on initial page load)
-  const getNextPsalm = useCallback(async () => {
-    // Prevent duplicate calls (React strict mode / rapid re-renders)
-    if (isLoadingPsalmRef.current) return;
-    isLoadingPsalmRef.current = true;
-    
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/next-available?deviceId=${deviceId}`
-      );
-      if (!response.ok) {
-        if (response.status === 404) {
-          toast({
-            title: "All Tehillim Complete!",
-            description: "Amazing! The entire Sefer Tehillim has been completed.",
-          });
-          isLoadingPsalmRef.current = false;
-          return;
-        }
-        throw new Error('Failed to get psalm');
-      }
-      const data = await response.json();
-      setCurrentPsalm(data.psalmNumber);
-      setIsReading(true);
-      startReadingMutation.mutate(data.psalmNumber);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Could not find an available psalm.",
-        variant: "destructive",
-      });
-      isLoadingPsalmRef.current = false;
-    }
-  }, [slug, deviceId, startReadingMutation]);
-
   // Get a random psalm (used for "Find me another" button)
   const getRandomPsalm = useCallback(async () => {
     try {
@@ -213,11 +194,24 @@ export default function ChainPage() {
     setIsReading(false);
   }, [slug]);
 
+  // Use nextPsalm from initial response for instant loading
   useEffect(() => {
-    if (chain && !currentPsalm && !isReading) {
-      getNextPsalm();
+    if (chainData?.nextPsalm && !currentPsalm && !isReading) {
+      setCurrentPsalm(chainData.nextPsalm);
+      setIsReading(true);
+      // Only start a new reading if user doesn't already have an active one
+      if (!chainData.hasActiveReading) {
+        startReadingMutation.mutate(chainData.nextPsalm);
+      }
+      isLoadingPsalmRef.current = false;
+    } else if (chainData && chainData.nextPsalm === null && !currentPsalm) {
+      // All psalms completed
+      toast({
+        title: "All Tehillim Complete!",
+        description: "Amazing! The entire Sefer Tehillim has been completed.",
+      });
     }
-  }, [chain, currentPsalm, isReading, getNextPsalm]);
+  }, [chainData, currentPsalm, isReading, startReadingMutation]);
 
   const handleShare = async () => {
     const url = `${window.location.origin}/c/${slug}`;
@@ -303,7 +297,7 @@ export default function ChainPage() {
   }
 
   // Count visible stats to determine centering
-  const showBooksCompleted = (stats?.booksCompleted || 0) > 0;
+  const showBooksCompleted = (displayStats?.booksCompleted || 0) > 0;
   const visibleStats = showBooksCompleted ? 4 : 3;
 
   return (
@@ -341,21 +335,21 @@ export default function ChainPage() {
         
         <div className={`grid gap-2 ${visibleStats === 3 ? 'grid-cols-3 max-w-xs mx-auto' : 'grid-cols-4'}`}>
           <div className="bg-white rounded-xl px-2 py-1.5 text-center border border-blush/10">
-            <p className="platypi-bold text-sm text-black">{stats?.totalCompleted || 0}</p>
+            <p className="platypi-bold text-sm text-black">{displayStats?.totalCompleted || 0}</p>
             <p className="platypi-regular text-[10px] text-black/60">Said</p>
           </div>
           {showBooksCompleted && (
             <div className="bg-white rounded-xl px-2 py-1.5 text-center border border-blush/10">
-              <p className="platypi-bold text-sm text-black">{stats?.booksCompleted || 0}</p>
+              <p className="platypi-bold text-sm text-black">{displayStats?.booksCompleted || 0}</p>
               <p className="platypi-regular text-[10px] text-black/60">Books</p>
             </div>
           )}
           <div className="bg-white rounded-xl px-2 py-1.5 text-center border border-blush/10">
-            <p className="platypi-bold text-sm text-black">{stats?.currentlyReading || 0}</p>
+            <p className="platypi-bold text-sm text-black">{displayStats?.currentlyReading || 0}</p>
             <p className="platypi-regular text-[10px] text-black/60">Reading</p>
           </div>
           <div className="bg-white rounded-xl px-2 py-1.5 text-center border border-blush/10">
-            <p className="platypi-bold text-sm text-black">{stats?.available || 150}</p>
+            <p className="platypi-bold text-sm text-black">{displayStats?.available || 150}</p>
             <p className="platypi-regular text-[10px] text-black/60">Available</p>
           </div>
         </div>
@@ -369,7 +363,11 @@ export default function ChainPage() {
 
       <div className="flex-1 overflow-y-auto bg-white relative">
         <div className="p-4 pb-20">
-          {psalmContent ? (
+          {psalmLoading ? (
+            <div className="flex items-center justify-center h-full min-h-[200px]">
+              <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
+            </div>
+          ) : psalmContent ? (
             <div
               className={`leading-relaxed text-black ${showHebrew ? 'text-right vc-koren-hebrew' : 'text-left koren-siddur-english'}`}
               style={{ fontSize: showHebrew ? `${fontSize + 1}px` : `${fontSize}px` }}
