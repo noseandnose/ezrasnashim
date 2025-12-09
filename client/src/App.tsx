@@ -18,9 +18,6 @@ import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
 import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
 import { initializePerformance, whenIdle } from "./lib/startup-performance";
-import { initializeFlutterFlowReload } from "@/utils/flutterflow-reload";
-import { setGlobalModalOpener } from "@/utils/dom-event-bridge";
-import { useModalStore } from "@/lib/types";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));
@@ -55,19 +52,8 @@ function Router() {
   // Handle Android back button navigation
   useBackButton();
   
-  // Register global modal opener for DOM bridge fallback (FlutterFlow button fix)
-  const { openModal } = useModalStore();
-  useEffect(() => {
-    setGlobalModalOpener((modalType, section, vortId) => {
-      openModal(modalType, section as any, undefined, vortId);
-    });
-  }, [openModal]);
-  
   // Initialize critical systems - defer non-critical operations
   useEffect(() => {
-    // CRITICAL: Initialize FlutterFlow reload-on-resume (fixes button freeze)
-    initializeFlutterFlowReload();
-    
     // CRITICAL FIX: Reset --nav-offset on mount to clear any stale cached values
     document.documentElement.style.setProperty('--nav-offset', '0px');
     
