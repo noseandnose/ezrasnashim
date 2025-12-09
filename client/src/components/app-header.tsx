@@ -5,13 +5,12 @@ import { useHomeSummary } from "@/hooks/use-home-summary";
 import { BarChart3, Info, Share2, Heart, Mail, Share, X, Menu, MessageSquare, Search, Calendar } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import logoImage from "@assets/A_project_of_(4)_1764762086237.png";
 import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
 import MessageModal from "./modals/message-modal";
 import { SearchModal } from "./SearchModal";
 import { getLocalDateString } from "@/lib/dateUtils";
-import { registerAction, unregisterAction } from "@/utils/dom-event-bridge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -115,42 +114,6 @@ export default function AppHeader() {
       setClickCount(0); // Reset counter
     }
   };
-
-  // Store callbacks in refs for DOM bridge to access current versions
-  const setLocationRef = useRef(setLocation);
-  const openModalRef = useRef(openModal);
-  const handleShareRef = useRef(handleShare);
-  const handleInstallClickRef = useRef(handleInstallClick);
-  const handleOpenMessageRef = useRef(handleOpenMessage);
-  const setShowSearchModalRef = useRef(setShowSearchModal);
-  
-  setLocationRef.current = setLocation;
-  openModalRef.current = openModal;
-  handleShareRef.current = handleShare;
-  handleInstallClickRef.current = handleInstallClick;
-  handleOpenMessageRef.current = handleOpenMessage;
-  setShowSearchModalRef.current = setShowSearchModal;
-
-  // Register DOM bridge actions for header buttons (FlutterFlow resilience)
-  useEffect(() => {
-    registerAction('menu-analytics', () => setLocationRef.current('/statistics'));
-    registerAction('menu-info', () => openModalRef.current('about', 'about'));
-    registerAction('menu-date-converter', () => openModalRef.current('date-calculator-fullscreen', 'table'));
-    registerAction('menu-share', () => handleShareRef.current());
-    registerAction('menu-install', () => handleInstallClickRef.current());
-    registerAction('header-message', () => handleOpenMessageRef.current());
-    registerAction('header-search', () => setShowSearchModalRef.current(true));
-    
-    return () => {
-      unregisterAction('menu-analytics');
-      unregisterAction('menu-info');
-      unregisterAction('menu-date-converter');
-      unregisterAction('menu-share');
-      unregisterAction('menu-install');
-      unregisterAction('header-message');
-      unregisterAction('header-search');
-    };
-  }, []);
 
   return (
     <>

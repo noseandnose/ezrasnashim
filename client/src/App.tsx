@@ -78,6 +78,22 @@ function Router() {
     window.addEventListener('resize', updateNavOffset, { passive: true });
     window.addEventListener('orientationchange', updateNavOffset, { passive: true });
     
+    // Simple visibility change handler for mobile app WebView
+    // Refreshes when returning from background to ensure UI state is fresh
+    let lastVisibilityChange = 0;
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        const now = Date.now();
+        // Only reload if more than 5 minutes have passed since last visibility change
+        // This prevents unnecessary reloads on quick tab switches
+        if (now - lastVisibilityChange > 5 * 60 * 1000) {
+          window.location.reload();
+        }
+        lastVisibilityChange = now;
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
     // Defer performance optimizations - not blocking
     setTimeout(() => {
       initializePerformance();
@@ -122,6 +138,7 @@ function Router() {
     return () => {
       window.removeEventListener('resize', updateNavOffset);
       window.removeEventListener('orientationchange', updateNavOffset);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
   
