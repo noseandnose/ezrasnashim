@@ -1,12 +1,11 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useRoute, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Share2, ChevronLeft, Heart, Briefcase, Baby, Home, Star, Shield, Sparkles, HeartPulse } from "lucide-react";
+import { Share2, ChevronLeft, Heart, Briefcase, Baby, Home, Star, Shield, Sparkles, HeartPulse, Settings } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { formatTextContent } from "@/lib/text-formatter";
 import { AttributionSection } from "@/components/ui/attribution-section";
-import { FloatingSettings } from "@/components/ui/floating-settings";
 import { useLocationStore } from "@/hooks/use-jewish-times";
 import type { TehillimChain } from "@shared/schema";
 
@@ -39,15 +38,23 @@ const getReasonIcon = (reason: string) => {
 const formatReason = (reason: string): string => {
   const reasonMap: Record<string, string> = {
     'refuah': 'Refuah Shleima',
+    'refuah shleima': 'Refuah Shleima',
     'shidduch': 'Shidduch',
     'parnassa': 'Parnassa',
     'children': 'Children',
     'shalom-bayis': 'Shalom Bayis',
+    'shalom bayis': 'Shalom Bayis',
     'success': 'Success',
     'protection': 'Protection',
-    'general': 'General Tefillas',
+    'general': 'General Tefillos',
+    'general tefillos': 'General Tefillos',
   };
-  return reasonMap[reason.toLowerCase()] || reason;
+  const mapped = reasonMap[reason.toLowerCase()];
+  if (mapped) return mapped;
+  // Fallback: capitalize first letter of each word
+  return reason.split(/[\s-]+/).map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  ).join(' ');
 };
 
 // Koren URL based on user location
@@ -372,7 +379,7 @@ export default function ChainPage() {
           </div>
 
           {/* Tehillim text in white rounded box */}
-          <div className="bg-white rounded-2xl p-6 border border-blush/10">
+          <div className="bg-white rounded-2xl p-6 border border-blush/10 relative">
             {psalmLoading ? (
               <div className="flex items-center justify-center min-h-[200px]">
                 <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
@@ -391,6 +398,16 @@ export default function ChainPage() {
                 <div className="animate-spin w-6 h-6 border-2 border-blush border-t-transparent rounded-full"></div>
               </div>
             )}
+            
+            {/* Settings button inside tehillim box */}
+            <div className="absolute bottom-4 left-4">
+              <SettingsButton
+                fontSize={fontSize}
+                onFontSizeChange={setFontSize}
+                showHebrew={showHebrew}
+                onLanguageChange={(lang) => setShowHebrew(lang === 'hebrew')}
+              />
+            </div>
           </div>
 
           {/* Koren Attribution */}
@@ -423,17 +440,104 @@ export default function ChainPage() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Settings button component for inside the tehillim box
+function SettingsButton({ 
+  fontSize, 
+  onFontSizeChange, 
+  showHebrew, 
+  onLanguageChange 
+}: { 
+  fontSize: number; 
+  onFontSizeChange: (size: number) => void; 
+  showHebrew: boolean; 
+  onLanguageChange: (lang: 'hebrew' | 'english') => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="bg-gradient-feminine text-white rounded-full p-2.5 shadow-lg hover:scale-110 transition-all duration-200"
+        aria-label="Open settings"
+      >
+        <Settings className="w-5 h-5" />
+      </button>
       
-      {/* Floating Settings Button */}
-      <FloatingSettings
-        showFontControls={true}
-        fontSize={fontSize}
-        onFontSizeChange={setFontSize}
-        showLanguageControls={true}
-        language={showHebrew ? 'hebrew' : 'english'}
-        onLanguageChange={(lang) => setShowHebrew(lang === 'hebrew')}
-        bottomOffset="5rem"
-      />
+      {isOpen && (
+        <>
+          <div 
+            className="fixed inset-0 z-40"
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="absolute bottom-12 left-0 bg-white rounded-2xl shadow-xl border border-gray-200 p-4 z-50 min-w-[200px]">
+            <div className="space-y-4">
+              {/* Language Selector */}
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-2 text-center">Language</p>
+                <div className="flex bg-gradient-feminine rounded-2xl p-1">
+                  <button
+                    onClick={() => {
+                      onLanguageChange('hebrew');
+                      setIsOpen(false);
+                    }}
+                    className={`px-3 py-2 rounded-xl text-sm font-medium transition-colors flex-1 ${
+                      showHebrew 
+                        ? 'bg-white text-black shadow-sm' 
+                        : 'text-white hover:text-gray-100'
+                    }`}
+                  >
+                    עברית
+                  </button>
+                  <button
+                    onClick={() => {
+                      onLanguageChange('english');
+                      setIsOpen(false);
+                    }}
+                    className={`px-3 py-2 rounded-xl text-sm font-medium transition-colors flex-1 ${
+                      !showHebrew 
+                        ? 'bg-white text-black shadow-sm' 
+                        : 'text-white hover:text-gray-100'
+                    }`}
+                  >
+                    English
+                  </button>
+                </div>
+              </div>
+
+              {/* Font Size Controls */}
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-2 text-center">Font Size</p>
+                <div className="flex items-center justify-center gap-2 bg-gradient-feminine rounded-2xl p-2">
+                  <button
+                    onClick={() => onFontSizeChange(Math.max(12, fontSize - 2))}
+                    className="w-8 h-8 flex items-center justify-center rounded-xl bg-white text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors shadow-sm"
+                    aria-label="Decrease font size"
+                  >
+                    A-
+                  </button>
+                  <span className="text-sm text-white font-medium px-2">
+                    {fontSize}px
+                  </span>
+                  <button
+                    onClick={() => onFontSizeChange(Math.min(28, fontSize + 2))}
+                    className="w-8 h-8 flex items-center justify-center rounded-xl bg-white text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors shadow-sm"
+                    aria-label="Increase font size"
+                  >
+                    A+
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <p className="text-xs text-gray-500 mt-3 text-center">Tap outside to close</p>
+          </div>
+        </>
+      )}
     </div>
   );
 }
