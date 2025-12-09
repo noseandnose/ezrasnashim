@@ -390,7 +390,7 @@ export default function ChainPage() {
 
       <div className="flex items-center justify-center p-3 bg-white border-b border-blush/10">
         <span className="platypi-medium text-sm text-black">
-          {psalmContent?.displayTitle || (currentPsalm ? `Psalm ${currentPsalm}` : 'Loading...')}
+          {psalmContent?.displayTitle || (currentPsalm ? `Tehillim ${currentPsalm}` : 'Loading...')}
         </span>
       </div>
 
