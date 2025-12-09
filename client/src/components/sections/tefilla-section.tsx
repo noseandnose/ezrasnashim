@@ -11,7 +11,6 @@ import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
@@ -372,18 +371,19 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                 data-testid="input-chain-name"
               />
               
-              <Select value={chainReason} onValueChange={setChainReason}>
-                <SelectTrigger className="rounded-2xl border-blush/20 focus:border-blush bg-white" data-testid="select-chain-reason">
-                  <SelectValue placeholder="Select a reason..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {reasonOptions.map(option => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <select
+                value={chainReason}
+                onChange={(e) => setChainReason(e.target.value)}
+                className="w-full h-10 px-3 py-2 text-sm rounded-2xl border border-blush/20 focus:border-blush focus:outline-none focus:ring-2 focus:ring-blush/20 bg-white"
+                data-testid="select-chain-reason"
+              >
+                <option value="" disabled>Select a reason...</option>
+                {reasonOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
               
               <div className="flex space-x-3">
                 <Button 
