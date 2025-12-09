@@ -81,6 +81,28 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     return false;
   };
 
+  // Count total individual tehillim completions (today)
+  const countIndividualTehillim = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const todaysCompletions = completedModals[today];
+    if (!todaysCompletions) return 0;
+    
+    let count = 0;
+    // Count from singles
+    for (const modalId of Array.from(todaysCompletions.singles)) {
+      if (modalId.startsWith('individual-tehillim-')) {
+        count++;
+      }
+    }
+    // Count from repeatables
+    for (const [modalId, repeatCount] of Object.entries(todaysCompletions.repeatables)) {
+      if (modalId.startsWith('individual-tehillim-')) {
+        count += repeatCount;
+      }
+    }
+    return count;
+  };
+
   // Time-based prayer logic
   const getCurrentPrayer = () => {
     if (!times || isLoading) {
@@ -292,28 +314,31 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       {/* Main Tefilla Section - Tehillim */}
       <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg space-y-3">
         
-        {/* Personal Tehillim Chains Card */}
-        <div 
-          className="bg-white/70 rounded-2xl p-3 border border-blush/10"
-          style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}
-        >
+        {/* Total Tehillim Said Card */}
+        <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
           {/* Header Row - Title and Counter */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center space-x-3">
               <div className="bg-gradient-feminine p-3 rounded-full">
                 <Link2 className="text-white" size={20} />
               </div>
-              <h3 className="platypi-bold text-lg text-black">Tehillim Chains</h3>
+              <h3 className="platypi-bold text-lg text-black">Total Tehillim Said</h3>
             </div>
-            <div className="bg-gradient-feminine border border-blush/30 rounded-xl px-3 py-1.5 shadow-sm">
-              <p className="platypi-medium text-sm text-white">
-                Total Tehillim: <span className="platypi-bold">{chainTotal.toLocaleString()}</span>
+            <div className="bg-white border border-blush/30 rounded-xl px-3 py-1.5 shadow-sm">
+              <p className="platypi-medium text-sm text-black">
+                Today's Total: <span className="platypi-bold">{(chainTotal + countIndividualTehillim()).toLocaleString()}</span>
               </p>
             </div>
           </div>
           
-          {/* Buttons Row */}
-          <div className="flex items-center justify-center space-x-3 mb-2">
+          {/* Tehillim Chains Section with pulsating border */}
+          <div 
+            className="rounded-xl p-3 border border-blush/20"
+            style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}
+          >
+            <h4 className="platypi-bold text-sm text-black mb-2 text-center">Tehillim Chains</h4>
+            {/* Buttons Row */}
+            <div className="flex items-center justify-center space-x-3 mb-2">
             <Button
               type="button"
               variant="outline"
@@ -494,6 +519,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
               </Button>
             </div>
           )}
+          </div>
         </div>
 
       </div>
