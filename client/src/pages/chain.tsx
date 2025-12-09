@@ -131,38 +131,43 @@ export default function ChainPage() {
         psalmNumber,
       });
     },
-    onSuccess: async () => {
+    onMutate: async () => {
+      // OPTIMISTIC UPDATE: Show success immediately for instant feedback
       toast({
         title: "Tehillim Completed!",
         description: "May all your tefillas be answered.",
       });
       
-      // Refetch stats and load next psalm in parallel for speed
-      try {
-        const [, nextPsalmResponse] = await Promise.all([
-          Promise.all([
-            queryClient.refetchQueries({ queryKey: ['/api/tehillim-chains', slug, 'stats'] }),
-            queryClient.refetchQueries({ queryKey: ['/api/tehillim-chains/stats/total'] }),
-          ]),
-          fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/next-available?deviceId=${deviceId}`)
-        ]);
-        
-        // Process next psalm response
-        if (nextPsalmResponse.ok) {
-          const data = await nextPsalmResponse.json();
+      // Start fetching next psalm immediately (don't wait for API)
+      const nextPsalmPromise = fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/next-available?deviceId=${deviceId}`);
+      
+      // Process next psalm as soon as it's ready
+      nextPsalmPromise.then(async (response) => {
+        if (response.ok) {
+          const data = await response.json();
           setCurrentPsalm(data.psalmNumber);
           setIsReading(true);
           startReadingMutation.mutate(data.psalmNumber);
         } else {
-          // No more psalms available
           setIsReading(false);
           setCurrentPsalm(null);
         }
-      } catch {
-        // Network error - reset state gracefully
+      }).catch(() => {
         setIsReading(false);
         setCurrentPsalm(null);
-      }
+      });
+    },
+    onSuccess: async () => {
+      // Background: refresh stats after completion confirmed
+      queryClient.refetchQueries({ queryKey: ['/api/tehillim-chains', slug, 'stats'] });
+      queryClient.refetchQueries({ queryKey: ['/api/tehillim-chains/stats/total'] });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Could not save completion. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
