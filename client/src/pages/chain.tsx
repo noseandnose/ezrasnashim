@@ -169,12 +169,12 @@ export default function ChainPage() {
       if (data.completedPsalm) {
         markModalComplete(`chain-tehillim-${data.completedPsalm}`);
         
-        // Server already tracks analytics in completeChainReading, so we just need to invalidate queries
-        // Invalidate all relevant stats queries for UI updates
-        queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/stats/total'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/stats/global'] });
+        // Force immediate refetch of stats (not just invalidate which only marks stale)
+        // refetchQueries forces network fetch regardless of staleTime
+        queryClient.refetchQueries({ queryKey: ['/api/tehillim-chains/stats/total'] });
+        queryClient.refetchQueries({ queryKey: ['/api/tehillim-chains/stats/global'] });
         // Analytics queries - match any query key containing analytics paths
-        queryClient.invalidateQueries({ predicate: (query) => {
+        queryClient.refetchQueries({ predicate: (query) => {
           return query.queryKey.some((segment) => 
             typeof segment === 'string' && (
               segment.includes('/api/analytics/stats/') ||
