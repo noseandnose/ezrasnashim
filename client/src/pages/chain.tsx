@@ -431,7 +431,7 @@ export default function ChainPage() {
           />
 
           {/* Buttons */}
-          <div className="flex space-x-3 pt-2 pb-4">
+          <div className="flex space-x-3 pt-2 pb-2">
             <button
               onClick={handleFindAnother}
               disabled={!currentPsalm || isFindingAnother}
@@ -447,6 +447,17 @@ export default function ChainPage() {
               data-testid="button-complete"
             >
               {completeReadingMutation.isPending ? "Completing..." : "Complete"}
+            </button>
+          </div>
+          
+          {/* Do Other Mitvas Button */}
+          <div className="pb-4">
+            <button
+              onClick={() => window.location.href = '/'}
+              className="w-full py-3 rounded-2xl border-2 border-blush/20 bg-white text-black/70 platypi-regular hover:bg-blush/5 hover:scale-[1.02] transition-transform"
+              data-testid="button-do-other-mitvas"
+            >
+              Do Other Mitvas
             </button>
           </div>
         </div>
