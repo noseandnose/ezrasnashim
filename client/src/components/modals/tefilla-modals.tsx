@@ -1744,6 +1744,10 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
       queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/month'] });
       queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/total'] });
       
+      // Invalidate chain stats so Tefilla section updates immediately
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/stats/total'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/stats/global'] });
+      
       // Trigger event to refresh main tehillim section
       const event = new CustomEvent('tehillimCompleted');
       window.dispatchEvent(event);
