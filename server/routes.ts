@@ -2496,9 +2496,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get global tehillim stats (total read, books completed, unique readers)
+  // Cached for 5 minutes to avoid repeated expensive queries
+  let globalStatsCache: { data: any; timestamp: number } | null = null;
+  const GLOBAL_STATS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  
   app.get("/api/tehillim-chains/stats/global", async (req, res) => {
     try {
+      // Check cache first
+      if (globalStatsCache && Date.now() - globalStatsCache.timestamp < GLOBAL_STATS_CACHE_TTL) {
+        return res.json(globalStatsCache.data);
+      }
+      
       const stats = await storage.getTehillimGlobalStats();
+      
+      // Update cache
+      globalStatsCache = { data: stats, timestamp: Date.now() };
+      
       res.json(stats);
     } catch (error) {
       console.error("Error fetching global tehillim stats:", error);

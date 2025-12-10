@@ -226,10 +226,11 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const chainTotal = chainTotalData?.total || 0;
 
   // Fetch global tehillim stats
-  const { data: globalStats } = useQuery<{ totalRead: number; booksCompleted: number; uniqueReaders: number }>({
+  const { data: globalStats, isLoading: isLoadingGlobalStats } = useQuery<{ totalRead: number; booksCompleted: number; uniqueReaders: number }>({
     queryKey: ['/api/tehillim-chains/stats/global'],
-    staleTime: 60000,
-    refetchOnWindowFocus: true,
+    staleTime: 300000, // 5 minutes - data doesn't change often
+    gcTime: 600000, // Keep in cache for 10 minutes
+    refetchOnWindowFocus: false, // Don't refetch on every focus
   });
 
   // Reason options for the dropdown
@@ -401,11 +402,15 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
           <div className="border-t border-blush/10 pt-2 mt-1">
             <div className="flex justify-center gap-8 text-center">
               <div>
-                <p className="platypi-bold text-sm text-black">{(globalStats?.totalRead || 0).toLocaleString()}</p>
+                <p className="platypi-bold text-sm text-black">
+                  {isLoadingGlobalStats ? "..." : (globalStats?.totalRead || 0).toLocaleString()}
+                </p>
                 <p className="platypi-regular text-[10px] text-black/50">Tehillim Read</p>
               </div>
               <div className="border-l border-blush/10 pl-8">
-                <p className="platypi-bold text-sm text-black">{(globalStats?.booksCompleted || 0).toLocaleString()}</p>
+                <p className="platypi-bold text-sm text-black">
+                  {isLoadingGlobalStats ? "..." : (globalStats?.booksCompleted || 0).toLocaleString()}
+                </p>
                 <p className="platypi-regular text-[10px] text-black/50">Books Completed</p>
               </div>
             </div>
