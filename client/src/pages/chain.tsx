@@ -387,9 +387,10 @@ export default function ChainPage() {
             </div>
           </div>
 
-          {/* Progress bar */}
+          {/* Progress bar - uses totalCompleted directly for consistency */}
           {(() => {
-            const completed = 171 - (displayStats?.available || 171);
+            // Use totalCompleted directly instead of deriving from available to avoid inconsistency
+            const completed = displayStats?.totalCompleted || 0;
             const percentage = Math.round((completed / 171) * 100);
             const showCountInside = percentage >= 75;
             const booksCount = displayStats?.booksCompleted || 0;
