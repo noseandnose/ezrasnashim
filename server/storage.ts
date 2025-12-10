@@ -1127,27 +1127,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTehillimGlobalStats(): Promise<{ totalRead: number; booksCompleted: number; uniqueReaders: number }> {
-    // Get all daily stats to count all tehillim-related completions
+    // Get all daily stats to count tehillim from modalCompletions
+    // This matches the Analytics page calculation exactly
     const allStats = await db.select().from(dailyStats);
     
     let totalRead = 0;
-    let uniqueReaders = 0;
     
     for (const stats of allStats) {
-      // Count the base tehillimCompleted field
-      totalRead += stats.tehillimCompleted || 0;
-      uniqueReaders += stats.uniqueUsers || 0;
-      
-      // Also count all individual tehillim from modalCompletions
+      // Count tehillim from modalCompletions only (same as Analytics page)
       const completions = stats.modalCompletions as Record<string, number> || {};
       for (const [modalType, count] of Object.entries(completions)) {
-        // Count individual tehillim, chain tehillim, global tehillim, and tehillim-text
+        // Count the same types as Analytics page: global-tehillim-chain, tehillim-text, 
+        // chain-tehillim, special-tehillim, and individual-tehillim-*
         if (
           modalType.startsWith('individual-tehillim-') ||
-          modalType.startsWith('chain-tehillim') ||
+          modalType === 'individual-tehillim' ||
+          modalType === 'chain-tehillim' ||
           modalType === 'global-tehillim-chain' ||
-          modalType === 'global-tehillim' ||
-          modalType === 'tehillim-text'
+          modalType === 'tehillim-text' ||
+          modalType === 'special-tehillim'
         ) {
           totalRead += count;
         }
@@ -1157,7 +1155,7 @@ export class DatabaseStorage implements IStorage {
     // Books completed (total / 150, rounded down)
     const booksCompleted = Math.floor(totalRead / 150);
     
-    return { totalRead, booksCompleted, uniqueReaders };
+    return { totalRead, booksCompleted, uniqueReaders: 0 };
   }
 
   async migrateTehillimNamesToChains(): Promise<{ migrated: number; skipped: number; errors: string[] }> {
