@@ -4,7 +4,6 @@ import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
 import { useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
 import { useHomeSummary } from "@/hooks/use-home-summary";
 import HeartProgress from "@/components/heart-progress";
-import DailyProgress from "@/components/daily-progress";
 import type { Section } from "@/pages/home";
 import { useMemo } from "react";
 import grassImage from "@assets/Untitled_design_(4)_1765362936588.png";
@@ -315,29 +314,18 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         {/* Daily Progress Tracker - Compact Version */}
         <div 
           id="daily-progress-garden"
-          className="rounded-2xl shadow-lg border border-blush/10 bg-white mt-4 min-h-[90px] relative overflow-hidden"
+          className="rounded-2xl shadow-lg border border-blush/10 bg-white mt-4 min-h-[90px] relative"
         >
-          <div className="pl-4 pr-1 py-3 flex items-center justify-between">
-            {/* Left side: Title and subtitle */}
-            <div className="flex flex-col justify-center flex-1">
-              <h3 className="platypi-bold text-lg text-black mb-1 text-left">Daily Progress Garden</h3>
-              <p className="platypi-regular text-xs text-black/80 leading-relaxed text-left max-w-[160px]">
-                Complete one item from each Mitzva to see your daily progress Bloom
-              </p>
-            </div>
-            
-            {/* Right side: Progress image */}
-            <div className="flex items-center justify-center">
-              <DailyProgress />
-            </div>
-          </div>
-          
-          {/* Grass at the bottom */}
+          {/* Grass at the bottom - behind content */}
           <img 
             src={grassImage} 
             alt="" 
-            className="absolute bottom-0 left-0 w-full h-[50px] object-cover object-bottom"
+            className="absolute bottom-0 left-0 w-full h-auto"
           />
+          
+          <div className="pl-4 pr-1 py-3 relative z-10">
+            <h3 className="platypi-bold text-lg text-black mb-1 text-left">Daily Progress Garden</h3>
+          </div>
         </div>
       </div>
     </div>
