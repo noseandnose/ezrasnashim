@@ -56,17 +56,22 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     if (!todaysData) return 0;
     
     let count = 0;
+    // Torah modal IDs: halacha, chizuk, emuna, featured, pirkei-avot, parsha-vort
     if (todaysData.repeatables) {
       count += todaysData.repeatables['halacha'] || 0;
-      count += todaysData.repeatables['daily-chizuk'] || 0;
+      count += todaysData.repeatables['chizuk'] || 0;
       count += todaysData.repeatables['emuna'] || 0;
       count += todaysData.repeatables['featured'] || 0;
+      count += todaysData.repeatables['pirkei-avot'] || 0;
+      count += todaysData.repeatables['parsha-vort'] || 0;
     }
     if (todaysData.singles) {
       if (todaysData.singles.has('halacha')) count++;
-      if (todaysData.singles.has('daily-chizuk')) count++;
+      if (todaysData.singles.has('chizuk')) count++;
       if (todaysData.singles.has('emuna')) count++;
       if (todaysData.singles.has('featured')) count++;
+      if (todaysData.singles.has('pirkei-avot')) count++;
+      if (todaysData.singles.has('parsha-vort')) count++;
     }
     return count;
   }, [completedModals]);
