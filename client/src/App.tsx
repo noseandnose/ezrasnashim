@@ -78,15 +78,50 @@ function Router() {
     window.addEventListener('resize', updateNavOffset, { passive: true });
     window.addEventListener('orientationchange', updateNavOffset, { passive: true });
     
-    // Simple visibility change handler for mobile app WebView
-    // Refreshes every time app returns to foreground to fix untappable buttons issue
+    // Detect if running inside a mobile app webview (FlutterFlow or other app wrappers)
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isIOS = /iphone|ipod|ipad/.test(userAgent);
+    const isAndroid = /android/.test(userAgent);
+    
+    // Check for Flutter/FlutterFlow specific markers
+    const hasFlutterMarkers = 
+      userAgent.includes('flutter') || 
+      userAgent.includes('flutterflow') ||
+      userAgent.includes('dart');
+    
+    // Check for iOS WKWebView messageHandlers (set by Flutter)
+    const hasWebkitMessageHandlers = !!(window as any).webkit?.messageHandlers;
+    
+    // Check for standalone PWA mode (not a webview)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone === true;
+    
+    // Android webview detection - only definitive WebView markers
+    const isAndroidWebview = isAndroid && (
+      document.referrer.includes('android-app://') ||
+      userAgent.includes('; wv)') ||  // Standard Android WebView marker
+      userAgent.includes('wv)') ||
+      userAgent.includes('webview')
+    );
+    
+    // iOS webview detection - WKWebView with Flutter message handlers
+    const isIOSWebview = isIOS && hasWebkitMessageHandlers && !isStandalone;
+    
+    // Combined detection
+    const isInWebview = hasFlutterMarkers || isAndroidWebview || isIOSWebview;
+    
+    // Only add visibility change refresh for mobile app WebViews
+    // This fixes the untappable buttons issue in FlutterFlow without affecting normal web users
     let wasHidden = false;
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         wasHidden = true;
       } else if (document.visibilityState === 'visible' && wasHidden) {
-        // Refresh every time app comes back to foreground
-        window.location.reload();
+        // Only refresh in webview to fix untappable buttons
+        if (isInWebview) {
+          window.location.reload();
+        }
+        wasHidden = false;
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
