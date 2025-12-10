@@ -6,7 +6,7 @@ import { useHomeSummary } from "@/hooks/use-home-summary";
 import HeartProgress from "@/components/heart-progress";
 import type { Section } from "@/pages/home";
 import { useMemo } from "react";
-import grassImage from "@assets/Untitled_design_(4)_1765362936588.png";
+import grassImage from "@assets/Daily_Progress_Garden_1765364378183.png";
 
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
