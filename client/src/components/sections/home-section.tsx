@@ -31,10 +31,11 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     if (!todaysData) return 0;
     
     let count = 0;
-    // Tefilla repeatables: tehillim-text, individual-tehillim-X, nishmas-campaign, al-hamichiya, birkat-hamazon, meditation-X
+    // Tefilla repeatables: tehillim-text, individual-tehillim-X, chain-tehillim-X, nishmas-campaign, al-hamichiya, birkat-hamazon, meditation-X
     if (todaysData.repeatables) {
       Object.entries(todaysData.repeatables).forEach(([key, value]) => {
         if (key.startsWith('individual-tehillim-') || 
+            key.startsWith('chain-tehillim-') ||
             key === 'tehillim-text' || 
             key.startsWith('meditation-')) {
           count += value;
@@ -104,8 +105,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       return shuffled;
     };
     
-    // Available slots with more variation
-    const baseSlots = [3, 12, 22, 32, 42, 52, 62, 72, 82, 92];
+    // Available slots - keeping flowers away from edges to prevent cutoff
+    const baseSlots = [8, 16, 24, 34, 44, 54, 64, 74, 82, 90];
     
     // Shuffle slots for random distribution
     const shuffledSlots = shuffleArray(baseSlots);
@@ -121,14 +122,16 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     
     shuffledFlowers.forEach((type, index) => {
       const basePos = shuffledSlots[index % shuffledSlots.length];
-      // Add horizontal offset (-4 to +4%)
-      const horizontalOffset = (seededRandom() * 8) - 4;
+      // Add smaller horizontal offset (-2 to +2%) to keep within bounds
+      const horizontalOffset = (seededRandom() * 4) - 2;
+      // Clamp position to safe range (5% to 90%)
+      const clampedPos = Math.max(5, Math.min(90, basePos + horizontalOffset));
       // Add vertical offset (0 to 12px variation from bottom)
       const verticalOffset = Math.floor(seededRandom() * 12);
       
       positions.push({ 
         type, 
-        left: basePos + horizontalOffset, 
+        left: clampedPos, 
         bottom: verticalOffset,
         flipped: seededRandom() > 0.5
       });

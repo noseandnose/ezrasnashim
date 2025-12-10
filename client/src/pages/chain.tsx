@@ -6,6 +6,7 @@ import { toast } from "@/hooks/use-toast";
 import { formatTextContent } from "@/lib/text-formatter";
 import { AttributionSection } from "@/components/ui/attribution-section";
 import { useLocationStore } from "@/hooks/use-jewish-times";
+import { useModalCompletionStore } from "@/lib/types";
 import type { TehillimChain } from "@shared/schema";
 
 interface ChainStats {
@@ -138,6 +139,8 @@ export default function ChainPage() {
     staleTime: 10 * 60 * 1000,
   });
 
+  const markModalComplete = useModalCompletionStore((state) => state.markModalComplete);
+
   const completeReadingMutation = useMutation({
     mutationFn: async (psalmNumber: number) => {
       // Wait for the completion to finish before proceeding
@@ -158,9 +161,14 @@ export default function ChainPage() {
       // Get next psalm
       const nextResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/random-available?deviceId=${deviceId}&excludePsalm=${psalmNumber}`);
       const nextData = nextResponse.ok ? await nextResponse.json() : null;
-      return { nextPsalm: nextData?.psalmNumber || null, stats: completeData.stats };
+      return { nextPsalm: nextData?.psalmNumber || null, stats: completeData.stats, completedPsalm: psalmNumber };
     },
     onSuccess: (data) => {
+      // Mark modal complete for flower tracking
+      if (data.completedPsalm) {
+        markModalComplete(`chain-tehillim-${data.completedPsalm}`);
+      }
+      
       // Update local stats immediately with authoritative data from server
       if (data.stats) {
         setLocalStats(data.stats);
