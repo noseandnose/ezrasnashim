@@ -365,9 +365,13 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                 if (isLoadingRandom) return;
                 setIsLoadingRandom(true);
                 try {
+                  // Get device ID for cache key
+                  const deviceId = localStorage.getItem('tehillim_device_id') || 'anonymous';
                   const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/tehillim-chains/random?t=${Date.now()}`);
                   if (response.ok) {
                     const chain = await response.json();
+                    // Pre-populate the query cache so chain page loads instantly
+                    queryClient.setQueryData(['/api/tehillim-chains', chain.slug, deviceId], chain);
                     setLocation(`/c/${chain.slug}`);
                   }
                 } catch (error) {
