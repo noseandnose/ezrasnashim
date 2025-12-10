@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRoute, useLocation } from "wouter";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Share2, ChevronLeft, Heart, Briefcase, Baby, Home, Star, Shield, Sparkles, HeartPulse, Settings } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { formatTextContent } from "@/lib/text-formatter";
@@ -59,7 +59,6 @@ export default function ChainPage() {
   const [, params] = useRoute("/c/:slug");
   const [, setLocation] = useLocation();
   const slug = params?.slug || "";
-  const queryClient = useQueryClient();
   
   const [showHebrew, setShowHebrew] = useState(true);
   const [fontSize, setFontSize] = useState(18);
@@ -93,23 +92,40 @@ export default function ChainPage() {
 
   // Extract chain and stats from combined response
   const chain = chainData;
-  const stats = chainData?.stats;
+  const initialStats = chainData?.stats;
 
-  // Separate stats query for periodic refresh only (not blocking initial load)
-  const { data: refreshedStats } = useQuery<ChainStats>({
-    queryKey: ['/api/tehillim-chains', slug, 'stats'],
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/stats`);
-      if (!response.ok) throw new Error('Failed to fetch stats');
-      return response.json();
-    },
-    enabled: !!slug && !!chainData,
-    refetchInterval: 30000,
-    staleTime: 0,
-  });
+  // Local state for stats - updated immediately on completion
+  const [localStats, setLocalStats] = useState<ChainStats | null>(null);
 
-  // Use refreshed stats if available, otherwise use initial stats
-  const displayStats = refreshedStats || stats;
+  // Sync local stats when chain data loads
+  useEffect(() => {
+    if (initialStats && !localStats) {
+      setLocalStats(initialStats);
+    }
+  }, [initialStats, localStats]);
+
+  // Periodic stats refresh (every 30 seconds)
+  useEffect(() => {
+    if (!slug || !chainData) return;
+    
+    const refreshStats = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/stats`);
+        if (response.ok) {
+          const stats = await response.json();
+          setLocalStats(stats);
+        }
+      } catch (error) {
+        // Silently fail - not critical
+      }
+    };
+    
+    const interval = setInterval(refreshStats, 30000);
+    return () => clearInterval(interval);
+  }, [slug, chainData]);
+
+  // Use local stats (most up-to-date) or initial stats as fallback
+  const displayStats = localStats || initialStats;
 
   const { data: psalmContent, isLoading: psalmLoading } = useQuery<TehillimContent>({
     queryKey: ['/api/tehillim', currentPsalm],
@@ -144,14 +160,10 @@ export default function ChainPage() {
       const nextData = nextResponse.ok ? await nextResponse.json() : null;
       return { nextPsalm: nextData?.psalmNumber || null, stats: completeData.stats };
     },
-    onSuccess: async (data) => {
-      // Update cache with authoritative stats from server
+    onSuccess: (data) => {
+      // Update local stats immediately with authoritative data from server
       if (data.stats) {
-        queryClient.setQueryData(['/api/tehillim-chains', slug, 'stats'], data.stats);
-        queryClient.setQueryData(['/api/tehillim-chains', slug, deviceId], (old: ChainWithMeta | undefined) => {
-          if (!old) return old;
-          return { ...old, stats: data.stats };
-        });
+        setLocalStats(data.stats);
       }
       
       // Load next psalm silently (no popup)
