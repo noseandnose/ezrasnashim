@@ -79,25 +79,14 @@ function Router() {
     window.addEventListener('orientationchange', updateNavOffset, { passive: true });
     
     // Simple visibility change handler for mobile app WebView
-    // Refreshes when returning from background to ensure UI state is fresh
-    // Fixes issue where buttons become untappable after app is minimized
-    let hiddenTimestamp: number | null = null;
+    // Refreshes every time app returns to foreground to fix untappable buttons issue
+    let wasHidden = false;
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        // Always record/update when the page is hidden
-        // This ensures we track the most recent hidden time
-        hiddenTimestamp = Date.now();
-      } else if (document.visibilityState === 'visible') {
-        // Reload if we were hidden for more than 10 seconds
-        // Short threshold to fix untappable buttons issue in mobile app wrappers
-        if (hiddenTimestamp !== null) {
-          const timeHidden = Date.now() - hiddenTimestamp;
-          if (timeHidden > 10 * 1000) {
-            window.location.reload();
-          }
-        }
-        // Reset after checking (but after the reload condition check)
-        hiddenTimestamp = null;
+        wasHidden = true;
+      } else if (document.visibilityState === 'visible' && wasHidden) {
+        // Refresh every time app comes back to foreground
+        window.location.reload();
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
