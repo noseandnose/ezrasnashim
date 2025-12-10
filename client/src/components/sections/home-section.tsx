@@ -7,6 +7,7 @@ import HeartProgress from "@/components/heart-progress";
 import DailyProgress from "@/components/daily-progress";
 import type { Section } from "@/pages/home";
 import { useMemo } from "react";
+import grassImage from "@assets/Untitled_design_(3)_1765362711636.png";
 
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
@@ -314,20 +315,29 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         {/* Daily Progress Tracker - Compact Version */}
         <div 
           id="daily-progress-garden"
-          className="rounded-2xl pl-4 pr-1 py-3 shadow-lg border border-blush/10 bg-white mt-4 flex items-center justify-between min-h-[90px]"
+          className="rounded-2xl shadow-lg border border-blush/10 bg-white mt-4 min-h-[90px] relative overflow-hidden"
         >
-          {/* Left side: Title and subtitle */}
-          <div className="flex flex-col justify-center flex-1">
-            <h3 className="platypi-bold text-lg text-black mb-1 text-left">Daily Progress Garden</h3>
-            <p className="platypi-regular text-xs text-black/80 leading-relaxed text-left max-w-[160px]">
-              Complete one item from each Mitzva to see your daily progress Bloom
-            </p>
+          <div className="pl-4 pr-1 py-3 flex items-center justify-between">
+            {/* Left side: Title and subtitle */}
+            <div className="flex flex-col justify-center flex-1">
+              <h3 className="platypi-bold text-lg text-black mb-1 text-left">Daily Progress Garden</h3>
+              <p className="platypi-regular text-xs text-black/80 leading-relaxed text-left max-w-[160px]">
+                Complete one item from each Mitzva to see your daily progress Bloom
+              </p>
+            </div>
+            
+            {/* Right side: Progress image */}
+            <div className="flex items-center justify-center">
+              <DailyProgress />
+            </div>
           </div>
           
-          {/* Right side: Progress image */}
-          <div className="flex items-center justify-center">
-            <DailyProgress />
-          </div>
+          {/* Grass at the bottom */}
+          <img 
+            src={grassImage} 
+            alt="" 
+            className="absolute bottom-0 left-0 w-full h-[30px] object-cover object-top"
+          />
         </div>
       </div>
     </div>
