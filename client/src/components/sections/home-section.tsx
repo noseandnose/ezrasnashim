@@ -31,12 +31,16 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     if (!todaysData) return 0;
     
     let count = 0;
-    // Tefilla repeatables: tehillim-text, individual-tehillim-X, chain-tehillim-X, nishmas-campaign, al-hamichiya, birkat-hamazon, meditation-X
+    // Tefilla repeatables - matches what's actually stored locally via markModalComplete:
+    // tehillim-text (global chain), individual-tehillim-X, chain-tehillim-X,
+    // nishmas-campaign, al-hamichiya, birkat-hamazon, meditation-X, brocha-X, womens-prayer-X
     if (todaysData.repeatables) {
       Object.entries(todaysData.repeatables).forEach(([key, value]) => {
         if (key.startsWith('individual-tehillim-') || 
             key.startsWith('chain-tehillim-') ||
-            key === 'tehillim-text' || 
+            key.startsWith('brocha-') ||
+            key.startsWith('womens-prayer-') ||
+            key === 'tehillim-text' ||  // Global tehillim chain marks this
             key.startsWith('meditation-')) {
           count += value;
         }
@@ -45,7 +49,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       count += todaysData.repeatables['al-hamichiya'] || 0;
       count += todaysData.repeatables['birkat-hamazon'] || 0;
     }
-    // Tefilla singles: mincha, maariv, morning-brochas
+    // Tefilla singles: mincha, maariv, morning-brochas (defined in SINGLE_COMPLETION_PRAYERS)
     if (todaysData.singles) {
       if (todaysData.singles.has('mincha')) count++;
       if (todaysData.singles.has('maariv')) count++;
@@ -61,6 +65,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     
     let count = 0;
     // Torah modal IDs: halacha, chizuk, emuna, featured, pirkei-avot, parsha-vort
+    // All Torah items are repeatables (not in SINGLE_COMPLETION_PRAYERS set)
     if (todaysData.repeatables) {
       count += todaysData.repeatables['halacha'] || 0;
       count += todaysData.repeatables['chizuk'] || 0;
@@ -68,14 +73,6 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       count += todaysData.repeatables['featured'] || 0;
       count += todaysData.repeatables['pirkei-avot'] || 0;
       count += todaysData.repeatables['parsha-vort'] || 0;
-    }
-    if (todaysData.singles) {
-      if (todaysData.singles.has('halacha')) count++;
-      if (todaysData.singles.has('chizuk')) count++;
-      if (todaysData.singles.has('emuna')) count++;
-      if (todaysData.singles.has('featured')) count++;
-      if (todaysData.singles.has('pirkei-avot')) count++;
-      if (todaysData.singles.has('parsha-vort')) count++;
     }
     return count;
   }, [completedModals]);

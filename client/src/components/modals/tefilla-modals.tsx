@@ -716,6 +716,7 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
   const tefillaConditions = useTefillaConditions();
   const { completeTask } = useDailyCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
+  const { markModalComplete } = useModalCompletionStore();
 
   // Me'ein Shalosh food selection state
   const [selectedOptions, setSelectedOptions] = useState({
@@ -735,9 +736,11 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
   const isMeeinShalosh = brocha.title === "Me'ein Shalosh";
 
   const handleComplete = () => {
+    const modalId = `brocha-${brocha.id}`;
     // Track with specific brocha ID for backend analytics
-    trackModalComplete(`brocha-${brocha.id}`);
-    // Don't mark as complete since brochas are repeatable
+    trackModalComplete(modalId);
+    // Mark as complete for local flower counting (repeatables can be done multiple times)
+    markModalComplete(modalId);
     completeTask('tefilla');
     // Close fullscreen
     const event = new CustomEvent('closeFullscreen');
