@@ -201,11 +201,20 @@ export default function ChainPage() {
         throw new Error('Failed to get psalm');
       }
       const data = await response.json();
-      setCurrentPsalm(data.psalmNumber);
+      if (data.psalmNumber && typeof data.psalmNumber === 'number') {
+        setCurrentPsalm(data.psalmNumber);
+      } else {
+        // No valid psalm returned, but request succeeded - likely all complete
+        toast({
+          title: "All Tehillim Complete!",
+          description: "Amazing! The entire Sefer Tehillim has been completed.",
+        });
+      }
     } catch (error) {
+      console.error('getRandomPsalm error:', error);
       toast({
         title: "Error",
-        description: "Could not find an available psalm.",
+        description: "Could not find an available psalm. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -347,11 +356,14 @@ export default function ChainPage() {
               <p className="platypi-medium text-sm text-black/60">Tehillim Chain for</p>
               <p className="platypi-bold text-base text-black">{chain.name}</p>
             </div>
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blush/10">
-              {(() => {
-                const ReasonIcon = getReasonIcon(chain.reason);
-                return <ReasonIcon size={20} className="text-blush" />;
-              })()}
+            <div className="flex flex-col items-center">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blush/10">
+                {(() => {
+                  const ReasonIcon = getReasonIcon(chain.reason);
+                  return <ReasonIcon size={20} className="text-blush" />;
+                })()}
+              </div>
+              <p className="platypi-regular text-[10px] text-black/50 mt-1 capitalize">{chain.reason}</p>
             </div>
           </div>
 
@@ -359,17 +371,30 @@ export default function ChainPage() {
           {(() => {
             const completed = 171 - (displayStats?.available || 171);
             const percentage = Math.round((completed / 171) * 100);
+            const showCountInside = percentage >= 75;
             return (
               <div className="space-y-1">
                 <div className="flex justify-between items-center text-xs">
                   <span className="platypi-bold text-black/60">Sefer Completion Progress</span>
                   <span className="platypi-bold text-black">{percentage}%</span>
                 </div>
-                <div className="h-4 bg-gradient-feminine rounded-full overflow-hidden">
+                <div className="h-5 bg-gradient-feminine rounded-full overflow-hidden relative">
                   <div 
-                    className="h-full bg-sage rounded-full transition-all duration-500"
+                    className="h-full bg-sage rounded-full transition-all duration-500 flex items-center"
                     style={{ width: `${percentage}%` }}
-                  />
+                  >
+                    {showCountInside && (
+                      <span className="platypi-bold text-[10px] text-white ml-auto mr-2">{completed}/171</span>
+                    )}
+                  </div>
+                  {!showCountInside && completed > 0 && (
+                    <span 
+                      className="absolute top-1/2 -translate-y-1/2 platypi-bold text-[10px] text-black/70"
+                      style={{ left: `calc(${percentage}% + 6px)` }}
+                    >
+                      {completed}/171
+                    </span>
+                  )}
                 </div>
                 {showBooksCompleted && (
                   <p className="platypi-regular text-[10px] text-black/50 text-center">
