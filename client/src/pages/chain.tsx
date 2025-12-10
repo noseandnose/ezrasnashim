@@ -131,12 +131,25 @@ export default function ChainPage() {
         body: JSON.stringify({ deviceId, psalmNumber }),
       });
       
+      // Throw on failure so onError handles it and rolls back optimistic updates
+      if (!completeResponse.ok) {
+        throw new Error('Failed to save completion');
+      }
+      
       // Get next psalm
       const nextResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/random-available?deviceId=${deviceId}&excludePsalm=${psalmNumber}`);
       const nextData = nextResponse.ok ? await nextResponse.json() : null;
-      return { nextPsalm: nextData?.psalmNumber || null, completionSuccess: completeResponse.ok };
+      return { nextPsalm: nextData?.psalmNumber || null };
     },
-    onMutate: () => {
+    onMutate: async () => {
+      // Cancel any outgoing refetches so they don't overwrite optimistic update
+      await queryClient.cancelQueries({ queryKey: ['/api/tehillim-chains', slug, 'stats'] });
+      await queryClient.cancelQueries({ queryKey: ['/api/tehillim-chains', slug, deviceId] });
+      
+      // Snapshot previous values for rollback
+      const previousStats = queryClient.getQueryData<ChainStats>(['/api/tehillim-chains', slug, 'stats']);
+      const previousChainData = queryClient.getQueryData<ChainWithMeta>(['/api/tehillim-chains', slug, deviceId]);
+      
       // Optimistically update both stats sources
       queryClient.setQueryData(['/api/tehillim-chains', slug, 'stats'], (old: ChainStats | undefined) => {
         if (!old) return old;
@@ -158,6 +171,9 @@ export default function ChainPage() {
           },
         };
       });
+      
+      // Return context with previous values for rollback
+      return { previousStats, previousChainData };
     },
     onSuccess: async (data) => {
       // Load next psalm silently (no popup)
@@ -171,7 +187,15 @@ export default function ChainPage() {
       // This prevents the optimistic update from being overwritten by server stats
       // which calculate "unique completions" differently than our optimistic increment
     },
-    onError: () => {
+    onError: (_error, _variables, context) => {
+      // Roll back to previous values on error
+      if (context?.previousStats) {
+        queryClient.setQueryData(['/api/tehillim-chains', slug, 'stats'], context.previousStats);
+      }
+      if (context?.previousChainData) {
+        queryClient.setQueryData(['/api/tehillim-chains', slug, deviceId], context.previousChainData);
+      }
+      
       toast({
         title: "Error",
         description: "Could not save completion. Please try again.",
