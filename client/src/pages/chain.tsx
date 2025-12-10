@@ -7,6 +7,8 @@ import { formatTextContent } from "@/lib/text-formatter";
 import { AttributionSection } from "@/components/ui/attribution-section";
 import { useLocationStore } from "@/hooks/use-jewish-times";
 import { useModalCompletionStore } from "@/lib/types";
+import { useAnalytics } from "@/hooks/use-analytics";
+import { queryClient } from "@/lib/queryClient";
 import type { TehillimChain } from "@shared/schema";
 
 interface ChainStats {
@@ -67,6 +69,9 @@ export default function ChainPage() {
   
   // Track loading state for find another button
   const [isFindingAnother, setIsFindingAnother] = useState(false);
+  
+  // Analytics tracking
+  const { trackCompletion } = useAnalytics();
   
   // Koren URL for attribution
   const korenUrl = useKorenUrl();
@@ -167,6 +172,22 @@ export default function ChainPage() {
       // Mark modal complete for flower tracking
       if (data.completedPsalm) {
         markModalComplete(`chain-tehillim-${data.completedPsalm}`);
+        
+        // Track analytics for tehillim completion
+        trackCompletion(`chain-tehillim-${data.completedPsalm}`);
+        
+        // Invalidate all relevant stats queries for UI updates
+        queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/stats/total'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/stats/global'] });
+        // Analytics queries - match any query key containing analytics paths
+        queryClient.invalidateQueries({ predicate: (query) => {
+          return query.queryKey.some((segment) => 
+            typeof segment === 'string' && (
+              segment.includes('/api/analytics/stats/') ||
+              segment.includes('/api/analytics/community-impact')
+            )
+          );
+        }});
       }
       
       // Update local stats immediately with authoritative data from server
