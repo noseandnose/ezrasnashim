@@ -105,8 +105,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       return shuffled;
     };
     
-    // Available slots - keeping flowers away from edges to prevent cutoff
-    const baseSlots = [8, 16, 24, 34, 44, 54, 64, 74, 82, 90];
+    // Available slots - keeping flowers well away from edges to prevent cutoff
+    const baseSlots = [6, 14, 22, 30, 40, 50, 60, 68, 76, 82];
     
     // Shuffle slots for random distribution
     const shuffledSlots = shuffleArray(baseSlots);
@@ -124,8 +124,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       const basePos = shuffledSlots[index % shuffledSlots.length];
       // Add smaller horizontal offset (-2 to +2%) to keep within bounds
       const horizontalOffset = (seededRandom() * 4) - 2;
-      // Clamp position to safe range (5% to 90%)
-      const clampedPos = Math.max(5, Math.min(90, basePos + horizontalOffset));
+      // Clamp position to safe range (5% to 82%) to prevent cutoff
+      const clampedPos = Math.max(5, Math.min(82, basePos + horizontalOffset));
       // Add vertical offset (0 to 12px variation from bottom)
       const verticalOffset = Math.floor(seededRandom() * 12);
       
