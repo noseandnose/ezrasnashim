@@ -7,7 +7,7 @@ import HeartProgress from "@/components/heart-progress";
 import type { Section } from "@/pages/home";
 import { useMemo } from "react";
 import { getLocalDateString } from "@/lib/dateUtils";
-import grassImage from "@assets/Daily_Progress_Garden_(1)_1765365198853.png";
+import grassImage from "@assets/Daily_Progress_Garden_(2)_1765369219898.png";
 import torahFlower from "@assets/Torah_1765366005744.png";
 import tefillaFlower from "@assets/Tefilla_1765366005744.png";
 import tzedakaFlower from "@assets/Tzedaka_1765366005742.png";
