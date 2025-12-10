@@ -92,40 +92,44 @@ export default function Statistics() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run on mount
 
-  // Fetch today's stats - only refetch when page is visible AND this period is selected
+  // Fetch today's stats - always refetch on mount to get fresh data after chain completions
   const { data: todayStats, isLoading: todayLoading } = useQuery<DailyStats>({
     queryKey: [`/api/analytics/stats/today?date=${analyticsToday}`],
     staleTime: 30000, // Consider data fresh for 30 seconds
     gcTime: 300000, // Keep in memory for 5 minutes
     refetchInterval: isPageVisible && selectedPeriod === 'today' ? 120000 : false, // Only auto-refresh when visible and selected
     refetchOnWindowFocus: false, // Don't refetch on every focus
+    refetchOnMount: 'always', // Always refetch when page is visited to show fresh stats
   });
 
-  // Fetch weekly stats - only refetch when page is visible AND this period is selected
+  // Fetch weekly stats - always refetch on mount to get fresh data after chain completions
   const { data: weeklyStats, isLoading: weeklyLoading } = useQuery<PeriodStats>({
     queryKey: [`/api/analytics/stats/week?startDate=${weekStartDate}`],
     staleTime: 30000, // Consider data fresh for 30 seconds
     gcTime: 300000, // Keep in memory for 5 minutes
     refetchInterval: isPageVisible && selectedPeriod === 'week' ? 120000 : false,
     refetchOnWindowFocus: false,
+    refetchOnMount: 'always', // Always refetch when page is visited to show fresh stats
   });
 
-  // Fetch monthly stats - only refetch when page is visible AND this period is selected
+  // Fetch monthly stats - always refetch on mount to get fresh data after chain completions
   const { data: monthlyStats, isLoading: monthlyLoading } = useQuery<PeriodStats>({
     queryKey: ["/api/analytics/stats/month"],
     staleTime: 60000, // Monthly data can be stale for 1 minute
     gcTime: 300000, // Keep in memory for 5 minutes
     refetchInterval: isPageVisible && selectedPeriod === 'month' ? 120000 : false,
     refetchOnWindowFocus: false,
+    refetchOnMount: 'always', // Always refetch when page is visited to show fresh stats
   });
 
-  // Fetch total stats - only refetch when page is visible AND this period is selected
+  // Fetch total stats - always refetch on mount to get fresh data after chain completions
   const { data: totalStats, isLoading: totalLoading } = useQuery<PeriodStats>({
     queryKey: ["/api/analytics/stats/total"],
     staleTime: 60000, // Total data can be stale for 1 minute
     gcTime: 300000, // Keep in memory for 5 minutes
     refetchInterval: isPageVisible && selectedPeriod === 'alltime' ? 120000 : false,
     refetchOnWindowFocus: false,
+    refetchOnMount: 'always', // Always refetch when page is visited to show fresh stats
   });
 
   // Fetch active campaigns (chains) count

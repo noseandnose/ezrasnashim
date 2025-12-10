@@ -222,6 +222,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     queryKey: ['/api/tehillim-chains/stats/total'],
     staleTime: 60000,
     refetchOnWindowFocus: true,
+    refetchOnMount: 'always', // Always get fresh data when section mounts
   });
   const chainTotal = chainTotalData?.total || 0;
 
@@ -231,6 +232,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     staleTime: 300000, // 5 minutes - data doesn't change often
     gcTime: 600000, // Keep in cache for 10 minutes
     refetchOnWindowFocus: false, // Don't refetch on every focus
+    refetchOnMount: 'always', // Always get fresh data when section mounts
   });
 
   // Reason options for the dropdown
