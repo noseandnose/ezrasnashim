@@ -31,21 +31,24 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     if (!todaysData) return 0;
     
     let count = 0;
-    // Count individual tehillim completions (individual-tehillim-1, individual-tehillim-2, etc.)
+    // Tefilla repeatables: tehillim-text, individual-tehillim-X, nishmas-campaign, al-hamichiya, birkat-hamazon, meditation-X
     if (todaysData.repeatables) {
       Object.entries(todaysData.repeatables).forEach(([key, value]) => {
-        if (key.startsWith('individual-tehillim-') || key === 'tehillim-text') {
+        if (key.startsWith('individual-tehillim-') || 
+            key === 'tehillim-text' || 
+            key.startsWith('meditation-')) {
           count += value;
         }
       });
+      count += todaysData.repeatables['nishmas-campaign'] || 0;
+      count += todaysData.repeatables['al-hamichiya'] || 0;
+      count += todaysData.repeatables['birkat-hamazon'] || 0;
     }
-    // Count single-completion prayers
+    // Tefilla singles: mincha, maariv, morning-brochas
     if (todaysData.singles) {
       if (todaysData.singles.has('mincha')) count++;
       if (todaysData.singles.has('maariv')) count++;
       if (todaysData.singles.has('morning-brochas')) count++;
-      if (todaysData.singles.has('nishmas')) count++;
-      if (todaysData.singles.has('birkat-hamazon')) count++;
     }
     return count;
   }, [completedModals]);
