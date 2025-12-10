@@ -131,71 +131,37 @@ export default function ChainPage() {
         body: JSON.stringify({ deviceId, psalmNumber }),
       });
       
-      // Throw on failure so onError handles it and rolls back optimistic updates
+      // Throw on failure so onError handles it
       if (!completeResponse.ok) {
         throw new Error('Failed to save completion');
       }
       
+      // Server returns { reading, stats } - use authoritative stats
+      const completeData = await completeResponse.json();
+      
       // Get next psalm
       const nextResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/random-available?deviceId=${deviceId}&excludePsalm=${psalmNumber}`);
       const nextData = nextResponse.ok ? await nextResponse.json() : null;
-      return { nextPsalm: nextData?.psalmNumber || null };
-    },
-    onMutate: async () => {
-      // Cancel any outgoing refetches so they don't overwrite optimistic update
-      await queryClient.cancelQueries({ queryKey: ['/api/tehillim-chains', slug, 'stats'] });
-      await queryClient.cancelQueries({ queryKey: ['/api/tehillim-chains', slug, deviceId] });
-      
-      // Snapshot previous values for rollback
-      const previousStats = queryClient.getQueryData<ChainStats>(['/api/tehillim-chains', slug, 'stats']);
-      const previousChainData = queryClient.getQueryData<ChainWithMeta>(['/api/tehillim-chains', slug, deviceId]);
-      
-      // Optimistically update both stats sources
-      queryClient.setQueryData(['/api/tehillim-chains', slug, 'stats'], (old: ChainStats | undefined) => {
-        if (!old) return old;
-        return {
-          ...old,
-          totalCompleted: (old.totalCompleted || 0) + 1,
-          available: Math.max(0, (old.available || 171) - 1),
-        };
-      });
-      // Also update the main chain data stats
-      queryClient.setQueryData(['/api/tehillim-chains', slug, deviceId], (old: ChainWithMeta | undefined) => {
-        if (!old?.stats) return old;
-        return {
-          ...old,
-          stats: {
-            ...old.stats,
-            totalCompleted: (old.stats.totalCompleted || 0) + 1,
-            available: Math.max(0, (old.stats.available || 171) - 1),
-          },
-        };
-      });
-      
-      // Return context with previous values for rollback
-      return { previousStats, previousChainData };
+      return { nextPsalm: nextData?.psalmNumber || null, stats: completeData.stats };
     },
     onSuccess: async (data) => {
+      // Update cache with authoritative stats from server
+      if (data.stats) {
+        queryClient.setQueryData(['/api/tehillim-chains', slug, 'stats'], data.stats);
+        queryClient.setQueryData(['/api/tehillim-chains', slug, deviceId], (old: ChainWithMeta | undefined) => {
+          if (!old) return old;
+          return { ...old, stats: data.stats };
+        });
+      }
+      
       // Load next psalm silently (no popup)
       if (data.nextPsalm) {
         setCurrentPsalm(data.nextPsalm);
       } else {
         setCurrentPsalm(null);
       }
-      
-      // Don't invalidate stats cache - let the periodic 30-second refresh handle it
-      // This prevents the optimistic update from being overwritten by server stats
-      // which calculate "unique completions" differently than our optimistic increment
     },
-    onError: (_error, _variables, context) => {
-      // Roll back to previous values on error
-      if (context?.previousStats) {
-        queryClient.setQueryData(['/api/tehillim-chains', slug, 'stats'], context.previousStats);
-      }
-      if (context?.previousChainData) {
-        queryClient.setQueryData(['/api/tehillim-chains', slug, deviceId], context.previousChainData);
-      }
-      
+    onError: () => {
       toast({
         title: "Error",
         description: "Could not save completion. Please try again.",

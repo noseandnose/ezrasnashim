@@ -2652,7 +2652,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const reading = await storage.completeChainReading(chain.id, psalmNumber, deviceId);
-      res.json(reading);
+      
+      // Return updated stats so client uses authoritative data
+      const stats = await storage.getTehillimChainStats(chain.id);
+      res.json({ 
+        reading, 
+        stats: {
+          totalCompleted: stats.totalSaid,
+          booksCompleted: stats.booksCompleted,
+          currentlyReading: stats.currentlyReading,
+          available: stats.available,
+        }
+      });
     } catch (error) {
       console.error("Error completing chain reading:", error);
       res.status(500).json({ error: "Failed to complete reading" });
