@@ -2617,7 +2617,7 @@ export class DatabaseStorage implements IStorage {
   // Helper method to calculate total acts
   private calculateTotalActs(modalCompletions: Record<string, number>, gaveElsewhereCompletions: number = 0, namesProcessed: number = 0, meditationsCompleted: number = 0): number {
     const torahActs = ['torah', 'chizuk', 'emuna', 'halacha', 'featured', 'parsha-vort', 'pirkei-avot'];
-    const tefillaActs = ['tefilla', 'morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'birkat-hamazon', 'al-hamichiya', 'special-tehillim', 'global-tehillim-chain', 'tehillim-text'];
+    const tefillaActs = ['tefilla', 'morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'birkat-hamazon', 'al-hamichiya', 'special-tehillim', 'global-tehillim-chain', 'tehillim-text', 'chain-tehillim'];
     const tzedakaActs = ['tzedaka', 'donate'];
     
     let totalActs = 0;
@@ -2627,9 +2627,10 @@ export class DatabaseStorage implements IStorage {
       if (torahActs.includes(modalType) || tefillaActs.includes(modalType) || tzedakaActs.includes(modalType)) {
         totalActs += count;
       }
-      // Also count individual tehillim, womens prayers, and individual brochas
+      // Also count individual tehillim, chain tehillim (with psalm number), womens prayers, and individual brochas
       if (
         modalType.startsWith('individual-tehillim-') ||
+        modalType.startsWith('chain-tehillim-') ||  // Personal chain tehillim completions
         modalType.startsWith('womens-prayer-') ||
         modalType.startsWith('brocha-')  // Count individual brochas like Asher Yatzar
       ) {
