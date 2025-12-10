@@ -2677,6 +2677,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const reading = await storage.completeChainReading(chain.id, psalmNumber, deviceId);
       
+      // Invalidate global stats cache so next request gets fresh data
+      globalStatsCache = null;
+      
       // Return updated stats so client uses authoritative data
       const stats = await storage.getTehillimChainStats(chain.id);
       res.json({ 

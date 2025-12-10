@@ -7,7 +7,6 @@ import { formatTextContent } from "@/lib/text-formatter";
 import { AttributionSection } from "@/components/ui/attribution-section";
 import { useLocationStore } from "@/hooks/use-jewish-times";
 import { useModalCompletionStore } from "@/lib/types";
-import { useAnalytics } from "@/hooks/use-analytics";
 import { queryClient } from "@/lib/queryClient";
 import type { TehillimChain } from "@shared/schema";
 
@@ -69,9 +68,6 @@ export default function ChainPage() {
   
   // Track loading state for find another button
   const [isFindingAnother, setIsFindingAnother] = useState(false);
-  
-  // Analytics tracking
-  const { trackCompletion } = useAnalytics();
   
   // Koren URL for attribution
   const korenUrl = useKorenUrl();
@@ -173,9 +169,7 @@ export default function ChainPage() {
       if (data.completedPsalm) {
         markModalComplete(`chain-tehillim-${data.completedPsalm}`);
         
-        // Track analytics for tehillim completion
-        trackCompletion(`chain-tehillim-${data.completedPsalm}`);
-        
+        // Server already tracks analytics in completeChainReading, so we just need to invalidate queries
         // Invalidate all relevant stats queries for UI updates
         queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/stats/total'] });
         queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/stats/global'] });
