@@ -440,7 +440,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           <img 
             src={grassImage} 
             alt="" 
-            className="absolute bottom-0 left-0 w-full h-auto z-[2]"
+            className="absolute bottom-[-8px] left-0 w-full h-auto z-[2]"
           />
           
           {/* Flowers - appear when completions happen, behind grass */}
@@ -449,7 +449,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               key={`${flower.type}-${index}`}
               src={flower.type === 'torah' ? torahFlower : flower.type === 'tefilla' ? tefillaFlower : tzedakaFlower} 
               alt={`${flower.type} flower`} 
-              className="absolute bottom-0 h-[70px] w-auto z-[1]"
+              className="absolute bottom-0 h-[77px] w-auto z-[1]"
               style={{ 
                 left: `${flower.left}%`,
                 transform: flower.flipped ? 'scaleX(-1)' : 'none'
