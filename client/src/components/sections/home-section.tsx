@@ -1,5 +1,5 @@
 import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Star } from "lucide-react";
-import { useModalStore, useDailyCompletionStore } from "@/lib/types";
+import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
 import { useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
 import { useHomeSummary } from "@/hooks/use-home-summary";
@@ -18,7 +18,52 @@ interface HomeSectionProps {
 export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   const { openModal } = useModalStore();
   const { torahCompleted, tefillaCompleted, tzedakaCompleted } = useDailyCompletionStore();
+  const { getCompletionCount } = useModalCompletionStore();
   
+  // Get flower counts for each category
+  const tefillaFlowerCount = useMemo(() => {
+    // Count all tefilla-related completions
+    const tehillimCount = getCompletionCount('tehillim');
+    const minchaCount = getCompletionCount('mincha');
+    const maarivCount = getCompletionCount('maariv');
+    const morningBrochasCount = getCompletionCount('morning-brochas');
+    const nishmasCount = getCompletionCount('nishmas');
+    const birkatHamazonCount = getCompletionCount('birkat-hamazon');
+    return tehillimCount + minchaCount + maarivCount + morningBrochasCount + nishmasCount + birkatHamazonCount;
+  }, [getCompletionCount]);
+
+  const torahFlowerCount = useMemo(() => {
+    const halachaCount = getCompletionCount('halacha');
+    const dailyChizukCount = getCompletionCount('daily-chizuk');
+    const emunaCount = getCompletionCount('emuna');
+    return halachaCount + dailyChizukCount + emunaCount;
+  }, [getCompletionCount]);
+
+  const tzedakaFlowerCount = useMemo(() => {
+    return tzedakaCompleted ? 1 : 0;
+  }, [tzedakaCompleted]);
+
+  // Generate stable random positions for flowers
+  const flowerPositions = useMemo(() => {
+    const positions: { type: 'torah' | 'tefilla' | 'tzedaka'; left: number }[] = [];
+    let seed = 12345;
+    const seededRandom = () => {
+      seed = (seed * 9301 + 49297) % 233280;
+      return seed / 233280;
+    };
+    
+    for (let i = 0; i < torahFlowerCount; i++) {
+      positions.push({ type: 'torah', left: 5 + seededRandom() * 85 });
+    }
+    for (let i = 0; i < tefillaFlowerCount; i++) {
+      positions.push({ type: 'tefilla', left: 5 + seededRandom() * 85 });
+    }
+    for (let i = 0; i < tzedakaFlowerCount; i++) {
+      positions.push({ type: 'tzedaka', left: 5 + seededRandom() * 85 });
+    }
+    return positions;
+  }, [torahFlowerCount, tefillaFlowerCount, tzedakaFlowerCount]);
+
   // Load location immediately on startup for accurate times
   const jewishTimesQuery = useJewishTimes();
   const { coordinates, permissionDenied } = useGeolocation();
@@ -319,38 +364,23 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           id="daily-progress-garden"
           className="rounded-2xl shadow-lg border border-blush/10 bg-white mt-4 min-h-[120px] relative overflow-hidden"
         >
-          {/* Grass at the bottom - behind content */}
+          {/* Grass at the bottom - in front of flowers, behind text */}
           <img 
             src={grassImage} 
             alt="" 
-            className="absolute bottom-0 left-0 w-full h-auto"
+            className="absolute bottom-0 left-0 w-full h-auto z-[2]"
           />
           
-          {/* Flowers - appear when completions happen */}
-          {torahCompleted && (
+          {/* Flowers - appear when completions happen, behind grass */}
+          {flowerPositions.map((flower, index) => (
             <img 
-              src={torahFlower} 
-              alt="Torah flower" 
-              className="absolute bottom-0 h-[70px] w-auto z-[5]"
-              style={{ left: '15%' }}
+              key={`${flower.type}-${index}`}
+              src={flower.type === 'torah' ? torahFlower : flower.type === 'tefilla' ? tefillaFlower : tzedakaFlower} 
+              alt={`${flower.type} flower`} 
+              className="absolute bottom-0 h-[70px] w-auto z-[1]"
+              style={{ left: `${flower.left}%` }}
             />
-          )}
-          {tefillaCompleted && (
-            <img 
-              src={tefillaFlower} 
-              alt="Tefilla flower" 
-              className="absolute bottom-0 h-[70px] w-auto z-[5]"
-              style={{ left: '45%' }}
-            />
-          )}
-          {tzedakaCompleted && (
-            <img 
-              src={tzedakaFlower} 
-              alt="Tzedaka flower" 
-              className="absolute bottom-0 h-[70px] w-auto z-[5]"
-              style={{ left: '75%' }}
-            />
-          )}
+          ))}
           
           <div className="pl-4 pr-1 py-3 relative z-10">
             <h3 className="platypi-bold text-lg text-black mb-1 text-left">Daily Progress Garden</h3>
