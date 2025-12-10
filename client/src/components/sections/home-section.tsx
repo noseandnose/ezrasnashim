@@ -7,6 +7,9 @@ import HeartProgress from "@/components/heart-progress";
 import type { Section } from "@/pages/home";
 import { useMemo } from "react";
 import grassImage from "@assets/Daily_Progress_Garden_(1)_1765365198853.png";
+import torahFlower from "@assets/Torah_1765366005744.png";
+import tefillaFlower from "@assets/Tefilla_1765366005744.png";
+import tzedakaFlower from "@assets/Tzedaka_1765366005742.png";
 
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
@@ -322,6 +325,32 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             alt="" 
             className="absolute bottom-0 left-0 w-full h-auto"
           />
+          
+          {/* Flowers - appear when completions happen */}
+          {torahCompleted && (
+            <img 
+              src={torahFlower} 
+              alt="Torah flower" 
+              className="absolute bottom-0 h-[70px] w-auto z-[5]"
+              style={{ left: '15%' }}
+            />
+          )}
+          {tefillaCompleted && (
+            <img 
+              src={tefillaFlower} 
+              alt="Tefilla flower" 
+              className="absolute bottom-0 h-[70px] w-auto z-[5]"
+              style={{ left: '45%' }}
+            />
+          )}
+          {tzedakaCompleted && (
+            <img 
+              src={tzedakaFlower} 
+              alt="Tzedaka flower" 
+              className="absolute bottom-0 h-[70px] w-auto z-[5]"
+              style={{ left: '75%' }}
+            />
+          )}
           
           <div className="pl-4 pr-1 py-3 relative z-10">
             <h3 className="platypi-bold text-lg text-black mb-1 text-left">Daily Progress Garden</h3>
