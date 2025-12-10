@@ -716,6 +716,7 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
   const tefillaConditions = useTefillaConditions();
   const { completeTask } = useDailyCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
+  const { markModalComplete } = useModalCompletionStore();
 
   // Me'ein Shalosh food selection state
   const [selectedOptions, setSelectedOptions] = useState({
@@ -735,9 +736,11 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
   const isMeeinShalosh = brocha.title === "Me'ein Shalosh";
 
   const handleComplete = () => {
+    const modalId = `brocha-${brocha.id}`;
     // Track with specific brocha ID for backend analytics
-    trackModalComplete(`brocha-${brocha.id}`);
-    // Don't mark as complete since brochas are repeatable
+    trackModalComplete(modalId);
+    // Mark as complete for local flower counting (repeatables can be done multiple times)
+    markModalComplete(modalId);
     completeTask('tefilla');
     // Close fullscreen
     const event = new CustomEvent('closeFullscreen');
@@ -1741,6 +1744,10 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
       queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/month'] });
       queryClient.invalidateQueries({ queryKey: ['/api/analytics/stats/total'] });
       
+      // Invalidate chain stats so Tefilla section updates immediately
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/stats/total'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/stats/global'] });
+      
       // Trigger event to refresh main tehillim section
       const event = new CustomEvent('tehillimCompleted');
       window.dispatchEvent(event);
@@ -1764,9 +1771,9 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
   const isCompleted = isModalComplete(completionKey);
 
   const handleComplete = () => {
-    // Track modal completion for feature usage (use unique key to avoid double counting)
+    // Track modal completion - use aligned identifier (read logic handles legacy tehillim-text for old data)
     trackModalComplete('global-tehillim-chain');
-    markModalComplete('tehillim-text');
+    markModalComplete('global-tehillim-chain');
     completeTask('tefilla');
     
     // Advance the chain (this will trigger the analytics tracking in onSuccess)
@@ -1783,9 +1790,9 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
   };
 
   const handleCompleteAndNext = async () => {
-    // Track modal completion for feature usage (use unique key to avoid double counting)
+    // Track modal completion - use aligned identifier (read logic handles legacy tehillim-text for old data)
     trackModalComplete('global-tehillim-chain');
-    markModalComplete('tehillim-text');
+    markModalComplete('global-tehillim-chain');
     completeTask('tefilla');
     
     // Check if congratulations should be shown - if yes, show it and stop navigation

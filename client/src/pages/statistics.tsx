@@ -451,6 +451,8 @@ export default function Statistics() {
             <StatCard
               title="Tehillim Said"
               value={currentLoading ? "..." : (() => {
+                // Server-side analytics: no dedup needed because analytics only tracks once per completion
+                // (global-tehillim-chain for new, tehillim-text for historical)
                 const modalCompletions = (currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {};
                 const globalTehillimChain = modalCompletions['global-tehillim-chain'] || 0;
                 const globalTehillimText = modalCompletions['tehillim-text'] || 0;
@@ -493,6 +495,8 @@ export default function Statistics() {
                     let brochasTotal = 0;
 
                     // Process all modal completion entries
+                    // Note: Server-side analytics doesn't have dual-write issue - each completion is tracked once
+                    // (global-tehillim-chain for new completions, tehillim-text for historical)
                     Object.entries(modalCompletions).forEach(([modalType, count]) => {
                       if (modalType.startsWith('individual-tehillim-') || modalType === 'individual-tehillim' ||
                           modalType === 'global-tehillim-chain' || modalType === 'tehillim-text' ||
