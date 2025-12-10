@@ -31,16 +31,17 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     if (!todaysData) return 0;
     
     let count = 0;
-    // Tefilla repeatables - matches what's actually stored locally via markModalComplete:
-    // tehillim-text (global chain), individual-tehillim-X, chain-tehillim-X,
-    // nishmas-campaign, al-hamichiya, birkat-hamazon, meditation-X, brocha-X, womens-prayer-X
+    // Tefilla repeatables - matches what's stored locally via markModalComplete:
+    // global-tehillim-chain (new aligned key), tehillim-text (legacy), individual-tehillim-X,
+    // chain-tehillim-X, nishmas-campaign, al-hamichiya, birkat-hamazon, meditation-X, brocha-X, womens-prayer-X
     if (todaysData.repeatables) {
       Object.entries(todaysData.repeatables).forEach(([key, value]) => {
         if (key.startsWith('individual-tehillim-') || 
             key.startsWith('chain-tehillim-') ||
             key.startsWith('brocha-') ||
             key.startsWith('womens-prayer-') ||
-            key === 'tehillim-text' ||  // Global tehillim chain marks this
+            key === 'global-tehillim-chain' ||  // New aligned identifier
+            key === 'tehillim-text' ||  // Legacy identifier for backward compatibility
             key.startsWith('meditation-')) {
           count += value;
         }

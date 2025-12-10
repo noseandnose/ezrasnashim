@@ -1767,9 +1767,9 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
   const isCompleted = isModalComplete(completionKey);
 
   const handleComplete = () => {
-    // Track modal completion for feature usage (use unique key to avoid double counting)
+    // Track modal completion - use aligned identifier (read logic handles legacy tehillim-text for old data)
     trackModalComplete('global-tehillim-chain');
-    markModalComplete('tehillim-text');
+    markModalComplete('global-tehillim-chain');
     completeTask('tefilla');
     
     // Advance the chain (this will trigger the analytics tracking in onSuccess)
@@ -1786,9 +1786,9 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
   };
 
   const handleCompleteAndNext = async () => {
-    // Track modal completion for feature usage (use unique key to avoid double counting)
+    // Track modal completion - use aligned identifier (read logic handles legacy tehillim-text for old data)
     trackModalComplete('global-tehillim-chain');
-    markModalComplete('tehillim-text');
+    markModalComplete('global-tehillim-chain');
     completeTask('tefilla');
     
     // Check if congratulations should be shown - if yes, show it and stop navigation
