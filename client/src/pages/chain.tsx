@@ -124,17 +124,17 @@ export default function ChainPage() {
 
   const completeReadingMutation = useMutation({
     mutationFn: async (psalmNumber: number) => {
-      // Fire and forget the completion - don't wait for it
-      fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/complete`, {
+      // Wait for the completion to finish before proceeding
+      const completeResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/complete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ deviceId, psalmNumber }),
-      }).catch(() => {});
+      });
       
-      // Immediately get next psalm
+      // Get next psalm
       const nextResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/random-available?deviceId=${deviceId}&excludePsalm=${psalmNumber}`);
       const nextData = nextResponse.ok ? await nextResponse.json() : null;
-      return { nextPsalm: nextData?.psalmNumber || null };
+      return { nextPsalm: nextData?.psalmNumber || null, completionSuccess: completeResponse.ok };
     },
     onMutate: () => {
       // Optimistically update both stats sources
@@ -167,11 +167,11 @@ export default function ChainPage() {
         setCurrentPsalm(null);
       }
       
-      // Background refresh stats after a delay
-      setTimeout(() => {
+      // Only invalidate after completion is confirmed saved
+      if (data.completionSuccess) {
         queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains', slug, 'stats'] });
         queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/stats/total'] });
-      }, 2000);
+      }
     },
     onError: () => {
       toast({
