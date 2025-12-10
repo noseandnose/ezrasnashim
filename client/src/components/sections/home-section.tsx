@@ -59,11 +59,13 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       count += todaysData.repeatables['halacha'] || 0;
       count += todaysData.repeatables['daily-chizuk'] || 0;
       count += todaysData.repeatables['emuna'] || 0;
+      count += todaysData.repeatables['featured'] || 0;
     }
     if (todaysData.singles) {
       if (todaysData.singles.has('halacha')) count++;
       if (todaysData.singles.has('daily-chizuk')) count++;
       if (todaysData.singles.has('emuna')) count++;
+      if (todaysData.singles.has('featured')) count++;
     }
     return count;
   }, [completedModals]);
@@ -72,23 +74,55 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     return tzedakaCompleted ? 1 : 0;
   }, [tzedakaCompleted]);
 
-  // Generate stable random positions for flowers
+  // Generate stable positions for flowers - spread them out evenly
   const flowerPositions = useMemo(() => {
-    const positions: { type: 'torah' | 'tefilla' | 'tzedaka'; left: number }[] = [];
+    const positions: { type: 'torah' | 'tefilla' | 'tzedaka'; left: number; flipped: boolean }[] = [];
+    
+    // Track counts for flipping logic
+    let torahCount = 0;
+    let tefillaCount = 0;
+    let tzedakaCount = 0;
+    
+    // Predefined position slots to avoid overlap (percentages from left)
+    const slots = [5, 15, 25, 35, 45, 55, 65, 75, 85];
+    let slotIndex = 0;
+    
+    // Add a small random offset to each slot for variety
     let seed = 12345;
     const seededRandom = () => {
       seed = (seed * 9301 + 49297) % 233280;
-      return seed / 233280;
+      return (seed / 233280) * 6 - 3; // -3 to +3 offset
     };
     
     for (let i = 0; i < torahFlowerCount; i++) {
-      positions.push({ type: 'torah', left: 5 + seededRandom() * 85 });
+      const basePos = slots[slotIndex % slots.length];
+      positions.push({ 
+        type: 'torah', 
+        left: basePos + seededRandom(), 
+        flipped: torahCount % 2 === 1 
+      });
+      torahCount++;
+      slotIndex++;
     }
     for (let i = 0; i < tefillaFlowerCount; i++) {
-      positions.push({ type: 'tefilla', left: 5 + seededRandom() * 85 });
+      const basePos = slots[slotIndex % slots.length];
+      positions.push({ 
+        type: 'tefilla', 
+        left: basePos + seededRandom(), 
+        flipped: tefillaCount % 2 === 1 
+      });
+      tefillaCount++;
+      slotIndex++;
     }
     for (let i = 0; i < tzedakaFlowerCount; i++) {
-      positions.push({ type: 'tzedaka', left: 5 + seededRandom() * 85 });
+      const basePos = slots[slotIndex % slots.length];
+      positions.push({ 
+        type: 'tzedaka', 
+        left: basePos + seededRandom(), 
+        flipped: tzedakaCount % 2 === 1 
+      });
+      tzedakaCount++;
+      slotIndex++;
     }
     return positions;
   }, [torahFlowerCount, tefillaFlowerCount, tzedakaFlowerCount]);
@@ -407,7 +441,10 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               src={flower.type === 'torah' ? torahFlower : flower.type === 'tefilla' ? tefillaFlower : tzedakaFlower} 
               alt={`${flower.type} flower`} 
               className="absolute bottom-0 h-[70px] w-auto z-[1]"
-              style={{ left: `${flower.left}%` }}
+              style={{ 
+                left: `${flower.left}%`,
+                transform: flower.flipped ? 'scaleX(-1)' : 'none'
+              }}
             />
           ))}
           
