@@ -7,7 +7,7 @@ import HeartProgress from "@/components/heart-progress";
 import DailyProgress from "@/components/daily-progress";
 import type { Section } from "@/pages/home";
 import { useMemo } from "react";
-import grassImage from "@assets/Untitled_design_(3)_1765362711636.png";
+import grassImage from "@assets/Untitled_design_(4)_1765362936588.png";
 
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
@@ -336,7 +336,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           <img 
             src={grassImage} 
             alt="" 
-            className="absolute bottom-0 left-0 w-full h-[30px] object-cover object-top"
+            className="absolute bottom-0 left-0 w-full h-[50px] object-cover object-bottom"
           />
         </div>
       </div>
