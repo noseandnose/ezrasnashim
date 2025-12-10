@@ -20,26 +20,53 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   const { torahCompleted, tefillaCompleted, tzedakaCompleted } = useDailyCompletionStore();
   // Subscribe to completedModals to trigger re-renders when completions change
   const completedModals = useModalCompletionStore((state) => state.completedModals);
-  const getCompletionCount = useModalCompletionStore((state) => state.getCompletionCount);
   
   // Get flower counts for each category - recomputes when completedModals changes
   const tefillaFlowerCount = useMemo(() => {
     // Count all tefilla-related completions
-    const tehillimCount = getCompletionCount('tehillim');
-    const minchaCount = getCompletionCount('mincha');
-    const maarivCount = getCompletionCount('maariv');
-    const morningBrochasCount = getCompletionCount('morning-brochas');
-    const nishmasCount = getCompletionCount('nishmas');
-    const birkatHamazonCount = getCompletionCount('birkat-hamazon');
-    return tehillimCount + minchaCount + maarivCount + morningBrochasCount + nishmasCount + birkatHamazonCount;
-  }, [completedModals, getCompletionCount]);
+    // Get today's date key
+    const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD format
+    const todaysData = completedModals[today];
+    if (!todaysData) return 0;
+    
+    let count = 0;
+    // Count individual tehillim completions (individual-tehillim-1, individual-tehillim-2, etc.)
+    if (todaysData.repeatables) {
+      Object.entries(todaysData.repeatables).forEach(([key, value]) => {
+        if (key.startsWith('individual-tehillim-') || key === 'tehillim-text') {
+          count += value;
+        }
+      });
+    }
+    // Count single-completion prayers
+    if (todaysData.singles) {
+      if (todaysData.singles.has('mincha')) count++;
+      if (todaysData.singles.has('maariv')) count++;
+      if (todaysData.singles.has('morning-brochas')) count++;
+      if (todaysData.singles.has('nishmas')) count++;
+      if (todaysData.singles.has('birkat-hamazon')) count++;
+    }
+    return count;
+  }, [completedModals]);
 
   const torahFlowerCount = useMemo(() => {
-    const halachaCount = getCompletionCount('halacha');
-    const dailyChizukCount = getCompletionCount('daily-chizuk');
-    const emunaCount = getCompletionCount('emuna');
-    return halachaCount + dailyChizukCount + emunaCount;
-  }, [completedModals, getCompletionCount]);
+    const today = new Date().toLocaleDateString('en-CA');
+    const todaysData = completedModals[today];
+    if (!todaysData) return 0;
+    
+    let count = 0;
+    if (todaysData.repeatables) {
+      count += todaysData.repeatables['halacha'] || 0;
+      count += todaysData.repeatables['daily-chizuk'] || 0;
+      count += todaysData.repeatables['emuna'] || 0;
+    }
+    if (todaysData.singles) {
+      if (todaysData.singles.has('halacha')) count++;
+      if (todaysData.singles.has('daily-chizuk')) count++;
+      if (todaysData.singles.has('emuna')) count++;
+    }
+    return count;
+  }, [completedModals]);
 
   const tzedakaFlowerCount = useMemo(() => {
     return tzedakaCompleted ? 1 : 0;
