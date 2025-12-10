@@ -1127,31 +1127,35 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTehillimGlobalStats(): Promise<{ totalRead: number; booksCompleted: number; uniqueReaders: number }> {
-    // Get total chain completions
-    const chainResult = await db.select({ count: sql<number>`count(*)` })
-      .from(tehillimChainReadings)
-      .where(eq(tehillimChainReadings.status, 'completed'));
-    const chainCount = Number(chainResult[0]?.count || 0);
+    // Get all daily stats to count all tehillim-related completions
+    const allStats = await db.select().from(dailyStats);
     
-    // Get total from daily stats (individual tehillim completions)
-    const dailyResult = await db.select({ 
-      total: sql<number>`COALESCE(SUM(${dailyStats.tehillimCompleted}), 0)` 
-    }).from(dailyStats);
-    const dailyCount = Number(dailyResult[0]?.total || 0);
+    let totalRead = 0;
+    let uniqueReaders = 0;
     
-    // Total tehillim read (chains + general)
-    const totalRead = chainCount + dailyCount;
+    for (const stats of allStats) {
+      // Count the base tehillimCompleted field
+      totalRead += stats.tehillimCompleted || 0;
+      uniqueReaders += stats.uniqueUsers || 0;
+      
+      // Also count all individual tehillim from modalCompletions
+      const completions = stats.modalCompletions as Record<string, number> || {};
+      for (const [modalType, count] of Object.entries(completions)) {
+        // Count individual tehillim, chain tehillim, global tehillim, and tehillim-text
+        if (
+          modalType.startsWith('individual-tehillim-') ||
+          modalType.startsWith('chain-tehillim') ||
+          modalType === 'global-tehillim-chain' ||
+          modalType === 'global-tehillim' ||
+          modalType === 'tehillim-text'
+        ) {
+          totalRead += count;
+        }
+      }
+    }
     
     // Books completed (total / 150, rounded down)
     const booksCompleted = Math.floor(totalRead / 150);
-    
-    // Unique readers from chain readings
-    const uniqueReadersResult = await db.select({ 
-      count: sql<number>`count(DISTINCT ${tehillimChainReadings.deviceId})` 
-    })
-      .from(tehillimChainReadings)
-      .where(eq(tehillimChainReadings.status, 'completed'));
-    const uniqueReaders = Number(uniqueReadersResult[0]?.count || 0);
     
     return { totalRead, booksCompleted, uniqueReaders };
   }
