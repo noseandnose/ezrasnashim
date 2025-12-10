@@ -320,7 +320,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           <img 
             src={grassImage} 
             alt="" 
-            className="absolute -bottom-2 left-0 w-full h-auto"
+            className="absolute bottom-1 left-0 w-full h-auto"
           />
           
           <div className="pl-4 pr-1 py-3 relative z-10">
