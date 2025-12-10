@@ -399,18 +399,14 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
 
           {/* Stats Line */}
           <div className="border-t border-blush/10 pt-2 mt-1">
-            <div className="flex justify-around text-center">
+            <div className="flex justify-center gap-8 text-center">
               <div>
                 <p className="platypi-bold text-sm text-black">{(globalStats?.totalRead || 0).toLocaleString()}</p>
                 <p className="platypi-regular text-[10px] text-black/50">Tehillim Read</p>
               </div>
-              <div className="border-l border-blush/10 pl-4">
+              <div className="border-l border-blush/10 pl-8">
                 <p className="platypi-bold text-sm text-black">{(globalStats?.booksCompleted || 0).toLocaleString()}</p>
                 <p className="platypi-regular text-[10px] text-black/50">Books Completed</p>
-              </div>
-              <div className="border-l border-blush/10 pl-4">
-                <p className="platypi-bold text-sm text-black">{(globalStats?.uniqueReaders || 0).toLocaleString()}</p>
-                <p className="platypi-regular text-[10px] text-black/50">Readers</p>
               </div>
             </div>
           </div>
