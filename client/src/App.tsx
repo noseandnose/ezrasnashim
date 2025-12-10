@@ -87,6 +87,7 @@ function Router() {
     const hasFlutterMarkers = 
       userAgent.includes('flutter') || 
       userAgent.includes('flutterflow') ||
+      userAgent.includes('fxlauncher') ||
       userAgent.includes('dart');
     
     // Check for iOS WKWebView messageHandlers (set by Flutter)
@@ -96,16 +97,23 @@ function Router() {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as any).standalone === true;
     
-    // Android webview detection - only definitive WebView markers
-    const isAndroidWebview = isAndroid && (
+    // Android webview detection - check for WebView markers
+    // FlutterFlow uses Android WebView which includes 'wv' or 'Version/X.X Chrome' pattern
+    const isAndroidWebview = isAndroid && !isStandalone && (
       document.referrer.includes('android-app://') ||
       userAgent.includes('; wv)') ||  // Standard Android WebView marker
       userAgent.includes('wv)') ||
-      userAgent.includes('webview')
+      userAgent.includes('webview') ||
+      // FlutterFlow WebView pattern: has Chrome but also "Version/X.X" which browsers don't have
+      (userAgent.includes('chrome') && /version\/\d/.test(userAgent))
     );
     
-    // iOS webview detection - WKWebView with Flutter message handlers
-    const isIOSWebview = isIOS && hasWebkitMessageHandlers && !isStandalone;
+    // iOS webview detection - WKWebView (no Safari identifier, or has webkit handlers)
+    const isIOSWebview = isIOS && !isStandalone && (
+      hasWebkitMessageHandlers ||
+      // WKWebView doesn't have "Safari" in UA
+      (!userAgent.includes('safari') && userAgent.includes('applewebkit'))
+    );
     
     // Combined detection
     const isInWebview = hasFlutterMarkers || isAndroidWebview || isIOSWebview;

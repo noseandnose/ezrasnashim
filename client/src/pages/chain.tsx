@@ -7,6 +7,8 @@ import { formatTextContent } from "@/lib/text-formatter";
 import { AttributionSection } from "@/components/ui/attribution-section";
 import { useLocationStore } from "@/hooks/use-jewish-times";
 import { useModalCompletionStore } from "@/lib/types";
+import { useAnalytics } from "@/hooks/use-analytics";
+import { queryClient } from "@/lib/queryClient";
 import type { TehillimChain } from "@shared/schema";
 
 interface ChainStats {
@@ -67,6 +69,9 @@ export default function ChainPage() {
   
   // Track loading state for find another button
   const [isFindingAnother, setIsFindingAnother] = useState(false);
+  
+  // Analytics tracking
+  const { trackCompletion } = useAnalytics();
   
   // Koren URL for attribution
   const korenUrl = useKorenUrl();
@@ -167,6 +172,22 @@ export default function ChainPage() {
       // Mark modal complete for flower tracking
       if (data.completedPsalm) {
         markModalComplete(`chain-tehillim-${data.completedPsalm}`);
+        
+        // Track analytics for tehillim completion
+        trackCompletion(`chain-tehillim-${data.completedPsalm}`);
+        
+        // Invalidate all relevant stats queries for UI updates
+        queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/stats/total'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/stats/global'] });
+        // Analytics queries - match any query key containing analytics paths
+        queryClient.invalidateQueries({ predicate: (query) => {
+          return query.queryKey.some((segment) => 
+            typeof segment === 'string' && (
+              segment.includes('/api/analytics/stats/') ||
+              segment.includes('/api/analytics/community-impact')
+            )
+          );
+        }});
       }
       
       // Update local stats immediately with authoritative data from server
@@ -324,9 +345,6 @@ export default function ChainPage() {
     );
   }
 
-  // Stats: show Completed, Books (if any), Available (remove Reading)
-  const showBooksCompleted = (displayStats?.booksCompleted || 0) > 0;
-
   return (
     <div className="fixed inset-0 bg-white flex flex-col z-50 overflow-hidden">
       {/* Header with Tehillim name */}
@@ -380,6 +398,8 @@ export default function ChainPage() {
             const completed = 171 - (displayStats?.available || 171);
             const percentage = Math.round((completed / 171) * 100);
             const showCountInside = percentage >= 75;
+            const booksCount = displayStats?.booksCompleted || 0;
+            const booksText = booksCount > 0 ? ` (${booksCount} ${booksCount === 1 ? 'Book' : 'Books'} Completed)` : '';
             return (
               <div className="space-y-1">
                 <div className="flex justify-between items-center text-xs">
@@ -392,23 +412,18 @@ export default function ChainPage() {
                     style={{ width: `${percentage}%` }}
                   >
                     {showCountInside && (
-                      <span className="platypi-bold text-[10px] text-white ml-auto mr-2">{completed}/171</span>
+                      <span className="platypi-bold text-[10px] text-white ml-auto mr-2 whitespace-nowrap">{completed}/171{booksText}</span>
                     )}
                   </div>
                   {!showCountInside && completed > 0 && (
                     <span 
-                      className="absolute top-1/2 -translate-y-1/2 platypi-bold text-[10px] text-black/70"
+                      className="absolute top-1/2 -translate-y-1/2 platypi-bold text-[10px] text-black/70 whitespace-nowrap"
                       style={{ left: `calc(${percentage}% + 6px)` }}
                     >
-                      {completed}/171
+                      {completed}/171{booksText}
                     </span>
                   )}
                 </div>
-                {showBooksCompleted && (
-                  <p className="platypi-regular text-[10px] text-black/50 text-center">
-                    {displayStats?.booksCompleted} complete {displayStats?.booksCompleted === 1 ? 'book' : 'books'}
-                  </p>
-                )}
               </div>
             );
           })()}
