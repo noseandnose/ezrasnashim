@@ -6,6 +6,7 @@ import { useHomeSummary } from "@/hooks/use-home-summary";
 import HeartProgress from "@/components/heart-progress";
 import type { Section } from "@/pages/home";
 import { useMemo } from "react";
+import { getLocalDateString } from "@/lib/dateUtils";
 import grassImage from "@assets/Daily_Progress_Garden_(1)_1765365198853.png";
 import torahFlower from "@assets/Torah_1765366005744.png";
 import tefillaFlower from "@assets/Tefilla_1765366005744.png";
@@ -24,8 +25,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   // Get flower counts for each category - recomputes when completedModals changes
   const tefillaFlowerCount = useMemo(() => {
     // Count all tefilla-related completions
-    // Get today's date key
-    const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD format
+    // Get today's date key - must use getLocalDateString to match the store
+    const today = getLocalDateString();
     const todaysData = completedModals[today];
     if (!todaysData) return 0;
     
@@ -50,7 +51,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   }, [completedModals]);
 
   const torahFlowerCount = useMemo(() => {
-    const today = new Date().toLocaleDateString('en-CA');
+    const today = getLocalDateString();
     const todaysData = completedModals[today];
     if (!todaysData) return 0;
     
