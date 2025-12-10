@@ -150,7 +150,7 @@ export const useAnalytics = () => {
   };
 
   const trackCompletion = (modalName: string) => {
-    trackEvent("modal_complete", { modal: modalName });
+    trackEvent("modal_complete", { modalType: modalName });
   };
 
   return { trackEvent, trackCompletion };
