@@ -83,56 +83,57 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     return tzedakaCompleted ? 1 : 0;
   }, [tzedakaCompleted]);
 
-  // Generate stable positions for flowers - spread them out evenly
+  // Generate stable but randomized positions for flowers - like a natural garden
   const flowerPositions = useMemo(() => {
-    const positions: { type: 'torah' | 'tefilla' | 'tzedaka'; left: number; flipped: boolean }[] = [];
+    const positions: { type: 'torah' | 'tefilla' | 'tzedaka'; left: number; bottom: number; flipped: boolean }[] = [];
     
-    // Track counts for flipping logic
-    let torahCount = 0;
-    let tefillaCount = 0;
-    let tzedakaCount = 0;
-    
-    // Predefined position slots to avoid overlap (percentages from left)
-    const slots = [5, 15, 25, 35, 45, 55, 65, 75, 85];
-    let slotIndex = 0;
-    
-    // Add a small random offset to each slot for variety
-    let seed = 12345;
+    // Seeded random for consistent but varied positions
+    let seed = 42;
     const seededRandom = () => {
       seed = (seed * 9301 + 49297) % 233280;
-      return (seed / 233280) * 6 - 3; // -3 to +3 offset
+      return seed / 233280;
     };
     
-    for (let i = 0; i < torahFlowerCount; i++) {
-      const basePos = slots[slotIndex % slots.length];
+    // Shuffle helper using seeded random
+    const shuffleArray = <T,>(arr: T[]): T[] => {
+      const shuffled = [...arr];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(seededRandom() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    };
+    
+    // Available slots with more variation
+    const baseSlots = [3, 12, 22, 32, 42, 52, 62, 72, 82, 92];
+    
+    // Shuffle slots for random distribution
+    const shuffledSlots = shuffleArray(baseSlots);
+    
+    // Create all flower entries with type
+    const allFlowers: ('torah' | 'tefilla' | 'tzedaka')[] = [];
+    for (let i = 0; i < torahFlowerCount; i++) allFlowers.push('torah');
+    for (let i = 0; i < tefillaFlowerCount; i++) allFlowers.push('tefilla');
+    for (let i = 0; i < tzedakaFlowerCount; i++) allFlowers.push('tzedaka');
+    
+    // Shuffle the order of flowers for mixed distribution
+    const shuffledFlowers = shuffleArray(allFlowers);
+    
+    shuffledFlowers.forEach((type, index) => {
+      const basePos = shuffledSlots[index % shuffledSlots.length];
+      // Add horizontal offset (-4 to +4%)
+      const horizontalOffset = (seededRandom() * 8) - 4;
+      // Add vertical offset (0 to 12px variation from bottom)
+      const verticalOffset = Math.floor(seededRandom() * 12);
+      
       positions.push({ 
-        type: 'torah', 
-        left: basePos + seededRandom(), 
-        flipped: torahCount % 2 === 1 
+        type, 
+        left: basePos + horizontalOffset, 
+        bottom: verticalOffset,
+        flipped: seededRandom() > 0.5
       });
-      torahCount++;
-      slotIndex++;
-    }
-    for (let i = 0; i < tefillaFlowerCount; i++) {
-      const basePos = slots[slotIndex % slots.length];
-      positions.push({ 
-        type: 'tefilla', 
-        left: basePos + seededRandom(), 
-        flipped: tefillaCount % 2 === 1 
-      });
-      tefillaCount++;
-      slotIndex++;
-    }
-    for (let i = 0; i < tzedakaFlowerCount; i++) {
-      const basePos = slots[slotIndex % slots.length];
-      positions.push({ 
-        type: 'tzedaka', 
-        left: basePos + seededRandom(), 
-        flipped: tzedakaCount % 2 === 1 
-      });
-      tzedakaCount++;
-      slotIndex++;
-    }
+    });
+    
     return positions;
   }, [torahFlowerCount, tefillaFlowerCount, tzedakaFlowerCount]);
 
@@ -449,9 +450,10 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               key={`${flower.type}-${index}`}
               src={flower.type === 'torah' ? torahFlower : flower.type === 'tefilla' ? tefillaFlower : tzedakaFlower} 
               alt={`${flower.type} flower`} 
-              className="absolute bottom-0 h-[77px] w-auto z-[1]"
+              className="absolute h-[77px] w-auto z-[1]"
               style={{ 
                 left: `${flower.left}%`,
+                bottom: `${flower.bottom}px`,
                 transform: flower.flipped ? 'scaleX(-1)' : 'none'
               }}
             />
