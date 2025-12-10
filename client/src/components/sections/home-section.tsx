@@ -18,9 +18,11 @@ interface HomeSectionProps {
 export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   const { openModal } = useModalStore();
   const { torahCompleted, tefillaCompleted, tzedakaCompleted } = useDailyCompletionStore();
-  const { getCompletionCount } = useModalCompletionStore();
+  // Subscribe to completedModals to trigger re-renders when completions change
+  const completedModals = useModalCompletionStore((state) => state.completedModals);
+  const getCompletionCount = useModalCompletionStore((state) => state.getCompletionCount);
   
-  // Get flower counts for each category
+  // Get flower counts for each category - recomputes when completedModals changes
   const tefillaFlowerCount = useMemo(() => {
     // Count all tefilla-related completions
     const tehillimCount = getCompletionCount('tehillim');
@@ -30,14 +32,14 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     const nishmasCount = getCompletionCount('nishmas');
     const birkatHamazonCount = getCompletionCount('birkat-hamazon');
     return tehillimCount + minchaCount + maarivCount + morningBrochasCount + nishmasCount + birkatHamazonCount;
-  }, [getCompletionCount]);
+  }, [completedModals, getCompletionCount]);
 
   const torahFlowerCount = useMemo(() => {
     const halachaCount = getCompletionCount('halacha');
     const dailyChizukCount = getCompletionCount('daily-chizuk');
     const emunaCount = getCompletionCount('emuna');
     return halachaCount + dailyChizukCount + emunaCount;
-  }, [getCompletionCount]);
+  }, [completedModals, getCompletionCount]);
 
   const tzedakaFlowerCount = useMemo(() => {
     return tzedakaCompleted ? 1 : 0;
