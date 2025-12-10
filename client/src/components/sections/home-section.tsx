@@ -314,7 +314,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         {/* Daily Progress Tracker - Compact Version */}
         <div 
           id="daily-progress-garden"
-          className="rounded-2xl shadow-lg border border-blush/10 bg-white mt-4 min-h-[90px] relative"
+          className="rounded-2xl shadow-lg border border-blush/10 bg-white mt-4 min-h-[90px] relative overflow-hidden"
         >
           {/* Grass at the bottom - behind content */}
           <img 
