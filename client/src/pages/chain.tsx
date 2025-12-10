@@ -167,11 +167,9 @@ export default function ChainPage() {
         setCurrentPsalm(null);
       }
       
-      // Only invalidate after completion is confirmed saved
-      if (data.completionSuccess) {
-        queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains', slug, 'stats'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/stats/total'] });
-      }
+      // Don't invalidate stats cache - let the periodic 30-second refresh handle it
+      // This prevents the optimistic update from being overwritten by server stats
+      // which calculate "unique completions" differently than our optimistic increment
     },
     onError: () => {
       toast({
