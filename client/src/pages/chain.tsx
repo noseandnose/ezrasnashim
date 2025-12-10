@@ -413,7 +413,7 @@ export default function ChainPage() {
             <button
               onClick={handleFindAnother}
               disabled={!currentPsalm || isFindingAnother}
-              className="flex-1 py-4 rounded-2xl border-2 border-amber-300 bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-900 platypi-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-amber-200 hover:to-yellow-200 hover:scale-105 transition-all"
+              className="flex-1 py-4 rounded-2xl border border-amber-200/50 bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-900 platypi-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-amber-200 hover:to-yellow-200 hover:scale-105 transition-all"
               data-testid="button-find-another"
             >
               {isFindingAnother ? 'Loading...' : 'Find me another'}
