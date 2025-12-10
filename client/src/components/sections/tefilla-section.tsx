@@ -225,6 +225,13 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   });
   const chainTotal = chainTotalData?.total || 0;
 
+  // Fetch global tehillim stats
+  const { data: globalStats } = useQuery<{ totalRead: number; booksCompleted: number; uniqueReaders: number }>({
+    queryKey: ['/api/tehillim-chains/stats/global'],
+    staleTime: 60000,
+    refetchOnWindowFocus: true,
+  });
+
   // Reason options for the dropdown
   const reasonOptions = [
     { value: 'refuah', label: 'Refuah Shleima' },
@@ -388,6 +395,24 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
               </div>
               {isLoadingRandom ? 'Loading...' : 'Random'}
             </Button>
+          </div>
+
+          {/* Stats Line */}
+          <div className="border-t border-blush/10 pt-2 mt-1">
+            <div className="flex justify-around text-center">
+              <div>
+                <p className="platypi-bold text-sm text-black">{(globalStats?.totalRead || 0).toLocaleString()}</p>
+                <p className="platypi-regular text-[10px] text-black/50">Tehillim Read</p>
+              </div>
+              <div className="border-l border-blush/10 pl-4">
+                <p className="platypi-bold text-sm text-black">{(globalStats?.booksCompleted || 0).toLocaleString()}</p>
+                <p className="platypi-regular text-[10px] text-black/50">Books Completed</p>
+              </div>
+              <div className="border-l border-blush/10 pl-4">
+                <p className="platypi-bold text-sm text-black">{(globalStats?.uniqueReaders || 0).toLocaleString()}</p>
+                <p className="platypi-regular text-[10px] text-black/50">Readers</p>
+              </div>
+            </div>
           </div>
 
           {/* Create Chain Form */}

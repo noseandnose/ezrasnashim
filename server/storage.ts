@@ -129,6 +129,7 @@ export interface IStorage {
   getAvailablePsalmForChain(chainId: number, excludeDeviceId?: string): Promise<number | null>;
   getRandomAvailablePsalmForChain(chainId: number, excludeDeviceId?: string, excludePsalm?: number): Promise<number | null>;
   getTotalChainTehillimCompleted(): Promise<number>;
+  getTehillimGlobalStats(): Promise<{ totalRead: number; booksCompleted: number; uniqueReaders: number }>;
   migrateTehillimNamesToChains(): Promise<{ migrated: number; skipped: number; errors: string[] }>;
 
   // Mincha methods
@@ -1123,6 +1124,36 @@ export class DatabaseStorage implements IStorage {
     const chainCount = Number(chainResult[0]?.count || 0);
     
     return chainCount;
+  }
+
+  async getTehillimGlobalStats(): Promise<{ totalRead: number; booksCompleted: number; uniqueReaders: number }> {
+    // Get total chain completions
+    const chainResult = await db.select({ count: sql<number>`count(*)` })
+      .from(tehillimChainReadings)
+      .where(eq(tehillimChainReadings.status, 'completed'));
+    const chainCount = Number(chainResult[0]?.count || 0);
+    
+    // Get total from daily stats (individual tehillim completions)
+    const dailyResult = await db.select({ 
+      total: sql<number>`COALESCE(SUM(${dailyStats.tehillimCompleted}), 0)` 
+    }).from(dailyStats);
+    const dailyCount = Number(dailyResult[0]?.total || 0);
+    
+    // Total tehillim read (chains + general)
+    const totalRead = chainCount + dailyCount;
+    
+    // Books completed (total / 150, rounded down)
+    const booksCompleted = Math.floor(totalRead / 150);
+    
+    // Unique readers from chain readings
+    const uniqueReadersResult = await db.select({ 
+      count: sql<number>`count(DISTINCT ${tehillimChainReadings.deviceId})` 
+    })
+      .from(tehillimChainReadings)
+      .where(eq(tehillimChainReadings.status, 'completed'));
+    const uniqueReaders = Number(uniqueReadersResult[0]?.count || 0);
+    
+    return { totalRead, booksCompleted, uniqueReaders };
   }
 
   async migrateTehillimNamesToChains(): Promise<{ migrated: number; skipped: number; errors: string[] }> {

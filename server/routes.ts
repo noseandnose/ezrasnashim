@@ -2495,6 +2495,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get global tehillim stats (total read, books completed, unique readers)
+  app.get("/api/tehillim-chains/stats/global", async (req, res) => {
+    try {
+      const stats = await storage.getTehillimGlobalStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching global tehillim stats:", error);
+      res.json({ totalRead: 0, booksCompleted: 0, uniqueReaders: 0 });
+    }
+  });
+
   // Get active campaign (chain) count
   app.get("/api/tehillim-chains/stats/active-count", async (req, res) => {
     try {
