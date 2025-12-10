@@ -160,7 +160,7 @@ export default function ParshaVortModal() {
             }`}
             data-testid={isCompleted ? 'button-parsha-completed' : 'button-complete-parsha'}
           >
-            {isCompleted ? 'Completed Today' : 'Complete Parsha Vort'}
+            {isCompleted ? 'Completed Today' : 'Complete'}
           </Button>
 
           {/* Heart Explosion Animation */}

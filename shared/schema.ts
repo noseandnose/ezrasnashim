@@ -808,6 +808,49 @@ export const insertTehillimSchema = createInsertSchema(tehillim);
 export type Tehillim = typeof tehillim.$inferSelect;
 export type InsertTehillim = z.infer<typeof insertTehillimSchema>;
 
+// Personal Tehillim Chains - users can create chains for specific people
+export const tehillimChains = pgTable("tehillim_chains", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(), // Person's name (Hebrew or English)
+  reason: text("reason").notNull(), // Reason for the chain (refuah, shidduch, etc.)
+  slug: text("slug").notNull().unique(), // URL-friendly identifier (auto-generated)
+  createdAt: timestamp("created_at").defaultNow(),
+  creatorDeviceId: text("creator_device_id"), // Track who created it
+  isActive: boolean("is_active").default(true),
+}, (table) => ({
+  slugIdx: index("idx_tehillim_chains_slug").on(table.slug),
+  nameIdx: index("idx_tehillim_chains_name").on(table.name),
+}));
+
+// Tehillim Chain Readings - tracks which psalms are being read/completed on each chain
+export const tehillimChainReadings = pgTable("tehillim_chain_readings", {
+  id: serial("id").primaryKey(),
+  chainId: integer("chain_id").notNull().references(() => tehillimChains.id),
+  psalmNumber: integer("psalm_number").notNull(), // 1-150
+  deviceId: text("device_id").notNull(), // Track which device is reading
+  status: text("status").notNull().default("reading"), // 'reading' or 'completed'
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+}, (table) => ({
+  chainIdIdx: index("idx_chain_readings_chain_id").on(table.chainId),
+  statusIdx: index("idx_chain_readings_status").on(table.status),
+}));
+
+export const insertTehillimChainSchema = createInsertSchema(tehillimChains).omit({
+  id: true,
+  createdAt: true,
+});
+export type TehillimChain = typeof tehillimChains.$inferSelect;
+export type InsertTehillimChain = z.infer<typeof insertTehillimChainSchema>;
+
+export const insertTehillimChainReadingSchema = createInsertSchema(tehillimChainReadings).omit({
+  id: true,
+  startedAt: true,
+  completedAt: true,
+});
+export type TehillimChainReading = typeof tehillimChainReadings.$inferSelect;
+export type InsertTehillimChainReading = z.infer<typeof insertTehillimChainReadingSchema>;
+
 // Messages table for daily messages to users
 export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),

@@ -116,7 +116,7 @@ export default function DailyEmunaModal() {
             }`}
             data-testid={isCompleted ? 'button-emuna-completed' : 'button-complete-emuna'}
           >
-            {isCompleted ? 'Completed Today' : 'Complete Daily Emuna'}
+            {isCompleted ? 'Completed Today' : 'Complete'}
           </Button>
 
           <HeartExplosion 

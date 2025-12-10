@@ -106,6 +106,8 @@ const useTefillaConditions = () => {
           isAseretYemeiTeshuva: false,
           isSukkot: false,
           isPesach: false,
+          isChanuka: false,
+          isPurim: false,
           isRoshChodeshSpecial: false,
           isSunday: false,
           isMonday: false,
@@ -156,6 +158,8 @@ const useMaarivTefillaConditions = () => {
           isAseretYemeiTeshuva: false,
           isSukkot: false,
           isPesach: false,
+          isChanuka: false,
+          isPurim: false,
           isRoshChodeshSpecial: false,
           isSunday: false,
           isMonday: false,
@@ -193,6 +197,8 @@ const processTefillaContent = (text: string, conditions: TefillaConditions | nul
     isAseretYemeiTeshuva: false,
     isSukkot: false,
     isPesach: false,
+    isChanuka: false,
+    isPurim: false,
     isRoshChodeshSpecial: false,
     isSunday: false,
     isMonday: false,
@@ -637,7 +643,7 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
             : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
-        {isModalComplete('maariv') ? 'Completed Today' : 'Complete Maariv'}
+        {isModalComplete('maariv') ? 'Completed Today' : 'Complete'}
       </Button>
     </div>
   );
@@ -699,7 +705,7 @@ function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
             : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
-        {isModalComplete('mincha') ? 'Completed Today' : 'Complete Mincha'}
+        {isModalComplete('mincha') ? 'Completed Today' : 'Complete'}
       </Button>
     </div>
   );
@@ -904,15 +910,14 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
   return (
     <div className="space-y-6">
       {/* Tab Navigation */}
-      <div className="flex bg-warm-gray/10 rounded-xl p-1 mb-4">
+      <div className="flex bg-blush/20 rounded-xl p-1 mb-4">
         <button
           onClick={() => setActiveTab('daily')}
           className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
             activeTab === 'daily'
-              ? 'bg-white text-black'
-              : 'text-black/60 hover:text-black'
+              ? 'bg-white text-black shadow-md border border-blush/30'
+              : 'text-black/50 hover:text-black/70'
           }`}
-          style={activeTab === 'daily' ? { boxShadow: '0 4px 6px -1px hsla(350, 45%, 85%, 0.5), 0 2px 4px -1px hsla(350, 45%, 85%, 0.3)' } : {}}
         >
           Daily ({hasDaily ? dailyBrochas.length : 0})
         </button>
@@ -920,10 +925,9 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
           onClick={() => setActiveTab('special')}
           className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
             activeTab === 'special'
-              ? 'bg-white text-black'
-              : 'text-black/60 hover:text-black'
+              ? 'bg-white text-black shadow-md border border-blush/30'
+              : 'text-black/50 hover:text-black/70'
           }`}
-          style={activeTab === 'special' ? { boxShadow: '0 4px 6px -1px hsla(350, 45%, 85%, 0.5), 0 2px 4px -1px hsla(350, 45%, 85%, 0.3)' } : {}}
         >
           Special ({hasSpecial ? specialBrochas.length : 0})
         </button>
@@ -1336,7 +1340,7 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
             : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
-        {todayCompleted ? 'Complete Again' : 'Complete Nishmas'}
+        {todayCompleted ? 'Complete Again' : 'Complete'}
       </Button>
     </div>
   );
@@ -1542,7 +1546,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
               : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
           }`}
         >
-          {isCompleted ? 'Complete Again' : `Complete Tehillim ${selectedPsalm}`}
+          {isCompleted ? 'Complete Again' : 'Complete'}
         </Button>
       ) : (
         // Show both "Complete" and "Complete & Next" buttons
@@ -2563,7 +2567,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
-              {isModalComplete('mincha') ? 'Completed Today' : 'Complete Mincha'}
+              {isModalComplete('mincha') ? 'Completed Today' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>
@@ -2681,7 +2685,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
-              {isModalComplete('blessings') ? 'Complete Again' : 'Complete Blessings'}
+              {isModalComplete('blessings') ? 'Complete Again' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showExplosion && activeExplosionModal === 'blessings'} />
           </div>
@@ -2711,7 +2715,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
-              {isModalComplete('tefillos') ? 'Complete Again' : 'Complete Tefillos'}
+              {isModalComplete('tefillos') ? 'Complete Again' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showExplosion && activeExplosionModal === 'tefillos'} />
           </div>
@@ -2755,7 +2759,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
-              {isModalComplete('personal-prayers') ? 'Complete Again' : 'Complete Personal Prayers'}
+              {isModalComplete('personal-prayers') ? 'Complete Again' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showExplosion && activeExplosionModal === 'personal-prayers'} />
           </div>
@@ -3130,7 +3134,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
-              {isModalComplete('maariv') ? 'Completed Today' : 'Complete Maariv'}
+              {isModalComplete('maariv') ? 'Completed Today' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showExplosion} />
           </div>

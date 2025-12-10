@@ -242,7 +242,7 @@ function MeditationAudioPlayer({
           }`}
           data-testid="button-complete-meditation"
         >
-          {isCompleted ? 'Completed Today' : 'Complete Meditation'}
+          {isCompleted ? 'Completed Today' : 'Complete'}
         </Button>
 
         <HeartExplosion trigger={showExplosion} />

@@ -2,6 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
+import { db } from "./db";
+import { and, eq, gt } from "drizzle-orm";
 import serverAxiosClient from "./axiosClient";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -127,6 +129,10 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY && VAPID_EMAIL) {
 }
 import { 
   insertTehillimNameSchema,
+  insertTehillimChainSchema,
+  insertTehillimChainReadingSchema,
+  tehillimChains,
+  tehillimChainReadings,
   insertDailyHalachaSchema,
   insertDailyEmunaSchema,
   insertDailyChizukSchema,
@@ -2362,6 +2368,395 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(500).json({ message: "Failed to create Tehillim name" });
       }
+    }
+  });
+
+  // Get Tehillim text by tehillim id (1-171 for chain reading) - MUST be after all specific routes
+  // Psalm 119 has 22 parts (ids 119-140), giving 171 total units
+  app.get("/api/tehillim/:tehillimId", async (req, res) => {
+    try {
+      const tehillimId = parseInt(req.params.tehillimId);
+      
+      // 171 total tehillim units (150 psalms, but psalm 119 has 22 parts)
+      if (isNaN(tehillimId) || tehillimId < 1 || tehillimId > 171) {
+        return res.status(400).json({ error: "Tehillim ID must be between 1 and 171" });
+      }
+      
+      // Fetch by tehillim table id - this handles psalm 119 parts correctly
+      const tehillimRow = await storage.getSupabaseTehillimById(tehillimId);
+      
+      if (!tehillimRow) {
+        return res.status(404).json({ error: "Tehillim not found" });
+      }
+      
+      // Build display title: "Tehillim X" or "Tehillim 119 (Part Y)"
+      let displayTitle = `Tehillim ${tehillimRow.englishNumber}`;
+      if (tehillimRow.englishNumber === 119 && tehillimRow.partNumber > 1) {
+        // Show part number for psalm 119 parts 2-22
+        displayTitle = `Tehillim 119 (Part ${tehillimRow.partNumber})`;
+      } else if (tehillimRow.englishNumber === 119 && tehillimRow.partNumber === 1) {
+        displayTitle = `Tehillim 119 (Part 1)`;
+      }
+      
+      res.json({
+        tehillimId,
+        psalmNumber: tehillimRow.englishNumber,
+        partNumber: tehillimRow.partNumber,
+        displayTitle,
+        hebrewNumber: tehillimRow.hebrewNumber,
+        hebrewText: tehillimRow.hebrewText || '',
+        englishText: tehillimRow.englishText || ''
+      });
+    } catch (error) {
+      console.error('Error fetching Tehillim:', error);
+      return res.status(500).json({ error: "Failed to fetch Tehillim" });
+    }
+  });
+
+  // =====================
+  // Tehillim Chains Routes
+  // =====================
+
+  // Helper function to generate URL slug from name
+  function generateSlug(name: string): string {
+    // Check if name has Latin characters
+    const latinChars = name.replace(/[^a-zA-Z0-9\s-]/g, '').trim();
+    if (latinChars.length >= 2) {
+      // Create URL-friendly slug from Latin characters
+      return latinChars
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .substring(0, 50) + '-' + Date.now().toString(36);
+    }
+    // Fallback to numeric ID for Hebrew names
+    return Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
+  }
+
+  // Create a new Tehillim Chain
+  app.post("/api/tehillim-chains", async (req, res) => {
+    try {
+      const { name, reason, deviceId } = req.body;
+      
+      if (!name || !reason) {
+        return res.status(400).json({ error: "Name and reason are required" });
+      }
+
+      // Generate unique slug
+      let slug = generateSlug(name);
+      
+      // Ensure slug is unique by checking database
+      let existingChain = await storage.getTehillimChainBySlug(slug);
+      let attempts = 0;
+      while (existingChain && attempts < 5) {
+        slug = generateSlug(name);
+        existingChain = await storage.getTehillimChainBySlug(slug);
+        attempts++;
+      }
+
+      const chain = await storage.createTehillimChain({
+        name,
+        reason,
+        slug,
+        creatorDeviceId: deviceId || null,
+        isActive: true,
+      });
+
+      res.json(chain);
+    } catch (error) {
+      console.error("Error creating Tehillim chain:", error);
+      res.status(500).json({ error: "Failed to create Tehillim chain" });
+    }
+  });
+
+  // Search Tehillim Chains by name
+  app.get("/api/tehillim-chains/search", async (req, res) => {
+    try {
+      const query = (req.query.q as string) || '';
+      const chains = await storage.searchTehillimChains(query);
+      res.json(chains);
+    } catch (error) {
+      // Return empty array if database tables don't exist yet
+      console.error("Error searching Tehillim chains (returning empty):", error);
+      res.json([]);
+    }
+  });
+
+  // Get all-time total tehillim completed across all chains
+  // NOTE: This must be BEFORE the :slug route to avoid "stats" being matched as a slug
+  app.get("/api/tehillim-chains/stats/total", async (req, res) => {
+    try {
+      const total = await storage.getTotalChainTehillimCompleted();
+      res.json({ total });
+    } catch (error) {
+      // Return 0 if database tables don't exist yet or query fails
+      console.error("Error fetching total chains tehillim (returning 0):", error);
+      res.json({ total: 0 });
+    }
+  });
+
+  // Get global tehillim stats (total read, books completed, unique readers)
+  // Cached for 5 minutes to avoid repeated expensive queries
+  let globalStatsCache: { data: any; timestamp: number } | null = null;
+  const GLOBAL_STATS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  
+  app.get("/api/tehillim-chains/stats/global", async (req, res) => {
+    try {
+      // Check cache first
+      if (globalStatsCache && Date.now() - globalStatsCache.timestamp < GLOBAL_STATS_CACHE_TTL) {
+        return res.json(globalStatsCache.data);
+      }
+      
+      const stats = await storage.getTehillimGlobalStats();
+      
+      // Update cache
+      globalStatsCache = { data: stats, timestamp: Date.now() };
+      
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching global tehillim stats:", error);
+      res.json({ totalRead: 0, booksCompleted: 0, uniqueReaders: 0 });
+    }
+  });
+
+  // Get active campaign (chain) count
+  app.get("/api/tehillim-chains/stats/active-count", async (req, res) => {
+    try {
+      const count = await storage.getActiveTehillimChainCount();
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching active chain count:", error);
+      res.json({ count: 0 });
+    }
+  });
+
+  // Get a random Tehillim Chain
+  app.get("/api/tehillim-chains/random", async (req, res) => {
+    try {
+      const randomChain = await storage.getRandomTehillimChain();
+      if (!randomChain) {
+        return res.status(404).json({ error: "No chains found" });
+      }
+      res.json(randomChain);
+    } catch (error) {
+      console.error("Error getting random chain:", error);
+      res.status(500).json({ error: "Failed to get random chain" });
+    }
+  });
+
+  // Get a specific Tehillim Chain by slug (includes stats and next psalm for fast loading)
+  app.get("/api/tehillim-chains/:slug", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const { deviceId } = req.query;
+      const chain = await storage.getTehillimChainBySlug(slug);
+      
+      if (!chain) {
+        return res.status(404).json({ error: "Chain not found" });
+      }
+
+      // Check if device has an active reading first (for returning users)
+      let activeReading: number | null = null;
+      if (deviceId) {
+        const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+        const readings = await db.select({ psalmNumber: tehillimChainReadings.psalmNumber })
+          .from(tehillimChainReadings)
+          .where(and(
+            eq(tehillimChainReadings.chainId, chain.id),
+            eq(tehillimChainReadings.deviceId, deviceId as string),
+            eq(tehillimChainReadings.status, 'reading'),
+            gt(tehillimChainReadings.startedAt, tenMinutesAgo)
+          ))
+          .limit(1);
+        if (readings.length > 0) {
+          activeReading = readings[0].psalmNumber;
+        }
+      }
+
+      // Fetch stats and next psalm in parallel to eliminate waterfall
+      const [stats, nextAvailable] = await Promise.all([
+        storage.getTehillimChainStats(chain.id),
+        storage.getRandomAvailablePsalmForChain(chain.id, deviceId as string | undefined)
+      ]);
+
+      // Return active reading if exists, otherwise next available
+      const nextPsalm = activeReading || nextAvailable;
+
+      // Pre-adjust stats when a new reading is about to start
+      // This ensures consistent numbers between fresh visits and refreshes
+      const willStartNewReading = !activeReading && nextAvailable !== null;
+      const adjustedStats = {
+        totalCompleted: stats.totalSaid,
+        booksCompleted: stats.booksCompleted,
+        currentlyReading: willStartNewReading ? stats.currentlyReading + 1 : stats.currentlyReading,
+        available: willStartNewReading ? Math.max(0, stats.available - 1) : stats.available
+      };
+
+      res.json({
+        ...chain,
+        stats: adjustedStats,
+        nextPsalm: nextPsalm || null,
+        hasActiveReading: !!activeReading
+      });
+    } catch (error) {
+      console.error("Error fetching Tehillim chain:", error);
+      res.status(500).json({ error: "Failed to fetch Tehillim chain" });
+    }
+  });
+
+  // Get chain stats (total said, books completed, currently reading, available)
+  app.get("/api/tehillim-chains/:slug/stats", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const chain = await storage.getTehillimChainBySlug(slug);
+      
+      if (!chain) {
+        return res.status(404).json({ error: "Chain not found" });
+      }
+
+      const stats = await storage.getTehillimChainStats(chain.id);
+      // Map totalSaid to totalCompleted for frontend compatibility
+      res.json({
+        totalCompleted: stats.totalSaid,
+        booksCompleted: stats.booksCompleted,
+        currentlyReading: stats.currentlyReading,
+        available: stats.available
+      });
+    } catch (error) {
+      console.error("Error fetching chain stats:", error);
+      res.status(500).json({ error: "Failed to fetch chain stats" });
+    }
+  });
+
+  // Start reading a psalm on a chain
+  app.post("/api/tehillim-chains/:slug/start-reading", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const { deviceId, psalmNumber } = req.body;
+
+      if (!deviceId) {
+        return res.status(400).json({ error: "Device ID is required" });
+      }
+
+      const chain = await storage.getTehillimChainBySlug(slug);
+      if (!chain) {
+        return res.status(404).json({ error: "Chain not found" });
+      }
+
+      // If no psalm specified, get a random available one
+      let psalm = psalmNumber;
+      if (!psalm) {
+        psalm = await storage.getRandomAvailablePsalmForChain(chain.id);
+        if (!psalm) {
+          return res.status(404).json({ error: "No psalms available - all have been completed or are being read" });
+        }
+      }
+
+      const reading = await storage.startChainReading(chain.id, psalm, deviceId);
+      res.json(reading);
+    } catch (error) {
+      console.error("Error starting chain reading:", error);
+      res.status(500).json({ error: "Failed to start reading" });
+    }
+  });
+
+  // Complete a psalm on a chain
+  app.post("/api/tehillim-chains/:slug/complete", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const { deviceId, psalmNumber } = req.body;
+
+      if (!deviceId || !psalmNumber) {
+        return res.status(400).json({ error: "Device ID and psalm number are required" });
+      }
+
+      const chain = await storage.getTehillimChainBySlug(slug);
+      if (!chain) {
+        return res.status(404).json({ error: "Chain not found" });
+      }
+
+      const reading = await storage.completeChainReading(chain.id, psalmNumber, deviceId);
+      
+      // Return updated stats so client uses authoritative data
+      const stats = await storage.getTehillimChainStats(chain.id);
+      res.json({ 
+        reading, 
+        stats: {
+          totalCompleted: stats.totalSaid,
+          booksCompleted: stats.booksCompleted,
+          currentlyReading: stats.currentlyReading,
+          available: stats.available,
+        }
+      });
+    } catch (error) {
+      console.error("Error completing chain reading:", error);
+      res.status(500).json({ error: "Failed to complete reading" });
+    }
+  });
+
+  // Get next random available psalm for a chain (default on page load)
+  app.get("/api/tehillim-chains/:slug/next-available", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const { deviceId } = req.query;
+
+      const chain = await storage.getTehillimChainBySlug(slug);
+      if (!chain) {
+        return res.status(404).json({ error: "Chain not found" });
+      }
+
+      const psalm = await storage.getRandomAvailablePsalmForChain(chain.id, deviceId as string);
+      if (!psalm) {
+        return res.status(404).json({ error: "No psalms available" });
+      }
+
+      res.json({ psalmNumber: psalm });
+    } catch (error) {
+      console.error("Error getting next psalm:", error);
+      res.status(500).json({ error: "Failed to get next psalm" });
+    }
+  });
+
+  // Get a random available psalm for a chain (for "Find me another" button)
+  app.get("/api/tehillim-chains/:slug/random-available", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const { deviceId, excludePsalm } = req.query;
+
+      const chain = await storage.getTehillimChainBySlug(slug);
+      if (!chain) {
+        return res.status(404).json({ error: "Chain not found" });
+      }
+
+      // Parse excludePsalm and ensure it's a valid number
+      let excludePsalmNum: number | undefined;
+      if (excludePsalm) {
+        const parsed = parseInt(excludePsalm as string, 10);
+        if (!isNaN(parsed) && parsed >= 1 && parsed <= 171) {
+          excludePsalmNum = parsed;
+        }
+      }
+      
+      const psalm = await storage.getRandomAvailablePsalmForChain(chain.id, deviceId as string, excludePsalmNum);
+      if (!psalm) {
+        return res.status(404).json({ error: "No psalms available" });
+      }
+
+      res.json({ psalmNumber: psalm });
+    } catch (error) {
+      console.error("Error getting random psalm:", error);
+      res.status(500).json({ error: "Failed to get random psalm" });
+    }
+  });
+
+  // Admin: Migrate tehillim_names to tehillim_chains
+  app.post("/api/admin/migrate-tehillim-names", requireAdminAuth, async (req, res) => {
+    try {
+      const result = await storage.migrateTehillimNamesToChains();
+      res.json(result);
+    } catch (error) {
+      console.error("Error migrating tehillim names:", error);
+      res.status(500).json({ error: "Failed to migrate tehillim names" });
     }
   });
 

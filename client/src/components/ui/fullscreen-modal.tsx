@@ -7,7 +7,6 @@ import { useLocation } from 'wouter';
 import { MiniCompassModal } from '@/components/modals/mini-compass-modal';
 import { ensureSafeAreaVariables } from '@/hooks/use-safe-area';
 import { getHebrewFontClass } from '@/lib/hebrewUtils';
-import { registerAction, unregisterAction, registerClickHandler } from '@/utils/dom-event-bridge';
 
 // Global counter and state to track active fullscreen modals
 // Prevents race conditions when closing one modal while another opens
@@ -137,9 +136,6 @@ export function FullscreenModal({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [, setLocation] = useLocation();
   const [showCompass, setShowCompass] = useState(false);
-
-  // Generate unique action ID for this modal instance
-  const actionId = useRef(`close-modal-${Math.random().toString(36).substr(2, 9)}`).current;
   
   // Track if this modal instance is already closing (prevents double-close from rapid clicks)
   const isClosingRef = useRef(false);
@@ -151,77 +147,20 @@ export function FullscreenModal({
     }
   }, [isOpen]);
 
-  // Memoized safe close handler - stable reference prevents constant re-registration
-  const safeClose = useCallback(() => {
-    // Prevent double-close from rapid clicking
+  // Simple close handler with double-click protection
+  const handleClose = useCallback(() => {
     if (isClosingRef.current) {
       return;
     }
     isClosingRef.current = true;
-    
-    // If page is hidden, close immediately (rAF won't fire when hidden)
-    if (document.visibilityState !== 'visible') {
-      onClose();
-      forceResetScrollLock();
-      return;
-    }
-    // Use rAF with timeout fallback to ensure close always runs
-    let closed = false;
-    const doClose = () => {
-      if (closed) return;
-      closed = true;
-      onClose();
-    };
-    requestAnimationFrame(doClose);
-    // Fallback: if rAF doesn't fire within 250ms, close anyway
-    setTimeout(doClose, 250);
+    onClose();
   }, [onClose]);
-
-  // Register DOM event bridge for resilient click handling in FlutterFlow
-  useEffect(() => {
-    registerAction(actionId, safeClose);
-    
-    return () => {
-      unregisterAction(actionId);
-    };
-  }, [actionId, safeClose]);
   
-  // Ref callback for close buttons to register with WeakMap (FlutterFlow fix)
-  const closeButtonRef = useCallback((element: HTMLButtonElement | null) => {
-    if (element) {
-      registerClickHandler(element, () => {
-        safeClose();
-      });
-    }
-  }, [safeClose]);
-  
-  // Ref callback for logo/home button
-  const logoButtonRef = useCallback((element: HTMLButtonElement | null) => {
-    if (element) {
-      registerClickHandler(element, () => {
-        onClose();
-        setLocation('/');
-      });
-    }
+  // Handler for logo/home button
+  const handleLogoClick = useCallback(() => {
+    onClose();
+    setLocation('/');
   }, [onClose, setLocation]);
-  
-  // Ref callback for compass button
-  const compassButtonRef = useCallback((element: HTMLButtonElement | null) => {
-    if (element) {
-      registerClickHandler(element, () => {
-        setShowCompass(true);
-      });
-    }
-  }, []);
-  
-  // Ref callback for info button
-  const infoButtonRef = useCallback((element: HTMLButtonElement | null) => {
-    if (element && onInfoClick) {
-      registerClickHandler(element, () => {
-        onInfoClick(!showInfoPopover);
-      });
-    }
-  }, [onInfoClick, showInfoPopover]);
 
   // Use useLayoutEffect to ensure new modal increments counter before old modal's cleanup runs
   // This prevents race conditions in chained modal scenarios
@@ -436,12 +375,10 @@ export function FullscreenModal({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <button
-                ref={logoButtonRef}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  onClose();
-                  setLocation('/');
+                  handleLogoClick();
                 }}
                 className="hover:opacity-80 transition-opacity"
                 aria-label="Go to home"
@@ -456,7 +393,6 @@ export function FullscreenModal({
 
               {showCompassButton && (
                 <button
-                  ref={compassButtonRef}
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -480,7 +416,6 @@ export function FullscreenModal({
                 <Popover open={showInfoPopover} onOpenChange={(open) => onInfoClick?.(open)}>
                   <PopoverTrigger asChild>
                     <button
-                      ref={infoButtonRef}
                       className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
                       aria-label="Prayer timing information"
                       type="button"
@@ -499,14 +434,11 @@ export function FullscreenModal({
                 </Popover>
               )}
               <button
-                ref={closeButtonRef}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  e.nativeEvent.stopImmediatePropagation();
-                  safeClose();
+                  handleClose();
                 }}
-                data-action={actionId}
                 data-testid="button-close-modal"
                 className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
                 aria-label="Close fullscreen"
@@ -520,14 +452,11 @@ export function FullscreenModal({
       ) : (
         /* Compact close button for headerless modals */
         <button
-          ref={closeButtonRef}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            e.nativeEvent.stopImmediatePropagation();
-            safeClose();
+            handleClose();
           }}
-          data-action={actionId}
           data-testid="button-close-modal"
           className="absolute right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm hover:bg-white/90 transition-colors shadow-sm z-10"
           style={{ top: 'max(12px, env(safe-area-inset-top))' }}

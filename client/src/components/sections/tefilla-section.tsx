@@ -1,8 +1,8 @@
-import { HandHeart, Plus, User, AlertCircle, Heart, Star, Compass, ArrowRight, Baby, HeartHandshake, GraduationCap, Users, Stethoscope, DollarSign, Smile, TrendingUp, Sunrise, Sun, Moon, Stars, Globe, Unlock } from "lucide-react";
+import { HandHeart, Plus, Heart, Star, Compass, ArrowRight, Sunrise, Sun, Moon, Stars, Search, Link2, ChevronRight, ChevronDown, Stethoscope, Users, Shuffle, Briefcase, Baby, Home, Shield, Sparkles, HeartPulse } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
-import { registerClickHandler } from "@/utils/dom-event-bridge";
+import { useLocation } from "wouter";
 
 interface TefillaSectionProps {
   onSectionChange?: (section: Section) => void;
@@ -11,11 +11,22 @@ import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
-import type { TehillimName, GlobalTehillimProgress } from "@shared/schema";
+import type { TehillimChain } from "@shared/schema";
+
+const getReasonIcon = (reason: string) => {
+  const lowerReason = reason.toLowerCase();
+  if (lowerReason.includes('refuah') || lowerReason.includes('health')) return HeartPulse;
+  if (lowerReason.includes('shidduch') || lowerReason.includes('match')) return Heart;
+  if (lowerReason.includes('parnassa') || lowerReason.includes('livelihood')) return Briefcase;
+  if (lowerReason.includes('children') || lowerReason.includes('child')) return Baby;
+  if (lowerReason.includes('shalom') || lowerReason.includes('peace')) return Home;
+  if (lowerReason.includes('success')) return Star;
+  if (lowerReason.includes('protection')) return Shield;
+  return Sparkles;
+};
 
 export default function TefillaSection({ onSectionChange: _onSectionChange }: TefillaSectionProps) {
   const { openModal } = useModalStore();
@@ -23,50 +34,29 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const { isModalComplete, completedModals } = useModalCompletionStore();
   const { data: times, isLoading } = useJewishTimes();
 
-  // Prefetch brochas data to speed up loading when user clicks
+  // Lazy prefetch prayer data when browser is idle (not on mount)
   const queryClient = useQueryClient();
   
-  useQuery({
-    queryKey: ['/api/brochas/daily'],
-    staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (garbage collection time)
-  });
-
-  useQuery({
-    queryKey: ['/api/brochas/special'],
-    staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (garbage collection time)
-  });
-  
-  // Prefetch Mincha and Maariv prayers to prevent empty modals
   useEffect(() => {
-    // Prefetch Mincha prayer - uses default queryFn from queryClient
-    queryClient.prefetchQuery({
-      queryKey: ['/api/mincha/prayer'],
-      staleTime: 10 * 60 * 1000,
-      gcTime: 30 * 60 * 1000,
-    });
+    // Use requestIdleCallback to defer prefetching until browser is idle
+    const prefetchPrayers = () => {
+      const prefetchOptions = { staleTime: 10 * 60 * 1000, gcTime: 30 * 60 * 1000 };
+      queryClient.prefetchQuery({ queryKey: ['/api/brochas/daily'], ...prefetchOptions });
+      queryClient.prefetchQuery({ queryKey: ['/api/brochas/special'], ...prefetchOptions });
+      queryClient.prefetchQuery({ queryKey: ['/api/mincha/prayer'], ...prefetchOptions });
+      queryClient.prefetchQuery({ queryKey: ['/api/maariv/prayer'], ...prefetchOptions });
+      queryClient.prefetchQuery({ queryKey: ['/api/nishmas/prayer'], ...prefetchOptions });
+      queryClient.prefetchQuery({ queryKey: ['/api/morning/prayers'], ...prefetchOptions });
+    };
     
-    // Prefetch Maariv prayer - uses default queryFn from queryClient
-    queryClient.prefetchQuery({
-      queryKey: ['/api/maariv/prayer'],
-      staleTime: 10 * 60 * 1000,
-      gcTime: 30 * 60 * 1000,
-    });
-    
-    // Prefetch Nishmas prayer - uses default queryFn from queryClient
-    queryClient.prefetchQuery({
-      queryKey: ['/api/nishmas/prayer'],
-      staleTime: 10 * 60 * 1000,
-      gcTime: 30 * 60 * 1000,
-    });
-    
-    // Prefetch morning prayers - uses default queryFn from queryClient
-    queryClient.prefetchQuery({
-      queryKey: ['/api/morning/prayers'],
-      staleTime: 10 * 60 * 1000,
-      gcTime: 30 * 60 * 1000,
-    });
+    // Defer prefetching until browser is idle (fallback: 2 seconds)
+    if ('requestIdleCallback' in window) {
+      const id = requestIdleCallback(prefetchPrayers, { timeout: 3000 });
+      return () => cancelIdleCallback(id);
+    } else {
+      const id = setTimeout(prefetchPrayers, 2000);
+      return () => clearTimeout(id);
+    }
   }, [queryClient]);
 
   // Helper function to check if any individual Tehillim has been completed
@@ -89,6 +79,28 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       }
     }
     return false;
+  };
+
+  // Count total individual tehillim completions (today)
+  const countIndividualTehillim = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const todaysCompletions = completedModals[today];
+    if (!todaysCompletions) return 0;
+    
+    let count = 0;
+    // Count from singles
+    for (const modalId of Array.from(todaysCompletions.singles)) {
+      if (modalId.startsWith('individual-tehillim-')) {
+        count++;
+      }
+    }
+    // Count from repeatables
+    for (const [modalId, repeatCount] of Object.entries(todaysCompletions.repeatables)) {
+      if (modalId.startsWith('individual-tehillim-')) {
+        count += repeatCount;
+      }
+    }
+    return count;
   };
 
   // Time-based prayer logic
@@ -187,393 +199,280 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
 
   const currentPrayer = getCurrentPrayer();
 
-  // Helper functions for reason icons and short text
-  const getReasonIcon = (reason: string, reasonEnglish?: string) => {
-    // Map Hebrew reasons and English translations to icons
-    const reasonToCode = (r: string, eng?: string): string => {
-      // Handle both Hebrew and English reasons, plus common variations
-      if (r === "רפואה שלמה" || eng === "Complete Healing" || r === "health" || eng === "health" || r === "Health") return "health";
-      if (r === "שידוך" || eng === "Finding a mate" || r === "shidduch" || eng === "shidduch") return "shidduch";
-      if (r === "זרע של קיימא" || eng === "Children" || r === "children" || eng === "children") return "children";
-      if (r === "פרנסה" || eng === "Livelihood" || r === "parnassa" || eng === "parnassa") return "parnassa";
-      if (r === "הצלחה" || eng === "Success" || r === "success" || eng === "success") return "success";
-      if (r === "שלום בית" || eng === "Family" || r === "family" || eng === "family") return "family";
-      if (r === "חכמה" || eng === "Education" || r === "education" || eng === "education") return "education";
-      if (r === "עליית נשמה" || eng === "Peace" || r === "peace" || eng === "peace") return "peace";
-      if (r === "פדיון שבויים" || eng === "Release from Captivity" || r === "hostages" || eng === "hostages") return "hostages";
-      return "general";
-    };
-    
-    const code = reasonToCode(reason, reasonEnglish);
-    const iconMap: Record<string, JSX.Element> = {
-      'health': <Stethoscope size={12} className="text-red-500" />,
-      'shidduch': <HeartHandshake size={12} className="text-pink-500" />,
-      'children': <Baby size={12} className="text-blue-500" />,
-      'parnassa': <DollarSign size={12} className="text-green-500" />,
-      'success': <Star size={12} className="text-yellow-500" />,
-      'family': <Users size={12} className="text-purple-500" />,
-      'education': <GraduationCap size={12} className="text-indigo-500" />,
-      'peace': <Smile size={12} className="text-teal-500" />,
-      'hostages': <Unlock size={12} className="text-orange-600" />,
-      'general': <Heart size={12} className="text-blush" />
-    };
-    
-    return iconMap[code];
-  };
-
-  const getReasonShort = (reason: string, reasonEnglish?: string) => {
-    // Map Hebrew reasons and English translations to short text
-    const reasonToCode = (r: string, eng?: string): string => {
-      // Handle both Hebrew and English reasons, plus common variations
-      if (r === "רפואה שלמה" || eng === "Complete Healing" || r === "health" || eng === "health" || r === "Health") return "health";
-      if (r === "שידוך" || eng === "Finding a mate" || r === "shidduch" || eng === "shidduch") return "shidduch";
-      if (r === "זרע של קיימא" || eng === "Children" || r === "children" || eng === "children") return "children";
-      if (r === "פרנסה" || eng === "Livelihood" || r === "parnassa" || eng === "parnassa") return "parnassa";
-      if (r === "הצלחה" || eng === "Success" || r === "success" || eng === "success") return "success";
-      if (r === "שלום בית" || eng === "Family" || r === "family" || eng === "family") return "family";
-      if (r === "חכמה" || eng === "Education" || r === "education" || eng === "education") return "education";
-      if (r === "עליית נשמה" || eng === "Peace" || r === "peace" || eng === "peace") return "peace";
-      if (r === "פדיון שבויים" || eng === "Release from Captivity" || r === "hostages" || eng === "hostages") return "hostages";
-      return "general";
-    };
-    
-    const code = reasonToCode(reason, reasonEnglish);
-    const shortMap: Record<string, string> = {
-      'health': 'Health',
-      'shidduch': 'Match',
-      'children': 'Kids',
-      'parnassa': 'Income',
-      'success': 'Success',
-      'family': 'Family',
-      'education': 'Study',
-      'peace': 'Peace',
-      'hostages': 'Release',
-      'general': 'Prayer'
-    };
-    
-    return shortMap[code];
-  };
+  // Tehillim Chains state
+  const [chainView, setChainView] = useState<'none' | 'create' | 'find'>('none');
+  const [chainName, setChainName] = useState("");
+  const [chainReason, setChainReason] = useState("");
+  const [reasonDropdownOpen, setReasonDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoadingRandom, setIsLoadingRandom] = useState(false);
+  const [, setLocation] = useLocation();
   
-  // Local state management
-  const [hebrewName, setHebrewName] = useState("");
-  const [reason, setReason] = useState("");
-  const [reasonEnglish, setReasonEnglish] = useState("");
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [_showHebrew, _setShowHebrew] = useState(true);
+  // Toggle handlers for Create/Find buttons
+  const handleCreateToggle = useCallback(() => {
+    setChainView(prev => prev === 'create' ? 'none' : 'create');
+  }, []);
+  
+  const handleFindToggle = useCallback(() => {
+    setChainView(prev => prev === 'find' ? 'none' : 'find');
+  }, []);
 
-  // Fetch global Tehillim progress
-  const { data: progress, isError: progressError } = useQuery<GlobalTehillimProgress>({
-    queryKey: ['/api/tehillim/progress'], 
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/progress`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch tehillim progress');
-      }
-      const data = await response.json();
-      // Progress data updated
-      return data;
-    },
-    staleTime: 60000,           // Cache for 1 minute
-    refetchOnWindowFocus: true, // Refetch when users return to app
-    refetchInterval: 180000,    // Check every 3 minutes (reduced from 30s for performance)
-    retry: 3,
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000)
+  // Fetch total tehillim from all chains
+  const { data: chainTotalData } = useQuery<{ total: number }>({
+    queryKey: ['/api/tehillim-chains/stats/total'],
+    staleTime: 60000,
+    refetchOnWindowFocus: true,
   });
-  
-  // Fetch current name for the perek - MUST be defined before useEffect hooks that use it
-  const { data: currentName } = useQuery<TehillimName | null>({
-    queryFn: async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/current-name`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch current name');
-        }
-        return response.json();
-      } catch (error) {
-        // Failed to fetch current name
-        return null; // Return null as fallback
-      }
-    },
-    queryKey: ['/api/tehillim/current-name', progress?.currentPerek], // Include perek in key to force refetch
-    staleTime: 0,                   // NO caching - keep real-time for global chain
-    refetchOnWindowFocus: true,     // Refetch when users return to app  
-    enabled: !!progress?.currentPerek && progress.currentPerek >= 1 && progress.currentPerek <= 171 // Only fetch when we have valid progress (includes Perek 119 parts)
-  });
-  
-  // Only refetch tehillim data when explicitly needed (removed aggressive polling)
-  // Removed automatic refetching on mount and modal state changes to prevent request storms
-  
-  // Listen for tehillim completion event - only invalidate when actually needed
-  useEffect(() => {
-    const handleTehillimCompleted = () => {
-      // Only invalidate specific queries after completion (no aggressive refetching)
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/progress'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
-    };
-    
-    window.addEventListener('tehillimCompleted', handleTehillimCompleted);
-    return () => window.removeEventListener('tehillimCompleted', handleTehillimCompleted);
-  }, [queryClient]);
+  const chainTotal = chainTotalData?.total || 0;
 
-  // Get the actual Tehillim info to display English number and part
-  const { data: tehillimInfo } = useQuery<{
-    id: number;
-    englishNumber: number;
-    partNumber: number;
-    hebrewNumber: string;
-  }>({
-    queryKey: ['/api/tehillim/info', progress?.currentPerek],
+  // Fetch global tehillim stats
+  const { data: globalStats, isLoading: isLoadingGlobalStats } = useQuery<{ totalRead: number; booksCompleted: number; uniqueReaders: number }>({
+    queryKey: ['/api/tehillim-chains/stats/global'],
+    staleTime: 300000, // 5 minutes - data doesn't change often
+    gcTime: 600000, // Keep in cache for 10 minutes
+    refetchOnWindowFocus: false, // Don't refetch on every focus
+  });
+
+  // Reason options for the dropdown
+  const reasonOptions = [
+    { value: 'refuah', label: 'Refuah Shleima' },
+    { value: 'shidduch', label: 'Shidduch' },
+    { value: 'parnassa', label: 'Parnassa' },
+    { value: 'children', label: 'Children' },
+    { value: 'shalom-bayis', label: 'Shalom Bayis' },
+    { value: 'success', label: 'Success' },
+    { value: 'protection', label: 'Protection' },
+    { value: 'general', label: 'General Tefillas' },
+  ];
+
+  // Search chains query - fetch recent by default when Find is open
+  const { data: searchResults = [], isLoading: isSearching } = useQuery<TehillimChain[]>({
+    queryKey: ['/api/tehillim-chains/search', searchQuery],
     queryFn: async () => {
-      if (!progress?.currentPerek) return null;
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/info/${progress.currentPerek}`);
-      if (!response.ok) return null;
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/search?q=${encodeURIComponent(searchQuery)}`);
+      if (!response.ok) throw new Error('Search failed');
       return response.json();
     },
-    enabled: !!progress?.currentPerek && progress.currentPerek >= 1 && progress.currentPerek <= 171, // Includes Perek 119 parts
-    staleTime: 10 * 60 * 1000,  // Keep fresh for 10 minutes 
-    gcTime: 30 * 60 * 1000,     // Cache for 30 minutes
-    refetchOnWindowFocus: false
+    staleTime: 30000,
+    enabled: chainView === 'find',
   });
 
-
-
-  // Fetch all active names for count display
-  const { data: _allNames } = useQuery<TehillimName[]>({
-    queryFn: async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/names`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch tehillim names');
-        }
-        return response.json();
-      } catch (error) {
-        // Silent error handling - don't show runtime error modal
-        // Failed to fetch tehillim names
-        return []; // Return empty array as fallback
-      }
+  // Create chain mutation
+  const createChainMutation = useMutation({
+    mutationFn: async (data: { name: string; reason: string; deviceId?: string }) => {
+      return apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/tehillim-chains`, data);
     },
-    queryKey: ['/api/tehillim/names'],
-    refetchInterval: 180000, // Refresh every 3 minutes (reduced from 1min for performance)
-    retry: 3, // Retry failed requests 3 times
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
-  });
-
-  // Fetch Tehillim preview (first line) for display
-  const { data: _tehillimPreview, isLoading: _isPreviewLoading } = useQuery<{preview: string; perek: number; language: string}>({
-    queryKey: ['/api/tehillim/preview', progress?.currentPerek],
-    queryFn: async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim/preview/${progress?.currentPerek}?language=hebrew`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch tehillim preview');
-        }
-        return response.json();
-      } catch (error) {
-        // Failed to fetch tehillim preview
-        return { preview: '', perek: progress?.currentPerek || 0, language: 'hebrew' }; // Return empty preview as fallback
-      }
-    },
-    enabled: !!progress?.currentPerek && progress.currentPerek >= 1 && progress.currentPerek <= 171, // Includes Perek 119 parts
-    staleTime: 60000, // Cache for 1 minute - preview text doesn't change
-    gcTime: 300000 // Keep in cache for 5 minutes
-  });
-
-  // Removed unused _completePerekMutation to fix TypeScript errors
-
-  // Mutation to add a new name
-  const addNameMutation = useMutation({
-    mutationFn: async (data: { hebrewName: string; reason: string; reasonEnglish?: string }) => {
-      return apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/tehillim/names`, data);
-    },
-    onSuccess: () => {
+    onSuccess: async (response) => {
+      const chain = response.data;
       toast({
-        title: "Name Added Successfully",
-        description: "The name has been added to the Tehillim cycle and will be removed automatically after 18 days.",
+        title: "Chain Created!",
+        description: "Your Tehillim chain has been created.",
       });
-      setHebrewName("");
-      setReason("");
-      setReasonEnglish("");
-      setShowAddForm(false);
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/names'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/tehillim/current-name'] });
+      setChainName("");
+      setChainReason("");
+      setChainView('none');
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/stats/total'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/search'] });
+      // Navigate to the new chain
+      setLocation(`/c/${chain.slug}`);
     },
     onError: () => {
       toast({
         title: "Error",
-        description: "Failed to add name. Please try again.",
+        description: "Failed to create chain. Please try again.",
         variant: "destructive"
       });
     }
   });
 
-  const handleAddName = () => {
-    if (!hebrewName.trim() || !reason.trim()) {
+  const handleCreateChain = () => {
+    if (!chainName.trim() || !chainReason.trim()) {
       toast({
-        title: "Required Fields Missing",
-        description: "Please fill in both the Hebrew name and reason fields.",
+        title: "Missing Information",
+        description: "Please enter both a name and reason.",
         variant: "destructive"
       });
       return;
     }
-
-    addNameMutation.mutate({
-      hebrewName: hebrewName.trim(),
-      reason: reason.trim(),
-      reasonEnglish: reasonEnglish.trim() || ""
-    });
+    // Get device ID from localStorage or generate one
+    let deviceId = localStorage.getItem('deviceId');
+    if (!deviceId) {
+      deviceId = 'device-' + Date.now().toString(36) + Math.random().toString(36).substring(2);
+      localStorage.setItem('deviceId', deviceId);
+    }
+    createChainMutation.mutate({ name: chainName, reason: chainReason, deviceId });
   };
 
-  // Removed unused completePerek function
-
-  // Reason options for the dropdown with proper icons
-  const reasonOptions = [
-    { 
-      value: "health", 
-      label: "רפואה שלמה (Complete Healing)", 
-      english: "Health",
-      icon: <Stethoscope size={16} className="text-red-500" />
-    },
-    { 
-      value: "children", 
-      label: "זרע של קיימא (Children)", 
-      english: "Children",
-      icon: <Baby size={16} className="text-blue-500" />
-    },
-    { 
-      value: "shidduch", 
-      label: "שידוך הגון (Good Match)", 
-      english: "Match",
-      icon: <Heart size={16} className="text-pink-500" />
-    },
-    { 
-      value: "parnassa", 
-      label: "פרנסה טובה (Good Livelihood)", 
-      english: "Income",
-      icon: <DollarSign size={16} className="text-green-500" />
-    },
-    { 
-      value: "success", 
-      label: "הצלחה (Success)", 
-      english: "Success",
-      icon: <TrendingUp size={16} className="text-yellow-500" />
-    },
-    { 
-      value: "family", 
-      label: "שלום בית (Peace in Home)", 
-      english: "Family",
-      icon: <Users size={16} className="text-purple-500" />
-    },
-    { 
-      value: "peace", 
-      label: "עליית נשמה (Soul Elevation)", 
-      english: "Peace",
-      icon: <Smile size={16} className="text-teal-500" />
-    },
-    { 
-      value: "hostages", 
-      label: "פדיון שבויים (Release from Captivity)", 
-      english: "Release from Captivity",
-      icon: <Unlock size={16} className="text-orange-600" />
-    }
-  ];
-
-  // Ref callback for global tehillim button (FlutterFlow WebView fix)
-  const globalTehillimButtonRef = useCallback((element: HTMLButtonElement | null) => {
-    if (element) {
-      registerClickHandler(element, () => {
-        const event = new CustomEvent('openGlobalTehillimFullscreen', { 
-          detail: { nextPerek: progress?.currentPerek || 59 } 
-        });
-        window.dispatchEvent(event);
-      });
-    }
-  }, [progress?.currentPerek]);
-
-  // Ref callback for compass button (FlutterFlow WebView fix)
-  const compassButtonRef = useCallback((element: HTMLButtonElement | null) => {
-    if (element) {
-      registerClickHandler(element, () => {
-        const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
-          detail: {
-            title: 'The Kotel Compass',
-            contentType: 'compass'
-          }
-        });
-        window.dispatchEvent(fullscreenEvent);
-      });
-    }
+  // Compass button handler
+  const handleOpenCompass = useCallback(() => {
+    const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
+      detail: {
+        title: 'The Kotel Compass',
+        contentType: 'compass'
+      }
+    });
+    window.dispatchEvent(fullscreenEvent);
   }, []);
+
 
 
   return (
     <div className="pb-20" data-bridge-container>
 
       {/* Main Tefilla Section - Tehillim */}
-      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">
-        {/* Global Tehillim Chain Card */}
+      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg space-y-3">
+        
+        {/* Total Tehillim Said Card */}
         <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
-          <div className="flex items-center justify-between mb-2">
+          {/* Header Row - Title and Subheading */}
+          <div className="flex items-center mb-3">
             <div className="flex items-center space-x-3">
               <div className="bg-gradient-feminine p-3 rounded-full">
-                <Globe className="text-white" size={20} />
+                <Link2 className="text-white" size={20} />
               </div>
               <div>
-                <h3 className="platypi-bold text-lg text-black">Global Tehillim Chain</h3>
-
+                <h3 className="platypi-bold text-lg text-black">Tehillim Chains</h3>
+                <span className="platypi-medium text-sm text-black/60">Sefer Tehillim, Completed Together.</span>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setShowAddForm(!showAddForm)}
-                className="text-blush text-xs px-3 py-1 h-auto bg-white border-blush/30 hover:bg-blush/5"
-              >
-                <Plus size={14} className="mr-1" />
-                Add Name
-              </Button>
+          </div>
+          
+          {/* Tehillim Chains Section with pulsating border */}
+          <div 
+            className="rounded-xl p-3 border border-blush/20"
+            style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}
+          >
+            {/* Buttons Row */}
+            <div className="flex items-center justify-center space-x-3 mb-2">
+            <Button
+              type="button"
+              onClick={handleCreateToggle}
+              className={`text-sm px-4 py-2 bg-white border border-blush/30 text-black rounded-xl hover:bg-blush/5 inline-flex items-center ${chainView === 'create' ? 'border-blush' : ''}`}
+              data-testid="button-chain-create"
+            >
+              <div className="flex h-7 w-7 items-center justify-center bg-gradient-feminine rounded-full mr-1 shrink-0">
+                <Plus size={16} className="text-white" />
+              </div>
+              Create
+            </Button>
+            <Button
+              type="button"
+              onClick={handleFindToggle}
+              className={`text-sm px-4 py-2 bg-white border border-blush/30 text-black rounded-xl hover:bg-blush/5 inline-flex items-center ${chainView === 'find' ? 'border-blush' : ''}`}
+              data-testid="button-chain-find"
+            >
+              <div className="flex h-7 w-7 items-center justify-center bg-gradient-feminine rounded-full mr-1 shrink-0">
+                <Search size={16} className="text-white" />
+              </div>
+              Find
+            </Button>
+            <Button
+              type="button"
+              disabled={isLoadingRandom}
+              onClick={async () => {
+                if (isLoadingRandom) return;
+                setIsLoadingRandom(true);
+                try {
+                  // Get device ID for cache key
+                  const deviceId = localStorage.getItem('tehillim_device_id') || 'anonymous';
+                  const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/tehillim-chains/random?t=${Date.now()}`);
+                  if (response.ok) {
+                    const chain = await response.json();
+                    // Pre-populate the query cache so chain page loads instantly
+                    queryClient.setQueryData(['/api/tehillim-chains', chain.slug, deviceId], chain);
+                    setLocation(`/c/${chain.slug}`);
+                  }
+                } catch (error) {
+                  console.error('Failed to get random chain:', error);
+                } finally {
+                  setIsLoadingRandom(false);
+                }
+              }}
+              className={`text-sm px-4 py-2 bg-white border border-blush/30 text-black rounded-xl hover:bg-blush/5 inline-flex items-center ${isLoadingRandom ? 'opacity-50 cursor-not-allowed' : ''}`}
+              data-testid="button-chain-random"
+            >
+              <div className="flex h-7 w-7 items-center justify-center bg-gradient-feminine rounded-full mr-1 shrink-0">
+                <Shuffle size={16} className={`text-white ${isLoadingRandom ? 'animate-spin' : ''}`} />
+              </div>
+              {isLoadingRandom ? 'Loading...' : 'Random'}
+            </Button>
+          </div>
+
+          {/* Stats Line */}
+          <div className="border-t border-blush/10 pt-2 mt-1">
+            <div className="flex justify-center gap-8 text-center">
+              <div>
+                <p className="platypi-bold text-sm text-black">
+                  {isLoadingGlobalStats ? "..." : (globalStats?.totalRead || 0).toLocaleString()}
+                </p>
+                <p className="platypi-regular text-[10px] text-black/50">Tehillim Read</p>
+              </div>
+              <div className="border-l border-blush/10 pl-8">
+                <p className="platypi-bold text-sm text-black">
+                  {isLoadingGlobalStats ? "..." : (globalStats?.booksCompleted || 0).toLocaleString()}
+                </p>
+                <p className="platypi-regular text-[10px] text-black/50">Books Completed</p>
+              </div>
             </div>
           </div>
 
-          {/* Add Name Form or Compact Perek Display */}
-          {showAddForm ? (
-            <div className="space-y-3 mb-3 p-3 bg-gradient-to-r from-ivory to-lavender/5 rounded-2xl border border-lavender/20">
-              <div className="flex items-center space-x-2 text-sm text-blush/80">
-                <AlertCircle size={16} />
-                <span className="platypi-regular">Names are automatically removed after 18 days</span>
-              </div>
-              
+          {/* Create Chain Form */}
+          {chainView === 'create' && (
+            <div className="space-y-3 p-3 bg-gradient-to-r from-ivory to-lavender/5 rounded-2xl border border-lavender/20">
               <Input
-                placeholder="Hebrew Name"
-                value={hebrewName}
-                onChange={(e) => setHebrewName(e.target.value)}
+                placeholder="Chain Name (Name Ben/Bat Name)"
+                value={chainName}
+                onChange={(e) => setChainName(e.target.value)}
                 className="text-left rounded-2xl border-blush/20 focus:border-blush bg-white"
-                dir="ltr"
+                data-testid="input-chain-name"
               />
               
-              <Select value={reason} onValueChange={(value) => {
-                setReason(value);
-                const option = reasonOptions.find(opt => opt.value === value);
-                setReasonEnglish(option?.english || "");
-              }}>
-                <SelectTrigger className="w-full rounded-2xl border-blush/20 bg-white">
-                  <SelectValue placeholder="Select Reason" />
-                </SelectTrigger>
-                <SelectContent className="bg-white">
-                  {reasonOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value} className="bg-white hover:bg-gray-50">
-                      <div className="flex items-center space-x-2">
-                        {option.icon}
-                        <span>{option.label}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setReasonDropdownOpen(!reasonDropdownOpen)}
+                  className="flex h-10 w-full items-center justify-between rounded-2xl border border-blush/20 bg-white px-3 py-2 text-sm focus:border-blush focus:outline-none focus:ring-2 focus:ring-blush/20"
+                  data-testid="select-chain-reason"
+                >
+                  {chainReason ? (
+                    <span className="inline-flex items-center gap-2">
+                      {(() => {
+                        const ReasonIcon = getReasonIcon(chainReason);
+                        return <ReasonIcon size={16} className="text-blush" />;
+                      })()}
+                      {reasonOptions.find(o => o.value === chainReason)?.label}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">Select a reason...</span>
+                  )}
+                  <ChevronDown size={16} className={`text-muted-foreground transition-transform ${reasonDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {reasonDropdownOpen && (
+                  <div className="mt-2 w-full rounded-xl border border-blush/20 bg-white shadow-sm overflow-hidden">
+                    {reasonOptions.map((option, index) => {
+                      const OptionIcon = getReasonIcon(option.value);
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => {
+                            setChainReason(option.value);
+                            setReasonDropdownOpen(false);
+                          }}
+                          className={`flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-blush/5 ${index !== reasonOptions.length - 1 ? 'border-b border-blush/10' : ''}`}
+                        >
+                          <OptionIcon size={14} className="text-blush" />
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
               
               <div className="flex space-x-3">
                 <Button 
-                  onClick={() => setShowAddForm(false)} 
+                  onClick={() => setChainView('none')} 
                   variant="outline"
                   size="sm"
                   className="flex-1 rounded-2xl border-blush/30 hover:bg-blush/5 bg-white"
@@ -581,90 +480,76 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                   Cancel
                 </Button>
                 <Button 
-                  onClick={handleAddName}
-                  disabled={addNameMutation.isPending}
+                  onClick={handleCreateChain}
+                  disabled={createChainMutation.isPending}
                   size="sm"
                   className="flex-1 rounded-2xl bg-gradient-feminine hover:opacity-90 text-white"
+                  data-testid="button-create-chain"
                 >
-                  {addNameMutation.isPending ? "Adding..." : "Add Name"}
+                  {createChainMutation.isPending ? "Creating..." : "Create Chain"}
                 </Button>
               </div>
             </div>
-          ) : (
-            <button
-              ref={globalTehillimButtonRef}
-              onClick={() => {
-                // Dispatch custom event to open global tehillim directly in fullscreen
-                const event = new CustomEvent('openGlobalTehillimFullscreen', { 
-                  detail: { nextPerek: progress?.currentPerek || 59 } 
-                });
-                window.dispatchEvent(event);
-              }}
-              className="w-full bg-white/90 rounded-2xl p-3 border border-blush/20 hover:bg-white transition-all duration-300 shadow-sm"
-              style={{
-                animation: 'gentle-glow-pink 3s ease-in-out infinite'
-              }}
-            >
-              {/* Header with perek number */}
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="platypi-bold text-lg text-black">
-                  {tehillimInfo ? (
-                    tehillimInfo.englishNumber === 119 && tehillimInfo.partNumber
-                      ? `Perek ${tehillimInfo.englishNumber} Part ${tehillimInfo.partNumber}`
-                      : `Perek ${tehillimInfo.englishNumber}`
-                  ) : 'Loading...'}
-                </h4>
-                <div className="bg-gradient-feminine p-2 rounded-full">
-                  <ArrowRight className="text-white" size={14} strokeWidth={2} />
-                </div>
-              </div>
-              
-              {/* Progress Bar */}
-              <div className="mb-2">
-                <div className="w-full bg-blush/20 rounded-full h-1.5">
-                  <div 
-                    className="bg-gradient-feminine h-1.5 rounded-full transition-all duration-500 ease-out"
-                    style={{ width: `${progressError ? 0 : ((progress?.currentPerek || 0) / 171) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              {/* Name assignment with reason icon */}
-              {progressError ? (
-                <div className="mb-2 p-2 bg-red-50 rounded-xl border border-red-200">
-                  <div className="flex items-center justify-center space-x-2">
-                    <AlertCircle size={14} className="text-red-500" />
-                    <span className="platypi-regular text-xs text-red-600">Unable to connect to Tehillim chain</span>
-                  </div>
-                </div>
-              ) : currentName ? (
-                <div className="mb-2 p-2 bg-white/60 rounded-xl border border-blush/10">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-1">
-                      <User size={12} className="text-blush" />
-                      <span className="platypi-medium text-sm text-black heebo-regular text-right" dir="rtl">
-                        {currentName.hebrewName}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      {getReasonIcon(currentName.reason, currentName.reasonEnglish ?? undefined)}
-                      <span className="text-xs text-black/60 platypi-regular">
-                        {getReasonShort(currentName.reason, currentName.reasonEnglish ?? undefined)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="mb-2 p-2 bg-white/60 rounded-xl border border-blush/10">
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="animate-spin w-3 h-3 border border-blush border-t-transparent rounded-full"></div>
-                    <span className="platypi-regular text-xs text-black/50">Loading name...</span>
-                  </div>
-                </div>
-              )}
-            </button>
           )}
 
+          {/* Find Chain Form */}
+          {chainView === 'find' && (
+            <div className="space-y-3 p-3 bg-gradient-to-r from-ivory to-lavender/5 rounded-2xl border border-lavender/20">
+              <Input
+                placeholder="Search by name or reason..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="text-left rounded-2xl border-blush/20 focus:border-blush bg-white"
+                data-testid="input-chain-search"
+              />
+              
+              {isSearching && (
+                <div className="flex items-center justify-center py-4">
+                  <div className="animate-spin w-5 h-5 border-2 border-blush border-t-transparent rounded-full"></div>
+                </div>
+              )}
+              
+              {!isSearching && searchResults.length > 0 && (
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {searchResults.map((chain) => {
+                    const ReasonIcon = getReasonIcon(chain.reason);
+                    return (
+                      <button
+                        key={chain.id}
+                        onClick={() => setLocation(`/c/${chain.slug}`)}
+                        className="w-full p-3 bg-white rounded-xl border border-blush/20 hover:bg-blush/5 transition-all flex items-center justify-between"
+                      >
+                        <div className="text-left">
+                          <p className="platypi-medium text-sm text-black">{chain.name}</p>
+                          <div className="flex items-center gap-1.5">
+                            <ReasonIcon size={12} className="text-blush/70" />
+                            <p className="platypi-regular text-xs text-black/60">{chain.reason}</p>
+                          </div>
+                        </div>
+                        <ChevronRight size={16} className="text-blush" />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              
+              {!isSearching && searchResults.length === 0 && (
+                <p className="text-center text-sm text-black/50 py-4 platypi-regular">
+                  {searchQuery ? "No chains found. Try a different search or create a new one." : "No chains created yet. Be the first to create one!"}
+                </p>
+              )}
+              
+              <Button 
+                onClick={() => setChainView('none')} 
+                variant="outline"
+                size="sm"
+                className="w-full rounded-2xl border-blush/30 hover:bg-blush/5 bg-white"
+              >
+                Close
+              </Button>
+            </div>
+          )}
+          </div>
         </div>
 
       </div>
@@ -840,18 +725,10 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
 
         {/* The Kotel Compass Section */}
         <div className="bg-gradient-soft rounded-3xl p-4 shadow-lg">
-          <button
-            ref={compassButtonRef}
-            onClick={() => {
-              const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
-                detail: {
-                  title: 'The Kotel Compass',
-                  contentType: 'compass'
-                }
-              });
-              window.dispatchEvent(fullscreenEvent);
-            }}
-            className="w-full bg-white/70 rounded-2xl p-3 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left"
+          <Button
+            variant="ghost"
+            onClick={handleOpenCompass}
+            className="w-full bg-white/70 rounded-2xl p-3 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left h-auto"
             data-testid="button-open-compass"
           >
             <div className="flex items-center space-x-3">
@@ -866,7 +743,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                 <ArrowRight className="text-white" size={16} />
               </div>
             </div>
-          </button>
+          </Button>
         </div>
 
         {/* Bottom padding */}

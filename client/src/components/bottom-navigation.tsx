@@ -1,7 +1,6 @@
 import { BookOpen, HandHeart, Heart, Sparkles, Coins } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import type { Section } from "@/pages/home";
-import { registerAction, unregisterAction } from "@/utils/dom-event-bridge";
 
 interface BottomNavigationProps {
   activeSection: Section | null;
@@ -30,24 +29,9 @@ export default function BottomNavigation({
     { id: "table" as Section, icon: Sparkles, label: "Life", isCenter: false },
   ];
 
-  // Store onSectionChange in a ref so DOM bridge actions always have current callback
+  // Store onSectionChange in a ref for stable callback reference
   const onSectionChangeRef = useRef(onSectionChange);
   onSectionChangeRef.current = onSectionChange;
-
-  // Register DOM bridge actions for each nav button (FlutterFlow resilience)
-  useEffect(() => {
-    const actions = navItems.map(item => {
-      const actionId = `nav-${item.id}`;
-      registerAction(actionId, () => {
-        onSectionChangeRef.current(item.id);
-      });
-      return actionId;
-    });
-
-    return () => {
-      actions.forEach(actionId => unregisterAction(actionId));
-    };
-  }, []); // Empty deps - actions registered once, use ref for current callback
 
   const getActiveColorClass = (sectionId: Section) => {
     switch (sectionId) {

@@ -10,6 +10,8 @@ interface FloatingSettingsProps {
   showLanguageControls?: boolean;
   language?: 'hebrew' | 'english';
   onLanguageChange?: ((lang: 'hebrew' | 'english') => void) | undefined;
+  // Position
+  bottomOffset?: string;
 }
 
 export function FloatingSettings({
@@ -18,7 +20,8 @@ export function FloatingSettings({
   onFontSizeChange,
   showLanguageControls = false,
   language = 'hebrew',
-  onLanguageChange
+  onLanguageChange,
+  bottomOffset = '1.5rem'
 }: FloatingSettingsProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -35,7 +38,7 @@ export function FloatingSettings({
         className="fixed left-6 bg-gradient-feminine text-white rounded-full p-3 shadow-lg hover:scale-110 transition-all duration-200"
         style={{ 
           zIndex: 2147483646,
-          bottom: 'calc(1.5rem + var(--viewport-bottom-offset, 0px))'
+          bottom: `calc(${bottomOffset} + var(--viewport-bottom-offset, 0px))`
         }}
         aria-label="Open settings"
       >
@@ -52,7 +55,10 @@ export function FloatingSettings({
           />
           
           {/* Drawer Panel */}
-          <div className="fixed bottom-6 left-20 bg-white rounded-2xl shadow-xl border border-gray-200 p-4 z-50 min-w-[200px]">
+          <div 
+            className="fixed left-20 bg-white rounded-2xl shadow-xl border border-gray-200 p-4 z-50 min-w-[200px]"
+            style={{ bottom: `calc(${bottomOffset} + var(--viewport-bottom-offset, 0px))` }}
+          >
             <div className="space-y-4">
               {/* Language Selector */}
               {showLanguageControls && onLanguageChange && (

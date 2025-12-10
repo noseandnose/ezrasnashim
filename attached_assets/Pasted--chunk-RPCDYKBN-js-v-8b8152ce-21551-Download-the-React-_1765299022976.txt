@@ -1,0 +1,91 @@
+
+chunk-RPCDYKBN.js?v=8b8152ce:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+SearchContext.tsx:478 [SearchContext] Search index built: 164 items
+SearchContext.tsx:479 [SearchContext] Torah data: Object
+SearchContext.tsx:502 [SearchContext] MiniSearch index created successfully with 164 records
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/version
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/torah/halacha/2025-12-09
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/torah/chizuk/2025-12-09
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/torah/emuna/2025-12-09
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/mincha/prayers
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/maariv/prayers
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/morning/prayers
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/brochas/daily
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/brochas/special
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/table/recipe
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/pirkei-avot
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/marriage-insights/2025-12-09
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/womens-prayers/refuah
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/womens-prayers/family
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/womens-prayers/life
+axiosClient.ts:75 [API Response] 200 GET /api/torah/halacha/2025-12-09
+axiosClient.ts:78 [API Response Data] Object
+axiosClient.ts:75 [API Response] 200 GET /api/torah/chizuk/2025-12-09
+axiosClient.ts:78 [API Response Data] Object
+axiosClient.ts:75 [API Response] 200 GET /api/torah/emuna/2025-12-09
+axiosClient.ts:78 [API Response Data] Object
+axiosClient.ts:75 [API Response] 200 GET /api/maariv/prayers
+axiosClient.ts:78 [API Response Data] Array(3)
+axiosClient.ts:75 [API Response] 200 GET /api/mincha/prayers
+axiosClient.ts:78 [API Response Data] Array(4)
+axiosClient.ts:75 [API Response] 200 GET /api/morning/prayers
+axiosClient.ts:78 [API Response Data] Array(8)
+axiosClient.ts:75 [API Response] 200 GET /api/brochas/daily
+axiosClient.ts:78 [API Response Data] Array(4)
+axiosClient.ts:75 [API Response] 200 GET /api/brochas/special
+axiosClient.ts:78 [API Response Data] Array(2)
+axiosClient.ts:75 [API Response] 200 GET /api/table/recipe
+axiosClient.ts:78 [API Response Data] Object
+axiosClient.ts:75 [API Response] 200 GET /api/pirkei-avot
+axiosClient.ts:78 [API Response Data] Array(133)
+axiosClient.ts:75 [API Response] 200 GET /api/womens-prayers/refuah
+axiosClient.ts:78 [API Response Data] Array(2)
+axiosClient.ts:75 [API Response] 200 GET /api/marriage-insights/2025-12-09
+axiosClient.ts:78 [API Response Data] Object
+axiosClient.ts:75 [API Response] 200 GET /api/womens-prayers/family
+axiosClient.ts:78 [API Response Data] Array(3)
+axiosClient.ts:75 [API Response] 200 GET /api/womens-prayers/life
+axiosClient.ts:78 [API Response Data] Array(3)
+main.tsx:26 [SW] Skipping service worker registration in development mode (non-localhost)
+main.tsx:48 [Version] Version checks disabled in development mode
+SearchContext.tsx:478 [SearchContext] Search index built: 184 items
+SearchContext.tsx:479 [SearchContext] Torah data: Object
+SearchContext.tsx:502 [SearchContext] MiniSearch index created successfully with 184 records
+useVersionCheck.ts:106 Version check skipped: Invalid content type text/html
+axiosClient.ts:75 [API Response] 200 GET /api/version
+axiosClient.ts:78 [API Response Data] Object
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/push/vapid-public-key
+axiosClient.ts:75 [API Response] 200 GET /api/push/vapid-public-key
+axiosClient.ts:78 [API Response Data] Object
+axiosClient.ts:58 [API Request] POST https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/push/subscribe
+axiosClient.ts:61 [API Request Data] {subscription: {…}, sessionId: null}
+main.tsx:33 [SW] Cleaning up 1 existing service worker(s)
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/zmanim/31.701737231628524/34.985041651228876
+axiosClient.ts:75 [API Response] 200 GET /api/zmanim/31.701737231628524/34.985041651228876
+axiosClient.ts:78 [API Response Data] {sunrise: '6:28 AM', shkia: '4:37 PM', tzaitHakochavim: '5:09 PM', minchaGedolah: '11:58 AM', minchaKetanah: '2:30 PM', …}
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/tehillim-chains/stats/total
+axiosClient.ts:75 [API Response] 200 GET /api/tehillim-chains/stats/total
+axiosClient.ts:78 [API Response Data] {total: 24}
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/mincha/prayer
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/maariv/prayer
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/nishmas/prayer
+axiosClient.ts:75 [API Response] 200 GET /api/maariv/prayer
+axiosClient.ts:78 [API Response Data] (3) [{…}, {…}, {…}]
+axiosClient.ts:75 [API Response] 200 GET /api/mincha/prayer
+axiosClient.ts:78 [API Response Data] (4) [{…}, {…}, {…}, {…}]
+axiosClient.ts:75 [API Response] 200 GET /api/nishmas/prayer
+axiosClient.ts:75 [API Response] 200 POST /api/push/subscribe
+axiosClient.ts:78 [API Response Data] {success: true, message: 'Successfully subscribed to push notifications', subscriptionId: 1715}
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/torah/pirkei-avot/2025-12-09
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/table/vort
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/torah/featured/2025-12-09
+axiosClient.ts:75 [API Response] 200 GET /api/torah/pirkei-avot/2025-12-09
+axiosClient.ts:78 [API Response Data] {text: 'Ten things were created on the eve of the Sabbath …braham. And some say: also tongs made with tongs.', chapter: 5, source: '5.8'}
+axiosClient.ts:75 [API Response] 200 GET /api/torah/featured/2025-12-09
+axiosClient.ts:78 [API Response Data] {id: 109, date: '2025-12-09', title: 'The Clock and the Calendar', content: 'Here is another method to build up a good heart. T…stand the value of time and design plans to grow.', audioUrl: null, …}
+useVersionCheck.ts:106 Version check skipped: Invalid content type text/html
+axiosClient.ts:75 [API Response] 200 GET /api/table/vort
+axiosClient.ts:78 [API Response Data] [{…}]
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/brochas/2
+axiosClient.ts:75 [API Response] 200 GET /api/brochas/2
+axiosClient.ts:78 [API Response Data] {id: '2', title: 'Birkat Hamazon', hebrewText: '[[ROSH_CHODESH|SUKKOT|PESACH]]**שִׁיר הַמַּעֲלוֹת*… יִתֵּן יהוה יְְבָרֵךְְְ אֶת־עַמּוֹ בַשָּׁלוֹם...', englishText: '[[ROSH_CHODESH|SUKKOT|PESACH]]A song of ascents.. …ength. The Lord will bless His people with peace.', description: 'After Bread Meals', …}

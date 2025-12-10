@@ -1,8 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Play, Pause } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { registerAction } from "@/utils/dom-event-bridge";
 
 interface AudioPlayerProps {
   title: string;
@@ -64,7 +62,17 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
     const audio = audioRef.current;
     if (audio) {
       if (audio.paused) {
-        audio.play().catch(() => {
+        // Resume audio context if suspended (required for PWA/home screen mode)
+        const audioContext = (window as any).AudioContext || (window as any).webkitAudioContext;
+        if (audioContext) {
+          const ctx = new audioContext();
+          if (ctx.state === 'suspended') {
+            ctx.resume();
+          }
+        }
+        
+        audio.play().catch((err) => {
+          console.error('[AudioPlayer] Play failed:', err);
           setAudioError(true);
         });
       } else {
@@ -73,10 +81,6 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
     }
   }, []);
   
-  // Keep a stable ref for the bridge
-  const togglePlayRef = useRef(togglePlay);
-  togglePlayRef.current = togglePlay;
-
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -210,17 +214,6 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
   }, []);
 
   const directAudioUrl = getDirectAudioUrl(audioUrl);
-  
-  // Generate a stable unique ID for this audio player instance
-  const playerIdRef = useRef(`audio-player-${Math.random().toString(36).substr(2, 9)}`);
-  const actionName = `toggle-audio-${playerIdRef.current}`;
-  
-  // Register the action with the bridge for FlutterFlow resilience
-  useEffect(() => {
-    registerAction(actionName, () => {
-      togglePlayRef.current();
-    });
-  }, [actionName]);
 
   return (
     <div className="bg-gray-50 rounded-2xl p-4 mb-4 audio-controls border border-gray-200" data-bridge-container>
@@ -238,20 +231,19 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
       <div className="flex items-center justify-between mb-4">
         <div className="w-16"></div> {/* Left spacer */}
         
-        <Button
+        <button
           onClick={togglePlay}
-          disabled={audioError}
-          className="bg-gradient-feminine rounded-full p-4 hover:scale-105 transition-all border-0 text-white audio-play-button disabled:opacity-50"
-          style={{ WebkitTapHighlightColor: 'transparent' }}
-          data-action={actionName}
+          className={`bg-gradient-feminine rounded-full p-4 hover:scale-105 transition-all border-0 text-white audio-play-button inline-flex items-center justify-center ${audioError ? 'opacity-50' : ''}`}
+          style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
           data-testid="button-audio-play"
+          type="button"
         >
           {isPlaying ? (
             <Pause className="w-7 h-7" />
           ) : (
             <Play className="w-7 h-7 ml-0.5" />
           )}
-        </Button>
+        </button>
         
         <div className="bg-gray-200 rounded-lg p-1">
           <Select value={playbackSpeed} onValueChange={setPlaybackSpeed}>

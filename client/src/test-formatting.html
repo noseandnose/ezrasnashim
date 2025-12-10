@@ -103,7 +103,7 @@
             formatted = formatted.replace(/\[\[([^\]]+?)\]\]/g, (match, content) => {
                 const conditionalKeywords = [
                     'OUTSIDE_ISRAEL', 'ONLY_ISRAEL', 'ROSH_CHODESH', 'FAST_DAY', 
-                    'ASERET_YEMEI_TESHUVA', 'SUKKOT', 'PESACH', 'ROSH_CHODESH_SPECIAL'
+                    'ASERET_YEMEI_TESHUVA', 'SUKKOT', 'PESACH', 'SPECIAL_REMOVE'
                 ];
                 
                 if (conditionalKeywords.some(keyword => content.includes(keyword))) {

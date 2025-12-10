@@ -1,12 +1,16 @@
 import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Star } from "lucide-react";
-import { useModalStore, useDailyCompletionStore } from "@/lib/types";
+import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
 import { useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
 import { useHomeSummary } from "@/hooks/use-home-summary";
 import HeartProgress from "@/components/heart-progress";
-import DailyProgress from "@/components/daily-progress";
 import type { Section } from "@/pages/home";
 import { useMemo } from "react";
+import { getLocalDateString } from "@/lib/dateUtils";
+import grassImage from "@assets/Daily_Progress_Garden_(2)_1765369219898.png";
+import torahFlower from "@assets/Torah_1765366005744.png";
+import tefillaFlower from "@assets/Tefilla_1765366005744.png";
+import tzedakaFlower from "@assets/Tzedaka_1765366005742.png";
 
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
@@ -15,7 +19,127 @@ interface HomeSectionProps {
 export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   const { openModal } = useModalStore();
   const { torahCompleted, tefillaCompleted, tzedakaCompleted } = useDailyCompletionStore();
+  // Subscribe to completedModals to trigger re-renders when completions change
+  const completedModals = useModalCompletionStore((state) => state.completedModals);
   
+  // Get flower counts for each category - recomputes when completedModals changes
+  const tefillaFlowerCount = useMemo(() => {
+    // Count all tefilla-related completions
+    // Get today's date key - must use getLocalDateString to match the store
+    const today = getLocalDateString();
+    const todaysData = completedModals[today];
+    if (!todaysData) return 0;
+    
+    let count = 0;
+    // Tefilla repeatables: tehillim-text, individual-tehillim-X, chain-tehillim-X, nishmas-campaign, al-hamichiya, birkat-hamazon, meditation-X
+    if (todaysData.repeatables) {
+      Object.entries(todaysData.repeatables).forEach(([key, value]) => {
+        if (key.startsWith('individual-tehillim-') || 
+            key.startsWith('chain-tehillim-') ||
+            key === 'tehillim-text' || 
+            key.startsWith('meditation-')) {
+          count += value;
+        }
+      });
+      count += todaysData.repeatables['nishmas-campaign'] || 0;
+      count += todaysData.repeatables['al-hamichiya'] || 0;
+      count += todaysData.repeatables['birkat-hamazon'] || 0;
+    }
+    // Tefilla singles: mincha, maariv, morning-brochas
+    if (todaysData.singles) {
+      if (todaysData.singles.has('mincha')) count++;
+      if (todaysData.singles.has('maariv')) count++;
+      if (todaysData.singles.has('morning-brochas')) count++;
+    }
+    return count;
+  }, [completedModals]);
+
+  const torahFlowerCount = useMemo(() => {
+    const today = getLocalDateString();
+    const todaysData = completedModals[today];
+    if (!todaysData) return 0;
+    
+    let count = 0;
+    // Torah modal IDs: halacha, chizuk, emuna, featured, pirkei-avot, parsha-vort
+    if (todaysData.repeatables) {
+      count += todaysData.repeatables['halacha'] || 0;
+      count += todaysData.repeatables['chizuk'] || 0;
+      count += todaysData.repeatables['emuna'] || 0;
+      count += todaysData.repeatables['featured'] || 0;
+      count += todaysData.repeatables['pirkei-avot'] || 0;
+      count += todaysData.repeatables['parsha-vort'] || 0;
+    }
+    if (todaysData.singles) {
+      if (todaysData.singles.has('halacha')) count++;
+      if (todaysData.singles.has('chizuk')) count++;
+      if (todaysData.singles.has('emuna')) count++;
+      if (todaysData.singles.has('featured')) count++;
+      if (todaysData.singles.has('pirkei-avot')) count++;
+      if (todaysData.singles.has('parsha-vort')) count++;
+    }
+    return count;
+  }, [completedModals]);
+
+  const tzedakaFlowerCount = useMemo(() => {
+    return tzedakaCompleted ? 1 : 0;
+  }, [tzedakaCompleted]);
+
+  // Generate stable but randomized positions for flowers - like a natural garden
+  const flowerPositions = useMemo(() => {
+    const positions: { type: 'torah' | 'tefilla' | 'tzedaka'; left: number; bottom: number; flipped: boolean }[] = [];
+    
+    // Seeded random for consistent but varied positions
+    let seed = 42;
+    const seededRandom = () => {
+      seed = (seed * 9301 + 49297) % 233280;
+      return seed / 233280;
+    };
+    
+    // Shuffle helper using seeded random
+    const shuffleArray = <T,>(arr: T[]): T[] => {
+      const shuffled = [...arr];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(seededRandom() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    };
+    
+    // Available slots - keeping flowers well away from edges to prevent cutoff
+    const baseSlots = [6, 14, 22, 30, 40, 50, 60, 68, 76, 82];
+    
+    // Shuffle slots for random distribution
+    const shuffledSlots = shuffleArray(baseSlots);
+    
+    // Create all flower entries with type
+    const allFlowers: ('torah' | 'tefilla' | 'tzedaka')[] = [];
+    for (let i = 0; i < torahFlowerCount; i++) allFlowers.push('torah');
+    for (let i = 0; i < tefillaFlowerCount; i++) allFlowers.push('tefilla');
+    for (let i = 0; i < tzedakaFlowerCount; i++) allFlowers.push('tzedaka');
+    
+    // Shuffle the order of flowers for mixed distribution
+    const shuffledFlowers = shuffleArray(allFlowers);
+    
+    shuffledFlowers.forEach((type, index) => {
+      const basePos = shuffledSlots[index % shuffledSlots.length];
+      // Add smaller horizontal offset (-2 to +2%) to keep within bounds
+      const horizontalOffset = (seededRandom() * 4) - 2;
+      // Clamp position to safe range (5% to 82%) to prevent cutoff
+      const clampedPos = Math.max(5, Math.min(82, basePos + horizontalOffset));
+      // Add vertical offset (0 to 12px variation from bottom)
+      const verticalOffset = Math.floor(seededRandom() * 12);
+      
+      positions.push({ 
+        type, 
+        left: clampedPos, 
+        bottom: verticalOffset,
+        flipped: seededRandom() > 0.5
+      });
+    });
+    
+    return positions;
+  }, [torahFlowerCount, tefillaFlowerCount, tzedakaFlowerCount]);
+
   // Load location immediately on startup for accurate times
   const jewishTimesQuery = useJewishTimes();
   const { coordinates, permissionDenied } = useGeolocation();
@@ -314,19 +438,32 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         {/* Daily Progress Tracker - Compact Version */}
         <div 
           id="daily-progress-garden"
-          className="rounded-2xl pl-4 pr-1 py-3 shadow-lg border border-blush/10 bg-white mt-4 flex items-center justify-between min-h-[90px]"
+          className="rounded-2xl shadow-lg border border-blush/10 bg-white mt-4 min-h-[120px] relative overflow-hidden"
         >
-          {/* Left side: Title and subtitle */}
-          <div className="flex flex-col justify-center flex-1">
-            <h3 className="platypi-bold text-lg text-black mb-1 text-left">Daily Progress Garden</h3>
-            <p className="platypi-regular text-xs text-black/80 leading-relaxed text-left max-w-[160px]">
-              Complete one item from each Mitzva to see your daily progress Bloom
-            </p>
-          </div>
+          {/* Grass at the bottom - in front of flowers, behind text */}
+          <img 
+            src={grassImage} 
+            alt="" 
+            className="absolute bottom-[-8px] left-0 w-full h-auto z-[2]"
+          />
           
-          {/* Right side: Progress image */}
-          <div className="flex items-center justify-center">
-            <DailyProgress />
+          {/* Flowers - appear when completions happen, behind grass */}
+          {flowerPositions.map((flower, index) => (
+            <img 
+              key={`${flower.type}-${index}`}
+              src={flower.type === 'torah' ? torahFlower : flower.type === 'tefilla' ? tefillaFlower : tzedakaFlower} 
+              alt={`${flower.type} flower`} 
+              className="absolute h-[77px] w-auto z-[1]"
+              style={{ 
+                left: `${flower.left}%`,
+                bottom: `${flower.bottom}px`,
+                transform: flower.flipped ? 'scaleX(-1)' : 'none'
+              }}
+            />
+          ))}
+          
+          <div className="pl-4 pr-1 py-3 relative z-10">
+            <h3 className="platypi-bold text-lg text-black mb-1 text-left">Daily Progress Garden</h3>
           </div>
         </div>
       </div>

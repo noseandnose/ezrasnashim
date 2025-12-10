@@ -19,7 +19,7 @@ You can use these code words in your Tefilla text within double square brackets:
 - `[[ASERET_YEMEI_TESHUVA]]content[[/ASERET_YEMEI_TESHUVA]]` - Shows only during the days between Rosh Hashana and Yom Kippur
 - `[[SUKKOT]]content[[/SUKKOT]]` - Shows only during Sukkot
 - `[[PESACH]]content[[/PESACH]]` - Shows only during Pesach
-- `[[ROSH_CHODESH_SPECIAL]]content[[/ROSH_CHODESH_SPECIAL]]` - HIDES content during Rosh Chodesh, Pesach, Sukkot, or Aseret Yemei Teshuva (exclusion tag)
+- `[[SPECIAL_REMOVE]]content[[/SPECIAL_REMOVE]]` - HIDES content during Rosh Chodesh, Pesach, Sukkot, or Aseret Yemei Teshuva (exclusion tag)
 
 ### Combining Conditions
 You can combine multiple conditions using commas (AND logic):
@@ -27,7 +27,7 @@ You can combine multiple conditions using commas (AND logic):
 - `[[OUTSIDE_ISRAEL,FAST_DAY]]content[[/OUTSIDE_ISRAEL,FAST_DAY]]` - Shows only for users outside Israel on fast days
 - `[[ROSH_CHODESH,PESACH]]content[[/ROSH_CHODESH,PESACH]]` - Shows only during Rosh Chodesh that occurs during Pesach
 - `[[OUTSIDE_ISRAEL,ASERET_YEMEI_TESHUVA]]content[[/OUTSIDE_ISRAEL,ASERET_YEMEI_TESHUVA]]` - Shows only for users outside Israel during the Ten Days of Repentance
-- `[[ROSH_CHODESH_SPECIAL]]content[[/ROSH_CHODESH_SPECIAL]]` - Shows content EXCEPT during Rosh Chodesh, Pesach, Sukkot, or Aseret Yemei Teshuva
+- `[[SPECIAL_REMOVE]]content[[/SPECIAL_REMOVE]]` - Shows content EXCEPT during Rosh Chodesh, Pesach, Sukkot, or Aseret Yemei Teshuva
 
 ## Example Usage in Supabase
 

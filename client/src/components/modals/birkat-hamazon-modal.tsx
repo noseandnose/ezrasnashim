@@ -122,6 +122,8 @@ export function BirkatHamazonModal() {
           isAseretYemeiTeshuva: false,
           isSukkot: false,
           isPesach: false,
+          isChanuka: false,
+          isPurim: false,
           isRoshChodeshSpecial: false,
           isSunday: false,
           isMonday: false,
@@ -235,15 +237,43 @@ export function BirkatHamazonModal() {
   const renderPrayerText = (prayer: BirkatHamazonPrayer | any, includeSelectedOptions = false) => {
     const text = language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation;
     
+    // Default conditions to use when conditions haven't loaded yet
+    // This ensures conditional markup is still processed (all conditions default to false)
+    const defaultConditions: TefillaConditions = {
+      isInIsrael: false,
+      isRoshChodesh: false,
+      isFastDay: false,
+      isAseretYemeiTeshuva: false,
+      isSukkot: false,
+      isPesach: false,
+      isChanuka: false,
+      isPurim: false,
+      isRoshChodeshSpecial: false,
+      isSunday: false,
+      isMonday: false,
+      isTuesday: false,
+      isWednesday: false,
+      isThursday: false,
+      isFriday: false,
+      isSaturday: false,
+      isMH: false,
+      isMT: false,
+      isTBI: false,
+      isTTI: false,
+      isTTC: false,
+      isTBC: false
+    };
     
-    // Apply conditional processing first if conditions are available
+    const effectiveConditions = conditions || defaultConditions;
+    
+    // Apply conditional processing first
     let processedText = text;
-    if (conditions && text) {
+    if (text) {
       // For Me'ein Shalosh, include selected food options in conditions
       const extendedConditions = includeSelectedOptions ? {
-        ...conditions,
+        ...effectiveConditions,
         selectedFoodTypes: selectedOptions
-      } : conditions;
+      } : effectiveConditions;
       
       processedText = processTefillaText(text, extendedConditions);
     }
@@ -640,6 +670,8 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
           isAseretYemeiTeshuva: false,
           isSukkot: false,
           isPesach: false,
+          isChanuka: false,
+          isPurim: false,
           isRoshChodeshSpecial: false,
           isSunday: false,
           isMonday: false,
@@ -662,12 +694,40 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
 
   const renderPrayerText = (prayer: any) => {
     const text = language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation;
+    
+    // Default conditions to use when conditions haven't loaded yet
+    const defaultConditions: TefillaConditions = {
+      isInIsrael: false,
+      isRoshChodesh: false,
+      isFastDay: false,
+      isAseretYemeiTeshuva: false,
+      isSukkot: false,
+      isPesach: false,
+      isChanuka: false,
+      isPurim: false,
+      isRoshChodeshSpecial: false,
+      isSunday: false,
+      isMonday: false,
+      isTuesday: false,
+      isWednesday: false,
+      isThursday: false,
+      isFriday: false,
+      isSaturday: false,
+      isMH: false,
+      isMT: false,
+      isTBI: false,
+      isTTI: false,
+      isTTC: false,
+      isTBC: false
+    };
+    
+    const effectiveConditions = conditions || defaultConditions;
     let processedText = text;
     
-    if (conditions && text) {
+    if (text) {
       // Include selected food options in conditions for Me'ein Shalosh
       const extendedConditions = {
-        ...conditions,
+        ...effectiveConditions,
         selectedFoodTypes: selectedOptions
       };
       
@@ -820,6 +880,8 @@ export function BirkatHamazonFullscreenContent({ language, fontSize }: { languag
           isAseretYemeiTeshuva: false,
           isSukkot: false,
           isPesach: false,
+          isChanuka: false,
+          isPurim: false,
           isRoshChodeshSpecial: false,
           isSunday: false,
           isMonday: false,
@@ -842,10 +904,38 @@ export function BirkatHamazonFullscreenContent({ language, fontSize }: { languag
 
   const renderPrayerText = (prayer: BirkatHamazonPrayer) => {
     const text = language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation;
+    
+    // Default conditions to use when conditions haven't loaded yet
+    const defaultConditions: TefillaConditions = {
+      isInIsrael: false,
+      isRoshChodesh: false,
+      isFastDay: false,
+      isAseretYemeiTeshuva: false,
+      isSukkot: false,
+      isPesach: false,
+      isChanuka: false,
+      isPurim: false,
+      isRoshChodeshSpecial: false,
+      isSunday: false,
+      isMonday: false,
+      isTuesday: false,
+      isWednesday: false,
+      isThursday: false,
+      isFriday: false,
+      isSaturday: false,
+      isMH: false,
+      isMT: false,
+      isTBI: false,
+      isTTI: false,
+      isTTC: false,
+      isTBC: false
+    };
+    
+    const effectiveConditions = conditions || defaultConditions;
     let processedText = text;
     
-    if (conditions && text) {
-      processedText = processTefillaText(text, conditions);
+    if (text) {
+      processedText = processTefillaText(text, effectiveConditions);
     }
     
     const formattedText = formatTextContent(processedText);

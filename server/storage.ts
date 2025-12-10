@@ -6,6 +6,7 @@ import {
   dailyRecipes, parshaVorts, tableInspirations, marriageInsights, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats, acts,
   mitzvahSessions, mitzvahCompletions, mitzvahDailyTotals,
+  tehillimChains, tehillimChainReadings,
 
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
@@ -37,10 +38,12 @@ import {
   scheduledNotifications, type ScheduledNotification, type InsertScheduledNotification,
   pushSubscriptions, pushNotifications,
   type PushSubscription, type InsertPushSubscription,
-  type PushNotification, type InsertPushNotification
+  type PushNotification, type InsertPushNotification,
+  type TehillimChain, type InsertTehillimChain,
+  type TehillimChainReading, type InsertTehillimChainReading
 } from "../shared/schema";
 import { db, pool } from "./db";
-import { eq, gt, lt, gte, lte, and, sql, like, desc, inArray, isNull } from "drizzle-orm";
+import { eq, gt, lt, gte, lte, and, or, sql, like, ilike, desc, inArray, isNull } from "drizzle-orm";
 import { cleanHebrewText, memoize, withRetry, formatDate } from './typeHelpers';
 
 export interface IStorage {
@@ -113,6 +116,21 @@ export interface IStorage {
   getSupabaseTehillimByEnglishAndPart(englishNumber: number, partNumber: number): Promise<{id: number; englishNumber: number; partNumber: number; hebrewNumber: string; hebrewText: string; englishText: string;} | null>;
   getTehillimById(id: number, language: string): Promise<{text: string; perek: number; language: string}>;
   getSupabaseTehillimPreview(id: number, language: string): Promise<{preview: string; englishNumber: number; partNumber: number; language: string;} | null>;
+
+  // Tehillim Chains methods
+  createTehillimChain(chain: InsertTehillimChain): Promise<TehillimChain>;
+  getTehillimChainBySlug(slug: string): Promise<TehillimChain | null>;
+  searchTehillimChains(query: string): Promise<TehillimChain[]>;
+  getRandomTehillimChain(): Promise<TehillimChain | null>;
+  getActiveTehillimChainCount(): Promise<number>;
+  getTehillimChainStats(chainId: number): Promise<{totalSaid: number; booksCompleted: number; currentlyReading: number; available: number}>;
+  startChainReading(chainId: number, psalmNumber: number, deviceId: string): Promise<TehillimChainReading>;
+  completeChainReading(chainId: number, psalmNumber: number, deviceId: string): Promise<TehillimChainReading | null>;
+  getAvailablePsalmForChain(chainId: number, excludeDeviceId?: string): Promise<number | null>;
+  getRandomAvailablePsalmForChain(chainId: number, excludeDeviceId?: string, excludePsalm?: number): Promise<number | null>;
+  getTotalChainTehillimCompleted(): Promise<number>;
+  getTehillimGlobalStats(): Promise<{ totalRead: number; booksCompleted: number; uniqueReaders: number }>;
+  migrateTehillimNamesToChains(): Promise<{ migrated: number; skipped: number; errors: string[] }>;
 
   // Mincha methods
   getMinchaPrayers(): Promise<MinchaPrayer[]>;
@@ -716,6 +734,483 @@ export class DatabaseStorage implements IStorage {
       console.error('Error getting Tehillim preview:', error);
       return null;
     }
+  }
+
+  // =====================
+  // Tehillim Chains Methods
+  // =====================
+
+  async createTehillimChain(chain: InsertTehillimChain): Promise<TehillimChain> {
+    const [newChain] = await db.insert(tehillimChains).values(chain).returning();
+    return newChain;
+  }
+
+  async getTehillimChainBySlug(slug: string): Promise<TehillimChain | null> {
+    const [chain] = await db.select().from(tehillimChains).where(eq(tehillimChains.slug, slug));
+    return chain || null;
+  }
+
+  async searchTehillimChains(query: string): Promise<TehillimChain[]> {
+    if (!query || query.trim() === '') {
+      // Return recent chains if no query
+      return db.select().from(tehillimChains)
+        .where(eq(tehillimChains.isActive, true))
+        .orderBy(desc(tehillimChains.createdAt))
+        .limit(5);
+    }
+    
+    // Search by name or reason (case-insensitive)
+    const searchPattern = `%${query}%`;
+    return db.select().from(tehillimChains)
+      .where(and(
+        eq(tehillimChains.isActive, true),
+        or(
+          ilike(tehillimChains.name, searchPattern),
+          ilike(tehillimChains.reason, searchPattern)
+        )
+      ))
+      .orderBy(desc(tehillimChains.createdAt))
+      .limit(20);
+  }
+
+  async getRandomTehillimChain(): Promise<TehillimChain | null> {
+    // Get all active chains
+    const chains = await db.select().from(tehillimChains)
+      .where(eq(tehillimChains.isActive, true));
+    
+    if (chains.length === 0) {
+      return null;
+    }
+    
+    // Return a random chain
+    return chains[Math.floor(Math.random() * chains.length)];
+  }
+
+  async getActiveTehillimChainCount(): Promise<number> {
+    const result = await db.select({ count: sql<number>`count(*)` })
+      .from(tehillimChains)
+      .where(eq(tehillimChains.isActive, true));
+    return Number(result[0]?.count || 0);
+  }
+
+  async getTehillimChainStats(chainId: number): Promise<{totalSaid: number; booksCompleted: number; currentlyReading: number; available: number}> {
+    // Total tehillim units: 171 (psalms 1-150, but psalm 119 has 22 parts instead of 1)
+    const TOTAL_TEHILLIM_UNITS = 171;
+    
+    // Get completions per tehillim id to properly track cycles
+    // psalmNumber in the database represents tehillim table id (1-171), not psalm number
+    const completedResult = await db.select({ 
+      psalmNumber: tehillimChainReadings.psalmNumber,
+      count: sql<number>`count(*)`
+    })
+      .from(tehillimChainReadings)
+      .where(and(
+        eq(tehillimChainReadings.chainId, chainId),
+        eq(tehillimChainReadings.status, 'completed')
+      ))
+      .groupBy(tehillimChainReadings.psalmNumber);
+    
+    // A book is complete when ALL 171 tehillim units have been read at least once
+    // booksCompleted = minimum completion count across all 171 units
+    // If any unit has never been completed, booksCompleted = 0
+    const uniqueUnitsCompleted = completedResult.length;
+    let booksCompleted = 0;
+    if (uniqueUnitsCompleted === TOTAL_TEHILLIM_UNITS) {
+      // All units have been completed at least once
+      // Find the minimum completion count - that's how many full books
+      const minCompletions = Math.min(...completedResult.map(r => Number(r.count)));
+      booksCompleted = minCompletions;
+    }
+    
+    // Count UNIQUE units completed in the CURRENT cycle (after the completed books)
+    // A unit is completed in current cycle if its completion count > booksCompleted
+    let completedInCurrentCycle = 0;
+    for (const row of completedResult) {
+      const completionsForUnit = Number(row.count);
+      if (completionsForUnit > booksCompleted) {
+        completedInCurrentCycle++;
+      }
+    }
+    
+    // Get currently reading (active readings started in last 10 minutes)
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+    const readingResult = await db.select({ 
+      count: sql<number>`count(DISTINCT ${tehillimChainReadings.psalmNumber})` 
+    })
+      .from(tehillimChainReadings)
+      .where(and(
+        eq(tehillimChainReadings.chainId, chainId),
+        eq(tehillimChainReadings.status, 'reading'),
+        gt(tehillimChainReadings.startedAt, tenMinutesAgo)
+      ));
+    const currentlyReading = Number(readingResult[0]?.count || 0);
+    
+    // Calculate available units in current cycle
+    // IMPORTANT: completed + reading + available must equal 171
+    const available = Math.max(0, TOTAL_TEHILLIM_UNITS - completedInCurrentCycle - currentlyReading);
+    
+    // Return UNIQUE completions in current cycle as "totalSaid" for display
+    // This ensures: totalSaid + currentlyReading + available = 171
+    return { totalSaid: completedInCurrentCycle, booksCompleted, currentlyReading, available };
+  }
+
+  async startChainReading(chainId: number, psalmNumber: number, deviceId: string): Promise<TehillimChainReading> {
+    // First, check if this device already has an active reading on this chain
+    const existingReading = await db.select().from(tehillimChainReadings)
+      .where(and(
+        eq(tehillimChainReadings.chainId, chainId),
+        eq(tehillimChainReadings.deviceId, deviceId),
+        eq(tehillimChainReadings.status, 'reading')
+      ))
+      .limit(1);
+    
+    // If there's an existing reading, DELETE it (don't store abandoned readings)
+    // Completions should ONLY happen via explicit "Complete" button click
+    if (existingReading.length > 0) {
+      await db.delete(tehillimChainReadings)
+        .where(eq(tehillimChainReadings.id, existingReading[0].id));
+    }
+    
+    // Also cleanup any stale readings older than 10 minutes (from any device on this chain)
+    // Include readings with null startedAt (legacy data) in the cleanup
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+    await db.delete(tehillimChainReadings)
+      .where(and(
+        eq(tehillimChainReadings.chainId, chainId),
+        eq(tehillimChainReadings.status, 'reading'),
+        or(
+          lt(tehillimChainReadings.startedAt, tenMinutesAgo),
+          isNull(tehillimChainReadings.startedAt)
+        )
+      ));
+    
+    // Create new reading
+    const [reading] = await db.insert(tehillimChainReadings).values({
+      chainId,
+      psalmNumber,
+      deviceId,
+      status: 'reading',
+    }).returning();
+    
+    return reading;
+  }
+
+  async completeChainReading(chainId: number, psalmNumber: number, deviceId: string): Promise<TehillimChainReading | null> {
+    // Find the reading and mark it complete
+    const [reading] = await db.select().from(tehillimChainReadings)
+      .where(and(
+        eq(tehillimChainReadings.chainId, chainId),
+        eq(tehillimChainReadings.psalmNumber, psalmNumber),
+        eq(tehillimChainReadings.deviceId, deviceId),
+        eq(tehillimChainReadings.status, 'reading')
+      ))
+      .limit(1);
+    
+    let completedReading: TehillimChainReading | null = null;
+    
+    if (!reading) {
+      // Check if there's already a completed reading for this psalm by this device
+      // This prevents duplicate completions when the user clicks complete multiple times
+      const [existingCompleted] = await db.select().from(tehillimChainReadings)
+        .where(and(
+          eq(tehillimChainReadings.chainId, chainId),
+          eq(tehillimChainReadings.psalmNumber, psalmNumber),
+          eq(tehillimChainReadings.deviceId, deviceId),
+          eq(tehillimChainReadings.status, 'completed')
+        ))
+        .orderBy(desc(tehillimChainReadings.completedAt))
+        .limit(1);
+      
+      if (existingCompleted) {
+        // Already completed by this device - return existing without creating duplicate
+        console.log(`Chain ${chainId} psalm ${psalmNumber} already completed by device ${deviceId.slice(0, 20)}...`);
+        return existingCompleted;
+      }
+      
+      // No active reading and no existing completion - create a new completed one
+      const [newReading] = await db.insert(tehillimChainReadings).values({
+        chainId,
+        psalmNumber,
+        deviceId,
+        status: 'completed',
+      }).returning();
+      completedReading = newReading;
+    } else {
+      // Update existing reading
+      const [updatedReading] = await db.update(tehillimChainReadings)
+        .set({ status: 'completed', completedAt: new Date() })
+        .where(eq(tehillimChainReadings.id, reading.id))
+        .returning();
+      completedReading = updatedReading;
+    }
+    
+    // Track analytics event for chain tehillim completion
+    try {
+      // Get chain info for analytics
+      const [chain] = await db.select().from(tehillimChains).where(eq(tehillimChains.id, chainId));
+      
+      // Track as tehillim_complete event
+      await db.insert(analyticsEvents).values({
+        eventType: 'tehillim_complete',
+        eventData: {
+          perekNumber: psalmNumber,
+          chainId: chainId,
+          chainName: chain?.name || 'Unknown',
+          chainReason: chain?.reason || 'Unknown',
+          isChainTehillim: true
+        },
+        sessionId: deviceId,
+        analyticsDate: formatDate(new Date())
+      });
+      
+      // Track as modal_complete for mitzvah counting
+      await db.insert(analyticsEvents).values({
+        eventType: 'modal_complete',
+        eventData: {
+          modalType: 'chain-tehillim',
+          perekNumber: psalmNumber,
+          chainId: chainId,
+          chainName: chain?.name || 'Unknown'
+        },
+        sessionId: deviceId,
+        analyticsDate: formatDate(new Date())
+      });
+      
+      // Recalculate daily stats
+      const today = formatDate(new Date());
+      await this.recalculateDailyStats(today);
+    } catch (analyticsError) {
+      console.error('Failed to track chain tehillim analytics:', analyticsError);
+    }
+    
+    return completedReading;
+  }
+
+  async getAvailablePsalmForChain(chainId: number, excludeDeviceId?: string): Promise<number | null> {
+    // Total tehillim units: 171 (psalms 1-150, but psalm 119 has 22 parts instead of 1)
+    const TOTAL_TEHILLIM_UNITS = 171;
+    
+    // Get all units currently being read by OTHER devices (active in last 10 min)
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+    
+    // Build where clause - exclude current device's readings so they can get a fresh unit
+    const whereConditions = [
+      eq(tehillimChainReadings.chainId, chainId),
+      eq(tehillimChainReadings.status, 'reading'),
+      gt(tehillimChainReadings.startedAt, tenMinutesAgo)
+    ];
+    
+    // If we have a device ID, exclude that device's readings (so same user can get new units)
+    if (excludeDeviceId) {
+      whereConditions.push(sql`${tehillimChainReadings.deviceId} != ${excludeDeviceId}`);
+    }
+    
+    const activeReadings = await db.select({ psalmNumber: tehillimChainReadings.psalmNumber })
+      .from(tehillimChainReadings)
+      .where(and(...whereConditions));
+    
+    // Get completed units in current cycle
+    // psalmNumber represents tehillim table id (1-171)
+    const completedResult = await db.select({ 
+      psalmNumber: tehillimChainReadings.psalmNumber,
+      count: sql<number>`count(*)`
+    })
+      .from(tehillimChainReadings)
+      .where(and(
+        eq(tehillimChainReadings.chainId, chainId),
+        eq(tehillimChainReadings.status, 'completed')
+      ))
+      .groupBy(tehillimChainReadings.psalmNumber);
+    
+    // Calculate books completed (a book is complete when ALL 171 units are read)
+    const uniqueUnitsCompleted = completedResult.length;
+    let booksCompleted = 0;
+    if (uniqueUnitsCompleted === TOTAL_TEHILLIM_UNITS) {
+      const minCompletions = Math.min(...completedResult.map(r => Number(r.count)));
+      booksCompleted = minCompletions;
+    }
+    
+    // Find units completed in current cycle (after the completed books)
+    const completedUnits = new Set<number>();
+    for (const row of completedResult) {
+      const completionsForUnit = Number(row.count);
+      if (completionsForUnit > booksCompleted) {
+        completedUnits.add(row.psalmNumber);
+      }
+    }
+    
+    // Get units being read by others
+    const readingUnits = new Set(activeReadings.map(r => r.psalmNumber));
+    
+    // Find available units (not completed in this cycle, not being read by others)
+    // Iterate through tehillim ids 1-171
+    const available: number[] = [];
+    for (let i = 1; i <= TOTAL_TEHILLIM_UNITS; i++) {
+      if (!completedUnits.has(i) && !readingUnits.has(i)) {
+        available.push(i);
+      }
+    }
+    
+    if (available.length === 0) {
+      // All units completed or being read - start new cycle with id 1
+      return 1;
+    }
+    
+    // Return the first available tehillim id (sequential order starting from 1)
+    return available[0];
+  }
+
+  async getRandomAvailablePsalmForChain(chainId: number, excludeDeviceId?: string, excludePsalm?: number): Promise<number | null> {
+    // Total tehillim units: 171 (psalms 1-150, but psalm 119 has 22 parts instead of 1)
+    const TOTAL_TEHILLIM_UNITS = 171;
+    
+    // Get completed units in current cycle
+    const completedResult = await db.select({ 
+      psalmNumber: tehillimChainReadings.psalmNumber,
+      count: sql<number>`count(*)`
+    })
+      .from(tehillimChainReadings)
+      .where(and(
+        eq(tehillimChainReadings.chainId, chainId),
+        eq(tehillimChainReadings.status, 'completed')
+      ))
+      .groupBy(tehillimChainReadings.psalmNumber);
+    
+    // Calculate books completed (a book is complete when ALL 171 units are read)
+    const uniqueUnitsCompleted = completedResult.length;
+    let booksCompleted = 0;
+    if (uniqueUnitsCompleted === TOTAL_TEHILLIM_UNITS) {
+      const minCompletions = Math.min(...completedResult.map(r => Number(r.count)));
+      booksCompleted = minCompletions;
+    }
+    
+    const completedUnits = new Set<number>();
+    for (const row of completedResult) {
+      const completionsForUnit = Number(row.count);
+      if (completionsForUnit > booksCompleted) {
+        completedUnits.add(row.psalmNumber);
+      }
+    }
+    
+    // Build available list - exclude completed units and the currently displayed psalm
+    const available: number[] = [];
+    for (let i = 1; i <= TOTAL_TEHILLIM_UNITS; i++) {
+      // Skip if already completed in this cycle
+      if (completedUnits.has(i)) continue;
+      // Skip the currently displayed psalm (for "Find me another")
+      if (excludePsalm && i === excludePsalm) continue;
+      available.push(i);
+    }
+    
+    if (available.length === 0) {
+      // All units completed - if we excluded one, try returning any random one
+      if (excludePsalm) {
+        const allUnits = Array.from({ length: TOTAL_TEHILLIM_UNITS }, (_, i) => i + 1)
+          .filter(i => i !== excludePsalm);
+        return allUnits[Math.floor(Math.random() * allUnits.length)] || 1;
+      }
+      return 1;
+    }
+    
+    // Return a random available tehillim id
+    return available[Math.floor(Math.random() * available.length)];
+  }
+
+  async getTotalChainTehillimCompleted(): Promise<number> {
+    // Get chain completions only (not individual tehillim from dailyStats)
+    const chainResult = await db.select({ count: sql<number>`count(*)` })
+      .from(tehillimChainReadings)
+      .where(eq(tehillimChainReadings.status, 'completed'));
+    const chainCount = Number(chainResult[0]?.count || 0);
+    
+    return chainCount;
+  }
+
+  async getTehillimGlobalStats(): Promise<{ totalRead: number; booksCompleted: number; uniqueReaders: number }> {
+    // Get all daily stats to count tehillim from modalCompletions
+    // This matches the Analytics page calculation exactly
+    const allStats = await db.select().from(dailyStats);
+    
+    let totalRead = 0;
+    
+    for (const stats of allStats) {
+      // Count tehillim from modalCompletions only (same as Analytics page)
+      const completions = stats.modalCompletions as Record<string, number> || {};
+      for (const [modalType, count] of Object.entries(completions)) {
+        // Count the same types as Analytics page: global-tehillim-chain, tehillim-text, 
+        // chain-tehillim, special-tehillim, and individual-tehillim-*
+        if (
+          modalType.startsWith('individual-tehillim-') ||
+          modalType === 'individual-tehillim' ||
+          modalType === 'chain-tehillim' ||
+          modalType === 'global-tehillim-chain' ||
+          modalType === 'tehillim-text' ||
+          modalType === 'special-tehillim'
+        ) {
+          totalRead += count;
+        }
+      }
+    }
+    
+    // Books completed (total / 150, rounded down)
+    const booksCompleted = Math.floor(totalRead / 150);
+    
+    return { totalRead, booksCompleted, uniqueReaders: 0 };
+  }
+
+  async migrateTehillimNamesToChains(): Promise<{ migrated: number; skipped: number; errors: string[] }> {
+    let migrated = 0;
+    let skipped = 0;
+    const errors: string[] = [];
+    
+    try {
+      // Get all tehillim names
+      const names = await db.select().from(tehillimNames);
+      
+      for (const name of names) {
+        try {
+          // Generate slug from name - use numeric ID for Hebrew names
+          let slug: string;
+          const isLatin = /^[a-zA-Z0-9\s-]+$/.test(name.hebrewName);
+          if (isLatin) {
+            // Convert to URL-friendly slug
+            slug = name.hebrewName
+              .toLowerCase()
+              .replace(/[^a-z0-9\s-]/g, '')
+              .replace(/\s+/g, '-')
+              .replace(/-+/g, '-')
+              .substring(0, 50);
+          } else {
+            // Use numeric ID for Hebrew/non-Latin names
+            slug = `chain-${name.id}`;
+          }
+          
+          // Check if chain with this slug already exists
+          const existing = await db.select().from(tehillimChains).where(eq(tehillimChains.slug, slug)).limit(1);
+          if (existing.length > 0) {
+            skipped++;
+            continue;
+          }
+          
+          // Create the chain
+          await db.insert(tehillimChains).values({
+            name: name.hebrewName,
+            reason: name.reasonEnglish || name.reason || 'Prayer',
+            slug,
+            creatorDeviceId: 'migrated-from-global',
+            createdAt: name.dateAdded || new Date(),
+          });
+          
+          migrated++;
+        } catch (err) {
+          errors.push(`Error migrating name ID ${name.id}: ${err}`);
+        }
+      }
+    } catch (err) {
+      errors.push(`Error fetching tehillim names: ${err}`);
+    }
+    
+    return { migrated, skipped, errors };
   }
 
   // DEPRECATED - Use getSupabaseTehillim instead

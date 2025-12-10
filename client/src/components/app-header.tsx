@@ -5,13 +5,12 @@ import { useHomeSummary } from "@/hooks/use-home-summary";
 import { BarChart3, Info, Share2, Heart, Mail, Share, X, Menu, MessageSquare, Search, Calendar } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import logoImage from "@assets/A_project_of_(4)_1764762086237.png";
 import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
 import MessageModal from "./modals/message-modal";
 import { SearchModal } from "./SearchModal";
 import { getLocalDateString } from "@/lib/dateUtils";
-import { registerAction, unregisterAction } from "@/utils/dom-event-bridge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -116,42 +115,6 @@ export default function AppHeader() {
     }
   };
 
-  // Store callbacks in refs for DOM bridge to access current versions
-  const setLocationRef = useRef(setLocation);
-  const openModalRef = useRef(openModal);
-  const handleShareRef = useRef(handleShare);
-  const handleInstallClickRef = useRef(handleInstallClick);
-  const handleOpenMessageRef = useRef(handleOpenMessage);
-  const setShowSearchModalRef = useRef(setShowSearchModal);
-  
-  setLocationRef.current = setLocation;
-  openModalRef.current = openModal;
-  handleShareRef.current = handleShare;
-  handleInstallClickRef.current = handleInstallClick;
-  handleOpenMessageRef.current = handleOpenMessage;
-  setShowSearchModalRef.current = setShowSearchModal;
-
-  // Register DOM bridge actions for header buttons (FlutterFlow resilience)
-  useEffect(() => {
-    registerAction('menu-analytics', () => setLocationRef.current('/statistics'));
-    registerAction('menu-info', () => openModalRef.current('about', 'about'));
-    registerAction('menu-date-converter', () => openModalRef.current('date-calculator-fullscreen', 'table'));
-    registerAction('menu-share', () => handleShareRef.current());
-    registerAction('menu-install', () => handleInstallClickRef.current());
-    registerAction('header-message', () => handleOpenMessageRef.current());
-    registerAction('header-search', () => setShowSearchModalRef.current(true));
-    
-    return () => {
-      unregisterAction('menu-analytics');
-      unregisterAction('menu-info');
-      unregisterAction('menu-date-converter');
-      unregisterAction('menu-share');
-      unregisterAction('menu-install');
-      unregisterAction('header-message');
-      unregisterAction('header-search');
-    };
-  }, []);
-
   return (
     <>
       <header className="header-extended fixed top-0 left-0 right-0 bg-gradient-soft px-3 border-0 shadow-none z-40" data-bridge-container style={{ 
@@ -164,13 +127,16 @@ export default function AppHeader() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={`p-2 rounded-full hover:bg-white/50 transition-colors focus:outline-none ${
+                  className={`p-2 rounded-full hover:bg-white/50 transition-colors focus:outline-none relative ${
                     shouldHighlight ? 'animate-pulse border-2 border-blush shadow-lg' : ''
                   }`}
                   aria-label="Menu"
                   data-testid="button-menu"
                 >
                   <Menu className="h-5 w-5 text-black/70" />
+                  {!!todayMessage && !hasReadMessage && (
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-blush rounded-full" data-testid="indicator-unread-menu" />
+                  )}
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48">
@@ -239,17 +205,20 @@ export default function AppHeader() {
                   <MessageSquare className="h-5 w-5 mr-2" />
                   Community Feedback
                 </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleOpenMessage}
+                  className="cursor-pointer relative"
+                  data-testid="menu-item-message"
+                  data-action="menu-message"
+                >
+                  <Mail className="h-5 w-5 mr-2" />
+                  Daily Message
+                  {!!todayMessage && !hasReadMessage && (
+                    <span className="ml-auto w-2 h-2 bg-blush rounded-full" />
+                  )}
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <button
-              onClick={() => setShowSearchModal(true)}
-              className="p-2 rounded-full hover:bg-white/50 transition-colors"
-              aria-label="Search"
-              data-testid="button-search"
-              data-action="header-search"
-            >
-              <Search className="h-5 w-5 text-black/70" />
-            </button>
           </div>
           <div className="flex-shrink-0 flex items-center" style={{ height: 'var(--header-row-height)' }}>
             <img 
@@ -263,16 +232,13 @@ export default function AppHeader() {
           </div>
           <div className="flex items-center gap-1 flex-1 justify-end">
             <button
-              onClick={handleOpenMessage}
-              className="p-2 rounded-full hover:bg-white/50 transition-colors relative"
-              aria-label="Daily Message"
-              data-testid="button-message"
-              data-action="header-message"
+              onClick={() => setShowSearchModal(true)}
+              className="p-2 rounded-full hover:bg-white/50 transition-colors"
+              aria-label="Search"
+              data-testid="button-search"
+              data-action="header-search"
             >
-              <Mail className="h-5 w-5 text-black/70" />
-              {!!todayMessage && !hasReadMessage && (
-                <span className="absolute top-1 right-1 w-2 h-2 bg-blush rounded-full" data-testid="indicator-unread-message" />
-              )}
+              <Search className="h-5 w-5 text-black/70" />
             </button>
           </div>
         </div>
