@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins, DollarSign, Trophy, RefreshCw, HandHeart, Brain } from "lucide-react";
+import { Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins, DollarSign, Trophy, RefreshCw, HandHeart, Brain, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
@@ -211,6 +211,8 @@ export default function Statistics() {
     nishmas: "Nishmas",
     "birkat-hamazon": "Birkat Hamazon",
     "tehillim": "Tehillim",
+    "individual-tehillim": "Individual Tehillim",
+    "tehillim-chains": "Tehillim Chains",
     "special-tehillim": "Special Tehillim", 
     "nishmas-campaign": "Nishmas Kol Chai",
     "al-hamichiya": "Al Hamichiya",
@@ -262,6 +264,7 @@ export default function Statistics() {
     "tehillim-text": ScrollText, // Legacy key for existing data
     "special-tehillim": Star,
     "individual-tehillim": ScrollText,
+    "tehillim-chains": Link2,  // Chain icon for tehillim chains
     "nishmas-campaign": Heart,
     "al-hamichiya": Clock3,
     "individual-prayer": Heart,
@@ -488,9 +491,10 @@ export default function Statistics() {
                   {(() => {
                     const modalCompletions = (currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {};
                     
-                    // Create a processed entries array with tehillim aggregated
+                    // Create a processed entries array with tehillim split into Individual vs Chains
                     const processedEntries: Array<[string, number]> = [];
-                    let tehillimTotal = 0;
+                    let individualTehillimTotal = 0;
+                    let tehillimChainsTotal = 0;
                     let womensPrayerTotal = 0;
                     let brochasTotal = 0;
 
@@ -498,11 +502,13 @@ export default function Statistics() {
                     // Note: Server-side analytics doesn't have dual-write issue - each completion is tracked once
                     // (global-tehillim-chain for new completions, tehillim-text for historical)
                     Object.entries(modalCompletions).forEach(([modalType, count]) => {
-                      if (modalType.startsWith('individual-tehillim-') || modalType === 'individual-tehillim' ||
-                          modalType === 'global-tehillim-chain' || modalType === 'tehillim-text' ||
-                          modalType === 'chain-tehillim') {
-                        // Aggregate all tehillim types into one
-                        tehillimTotal += (count as number) || 0;
+                      if (modalType.startsWith('individual-tehillim-') || modalType === 'individual-tehillim') {
+                        // Individual Tehillim (from tehillim selector)
+                        individualTehillimTotal += (count as number) || 0;
+                      } else if (modalType === 'global-tehillim-chain' || modalType === 'tehillim-text' ||
+                          modalType === 'chain-tehillim' || modalType.startsWith('chain-tehillim-')) {
+                        // Tehillim Chains (global chain and personal chains)
+                        tehillimChainsTotal += (count as number) || 0;
                       } else if (modalType === 'tzedaka' || modalType === 'donate') {
                         // Skip tzedaka modals - we'll aggregate them separately with tzedakaActs
                       } else if (modalType.startsWith('womens-prayer-')) {
@@ -519,9 +525,14 @@ export default function Statistics() {
                       }
                     });
                     
-                    // Add aggregated tehillim if there are any
-                    if (tehillimTotal > 0) {
-                      processedEntries.push(['tehillim', tehillimTotal]);
+                    // Add individual tehillim if there are any
+                    if (individualTehillimTotal > 0) {
+                      processedEntries.push(['individual-tehillim', individualTehillimTotal]);
+                    }
+                    
+                    // Add tehillim chains if there are any
+                    if (tehillimChainsTotal > 0) {
+                      processedEntries.push(['tehillim-chains', tehillimChainsTotal]);
                     }
 
                     if (womensPrayerTotal > 0) {
