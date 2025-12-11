@@ -16,6 +16,10 @@ import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
 import type { TehillimChain } from "@shared/schema";
 
+const toTitleCase = (str: string) => {
+  return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+};
+
 const getReasonIcon = (reason: string) => {
   const lowerReason = reason.toLowerCase();
   if (lowerReason.includes('refuah') || lowerReason.includes('health')) return HeartPulse;
@@ -525,7 +529,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                           <p className="platypi-medium text-sm text-black">{chain.name}</p>
                           <div className="flex items-center gap-1.5">
                             <ReasonIcon size={12} className="text-blush/70" />
-                            <p className="platypi-regular text-xs text-black/60">{chain.reason}</p>
+                            <p className="platypi-regular text-xs text-black/60">{toTitleCase(chain.reason)}</p>
                           </div>
                         </div>
                         <ChevronRight size={16} className="text-blush" />

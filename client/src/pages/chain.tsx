@@ -25,6 +25,10 @@ interface ChainWithMeta extends TehillimChain {
   hasActiveReading?: boolean;
 }
 
+const toTitleCase = (str: string) => {
+  return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+};
+
 const getReasonIcon = (reason: string) => {
   const lowerReason = reason.toLowerCase();
   if (lowerReason.includes('refuah') || lowerReason.includes('health')) return HeartPulse;
@@ -278,7 +282,7 @@ export default function ChainPage() {
       try {
         await navigator.share({
           title: `Tehillim Chain: ${chain?.name}`,
-          text: `Join me in saying Tehillim for ${chain?.name} - ${chain?.reason}`,
+          text: `Join me in saying Tehillim for ${chain?.name} - ${toTitleCase(chain?.reason || '')}`,
           url,
         });
         return;
@@ -486,7 +490,7 @@ export default function ChainPage() {
                   return <ReasonIcon size={20} className="text-blush" />;
                 })()}
               </div>
-              <p className="platypi-regular text-[10px] text-black/50 mt-1 capitalize">{chain.reason}</p>
+              <p className="platypi-regular text-[10px] text-black/50 mt-1">{toTitleCase(chain.reason)}</p>
             </div>
           </div>
 
