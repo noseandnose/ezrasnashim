@@ -451,7 +451,7 @@ export default function TorahSection({}: TorahSectionProps) {
           })}
         </div>
 
-        {/* Shmirat Halashon Bar - Uses featured content */}
+        {/* Inspiration Hub Bar - Uses featured content */}
         {(() => {
           const hasVideo = !!featuredContent?.videoUrl;
           const hasAudio = !!featuredContent?.audioUrl;
@@ -473,7 +473,7 @@ export default function TorahSection({}: TorahSectionProps) {
                   <Star className="text-white" size={16} strokeWidth={1.5} />
                 </div>
                 <div className="text-left flex-grow">
-                  <h3 className="platypi-bold text-sm text-black">Shmirat Halashon</h3>
+                  <h3 className="platypi-bold text-sm text-black">Inspiration Hub</h3>
                   <p className="platypi-regular text-xs text-black/60">
                     {featuredContent?.title ? toCamelCase(featuredContent.title) : 'Special Topics'}
                   </p>
@@ -506,7 +506,7 @@ export default function TorahSection({}: TorahSectionProps) {
                   <Star className="text-gray-500" size={16} strokeWidth={1.5} />
                 </div>
                 <div className="text-left flex-grow">
-                  <h3 className="platypi-bold text-sm text-black">Shmirat Halashon</h3>
+                  <h3 className="platypi-bold text-sm text-black">Inspiration Hub</h3>
                   <p className="platypi-regular text-xs text-black/60">Special Topics</p>
                 </div>
                 {/* No play icon when there's no content */}
