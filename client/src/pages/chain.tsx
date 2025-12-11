@@ -457,7 +457,7 @@ export default function ChainPage() {
             data-testid="button-reminder"
             title="Set daily reminder"
           >
-            <Bell size={16} />
+            <Bell size={16} strokeWidth={2.5} />
           </button>
           <button
             onClick={handleShare}
