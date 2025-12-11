@@ -380,6 +380,25 @@ export const featuredContent = pgTable("featured_content", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Today's Special - expandable content bar for home page
+export const todaysSpecial = pgTable("todays_special", {
+  id: serial("id").primaryKey(),
+  fromDate: date("from_date").notNull(),
+  untilDate: date("until_date").notNull(),
+  title: text("title").notNull(),
+  subtitle: text("subtitle"),
+  imageUrl: text("image_url"),
+  contentEnglish: text("content_english"),
+  contentHebrew: text("content_hebrew"),
+  linkTitle: text("link_title"),
+  url: text("url"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertTodaysSpecialSchema = createInsertSchema(todaysSpecial).omit({ id: true, createdAt: true });
+export type InsertTodaysSpecial = z.infer<typeof insertTodaysSpecialSchema>;
+export type TodaysSpecial = typeof todaysSpecial.$inferSelect;
+
 // Pirkei Avot table for internal content management
 export const pirkeiAvot = pgTable("pirkei_avot", {
   id: serial("id").primaryKey(),
