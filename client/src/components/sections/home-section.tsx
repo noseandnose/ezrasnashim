@@ -1,4 +1,4 @@
-import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Star, Sparkles, Settings, ExternalLink, Plus, Minus } from "lucide-react";
+import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Star, Sparkles, Settings, Plus, Minus } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
@@ -462,7 +462,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
                 {/* Floating Settings Button - Bottom Left */}
                 <button
                   onClick={() => setShowTodaysSpecialSettings(!showTodaysSpecialSettings)}
-                  className="absolute bottom-3 left-3 bg-gradient-feminine text-white rounded-full p-2.5 shadow-lg hover:scale-110 transition-all duration-200"
+                  className="absolute bottom-3 left-3 bg-gradient-feminine text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:scale-110 transition-all duration-200"
                   data-testid="button-todays-special-settings"
                 >
                   <Settings size={18} />
@@ -546,11 +546,10 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
                     href={todaysSpecial.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="absolute bottom-3 right-3 bg-gradient-feminine text-white rounded-full p-2.5 shadow-lg hover:scale-110 transition-all duration-200"
+                    className="absolute bottom-3 right-3 bg-gradient-feminine text-white rounded-full px-4 py-2 shadow-lg hover:scale-105 transition-all duration-200 platypi-medium text-sm"
                     data-testid="link-todays-special"
-                    title={todaysSpecial.linkTitle}
                   >
-                    <ExternalLink size={18} />
+                    {todaysSpecial.linkTitle}
                   </a>
                 )}
               </div>
