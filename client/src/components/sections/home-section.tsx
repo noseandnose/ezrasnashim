@@ -445,75 +445,10 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             
             {/* Expanded Content */}
             {todaysSpecialExpanded && (
-              <div className="px-3 pb-3 border-t border-blush/10">
-                {/* Settings Row */}
-                <div className="flex items-center justify-end gap-2 py-2 border-b border-blush/10">
-                  <button
-                    onClick={() => setShowTodaysSpecialSettings(!showTodaysSpecialSettings)}
-                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                    data-testid="button-todays-special-settings"
-                  >
-                    <Settings size={16} className="text-black/60" />
-                  </button>
-                </div>
-                
-                {/* Settings Panel */}
-                {showTodaysSpecialSettings && (
-                  <div className="py-2 px-2 bg-gray-50 rounded-xl my-2 space-y-2">
-                    {/* Language Toggle - only show if both languages exist */}
-                    {hasBothLanguages && (
-                      <div className="flex items-center justify-between">
-                        <span className="platypi-medium text-xs text-black">Language</span>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => setTodaysSpecialLanguage('english')}
-                            className={`px-2 py-1 rounded-full text-xs platypi-medium transition-colors ${
-                              todaysSpecialLanguage === 'english' 
-                                ? 'bg-gradient-feminine text-white' 
-                                : 'bg-gray-200 text-black/70'
-                            }`}
-                          >
-                            English
-                          </button>
-                          <button
-                            onClick={() => setTodaysSpecialLanguage('hebrew')}
-                            className={`px-2 py-1 rounded-full text-xs platypi-medium transition-colors ${
-                              todaysSpecialLanguage === 'hebrew' 
-                                ? 'bg-gradient-feminine text-white' 
-                                : 'bg-gray-200 text-black/70'
-                            }`}
-                          >
-                            עברית
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Font Size Controls */}
-                    <div className="flex items-center justify-between">
-                      <span className="platypi-medium text-xs text-black">Font Size</span>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setTodaysSpecialFontSize(prev => Math.max(12, prev - 2))}
-                          className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center hover:bg-gray-300 transition-colors"
-                        >
-                          <span className="text-sm font-bold">−</span>
-                        </button>
-                        <span className="platypi-regular text-xs w-6 text-center">{todaysSpecialFontSize}</span>
-                        <button
-                          onClick={() => setTodaysSpecialFontSize(prev => Math.min(24, prev + 2))}
-                          className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center hover:bg-gray-300 transition-colors"
-                        >
-                          <span className="text-sm font-bold">+</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
+              <div className="relative px-3 pb-16 pt-3 border-t border-blush/10">
                 {/* Content */}
                 <div 
-                  className={`py-2 platypi-regular text-black leading-relaxed whitespace-pre-line ${
+                  className={`platypi-regular text-black leading-relaxed whitespace-pre-line ${
                     todaysSpecialLanguage === 'hebrew' ? 'text-right' : 'text-left'
                   }`}
                   style={{ fontSize: `${todaysSpecialFontSize}px` }}
@@ -524,17 +459,98 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
                     : todaysSpecial.contentEnglish || todaysSpecial.contentHebrew}
                 </div>
                 
-                {/* Link Button - only show if URL exists */}
+                {/* Floating Settings Button - Bottom Left */}
+                <button
+                  onClick={() => setShowTodaysSpecialSettings(!showTodaysSpecialSettings)}
+                  className="absolute bottom-3 left-3 bg-gradient-feminine text-white rounded-full p-2.5 shadow-lg hover:scale-110 transition-all duration-200"
+                  data-testid="button-todays-special-settings"
+                >
+                  <Settings size={18} />
+                </button>
+                
+                {/* Settings Panel - Above floating button */}
+                {showTodaysSpecialSettings && (
+                  <>
+                    {/* Backdrop */}
+                    <div 
+                      className="fixed inset-0 z-40"
+                      onClick={() => setShowTodaysSpecialSettings(false)}
+                    />
+                    <div className="absolute bottom-14 left-3 bg-white rounded-2xl shadow-xl border border-gray-200 p-3 z-50 min-w-[180px]">
+                      <div className="space-y-3">
+                        {/* Language Toggle */}
+                        {hasBothLanguages && (
+                          <div>
+                            <p className="text-xs font-medium text-gray-700 mb-1.5 text-center">Language</p>
+                            <div className="flex bg-gradient-feminine rounded-xl p-0.5">
+                              <button
+                                onClick={() => {
+                                  setTodaysSpecialLanguage('english');
+                                  setShowTodaysSpecialSettings(false);
+                                }}
+                                className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-colors flex-1 ${
+                                  todaysSpecialLanguage === 'english' 
+                                    ? 'bg-white text-black shadow-sm' 
+                                    : 'text-white hover:text-gray-100'
+                                }`}
+                              >
+                                English
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setTodaysSpecialLanguage('hebrew');
+                                  setShowTodaysSpecialSettings(false);
+                                }}
+                                className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-colors flex-1 ${
+                                  todaysSpecialLanguage === 'hebrew' 
+                                    ? 'bg-white text-black shadow-sm' 
+                                    : 'text-white hover:text-gray-100'
+                                }`}
+                              >
+                                עברית
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Font Size Controls */}
+                        <div>
+                          <p className="text-xs font-medium text-gray-700 mb-1.5 text-center">Font Size</p>
+                          <div className="flex items-center justify-center gap-2 bg-gradient-feminine rounded-xl p-1.5">
+                            <button
+                              onClick={() => setTodaysSpecialFontSize(prev => Math.max(12, prev - 2))}
+                              className="w-7 h-7 flex items-center justify-center rounded-lg bg-white text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors shadow-sm"
+                            >
+                              A-
+                            </button>
+                            <span className="text-xs text-white font-medium px-1">
+                              {todaysSpecialFontSize}px
+                            </span>
+                            <button
+                              onClick={() => setTodaysSpecialFontSize(prev => Math.min(24, prev + 2))}
+                              className="w-7 h-7 flex items-center justify-center rounded-lg bg-white text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors shadow-sm"
+                            >
+                              A+
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-gray-500 mt-2 text-center">Tap outside to close</p>
+                    </div>
+                  </>
+                )}
+                
+                {/* Floating Link Button - Bottom Right */}
                 {todaysSpecial.url && todaysSpecial.linkTitle && (
                   <a
                     href={todaysSpecial.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-feminine text-white rounded-xl platypi-medium text-xs hover:scale-105 transition-transform mt-2"
+                    className="absolute bottom-3 right-3 bg-gradient-feminine text-white rounded-full p-2.5 shadow-lg hover:scale-110 transition-all duration-200"
                     data-testid="link-todays-special"
+                    title={todaysSpecial.linkTitle}
                   >
-                    {todaysSpecial.linkTitle}
-                    <ExternalLink size={12} />
+                    <ExternalLink size={18} />
                   </a>
                 )}
               </div>
