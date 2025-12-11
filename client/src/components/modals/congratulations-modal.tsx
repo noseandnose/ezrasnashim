@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/lib/types";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { useEffect } from "react";
-import stage3Image from '@assets/Stage3_1753300751700.png';
+import mazalTovBackground from '@assets/Untitled_design_(5)_1765437598889.png';
 
 export default function CongratulationsModal() {
   const { activeModal, closeModal } = useModalStore();
@@ -24,7 +24,7 @@ export default function CongratulationsModal() {
           {/* Beautiful Stage 3 Flower Image - Fill entire modal */}
           <div className="absolute inset-0 pointer-events-none rounded-3xl overflow-hidden">
             <img 
-              src={stage3Image} 
+              src={mazalTovBackground} 
               alt="Beautiful flower bouquet - Full completions!" 
               className="w-full h-full object-cover opacity-30"
             />
