@@ -184,6 +184,17 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   // Check if Today's Special has content
   const hasTodaysSpecialContent = todaysSpecial && (todaysSpecial.contentEnglish || todaysSpecial.contentHebrew);
   const hasBothLanguages = todaysSpecial?.contentEnglish && todaysSpecial?.contentHebrew;
+  
+  // Helper function to replace placeholders in Today's Special text
+  const replacePlaceholders = (text: string | null | undefined): string => {
+    if (!text) return '';
+    return text
+      .replace(/\{\{shkia\}\}/gi, jewishTimesQuery.data?.shkia || '')
+      .replace(/\{\{sunrise\}\}/gi, jewishTimesQuery.data?.sunrise || '')
+      .replace(/\{\{mincha\}\}/gi, jewishTimesQuery.data?.minchaGedolah || '')
+      .replace(/\{\{candleLighting\}\}/gi, jewishTimesQuery.data?.candleLighting || '')
+      .replace(/\{\{havdalah\}\}/gi, jewishTimesQuery.data?.havdalah || '');
+  };
 
 
 
@@ -433,9 +444,9 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
                 
                 {/* Title and Subtitle */}
                 <div className="flex-grow">
-                  <h3 className="platypi-bold text-sm text-black">{todaysSpecial.title || "Today's Special"}</h3>
+                  <h3 className="platypi-bold text-sm text-black">{replacePlaceholders(todaysSpecial.title) || "Today's Special"}</h3>
                   {todaysSpecial.subtitle && (
-                    <p className="platypi-regular text-xs text-black/70">{todaysSpecial.subtitle}</p>
+                    <p className="platypi-regular text-xs text-black/70">{replacePlaceholders(todaysSpecial.subtitle)}</p>
                   )}
                 </div>
                 
@@ -458,8 +469,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
                   dir={todaysSpecialLanguage === 'hebrew' ? 'rtl' : 'ltr'}
                 >
                   {todaysSpecialLanguage === 'hebrew' && todaysSpecial.contentHebrew
-                    ? todaysSpecial.contentHebrew
-                    : todaysSpecial.contentEnglish || todaysSpecial.contentHebrew}
+                    ? replacePlaceholders(todaysSpecial.contentHebrew)
+                    : replacePlaceholders(todaysSpecial.contentEnglish || todaysSpecial.contentHebrew)}
                 </div>
                 
                 {/* Floating Settings Button - Bottom Left */}
