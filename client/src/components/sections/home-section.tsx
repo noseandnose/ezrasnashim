@@ -462,8 +462,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               <div className="relative px-3 pb-16 pt-3 border-t border-blush/10">
                 {/* Content */}
                 <div 
-                  className={`platypi-regular text-black leading-relaxed whitespace-pre-line ${
-                    todaysSpecialLanguage === 'hebrew' ? 'text-right' : 'text-left'
+                  className={`text-black leading-relaxed whitespace-pre-line ${
+                    todaysSpecialLanguage === 'hebrew' ? 'vc-koren-hebrew' : 'platypi-regular text-left'
                   }`}
                   style={{ fontSize: `${todaysSpecialFontSize}px` }}
                   dir={todaysSpecialLanguage === 'hebrew' ? 'rtl' : 'ltr'}
