@@ -192,8 +192,8 @@ export default function TorahSection({}: TorahSectionProps) {
     {
       id: 'speakers',
       icon: BookOpen,
-      title: 'Featured Speakers',
-      subtitle: 'Daily Torah Inspiration',
+      title: 'Parsha Inspiration',
+      subtitle: 'Weekly Torah wisdom',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
@@ -355,7 +355,7 @@ export default function TorahSection({}: TorahSectionProps) {
                 isLoading = parshaVortsLoading;
                 hasContent = activeVortsForButton.length > 0;
                 if (hasContent && !isCompleted && firstVort) {
-                  displaySubtitle = firstVort.speaker ? `${firstVort.speaker}` : 'Daily Torah Inspiration';
+                  displaySubtitle = firstVort.speaker ? `by ${firstVort.speaker}` : 'Weekly Torah wisdom';
                 } else if (isError) {
                   displaySubtitle = 'Temporarily unavailable';
                 } else if (isLoading) {
