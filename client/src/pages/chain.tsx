@@ -307,29 +307,22 @@ export default function ChainPage() {
     }
   };
 
-  const handleCreateCalendarReminder = () => {
+  const handleGoogleCalendar = () => {
     if (!chain) return;
     
     const chainUrl = `${window.location.origin}/c/${slug}`;
     const eventTitle = `Daven for ${chain.name}`;
     
-    // Parse the selected time
     const [hours, minutes] = reminderTime.split(':').map(Number);
-    
-    // Create start date for tomorrow at the selected time
     const startDate = new Date();
     startDate.setDate(startDate.getDate() + 1);
     startDate.setHours(hours, minutes, 0, 0);
-    
-    // Event duration: 15 minutes
     const endDate = new Date(startDate.getTime() + 15 * 60 * 1000);
     
-    // Format dates for Google Calendar (YYYYMMDDTHHMMSS)
     const formatDate = (date: Date) => {
       return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
     };
     
-    // Create Google Calendar URL with recurrence (Sun-Fri, excluding Saturday/Shabbat)
     const googleCalendarUrl = new URL('https://calendar.google.com/calendar/r/eventedit');
     googleCalendarUrl.searchParams.set('text', eventTitle);
     googleCalendarUrl.searchParams.set('location', chainUrl);
@@ -337,14 +330,54 @@ export default function ChainPage() {
     googleCalendarUrl.searchParams.set('recur', 'RRULE:FREQ=WEEKLY;BYDAY=SU,MO,TU,WE,TH,FR');
     googleCalendarUrl.searchParams.set('details', `Time to say Tehillim for ${chain.name}\n\nOpen your Tehillim chain: ${chainUrl}`);
     
-    // Open in new tab
     window.open(googleCalendarUrl.toString(), '_blank');
+    setShowReminderDialog(false);
+    toast({ title: "Calendar opened!", description: "Save the event to get daily reminders." });
+  };
+
+  const handleAppleCalendar = () => {
+    if (!chain) return;
+    
+    const chainUrl = `${window.location.origin}/c/${slug}`;
+    const eventTitle = `Daven for ${chain.name}`;
+    
+    const [hours, minutes] = reminderTime.split(':').map(Number);
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() + 1);
+    startDate.setHours(hours, minutes, 0, 0);
+    const endDate = new Date(startDate.getTime() + 15 * 60 * 1000);
+    
+    const formatICSDate = (date: Date) => {
+      return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '').slice(0, -1);
+    };
+    
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Ezras Nashim//Tehillim Chain//EN',
+      'BEGIN:VEVENT',
+      `DTSTART:${formatICSDate(startDate)}`,
+      `DTEND:${formatICSDate(endDate)}`,
+      'RRULE:FREQ=WEEKLY;BYDAY=SU,MO,TU,WE,TH,FR',
+      `SUMMARY:${eventTitle}`,
+      `LOCATION:${chainUrl}`,
+      `DESCRIPTION:Time to say Tehillim for ${chain.name}\\n\\nOpen your Tehillim chain: ${chainUrl}`,
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n');
+    
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `tehillim-reminder-${slug}.ics`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
     
     setShowReminderDialog(false);
-    toast({
-      title: "Calendar opened!",
-      description: "Save the event to get daily reminders.",
-    });
+    toast({ title: "Calendar file downloaded!", description: "Open it to add to your calendar." });
   };
 
   const handleComplete = () => {
@@ -406,7 +439,7 @@ export default function ChainPage() {
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={() => setShowReminderDialog(true)}
-            className="p-2 rounded-full bg-gradient-feminine text-white hover:scale-105 transition-all shadow-sm"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-gradient-feminine text-white hover:scale-105 transition-all shadow-sm"
             data-testid="button-reminder"
             title="Set daily reminder"
           >
@@ -583,12 +616,21 @@ export default function ChainPage() {
               Repeats Sunday through Friday (excluding Shabbat)
             </p>
             
-            <Button
-              onClick={handleCreateCalendarReminder}
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium hover:scale-105 transition-all"
-            >
-              Add to Calendar
-            </Button>
+            <div className="space-y-3">
+              <Button
+                onClick={handleGoogleCalendar}
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium hover:scale-105 transition-all"
+              >
+                Add to Google Calendar
+              </Button>
+              <Button
+                onClick={handleAppleCalendar}
+                variant="outline"
+                className="w-full border-blush/30 text-black py-3 rounded-xl platypi-medium hover:scale-105 hover:bg-blush/5 transition-all"
+              >
+                Add to Apple Calendar
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
