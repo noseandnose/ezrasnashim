@@ -406,7 +406,10 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
 
         {/* Today's Special Expandable Bar - Only shown when content exists */}
         {hasTodaysSpecialContent && todaysSpecial && (
-          <div className="bg-white/80 rounded-xl mt-2 overflow-hidden border border-blush/20">
+          <div 
+            className="bg-white/80 rounded-xl mt-2 overflow-hidden border border-blush/20"
+            style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}
+          >
             {/* Collapsed/Header Bar */}
             <button
               onClick={() => setTodaysSpecialExpanded(!todaysSpecialExpanded)}
