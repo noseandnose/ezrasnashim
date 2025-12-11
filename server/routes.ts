@@ -2570,6 +2570,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate ICS calendar file for a Tehillim Chain reminder
+  app.get("/api/tehillim-chains/:slug/reminder.ics", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const { time } = req.query;
+      
+      const chain = await storage.getTehillimChainBySlug(slug);
+      if (!chain) {
+        return res.status(404).json({ error: "Chain not found" });
+      }
+      
+      const reminderTime = (time as string) || '09:00';
+      const [hours, minutes] = reminderTime.split(':').map(Number);
+      
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() + 1);
+      startDate.setHours(hours, minutes, 0, 0);
+      const endDate = new Date(startDate.getTime() + 15 * 60 * 1000);
+      
+      const formatLocalICSDate = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const h = String(date.getHours()).padStart(2, '0');
+        const m = String(date.getMinutes()).padStart(2, '0');
+        const s = String(date.getSeconds()).padStart(2, '0');
+        return `${year}${month}${day}T${h}${m}${s}`;
+      };
+      
+      const chainUrl = `${req.protocol}://${req.get('host')}/c/${slug}`;
+      const eventTitle = `Daven for ${chain.name}`;
+      
+      const icsContent = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Ezras Nashim//Tehillim Chain//EN',
+        'METHOD:PUBLISH',
+        'BEGIN:VEVENT',
+        `UID:${slug}-${Date.now()}@ezrasnashim.app`,
+        `DTSTAMP:${formatLocalICSDate(new Date())}`,
+        `DTSTART:${formatLocalICSDate(startDate)}`,
+        `DTEND:${formatLocalICSDate(endDate)}`,
+        'RRULE:FREQ=WEEKLY;BYDAY=SU,MO,TU,WE,TH,FR',
+        `SUMMARY:${eventTitle}`,
+        `LOCATION:${chainUrl}`,
+        `DESCRIPTION:Time to say Tehillim for ${chain.name}. Open your Tehillim chain: ${chainUrl}`,
+        'END:VEVENT',
+        'END:VCALENDAR'
+      ].join('\r\n');
+      
+      res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="tehillim-reminder-${slug}.ics"`);
+      res.send(icsContent);
+    } catch (error) {
+      console.error("Error generating ICS file:", error);
+      res.status(500).json({ error: "Failed to generate calendar file" });
+    }
+  });
+
   // Get a specific Tehillim Chain by slug (includes stats and next psalm for fast loading)
   app.get("/api/tehillim-chains/:slug", async (req, res) => {
     try {

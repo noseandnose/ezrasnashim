@@ -341,7 +341,14 @@ export default function ChainPage() {
     googleCalendarUrl.searchParams.set('recur', 'RRULE:FREQ=WEEKLY;BYDAY=SU,MO,TU,WE,TH,FR');
     googleCalendarUrl.searchParams.set('details', `Time to say Tehillim for ${chain.name}\n\nOpen your Tehillim chain: ${chainUrl}`);
     
-    window.open(googleCalendarUrl.toString(), '_blank');
+    const calendarUrl = googleCalendarUrl.toString();
+    const newWindow = window.open(calendarUrl, '_blank');
+    
+    // If window.open fails (blocked by WebView), fallback to same-window navigation
+    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+      window.location.assign(calendarUrl);
+    }
+    
     setShowReminderDialog(false);
     toast({ title: "Calendar opened!", description: "Save the event to get daily reminders." });
   };
@@ -349,63 +356,14 @@ export default function ChainPage() {
   const handleAppleCalendar = () => {
     if (!chain) return;
     
-    const chainUrl = `${window.location.origin}/c/${slug}`;
-    const eventTitle = `Daven for ${chain.name}`;
+    // Use backend endpoint for ICS file - works better in WebViews and mobile apps
+    const icsUrl = `/api/tehillim-chains/${slug}/reminder.ics?time=${encodeURIComponent(reminderTime)}`;
     
-    const [hours, minutes] = reminderTime.split(':').map(Number);
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() + 1);
-    startDate.setHours(hours, minutes, 0, 0);
-    const endDate = new Date(startDate.getTime() + 15 * 60 * 1000);
-    
-    // Format in local time for ICS file
-    const formatLocalICSDate = (date: Date) => {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const h = String(date.getHours()).padStart(2, '0');
-      const m = String(date.getMinutes()).padStart(2, '0');
-      const s = String(date.getSeconds()).padStart(2, '0');
-      return `${year}${month}${day}T${h}${m}${s}`;
-    };
-    
-    const icsContent = [
-      'BEGIN:VCALENDAR',
-      'VERSION:2.0',
-      'PRODID:-//Ezras Nashim//Tehillim Chain//EN',
-      'METHOD:PUBLISH',
-      'BEGIN:VEVENT',
-      `UID:${slug}-${Date.now()}@ezrasnashim.app`,
-      `DTSTAMP:${formatLocalICSDate(new Date())}`,
-      `DTSTART:${formatLocalICSDate(startDate)}`,
-      `DTEND:${formatLocalICSDate(endDate)}`,
-      'RRULE:FREQ=WEEKLY;BYDAY=SU,MO,TU,WE,TH,FR',
-      `SUMMARY:${eventTitle}`,
-      `LOCATION:${chainUrl}`,
-      `DESCRIPTION:Time to say Tehillim for ${chain.name}. Open your Tehillim chain: ${chainUrl}`,
-      'END:VEVENT',
-      'END:VCALENDAR'
-    ].join('\r\n');
-    
-    // Use data URI approach for better iOS Safari compatibility
-    const dataUri = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(icsContent);
-    
-    // For iOS, open in same window to trigger calendar app
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    if (isIOS) {
-      window.location.href = dataUri;
-    } else {
-      // For desktop, use download link
-      const link = document.createElement('a');
-      link.href = dataUri;
-      link.download = `tehillim-reminder-${slug}.ics`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+    // Navigate to the ICS file - this triggers a download/calendar open in most environments
+    window.location.assign(icsUrl);
     
     setShowReminderDialog(false);
-    toast({ title: "Calendar opened!", description: "Add the event to get daily reminders." });
+    toast({ title: "Calendar file downloading!", description: "Open the file to add the reminder to your calendar." });
   };
 
   const handleComplete = () => {
