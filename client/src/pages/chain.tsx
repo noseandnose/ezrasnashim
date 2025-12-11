@@ -1,7 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRoute, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Share2, ChevronLeft, Heart, Briefcase, Baby, Home, Star, Shield, Sparkles, HeartPulse, Settings } from "lucide-react";
+import { Share2, ChevronLeft, Heart, Briefcase, Baby, Home, Star, Shield, Sparkles, HeartPulse, Settings, Bell } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { formatTextContent } from "@/lib/text-formatter";
 import { AttributionSection } from "@/components/ui/attribution-section";
@@ -68,6 +70,10 @@ export default function ChainPage() {
   
   // Track loading state for find another button
   const [isFindingAnother, setIsFindingAnother] = useState(false);
+  
+  // Reminder dialog state
+  const [showReminderDialog, setShowReminderDialog] = useState(false);
+  const [reminderTime, setReminderTime] = useState("09:00");
   
   // Koren URL for attribution
   const korenUrl = useKorenUrl();
@@ -301,6 +307,46 @@ export default function ChainPage() {
     }
   };
 
+  const handleCreateCalendarReminder = () => {
+    if (!chain) return;
+    
+    const chainUrl = `${window.location.origin}/c/${slug}`;
+    const eventTitle = `Daven for ${chain.name}`;
+    
+    // Parse the selected time
+    const [hours, minutes] = reminderTime.split(':').map(Number);
+    
+    // Create start date for tomorrow at the selected time
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() + 1);
+    startDate.setHours(hours, minutes, 0, 0);
+    
+    // Event duration: 15 minutes
+    const endDate = new Date(startDate.getTime() + 15 * 60 * 1000);
+    
+    // Format dates for Google Calendar (YYYYMMDDTHHMMSS)
+    const formatDate = (date: Date) => {
+      return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    };
+    
+    // Create Google Calendar URL with recurrence (Sun-Fri, excluding Saturday/Shabbat)
+    const googleCalendarUrl = new URL('https://calendar.google.com/calendar/r/eventedit');
+    googleCalendarUrl.searchParams.set('text', eventTitle);
+    googleCalendarUrl.searchParams.set('location', chainUrl);
+    googleCalendarUrl.searchParams.set('dates', `${formatDate(startDate)}/${formatDate(endDate)}`);
+    googleCalendarUrl.searchParams.set('recur', 'RRULE:FREQ=WEEKLY;BYDAY=SU,MO,TU,WE,TH,FR');
+    googleCalendarUrl.searchParams.set('details', `Time to say Tehillim for ${chain.name}\n\nOpen your Tehillim chain: ${chainUrl}`);
+    
+    // Open in new tab
+    window.open(googleCalendarUrl.toString(), '_blank');
+    
+    setShowReminderDialog(false);
+    toast({
+      title: "Calendar opened!",
+      description: "Save the event to get daily reminders.",
+    });
+  };
+
   const handleComplete = () => {
     if (currentPsalm) {
       completeReadingMutation.mutate(currentPsalm);
@@ -357,14 +403,24 @@ export default function ChainPage() {
           </h1>
         </div>
         
-        <button
-          onClick={handleShare}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-feminine text-white hover:scale-105 transition-all shadow-sm flex-shrink-0"
-          data-testid="button-share"
-        >
-          <Share2 size={16} />
-          <span className="text-sm platypi-medium">Share</span>
-        </button>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            onClick={() => setShowReminderDialog(true)}
+            className="p-2 rounded-full bg-gradient-feminine text-white hover:scale-105 transition-all shadow-sm"
+            data-testid="button-reminder"
+            title="Set daily reminder"
+          >
+            <Bell size={16} />
+          </button>
+          <button
+            onClick={handleShare}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-feminine text-white hover:scale-105 transition-all shadow-sm"
+            data-testid="button-share"
+          >
+            <Share2 size={16} />
+            <span className="text-sm platypi-medium">Share</span>
+          </button>
+        </div>
       </div>
 
       {/* Scrollable content area */}
@@ -499,6 +555,43 @@ export default function ChainPage() {
           onLanguageChange={(lang) => setShowHebrew(lang === 'hebrew')}
         />
       </div>
+
+      {/* Daily Reminder Dialog */}
+      <Dialog open={showReminderDialog} onOpenChange={setShowReminderDialog}>
+        <DialogContent className="max-w-sm mx-auto rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="platypi-bold text-xl text-center">Set Daily Reminder</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <p className="platypi-regular text-black/70 text-center text-sm">
+              Get a daily reminder to daven for {chain?.name}
+            </p>
+            
+            <div className="space-y-2">
+              <label className="platypi-medium text-sm text-black/80 block text-center">
+                Choose your reminder time
+              </label>
+              <input
+                type="time"
+                value={reminderTime}
+                onChange={(e) => setReminderTime(e.target.value)}
+                className="w-full p-3 border border-blush/20 rounded-xl text-center platypi-regular text-lg focus:outline-none focus:ring-2 focus:ring-blush/30"
+              />
+            </div>
+            
+            <p className="platypi-regular text-xs text-black/50 text-center">
+              Repeats Sunday through Friday (excluding Shabbat)
+            </p>
+            
+            <Button
+              onClick={handleCreateCalendarReminder}
+              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium hover:scale-105 transition-all"
+            >
+              Add to Calendar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
