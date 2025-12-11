@@ -163,7 +163,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   // Today's Special state and data
   const today = new Date().toISOString().split('T')[0];
   const [todaysSpecialExpanded, setTodaysSpecialExpanded] = useState(false);
-  const [todaysSpecialLanguage, setTodaysSpecialLanguage] = useState<'english' | 'hebrew'>('english');
+  const [todaysSpecialLanguage, setTodaysSpecialLanguage] = useState<'english' | 'hebrew'>('hebrew');
   const [todaysSpecialFontSize, setTodaysSpecialFontSize] = useState(16);
   const [showTodaysSpecialSettings, setShowTodaysSpecialSettings] = useState(false);
 
@@ -468,8 +468,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
                   style={{ fontSize: `${todaysSpecialFontSize}px` }}
                   dir={todaysSpecialLanguage === 'hebrew' ? 'rtl' : 'ltr'}
                 >
-                  {todaysSpecialLanguage === 'hebrew' && todaysSpecial.contentHebrew
-                    ? replacePlaceholders(todaysSpecial.contentHebrew)
+                  {todaysSpecialLanguage === 'hebrew' 
+                    ? replacePlaceholders(todaysSpecial.contentHebrew || todaysSpecial.contentEnglish)
                     : replacePlaceholders(todaysSpecial.contentEnglish || todaysSpecial.contentHebrew)}
                 </div>
                 
