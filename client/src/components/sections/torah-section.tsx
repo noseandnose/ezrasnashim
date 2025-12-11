@@ -111,7 +111,7 @@ export default function TorahSection({}: TorahSectionProps) {
   });
 
   // Fetch today's Featured content
-  const { data: featuredContent, isError: featuredError, isLoading: featuredLoading } = useQuery<{title?: string; content?: string; audioUrl?: string; videoUrl?: string; provider?: string; footnotes?: string}>({
+  const { data: featuredContent, isError: featuredError, isLoading: featuredLoading } = useQuery<{title?: string; content?: string; audioUrl?: string; videoUrl?: string; imageUrl?: string; speaker?: string; speakerWebsite?: string; footnotes?: string}>({
     queryKey: ['/api/torah/featured', today],
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
