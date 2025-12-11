@@ -377,6 +377,8 @@ export default function TorahSection({}: TorahSectionProps) {
                 break;
             }
             
+            const showComingSoon = !hasContent && !isLoading && !isError;
+            
             return (
               <button
                 key={id}
@@ -407,6 +409,15 @@ export default function TorahSection({}: TorahSectionProps) {
                 data-modal-section="torah"
                 data-testid={`button-torah-${id}`}
               >
+                {/* Coming Soon Overlay */}
+                {showComingSoon && (
+                  <div className="absolute inset-0 bg-black/50 rounded-3xl flex items-center justify-center z-10">
+                    <div className="bg-white/90 rounded-xl px-3 py-1.5 shadow-lg">
+                      <p className="platypi-bold text-xs text-black">Coming Soon</p>
+                    </div>
+                  </div>
+                )}
+                
                 {/* Content Type Indicator - only show if there's content and a valid type */}
                 {contentType && hasContent && (
                   <div className="absolute top-2 left-2 bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
@@ -425,18 +436,16 @@ export default function TorahSection({}: TorahSectionProps) {
                     <img 
                       src={customCandleIcon} 
                       alt="Learn Shabbos" 
-                      className="w-[18px] h-[18px] object-contain"
+                      className={`w-[18px] h-[18px] object-contain ${showComingSoon ? 'opacity-60' : ''}`}
                     />
                   ) : (
                     <Icon className={`${hasContent ? iconColor : 'text-gray-500'}`} size={18} strokeWidth={1.5} />
                   )}
                 </div>
-                <h3 className="platypi-bold text-xs text-black mb-1 tracking-wide">{title}</h3>
-                <div className="platypi-regular text-xs text-black/60 leading-relaxed">
+                <h3 className={`platypi-bold text-xs text-black mb-1 tracking-wide ${showComingSoon ? 'opacity-60' : ''}`}>{title}</h3>
+                <div className={`platypi-regular text-xs text-black/60 leading-relaxed ${showComingSoon ? 'opacity-60' : ''}`}>
                   {isCompleted ? (
                     'Completed'
-                  ) : !hasContent && !isLoading && !isError ? (
-                    'Coming Soon'
                   ) : (
                     <>
                       <div>{displaySubtitle}</div>
