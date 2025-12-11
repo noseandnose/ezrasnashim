@@ -137,7 +137,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000
   });
 
-  const { data: featuredContent } = useQuery<{title?: string; content?: string; speaker?: string; speakerWebsite?: string; imageUrl?: string; footnotes?: string; attributionLabel?: string; attributionLogoUrl?: string; attributionAboutText?: string}>({
+  const { data: featuredContent } = useQuery<{title?: string; content?: string; speaker?: string; speakerWebsite?: string; imageUrl?: string; footnotes?: string; thankYouMessage?: string; attributionLogoUrl?: string; attributionAboutText?: string}>({
     queryKey: ['/api/torah/featured', today],
     enabled: activeModal === 'featured',
     staleTime: 5 * 60 * 1000,
@@ -1049,7 +1049,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               
               {/* Attribution Section for Featured Content */}
               <AttributionSection
-                label={featuredContent.attributionLabel || `Thank you to ${featuredContent.speaker || 'our content provider'} for this content`}
+                label={featuredContent.thankYouMessage || `Thank you to ${featuredContent.speaker || 'our content provider'} for this content`}
                 logoUrl={featuredContent.attributionLogoUrl}
                 aboutText={featuredContent.attributionAboutText}
                 websiteUrl={featuredContent.speakerWebsite}

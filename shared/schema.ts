@@ -374,7 +374,7 @@ export const featuredContent = pgTable("featured_content", {
   speaker: text("speaker"),
   speakerWebsite: text("speaker_website"),
   footnotes: text("footnotes"),
-  attributionLabel: text("attribution_label"), // Short label for collapsed attribution
+  thankYouMessage: text("thank_you_message"), // Thank you message for attribution
   attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
   attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
