@@ -309,7 +309,6 @@ export default function TorahSection({}: TorahSectionProps) {
                 isLoading = halachaLoading;
                 hasContent = !!halachaContent?.content && !isError;
                 if (hasContent && !isCompleted && halachaContent) {
-                  readingTime = calculateReadingTime(halachaContent.content || '');
                   const camelCaseTitle = toCamelCase(halachaContent.title || '');
                   displaySubtitle = camelCaseTitle || 'Learn Shabbos';
                 } else if (isError) {
