@@ -8,9 +8,9 @@ import type { Section } from "@/pages/home";
 import { useMemo } from "react";
 import { getLocalDateString } from "@/lib/dateUtils";
 import grassImage from "@assets/Daily_Progress_Garden_(2)_1765369219898.png";
-import torahFlower from "@assets/Torah_1765366005744.png";
-import tefillaFlower from "@assets/Tefilla_1765366005744.png";
-import tzedakaFlower from "@assets/Tzedaka_1765366005742.png";
+import torahFlower from "@assets/Torah_1765437211120.png";
+import tefillaFlower from "@assets/Tefilla_1765437211121.png";
+import tzedakaFlower from "@assets/Tzedaka_1765437211121.png";
 
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
