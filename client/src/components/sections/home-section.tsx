@@ -546,7 +546,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
                     href={todaysSpecial.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="absolute bottom-3 right-3 bg-gradient-feminine text-white rounded-full px-4 py-2 shadow-lg hover:scale-105 transition-all duration-200 platypi-medium text-sm"
+                    className="absolute bottom-3 right-3 bg-gradient-feminine text-white rounded-full px-3 py-1 shadow-lg hover:scale-105 transition-all duration-200 platypi-medium text-xs"
                     data-testid="link-todays-special"
                   >
                     {todaysSpecial.linkTitle}
