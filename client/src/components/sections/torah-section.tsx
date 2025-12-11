@@ -499,29 +499,7 @@ export default function TorahSection({}: TorahSectionProps) {
                 </div>
               </div>
             </div>
-          ) : (
-            // Show single "Coming Soon" bar when no content available
-            <div className="w-full bg-white rounded-2xl p-3 shadow-lg border border-blush/10 mb-3 relative">
-              {/* Coming Soon Overlay */}
-              <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center z-10">
-                <div className="bg-white/90 rounded-xl px-4 py-2 shadow-lg">
-                  <p className="platypi-bold text-sm text-black">Coming Soon</p>
-                </div>
-              </div>
-              
-              {/* Content (unclickable) - no play icon when no content */}
-              <div className="flex items-center gap-3 opacity-60 cursor-not-allowed">
-                <div className="bg-gray-300 p-2 rounded-full">
-                  <Star className="text-gray-500" size={16} strokeWidth={1.5} />
-                </div>
-                <div className="text-left flex-grow">
-                  <h3 className="platypi-bold text-sm text-black">Inspiration Hub</h3>
-                  <p className="platypi-regular text-xs text-black/60">Special Topics</p>
-                </div>
-                {/* No play icon when there's no content */}
-              </div>
-            </div>
-          );
+          ) : null;
         })()}
 
         {/* Bottom padding */}
