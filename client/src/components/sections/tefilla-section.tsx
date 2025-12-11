@@ -669,28 +669,26 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
         </div>
 
         {/* Womens Tefillas Section */}
-        <div className="bg-gradient-soft rounded-3xl p-4 shadow-lg">
-          <button
-            onClick={() => openModal('womens-tefillas', 'tefilla')}
-            className="w-full bg-white/70 rounded-2xl p-3 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left h-auto"
-            data-modal-type="womens-tefillas"
-            data-modal-section="tefilla"
-            data-testid="button-tefilla-womens"
-          >
-            <div className="flex items-center space-x-3">
-              <div className="bg-gradient-feminine p-3 rounded-full">
-                <HandHeart className="text-white" size={20} />
-              </div>
-              <div className="flex-grow">
-                <h3 className="platypi-bold text-lg text-black">Womens Tefillas</h3>
-                <p className="platypi-regular text-sm text-black/70">Special Prayers for Special Occasions</p>
-              </div>
-              <div className="bg-gradient-feminine p-2 rounded-full shadow-lg">
-                <ArrowRight className="text-white" size={16} />
-              </div>
+        <button
+          onClick={() => openModal('womens-tefillas', 'tefilla')}
+          className="w-full bg-white rounded-3xl p-4 shadow-lg border border-blush/10 hover:scale-[1.02] transition-all duration-300 text-left"
+          data-modal-type="womens-tefillas"
+          data-modal-section="tefilla"
+          data-testid="button-tefilla-womens"
+        >
+          <div className="flex items-center space-x-3">
+            <div className="bg-gradient-feminine p-3 rounded-full">
+              <HandHeart className="text-white" size={20} />
             </div>
-          </button>
-        </div>
+            <div className="flex-grow">
+              <h3 className="platypi-bold text-lg text-black">Womens Tefillas</h3>
+              <p className="platypi-regular text-sm text-black/70">Special Prayers for Special Occasions</p>
+            </div>
+            <div className="bg-gradient-feminine p-2 rounded-full shadow-lg">
+              <ArrowRight className="text-white" size={16} />
+            </div>
+          </div>
+        </button>
 
         {/* The Kotel Compass Section */}
         <div className="bg-gradient-soft rounded-3xl p-4 shadow-lg">
