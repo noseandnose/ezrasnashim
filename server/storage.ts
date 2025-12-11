@@ -1563,7 +1563,12 @@ export class DatabaseStorage implements IStorage {
 
   async getFeaturedContentByDate(date: string): Promise<FeaturedContent | undefined> {
     try {
-      const [result] = await db.select().from(featuredContent).where(eq(featuredContent.date, date)).limit(1);
+      const [result] = await db.select().from(featuredContent)
+        .where(and(
+          lte(featuredContent.fromDate, date),
+          gte(featuredContent.untilDate, date)
+        ))
+        .limit(1);
       return result;
     } catch (error) {
       console.error('Failed to fetch featured content:', error);
