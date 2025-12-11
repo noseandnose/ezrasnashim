@@ -2,7 +2,7 @@ import serverAxiosClient from "./axiosClient";
 import { 
   shopItems, 
   tehillimNames, tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, birkatHamazonPrayers, afterBrochasPrayers, brochas, sponsors, nishmasText,
-  dailyHalacha, dailyEmuna, dailyChizuk, featuredContent,
+  dailyHalacha, dailyEmuna, dailyChizuk, featuredContent, todaysSpecial,
   dailyRecipes, parshaVorts, tableInspirations, marriageInsights, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats, acts,
   mitzvahSessions, mitzvahCompletions, mitzvahDailyTotals,
@@ -40,7 +40,8 @@ import {
   type PushSubscription, type InsertPushSubscription,
   type PushNotification, type InsertPushNotification,
   type TehillimChain, type InsertTehillimChain,
-  type TehillimChainReading, type InsertTehillimChainReading
+  type TehillimChainReading, type InsertTehillimChainReading,
+  type TodaysSpecial, type InsertTodaysSpecial
 } from "../shared/schema";
 import { db, pool } from "./db";
 import { eq, gt, lt, gte, lte, and, or, sql, like, ilike, desc, inArray, isNull } from "drizzle-orm";
@@ -64,6 +65,10 @@ export interface IStorage {
   
   getFeaturedContentByDate(date: string): Promise<FeaturedContent | undefined>;
   createFeaturedContent(featured: InsertFeaturedContent): Promise<FeaturedContent>;
+  
+  // Today's Special methods
+  getTodaysSpecialByDate(date: string): Promise<TodaysSpecial | undefined>;
+  createTodaysSpecial(special: InsertTodaysSpecial): Promise<TodaysSpecial>;
   
   // Pirkei Avot methods
   getAllPirkeiAvot(): Promise<PirkeiAvot[]>;
@@ -1579,6 +1584,27 @@ export class DatabaseStorage implements IStorage {
   async createFeaturedContent(insertFeatured: InsertFeaturedContent): Promise<FeaturedContent> {
     const [featured] = await db.insert(featuredContent).values(insertFeatured).returning();
     return featured;
+  }
+
+  // Today's Special methods
+  async getTodaysSpecialByDate(date: string): Promise<TodaysSpecial | undefined> {
+    try {
+      const [result] = await db.select().from(todaysSpecial)
+        .where(and(
+          lte(todaysSpecial.fromDate, date),
+          gte(todaysSpecial.untilDate, date)
+        ))
+        .limit(1);
+      return result;
+    } catch (error) {
+      console.error('Failed to fetch today\'s special:', error);
+      return undefined;
+    }
+  }
+
+  async createTodaysSpecial(insertSpecial: InsertTodaysSpecial): Promise<TodaysSpecial> {
+    const [special] = await db.insert(todaysSpecial).values(insertSpecial).returning();
+    return special;
   }
 
   // Pirkei Avot methods  
