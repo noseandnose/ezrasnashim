@@ -319,14 +319,21 @@ export default function ChainPage() {
     startDate.setHours(hours, minutes, 0, 0);
     const endDate = new Date(startDate.getTime() + 15 * 60 * 1000);
     
-    const formatDate = (date: Date) => {
-      return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    // Format in local time (not UTC) for Google Calendar
+    const formatLocalDate = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const h = String(date.getHours()).padStart(2, '0');
+      const m = String(date.getMinutes()).padStart(2, '0');
+      const s = String(date.getSeconds()).padStart(2, '0');
+      return `${year}${month}${day}T${h}${m}${s}`;
     };
     
     const googleCalendarUrl = new URL('https://calendar.google.com/calendar/r/eventedit');
     googleCalendarUrl.searchParams.set('text', eventTitle);
     googleCalendarUrl.searchParams.set('location', chainUrl);
-    googleCalendarUrl.searchParams.set('dates', `${formatDate(startDate)}/${formatDate(endDate)}`);
+    googleCalendarUrl.searchParams.set('dates', `${formatLocalDate(startDate)}/${formatLocalDate(endDate)}`);
     googleCalendarUrl.searchParams.set('recur', 'RRULE:FREQ=WEEKLY;BYDAY=SU,MO,TU,WE,TH,FR');
     googleCalendarUrl.searchParams.set('details', `Time to say Tehillim for ${chain.name}\n\nOpen your Tehillim chain: ${chainUrl}`);
     
@@ -347,8 +354,15 @@ export default function ChainPage() {
     startDate.setHours(hours, minutes, 0, 0);
     const endDate = new Date(startDate.getTime() + 15 * 60 * 1000);
     
-    const formatICSDate = (date: Date) => {
-      return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '').slice(0, -1);
+    // Format in local time for ICS file
+    const formatLocalICSDate = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const h = String(date.getHours()).padStart(2, '0');
+      const m = String(date.getMinutes()).padStart(2, '0');
+      const s = String(date.getSeconds()).padStart(2, '0');
+      return `${year}${month}${day}T${h}${m}${s}`;
     };
     
     const icsContent = [
@@ -356,8 +370,8 @@ export default function ChainPage() {
       'VERSION:2.0',
       'PRODID:-//Ezras Nashim//Tehillim Chain//EN',
       'BEGIN:VEVENT',
-      `DTSTART:${formatICSDate(startDate)}`,
-      `DTEND:${formatICSDate(endDate)}`,
+      `DTSTART:${formatLocalICSDate(startDate)}`,
+      `DTEND:${formatLocalICSDate(endDate)}`,
       'RRULE:FREQ=WEEKLY;BYDAY=SU,MO,TU,WE,TH,FR',
       `SUMMARY:${eventTitle}`,
       `LOCATION:${chainUrl}`,
