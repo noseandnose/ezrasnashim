@@ -461,7 +461,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           ))}
           
           <div className="pl-4 pr-1 py-3 relative z-10">
-            <h3 className="platypi-bold text-lg text-black mb-1 text-left">Daily Progress Garden</h3>
+            <h3 className="platypi-bold text-lg text-black mb-1 text-left">Daily Mitzvah Garden</h3>
           </div>
         </div>
       </div>
