@@ -1107,7 +1107,7 @@ function WomensTefillaFullscreenContent({ language: _language, fontSize: _fontSi
               key={prayer.id}
               onClick={() => {
                 // Store the selected prayer ID globally and open individual prayer fullscreen
-                (window as any).selectedWomensPrayerId = prayer.id;
+                (window as any).selectedPrayerId = prayer.id;
                 const openEvent = new CustomEvent('openDirectFullscreen', {
                   detail: {
                     title: prayer.prayerName,
