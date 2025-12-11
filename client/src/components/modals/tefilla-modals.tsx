@@ -2317,7 +2317,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           contentType = 'brochas';
           break;
         case 'womens-tefillas':
-          title = 'Womens Tefillas';
+          title = "Women's Tefillas";
           contentType = 'womens-tefillas';
           break;
       }

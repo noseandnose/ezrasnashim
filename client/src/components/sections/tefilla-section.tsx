@@ -668,7 +668,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
           </button>
         </div>
 
-        {/* Womens Tefillas Section */}
+        {/* Women's Tefillas Section */}
         <button
           onClick={() => openModal('womens-tefillas', 'tefilla')}
           className="w-full bg-white rounded-3xl p-4 shadow-lg border border-blush/10 hover:scale-[1.02] transition-all duration-300 text-left"
@@ -681,11 +681,8 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
               <HandHeart className="text-white" size={20} />
             </div>
             <div className="flex-grow">
-              <h3 className="platypi-bold text-lg text-black">Womens Tefillas</h3>
+              <h3 className="platypi-bold text-lg text-black">Women's Tefillas</h3>
               <p className="platypi-regular text-sm text-black/70">Special Prayers for Special Occasions</p>
-            </div>
-            <div className="bg-gradient-feminine p-2 rounded-full shadow-lg">
-              <ArrowRight className="text-white" size={16} />
             </div>
           </div>
         </button>
@@ -705,9 +702,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
               <div className="flex-grow">
                 <h3 className="platypi-bold text-lg text-black">The Kotel Compass</h3>
                 <p className="platypi-regular text-sm text-black/70">Direct your Heart Home</p>
-              </div>
-              <div className="bg-gradient-feminine p-2 rounded-full shadow-lg">
-                <ArrowRight className="text-white" size={16} />
               </div>
             </div>
           </Button>
