@@ -1,7 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRoute, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Share2, ChevronLeft, Heart, Briefcase, Baby, Home, Star, Shield, Sparkles, HeartPulse, Settings } from "lucide-react";
+import { Share2, ChevronLeft, Heart, Briefcase, Baby, Home, Star, Shield, Sparkles, HeartPulse, Settings, Bell } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { formatTextContent } from "@/lib/text-formatter";
 import { AttributionSection } from "@/components/ui/attribution-section";
@@ -68,6 +70,10 @@ export default function ChainPage() {
   
   // Track loading state for find another button
   const [isFindingAnother, setIsFindingAnother] = useState(false);
+  
+  // Reminder dialog state
+  const [showReminderDialog, setShowReminderDialog] = useState(false);
+  const [reminderTime, setReminderTime] = useState("09:00");
   
   // Koren URL for attribution
   const korenUrl = useKorenUrl();
@@ -301,6 +307,93 @@ export default function ChainPage() {
     }
   };
 
+  const handleGoogleCalendar = () => {
+    if (!chain) return;
+    
+    const chainUrl = `${window.location.origin}/c/${slug}`;
+    const eventTitle = `Daven for ${chain.name}`;
+    
+    const [hours, minutes] = reminderTime.split(':').map(Number);
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() + 1);
+    startDate.setHours(hours, minutes, 0, 0);
+    const endDate = new Date(startDate.getTime() + 15 * 60 * 1000);
+    
+    // Format in local time (not UTC) for Google Calendar
+    const formatLocalDate = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const h = String(date.getHours()).padStart(2, '0');
+      const m = String(date.getMinutes()).padStart(2, '0');
+      const s = String(date.getSeconds()).padStart(2, '0');
+      return `${year}${month}${day}T${h}${m}${s}`;
+    };
+    
+    const googleCalendarUrl = new URL('https://calendar.google.com/calendar/r/eventedit');
+    googleCalendarUrl.searchParams.set('text', eventTitle);
+    googleCalendarUrl.searchParams.set('location', chainUrl);
+    googleCalendarUrl.searchParams.set('dates', `${formatLocalDate(startDate)}/${formatLocalDate(endDate)}`);
+    googleCalendarUrl.searchParams.set('recur', 'RRULE:FREQ=WEEKLY;BYDAY=SU,MO,TU,WE,TH,FR');
+    googleCalendarUrl.searchParams.set('details', `Time to say Tehillim for ${chain.name}\n\nOpen your Tehillim chain: ${chainUrl}`);
+    
+    window.open(googleCalendarUrl.toString(), '_blank');
+    setShowReminderDialog(false);
+    toast({ title: "Calendar opened!", description: "Save the event to get daily reminders." });
+  };
+
+  const handleAppleCalendar = () => {
+    if (!chain) return;
+    
+    const chainUrl = `${window.location.origin}/c/${slug}`;
+    const eventTitle = `Daven for ${chain.name}`;
+    
+    const [hours, minutes] = reminderTime.split(':').map(Number);
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() + 1);
+    startDate.setHours(hours, minutes, 0, 0);
+    const endDate = new Date(startDate.getTime() + 15 * 60 * 1000);
+    
+    // Format in local time for ICS file
+    const formatLocalICSDate = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const h = String(date.getHours()).padStart(2, '0');
+      const m = String(date.getMinutes()).padStart(2, '0');
+      const s = String(date.getSeconds()).padStart(2, '0');
+      return `${year}${month}${day}T${h}${m}${s}`;
+    };
+    
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Ezras Nashim//Tehillim Chain//EN',
+      'BEGIN:VEVENT',
+      `DTSTART:${formatLocalICSDate(startDate)}`,
+      `DTEND:${formatLocalICSDate(endDate)}`,
+      'RRULE:FREQ=WEEKLY;BYDAY=SU,MO,TU,WE,TH,FR',
+      `SUMMARY:${eventTitle}`,
+      `LOCATION:${chainUrl}`,
+      `DESCRIPTION:Time to say Tehillim for ${chain.name}\\n\\nOpen your Tehillim chain: ${chainUrl}`,
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n');
+    
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `tehillim-reminder-${slug}.ics`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    setShowReminderDialog(false);
+    toast({ title: "Calendar file downloaded!", description: "Open it to add to your calendar." });
+  };
+
   const handleComplete = () => {
     if (currentPsalm) {
       completeReadingMutation.mutate(currentPsalm);
@@ -357,14 +450,24 @@ export default function ChainPage() {
           </h1>
         </div>
         
-        <button
-          onClick={handleShare}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-feminine text-white hover:scale-105 transition-all shadow-sm flex-shrink-0"
-          data-testid="button-share"
-        >
-          <Share2 size={16} />
-          <span className="text-sm platypi-medium">Share</span>
-        </button>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            onClick={() => setShowReminderDialog(true)}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-gradient-feminine text-white hover:scale-105 transition-all shadow-sm"
+            data-testid="button-reminder"
+            title="Set daily reminder"
+          >
+            <Bell size={16} strokeWidth={2.5} />
+          </button>
+          <button
+            onClick={handleShare}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-feminine text-white hover:scale-105 transition-all shadow-sm"
+            data-testid="button-share"
+          >
+            <Share2 size={16} />
+            <span className="text-sm platypi-medium">Share</span>
+          </button>
+        </div>
       </div>
 
       {/* Scrollable content area */}
@@ -499,6 +602,52 @@ export default function ChainPage() {
           onLanguageChange={(lang) => setShowHebrew(lang === 'hebrew')}
         />
       </div>
+
+      {/* Daily Reminder Dialog */}
+      <Dialog open={showReminderDialog} onOpenChange={setShowReminderDialog}>
+        <DialogContent className="max-w-sm mx-auto rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="platypi-bold text-xl text-center">Set Daily Reminder</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <p className="platypi-regular text-black/70 text-center text-sm">
+              Get a daily reminder to daven for {chain?.name}
+            </p>
+            
+            <div className="space-y-2">
+              <label className="platypi-medium text-sm text-black/80 block text-center">
+                Choose your reminder time
+              </label>
+              <input
+                type="time"
+                value={reminderTime}
+                onChange={(e) => setReminderTime(e.target.value)}
+                className="w-full p-3 border border-blush/20 rounded-xl text-center platypi-regular text-lg focus:outline-none focus:ring-2 focus:ring-blush/30"
+              />
+            </div>
+            
+            <p className="platypi-regular text-xs text-black/50 text-center">
+              Repeats Sunday through Friday (excluding Shabbat)
+            </p>
+            
+            <div className="space-y-3">
+              <Button
+                onClick={handleGoogleCalendar}
+                className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium hover:scale-105 transition-all"
+              >
+                Add to Google Calendar
+              </Button>
+              <Button
+                onClick={handleAppleCalendar}
+                variant="outline"
+                className="w-full border-blush/30 text-black py-3 rounded-xl platypi-medium hover:scale-105 hover:bg-blush/5 transition-all"
+              >
+                Add to Apple Calendar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
