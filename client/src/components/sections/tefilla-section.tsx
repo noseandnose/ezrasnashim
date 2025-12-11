@@ -1,4 +1,4 @@
-import { HandHeart, Plus, Heart, Star, Compass, ArrowRight, Sunrise, Sun, Moon, Stars, Search, Link2, ChevronRight, ChevronDown, Stethoscope, Users, Shuffle, Briefcase, Baby, Home, Shield, Sparkles, HeartPulse } from "lucide-react";
+import { HandHeart, Plus, Heart, Star, Compass, ArrowRight, Sunrise, Sun, Moon, Stars, Search, Link2, ChevronRight, ChevronDown, Shuffle, Briefcase, Baby, Home, Shield, Sparkles, HeartPulse } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -668,62 +668,24 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
           </button>
         </div>
 
-        {/* Personal Prayer Section */}
-        <div className="bg-white rounded-3xl p-3 shadow-lg border border-blush/10">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="bg-gradient-feminine p-2 rounded-full">
-              <HandHeart className="text-white" size={18} />
+        {/* Women's Tefillas Section */}
+        <button
+          onClick={() => openModal('womens-tefillas', 'tefilla')}
+          className="w-full bg-white rounded-3xl p-4 shadow-lg border border-blush/10 hover:scale-[1.02] transition-all duration-300 text-left"
+          data-modal-type="womens-tefillas"
+          data-modal-section="tefilla"
+          data-testid="button-tefilla-womens"
+        >
+          <div className="flex items-center space-x-3">
+            <div className="bg-gradient-feminine p-3 rounded-full">
+              <HandHeart className="text-white" size={20} />
             </div>
-            <div>
-              <h3 className="platypi-bold text-lg text-black">Personal Prayers</h3>
-              <p className="platypi-regular text-sm text-black/70">Categories for your Tefillos</p>
+            <div className="flex-grow">
+              <h3 className="platypi-bold text-lg text-black">Women's Tefillas</h3>
+              <p className="platypi-regular text-sm text-black/70">Special Prayers for Special Occasions</p>
             </div>
           </div>
-          
-          <div className="grid grid-cols-3 gap-2">
-            <button 
-              onClick={() => openModal('refuah', 'tefilla')}
-              className="bg-gradient-to-br from-blush/10 to-blush/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-blush/20"
-              data-modal-type="refuah"
-              data-modal-section="tefilla"
-              data-testid="button-tefilla-refuah"
-            >
-              <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-1 w-fit">
-                <Stethoscope className="text-white" size={16} strokeWidth={1.5} />
-              </div>
-              <h4 className="platypi-bold text-sm text-black">Refuah</h4>
-              <p className="platypi-regular text-xs text-black/60 mt-1">Healing</p>
-            </button>
-            
-            <button 
-              onClick={() => openModal('family', 'tefilla')}
-              className="bg-gradient-to-br from-lavender/10 to-lavender/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-lavender/20"
-              data-modal-type="family"
-              data-modal-section="tefilla"
-              data-testid="button-tefilla-family"
-            >
-              <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-1 w-fit">
-                <Users className="text-white" size={16} strokeWidth={1.5} />
-              </div>
-              <h4 className="platypi-bold text-sm text-black">Family</h4>
-              <p className="platypi-regular text-xs text-black/60 mt-1">Home</p>
-            </button>
-            
-            <button 
-              onClick={() => openModal('life', 'tefilla')}
-              className="bg-gradient-to-br from-sage/10 to-sage/5 rounded-2xl p-3 text-center hover:scale-105 transition-all duration-300 border border-sage/20"
-              data-modal-type="life"
-              data-modal-section="tefilla"
-              data-testid="button-tefilla-life"
-            >
-              <div className="bg-gradient-feminine p-2 rounded-full mx-auto mb-1 w-fit">
-                <Heart className="text-white" size={16} strokeWidth={1.5} />
-              </div>
-              <h4 className="platypi-bold text-sm text-black">Life</h4>
-              <p className="platypi-regular text-xs text-black/60 mt-1">Guidance</p>
-            </button>
-          </div>
-        </div>
+        </button>
 
         {/* The Kotel Compass Section */}
         <div className="bg-gradient-soft rounded-3xl p-4 shadow-lg">
@@ -740,9 +702,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
               <div className="flex-grow">
                 <h3 className="platypi-bold text-lg text-black">The Kotel Compass</h3>
                 <p className="platypi-regular text-sm text-black/70">Direct your Heart Home</p>
-              </div>
-              <div className="bg-gradient-feminine p-2 rounded-full shadow-lg">
-                <ArrowRight className="text-white" size={16} />
               </div>
             </div>
           </Button>

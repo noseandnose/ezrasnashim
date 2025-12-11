@@ -566,6 +566,8 @@ function renderPrayerContent(contentType: string | undefined, language: 'hebrew'
       return <TehillimFullscreenContent language={language} fontSize={fontSize} />;
     case 'brochas':
       return <BrochasFullscreenContent language={language} fontSize={fontSize} />;
+    case 'womens-tefillas':
+      return <WomensTefillaFullscreenContent language={language} fontSize={fontSize} />;
     case 'individual-brocha':
       return <IndividualBrochaFullscreenContent language={language} fontSize={fontSize} />;
     case 'global-tehillim':
@@ -986,6 +988,163 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
         )}
       </div>
       
+    </div>
+  );
+}
+
+// Women's Tefillas fullscreen content with 3 tabs
+function WomensTefillaFullscreenContent({ language: _language, fontSize: _fontSize }: { language: 'hebrew' | 'english'; fontSize: number }) {
+  const [activeTab, setActiveTab] = useState<'refuah' | 'family' | 'life'>('refuah');
+  
+  const { data: refuahPrayers = [], isLoading: refuahLoading } = useQuery<WomensPrayer[]>({
+    queryKey: ['/api/womens-prayers/refuah'],
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+
+  const { data: familyPrayers = [], isLoading: familyLoading } = useQuery<WomensPrayer[]>({
+    queryKey: ['/api/womens-prayers/family'],
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+
+  const { data: lifePrayers = [], isLoading: lifeLoading } = useQuery<WomensPrayer[]>({
+    queryKey: ['/api/womens-prayers/life'],
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+
+  // Icon mapping for prayer categories
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'refuah':
+        return Stethoscope;
+      case 'family':
+        return Users;
+      case 'life':
+        return Heart;
+      default:
+        return HandHeart;
+    }
+  };
+
+  // Type arrays properly
+  const refuahArray = Array.isArray(refuahPrayers) ? refuahPrayers : [];
+  const familyArray = Array.isArray(familyPrayers) ? familyPrayers : [];
+  const lifeArray = Array.isArray(lifePrayers) ? lifePrayers : [];
+  
+  // Show loading only if we have no data at all
+  const hasData = refuahArray.length > 0 || familyArray.length > 0 || lifeArray.length > 0;
+  
+  if (!hasData && (refuahLoading || familyLoading || lifeLoading)) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-rose-blush/30 border-t-rose-blush rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 platypi-regular">Loading prayers...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const getCurrentPrayers = () => {
+    switch (activeTab) {
+      case 'refuah':
+        return refuahArray;
+      case 'family':
+        return familyArray;
+      case 'life':
+        return lifeArray;
+      default:
+        return [];
+    }
+  };
+
+  const currentPrayers = getCurrentPrayers();
+  const IconComponent = getCategoryIcon(activeTab);
+
+  return (
+    <div className="space-y-6">
+      {/* Tab Navigation - 3 tabs */}
+      <div className="flex bg-blush/20 rounded-xl p-1 mb-4">
+        <button
+          onClick={() => setActiveTab('refuah')}
+          className={`flex-1 py-2 px-3 rounded-lg text-sm platypi-medium transition-all ${
+            activeTab === 'refuah'
+              ? 'bg-white text-black shadow-md border border-blush/30'
+              : 'text-black/50 hover:text-black/70'
+          }`}
+        >
+          Refuah ({refuahArray.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('family')}
+          className={`flex-1 py-2 px-3 rounded-lg text-sm platypi-medium transition-all ${
+            activeTab === 'family'
+              ? 'bg-white text-black shadow-md border border-blush/30'
+              : 'text-black/50 hover:text-black/70'
+          }`}
+        >
+          Family ({familyArray.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('life')}
+          className={`flex-1 py-2 px-3 rounded-lg text-sm platypi-medium transition-all ${
+            activeTab === 'life'
+              ? 'bg-white text-black shadow-md border border-blush/30'
+              : 'text-black/50 hover:text-black/70'
+          }`}
+        >
+          Life ({lifeArray.length})
+        </button>
+      </div>
+
+      {/* Prayer Buttons with pink glow */}
+      <div className="space-y-4">
+        {currentPrayers.length > 0 ? (
+          currentPrayers.map((prayer: WomensPrayer) => (
+            <button
+              key={prayer.id}
+              onClick={() => {
+                // Store the selected prayer ID globally and open individual prayer fullscreen
+                (window as any).selectedPrayerId = prayer.id;
+                const openEvent = new CustomEvent('openDirectFullscreen', {
+                  detail: {
+                    title: prayer.prayerName,
+                    contentType: 'individual-prayer',
+                    hasTranslation: true
+                  }
+                });
+                window.dispatchEvent(openEvent);
+              }}
+              className="w-full bg-white rounded-2xl p-4 border border-blush/10 hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-4 complete-button-pulse"
+            >
+              {/* Icon with gradient circle */}
+              <div className="p-3 rounded-full bg-gradient-feminine flex-shrink-0">
+                <IconComponent className="text-white" size={20} strokeWidth={1.5} />
+              </div>
+              
+              {/* Text content */}
+              <div className="flex-grow text-center">
+                <h3 className="platypi-bold text-lg text-black mb-1">
+                  {prayer.prayerName}
+                </h3>
+                {prayer.description && (
+                  <p className="platypi-regular text-sm text-black/70">
+                    {prayer.description}
+                  </p>
+                )}
+              </div>
+            </button>
+          ))
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-600 platypi-regular">
+              No {activeTab} prayers available
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -2122,7 +2281,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
   // Auto-redirect prayer modals to fullscreen
   useEffect(() => {
-    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'individual-tehillim', 'tehillim-text', 'special-tehillim', 'brochas'];
+    const fullscreenPrayerModals = ['morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'individual-tehillim', 'tehillim-text', 'special-tehillim', 'brochas', 'womens-tefillas'];
     
     if (activeModal && fullscreenPrayerModals.includes(activeModal)) {
       let title = '';
@@ -2156,6 +2315,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         case 'brochas':
           title = 'Brochas';
           contentType = 'brochas';
+          break;
+        case 'womens-tefillas':
+          title = "Women's Tefillas";
+          contentType = 'womens-tefillas';
           break;
       }
       

@@ -22,6 +22,7 @@ export type ModalType =
   | 'life' 
   | 'individual-prayer'
   | 'womens-prayers'
+  | 'womens-tefillas'
   | 'blessings'
   | 'tefillos'
   | 'personal-prayers'

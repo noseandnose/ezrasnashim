@@ -126,12 +126,15 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       const clampedPos = Math.max(5, Math.min(82, basePos + horizontalOffset));
       // Add vertical offset (0 to 12px variation from bottom)
       const verticalOffset = Math.floor(seededRandom() * 12);
+      // Random scale: base 0.9 (10% smaller), can go down to 0.75 but never bigger than 0.9
+      const scale = 0.9 - (seededRandom() * 0.15);
       
       positions.push({ 
         type, 
         left: clampedPos, 
         bottom: verticalOffset,
-        flipped: seededRandom() > 0.5
+        flipped: seededRandom() > 0.5,
+        scale
       });
     });
     
@@ -455,7 +458,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               style={{ 
                 left: `${flower.left}%`,
                 bottom: `${flower.bottom}px`,
-                transform: flower.flipped ? 'scaleX(-1)' : 'none'
+                transform: `scale(${flower.scale})${flower.flipped ? ' scaleX(-1)' : ''}`
               }}
             />
           ))}
