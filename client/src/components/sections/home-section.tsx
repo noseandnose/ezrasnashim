@@ -1,4 +1,6 @@
-import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Star } from "lucide-react";
+import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Star, Sparkles, Settings, Plus, Minus } from "lucide-react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
 import { useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
@@ -83,8 +85,9 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   }, [tzedakaCompleted]);
 
   // Generate stable but randomized positions for flowers - like a natural garden
+  // Torah and Tzedaka flowers get priority slots so Tefilla flowers don't cover them
   const flowerPositions = useMemo(() => {
-    const positions: { type: 'torah' | 'tefilla' | 'tzedaka'; left: number; bottom: number; flipped: boolean }[] = [];
+    const positions: { type: 'torah' | 'tefilla' | 'tzedaka'; left: number; bottom: number; flipped: boolean; scale: number }[] = [];
     
     // Seeded random for consistent but varied positions
     let seed = 42;
@@ -104,29 +107,21 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     };
     
     // Available slots - keeping flowers well away from edges to prevent cutoff
-    const baseSlots = [6, 14, 22, 30, 40, 50, 60, 68, 76, 82];
+    const allSlots = [6, 14, 22, 30, 40, 50, 60, 68, 76, 82];
     
-    // Shuffle slots for random distribution
-    const shuffledSlots = shuffleArray(baseSlots);
+    // Shuffle all slots
+    const shuffledSlots = shuffleArray([...allSlots]);
     
-    // Create all flower entries with type
-    const allFlowers: ('torah' | 'tefilla' | 'tzedaka')[] = [];
-    for (let i = 0; i < torahFlowerCount; i++) allFlowers.push('torah');
-    for (let i = 0; i < tefillaFlowerCount; i++) allFlowers.push('tefilla');
-    for (let i = 0; i < tzedakaFlowerCount; i++) allFlowers.push('tzedaka');
+    // Track used slot indices
+    const usedSlotIndices = new Set<number>();
     
-    // Shuffle the order of flowers for mixed distribution
-    const shuffledFlowers = shuffleArray(allFlowers);
-    
-    shuffledFlowers.forEach((type, index) => {
-      const basePos = shuffledSlots[index % shuffledSlots.length];
-      // Add smaller horizontal offset (-2 to +2%) to keep within bounds
+    // Helper to add a flower position
+    const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', slotIndex: number) => {
+      usedSlotIndices.add(slotIndex);
+      const basePos = shuffledSlots[slotIndex];
       const horizontalOffset = (seededRandom() * 4) - 2;
-      // Clamp position to safe range (5% to 82%) to prevent cutoff
       const clampedPos = Math.max(5, Math.min(82, basePos + horizontalOffset));
-      // Add vertical offset (0 to 12px variation from bottom)
       const verticalOffset = Math.floor(seededRandom() * 12);
-      // Random scale: base 0.9 (10% smaller), can go down to 0.75 but never bigger than 0.9
       const scale = 0.9 - (seededRandom() * 0.15);
       
       positions.push({ 
@@ -136,7 +131,28 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         flipped: seededRandom() > 0.5,
         scale
       });
-    });
+    };
+    
+    // PRIORITY: Place Torah and Tzedaka flowers first (they're completed less often)
+    let nextSlot = 0;
+    
+    // Place Torah flowers first
+    for (let i = 0; i < torahFlowerCount && nextSlot < shuffledSlots.length; i++) {
+      addFlower('torah', nextSlot);
+      nextSlot++;
+    }
+    
+    // Place Tzedaka flowers next
+    for (let i = 0; i < tzedakaFlowerCount && nextSlot < shuffledSlots.length; i++) {
+      addFlower('tzedaka', nextSlot);
+      nextSlot++;
+    }
+    
+    // Place Tefilla flowers last - they only get remaining slots
+    for (let i = 0; i < tefillaFlowerCount && nextSlot < shuffledSlots.length; i++) {
+      addFlower('tefilla', nextSlot);
+      nextSlot++;
+    }
     
     return positions;
   }, [torahFlowerCount, tefillaFlowerCount, tzedakaFlowerCount]);
@@ -157,6 +173,42 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   // Use batched home summary for better performance
   const { data: homeSummary, isLoading: sponsorLoading } = useHomeSummary();
   const sponsor = homeSummary?.sponsor;
+
+  // Today's Special state and data
+  const today = new Date().toISOString().split('T')[0];
+  const [todaysSpecialExpanded, setTodaysSpecialExpanded] = useState(false);
+  const [todaysSpecialLanguage, setTodaysSpecialLanguage] = useState<'english' | 'hebrew'>('hebrew');
+  const [todaysSpecialFontSize, setTodaysSpecialFontSize] = useState(16);
+  const [showTodaysSpecialSettings, setShowTodaysSpecialSettings] = useState(false);
+
+  const { data: todaysSpecial } = useQuery<{
+    title?: string;
+    subtitle?: string;
+    imageUrl?: string;
+    contentEnglish?: string;
+    contentHebrew?: string;
+    linkTitle?: string;
+    url?: string;
+  }>({
+    queryKey: ['/api/home/todays-special', today],
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+
+  // Check if Today's Special has content
+  const hasTodaysSpecialContent = todaysSpecial && (todaysSpecial.contentEnglish || todaysSpecial.contentHebrew);
+  const hasBothLanguages = todaysSpecial?.contentEnglish && todaysSpecial?.contentHebrew;
+  
+  // Helper function to replace placeholders in Today's Special text
+  const replacePlaceholders = (text: string | null | undefined): string => {
+    if (!text) return '';
+    return text
+      .replace(/\{\{shkia\}\}/gi, jewishTimesQuery.data?.shkia || '')
+      .replace(/\{\{sunrise\}\}/gi, jewishTimesQuery.data?.sunrise || '')
+      .replace(/\{\{mincha\}\}/gi, jewishTimesQuery.data?.minchaGedolah || '')
+      .replace(/\{\{candleLighting\}\}/gi, jewishTimesQuery.data?.candleLighting || '')
+      .replace(/\{\{havdalah\}\}/gi, jewishTimesQuery.data?.havdalah || '');
+  };
 
 
 
@@ -376,6 +428,162 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             </button>
           </div>
         </div>
+
+        {/* Today's Special Expandable Bar - Only shown when content exists */}
+        {hasTodaysSpecialContent && todaysSpecial && (
+          <div 
+            className="bg-white/80 rounded-xl mt-2 overflow-hidden border border-blush/20"
+            style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}
+          >
+            {/* Collapsed/Header Bar */}
+            <button
+              onClick={() => setTodaysSpecialExpanded(!todaysSpecialExpanded)}
+              className="w-full p-3 text-left hover:bg-white/90 transition-colors"
+              data-testid="button-todays-special-toggle"
+            >
+              <div className="flex items-center gap-3">
+                {/* Image */}
+                {todaysSpecial.imageUrl && (
+                  <img 
+                    src={todaysSpecial.imageUrl} 
+                    alt={todaysSpecial.title || "Today's Special"} 
+                    className="w-10 h-10 rounded-xl object-cover"
+                  />
+                )}
+                {!todaysSpecial.imageUrl && (
+                  <div className="bg-gradient-feminine p-2 rounded-full">
+                    <Sparkles className="text-white" size={16} />
+                  </div>
+                )}
+                
+                {/* Title and Subtitle */}
+                <div className="flex-grow">
+                  <h3 className="platypi-bold text-sm text-black">{replacePlaceholders(todaysSpecial.title) || "Today's Special"}</h3>
+                  {todaysSpecial.subtitle && (
+                    <p className="platypi-regular text-xs text-black/70">{replacePlaceholders(todaysSpecial.subtitle)}</p>
+                  )}
+                </div>
+                
+                {/* Expand/Collapse indicator */}
+                <div className="text-black/40">
+                  {todaysSpecialExpanded ? <Minus size={18} /> : <Plus size={18} />}
+                </div>
+              </div>
+            </button>
+            
+            {/* Expanded Content */}
+            {todaysSpecialExpanded && (
+              <div className="relative px-3 pb-16 pt-3 border-t border-blush/10">
+                {/* Content */}
+                <div 
+                  className={`text-black leading-relaxed whitespace-pre-line ${
+                    todaysSpecialLanguage === 'hebrew' ? 'vc-koren-hebrew' : 'platypi-regular text-left'
+                  }`}
+                  style={{ fontSize: `${todaysSpecialFontSize}px` }}
+                  dir={todaysSpecialLanguage === 'hebrew' ? 'rtl' : 'ltr'}
+                >
+                  {todaysSpecialLanguage === 'hebrew' 
+                    ? replacePlaceholders(todaysSpecial.contentHebrew || todaysSpecial.contentEnglish)
+                    : replacePlaceholders(todaysSpecial.contentEnglish || todaysSpecial.contentHebrew)}
+                </div>
+                
+                {/* Floating Settings Button - Bottom Left */}
+                <button
+                  onClick={() => setShowTodaysSpecialSettings(!showTodaysSpecialSettings)}
+                  className="absolute bottom-3 left-3 bg-gradient-feminine text-white rounded-full w-7 h-7 flex items-center justify-center shadow-lg hover:scale-110 transition-all duration-200"
+                  data-testid="button-todays-special-settings"
+                >
+                  <Settings size={14} />
+                </button>
+                
+                {/* Settings Panel - Above floating button */}
+                {showTodaysSpecialSettings && (
+                  <>
+                    {/* Backdrop */}
+                    <div 
+                      className="fixed inset-0 z-40"
+                      onClick={() => setShowTodaysSpecialSettings(false)}
+                    />
+                    <div className="absolute bottom-14 left-3 bg-white rounded-2xl shadow-xl border border-gray-200 p-3 z-50 min-w-[180px]">
+                      <div className="space-y-3">
+                        {/* Language Toggle */}
+                        {hasBothLanguages && (
+                          <div>
+                            <p className="text-xs font-medium text-gray-700 mb-1.5 text-center">Language</p>
+                            <div className="flex bg-gradient-feminine rounded-xl p-0.5">
+                              <button
+                                onClick={() => {
+                                  setTodaysSpecialLanguage('english');
+                                  setShowTodaysSpecialSettings(false);
+                                }}
+                                className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-colors flex-1 ${
+                                  todaysSpecialLanguage === 'english' 
+                                    ? 'bg-white text-black shadow-sm' 
+                                    : 'text-white hover:text-gray-100'
+                                }`}
+                              >
+                                English
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setTodaysSpecialLanguage('hebrew');
+                                  setShowTodaysSpecialSettings(false);
+                                }}
+                                className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-colors flex-1 ${
+                                  todaysSpecialLanguage === 'hebrew' 
+                                    ? 'bg-white text-black shadow-sm' 
+                                    : 'text-white hover:text-gray-100'
+                                }`}
+                              >
+                                עברית
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Font Size Controls */}
+                        <div>
+                          <p className="text-xs font-medium text-gray-700 mb-1.5 text-center">Font Size</p>
+                          <div className="flex items-center justify-center gap-2 bg-gradient-feminine rounded-xl p-1.5">
+                            <button
+                              onClick={() => setTodaysSpecialFontSize(prev => Math.max(12, prev - 2))}
+                              className="w-7 h-7 flex items-center justify-center rounded-lg bg-white text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors shadow-sm"
+                            >
+                              A-
+                            </button>
+                            <span className="text-xs text-white font-medium px-1">
+                              {todaysSpecialFontSize}px
+                            </span>
+                            <button
+                              onClick={() => setTodaysSpecialFontSize(prev => Math.min(24, prev + 2))}
+                              className="w-7 h-7 flex items-center justify-center rounded-lg bg-white text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors shadow-sm"
+                            >
+                              A+
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-gray-500 mt-2 text-center">Tap outside to close</p>
+                    </div>
+                  </>
+                )}
+                
+                {/* Floating Link Button - Bottom Right */}
+                {todaysSpecial.url && todaysSpecial.linkTitle && (
+                  <a
+                    href={todaysSpecial.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute bottom-3 right-3 bg-gradient-feminine text-white rounded-full px-3 py-1 shadow-lg hover:scale-105 transition-all duration-200 platypi-medium text-xs flex items-center justify-center"
+                    data-testid="link-todays-special"
+                  >
+                    {todaysSpecial.linkTitle}
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
       {/* Main Action Buttons */}
       <div className="p-2 space-y-2">

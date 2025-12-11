@@ -364,18 +364,40 @@ export const dailyChizuk = pgTable("daily_chizuk", {
 
 export const featuredContent = pgTable("featured_content", {
   id: serial("id").primaryKey(),
-  date: date("date").notNull().unique(),
+  fromDate: date("from_date").notNull(),
+  untilDate: date("until_date").notNull(),
   title: text("title").notNull(),
   content: text("content"),
   audioUrl: text("audio_url"), // Optional: audio content URL
   videoUrl: text("video_url"), // Optional: video content URL
-  provider: text("provider"),
+  imageUrl: text("image_url"), // Optional: image content URL
+  speaker: text("speaker"),
+  speakerWebsite: text("speaker_website"),
   footnotes: text("footnotes"),
-  attributionLabel: text("attribution_label"), // Short label for collapsed attribution
+  thankYouMessage: text("thank_you_message"), // Thank you message for attribution
   attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
   attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+// Today's Special - expandable content bar for home page
+export const todaysSpecial = pgTable("todays_special", {
+  id: serial("id").primaryKey(),
+  fromDate: date("from_date").notNull(),
+  untilDate: date("until_date").notNull(),
+  title: text("title").notNull(),
+  subtitle: text("subtitle"),
+  imageUrl: text("image_url"),
+  contentEnglish: text("content_english"),
+  contentHebrew: text("content_hebrew"),
+  linkTitle: text("link_title"),
+  url: text("url"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertTodaysSpecialSchema = createInsertSchema(todaysSpecial).omit({ id: true, createdAt: true });
+export type InsertTodaysSpecial = z.infer<typeof insertTodaysSpecialSchema>;
+export type TodaysSpecial = typeof todaysSpecial.$inferSelect;
 
 // Pirkei Avot table for internal content management
 export const pirkeiAvot = pgTable("pirkei_avot", {

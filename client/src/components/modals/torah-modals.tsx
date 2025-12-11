@@ -137,7 +137,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000
   });
 
-  const { data: featuredContent } = useQuery<{title?: string; content?: string; provider?: string; footnotes?: string; attributionLabel?: string; attributionLogoUrl?: string; attributionAboutText?: string}>({
+  const { data: featuredContent } = useQuery<{title?: string; content?: string; speaker?: string; speakerWebsite?: string; imageUrl?: string; footnotes?: string; thankYouMessage?: string; attributionLogoUrl?: string; attributionAboutText?: string}>({
     queryKey: ['/api/torah/featured', today],
     enabled: activeModal === 'featured',
     staleTime: 5 * 60 * 1000,
@@ -692,24 +692,22 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                       </div>
                       
                       {/* Thank You Section for Featured Content */}
-                      {featuredContent.provider && (
+                      {featuredContent.speaker && (
                         <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
                           <p className="text-sm text-blue-900 platypi-medium">
-                            Thank you to{' '}
-                            {featuredContent.provider === 'Rabbi Daniel Braude' ? (
+                            Thank you to {featuredContent.speaker}
+                            {featuredContent.speakerWebsite && (
                               <>
-                                Rabbi Daniel Braude from{' '}
+                                {' - '}
                                 <a 
-                                  href="https://feldheim.com/learn-hilchos-lashon-hara-in-just-3-minutes-a-day"
+                                  href={featuredContent.speakerWebsite}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-blue-600 underline hover:text-blue-800"
                                 >
-                                  Learn Hilchos Lashon Hara in just 3 minutes a day
+                                  Visit Website
                                 </a>
                               </>
-                            ) : (
-                              featuredContent.provider
                             )}
                           </p>
                         </div>
@@ -838,24 +836,22 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           )}
 
           {/* Thank You Section - matches Halacha modal style */}
-          {featuredContent?.provider && (
+          {featuredContent?.speaker && (
             <div className="mb-1 p-4 bg-blue-50 rounded-xl border border-blue-100">
               <p className="text-sm text-blue-900 platypi-medium">
-                Thank you to{' '}
-                {featuredContent.provider === 'Rabbi Daniel Braude' ? (
+                Thank you to {featuredContent.speaker}
+                {featuredContent.speakerWebsite && (
                   <>
-                    Rabbi Daniel Braude from{' '}
+                    {' - '}
                     <a 
-                      href="https://feldheim.com/learn-hilchos-lashon-hara-in-just-3-minutes-a-day"
+                      href={featuredContent.speakerWebsite}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 underline hover:text-blue-800"
                     >
-                      Learn Hilchos Lashon Hara in just 3 minutes a day
+                      Visit Website
                     </a>
                   </>
-                ) : (
-                  featuredContent.provider
                 )}
               </p>
             </div>
@@ -1053,11 +1049,11 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               
               {/* Attribution Section for Featured Content */}
               <AttributionSection
-                label={featuredContent.attributionLabel || `Thank you to ${featuredContent.provider || 'Rabbi Daniel Braude'} for this content`}
+                label={featuredContent.thankYouMessage || `Thank you to ${featuredContent.speaker || 'our content provider'} for this content`}
                 logoUrl={featuredContent.attributionLogoUrl}
-                aboutText={featuredContent.attributionAboutText || "Rabbi Daniel Braude is a Torah educator whose 'Learn Hilchos Lashon Hara in Just 3 Minutes a Day' book makes the laws of proper speech accessible and practical for daily life."}
-                websiteUrl={featuredContent.provider === 'Rabbi Daniel Braude' ? "https://feldheim.com/learn-hilchos-lashon-hara-in-just-3-minutes-a-day" : undefined}
-                websiteLabel="Learn Hilchos Lashon Hara in just 3 minutes a day"
+                aboutText={featuredContent.attributionAboutText}
+                websiteUrl={featuredContent.speakerWebsite}
+                websiteLabel="Visit Website"
               />
               
               <div className="heart-explosion-container">

@@ -137,6 +137,7 @@ import {
   insertDailyEmunaSchema,
   insertDailyChizukSchema,
   insertFeaturedContentSchema,
+  insertTodaysSpecialSchema,
   insertDailyRecipeSchema,
   baseParshaVortSchema,
   insertParshaVortSchema,
@@ -1802,6 +1803,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(featured);
     } catch (error) {
       return res.status(500).json({ message: "Failed to create featured content" });
+    }
+  });
+
+  // Today's Special routes
+  app.get("/api/home/todays-special/:date",
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'todays-special' }),
+    async (req, res) => {
+      try {
+        const { date } = req.params;
+        const special = await storage.getTodaysSpecialByDate(date);
+        res.json(special || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch today's special" });
+      }
+    }
+  );
+
+  app.post("/api/home/todays-special", requireAdminAuth, async (req, res) => {
+    try {
+      const validatedData = insertTodaysSpecialSchema.parse(req.body);
+      const special = await storage.createTodaysSpecial(validatedData);
+      cache.clearCategory('todays-special');
+      res.json(special);
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to create today's special" });
     }
   });
 

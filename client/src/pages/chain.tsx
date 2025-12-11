@@ -25,6 +25,10 @@ interface ChainWithMeta extends TehillimChain {
   hasActiveReading?: boolean;
 }
 
+const toTitleCase = (str: string) => {
+  return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+};
+
 const getReasonIcon = (reason: string) => {
   const lowerReason = reason.toLowerCase();
   if (lowerReason.includes('refuah') || lowerReason.includes('health')) return HeartPulse;
@@ -278,7 +282,7 @@ export default function ChainPage() {
       try {
         await navigator.share({
           title: `Tehillim Chain: ${chain?.name}`,
-          text: `Join me in saying Tehillim for ${chain?.name} - ${chain?.reason}`,
+          text: `Join me in saying Tehillim for ${chain?.name} - ${toTitleCase(chain?.reason || '')}`,
           url,
         });
         return;
@@ -369,29 +373,39 @@ export default function ChainPage() {
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
       'PRODID:-//Ezras Nashim//Tehillim Chain//EN',
+      'METHOD:PUBLISH',
       'BEGIN:VEVENT',
+      `UID:${slug}-${Date.now()}@ezrasnashim.app`,
+      `DTSTAMP:${formatLocalICSDate(new Date())}`,
       `DTSTART:${formatLocalICSDate(startDate)}`,
       `DTEND:${formatLocalICSDate(endDate)}`,
       'RRULE:FREQ=WEEKLY;BYDAY=SU,MO,TU,WE,TH,FR',
       `SUMMARY:${eventTitle}`,
       `LOCATION:${chainUrl}`,
-      `DESCRIPTION:Time to say Tehillim for ${chain.name}\\n\\nOpen your Tehillim chain: ${chainUrl}`,
+      `DESCRIPTION:Time to say Tehillim for ${chain.name}. Open your Tehillim chain: ${chainUrl}`,
       'END:VEVENT',
       'END:VCALENDAR'
     ].join('\r\n');
     
-    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `tehillim-reminder-${slug}.ics`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    // Use data URI approach for better iOS Safari compatibility
+    const dataUri = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(icsContent);
+    
+    // For iOS, open in same window to trigger calendar app
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+      window.location.href = dataUri;
+    } else {
+      // For desktop, use download link
+      const link = document.createElement('a');
+      link.href = dataUri;
+      link.download = `tehillim-reminder-${slug}.ics`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
     
     setShowReminderDialog(false);
-    toast({ title: "Calendar file downloaded!", description: "Open it to add to your calendar." });
+    toast({ title: "Calendar opened!", description: "Add the event to get daily reminders." });
   };
 
   const handleComplete = () => {
@@ -486,7 +500,7 @@ export default function ChainPage() {
                   return <ReasonIcon size={20} className="text-blush" />;
                 })()}
               </div>
-              <p className="platypi-regular text-[10px] text-black/50 mt-1 capitalize">{chain.reason}</p>
+              <p className="platypi-regular text-[10px] text-black/50 mt-1">{toTitleCase(chain.reason)}</p>
             </div>
           </div>
 
