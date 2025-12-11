@@ -471,14 +471,14 @@ export default function ChainPage() {
             </button>
           </div>
           
-          {/* Do Other Mitvas Button */}
+          {/* Do Other Mitsvahs Button */}
           <div className="pb-4">
             <button
               onClick={() => window.location.href = '/'}
-              className="w-full py-3 rounded-2xl border-2 border-blush/20 bg-white text-black/70 platypi-regular hover:bg-blush/5 hover:scale-[1.02] transition-transform"
-              data-testid="button-do-other-mitvas"
+              className="w-full py-4 rounded-2xl bg-gradient-to-r from-sage via-sage/90 to-lavender text-white platypi-medium shadow-lg hover:shadow-xl hover:scale-[1.03] transition-all duration-300"
+              data-testid="button-do-other-mitsvahs"
             >
-              Do Other Mitvas
+              ✨ Do Other Mitsvahs ✨
             </button>
           </div>
         </div>
