@@ -1,4 +1,4 @@
-import { HandHeart, Plus, Heart, Star, Compass, ArrowRight, Sunrise, Sun, Moon, Stars, Search, Link2, ChevronRight, ChevronDown, Shuffle, Briefcase, Baby, Home, Shield, Sparkles, HeartPulse } from "lucide-react";
+import { HandHeart, Plus, Heart, Star, Compass, ArrowRight, Sunrise, Sun, Moon, Stars, Search, Link2, ChevronRight, ChevronDown, Shuffle, Briefcase, Baby, Home, Shield, Sparkles, HeartPulse, Settings, ExternalLink, Minus } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -238,6 +238,31 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     refetchOnWindowFocus: false, // Don't refetch on every focus
     refetchOnMount: 'always', // Always get fresh data when section mounts
   });
+
+  // Today's Special state and data
+  const today = new Date().toISOString().split('T')[0];
+  const [todaysSpecialExpanded, setTodaysSpecialExpanded] = useState(false);
+  const [todaysSpecialLanguage, setTodaysSpecialLanguage] = useState<'english' | 'hebrew'>('english');
+  const [todaysSpecialFontSize, setTodaysSpecialFontSize] = useState(16);
+  const [showTodaysSpecialSettings, setShowTodaysSpecialSettings] = useState(false);
+
+  const { data: todaysSpecial } = useQuery<{
+    title?: string;
+    subtitle?: string;
+    imageUrl?: string;
+    contentEnglish?: string;
+    contentHebrew?: string;
+    linkTitle?: string;
+    url?: string;
+  }>({
+    queryKey: ['/api/home/todays-special', today],
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+
+  // Check if Today's Special has content
+  const hasTodaysSpecialContent = todaysSpecial && (todaysSpecial.contentEnglish || todaysSpecial.contentHebrew);
+  const hasBothLanguages = todaysSpecial?.contentEnglish && todaysSpecial?.contentHebrew;
 
   // Reason options for the dropdown
   const reasonOptions = [
@@ -671,6 +696,144 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             </p>
           </button>
         </div>
+
+        {/* Today's Special Expandable Bar - Only shown when content exists */}
+        {hasTodaysSpecialContent && todaysSpecial && (
+          <div className="bg-white rounded-3xl shadow-lg border border-blush/10 overflow-hidden">
+            {/* Collapsed/Header Bar */}
+            <button
+              onClick={() => setTodaysSpecialExpanded(!todaysSpecialExpanded)}
+              className="w-full p-4 text-left hover:bg-gray-50 transition-colors"
+              data-testid="button-todays-special-toggle"
+            >
+              <div className="flex items-center gap-3">
+                {/* Image */}
+                {todaysSpecial.imageUrl && (
+                  <img 
+                    src={todaysSpecial.imageUrl} 
+                    alt={todaysSpecial.title || "Today's Special"} 
+                    className="w-12 h-12 rounded-xl object-cover"
+                  />
+                )}
+                {!todaysSpecial.imageUrl && (
+                  <div className="bg-gradient-feminine p-3 rounded-full">
+                    <Sparkles className="text-white" size={20} />
+                  </div>
+                )}
+                
+                {/* Title and Subtitle */}
+                <div className="flex-grow">
+                  <h3 className="platypi-bold text-lg text-black">{todaysSpecial.title || "Today's Special"}</h3>
+                  {todaysSpecial.subtitle && (
+                    <p className="platypi-regular text-sm text-black/70">{todaysSpecial.subtitle}</p>
+                  )}
+                </div>
+                
+                {/* Expand/Collapse indicator */}
+                <div className="text-black/40">
+                  {todaysSpecialExpanded ? <Minus size={20} /> : <Plus size={20} />}
+                </div>
+              </div>
+            </button>
+            
+            {/* Expanded Content */}
+            {todaysSpecialExpanded && (
+              <div className="px-4 pb-4 border-t border-blush/10">
+                {/* Settings Row */}
+                <div className="flex items-center justify-end gap-2 py-2 border-b border-blush/10">
+                  <button
+                    onClick={() => setShowTodaysSpecialSettings(!showTodaysSpecialSettings)}
+                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                    data-testid="button-todays-special-settings"
+                  >
+                    <Settings size={18} className="text-black/60" />
+                  </button>
+                </div>
+                
+                {/* Settings Panel */}
+                {showTodaysSpecialSettings && (
+                  <div className="py-3 px-2 bg-gray-50 rounded-xl my-2 space-y-3">
+                    {/* Language Toggle - only show if both languages exist */}
+                    {hasBothLanguages && (
+                      <div className="flex items-center justify-between">
+                        <span className="platypi-medium text-sm text-black">Language</span>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setTodaysSpecialLanguage('english')}
+                            className={`px-3 py-1 rounded-full text-sm platypi-medium transition-colors ${
+                              todaysSpecialLanguage === 'english' 
+                                ? 'bg-gradient-feminine text-white' 
+                                : 'bg-gray-200 text-black/70'
+                            }`}
+                          >
+                            English
+                          </button>
+                          <button
+                            onClick={() => setTodaysSpecialLanguage('hebrew')}
+                            className={`px-3 py-1 rounded-full text-sm platypi-medium transition-colors ${
+                              todaysSpecialLanguage === 'hebrew' 
+                                ? 'bg-gradient-feminine text-white' 
+                                : 'bg-gray-200 text-black/70'
+                            }`}
+                          >
+                            עברית
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Font Size Controls */}
+                    <div className="flex items-center justify-between">
+                      <span className="platypi-medium text-sm text-black">Font Size</span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setTodaysSpecialFontSize(prev => Math.max(12, prev - 2))}
+                          className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center hover:bg-gray-300 transition-colors"
+                        >
+                          <span className="text-lg font-bold">−</span>
+                        </button>
+                        <span className="platypi-regular text-sm w-8 text-center">{todaysSpecialFontSize}</span>
+                        <button
+                          onClick={() => setTodaysSpecialFontSize(prev => Math.min(24, prev + 2))}
+                          className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center hover:bg-gray-300 transition-colors"
+                        >
+                          <span className="text-lg font-bold">+</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Content */}
+                <div 
+                  className={`py-3 platypi-regular text-black leading-relaxed whitespace-pre-line ${
+                    todaysSpecialLanguage === 'hebrew' ? 'text-right' : 'text-left'
+                  }`}
+                  style={{ fontSize: `${todaysSpecialFontSize}px` }}
+                  dir={todaysSpecialLanguage === 'hebrew' ? 'rtl' : 'ltr'}
+                >
+                  {todaysSpecialLanguage === 'hebrew' && todaysSpecial.contentHebrew
+                    ? todaysSpecial.contentHebrew
+                    : todaysSpecial.contentEnglish || todaysSpecial.contentHebrew}
+                </div>
+                
+                {/* Link Button - only show if URL exists */}
+                {todaysSpecial.url && todaysSpecial.linkTitle && (
+                  <a
+                    href={todaysSpecial.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-feminine text-white rounded-xl platypi-medium text-sm hover:scale-105 transition-transform mt-2"
+                    data-testid="link-todays-special"
+                  >
+                    {todaysSpecial.linkTitle}
+                    <ExternalLink size={14} />
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Women's Tefillas Section */}
         <button
