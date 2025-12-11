@@ -462,10 +462,10 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
                 {/* Floating Settings Button - Bottom Left */}
                 <button
                   onClick={() => setShowTodaysSpecialSettings(!showTodaysSpecialSettings)}
-                  className="absolute bottom-3 left-3 bg-gradient-feminine text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:scale-110 transition-all duration-200"
+                  className="absolute bottom-3 left-3 bg-gradient-feminine text-white rounded-full w-7 h-7 flex items-center justify-center shadow-lg hover:scale-110 transition-all duration-200"
                   data-testid="button-todays-special-settings"
                 >
-                  <Settings size={18} />
+                  <Settings size={14} />
                 </button>
                 
                 {/* Settings Panel - Above floating button */}
