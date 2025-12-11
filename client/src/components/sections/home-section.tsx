@@ -85,6 +85,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
   }, [tzedakaCompleted]);
 
   // Generate stable but randomized positions for flowers - like a natural garden
+  // Torah and Tzedaka flowers get priority slots so Tefilla flowers don't cover them
   const flowerPositions = useMemo(() => {
     const positions: { type: 'torah' | 'tefilla' | 'tzedaka'; left: number; bottom: number; flipped: boolean; scale: number }[] = [];
     
@@ -106,29 +107,21 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     };
     
     // Available slots - keeping flowers well away from edges to prevent cutoff
-    const baseSlots = [6, 14, 22, 30, 40, 50, 60, 68, 76, 82];
+    const allSlots = [6, 14, 22, 30, 40, 50, 60, 68, 76, 82];
     
-    // Shuffle slots for random distribution
-    const shuffledSlots = shuffleArray(baseSlots);
+    // Shuffle all slots
+    const shuffledSlots = shuffleArray([...allSlots]);
     
-    // Create all flower entries with type
-    const allFlowers: ('torah' | 'tefilla' | 'tzedaka')[] = [];
-    for (let i = 0; i < torahFlowerCount; i++) allFlowers.push('torah');
-    for (let i = 0; i < tefillaFlowerCount; i++) allFlowers.push('tefilla');
-    for (let i = 0; i < tzedakaFlowerCount; i++) allFlowers.push('tzedaka');
+    // Track used slot indices
+    const usedSlotIndices = new Set<number>();
     
-    // Shuffle the order of flowers for mixed distribution
-    const shuffledFlowers = shuffleArray(allFlowers);
-    
-    shuffledFlowers.forEach((type, index) => {
-      const basePos = shuffledSlots[index % shuffledSlots.length];
-      // Add smaller horizontal offset (-2 to +2%) to keep within bounds
+    // Helper to add a flower position
+    const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', slotIndex: number) => {
+      usedSlotIndices.add(slotIndex);
+      const basePos = shuffledSlots[slotIndex];
       const horizontalOffset = (seededRandom() * 4) - 2;
-      // Clamp position to safe range (5% to 82%) to prevent cutoff
       const clampedPos = Math.max(5, Math.min(82, basePos + horizontalOffset));
-      // Add vertical offset (0 to 12px variation from bottom)
       const verticalOffset = Math.floor(seededRandom() * 12);
-      // Random scale: base 0.9 (10% smaller), can go down to 0.75 but never bigger than 0.9
       const scale = 0.9 - (seededRandom() * 0.15);
       
       positions.push({ 
@@ -138,7 +131,28 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         flipped: seededRandom() > 0.5,
         scale
       });
-    });
+    };
+    
+    // PRIORITY: Place Torah and Tzedaka flowers first (they're completed less often)
+    let nextSlot = 0;
+    
+    // Place Torah flowers first
+    for (let i = 0; i < torahFlowerCount && nextSlot < shuffledSlots.length; i++) {
+      addFlower('torah', nextSlot);
+      nextSlot++;
+    }
+    
+    // Place Tzedaka flowers next
+    for (let i = 0; i < tzedakaFlowerCount && nextSlot < shuffledSlots.length; i++) {
+      addFlower('tzedaka', nextSlot);
+      nextSlot++;
+    }
+    
+    // Place Tefilla flowers last - they only get remaining slots
+    for (let i = 0; i < tefillaFlowerCount && nextSlot < shuffledSlots.length; i++) {
+      addFlower('tefilla', nextSlot);
+      nextSlot++;
+    }
     
     return positions;
   }, [torahFlowerCount, tefillaFlowerCount, tzedakaFlowerCount]);
