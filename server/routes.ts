@@ -2570,7 +2570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Generate ICS calendar file for a Tehillim Chain reminder
+  // Generate ICS calendar file for a Tehillim Chain reminder (v2 - WebView compatible)
   app.get("/api/tehillim-chains/:slug/reminder.ics", async (req, res) => {
     try {
       const { slug } = req.params;
