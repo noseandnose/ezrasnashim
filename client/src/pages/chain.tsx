@@ -481,7 +481,7 @@ export default function ChainPage() {
             </div>
             {chain.description && isDescriptionExpanded && (
               <div className="mt-3 pt-3 border-t border-blush/10">
-                <p className="platypi-regular text-sm text-black/80 leading-relaxed">{chain.description}</p>
+                <p className="platypi-regular text-sm text-black/80 leading-relaxed whitespace-pre-line">{chain.description}</p>
               </div>
             )}
           </div>
