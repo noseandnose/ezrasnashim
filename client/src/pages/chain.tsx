@@ -477,9 +477,9 @@ export default function ChainPage() {
             )}
             {chain.description && (
               <div 
-                className={`absolute bottom-2 right-2 w-6 h-6 flex items-center justify-center rounded-full bg-gradient-feminine shadow-sm transition-transform ${isDescriptionExpanded ? 'rotate-180' : ''}`}
+                className={`absolute bottom-2 right-2 w-5 h-5 flex items-center justify-center rounded-full bg-gradient-feminine shadow-sm transition-transform ${isDescriptionExpanded ? 'rotate-180' : ''}`}
               >
-                <ChevronDown size={14} className="text-white" />
+                <ChevronDown size={12} className="text-white" />
               </div>
             )}
           </div>
