@@ -3745,7 +3745,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if we've already processed this payment (idempotency check)
       const existingAct = await storage.getActByPaymentIntentId(paymentIntentId);
       if (existingAct) {
-        console.log(`Payment ${paymentIntentId} already processed - returning success`);
+        console.log(`Payment ${paymentIntentId} already processed - checking campaign update`);
+        
+        // CRITICAL FIX: Still update campaign progress even if act exists
+        // This handles race condition where webhook created act but didn't update campaign
+        const buttonType = existingAct.subtype || metadata?.buttonType || 'put_a_coin';
+        if (buttonType === 'active_campaign') {
+          try {
+            const activeCampaign = await storage.getActiveCampaign();
+            if (activeCampaign) {
+              // Check if this specific donation amount was already added to campaign
+              // by looking at the donation record and campaign update timestamp
+              const donation = await storage.getDonationByPaymentIntentId(paymentIntentId);
+              if (donation) {
+                const donationAmount = donation.amount / 100; // Convert cents to dollars
+                // Only update if campaign was last updated before the donation was created
+                // This prevents double-counting
+                const campaignLastUpdated = new Date(activeCampaign.updatedAt || 0);
+                const donationCreated = new Date(donation.createdAt);
+                
+                if (campaignLastUpdated < donationCreated) {
+                  const newAmount = activeCampaign.currentAmount + donationAmount;
+                  await storage.updateCampaignProgress(activeCampaign.id, newAmount);
+                  console.log(`Late campaign update: ${activeCampaign.currentAmount} + ${donationAmount} = ${newAmount}`);
+                } else {
+                  console.log(`Campaign already updated after this donation (${campaignLastUpdated.toISOString()} >= ${donationCreated.toISOString()})`);
+                }
+              }
+            }
+          } catch (campaignError) {
+            console.error('Error checking/updating campaign for existing payment:', campaignError);
+          }
+        }
+        
         return res.json({ 
           success: true, 
           message: "Payment already processed",
