@@ -458,16 +458,7 @@ export default function ChainPage() {
             <div className="flex items-center justify-between">
               <div className="text-left flex-1">
                 <p className="platypi-medium text-sm text-black/60">Tehillim Chain for</p>
-                <div className="flex items-center gap-1.5">
-                  <p className="platypi-bold text-base text-black">{chain.name}</p>
-                  {chain.description && (
-                    <div 
-                      className={`w-5 h-5 flex items-center justify-center rounded-full bg-gradient-feminine shadow-sm transition-transform flex-shrink-0 ${isDescriptionExpanded ? 'rotate-180' : ''}`}
-                    >
-                      <ChevronDown size={12} className="text-white" />
-                    </div>
-                  )}
-                </div>
+                <p className="platypi-bold text-base text-black">{chain.name}</p>
               </div>
               <div className="flex flex-col items-center flex-shrink-0">
                 <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blush/10">
@@ -482,6 +473,13 @@ export default function ChainPage() {
             {chain.description && isDescriptionExpanded && (
               <div className="mt-3 pt-3 border-t border-blush/10">
                 <p className="platypi-regular text-sm text-black/80 leading-relaxed whitespace-pre-line">{chain.description}</p>
+              </div>
+            )}
+            {chain.description && (
+              <div 
+                className={`absolute bottom-2 right-2 w-6 h-6 flex items-center justify-center rounded-full bg-gradient-feminine shadow-sm transition-transform ${isDescriptionExpanded ? 'rotate-180' : ''}`}
+              >
+                <ChevronDown size={14} className="text-white" />
               </div>
             )}
           </div>
