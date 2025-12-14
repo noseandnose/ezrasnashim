@@ -1548,8 +1548,8 @@ select {
   }
   
   /* Larger touch targets for mobile */
-  /* Only apply to standalone buttons and links, not inline text links */
-  button,
+  /* Only apply to form buttons and standalone links, not icon buttons or inline links */
+  button.btn-touch-target,
   .button,
   a.button-link,
   nav a,
