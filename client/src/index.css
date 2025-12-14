@@ -751,6 +751,29 @@ nav span, nav a, [role="navigation"] span, [role="navigation"] a,
   text-overflow: clip !important;
 }
 
+/* Wheel date picker - prevent vibrating/layout shifts from global rules */
+[data-testid="wheel-month"],
+[data-testid="wheel-day"],
+[data-testid="wheel-year"],
+[data-testid="wheel-month"] *,
+[data-testid="wheel-day"] *,
+[data-testid="wheel-year"] * {
+  word-wrap: normal !important;
+  overflow-wrap: normal !important;
+  hyphens: none !important;
+  word-break: keep-all !important;
+  white-space: nowrap !important;
+}
+
+/* Scrollbar-hide utility for wheel pickers */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Fixed-height containers with text - allow internal scrolling if needed */
 .truncate-text {
   overflow: hidden;
