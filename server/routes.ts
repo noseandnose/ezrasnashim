@@ -2937,6 +2937,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/meditations/all", async (req, res) => {
+    try {
+      const allMeditations = await storage.getAllMeditations();
+      res.json(allMeditations);
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to fetch all meditations" });
+    }
+  });
+
   // Discount promotion routes
   app.get("/api/discount-promotions/active", async (req, res) => {
     try {
