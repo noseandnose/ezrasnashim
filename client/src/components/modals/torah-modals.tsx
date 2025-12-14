@@ -54,7 +54,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           contentType = 'halacha';
           break;
         case 'featured':
-          title = 'Shmirat Halashon';
+          title = 'Inspiration Hub';
           contentType = 'featured';
           break;
       }
@@ -137,9 +137,9 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000
   });
 
-  const { data: featuredContent } = useQuery<{title?: string; content?: string; speaker?: string; speakerWebsite?: string; imageUrl?: string; footnotes?: string; thankYouMessage?: string; attributionLogoUrl?: string; attributionAboutText?: string}>({
+  const { data: featuredContent } = useQuery<{title?: string; content?: string; audioUrl?: string; speaker?: string; speakerWebsite?: string; imageUrl?: string; footnotes?: string; thankYouMessage?: string; attributionLogoUrl?: string; attributionAboutText?: string}>({
     queryKey: ['/api/torah/featured', today],
-    enabled: activeModal === 'featured',
+    enabled: activeModal === 'featured' || fullscreenContent.contentType === 'featured',
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000
   });
@@ -1016,12 +1016,46 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                     {featuredContent.title}
                   </h3>
                 )}
-                <div 
-                  className="platypi-regular leading-relaxed text-black whitespace-pre-line"
-                  style={{ fontSize: `${fontSize}px` }}
-                >
-                  <div dangerouslySetInnerHTML={{ __html: formatContentWithFootnotes(featuredContent.content, featuredContent.footnotes) }} />
-                </div>
+                
+                {/* Audio Player for audio content */}
+                {featuredContent.audioUrl && (
+                  <div className="mb-4">
+                    <AudioPlayer 
+                      title={featuredContent.title || 'Inspiration Hub'}
+                      duration="0:00"
+                      audioUrl={featuredContent.audioUrl}
+                      onAudioEnded={() => {
+                        if (!isModalComplete('featured')) {
+                          trackModalComplete('featured');
+                          markModalComplete('featured');
+                          setShowExplosion(true);
+                          setTimeout(() => {
+                            setShowExplosion(false);
+                            completeTask('torah');
+                            if (checkAndShowCongratulations()) {
+                              openModal('congratulations', 'torah');
+                            }
+                            const event = new CustomEvent('closeFullscreen');
+                            window.dispatchEvent(event);
+                            setTimeout(() => {
+                              window.location.hash = '#/?section=home&scrollToProgress=true';
+                            }, 100);
+                          }, 1500);
+                        }
+                      }}
+                    />
+                  </div>
+                )}
+                
+                {/* Text content (only show if there's actual content) */}
+                {featuredContent.content && (
+                  <div 
+                    className="platypi-regular leading-relaxed text-black whitespace-pre-line"
+                    style={{ fontSize: `${fontSize}px` }}
+                  >
+                    <div dangerouslySetInnerHTML={{ __html: formatContentWithFootnotes(featuredContent.content, featuredContent.footnotes) }} />
+                  </div>
+                )}
 
                 {/* Footnotes Section */}
                 {featuredContent.footnotes && showFootnotes && (
