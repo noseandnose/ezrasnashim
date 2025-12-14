@@ -502,15 +502,44 @@ export async function getCurrentTefillaConditions(
     const isFriday = dayOfWeek === 5;
     const isSaturday = dayOfWeek === 6;
     let hebrewDate = undefined;
+    
+    // Check if we're after sunset - Jewish days begin at sunset
+    let isAfterSunset = false;
+    if (latitude && longitude) {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const { getLocalDateString } = await import('../lib/dateUtils');
+        const todayDate = getLocalDateString();
+        const zmanimResponse = await fetch(
+          `${apiUrl}/api/zmanim/${todayDate}?lat=${latitude}&lng=${longitude}`
+        );
+        if (zmanimResponse.ok) {
+          const zmanimData = await zmanimResponse.json();
+          if (zmanimData.shkia) {
+            const now = new Date();
+            const sunsetTime = new Date(zmanimData.shkia);
+            isAfterSunset = now >= sunsetTime;
+          }
+        }
+      } catch (error) {
+        // Fallback: use 6 PM as approximate sunset if API fails
+        const now = new Date();
+        isAfterSunset = now.getHours() >= 18;
+      }
+    } else {
+      // No location - use 6 PM as fallback sunset time
+      const now = new Date();
+      isAfterSunset = now.getHours() >= 18;
+    }
 
     try {
       const { getLocalDateString, getLocalTomorrowString } = await import('../lib/dateUtils');
       const today = getLocalDateString();
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       
-      // For Maariv (evening prayer), check tomorrow's date for Rosh Chodesh
+      // For Maariv (evening prayer) OR after sunset, check tomorrow's date
       // since Jewish days begin at sunset
-      const dateToCheck = checkTomorrowForRoshChodesh ? getLocalTomorrowString() : today;
+      const dateToCheck = (checkTomorrowForRoshChodesh || isAfterSunset) ? getLocalTomorrowString() : today;
       
       const hebrewResponse = await fetch(
         `${apiUrl}/api/hebrew-date/${dateToCheck}`
