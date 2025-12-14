@@ -373,14 +373,14 @@ export function FullscreenModal({
           }}
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <button
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   handleLogoClick();
                 }}
-                className="hover:opacity-80 transition-opacity"
+                className="hover:opacity-80 transition-opacity flex-shrink-0"
                 aria-label="Go to home"
                 type="button"
               >
@@ -398,7 +398,7 @@ export function FullscreenModal({
                     e.stopPropagation();
                     setShowCompass(true);
                   }}
-                  className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+                  className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
                   aria-label="Open compass"
                   type="button"
                 >
@@ -407,16 +407,16 @@ export function FullscreenModal({
               )}
             </div>
 
-            <h1 className={`text-lg font-semibold text-gray-900 text-center flex-1 mx-4 ${title ? getHebrewFontClass(title, 'platypi-semibold') : 'platypi-semibold'}`}>
+            <h1 className={`text-lg font-semibold text-gray-900 text-center flex-1 mx-4 truncate min-w-0 ${title ? getHebrewFontClass(title, 'platypi-semibold') : 'platypi-semibold'}`}>
               {title}
             </h1>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               {showInfoIcon && (
                 <Popover open={showInfoPopover} onOpenChange={(open) => onInfoClick?.(open)}>
                   <PopoverTrigger asChild>
                     <button
-                      className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+                      className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
                       aria-label="Prayer timing information"
                       type="button"
                       onClick={(e) => {
@@ -440,7 +440,7 @@ export function FullscreenModal({
                   handleClose();
                 }}
                 data-testid="button-close-modal"
-                className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+                className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
                 aria-label="Close fullscreen"
                 type="button"
               >
