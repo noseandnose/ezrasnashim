@@ -632,7 +632,7 @@ export default function TzedakaModals() {
               <div className="grid grid-cols-5 gap-2">
                 <button
                   onClick={() => setDonationAmount("1")}
-                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     donationAmount === "1"
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
@@ -642,7 +642,7 @@ export default function TzedakaModals() {
                 </button>
                 <button
                   onClick={() => setDonationAmount("18")}
-                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     donationAmount === "18"
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
@@ -652,7 +652,7 @@ export default function TzedakaModals() {
                 </button>
                 <button
                   onClick={() => setDonationAmount("180")}
-                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     donationAmount === "180"
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
@@ -662,7 +662,7 @@ export default function TzedakaModals() {
                 </button>
                 <button
                   onClick={() => setDonationAmount("1800")}
-                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     donationAmount === "1800"
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
@@ -672,7 +672,7 @@ export default function TzedakaModals() {
                 </button>
                 <button
                   onClick={() => setDonationAmount("custom")}
-                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     donationAmount === "custom"
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
@@ -751,7 +751,7 @@ export default function TzedakaModals() {
               <div className="grid grid-cols-5 gap-2">
                 <button
                   onClick={() => setDonationAmount("1")}
-                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     donationAmount === "1"
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
@@ -761,7 +761,7 @@ export default function TzedakaModals() {
                 </button>
                 <button
                   onClick={() => setDonationAmount("18")}
-                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     donationAmount === "18"
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
@@ -771,7 +771,7 @@ export default function TzedakaModals() {
                 </button>
                 <button
                   onClick={() => setDonationAmount("36")}
-                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     donationAmount === "36"
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
@@ -781,7 +781,7 @@ export default function TzedakaModals() {
                 </button>
                 <button
                   onClick={() => setDonationAmount("72")}
-                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     donationAmount === "72"
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
@@ -791,7 +791,7 @@ export default function TzedakaModals() {
                 </button>
                 <button
                   onClick={() => setDonationAmount("custom")}
-                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     donationAmount === "custom"
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
