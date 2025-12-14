@@ -141,7 +141,7 @@ export default function DonationModal() {
                 <button
                   key={quickAmount.value}
                   onClick={() => handleAmountSelect(quickAmount.value)}
-                  className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                  className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     amount === quickAmount.value
                       ? 'bg-gradient-feminine text-white shadow-soft'
                       : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'

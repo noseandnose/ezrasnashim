@@ -1,8 +1,7 @@
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { Brain, Play } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Play } from "lucide-react";
 import AudioPlayer from "@/components/audio-player";
 import { Button } from "@/components/ui/button";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
@@ -28,111 +27,100 @@ interface Meditation {
 
 export default function MeditationModals() {
   const { activeModal, closeModal, openModal } = useModalStore();
-  const [selectedSection, setSelectedSection] = useState<string>("");
+  const [selectedMeditation, setSelectedMeditation] = useState<Meditation | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("");
 
-  // Fetch meditation categories
   const { data: categories = [], isLoading: categoriesLoading } = useQuery<MeditationCategory[]>({
     queryKey: ['/api/meditations/categories'],
     enabled: activeModal === 'meditation-categories',
   });
 
-  // Fetch meditations for selected category
-  const { data: meditations = [], isLoading: meditationsLoading } = useQuery<Meditation[]>({
-    queryKey: ['/api/meditations/section', selectedSection],
-    enabled: activeModal === 'meditation-list' && !!selectedSection,
+  const { data: allMeditations = [], isLoading: meditationsLoading } = useQuery<Meditation[]>({
+    queryKey: ['/api/meditations/all'],
+    enabled: activeModal === 'meditation-categories',
   });
 
-  const handleCategorySelect = (section: string) => {
-    setSelectedSection(section);
-    openModal('meditation-list', 'table');
-  };
+  useEffect(() => {
+    if (categories.length > 0 && !activeTab) {
+      setActiveTab(categories[0].section);
+    }
+  }, [categories, activeTab]);
+
+  const meditationsBySection = allMeditations.reduce((acc, med) => {
+    if (!acc[med.section]) {
+      acc[med.section] = [];
+    }
+    acc[med.section].push(med);
+    return acc;
+  }, {} as Record<string, Meditation[]>);
 
   const handleMeditationSelect = (meditation: Meditation) => {
-    // Store meditation data in modal store for audio player
-    openModal('meditation-player', 'table');
     setSelectedMeditation(meditation);
+    openModal('meditation-player', 'table');
   };
 
-  const [selectedMeditation, setSelectedMeditation] = useState<Meditation | null>(null);
+  const isLoading = categoriesLoading || meditationsLoading;
+  const activeMeditations = meditationsBySection[activeTab] || [];
 
   return (
     <>
-      {/* Category Selection Modal */}
-      <Dialog open={activeModal === 'meditation-categories'} onOpenChange={() => closeModal()}>
-        <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" data-bridge-container aria-describedby="meditation-categories-description">
-          <div id="meditation-categories-description" className="sr-only">Select a meditation category</div>
-          
-          <div className="flex items-center justify-center mb-4 relative">
-            <DialogTitle className="text-xl platypi-bold text-black">Choose a Category</DialogTitle>
+      <FullscreenModal
+        isOpen={activeModal === 'meditation-categories'}
+        onClose={() => closeModal()}
+        title="Meditations"
+      >
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin w-8 h-8 border-2 border-blush border-t-transparent rounded-full"></div>
           </div>
-
-          {categoriesLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin w-8 h-8 border-2 border-blush border-t-transparent rounded-full"></div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {categories.map((category, index) => (
+        ) : (
+          <div className="space-y-4">
+            <div className="flex rounded-2xl bg-blush/10 p-1 border border-blush/20">
+              {categories.map((category) => (
                 <button
-                  key={index}
-                  onClick={() => handleCategorySelect(category.section)}
-                  className="w-full rounded-2xl p-4 text-left hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
-                  data-testid={`button-category-${category.section.toLowerCase().replace(/\s+/g, '-')}`}
+                  key={category.section}
+                  onClick={() => setActiveTab(category.section)}
+                  className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
+                    activeTab === category.section
+                      ? 'bg-gradient-feminine text-white shadow-lg'
+                      : 'text-black/70 hover:bg-blush/10'
+                  }`}
+                  data-testid={`tab-category-${category.section.toLowerCase().replace(/\s+/g, '-')}`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-full bg-gradient-feminine">
-                      <Brain className="text-white" size={20} strokeWidth={1.5} />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="platypi-bold text-sm text-black mb-1">{category.section}</h3>
-                      <p className="platypi-regular text-xs text-black/60">{category.subtitle}</p>
-                    </div>
-                  </div>
+                  <span className="platypi-semibold text-xs leading-tight block">
+                    {category.section}
+                  </span>
                 </button>
               ))}
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
 
-      {/* Meditation List Modal */}
-      <Dialog open={activeModal === 'meditation-list'} onOpenChange={() => closeModal(true)}>
-        <DialogContent className="dialog-content w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular" data-bridge-container aria-describedby="meditation-list-description">
-          <div id="meditation-list-description" className="sr-only">Select a meditation to listen</div>
-          
-          <div className="flex items-center justify-center mb-4 relative">
-            <DialogTitle className="text-xl platypi-bold text-black">{selectedSection}</DialogTitle>
-          </div>
-
-          {meditationsLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin w-8 h-8 border-2 border-blush border-t-transparent rounded-full"></div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {meditations.map((meditation) => (
+            <div className="space-y-2">
+              {activeMeditations.map((meditation) => (
                 <button
                   key={meditation.id}
                   onClick={() => handleMeditationSelect(meditation)}
-                  className="w-full rounded-2xl p-4 text-left hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
+                  className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-200 shadow-lg border border-blush/10 bg-white"
                   data-testid={`button-meditation-${meditation.id}`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-full bg-gradient-feminine">
-                      <Play className="text-white" size={18} strokeWidth={1.5} />
+                    <div className="p-2 rounded-full bg-gradient-feminine flex-shrink-0">
+                      <Play className="text-white" size={16} strokeWidth={2} />
                     </div>
-                    <div className="flex-1">
-                      <h3 className="platypi-bold text-sm text-black">{meditation.name}</h3>
-                    </div>
+                    <span className="platypi-medium text-sm text-black">{meditation.name}</span>
                   </div>
                 </button>
               ))}
+              
+              {activeMeditations.length === 0 && (
+                <div className="text-center py-8 text-black/50 platypi-regular">
+                  No meditations available in this category
+                </div>
+              )}
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
+          </div>
+        )}
+      </FullscreenModal>
 
-      {/* Audio Player Modal */}
       <MeditationAudioPlayer 
         meditation={selectedMeditation}
         isOpen={activeModal === 'meditation-player'}
@@ -142,7 +130,6 @@ export default function MeditationModals() {
   );
 }
 
-// Audio Player Component - Fullscreen like Daily Chizuk
 function MeditationAudioPlayer({ 
   meditation, 
   isOpen, 

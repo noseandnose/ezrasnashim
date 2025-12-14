@@ -502,15 +502,44 @@ export async function getCurrentTefillaConditions(
     const isFriday = dayOfWeek === 5;
     const isSaturday = dayOfWeek === 6;
     let hebrewDate = undefined;
+    
+    // Check if we're after sunset - Jewish days begin at sunset
+    // Only switch to tomorrow's date if we can verify sunset time from zmanim
+    // If zmanim fails, stay conservative and use today's date (avoid false positives)
+    let isAfterSunset = false;
+    if (latitude && longitude) {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const { getLocalDateString } = await import('../lib/dateUtils');
+        const todayDate = getLocalDateString();
+        const zmanimResponse = await fetch(
+          `${apiUrl}/api/zmanim/${todayDate}?lat=${latitude}&lng=${longitude}`
+        );
+        if (zmanimResponse.ok) {
+          const zmanimData = await zmanimResponse.json();
+          if (zmanimData.shkia) {
+            const now = new Date();
+            const sunsetTime = new Date(zmanimData.shkia);
+            isAfterSunset = now >= sunsetTime;
+          }
+        }
+        // If zmanim fetch fails or no shkia data, isAfterSunset stays false (conservative)
+      } catch (error) {
+        // If API fails, stay conservative - don't switch to tomorrow's holiday
+        // This prevents showing holiday content prematurely
+        isAfterSunset = false;
+      }
+    }
+    // If no location data, stay conservative and use today's date
 
     try {
       const { getLocalDateString, getLocalTomorrowString } = await import('../lib/dateUtils');
       const today = getLocalDateString();
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       
-      // For Maariv (evening prayer), check tomorrow's date for Rosh Chodesh
+      // For Maariv (evening prayer) OR after sunset, check tomorrow's date
       // since Jewish days begin at sunset
-      const dateToCheck = checkTomorrowForRoshChodesh ? getLocalTomorrowString() : today;
+      const dateToCheck = (checkTomorrowForRoshChodesh || isAfterSunset) ? getLocalTomorrowString() : today;
       
       const hebrewResponse = await fetch(
         `${apiUrl}/api/hebrew-date/${dateToCheck}`

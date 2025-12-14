@@ -203,6 +203,7 @@ export interface IStorage {
   // Meditation methods
   getMeditationCategories(): Promise<{section: string; subtitle: string}[]>;
   getMeditationsBySection(section: string): Promise<Meditation[]>;
+  getAllMeditations(): Promise<Meditation[]>;
   getMeditationById(id: number): Promise<Meditation | undefined>;
 
   // Discount promotion methods
@@ -2109,6 +2110,13 @@ export class DatabaseStorage implements IStorage {
       .from(meditations)
       .where(eq(meditations.section, section))
       .orderBy(meditations.name);
+  }
+
+  async getAllMeditations(): Promise<Meditation[]> {
+    return await db
+      .select()
+      .from(meditations)
+      .orderBy(meditations.section, meditations.name);
   }
 
   async getMeditationById(id: number): Promise<Meditation | undefined> {

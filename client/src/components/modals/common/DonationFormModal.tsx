@@ -171,7 +171,7 @@ export function DonationFormModal({ config, isOpen, onClose, activeCampaign }: D
               <button
                 key={amount}
                 onClick={() => setDonationAmount(amount)}
-                className={`p-2 rounded-xl text-xs platypi-medium transition-all ${
+                className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                   donationAmount === amount
                     ? 'bg-gradient-feminine text-white shadow-soft'
                     : 'bg-white/70 backdrop-blur-sm border border-blush/20 text-warm-gray hover:bg-white/90'
