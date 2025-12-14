@@ -451,22 +451,14 @@ export default function ChainPage() {
         <div className="p-4 space-y-4">
           {/* Tehillim Chain section with border */}
           <div 
-            className={`py-3 px-4 border border-blush/20 rounded-xl bg-white ${chain.description ? 'cursor-pointer' : ''}`}
+            className={`py-3 px-4 border border-blush/20 rounded-xl bg-white relative ${chain.description ? 'cursor-pointer' : ''}`}
             onClick={() => chain.description && setIsDescriptionExpanded(!isDescriptionExpanded)}
             data-testid="chain-header"
           >
             <div className="flex items-center justify-between">
               <div className="text-left flex-1">
                 <p className="platypi-medium text-sm text-black/60">Tehillim Chain for</p>
-                <div className="flex items-center gap-2">
-                  <p className="platypi-bold text-base text-black">{chain.name}</p>
-                  {chain.description && (
-                    <ChevronDown 
-                      size={22} 
-                      className={`text-blush transition-transform ${isDescriptionExpanded ? 'rotate-180' : ''}`}
-                    />
-                  )}
-                </div>
+                <p className="platypi-bold text-base text-black">{chain.name}</p>
               </div>
               <div className="flex flex-col items-center flex-shrink-0">
                 <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blush/10">
@@ -481,6 +473,13 @@ export default function ChainPage() {
             {chain.description && isDescriptionExpanded && (
               <div className="mt-3 pt-3 border-t border-blush/10">
                 <p className="platypi-regular text-sm text-black/80 leading-relaxed">{chain.description}</p>
+              </div>
+            )}
+            {chain.description && (
+              <div 
+                className={`absolute bottom-2 right-2 w-6 h-6 flex items-center justify-center rounded-full bg-gradient-feminine shadow-sm transition-transform ${isDescriptionExpanded ? 'rotate-180' : ''}`}
+              >
+                <ChevronDown size={14} className="text-white" />
               </div>
             )}
           </div>
