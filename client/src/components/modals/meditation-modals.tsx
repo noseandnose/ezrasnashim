@@ -1,7 +1,7 @@
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { Brain, Play, ChevronDown, ChevronUp } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Play } from "lucide-react";
 import AudioPlayer from "@/components/audio-player";
 import { Button } from "@/components/ui/button";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
@@ -28,7 +28,7 @@ interface Meditation {
 export default function MeditationModals() {
   const { activeModal, closeModal, openModal } = useModalStore();
   const [selectedMeditation, setSelectedMeditation] = useState<Meditation | null>(null);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [activeTab, setActiveTab] = useState<string>("");
 
   const { data: categories = [], isLoading: categoriesLoading } = useQuery<MeditationCategory[]>({
     queryKey: ['/api/meditations/categories'],
@@ -40,6 +40,12 @@ export default function MeditationModals() {
     enabled: activeModal === 'meditation-categories',
   });
 
+  useEffect(() => {
+    if (categories.length > 0 && !activeTab) {
+      setActiveTab(categories[0].section);
+    }
+  }, [categories, activeTab]);
+
   const meditationsBySection = allMeditations.reduce((acc, med) => {
     if (!acc[med.section]) {
       acc[med.section] = [];
@@ -48,24 +54,13 @@ export default function MeditationModals() {
     return acc;
   }, {} as Record<string, Meditation[]>);
 
-  const toggleSection = (section: string) => {
-    setExpandedSections(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(section)) {
-        newSet.delete(section);
-      } else {
-        newSet.add(section);
-      }
-      return newSet;
-    });
-  };
-
   const handleMeditationSelect = (meditation: Meditation) => {
     setSelectedMeditation(meditation);
     openModal('meditation-player', 'table');
   };
 
   const isLoading = categoriesLoading || meditationsLoading;
+  const activeMeditations = meditationsBySection[activeTab] || [];
 
   return (
     <>
@@ -80,56 +75,48 @@ export default function MeditationModals() {
           </div>
         ) : (
           <div className="space-y-4">
-            {categories.map((category) => {
-              const sectionMeditations = meditationsBySection[category.section] || [];
-              const isExpanded = expandedSections.has(category.section);
-              
-              return (
-                <div 
+            <div className="flex rounded-2xl bg-blush/10 p-1 border border-blush/20">
+              {categories.map((category) => (
+                <button
                   key={category.section}
-                  className="bg-white rounded-2xl border border-blush/10 shadow-lg overflow-hidden"
+                  onClick={() => setActiveTab(category.section)}
+                  className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
+                    activeTab === category.section
+                      ? 'bg-gradient-feminine text-white shadow-lg'
+                      : 'text-black/70 hover:bg-blush/10'
+                  }`}
+                  data-testid={`tab-category-${category.section.toLowerCase().replace(/\s+/g, '-')}`}
                 >
-                  <button
-                    onClick={() => toggleSection(category.section)}
-                    className="w-full p-4 text-left flex items-center gap-3 hover:bg-blush/5 transition-colors"
-                    data-testid={`button-section-${category.section.toLowerCase().replace(/\s+/g, '-')}`}
-                  >
+                  <span className="platypi-semibold text-xs leading-tight block">
+                    {category.section}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            <div className="space-y-2">
+              {activeMeditations.map((meditation) => (
+                <button
+                  key={meditation.id}
+                  onClick={() => handleMeditationSelect(meditation)}
+                  className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-200 shadow-lg border border-blush/10 bg-white"
+                  data-testid={`button-meditation-${meditation.id}`}
+                >
+                  <div className="flex items-center gap-3">
                     <div className="p-2 rounded-full bg-gradient-feminine flex-shrink-0">
-                      <Brain className="text-white" size={20} strokeWidth={1.5} />
+                      <Play className="text-white" size={16} strokeWidth={2} />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="platypi-bold text-base text-black">{category.section}</h3>
-                      <p className="platypi-regular text-xs text-black/60">{category.subtitle}</p>
-                    </div>
-                    <div className="flex-shrink-0 p-1">
-                      {isExpanded ? (
-                        <ChevronUp className="text-blush" size={20} />
-                      ) : (
-                        <ChevronDown className="text-blush" size={20} />
-                      )}
-                    </div>
-                  </button>
-                  
-                  {isExpanded && sectionMeditations.length > 0 && (
-                    <div className="border-t border-blush/10 bg-blush/5">
-                      {sectionMeditations.map((meditation) => (
-                        <button
-                          key={meditation.id}
-                          onClick={() => handleMeditationSelect(meditation)}
-                          className="w-full p-3 pl-14 text-left flex items-center gap-3 hover:bg-blush/10 transition-colors border-b border-blush/5 last:border-b-0"
-                          data-testid={`button-meditation-${meditation.id}`}
-                        >
-                          <div className="p-1.5 rounded-full bg-white border border-blush/20 flex-shrink-0">
-                            <Play className="text-blush" size={14} strokeWidth={2} />
-                          </div>
-                          <span className="platypi-medium text-sm text-black">{meditation.name}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                    <span className="platypi-medium text-sm text-black">{meditation.name}</span>
+                  </div>
+                </button>
+              ))}
+              
+              {activeMeditations.length === 0 && (
+                <div className="text-center py-8 text-black/50 platypi-regular">
+                  No meditations available in this category
                 </div>
-              );
-            })}
+              )}
+            </div>
           </div>
         )}
       </FullscreenModal>
