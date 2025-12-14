@@ -315,58 +315,65 @@ export function BirkatHamazonModal() {
     );
   };
 
-  // After Brochas tab state
-  const [afterBrochasTab, setAfterBrochasTab] = useState<'me-ein-shalosh' | 'birkat-hamazon'>('me-ein-shalosh');
-
-  // Show After Brochas fullscreen modal with tabs
+  // Show After Brochas selection modal
   if (activeModal === 'after-brochas') {
     return (
-      <FullscreenModal
-        isOpen={true}
-        onClose={() => closeModal(true)}
-        title="After Brochas"
-        showFontControls={true}
-        fontSize={fontSize}
-        onFontSizeChange={(size) => setFontSize(size)}
-        showLanguageControls={true}
-        language={language}
-        onLanguageChange={setLanguage}
-      >
-        <div className="space-y-4">
-          {/* Tab selector matching meditation style */}
-          <div className="flex rounded-2xl bg-blush/10 p-1 border border-blush/20">
+      <Dialog open={true} onOpenChange={() => closeModal(true)}>
+        <DialogContent className="w-full max-w-md rounded-3xl p-6 platypi-regular">
+          <DialogHeader className="text-center mb-4 pr-8">
+            <DialogTitle className="text-lg platypi-bold text-black">After Brochas</DialogTitle>
+            <DialogDescription className="text-sm text-gray-600 platypi-regular">Prayers of Thanks</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
             <button
-              onClick={() => setAfterBrochasTab('me-ein-shalosh')}
-              className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
-                afterBrochasTab === 'me-ein-shalosh'
-                  ? 'bg-gradient-feminine text-white shadow-lg'
-                  : 'text-black/70 hover:bg-blush/10'
-              }`}
-              data-testid="tab-me-ein-shalosh"
+              onClick={() => {
+                // Open Me'ein Shalosh directly in fullscreen
+                setFullscreenContent({
+                  isOpen: true,
+                  title: 'Me\'ein Shalosh',
+                  contentType: 'me-ein-shalosh',
+                  content: ({ language: currentLang, fontSize: currentFontSize }: { language: 'hebrew' | 'english', fontSize: number }) => 
+                    <MeeinShaloshFullscreenContent language={currentLang} fontSize={currentFontSize} />
+                });
+                closeModal(); // Close the After Brochas selection modal
+              }}
+              className="w-full bg-white rounded-xl p-4 border border-blush/10 hover:bg-blush/5 transition-colors text-left"
             >
-              <span className="platypi-semibold text-xs leading-tight block">Me'ein Shalosh</span>
+              <h3 className="platypi-medium text-black mb-1">Me'ein Shalosh</h3>
+              <p className="text-sm text-gray-600">Al HaMichiya/HaGafen/HaEtz</p>
             </button>
+
             <button
-              onClick={() => setAfterBrochasTab('birkat-hamazon')}
-              className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
-                afterBrochasTab === 'birkat-hamazon'
-                  ? 'bg-gradient-feminine text-white shadow-lg'
-                  : 'text-black/70 hover:bg-blush/10'
-              }`}
-              data-testid="tab-birkat-hamazon"
+              onClick={() => {
+                // Open Birkat Hamazon directly in fullscreen
+                setFullscreenContent({
+                  isOpen: true,
+                  title: 'Birkat Hamazon',
+                  contentType: 'birkat-hamazon',
+                  content: ({ language: currentLang, fontSize: currentFontSize }: { language: 'hebrew' | 'english', fontSize: number }) => 
+                    <BirkatHamazonFullscreenContent language={currentLang} fontSize={currentFontSize} />
+                });
+                closeModal(); // Close the After Brochas selection modal
+              }}
+              className="w-full bg-white rounded-xl p-4 border border-blush/10 hover:bg-blush/5 transition-colors text-left"
             >
-              <span className="platypi-semibold text-xs leading-tight block">Birkat Hamazon</span>
+              <h3 className="platypi-medium text-black mb-1">Birkat Hamazon</h3>
+              <p className="text-sm text-gray-600">After bread meals</p>
             </button>
           </div>
 
-          {/* Tab content */}
-          {afterBrochasTab === 'me-ein-shalosh' ? (
-            <MeeinShaloshFullscreenContent language={language} fontSize={fontSize} />
-          ) : (
-            <BirkatHamazonFullscreenContent language={language} fontSize={fontSize} />
-          )}
-        </div>
-      </FullscreenModal>
+          <div className="flex space-x-3 mt-6">
+            <Button 
+              onClick={() => closeModal()} 
+              variant="outline"
+              className="flex-1 rounded-2xl border-blush/30 text-blush hover:bg-blush/5"
+            >
+              Cancel
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     );
   }
 
