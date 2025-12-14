@@ -96,31 +96,18 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       return seed / 233280;
     };
     
-    // Shuffle helper using seeded random
-    const shuffleArray = <T,>(arr: T[]): T[] => {
-      const shuffled = [...arr];
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(seededRandom() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-      }
-      return shuffled;
-    };
-    
-    // Generate positions dynamically - no fixed limit on flowers
-    // Use multiple rows to allow many flowers without excessive overlap
-    const totalFlowers = torahFlowerCount + tefillaFlowerCount + tzedakaFlowerCount;
-    
     // Helper to add a flower position with dynamic placement
     const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', index: number) => {
-      // Distribute flowers across the width (5% to 85%)
-      const widthRange = 80; // percentage range
-      const basePos = 5 + ((index * 17) % widthRange); // spread evenly with wrap
+      // Distribute flowers across the width (0% to 90%) - full width coverage
+      const widthRange = 90; // percentage range
+      const basePos = ((index * 17) % widthRange); // spread evenly with wrap starting from 0
       const horizontalOffset = (seededRandom() * 8) - 4;
-      const clampedPos = Math.max(5, Math.min(85, basePos + horizontalOffset));
+      const clampedPos = Math.max(0, Math.min(90, basePos + horizontalOffset));
       
-      // Use multiple vertical levels for many flowers (0-20px from bottom)
+      // Use negative bottom values so flower stalks are hidden in the ground
+      // Base: -15px so stalks are below the grass line
       const row = Math.floor(index / 6); // new row every 6 flowers
-      const verticalOffset = Math.floor(seededRandom() * 8) + (row * 6);
+      const verticalOffset = -15 + Math.floor(seededRandom() * 8) + (row * 4);
       
       // Vary scale slightly - flowers further back (higher rows) are smaller
       const baseScale = 0.85 - (row * 0.08);
@@ -657,12 +644,20 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           />
           
           {/* Flowers - appear when completions happen, behind grass */}
-          {flowerPositions.map((flower, index) => (
+          {/* Tefilla flowers first (z-index 1), then Torah/Tzedaka on top (z-index 3) */}
+          {flowerPositions
+            .slice()
+            .sort((a, b) => {
+              // Tefilla flowers render first (back), Torah/Tzedaka render last (front)
+              const zOrder = { tefilla: 0, torah: 1, tzedaka: 1 };
+              return zOrder[a.type] - zOrder[b.type];
+            })
+            .map((flower, index) => (
             <img 
               key={`${flower.type}-${index}`}
               src={flower.type === 'torah' ? torahFlower : flower.type === 'tefilla' ? tefillaFlower : tzedakaFlower} 
               alt={`${flower.type} flower`} 
-              className="absolute h-[77px] w-auto z-[1]"
+              className={`absolute h-[77px] w-auto ${flower.type === 'tefilla' ? 'z-[1]' : 'z-[3]'}`}
               style={{ 
                 left: `${flower.left}%`,
                 bottom: `${flower.bottom}px`,
