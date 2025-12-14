@@ -426,11 +426,11 @@ export default function ChainPage() {
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={() => setShowReminderDialog(true)}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-gradient-feminine text-white hover:scale-105 transition-all shadow-sm"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-gradient-feminine hover:scale-105 transition-all shadow-sm"
             data-testid="button-reminder"
             title="Set daily reminder"
           >
-            <Bell size={16} strokeWidth={2.5} />
+            <Bell size={16} strokeWidth={2.5} className="text-white" />
           </button>
           <button
             onClick={handleShare}
@@ -452,14 +452,14 @@ export default function ChainPage() {
               <p className="platypi-medium text-sm text-black/60">Tehillim Chain for</p>
               <p className="platypi-bold text-base text-black">{chain.name}</p>
             </div>
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center flex-shrink-0">
               <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blush/10">
                 {(() => {
                   const ReasonIcon = getReasonIcon(chain.reason);
                   return <ReasonIcon size={20} className="text-blush" />;
                 })()}
               </div>
-              <p className="platypi-regular text-[10px] text-black/50 mt-1">{toTitleCase(chain.reason)}</p>
+              <p className="platypi-regular text-[10px] text-black/50 mt-1 whitespace-nowrap">{toTitleCase(chain.reason)}</p>
             </div>
           </div>
 
