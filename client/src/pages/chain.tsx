@@ -467,7 +467,7 @@ export default function ChainPage() {
                     return <ReasonIcon size={20} className="text-blush" />;
                   })()}
                 </div>
-                <p className="platypi-regular text-[10px] text-black/50 mt-1 whitespace-nowrap">{toTitleCase(chain.reason)}</p>
+                <p className="platypi-regular text-[10px] text-black/50 mt-0.5 whitespace-nowrap">{toTitleCase(chain.reason)}</p>
               </div>
             </div>
             {chain.description && isDescriptionExpanded && (
