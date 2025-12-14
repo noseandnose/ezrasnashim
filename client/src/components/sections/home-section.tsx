@@ -96,20 +96,6 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       return seed / 233280;
     };
     
-    // Shuffle helper using seeded random
-    const shuffleArray = <T,>(arr: T[]): T[] => {
-      const shuffled = [...arr];
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(seededRandom() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-      }
-      return shuffled;
-    };
-    
-    // Generate positions dynamically - no fixed limit on flowers
-    // Use multiple rows to allow many flowers without excessive overlap
-    const totalFlowers = torahFlowerCount + tefillaFlowerCount + tzedakaFlowerCount;
-    
     // Helper to add a flower position with dynamic placement
     const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', index: number) => {
       // Distribute flowers across the width (0% to 90%) - full width coverage
