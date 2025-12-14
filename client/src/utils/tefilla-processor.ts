@@ -504,6 +504,8 @@ export async function getCurrentTefillaConditions(
     let hebrewDate = undefined;
     
     // Check if we're after sunset - Jewish days begin at sunset
+    // Only switch to tomorrow's date if we can verify sunset time from zmanim
+    // If zmanim fails, stay conservative and use today's date (avoid false positives)
     let isAfterSunset = false;
     if (latitude && longitude) {
       try {
@@ -521,16 +523,14 @@ export async function getCurrentTefillaConditions(
             isAfterSunset = now >= sunsetTime;
           }
         }
+        // If zmanim fetch fails or no shkia data, isAfterSunset stays false (conservative)
       } catch (error) {
-        // Fallback: use 6 PM as approximate sunset if API fails
-        const now = new Date();
-        isAfterSunset = now.getHours() >= 18;
+        // If API fails, stay conservative - don't switch to tomorrow's holiday
+        // This prevents showing holiday content prematurely
+        isAfterSunset = false;
       }
-    } else {
-      // No location - use 6 PM as fallback sunset time
-      const now = new Date();
-      isAfterSunset = now.getHours() >= 18;
     }
+    // If no location data, stay conservative and use today's date
 
     try {
       const { getLocalDateString, getLocalTomorrowString } = await import('../lib/dateUtils');
