@@ -3206,6 +3206,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             sponsorName:  metadata?.sponsorName || "",
             dedication: metadata?.dedication || "",
             message: metadata?.message || "",
+            email: metadata?.email || "",
             timestamp: new Date().toISOString(),
           },
         },
@@ -3226,11 +3227,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           amount: Math.round(parseFloat(amount) * 100), // Convert to cents
           type: metadata?.buttonType || "put_a_coin",
           donationType: donationType || "General Donation",
+          sponsorName: metadata?.sponsorName || null,
+          dedication: metadata?.dedication || null,
+          email: metadata?.email || null,
           metadata: {
             buttonType: metadata?.buttonType || "put_a_coin",
             sponsorName: metadata?.sponsorName || "",
             dedication: metadata?.dedication || "",
             message: metadata?.message || "",
+            email: metadata?.email || "",
             source: "ezras-nashim-donation",
             timestamp: new Date().toISOString()
           },
