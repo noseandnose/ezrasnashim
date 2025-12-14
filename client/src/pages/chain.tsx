@@ -462,7 +462,7 @@ export default function ChainPage() {
                   <p className="platypi-bold text-base text-black">{chain.name}</p>
                   {chain.description && (
                     <ChevronDown 
-                      size={18} 
+                      size={22} 
                       className={`text-blush transition-transform ${isDescriptionExpanded ? 'rotate-180' : ''}`}
                     />
                   )}
