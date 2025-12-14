@@ -3805,26 +3805,28 @@ function SpecialTehillimFullscreenContent({ language: _language, fontSize: _font
   return (
     <div className="space-y-4">
       {/* Tab Navigation */}
-      <div className="flex bg-blush/20 rounded-xl p-1 mb-4">
+      <div className="flex rounded-2xl bg-blush/10 p-1 border border-blush/20 mb-4">
         <button
           onClick={() => setTehillimActiveTab('all')}
-          className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
+          className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
             tehillimActiveTab === 'all'
-              ? 'bg-white text-black shadow-md border border-blush/30'
-              : 'text-black/50 hover:text-black/70'
+              ? 'bg-gradient-feminine text-white shadow-lg'
+              : 'text-black/70 hover:bg-blush/10'
           }`}
+          data-testid="tab-sefer-tehillim"
         >
-          Sefer Tehillim
+          <span className="platypi-semibold text-xs leading-tight block">Sefer Tehillim</span>
         </button>
         <button
           onClick={() => setTehillimActiveTab('special')}
-          className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
+          className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
             tehillimActiveTab === 'special'
-              ? 'bg-white text-black shadow-md border border-blush/30'
-              : 'text-black/50 hover:text-black/70'
+              ? 'bg-gradient-feminine text-white shadow-lg'
+              : 'text-black/70 hover:bg-blush/10'
           }`}
+          data-testid="tab-special-occasions"
         >
-          Special Occasions
+          <span className="platypi-semibold text-xs leading-tight block">Special Occasions</span>
         </button>
       </div>
 
@@ -4057,26 +4059,28 @@ function SpecialTehillimModal() {
       </DialogHeader>
 
       {/* Tab Navigation */}
-      <div className="flex bg-blush/20 rounded-xl p-1 mb-4">
+      <div className="flex rounded-2xl bg-blush/10 p-1 border border-blush/20 mb-4">
         <button
           onClick={() => setTehillimActiveTab('all')}
-          className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
+          className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
             tehillimActiveTab === 'all'
-              ? 'bg-white text-black shadow-md border border-blush/30'
-              : 'text-black/50 hover:text-black/70'
+              ? 'bg-gradient-feminine text-white shadow-lg'
+              : 'text-black/70 hover:bg-blush/10'
           }`}
+          data-testid="tab-sefer-tehillim"
         >
-          Sefer Tehillim
+          <span className="platypi-semibold text-xs leading-tight block">Sefer Tehillim</span>
         </button>
         <button
           onClick={() => setTehillimActiveTab('special')}
-          className={`flex-1 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
+          className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
             tehillimActiveTab === 'special'
-              ? 'bg-white text-black shadow-md border border-blush/30'
-              : 'text-black/50 hover:text-black/70'
+              ? 'bg-gradient-feminine text-white shadow-lg'
+              : 'text-black/70 hover:bg-blush/10'
           }`}
+          data-testid="tab-special-occasions"
         >
-          Special Occasions
+          <span className="platypi-semibold text-xs leading-tight block">Special Occasions</span>
         </button>
       </div>
 
