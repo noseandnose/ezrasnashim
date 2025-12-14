@@ -2667,6 +2667,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Return active reading if exists, otherwise next available
       const nextPsalm = activeReading || nextAvailable;
 
+      // Prevent browser caching for real-time stats
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
       // Return raw stats without pre-adjustment for consistency across all endpoints
       // The progress bar now uses totalCompleted directly instead of deriving from available
       res.json({
@@ -2687,6 +2691,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get chain stats (total said, books completed, currently reading, available)
+  // No caching - stats must be fresh for real-time feedback
   app.get("/api/tehillim-chains/:slug/stats", async (req, res) => {
     try {
       const { slug } = req.params;
@@ -2697,6 +2702,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const stats = await storage.getTehillimChainStats(chain.id);
+      // Prevent browser caching for real-time stats
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
       // Map totalSaid to totalCompleted for frontend compatibility
       res.json({
         totalCompleted: stats.totalSaid,
