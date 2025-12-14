@@ -722,18 +722,33 @@ button, .btn, [role="button"] {
 /* GLOBAL FONT SIZE ADAPTATION - Comprehensive text overflow protection */
 /* Prevents text from breaking layouts when users have larger system font sizes */
 
-/* Global word wrapping to prevent horizontal overflow */
+/* Global word wrapping to prevent horizontal overflow - EXCEPT navigation */
 *, *::before, *::after {
   word-wrap: break-word;
   overflow-wrap: break-word;
-  hyphens: auto;
 }
 
 /* Text containers - ensure proper wrapping and no horizontal overflow */
-p, span, div, li, td, th, label, h1, h2, h3, h4, h5, h6 {
+p, li, td, th, label {
   max-width: 100%;
   word-wrap: break-word;
   overflow-wrap: break-word;
+}
+
+/* Bottom navigation - NEVER wrap text, use flexible sizing */
+nav, [role="navigation"], .bottom-nav, footer nav {
+  hyphens: none !important;
+  word-break: keep-all !important;
+  white-space: nowrap !important;
+}
+
+nav span, nav a, [role="navigation"] span, [role="navigation"] a,
+.bottom-nav span, .bottom-nav a, footer nav span, footer nav a {
+  hyphens: none !important;
+  word-break: keep-all !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
 }
 
 /* Fixed-height containers with text - allow internal scrolling if needed */
