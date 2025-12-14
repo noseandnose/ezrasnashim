@@ -106,23 +106,25 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       return shuffled;
     };
     
-    // Available slots - keeping flowers well away from edges to prevent cutoff
-    const allSlots = [6, 14, 22, 30, 40, 50, 60, 68, 76, 82];
+    // Generate positions dynamically - no fixed limit on flowers
+    // Use multiple rows to allow many flowers without excessive overlap
+    const totalFlowers = torahFlowerCount + tefillaFlowerCount + tzedakaFlowerCount;
     
-    // Shuffle all slots
-    const shuffledSlots = shuffleArray([...allSlots]);
-    
-    // Track used slot indices
-    const usedSlotIndices = new Set<number>();
-    
-    // Helper to add a flower position
-    const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', slotIndex: number) => {
-      usedSlotIndices.add(slotIndex);
-      const basePos = shuffledSlots[slotIndex];
-      const horizontalOffset = (seededRandom() * 4) - 2;
-      const clampedPos = Math.max(5, Math.min(82, basePos + horizontalOffset));
-      const verticalOffset = Math.floor(seededRandom() * 12);
-      const scale = 0.9 - (seededRandom() * 0.15);
+    // Helper to add a flower position with dynamic placement
+    const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', index: number) => {
+      // Distribute flowers across the width (5% to 85%)
+      const widthRange = 80; // percentage range
+      const basePos = 5 + ((index * 17) % widthRange); // spread evenly with wrap
+      const horizontalOffset = (seededRandom() * 8) - 4;
+      const clampedPos = Math.max(5, Math.min(85, basePos + horizontalOffset));
+      
+      // Use multiple vertical levels for many flowers (0-20px from bottom)
+      const row = Math.floor(index / 6); // new row every 6 flowers
+      const verticalOffset = Math.floor(seededRandom() * 8) + (row * 6);
+      
+      // Vary scale slightly - flowers further back (higher rows) are smaller
+      const baseScale = 0.85 - (row * 0.08);
+      const scale = Math.max(0.5, baseScale - (seededRandom() * 0.1));
       
       positions.push({ 
         type, 
@@ -133,25 +135,23 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       });
     };
     
+    let flowerIndex = 0;
+    
     // PRIORITY: Place Torah and Tzedaka flowers first (they're completed less often)
-    let nextSlot = 0;
-    
-    // Place Torah flowers first
-    for (let i = 0; i < torahFlowerCount && nextSlot < shuffledSlots.length; i++) {
-      addFlower('torah', nextSlot);
-      nextSlot++;
+    for (let i = 0; i < torahFlowerCount; i++) {
+      addFlower('torah', flowerIndex);
+      flowerIndex++;
     }
     
-    // Place Tzedaka flowers next
-    for (let i = 0; i < tzedakaFlowerCount && nextSlot < shuffledSlots.length; i++) {
-      addFlower('tzedaka', nextSlot);
-      nextSlot++;
+    for (let i = 0; i < tzedakaFlowerCount; i++) {
+      addFlower('tzedaka', flowerIndex);
+      flowerIndex++;
     }
     
-    // Place Tefilla flowers last - they only get remaining slots
-    for (let i = 0; i < tefillaFlowerCount && nextSlot < shuffledSlots.length; i++) {
-      addFlower('tefilla', nextSlot);
-      nextSlot++;
+    // Place Tefilla flowers last
+    for (let i = 0; i < tefillaFlowerCount; i++) {
+      addFlower('tefilla', flowerIndex);
+      flowerIndex++;
     }
     
     return positions;
