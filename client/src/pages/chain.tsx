@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRoute, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Share2, ChevronLeft, Heart, Briefcase, Baby, Home, Star, Shield, Sparkles, HeartPulse, Settings, Bell } from "lucide-react";
+import { Share2, ChevronLeft, ChevronDown, Heart, Briefcase, Baby, Home, Star, Shield, Sparkles, HeartPulse, Settings, Bell } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
@@ -78,6 +78,9 @@ export default function ChainPage() {
   // Reminder dialog state
   const [showReminderDialog, setShowReminderDialog] = useState(false);
   const [reminderTime, setReminderTime] = useState("09:00");
+  
+  // Description expansion state
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   
   // Koren URL for attribution
   const korenUrl = useKorenUrl();
@@ -447,20 +450,38 @@ export default function ChainPage() {
       <div className="flex-1 overflow-y-auto">
         <div className="p-4 space-y-4">
           {/* Tehillim Chain section with border */}
-          <div className="py-3 px-4 border border-blush/20 rounded-xl bg-white flex items-center justify-between">
-            <div className="text-left">
-              <p className="platypi-medium text-sm text-black/60">Tehillim Chain for</p>
-              <p className="platypi-bold text-base text-black">{chain.name}</p>
-            </div>
-            <div className="flex flex-col items-center flex-shrink-0">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blush/10">
-                {(() => {
-                  const ReasonIcon = getReasonIcon(chain.reason);
-                  return <ReasonIcon size={20} className="text-blush" />;
-                })()}
+          <div 
+            className={`py-3 px-4 border border-blush/20 rounded-xl bg-white relative ${chain.description ? 'cursor-pointer' : ''}`}
+            onClick={() => chain.description && setIsDescriptionExpanded(!isDescriptionExpanded)}
+            data-testid="chain-header"
+          >
+            <div className="flex items-center justify-between">
+              <div className="text-left flex-1">
+                <p className="platypi-medium text-sm text-black/60">Tehillim Chain for</p>
+                <p className="platypi-bold text-base text-black">{chain.name}</p>
               </div>
-              <p className="platypi-regular text-[10px] text-black/50 mt-1 whitespace-nowrap">{toTitleCase(chain.reason)}</p>
+              <div className="flex flex-col items-center flex-shrink-0">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blush/10">
+                  {(() => {
+                    const ReasonIcon = getReasonIcon(chain.reason);
+                    return <ReasonIcon size={20} className="text-blush" />;
+                  })()}
+                </div>
+                <p className="platypi-regular text-[10px] text-black/50 whitespace-nowrap">{toTitleCase(chain.reason)}</p>
+              </div>
             </div>
+            {chain.description && isDescriptionExpanded && (
+              <div className="mt-3 pt-3 border-t border-blush/10">
+                <p className="platypi-regular text-sm text-black/80 leading-relaxed whitespace-pre-line">{chain.description}</p>
+              </div>
+            )}
+            {chain.description && (
+              <div 
+                className={`absolute bottom-2 right-2 w-5 h-5 flex items-center justify-center rounded-full bg-gradient-feminine shadow-sm transition-transform ${isDescriptionExpanded ? 'rotate-180' : ''}`}
+              >
+                <ChevronDown size={12} className="text-white" />
+              </div>
+            )}
           </div>
 
           {/* Progress bar - uses totalCompleted directly for consistency */}

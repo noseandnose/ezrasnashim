@@ -207,6 +207,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const [chainView, setChainView] = useState<'none' | 'create' | 'find'>('none');
   const [chainName, setChainName] = useState("");
   const [chainReason, setChainReason] = useState("");
+  const [chainDescription, setChainDescription] = useState("");
   const [reasonDropdownOpen, setReasonDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoadingRandom, setIsLoadingRandom] = useState(false);
@@ -266,7 +267,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
 
   // Create chain mutation
   const createChainMutation = useMutation({
-    mutationFn: async (data: { name: string; reason: string; deviceId?: string }) => {
+    mutationFn: async (data: { name: string; reason: string; description?: string; deviceId?: string }) => {
       return apiRequest('POST', `${import.meta.env.VITE_API_URL}/api/tehillim-chains`, data);
     },
     onSuccess: async (response) => {
@@ -277,6 +278,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       });
       setChainName("");
       setChainReason("");
+      setChainDescription("");
       setChainView('none');
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/stats/total'] });
       queryClient.invalidateQueries({ queryKey: ['/api/tehillim-chains/search'] });
@@ -307,7 +309,13 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       deviceId = 'device-' + Date.now().toString(36) + Math.random().toString(36).substring(2);
       localStorage.setItem('deviceId', deviceId);
     }
-    createChainMutation.mutate({ name: chainName, reason: chainReason, deviceId });
+    const descriptionValue = chainDescription.trim();
+    createChainMutation.mutate({ 
+      name: chainName, 
+      reason: chainReason, 
+      ...(descriptionValue ? { description: descriptionValue } : {}),
+      deviceId 
+    });
   };
 
   // Compass button handler
@@ -476,6 +484,14 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
                   </div>
                 )}
               </div>
+              
+              <textarea
+                placeholder="Add a description (optional)"
+                value={chainDescription}
+                onChange={(e) => setChainDescription(e.target.value)}
+                className="w-full min-h-[60px] rounded-2xl border border-blush/20 bg-white px-3 py-2 text-sm focus:border-blush focus:outline-none focus:ring-2 focus:ring-blush/20 resize-none"
+                data-testid="input-chain-description"
+              />
               
               <div className="flex space-x-3">
                 <Button 

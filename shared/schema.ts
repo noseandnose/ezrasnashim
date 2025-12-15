@@ -835,6 +835,7 @@ export const tehillimChains = pgTable("tehillim_chains", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(), // Person's name (Hebrew or English)
   reason: text("reason").notNull(), // Reason for the chain (refuah, shidduch, etc.)
+  description: text("description"), // Optional description for the chain
   slug: text("slug").notNull().unique(), // URL-friendly identifier (auto-generated)
   createdAt: timestamp("created_at").defaultNow(),
   creatorDeviceId: text("creator_device_id"), // Track who created it
