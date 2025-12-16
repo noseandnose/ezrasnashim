@@ -1555,28 +1555,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Birkat Hamazon routes
-  app.get("/api/birkat-hamazon/prayers",
-    cacheMiddleware({ ttl: CACHE_TTL.STATIC_PRAYERS, category: 'prayers-birkat-hamazon' }),
-    async (req, res) => {
-      try {
-        const prayers = await storage.getBirkatHamazonPrayers();
-        res.json(prayers);
-      } catch (error) {
-        return res.status(500).json({ message: "Failed to fetch Birkat Hamazon prayers" });
-      }
-    }
-  );
-
-  app.post("/api/birkat-hamazon/prayers", requireAdminAuth, async (req, res) => {
-    try {
-      const prayer = await storage.createBirkatHamazonPrayer(req.body);
-      res.json(prayer);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to create Birkat Hamazon prayer" });
-    }
-  });
-
   // Sponsor routes
   app.get("/api/sponsors/:contentType/:date", async (req, res) => {
     try {

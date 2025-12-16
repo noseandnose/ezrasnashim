@@ -1,7 +1,7 @@
 import serverAxiosClient from "./axiosClient";
 import { 
   shopItems, 
-  tehillimNames, tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, birkatHamazonPrayers, afterBrochasPrayers, brochas, sponsors, nishmasText,
+  tehillimNames, tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, afterBrochasPrayers, brochas, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent, todaysSpecial,
   dailyRecipes, parshaVorts, tableInspirations, marriageInsights, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats, acts,
@@ -11,7 +11,6 @@ import {
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
   type MaarivPrayer, type InsertMaarivPrayer, type MorningPrayer, type InsertMorningPrayer,
-  type BirkatHamazonPrayer, type InsertBirkatHamazonPrayer,
   type AfterBrochasPrayer, type InsertAfterBrochasPrayer,
   type Brocha, type InsertBrocha,
   type Sponsor, type InsertSponsor, type NishmasText, type InsertNishmasText,
@@ -159,10 +158,6 @@ export interface IStorage {
   getBrochaById(id: number): Promise<Brocha | undefined>;
   createBrocha(brocha: InsertBrocha): Promise<Brocha>;
   
-  // Birkat Hamazon methods
-  getBirkatHamazonPrayers(): Promise<BirkatHamazonPrayer[]>;
-  createBirkatHamazonPrayer(prayer: InsertBirkatHamazonPrayer): Promise<BirkatHamazonPrayer>;
-
   // Sponsor methods
   getSponsorByContentTypeAndDate(contentType: string, date: string): Promise<Sponsor | undefined>;
   getDailySponsor(date: string): Promise<Sponsor | undefined>;
@@ -1479,16 +1474,6 @@ export class DatabaseStorage implements IStorage {
   async createBrocha(insertBrocha: InsertBrocha): Promise<Brocha> {
     const [brocha] = await db.insert(brochas).values(insertBrocha).returning();
     return brocha;
-  }
-
-  // Birkat Hamazon methods
-  async getBirkatHamazonPrayers(): Promise<BirkatHamazonPrayer[]> {
-    return await db.select().from(birkatHamazonPrayers).orderBy(birkatHamazonPrayers.orderIndex);
-  }
-
-  async createBirkatHamazonPrayer(insertPrayer: InsertBirkatHamazonPrayer): Promise<BirkatHamazonPrayer> {
-    const [prayer] = await db.insert(birkatHamazonPrayers).values(insertPrayer).returning();
-    return prayer;
   }
 
   // Sponsor methods

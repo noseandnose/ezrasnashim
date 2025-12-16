@@ -14,12 +14,15 @@ import { processTefillaText, getCurrentTefillaConditions, type TefillaConditions
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { AttributionSection } from "@/components/ui/attribution-section";
 
-interface BirkatHamazonPrayer {
+// Using Brocha type from brochas table (id=2 is Birkat Hamazon)
+interface Brocha {
   id: number;
-  prayerType: string;
-  hebrewText: string;
-  englishTranslation: string;
-  orderIndex: number;
+  title: string;
+  hebrewText: string | null;
+  englishText: string | null;
+  description: string | null;
+  specialOccasions: boolean | null;
+  orderIndex: number | null;
 }
 
 // Helper to get Koren URL based on location
@@ -145,8 +148,8 @@ export function BirkatHamazonModal() {
     loadConditions();
   }, [coordinates]);
 
-  const { data: prayers, isLoading } = useQuery<BirkatHamazonPrayer[]>({
-    queryKey: ["/api/birkat-hamazon/prayers"],
+  const { data: birkatHamazon, isLoading } = useQuery<Brocha>({
+    queryKey: ["/api/brochas", 2],
     enabled: activeModal === 'birkat-hamazon',
   });
 
@@ -234,8 +237,9 @@ export function BirkatHamazonModal() {
     </div>
   );
 
-  const renderPrayerText = (prayer: BirkatHamazonPrayer | any, includeSelectedOptions = false) => {
-    const text = language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation;
+  const renderPrayerText = (prayer: Brocha | any, includeSelectedOptions = false) => {
+    // Support both Brocha (englishText) and afterBrochasPrayers (englishTranslation)
+    const text = language === "hebrew" ? prayer.hebrewText : (prayer.englishText ?? prayer.englishTranslation);
     
     // Default conditions to use when conditions haven't loaded yet
     // This ensures conditional markup is still processed (all conditions default to false)
@@ -547,15 +551,13 @@ export function BirkatHamazonModal() {
               <div className="flex justify-center py-8">
                 <span className="text-sm text-gray-500">Loading prayers...</span>
               </div>
-            ) : (
+            ) : birkatHamazon ? (
               <div className="space-y-6">
-                {prayers?.map((prayer) => (
-                  <div key={prayer.id} className="bg-white rounded-2xl p-4 border border-blush/10">
-                    {renderPrayerText(prayer)}
-                  </div>
-                ))}
+                <div className="bg-white rounded-2xl p-4 border border-blush/10">
+                  {renderPrayerText(birkatHamazon)}
+                </div>
               </div>
-            )}
+            ) : null}
             
             <KorenThankYou />
             
@@ -584,15 +586,13 @@ export function BirkatHamazonModal() {
                 <div className="flex justify-center py-8">
                   <span className="text-sm text-gray-500">Loading prayers...</span>
                 </div>
-              ) : (
+              ) : birkatHamazon ? (
                 <div className="space-y-6">
-                  {prayers?.map((prayer) => (
-                    <div key={prayer.id} className="bg-white rounded-2xl p-4 border border-blush/10">
-                      {renderPrayerText(prayer)}
-                    </div>
-                  ))}
+                  <div className="bg-white rounded-2xl p-4 border border-blush/10">
+                    {renderPrayerText(birkatHamazon)}
+                  </div>
                 </div>
-              )}
+              ) : null}
             </div>
 
           <KorenThankYou />
@@ -856,8 +856,8 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
 }
 
 export function BirkatHamazonFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
-  const { data: prayers = [], isLoading } = useQuery<BirkatHamazonPrayer[]>({
-    queryKey: ["/api/birkat-hamazon/prayers"],
+  const { data: birkatHamazon, isLoading } = useQuery<Brocha>({
+    queryKey: ["/api/brochas", 2],
   });
 
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
@@ -902,8 +902,8 @@ export function BirkatHamazonFullscreenContent({ language, fontSize }: { languag
     loadConditions();
   }, [coordinates]);
 
-  const renderPrayerText = (prayer: BirkatHamazonPrayer) => {
-    const text = language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation;
+  const renderPrayerText = (prayer: Brocha) => {
+    const text = language === "hebrew" ? prayer.hebrewText : prayer.englishText;
     
     // Default conditions to use when conditions haven't loaded yet
     const defaultConditions: TefillaConditions = {
@@ -973,14 +973,13 @@ export function BirkatHamazonFullscreenContent({ language, fontSize }: { languag
   };
 
   if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
+  if (!birkatHamazon) return <div className="text-center py-8">Prayer not found</div>;
 
   return (
     <div className="space-y-6">
-      {prayers?.map((prayer) => (
-        <div key={prayer.id} className="bg-white rounded-2xl p-6 border border-blush/10">
-          {renderPrayerText(prayer)}
-        </div>
-      ))}
+      <div className="bg-white rounded-2xl p-6 border border-blush/10">
+        {renderPrayerText(birkatHamazon)}
+      </div>
       
       <KorenThankYou />
 

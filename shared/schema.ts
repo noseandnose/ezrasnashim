@@ -191,14 +191,6 @@ export const morningPrayers = pgTable("morning_prayers", {
   orderIndex: integer("order_index").default(0),
 });
 
-export const birkatHamazonPrayers = pgTable("birkat_hamazon_prayers", {
-  id: serial("id").primaryKey(),
-  prayerType: text("prayer_type").notNull(), // e.g., "main_blessing", "shir_hamaalot", "nodeh_lecha", "harachaman"
-  hebrewText: text("hebrew_text").notNull(),
-  englishTranslation: text("english_translation").notNull(),
-  orderIndex: integer("order_index").default(0),
-});
-
 export const afterBrochasPrayers = pgTable("after_brochas_prayers", {
   id: serial("id").primaryKey(),
   prayerName: text("prayer_name").notNull(), // "Al Hamichiya" or "Birkat Hamazon"
@@ -548,10 +540,6 @@ export const insertMorningPrayerSchema = createInsertSchema(morningPrayers).omit
   id: true,
 });
 
-export const insertBirkatHamazonPrayerSchema = createInsertSchema(birkatHamazonPrayers).omit({
-  id: true,
-});
-
 export const insertAfterBrochasPrayerSchema = createInsertSchema(afterBrochasPrayers).omit({
   id: true,
   createdAt: true,
@@ -743,8 +731,6 @@ export type MaarivPrayer = typeof maarivPrayers.$inferSelect;
 export type InsertMaarivPrayer = z.infer<typeof insertMaarivPrayerSchema>;
 export type MorningPrayer = typeof morningPrayers.$inferSelect;
 export type InsertMorningPrayer = z.infer<typeof insertMorningPrayerSchema>;
-export type BirkatHamazonPrayer = typeof birkatHamazonPrayers.$inferSelect;
-export type InsertBirkatHamazonPrayer = z.infer<typeof insertBirkatHamazonPrayerSchema>;
 export type Sponsor = typeof sponsors.$inferSelect;
 export type InsertSponsor = z.infer<typeof insertSponsorSchema>;
 
