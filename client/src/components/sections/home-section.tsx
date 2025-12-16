@@ -1,4 +1,4 @@
-import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Star, Sparkles, Settings, Plus, Minus } from "lucide-react";
+import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
@@ -411,12 +411,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               data-testid="button-home-events"
             >
               <div className="flex items-center justify-center mb-1">
-                <div className="bg-gradient-feminine p-1.5 rounded-full relative">
+                <div className="bg-gradient-feminine p-1.5 rounded-full">
                   <Clock className="text-white" size={12} />
-                  {/* Small star inside circle */}
-                  <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-gradient-to-r from-blush to-muted-lavender rounded-full flex items-center justify-center">
-                    <Star className="text-white" size={6} fill="currentColor" />
-                  </div>
                 </div>
               </div>
               <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
