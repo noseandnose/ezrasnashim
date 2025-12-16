@@ -1068,36 +1068,39 @@ function WomensTefillaFullscreenContent({ language: _language, fontSize: _fontSi
   return (
     <div className="space-y-6">
       {/* Tab Navigation - 3 tabs */}
-      <div className="flex bg-blush/20 rounded-xl p-1 mb-4">
+      <div className="flex rounded-2xl bg-blush/10 p-1 border border-blush/20">
         <button
           onClick={() => setActiveTab('refuah')}
-          className={`flex-1 py-2 px-3 rounded-lg text-sm platypi-medium transition-all ${
+          className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
             activeTab === 'refuah'
-              ? 'bg-white text-black shadow-md border border-blush/30'
-              : 'text-black/50 hover:text-black/70'
+              ? 'bg-gradient-feminine text-white shadow-lg'
+              : 'text-black/70 hover:bg-blush/10'
           }`}
+          data-testid="tab-womens-refuah"
         >
-          Refuah ({refuahArray.length})
+          <span className="platypi-semibold text-xs leading-tight block">Refuah ({refuahArray.length})</span>
         </button>
         <button
           onClick={() => setActiveTab('family')}
-          className={`flex-1 py-2 px-3 rounded-lg text-sm platypi-medium transition-all ${
+          className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
             activeTab === 'family'
-              ? 'bg-white text-black shadow-md border border-blush/30'
-              : 'text-black/50 hover:text-black/70'
+              ? 'bg-gradient-feminine text-white shadow-lg'
+              : 'text-black/70 hover:bg-blush/10'
           }`}
+          data-testid="tab-womens-family"
         >
-          Family ({familyArray.length})
+          <span className="platypi-semibold text-xs leading-tight block">Family ({familyArray.length})</span>
         </button>
         <button
           onClick={() => setActiveTab('life')}
-          className={`flex-1 py-2 px-3 rounded-lg text-sm platypi-medium transition-all ${
+          className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
             activeTab === 'life'
-              ? 'bg-white text-black shadow-md border border-blush/30'
-              : 'text-black/50 hover:text-black/70'
+              ? 'bg-gradient-feminine text-white shadow-lg'
+              : 'text-black/70 hover:bg-blush/10'
           }`}
+          data-testid="tab-womens-life"
         >
-          Life ({lifeArray.length})
+          <span className="platypi-semibold text-xs leading-tight block">Life ({lifeArray.length})</span>
         </button>
       </div>
 

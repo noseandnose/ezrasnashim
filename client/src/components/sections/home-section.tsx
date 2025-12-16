@@ -1,4 +1,4 @@
-import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Star, Sparkles, Settings, Plus, Minus } from "lucide-react";
+import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
@@ -9,6 +9,7 @@ import HeartProgress from "@/components/heart-progress";
 import type { Section } from "@/pages/home";
 import { useMemo } from "react";
 import { getLocalDateString } from "@/lib/dateUtils";
+import DOMPurify from "dompurify";
 import grassImage from "@assets/Daily_Progress_Garden_(2)_1765369219898.png";
 import torahFlower from "@assets/Torah_1765437211120.png";
 import tefillaFlower from "@assets/Tefilla_1765437211121.png";
@@ -195,6 +196,14 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       .replace(/\{\{mincha\}\}/gi, jewishTimesQuery.data?.minchaGedolah || '')
       .replace(/\{\{candleLighting\}\}/gi, jewishTimesQuery.data?.candleLighting || '')
       .replace(/\{\{havdalah\}\}/gi, jewishTimesQuery.data?.havdalah || '');
+  };
+
+  const formatMarkdown = (text: string | null | undefined): string => {
+    if (!text) return '';
+    const withPlaceholders = replacePlaceholders(text);
+    const withBold = withPlaceholders.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    const withLineBreaks = withBold.replace(/\n/g, '<br>');
+    return DOMPurify.sanitize(withLineBreaks);
   };
 
 
@@ -402,12 +411,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               data-testid="button-home-events"
             >
               <div className="flex items-center justify-center mb-1">
-                <div className="bg-gradient-feminine p-1.5 rounded-full relative">
+                <div className="bg-gradient-feminine p-1.5 rounded-full">
                   <Clock className="text-white" size={12} />
-                  {/* Small star inside circle */}
-                  <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-gradient-to-r from-blush to-muted-lavender rounded-full flex items-center justify-center">
-                    <Star className="text-white" size={6} fill="currentColor" />
-                  </div>
                 </div>
               </div>
               <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
@@ -463,16 +468,17 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               <div className="relative px-3 pb-16 pt-3 border-t border-blush/10">
                 {/* Content */}
                 <div 
-                  className={`text-black leading-relaxed whitespace-pre-line ${
+                  className={`text-black leading-relaxed ${
                     todaysSpecialLanguage === 'hebrew' ? 'vc-koren-hebrew' : 'platypi-regular text-left'
                   }`}
                   style={{ fontSize: `${todaysSpecialFontSize}px` }}
                   dir={todaysSpecialLanguage === 'hebrew' ? 'rtl' : 'ltr'}
-                >
-                  {todaysSpecialLanguage === 'hebrew' 
-                    ? replacePlaceholders(todaysSpecial.contentHebrew || todaysSpecial.contentEnglish)
-                    : replacePlaceholders(todaysSpecial.contentEnglish || todaysSpecial.contentHebrew)}
-                </div>
+                  dangerouslySetInnerHTML={{
+                    __html: todaysSpecialLanguage === 'hebrew' 
+                      ? formatMarkdown(todaysSpecial.contentHebrew || todaysSpecial.contentEnglish)
+                      : formatMarkdown(todaysSpecial.contentEnglish || todaysSpecial.contentHebrew)
+                  }}
+                />
                 
                 {/* Floating Settings Button - Bottom Left */}
                 <button
