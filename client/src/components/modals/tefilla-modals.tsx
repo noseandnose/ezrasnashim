@@ -772,54 +772,69 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
         <div className="bg-blush/10 rounded-2xl p-4 border border-blush/20">
           <div className="flex justify-center">
             <div className="flex items-center gap-6">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="grain"
-                  checked={selectedOptions.grain}
-                  onCheckedChange={(checked) => 
-                    setSelectedOptions(prev => ({ ...prev, grain: !!checked }))
-                  }
-                  className="h-3 w-3 border-2 border-gray-600 data-[state=checked]:bg-blush data-[state=checked]:border-blush [&>span>svg]:h-4 [&>span>svg]:w-4 [&>span>svg]:stroke-[4]"
-                />
-                <label 
-                  htmlFor="grain" 
-                  className="text-sm platypi-medium text-black cursor-pointer"
+              <button
+                type="button"
+                onClick={() => setSelectedOptions(prev => ({ ...prev, grain: !prev.grain }))}
+                className="flex items-center gap-2"
+              >
+                <span 
+                  className={`inline-flex items-center justify-center rounded-full border-2 transition-colors ${
+                    selectedOptions.grain 
+                      ? 'bg-blush border-blush' 
+                      : 'bg-white border-gray-400'
+                  }`}
+                  style={{ width: '22px', height: '22px' }}
                 >
-                  Grains
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="wine"
-                  checked={selectedOptions.wine}
-                  onCheckedChange={(checked) => 
-                    setSelectedOptions(prev => ({ ...prev, wine: !!checked }))
-                  }
-                  className="h-3 w-3 border-2 border-gray-600 data-[state=checked]:bg-blush data-[state=checked]:border-blush [&>span>svg]:h-4 [&>span>svg]:w-4 [&>span>svg]:stroke-[4]"
-                />
-                <label 
-                  htmlFor="wine" 
-                  className="text-sm platypi-medium text-black cursor-pointer"
+                  {selectedOptions.grain && (
+                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </span>
+                <span className="text-sm platypi-medium text-black">Grains</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedOptions(prev => ({ ...prev, wine: !prev.wine }))}
+                className="flex items-center gap-2"
+              >
+                <span 
+                  className={`inline-flex items-center justify-center rounded-full border-2 transition-colors ${
+                    selectedOptions.wine 
+                      ? 'bg-blush border-blush' 
+                      : 'bg-white border-gray-400'
+                  }`}
+                  style={{ width: '22px', height: '22px' }}
                 >
-                  Wine
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="fruit"
-                  checked={selectedOptions.fruit}
-                  onCheckedChange={(checked) => 
-                    setSelectedOptions(prev => ({ ...prev, fruit: !!checked }))
-                  }
-                  className="h-3 w-3 border-2 border-gray-600 data-[state=checked]:bg-blush data-[state=checked]:border-blush [&>span>svg]:h-4 [&>span>svg]:w-4 [&>span>svg]:stroke-[4]"
-                />
-                <label 
-                  htmlFor="fruit" 
-                  className="text-sm platypi-medium text-black cursor-pointer"
+                  {selectedOptions.wine && (
+                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </span>
+                <span className="text-sm platypi-medium text-black">Wine</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedOptions(prev => ({ ...prev, fruit: !prev.fruit }))}
+                className="flex items-center gap-2"
+              >
+                <span 
+                  className={`inline-flex items-center justify-center rounded-full border-2 transition-colors ${
+                    selectedOptions.fruit 
+                      ? 'bg-blush border-blush' 
+                      : 'bg-white border-gray-400'
+                  }`}
+                  style={{ width: '22px', height: '22px' }}
                 >
-                  Fruits
-                </label>
-              </div>
+                  {selectedOptions.fruit && (
+                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </span>
+                <span className="text-sm platypi-medium text-black">Fruits</span>
+              </button>
             </div>
           </div>
         </div>
