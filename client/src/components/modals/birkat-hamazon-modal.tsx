@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Expand } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
@@ -658,7 +657,7 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
     queryKey: ["/api/brochas", 1],
   });
 
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { completeTask } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { coordinates } = useLocationStore();
@@ -890,7 +889,7 @@ export function BirkatHamazonFullscreenContent({ language, fontSize }: { languag
     queryKey: ["/api/brochas", 2],
   });
 
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { completeTask } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { coordinates } = useLocationStore();
