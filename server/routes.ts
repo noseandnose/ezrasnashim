@@ -141,6 +141,7 @@ import {
   insertDailyRecipeSchema,
   baseParshaVortSchema,
   insertParshaVortSchema,
+  insertTorahClassSchema,
   insertTableInspirationSchema,
   insertMarriageInsightSchema,
   insertNishmasTextSchema,
@@ -2011,6 +2012,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error deleting Parsha vort:', error);
       return res.status(500).json({ message: "Failed to delete Parsha vort" });
+    }
+  });
+
+  // Torah Classes routes
+  app.get("/api/torah-classes", async (req, res) => {
+    try {
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
+      const classes = await storage.getTorahClassesByDate(today);
+      res.json(classes);
+    } catch (error) {
+      console.error('Error fetching Torah classes:', error);
+      return res.status(500).json({ message: "Failed to fetch Torah classes" });
+    }
+  });
+
+  app.get("/api/torah-classes/all", requireAdminAuth, async (req, res) => {
+    try {
+      const classes = await storage.getAllTorahClasses();
+      res.json(classes);
+    } catch (error) {
+      console.error('Error fetching all Torah classes:', error);
+      return res.status(500).json({ message: "Failed to fetch Torah classes" });
+    }
+  });
+
+  app.post("/api/torah-classes", requireAdminAuth, async (req, res) => {
+    try {
+      const validatedData = insertTorahClassSchema.parse(req.body);
+      const torahClass = await storage.createTorahClass(validatedData);
+      res.json(torahClass);
+    } catch (error) {
+      console.error('Error creating Torah class:', error);
+      return res.status(500).json({ message: "Failed to create Torah class" });
+    }
+  });
+
+  app.put("/api/torah-classes/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID" });
+      }
+      
+      const validatedData = insertTorahClassSchema.partial().parse(req.body);
+      const torahClass = await storage.updateTorahClass(id, validatedData);
+      
+      if (!torahClass) {
+        return res.status(404).json({ message: "Torah class not found" });
+      }
+      
+      res.json(torahClass);
+    } catch (error) {
+      console.error('Error updating Torah class:', error);
+      return res.status(500).json({ message: "Failed to update Torah class" });
+    }
+  });
+
+  app.delete("/api/torah-classes/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID" });
+      }
+      
+      const success = await storage.deleteTorahClass(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Torah class not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting Torah class:', error);
+      return res.status(500).json({ message: "Failed to delete Torah class" });
     }
   });
 

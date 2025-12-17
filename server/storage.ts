@@ -3,7 +3,7 @@ import {
   shopItems, 
   tehillimNames, tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, brochas, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent, todaysSpecial,
-  dailyRecipes, parshaVorts, tableInspirations, marriageInsights, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
+  dailyRecipes, parshaVorts, torahClasses, tableInspirations, marriageInsights, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats, acts,
   mitzvahSessions, mitzvahCompletions, mitzvahDailyTotals,
   tehillimChains, tehillimChainReadings,
@@ -19,6 +19,7 @@ import {
   type FeaturedContent, type InsertFeaturedContent,
   type DailyRecipe, type InsertDailyRecipe,
   type ParshaVort, type InsertParshaVort,
+  type TorahClass, type InsertTorahClass,
   type TableInspiration, type InsertTableInspiration,
   type MarriageInsight, type InsertMarriageInsight,
   type CommunityImpact, type InsertCommunityImpact,
@@ -86,6 +87,14 @@ export interface IStorage {
   createParshaVort(vort: InsertParshaVort): Promise<ParshaVort>;
   updateParshaVort(id: number, vort: Partial<InsertParshaVort>): Promise<ParshaVort | undefined>;
   deleteParshaVort(id: number): Promise<boolean>;
+
+  // Torah classes methods
+  getTorahClassByDate(date: string): Promise<TorahClass | undefined>;
+  getTorahClassesByDate(date: string): Promise<TorahClass[]>;
+  getAllTorahClasses(): Promise<TorahClass[]>;
+  createTorahClass(torahClass: InsertTorahClass): Promise<TorahClass>;
+  updateTorahClass(id: number, torahClass: Partial<InsertTorahClass>): Promise<TorahClass | undefined>;
+  deleteTorahClass(id: number): Promise<boolean>;
 
   // Table inspiration methods
   getTableInspirationByDate(date: string): Promise<TableInspiration | undefined>;
@@ -1706,6 +1715,58 @@ export class DatabaseStorage implements IStorage {
 
   async deleteParshaVort(id: number): Promise<boolean> {
     const result = await db.delete(parshaVorts).where(eq(parshaVorts.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+
+  // Torah Classes methods
+  async getTorahClassByDate(date: string): Promise<TorahClass | undefined> {
+    const [torahClass] = await db
+      .select()
+      .from(torahClasses)
+      .where(and(
+        lte(torahClasses.fromDate, date),
+        gte(torahClasses.untilDate, date)
+      ))
+      .limit(1);
+    return torahClass;
+  }
+
+  async getTorahClassesByDate(date: string): Promise<TorahClass[]> {
+    const classes = await db
+      .select()
+      .from(torahClasses)
+      .where(and(
+        lte(torahClasses.fromDate, date),
+        gte(torahClasses.untilDate, date)
+      ))
+      .orderBy(torahClasses.id);
+    return classes;
+  }
+
+  async getAllTorahClasses(): Promise<TorahClass[]> {
+    return await db.select().from(torahClasses).orderBy(desc(torahClasses.fromDate), desc(torahClasses.id));
+  }
+
+  async createTorahClass(insertClass: InsertTorahClass): Promise<TorahClass> {
+    const [torahClass] = await db.insert(torahClasses).values(insertClass).returning();
+    return torahClass;
+  }
+
+  async updateTorahClass(id: number, updatedClass: Partial<InsertTorahClass>): Promise<TorahClass | undefined> {
+    const cleanedData = Object.fromEntries(
+      Object.entries(updatedClass).filter(([_, value]) => value !== undefined)
+    );
+    
+    const [torahClass] = await db
+      .update(torahClasses)
+      .set(cleanedData)
+      .where(eq(torahClasses.id, id))
+      .returning();
+    return torahClass || undefined;
+  }
+
+  async deleteTorahClass(id: number): Promise<boolean> {
+    const result = await db.delete(torahClasses).where(eq(torahClasses.id, id));
     return result.rowCount ? result.rowCount > 0 : false;
   }
 

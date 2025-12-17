@@ -1,4 +1,4 @@
-import { Book, Heart, Shield, BookOpen, Scroll, Triangle, Check, Video, Star } from "lucide-react";
+import { Book, Heart, Shield, BookOpen, Scroll, Triangle, Check, Video, Star, ChevronRight, GraduationCap } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import { useModalStore, useModalCompletionStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
@@ -6,6 +6,7 @@ import type { Section } from "@/pages/home";
 import { useState, useRef, useCallback } from "react";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
+import type { TorahClass } from "@shared/schema";
 
 // Calculate reading time based on word count (average 200 words per minute)
 const calculateReadingTime = (text: string): string => {
@@ -42,7 +43,7 @@ export default function TorahSection({}: TorahSectionProps) {
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [pirkeiAvotExpanded, setPirkeiAvotExpanded] = useState(false);
   const pirkeiExpandButtonRef = useRef<HTMLButtonElement>(null);
-  
+    
   // Toggle handler for Pirkei Avot expand button
   const handlePirkeiAvotToggle = useCallback((event?: React.MouseEvent | { stopPropagation?: () => void }) => {
     if (event?.stopPropagation) {
@@ -118,6 +119,16 @@ export default function TorahSection({}: TorahSectionProps) {
     retry: 3,
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
+
+  // Fetch today's Torah Classes
+  const { data: torahClasses } = useQuery<TorahClass[]>({
+    queryKey: ['/api/torah-classes'],
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+
+  // Get the first available Torah class for display
+  const currentTorahClass = torahClasses?.[0];
 
   // Handle direct fullscreen opening for specific modals (bypassing modal completely)
   const handleDirectFullscreen = (modalType: string, event: React.MouseEvent) => {
@@ -286,6 +297,42 @@ export default function TorahSection({}: TorahSectionProps) {
               </div>
             )}
           </div>
+        )}
+
+        {/* Torah Classes Bar - Only shown when content exists */}
+        {currentTorahClass && (
+          <button 
+            onClick={() => openModal('torah-class', 'torah')}
+            className="w-full bg-white/80 rounded-xl mt-3 overflow-hidden border border-blush/20 p-3 text-left hover:bg-white/90 transition-colors"
+            style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}
+            data-testid="button-torah-class"
+          >
+            <div className="flex items-center gap-3">
+              {/* Image */}
+              {currentTorahClass.imageUrl ? (
+                <img 
+                  src={currentTorahClass.imageUrl} 
+                  alt={currentTorahClass.title} 
+                  className="w-10 h-10 rounded-xl object-cover"
+                />
+              ) : (
+                <div className="bg-gradient-feminine p-2 rounded-full">
+                  <GraduationCap className="text-white" size={16} />
+                </div>
+              )}
+              
+              {/* Title and Subtitle */}
+              <div className="flex-grow">
+                <h3 className="platypi-bold text-sm text-black">{currentTorahClass.title}</h3>
+                {currentTorahClass.subtitle && (
+                  <p className="platypi-regular text-xs text-black/70">{currentTorahClass.subtitle}</p>
+                )}
+              </div>
+              
+              {/* Arrow indicator */}
+              <ChevronRight className="text-black/40" size={18} />
+            </div>
+          </button>
         )}
       </div>
 
