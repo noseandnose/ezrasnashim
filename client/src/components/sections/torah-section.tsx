@@ -1,4 +1,4 @@
-import { Book, Heart, Shield, BookOpen, Scroll, Triangle, Check, Video, Star, Plus, Minus, GraduationCap } from "lucide-react";
+import { Book, Heart, Shield, BookOpen, Scroll, Triangle, Check, Video, Star, ChevronRight, GraduationCap } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import { useModalStore, useModalCompletionStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
@@ -43,8 +43,7 @@ export default function TorahSection({}: TorahSectionProps) {
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [pirkeiAvotExpanded, setPirkeiAvotExpanded] = useState(false);
   const pirkeiExpandButtonRef = useRef<HTMLButtonElement>(null);
-  const [torahClassExpanded, setTorahClassExpanded] = useState(false);
-  
+    
   // Toggle handler for Pirkei Avot expand button
   const handlePirkeiAvotToggle = useCallback((event?: React.MouseEvent | { stopPropagation?: () => void }) => {
     if (event?.stopPropagation) {
@@ -302,96 +301,38 @@ export default function TorahSection({}: TorahSectionProps) {
 
         {/* Torah Classes Bar - Only shown when content exists */}
         {currentTorahClass && (
-          <div 
-            className="bg-white/80 rounded-xl mt-3 overflow-hidden border border-blush/20"
+          <button 
+            onClick={() => openModal('torah-class', 'torah')}
+            className="w-full bg-white/80 rounded-xl mt-3 overflow-hidden border border-blush/20 p-3 text-left hover:bg-white/90 transition-colors"
             style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}
+            data-testid="button-torah-class"
           >
-            {/* Collapsed/Header Bar */}
-            <button
-              onClick={() => setTorahClassExpanded(!torahClassExpanded)}
-              className="w-full p-3 text-left hover:bg-white/90 transition-colors"
-              data-testid="button-torah-class-toggle"
-            >
-              <div className="flex items-center gap-3">
-                {/* Image */}
-                {currentTorahClass.imageUrl ? (
-                  <img 
-                    src={currentTorahClass.imageUrl} 
-                    alt={currentTorahClass.title} 
-                    className="w-10 h-10 rounded-xl object-cover"
-                  />
-                ) : (
-                  <div className="bg-gradient-feminine p-2 rounded-full">
-                    <GraduationCap className="text-white" size={16} />
-                  </div>
-                )}
-                
-                {/* Title and Subtitle */}
-                <div className="flex-grow">
-                  <h3 className="platypi-bold text-sm text-black">{currentTorahClass.title}</h3>
-                  {currentTorahClass.subtitle && (
-                    <p className="platypi-regular text-xs text-black/70">{currentTorahClass.subtitle}</p>
-                  )}
+            <div className="flex items-center gap-3">
+              {/* Image */}
+              {currentTorahClass.imageUrl ? (
+                <img 
+                  src={currentTorahClass.imageUrl} 
+                  alt={currentTorahClass.title} 
+                  className="w-10 h-10 rounded-xl object-cover"
+                />
+              ) : (
+                <div className="bg-gradient-feminine p-2 rounded-full">
+                  <GraduationCap className="text-white" size={16} />
                 </div>
-                
-                {/* Expand/Collapse indicator */}
-                <div className="text-black/40">
-                  {torahClassExpanded ? <Minus size={18} /> : <Plus size={18} />}
-                </div>
-              </div>
-            </button>
-            
-            {/* Expanded Content */}
-            {torahClassExpanded && (
-              <div className="px-3 pb-3 pt-2 border-t border-blush/10 space-y-3">
-                {/* Content text */}
-                {currentTorahClass.content && (
-                  <p className="platypi-regular text-sm text-black leading-relaxed">
-                    {currentTorahClass.content}
-                  </p>
-                )}
-                
-                {/* Audio player */}
-                {currentTorahClass.audioUrl && (
-                  <audio 
-                    controls 
-                    className="w-full h-10"
-                    src={currentTorahClass.audioUrl}
-                  >
-                    Your browser does not support the audio element.
-                  </audio>
-                )}
-                
-                {/* Video embed */}
-                {currentTorahClass.videoUrl && (
-                  <div className="aspect-video rounded-lg overflow-hidden">
-                    <iframe
-                      src={currentTorahClass.videoUrl.replace('watch?v=', 'embed/')}
-                      className="w-full h-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
-                )}
-                
-                {/* Speaker info */}
-                {currentTorahClass.speaker && (
-                  <p className="platypi-regular text-xs text-black/60">
-                    {currentTorahClass.speakerWebsite ? (
-                      <a 
-                        href={currentTorahClass.speakerWebsite} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="hover:text-blush transition-colors"
-                      >
-                        {currentTorahClass.speaker}
-                      </a>
-                    ) : currentTorahClass.speaker}
-                  </p>
+              )}
+              
+              {/* Title and Subtitle */}
+              <div className="flex-grow">
+                <h3 className="platypi-bold text-sm text-black">{currentTorahClass.title}</h3>
+                {currentTorahClass.subtitle && (
+                  <p className="platypi-regular text-xs text-black/70">{currentTorahClass.subtitle}</p>
                 )}
               </div>
-            )}
-          </div>
+              
+              {/* Arrow indicator */}
+              <ChevronRight className="text-black/40" size={18} />
+            </div>
+          </button>
         )}
       </div>
 
