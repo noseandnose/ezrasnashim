@@ -1784,9 +1784,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Today's Special routes
+  // Today's Special routes - short cache since content may be edited frequently
   app.get("/api/home/todays-special/:date",
-    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'todays-special' }),
+    cacheMiddleware({ ttl: CACHE_TTL.TODAYS_SPECIAL, category: 'todays-special' }),
     async (req, res) => {
       try {
         const { date } = req.params;
