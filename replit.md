@@ -40,7 +40,7 @@ Header layout: Search icon placed next to hamburger menu for quick access. Heade
 - **Primary**: PostgreSQL (Supabase configured).
 - **ORM**: Drizzle ORM with schema-first approach and Drizzle Kit.
 - **Connection**: Node-postgres (pg) with pooling.
-- **Specific Tables**: `tehillim`, `after_brochas_prayers`, `pirkei_avot`, `daily_recipes`, `marriage_insights`.
+- **Specific Tables**: `tehillim`, `after_brochas_prayers`, `pirkei_avot`, `daily_recipes`, `marriage_insights`, `torah_classes`.
 
 ### Object Storage
 - **Provider**: AWS S3 with CloudFront CDN.
@@ -51,7 +51,8 @@ Header layout: Search icon placed next to hamburger menu for quick access. Heade
 ### Core Application Features
 - **Daily Completion Tracking**: Torah, Tefilla, Tzedaka tracked with offline support.
 - **Jewish Times Integration**: Real-time zmanim (Hebcal.com).
-- **Content Management**: Daily Torah, prayers (Mincha, Nishmas, Tehillim, Morning Brochas, Birkat Hamazon, Maariv), Shabbat resources, Pirkei Avot.
+- **Content Management**: Daily Torah, prayers (Mincha, Nishmas, Tehillim, Morning Brochas, Birkat Hamazon, Maariv), Shabbat resources, Pirkei Avot, Torah Classes.
+- **Torah Classes**: Daily Torah classes section with series content from multiple providers, displayed conditionally when content exists for the day, using date range filtering (fromDate/untilDate) to support scheduled content series.
 - **The Kotel Compass**: Geolocation-based compass for prayer orientation, with Android WebView fixes.
 - **Donation System**: Stripe integration.
 - **Personal Tehillim Chains**: Individual prayer chains with create/find, stats, and shareable links.
