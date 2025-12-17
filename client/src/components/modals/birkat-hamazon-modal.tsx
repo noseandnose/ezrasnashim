@@ -774,30 +774,32 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
       <div className="bg-gradient-to-r from-lavender-50 to-rose-50 rounded-2xl p-4 border border-lavender/20" style={{ animation: 'gentle-glow-pink-thin 3s ease-in-out infinite' }}>
         <div className="flex justify-center">
           <div className="flex gap-8">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Checkbox
               id="grain-fullscreen"
               checked={selectedOptions.grain}
               onCheckedChange={(checked) => 
                 setSelectedOptions(prev => ({ ...prev, grain: !!checked }))
               }
-              className="h-5 w-5 min-w-[20px] min-h-[20px] shrink-0 border-2 border-gray-600 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+              className="border-2 border-gray-600 rounded data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+              style={{ width: '20px', height: '20px', minWidth: '20px', minHeight: '20px', flexShrink: 0 }}
             />
             <label 
               htmlFor="grain-fullscreen" 
               className="text-sm platypi-medium text-black cursor-pointer"
             >
-              Grain
+              Grains
             </label>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Checkbox
               id="wine-fullscreen"
               checked={selectedOptions.wine}
               onCheckedChange={(checked) => 
                 setSelectedOptions(prev => ({ ...prev, wine: !!checked }))
               }
-              className="h-5 w-5 min-w-[20px] min-h-[20px] shrink-0 border-2 border-gray-600 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+              className="border-2 border-gray-600 rounded data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+              style={{ width: '20px', height: '20px', minWidth: '20px', minHeight: '20px', flexShrink: 0 }}
             />
             <label 
               htmlFor="wine-fullscreen" 
@@ -806,14 +808,15 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
               Wine
             </label>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Checkbox
               id="fruit-fullscreen"
               checked={selectedOptions.fruit}
               onCheckedChange={(checked) => 
                 setSelectedOptions(prev => ({ ...prev, fruit: !!checked }))
               }
-              className="h-5 w-5 min-w-[20px] min-h-[20px] shrink-0 border-2 border-gray-600 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+              className="border-2 border-gray-600 rounded data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+              style={{ width: '20px', height: '20px', minWidth: '20px', minHeight: '20px', flexShrink: 0 }}
             />
             <label 
               htmlFor="fruit-fullscreen" 
