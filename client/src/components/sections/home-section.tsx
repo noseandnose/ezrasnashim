@@ -105,10 +105,10 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       const horizontalOffset = (seededRandom() * 8) - 4;
       const clampedPos = Math.max(0, Math.min(90, basePos + horizontalOffset));
       
-      // Use negative bottom values so flower stalks are hidden in the ground
-      // Base: -15px so stalks are below the grass line
+      // Use slightly negative bottom values so flower stalks peek above the grass
+      // Base: -5px so flowers are more visible but stalks still partially hidden
       const row = Math.floor(index / 6); // new row every 6 flowers
-      const verticalOffset = -15 + Math.floor(seededRandom() * 8) + (row * 4);
+      const verticalOffset = -5 + Math.floor(seededRandom() * 8) + (row * 4);
       
       // Vary scale slightly - flowers further back (higher rows) are smaller
       const baseScale = 0.85 - (row * 0.08);
@@ -649,8 +649,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             className="absolute bottom-[-8px] left-0 w-full h-auto z-[2]"
           />
           
-          {/* Flowers - appear when completions happen, behind grass */}
-          {/* Tefilla flowers first (z-index 1), then Torah/Tzedaka on top (z-index 3) */}
+          {/* Flowers - appear when completions happen, ALL behind grass (z-[1]) */}
+          {/* Sorting ensures Tefilla renders first (back), Torah/Tzedaka on top (front) */}
           {flowerPositions
             .slice()
             .sort((a, b) => {
@@ -663,7 +663,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
               key={`${flower.type}-${index}`}
               src={flower.type === 'torah' ? torahFlower : flower.type === 'tefilla' ? tefillaFlower : tzedakaFlower} 
               alt={`${flower.type} flower`} 
-              className={`absolute h-[77px] w-auto ${flower.type === 'tefilla' ? 'z-[1]' : 'z-[3]'}`}
+              className="absolute h-[77px] w-auto z-[1]"
               style={{ 
                 left: `${flower.left}%`,
                 bottom: `${flower.bottom}px`,

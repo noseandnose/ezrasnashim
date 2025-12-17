@@ -49,7 +49,7 @@ export const queryKeys = {
     all: ['tefilla'] as const,
     morning: () => ['/api/morning/prayers'] as const,
     mincha: () => ['/api/mincha/prayers'] as const,
-    birkatHamazon: () => ['/api/birkat-hamazon/prayers'] as const,
+    birkatHamazon: () => ['/api/brochas', 2] as const,
     afterBrochas: () => ['/api/after-brochas/prayers'] as const,
     womens: () => ['/api/womens/prayers'] as const,
   },
