@@ -405,54 +405,71 @@ export function BirkatHamazonModal() {
             
             {/* Me'ein Shalosh Food Selection Checkboxes */}
             <div className="bg-gradient-to-r from-lavender-50 to-rose-50 rounded-2xl p-4 border border-lavender/20">
-              <div className="grid grid-cols-3 gap-4">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="grain"
-                    checked={selectedOptions.grain}
-                    onCheckedChange={(checked) => 
-                      setSelectedOptions(prev => ({ ...prev, grain: !!checked }))
-                    }
-                    className="border-blush data-[state=checked]:bg-blush data-[state=checked]:border-blush"
-                  />
-                  <label 
-                    htmlFor="grain" 
-                    className="text-sm platypi-medium text-black cursor-pointer"
+              <div className="flex justify-center">
+                <div className="flex gap-6">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedOptions(prev => ({ ...prev, grain: !prev.grain }))}
+                    className="flex items-center gap-2"
                   >
-                    Grain
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="wine"
-                    checked={selectedOptions.wine}
-                    onCheckedChange={(checked) => 
-                      setSelectedOptions(prev => ({ ...prev, wine: !!checked }))
-                    }
-                    className="border-blush data-[state=checked]:bg-blush data-[state=checked]:border-blush"
-                  />
-                  <label 
-                    htmlFor="wine" 
-                    className="text-sm platypi-medium text-black cursor-pointer"
+                    <span 
+                      className={`inline-flex items-center justify-center rounded-full border-2 transition-colors ${
+                        selectedOptions.grain 
+                          ? 'bg-blush border-blush' 
+                          : 'bg-white border-gray-400'
+                      }`}
+                      style={{ width: '22px', height: '22px' }}
+                    >
+                      {selectedOptions.grain && (
+                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </span>
+                    <span className="text-sm platypi-medium text-black">Grains</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedOptions(prev => ({ ...prev, wine: !prev.wine }))}
+                    className="flex items-center gap-2"
                   >
-                    Wine
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="fruit"
-                    checked={selectedOptions.fruit}
-                    onCheckedChange={(checked) => 
-                      setSelectedOptions(prev => ({ ...prev, fruit: !!checked }))
-                    }
-                    className="border-blush data-[state=checked]:bg-blush data-[state=checked]:border-blush"
-                  />
-                  <label 
-                    htmlFor="fruit" 
-                    className="text-sm platypi-medium text-black cursor-pointer"
+                    <span 
+                      className={`inline-flex items-center justify-center rounded-full border-2 transition-colors ${
+                        selectedOptions.wine 
+                          ? 'bg-blush border-blush' 
+                          : 'bg-white border-gray-400'
+                      }`}
+                      style={{ width: '22px', height: '22px' }}
+                    >
+                      {selectedOptions.wine && (
+                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </span>
+                    <span className="text-sm platypi-medium text-black">Wine</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedOptions(prev => ({ ...prev, fruit: !prev.fruit }))}
+                    className="flex items-center gap-2"
                   >
-                    Fruits
-                  </label>
+                    <span 
+                      className={`inline-flex items-center justify-center rounded-full border-2 transition-colors ${
+                        selectedOptions.fruit 
+                          ? 'bg-blush border-blush' 
+                          : 'bg-white border-gray-400'
+                      }`}
+                      style={{ width: '22px', height: '22px' }}
+                    >
+                      {selectedOptions.fruit && (
+                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </span>
+                    <span className="text-sm platypi-medium text-black">Fruits</span>
+                  </button>
                 </div>
               </div>
             </div>
