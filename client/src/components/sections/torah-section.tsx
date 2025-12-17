@@ -1,4 +1,4 @@
-import { Book, Heart, Shield, BookOpen, Scroll, Triangle, Check, Video, Star } from "lucide-react";
+import { Book, Heart, Shield, BookOpen, Scroll, Triangle, Check, Video, Star, Plus, Minus, GraduationCap } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import { useModalStore, useModalCompletionStore, useDailyCompletionStore } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
@@ -6,6 +6,7 @@ import type { Section } from "@/pages/home";
 import { useState, useRef, useCallback } from "react";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
+import type { TorahClass } from "@shared/schema";
 
 // Calculate reading time based on word count (average 200 words per minute)
 const calculateReadingTime = (text: string): string => {
@@ -42,6 +43,7 @@ export default function TorahSection({}: TorahSectionProps) {
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [pirkeiAvotExpanded, setPirkeiAvotExpanded] = useState(false);
   const pirkeiExpandButtonRef = useRef<HTMLButtonElement>(null);
+  const [torahClassExpanded, setTorahClassExpanded] = useState(false);
   
   // Toggle handler for Pirkei Avot expand button
   const handlePirkeiAvotToggle = useCallback((event?: React.MouseEvent | { stopPropagation?: () => void }) => {
@@ -118,6 +120,16 @@ export default function TorahSection({}: TorahSectionProps) {
     retry: 3,
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
+
+  // Fetch today's Torah Classes
+  const { data: torahClasses } = useQuery<TorahClass[]>({
+    queryKey: ['/api/torah-classes'],
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+
+  // Get the first available Torah class for display
+  const currentTorahClass = torahClasses?.[0];
 
   // Handle direct fullscreen opening for specific modals (bypassing modal completely)
   const handleDirectFullscreen = (modalType: string, event: React.MouseEvent) => {
@@ -282,6 +294,100 @@ export default function TorahSection({}: TorahSectionProps) {
                       <polyline points={pirkeiAvotExpanded ? "18 15 12 9 6 15" : "6 9 12 15 18 9"}></polyline>
                     </svg>
                   </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Torah Classes Bar - Only shown when content exists */}
+        {currentTorahClass && (
+          <div 
+            className="bg-white/80 rounded-xl mt-3 overflow-hidden border border-blush/20"
+            style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}
+          >
+            {/* Collapsed/Header Bar */}
+            <button
+              onClick={() => setTorahClassExpanded(!torahClassExpanded)}
+              className="w-full p-3 text-left hover:bg-white/90 transition-colors"
+              data-testid="button-torah-class-toggle"
+            >
+              <div className="flex items-center gap-3">
+                {/* Image */}
+                {currentTorahClass.imageUrl ? (
+                  <img 
+                    src={currentTorahClass.imageUrl} 
+                    alt={currentTorahClass.title} 
+                    className="w-10 h-10 rounded-xl object-cover"
+                  />
+                ) : (
+                  <div className="bg-gradient-feminine p-2 rounded-full">
+                    <GraduationCap className="text-white" size={16} />
+                  </div>
+                )}
+                
+                {/* Title and Subtitle */}
+                <div className="flex-grow">
+                  <h3 className="platypi-bold text-sm text-black">{currentTorahClass.title}</h3>
+                  {currentTorahClass.subtitle && (
+                    <p className="platypi-regular text-xs text-black/70">{currentTorahClass.subtitle}</p>
+                  )}
+                </div>
+                
+                {/* Expand/Collapse indicator */}
+                <div className="text-black/40">
+                  {torahClassExpanded ? <Minus size={18} /> : <Plus size={18} />}
+                </div>
+              </div>
+            </button>
+            
+            {/* Expanded Content */}
+            {torahClassExpanded && (
+              <div className="px-3 pb-3 pt-2 border-t border-blush/10 space-y-3">
+                {/* Content text */}
+                {currentTorahClass.content && (
+                  <p className="platypi-regular text-sm text-black leading-relaxed">
+                    {currentTorahClass.content}
+                  </p>
+                )}
+                
+                {/* Audio player */}
+                {currentTorahClass.audioUrl && (
+                  <audio 
+                    controls 
+                    className="w-full h-10"
+                    src={currentTorahClass.audioUrl}
+                  >
+                    Your browser does not support the audio element.
+                  </audio>
+                )}
+                
+                {/* Video embed */}
+                {currentTorahClass.videoUrl && (
+                  <div className="aspect-video rounded-lg overflow-hidden">
+                    <iframe
+                      src={currentTorahClass.videoUrl.replace('watch?v=', 'embed/')}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                )}
+                
+                {/* Speaker info */}
+                {currentTorahClass.speaker && (
+                  <p className="platypi-regular text-xs text-black/60">
+                    {currentTorahClass.speakerWebsite ? (
+                      <a 
+                        href={currentTorahClass.speakerWebsite} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="hover:text-blush transition-colors"
+                      >
+                        {currentTorahClass.speaker}
+                      </a>
+                    ) : currentTorahClass.speaker}
+                  </p>
                 )}
               </div>
             )}
