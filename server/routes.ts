@@ -1474,28 +1474,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // After Brochas routes
-  app.get("/api/after-brochas/prayers",
-    cacheMiddleware({ ttl: CACHE_TTL.STATIC_PRAYERS, category: 'prayers-after-brochas' }),
-    async (req, res) => {
-      try {
-        const prayers = await storage.getAfterBrochasPrayers();
-        res.json(prayers);
-      } catch (error) {
-        return res.status(500).json({ message: "Failed to fetch After Brochas prayers" });
-      }
-    }
-  );
-
-  app.post("/api/after-brochas/prayers", requireAdminAuth, async (req, res) => {
-    try {
-      const prayer = await storage.createAfterBrochasPrayer(req.body);
-      res.json(prayer);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to create After Brochas prayer" });
-    }
-  });
-
   // Brochas routes
   app.get("/api/brochas", async (req, res) => {
     try {
@@ -1784,9 +1762,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Today's Special routes
+  // Today's Special routes - short cache since content may be edited frequently
   app.get("/api/home/todays-special/:date",
-    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'todays-special' }),
+    cacheMiddleware({ ttl: CACHE_TTL.TODAYS_SPECIAL, category: 'todays-special' }),
     async (req, res) => {
       try {
         const { date } = req.params;

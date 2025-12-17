@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Expand } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
@@ -153,8 +152,9 @@ export function BirkatHamazonModal() {
     enabled: activeModal === 'birkat-hamazon',
   });
 
-  const { data: afterBrochasPrayers, isLoading: isAfterBrochasLoading } = useQuery<{prayerName: string; hebrewText: string; englishTranslation: string}[]>({
-    queryKey: ["/api/after-brochas/prayers"],
+  // Me'ein Shalosh from brochas table (id=1)
+  const { data: meeinShalosh, isLoading: isMeeinShaloshLoading } = useQuery<Brocha>({
+    queryKey: ["/api/brochas", 1],
     enabled: activeModal === 'after-brochas' || activeModal === 'al-hamichiya',
   });
 
@@ -404,71 +404,86 @@ export function BirkatHamazonModal() {
             
             {/* Me'ein Shalosh Food Selection Checkboxes */}
             <div className="bg-gradient-to-r from-lavender-50 to-rose-50 rounded-2xl p-4 border border-lavender/20">
-              <div className="grid grid-cols-3 gap-4">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="grain"
-                    checked={selectedOptions.grain}
-                    onCheckedChange={(checked) => 
-                      setSelectedOptions(prev => ({ ...prev, grain: !!checked }))
-                    }
-                    className="border-blush data-[state=checked]:bg-blush data-[state=checked]:border-blush"
-                  />
-                  <label 
-                    htmlFor="grain" 
-                    className="text-sm platypi-medium text-black cursor-pointer"
+              <div className="flex justify-center">
+                <div className="flex gap-6">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedOptions(prev => ({ ...prev, grain: !prev.grain }))}
+                    className="flex items-center gap-2"
                   >
-                    Grain
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="wine"
-                    checked={selectedOptions.wine}
-                    onCheckedChange={(checked) => 
-                      setSelectedOptions(prev => ({ ...prev, wine: !!checked }))
-                    }
-                    className="border-blush data-[state=checked]:bg-blush data-[state=checked]:border-blush"
-                  />
-                  <label 
-                    htmlFor="wine" 
-                    className="text-sm platypi-medium text-black cursor-pointer"
+                    <span 
+                      className={`inline-flex items-center justify-center rounded-full border-2 transition-colors ${
+                        selectedOptions.grain 
+                          ? 'bg-blush border-blush' 
+                          : 'bg-white border-gray-400'
+                      }`}
+                      style={{ width: '22px', height: '22px' }}
+                    >
+                      {selectedOptions.grain && (
+                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </span>
+                    <span className="text-sm platypi-medium text-black">Grains</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedOptions(prev => ({ ...prev, wine: !prev.wine }))}
+                    className="flex items-center gap-2"
                   >
-                    Wine
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="fruit"
-                    checked={selectedOptions.fruit}
-                    onCheckedChange={(checked) => 
-                      setSelectedOptions(prev => ({ ...prev, fruit: !!checked }))
-                    }
-                    className="border-blush data-[state=checked]:bg-blush data-[state=checked]:border-blush"
-                  />
-                  <label 
-                    htmlFor="fruit" 
-                    className="text-sm platypi-medium text-black cursor-pointer"
+                    <span 
+                      className={`inline-flex items-center justify-center rounded-full border-2 transition-colors ${
+                        selectedOptions.wine 
+                          ? 'bg-blush border-blush' 
+                          : 'bg-white border-gray-400'
+                      }`}
+                      style={{ width: '22px', height: '22px' }}
+                    >
+                      {selectedOptions.wine && (
+                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </span>
+                    <span className="text-sm platypi-medium text-black">Wine</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedOptions(prev => ({ ...prev, fruit: !prev.fruit }))}
+                    className="flex items-center gap-2"
                   >
-                    Fruits
-                  </label>
+                    <span 
+                      className={`inline-flex items-center justify-center rounded-full border-2 transition-colors ${
+                        selectedOptions.fruit 
+                          ? 'bg-blush border-blush' 
+                          : 'bg-white border-gray-400'
+                      }`}
+                      style={{ width: '22px', height: '22px' }}
+                    >
+                      {selectedOptions.fruit && (
+                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </span>
+                    <span className="text-sm platypi-medium text-black">Fruits</span>
+                  </button>
                 </div>
               </div>
             </div>
             
-            {isAfterBrochasLoading ? (
+            {isMeeinShaloshLoading ? (
               <div className="flex justify-center py-8">
                 <span className="text-sm text-gray-500">Loading prayer...</span>
               </div>
-            ) : (
+            ) : meeinShalosh ? (
               <div className="space-y-6">
-                {afterBrochasPrayers?.filter(p => p.prayerName === "Me'ein Shalosh").map((prayer, index) => (
-                  <div key={index} className="bg-white rounded-2xl p-4 border border-blush/10">
-                    {renderPrayerText(prayer as any, true)}
-                  </div>
-                ))}
+                <div className="bg-white rounded-2xl p-4 border border-blush/10">
+                  {renderPrayerText(meeinShalosh, true)}
+                </div>
               </div>
-            )}
+            ) : null}
             
             <KorenThankYou />
             
@@ -494,19 +509,17 @@ export function BirkatHamazonModal() {
             <StandardModalHeader />
             
             <div className="max-h-[60vh] overflow-y-auto">
-            {isAfterBrochasLoading ? (
+            {isMeeinShaloshLoading ? (
               <div className="flex justify-center py-8">
                 <span className="text-sm text-gray-500">Loading prayer...</span>
               </div>
-            ) : (
+            ) : meeinShalosh ? (
               <div className="space-y-6">
-                {afterBrochasPrayers?.filter(p => p.prayerName === "Me'ein Shalosh").map((prayer, index) => (
-                  <div key={index} className="bg-white rounded-2xl p-4 border border-blush/10">
-                    {renderPrayerText(prayer as any)}
-                  </div>
-                ))}
+                <div className="bg-white rounded-2xl p-4 border border-blush/10">
+                  {renderPrayerText(meeinShalosh)}
+                </div>
               </div>
-            )}
+            ) : null}
           </div>
 
           <KorenThankYou />
@@ -639,11 +652,12 @@ export function BirkatHamazonModal() {
 
 // Fullscreen content components
 export function MeeinShaloshFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
-  const { data: afterBrochasPrayers = [], isLoading } = useQuery<{prayerName: string; hebrewText: string; englishTranslation: string}[]>({
-    queryKey: ["/api/after-brochas/prayers"],
+  // Me'ein Shalosh from brochas table (id=1)
+  const { data: meeinShalosh, isLoading } = useQuery<Brocha>({
+    queryKey: ["/api/brochas", 1],
   });
 
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { completeTask } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { coordinates } = useLocationStore();
@@ -692,8 +706,8 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
     loadConditions();
   }, [coordinates]);
 
-  const renderPrayerText = (prayer: any) => {
-    const text = language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation;
+  const renderPrayerText = (prayer: Brocha) => {
+    const text = language === "hebrew" ? prayer.hebrewText : prayer.englishText;
     
     // Default conditions to use when conditions haven't loaded yet
     const defaultConditions: TefillaConditions = {
@@ -775,67 +789,82 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
       {/* Me'ein Shalosh Food Selection Checkboxes */}
       <div className="bg-gradient-to-r from-lavender-50 to-rose-50 rounded-2xl p-4 border border-lavender/20" style={{ animation: 'gentle-glow-pink-thin 3s ease-in-out infinite' }}>
         <div className="flex justify-center">
-          <div className="flex gap-8">
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="grain-fullscreen"
-              checked={selectedOptions.grain}
-              onCheckedChange={(checked) => 
-                setSelectedOptions(prev => ({ ...prev, grain: !!checked }))
-              }
-              className="h-5 w-5 border-2 border-gray-600 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
-            />
-            <label 
-              htmlFor="grain-fullscreen" 
-              className="text-sm platypi-medium text-black cursor-pointer"
+          <div className="flex gap-6">
+            <button
+              type="button"
+              onClick={() => setSelectedOptions(prev => ({ ...prev, grain: !prev.grain }))}
+              className="flex items-center gap-2"
             >
-              Grain
-            </label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="wine-fullscreen"
-              checked={selectedOptions.wine}
-              onCheckedChange={(checked) => 
-                setSelectedOptions(prev => ({ ...prev, wine: !!checked }))
-              }
-              className="h-5 w-5 border-2 border-gray-600 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
-            />
-            <label 
-              htmlFor="wine-fullscreen" 
-              className="text-sm platypi-medium text-black cursor-pointer"
+              <span 
+                className={`inline-flex items-center justify-center rounded-full border-2 transition-colors ${
+                  selectedOptions.grain 
+                    ? 'bg-blush border-blush' 
+                    : 'bg-white border-gray-400'
+                }`}
+                style={{ width: '22px', height: '22px' }}
+              >
+                {selectedOptions.grain && (
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </span>
+              <span className="text-sm platypi-medium text-black">Grains</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedOptions(prev => ({ ...prev, wine: !prev.wine }))}
+              className="flex items-center gap-2"
             >
-              Wine
-            </label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="fruit-fullscreen"
-              checked={selectedOptions.fruit}
-              onCheckedChange={(checked) => 
-                setSelectedOptions(prev => ({ ...prev, fruit: !!checked }))
-              }
-              className="h-5 w-5 border-2 border-gray-600 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
-            />
-            <label 
-              htmlFor="fruit-fullscreen" 
-              className="text-sm platypi-medium text-black cursor-pointer"
+              <span 
+                className={`inline-flex items-center justify-center rounded-full border-2 transition-colors ${
+                  selectedOptions.wine 
+                    ? 'bg-blush border-blush' 
+                    : 'bg-white border-gray-400'
+                }`}
+                style={{ width: '22px', height: '22px' }}
+              >
+                {selectedOptions.wine && (
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </span>
+              <span className="text-sm platypi-medium text-black">Wine</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedOptions(prev => ({ ...prev, fruit: !prev.fruit }))}
+              className="flex items-center gap-2"
             >
-              Fruits
-            </label>
-          </div>
+              <span 
+                className={`inline-flex items-center justify-center rounded-full border-2 transition-colors ${
+                  selectedOptions.fruit 
+                    ? 'bg-blush border-blush' 
+                    : 'bg-white border-gray-400'
+                }`}
+                style={{ width: '22px', height: '22px' }}
+              >
+                {selectedOptions.fruit && (
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </span>
+              <span className="text-sm platypi-medium text-black">Fruits</span>
+            </button>
           </div>
         </div>
       </div>
       
       <div className="space-y-6">
-        {afterBrochasPrayers?.filter(p => p.prayerName === "Me'ein Shalosh").map((prayer, index) => (
-          <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
-            {conditions ? renderPrayerText(prayer) : (
+        {meeinShalosh && (
+          <div className="bg-white rounded-2xl p-6 border border-blush/10">
+            {conditions ? renderPrayerText(meeinShalosh) : (
               <div className="text-center text-gray-500">Loading prayer conditions...</div>
             )}
           </div>
-        ))}
+        )}
       </div>
       
       <KorenThankYou />
@@ -860,7 +889,7 @@ export function BirkatHamazonFullscreenContent({ language, fontSize }: { languag
     queryKey: ["/api/brochas", 2],
   });
 
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { completeTask } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { coordinates } = useLocationStore();

@@ -1,7 +1,7 @@
 import serverAxiosClient from "./axiosClient";
 import { 
   shopItems, 
-  tehillimNames, tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, afterBrochasPrayers, brochas, sponsors, nishmasText,
+  tehillimNames, tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, brochas, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent, todaysSpecial,
   dailyRecipes, parshaVorts, tableInspirations, marriageInsights, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats, acts,
@@ -11,7 +11,6 @@ import {
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
   type MaarivPrayer, type InsertMaarivPrayer, type MorningPrayer, type InsertMorningPrayer,
-  type AfterBrochasPrayer, type InsertAfterBrochasPrayer,
   type Brocha, type InsertBrocha,
   type Sponsor, type InsertSponsor, type NishmasText, type InsertNishmasText,
   type DailyHalacha, type InsertDailyHalacha,
@@ -148,10 +147,6 @@ export interface IStorage {
   getMaarivPrayers(): Promise<MaarivPrayer[]>;
   createMaarivPrayer(prayer: InsertMaarivPrayer): Promise<MaarivPrayer>;
 
-  // After Brochas methods
-  getAfterBrochasPrayers(): Promise<AfterBrochasPrayer[]>;
-  createAfterBrochasPrayer(prayer: InsertAfterBrochasPrayer): Promise<AfterBrochasPrayer>;
-  
   // Brochas methods
   getBrochas(): Promise<Brocha[]>;
   getBrochasByType(isSpecial: boolean): Promise<Brocha[]>;
@@ -1442,16 +1437,6 @@ export class DatabaseStorage implements IStorage {
 
   async createMaarivPrayer(insertPrayer: InsertMaarivPrayer): Promise<MaarivPrayer> {
     const [prayer] = await db.insert(maarivPrayers).values(insertPrayer).returning();
-    return prayer;
-  }
-
-  // After Brochas methods
-  async getAfterBrochasPrayers(): Promise<AfterBrochasPrayer[]> {
-    return await db.select().from(afterBrochasPrayers);
-  }
-
-  async createAfterBrochasPrayer(insertPrayer: InsertAfterBrochasPrayer): Promise<AfterBrochasPrayer> {
-    const [prayer] = await db.insert(afterBrochasPrayers).values(insertPrayer).returning();
     return prayer;
   }
 

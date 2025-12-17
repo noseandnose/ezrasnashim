@@ -66,4 +66,5 @@ export const CACHE_TTL = {
   STATIC_PRAYERS: 7 * 24 * 60 * 60, // 7 days
   PIRKEI_AVOT: 7 * 24 * 60 * 60,    // 7 days
   TEHILLIM: 30 * 24 * 60 * 60,      // 30 days
+  TODAYS_SPECIAL: 5 * 60,          // 5 minutes - content that may be edited frequently
 } as const;
