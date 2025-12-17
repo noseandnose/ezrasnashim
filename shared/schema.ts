@@ -191,15 +191,6 @@ export const morningPrayers = pgTable("morning_prayers", {
   orderIndex: integer("order_index").default(0),
 });
 
-export const afterBrochasPrayers = pgTable("after_brochas_prayers", {
-  id: serial("id").primaryKey(),
-  prayerName: text("prayer_name").notNull(), // "Al Hamichiya" or "Birkat Hamazon"
-  hebrewText: text("hebrew_text").notNull(),
-  englishTranslation: text("english_translation").notNull(),
-  description: text("description"),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
 export const brochas = pgTable("brochas", {
   id: serial("id").primaryKey(),
   title: text("Title").notNull(),
@@ -540,11 +531,6 @@ export const insertMorningPrayerSchema = createInsertSchema(morningPrayers).omit
   id: true,
 });
 
-export const insertAfterBrochasPrayerSchema = createInsertSchema(afterBrochasPrayers).omit({
-  id: true,
-  createdAt: true,
-});
-
 export const insertBrochasSchema = createInsertSchema(brochas).omit({
   id: true,
 });
@@ -638,8 +624,6 @@ export const insertMitzvahDailyTotalsSchema = createInsertSchema(mitzvahDailyTot
 });
 
 // Types
-export type AfterBrochasPrayer = typeof afterBrochasPrayers.$inferSelect;
-export type InsertAfterBrochasPrayer = z.infer<typeof insertAfterBrochasPrayerSchema>;
 export type Brocha = typeof brochas.$inferSelect;
 export type InsertBrocha = z.infer<typeof insertBrochasSchema>;
 

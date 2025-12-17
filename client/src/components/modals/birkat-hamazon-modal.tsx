@@ -153,8 +153,9 @@ export function BirkatHamazonModal() {
     enabled: activeModal === 'birkat-hamazon',
   });
 
-  const { data: afterBrochasPrayers, isLoading: isAfterBrochasLoading } = useQuery<{prayerName: string; hebrewText: string; englishTranslation: string}[]>({
-    queryKey: ["/api/after-brochas/prayers"],
+  // Me'ein Shalosh from brochas table (id=1)
+  const { data: meeinShalosh, isLoading: isMeeinShaloshLoading } = useQuery<Brocha>({
+    queryKey: ["/api/brochas", 1],
     enabled: activeModal === 'after-brochas' || activeModal === 'al-hamichiya',
   });
 
@@ -456,19 +457,17 @@ export function BirkatHamazonModal() {
               </div>
             </div>
             
-            {isAfterBrochasLoading ? (
+            {isMeeinShaloshLoading ? (
               <div className="flex justify-center py-8">
                 <span className="text-sm text-gray-500">Loading prayer...</span>
               </div>
-            ) : (
+            ) : meeinShalosh ? (
               <div className="space-y-6">
-                {afterBrochasPrayers?.filter(p => p.prayerName === "Me'ein Shalosh").map((prayer, index) => (
-                  <div key={index} className="bg-white rounded-2xl p-4 border border-blush/10">
-                    {renderPrayerText(prayer as any, true)}
-                  </div>
-                ))}
+                <div className="bg-white rounded-2xl p-4 border border-blush/10">
+                  {renderPrayerText(meeinShalosh, true)}
+                </div>
               </div>
-            )}
+            ) : null}
             
             <KorenThankYou />
             
@@ -494,19 +493,17 @@ export function BirkatHamazonModal() {
             <StandardModalHeader />
             
             <div className="max-h-[60vh] overflow-y-auto">
-            {isAfterBrochasLoading ? (
+            {isMeeinShaloshLoading ? (
               <div className="flex justify-center py-8">
                 <span className="text-sm text-gray-500">Loading prayer...</span>
               </div>
-            ) : (
+            ) : meeinShalosh ? (
               <div className="space-y-6">
-                {afterBrochasPrayers?.filter(p => p.prayerName === "Me'ein Shalosh").map((prayer, index) => (
-                  <div key={index} className="bg-white rounded-2xl p-4 border border-blush/10">
-                    {renderPrayerText(prayer as any)}
-                  </div>
-                ))}
+                <div className="bg-white rounded-2xl p-4 border border-blush/10">
+                  {renderPrayerText(meeinShalosh)}
+                </div>
               </div>
-            )}
+            ) : null}
           </div>
 
           <KorenThankYou />
@@ -639,8 +636,9 @@ export function BirkatHamazonModal() {
 
 // Fullscreen content components
 export function MeeinShaloshFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
-  const { data: afterBrochasPrayers = [], isLoading } = useQuery<{prayerName: string; hebrewText: string; englishTranslation: string}[]>({
-    queryKey: ["/api/after-brochas/prayers"],
+  // Me'ein Shalosh from brochas table (id=1)
+  const { data: meeinShalosh, isLoading } = useQuery<Brocha>({
+    queryKey: ["/api/brochas", 1],
   });
 
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
@@ -692,8 +690,8 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
     loadConditions();
   }, [coordinates]);
 
-  const renderPrayerText = (prayer: any) => {
-    const text = language === "hebrew" ? prayer.hebrewText : prayer.englishTranslation;
+  const renderPrayerText = (prayer: Brocha) => {
+    const text = language === "hebrew" ? prayer.hebrewText : prayer.englishText;
     
     // Default conditions to use when conditions haven't loaded yet
     const defaultConditions: TefillaConditions = {
@@ -829,13 +827,13 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
       </div>
       
       <div className="space-y-6">
-        {afterBrochasPrayers?.filter(p => p.prayerName === "Me'ein Shalosh").map((prayer, index) => (
-          <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
-            {conditions ? renderPrayerText(prayer) : (
+        {meeinShalosh && (
+          <div className="bg-white rounded-2xl p-6 border border-blush/10">
+            {conditions ? renderPrayerText(meeinShalosh) : (
               <div className="text-center text-gray-500">Loading prayer conditions...</div>
             )}
           </div>
-        ))}
+        )}
       </div>
       
       <KorenThankYou />

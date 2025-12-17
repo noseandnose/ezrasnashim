@@ -50,7 +50,7 @@ export const queryKeys = {
     morning: () => ['/api/morning/prayers'] as const,
     mincha: () => ['/api/mincha/prayers'] as const,
     birkatHamazon: () => ['/api/brochas', 2] as const,
-    afterBrochas: () => ['/api/after-brochas/prayers'] as const,
+    meeinShalosh: () => ['/api/brochas', 1] as const,
     womens: () => ['/api/womens/prayers'] as const,
   },
   
