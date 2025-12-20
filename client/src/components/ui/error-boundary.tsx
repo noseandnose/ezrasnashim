@@ -17,6 +17,11 @@ class ErrorBoundary extends Component<Props, State> {
     isRecovering: false
   };
 
+  public componentDidMount() {
+    // Clear chunk recovery flag on successful mount (app loaded successfully)
+    sessionStorage.removeItem('chunk-recovery-attempt');
+  }
+
   public static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error, isRecovering: false };
   }
