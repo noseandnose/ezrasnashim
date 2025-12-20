@@ -121,18 +121,55 @@ function Router() {
     // Only add visibility change refresh for mobile app WebViews
     // This fixes the untappable buttons issue in FlutterFlow without affecting normal web users
     let wasHidden = false;
+    let lastActiveTime = Date.now();
+    
+    const handleResume = () => {
+      // Only refresh in webview to fix untappable buttons
+      if (isInWebview) {
+        const timeSinceLastActive = Date.now() - lastActiveTime;
+        // Only reload if app was hidden for more than 5 seconds
+        // This prevents reload loops while allowing recovery from background
+        if (timeSinceLastActive > 5000) {
+          console.log('[WebView] App resumed after', Math.round(timeSinceLastActive / 1000), 'seconds, refreshing...');
+          // Reset scroll lock that might have been left on
+          document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
+          window.location.reload();
+        } else {
+          // Just reset scroll lock without reloading for short background times
+          document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
+        }
+      }
+      wasHidden = false;
+    };
+    
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         wasHidden = true;
+        lastActiveTime = Date.now();
       } else if (document.visibilityState === 'visible' && wasHidden) {
-        // Only refresh in webview to fix untappable buttons
-        if (isInWebview) {
-          window.location.reload();
-        }
-        wasHidden = false;
+        handleResume();
       }
     };
+    
+    // Listen to pageshow for back/forward cache restoration (bfcache)
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted || wasHidden) {
+        handleResume();
+      }
+    };
+    
+    // Listen to focus for when WebView regains focus without visibility change
+    const handleFocus = () => {
+      if (wasHidden) {
+        handleResume();
+      }
+    };
+    
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pageshow', handlePageShow);
+    window.addEventListener('focus', handleFocus);
     
     // Defer performance optimizations - not blocking
     setTimeout(() => {
@@ -179,6 +216,8 @@ function Router() {
       window.removeEventListener('resize', updateNavOffset);
       window.removeEventListener('orientationchange', updateNavOffset);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pageshow', handlePageShow as EventListener);
+      window.removeEventListener('focus', handleFocus);
     };
   }, []);
   
