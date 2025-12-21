@@ -99,12 +99,12 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     
     // Helper to add a flower position with dynamic placement
     const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', index: number) => {
-      // Distribute flowers across the width (2% to 98%) - flowers can go nearly edge to edge
-      const edgeBuffer = 2; // small buffer from edges
-      const widthRange = 96; // percentage range (2 to 98)
-      const basePos = edgeBuffer + ((index * 17) % widthRange); // spread evenly starting from 2%
-      const horizontalOffset = (seededRandom() * 4) - 2; // smaller offset to stay in bounds
-      const clampedPos = Math.max(edgeBuffer, Math.min(100 - edgeBuffer, basePos + horizontalOffset));
+      // Distribute flowers evenly across full width (0% to 95%)
+      // Use golden ratio spacing for natural-looking distribution
+      const goldenRatio = 0.618033988749;
+      const basePos = ((index * goldenRatio * 100) % 95); // 0-95% range
+      const horizontalOffset = (seededRandom() * 6) - 3; // slight randomness
+      const clampedPos = Math.max(0, Math.min(95, basePos + horizontalOffset));
       
       // Use slightly negative bottom values so flower stalks peek above the grass
       // Base: -5px so flowers are more visible but stalks still partially hidden
