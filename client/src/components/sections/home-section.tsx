@@ -319,7 +319,15 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     <div className="pb-20" data-bridge-container>
       
       {/* Unified Top Section with Greeting, Times, and Today Info - Connected to top bar */}
-      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">
+      <div 
+        className="rounded-b-3xl p-3 mx-2 mt-2 border border-white/40"
+        style={{
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.6) 100%)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.5)'
+        }}
+      >
         {/* Greeting and Date in one row */}
         <div className="flex items-center justify-between mb-3">
           <h1 className="platypi-bold text-xl text-black tracking-wide">{getGreeting()}</h1>
