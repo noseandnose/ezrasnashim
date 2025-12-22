@@ -4078,58 +4078,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Mitzvah tracking routes - Server-side sync for community totals
-  app.post("/api/mitzvos/sync", async (req, res) => {
-    try {
-      const { deviceId, completions } = req.body;
-      
-      if (!deviceId || !Array.isArray(completions)) {
-        return res.status(400).json({ message: "deviceId and completions array required" });
-      }
-      
-      // Validate completions format
-      for (const c of completions) {
-        if (!c.category || !c.date || !c.idempotencyKey) {
-          return res.status(400).json({ message: "Each completion requires category, date, and idempotencyKey" });
-        }
-        if (!['torah', 'tefilla', 'tzedaka'].includes(c.category)) {
-          return res.status(400).json({ message: "Invalid category. Must be torah, tefilla, or tzedaka" });
-        }
-      }
-      
-      const result = await storage.syncMitzvahCompletions(deviceId, completions);
-      res.json(result);
-    } catch (error) {
-      console.error('Error syncing mitzvah completions:', error);
-      return res.status(500).json({ message: "Failed to sync completions" });
-    }
-  });
-
-  app.get("/api/mitzvos/totals", async (req, res) => {
-    try {
-      const date = req.query.date as string | undefined;
-      const totals = await storage.getMitzvahTotals(date);
-      res.json(totals);
-    } catch (error) {
-      console.error('Error getting mitzvah totals:', error);
-      return res.status(500).json({ message: "Failed to get totals" });
-    }
-  });
-
-  app.get("/api/mitzvos/streak/:deviceId", async (req, res) => {
-    try {
-      const { deviceId } = req.params;
-      if (!deviceId) {
-        return res.status(400).json({ message: "deviceId required" });
-      }
-      const streak = await storage.getDeviceStreak(deviceId);
-      res.json({ streak });
-    } catch (error) {
-      console.error('Error getting device streak:', error);
-      return res.status(500).json({ message: "Failed to get streak" });
-    }
-  });
-
   // Analytics routes
   // Only track essential completion events (not page views)
   app.post("/api/analytics/track", async (req, res) => {
