@@ -126,9 +126,7 @@ export default function AppHeader() {
           minHeight: 'var(--header-total-height)',
           background: 'linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.7) 100%)',
           backdropFilter: 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          boxShadow: '0 1px 0 rgba(255,255,255,0.5), 0 4px 20px rgba(0,0,0,0.05)',
-          borderBottom: '1px solid rgba(255,255,255,0.3)'
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)'
         }}
       >
         <div className="flex items-center px-2" style={{ minHeight: 'var(--header-row-height)' }}>
