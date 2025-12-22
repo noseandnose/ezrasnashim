@@ -12,41 +12,24 @@ export default function BottomNavigation({
   onSectionChange,
 }: BottomNavigationProps) {
   const navItems = [
-    { id: "torah" as Section, icon: BookOpen, label: "Torah", isCenter: false },
-    {
-      id: "tefilla" as Section,
-      icon: HandHeart,
-      label: "Tefilla",
-      isCenter: false,
-    },
-    { id: "home" as Section, icon: Heart, label: "Home", isCenter: true },
-    {
-      id: "tzedaka" as Section,
-      icon: Coins,
-      label: "Tzedaka",
-      isCenter: false,
-    },
-    { id: "table" as Section, icon: Sparkles, label: "Life", isCenter: false },
+    { id: "torah" as Section, icon: BookOpen, label: "Torah" },
+    { id: "tefilla" as Section, icon: HandHeart, label: "Tefilla" },
+    { id: "home" as Section, icon: Heart, label: "Home" },
+    { id: "tzedaka" as Section, icon: Coins, label: "Tzedaka" },
+    { id: "table" as Section, icon: Sparkles, label: "Life" },
   ];
 
-  // Store onSectionChange in a ref for stable callback reference
   const onSectionChangeRef = useRef(onSectionChange);
   onSectionChangeRef.current = onSectionChange;
 
-  const getActiveColorClass = (sectionId: Section) => {
+  const getActiveColor = (sectionId: Section) => {
     switch (sectionId) {
-      case "torah":
-        return "bg-white text-muted-lavender rounded-2xl border-2 border-muted-lavender/30 w-16 h-16";
-      case "tefilla":
-        return "bg-white text-rose-blush rounded-2xl border-2 border-rose-blush/30 w-16 h-16";
-      case "tzedaka":
-        return "bg-white text-sage rounded-2xl border-2 border-sage/30 w-16 h-16";
-      case "table":
-        return "bg-white text-sand-gold rounded-2xl border-2 border-sand-gold/30 w-16 h-16";
-      case "home":
-        return "bg-gradient-feminine rounded-2xl shadow-lg w-16 h-16";
-      default:
-        return "bg-white text-rose-blush rounded-2xl border-2 border-rose-blush/30 w-16 h-16";
+      case "torah": return "text-muted-lavender";
+      case "tefilla": return "text-rose-blush";
+      case "tzedaka": return "text-sage";
+      case "table": return "text-sand-gold";
+      case "home": return "text-rose-blush";
+      default: return "text-rose-blush";
     }
   };
 
@@ -54,59 +37,76 @@ export default function BottomNavigation({
     <nav
       data-bottom-nav
       data-bridge-container
-      className="nav-extended fixed left-0 right-0 mx-auto w-full max-w-md bg-gradient-soft backdrop-blur-sm border-t border-rose-blush/15 shadow-2xl rounded-t-3xl transition-gentle z-50"
+      className="nav-extended fixed left-4 right-4 mx-auto max-w-md z-50"
       style={{
-        bottom: "var(--nav-offset, 0px)",
-        paddingBottom: "calc(var(--safe-area-bottom, 0px) + 0.5rem)",
+        bottom: "calc(var(--nav-offset, 0px) + var(--safe-area-bottom, 0px) + 12px)",
         touchAction: "none"
       }}
     >
-      <div className="flex items-center justify-around py-2 px-2">
-        {navItems.map(({ id, icon: Icon, label }) => (
-          <button
-            key={id}
-            onClick={() => onSectionChange(id)}
-            data-action={`nav-${id}`}
-            data-testid={`nav-${id}`}
-            className={`flex flex-col items-center justify-center transition-all duration-300 ${
-              activeSection === id
-                ? getActiveColorClass(id)
-                : "hover:bg-blush/5 rounded-xl w-16 h-16"
-            }`}
-          >
-            <Icon
-              className={`mb-1 transition-gentle ${
-                activeSection === id
-                  ? id === "home"
-                    ? "text-white"
-                    : ""
-                  : "text-warm-gray/70"
-              }`}
-              size={activeSection === id ? 22 : 20}
-              strokeWidth={1.5}
-              fill="none"
-            />
-            <span
-              className={`${activeSection === id ? "platypi-bold" : "platypi-medium"} text-xs transition-colors duration-300 ${
-                activeSection === id
-                  ? id === "home"
-                    ? "text-white"
-                    : id === "torah"
-                      ? "text-muted-lavender"
-                      : id === "tefilla"
-                        ? "text-rose-blush"
-                        : id === "tzedaka"
-                          ? "text-sage"
-                          : id === "table"
-                            ? "text-sand-gold"
-                            : "text-rose-blush"
-                  : "text-warm-gray/70"
-              }`}
-            >
-              {label}
-            </span>
-          </button>
-        ))}
+      <div 
+        className="relative overflow-hidden rounded-[28px] border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.4)]"
+        style={{
+          background: "linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.55) 100%)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+        }}
+      >
+        <div 
+          className="absolute inset-0 rounded-[28px] pointer-events-none"
+          style={{
+            background: "linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 50%)",
+          }}
+        />
+        
+        <div className="relative flex items-center justify-around py-2.5 px-1">
+          {navItems.map(({ id, icon: Icon, label }) => {
+            const isActive = activeSection === id;
+            const isHome = id === "home";
+            
+            return (
+              <button
+                key={id}
+                onClick={() => onSectionChange(id)}
+                data-action={`nav-${id}`}
+                data-testid={`nav-${id}`}
+                className={`flex flex-col items-center justify-center transition-all duration-300 rounded-2xl px-3 py-2 min-w-[56px] ${
+                  isActive 
+                    ? isHome
+                      ? "bg-gradient-to-br from-rose-blush/90 to-blush/80 shadow-lg"
+                      : "bg-white/60 shadow-sm"
+                    : "hover:bg-white/40"
+                }`}
+                style={isActive && !isHome ? {
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.5)"
+                } : undefined}
+              >
+                <Icon
+                  className={`mb-0.5 transition-all duration-300 ${
+                    isActive
+                      ? isHome
+                        ? "text-white drop-shadow-sm"
+                        : getActiveColor(id)
+                      : "text-gray-500/70"
+                  }`}
+                  size={isActive ? 22 : 20}
+                  strokeWidth={isActive ? 2 : 1.5}
+                  fill="none"
+                />
+                <span
+                  className={`text-[10px] transition-all duration-300 ${
+                    isActive 
+                      ? isHome
+                        ? "text-white font-semibold"
+                        : `${getActiveColor(id)} font-semibold`
+                      : "text-gray-500/70 font-medium"
+                  }`}
+                >
+                  {label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </nav>
   );
