@@ -579,52 +579,8 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
 
       {/* OTHER SECTIONS BELOW - SEPARATE FROM MAIN */}
       <div className="py-2 space-y-2">
-        {/* Top Row: Morning Brochas and Mincha */}
+        {/* Top Row: Siddur and Tehillim */}
         <div className="grid grid-cols-2 gap-2">
-          <div className="relative">
-            <button 
-              onClick={() => {
-                // Only open modal if not disabled
-                if (!currentPrayer.disabled) {
-                  openModal(currentPrayer.modal, 'tefilla');
-                }
-              }}
-              disabled={currentPrayer.disabled}
-              className={`w-full rounded-3xl p-3 text-center transition-all duration-300 shadow-lg border border-blush/10 ${
-                currentPrayer.disabled 
-                  ? 'bg-gray-100 opacity-60 cursor-not-allowed' 
-                  : isModalComplete(currentPrayer.modal) 
-                    ? 'bg-sage/20 hover:scale-105' 
-                    : 'bg-white hover:scale-105'
-              }`}
-              data-modal-type={currentPrayer.modal}
-              data-modal-section="tefilla"
-              data-testid="button-tefilla-prayer"
-            >
-              <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-                currentPrayer.disabled 
-                  ? 'bg-gray-300' 
-                  : isModalComplete(currentPrayer.modal) 
-                    ? 'bg-sage' 
-                    : 'bg-gradient-feminine'
-              }`}>
-                {currentPrayer.modal === 'morning-brochas' ? (
-                  <Sunrise className={currentPrayer.disabled ? "text-gray-500" : "text-white"} size={18} />
-                ) : currentPrayer.modal === 'mincha' ? (
-                  <Sun className={currentPrayer.disabled ? "text-gray-500" : "text-white"} size={18} />
-                ) : (
-                  <Moon className={currentPrayer.disabled ? "text-gray-500" : "text-white"} size={18} />
-                )}
-              </div>
-              <h3 className={`platypi-bold text-sm mb-1 ${currentPrayer.disabled ? 'text-gray-500' : 'text-black'}`}>
-                {currentPrayer.title}
-              </h3>
-              <p className={`platypi-regular text-xs ${currentPrayer.disabled ? 'text-gray-400' : 'text-black/60'}`}>
-                {isModalComplete(currentPrayer.modal) ? 'Completed' : currentPrayer.subtitle}
-              </p>
-            </button>
-          </div>
-
           <button 
             onClick={() => openModal('brochas', 'tefilla')}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
@@ -639,15 +595,12 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             }`}>
               <Star className="text-white" size={18} />
             </div>
-            <h3 className="platypi-bold text-sm text-black mb-1">Brochas</h3>
+            <h3 className="platypi-bold text-sm text-black mb-1">Siddur</h3>
             <p className="platypi-regular text-xs text-black/60">
-              {(isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'Completed' : 'Daily and Special'}
+              {(isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'Completed' : 'Tefillas and Brochas'}
             </p>
           </button>
-        </div>
 
-        {/* Bottom Row: Special Tehillim and Nishmas */}
-        <div className="grid grid-cols-2 gap-2">
           <button 
             onClick={() => openModal('special-tehillim', 'tefilla')}
             className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
@@ -666,6 +619,25 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             <p className="platypi-regular text-xs text-black/60">
               {hasAnyTehillimCompleted() ? 'Completed' : 'All & Special'}
             </p>
+          </button>
+        </div>
+
+        {/* Bottom Row: Women's Tefillas and Nishmas */}
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => openModal('womens-tefillas', 'tefilla')}
+            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
+              false ? 'bg-sage/20' : 'bg-white'
+            }`}
+            data-modal-type="womens-tefillas"
+            data-modal-section="tefilla"
+            data-testid="button-tefilla-womens"
+          >
+            <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-feminine">
+              <HandHeart className="text-white" size={18} />
+            </div>
+            <h3 className="platypi-bold text-sm text-black mb-1">Women's Tefillas</h3>
+            <p className="platypi-regular text-xs text-black/60">Special Prayers</p>
           </button>
 
           <button 
@@ -688,25 +660,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             </p>
           </button>
         </div>
-
-        {/* Women's Tefillas Section */}
-        <button
-          onClick={() => openModal('womens-tefillas', 'tefilla')}
-          className="w-full bg-white rounded-3xl p-4 shadow-lg border border-blush/10 hover:scale-[1.02] transition-all duration-300 text-left"
-          data-modal-type="womens-tefillas"
-          data-modal-section="tefilla"
-          data-testid="button-tefilla-womens"
-        >
-          <div className="flex items-center space-x-3">
-            <div className="bg-gradient-feminine p-3 rounded-full">
-              <HandHeart className="text-white" size={20} />
-            </div>
-            <div className="flex-grow">
-              <h3 className="platypi-bold text-lg text-black">Women's Tefillas</h3>
-              <p className="platypi-regular text-sm text-black/70">Special Prayers for Special Occasions</p>
-            </div>
-          </div>
-        </button>
 
         {/* The Kotel Compass Section */}
         <div className="bg-gradient-soft rounded-3xl p-4 shadow-lg">

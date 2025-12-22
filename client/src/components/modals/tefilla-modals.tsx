@@ -3,7 +3,7 @@ import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { HandHeart, Scroll, Heart, Plus, Minus, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Unlock, Check, Utensils, Wine, Car, Wheat, Moon, User, Info } from "lucide-react";
+import { HandHeart, Scroll, Heart, Plus, Minus, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Unlock, Check, Utensils, Wine, Car, Wheat, Moon, User, Info, Sunrise, Sun } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
@@ -557,6 +557,8 @@ function renderPrayerContent(contentType: string | undefined, language: 'hebrew'
       return <MaarivFullscreenContent language={language} fontSize={fontSize} />;
     case 'mincha':
       return <MinchaFullscreenContent language={language} fontSize={fontSize} />;
+    case 'shacharis':
+      return <ShachrisFullscreenContent language={language} fontSize={fontSize} />;
     case 'morning-brochas':
       return <MorningBrochasWithNavigation language={language} fontSize={fontSize} />;
     case 'nishmas-campaign':
@@ -707,6 +709,66 @@ function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
         }`}
       >
         {isModalComplete('mincha') ? 'Completed Today' : 'Complete'}
+      </Button>
+    </div>
+  );
+}
+
+function ShachrisFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  const { data: prayers = [], isLoading } = useQuery<MorningPrayer[]>({
+    queryKey: ['/api/morning/prayers'],
+  });
+
+  const tefillaConditions = useTefillaConditions();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+  const { openModal } = useModalStore();
+
+  if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
+
+  const handleComplete = () => {
+    trackModalComplete('shacharis');
+    markModalComplete('shacharis');
+    completeTask('tefilla');
+    
+    if (checkAndShowCongratulations()) {
+      openModal('congratulations', 'tefilla');
+    }
+    
+    const event = new CustomEvent('closeFullscreen');
+    window.dispatchEvent(event);
+  };
+
+  return (
+    <div className="space-y-6">
+      {prayers.map((prayer, index) => (
+        <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
+          <div
+            className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
+            style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
+            dangerouslySetInnerHTML={{
+              __html: processTefillaContent(
+                language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation, 
+                tefillaConditions
+              )
+            }}
+          />
+        </div>
+      ))}
+      
+      <KorenThankYou />
+
+      <Button
+        onClick={isModalComplete('shacharis') ? undefined : handleComplete}
+        disabled={isModalComplete('shacharis')}
+        className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
+          isModalComplete('shacharis') 
+            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
+        }`}
+      >
+        {isModalComplete('shacharis') ? 'Completed Today' : 'Complete'}
       </Button>
     </div>
   );
@@ -871,6 +933,7 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
 
 function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: { language: 'hebrew' | 'english'; fontSize: number }) {
   const [activeTab, setActiveTab] = useState<'daily' | 'special'>('daily');
+  const { isModalComplete } = useModalCompletionStore();
   
   const { data: dailyBrochas = [], isLoading: dailyLoading } = useQuery<any[]>({
     queryKey: ['/api/brochas/daily'],
@@ -954,7 +1017,7 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
         </button>
       </div>
 
-      {/* Prayer Buttons */}
+      {/* Brocha Buttons */}
       <div className="space-y-4">
         {currentBrochas.length > 0 ? (
           currentBrochas.map((brocha: any) => {
@@ -1003,6 +1066,113 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
           </div>
         )}
       </div>
+
+      {/* Daily Tefillos Section - Only show in Daily tab, after brochas */}
+      {activeTab === 'daily' && (
+        <div className="space-y-3 mt-2">
+          {/* Divider */}
+          <div className="border-t border-blush/20 my-4"></div>
+          
+          {/* Shacharis */}
+          <button
+            onClick={() => {
+              const openEvent = new CustomEvent('openDirectFullscreen', {
+                detail: {
+                  title: 'Shacharis',
+                  contentType: 'shacharis',
+                  hasTranslation: true
+                }
+              });
+              window.dispatchEvent(openEvent);
+            }}
+            className={`w-full rounded-2xl p-4 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-4 complete-button-pulse ${
+              isModalComplete('shacharis') 
+                ? 'bg-sage/10 border-sage/30' 
+                : 'bg-white border-blush/10'
+            }`}
+            data-testid="button-shacharis"
+          >
+            <div className={`p-3 rounded-full flex-shrink-0 ${isModalComplete('shacharis') ? 'bg-sage' : 'bg-gradient-feminine'}`}>
+              <Sunrise className="text-white" size={20} strokeWidth={1.5} />
+            </div>
+            <div className="flex-grow text-center">
+              <h3 className="platypi-bold text-lg text-black mb-1">Shacharis</h3>
+              <p className="platypi-regular text-sm text-black/70">Morning Tefilla</p>
+            </div>
+            {isModalComplete('shacharis') && (
+              <div className="flex-shrink-0">
+                <Check className="text-sage" size={20} />
+              </div>
+            )}
+          </button>
+          
+          {/* Mincha */}
+          <button
+            onClick={() => {
+              const openEvent = new CustomEvent('openDirectFullscreen', {
+                detail: {
+                  title: 'Mincha',
+                  contentType: 'mincha',
+                  hasTranslation: true
+                }
+              });
+              window.dispatchEvent(openEvent);
+            }}
+            className={`w-full rounded-2xl p-4 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-4 complete-button-pulse ${
+              isModalComplete('mincha') 
+                ? 'bg-sage/10 border-sage/30' 
+                : 'bg-white border-blush/10'
+            }`}
+            data-testid="button-mincha"
+          >
+            <div className={`p-3 rounded-full flex-shrink-0 ${isModalComplete('mincha') ? 'bg-sage' : 'bg-gradient-feminine'}`}>
+              <Sun className="text-white" size={20} strokeWidth={1.5} />
+            </div>
+            <div className="flex-grow text-center">
+              <h3 className="platypi-bold text-lg text-black mb-1">Mincha</h3>
+              <p className="platypi-regular text-sm text-black/70">Afternoon Tefilla</p>
+            </div>
+            {isModalComplete('mincha') && (
+              <div className="flex-shrink-0">
+                <Check className="text-sage" size={20} />
+              </div>
+            )}
+          </button>
+          
+          {/* Maariv */}
+          <button
+            onClick={() => {
+              const openEvent = new CustomEvent('openDirectFullscreen', {
+                detail: {
+                  title: 'Maariv',
+                  contentType: 'maariv',
+                  hasTranslation: true
+                }
+              });
+              window.dispatchEvent(openEvent);
+            }}
+            className={`w-full rounded-2xl p-4 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-4 complete-button-pulse ${
+              isModalComplete('maariv') 
+                ? 'bg-sage/10 border-sage/30' 
+                : 'bg-white border-blush/10'
+            }`}
+            data-testid="button-maariv"
+          >
+            <div className={`p-3 rounded-full flex-shrink-0 ${isModalComplete('maariv') ? 'bg-sage' : 'bg-gradient-feminine'}`}>
+              <Moon className="text-white" size={20} strokeWidth={1.5} />
+            </div>
+            <div className="flex-grow text-center">
+              <h3 className="platypi-bold text-lg text-black mb-1">Maariv</h3>
+              <p className="platypi-regular text-sm text-black/70">Evening Tefilla</p>
+            </div>
+            {isModalComplete('maariv') && (
+              <div className="flex-shrink-0">
+                <Check className="text-sage" size={20} />
+              </div>
+            )}
+          </button>
+        </div>
+      )}
       
     </div>
   );
@@ -2332,7 +2502,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           contentType = 'special-tehillim';
           break;
         case 'brochas':
-          title = 'Brochas';
+          title = 'Siddur';
           contentType = 'brochas';
           break;
         case 'womens-tefillas':
@@ -2406,11 +2576,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       closeModal();
       
       if (wasIndividualBrocha) {
-        // Go back to Brochas selector instead of home
+        // Go back to Siddur selector instead of home
         setTimeout(() => {
           setFullscreenContent({
             isOpen: true,
-            title: 'Brochas',
+            title: 'Siddur',
             contentType: 'brochas',
             content: null
           });
