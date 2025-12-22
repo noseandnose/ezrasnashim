@@ -63,13 +63,13 @@ export default function BottomNavigation({
                     : "hover:bg-white/40"
                 }`}
                 style={isActive ? {
-                  background: "linear-gradient(135deg, hsl(350, 45%, 75%) 0%, hsl(340, 50%, 80%) 100%)"
+                  background: "linear-gradient(135deg, hsl(350, 45%, 85%) 0%, hsl(260, 30%, 85%) 100%)"
                 } : undefined}
               >
                 <Icon
                   className={`mb-0.5 transition-all duration-300 ${
                     isActive
-                      ? "text-white drop-shadow-sm"
+                      ? "text-rose-700 drop-shadow-sm"
                       : "text-gray-500/70"
                   }`}
                   size={isActive ? 22 : 20}
@@ -79,7 +79,7 @@ export default function BottomNavigation({
                 <span
                   className={`text-[10px] transition-all duration-300 ${
                     isActive 
-                      ? "text-white font-semibold"
+                      ? "text-rose-700 font-semibold"
                       : "text-gray-500/70 font-medium"
                   }`}
                 >
