@@ -22,17 +22,6 @@ export default function BottomNavigation({
   const onSectionChangeRef = useRef(onSectionChange);
   onSectionChangeRef.current = onSectionChange;
 
-  const getActiveColor = (sectionId: Section) => {
-    switch (sectionId) {
-      case "torah": return "text-muted-lavender";
-      case "tefilla": return "text-rose-blush";
-      case "tzedaka": return "text-sage";
-      case "table": return "text-sand-gold";
-      case "home": return "text-rose-blush";
-      default: return "text-rose-blush";
-    }
-  };
-
   return (
     <nav
       data-bottom-nav
@@ -61,7 +50,6 @@ export default function BottomNavigation({
         <div className="relative flex items-center justify-around py-2.5 px-1">
           {navItems.map(({ id, icon: Icon, label }) => {
             const isActive = activeSection === id;
-            const isHome = id === "home";
             
             return (
               <button
@@ -71,21 +59,14 @@ export default function BottomNavigation({
                 data-testid={`nav-${id}`}
                 className={`flex flex-col items-center justify-center transition-all duration-300 rounded-2xl px-3 py-2 min-w-[56px] ${
                   isActive 
-                    ? isHome
-                      ? "bg-gradient-to-br from-rose-blush/90 to-blush/80 shadow-lg"
-                      : "bg-white/60 shadow-sm"
+                    ? "bg-gradient-to-br from-rose-blush/90 to-blush/80 shadow-lg"
                     : "hover:bg-white/40"
                 }`}
-                style={isActive && !isHome ? {
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.5)"
-                } : undefined}
               >
                 <Icon
                   className={`mb-0.5 transition-all duration-300 ${
                     isActive
-                      ? isHome
-                        ? "text-white drop-shadow-sm"
-                        : getActiveColor(id)
+                      ? "text-white drop-shadow-sm"
                       : "text-gray-500/70"
                   }`}
                   size={isActive ? 22 : 20}
@@ -95,9 +76,7 @@ export default function BottomNavigation({
                 <span
                   className={`text-[10px] transition-all duration-300 ${
                     isActive 
-                      ? isHome
-                        ? "text-white font-semibold"
-                        : `${getActiveColor(id)} font-semibold`
+                      ? "text-white font-semibold"
                       : "text-gray-500/70 font-medium"
                   }`}
                 >
