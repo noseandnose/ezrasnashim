@@ -117,11 +117,20 @@ export default function AppHeader() {
 
   return (
     <>
-      <header className="header-extended fixed top-0 left-0 right-0 bg-gradient-soft px-3 border-0 shadow-none z-40" data-bridge-container style={{ 
-        paddingTop: `calc(var(--safe-area-top) + 0.625rem)`, 
-        paddingBottom: '0.625rem',
-        minHeight: 'var(--header-total-height)'
-      }}>
+      <header 
+        className="header-extended fixed top-0 left-0 right-0 px-3 border-0 z-40" 
+        data-bridge-container 
+        style={{ 
+          paddingTop: `calc(var(--safe-area-top) + 0.625rem)`, 
+          paddingBottom: '0.625rem',
+          minHeight: 'var(--header-total-height)',
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.7) 100%)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          boxShadow: '0 1px 0 rgba(255,255,255,0.5), 0 4px 20px rgba(0,0,0,0.05)',
+          borderBottom: '1px solid rgba(255,255,255,0.3)'
+        }}
+      >
         <div className="flex items-center px-2" style={{ minHeight: 'var(--header-row-height)' }}>
           <div className="flex items-center gap-1 flex-1">
             <DropdownMenu>
