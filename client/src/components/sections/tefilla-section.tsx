@@ -336,12 +336,12 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
 
       {/* Main Tefilla Section - Tehillim */}
       <div 
-        className="rounded-b-3xl p-3 mx-2 mt-2 border border-white/40 space-y-3"
+        className="rounded-b-3xl p-3 space-y-3"
         style={{
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.6) 100%)',
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.7) 100%)',
           backdropFilter: 'blur(20px) saturate(180%)',
           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.5)'
+          boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
         }}
       >
         

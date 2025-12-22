@@ -320,12 +320,12 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       
       {/* Unified Top Section with Greeting, Times, and Today Info - Connected to top bar */}
       <div 
-        className="rounded-b-3xl p-3 mx-2 mt-2 border border-white/40"
+        className="rounded-b-3xl p-3"
         style={{
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.6) 100%)',
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.7) 100%)',
           backdropFilter: 'blur(20px) saturate(180%)',
           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.5)'
+          boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
         }}
       >
         {/* Greeting and Date in one row */}
