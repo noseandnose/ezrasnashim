@@ -338,7 +338,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
       <div 
         className="rounded-b-3xl p-3 space-y-3"
         style={{
-          background: 'linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.7) 100%)',
+          background: 'linear-gradient(180deg, rgba(186,137,160,0.15) 0%, rgba(186,137,160,0.08) 100%)',
           backdropFilter: 'blur(20px) saturate(180%)',
           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
           boxShadow: '0 8px 32px rgba(0,0,0,0.08)'

@@ -124,7 +124,7 @@ export default function AppHeader() {
           paddingTop: `calc(var(--safe-area-top) + 0.625rem)`, 
           paddingBottom: '0.625rem',
           minHeight: 'var(--header-total-height)',
-          background: 'linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.7) 100%)',
+          background: 'linear-gradient(180deg, rgba(186,137,160,0.15) 0%, rgba(186,137,160,0.08) 100%)',
           backdropFilter: 'blur(20px) saturate(180%)',
           WebkitBackdropFilter: 'blur(20px) saturate(180%)'
         }}
