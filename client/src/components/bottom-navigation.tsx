@@ -59,9 +59,12 @@ export default function BottomNavigation({
                 data-testid={`nav-${id}`}
                 className={`flex flex-col items-center justify-center transition-all duration-300 rounded-2xl px-3 py-2 min-w-[56px] ${
                   isActive 
-                    ? "bg-gradient-to-br from-rose-blush/90 to-blush/80 shadow-lg"
+                    ? "shadow-lg"
                     : "hover:bg-white/40"
                 }`}
+                style={isActive ? {
+                  background: "linear-gradient(135deg, hsl(350, 45%, 75%) 0%, hsl(340, 50%, 80%) 100%)"
+                } : undefined}
               >
                 <Icon
                   className={`mb-0.5 transition-all duration-300 ${
