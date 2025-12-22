@@ -2502,7 +2502,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           contentType = 'special-tehillim';
           break;
         case 'brochas':
-          title = 'Brochas';
+          title = 'Siddur';
           contentType = 'brochas';
           break;
         case 'womens-tefillas':
@@ -2576,11 +2576,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       closeModal();
       
       if (wasIndividualBrocha) {
-        // Go back to Brochas selector instead of home
+        // Go back to Siddur selector instead of home
         setTimeout(() => {
           setFullscreenContent({
             isOpen: true,
-            title: 'Brochas',
+            title: 'Siddur',
             contentType: 'brochas',
             content: null
           });
