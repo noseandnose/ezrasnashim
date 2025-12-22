@@ -1017,113 +1017,6 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
         </button>
       </div>
 
-      {/* Daily Prayers Section - Only show in Daily tab */}
-      {activeTab === 'daily' && (
-        <div className="space-y-3 mb-2">
-          {/* Shacharis */}
-          <button
-            onClick={() => {
-              const openEvent = new CustomEvent('openDirectFullscreen', {
-                detail: {
-                  title: 'Shacharis',
-                  contentType: 'shacharis',
-                  hasTranslation: true
-                }
-              });
-              window.dispatchEvent(openEvent);
-            }}
-            className={`w-full rounded-2xl p-4 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-4 complete-button-pulse ${
-              isModalComplete('shacharis') 
-                ? 'bg-sage/10 border-sage/30' 
-                : 'bg-white border-blush/10'
-            }`}
-            data-testid="button-shacharis"
-          >
-            <div className={`p-3 rounded-full flex-shrink-0 ${isModalComplete('shacharis') ? 'bg-sage' : 'bg-gradient-feminine'}`}>
-              <Sunrise className="text-white" size={20} strokeWidth={1.5} />
-            </div>
-            <div className="flex-grow text-center">
-              <h3 className="platypi-bold text-lg text-black mb-1">Shacharis</h3>
-              <p className="platypi-regular text-sm text-black/70">Morning Prayer</p>
-            </div>
-            {isModalComplete('shacharis') && (
-              <div className="flex-shrink-0">
-                <Check className="text-sage" size={20} />
-              </div>
-            )}
-          </button>
-          
-          {/* Mincha */}
-          <button
-            onClick={() => {
-              const openEvent = new CustomEvent('openDirectFullscreen', {
-                detail: {
-                  title: 'Mincha',
-                  contentType: 'mincha',
-                  hasTranslation: true
-                }
-              });
-              window.dispatchEvent(openEvent);
-            }}
-            className={`w-full rounded-2xl p-4 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-4 complete-button-pulse ${
-              isModalComplete('mincha') 
-                ? 'bg-sage/10 border-sage/30' 
-                : 'bg-white border-blush/10'
-            }`}
-            data-testid="button-mincha"
-          >
-            <div className={`p-3 rounded-full flex-shrink-0 ${isModalComplete('mincha') ? 'bg-sage' : 'bg-gradient-feminine'}`}>
-              <Sun className="text-white" size={20} strokeWidth={1.5} />
-            </div>
-            <div className="flex-grow text-center">
-              <h3 className="platypi-bold text-lg text-black mb-1">Mincha</h3>
-              <p className="platypi-regular text-sm text-black/70">Afternoon Prayer</p>
-            </div>
-            {isModalComplete('mincha') && (
-              <div className="flex-shrink-0">
-                <Check className="text-sage" size={20} />
-              </div>
-            )}
-          </button>
-          
-          {/* Maariv */}
-          <button
-            onClick={() => {
-              const openEvent = new CustomEvent('openDirectFullscreen', {
-                detail: {
-                  title: 'Maariv',
-                  contentType: 'maariv',
-                  hasTranslation: true
-                }
-              });
-              window.dispatchEvent(openEvent);
-            }}
-            className={`w-full rounded-2xl p-4 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-4 complete-button-pulse ${
-              isModalComplete('maariv') 
-                ? 'bg-sage/10 border-sage/30' 
-                : 'bg-white border-blush/10'
-            }`}
-            data-testid="button-maariv"
-          >
-            <div className={`p-3 rounded-full flex-shrink-0 ${isModalComplete('maariv') ? 'bg-sage' : 'bg-gradient-feminine'}`}>
-              <Moon className="text-white" size={20} strokeWidth={1.5} />
-            </div>
-            <div className="flex-grow text-center">
-              <h3 className="platypi-bold text-lg text-black mb-1">Maariv</h3>
-              <p className="platypi-regular text-sm text-black/70">Evening Prayer</p>
-            </div>
-            {isModalComplete('maariv') && (
-              <div className="flex-shrink-0">
-                <Check className="text-sage" size={20} />
-              </div>
-            )}
-          </button>
-          
-          {/* Divider */}
-          <div className="border-t border-blush/20 my-4"></div>
-        </div>
-      )}
-
       {/* Brocha Buttons */}
       <div className="space-y-4">
         {currentBrochas.length > 0 ? (
@@ -1173,6 +1066,113 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
           </div>
         )}
       </div>
+
+      {/* Daily Tefillos Section - Only show in Daily tab, after brochas */}
+      {activeTab === 'daily' && (
+        <div className="space-y-3 mt-2">
+          {/* Divider */}
+          <div className="border-t border-blush/20 my-4"></div>
+          
+          {/* Shacharis */}
+          <button
+            onClick={() => {
+              const openEvent = new CustomEvent('openDirectFullscreen', {
+                detail: {
+                  title: 'Shacharis',
+                  contentType: 'shacharis',
+                  hasTranslation: true
+                }
+              });
+              window.dispatchEvent(openEvent);
+            }}
+            className={`w-full rounded-2xl p-4 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-4 complete-button-pulse ${
+              isModalComplete('shacharis') 
+                ? 'bg-sage/10 border-sage/30' 
+                : 'bg-white border-blush/10'
+            }`}
+            data-testid="button-shacharis"
+          >
+            <div className={`p-3 rounded-full flex-shrink-0 ${isModalComplete('shacharis') ? 'bg-sage' : 'bg-gradient-feminine'}`}>
+              <Sunrise className="text-white" size={20} strokeWidth={1.5} />
+            </div>
+            <div className="flex-grow text-center">
+              <h3 className="platypi-bold text-lg text-black mb-1">Shacharis</h3>
+              <p className="platypi-regular text-sm text-black/70">Morning Tefilla</p>
+            </div>
+            {isModalComplete('shacharis') && (
+              <div className="flex-shrink-0">
+                <Check className="text-sage" size={20} />
+              </div>
+            )}
+          </button>
+          
+          {/* Mincha */}
+          <button
+            onClick={() => {
+              const openEvent = new CustomEvent('openDirectFullscreen', {
+                detail: {
+                  title: 'Mincha',
+                  contentType: 'mincha',
+                  hasTranslation: true
+                }
+              });
+              window.dispatchEvent(openEvent);
+            }}
+            className={`w-full rounded-2xl p-4 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-4 complete-button-pulse ${
+              isModalComplete('mincha') 
+                ? 'bg-sage/10 border-sage/30' 
+                : 'bg-white border-blush/10'
+            }`}
+            data-testid="button-mincha"
+          >
+            <div className={`p-3 rounded-full flex-shrink-0 ${isModalComplete('mincha') ? 'bg-sage' : 'bg-gradient-feminine'}`}>
+              <Sun className="text-white" size={20} strokeWidth={1.5} />
+            </div>
+            <div className="flex-grow text-center">
+              <h3 className="platypi-bold text-lg text-black mb-1">Mincha</h3>
+              <p className="platypi-regular text-sm text-black/70">Afternoon Tefilla</p>
+            </div>
+            {isModalComplete('mincha') && (
+              <div className="flex-shrink-0">
+                <Check className="text-sage" size={20} />
+              </div>
+            )}
+          </button>
+          
+          {/* Maariv */}
+          <button
+            onClick={() => {
+              const openEvent = new CustomEvent('openDirectFullscreen', {
+                detail: {
+                  title: 'Maariv',
+                  contentType: 'maariv',
+                  hasTranslation: true
+                }
+              });
+              window.dispatchEvent(openEvent);
+            }}
+            className={`w-full rounded-2xl p-4 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-4 complete-button-pulse ${
+              isModalComplete('maariv') 
+                ? 'bg-sage/10 border-sage/30' 
+                : 'bg-white border-blush/10'
+            }`}
+            data-testid="button-maariv"
+          >
+            <div className={`p-3 rounded-full flex-shrink-0 ${isModalComplete('maariv') ? 'bg-sage' : 'bg-gradient-feminine'}`}>
+              <Moon className="text-white" size={20} strokeWidth={1.5} />
+            </div>
+            <div className="flex-grow text-center">
+              <h3 className="platypi-bold text-lg text-black mb-1">Maariv</h3>
+              <p className="platypi-regular text-sm text-black/70">Evening Tefilla</p>
+            </div>
+            {isModalComplete('maariv') && (
+              <div className="flex-shrink-0">
+                <Check className="text-sage" size={20} />
+              </div>
+            )}
+          </button>
+        </div>
+      )}
       
     </div>
   );
