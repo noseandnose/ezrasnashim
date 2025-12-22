@@ -118,19 +118,27 @@ function Router() {
     // Combined detection
     const isInWebview = hasFlutterMarkers || isAndroidWebview || isIOSWebview;
     
-    // Only add visibility change refresh for mobile app WebViews
-    // This fixes the untappable buttons issue in FlutterFlow without affecting normal web users
-    let wasHidden = false;
-    let lastActiveTime = Date.now();
+    // WebView resume handler for FlutterFlow apps
+    // Fixes untappable buttons by reloading after returning from background
+    // FlutterFlow WebViews may fire blur/pagehide WITHOUT visibilitychange,
+    // so we track background time on multiple events
+    let lastBackgroundTime: number | null = null;
+    const BACKGROUND_THRESHOLD = 3000; // 3 seconds - reliable for WebView recovery
+    
+    const markBackground = () => {
+      if (isInWebview && lastBackgroundTime === null) {
+        lastBackgroundTime = Date.now();
+      }
+    };
     
     const handleResume = () => {
       // Only refresh in webview to fix untappable buttons
-      if (isInWebview) {
-        const timeSinceLastActive = Date.now() - lastActiveTime;
-        // Only reload if app was hidden for more than 5 seconds
-        // This prevents reload loops while allowing recovery from background
-        if (timeSinceLastActive > 5000) {
-          console.log('[WebView] App resumed after', Math.round(timeSinceLastActive / 1000), 'seconds, refreshing...');
+      if (isInWebview && lastBackgroundTime !== null) {
+        const timeInBackground = Date.now() - lastBackgroundTime;
+        lastBackgroundTime = null; // Reset immediately to prevent double-reload
+        
+        if (timeInBackground > BACKGROUND_THRESHOLD) {
+          console.log('[WebView] App resumed after', Math.round(timeInBackground / 1000), 'seconds, refreshing...');
           // Reset scroll lock that might have been left on
           document.body.style.overflow = '';
           document.documentElement.style.overflow = '';
@@ -141,35 +149,47 @@ function Router() {
           document.documentElement.style.overflow = '';
         }
       }
-      wasHidden = false;
     };
     
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        wasHidden = true;
-        lastActiveTime = Date.now();
-      } else if (document.visibilityState === 'visible' && wasHidden) {
+        markBackground();
+      } else if (document.visibilityState === 'visible') {
         handleResume();
       }
     };
     
+    // FlutterFlow WebViews may fire blur/pagehide without visibilitychange
+    const handleBlur = () => {
+      markBackground();
+    };
+    
+    const handlePageHide = () => {
+      markBackground();
+    };
+    
     // Listen to pageshow for back/forward cache restoration (bfcache)
     const handlePageShow = (event: PageTransitionEvent) => {
-      if (event.persisted || wasHidden) {
+      if (event.persisted || lastBackgroundTime !== null) {
         handleResume();
       }
     };
     
     // Listen to focus for when WebView regains focus without visibility change
     const handleFocus = () => {
-      if (wasHidden) {
-        handleResume();
-      }
+      // Small delay to let visibilitychange fire first if it's going to
+      setTimeout(() => {
+        if (lastBackgroundTime !== null) {
+          handleResume();
+        }
+      }, 50);
     };
     
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('pageshow', handlePageShow);
     window.addEventListener('focus', handleFocus);
+    window.addEventListener('blur', handleBlur);
+    window.addEventListener('pagehide', handlePageHide);
     
     // Defer performance optimizations - not blocking
     setTimeout(() => {
@@ -218,6 +238,8 @@ function Router() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('pageshow', handlePageShow as EventListener);
       window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('pagehide', handlePageHide);
     };
   }, []);
   
