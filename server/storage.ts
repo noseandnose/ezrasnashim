@@ -2735,46 +2735,42 @@ export class DatabaseStorage implements IStorage {
     totalMeditationsCompleted: number;
     totalModalCompletions: Record<string, number>;
   }> {
-    // Get all daily stats
-    const allStats = await db.select().from(dailyStats);
+    // Use SQL aggregation for speed - avoid fetching all rows
+    const [aggregated] = await db
+      .select({
+        totalUsers: sql<number>`COALESCE(SUM(${dailyStats.uniqueUsers}), 0)`,
+        totalPageViews: sql<number>`COALESCE(SUM(${dailyStats.pageViews}), 0)`,
+        totalTehillimCompleted: sql<number>`COALESCE(SUM(${dailyStats.tehillimCompleted}), 0)`,
+        totalNamesProcessed: sql<number>`COALESCE(SUM(${dailyStats.namesProcessed}), 0)`,
+        totalBooksCompleted: sql<number>`COALESCE(SUM(${dailyStats.booksCompleted}), 0)`,
+        totalTzedakaActs: sql<number>`COALESCE(SUM(${dailyStats.tzedakaActs}), 0)`,
+        totalActs: sql<number>`COALESCE(SUM(${dailyStats.totalActs}), 0)`,
+        totalMeditationsCompleted: sql<number>`COALESCE(SUM(${dailyStats.meditationsCompleted}), 0)`,
+      })
+      .from(dailyStats);
     
-    // Aggregate totals
-    let totalUsers = 0;
-    let totalPageViews = 0;
-    let totalTehillimCompleted = 0;
-    let totalNamesProcessed = 0;
-    let totalBooksCompleted = 0;
-    let totalTzedakaCompleted = 0;
-    let totalActs = 0;
-    let totalMeditationsCompleted = 0;
+    // For modal completions, we still need to aggregate JSON - fetch only that column
+    const modalRows = await db
+      .select({ modalCompletions: dailyStats.modalCompletions })
+      .from(dailyStats);
+    
     const totalModalCompletions: Record<string, number> = {};
-    
-    for (const stats of allStats) {
-      totalUsers += stats.uniqueUsers || 0;
-      totalPageViews += stats.pageViews || 0;
-      totalTehillimCompleted += stats.tehillimCompleted || 0;
-      totalNamesProcessed += stats.namesProcessed || 0;
-      totalBooksCompleted += stats.booksCompleted || 0;
-      totalTzedakaCompleted += stats.tzedakaActs || 0;
-      totalActs += stats.totalActs || 0;
-      totalMeditationsCompleted += stats.meditationsCompleted || 0;
-      
-      // Merge modal completions
-      const completions = stats.modalCompletions as Record<string, number> || {};
+    for (const row of modalRows) {
+      const completions = row.modalCompletions as Record<string, number> || {};
       for (const [modalType, count] of Object.entries(completions)) {
         totalModalCompletions[modalType] = (totalModalCompletions[modalType] || 0) + count;
       }
     }
     
     return {
-      totalUsers,
-      totalPageViews,
-      totalTehillimCompleted,
-      totalNamesProcessed,
-      totalBooksCompleted,
-      totalTzedakaActs: totalTzedakaCompleted,
-      totalActs,
-      totalMeditationsCompleted,
+      totalUsers: Number(aggregated?.totalUsers) || 0,
+      totalPageViews: Number(aggregated?.totalPageViews) || 0,
+      totalTehillimCompleted: Number(aggregated?.totalTehillimCompleted) || 0,
+      totalNamesProcessed: Number(aggregated?.totalNamesProcessed) || 0,
+      totalBooksCompleted: Number(aggregated?.totalBooksCompleted) || 0,
+      totalTzedakaActs: Number(aggregated?.totalTzedakaActs) || 0,
+      totalActs: Number(aggregated?.totalActs) || 0,
+      totalMeditationsCompleted: Number(aggregated?.totalMeditationsCompleted) || 0,
       totalModalCompletions
     };
   }

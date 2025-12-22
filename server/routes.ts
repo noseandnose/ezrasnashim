@@ -4191,13 +4191,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Accept client-provided date parameter for proper timezone handling
-      // If no date provided, calculate using server time (fallback for backward compatibility)
       let today: string;
       if (req.query.date && typeof req.query.date === 'string') {
-        // Client provides the correct analytics date accounting for their local 2 AM boundary
         today = req.query.date;
       } else {
-        // Fallback: use server time calculation (may be incorrect for users in different timezones)
         const now = new Date();
         const hours = now.getHours();
         if (hours < 2) {
@@ -4206,8 +4203,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         today = now.toISOString().split('T')[0];
       }
       
-      // Recalculate stats to ensure they're current
-      const stats = await storage.recalculateDailyStats(today);
+      // Read pre-calculated stats (trackEvent already updates stats when events are added)
+      // Only recalculate if no stats exist for today
+      let stats = await storage.getDailyStats(today);
+      if (!stats) {
+        stats = await storage.recalculateDailyStats(today);
+      }
       
       res.json(stats || {
         date: today,
