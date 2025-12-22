@@ -639,9 +639,9 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
             }`}>
               <Star className="text-white" size={18} />
             </div>
-            <h3 className="platypi-bold text-sm text-black mb-1">Brochas</h3>
+            <h3 className="platypi-bold text-sm text-black mb-1">Siddur</h3>
             <p className="platypi-regular text-xs text-black/60">
-              {(isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'Completed' : 'Daily and Special'}
+              {(isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'Completed' : 'Tefillas and Brochas'}
             </p>
           </button>
         </div>
