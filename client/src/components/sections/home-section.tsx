@@ -11,9 +11,9 @@ import { useMemo } from "react";
 import { getLocalDateString } from "@/lib/dateUtils";
 import DOMPurify from "dompurify";
 import grassImage from "@assets/Daily_Progress_Garden_(4)_1766474176491.png";
-import torahFlower from "@assets/Torah_1765437211120.png";
-import tefillaFlower from "@assets/Tefilla_1765437211121.png";
-import tzedakaFlower from "@assets/Tzedaka_1765437211121.png";
+import torahFlower from "@assets/Torah_1766474274420.png";
+import tefillaFlower from "@assets/Tefilla_1766474274425.png";
+import tzedakaFlower from "@assets/Tzedaka_1766474274426.png";
 
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
@@ -97,23 +97,19 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       return seed / 233280;
     };
     
-    // Helper to add a flower position with dynamic placement
+    // Helper to add a flower position with dynamic placement - scattered ON the grass
     const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', index: number) => {
-      // Distribute flowers evenly across full width (0% to 95%)
-      // Use golden ratio spacing for natural-looking distribution
+      // Distribute flowers randomly across full width (5% to 90%)
       const goldenRatio = 0.618033988749;
-      const basePos = ((index * goldenRatio * 100) % 95); // 0-95% range
-      const horizontalOffset = (seededRandom() * 6) - 3; // slight randomness
-      const clampedPos = Math.max(0, Math.min(95, basePos + horizontalOffset));
+      const basePos = ((index * goldenRatio * 100) % 85) + 5; // 5-90% range
+      const horizontalOffset = (seededRandom() * 10) - 5; // more randomness
+      const clampedPos = Math.max(5, Math.min(90, basePos + horizontalOffset));
       
-      // Use slightly negative bottom values so flower stalks peek above the grass
-      // Base: -5px so flowers are more visible but stalks still partially hidden
-      const row = Math.floor(index / 6); // new row every 6 flowers
-      const verticalOffset = -5 + Math.floor(seededRandom() * 8) + (row * 4);
+      // Place flowers ON the grass - random positions within grass area (10% to 60% from bottom)
+      const verticalOffset = 10 + Math.floor(seededRandom() * 50); // 10-60% up from bottom
       
-      // Vary scale slightly - flowers further back (higher rows) are smaller
-      const baseScale = 0.85 - (row * 0.08);
-      const scale = Math.max(0.5, baseScale - (seededRandom() * 0.1));
+      // Vary scale - smaller flowers look scattered naturally
+      const scale = 0.4 + (seededRandom() * 0.25); // 0.4 to 0.65 scale
       
       positions.push({ 
         type, 
@@ -651,32 +647,30 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           id="daily-progress-garden"
           className="rounded-2xl shadow-lg border border-blush/10 bg-white mt-4 min-h-[100px] relative overflow-hidden"
         >
-          {/* Grass at the bottom - takes up most of section, in front of flowers, behind text */}
+          {/* Grass at the bottom - takes up most of section, BEHIND flowers */}
           <img 
             src={grassImage} 
             alt="" 
-            className="absolute bottom-0 left-0 w-full z-[2]"
-            style={{ height: '85%', objectFit: 'cover', objectPosition: 'bottom' }}
+            className="absolute bottom-0 left-0 w-full z-[1]"
+            style={{ height: '95%', objectFit: 'cover', objectPosition: 'bottom' }}
           />
           
-          {/* Flowers - appear when completions happen, ALL behind grass (z-[1]) */}
-          {/* Sorting ensures Tefilla renders first (back), Torah/Tzedaka on top (front) */}
+          {/* Flowers - scattered ON TOP of grass */}
           {flowerPositions
             .slice()
             .sort((a, b) => {
-              // Tefilla flowers render first (back), Torah/Tzedaka render last (front)
-              const zOrder = { tefilla: 0, torah: 1, tzedaka: 1 };
-              return zOrder[a.type] - zOrder[b.type];
+              // Flowers further back (higher bottom %) render first, closer ones render on top
+              return a.bottom - b.bottom;
             })
             .map((flower, index) => (
             <img 
               key={`${flower.type}-${index}`}
               src={flower.type === 'torah' ? torahFlower : flower.type === 'tefilla' ? tefillaFlower : tzedakaFlower} 
               alt={`${flower.type} flower`} 
-              className="absolute h-[77px] w-auto z-[1]"
+              className="absolute w-12 h-12 z-[2]"
               style={{ 
                 left: `${flower.left}%`,
-                bottom: `${flower.bottom}px`,
+                bottom: `${flower.bottom}%`,
                 transform: `scale(${flower.scale})${flower.flipped ? ' scaleX(-1)' : ''}`
               }}
             />
