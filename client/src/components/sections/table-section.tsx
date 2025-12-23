@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Utensils, Flame, Star, Heart, MapPin, Brain, ChevronDown, ChevronUp, Settings, Sparkles } from "lucide-react";
+import { Utensils, Flame, Star, Heart, MapPin, Brain, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
@@ -27,11 +27,8 @@ export default function TableSection() {
   const isShabbosDataLoading = shabbosLoading && !!coordinates;
   const showShabbosError = !coordinates && permissionDenied;
   
-  // Gift of Chatzos state and data
+  // Gift of Chatzos state
   const [giftExpanded, setGiftExpanded] = useState(false);
-  const [giftLanguage, setGiftLanguage] = useState<'english' | 'hebrew'>('hebrew');
-  const [giftFontSize, setGiftFontSize] = useState(16);
-  const [showGiftSettings, setShowGiftSettings] = useState(false);
   
   // Get current day of week (0 = Sunday, 6 = Saturday)
   const currentDayOfWeek = new Date().getDay();
@@ -52,8 +49,7 @@ export default function TableSection() {
   });
 
   // Check if Gift of Chatzos has content
-  const hasGiftContent = giftOfChatzos && (giftOfChatzos.contentEnglish || giftOfChatzos.contentHebrew);
-  const hasGiftBothLanguages = giftOfChatzos?.contentEnglish && giftOfChatzos?.contentHebrew;
+  const hasGiftContent = giftOfChatzos && giftOfChatzos.contentEnglish;
 
   const formatGiftMarkdown = (text: string | null | undefined): string => {
     if (!text) return '';
@@ -273,30 +269,13 @@ export default function TableSection() {
             
             {/* Expanded Content */}
             {giftExpanded && (
-              <div className="px-3 pb-3 relative">
-                {/* Settings Button */}
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowGiftSettings(!showGiftSettings);
-                  }}
-                  className="absolute top-0 right-3 p-1.5 rounded-full bg-blush/20 hover:bg-blush/30 transition-colors z-10"
-                  data-testid="button-gift-settings"
-                >
-                  <Settings className="text-lavender" size={14} />
-                </button>
-                
+              <div className="px-3 pb-3">
                 {/* Content */}
                 <div 
-                  className={`platypi-regular text-black/80 leading-relaxed ${giftLanguage === 'hebrew' ? 'text-right' : 'text-left'}`}
-                  style={{ fontSize: `${giftFontSize}px` }}
-                  dir={giftLanguage === 'hebrew' ? 'rtl' : 'ltr'}
+                  className="platypi-regular text-black/80 leading-relaxed text-left"
+                  style={{ fontSize: '16px' }}
                   dangerouslySetInnerHTML={{ 
-                    __html: formatGiftMarkdown(
-                      giftLanguage === 'hebrew' 
-                        ? giftOfChatzos.contentHebrew 
-                        : giftOfChatzos.contentEnglish
-                    ) 
+                    __html: formatGiftMarkdown(giftOfChatzos.contentEnglish) 
                   }}
                 />
                 
@@ -321,78 +300,13 @@ export default function TableSection() {
                   </div>
                 )}
                 
-                {/* Settings Popup */}
-                {showGiftSettings && (
-                  <>
-                    <div 
-                      className="fixed inset-0 z-40"
-                      onClick={() => setShowGiftSettings(false)}
-                    />
-                    <div className="absolute top-8 right-3 bg-gradient-feminine rounded-xl p-3 shadow-xl z-50 min-w-[180px]">
-                      <div className="space-y-3">
-                        {/* Language Toggle - only show if both languages available */}
-                        {hasGiftBothLanguages && (
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-white font-medium">Language</span>
-                            <div className="flex bg-white/20 rounded-lg overflow-hidden">
-                              <button
-                                onClick={() => setGiftLanguage('hebrew')}
-                                className={`px-2 py-1 text-xs font-medium transition-colors ${
-                                  giftLanguage === 'hebrew' 
-                                    ? 'bg-white text-gray-700' 
-                                    : 'text-white hover:bg-white/10'
-                                }`}
-                              >
-                                עברית
-                              </button>
-                              <button
-                                onClick={() => setGiftLanguage('english')}
-                                className={`px-2 py-1 text-xs font-medium transition-colors ${
-                                  giftLanguage === 'english' 
-                                    ? 'bg-white text-gray-700' 
-                                    : 'text-white hover:bg-white/10'
-                                }`}
-                              >
-                                English
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* Font Size Controls */}
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-white font-medium">Font Size</span>
-                          <div className="flex items-center space-x-1">
-                            <button
-                              onClick={() => setGiftFontSize(prev => Math.max(12, prev - 2))}
-                              className="w-7 h-7 flex items-center justify-center rounded-lg bg-white text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors shadow-sm"
-                            >
-                              A-
-                            </button>
-                            <span className="text-xs text-white font-medium px-1">
-                              {giftFontSize}px
-                            </span>
-                            <button
-                              onClick={() => setGiftFontSize(prev => Math.min(24, prev + 2))}
-                              className="w-7 h-7 flex items-center justify-center rounded-lg bg-white text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors shadow-sm"
-                            >
-                              A+
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-[10px] text-gray-200 mt-2 text-center">Tap outside to close</p>
-                    </div>
-                  </>
-                )}
-                
                 {/* Floating Link Button - Bottom Right */}
                 {giftOfChatzos.url && giftOfChatzos.linkTitle && (
                   <a
                     href={giftOfChatzos.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="absolute bottom-3 right-3 bg-gradient-feminine text-white rounded-full px-3 py-1 shadow-lg hover:scale-105 transition-all duration-200 platypi-medium text-xs flex items-center justify-center"
+                    className="bg-gradient-feminine text-white rounded-full px-3 py-1.5 mt-3 shadow-lg hover:scale-105 transition-all duration-200 platypi-medium text-xs inline-flex items-center justify-center"
                     data-testid="link-gift-of-chatzos"
                   >
                     {giftOfChatzos.linkTitle}
