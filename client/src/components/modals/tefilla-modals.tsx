@@ -1197,7 +1197,7 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
                   });
                   window.dispatchEvent(openEvent);
                 }}
-                className="w-full bg-white rounded-2xl p-3 border border-blush/10 hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-3 complete-button-pulse"
+                className="w-full bg-white rounded-2xl p-2 border border-blush/10 hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-3"
               >
                 {/* Icon with gradient circle */}
                 <div className="p-3 rounded-full bg-gradient-feminine flex-shrink-0">
@@ -1245,7 +1245,7 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
               });
               window.dispatchEvent(openEvent);
             }}
-            className={`w-full rounded-2xl p-3 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-3 complete-button-pulse ${
+            className={`w-full rounded-2xl p-2 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-3 ${
               isModalComplete('shacharis') 
                 ? 'bg-sage/10 border-sage/30' 
                 : 'bg-white border-blush/10'
@@ -1278,7 +1278,7 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
               });
               window.dispatchEvent(openEvent);
             }}
-            className={`w-full rounded-2xl p-3 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-3 complete-button-pulse ${
+            className={`w-full rounded-2xl p-2 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-3 ${
               isModalComplete('mincha') 
                 ? 'bg-sage/10 border-sage/30' 
                 : 'bg-white border-blush/10'
@@ -1311,7 +1311,7 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
               });
               window.dispatchEvent(openEvent);
             }}
-            className={`w-full rounded-2xl p-3 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-3 complete-button-pulse ${
+            className={`w-full rounded-2xl p-2 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-3 ${
               isModalComplete('maariv') 
                 ? 'bg-sage/10 border-sage/30' 
                 : 'bg-white border-blush/10'
