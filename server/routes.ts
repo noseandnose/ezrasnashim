@@ -4987,6 +4987,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Torah Summary - Batched endpoint for all Torah section data
+  app.get("/api/torah-summary", async (req, res) => {
+    try {
+      const date = req.query.date as string;
+      
+      if (!date) {
+        return res.status(400).json({ error: "Date parameter required (YYYY-MM-DD format)" });
+      }
+
+      // Fetch all Torah data in parallel with individual error tracking
+      const [halacha, chizuk, emuna, featured, pirkeiAvot, parshaVorts, torahClasses] = await Promise.allSettled([
+        storage.getDailyHalachaByDate(date),
+        storage.getDailyChizukByDate(date),
+        storage.getDailyEmunaByDate(date),
+        storage.getFeaturedContentByDate(date),
+        storage.getCurrentPirkeiAvot(),
+        storage.getParshaVortsByDate(date),
+        storage.getTorahClassesByDate(date)
+      ]);
+
+      // Track per-section errors for UI fallback messages
+      const errors: Record<string, boolean> = {};
+      if (halacha.status === 'rejected') errors.halacha = true;
+      if (chizuk.status === 'rejected') errors.chizuk = true;
+      if (emuna.status === 'rejected') errors.emuna = true;
+      if (featured.status === 'rejected') errors.featured = true;
+      if (pirkeiAvot.status === 'rejected') errors.pirkeiAvot = true;
+      if (parshaVorts.status === 'rejected') errors.parshaVorts = true;
+      if (torahClasses.status === 'rejected') errors.torahClasses = true;
+
+      // Format Pirkei Avot response to match existing /api/torah/pirkei-avot/:date API
+      let formattedPirkeiAvot = null;
+      if (pirkeiAvot.status === 'fulfilled' && pirkeiAvot.value) {
+        formattedPirkeiAvot = {
+          text: pirkeiAvot.value.content,
+          chapter: pirkeiAvot.value.chapter,
+          source: `${pirkeiAvot.value.chapter}.${pirkeiAvot.value.perek}`
+        };
+      }
+
+      const summary = {
+        halacha: halacha.status === 'fulfilled' ? halacha.value : null,
+        chizuk: chizuk.status === 'fulfilled' ? chizuk.value : null,
+        emuna: emuna.status === 'fulfilled' ? emuna.value : null,
+        featured: featured.status === 'fulfilled' ? featured.value : null,
+        pirkeiAvot: formattedPirkeiAvot,
+        parshaVorts: parshaVorts.status === 'fulfilled' ? parshaVorts.value : [],
+        torahClasses: torahClasses.status === 'fulfilled' ? torahClasses.value : [],
+        errors: Object.keys(errors).length > 0 ? errors : undefined,
+        fetchedAt: new Date().toISOString()
+      };
+
+      // Set caching: 5 minutes for Torah content
+      res.set({
+        'Cache-Control': 'public, max-age=300', // 5 minutes
+      });
+
+      res.json(summary);
+    } catch (error) {
+      console.error('Error fetching torah summary:', error);
+      return res.status(500).json({ error: "Failed to fetch torah summary" });
+    }
+  });
+
   // Messages routes - Public endpoint for fetching messages by date (no auth required)
   app.get("/api/messages/:date", async (req, res) => {
     try {
