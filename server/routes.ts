@@ -138,6 +138,7 @@ import {
   insertDailyChizukSchema,
   insertFeaturedContentSchema,
   insertTodaysSpecialSchema,
+  insertGiftOfChatzosSchema,
   insertDailyRecipeSchema,
   baseParshaVortSchema,
   insertParshaVortSchema,
@@ -1785,6 +1786,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(special);
     } catch (error) {
       return res.status(500).json({ message: "Failed to create today's special" });
+    }
+  });
+
+  // Gift of Chatzos routes - day-of-week based content for life page
+  app.get("/api/life/gift-of-chatzos/:dayOfWeek",
+    cacheMiddleware({ ttl: CACHE_TTL.TODAYS_SPECIAL, category: 'gift-of-chatzos' }),
+    async (req, res) => {
+      try {
+        const dayOfWeek = parseInt(req.params.dayOfWeek);
+        if (isNaN(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) {
+          return res.status(400).json({ message: "Invalid day of week (0-6)" });
+        }
+        const gift = await storage.getGiftOfChatzosByDayOfWeek(dayOfWeek);
+        res.json(gift || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch gift of chatzos" });
+      }
+    }
+  );
+
+  app.get("/api/life/gift-of-chatzos",
+    cacheMiddleware({ ttl: CACHE_TTL.TODAYS_SPECIAL, category: 'gift-of-chatzos-all' }),
+    async (req, res) => {
+      try {
+        const allGifts = await storage.getAllGiftOfChatzos();
+        res.json(allGifts);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch all gift of chatzos" });
+      }
+    }
+  );
+
+  app.post("/api/life/gift-of-chatzos", requireAdminAuth, async (req, res) => {
+    try {
+      const validatedData = insertGiftOfChatzosSchema.parse(req.body);
+      const gift = await storage.createGiftOfChatzos(validatedData);
+      cache.clearCategory('gift-of-chatzos');
+      cache.clearCategory('gift-of-chatzos-all');
+      res.json(gift);
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to create gift of chatzos" });
+    }
+  });
+
+  app.patch("/api/life/gift-of-chatzos/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const gift = await storage.updateGiftOfChatzos(id, req.body);
+      cache.clearCategory('gift-of-chatzos');
+      cache.clearCategory('gift-of-chatzos-all');
+      res.json(gift);
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to update gift of chatzos" });
     }
   });
 

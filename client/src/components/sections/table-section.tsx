@@ -1,10 +1,12 @@
-import { Utensils, Flame, Star, Heart, MapPin, Brain } from "lucide-react";
+import { useState } from "react";
+import { Utensils, Flame, Star, Heart, MapPin, Brain, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
 import { useGeolocation, useJewishTimes } from "@/hooks/use-jewish-times";
 import { useQuery } from "@tanstack/react-query";
+import DOMPurify from "dompurify";
 
 
 export default function TableSection() {
@@ -25,7 +27,36 @@ export default function TableSection() {
   const isShabbosDataLoading = shabbosLoading && !!coordinates;
   const showShabbosError = !coordinates && permissionDenied;
   
+  // Gift of Chatzos state
+  const [giftExpanded, setGiftExpanded] = useState(false);
+  
+  // Get current day of week (0 = Sunday, 6 = Saturday)
+  const currentDayOfWeek = new Date().getDay();
+  
+  const { data: giftOfChatzos } = useQuery<{
+    title?: string;
+    subtitle?: string;
+    imageUrl?: string;
+    contentEnglish?: string;
+    contentHebrew?: string;
+    linkTitle?: string;
+    url?: string;
+    thankYouMessage?: string;
+  }>({
+    queryKey: ['/api/life/gift-of-chatzos', currentDayOfWeek],
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
 
+  // Check if Gift of Chatzos has content
+  const hasGiftContent = giftOfChatzos && giftOfChatzos.contentEnglish;
+
+  const formatGiftMarkdown = (text: string | null | undefined): string => {
+    if (!text) return '';
+    const withBold = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    const withLineBreaks = withBold.replace(/\n/g, '<br>');
+    return DOMPurify.sanitize(withLineBreaks);
+  };
 
   // Fetch today's table inspiration content
   const today = new Date().toISOString().split('T')[0];
@@ -190,6 +221,110 @@ export default function TableSection() {
             </div>
           </div>
         </div>
+        
+        {/* Gift of Chatzos Expandable Bar - Only shown when content exists */}
+        {hasGiftContent && giftOfChatzos && (
+          <div 
+            className="bg-white/80 rounded-xl mt-2 overflow-hidden border border-blush/20"
+          >
+            {/* Collapsed/Header Bar */}
+            <button
+              onClick={() => setGiftExpanded(!giftExpanded)}
+              className="w-full p-3 text-left hover:bg-white/90 transition-colors"
+              data-testid="button-gift-of-chatzos-toggle"
+            >
+              <div className="flex items-center gap-3">
+                {/* Image */}
+                {giftOfChatzos.imageUrl && (
+                  <img 
+                    src={giftOfChatzos.imageUrl} 
+                    alt={giftOfChatzos.title || "The Gift of Chatzos"} 
+                    className="w-10 h-10 rounded-xl object-cover"
+                  />
+                )}
+                {!giftOfChatzos.imageUrl && (
+                  <div className="bg-gradient-feminine p-2 rounded-full">
+                    <Sparkles className="text-white" size={16} />
+                  </div>
+                )}
+                
+                {/* Title and Subtitle */}
+                <div className="flex-grow">
+                  <h3 className="platypi-bold text-sm text-black">{giftOfChatzos.title || "The Gift of Chatzos"}</h3>
+                  {giftOfChatzos.subtitle && (
+                    <p className="platypi-regular text-xs text-black/70">{giftOfChatzos.subtitle}</p>
+                  )}
+                </div>
+                
+                {/* Expand/Collapse Icon */}
+                <div className="p-1 rounded-full bg-blush/20">
+                  {giftExpanded ? (
+                    <ChevronUp className="text-lavender" size={16} />
+                  ) : (
+                    <ChevronDown className="text-lavender" size={16} />
+                  )}
+                </div>
+              </div>
+            </button>
+            
+            {/* Expanded Content */}
+            {giftExpanded && (
+              <div className="px-3 pb-3">
+                {/* Image above content */}
+                {giftOfChatzos.imageUrl && (
+                  <img 
+                    src={giftOfChatzos.imageUrl} 
+                    alt={giftOfChatzos.title || "The Gift of Chatzos"} 
+                    className="w-full rounded-xl object-cover mb-3"
+                  />
+                )}
+                
+                {/* Content */}
+                <div 
+                  className="platypi-regular text-black/80 leading-relaxed text-left"
+                  style={{ fontSize: '16px' }}
+                  dangerouslySetInnerHTML={{ 
+                    __html: formatGiftMarkdown(giftOfChatzos.contentEnglish) 
+                  }}
+                />
+                
+                {/* Thank You Message - linked to URL */}
+                {giftOfChatzos.thankYouMessage && (
+                  <div className="mt-4 pt-3 border-t border-blush/20">
+                    {giftOfChatzos.url ? (
+                      <a
+                        href={giftOfChatzos.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="platypi-medium text-sm text-lavender hover:text-lavender/80 transition-colors underline"
+                        data-testid="link-gift-thank-you"
+                      >
+                        {giftOfChatzos.thankYouMessage}
+                      </a>
+                    ) : (
+                      <p className="platypi-medium text-sm text-lavender">
+                        {giftOfChatzos.thankYouMessage}
+                      </p>
+                    )}
+                  </div>
+                )}
+                
+                {/* Floating Link Button - Bottom Right */}
+                {giftOfChatzos.url && giftOfChatzos.linkTitle && (
+                  <a
+                    href={giftOfChatzos.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-gradient-feminine text-white rounded-full px-3 py-1.5 mt-3 shadow-lg hover:scale-105 transition-all duration-200 platypi-medium text-xs inline-flex items-center justify-center"
+                    data-testid="link-gift-of-chatzos"
+                  >
+                    {giftOfChatzos.linkTitle}
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Shabbos Content Grid - Separate Section */}
