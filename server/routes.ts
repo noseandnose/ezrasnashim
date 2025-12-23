@@ -4996,6 +4996,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Date parameter required (YYYY-MM-DD format)" });
       }
 
+      // Check server-side cache first (5 minute TTL)
+      const cacheKey = `torah-summary:${date}`;
+      const cached = cache.get<any>(cacheKey);
+      if (cached) {
+        res.set({ 'Cache-Control': 'public, max-age=300' });
+        return res.json(cached);
+      }
+
       // Fetch all Torah data in parallel with individual error tracking
       const [halacha, chizuk, emuna, featured, pirkeiAvot, parshaVorts, torahClasses] = await Promise.allSettled([
         storage.getDailyHalachaByDate(date),
@@ -5039,7 +5047,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         fetchedAt: new Date().toISOString()
       };
 
-      // Set caching: 5 minutes for Torah content
+      // Cache the result for 5 minutes
+      cache.set(cacheKey, summary, { ttl: 300 });
+
+      // Set HTTP caching: 5 minutes for Torah content
       res.set({
         'Cache-Control': 'public, max-age=300', // 5 minutes
       });
