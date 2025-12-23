@@ -217,7 +217,15 @@ export default function TorahSection({}: TorahSectionProps) {
     <div className="pb-20" data-bridge-container>
       
       {/* Main Torah Section - Connected to top bar */}
-      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">
+      <div 
+        className="rounded-b-3xl p-3"
+        style={{
+          background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
+        }}
+      >
         {/* Daily Inspiration - Pirkei Avot */}
         {(pirkeiAvot || pirkeiError) && (
           <div className="bg-white/70 rounded-2xl p-3 mb-3 border border-blush/10 relative"

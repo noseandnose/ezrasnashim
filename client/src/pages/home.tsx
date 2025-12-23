@@ -168,7 +168,10 @@ export default function Home() {
   };
 
   return (
-    <div className="mobile-app bg-white">
+    <div className="mobile-app" style={{ 
+      background: 'linear-gradient(180deg, hsl(350, 45%, 98%) 0%, hsl(260, 30%, 98%) 50%, hsl(350, 45%, 96%) 100%)',
+      minHeight: '100vh'
+    }}>
       <AppHeader />
       
       <main className="content-area" data-scroll-lock-target>

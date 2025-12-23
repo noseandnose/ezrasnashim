@@ -10,10 +10,10 @@ import type { Section } from "@/pages/home";
 import { useMemo } from "react";
 import { getLocalDateString } from "@/lib/dateUtils";
 import DOMPurify from "dompurify";
-import grassImage from "@assets/Daily_Progress_Garden_(2)_1765369219898.png";
-import torahFlower from "@assets/Torah_1765437211120.png";
-import tefillaFlower from "@assets/Tefilla_1765437211121.png";
-import tzedakaFlower from "@assets/Tzedaka_1765437211121.png";
+import grassImage from "@assets/Daily_Progress_Garden_(5)_1766474472398.png";
+import torahFlower from "@assets/Torah_1766474274420.png";
+import tefillaFlower from "@assets/Tefilla_1766474274425.png";
+import tzedakaFlower from "@assets/Tzedaka_1766474274426.png";
 
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
@@ -97,50 +97,73 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       return seed / 233280;
     };
     
-    // Helper to add a flower position with dynamic placement
-    const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', index: number) => {
-      // Distribute flowers evenly across full width (0% to 95%)
-      // Use golden ratio spacing for natural-looking distribution
-      const goldenRatio = 0.618033988749;
-      const basePos = ((index * goldenRatio * 100) % 95); // 0-95% range
-      const horizontalOffset = (seededRandom() * 6) - 3; // slight randomness
-      const clampedPos = Math.max(0, Math.min(95, basePos + horizontalOffset));
-      
-      // Use slightly negative bottom values so flower stalks peek above the grass
-      // Base: -5px so flowers are more visible but stalks still partially hidden
-      const row = Math.floor(index / 6); // new row every 6 flowers
-      const verticalOffset = -5 + Math.floor(seededRandom() * 8) + (row * 4);
-      
-      // Vary scale slightly - flowers further back (higher rows) are smaller
-      const baseScale = 0.85 - (row * 0.08);
-      const scale = Math.max(0.5, baseScale - (seededRandom() * 0.1));
-      
-      positions.push({ 
-        type, 
-        left: clampedPos, 
-        bottom: verticalOffset,
-        flipped: seededRandom() > 0.5,
-        scale
-      });
+    // Flower radius in percentage units (based on w-12 = 48px in ~350px container ≈ 14%)
+    const FLOWER_RADIUS = 7;
+    // Minimum distance between flower centers (95% of combined radii = max 5% overlap)
+    const MIN_DISTANCE_FACTOR = 0.95;
+    
+    // Check if a position collides with existing flowers (more than 5% overlap)
+    const checkCollision = (left: number, bottom: number, scale: number) => {
+      const newRadius = FLOWER_RADIUS * scale;
+      for (const existing of positions) {
+        const existingRadius = FLOWER_RADIUS * existing.scale;
+        const minDistance = (newRadius + existingRadius) * MIN_DISTANCE_FACTOR;
+        const dx = left - existing.left;
+        const dy = bottom - existing.bottom;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < minDistance) {
+          return true; // Collision detected
+        }
+      }
+      return false;
     };
     
-    let flowerIndex = 0;
+    // Helper to add a flower position with collision avoidance
+    const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', index: number) => {
+      const scale = 0.40 + (seededRandom() * 0.35); // 0.40 to 0.75 scale (5% bigger, more variation)
+      const flipped = seededRandom() > 0.5;
+      
+      // Try up to 30 times to find a non-colliding position
+      for (let attempt = 0; attempt < 30; attempt++) {
+        // Scatter across entire width and height, but avoid top-left title area
+        // Title is roughly in top 60% height and left 55% width
+        let left: number;
+        let bottom: number;
+        
+        // Generate random position across full area
+        left = 5 + seededRandom() * 87; // 5-92% (full width with margins)
+        bottom = 5 + seededRandom() * 55; // 5-60% (use more vertical space)
+        
+        // Avoid title area: if in top portion (bottom > 40%), stay away from left side
+        if (bottom > 40 && left < 55) {
+          // Skip this position - it would overlap with title
+          continue;
+        }
+        
+        if (!checkCollision(left, bottom, scale)) {
+          positions.push({ type, left, bottom, flipped, scale });
+          return;
+        }
+      }
+      
+      // Fallback: place on right side with smaller scale to fit
+      const left = 50 + seededRandom() * 42;
+      const bottom = 5 + seededRandom() * 35;
+      positions.push({ type, left, bottom, flipped, scale: scale * 0.7 });
+    };
     
     // PRIORITY: Place Torah and Tzedaka flowers first (they're completed less often)
     for (let i = 0; i < torahFlowerCount; i++) {
-      addFlower('torah', flowerIndex);
-      flowerIndex++;
+      addFlower('torah', i);
     }
     
     for (let i = 0; i < tzedakaFlowerCount; i++) {
-      addFlower('tzedaka', flowerIndex);
-      flowerIndex++;
+      addFlower('tzedaka', i);
     }
     
     // Place Tefilla flowers last
     for (let i = 0; i < tefillaFlowerCount; i++) {
-      addFlower('tefilla', flowerIndex);
-      flowerIndex++;
+      addFlower('tefilla', i);
     }
     
     return positions;
@@ -319,7 +342,15 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     <div className="pb-20" data-bridge-container>
       
       {/* Unified Top Section with Greeting, Times, and Today Info - Connected to top bar */}
-      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">
+      <div 
+        className="rounded-b-3xl p-3"
+        style={{
+          background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
+        }}
+      >
         {/* Greeting and Date in one row */}
         <div className="flex items-center justify-between mb-3">
           <h1 className="platypi-bold text-xl text-black tracking-wide">{getGreeting()}</h1>
@@ -641,40 +672,50 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         {/* Daily Progress Tracker - Compact Version */}
         <div 
           id="daily-progress-garden"
-          className="rounded-2xl shadow-lg border border-blush/10 bg-white mt-4 min-h-[120px] relative overflow-hidden"
+          className="rounded-2xl shadow-lg border border-blush/10 bg-white mt-4 min-h-[100px] relative overflow-hidden"
         >
-          {/* Grass at the bottom - in front of flowers, behind text */}
+          {/* Grass - covers entire section, BEHIND flowers */}
           <img 
             src={grassImage} 
             alt="" 
-            className="absolute bottom-[-8px] left-0 w-full h-auto z-[2]"
+            className="absolute inset-0 w-full h-full z-[1]"
+            style={{ objectFit: 'cover' }}
           />
           
-          {/* Flowers - appear when completions happen, ALL behind grass (z-[1]) */}
-          {/* Sorting ensures Tefilla renders first (back), Torah/Tzedaka on top (front) */}
+          {/* Flowers - scattered ON TOP of grass */}
           {flowerPositions
             .slice()
             .sort((a, b) => {
-              // Tefilla flowers render first (back), Torah/Tzedaka render last (front)
-              const zOrder = { tefilla: 0, torah: 1, tzedaka: 1 };
-              return zOrder[a.type] - zOrder[b.type];
+              // Flowers further back (higher bottom %) render first, closer ones render on top
+              return a.bottom - b.bottom;
             })
             .map((flower, index) => (
             <img 
               key={`${flower.type}-${index}`}
               src={flower.type === 'torah' ? torahFlower : flower.type === 'tefilla' ? tefillaFlower : tzedakaFlower} 
               alt={`${flower.type} flower`} 
-              className="absolute h-[77px] w-auto z-[1]"
+              className="absolute w-12 h-12 z-[2]"
               style={{ 
                 left: `${flower.left}%`,
-                bottom: `${flower.bottom}px`,
+                bottom: `${flower.bottom}%`,
                 transform: `scale(${flower.scale})${flower.flipped ? ' scaleX(-1)' : ''}`
               }}
             />
           ))}
           
-          <div className="pl-4 pr-1 py-3 relative z-10">
-            <h3 className="platypi-bold text-lg text-black mb-1 text-left">Daily Mitzvah Garden</h3>
+          <div className="absolute top-2 left-2 z-10">
+            <div 
+              className="px-2 py-1 rounded-lg"
+              style={{
+                background: 'rgba(255,255,255,0.6)',
+                backdropFilter: 'blur(12px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+                border: '1px solid rgba(255,255,255,0.4)',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.08)'
+              }}
+            >
+              <h3 className="platypi-bold text-xs text-black">Daily Mitzvah Garden</h3>
+            </div>
           </div>
         </div>
       </div>

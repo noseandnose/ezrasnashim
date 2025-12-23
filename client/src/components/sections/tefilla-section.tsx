@@ -335,7 +335,15 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     <div className="pb-20" data-bridge-container>
 
       {/* Main Tefilla Section - Tehillim */}
-      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg space-y-3">
+      <div 
+        className="rounded-b-3xl p-3 space-y-3"
+        style={{
+          background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
+        }}
+      >
         
         {/* Total Tehillim Said Card */}
         <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">

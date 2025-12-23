@@ -558,7 +558,7 @@ function renderPrayerContent(contentType: string | undefined, language: 'hebrew'
     case 'mincha':
       return <MinchaFullscreenContent language={language} fontSize={fontSize} />;
     case 'shacharis':
-      return <ShachrisFullscreenContent language={language} fontSize={fontSize} />;
+      return <ShachrisWithNavigation language={language} fontSize={fontSize} />;
     case 'morning-brochas':
       return <MorningBrochasWithNavigation language={language} fontSize={fontSize} />;
     case 'nishmas-campaign':
@@ -714,7 +714,99 @@ function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
   );
 }
 
-function ShachrisFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+// Singleton to store shacharis navigation state
+let shachrisNavState = {
+  expandedSection: 0,
+  scrollToBottom: () => {}
+};
+
+// Wrapper component that provides context for both content and arrow
+export function ShachrisWithNavigation({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  // State for managing which section is expanded
+  const [expandedSection, setExpandedSection] = useState<number>(0);
+  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Scroll to bottom of currently expanded section
+  const scrollToBottomOfSection = () => {
+    if (expandedSection >= 0 && sectionRefs.current[expandedSection]) {
+      const sectionElement = sectionRefs.current[expandedSection];
+      const sectionContent = sectionElement!.querySelector('div[class*="px-6 pb-6"]');
+      const doneButton = sectionContent?.querySelector('button') || 
+                         sectionElement!.querySelector('button[class*="bg-gradient-feminine"], button[class*="bg-sage"]');
+      
+      if (doneButton) {
+        doneButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        sectionElement!.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
+    }
+  };
+
+  // Update global state
+  useEffect(() => {
+    shachrisNavState = {
+      expandedSection,
+      scrollToBottom: scrollToBottomOfSection
+    };
+  }, [expandedSection]);
+
+  return (
+    <ShachrisFullscreenContent 
+      language={language} 
+      fontSize={fontSize}
+      expandedSection={expandedSection}
+      setExpandedSection={setExpandedSection}
+      sectionRefs={sectionRefs}
+    />
+  );
+}
+
+// Export the arrow separately for use in floating element
+export function ShachrisNavigationArrow() {
+  // Force re-render when state changes
+  const [, forceUpdate] = useState(0);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      forceUpdate(n => n + 1);
+    }, 100); // Poll for state changes
+    
+    return () => clearInterval(interval);
+  }, []);
+  
+  if (shachrisNavState.expandedSection < 0) return null;
+  
+  return (
+    <button
+      onClick={shachrisNavState.scrollToBottom}
+      className="fixed right-6 bg-gradient-feminine text-white rounded-full p-3 shadow-lg hover:scale-110 transition-all duration-200"
+      style={{ 
+        zIndex: 2147483646,
+        bottom: 'calc(1.5rem + var(--viewport-bottom-offset, 0px))'
+      }}
+      aria-label="Jump to bottom of section"
+      data-testid="button-scroll-to-section-bottom-shacharis"
+    >
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7-7-7" />
+      </svg>
+    </button>
+  );
+}
+
+function ShachrisFullscreenContent({ 
+  language, 
+  fontSize,
+  expandedSection,
+  setExpandedSection,
+  sectionRefs
+}: { 
+  language: 'hebrew' | 'english';
+  fontSize: number;
+  expandedSection: number;
+  setExpandedSection: (index: number) => void;
+  sectionRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
+}) {
   const { data: prayers = [], isLoading } = useQuery<MorningPrayer[]>({
     queryKey: ['/api/morning/prayers'],
   });
@@ -740,36 +832,104 @@ function ShachrisFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     window.dispatchEvent(event);
   };
 
+  // Handle section expansion with scroll-to-top
+  const handleSectionToggle = (sectionIndex: number) => {
+    const isCurrentlyExpanded = expandedSection === sectionIndex;
+    const newExpandedSection = isCurrentlyExpanded ? -1 : sectionIndex;
+    
+    setExpandedSection(newExpandedSection);
+    
+    // Scroll to top of the section when opening
+    if (!isCurrentlyExpanded && sectionRefs.current[sectionIndex]) {
+      setTimeout(() => {
+        sectionRefs.current[sectionIndex]?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }, 100);
+    }
+  };
+
+  // Group prayers by orderIndex
+  const groupedPrayers = prayers.reduce((groups, prayer) => {
+    const orderIndex = prayer.orderIndex || 0;
+    if (!groups[orderIndex]) {
+      groups[orderIndex] = [];
+    }
+    groups[orderIndex].push(prayer);
+    return groups;
+  }, {} as Record<number, MorningPrayer[]>);
+
+  // Get sorted order indices
+  const sortedOrderIndices = Object.keys(groupedPrayers)
+    .map(Number)
+    .sort((a, b) => a - b);
+
   return (
-    <div className="space-y-6">
-      {prayers.map((prayer, index) => (
-        <div key={index} className="bg-white rounded-2xl p-6 border border-blush/10">
-          <div
-            className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
-            style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
-            dangerouslySetInnerHTML={{
-              __html: processTefillaContent(
-                language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation, 
-                tefillaConditions
-              )
-            }}
-          />
-        </div>
-      ))}
+    <div className="space-y-4">
+      {sortedOrderIndices.map((orderIndex, sectionIndex) => {
+        const sectionPrayers = groupedPrayers[orderIndex];
+        const isExpanded = expandedSection === sectionIndex;
+        const sectionTitle = sectionPrayers[0]?.prayerType || `Section ${orderIndex}`;
+
+        return (
+          <div 
+            key={orderIndex} 
+            ref={(el) => { sectionRefs.current[sectionIndex] = el; }}
+            className="bg-white rounded-2xl border border-blush/10 overflow-hidden"
+          >
+            {/* Section Header - Clickable */}
+            <button
+              onClick={() => handleSectionToggle(sectionIndex)}
+              className="w-full px-4 py-3 text-left hover:bg-blush/5 transition-colors flex items-center justify-between"
+            >
+              <h3 className="platypi-bold text-lg text-black">
+                {sectionTitle}
+              </h3>
+              <div className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </button>
+
+            {/* Section Content - Collapsible */}
+            {isExpanded && (
+              <div className="px-4 pb-4 space-y-4">
+                {sectionPrayers.map((prayer: MorningPrayer, prayerIndex: number) => (
+                  <div key={prayerIndex}>
+                    <div
+                      className={`${language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'koren-siddur-english text-left'} leading-relaxed text-black`}
+                      style={{ fontSize: language === 'hebrew' ? `${fontSize + 1}px` : `${fontSize}px` }}
+                      dangerouslySetInnerHTML={{
+                        __html: processTefillaContent(
+                          language === 'hebrew' ? prayer.hebrewText : prayer.englishTranslation, 
+                          tefillaConditions
+                        ).replace(/<strong>/g, '<strong class="vc-koren-hebrew-bold">')
+                      }}
+                    />
+                  </div>
+                ))}
+                
+                {/* Done Button for this section */}
+                <Button
+                  onClick={isModalComplete('shacharis') ? undefined : handleComplete}
+                  disabled={isModalComplete('shacharis')}
+                  className={`w-full py-3 rounded-xl platypi-medium border-0 mt-4 ${
+                    isModalComplete('shacharis') 
+                      ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
+                  }`}
+                >
+                  {isModalComplete('shacharis') ? 'Completed Today' : 'Complete'}
+                </Button>
+              </div>
+            )}
+          </div>
+        );
+      })}
       
       <KorenThankYou />
-
-      <Button
-        onClick={isModalComplete('shacharis') ? undefined : handleComplete}
-        disabled={isModalComplete('shacharis')}
-        className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
-          isModalComplete('shacharis') 
-            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-            : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
-        }`}
-      >
-        {isModalComplete('shacharis') ? 'Completed Today' : 'Complete'}
-      </Button>
     </div>
   );
 }
@@ -954,7 +1114,7 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
         return Wine; // Wine icon for Me'ein Shalosh
       case "Birkat Hamazon":
         return Utensils; // Fork and knife for Birkat Hamazon
-      case "Kriyat Shmah Al Hamita":
+      case "Kriyat Shema Al Hamita":
         return Moon; // Moon for bedtime prayer
       case "Asher Yatzar":
         return User; // Simple user/lady icon
@@ -1037,7 +1197,7 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
                   });
                   window.dispatchEvent(openEvent);
                 }}
-                className="w-full bg-white rounded-2xl p-4 border border-blush/10 hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-4 complete-button-pulse"
+                className="w-full bg-white rounded-2xl p-2 border border-blush/10 hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-3"
               >
                 {/* Icon with gradient circle */}
                 <div className="p-3 rounded-full bg-gradient-feminine flex-shrink-0">
@@ -1085,7 +1245,7 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
               });
               window.dispatchEvent(openEvent);
             }}
-            className={`w-full rounded-2xl p-4 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-4 complete-button-pulse ${
+            className={`w-full rounded-2xl p-2 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-3 ${
               isModalComplete('shacharis') 
                 ? 'bg-sage/10 border-sage/30' 
                 : 'bg-white border-blush/10'
@@ -1118,7 +1278,7 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
               });
               window.dispatchEvent(openEvent);
             }}
-            className={`w-full rounded-2xl p-4 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-4 complete-button-pulse ${
+            className={`w-full rounded-2xl p-2 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-3 ${
               isModalComplete('mincha') 
                 ? 'bg-sage/10 border-sage/30' 
                 : 'bg-white border-blush/10'
@@ -1151,7 +1311,7 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
               });
               window.dispatchEvent(openEvent);
             }}
-            className={`w-full rounded-2xl p-4 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-4 complete-button-pulse ${
+            className={`w-full rounded-2xl p-2 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-3 ${
               isModalComplete('maariv') 
                 ? 'bg-sage/10 border-sage/30' 
                 : 'bg-white border-blush/10'
@@ -3567,7 +3727,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           fullscreenContent.title === 'Maariv Prayer' ? getMaarivTooltip() : undefined
         }
         showCompassButton={fullscreenContent.contentType === 'morning-brochas' || fullscreenContent.contentType === 'mincha' || fullscreenContent.contentType === 'maariv'}
-        floatingElement={fullscreenContent.contentType === 'morning-brochas' ? <MorningBrochasNavigationArrow /> : undefined}
+        floatingElement={
+          fullscreenContent.contentType === 'morning-brochas' ? <MorningBrochasNavigationArrow /> :
+          fullscreenContent.contentType === 'shacharis' ? <ShachrisNavigationArrow /> : undefined
+        }
       >
         {fullscreenContent.content || renderPrayerContent(fullscreenContent.contentType, language, fontSize)}
       </FullscreenModal>

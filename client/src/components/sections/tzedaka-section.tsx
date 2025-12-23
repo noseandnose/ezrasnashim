@@ -225,7 +225,15 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
     <div className="pb-20" data-bridge-container>
       
       {/* Main Tzedaka Section - ONLY CAMPAIGN */}
-      <div className="bg-gradient-soft rounded-b-3xl px-3 pt-3 pb-2 shadow-lg">
+      <div 
+        className="rounded-b-3xl px-3 pt-3 pb-2"
+        style={{
+          background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
+        }}
+      >
         <button 
           onClick={() => handleTzedakaButtonClick('active_campaign')}
           className={`w-full rounded-2xl px-3 pt-3 pb-2 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left ${

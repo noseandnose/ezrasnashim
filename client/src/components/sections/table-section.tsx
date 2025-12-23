@@ -107,7 +107,15 @@ export default function TableSection() {
     <div className="pb-20" data-bridge-container>
       
       {/* Main Table Section - Connected to top bar - Only This Shabbos */}
-      <div className="bg-gradient-soft rounded-b-3xl p-3 shadow-lg">
+      <div 
+        className="rounded-b-3xl p-3"
+        style={{
+          background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
+        }}
+      >
         {/* Location Permission Prompt */}
         {showLocationPrompt && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 mb-3">
