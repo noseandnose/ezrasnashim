@@ -97,51 +97,62 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       return seed / 233280;
     };
     
-    // Helper to add a flower position with dynamic placement - scattered ON the grass
-    const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', index: number) => {
-      // Distribute flowers randomly across width, avoiding top-left title area
-      const goldenRatio = 0.618033988749;
-      let basePos = ((index * goldenRatio * 100) % 70) + 25; // 25-95% range (avoid left side)
-      const horizontalOffset = (seededRandom() * 8) - 4;
-      let clampedPos = Math.max(25, Math.min(92, basePos + horizontalOffset));
-      
-      // Place flowers in lower portion only (5% to 35% from bottom)
-      const verticalOffset = 5 + Math.floor(seededRandom() * 30); // 5-35% up from bottom
-      
-      // If flower is in left 40%, keep it very low (under 25%) to avoid title
-      if (clampedPos < 40) {
-        clampedPos = 40 + Math.floor(seededRandom() * 52); // Push to right side
+    // Flower radius in percentage units (based on w-12 = 48px in ~350px container ≈ 14%)
+    const FLOWER_RADIUS = 7;
+    // Minimum distance between flower centers (95% of combined radii = max 5% overlap)
+    const MIN_DISTANCE_FACTOR = 0.95;
+    
+    // Check if a position collides with existing flowers (more than 5% overlap)
+    const checkCollision = (left: number, bottom: number, scale: number) => {
+      const newRadius = FLOWER_RADIUS * scale;
+      for (const existing of positions) {
+        const existingRadius = FLOWER_RADIUS * existing.scale;
+        const minDistance = (newRadius + existingRadius) * MIN_DISTANCE_FACTOR;
+        const dx = left - existing.left;
+        const dy = bottom - existing.bottom;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < minDistance) {
+          return true; // Collision detected
+        }
       }
-      
-      // Vary scale - smaller flowers look scattered naturally
-      const scale = 0.35 + (seededRandom() * 0.2); // 0.35 to 0.55 scale
-      
-      positions.push({ 
-        type, 
-        left: clampedPos, 
-        bottom: verticalOffset,
-        flipped: seededRandom() > 0.5,
-        scale
-      });
+      return false;
     };
     
-    let flowerIndex = 0;
+    // Helper to add a flower position with collision avoidance
+    const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', index: number) => {
+      const scale = 0.35 + (seededRandom() * 0.2); // 0.35 to 0.55 scale
+      const flipped = seededRandom() > 0.5;
+      
+      // Try up to 20 times to find a non-colliding position
+      for (let attempt = 0; attempt < 20; attempt++) {
+        // Random position: right side only (40-92%), lower portion (5-40%)
+        const left = 40 + seededRandom() * 52; // 40-92%
+        const bottom = 5 + seededRandom() * 35; // 5-40%
+        
+        if (!checkCollision(left, bottom, scale)) {
+          positions.push({ type, left, bottom, flipped, scale });
+          return;
+        }
+      }
+      
+      // Fallback: place anyway with smaller scale to fit
+      const left = 40 + seededRandom() * 52;
+      const bottom = 5 + seededRandom() * 35;
+      positions.push({ type, left, bottom, flipped, scale: scale * 0.7 });
+    };
     
     // PRIORITY: Place Torah and Tzedaka flowers first (they're completed less often)
     for (let i = 0; i < torahFlowerCount; i++) {
-      addFlower('torah', flowerIndex);
-      flowerIndex++;
+      addFlower('torah', i);
     }
     
     for (let i = 0; i < tzedakaFlowerCount; i++) {
-      addFlower('tzedaka', flowerIndex);
-      flowerIndex++;
+      addFlower('tzedaka', i);
     }
     
     // Place Tefilla flowers last
     for (let i = 0; i < tefillaFlowerCount; i++) {
-      addFlower('tefilla', flowerIndex);
-      flowerIndex++;
+      addFlower('tefilla', i);
     }
     
     return positions;
