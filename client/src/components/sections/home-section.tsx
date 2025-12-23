@@ -123,11 +123,22 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       const scale = 0.40 + (seededRandom() * 0.35); // 0.40 to 0.75 scale (5% bigger, more variation)
       const flipped = seededRandom() > 0.5;
       
-      // Try up to 20 times to find a non-colliding position
-      for (let attempt = 0; attempt < 20; attempt++) {
-        // Random position: right side only (40-92%), lower portion (5-40%)
-        const left = 40 + seededRandom() * 52; // 40-92%
-        const bottom = 5 + seededRandom() * 35; // 5-40%
+      // Try up to 30 times to find a non-colliding position
+      for (let attempt = 0; attempt < 30; attempt++) {
+        // Scatter across entire width and height, but avoid top-left title area
+        // Title is roughly in top 60% height and left 55% width
+        let left: number;
+        let bottom: number;
+        
+        // Generate random position across full area
+        left = 5 + seededRandom() * 87; // 5-92% (full width with margins)
+        bottom = 5 + seededRandom() * 55; // 5-60% (use more vertical space)
+        
+        // Avoid title area: if in top portion (bottom > 40%), stay away from left side
+        if (bottom > 40 && left < 55) {
+          // Skip this position - it would overlap with title
+          continue;
+        }
         
         if (!checkCollision(left, bottom, scale)) {
           positions.push({ type, left, bottom, flipped, scale });
@@ -135,8 +146,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         }
       }
       
-      // Fallback: place anyway with smaller scale to fit
-      const left = 40 + seededRandom() * 52;
+      // Fallback: place on right side with smaller scale to fit
+      const left = 50 + seededRandom() * 42;
       const bottom = 5 + seededRandom() * 35;
       positions.push({ type, left, bottom, flipped, scale: scale * 0.7 });
     };
