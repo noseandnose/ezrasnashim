@@ -400,6 +400,24 @@ export const insertTodaysSpecialSchema = createInsertSchema(todaysSpecial).omit(
 export type InsertTodaysSpecial = z.infer<typeof insertTodaysSpecialSchema>;
 export type TodaysSpecial = typeof todaysSpecial.$inferSelect;
 
+// Gift of Chatzos - day-of-week based content for life page
+export const giftOfChatzos = pgTable("gift_of_chatzos", {
+  id: serial("id").primaryKey(),
+  dayOfWeek: integer("day_of_week").notNull(), // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  title: text("title").notNull(),
+  subtitle: text("subtitle"),
+  imageUrl: text("image_url"),
+  contentEnglish: text("content_english"),
+  contentHebrew: text("content_hebrew"),
+  linkTitle: text("link_title"),
+  url: text("url"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertGiftOfChatzosSchema = createInsertSchema(giftOfChatzos).omit({ id: true, createdAt: true });
+export type InsertGiftOfChatzos = z.infer<typeof insertGiftOfChatzosSchema>;
+export type GiftOfChatzos = typeof giftOfChatzos.$inferSelect;
+
 // Pirkei Avot table for internal content management
 export const pirkeiAvot = pgTable("pirkei_avot", {
   id: serial("id").primaryKey(),

@@ -2,7 +2,7 @@ import serverAxiosClient from "./axiosClient";
 import { 
   shopItems, 
   tehillimNames, tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, brochas, sponsors, nishmasText,
-  dailyHalacha, dailyEmuna, dailyChizuk, featuredContent, todaysSpecial,
+  dailyHalacha, dailyEmuna, dailyChizuk, featuredContent, todaysSpecial, giftOfChatzos,
   dailyRecipes, parshaVorts, torahClasses, tableInspirations, marriageInsights, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats, acts,
   tehillimChains, tehillimChainReadings,
@@ -39,7 +39,8 @@ import {
   type PushNotification, type InsertPushNotification,
   type TehillimChain, type InsertTehillimChain,
   type TehillimChainReading, type InsertTehillimChainReading,
-  type TodaysSpecial, type InsertTodaysSpecial
+  type TodaysSpecial, type InsertTodaysSpecial,
+  type GiftOfChatzos, type InsertGiftOfChatzos
 } from "../shared/schema";
 import { db, pool } from "./db";
 import { eq, gt, lt, gte, lte, and, or, sql, like, ilike, desc, inArray, isNull } from "drizzle-orm";
@@ -67,6 +68,12 @@ export interface IStorage {
   // Today's Special methods
   getTodaysSpecialByDate(date: string): Promise<TodaysSpecial | undefined>;
   createTodaysSpecial(special: InsertTodaysSpecial): Promise<TodaysSpecial>;
+  
+  // Gift of Chatzos methods
+  getGiftOfChatzosByDayOfWeek(dayOfWeek: number): Promise<GiftOfChatzos | undefined>;
+  createGiftOfChatzos(gift: InsertGiftOfChatzos): Promise<GiftOfChatzos>;
+  updateGiftOfChatzos(id: number, gift: Partial<InsertGiftOfChatzos>): Promise<GiftOfChatzos | undefined>;
+  getAllGiftOfChatzos(): Promise<GiftOfChatzos[]>;
   
   // Pirkei Avot methods
   getAllPirkeiAvot(): Promise<PirkeiAvot[]>;
@@ -1579,6 +1586,33 @@ export class DatabaseStorage implements IStorage {
   async createTodaysSpecial(insertSpecial: InsertTodaysSpecial): Promise<TodaysSpecial> {
     const [special] = await db.insert(todaysSpecial).values(insertSpecial).returning();
     return special;
+  }
+
+  // Gift of Chatzos methods
+  async getGiftOfChatzosByDayOfWeek(dayOfWeek: number): Promise<GiftOfChatzos | undefined> {
+    try {
+      const [result] = await db.select().from(giftOfChatzos)
+        .where(eq(giftOfChatzos.dayOfWeek, dayOfWeek))
+        .limit(1);
+      return result;
+    } catch (error) {
+      console.error('Failed to fetch gift of chatzos:', error);
+      return undefined;
+    }
+  }
+
+  async createGiftOfChatzos(insertGift: InsertGiftOfChatzos): Promise<GiftOfChatzos> {
+    const [gift] = await db.insert(giftOfChatzos).values(insertGift).returning();
+    return gift;
+  }
+
+  async updateGiftOfChatzos(id: number, gift: Partial<InsertGiftOfChatzos>): Promise<GiftOfChatzos | undefined> {
+    const [updated] = await db.update(giftOfChatzos).set(gift).where(eq(giftOfChatzos.id, id)).returning();
+    return updated;
+  }
+
+  async getAllGiftOfChatzos(): Promise<GiftOfChatzos[]> {
+    return await db.select().from(giftOfChatzos).orderBy(giftOfChatzos.dayOfWeek);
   }
 
   // Pirkei Avot methods  
