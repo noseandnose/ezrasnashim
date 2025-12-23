@@ -44,6 +44,7 @@ export default function TableSection() {
     contentHebrew?: string;
     linkTitle?: string;
     url?: string;
+    thankYouMessage?: string;
   }>({
     queryKey: ['/api/life/gift-of-chatzos', currentDayOfWeek],
     staleTime: 5 * 60 * 1000,
@@ -299,6 +300,27 @@ export default function TableSection() {
                     ) 
                   }}
                 />
+                
+                {/* Thank You Message - linked to URL */}
+                {giftOfChatzos.thankYouMessage && (
+                  <div className="mt-4 pt-3 border-t border-blush/20">
+                    {giftOfChatzos.url ? (
+                      <a
+                        href={giftOfChatzos.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="platypi-medium text-sm text-lavender hover:text-lavender/80 transition-colors underline"
+                        data-testid="link-gift-thank-you"
+                      >
+                        {giftOfChatzos.thankYouMessage}
+                      </a>
+                    ) : (
+                      <p className="platypi-medium text-sm text-lavender">
+                        {giftOfChatzos.thankYouMessage}
+                      </p>
+                    )}
+                  </div>
+                )}
                 
                 {/* Settings Popup */}
                 {showGiftSettings && (

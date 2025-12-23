@@ -411,6 +411,7 @@ export const giftOfChatzos = pgTable("gift_of_chatzos", {
   contentHebrew: text("content_hebrew"),
   linkTitle: text("link_title"),
   url: text("url"),
+  thankYouMessage: text("thank_you_message"), // Appears under content, linked to URL
   createdAt: timestamp("created_at").defaultNow(),
 });
 
