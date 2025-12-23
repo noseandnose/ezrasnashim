@@ -10,7 +10,7 @@ import type { Section } from "@/pages/home";
 import { useMemo } from "react";
 import { getLocalDateString } from "@/lib/dateUtils";
 import DOMPurify from "dompurify";
-import grassImage from "@assets/Daily_Progress_Garden_(4)_1766474176491.png";
+import grassImage from "@assets/Daily_Progress_Garden_(5)_1766474472398.png";
 import torahFlower from "@assets/Torah_1766474274420.png";
 import tefillaFlower from "@assets/Tefilla_1766474274425.png";
 import tzedakaFlower from "@assets/Tzedaka_1766474274426.png";
@@ -647,12 +647,12 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           id="daily-progress-garden"
           className="rounded-2xl shadow-lg border border-blush/10 bg-white mt-4 min-h-[100px] relative overflow-hidden"
         >
-          {/* Grass at the bottom - takes up most of section, BEHIND flowers */}
+          {/* Grass - covers entire section, BEHIND flowers */}
           <img 
             src={grassImage} 
             alt="" 
-            className="absolute bottom-0 left-0 w-full z-[1]"
-            style={{ height: '95%', objectFit: 'cover', objectPosition: 'bottom' }}
+            className="absolute inset-0 w-full h-full z-[1]"
+            style={{ objectFit: 'cover' }}
           />
           
           {/* Flowers - scattered ON TOP of grass */}
@@ -676,8 +676,19 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             />
           ))}
           
-          <div className="pl-4 pr-1 py-3 relative z-10">
-            <h3 className="platypi-bold text-lg text-black mb-1 text-left">Daily Mitzvah Garden</h3>
+          <div className="absolute top-2 left-2 z-10">
+            <div 
+              className="px-3 py-1.5 rounded-xl"
+              style={{
+                background: 'rgba(255,255,255,0.6)',
+                backdropFilter: 'blur(12px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+                border: '1px solid rgba(255,255,255,0.4)',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.08)'
+              }}
+            >
+              <h3 className="platypi-bold text-sm text-black">Daily Mitzvah Garden</h3>
+            </div>
           </div>
         </div>
       </div>
