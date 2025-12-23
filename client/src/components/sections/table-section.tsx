@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { Utensils, Flame, Star, Heart, MapPin, Brain, ChevronDown, ChevronUp, Sparkles, ChevronRight, GraduationCap } from "lucide-react";
-import type { LifeClass } from "@shared/schema";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
 import { useGeolocation, useJewishTimes } from "@/hooks/use-jewish-times";
-import { useQuery } from "@tanstack/react-query";
+import { useTableSummary } from "@/hooks/use-table-summary";
 import DOMPurify from "dompurify";
 
 
@@ -31,33 +30,17 @@ export default function TableSection() {
   // Gift of Chatzos state
   const [giftExpanded, setGiftExpanded] = useState(false);
   
-  // Get current day of week (0 = Sunday, 6 = Saturday)
-  const currentDayOfWeek = new Date().getDay();
+  // Fetch all Table content in a single batched request (5 API calls → 1)
+  const { data: tableSummary } = useTableSummary();
   
-  const { data: giftOfChatzos } = useQuery<{
-    title?: string;
-    subtitle?: string;
-    imageUrl?: string;
-    contentEnglish?: string;
-    contentHebrew?: string;
-    linkTitle?: string;
-    url?: string;
-    thankYouMessage?: string;
-  }>({
-    queryKey: ['/api/life/gift-of-chatzos', currentDayOfWeek],
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-  });
+  // Extract data from the batched response
+  const giftOfChatzos = tableSummary?.giftOfChatzos;
+  const lifeClasses = tableSummary?.lifeClasses || [];
+  const inspirationContent = tableSummary?.inspiration;
+  const recipeContent = tableSummary?.recipe;
 
   // Check if Gift of Chatzos has content
   const hasGiftContent = giftOfChatzos && giftOfChatzos.contentEnglish;
-
-  // Fetch life classes for today
-  const { data: lifeClasses } = useQuery<LifeClass[]>({
-    queryKey: ['/api/life-classes'],
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-  });
 
   // Get the first available Life class for display
   const currentLifeClass = lifeClasses?.[0];
@@ -68,45 +51,6 @@ export default function TableSection() {
     const withLineBreaks = withBold.replace(/\n/g, '<br>');
     return DOMPurify.sanitize(withLineBreaks);
   };
-
-  // Fetch today's table inspiration content
-  const today = new Date().toISOString().split('T')[0];
-  const { data: inspirationContent } = useQuery<Record<string, any>>({
-    queryKey: [`/api/table/inspiration/${today}`],
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/inspiration/${today}`);
-      if (!response.ok) return null;
-      return response.json();
-    },
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 60 * 60 * 1000 // 1 hour
-  });
-
-
-
-  // Fetch daily recipe content
-  const { data: recipeContent } = useQuery<Record<string, any>>({
-    queryKey: [`/api/table/recipe`],
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/recipe`);
-      if (!response.ok) return null;
-      return response.json();
-    },
-    staleTime: 10 * 60 * 1000,
-    gcTime: 60 * 60 * 1000
-  });
-
-  // Fetch shop items
-  useQuery<Record<string, any>[]>({
-    queryKey: ['/api/shop'],
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/shop`);
-      if (!response.ok) return [];
-      return response.json();
-    },
-    staleTime: 10 * 60 * 1000,
-    gcTime: 60 * 60 * 1000
-  });
 
   // Calculate days until Shabbat using Jewish day (tzait to tzait)
   const getDaysUntilShabbat = (tzaitTime?: string) => {

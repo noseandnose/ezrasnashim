@@ -5062,6 +5062,155 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Tzedaka Summary - Batched endpoint for all Tzedaka section data
+  app.get("/api/tzedaka-summary", async (req, res) => {
+    try {
+      const date = req.query.date as string;
+      
+      if (!date) {
+        return res.status(400).json({ error: "Date parameter required (YYYY-MM-DD format)" });
+      }
+
+      // Check server-side cache first (5 minute TTL)
+      const cacheKey = `tzedaka-summary:${date}`;
+      const cached = cache.get<any>(cacheKey);
+      if (cached) {
+        res.set({ 'Cache-Control': 'public, max-age=300' });
+        return res.json(cached);
+      }
+
+      // Fetch all Tzedaka data in parallel
+      const [campaign, communityImpact] = await Promise.allSettled([
+        storage.getActiveCampaign(),
+        storage.getCommunityImpactByDate(date)
+      ]);
+
+      // Track per-section errors
+      const errors: Record<string, boolean> = {};
+      if (campaign.status === 'rejected') errors.campaign = true;
+      if (communityImpact.status === 'rejected') errors.communityImpact = true;
+
+      const summary = {
+        campaign: campaign.status === 'fulfilled' ? campaign.value : null,
+        communityImpact: communityImpact.status === 'fulfilled' ? communityImpact.value : null,
+        errors: Object.keys(errors).length > 0 ? errors : undefined,
+        fetchedAt: new Date().toISOString()
+      };
+
+      // Cache the result for 5 minutes
+      cache.set(cacheKey, summary, { ttl: 300 });
+
+      res.set({ 'Cache-Control': 'public, max-age=300' });
+      res.json(summary);
+    } catch (error) {
+      console.error('Error fetching tzedaka summary:', error);
+      return res.status(500).json({ error: "Failed to fetch tzedaka summary" });
+    }
+  });
+
+  // Tefilla Stats Summary - Batched endpoint for Tehillim chain statistics
+  app.get("/api/tefilla-stats", async (req, res) => {
+    try {
+      // Check server-side cache first (1 minute TTL for stats)
+      const cacheKey = 'tefilla-stats';
+      const cached = cache.get<any>(cacheKey);
+      if (cached) {
+        res.set({ 'Cache-Control': 'public, max-age=60' });
+        return res.json(cached);
+      }
+
+      // Fetch all stats in parallel
+      const [totalStats, globalStats] = await Promise.allSettled([
+        storage.getTotalChainTehillimCompleted(),
+        storage.getTehillimGlobalStats()
+      ]);
+
+      // Track per-section errors
+      const errors: Record<string, boolean> = {};
+      if (totalStats.status === 'rejected') errors.totalStats = true;
+      if (globalStats.status === 'rejected') errors.globalStats = true;
+
+      const summary = {
+        total: totalStats.status === 'fulfilled' ? totalStats.value || 0 : 0,
+        globalStats: globalStats.status === 'fulfilled' ? globalStats.value : null,
+        errors: Object.keys(errors).length > 0 ? errors : undefined,
+        fetchedAt: new Date().toISOString()
+      };
+
+      // Cache the result for 1 minute (stats update more frequently)
+      cache.set(cacheKey, summary, { ttl: 60 });
+
+      res.set({ 'Cache-Control': 'public, max-age=60' });
+      res.json(summary);
+    } catch (error) {
+      console.error('Error fetching tefilla stats:', error);
+      return res.status(500).json({ error: "Failed to fetch tefilla stats" });
+    }
+  });
+
+  // Table Summary - Batched endpoint for all Table section data
+  app.get("/api/table-summary", async (req, res) => {
+    try {
+      const date = req.query.date as string;
+      const dayOfWeek = parseInt(req.query.dayOfWeek as string);
+      
+      if (!date) {
+        return res.status(400).json({ error: "Date parameter required (YYYY-MM-DD format)" });
+      }
+      if (isNaN(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) {
+        return res.status(400).json({ error: "dayOfWeek parameter required (0-6)" });
+      }
+
+      // Check server-side cache first (5 minute TTL)
+      const cacheKey = `table-summary:${date}:${dayOfWeek}`;
+      const cached = cache.get<any>(cacheKey);
+      if (cached) {
+        res.set({ 'Cache-Control': 'public, max-age=300' });
+        return res.json(cached);
+      }
+
+      // Fetch all Table data in parallel with individual error tracking
+      const [giftOfChatzos, lifeClasses, inspiration, recipe, shopItems] = await Promise.allSettled([
+        storage.getGiftOfChatzosByDayOfWeek(dayOfWeek),
+        storage.getLifeClassesByDate(date),
+        storage.getTableInspirationByDate(date),
+        storage.getDailyRecipeByDate(date),
+        storage.getAllShopItems()
+      ]);
+
+      // Track per-section errors for UI fallback messages
+      const errors: Record<string, boolean> = {};
+      if (giftOfChatzos.status === 'rejected') errors.giftOfChatzos = true;
+      if (lifeClasses.status === 'rejected') errors.lifeClasses = true;
+      if (inspiration.status === 'rejected') errors.inspiration = true;
+      if (recipe.status === 'rejected') errors.recipe = true;
+      if (shopItems.status === 'rejected') errors.shopItems = true;
+
+      const summary = {
+        giftOfChatzos: giftOfChatzos.status === 'fulfilled' ? giftOfChatzos.value : null,
+        lifeClasses: lifeClasses.status === 'fulfilled' ? lifeClasses.value : [],
+        inspiration: inspiration.status === 'fulfilled' ? inspiration.value : null,
+        recipe: recipe.status === 'fulfilled' ? recipe.value : null,
+        shopItems: shopItems.status === 'fulfilled' ? shopItems.value : [],
+        errors: Object.keys(errors).length > 0 ? errors : undefined,
+        fetchedAt: new Date().toISOString()
+      };
+
+      // Cache the result for 5 minutes
+      cache.set(cacheKey, summary, { ttl: 300 });
+
+      // Set HTTP caching: 5 minutes for Table content
+      res.set({
+        'Cache-Control': 'public, max-age=300',
+      });
+
+      res.json(summary);
+    } catch (error) {
+      console.error('Error fetching table summary:', error);
+      return res.status(500).json({ error: "Failed to fetch table summary" });
+    }
+  });
+
   // Messages routes - Public endpoint for fetching messages by date (no auth required)
   app.get("/api/messages/:date", async (req, res) => {
     try {
