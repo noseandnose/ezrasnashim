@@ -4,9 +4,6 @@ import { insertTehillimNameSchema } from "../../shared/schema";
 import { z } from "zod";
 import { cacheMiddleware } from "../middleware/cache";
 import { CACHE_TTL } from "../cache/categoryCache";
-import { db } from "../db";
-import { tehillimChainReadings } from "../../shared/schema";
-import { and, eq, gt } from "drizzle-orm";
 
 export interface TehillimRouteDeps {
   storage: IStorage;
@@ -480,19 +477,7 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
 
       let activeReading: number | null = null;
       if (deviceId) {
-        const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
-        const readings = await db.select({ psalmNumber: tehillimChainReadings.psalmNumber })
-          .from(tehillimChainReadings)
-          .where(and(
-            eq(tehillimChainReadings.chainId, chain.id),
-            eq(tehillimChainReadings.deviceId, deviceId as string),
-            eq(tehillimChainReadings.status, 'reading'),
-            gt(tehillimChainReadings.startedAt, tenMinutesAgo)
-          ))
-          .limit(1);
-        if (readings.length > 0) {
-          activeReading = readings[0].psalmNumber;
-        }
+        activeReading = await storage.getActiveChainReadingForDevice(chain.id, deviceId as string);
       }
 
       const [stats, nextAvailable] = await Promise.all([

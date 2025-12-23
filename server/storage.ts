@@ -156,6 +156,7 @@ export interface IStorage {
   getRandomAvailablePsalmForChain(chainId: number, excludeDeviceId?: string, excludePsalm?: number): Promise<number | null>;
   getTotalChainTehillimCompleted(): Promise<number>;
   getTehillimGlobalStats(): Promise<{ totalRead: number; booksCompleted: number; uniqueReaders: number }>;
+  getActiveChainReadingForDevice(chainId: number, deviceId: string): Promise<number | null>;
   migrateTehillimNamesToChains(): Promise<{ migrated: number; skipped: number; errors: string[] }>;
 
   // Mincha methods
@@ -1239,6 +1240,20 @@ export class DatabaseStorage implements IStorage {
     const booksCompleted = Math.floor(totalRead / 150);
     
     return { totalRead, booksCompleted, uniqueReaders: 0 };
+  }
+
+  async getActiveChainReadingForDevice(chainId: number, deviceId: string): Promise<number | null> {
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+    const readings = await db.select({ psalmNumber: tehillimChainReadings.psalmNumber })
+      .from(tehillimChainReadings)
+      .where(and(
+        eq(tehillimChainReadings.chainId, chainId),
+        eq(tehillimChainReadings.deviceId, deviceId),
+        eq(tehillimChainReadings.status, 'reading'),
+        gt(tehillimChainReadings.startedAt, tenMinutesAgo)
+      ))
+      .limit(1);
+    return readings.length > 0 ? readings[0].psalmNumber : null;
   }
 
   async migrateTehillimNamesToChains(): Promise<{ migrated: number; skipped: number; errors: string[] }> {
