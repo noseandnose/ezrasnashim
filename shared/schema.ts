@@ -295,7 +295,9 @@ export const donations = pgTable("donations", {
   campaignId: text("campaign_id"), // Reference to campaign
   stripeSessionId: text("stripe_session_id"), // Stripe checkout session ID
   metadata: jsonb("metadata"), // Additional metadata from Stripe
-});
+}, (table) => ({
+  createdAtIdx: index("donations_created_at_idx").on(table.createdAt),
+}));
 
 export const inspirationalQuotes = pgTable("inspirational_quotes", {
   id: serial("id").primaryKey(),
@@ -351,7 +353,9 @@ export const dailyHalacha = pgTable("daily_halacha", {
   attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
   attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  dateIdx: index("daily_halacha_date_idx").on(table.date),
+}));
 
 export const dailyEmuna = pgTable("daily_emuna", {
   id: serial("id").primaryKey(),
