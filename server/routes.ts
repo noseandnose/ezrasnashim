@@ -2,8 +2,6 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
-import { db } from "./db";
-import { and, eq, gt } from "drizzle-orm";
 import serverAxiosClient from "./axiosClient";
 import path from "path";
 import { fileURLToPath } from "url";
