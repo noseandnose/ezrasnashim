@@ -152,7 +152,7 @@ import {
 } from "../shared/schema";
 import { z } from "zod";
 
-// Admin authentication middleware - supports both JWT tokens and legacy password (backward compatible)
+// Admin authentication middleware - JWT only (legacy password fallback removed)
 function requireAdminAuth(req: any, res: any, next: any) {
   if (!isAdminConfigured()) {
     return res.status(500).json({ 
@@ -171,23 +171,21 @@ function requireAdminAuth(req: any, res: any, next: any) {
     });
   }
   
-  // First, try JWT verification if configured
-  if (isJwtConfigured()) {
-    const jwtResult = verifyAdminToken(token);
-    if (jwtResult.valid) {
-      return next();
-    }
-    if (jwtResult.expired) {
-      return res.status(401).json({ 
-        message: "Unauthorized: Token expired, please login again" 
-      });
-    }
+  // JWT verification required
+  if (!isJwtConfigured()) {
+    return res.status(500).json({ 
+      message: "JWT authentication not configured. Please set JWT_SECRET." 
+    });
   }
   
-  // Fallback: Legacy plain password comparison (for backward compatibility)
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  if (adminPassword && token === adminPassword) {
+  const jwtResult = verifyAdminToken(token);
+  if (jwtResult.valid) {
     return next();
+  }
+  if (jwtResult.expired) {
+    return res.status(401).json({ 
+      message: "Unauthorized: Token expired, please login again" 
+    });
   }
   
   return res.status(401).json({ 
