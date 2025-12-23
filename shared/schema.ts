@@ -58,6 +58,24 @@ export const torahClasses = pgTable("torah_classes", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const lifeClasses = pgTable("life_classes", {
+  id: serial("id").primaryKey(),
+  fromDate: date("from_date").notNull(), // Start date for display
+  untilDate: date("until_date").notNull(), // End date for display
+  title: text("title").notNull(),
+  subtitle: text("subtitle"), // Subtitle for the bar display
+  content: text("content"),
+  audioUrl: text("audio_url"),
+  videoUrl: text("video_url"),
+  imageUrl: text("image_url"), // Graphic for the bar
+  speaker: text("speaker"),
+  speakerWebsite: text("speaker_website"),
+  thankYouMessage: text("thank_you_message"),
+  attributionLogoUrl: text("attribution_logo_url"),
+  attributionAboutText: text("attribution_about_text"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const tableInspirations = pgTable("table_inspirations", {
   id: serial("id").primaryKey(),
   fromDate: date("from_date").notNull(), // Week start date
@@ -626,6 +644,11 @@ export const insertTorahClassSchema = createInsertSchema(torahClasses).omit({
   createdAt: true,
 });
 
+export const insertLifeClassSchema = createInsertSchema(lifeClasses).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertMarriageInsightSchema = createInsertSchema(marriageInsights).omit({
   id: true,
   createdAt: true,
@@ -722,6 +745,8 @@ export type ParshaVort = typeof parshaVorts.$inferSelect;
 export type InsertParshaVort = z.infer<typeof insertParshaVortSchema>;
 export type TorahClass = typeof torahClasses.$inferSelect;
 export type InsertTorahClass = z.infer<typeof insertTorahClassSchema>;
+export type LifeClass = typeof lifeClasses.$inferSelect;
+export type InsertLifeClass = z.infer<typeof insertLifeClassSchema>;
 export type TableInspiration = typeof tableInspirations.$inferSelect;
 export type InsertTableInspiration = z.infer<typeof insertTableInspirationSchema>;
 
