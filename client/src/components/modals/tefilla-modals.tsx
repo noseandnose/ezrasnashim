@@ -558,7 +558,7 @@ function renderPrayerContent(contentType: string | undefined, language: 'hebrew'
     case 'mincha':
       return <MinchaFullscreenContent language={language} fontSize={fontSize} />;
     case 'shacharis':
-      return <ShachrisFullscreenContent language={language} fontSize={fontSize} />;
+      return <ShachrisWithNavigation language={language} fontSize={fontSize} />;
     case 'morning-brochas':
       return <MorningBrochasWithNavigation language={language} fontSize={fontSize} />;
     case 'nishmas-campaign':
@@ -714,13 +714,102 @@ function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
   );
 }
 
-function ShachrisFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+// Singleton to store shacharis navigation state
+let shachrisNavState = {
+  expandedSection: 0,
+  scrollToBottom: () => {}
+};
+
+// Wrapper component that provides context for both content and arrow
+export function ShachrisWithNavigation({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
+  // State for managing which section is expanded
+  const [expandedSection, setExpandedSection] = useState<number>(0);
+  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Scroll to bottom of currently expanded section
+  const scrollToBottomOfSection = () => {
+    if (expandedSection >= 0 && sectionRefs.current[expandedSection]) {
+      const sectionElement = sectionRefs.current[expandedSection];
+      const sectionContent = sectionElement!.querySelector('div[class*="px-6 pb-6"]');
+      const doneButton = sectionContent?.querySelector('button') || 
+                         sectionElement!.querySelector('button[class*="bg-gradient-feminine"], button[class*="bg-sage"]');
+      
+      if (doneButton) {
+        doneButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        sectionElement!.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
+    }
+  };
+
+  // Update global state
+  useEffect(() => {
+    shachrisNavState = {
+      expandedSection,
+      scrollToBottom: scrollToBottomOfSection
+    };
+  }, [expandedSection]);
+
+  return (
+    <ShachrisFullscreenContent 
+      language={language} 
+      fontSize={fontSize}
+      expandedSection={expandedSection}
+      setExpandedSection={setExpandedSection}
+      sectionRefs={sectionRefs}
+    />
+  );
+}
+
+// Export the arrow separately for use in floating element
+export function ShachrisNavigationArrow() {
+  // Force re-render when state changes
+  const [, forceUpdate] = useState(0);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      forceUpdate(n => n + 1);
+    }, 100); // Poll for state changes
+    
+    return () => clearInterval(interval);
+  }, []);
+  
+  if (shachrisNavState.expandedSection < 0) return null;
+  
+  return (
+    <button
+      onClick={shachrisNavState.scrollToBottom}
+      className="fixed right-6 bg-gradient-feminine text-white rounded-full p-3 shadow-lg hover:scale-110 transition-all duration-200"
+      style={{ 
+        zIndex: 2147483646,
+        bottom: 'calc(1.5rem + var(--viewport-bottom-offset, 0px))'
+      }}
+      aria-label="Jump to bottom of section"
+      data-testid="button-scroll-to-section-bottom-shacharis"
+    >
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7-7-7" />
+      </svg>
+    </button>
+  );
+}
+
+function ShachrisFullscreenContent({ 
+  language, 
+  fontSize,
+  expandedSection,
+  setExpandedSection,
+  sectionRefs
+}: { 
+  language: 'hebrew' | 'english';
+  fontSize: number;
+  expandedSection: number;
+  setExpandedSection: (index: number) => void;
+  sectionRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
+}) {
   const { data: prayers = [], isLoading } = useQuery<MorningPrayer[]>({
     queryKey: ['/api/morning/prayers'],
   });
-
-  const [expandedSection, setExpandedSection] = useState<number>(0);
-  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const tefillaConditions = useTefillaConditions();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
@@ -3638,7 +3727,10 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           fullscreenContent.title === 'Maariv Prayer' ? getMaarivTooltip() : undefined
         }
         showCompassButton={fullscreenContent.contentType === 'morning-brochas' || fullscreenContent.contentType === 'mincha' || fullscreenContent.contentType === 'maariv'}
-        floatingElement={fullscreenContent.contentType === 'morning-brochas' ? <MorningBrochasNavigationArrow /> : undefined}
+        floatingElement={
+          fullscreenContent.contentType === 'morning-brochas' ? <MorningBrochasNavigationArrow /> :
+          fullscreenContent.contentType === 'shacharis' ? <ShachrisNavigationArrow /> : undefined
+        }
       >
         {fullscreenContent.content || renderPrayerContent(fullscreenContent.contentType, language, fontSize)}
       </FullscreenModal>
