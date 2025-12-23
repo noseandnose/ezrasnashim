@@ -105,8 +105,8 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
       const horizontalOffset = (seededRandom() * 10) - 5; // more randomness
       const clampedPos = Math.max(5, Math.min(90, basePos + horizontalOffset));
       
-      // Place flowers ON the grass - random positions within grass area (10% to 60% from bottom)
-      const verticalOffset = 10 + Math.floor(seededRandom() * 50); // 10-60% up from bottom
+      // Place flowers ON the grass - keep them in lower portion to avoid title area (5% to 45% from bottom)
+      const verticalOffset = 5 + Math.floor(seededRandom() * 40); // 5-45% up from bottom
       
       // Vary scale - smaller flowers look scattered naturally
       const scale = 0.4 + (seededRandom() * 0.25); // 0.4 to 0.65 scale
@@ -678,7 +678,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
           
           <div className="absolute top-2 left-2 z-10">
             <div 
-              className="px-3 py-1.5 rounded-xl"
+              className="px-2 py-1 rounded-lg"
               style={{
                 background: 'rgba(255,255,255,0.6)',
                 backdropFilter: 'blur(12px) saturate(180%)',
@@ -687,7 +687,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
                 boxShadow: '0 4px 16px rgba(0,0,0,0.08)'
               }}
             >
-              <h3 className="platypi-bold text-sm text-black">Daily Mitzvah Garden</h3>
+              <h3 className="platypi-bold text-xs text-black">Daily Mitzvah Garden</h3>
             </div>
           </div>
         </div>
