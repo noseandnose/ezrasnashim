@@ -10,7 +10,7 @@ import type { Section } from "@/pages/home";
 import { useMemo } from "react";
 import { getLocalDateString } from "@/lib/dateUtils";
 import DOMPurify from "dompurify";
-import grassImage from "@assets/Daily_Progress_Garden_(2)_1765369219898.png";
+import grassImage from "@assets/Daily_Progress_Garden_(4)_1766474176491.png";
 import torahFlower from "@assets/Torah_1765437211120.png";
 import tefillaFlower from "@assets/Tefilla_1765437211121.png";
 import tzedakaFlower from "@assets/Tzedaka_1765437211121.png";
@@ -649,13 +649,14 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
         {/* Daily Progress Tracker - Compact Version */}
         <div 
           id="daily-progress-garden"
-          className="rounded-2xl shadow-lg border border-blush/10 bg-white mt-4 min-h-[120px] relative overflow-hidden"
+          className="rounded-2xl shadow-lg border border-blush/10 bg-white mt-4 min-h-[100px] relative overflow-hidden"
         >
-          {/* Grass at the bottom - in front of flowers, behind text */}
+          {/* Grass at the bottom - takes up most of section, in front of flowers, behind text */}
           <img 
             src={grassImage} 
             alt="" 
-            className="absolute bottom-[-8px] left-0 w-full h-auto z-[2]"
+            className="absolute bottom-0 left-0 w-full z-[2]"
+            style={{ height: '85%', objectFit: 'cover', objectPosition: 'bottom' }}
           />
           
           {/* Flowers - appear when completions happen, ALL behind grass (z-[1]) */}
