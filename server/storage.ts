@@ -3,7 +3,7 @@ import {
   shopItems, 
   tehillimNames, tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, brochas, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent, todaysSpecial, giftOfChatzos,
-  dailyRecipes, parshaVorts, torahClasses, tableInspirations, marriageInsights, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
+  dailyRecipes, parshaVorts, torahClasses, lifeClasses, tableInspirations, marriageInsights, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats, acts,
   tehillimChains, tehillimChainReadings,
 
@@ -19,6 +19,7 @@ import {
   type DailyRecipe, type InsertDailyRecipe,
   type ParshaVort, type InsertParshaVort,
   type TorahClass, type InsertTorahClass,
+  type LifeClass, type InsertLifeClass,
   type TableInspiration, type InsertTableInspiration,
   type MarriageInsight, type InsertMarriageInsight,
   type CommunityImpact, type InsertCommunityImpact,
@@ -101,6 +102,13 @@ export interface IStorage {
   createTorahClass(torahClass: InsertTorahClass): Promise<TorahClass>;
   updateTorahClass(id: number, torahClass: Partial<InsertTorahClass>): Promise<TorahClass | undefined>;
   deleteTorahClass(id: number): Promise<boolean>;
+
+  // Life classes methods
+  getLifeClassesByDate(date: string): Promise<LifeClass[]>;
+  getAllLifeClasses(): Promise<LifeClass[]>;
+  createLifeClass(lifeClass: InsertLifeClass): Promise<LifeClass>;
+  updateLifeClass(id: number, lifeClass: Partial<InsertLifeClass>): Promise<LifeClass | undefined>;
+  deleteLifeClass(id: number): Promise<boolean>;
 
   // Table inspiration methods
   getTableInspirationByDate(date: string): Promise<TableInspiration | undefined>;
@@ -1795,6 +1803,45 @@ export class DatabaseStorage implements IStorage {
 
   async deleteTorahClass(id: number): Promise<boolean> {
     const result = await db.delete(torahClasses).where(eq(torahClasses.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+
+  async getLifeClassesByDate(date: string): Promise<LifeClass[]> {
+    const classes = await db
+      .select()
+      .from(lifeClasses)
+      .where(and(
+        lte(lifeClasses.fromDate, date),
+        gte(lifeClasses.untilDate, date)
+      ))
+      .orderBy(lifeClasses.id);
+    return classes;
+  }
+
+  async getAllLifeClasses(): Promise<LifeClass[]> {
+    return await db.select().from(lifeClasses).orderBy(desc(lifeClasses.fromDate), desc(lifeClasses.id));
+  }
+
+  async createLifeClass(insertClass: InsertLifeClass): Promise<LifeClass> {
+    const [lifeClass] = await db.insert(lifeClasses).values(insertClass).returning();
+    return lifeClass;
+  }
+
+  async updateLifeClass(id: number, updatedClass: Partial<InsertLifeClass>): Promise<LifeClass | undefined> {
+    const cleanedData = Object.fromEntries(
+      Object.entries(updatedClass).filter(([_, value]) => value !== undefined)
+    );
+    
+    const [lifeClass] = await db
+      .update(lifeClasses)
+      .set(cleanedData)
+      .where(eq(lifeClasses.id, id))
+      .returning();
+    return lifeClass || undefined;
+  }
+
+  async deleteLifeClass(id: number): Promise<boolean> {
+    const result = await db.delete(lifeClasses).where(eq(lifeClasses.id, id));
     return result.rowCount ? result.rowCount > 0 : false;
   }
 
