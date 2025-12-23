@@ -1,0 +1,196 @@
+🔍 Replit Full App Audit Prompt
+
+Role & Mindset
+You are a principal software architect + senior product engineer performing a full professional audit of an existing production app.
+Act like this app is preparing for real users, scale, and monetization.
+Be direct, critical, and practical. Do not be polite. Do not hand-wave.
+
+📂 Scope
+
+Audit the entire codebase and system, including but not limited to:
+
+Frontend
+
+Backend / APIs
+
+Database schema & queries
+
+Auth & permissions
+
+State management
+
+Background jobs / schedulers
+
+Integrations (payments, messaging, storage, etc.)
+
+Deployment & environment setup
+
+Performance & scalability
+
+Security & privacy
+
+UX & product flow
+
+Error handling & logging
+
+🧠 What I Want From You
+
+Produce a structured audit report with the following sections in this exact order:
+
+1️⃣ Executive Summary (Non-Technical)
+
+One-paragraph summary of the overall health of the app
+
+Biggest strengths
+
+Biggest risks
+
+Is this app safe to scale? (Yes / No + why)
+
+2️⃣ Architecture Review
+
+Current architecture diagram (describe in text)
+
+What is well designed
+
+What is fragile or wrong
+
+What will break first at scale
+
+Suggested architecture improvements (practical, not theoretical)
+
+3️⃣ Code Quality & Maintainability
+
+Folder structure & separation of concerns
+
+Reusability
+
+Naming conventions
+
+Dead code / duplication
+
+Tech debt score (1–10)
+
+Refactoring priorities (ranked)
+
+4️⃣ Performance & Scalability
+
+Obvious performance bottlenecks
+
+Inefficient queries or loops
+
+Client vs server load issues
+
+How this behaves at:
+
+100 users
+
+10,000 users
+
+100,000 users
+
+Concrete optimization steps
+
+5️⃣ Security & Privacy Audit (CRITICAL)
+
+Authentication weaknesses
+
+Authorization flaws
+
+Data exposure risks
+
+Injection / XSS / CSRF risks
+
+Secrets handling
+
+File upload risks
+
+Rate limiting / abuse prevention
+
+Compliance risks (PII, minors, payments, etc.)
+
+🚨 Call out any critical vulnerability clearly.
+
+6️⃣ Database & Data Integrity
+
+Schema quality
+
+Indexing issues
+
+Over/under-normalization
+
+Risk of data corruption
+
+Backup & recovery readiness
+
+Migration readiness
+
+7️⃣ Error Handling & Observability
+
+Where errors are swallowed
+
+Missing try/catch
+
+Logging gaps
+
+Monitoring recommendations
+
+What will be impossible to debug later
+
+8️⃣ Product & UX Review
+
+User journey walkthrough
+
+Friction points
+
+Confusing flows
+
+Missing empty states
+
+Edge cases that will confuse users
+
+Monetization or conversion blockers (if applicable)
+
+9️⃣ Replit-Specific Improvements
+
+How to better leverage Replit features
+
+Dev environment issues
+
+Secrets & environment handling
+
+Preview / deployment setup
+
+Suggested Replit workflow improvements
+
+🔟 Action Plan
+
+Create a prioritized TODO list with:
+
+🔥 Critical (must fix immediately)
+
+⚠️ Important (before launch / scale)
+
+🧹 Cleanup (tech debt)
+
+🚀 Nice-to-have improvements
+
+Each item should include:
+
+What to fix
+
+Why it matters
+
+Rough effort (S / M / L)
+
+📌 Rules
+
+Be specific: reference actual files, functions, and patterns
+
+No generic advice
+
+No “it depends”
+
+If something is missing, say so explicitly
+
+If something is good, explain why
