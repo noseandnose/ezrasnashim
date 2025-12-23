@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { X } from "lucide-react";
 import { useLocation } from "wouter";
+import { sanitizeHTML } from "@/lib/sanitize";
 
 export default function Privacy() {
   const [, setLocation] = useLocation();
@@ -137,16 +138,18 @@ Questions or requests? Email team@ezrasnashim.app.
             <div
               className="whitespace-pre-line leading-relaxed text-gray-800 text-base"
               dangerouslySetInnerHTML={{
-                __html: privacyContent
-                  .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-                  .replace(
-                    /## (.*)/g,
-                    '<h2 class="text-xl font-bold mt-6 mb-3 text-gray-900">$1</h2>',
-                  )
-                  .replace(
-                    /### (.*)/g,
-                    '<h3 class="text-lg font-semibold mt-4 mb-2 text-gray-800">$1</h3>',
-                  ),
+                __html: sanitizeHTML(
+                  privacyContent
+                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                    .replace(
+                      /## (.*)/g,
+                      '<h2 class="text-xl font-bold mt-6 mb-3 text-gray-900">$1</h2>',
+                    )
+                    .replace(
+                      /### (.*)/g,
+                      '<h3 class="text-lg font-semibold mt-4 mb-2 text-gray-800">$1</h3>',
+                    )
+                ),
               }}
             />
           </div>

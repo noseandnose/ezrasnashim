@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { sanitizeHTML } from "@/lib/sanitize";
 
 interface AttributionSectionProps {
   label: string;
@@ -52,7 +53,7 @@ export function AttributionSection({
         {labelHtml ? (
           <p 
             className="text-sm platypi-medium text-black text-center"
-            dangerouslySetInnerHTML={{ __html: label }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHTML(label) }}
           />
         ) : (
           <p className="text-sm platypi-medium text-black text-center">
@@ -75,7 +76,7 @@ export function AttributionSection({
             {labelHtml ? (
               <span 
                 className="platypi-medium text-black text-sm"
-                dangerouslySetInnerHTML={{ __html: label }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHTML(label) }}
               />
             ) : (
               <span className="platypi-medium text-black text-sm">{label}</span>
