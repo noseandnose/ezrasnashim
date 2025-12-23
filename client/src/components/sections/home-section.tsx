@@ -99,17 +99,22 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     
     // Helper to add a flower position with dynamic placement - scattered ON the grass
     const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', index: number) => {
-      // Distribute flowers randomly across full width (5% to 90%)
+      // Distribute flowers randomly across width, avoiding top-left title area
       const goldenRatio = 0.618033988749;
-      const basePos = ((index * goldenRatio * 100) % 85) + 5; // 5-90% range
-      const horizontalOffset = (seededRandom() * 10) - 5; // more randomness
-      const clampedPos = Math.max(5, Math.min(90, basePos + horizontalOffset));
+      let basePos = ((index * goldenRatio * 100) % 70) + 25; // 25-95% range (avoid left side)
+      const horizontalOffset = (seededRandom() * 8) - 4;
+      let clampedPos = Math.max(25, Math.min(92, basePos + horizontalOffset));
       
-      // Place flowers ON the grass - keep them in lower portion to avoid title area (5% to 45% from bottom)
-      const verticalOffset = 5 + Math.floor(seededRandom() * 40); // 5-45% up from bottom
+      // Place flowers in lower portion only (5% to 35% from bottom)
+      const verticalOffset = 5 + Math.floor(seededRandom() * 30); // 5-35% up from bottom
+      
+      // If flower is in left 40%, keep it very low (under 25%) to avoid title
+      if (clampedPos < 40) {
+        clampedPos = 40 + Math.floor(seededRandom() * 52); // Push to right side
+      }
       
       // Vary scale - smaller flowers look scattered naturally
-      const scale = 0.4 + (seededRandom() * 0.25); // 0.4 to 0.65 scale
+      const scale = 0.35 + (seededRandom() * 0.2); // 0.35 to 0.55 scale
       
       positions.push({ 
         type, 
