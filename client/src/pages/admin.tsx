@@ -19,7 +19,21 @@ type AdminTab = 'messages' | 'recipes' | 'inspirations' | 'notifications' | 'par
 export default function Admin() {
   const [activeTab, setActiveTab] = useState<AdminTab>('messages');
   const [adminPassword, setAdminPassword] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authToken, setAuthToken] = useState<string | null>(() => {
+    // Try to restore token from sessionStorage on mount
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('adminToken');
+    }
+    return null;
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    // Check if we have a stored token
+    if (typeof window !== 'undefined') {
+      return !!sessionStorage.getItem('adminToken');
+    }
+    return false;
+  });
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { toast } = useToast();
 
   // Messages state
@@ -105,8 +119,20 @@ export default function Admin() {
 
   // Set up authorization headers for authenticated requests
   const getAuthHeaders = () => ({
-    'Authorization': `Bearer ${adminPassword}`
+    'Authorization': `Bearer ${authToken}`
   });
+
+  // Handle logout
+  const handleLogout = () => {
+    setAuthToken(null);
+    setIsAuthenticated(false);
+    setAdminPassword('');
+    sessionStorage.removeItem('adminToken');
+    toast({
+      title: 'Logged Out',
+      description: 'You have been logged out.',
+    });
+  };
 
   // Messages API calls
   const { data: messages, refetch: refetchMessages } = useQuery({
@@ -286,23 +312,41 @@ export default function Admin() {
       return;
     }
 
+    setIsLoggingIn(true);
     try {
-      // Test authentication by trying to fetch messages
-      await axiosClient.get('/api/messages?upcoming=true', {
-        headers: { 'Authorization': `Bearer ${trimmedPassword}` }
+      // Call the new login endpoint to get JWT token
+      const response = await axiosClient.post('/api/admin/login', {
+        password: trimmedPassword
       });
-      // Store the trimmed password for future API calls
-      setAdminPassword(trimmedPassword);
-      setIsAuthenticated(true);
-      toast({
-        title: 'Login Successful',
-        description: 'You are now authenticated as admin.',
-      });
+      
+      if (response.data.success && response.data.token) {
+        const token = response.data.token;
+        setAuthToken(token);
+        setIsAuthenticated(true);
+        setAdminPassword(''); // Clear password from memory
+        sessionStorage.setItem('adminToken', token);
+        toast({
+          title: 'Login Successful',
+          description: 'You are now authenticated as admin.',
+        });
+      } else {
+        toast({
+          title: 'Authentication Failed',
+          description: response.data.message || 'Invalid credentials.',
+          variant: 'destructive'
+        });
+      }
     } catch (error: any) {
       if (error.response?.status === 401) {
         toast({
           title: 'Authentication Failed',
-          description: 'Invalid admin password. Please try again.',
+          description: error.response?.data?.message || 'Invalid admin password. Please try again.',
+          variant: 'destructive'
+        });
+      } else if (error.response?.status === 429) {
+        toast({
+          title: 'Too Many Attempts',
+          description: 'Please wait a few minutes before trying again.',
           variant: 'destructive'
         });
       } else {
@@ -312,6 +356,8 @@ export default function Admin() {
           variant: 'destructive'
         });
       }
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -977,8 +1023,9 @@ export default function Admin() {
               onClick={handleLogin} 
               className="w-full admin-btn-primary"
               data-testid="button-admin-login"
+              disabled={isLoggingIn}
             >
-              Login
+              {isLoggingIn ? 'Logging in...' : 'Login'}
             </Button>
           </div>
         </Card>
@@ -990,9 +1037,17 @@ export default function Admin() {
     <div className="min-h-screen admin-bg-gradient">
       <div className="container mx-auto p-4 max-w-7xl">
         {/* Header */}
-        <div className="mb-8 text-center">
+        <div className="mb-8 text-center relative">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Panel</h1>
           <p className="text-gray-600">Manage messages, recipes, and notifications</p>
+          <Button 
+            onClick={handleLogout}
+            variant="outline"
+            className="absolute top-0 right-0 text-sm"
+            data-testid="button-admin-logout"
+          >
+            Logout
+          </Button>
         </div>
 
         {/* Tabs */}

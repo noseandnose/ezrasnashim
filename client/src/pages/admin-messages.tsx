@@ -15,7 +15,19 @@ import type { Message } from '@shared/schema';
 
 export default function AdminMessages() {
   const [adminPassword, setAdminPassword] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authToken, setAuthToken] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('adminToken');
+    }
+    return null;
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return !!sessionStorage.getItem('adminToken');
+    }
+    return false;
+  });
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [formData, setFormData] = useState({
     date: '',
     title: '',
@@ -27,7 +39,7 @@ export default function AdminMessages() {
 
   // Set up authorization headers for authenticated requests
   const getAuthHeaders = () => ({
-    'Authorization': `Bearer ${adminPassword}`
+    'Authorization': `Bearer ${authToken}`
   });
 
   // Fetch upcoming messages if authenticated
@@ -61,21 +73,40 @@ export default function AdminMessages() {
       return;
     }
 
+    setIsLoggingIn(true);
     try {
-      // Test authentication by trying to fetch messages
-      await axiosClient.get('/api/messages?upcoming=true', {
-        headers: { 'Authorization': `Bearer ${adminPassword}` }
+      const response = await axiosClient.post('/api/admin/login', {
+        password: adminPassword.trim()
       });
-      setIsAuthenticated(true);
-      toast({
-        title: 'Login Successful',
-        description: 'You are now authenticated as admin.',
-      });
+      
+      if (response.data.success && response.data.token) {
+        const token = response.data.token;
+        setAuthToken(token);
+        setIsAuthenticated(true);
+        setAdminPassword('');
+        sessionStorage.setItem('adminToken', token);
+        toast({
+          title: 'Login Successful',
+          description: 'You are now authenticated as admin.',
+        });
+      } else {
+        toast({
+          title: 'Authentication Failed',
+          description: response.data.message || 'Invalid credentials.',
+          variant: 'destructive'
+        });
+      }
     } catch (error: any) {
       if (error.response?.status === 401) {
         toast({
           title: 'Authentication Failed',
           description: 'Invalid admin password.',
+          variant: 'destructive'
+        });
+      } else if (error.response?.status === 429) {
+        toast({
+          title: 'Too Many Attempts',
+          description: 'Please wait a few minutes before trying again.',
           variant: 'destructive'
         });
       } else {
@@ -85,6 +116,8 @@ export default function AdminMessages() {
           variant: 'destructive'
         });
       }
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -247,8 +280,9 @@ export default function AdminMessages() {
                 onClick={handleLogin} 
                 className="w-full"
                 data-testid="button-admin-login"
+                disabled={isLoggingIn}
               >
-                Login
+                {isLoggingIn ? 'Logging in...' : 'Login'}
               </Button>
             </div>
           </Card>

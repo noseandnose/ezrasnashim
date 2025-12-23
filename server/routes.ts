@@ -13,6 +13,7 @@ import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { pushRetryQueue, PushRetryQueue } from "./pushRetryQueue";
 import { cacheMiddleware } from "./middleware/cache";
 import { CACHE_TTL, cache } from "./cache/categoryCache";
+import { validateAdminLogin, verifyAdminToken, isJwtConfigured, isAdminConfigured } from "./auth";
 
 // Server-side cache with TTL and request coalescing to prevent API rate limiting
 interface CacheEntry {
@@ -151,11 +152,9 @@ import {
 } from "../shared/schema";
 import { z } from "zod";
 
-// Admin authentication middleware
+// Admin authentication middleware - supports both JWT tokens and legacy password (backward compatible)
 function requireAdminAuth(req: any, res: any, next: any) {
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  
-  if (!adminPassword) {
+  if (!isAdminConfigured()) {
     return res.status(500).json({ 
       message: "Admin authentication not configured" 
     });
@@ -166,13 +165,34 @@ function requireAdminAuth(req: any, res: any, next: any) {
     ? authHeader.slice(7) 
     : null;
   
-  if (!token || token !== adminPassword) {
+  if (!token) {
     return res.status(401).json({ 
-      message: "Unauthorized: Invalid admin credentials" 
+      message: "Unauthorized: No credentials provided" 
     });
   }
   
-  next();
+  // First, try JWT verification if configured
+  if (isJwtConfigured()) {
+    const jwtResult = verifyAdminToken(token);
+    if (jwtResult.valid) {
+      return next();
+    }
+    if (jwtResult.expired) {
+      return res.status(401).json({ 
+        message: "Unauthorized: Token expired, please login again" 
+      });
+    }
+  }
+  
+  // Fallback: Legacy plain password comparison (for backward compatibility)
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (adminPassword && token === adminPassword) {
+    return next();
+  }
+  
+  return res.status(401).json({ 
+    message: "Unauthorized: Invalid admin credentials" 
+  });
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -185,6 +205,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Error cleaning up expired names
     }
   }, 60 * 60 * 1000); // Run every hour
+
+  // Admin login endpoint - returns JWT token on successful authentication
+  app.post("/api/admin/login", async (req, res) => {
+    try {
+      const { password } = req.body;
+      
+      if (!password || typeof password !== 'string') {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Password is required" 
+        });
+      }
+      
+      const result = await validateAdminLogin(password);
+      
+      if (result.success && result.token) {
+        return res.json({ 
+          success: true, 
+          token: result.token,
+          expiresIn: '24h'
+        });
+      }
+      
+      return res.status(401).json({ 
+        success: false, 
+        message: result.error || "Invalid credentials" 
+      });
+    } catch (error) {
+      console.error('Admin login error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: "Login failed" 
+      });
+    }
+  });
+
+  // Admin auth status check - verifies if current token is valid
+  app.get("/api/admin/auth-status", requireAdminAuth, (req, res) => {
+    res.json({ authenticated: true });
+  });
 
   // Calendar download endpoint using GET request to avoid CORS issues
   app.get("/api/download-calendar", async (req, res) => {
