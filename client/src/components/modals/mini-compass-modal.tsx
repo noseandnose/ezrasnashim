@@ -207,19 +207,21 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
               </div>
 
               <div className="absolute top-1/2 left-1/2 z-40 pointer-events-none" style={{ transform: 'translate(-50%, -50%)' }}>
-                <Heart 
-                  className="w-8 h-8 text-blush fill-blush"
+                {/* Heart with white background circle */}
+                <div 
+                  className="w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center"
                   style={{
                     position: 'absolute',
                     left: '50%',
                     top: '50%',
-                    transform: state.isAligned 
-                      ? 'translate(-50%, -50%) scale(1.2)' 
-                      : 'translate(-50%, -50%)',
-                    transition: state.isAligned ? 'transform 0.6s ease-in-out' : 'none',
+                    transform: 'translate(-50%, -50%)',
                     animation: state.isAligned ? 'heartPulse 1.5s ease-in-out infinite' : 'none'
                   }}
-                />
+                >
+                  <Heart 
+                    className={`w-7 h-7 ${state.isAligned ? 'text-rose-500 fill-rose-500' : 'text-blush fill-blush'}`}
+                  />
+                </div>
               </div>
             </div>
 
