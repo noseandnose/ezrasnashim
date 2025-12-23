@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Utensils, Flame, Star, Heart, MapPin, Brain, ChevronDown, ChevronUp, Sparkles, ChevronRight, GraduationCap } from "lucide-react";
+import { Utensils, Flame, Star, Heart, MapPin, Brain, ChevronDown, ChevronUp, ChevronRight, GraduationCap } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
@@ -190,20 +190,13 @@ export default function TableSection() {
               data-testid="button-gift-of-chatzos-toggle"
             >
               <div className="flex items-center gap-3">
-                {/* Image */}
-                {giftOfChatzos.imageUrl && (
-                  <img 
-                    src={giftOfChatzos.imageUrl} 
-                    alt={giftOfChatzos.title || "The Gift of Chatzos"} 
-                    className="w-10 h-10 rounded-xl object-cover"
-                    loading="lazy"
-                  />
-                )}
-                {!giftOfChatzos.imageUrl && (
-                  <div className="bg-gradient-feminine p-2 rounded-full">
-                    <Sparkles className="text-white" size={16} />
-                  </div>
-                )}
+                {/* Static thumbnail image for collapsed state */}
+                <img 
+                  src="https://static.wixstatic.com/media/3b5ba3_483913622d834e2593a165e13fe65ab1~mv2.png/v1/fill/w_102,h_102,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Group%2017%20(1).png" 
+                  alt={giftOfChatzos.title || "The Gift of Chatzos"} 
+                  className="w-10 h-10 rounded-xl object-cover"
+                  loading="lazy"
+                />
                 
                 {/* Title and Subtitle */}
                 <div className="flex-grow">
