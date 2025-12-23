@@ -171,6 +171,7 @@ export default function TorahSection({}: TorahSectionProps) {
       <div className="bg-yellow-100 p-2 m-2 rounded text-xs text-black font-mono">
         <p>Loading: {torahLoading ? 'YES' : 'NO'}</p>
         <p>Error: {torahError ? 'YES' : 'NO'}</p>
+        <p>ErrorMsg: {torahErrorDetails?.message || 'none'}</p>
         <p>Has Data: {torahSummary ? 'YES' : 'NO'}</p>
         <p>Pirkei: {pirkeiAvot?.text?.substring(0, 30) || 'none'}</p>
         <p>Halacha: {halachaContent?.title?.substring(0, 30) || 'none'}</p>
