@@ -250,9 +250,78 @@ export interface IStorage {
     totalBooksCompleted: number;
     totalModalCompletions: Record<string, number>;
   }>;
+  recalculateDailyStats(date: string): Promise<DailyStats>;
+  getMonthlyStats(year: number, month: number): Promise<{
+    totalUsers: number;
+    totalPageViews: number;
+    totalTehillimCompleted: number;
+    totalNamesProcessed: number;
+    totalBooksCompleted: number;
+    totalTzedakaActs: number;
+    totalActs: number;
+    totalMeditationsCompleted: number;
+    totalModalCompletions: Record<string, number>;
+  }>;
+  recalculateAllHistoricalStats(): Promise<{ updated: number; dates: string[] }>;
+  getDateRangeStats(startDate: string, endDate: string): Promise<{
+    totalUsers: number;
+    totalPageViews: number;
+    totalTehillimCompleted: number;
+    totalNamesProcessed: number;
+    totalBooksCompleted: number;
+    totalTzedakaActs: number;
+    totalActs: number;
+    totalMeditationsCompleted: number;
+    totalModalCompletions: Record<string, number>;
+    moneyRaised: number;
+    activeCampaignTotal: number;
+    putACoinTotal: number;
+    sponsorADayTotal: number;
+    gaveElsewhereCount: number;
+  }>;
+  getComparisonStats(period: 'week' | 'month'): Promise<{
+    current: {
+      totalUsers: number;
+      totalActs: number;
+      totalTehillimCompleted: number;
+      totalNamesProcessed: number;
+      totalBooksCompleted: number;
+      totalTzedakaActs: number;
+      totalMeditationsCompleted: number;
+      moneyRaised: number;
+      activeCampaignTotal: number;
+      putACoinTotal: number;
+      sponsorADayTotal: number;
+      totalModalCompletions: Record<string, number>;
+    };
+    previous: {
+      totalUsers: number;
+      totalActs: number;
+      totalTehillimCompleted: number;
+      totalNamesProcessed: number;
+      totalBooksCompleted: number;
+      totalTzedakaActs: number;
+      totalMeditationsCompleted: number;
+      moneyRaised: number;
+      activeCampaignTotal: number;
+      putACoinTotal: number;
+      sponsorADayTotal: number;
+      totalModalCompletions: Record<string, number>;
+    };
+    changes: {
+      users: number;
+      acts: number;
+      tehillim: number;
+      names: number;
+      books: number;
+      tzedaka: number;
+      meditations: number;
+      moneyRaised: number;
+    };
+  }>;
 
   // Community impact methods
-  getCommunityImpact(): Promise<{
+  getCommunityImpact(period?: string): Promise<{
     totalDaysSponsored: number;
     totalCampaigns: number;
     totalRaised: number;
