@@ -69,7 +69,7 @@ Header layout: Search icon placed next to hamburger menu for quick access. Heade
 - **Mobile App Support**: Enhanced detection for mobile app wrappers.
 - **PWA Enhancements**: Bottom navigation, service worker cache updates, haptic feedback, smart install prompts.
 - **Performance**: Lazy loading, code splitting, compression, optimized build, font optimization, splash screen optimization, server-side in-memory caching.
-- **Security**: Drizzle ORM for SQL injection prevention, DOMPurify for HTML sanitization.
+- **Security**: Drizzle ORM for SQL injection prevention, DOMPurify for HTML sanitization. Admin authentication uses JWT tokens (24h expiry) with bcrypt password hashing. Rate limiting on login endpoint (10 attempts per 15 minutes). Legacy ADMIN_PASSWORD bearer auth temporarily retained for backward compatibility during transition - should be removed once all clients migrate to JWT.
 - **Deployment**: Static frontend (S3), backend (ECS), PostgreSQL (Supabase).
 - **Automated Cache Busting**: Version control and cache management with build timestamp, `/api/version` endpoint, and `stale-while-revalidate` service worker. Aggressive update distribution with immediate user prompts and forced hard reloads for critical updates. Push notification registration error handling for restricted environments.
 
