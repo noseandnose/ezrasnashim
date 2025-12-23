@@ -143,6 +143,7 @@ import {
   baseParshaVortSchema,
   insertParshaVortSchema,
   insertTorahClassSchema,
+  insertLifeClassSchema,
   insertTableInspirationSchema,
   insertMarriageInsightSchema,
   insertNishmasTextSchema,
@@ -2145,6 +2146,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error deleting Torah class:', error);
       return res.status(500).json({ message: "Failed to delete Torah class" });
+    }
+  });
+
+  // Life Classes routes
+  app.get("/api/life-classes", async (req, res) => {
+    try {
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
+      const classes = await storage.getLifeClassesByDate(today);
+      res.json(classes);
+    } catch (error) {
+      console.error('Error fetching Life classes:', error);
+      return res.status(500).json({ message: "Failed to fetch Life classes" });
+    }
+  });
+
+  app.get("/api/life-classes/all", requireAdminAuth, async (req, res) => {
+    try {
+      const classes = await storage.getAllLifeClasses();
+      res.json(classes);
+    } catch (error) {
+      console.error('Error fetching all Life classes:', error);
+      return res.status(500).json({ message: "Failed to fetch Life classes" });
+    }
+  });
+
+  app.post("/api/life-classes", requireAdminAuth, async (req, res) => {
+    try {
+      const validatedData = insertLifeClassSchema.parse(req.body);
+      const lifeClass = await storage.createLifeClass(validatedData);
+      res.json(lifeClass);
+    } catch (error) {
+      console.error('Error creating Life class:', error);
+      return res.status(500).json({ message: "Failed to create Life class" });
+    }
+  });
+
+  app.put("/api/life-classes/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID" });
+      }
+      
+      const validatedData = insertLifeClassSchema.partial().parse(req.body);
+      const lifeClass = await storage.updateLifeClass(id, validatedData);
+      
+      if (!lifeClass) {
+        return res.status(404).json({ message: "Life class not found" });
+      }
+      
+      res.json(lifeClass);
+    } catch (error) {
+      console.error('Error updating Life class:', error);
+      return res.status(500).json({ message: "Failed to update Life class" });
+    }
+  });
+
+  app.delete("/api/life-classes/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID" });
+      }
+      
+      const success = await storage.deleteLifeClass(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Life class not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting Life class:', error);
+      return res.status(500).json({ message: "Failed to delete Life class" });
     }
   });
 
