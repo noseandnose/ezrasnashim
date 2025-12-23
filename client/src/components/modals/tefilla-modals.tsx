@@ -881,7 +881,7 @@ function ShachrisFullscreenContent({
             {/* Section Header - Clickable */}
             <button
               onClick={() => handleSectionToggle(sectionIndex)}
-              className="w-full px-6 py-4 text-left hover:bg-blush/5 transition-colors flex items-center justify-between"
+              className="w-full px-4 py-3 text-left hover:bg-blush/5 transition-colors flex items-center justify-between"
             >
               <h3 className="platypi-bold text-lg text-black">
                 {sectionTitle}
@@ -895,7 +895,7 @@ function ShachrisFullscreenContent({
 
             {/* Section Content - Collapsible */}
             {isExpanded && (
-              <div className="px-6 pb-6 space-y-4">
+              <div className="px-4 pb-4 space-y-4">
                 {sectionPrayers.map((prayer: MorningPrayer, prayerIndex: number) => (
                   <div key={prayerIndex}>
                     <div
@@ -918,7 +918,7 @@ function ShachrisFullscreenContent({
                   className={`w-full py-3 rounded-xl platypi-medium border-0 mt-4 ${
                     isModalComplete('shacharis') 
                       ? 'bg-sage text-white cursor-not-allowed opacity-70' 
-                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
+                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
                   }`}
                 >
                   {isModalComplete('shacharis') ? 'Completed Today' : 'Complete'}
