@@ -120,7 +120,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     
     // Helper to add a flower position with collision avoidance
     const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', index: number) => {
-      const scale = 0.35 + (seededRandom() * 0.2); // 0.35 to 0.55 scale
+      const scale = 0.40 + (seededRandom() * 0.35); // 0.40 to 0.75 scale (5% bigger, more variation)
       const flipped = seededRandom() > 0.5;
       
       // Try up to 20 times to find a non-colliding position
