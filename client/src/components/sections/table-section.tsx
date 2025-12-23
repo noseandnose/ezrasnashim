@@ -155,6 +155,7 @@ export default function TableSection() {
                   src={customCandleIcon} 
                   alt="Candle lighting" 
                   className="w-5 h-4 object-contain"
+                  loading="lazy"
                 />
                 <p className="platypi-bold text-base text-black platypi-medium">
                   {showShabbosError ? "--:--" : 
@@ -195,6 +196,7 @@ export default function TableSection() {
                     src={giftOfChatzos.imageUrl} 
                     alt={giftOfChatzos.title || "The Gift of Chatzos"} 
                     className="w-10 h-10 rounded-xl object-cover"
+                    loading="lazy"
                   />
                 )}
                 {!giftOfChatzos.imageUrl && (
@@ -231,6 +233,7 @@ export default function TableSection() {
                     src={giftOfChatzos.imageUrl} 
                     alt={giftOfChatzos.title || "The Gift of Chatzos"} 
                     className="w-full rounded-xl object-cover mb-3"
+                    loading="lazy"
                   />
                 )}
                 
@@ -296,6 +299,7 @@ export default function TableSection() {
                   src={currentLifeClass.imageUrl} 
                   alt={currentLifeClass.title} 
                   className="w-10 h-10 rounded-xl object-cover"
+                  loading="lazy"
                 />
               ) : (
                 <div className="bg-gradient-feminine p-2 rounded-full">

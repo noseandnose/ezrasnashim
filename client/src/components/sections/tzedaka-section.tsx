@@ -63,6 +63,7 @@ function CommunityImpactButton({ impactContent, isLoading }: { impactContent: Co
             src={impactContent.imageUrl} 
             alt={impactContent.title}
             className="w-full h-full rounded-full object-cover"
+            loading="lazy"
           />
         </div>
         <div className="flex-grow">

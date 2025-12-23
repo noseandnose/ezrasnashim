@@ -247,6 +247,7 @@ export default function TorahSection({}: TorahSectionProps) {
                   src={currentTorahClass.imageUrl} 
                   alt={currentTorahClass.title} 
                   className="w-10 h-10 rounded-xl object-cover"
+                  loading="lazy"
                 />
               ) : (
                 <div className="bg-gradient-feminine p-2 rounded-full">
@@ -417,6 +418,7 @@ export default function TorahSection({}: TorahSectionProps) {
                       src={customCandleIcon} 
                       alt="Learn Shabbos" 
                       className={`w-[18px] h-[18px] object-contain ${showComingSoon ? 'opacity-60' : ''}`}
+                      loading="lazy"
                     />
                   ) : (
                     <Icon className={`${hasContent ? iconColor : 'text-gray-500'}`} size={18} strokeWidth={1.5} />

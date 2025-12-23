@@ -457,6 +457,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
                     src={todaysSpecial.imageUrl} 
                     alt={todaysSpecial.title || "Today's Special"} 
                     className="w-10 h-10 rounded-xl object-cover"
+                    loading="lazy"
                   />
                 )}
                 {!todaysSpecial.imageUrl && (
@@ -665,6 +666,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             alt="" 
             className="absolute inset-0 w-full h-full z-[1]"
             style={{ objectFit: 'cover' }}
+            loading="lazy"
           />
           
           {/* Flowers - scattered ON TOP of grass */}
@@ -685,6 +687,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
                 bottom: `${flower.bottom}%`,
                 transform: `scale(${flower.scale})${flower.flipped ? ' scaleX(-1)' : ''}`
               }}
+              loading="lazy"
             />
           ))}
           
