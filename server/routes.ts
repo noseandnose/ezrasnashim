@@ -14,6 +14,7 @@ import { pushRetryQueue, PushRetryQueue } from "./pushRetryQueue";
 import { cacheMiddleware } from "./middleware/cache";
 import { CACHE_TTL, cache } from "./cache/categoryCache";
 import { validateAdminLogin, verifyAdminToken, isJwtConfigured, isAdminConfigured } from "./auth";
+import { registerUtilityRoutes } from "./routes/utility";
 
 // Server-side cache with TTL and request coalescing to prevent API rate limiting
 interface CacheEntry {
@@ -203,6 +204,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Error cleaning up expired names
     }
   }, 60 * 60 * 1000); // Run every hour
+
+  // Register utility routes (healthcheck, version, root handler)
+  registerUtilityRoutes(app, { requireAdminAuth });
 
   // Admin login endpoint - returns JWT token on successful authentication
   app.post("/api/admin/login", async (req, res) => {
@@ -4844,154 +4848,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching Hebrew date:', error);
       return res.status(500).json({ message: "Failed to fetch Hebrew date data" });
-    }
-  });
-
-  // Enhanced health check with configuration status
-  app.get("/healthcheck", (req, res) => {
-    const isProduction = process.env.NODE_ENV === 'production';
-    
-    // Check critical services
-    const health = {
-      status: "OK",
-      timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development',
-      services: {
-        database: !!process.env.DATABASE_URL,
-        stripe: !!process.env.STRIPE_SECRET_KEY,
-        pushNotifications: !!(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY),
-        admin: !!process.env.ADMIN_PASSWORD
-      }
-    };
-    
-    // In production, include a warnings array for missing optional services
-    if (isProduction) {
-      const warnings: string[] = [];
-      if (!health.services.stripe) warnings.push('Stripe not configured - donations disabled');
-      if (!health.services.pushNotifications) warnings.push('Push notifications not configured');
-      if (!health.services.admin) warnings.push('Admin panel not configured');
-      
-      if (warnings.length > 0) {
-        (health as any).warnings = warnings;
-      }
-    }
-    
-    res.json(health);
-  })
-
-  // Development: Inform about frontend port  
-  if (process.env.NODE_ENV === 'development') {
-    app.get("/", (req, res) => {
-      res.send(`
-        <html>
-          <head>
-            <title>Ezras Nashim API Server</title>
-            <style>
-              body { font-family: Platypi, serif; text-align: center; padding: 50px; background: #f5f5f5; }
-              .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-              h1 { color: #333; margin-bottom: 20px; }
-              p { color: #666; line-height: 1.6; margin-bottom: 15px; }
-              .frontend-link { display: inline-block; padding: 12px 24px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-              .frontend-link:hover { background: #0056b3; }
-              .api-status { color: #28a745; font-weight: bold; }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <h1>🌺 Ezras Nashim API Server</h1>
-              <p class="api-status">✅ API Server Running (Port 5000)</p>
-              <p>This is the backend API server. To access the Ezras Nashim application interface, please use:</p>
-              <a href="https://${req.get('host')?.replace(':5000', ':5173')}" class="frontend-link">
-                Access Frontend Application (Port 5173)
-              </a>
-              <p><small>The frontend runs on port 5173 during development.</small></p>
-            </div>
-          </body>
-        </html>
-      `);
-    });
-  } else {
-    // Production: Serve API status  
-    app.get("/", (req, res) => {
-      res.json({ status: "OK" });
-    });
-  }
-  
-  // Version endpoint for PWA update checking - AUTOMATIC VERSIONING
-  // Automatically generate version based on deployment time
-  const SERVER_START_TIME = Date.now();
-  const DEPLOYMENT_DATE = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-  const DEPLOYMENT_TIME = Math.floor(SERVER_START_TIME / 1000); // Unix timestamp in seconds
-  
-  // Generate automatic version: date + time-based
-  const generateAutoVersion = (): string => {
-    const date = new Date();
-    const year = date.getFullYear().toString().slice(-2); // Last 2 digits of year
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hour = String(date.getHours()).padStart(2, '0');
-    const minute = String(date.getMinutes()).padStart(2, '0');
-    
-    return `${year}.${month}.${day}.${hour}${minute}`;
-  };
-  
-  const APP_VERSION = process.env.APP_VERSION || generateAutoVersion();
-  
-  // Use deployment timestamp as version timestamp for automatic updates
-  const getVersionTimestamp = (): number => {
-    // In production, use server start time as deployment timestamp
-    // This ensures each deployment gets a unique timestamp
-    return SERVER_START_TIME;
-  };
-  
-  app.get("/api/version", (req, res) => {
-    // Aggressive no-cache headers to ensure users always get fresh version info
-    res.set({
-      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
-      'Pragma': 'no-cache',
-      'Expires': '0',
-      'Surrogate-Control': 'no-store'
-    });
-    
-    const versionTimestamp = getVersionTimestamp();
-    const version = {
-      timestamp: versionTimestamp,
-      version: APP_VERSION,
-      buildDate: new Date(versionTimestamp).toISOString(),
-      serverUptime: Date.now() - SERVER_START_TIME,
-      // Support for critical updates - set these env vars when deploying urgent fixes
-      isCritical: process.env.CRITICAL_UPDATE === 'true',
-      releaseNotes: process.env.RELEASE_NOTES || undefined
-    };
-    res.json(version);
-  });
-
-  // Admin endpoint to regenerate cache version - Forces PWA update
-  app.post("/api/regenerate-cache-version", requireAdminAuth, async (req, res) => {
-    try {
-      const { execSync } = await import('child_process');
-      const __dirname = path.dirname(fileURLToPath(import.meta.url));
-      const scriptPath = path.join(__dirname, '../scripts/generate-version.js');
-      
-      // Execute the version generation script
-      const output = execSync(`node ${scriptPath}`, { encoding: 'utf-8' });
-      
-      console.log('[Admin] Cache version regenerated:', output);
-      
-      res.status(200).json({
-        success: true,
-        message: 'Cache version regenerated successfully',
-        output: output.trim(),
-        newVersion: `v1.0.0-${Date.now()}`,
-        note: 'Users will receive update prompt on next app focus'
-      });
-    } catch (error: any) {
-      console.error('[Admin] Failed to regenerate cache version:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to regenerate cache version',
-        error: error.message
-      });
     }
   });
 
