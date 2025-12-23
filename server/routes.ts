@@ -3,6 +3,8 @@ import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
 import adminMessagesRouter from "./routes/admin-messages";
+import { createMarriageInsightsRouter } from "./routes/admin-marriage-insights";
+import { createTorahClassesRouter, createLifeClassesRouter } from "./routes/admin-classes";
 import { db } from "./db";
 import { and, eq, gt } from "drizzle-orm";
 import serverAxiosClient from "./axiosClient";
@@ -247,6 +249,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Mount modular route files
   app.use("/api/messages", adminMessagesRouter);
+  app.use("/api/marriage-insights", createMarriageInsightsRouter(storage));
+  app.use("/api/torah-classes", createTorahClassesRouter(storage));
+  app.use("/api/life-classes", createLifeClassesRouter(storage));
 
   // Calendar download endpoint using GET request to avoid CORS issues
   app.get("/api/download-calendar", async (req, res) => {
@@ -1312,69 +1317,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Marriage Insights routes
-  app.get("/api/marriage-insights/:date", 
-    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'marriage-insights' }),
-    async (req, res) => {
-      try {
-        const { date } = req.params;
-        const insight = await storage.getMarriageInsightByDate(date);
-        res.json(insight || null);
-      } catch (error) {
-        return res.status(500).json({ message: "Failed to fetch marriage insight" });
-      }
-    }
-  );
-
-  app.post("/api/marriage-insights", requireAdminAuth, async (req, res) => {
-    try {
-      const validatedData = insertMarriageInsightSchema.parse(req.body);
-      const insight = await storage.createMarriageInsight(validatedData);
-      cache.clearCategory('marriage-insights');
-      res.json(insight);
-    } catch (error) {
-      console.error("Failed to create marriage insight:", error);
-      return res.status(500).json({ message: "Failed to create marriage insight" });
-    }
-  });
-
-  app.get("/api/marriage-insights", requireAdminAuth, async (req, res) => {
-    try {
-      const insights = await storage.getAllMarriageInsights();
-      res.json(insights);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch marriage insights" });
-    }
-  });
-
-  app.patch("/api/marriage-insights/:id", requireAdminAuth, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const validatedData = insertMarriageInsightSchema.partial().parse(req.body);
-      const insight = await storage.updateMarriageInsight(id, validatedData);
-      if (!insight) {
-        return res.status(404).json({ message: "Marriage insight not found" });
-      }
-      cache.clearCategory('marriage-insights');
-      res.json(insight);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to update marriage insight" });
-    }
-  });
-
-  app.delete("/api/marriage-insights/:id", requireAdminAuth, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const success = await storage.deleteMarriageInsight(id);
-      if (!success) {
-        return res.status(404).json({ message: "Marriage insight not found" });
-      }
-      cache.clearCategory('marriage-insights');
-      res.json({ message: "Marriage insight deleted successfully" });
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to delete marriage insight" });
-    }
-  });
+  // Marriage Insights routes - MOVED TO server/routes/admin-marriage-insights.ts
+  // Routes mounted at /api/marriage-insights via createMarriageInsightsRouter
 
   // Object storage endpoints for file uploads
   app.post("/api/objects/upload", requireAdminAuth, async (req, res) => {
@@ -2132,163 +2076,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Torah Classes routes
-  app.get("/api/torah-classes", async (req, res) => {
-    try {
-      const now = new Date();
-      const hours = now.getHours();
-      if (hours < 2) {
-        now.setDate(now.getDate() - 1);
-      }
-      const today = now.toISOString().split('T')[0];
-      const classes = await storage.getTorahClassesByDate(today);
-      res.json(classes);
-    } catch (error) {
-      console.error('Error fetching Torah classes:', error);
-      return res.status(500).json({ message: "Failed to fetch Torah classes" });
-    }
-  });
+  // Torah Classes routes - MOVED TO server/routes/admin-classes.ts
+  // Routes mounted at /api/torah-classes via createTorahClassesRouter
 
-  app.get("/api/torah-classes/all", requireAdminAuth, async (req, res) => {
-    try {
-      const classes = await storage.getAllTorahClasses();
-      res.json(classes);
-    } catch (error) {
-      console.error('Error fetching all Torah classes:', error);
-      return res.status(500).json({ message: "Failed to fetch Torah classes" });
-    }
-  });
-
-  app.post("/api/torah-classes", requireAdminAuth, async (req, res) => {
-    try {
-      const validatedData = insertTorahClassSchema.parse(req.body);
-      const torahClass = await storage.createTorahClass(validatedData);
-      res.json(torahClass);
-    } catch (error) {
-      console.error('Error creating Torah class:', error);
-      return res.status(500).json({ message: "Failed to create Torah class" });
-    }
-  });
-
-  app.put("/api/torah-classes/:id", requireAdminAuth, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid ID" });
-      }
-      
-      const validatedData = insertTorahClassSchema.partial().parse(req.body);
-      const torahClass = await storage.updateTorahClass(id, validatedData);
-      
-      if (!torahClass) {
-        return res.status(404).json({ message: "Torah class not found" });
-      }
-      
-      res.json(torahClass);
-    } catch (error) {
-      console.error('Error updating Torah class:', error);
-      return res.status(500).json({ message: "Failed to update Torah class" });
-    }
-  });
-
-  app.delete("/api/torah-classes/:id", requireAdminAuth, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid ID" });
-      }
-      
-      const success = await storage.deleteTorahClass(id);
-      
-      if (!success) {
-        return res.status(404).json({ message: "Torah class not found" });
-      }
-      
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error deleting Torah class:', error);
-      return res.status(500).json({ message: "Failed to delete Torah class" });
-    }
-  });
-
-  // Life Classes routes
-  app.get("/api/life-classes", async (req, res) => {
-    try {
-      const now = new Date();
-      const hours = now.getHours();
-      if (hours < 2) {
-        now.setDate(now.getDate() - 1);
-      }
-      const today = now.toISOString().split('T')[0];
-      const classes = await storage.getLifeClassesByDate(today);
-      res.json(classes);
-    } catch (error) {
-      console.error('Error fetching Life classes:', error);
-      return res.status(500).json({ message: "Failed to fetch Life classes" });
-    }
-  });
-
-  app.get("/api/life-classes/all", requireAdminAuth, async (req, res) => {
-    try {
-      const classes = await storage.getAllLifeClasses();
-      res.json(classes);
-    } catch (error) {
-      console.error('Error fetching all Life classes:', error);
-      return res.status(500).json({ message: "Failed to fetch Life classes" });
-    }
-  });
-
-  app.post("/api/life-classes", requireAdminAuth, async (req, res) => {
-    try {
-      const validatedData = insertLifeClassSchema.parse(req.body);
-      const lifeClass = await storage.createLifeClass(validatedData);
-      res.json(lifeClass);
-    } catch (error) {
-      console.error('Error creating Life class:', error);
-      return res.status(500).json({ message: "Failed to create Life class" });
-    }
-  });
-
-  app.put("/api/life-classes/:id", requireAdminAuth, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid ID" });
-      }
-      
-      const validatedData = insertLifeClassSchema.partial().parse(req.body);
-      const lifeClass = await storage.updateLifeClass(id, validatedData);
-      
-      if (!lifeClass) {
-        return res.status(404).json({ message: "Life class not found" });
-      }
-      
-      res.json(lifeClass);
-    } catch (error) {
-      console.error('Error updating Life class:', error);
-      return res.status(500).json({ message: "Failed to update Life class" });
-    }
-  });
-
-  app.delete("/api/life-classes/:id", requireAdminAuth, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid ID" });
-      }
-      
-      const success = await storage.deleteLifeClass(id);
-      
-      if (!success) {
-        return res.status(404).json({ message: "Life class not found" });
-      }
-      
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error deleting Life class:', error);
-      return res.status(500).json({ message: "Failed to delete Life class" });
-    }
-  });
+  // Life Classes routes - MOVED TO server/routes/admin-classes.ts
+  // Routes mounted at /api/life-classes via createLifeClassesRouter
 
   // Zmanim route that returns parsed and adjusted times
   app.get("/api/zmanim/:location?", async (req, res) => {
