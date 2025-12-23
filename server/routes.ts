@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
+import adminMessagesRouter from "./routes/admin-messages";
 import { db } from "./db";
 import { and, eq, gt } from "drizzle-orm";
 import serverAxiosClient from "./axiosClient";
@@ -243,6 +244,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/auth-status", requireAdminAuth, (req, res) => {
     res.json({ authenticated: true });
   });
+
+  // Mount modular route files
+  app.use("/api/messages", adminMessagesRouter);
 
   // Calendar download endpoint using GET request to avoid CORS issues
   app.get("/api/download-calendar", async (req, res) => {
@@ -5269,88 +5273,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Messages routes - Public endpoint for fetching messages by date (no auth required)
-  app.get("/api/messages/:date", async (req, res) => {
-    try {
-      const { date } = req.params;
-      const message = await storage.getMessageByDate(date);
-      
-      if (!message) {
-        return res.status(404).json({ message: "No message found for this date" });
-      }
-      
-      res.json(message);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch message" });
-    }
-  });
-  
-  // Admin-only endpoints - require authentication
-  app.post("/api/messages", requireAdminAuth, async (req, res) => {
-    try {
-      // Validate request body with Zod schema
-      const validatedData = insertMessagesSchema.parse(req.body);
-      const newMessage = await storage.createMessage(validatedData);
-      res.status(201).json(newMessage);
-    } catch (error: any) {
-      if (error.name === 'ZodError') {
-        return res.status(400).json({ 
-          message: "Invalid message data", 
-          errors: error.errors 
-        });
-      }
-      console.error("Error creating message:", error);
-      res.status(500).json({ message: "Failed to create message" });
-    }
-  });
-
-  app.get("/api/messages", requireAdminAuth, async (req, res) => {
-    try {
-      const { upcoming } = req.query;
-      const messages = upcoming === 'true' 
-        ? await storage.getUpcomingMessages()
-        : await storage.getAllMessages();
-      res.json(messages);
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-      return res.status(500).json({ message: "Failed to fetch messages" });
-    }
-  });
-
-  app.put("/api/messages/:id", requireAdminAuth, async (req, res) => {
-    try {
-      const { id } = req.params;
-      // Validate request body with Zod schema (omit id and timestamps for updates)
-      const updateSchema = insertMessagesSchema.omit({ 
-        id: true, 
-        createdAt: true, 
-        updatedAt: true 
-      });
-      const validatedData = updateSchema.parse(req.body);
-      const updatedMessage = await storage.updateMessage(parseInt(id), validatedData);
-      res.json(updatedMessage);
-    } catch (error: any) {
-      if (error.name === 'ZodError') {
-        return res.status(400).json({ 
-          message: "Invalid message data", 
-          errors: error.errors 
-        });
-      }
-      console.error("Error updating message:", error);
-      res.status(500).json({ message: "Failed to update message" });
-    }
-  });
-
-  app.delete("/api/messages/:id", requireAdminAuth, async (req, res) => {
-    try {
-      const { id } = req.params;
-      await storage.deleteMessage(parseInt(id));
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error deleting message:", error);
-      return res.status(500).json({ message: "Failed to delete message" });
-    }
-  });
+  // Messages routes - MOVED TO server/routes/admin-messages.ts
+  // Routes mounted at /api/messages via adminMessagesRouter
 
   // Scheduled Notification endpoints (admin-only)
   app.get("/api/scheduled-notifications", requireAdminAuth, async (req, res) => {
