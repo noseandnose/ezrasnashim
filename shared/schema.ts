@@ -21,7 +21,9 @@ export const dailyRecipes = pgTable("daily_recipes", {
   attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
   attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  dateIdx: index("daily_recipes_date_idx").on(table.date),
+}));
 
 export const parshaVorts = pgTable("parsha_vorts", {
   id: serial("id").primaryKey(),
@@ -38,7 +40,9 @@ export const parshaVorts = pgTable("parsha_vorts", {
   attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
   attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  dateRangeIdx: index("parsha_vorts_date_range_idx").on(table.fromDate, table.untilDate),
+}));
 
 export const torahClasses = pgTable("torah_classes", {
   id: serial("id").primaryKey(),
@@ -56,7 +60,9 @@ export const torahClasses = pgTable("torah_classes", {
   attributionLogoUrl: text("attribution_logo_url"),
   attributionAboutText: text("attribution_about_text"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  dateRangeIdx: index("torah_classes_date_range_idx").on(table.fromDate, table.untilDate),
+}));
 
 export const lifeClasses = pgTable("life_classes", {
   id: serial("id").primaryKey(),
@@ -74,7 +80,9 @@ export const lifeClasses = pgTable("life_classes", {
   attributionLogoUrl: text("attribution_logo_url"),
   attributionAboutText: text("attribution_about_text"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  dateRangeIdx: index("life_classes_date_range_idx").on(table.fromDate, table.untilDate),
+}));
 
 export const tableInspirations = pgTable("table_inspirations", {
   id: serial("id").primaryKey(),
@@ -96,7 +104,9 @@ export const tableInspirations = pgTable("table_inspirations", {
   attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
   attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  dateRangeIdx: index("table_inspirations_date_range_idx").on(table.fromDate, table.untilDate),
+}));
 
 export const marriageInsights = pgTable("marriage_insights", {
   id: serial("id").primaryKey(),
@@ -124,7 +134,9 @@ export const communityImpact = pgTable("community_impact", {
   imageUrl: text("image_url"),
   videoUrl: text("video_url"), // Optional: video content URL
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  dateRangeIdx: index("community_impact_date_range_idx").on(table.fromDate, table.untilDate),
+}));
 
 // Push notification tables
 export const pushSubscriptions = pgTable("push_subscriptions", {
@@ -247,7 +259,9 @@ export const sponsors = pgTable("sponsors", {
   message: text("message"), // Short message about the person
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  dateIdx: index("sponsors_date_idx").on(table.sponsorshipDate),
+}));
 
 export const nishmasText = pgTable("nishmas_text", {
   id: serial("id").primaryKey(),
@@ -401,7 +415,9 @@ export const featuredContent = pgTable("featured_content", {
   attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
   attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  dateRangeIdx: index("featured_content_date_range_idx").on(table.fromDate, table.untilDate),
+}));
 
 // Today's Special - expandable content bar for home page
 export const todaysSpecial = pgTable("todays_special", {
@@ -416,7 +432,9 @@ export const todaysSpecial = pgTable("todays_special", {
   linkTitle: text("link_title"),
   url: text("url"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  dateRangeIdx: index("todays_special_date_range_idx").on(table.fromDate, table.untilDate),
+}));
 
 export const insertTodaysSpecialSchema = createInsertSchema(todaysSpecial).omit({ id: true, createdAt: true });
 export type InsertTodaysSpecial = z.infer<typeof insertTodaysSpecialSchema>;
