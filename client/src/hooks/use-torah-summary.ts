@@ -44,7 +44,9 @@ export function useTorahSummary() {
     queryKey: ['/api/torah-summary', today],
     queryFn: async () => {
       console.log('[useTorahSummary] Fetching torah summary for date:', today);
-      const response = await fetch(`/api/torah-summary?date=${today}`);
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/torah-summary?date=${today}`
+      );
       if (!response.ok) {
         throw new Error('Failed to fetch torah summary');
       }
