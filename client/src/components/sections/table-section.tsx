@@ -230,7 +230,6 @@ export default function TableSection() {
         {hasGiftContent && giftOfChatzos && (
           <div 
             className="bg-white/80 rounded-xl mt-2 overflow-hidden border border-blush/20"
-            style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}
           >
             {/* Collapsed/Header Bar */}
             <button
