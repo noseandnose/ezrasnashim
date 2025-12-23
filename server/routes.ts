@@ -4937,7 +4937,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Batched homepage data endpoint - reduces initial load requests from 2+ to 1
+  // Batched homepage data endpoint - reduces initial load requests
+  // Now includes: message, sponsor, todaysSpecial (3 calls → 1)
   app.get("/api/home-summary", async (req, res) => {
     try {
       const date = req.query.date as string;
@@ -4949,9 +4950,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const errors: { field: string; error: string }[] = [];
       
       // Fetch all data in parallel with individual error handling
-      const [message, sponsor] = await Promise.allSettled([
+      const [message, sponsor, todaysSpecial] = await Promise.allSettled([
         storage.getMessageByDate(date),
-        storage.getDailySponsor(date)
+        storage.getDailySponsor(date),
+        storage.getTodaysSpecialByDate(date)
       ]);
 
       // Track any errors
@@ -4961,15 +4963,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (sponsor.status === 'rejected') {
         errors.push({ field: 'sponsor', error: sponsor.reason?.message || 'Failed to fetch sponsor' });
       }
+      if (todaysSpecial.status === 'rejected') {
+        errors.push({ field: 'todaysSpecial', error: todaysSpecial.reason?.message || 'Failed to fetch today\'s special' });
+      }
 
       const summary = {
         message: message.status === 'fulfilled' ? message.value : null,
         sponsor: sponsor.status === 'fulfilled' ? sponsor.value : null,
+        todaysSpecial: todaysSpecial.status === 'fulfilled' ? todaysSpecial.value : null,
         errors: errors.length > 0 ? errors : undefined,
         fetchedAt: new Date().toISOString()
       };
 
-      // Set caching: 2 minutes for messages (check frequently), 15 minutes for sponsors
+      // Set caching: 2 minutes for messages (check frequently)
       res.set({
         'Cache-Control': 'public, max-age=120', // 2 minutes
       });

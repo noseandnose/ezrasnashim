@@ -21,9 +21,24 @@ interface Sponsor {
   createdAt: string;
 }
 
+interface TodaysSpecial {
+  id: number;
+  fromDate: string;
+  untilDate: string;
+  title: string;
+  subtitle?: string | null;
+  imageUrl?: string | null;
+  contentEnglish?: string | null;
+  contentHebrew?: string | null;
+  linkTitle?: string | null;
+  url?: string | null;
+  createdAt?: string | null;
+}
+
 interface HomeSummary {
   message: Message | null;
   sponsor: Sponsor | null;
+  todaysSpecial: TodaysSpecial | null;
   errors?: { field: string; error: string }[];
   fetchedAt: string;
 }
