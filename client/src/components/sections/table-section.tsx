@@ -270,6 +270,15 @@ export default function TableSection() {
             {/* Expanded Content */}
             {giftExpanded && (
               <div className="px-3 pb-3">
+                {/* Image above content */}
+                {giftOfChatzos.imageUrl && (
+                  <img 
+                    src={giftOfChatzos.imageUrl} 
+                    alt={giftOfChatzos.title || "The Gift of Chatzos"} 
+                    className="w-full rounded-xl object-cover mb-3"
+                  />
+                )}
+                
                 {/* Content */}
                 <div 
                   className="platypi-regular text-black/80 leading-relaxed text-left"
