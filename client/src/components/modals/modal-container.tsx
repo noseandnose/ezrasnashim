@@ -12,6 +12,7 @@ import { EventsModal } from "./events-modal";
 import MeditationModals from "./meditation-modals";
 import ParshaVortModal from "./parsha-vort-modal";
 import TorahClassModal from "./torah-class-modal";
+import LifeClassModal from "./life-class-modal";
 import DailyChizukModal from "./daily-chizuk-modal";
 import DailyEmunaModal from "./daily-emuna-modal";
 import { useModalStore } from "@/lib/types";
@@ -34,6 +35,7 @@ export default function ModalContainer({ onSectionChange }: ModalContainerProps)
       <MeditationModals />
       <ParshaVortModal />
       <TorahClassModal />
+      <LifeClassModal />
       <DailyChizukModal />
       <DailyEmunaModal />
       {activeModal === 'congratulations' && <CongratulationsModal />}

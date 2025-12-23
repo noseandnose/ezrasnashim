@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Utensils, Flame, Star, Heart, MapPin, Brain, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
+import { Utensils, Flame, Star, Heart, MapPin, Brain, ChevronDown, ChevronUp, Sparkles, ChevronRight, GraduationCap } from "lucide-react";
+import type { LifeClass } from "@shared/schema";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
@@ -50,6 +51,16 @@ export default function TableSection() {
 
   // Check if Gift of Chatzos has content
   const hasGiftContent = giftOfChatzos && giftOfChatzos.contentEnglish;
+
+  // Fetch life classes for today
+  const { data: lifeClasses } = useQuery<LifeClass[]>({
+    queryKey: ['/api/life-classes'],
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+
+  // Get the first available Life class for display
+  const currentLifeClass = lifeClasses?.[0];
 
   const formatGiftMarkdown = (text: string | null | undefined): string => {
     if (!text) return '';
@@ -324,6 +335,42 @@ export default function TableSection() {
               </div>
             )}
           </div>
+        )}
+
+        {/* Life Classes Bar - Only shown when content exists */}
+        {currentLifeClass && (
+          <button 
+            onClick={() => openModal('life-class', 'table')}
+            className="w-full bg-white/80 rounded-xl mt-2 overflow-hidden border border-blush/20 p-3 text-left hover:bg-white/90 transition-colors"
+            style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}
+            data-testid="button-life-class"
+          >
+            <div className="flex items-center gap-3">
+              {/* Image */}
+              {currentLifeClass.imageUrl ? (
+                <img 
+                  src={currentLifeClass.imageUrl} 
+                  alt={currentLifeClass.title} 
+                  className="w-10 h-10 rounded-xl object-cover"
+                />
+              ) : (
+                <div className="bg-gradient-feminine p-2 rounded-full">
+                  <GraduationCap className="text-white" size={16} />
+                </div>
+              )}
+              
+              {/* Title and Subtitle */}
+              <div className="flex-grow">
+                <h3 className="platypi-bold text-sm text-black">{currentLifeClass.title}</h3>
+                {currentLifeClass.subtitle && (
+                  <p className="platypi-regular text-xs text-black/70">{currentLifeClass.subtitle}</p>
+                )}
+              </div>
+              
+              {/* Arrow indicator */}
+              <ChevronRight className="text-black/40" size={18} />
+            </div>
+          </button>
         )}
       </div>
 
