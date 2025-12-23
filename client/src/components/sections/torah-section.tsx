@@ -52,7 +52,19 @@ export default function TorahSection({}: TorahSectionProps) {
   }, []);
   
   // Fetch all Torah content in a single batched request
-  const { data: torahSummary, isLoading: torahLoading } = useTorahSummary();
+  const { data: torahSummary, isLoading: torahLoading, isError: torahError, error: torahErrorDetails } = useTorahSummary();
+  
+  // Debug logging
+  console.log('[TorahSection] Component rendered', {
+    torahLoading,
+    torahError,
+    hasData: !!torahSummary,
+    torahErrorDetails: torahErrorDetails?.message,
+    pirkeiAvotText: torahSummary?.pirkeiAvot?.text?.substring(0, 30),
+    hasHalacha: !!torahSummary?.halacha,
+    hasChizuk: !!torahSummary?.chizuk,
+    hasEmuna: !!torahSummary?.emuna
+  });
   
   // Extract data from the batched response
   const pirkeiAvot = torahSummary?.pirkeiAvot;
@@ -154,6 +166,16 @@ export default function TorahSection({}: TorahSectionProps) {
 
   return (
     <div className="pb-20" data-bridge-container>
+      
+      {/* DEBUG - Visual State Display */}
+      <div className="bg-yellow-100 p-2 m-2 rounded text-xs text-black font-mono">
+        <p>Loading: {torahLoading ? 'YES' : 'NO'}</p>
+        <p>Error: {torahError ? 'YES' : 'NO'}</p>
+        <p>Has Data: {torahSummary ? 'YES' : 'NO'}</p>
+        <p>Pirkei: {pirkeiAvot?.text?.substring(0, 30) || 'none'}</p>
+        <p>Halacha: {halachaContent?.title?.substring(0, 30) || 'none'}</p>
+        <p>Chizuk: {chizukContent?.title?.substring(0, 30) || 'none'}</p>
+      </div>
       
       {/* Main Torah Section - Connected to top bar */}
       <div 
