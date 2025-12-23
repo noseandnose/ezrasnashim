@@ -1205,30 +1205,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   // Shop routes
-  app.get("/api/shop", async (req, res) => {
-    try {
-      const items = await storage.getAllShopItems();
-      res.json(items);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch shop items" });
+  app.get("/api/shop", 
+    cacheMiddleware({ ttl: CACHE_TTL.PIRKEI_AVOT, category: 'shop-items' }),
+    async (req, res) => {
+      try {
+        const items = await storage.getAllShopItems();
+        res.json(items);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch shop items" });
+      }
     }
-  });
+  );
 
-  app.get("/api/shop/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid shop item ID" });
+  app.get("/api/shop/:id", 
+    cacheMiddleware({ ttl: CACHE_TTL.PIRKEI_AVOT, category: 'shop-item' }),
+    async (req, res) => {
+      try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+          return res.status(400).json({ message: "Invalid shop item ID" });
+        }
+        const item = await storage.getShopItemById(id);
+        if (!item) {
+          return res.status(404).json({ message: "Shop item not found" });
+        }
+        res.json(item);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch shop item" });
       }
-      const item = await storage.getShopItemById(id);
-      if (!item) {
-        return res.status(404).json({ message: "Shop item not found" });
-      }
-      res.json(item);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch shop item" });
     }
-  });
+  );
 
   // Hebcal API proxy
   app.get("/api/hebcal/:location?", async (req, res) => {
@@ -1348,15 +1354,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Community impact routes
-  app.get("/api/community/impact/:date", async (req, res) => {
-    try {
-      const { date } = req.params;
-      const impact = await storage.getCommunityImpactByDate(date);
-      res.json(impact || null);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch community impact" });
+  app.get("/api/community/impact/:date", 
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'community-impact' }),
+    async (req, res) => {
+      try {
+        const { date } = req.params;
+        const impact = await storage.getCommunityImpactByDate(date);
+        res.json(impact || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch community impact" });
+      }
     }
-  });
+  );
 
   // Sponsor routes
   app.get("/api/sponsors/:contentType/:date", async (req, res) => {
@@ -1463,14 +1472,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Campaign routes
-  app.get("/api/campaigns/active", async (req, res) => {
-    try {
-      const campaign = await storage.getActiveCampaign();
-      res.json(campaign || null);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch active campaign" });
+  app.get("/api/campaigns/active", 
+    cacheMiddleware({ ttl: CACHE_TTL.TODAYS_SPECIAL, category: 'campaigns-active' }),
+    async (req, res) => {
+      try {
+        const campaign = await storage.getActiveCampaign();
+        res.json(campaign || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch active campaign" });
+      }
     }
-  });
+  );
 
   app.get("/api/campaigns", async (req, res) => {
     try {
@@ -1491,33 +1503,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Daily recipe routes
-  app.get("/api/table/recipe/:date", async (req, res) => {
-    try {
-      const { date } = req.params;
-      const recipe = await storage.getDailyRecipeByDate(date);
-      res.json(recipe || null);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch daily recipe" });
-    }
-  });
-
-  app.get("/api/table/recipe", async (req, res) => {
-    try {
-      // Get current date
-      // Day starts at 02:00 local time for analytics
-      const now = new Date();
-      const hours = now.getHours();
-      if (hours < 2) {
-        now.setDate(now.getDate() - 1);
+  app.get("/api/table/recipe/:date", 
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'daily-recipes' }),
+    async (req, res) => {
+      try {
+        const { date } = req.params;
+        const recipe = await storage.getDailyRecipeByDate(date);
+        res.json(recipe || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch daily recipe" });
       }
-      const today = now.toISOString().split('T')[0];
-      
-      const recipe = await storage.getDailyRecipeByDate(today);
-      res.json(recipe || null);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch daily recipe" });
     }
-  });
+  );
+
+  app.get("/api/table/recipe", 
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'daily-recipes-today' }),
+    async (req, res) => {
+      try {
+        // Get current date
+        // Day starts at 02:00 local time for analytics
+        const now = new Date();
+        const hours = now.getHours();
+        if (hours < 2) {
+          now.setDate(now.getDate() - 1);
+        }
+        const today = now.toISOString().split('T')[0];
+        
+        const recipe = await storage.getDailyRecipeByDate(today);
+        res.json(recipe || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch daily recipe" });
+      }
+    }
+  );
 
   app.post("/api/table/recipe", requireAdminAuth, async (req, res) => {
     try {
@@ -1550,32 +1568,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/table/vort/:week", async (req, res) => {
-    try {
-      const { week } = req.params;
-      const vort = await storage.getParshaVortByWeek(week);
-      res.json(vort || null);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch Parsha vort" });
-    }
-  });
-
-  app.get("/api/table/vort", async (req, res) => {
-    try {
-      // Day starts at 02:00 local time for analytics
-      const now = new Date();
-      const hours = now.getHours();
-      if (hours < 2) {
-        now.setDate(now.getDate() - 1);
+  app.get("/api/table/vort/:week", 
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'parsha-vorts' }),
+    async (req, res) => {
+      try {
+        const { week } = req.params;
+        const vort = await storage.getParshaVortByWeek(week);
+        res.json(vort || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch Parsha vort" });
       }
-      const today = now.toISOString().split('T')[0];
-      const vorts = await storage.getParshaVortsByDate(today);
-      res.json(vorts);
-    } catch (error) {
-      console.error('Error fetching Parsha vorts:', error);
-      return res.status(500).json({ message: "Failed to fetch Parsha vorts" });
     }
-  });
+  );
+
+  app.get("/api/table/vort", 
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'parsha-vorts-today' }),
+    async (req, res) => {
+      try {
+        // Day starts at 02:00 local time for analytics
+        const now = new Date();
+        const hours = now.getHours();
+        if (hours < 2) {
+          now.setDate(now.getDate() - 1);
+        }
+        const today = now.toISOString().split('T')[0];
+        const vorts = await storage.getParshaVortsByDate(today);
+        res.json(vorts);
+      } catch (error) {
+        console.error('Error fetching Parsha vorts:', error);
+        return res.status(500).json({ message: "Failed to fetch Parsha vorts" });
+      }
+    }
+  );
 
   app.post("/api/table/vort", requireAdminAuth, async (req, res) => {
     try {
@@ -1660,21 +1684,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Torah Classes routes
-  app.get("/api/torah-classes", async (req, res) => {
-    try {
-      const now = new Date();
-      const hours = now.getHours();
-      if (hours < 2) {
-        now.setDate(now.getDate() - 1);
+  app.get("/api/torah-classes", 
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'torah-classes-today' }),
+    async (req, res) => {
+      try {
+        const now = new Date();
+        const hours = now.getHours();
+        if (hours < 2) {
+          now.setDate(now.getDate() - 1);
+        }
+        const today = now.toISOString().split('T')[0];
+        const classes = await storage.getTorahClassesByDate(today);
+        res.json(classes);
+      } catch (error) {
+        console.error('Error fetching Torah classes:', error);
+        return res.status(500).json({ message: "Failed to fetch Torah classes" });
       }
-      const today = now.toISOString().split('T')[0];
-      const classes = await storage.getTorahClassesByDate(today);
-      res.json(classes);
-    } catch (error) {
-      console.error('Error fetching Torah classes:', error);
-      return res.status(500).json({ message: "Failed to fetch Torah classes" });
     }
-  });
+  );
 
   app.get("/api/torah-classes/all", requireAdminAuth, async (req, res) => {
     try {
