@@ -101,32 +101,28 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     const positions: { type: 'torah' | 'tefilla' | 'tzedaka'; left: number; bottom: number; flipped: boolean; scale: number; overallIndex: number }[] = [];
     
     // Create a seeded random generator for a specific flower
-    const getFlowerRandom = (type: string, index: number) => {
-      // Unique seed per flower type and index
+    const getFlowerRandom = (type: string, index: number, overallIdx: number) => {
+      // Unique seed combining type, index, and overall position for more variety
       const baseSeed = type === 'torah' ? 100 : type === 'tefilla' ? 200 : 300;
-      let seed = baseSeed + index * 17;
+      let seed = baseSeed + index * 17 + overallIdx * 37;
       return () => {
         seed = (seed * 9301 + 49297) % 233280;
         return seed / 233280;
       };
     };
     
-    // Predefined horizontal slots to ensure flowers don't overlap
-    const slots = [15, 35, 55, 75, 90];
-    let slotIndex = 0;
     let overallFlowerIndex = 1; // 1-based overall index for milestone tracking
     
-    // Helper to add a flower with stable position
+    // Helper to add a flower with truly random position
     const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', index: number) => {
-      const random = getFlowerRandom(type, index);
+      const random = getFlowerRandom(type, index, overallFlowerIndex);
       // Random scale for size variation (0.65 to 1.05)
       const scale = 0.65 + (random() * 0.4);
       const flipped = random() > 0.5;
       // Stems start near bottom (10 to 15% from bottom)
       const bottom = 10 + random() * 5;
-      // Use slot position with small random offset for natural look
-      const left = slots[slotIndex % slots.length] + (random() * 10 - 5);
-      slotIndex++;
+      // Truly random horizontal position across full width (5% to 95%)
+      const left = 5 + random() * 90;
       
       positions.push({ type, left, bottom, flipped, scale, overallIndex: overallFlowerIndex });
       overallFlowerIndex++;
@@ -154,36 +150,58 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const { coordinates, permissionDenied } = useGeolocation();
   const { data: hebrewDate } = useHebrewDateWithShkia(jewishTimesQuery.data?.shkia);
 
-  // Get time-appropriate greeting
+  // Helper to check if current time is after tzais hakochavim (nightfall)
+  const isAfterTzais = (): boolean => {
+    const tzaisStr = jewishTimesQuery.data?.tzaitHakochavim;
+    if (!tzaisStr) return new Date().getHours() >= 18; // Fallback to 6 PM if no data
+    
+    const now = new Date();
+    const match = tzaisStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!match) return now.getHours() >= 18;
+    
+    let hours = parseInt(match[1]);
+    const minutes = parseInt(match[2]);
+    const isPM = match[3].toUpperCase() === 'PM';
+    
+    if (isPM && hours !== 12) hours += 12;
+    if (!isPM && hours === 12) hours = 0;
+    
+    const tzaisTime = new Date(now);
+    tzaisTime.setHours(hours, minutes, 0, 0);
+    
+    return now >= tzaisTime;
+  };
+
+  // Get time-appropriate greeting (evening starts at tzais hakochavim)
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good Morning";
-    if (hour < 18) return "Good Afternoon";
-    return "Good Evening";
+    if (isAfterTzais()) return "Good Evening";
+    return "Good Afternoon";
   };
 
   // Get time-appropriate background for garden
   const getGardenBackground = () => {
     const hour = new Date().getHours();
     if (hour < 12) return morningBackground;
-    if (hour < 18) return afternoonBackground;
-    return nightBackground;
+    if (isAfterTzais()) return nightBackground;
+    return afternoonBackground;
   };
 
   // Get time-appropriate background for prayer button
   const getPrayerButtonBackground = () => {
     const hour = new Date().getHours();
     if (hour < 12) return prayerMorningBg;
-    if (hour < 18) return prayerAfternoonBg;
-    return prayerNightBg;
+    if (isAfterTzais()) return prayerNightBg;
+    return prayerAfternoonBg;
   };
 
   // Get time-appropriate background for shkia button
   const getShkiaButtonBackground = () => {
     const hour = new Date().getHours();
     if (hour < 12) return shkiaMorningBg;
-    if (hour < 18) return shkiaAfternoonBg;
-    return shkiaNightBg;
+    if (isAfterTzais()) return shkiaNightBg;
+    return shkiaAfternoonBg;
   };
 
   // Use batched home summary for better performance (message, sponsor, todaysSpecial in one call)
