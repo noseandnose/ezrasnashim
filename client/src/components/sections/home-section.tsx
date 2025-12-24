@@ -113,8 +113,8 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
       // Random scale for size variation (0.65 to 1.05)
       const scale = 0.65 + (random() * 0.4);
       const flipped = random() > 0.5;
-      // Stems start near bottom (5 to 15% from bottom)
-      const bottom = 5 + random() * 10;
+      // Stems start near bottom (10 to 20% from bottom)
+      const bottom = 10 + random() * 10;
       // Use slot position with small random offset for natural look
       const left = slots[slotIndex % slots.length] + (random() * 10 - 5);
       slotIndex++;
