@@ -115,11 +115,12 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     
     // Helper to add a flower position with collision avoidance
     const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', _index: number) => {
-      // Random scale for size variation (0.6 to 1.1)
-      const scale = 0.6 + (seededRandom() * 0.5);
+      // Random scale for size variation (0.7 to 1.2)
+      const scale = 0.7 + (seededRandom() * 0.5);
       const flipped = seededRandom() > 0.5;
-      // Random height offset for natural variation (40-70% from bottom)
-      const bottom = 40 + seededRandom() * 30;
+      // Random height offset - flowers grow from grass level (5-25% from bottom)
+      // This positions stems behind grass, with heads peeking out above
+      const bottom = 5 + seededRandom() * 20;
       
       // Try up to 20 times to find a non-colliding horizontal position
       for (let attempt = 0; attempt < 20; attempt++) {
@@ -678,8 +679,8 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               className="absolute z-[1]"
               style={{ 
                 left: `${flower.left}%`,
-                bottom: `${flower.bottom - 15}%`,
-                width: `${60 * flower.scale}px`,
+                bottom: `${flower.bottom}%`,
+                width: `${70 * flower.scale}px`,
                 height: 'auto',
                 transform: `translateX(-50%)${flower.flipped ? ' scaleX(-1)' : ''}`,
                 transformOrigin: 'bottom center'
