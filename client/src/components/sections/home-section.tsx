@@ -21,6 +21,9 @@ import milestone20Flower from "@assets/20_1766583559368.png";
 import prayerMorningBg from "@assets/Morning_1766585505566.png";
 import prayerAfternoonBg from "@assets/Afternoon_1766585505566.png";
 import prayerNightBg from "@assets/Night_1766585505565.png";
+import shkiaMorningBg from "@assets/Morning_1766586713115.png";
+import shkiaAfternoonBg from "@assets/Afternoon_1766586713114.png";
+import shkiaNightBg from "@assets/Night_1766586713110.png";
 
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
@@ -173,6 +176,14 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     if (hour < 12) return prayerMorningBg;
     if (hour < 18) return prayerAfternoonBg;
     return prayerNightBg;
+  };
+
+  // Get time-appropriate background for shkia button
+  const getShkiaButtonBackground = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return shkiaMorningBg;
+    if (hour < 18) return shkiaAfternoonBg;
+    return shkiaNightBg;
   };
 
   // Use batched home summary for better performance (message, sponsor, todaysSpecial in one call)
@@ -426,18 +437,28 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           <div className="relative">
             <button 
               onClick={() => openModal('events', 'home')}
-              className="w-full bg-white/80 rounded-xl p-3 text-center border border-blush/20 hover:scale-105 hover:bg-white/95 transition-all duration-300"
+              className="w-full rounded-xl p-3 text-center border border-blush/20 hover:scale-105 transition-all duration-300 overflow-hidden relative"
               data-modal-type="events"
               data-modal-section="home"
               data-testid="button-home-events"
             >
-              <div className="flex items-center justify-center mb-1">
-                <div className="bg-gradient-feminine p-1.5 rounded-full">
-                  <Clock className="text-white" size={12} />
+              {/* Background image */}
+              <img 
+                src={getShkiaButtonBackground()} 
+                alt="" 
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{ zIndex: 0 }}
+              />
+              {/* Content overlay */}
+              <div className="relative z-10">
+                <div className="flex items-center justify-center mb-1">
+                  <div className="bg-white/60 p-1.5 rounded-full">
+                    <Clock className="text-black" size={12} />
+                  </div>
                 </div>
+                <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
+                <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
               </div>
-              <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
-              <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
             </button>
           </div>
         </div>
