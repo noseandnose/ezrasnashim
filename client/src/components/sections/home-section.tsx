@@ -9,10 +9,13 @@ import type { Section } from "@/pages/home";
 import { useMemo } from "react";
 import { getLocalDateString } from "@/lib/dateUtils";
 import DOMPurify from "dompurify";
-import grassImage from "@assets/Daily_Progress_Garden_(5)_1766474472398.png";
-import torahFlower from "@assets/Torah_1766474274420.png";
-import tefillaFlower from "@assets/Tefilla_1766474274425.png";
-import tzedakaFlower from "@assets/Tzedaka_1766474274426.png";
+import grassImage from "@assets/Grass_1766581832995.png";
+import torahFlower from "@assets/Torah_1766581824736.png";
+import tefillaFlower from "@assets/Tefilla_1766581824746.png";
+import tzedakaFlower from "@assets/Tzedaka_1766581824745.png";
+import morningBackground from "@assets/Morning_1766581829382.png";
+import afternoonBackground from "@assets/Afternoon_1766581829381.png";
+import nightBackground from "@assets/Night_1766581829380.png";
 
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
