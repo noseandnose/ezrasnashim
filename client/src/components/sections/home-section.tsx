@@ -16,6 +16,8 @@ import tzedakaFlower from "@assets/Tzedaka_1766581824745.png";
 import morningBackground from "@assets/Morning_1766581829382.png";
 import afternoonBackground from "@assets/Afternoon_1766581829381.png";
 import nightBackground from "@assets/Night_1766581829380.png";
+import milestone10Flower from "@assets/10_1766583559373.png";
+import milestone20Flower from "@assets/20_1766583559368.png";
 
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
@@ -90,7 +92,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   // Generate stable but randomized positions for flowers - like a natural garden
   // Each flower has a fixed position based on its type and index (stable across re-renders)
   const flowerPositions = useMemo(() => {
-    const positions: { type: 'torah' | 'tefilla' | 'tzedaka'; left: number; bottom: number; flipped: boolean; scale: number }[] = [];
+    const positions: { type: 'torah' | 'tefilla' | 'tzedaka'; left: number; bottom: number; flipped: boolean; scale: number; overallIndex: number }[] = [];
     
     // Create a seeded random generator for a specific flower
     const getFlowerRandom = (type: string, index: number) => {
@@ -106,6 +108,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     // Predefined horizontal slots to ensure flowers don't overlap
     const slots = [15, 35, 55, 75, 90];
     let slotIndex = 0;
+    let overallFlowerIndex = 1; // 1-based overall index for milestone tracking
     
     // Helper to add a flower with stable position
     const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', index: number) => {
@@ -119,7 +122,8 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
       const left = slots[slotIndex % slots.length] + (random() * 10 - 5);
       slotIndex++;
       
-      positions.push({ type, left, bottom, flipped, scale });
+      positions.push({ type, left, bottom, flipped, scale, overallIndex: overallFlowerIndex });
+      overallFlowerIndex++;
     };
     
     // PRIORITY: Place Torah and Tzedaka flowers first (they're completed less often)
@@ -658,8 +662,18 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             .map((flower, index) => (
             <img 
               key={`${flower.type}-${index}`}
-              src={flower.type === 'torah' ? torahFlower : flower.type === 'tefilla' ? tefillaFlower : tzedakaFlower} 
-              alt={`${flower.type} flower`} 
+              src={
+                flower.overallIndex === 10 ? milestone10Flower :
+                flower.overallIndex === 20 ? milestone20Flower :
+                flower.type === 'torah' ? torahFlower : 
+                flower.type === 'tefilla' ? tefillaFlower : 
+                tzedakaFlower
+              } 
+              alt={
+                flower.overallIndex === 10 ? '10th flower milestone!' :
+                flower.overallIndex === 20 ? '20th flower milestone!' :
+                `${flower.type} flower`
+              } 
               className="absolute z-[1]"
               style={{ 
                 left: `${flower.left}%`,
