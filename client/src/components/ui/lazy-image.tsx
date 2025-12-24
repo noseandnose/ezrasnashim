@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 
 interface LazyImageProps {
   src: string;
@@ -9,9 +9,38 @@ interface LazyImageProps {
   onLoad?: () => void;
   onError?: () => void;
   onClick?: () => void;
+  webpSrc?: string;
 }
 
-export function LazyImage({ 
+let webpSupported: boolean | null = null;
+
+function checkWebPSupport(): Promise<boolean> {
+  if (webpSupported !== null) return Promise.resolve(webpSupported);
+  
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      webpSupported = img.width > 0 && img.height > 0;
+      resolve(webpSupported);
+    };
+    img.onerror = () => {
+      webpSupported = false;
+      resolve(false);
+    };
+    img.src = 'data:image/webp;base64,UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA==';
+  });
+}
+
+function getWebPUrl(src: string): string | null {
+  if (!src) return null;
+  if (src.endsWith('.webp')) return src;
+  if (src.includes('cloudinary.com')) {
+    return src.replace(/\.(jpg|jpeg|png|gif)$/i, '.webp');
+  }
+  return null;
+}
+
+function LazyImageComponent({ 
   src, 
   alt, 
   className = '', 
@@ -19,13 +48,13 @@ export function LazyImage({
   fallback,
   onLoad,
   onError,
-  onClick 
+  onClick,
+  webpSrc
 }: LazyImageProps) {
   const [imageSrc, setImageSrc] = useState<string | undefined>(undefined);
   const [isIntersecting, setIsIntersecting] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
-  // Set up Intersection Observer for lazy loading
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -37,7 +66,7 @@ export function LazyImage({
         });
       },
       {
-        rootMargin: '50px', // Start loading 50px before the image comes into view
+        rootMargin: '50px',
         threshold: 0.01
       }
     );
@@ -51,25 +80,45 @@ export function LazyImage({
     };
   }, []);
 
-  // Load image when it comes into view
   useEffect(() => {
     if (isIntersecting && src) {
-      const img = new Image();
-      img.src = src;
-      
-      img.onload = () => {
-        setImageSrc(src);
-        onLoad?.();
+      const loadImage = async () => {
+        const supportsWebP = await checkWebPSupport();
+        const webpUrl = webpSrc || getWebPUrl(src);
+        const urlToTry = supportsWebP && webpUrl ? webpUrl : src;
+        
+        const img = new Image();
+        img.src = urlToTry;
+        
+        img.onload = () => {
+          setImageSrc(urlToTry);
+          onLoad?.();
+        };
+        
+        img.onerror = () => {
+          if (urlToTry !== src) {
+            const fallbackImg = new Image();
+            fallbackImg.src = src;
+            fallbackImg.onload = () => {
+              setImageSrc(src);
+              onLoad?.();
+            };
+            fallbackImg.onerror = () => {
+              if (fallback) setImageSrc(fallback);
+              onError?.();
+            };
+          } else if (fallback) {
+            setImageSrc(fallback);
+            onError?.();
+          } else {
+            onError?.();
+          }
+        };
       };
       
-      img.onerror = () => {
-        if (fallback) {
-          setImageSrc(fallback);
-        }
-        onError?.();
-      };
+      loadImage();
     }
-  }, [isIntersecting, src, fallback, onLoad, onError]);
+  }, [isIntersecting, src, webpSrc, fallback, onLoad, onError]);
 
   return (
     <img
@@ -86,3 +135,5 @@ export function LazyImage({
     />
   );
 }
+
+export const LazyImage = memo(LazyImageComponent);

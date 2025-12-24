@@ -18,7 +18,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
   // Get today's date for content queries
   const today = new Date().toISOString().split('T')[0];
   
-  // Torah content queries
+  // Torah content queries - using shared TanStack query client for proper caching
   const { data: halachaContent } = useQuery<{title?: string; englishTitle?: string; hebrewTitle?: string}>({ 
     queryKey: ['/api/torah/halacha', today],
     staleTime: 15 * 60 * 1000,
@@ -516,7 +516,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     }
   }, [searchIndex]);
   
-  const isLoading = false; // We're using cached data, so no loading state needed
+  const isLoading = false; // Using cached TanStack Query data, no explicit loading state needed
   
   return (
     <SearchContext.Provider value={{ searchIndex, miniSearchIndex, isLoading }}>

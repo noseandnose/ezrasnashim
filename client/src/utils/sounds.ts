@@ -85,7 +85,7 @@ export const playCoinClinkSoundFromFile = () => {
     audio.play().catch(error => {
       // Could not play coin jingle sound file
     });
-  } catch (error) {
+  } catch {
     // Could not create audio element
   }
 };

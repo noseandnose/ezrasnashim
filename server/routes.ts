@@ -8,7 +8,7 @@ import { fileURLToPath } from "url";
 import { find as findTimezone } from "geo-tz";
 import webpush from "web-push";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
-import { pushRetryQueue, PushRetryQueue } from "./pushRetryQueue";
+import { pushRetryQueue } from "./pushRetryQueue";
 import { cacheMiddleware } from "./middleware/cache";
 import { CACHE_TTL, cache } from "./cache/categoryCache";
 import { validateAdminLogin, verifyAdminToken, isJwtConfigured, isAdminConfigured } from "./auth";
@@ -134,23 +134,11 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY && VAPID_EMAIL) {
   // Push notifications not configured - missing VAPID keys
 }
 import { 
-  insertTehillimNameSchema,
-  insertTehillimChainSchema,
-  insertTehillimChainReadingSchema,
-  tehillimChains,
-  tehillimChainReadings,
-  insertDailyHalachaSchema,
-  insertDailyEmunaSchema,
-  insertDailyChizukSchema,
-  insertFeaturedContentSchema,
-  insertTodaysSpecialSchema,
-  insertGiftOfChatzosSchema,
   insertDailyRecipeSchema,
   baseParshaVortSchema,
   insertParshaVortSchema,
   insertTorahClassSchema,
   insertLifeClassSchema,
-  insertTableInspirationSchema,
   insertMarriageInsightSchema,
   insertNishmasTextSchema,
   insertMessagesSchema

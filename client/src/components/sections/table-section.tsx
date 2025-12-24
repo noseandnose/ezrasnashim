@@ -48,8 +48,13 @@ export default function TableSection() {
   const formatGiftMarkdown = (text: string | null | undefined): string => {
     if (!text) return '';
     const withBold = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    const withLineBreaks = withBold.replace(/\n/g, '<br>');
-    return DOMPurify.sanitize(withLineBreaks);
+    const withLinks = withBold.replace(/\[([^\]]+)\]\(([^)]+)\)/g, 
+      '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #E91E63; text-decoration: underline;">$1</a>');
+    const withLineBreaks = withLinks.replace(/\n/g, '<br>');
+    return DOMPurify.sanitize(withLineBreaks, {
+      ALLOWED_TAGS: ['strong', 'b', 'br', 'a'],
+      ALLOWED_ATTR: ['href', 'target', 'rel', 'style']
+    });
   };
 
   // Calculate days until Shabbat using Jewish day (tzait to tzait)
@@ -137,7 +142,7 @@ export default function TableSection() {
                 </span>
               </div>
               <h3 className="platypi-bold text-lg text-black">
-                Days Until Shabbas {shabbosData?.parsha ? (
+                Days Until Shabbos {shabbosData?.parsha ? (
                   <span className="text-lavender"> {shabbosData.parsha.replace("Parashat ", "").replace("Parashah ", "")}</span>
                 ) : ""}
               </h3>
